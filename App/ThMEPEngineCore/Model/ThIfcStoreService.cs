@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Model
         public static ThIfcStoreService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-        private IfcStore Model { get; set; }
+        public IfcStore Model { get; set; }
 
         public void Initialize(string projectName)
         {
