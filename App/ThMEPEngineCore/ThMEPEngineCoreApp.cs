@@ -39,7 +39,7 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THCREATEWALL", CommandFlags.Modal)]
         public void ThCreateWall()
         {
-            using (var model = ThModelExtension.CreateandInitModel("HelloWall"))
+            using (var model = ThModelExtension.CreateAndInitModel("HelloWall"))
             {
                 if (model != null)
                 {

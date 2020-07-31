@@ -25,6 +25,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\ThIfcBuildingElement.cs" />
+    <Compile Include="Model\ThIfcElement.cs" />
+    <Compile Include="Model\ThIfcStoreService.cs" />
+    <Compile Include="Model\ThIfcWall.cs" />
+    <Compile Include="Model\ThIfcWallStandardCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="xBIM\ThModelExtension.cs" />

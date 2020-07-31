@@ -33,7 +33,7 @@ namespace ThMEPEngineCore.xBIM
         /// </summary>
         /// <param name="projectName">Name of the project</param>
         /// <returns></returns>
-        public static IfcStore CreateandInitModel(string projectName)
+        public static IfcStore CreateAndInitModel(string projectName)
         {
             //first we need to set up some credentials for ownership of data in the new model
             var credentials = new XbimEditorCredentials
