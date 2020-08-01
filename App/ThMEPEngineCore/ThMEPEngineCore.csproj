@@ -34,6 +34,8 @@
     <Compile Include="Model\ThIfcBuildingElement.cs" />
     <Compile Include="Model\ThIfcColumn.cs" />
     <Compile Include="Model\ThIfcColumnStandardCase.cs" />
+    <Compile Include="Model\ThIfcDoor.cs" />
+    <Compile Include="Model\ThIfcDoorStandardCase.cs" />
     <Compile Include="Model\ThIfcElement.cs" />
     <Compile Include="Model\ThIfcStoreService.cs" />
     <Compile Include="Model\ThIfcWall.cs" />
