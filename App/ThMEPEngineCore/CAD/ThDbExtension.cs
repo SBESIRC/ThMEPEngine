@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPEngineCore
+namespace ThMEPEngineCore.CAD
 {
-    class ThMEPDbExtension
+    public class ThDbExtension
     {
+        //
     }
 }
