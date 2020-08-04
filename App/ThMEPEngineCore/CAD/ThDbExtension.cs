@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using Linq2Acad;
 using System.Linq;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -12,47 +13,46 @@ namespace ThMEPEngineCore.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                return acadDatabase.ModelSpace
+                var curves = acadDatabase.ModelSpace
                     .OfType<Curve>()
-                    .Where(o => o.IsBuildElementCurve());
-            }
-        }
+                    .Where(o => o.IsBuildElementCurve())
+                    .Select(o => o.GetTransformedCopy(Matrix3d.Identity) as Curve).ToList();
 
-        public static IEnumerable<BlockReference> BuildElementBlockReferences(this Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                return acadDatabase.ModelSpace
+                var blockReferences = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => o.IsBuildElementBlockReference());
-            }
-        }
-
-        public static IEnumerable<Curve> BuildElementCurves(this Database database, BlockReference blockReference)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.Name);
-                if (blockTableRecord.IsBuildElementBlock())
+                foreach(var blockReference in blockReferences)
                 {
-                    return blockTableRecord
-                        .OfType<Curve>()
-                        .Where(o => o.IsBuildElementCurve());
+                    var mcs2wcs = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                    curves.AddRange(database.BuildElementCurves(blockReference, mcs2wcs));
                 }
-                return null;
+
+                return curves;
             }
         }
 
-        public static IEnumerable<BlockReference> BuildElementBlockReferences(this Database database, BlockReference blockReference)
+        public static IEnumerable<Curve> BuildElementCurves(this Database database, BlockReference blockReference, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var blockTableRecord = acadDatabase.Blocks.Element(blockReference.Name);
                 if (blockTableRecord.IsBuildElementBlock())
                 {
-                    return blockTableRecord
+                    var curves = blockTableRecord
+                        .OfType<Curve>()
+                        .Where(o => o.IsBuildElementCurve())
+                        .Select(o => o.GetTransformedCopy(matrix) as Curve).ToList();
+
+                    var nestedblockReferences = blockTableRecord
                         .OfType<BlockReference>()
                         .Where(o => o.IsBuildElementBlockReference());
+                    foreach(var nestedblockReference in nestedblockReferences)
+                    {
+                        var mcs2wcs = nestedblockReference.BlockTransform.PreMultiplyBy(matrix);
+                        curves.AddRange(database.BuildElementCurves(nestedblockReference, mcs2wcs));
+                    }
+
+                    return curves;
                 }
                 return null;
             }
