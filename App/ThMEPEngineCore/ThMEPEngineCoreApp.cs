@@ -3,6 +3,10 @@ using System.IO;
 using System.Collections;
 using System.Web.Script.Serialization;
 using System;
+using ThMEPEngineCore.xBIM;
+using Xbim.Ifc4.ProductExtension;
+using Xbim.Ifc4.SharedBldgElements;
+using Xbim.IO;
 
 namespace ThMEPEngineCore
 {
@@ -30,6 +34,47 @@ namespace ThMEPEngineCore
             var _JsonElementTypes = ReadTxt(Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ElementTypes.json"));
             ArrayList _ListElementTypes = _JavaScriptSerializer.Deserialize<ArrayList>(_JsonElementTypes);
+        }
+
+        [CommandMethod("TIANHUACAD", "THCREATEWALL", CommandFlags.Modal)]
+        public void ThCreateWall()
+        {
+            using (var model = ThModelExtension.CreateAndInitModel("HelloWall"))
+            {
+                if (model != null)
+                {
+                    IfcBuilding building = ThModelExtension.CreateBuilding(model, "Default Building");
+                    IfcWallStandardCase wall = ThModelExtension.CreateWall(model, 4000, 300, 2400);
+
+                    //if (wall != null) AddPropertiesToWall(model, wall);
+                    using (var txn = model.BeginTransaction("Add Wall"))
+                    {
+                        building.AddElement(wall);
+                        txn.Commit();
+                    }
+
+                    if (wall != null)
+                    {
+                        try
+                        {
+                            Console.WriteLine("Standard Wall successfully created....");
+                            //write the Ifc File
+                            model.SaveAs(Path.Combine(
+                                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "HelloWallIfc4.ifc"), StorageType.Ifc);
+                            Console.WriteLine("HelloWallIfc4.ifc has been successfully written");
+                        }
+                        catch (System.Exception e)
+                        {
+                            Console.WriteLine("Failed to save HelloWall.ifc");
+                            Console.WriteLine(e.Message);
+                        }
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Failed to initialise the model");
+                }
+            }
         }
 
         private string ReadTxt(string _Path)
