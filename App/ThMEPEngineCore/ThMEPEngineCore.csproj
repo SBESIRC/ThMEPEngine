@@ -26,6 +26,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\ThDbExtension.cs" />
+    <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="IO\ThDwgReader.cs" />
     <Compile Include="IO\ThDwgWriter.cs" />
     <Compile Include="IO\ThJsonReader.cs" />
