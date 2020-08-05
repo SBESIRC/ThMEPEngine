@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExtensionTools", "Utilities
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThCADCore.Test", "ThCADCore.Test\ThCADCore.Test.csproj", "{6076B322-959E-46B1-AA98-ADB363B10438}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPEngineCore.Test", "ThMEPEngineCore.Test\ThMEPEngineCore.Test.csproj", "{177B4E6A-7482-4D77-9A31-4AF641802AE7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -105,12 +107,28 @@ Global
 		{6076B322-959E-46B1-AA98-ADB363B10438}.Release-NET45|Any CPU.Build.0 = Release-NET45|Any CPU
 		{6076B322-959E-46B1-AA98-ADB363B10438}.Release-NET46|Any CPU.ActiveCfg = Release-NET46|Any CPU
 		{6076B322-959E-46B1-AA98-ADB363B10438}.Release-NET46|Any CPU.Build.0 = Release-NET46|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug-NET40|Any CPU.ActiveCfg = Debug-NET40|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug-NET40|Any CPU.Build.0 = Debug-NET40|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug-NET45|Any CPU.ActiveCfg = Debug-NET45|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug-NET45|Any CPU.Build.0 = Debug-NET45|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug-NET46|Any CPU.ActiveCfg = Debug-NET46|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Debug-NET46|Any CPU.Build.0 = Debug-NET46|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release-NET40|Any CPU.ActiveCfg = Release-NET40|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release-NET40|Any CPU.Build.0 = Release-NET40|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release-NET45|Any CPU.ActiveCfg = Release-NET45|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release-NET45|Any CPU.Build.0 = Release-NET45|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release-NET46|Any CPU.ActiveCfg = Release-NET46|Any CPU
+		{177B4E6A-7482-4D77-9A31-4AF641802AE7}.Release-NET46|Any CPU.Build.0 = Release-NET46|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		        SolutionGuid = {BACE1130-D315-4658-B063-566B4F1EBA5B}
 		SolutionGuid = {4DC31E7F-3F21-4F0B-B4C8-C20B040E84EF}
+		        SolutionGuid = {BACE1130-D315-4658-B063-566B4F1EBA5B}
 	EndGlobalSection
 EndGlobal
