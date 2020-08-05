@@ -110,13 +110,9 @@ namespace ThCADCore.NTS
                     continue;
                 }
 
-                if (neighbour is ILineString lineString)
+                if (Geometries.ContainsKey(neighbour))
                 {
-                    objs.Add(lineString.ToDbPolyline());
-                }
-                else
-                {
-                    throw new NotSupportedException();
+                    objs.Add(Geometries[neighbour]);
                 }
             }
             return objs[0] as Curve;
