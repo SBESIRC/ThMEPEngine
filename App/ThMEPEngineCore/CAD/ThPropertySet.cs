@@ -47,6 +47,18 @@ namespace ThMEPEngineCore.CAD
         }
 
         /// <summary>
+        /// 是否为幕墙
+        /// </summary>
+        public bool IsCurtainWall
+        {
+            get
+            {
+                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_WALL
+                    && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_CURTAIN_WALL;
+            }
+        }
+
+        /// <summary>
         /// 是否为结构墙（剪力墙）
         /// </summary>
         public bool IsShearWall

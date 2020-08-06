@@ -25,6 +25,7 @@ namespace ThMEPEngineCore
         // 图层
         public static string BUILDELEMENT_LAYER_WALL = "AE-WALL";
         public static string BUILDELEMENT_LAYER_WINDOW = "AE-WIND";
+        public static string BUILDELEMENT_LAYER_CURTAIN_WALL = "AE-FNSH";
 
         // 分类
         public static string BUILDELEMENT_CATEGORY_WALL = "墙";
