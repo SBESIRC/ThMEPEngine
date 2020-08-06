@@ -21,5 +21,15 @@ namespace ThMEPEngineCore
             BUILDELEMENT_PROPERTY_LAYER,
             BUILDELEMENT_PROPERTY_PROJECT_LEVEL
         };
+
+        // 图层
+        public static string BUILDELEMENT_LAYER_WALL = "AE-WALL";
+        public static string BUILDELEMENT_LAYER_WINDOW = "AE-WIND";
+
+        // 分类
+        public static string BUILDELEMENT_CATEGORY_WALL = "墙";
+        public static string BUILDELEMENT_CATEGORY_S_BEAM = "结构梁";
+        public static string BUILDELEMENT_CATEGORY_S_WALL = "结构墙";
+        public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
     }
 }

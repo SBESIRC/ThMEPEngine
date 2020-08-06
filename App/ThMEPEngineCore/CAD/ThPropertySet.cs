@@ -33,5 +33,53 @@ namespace ThMEPEngineCore.CAD
             // 返回属性集
             return propertySet;
         }
+
+        /// <summary>
+        /// 是否为建筑墙
+        /// </summary>
+        public bool IsArchWall
+        {
+            get
+            {
+                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_WALL
+                    && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+            }
+        }
+
+        /// <summary>
+        /// 是否为结构墙（剪力墙）
+        /// </summary>
+        public bool IsShearWall
+        {
+            get
+            {
+                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_WALL
+                    && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+            }
+        }
+
+        /// <summary>
+        /// 是否为结构柱
+        /// </summary>
+        public bool IsSColumn
+        {
+            get
+            {
+                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
+                    && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+            }
+        }
+
+        /// <summary>
+        /// 是否为结构梁
+        /// </summary>
+        public bool IsSBeam
+        {
+            get
+            {
+                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
+                    && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+            }
+        }
     }
 }
