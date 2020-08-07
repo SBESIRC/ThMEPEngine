@@ -54,7 +54,12 @@
     <Compile Include="Model\ThIfcElement.cs" />
     <Compile Include="Model\ThIfcFlowTerminal.cs" />
     <Compile Include="Model\ThIfcProduct.cs" />
+    <Compile Include="Model\ThIfcRelationship.cs" />
+    <Compile Include="Model\ThIfcRelConnects.cs" />
+    <Compile Include="Model\ThIfcRelSpaceBoundary.cs" />
     <Compile Include="Model\ThIfcSite.cs" />
+    <Compile Include="Model\ThIfcSlab.cs" />
+    <Compile Include="Model\ThIfcSlabStandardCase.cs" />
     <Compile Include="Model\ThIfcSpatialElement.cs" />
     <Compile Include="Model\ThIfcSpatialStructureElement.cs" />
     <Compile Include="Model\ThIfcSpatialZone.cs" />
