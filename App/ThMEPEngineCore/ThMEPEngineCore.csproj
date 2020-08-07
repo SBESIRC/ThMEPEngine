@@ -51,6 +51,9 @@
     <Compile Include="Model\ThIfcDoorStandardCase.cs" />
     <Compile Include="Model\ThIfcElement.cs" />
     <Compile Include="Model\ThIfcFlowTerminal.cs" />
+    <Compile Include="Model\ThIfcProduct.cs" />
+    <Compile Include="Model\ThIfcSpatialElement.cs" />
+    <Compile Include="Model\ThIfcSpatialZone.cs" />
     <Compile Include="Model\ThIfcStoreService.cs" />
     <Compile Include="Model\ThIfcWall.cs" />
     <Compile Include="Model\ThIfcWallStandardCase.cs" />

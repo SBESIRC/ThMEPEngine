@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcElement : ThIfcProduct
+    public class ThIfcSpatialZone : ThIfcSpatialElement
     {
-
     }
 }
