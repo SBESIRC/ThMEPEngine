@@ -37,6 +37,20 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static Polyline GetMinimumRectangle(this Polyline polyline)
+        {
+            var geom = polyline.ToNTSLineString();
+            var rectangle = MinimumDiameter.GetMinimumRectangle(geom);
+            if (rectangle is IPolygon polygon)
+            {
+                return polygon.Shell.ToDbPolyline();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public static Polyline ConvexHull(this Polyline polyline)
         {
             var convexHull = new ConvexHull(polyline.ToNTSLineString());
