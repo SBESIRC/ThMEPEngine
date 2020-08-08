@@ -29,12 +29,14 @@
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSLineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSLocate.cs" />
+    <Compile Include="NTS\ThCADCoreNTSMatch.cs" />
     <Compile Include="NTS\ThCADCoreNTSOperation.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolygonizer.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolylineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSPrecisionReducer.cs" />
     <Compile Include="NTS\ThCADCoreNTSRegionExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSService.cs" />
+    <Compile Include="NTS\ThCADCoreNTSSimplify.cs" />
     <Compile Include="NTS\ThCADCoreNTSSpatialIndex.cs" />
     <Compile Include="OutLiner.cs" />
     <Compile Include="PolylineValidationExtension.cs" />

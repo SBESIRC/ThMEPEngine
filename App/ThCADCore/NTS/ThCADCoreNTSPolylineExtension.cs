@@ -2,10 +2,9 @@
 using GeoAPI.Geometries;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Algorithm;
-using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
-using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -85,38 +84,44 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        //public static List<Polyline> Difference(this Polyline pRegion, Region sRegion)
-        //{
-        //    var regions = new List<Polyline>();
-        //    var pGeometry = pRegion.ToNTSPolygon();
-        //    var sGeometry = sRegion.ToNTSPolygon();
-        //    if (pGeometry == null || sGeometry == null)
-        //    {
-        //        return regions;
-        //    }
+        public static DBObjectCollection Difference(this Polyline region, DBObjectCollection curves)
+        {
+            var objs = new DBObjectCollection();
+            var geometry = region.ToNTSPolygon().Difference(curves.UnionGeometries());
+            if (geometry.IsEmpty)
+            {
+                return objs;
+            }
+            if (geometry is IPolygon polygon)
+            {
+                objs.Add(polygon.Shell.ToDbPolyline());
+                foreach(var hole in polygon.Holes)
+                {
+                    objs.Add(hole.ToDbPolyline());
+                }
+            }
+            else if (geometry is IMultiPolygon mPolygon)
+            {
+                foreach(IPolygon subPolygon in mPolygon.Geometries)
+                {
+                    objs.Add(subPolygon.Shell.ToDbPolyline());
+                    foreach (var hole in subPolygon.Holes)
+                    {
+                        objs.Add(hole.ToDbPolyline());
+                    }
+                }
+            }
+            return objs;
+        }
 
-        //    // 检查是否相交
-        //    if (!pGeometry.Intersects(sGeometry))
-        //    {
-        //        return regions;
-        //    }
+        public static bool Contains(this Polyline thisPline, Polyline otherPline)
+        {
+            return thisPline.ToNTSPolygon().Contains(otherPline.ToNTSPolygon());
+        }
 
-        //    // 若相交，则计算在pRegion，但不在sRegion的部分
-        //    var rGeometry = pGeometry.Difference(sGeometry);
-        //    if (rGeometry is IPolygon polygon)
-        //    {
-        //        regions.Add(polygon.Shell.ToDbPolyline());
-        //    }
-        //    else if (rGeometry is IMultiPolygon mPolygon)
-        //    {
-        //        regions.AddRange(mPolygon.ToDbPolylines());
-        //    }
-        //    else
-        //    {
-        //        // 为止情况，抛出异常
-        //        throw new NotSupportedException();
-        //    }
-        //    return regions;
-        //}
+        public static bool Contains(this Polyline thisPline, Point3d pt)
+        {
+            return thisPline.PointInPolygon(pt) == LocateStatus.Interior;
+        }
     }
 }

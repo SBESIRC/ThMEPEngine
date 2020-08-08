@@ -1,11 +1,15 @@
 ﻿using System;
+using System.Linq;
 using GeoAPI.Geometries;
 using System.Collections.Generic;
 using NetTopologySuite.Utilities;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Algorithm;
+using NetTopologySuite.Operation.Polygonize;
+using NetTopologySuite.Geometries.Utilities;
 using NetTopologySuite.Simplify;
+using GeometryExtensions;
 
 namespace ThCADCore.NTS
 {
@@ -22,7 +26,7 @@ namespace ThCADCore.NTS
             return pline;
         }
 
-        public static Line TDbline(this ILineString lineString)
+        public static Line ToDbline(this ILineString lineString)
         {
             var line = new Line
             {
@@ -36,14 +40,7 @@ namespace ThCADCore.NTS
         {
             var simplifier = new DouglasPeuckerLineSimplifier(lineString.Coordinates);
             var result = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(simplifier.Simplify());
-            if (result.Coordinates.Length == 2)
-            {
-                return result.TDbline();
-            }
-            else
-            {
-                return result.ToDbPolyline();
-            }
+            return result.ToDbline();
         }
 
         public static Polyline ToDbPolyline(this ILinearRing linearRing)
@@ -154,22 +151,29 @@ namespace ThCADCore.NTS
                 // 暂时不考虑“圆弧”的情况
                 points.Add(polyLine.GetPoint3dAt(i).ToNTSCoordinate());
             }
-            if (polyLine.Closed)
+
+            // 对于处于“闭合”状态的多段线，要保证其首尾点一致
+            if(polyLine.Closed && !points[0].Equals(points[points.Count - 1]))
             {
-                if (points[0].Equals(points[points.Count-1]))
-                {
-                    // 首尾端点一致的情况
-                    return ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points.ToArray());
-                }
-                else
-                {
-                    // 首尾端点不一致的情况
-                    points.Add(points[0]);
-                    return ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points.ToArray());
-                }
+                points.Add(points[0]);
             }
-            else if (points[0].Equals(points[points.Count - 1]))
+
+            if (points[0].Equals(points[points.Count - 1]))
             {
+                // 三个点，其中起点和终点重合
+                // 多段线退化成一根线段
+                if (points.Count == 3)
+                {
+                    return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
+                }
+
+                // 三个点，其中起点和终点重合
+                // 多段线退化成一个点
+                if (points.Count == 2)
+                {
+                    return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPointFromCoords(points.ToArray());
+                }
+
                 // 首尾端点一致的情况
                 // LinearRings are the fundamental building block for Polygons.
                 // LinearRings may not be degenerate; that is, a LinearRing must have at least 3 points.
@@ -184,17 +188,44 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static List<LineSegment> LineSegments(this Polyline polyLine)
+        {
+            var lineSegments = new List<LineSegment>();
+            foreach(var segment in new PolylineSegmentCollection(polyLine))
+            {
+                lineSegments.Add(new LineSegment(segment.StartPoint.ToNTSCoordinate(),
+                    segment.EndPoint.ToNTSCoordinate()));
+            }
+            return lineSegments;
+        }
+
         public static IPolygon ToNTSPolygon(this Polyline polyLine)
         {
-            var geometry = polyLine.ToNTSLineString();
-            if (geometry is ILinearRing linearRing)
+            var polygons = polyLine.Polygonize();
+            if (polygons.Count == 1)
             {
-                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(linearRing);
+                return polygons.First() as IPolygon;
+            }
+            else if (polygons.Count == 0)
+            {
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
             }
             else
             {
-                return null;
+                throw new NotSupportedException();
             }
+        }
+
+        public static IPolygon ToNTSPolygon(this Circle circle)
+        {
+            // 获取圆的外接矩形
+            var shapeFactory = new GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
+            {
+                NumPoints = 4,
+                Size = 2 * circle.Radius,
+                Centre = circle.Center.ToNTSCoordinate(),
+            };
+            return shapeFactory.CreateCircle();
         }
 
         public static ILineString ToNTSLineString(this Line line)
@@ -226,14 +257,54 @@ namespace ThCADCore.NTS
             return pline.ToNTSPolygon();
         }
 
-        public static IMultiPolygon ToNTSPolygons(this DBObjectCollection regions)
+        public static IMultiPolygon ToNTSPolygons(this DBObjectCollection objs)
         {
             var polygons = new List<IPolygon>();
-            foreach(Region region in regions)
+            foreach(Entity entity in objs)
+            {
+                if (entity is Polyline polyline)
+                {
+                    polygons.Add(polyline.ToNTSPolygon());
+                }
+                else if (entity is Region region)
+                {
+                    polygons.Add(region.ToNTSPolygon());
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
+        }
+
+        public static IMultiPolygon ToNTSPolygons(this DBObject obj)
+        {
+            var polygons = new List<IPolygon>();
+            if (obj is Polyline polyline)
+            {
+                polygons.Add(polyline.ToNTSPolygon());
+            }
+            else if (obj is Region region)
             {
                 polygons.Add(region.ToNTSPolygon());
             }
+            else
+            {
+                throw new NotSupportedException();
+            }
+
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
+        }
+
+        public static IGeometryCollection ToNTSPolygonCollection(this DBObjectCollection curves)
+        {
+            var polygons = new List<IPolygon>();
+            foreach (Polyline polyline in curves)
+            {
+                polygons.Add(polyline.ToNTSPolygon());
+            }
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection(polygons.ToArray());
         }
 
         public static ILineString ToNTSLineString(this Arc arc, int numPoints)

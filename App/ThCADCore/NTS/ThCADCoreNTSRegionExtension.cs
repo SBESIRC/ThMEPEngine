@@ -2,6 +2,7 @@
 using GeoAPI.Geometries;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
 
 namespace ThCADCore.NTS
 {
@@ -150,6 +151,58 @@ namespace ThCADCore.NTS
                 // 这里只捕捉异常，不做特殊的处理
             }
             return regions;
+        }
+
+        public static List<Polyline> Differences(this Region pRegion, DBObjectCollection sRegions)
+        {
+            var pGeometrys = new List<IPolygon>();
+            try
+            {
+                pGeometrys.Add(pRegion.ToNTSPolygon());
+                foreach (DBObject sGe in sRegions)
+                {
+                    var sGeometry = new DBObjectCollection() { sGe }.ToNTSPolygons();
+                    foreach (var pGeometry in pGeometrys)
+                    {
+                        if (pGeometry == null || sGeometry == null)
+                        {
+                            continue;
+                        }
+
+                        // 检查是否相交
+                        if (!pGeometry.Intersects(sGeometry))
+                        {
+                            continue;
+                        }
+
+                        // 若相交，则计算在pRegion，但不在sRegion的部分
+                        var rGeometry = pGeometry.Difference(sGeometry);
+                        if (rGeometry is IPolygon polygon)
+                        {
+                            pGeometrys = new List<IPolygon>() { polygon };
+                        }
+                        else if (rGeometry is IMultiPolygon mPolygon)
+                        {
+                            pGeometrys = new List<IPolygon>();
+                            foreach (IPolygon rPolygon in mPolygon.Geometries)
+                            {
+                                pGeometrys.Add(rPolygon);
+                            }
+                        }
+                        else
+                        {
+                            // 为止情况，抛出异常
+                            throw new NotSupportedException();
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // 在某些情况下，NTS会抛出异常
+                // 这里只捕捉异常，不做特殊的处理
+            }
+            return pGeometrys.Select(x => x.Shell.ToDbPolyline()).ToList();
         }
     }
 }

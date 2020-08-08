@@ -39,34 +39,25 @@ namespace ThCADCore.NTS
     {
         public static LocateStatus PointInPolygon(this Polyline polyline, Point3d pt)
         {
-            var geometry = polyline.ToNTSLineString();
-            if (geometry is IPolygon polygon)
+            var geometry = polyline.ToNTSPolygon();
+            if (geometry.IsEmpty)
             {
-                return (LocateStatus)SimplePointInAreaLocator.LocatePointInPolygon(pt.ToNTSCoordinate(), polygon);
+                return LocateStatus.Null;
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+
+            return (LocateStatus)SimplePointInAreaLocator.LocatePointInPolygon(pt.ToNTSCoordinate(), geometry);
         }
 
         public static LocateStatus IndexedPointInPolygon(this Polyline polyline, Point3d pt)
         {
-            var geometry = polyline.ToNTSLineString();
-            if (geometry is IPolygon polygon)
+            var geometry = polyline.ToNTSPolygon();
+            if (geometry.IsEmpty)
             {
-                var locator = new IndexedPointInAreaLocator(geometry);
-                return (LocateStatus)locator.Locate(pt.ToNTSCoordinate());
+                return LocateStatus.Null;
             }
-            else if (geometry is ILinearRing linearRing)
-            {
-                var locator = new IndexedPointInAreaLocator(geometry);
-                return (LocateStatus)locator.Locate(pt.ToNTSCoordinate());
-            }
-            else
-            {
-                throw new ArgumentException(); 
-            }
+
+            var locator = new IndexedPointInAreaLocator(geometry);
+            return (LocateStatus)locator.Locate(pt.ToNTSCoordinate());
         }
     }
 }
