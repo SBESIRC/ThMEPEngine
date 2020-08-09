@@ -72,6 +72,7 @@
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
+    <Compile Include="ThProjectDirStructureUtils.cs" />
     <Compile Include="xBIM\ThModelExtension.cs" />
   </ItemGroup>
   <ItemGroup>
