@@ -1,9 +1,17 @@
-﻿using Linq2Acad;
+﻿using System;
 using AcHelper;
+using Linq2Acad;
+#if ACAD2012
+    using System.Drawing;
+#else
+    using System.Windows;
+#endif
+using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.AutoCAD.Utility.ExtensionTools;
-using GeometryExtensions;
+using AcRegion = Autodesk.AutoCAD.DatabaseServices.Region;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace Autodesk.AutoCAD.EditorInput
 {
@@ -106,6 +114,30 @@ namespace Autodesk.AutoCAD.EditorInput
 
         }
 
+        public static PromptSelectionResult SelectByWindow(this Editor ed,
+            Point3d pt1,
+            Point3d pt2,
+            PolygonSelectionMode mode,
+            SelectionFilter filter)
+        {
+            // 保存当前view
+            ViewTableRecord view = ed.GetCurrentView();
+
+            // zoom到polygon
+            Active.Editor.ZoomWindow(new Extents3d(pt1, pt2));
+
+            // 选择
+            PromptSelectionResult result;
+            if (mode == PolygonSelectionMode.Crossing)
+                result = ed.SelectCrossingWindow(pt1, pt2, filter);
+            else
+                result = ed.SelectWindow(pt1, pt2, filter);
+
+            // 恢复view
+            ed.SetCurrentView(view);
+            return result;
+        }
+
         public static PromptSelectionResult SelectByRegion(this Editor ed,
             ObjectId regionId,
             PolygonSelectionMode mode,
@@ -113,7 +145,7 @@ namespace Autodesk.AutoCAD.EditorInput
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(regionId.Database))
             {
-                var polygon = acadDatabase.Element<Region>(regionId).Vertices();
+                var polygon = acadDatabase.Element<AcRegion>(regionId).Vertices();
                 return ed.SelectByPolygon(polygon, mode, filter);
             }
         }
@@ -138,6 +170,42 @@ namespace Autodesk.AutoCAD.EditorInput
                 COMTool.ZoomWindow(ext.MinPoint, ext.MaxPoint);
                 trans.Commit();
             }
+        }
+
+        public static PromptSelectionResult SelectAtPickBox(this Editor ed, Point3d pickBoxCentre)
+        {
+            //Get pick box's size on screen
+            Point screenPt = ed.PointToScreen(pickBoxCentre, 1);
+
+            //Get pickbox's size. Note, the number obtained from
+            //system variable "PICKBOX" is actually the half of
+            //pickbox's width/height
+            object pBox = AcadApp.GetSystemVariable("PICKBOX");
+            int pSize = Convert.ToInt32(pBox);
+
+            //Define a Point3dCollection for CrossingWindow selecting
+            Point3dCollection points = new Point3dCollection();
+
+            Point p;
+            Point3d pt;
+
+            p = new Point(screenPt.X - pSize, screenPt.Y - pSize);
+            pt = ed.PointToWorld(p, 1);
+            points.Add(pt);
+
+            p = new Point(screenPt.X + pSize, screenPt.Y - pSize);
+            pt = ed.PointToWorld(p, 1);
+            points.Add(pt);
+
+            p = new Point(screenPt.X + pSize, screenPt.Y + pSize);
+            pt = ed.PointToWorld(p, 1);
+            points.Add(pt);
+
+            p = new Point(screenPt.X - pSize, screenPt.Y + pSize);
+            pt = ed.PointToWorld(p, 1);
+            points.Add(pt);
+
+            return ed.SelectCrossingPolygon(points);
         }
     }
 }
