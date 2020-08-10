@@ -287,6 +287,26 @@ namespace ThCADCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThDelaunayTriangulation", CommandFlags.Modal)]
+        public void ThDelaunayTriangulation()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach (Entity diagram in pline.DelaunayTriangulation())
+                {
+                    diagram.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(diagram);
+                }
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "ThTrim", CommandFlags.Modal)]
         public void ThTrim()
         {
