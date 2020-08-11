@@ -7,9 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
-using StraightSkeletonNet.Primitives;
 using StraightSkeletonNet;
-using Autodesk.AutoCAD.Geometry;
 using Vector2d = StraightSkeletonNet.Primitives.Vector2d;
 
 namespace ThCADCore.Test
@@ -293,7 +291,7 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThDelaunayTriangulation", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THDT", CommandFlags.Modal)]
         public void ThDelaunayTriangulation()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -310,6 +308,37 @@ namespace ThCADCore.Test
                     points.Add(acadDatabase.Element<Entity>(obj).GeometricExtents.CenterPoint());
                 }
                 foreach (Entity diagram in points.DelaunayTriangulation())
+                {
+                    diagram.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(diagram);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THCDT", CommandFlags.Modal)]
+        public void ThConformingDelaunayTriangulation()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result1 = Active.Editor.GetSelection();
+                if (result1.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetEntity("请选择对象");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var points = new Point3dCollection();
+                foreach (var obj in result1.Value.GetObjectIds())
+                {
+                    points.Add(acadDatabase.Element<Entity>(obj).GeometricExtents.CenterPoint());
+                }
+                var pline = acadDatabase.Element<Polyline>(result2.ObjectId);
+                foreach (Entity diagram in points.ConformingDelaunayTriangulation(pline))
                 {
                     diagram.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(diagram);

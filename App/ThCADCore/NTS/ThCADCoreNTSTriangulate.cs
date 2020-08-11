@@ -49,6 +49,28 @@ namespace ThCADCore.NTS
             return objs;
         }
 
+        public static DBObjectCollection ConformingDelaunayTriangulation(this Point3dCollection points, Polyline polyline)
+        {
+            var objs = new DBObjectCollection();
+            var builder = new ConformingDelaunayTriangulationBuilder();
+            var sites = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPointFromCoords(points.ToNTSCoordinates());
+            builder.SetSites(sites);
+            builder.Constraints = polyline.ToNTSLineString();
+            var triangles = builder.GetTriangles(ThCADCoreNTSService.Instance.GeometryFactory);
+            foreach (var geometry in triangles.Geometries)
+            {
+                if (geometry is IPolygon polygon)
+                {
+                    objs.Add(polygon.Shell.ToDbPolyline());
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            return objs;
+        }
+
         public static DBObjectCollection DelaunayTriangulation(this Point3dCollection points)
         {
             var objs = new DBObjectCollection();
