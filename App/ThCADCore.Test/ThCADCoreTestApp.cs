@@ -3,6 +3,7 @@ using Linq2Acad;
 using ThCADCore.NTS;
 using NFox.Cad.Collections;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -292,14 +293,18 @@ namespace ThCADCore.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetEntity("请选择对象");
+                var result = Active.Editor.GetSelection();
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity diagram in pline.DelaunayTriangulation())
+                var points = new Point3dCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    points.Add(acadDatabase.Element<Entity>(obj).GeometricExtents.CenterPoint());
+                }
+                foreach (Entity diagram in points.DelaunayTriangulation())
                 {
                     diagram.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(diagram);
