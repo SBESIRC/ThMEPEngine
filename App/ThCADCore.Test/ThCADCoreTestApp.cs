@@ -6,6 +6,11 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
+using StraightSkeletonNet.Primitives;
+using StraightSkeletonNet;
+using Autodesk.AutoCAD.Geometry;
+using Vector2d = StraightSkeletonNet.Primitives.Vector2d;
 
 namespace ThCADCore.Test
 {
@@ -462,6 +467,65 @@ namespace ThCADCore.Test
                 {
                     acadDatabase.ModelSpace.Add(obj as Entity);
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThSkeleton", CommandFlags.Modal)]
+        public void ThSkeletonStraight()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    if (acadDatabase.Element<Entity>(obj) is Polyline poly)
+                    {
+                        var points = new List<Vector2d>();
+                        for (int i = 0; i < poly.NumberOfVertices; i++)
+                        {
+                            var point2d = poly.GetPoint2dAt(i);
+                            points.Add(new Vector2d(point2d.X, point2d.Y));
+                        }
+
+                        var polygonRes = SkeletonBuilder.Build(points);
+                        if (polygonRes != null)
+                        {
+                            var lines = new List<Line>();
+                            foreach (var edge in polygonRes.Edges)
+                            {
+                                var edgeS = edge.Edge.Begin;
+                                var edgeE = edge.Edge.End;
+                                var innerPoly = new Polyline();
+                                for (int i = 0; i < edge.Polygon.Count; i++)
+                                {
+                                    var polygonPt = edge.Polygon[i];
+                                    var centerPt = new Point3d(polygonPt.X, polygonPt.Y, 0);
+                                    innerPoly.AddVertexAt(i, centerPt.ToPoint2D(), 0, 0, 0);
+                                    var circle = new Circle(centerPt, new Vector3d(0, 0, 1), 0.5);
+                                    acadDatabase.ModelSpace.Add(circle);
+                                }
+
+                                innerPoly.Closed = true;
+                                acadDatabase.ModelSpace.Add(innerPoly);
+                                var ptS = new Point3d(edgeS.X, edgeS.Y, 0);
+                                var ptE = new Point3d(edgeE.X, edgeE.Y, 0);
+                                var line = new Line(ptS, ptE);
+                                lines.Add(line);
+                            }
+                            foreach (var drawLine in lines)
+                            {
+                                acadDatabase.ModelSpace.Add(drawLine);
+                            }
+                        }
+                    }
+                }
+
             }
         }
     }
