@@ -1,9 +1,9 @@
 ﻿using System;
 using GeoAPI.Geometries;
-using System.Collections.Generic;
 using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Linemerge;
+using NTSJoinStyle = GeoAPI.Operation.Buffer.JoinStyle;
 
 namespace ThCADCore.NTS
 {
@@ -84,7 +84,11 @@ namespace ThCADCore.NTS
         {
             var objs = new DBObjectCollection();
             var polygon = polyline.ToNTSPolygon();
-            var buffer = BufferOp.Buffer(polygon, distance, 1);
+            var parameters = new BufferParameters()
+            {
+                JoinStyle = NTSJoinStyle.Mitre,
+            };
+            var buffer = BufferOp.Buffer(polygon, distance, parameters);
             if (buffer.IsEmpty)
             {
                 return objs;
