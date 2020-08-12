@@ -105,5 +105,15 @@ namespace ThMEPEngineCore
                 columnDbExtension.ColumnCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
+        [CommandMethod("TIANHUACAD", "THExtractBeam", CommandFlags.Modal)]
+        public void ThExtractBeam()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var beamDbExtension = new ThStructureBeamDbExtension(Active.Database))
+            {
+                beamDbExtension.BuildElementCurves();
+                beamDbExtension.BeamCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
     }
 }

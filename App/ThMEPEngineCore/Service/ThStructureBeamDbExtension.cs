@@ -8,24 +8,25 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThStructureColumnDbExtension : ThStructureDbExtension,IDisposable
+    public class ThStructureBeamDbExtension : ThStructureDbExtension,IDisposable
     {
-        public List<Curve> ColumnCurves { get; set; }
-        public ThStructureColumnDbExtension(Database db):base(db)
+        public List<Curve> BeamCurves { get; set; }
+        public ThStructureBeamDbExtension(Database db):base(db)
         {
-            LayerFilter = ThColumnLayerManager.GeometryXrefLayers(db);
-            ColumnCurves = new List<Curve>();
+            LayerFilter = ThBeamLayerManager.GeometryXrefLayers(db);
+            BeamCurves = new List<Curve>();
         }
         public void Dispose()
         {
-            foreach (var curve in ColumnCurves)
+            foreach (var curve in BeamCurves)
             {
                 curve.Dispose();
             }
-            ColumnCurves.Clear();
+            BeamCurves.Clear();
         }
         public override void BuildElementCurves()
         {
+            List<string> xrefPaths = this.HostDb.XrefPaths();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 foreach(var ent in acadDatabase.ModelSpace)
@@ -35,10 +36,10 @@ namespace ThMEPEngineCore.Service
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
                         if (btr.IsFromExternalReference || btr.IsFromOverlayReference)
                         {
-                            if (ThStructureUtils.IsColumnXref(btr.PathName))
+                            if (ThStructureUtils.IsBeamXref(btr.PathName))
                             {
                                 var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                                ColumnCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
+                                BeamCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
                             }
                         }
                     }
@@ -48,6 +49,10 @@ namespace ThMEPEngineCore.Service
         private IEnumerable<Curve> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)
         {
             List<Curve> curves = new List<Curve>();
+            if(blockReference.BlockTableRecord==ObjectId.Null)
+            {
+                return curves;
+            }
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
@@ -58,15 +63,15 @@ namespace ThMEPEngineCore.Service
                         var dbObj = acadDatabase.Element<Entity>(objId);
                         if (dbObj is BlockReference blockObj)
                         {
-                            if(blockObj.IsBuildElementBlockReference())
+                            if (blockObj.IsBuildElementBlockReference())
                             {
                                 var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                 curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
                             }
                         }
-                        else if(dbObj is Curve curve)
+                        else if (dbObj is Curve curve)
                         {
-                            if(CheckCurveLayerValid(curve))
+                            if (CheckCurveLayerValid(curve))
                             {
                                 curves.Add(curve.GetTransformedCopy(matrix) as Curve);
                             }

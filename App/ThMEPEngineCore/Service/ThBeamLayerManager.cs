@@ -1,15 +1,17 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
+﻿using Linq2Acad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThBeamLayerManager
     {
+        /// <summary>
+        /// 获取ModelSpace下的Beam图层
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
         public static List<string> GeometryLayers(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -39,6 +41,42 @@ namespace ThMEPEngineCore.Service
                     // 返回指定的图层
                     return true;
                 }).ForEachDbObject(o => layers.Add(o.Name));
+                return layers;
+            }
+        }
+        /// <summary>
+        /// 获取Xref下的Beam图层
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
+        public static List<string> GeometryXrefLayers(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                var layers = new List<string>();
+                acadDatabase.Layers
+                    .Where(o =>
+                    {
+                        var layerName = ThStructureUtils.OriginalFromXref(o.Name).ToUpper();
+                        if (!layerName.Contains("S_BEAM"))
+                        {
+                            return false;
+                        }
+                        // 若图层名包含S_BEAM，
+                        // 则继续判断是否包含TEXT
+                        if (layerName.Contains("TEXT"))
+                        {
+                            return false;
+                        }
+
+                        // 继续判断是否包含REIN
+                        if (layerName.Contains("REIN"))
+                        {
+                            return false;
+                        }
+                        // 返回指定的图层
+                        return true;
+                    }).ForEachDbObject(o => layers.Add(o.Name));
                 return layers;
             }
         }
