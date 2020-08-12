@@ -54,7 +54,7 @@ namespace ThMEPEngineCore.CAD
 
                     return curves;
                 }
-                return null;
+                return new List<Curve>();
             }
         }
 

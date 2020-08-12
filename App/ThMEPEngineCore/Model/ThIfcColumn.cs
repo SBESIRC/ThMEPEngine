@@ -8,5 +8,6 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcColumn : ThIfcBuildingElement
     {
+
     }
 }

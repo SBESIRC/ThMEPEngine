@@ -7,6 +7,10 @@ using ThMEPEngineCore.xBIM;
 using Xbim.Ifc4.ProductExtension;
 using Xbim.Ifc4.SharedBldgElements;
 using Xbim.IO;
+using ThMEPEngineCore.Service;
+using System.Collections.Generic;
+using Linq2Acad;
+using AcHelper;
 
 namespace ThMEPEngineCore
 {
@@ -89,6 +93,16 @@ namespace ThMEPEngineCore
             catch
             {
                 return string.Empty;
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THExtractColumn", CommandFlags.Modal)]
+        public void ThExtractColumn()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var columnDbExtension = new ThStructureColumnDbExtension(Active.Database))
+            {
+                columnDbExtension.BuildElementCurves();
+                columnDbExtension.ColumnCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
     }

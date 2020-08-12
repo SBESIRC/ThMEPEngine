@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcElement : ThIfcProduct
+    public abstract class ThIfcElement : ThIfcProduct
     {
-
+        public Entity Outline { get; set; }
     }
 }

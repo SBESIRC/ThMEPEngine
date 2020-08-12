@@ -8,6 +8,8 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcBeam : ThIfcBuildingElement
     {
-        //
+        public ThIfcBeam()
+        {
+        }
     }
 }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcProduct
+    public abstract class ThIfcProduct
     {
     }
 }
