@@ -11,6 +11,7 @@ using ThMEPEngineCore.Service;
 using System.Collections.Generic;
 using Linq2Acad;
 using AcHelper;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore
 {
@@ -108,11 +109,9 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THExtractBeam", CommandFlags.Modal)]
         public void ThExtractBeam()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var beamDbExtension = new ThStructureBeamDbExtension(Active.Database))
+            using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
             {
-                beamDbExtension.BuildElementCurves();
-                beamDbExtension.BeamCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                beamEngine.Recognize();
             }
         }
     }
