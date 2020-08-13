@@ -24,7 +24,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NTS\ThCADCoreHatchExtension.cs" />
+    <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSDbExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSDbObjCollectionExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />

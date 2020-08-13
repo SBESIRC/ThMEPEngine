@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.BoundaryRepresentation;
 
 namespace ThCADCore.NTS
 {
-    public static class ThCADCoreHatchExtension
+    public static class ThCADCoreNTSHatchExtension
     {
         public static IPolygon ConvexHull(this Hatch hatch)
         {
