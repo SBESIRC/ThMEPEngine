@@ -1,13 +1,28 @@
 ﻿using System;
+using System.Linq;
 using GeoAPI.Geometries;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSRegionExtension
     {
+        public static IPolygon ToNTSPolygon(this Region region)
+        {
+            // 暂时不支持"复杂面域"
+            var plines = region.ToPolylines();
+            if (plines.Count != 1)
+            {
+                throw new NotSupportedException();
+            }
+
+            // 返回由面域外轮廓线封闭的多边形区域
+            var pline = plines[0] as Polyline;
+            return pline.ToNTSPolygon();
+        }
+
         public static Region Union(this Region pRegion, Region sRegion)
         {
             var pGeometry = pRegion.ToNTSPolygon();

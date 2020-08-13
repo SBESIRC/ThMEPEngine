@@ -40,14 +40,7 @@
     <Compile Include="NTS\ThCADCoreNTSSimplify.cs" />
     <Compile Include="NTS\ThCADCoreNTSSpatialIndex.cs" />
     <Compile Include="NTS\ThCADCoreNTSTriangulate.cs" />
-    <Compile Include="OutLiner.cs" />
-    <Compile Include="PolylineValidationExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ThCADCoreCommon.cs" />
-    <Compile Include="ThCADGeExtension.cs" />
-    <Compile Include="ThCADHatchExtension.cs" />
-    <Compile Include="ThCADRegionExtension.cs" />
-    <Compile Include="ThPolygonPartition.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">

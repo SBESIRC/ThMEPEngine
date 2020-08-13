@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Linq;
 using GeoAPI.Geometries;
-using System.Collections.Generic;
+using GeometryExtensions;
+using NetTopologySuite.Simplify;
+using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
+using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Algorithm;
-using NetTopologySuite.Operation.Polygonize;
-using NetTopologySuite.Geometries.Utilities;
-using NetTopologySuite.Simplify;
-using GeometryExtensions;
 
 namespace ThCADCore.NTS
 {
@@ -223,20 +221,6 @@ namespace ThCADCore.NTS
         public static IPolygon ToPolygon(this ILinearRing linearRing)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(linearRing);
-        }
-
-        public static IPolygon ToNTSPolygon(this Region region)
-        {
-            // 暂时不支持"复杂面域"
-            var plines = region.ToPolylines();
-            if (plines.Count != 1)
-            {
-                throw new NotSupportedException();
-            }
-
-            // 返回由面域外轮廓线封闭的多边形区域
-            var pline = plines[0] as Polyline;
-            return pline.ToNTSPolygon();
         }
 
         public static IMultiPolygon ToNTSPolygons(this DBObject obj)

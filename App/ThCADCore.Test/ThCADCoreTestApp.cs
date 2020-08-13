@@ -127,38 +127,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThMergeHatches", CommandFlags.Modal)]
-        public void ThMergeHatches()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var filterlist = OpFilter.Bulid(o =>
-                    o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Hatch)).DxfName);
-                var result = Active.Editor.GetSelection(options, filterlist);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-                foreach (var obj in objs.MergeHatches())
-                {
-                    var entity = obj as Entity;
-                    entity.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(entity);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThOutline", CommandFlags.Modal)]
         public void ThOutline()
         {
