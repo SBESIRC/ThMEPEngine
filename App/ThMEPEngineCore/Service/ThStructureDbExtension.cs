@@ -16,6 +16,7 @@ namespace ThMEPEngineCore.Service
             HostDb = db;
             LayerFilter = new List<string>();
         }
+        public abstract void BuildElementTexts();
         public abstract void BuildElementCurves();
         protected bool CheckCurveLayerValid(Curve curve)
         {

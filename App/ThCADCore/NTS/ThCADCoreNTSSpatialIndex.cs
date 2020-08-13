@@ -3,12 +3,15 @@ using GeoAPI.Geometries;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Index.Strtree;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThCADCore.NTS
 {
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
         private STRtree<IGeometry> Engine { get; set; }
+        private Dictionary<IGeometry, DBObject> Geometries { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
             Engine = new STRtree<IGeometry>();
@@ -22,24 +25,35 @@ namespace ThCADCore.NTS
 
         private void Initialize(DBObjectCollection objs)
         {
-            foreach(Curve obj in objs)
+            Geometries = new Dictionary<IGeometry, DBObject>();
+            foreach (Entity obj in objs)
             {
                 if (obj is Line line)
                 {
-                    AddGeometry(line.ToNTSLineString());
+                    Geometries.Add(line.ToNTSLineString(), line);
                 }
                 else if (obj is Polyline polyline)
                 {
-                    AddGeometry(polyline.ToNTSLineString());
+                    Geometries.Add(polyline.ToNTSLineString(), polyline);
                 }
                 else if (obj is Circle circle)
                 {
-                    AddGeometry(circle.ToNTSPolygon());
+                    Geometries.Add(circle.ToNTSPolygon(), circle);
+                }
+                else if (obj is DBText text)
+                {
+                    text.GetTextBoxCorners(out Point3d pt1, out Point3d pt2, out Point3d pt3, out Point3d pt4);
+                    var boundary = ThPolylineExtension.CreateRectangle(pt1, pt3, pt2, pt4);
+                    Geometries.Add(boundary.ToNTSLineString(), boundary);
                 }
                 else
                 {
                     throw new NotSupportedException();
                 }
+            }
+            foreach (var geometry in Geometries.Keys)
+            {
+                AddGeometry(geometry);
             }
         }
 
@@ -64,21 +78,9 @@ namespace ThCADCore.NTS
             var objs = new DBObjectCollection();
             foreach(var geometry in Engine.Query(envelope))
             {
-                if (geometry is ILineString lineString)
+                if (Geometries.ContainsKey(geometry))
                 {
-                    objs.Add(lineString.ToDbPolyline());
-                }
-                else if (geometry is ILinearRing linearRing)
-                {
-                    objs.Add(linearRing.ToDbPolyline());
-                }
-                else if (geometry is IPolygon polygon)
-                {
-                    objs.Add(polygon.Shell.ToDbPolyline());
-                }
-                else
-                {
-                    throw new NotSupportedException();
+                    objs.Add(Geometries[geometry]);
                 }
             }
             return objs;

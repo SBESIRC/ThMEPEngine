@@ -81,5 +81,9 @@ namespace ThMEPEngineCore.Service
             }
             return curves;
         }
+        public override void BuildElementTexts()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

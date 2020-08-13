@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
  
@@ -81,6 +82,23 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             // 比较第一个顶点和最后一个顶点，若他们重合，则多段线闭合；否则不闭合
             var enumerator = vertices.Cast<Point3d>();
             return enumerator.First().IsEqualTo(enumerator.Last(), tolerance);
+        }
+
+        public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
+        {
+            var points = new Point3dCollection()
+            {
+                pt1,
+                pt2,
+                pt3,
+                pt4
+            };
+            var pline = new Polyline()
+            {
+                Closed = true,
+            };
+            pline.CreatePolyline(points);
+            return pline;
         }
     }
 
