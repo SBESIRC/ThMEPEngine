@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using GeoAPI.Geometries;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Index.Strtree;
@@ -87,60 +88,12 @@ namespace ThCADCore.NTS
         }
 
         /// <summary>
-        /// 最近的邻居
-        /// </summary>
-        /// <param name="curve"></param>
-        /// <returns></returns>
-        public Curve NearestNeighbour(Curve curve)
-        {
-            IGeometry geometry = null;
-            if (curve is Line line)
-            {
-                geometry = line.ToNTSLineString();
-            }
-            else if (curve is Polyline polyline)
-            {
-                geometry = polyline.ToNTSLineString();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-
-            var objs = new DBObjectCollection();
-            var neighbours = Engine.NearestNeighbour(
-                geometry.EnvelopeInternal, 
-                geometry, 
-                new GeometryItemDistance(), 
-                2);
-            foreach(var neighbour in neighbours)
-            {
-                // 从邻居中过滤掉自己
-                if (neighbour.EqualsExact(geometry))
-                {
-                    continue;
-                }
-
-                if (neighbour is ILineString lineString)
-                {
-                    objs.Add(lineString.ToDbPolyline());
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return objs[0] as Curve;
-        }
-
-        /// <summary>
         /// 最近的几个邻居
         /// </summary>
         /// <param name="curve"></param>
         /// <returns></returns>
-        public DBObjectCollection NearestNeighbour(Curve curve, int num)
+        public DBObjectCollection NearestNeighbours(Curve curve, int num)
         {
-            num += 1;
             IGeometry geometry = null;
             if (curve is Line line)
             {
@@ -156,28 +109,13 @@ namespace ThCADCore.NTS
             }
 
             var objs = new DBObjectCollection();
-            var neighbours = Engine.NearestNeighbour(
+            Engine.NearestNeighbour(
                 geometry.EnvelopeInternal,
                 geometry,
                 new GeometryItemDistance(),
-                num);
-            foreach (var neighbour in neighbours)
-            {
-                // 从邻居中过滤掉自己
-                if (neighbour.EqualsExact(geometry))
-                {
-                    continue;
-                }
-
-                if (neighbour is ILineString lineString)
-                {
-                    objs.Add(lineString.ToDbPolyline());
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
+                num)
+                .Where(o => !o.EqualsExact(geometry))
+                .ForEach(o => objs.Add(Geometries[o]));
             return objs;
         }
 

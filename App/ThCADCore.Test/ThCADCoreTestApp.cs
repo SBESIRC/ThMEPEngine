@@ -442,8 +442,14 @@ namespace ThCADCore.Test
                     return;
                 }
 
-                var result2 = Active.Editor.GetEntity("请选择对象");
+                var result2 = Active.Editor.GetEntity("请选择查询对象");
                 if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result3 = Active.Editor.GetInteger("请输入邻居个数");
+                if (result3.Status != PromptStatus.OK)
                 {
                     return;
                 }
@@ -455,9 +461,14 @@ namespace ThCADCore.Test
                 }
 
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var nearestNeighbour = spatialIndex.NearestNeighbour(acadDatabase.Element<Curve>(result2.ObjectId));
-                nearestNeighbour.ColorIndex = 1;
-                acadDatabase.ModelSpace.Add(nearestNeighbour);
+                var host = acadDatabase.Element<Curve>(result2.ObjectId);
+                var nearestNeighbours = spatialIndex.NearestNeighbours(host, result3.Value);
+                foreach(Entity neighbour in nearestNeighbours)
+                {
+                    neighbour.UpgradeOpen();
+                    neighbour.ColorIndex = 1;
+                    neighbour.DowngradeOpen();
+                }
             }
         }
 
