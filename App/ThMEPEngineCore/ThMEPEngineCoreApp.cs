@@ -114,5 +114,15 @@ namespace ThMEPEngineCore
                 beamEngine.Recognize();
             }
         }
+        [CommandMethod("TIANHUACAD", "THExtractBeamText", CommandFlags.Modal)]
+        public void ThExtractBeamText()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var beamTextDbExtension = new ThStructureBeamTextDbExtension(Active.Database))
+            {
+                beamTextDbExtension.BuildElementTexts();
+                beamTextDbExtension.BeamTexts.ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
     }
 }

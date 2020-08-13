@@ -66,7 +66,7 @@ namespace ThMEPEngineCore.Service
                         }
                         else if(dbObj is Curve curve)
                         {
-                            if(CheckCurveLayerValid(curve))
+                            if(CheckLayerValid(curve))
                             {
                                 curves.Add(curve.GetTransformedCopy(matrix) as Curve);
                             }

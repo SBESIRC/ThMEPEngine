@@ -26,7 +26,6 @@ namespace ThMEPEngineCore.Service
         }
         public override void BuildElementCurves()
         {
-            List<string> xrefPaths = this.HostDb.XrefPaths();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 foreach(var ent in acadDatabase.ModelSpace)
@@ -71,7 +70,7 @@ namespace ThMEPEngineCore.Service
                         }
                         else if (dbObj is Curve curve)
                         {
-                            if (CheckCurveLayerValid(curve))
+                            if (CheckLayerValid(curve))
                             {
                                 curves.Add(curve.GetTransformedCopy(matrix) as Curve);
                             }

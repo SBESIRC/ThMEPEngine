@@ -112,5 +112,37 @@ namespace ThMEPEngineCore.Service
                 return layers;
             }
         }
+        public static List<string> AnnotationXrefLayers(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                var layers = new List<string>();
+                acadDatabase.Layers.Where(o =>
+                {
+                    var layerName = ThStructureUtils.OriginalFromXref(o.Name).ToUpper();
+                    if (layerName.Contains("SD_BEAM_TEXT"))
+                    {
+                        return true;
+                    }
+
+                    if (layerName.Contains("S_BEAM_SECD_TEXT"))
+                    {
+                        return true;
+                    }
+
+                    if (layerName.Contains("S_BEAM_XL_TEXT"))
+                    {
+                        return true;
+                    }
+
+                    if (layerName.Contains("S_BEAM_WALL_TEXT"))
+                    {
+                        return true;
+                    }
+                    return false;
+                }).ForEachDbObject(o => layers.Add(o.Name));
+                return layers;
+            }
+        }
     }
 }
