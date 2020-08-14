@@ -23,6 +23,24 @@ namespace ThCADCore.NTS
             return pline.ToNTSPolygon();
         }
 
+        public static Region ToDbRegion(this IPolygon polygon)
+        {
+            try
+            {
+                // 暂时不考虑有“洞”的情况
+                var curves = new DBObjectCollection
+                {
+                    polygon.Shell.ToDbPolyline()
+                };
+                return Region.CreateFromCurves(curves)[0] as Region;
+            }
+            catch
+            {
+                // 未知错误
+                return null;
+            }
+        }
+
         public static Region Union(this Region pRegion, Region sRegion)
         {
             var pGeometry = pRegion.ToNTSPolygon();

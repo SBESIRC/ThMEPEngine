@@ -3,6 +3,7 @@ using GeoAPI.Geometries;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Geometries.Utilities;
 
 namespace ThCADCore.NTS
 {
@@ -39,7 +40,6 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection(polygons.ToArray());
         }
 
-
         public static IGeometry ToNTSNodedLineStrings(this DBObjectCollection curves, double chord = 5.0)
         {
             IGeometry nodedLineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
@@ -65,20 +65,6 @@ namespace ThCADCore.NTS
             return nodedLineString;
         }
 
-        public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
-        {
-            var geom = curves.ToNTSNodedLineStrings();
-            var rectangle = MinimumDiameter.GetMinimumRectangle(geom);
-            if (rectangle is IPolygon polygon)
-            {
-                return polygon.Shell.ToDbPolyline();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
         public static List<IGeometry> ToNTSLineStrings(this DBObjectCollection curves, double chord = 5.0)
         {
             var geometries = new List<IGeometry>();
@@ -87,6 +73,10 @@ namespace ThCADCore.NTS
                 if (curve is Line line)
                 {
                     geometries.Add(line.ToNTSLineString());
+                }
+                else if (curve is Polyline polyline)
+                {
+                    geometries.Add(polyline.ToNTSLineString());
                 }
                 else if (curve is Arc arc)
                 {
@@ -100,22 +90,24 @@ namespace ThCADCore.NTS
             return geometries;
         }
 
-        public static Region ToDbRegion(this IPolygon polygon)
+        public static Polyline GetMinimumRectangle(this DBObjectCollection curves, double chord = 5.0)
         {
-            try
+            var geometry = curves.Combine(chord);
+            var rectangle = MinimumDiameter.GetMinimumRectangle(geometry);
+            if (rectangle is IPolygon polygon)
             {
-                // 暂时不考虑有“洞”的情况
-                var curves = new DBObjectCollection
-                {
-                    polygon.Shell.ToDbPolyline()
-                };
-                return Region.CreateFromCurves(curves)[0] as Region;
+                return polygon.Shell.ToDbPolyline();
             }
-            catch
+            else
             {
-                // 未知错误
-                return null;
+                throw new NotSupportedException();
             }
+        }
+
+        public static IGeometry Combine(this DBObjectCollection curves, double chord = 5.0)
+        {
+            var geometries = curves.ToNTSLineStrings(chord);
+            return GeometryCombiner.Combine(geometries);
         }
     }
 }
