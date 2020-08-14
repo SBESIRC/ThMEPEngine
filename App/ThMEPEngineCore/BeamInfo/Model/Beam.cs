@@ -47,7 +47,8 @@ namespace ThMEPEngineCore.BeamInfo.Model
                 }
             }
         }
-
+        public Point3d StartPoint { get; set; }
+        public Point3d EndPoint { get; set; }
         public Point3d UpStartPoint { get; set; }
 
         public Point3d UpEndPoint { get; set; }

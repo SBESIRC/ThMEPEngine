@@ -30,5 +30,9 @@ namespace ThMEPEngineCore.CAD
             double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
             return (angle < tolerance) || ((180.0 - angle) < tolerance);
         }
+        public static Point3d GetMidPt(Point3d pt1, Point3d pt2)
+        {
+            return new Point3d((pt1.X + pt2.X) / 2.0, (pt1.Y + pt2.Y) / 2.0, (pt1.Z + pt2.Z) / 2.0);
+        }
     }
 }

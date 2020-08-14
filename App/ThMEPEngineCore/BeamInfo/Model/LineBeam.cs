@@ -1,6 +1,9 @@
 using System;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
+using System.Linq;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.BeamInfo.Model
 {
@@ -8,36 +11,111 @@ namespace ThMEPEngineCore.BeamInfo.Model
     {
         public LineBeam(Curve newUpLine, Curve newDownLine)
         {
-            Curve shortLine, longLine;
-            if (newUpLine.GetLength() < newDownLine.GetLength())
+            if(newUpLine is Line firstLine && newDownLine is Line secondLine)
             {
-                shortLine = newUpLine;
-                longLine = newDownLine;
+                BeamNormal = ResetBeamDirection(firstLine.StartPoint.GetVectorTo(firstLine.EndPoint).GetNormal());
+                List<Line> lines = CreateOutLine(firstLine, secondLine, BeamNormal);
+                UpStartPoint = lines[0].StartPoint;
+                UpEndPoint = lines[0].EndPoint;
+                DownStartPoint = lines[1].StartPoint;
+                DownEndPoint = lines[1].EndPoint;
+                BeamSPointSolid = CreatePolyline(UpStartPoint, DownStartPoint, -BeamNormal, 10);
+                BeamEPointSolid = CreatePolyline(UpEndPoint, DownEndPoint, BeamNormal, 10);
+                StartPoint = ThGeometryTool.GetMidPt(UpStartPoint, DownStartPoint);
+                EndPoint = ThGeometryTool.GetMidPt(UpEndPoint, DownEndPoint);
+                lines.ForEach(o => o.Dispose());
+            }
+        }
+        private Vector3d ResetBeamDirection(Vector3d originBeamDir,double tolerance=1.0)
+        {
+            double angle = Vector3d.XAxis.GetAngleTo(originBeamDir, Vector3d.ZAxis) /Math.PI*180.0;
+            angle %= 360.0;
+            if (Math.Abs(angle-0.0)<= tolerance || Math.Abs(angle - 180.0) == tolerance)
+            {
+                return Vector3d.XAxis;
+            }
+            else if(Math.Abs(angle - 90.0) <= tolerance || Math.Abs(angle - 270.0) == tolerance)
+            {
+                return Vector3d.YAxis;
+            }
+            else if((angle>0.0 && angle < 90.0) || (angle > 180.0 && angle < 270.0))
+            {
+                //第一、第三象限
+                double rotateAng = Vector3d.XAxis.GetAngleTo(originBeamDir, Vector3d.ZAxis) % Math.PI;
+                return Vector3d.XAxis.RotateBy(rotateAng, Vector3d.ZAxis);
             }
             else
             {
-                shortLine = newDownLine;
-                longLine = newUpLine;
+                //第二、第四象限
+                double rotateAng = Vector3d.XAxis.GetAngleTo(originBeamDir, Vector3d.ZAxis) % Math.PI;
+                rotateAng += Math.PI;
+                return Vector3d.XAxis.RotateBy(rotateAng, Vector3d.ZAxis);
             }
-            BeamNormal = (shortLine as Line).Delta.GetNormal();
-            if (longLine.GetLength() - shortLine.GetLength() > 300)
+        }
+        /// <summary>
+        /// 调整梁线方向
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <param name="beamDir"></param>
+        /// <returns></returns>
+        private List<Line> CreateOutLine(Line first,Line second,Vector3d beamDir)
+        {
+            Vector3d upRight = beamDir.RotateBy(Math.PI / 2.0, Vector3d.ZAxis);
+            Plane plane = new Plane(first.StartPoint, beamDir);
+            Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
+            Matrix3d ucsToWcs = Matrix3d.PlaneToWorld(plane);
+            Point3d firstStartPt = first.StartPoint.TransformBy(wcsToUcs);
+            Point3d firstEndPt = first.EndPoint.TransformBy(wcsToUcs);
+            Point3d secondStartPt = second.StartPoint.TransformBy(wcsToUcs);
+            Point3d secondEndPt = second.EndPoint.TransformBy(wcsToUcs);
+            List<double> zValues = new List<double> { firstStartPt.Z, firstEndPt.Z, secondStartPt.Z, secondEndPt.Z };
+            double minZ = zValues.OrderBy(o => o).FirstOrDefault();
+            double maxZ = zValues.OrderByDescending(o => o).FirstOrDefault();
+            if(firstEndPt.Z> firstStartPt.Z)
             {
-                UpStartPoint = shortLine.StartPoint;
-                UpEndPoint = shortLine.EndPoint;
-                DownStartPoint = longLine.GetClosestPointTo(UpStartPoint, false);
-                DownEndPoint = longLine.GetClosestPointTo(UpEndPoint, false);
+                firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y,minZ);
+                firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, maxZ);
             }
             else
             {
-                DownStartPoint = longLine.StartPoint;
-                DownEndPoint = longLine.EndPoint;
-                UpStartPoint = shortLine.GetClosestPointTo(DownStartPoint, false);
-                UpEndPoint = shortLine.GetClosestPointTo(DownEndPoint, false);
+                firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, maxZ);
+                firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, minZ);
             }
-            
-
-            BeamSPointSolid = CreatePolyline(UpStartPoint, DownStartPoint, -BeamNormal, 10);
-            BeamEPointSolid = CreatePolyline(UpEndPoint, DownEndPoint, BeamNormal, 10);
+            if (secondEndPt.Z > secondStartPt.Z)
+            {
+                secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, minZ);
+                secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, maxZ);
+            }
+            else
+            {
+                secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, maxZ);
+                secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, minZ);
+            }
+            firstStartPt = firstStartPt.TransformBy(ucsToWcs);
+            firstEndPt = firstEndPt.TransformBy(ucsToWcs);
+            secondStartPt = secondStartPt.TransformBy(ucsToWcs);
+            secondEndPt = secondEndPt.TransformBy(ucsToWcs);
+            plane.Dispose();
+            Point3d firstMidPt = ThGeometryTool.GetMidPt(firstStartPt , firstEndPt);
+            Point3d secondMidPt = ThGeometryTool.GetMidPt(secondStartPt, secondEndPt);
+            Vector3d midVec = firstMidPt.GetVectorTo(secondMidPt);
+            if(midVec.DotProduct(upRight)<0.0)
+            {
+                return new List<Line>
+                {
+                    new Line(firstStartPt, firstEndPt),
+                    new Line(secondStartPt, secondEndPt)
+                };
+            }
+            else
+            {
+                return new List<Line>
+                {
+                    new Line(secondStartPt, secondEndPt) ,
+                    new Line(firstStartPt, firstEndPt)
+                };
+            }
         }
 
         public override Polyline BeamBoundary
