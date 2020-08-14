@@ -98,10 +98,12 @@
     <Compile Include="Model\ThIfcWindowStandardCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
+    <Compile Include="Service\ThShearWallLayerManager.cs" />
     <Compile Include="Service\ThBeamLayerManager.cs" />
     <Compile Include="Service\ThColumnLayerManager.cs" />
     <Compile Include="Service\ThBeamMarkingService.cs" />
     <Compile Include="Service\ThSpatialIndexService.cs" />
+    <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamTextDbExtension.cs" />
     <Compile Include="Service\ThStructureColumnDbExtension.cs" />

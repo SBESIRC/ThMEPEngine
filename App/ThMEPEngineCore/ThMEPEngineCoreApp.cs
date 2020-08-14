@@ -126,34 +126,15 @@ namespace ThMEPEngineCore
                 beamTextDbExtension.BuildElementTexts();
                 beamTextDbExtension.BeamTexts.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
-            
         }
-        [CommandMethod("TIANHUACAD", "TestCreateBeam", CommandFlags.Modal)]
-        public void TestCreateBeam()
+        [CommandMethod("TIANHUACAD", "THExtractShearWall", CommandFlags.Modal)]
+        public void THExtractShearWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var shearWallDbExtension = new ThStructureShearWallDbExtension(Active.Database))
             {
-                var curve1Res = Active.Editor.GetEntity("\nSelect first line");
-                var curve2Res = Active.Editor.GetEntity("\nSelect second line");
-
-                Line firstLine = acadDatabase.Element<Line>(curve1Res.ObjectId);
-                Line secondLine = acadDatabase.Element<Line>(curve2Res.ObjectId);
-
-                LineBeam lineBeam = new LineBeam(firstLine, secondLine);
-                Line upLine = new Line(lineBeam.UpStartPoint, lineBeam.UpEndPoint);
-                upLine.ColorIndex = 1;
-                Line downLine = new Line(lineBeam.DownStartPoint, lineBeam.DownEndPoint);
-                downLine.ColorIndex = 2;
-
-                acadDatabase.ModelSpace.Add(upLine);
-                acadDatabase.ModelSpace.Add(downLine);
-
-                Circle startCircle = new Circle(lineBeam.StartPoint, Vector3d.ZAxis, 10.0);
-                startCircle.ColorIndex = 3;
-                Circle endCircle = new Circle(lineBeam.EndPoint, Vector3d.ZAxis, 10.0);
-                endCircle.ColorIndex = 4;
-                acadDatabase.ModelSpace.Add(startCircle);
-                acadDatabase.ModelSpace.Add(endCircle);
+                shearWallDbExtension.BuildElementTexts();
+                shearWallDbExtension.ShearWallCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
     }
