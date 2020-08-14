@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
+﻿using System.IO;
+using System.Text.RegularExpressions;
 
 namespace ThMEPEngineCore.Service
 {
@@ -23,6 +19,27 @@ namespace ThMEPEngineCore.Service
         {
             int index = xrefLayer.LastIndexOf('|');
             return (index >= 0) ? xrefLayer.Substring(index + 1) : xrefLayer;
+        }
+
+        /// <summary>
+        /// 验证规格
+        /// </summary>
+        /// <returns></returns>
+        public static bool ValidateSpec(string spec)
+        {
+            if (string.IsNullOrEmpty(spec))
+            {
+                return false;
+            }
+            string pattern = @"^[\s]{0,}\d+[\s]{0,}[xX×]{1}[\s]{0,}\d+[\s]{0,}$";
+            if (Regex.IsMatch(spec, pattern))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

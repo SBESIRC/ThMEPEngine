@@ -43,9 +43,8 @@ namespace ThCADCore.NTS
                 }
                 else if (obj is DBText text)
                 {
-                    text.GetTextBoxCorners(out Point3d pt1, out Point3d pt2, out Point3d pt3, out Point3d pt4);
-                    var boundary = ThPolylineExtension.CreateRectangle(pt1, pt3, pt2, pt4);
-                    Geometries.Add(boundary.ToNTSLineString(), boundary);
+                    var boundary = ThPolylineExtension.CreateRectangle(text.GeometricExtents);
+                    Geometries.Add(boundary.ToNTSLineString(), text);
                 }
                 else
                 {

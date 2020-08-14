@@ -50,6 +50,7 @@
     <Compile Include="BeamInfo\Utils\ThStructureUtils.cs" />
     <Compile Include="CAD\ThDbExtension.cs" />
     <Compile Include="CAD\ThDrawTool.cs" />
+    <Compile Include="CAD\ThGeometryTool.cs" />
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
@@ -99,6 +100,8 @@
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="Service\ThBeamLayerManager.cs" />
     <Compile Include="Service\ThColumnLayerManager.cs" />
+    <Compile Include="Service\ThBeamMarkingService.cs" />
+    <Compile Include="Service\ThSpatialIndexService.cs" />
     <Compile Include="Service\ThStructureBeamDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamTextDbExtension.cs" />
     <Compile Include="Service\ThStructureColumnDbExtension.cs" />

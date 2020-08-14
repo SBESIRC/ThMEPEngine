@@ -100,6 +100,14 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             pline.CreatePolyline(points);
             return pline;
         }
+        public static Polyline CreateRectangle(Extents3d extents)
+        {
+            Point3d pt1 = extents.MinPoint;
+            Point3d pt3 = extents.MaxPoint;
+            Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
+            Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
+            return CreateRectangle(pt1,pt2,pt3,pt4);
+        }
     }
 
     public interface IDisposableCollection<T> : ICollection<T>, IDisposable
