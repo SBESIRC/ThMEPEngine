@@ -59,6 +59,17 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             }
         }
 
+        public static Polyline ExpandBy(this Polyline rectangle, double deltaX, double deltaY)
+        {
+            var v0 = rectangle.GetPoint3dAt(0) - rectangle.GetPoint3dAt(3);
+            var v1 = rectangle.GetPoint3dAt(0) - rectangle.GetPoint3dAt(1);
+            var p0 = rectangle.GetPoint3dAt(0) + (v0.GetNormal() * deltaY + v1.GetNormal() * deltaX);
+            var p1 = rectangle.GetPoint3dAt(1) + (v0.GetNormal() * deltaY - v1.GetNormal() * deltaX);
+            var p2 = rectangle.GetPoint3dAt(2) - (v0.GetNormal() * deltaY + v1.GetNormal() * deltaX);
+            var p3 = rectangle.GetPoint3dAt(3) - (v0.GetNormal() * deltaY - v1.GetNormal() * deltaX);
+            return CreateRectangle(p0, p1, p2, p3);
+        }
+
         public static Point3dCollection Vertices(this Polyline pLine)
         {
             //https://keanw.com/2007/04/iterating_throu.html
@@ -100,6 +111,7 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             pline.CreatePolyline(points);
             return pline;
         }
+
         public static Polyline CreateRectangle(Extents3d extents)
         {
             Point3d pt1 = extents.MinPoint;
@@ -107,67 +119,6 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
             Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
             return CreateRectangle(pt1,pt2,pt3,pt4);
-        }
-    }
-
-    public interface IDisposableCollection<T> : ICollection<T>, IDisposable
-       where T : IDisposable
-    {
-        void AddRange(IEnumerable<T> items);
-        IEnumerable<T> RemoveRange(IEnumerable<T> items);
-    }
-
-    public class DisposableSet<T> : HashSet<T>, IDisposableCollection<T>
-       where T : IDisposable
-    {
-        public DisposableSet()
-        {
-        }
-
-        public DisposableSet(IEnumerable<T> items)
-        {
-            AddRange(items);
-        }
-
-        public void Dispose()
-        {
-            if (base.Count > 0)
-            {
-                System.Exception last = null;
-                var list = this.ToList();
-                this.Clear();
-                foreach (T item in list)
-                {
-                    if (item != null)
-                    {
-                        try
-                        {
-                            item.Dispose();
-                        }
-                        catch (System.Exception ex)
-                        {
-                            last = last ?? ex;
-                        }
-                    }
-                }
-                if (last != null)
-                    throw last;
-            }
-        }
-
-        public void AddRange(IEnumerable<T> items)
-        {
-            if (items == null)
-                throw new ArgumentNullException("items");
-            base.UnionWith(items);
-        }
-
-        public IEnumerable<T> RemoveRange(IEnumerable<T> items)
-        {
-            if (items == null)
-                throw new ArgumentNullException("items");
-            base.ExceptWith(items);
-            return items;
         }
     }
 
