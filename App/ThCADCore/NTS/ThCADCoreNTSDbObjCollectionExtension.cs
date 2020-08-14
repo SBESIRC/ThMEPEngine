@@ -1,6 +1,7 @@
 ﻿using System;
 using GeoAPI.Geometries;
 using System.Collections.Generic;
+using NetTopologySuite.Algorithm;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
@@ -62,6 +63,20 @@ namespace ThCADCore.NTS
                 }
             }
             return nodedLineString;
+        }
+
+        public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
+        {
+            var geom = curves.ToNTSNodedLineStrings();
+            var rectangle = MinimumDiameter.GetMinimumRectangle(geom);
+            if (rectangle is IPolygon polygon)
+            {
+                return polygon.Shell.ToDbPolyline();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public static List<IGeometry> ToNTSLineStrings(this DBObjectCollection curves, double chord = 5.0)

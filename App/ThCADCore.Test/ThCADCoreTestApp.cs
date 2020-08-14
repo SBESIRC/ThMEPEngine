@@ -61,14 +61,18 @@ namespace ThCADCore.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetEntity("请选择对象");
+                var result = Active.Editor.GetSelection();
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                acadDatabase.ModelSpace.Add(pline.GetMinimumRectangle());
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                acadDatabase.ModelSpace.Add(objs.GetMinimumRectangle());
             }
         }
 
