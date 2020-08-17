@@ -114,7 +114,7 @@ namespace ThCADCore.NTS
 
         public static bool Overlaps(this Polyline thisPline, Polyline otherPline)
         {
-            return thisPline.ToNTSPolygon().Intersects(otherPline.ToNTSPolygon());
+            return thisPline.ToNTSPolygon().Overlaps(otherPline.ToNTSPolygon());
         }
 
         public static bool Contains(this Polyline thisPline, Point3d pt)
