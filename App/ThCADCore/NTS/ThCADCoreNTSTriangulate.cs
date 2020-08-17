@@ -1,5 +1,6 @@
 ﻿using System;
 using GeoAPI.Geometries;
+using NetTopologySuite.Densify;
 using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
@@ -13,7 +14,8 @@ namespace ThCADCore.NTS
         {
             var objs = new DBObjectCollection();
             var voronoiDiagram = new VoronoiDiagramBuilder();
-            voronoiDiagram.SetSites(LineString.Empty.Union(polyline.ToNTSLineString()));
+            var lineString = polyline.ToNTSLineString();
+            voronoiDiagram.SetSites(Densifier.Densify(lineString, lineString.Length / 50));
             var geometries = voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory);
             foreach (var geometry in geometries.Geometries)
             {
