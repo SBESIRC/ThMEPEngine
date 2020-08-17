@@ -4,6 +4,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using ThMEPEngineCore.BeamInfo;
+using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using TianHua.AutoCAD.Utility.ExtensionTools;
@@ -12,7 +13,6 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThBeamRecognitionEngine : ThModelRecognitionEngine, IDisposable
     {
-        public override List<ThIfcElement> Elements { get; set ; }
         public ThBeamRecognitionEngine()
         {
         }
@@ -22,10 +22,10 @@ namespace ThMEPEngineCore.Engine
             //ToDo
         }
 
-        public override void Recognize()
+        public override void Recognize(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var beamDbExtension = new ThStructureBeamDbExtension(Active.Database))
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (var beamDbExtension = new ThStructureBeamDbExtension(database))
             {
                 //获取梁线
                 beamDbExtension.BuildElementCurves();
@@ -52,11 +52,53 @@ namespace ThMEPEngineCore.Engine
                         List<DBText> findDbText = thBeamMarkingService.Match(dbTextSpatialIndex);
                         if (findDbText.Count == 1)
                         {
-                            acadDatabase.ModelSpace.Add(ThPolylineExtension.CreateRectangle(findDbText[0].GeometricExtents));
+                            Elements.Add(CreateIfcBeam(beam, findDbText[0].TextString));
+                            //acadDatabase.ModelSpace.Add(ThPolylineExtension.CreateRectangle(findDbText[0].GeometricExtents));
+                        }
+                        else
+                        {
+                            Elements.Add(CreateIfcBeam(beam));
                         }
                     }
                 }
+
+                //释放获取的梁断
+                beamCollection.Dispose();
             }
+        }
+
+        private ThIfcBeam CreateIfcBeam(Beam beam, string spec = "")
+        {
+            ThIfcBeam thIfcBeam;
+            if (beam is LineBeam)
+            {
+                thIfcBeam = new ThIfcLineBeam()
+                {
+                    Direction = beam.BeamNormal
+                };
+            }
+            else if (beam is ArcBeam)
+            {
+                thIfcBeam = new ThIfcArcBeam();
+            }
+            else
+            {
+                thIfcBeam = new ThIfcBeam();
+            }
+            thIfcBeam.Uuid = Guid.NewGuid().ToString();
+            thIfcBeam.StartPoint = beam.StartPoint;
+            thIfcBeam.EndPoint = beam.EndPoint;
+            thIfcBeam.Outline = beam.BeamBoundary.Clone() as Entity;
+            if (!string.IsNullOrEmpty(spec))
+            {
+                List<double> datas = ThStructureUtils.GetDoubleValues(spec);
+                if (datas.Count == 2)
+                {
+                    thIfcBeam.Width = datas[0];
+                    thIfcBeam.Height = datas[1];
+                }
+            }
+            return thIfcBeam;
         }
     }
 }

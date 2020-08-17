@@ -54,6 +54,8 @@
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
+    <Compile Include="Engine\ThBeamTypeRecogitionEngine.cs" />
+    <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThModelRecognitionEngine.cs" />
     <Compile Include="IO\ThDwgReader.cs" />
@@ -63,8 +65,10 @@
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
     <Compile Include="Model\Electrical\ThIfcLamp.cs" />
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />
+    <Compile Include="Model\ThBeamLink.cs" />
     <Compile Include="Model\ThIfcAlarm.cs" />
     <Compile Include="Model\Electrical\ThIfcAudioVisualAppliance.cs" />
+    <Compile Include="Model\ThIfcArcBeam.cs" />
     <Compile Include="Model\ThIfcBeam.cs" />
     <Compile Include="Model\ThIfcBeamStandardCase.cs" />
     <Compile Include="Model\ThIfcBuilding.cs" />
@@ -81,6 +85,7 @@
     <Compile Include="Model\ThIfcDoorStandardCase.cs" />
     <Compile Include="Model\ThIfcElement.cs" />
     <Compile Include="Model\ThIfcFlowTerminal.cs" />
+    <Compile Include="Model\ThIfcLineBeam.cs" />
     <Compile Include="Model\ThIfcProduct.cs" />
     <Compile Include="Model\ThIfcRelationship.cs" />
     <Compile Include="Model\ThIfcRelConnects.cs" />
@@ -98,10 +103,12 @@
     <Compile Include="Model\ThIfcWindowStandardCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
+    <Compile Include="Service\ThBeamLinkExtension.cs" />
     <Compile Include="Service\ThShearWallLayerManager.cs" />
     <Compile Include="Service\ThBeamLayerManager.cs" />
     <Compile Include="Service\ThColumnLayerManager.cs" />
     <Compile Include="Service\ThBeamMarkingService.cs" />
+    <Compile Include="Service\ThSpatialIndexManager.cs" />
     <Compile Include="Service\ThSpatialIndexService.cs" />
     <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamDbExtension.cs" />

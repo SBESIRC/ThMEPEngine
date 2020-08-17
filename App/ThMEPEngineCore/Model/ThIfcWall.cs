@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,13 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcWall : ThIfcBuildingElement
     {
-
+        public static ThIfcWall CreateWallEntity(Curve curve)
+        {
+            return new ThIfcWall()
+            {
+                Outline = curve,
+                Uuid = Guid.NewGuid().ToString()
+            };
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 
 namespace ThMEPEngineCore.Service
@@ -40,6 +42,20 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
+        }
+        public static List<double> GetDoubleValues(string str)
+        {
+            List<double> values = new List<double>();
+            string pattern = "[-]?\\d+([.]{1}\\d+)?";
+            MatchCollection matches = Regex.Matches(str, pattern);
+            foreach (var match in matches)
+            {
+                if (!string.IsNullOrEmpty(match.ToString()))
+                {
+                    values.Add(Convert.ToDouble(match.ToString()));
+                }
+            }
+            return values;
         }
     }
 }

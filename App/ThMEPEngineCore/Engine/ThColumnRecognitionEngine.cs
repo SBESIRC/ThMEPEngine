@@ -1,17 +1,22 @@
-﻿using System;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThColumnRecognitionEngine : ThModelRecognitionEngine, IDisposable
     {
-        public override List<ThIfcElement> Elements { get; set ; }
         public ThColumnRecognitionEngine()
         {
+            Elements = new List<ThIfcElement>();
         }
 
         public void Dispose()
@@ -19,9 +24,19 @@ namespace ThMEPEngineCore.Engine
             //ToDo
         }
 
-        public override void Recognize()
+        public override void Recognize(Database database)
         {
-           
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (var columnDbExtension = new ThStructureColumnDbExtension(database))
+            {
+                columnDbExtension.BuildElementCurves();
+                DBObjectCollection dbObjs = new DBObjectCollection();
+                columnDbExtension.ColumnCurves.ForEach(o => dbObjs.Add(o));
+                foreach(Curve curve in dbObjs.Union())
+                {
+                    Elements.Add(ThIfcColumn.CreateColumnEntity(curve));
+                }
+            }
         }
     }
 }

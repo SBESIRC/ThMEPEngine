@@ -114,7 +114,7 @@ namespace ThMEPEngineCore
         {
             using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
             {
-                beamEngine.Recognize();
+                beamEngine.Recognize(Active.Database);
             }
         }
         [CommandMethod("TIANHUACAD", "THExtractBeamText", CommandFlags.Modal)]
@@ -133,8 +133,18 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var shearWallDbExtension = new ThStructureShearWallDbExtension(Active.Database))
             {
-                shearWallDbExtension.BuildElementTexts();
+                shearWallDbExtension.BuildElementCurves();
                 shearWallDbExtension.ShearWallCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractBeamType", CommandFlags.Modal)]
+        public void ThExtractBeamType()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var thBeamTypeRecogitionEngine = new ThBeamTypeRecogitionEngine())
+            {
+                thBeamTypeRecogitionEngine.Recognize(Active.Database);
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(o => acadDatabase.ModelSpace.Add(o.Beams[0].Outline));
             }
         }
     }
