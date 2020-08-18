@@ -255,10 +255,31 @@ namespace ThCADCore.Test
                 }
 
                 var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity diagram in pline.VoronoiDiagram())
+                foreach (Entity diagram in pline.VoronoiTriangulation(pline.Length/50.0))
                 {
                     diagram.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(diagram);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThCenterline", CommandFlags.Modal)]
+        public void ThCenterline()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
+                var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(pline, pline.Length / 50.0);
+                foreach(Entity centerline in centerlines)
+                {
+                    centerline.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(centerline);
                 }
             }
         }

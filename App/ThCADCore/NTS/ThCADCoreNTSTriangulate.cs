@@ -10,14 +10,18 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSTriangulate
     {
-        public static DBObjectCollection VoronoiDiagram(this Polyline polyline)
+        public static IGeometryCollection VoronoiDiagram(this Polyline polyline, double distanceTolerance)
+        {
+            var lineString = polyline.ToNTSLineString();
+            var voronoiDiagram = new VoronoiDiagramBuilder();
+            voronoiDiagram.SetSites(Densifier.Densify(lineString, distanceTolerance));
+            return voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory);
+        }
+
+        public static DBObjectCollection VoronoiTriangulation(this Polyline polyline, double distanceTolerance)
         {
             var objs = new DBObjectCollection();
-            var voronoiDiagram = new VoronoiDiagramBuilder();
-            var lineString = polyline.ToNTSLineString();
-            voronoiDiagram.SetSites(Densifier.Densify(lineString, lineString.Length / 50));
-            var geometries = voronoiDiagram.GetDiagram(ThCADCoreNTSService.Instance.GeometryFactory);
-            foreach (var geometry in geometries.Geometries)
+            foreach (var geometry in polyline.VoronoiDiagram(distanceTolerance).Geometries)
             {
                 if (geometry is IPolygon polygon)
                 {
