@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 
@@ -20,6 +21,10 @@ namespace ThMEPEngineCore.Engine
             DBObjectCollection dbObjs = new DBObjectCollection();
             Elements.ForEach(o => dbObjs.Add(o.Outline));
             return dbObjs;
+        }
+        public IEnumerable<ThIfcElement> FilterByOutline(DBObjectCollection objs)
+        {
+            return Elements.Where(o => objs.Contains(o.Outline));
         }
     }
 }

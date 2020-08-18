@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
@@ -35,9 +36,11 @@ namespace ThMEPEngineCore.Engine
 
             //创建空间索引
             ThSpatialIndexManager.Instance.CreateColumnSpaticalIndex(thColumnRecognitionEngine.Collect());
+            ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(thBeamRecognitionEngine.Collect());
+            var outlines = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectAll();
 
             //Pass One 通过单根梁过滤
-            foreach(ThIfcElement beamElement in thBeamRecognitionEngine.Elements)
+            foreach (ThIfcElement beamElement in thBeamRecognitionEngine.FilterByOutline(outlines))
             {
                 ThBeamLinkExtension thBeamLinkExtension = new ThBeamLinkExtension(beamElement as ThIfcBeam);
                 thBeamLinkExtension.CreateSinglePrimaryBeamLink();
