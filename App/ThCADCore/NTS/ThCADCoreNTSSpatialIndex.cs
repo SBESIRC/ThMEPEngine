@@ -31,20 +31,36 @@ namespace ThCADCore.NTS
             {
                 if (obj is Line line)
                 {
-                    Geometries.Add(line.ToNTSLineString(), line);
+                    var geometry = line.ToNTSLineString();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, line);
+                    }
                 }
                 else if (obj is Polyline polyline)
                 {
-                    Geometries.Add(polyline.ToNTSLineString(), polyline);
+                    var geometry = polyline.ToNTSLineString();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, polyline);
+                    }
                 }
                 else if (obj is Circle circle)
                 {
-                    Geometries.Add(circle.ToNTSPolygon(), circle);
+                    var geometry = circle.ToNTSPolygon();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, circle);
+                    }
                 }
                 else if (obj is DBText text)
                 {
                     var boundary = ThPolylineExtension.CreateRectangle(text.GeometricExtents);
-                    Geometries.Add(boundary.ToNTSLineString(), text);
+                    var geometry = boundary.ToNTSLineString();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, text);
+                    }
                 }
                 else
                 {
@@ -71,6 +87,13 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectFence(Curve curve)
         {
             return Query(curve.GeometricExtents.ToEnvelope());
+        }
+
+        public DBObjectCollection SelectAll()
+        {
+            var objs = new DBObjectCollection();
+            Geometries.Values.ForEach(o => objs.Add(o));
+            return objs;
         }
 
         private DBObjectCollection Query(Envelope envelope)
