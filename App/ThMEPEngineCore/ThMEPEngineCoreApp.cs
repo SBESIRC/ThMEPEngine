@@ -112,9 +112,11 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THExtractBeam", CommandFlags.Modal)]
         public void ThExtractBeam()
         {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
             {
                 beamEngine.Recognize(Active.Database);
+                beamEngine.Elements.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
         }
         [CommandMethod("TIANHUACAD", "THExtractBeamText", CommandFlags.Modal)]
