@@ -1,5 +1,7 @@
 ﻿using System;
 using GeoAPI.Geometries;
+using System.Collections.Generic;
+using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Linemerge;
@@ -58,7 +60,7 @@ namespace ThCADCore.NTS
             return curves.ToNTSPolygonCollection().Buffer(0);
         }
 
-        public static DBObjectCollection Union(this DBObjectCollection curves)
+        public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
             var objs = new DBObjectCollection();
             var result = curves.UnionGeometries();
@@ -78,6 +80,26 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
             return objs;
+        }
+
+        public static DBObjectCollection UnionLineStrings(this DBObjectCollection curves)
+        {
+            // Unioning a set of LineStrings has the effect of noding and dissolving the input linework. 
+            // In this context "fully noded" means that there will be an endpoint or 
+            // node in the result for every endpoint or line segment crossing in the input. 
+            // "Dissolved" means that any duplicate (i.e. coincident) line segments or 
+            // portions of line segments will be reduced to a single line segment in the result.
+            var results = UnaryUnionOp.Union(curves.ToNTSLineStrings());
+            if (results is IMultiLineString geometries)
+            {
+                var objs = new DBObjectCollection();
+                geometries.ToDbPolylines().ForEach(o => objs.Add(o));
+                return objs;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public static DBObjectCollection Buffer(this Polyline polyline, double distance)
