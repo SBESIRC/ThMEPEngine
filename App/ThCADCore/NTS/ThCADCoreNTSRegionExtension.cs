@@ -150,7 +150,7 @@ namespace ThCADCore.NTS
             try
             {
                 var pGeometry = pRegion.ToNTSPolygon();
-                var sGeometry = sRegions.ToNTSPolygons();
+                var sGeometry = sRegions.ToNTSMultiPolygon();
                 if (pGeometry == null || sGeometry == null)
                 {
                     return regions;
@@ -194,7 +194,7 @@ namespace ThCADCore.NTS
                 pGeometrys.Add(pRegion.ToNTSPolygon());
                 foreach (DBObject sGe in sRegions)
                 {
-                    var sGeometry = new DBObjectCollection() { sGe }.ToNTSPolygons();
+                    var sGeometry = new DBObjectCollection() { sGe }.ToNTSMultiPolygon();
                     foreach (var pGeometry in pGeometrys)
                     {
                         if (pGeometry == null || sGeometry == null)

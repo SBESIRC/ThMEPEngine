@@ -32,7 +32,7 @@ namespace ThMEPEngineCore.Engine
                 columnDbExtension.BuildElementCurves();
                 DBObjectCollection dbObjs = new DBObjectCollection();
                 columnDbExtension.ColumnCurves.ForEach(o => dbObjs.Add(o));
-                foreach(Curve curve in dbObjs.Union())
+                foreach(Curve curve in dbObjs.UnionPolygons())
                 {
                     Elements.Add(ThIfcColumn.CreateColumnEntity(curve));
                 }
