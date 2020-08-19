@@ -1,7 +1,5 @@
-﻿using System;
-using GeoAPI.Geometries;
+﻿using GeoAPI.Geometries;
 using System.Collections.Generic;
-using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.LinearReferencing;
 
@@ -29,16 +27,11 @@ namespace ThCADCore.NTS
                 }
             }
             var centerlines = new DBObjectCollection();
-            if (UnaryUnionOp.Union(lineStrings) is IMultiLineString geometries)
+            foreach(ILineString lineString in lineStrings)
             {
-                var objs = new DBObjectCollection();
-                geometries.ToDbPolylines().ForEach(o => objs.Add(o));
-                return objs.Merge();
+                centerlines.Add(lineString.ToDbPolyline());
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            return centerlines;
         }
 
         private static IGeometry CreateLineString(LinearIterator iterator)
