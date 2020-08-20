@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.BeamInfo.Business;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 
@@ -41,7 +42,72 @@ namespace ThMEPEngineCore.Service
             }
             return false;
         }
-
+        public bool JudgeHalfPrimaryBeam(ThBeamLink thBeamLink)
+        {
+            if (JudgePrimaryBeam(thBeamLink))
+            {
+                return false;
+            }
+            var startLinkComponent = thBeamLink.Start.Where(o => o.GetType() == typeof(ThIfcColumn) || o.GetType() == typeof(ThIfcWall));
+            if(startLinkComponent.Any())
+            {
+                var endLinkPrimaryBeam = thBeamLink.End.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType==BeamComponentType.PrimaryBeam);
+                if(endLinkPrimaryBeam.Any())
+                {
+                    return true;
+                }
+            }
+            var endLinkComponent = thBeamLink.End.Where(o => o is ThIfcColumn || o is ThIfcWall);
+            if (endLinkComponent.Any())
+            {
+                var startLinkPrimaryBeam = thBeamLink.Start.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam);
+                if (startLinkPrimaryBeam.Any())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool JudgeOverhangingPrimaryBeam(ThBeamLink thBeamLink)
+        {
+            if (JudgePrimaryBeam(thBeamLink))
+            {
+                return false;
+            }
+            var startLinkComponent = thBeamLink.Start.Where(o => o.GetType() == typeof(ThIfcColumn) || o.GetType() == typeof(ThIfcWall));
+            if (startLinkComponent.Any())
+            {
+                if (thBeamLink.End.Count==0)
+                {
+                    return true;
+                }
+            }
+            var endLinkComponent = thBeamLink.End.Where(o => o is ThIfcColumn || o is ThIfcWall);
+            if (endLinkComponent.Any())
+            {
+                if (thBeamLink.Start.Count==0)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool JudgeSecondaryPrimaryBeam(ThBeamLink thBeamLink)
+        {
+            if (JudgePrimaryBeam(thBeamLink))
+            {
+                return false;
+            }
+            var startLinkComponent = thBeamLink.Start.Where(o => o is ThIfcColumn || o is ThIfcWall);
+            var endLinkComponent = thBeamLink.End.Where(o => o is ThIfcColumn || o is ThIfcWall);
+            if (startLinkComponent.Any() || endLinkComponent.Any())
+            {
+                return false;
+            }
+            var startLinkBeam = thBeamLink.Start.Where(o => o is ThIfcBeam);
+            var endLinkBeam = thBeamLink.End.Where(o => o is ThIfcBeam);
+            return startLinkBeam.Any() && endLinkBeam.Any();
+        }
         protected List<ThIfcElement> QueryPortLinkElements(Point3d portPt, double distance)
         {
             List<ThIfcElement> links = new List<ThIfcElement>();
@@ -120,6 +186,29 @@ namespace ThMEPEngineCore.Service
                 }
             }
             return segments.OrderBy(o => o.MidPoint.DistanceTo(pt)).FirstOrDefault().Length;
+        }
+        protected bool TwoBeamIsParallel(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
+        {
+            return firstBeam.Direction.IsParallelToEx(secondBeam.Direction);
+        }
+        protected bool TwoBeamIsCollinear(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
+        {
+
+            return firstBeam.Direction.IsCodirectionalTo(secondBeam.Direction) ||
+                   firstBeam.Direction.IsCodirectionalTo(secondBeam.Direction.Negate());
+        }
+        protected Polyline GetLineBeamPortEnvelop(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
+        {
+            double beamWidth = GetPolylineWidth(thIfcLineBeam.Outline as Polyline, portPt);
+            double distance = GenerateExpandDistance(thIfcLineBeam);
+            if (portPt.DistanceTo(thIfcLineBeam.StartPoint) < portPt.DistanceTo(thIfcLineBeam.EndPoint))
+            {
+                return CreatePortEnvelop(thIfcLineBeam.Direction.Negate(), portPt, beamWidth, distance);
+            }
+            else
+            {
+                return CreatePortEnvelop(thIfcLineBeam.Direction, portPt, beamWidth, distance);
+            }
         }
     }
 }

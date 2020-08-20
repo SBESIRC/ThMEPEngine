@@ -47,6 +47,9 @@ namespace ThMEPEngineCore.Engine
 
             // Pass Two 在剩余梁中找出两个柱子或墙之间有多根梁的梁段
             FindMultiBeamLinkInTwoVerComponent();
+
+            // Pass Three 在剩余梁中找出连接竖向构件的半主梁
+            FindHalfPrimaryBeamLink();
         }
         private void CreateSpatialIndex()
         {
@@ -78,14 +81,15 @@ namespace ThMEPEngineCore.Engine
         }
         private void FindMultiBeamLinkInTwoVerComponent()
         {
+            //主梁：两端均为竖向构件
             List<ThIfcElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
-            ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension()
+            ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension(unPrimaryBeams)
             {
                 ColumnEngine = thColumnRecognitionEngine,
                 BeamEngine = thBeamRecognitionEngine,
                 ShearWallEngine = thShearWallRecognitionEngine
             };
-            multiBeamLink.CreateMultipleBeamLink(unPrimaryBeams);
+            multiBeamLink.CreatePrimaryBeamLink();
             //using (AcadDatabase acadDatabase = AcadDatabase.Active())
             //{
             //    foreach (var primary in multiBeamLink.BeamLinks)
@@ -95,19 +99,30 @@ namespace ThMEPEngineCore.Engine
             //}
             PrimaryBeamLinks.AddRange(multiBeamLink.BeamLinks);
         }
+        private void FindHalfPrimaryBeamLink()
+        {
+            //半主梁：一端为竖向构件，另一端为主梁
+            List<ThIfcElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            ThHalfPrimaryBeamLinkExtension halfPrimaryBeamLink = new ThHalfPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
+            {
+                ColumnEngine = thColumnRecognitionEngine,
+                BeamEngine = thBeamRecognitionEngine,
+                ShearWallEngine = thShearWallRecognitionEngine
+            };
+            halfPrimaryBeamLink.CreateHalfPrimaryBeamLink();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                foreach (var primary in halfPrimaryBeamLink.HalfPrimaryBeamLinks)
+                {
+                    primary.Beams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+                }
+            }
+            HalfPrimaryBeamLinks.AddRange(halfPrimaryBeamLink.HalfPrimaryBeamLinks);
+        }
         private IEnumerable<ThIfcElement> FilterNotPrimaryBeams(List<ThIfcElement> totalBeams)
         {
-           return totalBeams.Where(o =>
-            {
-                if (o is ThIfcBeam thIfcBeam)
-                {
-                    if (thIfcBeam.ComponentType != BeamComponentType.PrimaryBeam)
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            });
+            return totalBeams.Where(o => o is ThIfcBeam thIfcBeam && 
+            thIfcBeam.ComponentType != BeamComponentType.PrimaryBeam);
         }
     }
 }
