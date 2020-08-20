@@ -146,7 +146,7 @@ namespace ThMEPEngineCore
             using (var thBeamTypeRecogitionEngine = new ThBeamTypeRecogitionEngine())
             {
                 thBeamTypeRecogitionEngine.Recognize(Active.Database);
-                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(o => acadDatabase.ModelSpace.Add(o.Beams[0].Outline));
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n=>acadDatabase.ModelSpace.Add(n.Outline)));
             }
         }
     }

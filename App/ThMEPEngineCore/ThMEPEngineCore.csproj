@@ -116,6 +116,7 @@
     <Compile Include="Service\ThStructureColumnDbExtension.cs" />
     <Compile Include="Service\ThStructureDbExtension.cs" />
     <Compile Include="Service\ThStructureUtils.cs" />
+    <Compile Include="Service\ThVerticalComponentBeamLinkExtension.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThProjectDirStructureUtils.cs" />
