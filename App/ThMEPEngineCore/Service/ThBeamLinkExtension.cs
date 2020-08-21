@@ -108,37 +108,49 @@ namespace ThMEPEngineCore.Service
             var endLinkBeam = thBeamLink.End.Where(o => o is ThIfcBeam);
             return startLinkBeam.Any() && endLinkBeam.Any();
         }
+
         protected List<ThIfcBuildingElement> QueryPortLinkElements(ThIfcBeam thIfcBeam, Point3d portPt)
         {
             List<ThIfcBuildingElement> links = new List<ThIfcBuildingElement>();
             DBObjectCollection linkObjs = new DBObjectCollection();
-            Polyline portEnvelop = null;
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {
-                portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
-            }
-            else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
-            {
-                portEnvelop = GetArcBeamPortEnvelop(thIfcArcBeam,portPt);
-            }
-            linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectFence(portEnvelop);
-            if (linkObjs.Count > 0)
-            {
-                foreach (DBObject dbObj in linkObjs)
+                Polyline portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
+
+                // 先判断是否搭接在柱上
+                linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectFence(portEnvelop);
+                if (linkObjs.Count > 0)
                 {
-                    links.Add(ColumnEngine.FilterByOutline(dbObj));
+                    // 确保梁的延伸和柱是“重叠(Overlap)”的
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => o.Overlaps(portEnvelop));
+                    foreach (DBObject dbObj in overlapObjs)
+                    {
+                        links.Add(ColumnEngine.FilterByOutline(dbObj));
+                    }
                 }
+                if (links.Count > 0)
+                {
+                    return links;
+                }
+
+                // 再判断是否搭接在剪力墙上
+                linkObjs = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectFence(portEnvelop);
+                if (linkObjs.Count > 0)
+                {
+                    // 确保梁的延伸和剪力墙是“重叠(Overlap)”的
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => o.Overlaps(portEnvelop));
+                    foreach (DBObject dbObj in overlapObjs)
+                    {
+                        links.Add(ShearWallEngine.FilterByOutline(dbObj));
+                    }
+                }
+
+                return links;
             }
             else
             {
-                linkObjs = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectFence(portEnvelop);
-                foreach (DBObject dbObj in linkObjs)
-                {
-                    links.Add(ShearWallEngine.FilterByOutline(dbObj));
-                }
+                throw new NotSupportedException();
             }
-            portEnvelop.Dispose();
-            return links;
         }
         protected double GenerateExpandDistance(ThIfcBeam beam)
         {

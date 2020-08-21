@@ -139,8 +139,8 @@ namespace ThMEPEngineCore
                 shearWallDbExtension.ShearWallCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
-        [CommandMethod("TIANHUACAD", "ThExtractBeamType", CommandFlags.Modal)]
-        public void ThExtractBeamType()
+        [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
+        public void ThExtractBeamConnect()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
