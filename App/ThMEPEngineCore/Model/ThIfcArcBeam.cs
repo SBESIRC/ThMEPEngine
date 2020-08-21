@@ -9,6 +9,11 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcArcBeam : ThIfcBeam
     {
+        /// <summary>
+        /// 起始端
+        /// </summary>
+        public Vector3d StartTangent { get; set; }
+        public Vector3d EndTangent { get; set; }
         public ThIfcArcBeam()
         {
         }

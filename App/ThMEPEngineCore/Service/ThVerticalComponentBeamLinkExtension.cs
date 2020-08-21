@@ -18,7 +18,7 @@ namespace ThMEPEngineCore.Service
         {
             BeamLinks = new List<ThBeamLink>();
             UnDefinedBeams = undefinedBeams;
-        }        
+        }
         public void CreatePrimaryBeamLink()
         {
             for (int i = 0; i < UnDefinedBeams.Count; i++)
@@ -32,9 +32,8 @@ namespace ThMEPEngineCore.Service
                 List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
                 Point3d prePt = PreFindBeamLink(currentBeam.StartPoint, linkElements);
                 Point3d backPt = BackFindBeamLink(currentBeam.EndPoint, linkElements);
-                double distance = GenerateExpandDistance(currentBeam);
-                thBeamLink.Start = QueryPortLinkElements(prePt, distance);
-                thBeamLink.End = QueryPortLinkElements(backPt, distance);
+                thBeamLink.Start = QueryPortLinkElements(linkElements[0], prePt);
+                thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count - 1], backPt);
                 if (JudgePrimaryBeam(thBeamLink))
                 {
                     thBeamLink.Beams = linkElements;
@@ -45,9 +44,8 @@ namespace ThMEPEngineCore.Service
         }
         private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
-            double distance = GenerateExpandDistance(beamLink[0]);
             //端点连接竖向构件则返回
-            if (QueryPortLinkElements(portPt, distance).Count>0)
+            if (QueryPortLinkElements(beamLink[0],portPt).Count>0)
             {
                 return portPt;
             }
@@ -95,9 +93,8 @@ namespace ThMEPEngineCore.Service
         }
         private Point3d BackFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
-            double distance = GenerateExpandDistance(beamLink[beamLink.Count-1]);
             //端点连接竖向构件则返回
-            if (QueryPortLinkElements(portPt, distance).Count > 0)
+            if (QueryPortLinkElements(beamLink[beamLink.Count - 1],portPt).Count > 0)
             {
                 return portPt;
             }

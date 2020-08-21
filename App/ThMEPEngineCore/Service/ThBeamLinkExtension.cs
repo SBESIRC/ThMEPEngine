@@ -1,13 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPEngineCore.BeamInfo.Business;
+using System.Collections.Generic;
+using ThCADCore.NTS;
+
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.BeamInfo.Business;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+
 
 namespace ThMEPEngineCore.Service
 {
@@ -22,9 +23,8 @@ namespace ThMEPEngineCore.Service
         public ThBeamLink CreateSinglePrimaryBeamLink(ThIfcBeam Beam)
         {
             ThBeamLink beamLink = new ThBeamLink();
-            double distance = GenerateExpandDistance(Beam);
-            beamLink.Start = QueryPortLinkElements(Beam.StartPoint, distance);
-            beamLink.End = QueryPortLinkElements(Beam.EndPoint, distance);
+            beamLink.Start = QueryPortLinkElements(Beam, Beam.StartPoint);
+            beamLink.End = QueryPortLinkElements(Beam, Beam.EndPoint);
             if (JudgePrimaryBeam(beamLink))
             {
                 Beam.ComponentType = BeamComponentType.PrimaryBeam;
@@ -108,11 +108,19 @@ namespace ThMEPEngineCore.Service
             var endLinkBeam = thBeamLink.End.Where(o => o is ThIfcBeam);
             return startLinkBeam.Any() && endLinkBeam.Any();
         }
-        protected List<ThIfcElement> QueryPortLinkElements(Point3d portPt, double distance)
+        protected List<ThIfcElement> QueryPortLinkElements(ThIfcBeam thIfcBeam, Point3d portPt)
         {
             List<ThIfcElement> links = new List<ThIfcElement>();
             DBObjectCollection linkObjs = new DBObjectCollection();
-            Polyline portEnvelop = CreatePortEnvelop(portPt, distance);
+            Polyline portEnvelop = null;
+            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
+            {
+                portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
+            }
+            else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
+            {
+                portEnvelop = GetArcBeamPortEnvelop(thIfcArcBeam,portPt);
+            }
             linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectFence(portEnvelop);
             if (linkObjs.Count > 0)
             {
@@ -142,15 +150,6 @@ namespace ThMEPEngineCore.Service
             {
                 return 500.0;
             }
-        }
-        protected Polyline CreatePortEnvelop(Point3d portPt, double distance)
-        {
-            Point3d pt1 = portPt + new Vector3d(distance, distance, 0.0);
-            Point3d pt2 = portPt + new Vector3d(-distance, distance, 0.0);
-            Point3d pt3 = portPt + new Vector3d(-distance, -distance, 0.0);
-            Point3d pt4 = portPt + new Vector3d(distance, -distance, 0.0);
-            Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
-            return CreatePolyline(pts);
         }
         protected Polyline CreatePortEnvelop(Vector3d dir,Point3d portPt,double width, double distance)
         {
@@ -209,6 +208,28 @@ namespace ThMEPEngineCore.Service
             {
                 return CreatePortEnvelop(thIfcLineBeam.Direction, portPt, beamWidth, distance);
             }
+        }
+        protected Polyline GetArcBeamPortEnvelop(ThIfcArcBeam thIfcArcBeam, Point3d portPt)
+        {
+            double beamWidth = GetPolylineWidth(thIfcArcBeam.Outline as Polyline, portPt);
+            double distance = GenerateExpandDistance(thIfcArcBeam);
+            if (portPt.DistanceTo(thIfcArcBeam.StartPoint) < portPt.DistanceTo(thIfcArcBeam.EndPoint))
+            {
+                return CreatePortEnvelop(thIfcArcBeam.StartTangent.Negate(), portPt, beamWidth, distance);
+            }
+            else
+            {
+                return CreatePortEnvelop(thIfcArcBeam.EndTangent.Negate(), portPt, beamWidth, distance);
+            }
+        }
+        protected bool OverlapFilter(ThIfcElement first, ThIfcElement second)
+        {
+            if (first.Outline is Polyline firstPolyline &&
+                second.Outline is Polyline secondPolyline)
+            {
+                return firstPolyline.Overlaps(secondPolyline);
+            }
+            return false;
         }
     }
 }

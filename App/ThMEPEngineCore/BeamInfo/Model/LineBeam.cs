@@ -30,11 +30,11 @@ namespace ThMEPEngineCore.BeamInfo.Model
         {
             double angle = Vector3d.XAxis.GetAngleTo(originBeamDir, Vector3d.ZAxis) /Math.PI*180.0;
             angle %= 360.0;
-            if (Math.Abs(angle-0.0)<= tolerance || Math.Abs(angle - 180.0) == tolerance)
+            if (Math.Abs(angle-0.0)<= tolerance || Math.Abs(angle - 180.0) <= tolerance)
             {
                 return Vector3d.XAxis;
             }
-            else if(Math.Abs(angle - 90.0) <= tolerance || Math.Abs(angle - 270.0) == tolerance)
+            else if(Math.Abs(angle - 90.0) <= tolerance || Math.Abs(angle - 270.0) <= tolerance)
             {
                 return Vector3d.YAxis;
             }
@@ -72,26 +72,11 @@ namespace ThMEPEngineCore.BeamInfo.Model
             List<double> zValues = new List<double> { firstStartPt.Z, firstEndPt.Z, secondStartPt.Z, secondEndPt.Z };
             double minZ = zValues.OrderBy(o => o).FirstOrDefault();
             double maxZ = zValues.OrderByDescending(o => o).FirstOrDefault();
-            if(firstEndPt.Z> firstStartPt.Z)
-            {
-                firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y,minZ);
-                firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, maxZ);
-            }
-            else
-            {
-                firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, maxZ);
-                firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, minZ);
-            }
-            if (secondEndPt.Z > secondStartPt.Z)
-            {
-                secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, minZ);
-                secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, maxZ);
-            }
-            else
-            {
-                secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, maxZ);
-                secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, minZ);
-            }
+            firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, minZ);
+            firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, maxZ);
+
+            secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, minZ);
+            secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, maxZ);
             firstStartPt = firstStartPt.TransformBy(ucsToWcs);
             firstEndPt = firstEndPt.TransformBy(ucsToWcs);
             secondStartPt = secondStartPt.TransformBy(ucsToWcs);
