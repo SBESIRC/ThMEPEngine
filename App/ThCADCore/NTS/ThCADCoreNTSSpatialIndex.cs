@@ -86,7 +86,14 @@ namespace ThCADCore.NTS
 
         public DBObjectCollection SelectFence(Curve curve)
         {
-            return Query(curve.GeometricExtents.ToEnvelope());
+            if (curve is Polyline polyline)
+            { 
+                return Query(polyline.ToNTSLineString().EnvelopeInternal);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public DBObjectCollection SelectAll()
@@ -139,58 +146,6 @@ namespace ThCADCore.NTS
                 .Where(o => !o.EqualsExact(geometry))
                 .ForEach(o => objs.Add(Geometries[o]));
             return objs;
-        }
-
-        /// <summary>
-        /// 找到最近的元素，并从集合中剔除该元素
-        /// </summary>
-        /// <param name="curve"></param>
-        /// <returns></returns>
-        public DBObject NearestNeighbourRemove(Curve curve)
-        {
-            IGeometry geometry = null;
-            if (curve is Line line)
-            {
-                geometry = line.ToNTSLineString();
-            }
-            else if (curve is Polyline polyline)
-            {
-                geometry = polyline.ToNTSLineString();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-
-            DBObject obj = null;
-            if (Engine.Count > 0)
-            {
-                var neighbours = Engine.NearestNeighbour(
-                                geometry.EnvelopeInternal,
-                                geometry,
-                                new GeometryItemDistance(),
-                                2);
-                foreach (var neighbour in neighbours)
-                {
-                    // 从邻居中过滤掉自己
-                    if (neighbour.EqualsExact(geometry))
-                    {
-                        continue;
-                    }
-
-                    if (neighbour is ILineString lineString)
-                    {
-                        obj =lineString.ToDbPolyline();
-                        Engine.Remove(neighbour.EnvelopeInternal, neighbour);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
-                }
-            }
-            
-            return obj;
         }
     }
 }
