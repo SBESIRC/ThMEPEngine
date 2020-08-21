@@ -1,13 +1,14 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using System;
+using System.Linq;
 using System.Collections.Generic;
+using ThCADCore.NTS;
 using ThMEPEngineCore.BeamInfo;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using TianHua.AutoCAD.Utility.ExtensionTools;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -99,6 +100,31 @@ namespace ThMEPEngineCore.Engine
                 }
             }
             return thIfcBeam;
+        }
+        public void SimilarityBeamRemove()
+        {
+            List<ThIfcElement> duplicateCollection = new List<ThIfcElement>();
+            ValidElements.ForEach(m =>
+            {
+                if (!duplicateCollection.Where(n => n.Uuid == m.Uuid).Any())
+                {
+                    DBObjectCollection dbObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(m.Outline as Curve);
+                    Polyline baseOutline = m.Outline as Polyline;
+                    foreach (DBObject dbObj in dbObjs)
+                    {
+                        ThIfcElement thIfcElement = FilterByOutline(dbObj);
+                        if(thIfcElement.Uuid!= m.Uuid)
+                        {
+                            double measure = baseOutline.Measure(thIfcElement.Outline as Polyline);
+                            if (measure >= 0.9)
+                            {
+                                duplicateCollection.Add(thIfcElement);
+                            }
+                        }
+                    }
+                }
+            });
+            ValidElements=ValidElements.Where(m => !duplicateCollection.Where(n => n.Uuid == m.Uuid).Any()).ToList();
         }
     }
 }

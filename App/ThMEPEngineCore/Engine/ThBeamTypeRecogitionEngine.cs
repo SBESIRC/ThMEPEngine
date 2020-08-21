@@ -59,6 +59,7 @@ namespace ThMEPEngineCore.Engine
             ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(thBeamRecognitionEngine.Collect());
             var beamGeometries = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectAll();
             thBeamRecognitionEngine.UpdateValidElements(beamGeometries);
+            thBeamRecognitionEngine.SimilarityBeamRemove();
             ThSpatialIndexManager.Instance.CreateWallSpaticalIndex(thShearWallRecognitionEngine.Collect());
             var wallGeometries = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectAll();
             thShearWallRecognitionEngine.UpdateValidElements(wallGeometries);
@@ -90,13 +91,6 @@ namespace ThMEPEngineCore.Engine
                 ShearWallEngine = thShearWallRecognitionEngine
             };
             multiBeamLink.CreatePrimaryBeamLink();
-            //using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            //{
-            //    foreach (var primary in multiBeamLink.BeamLinks)
-            //    {
-            //        primary.Beams.ForEach(o=> acadDatabase.ModelSpace.Add(o.Outline));
-            //    }
-            //}
             PrimaryBeamLinks.AddRange(multiBeamLink.BeamLinks);
         }
         private void FindHalfPrimaryBeamLink()
@@ -110,13 +104,6 @@ namespace ThMEPEngineCore.Engine
                 ShearWallEngine = thShearWallRecognitionEngine
             };
             halfPrimaryBeamLink.CreateHalfPrimaryBeamLink();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                foreach (var primary in halfPrimaryBeamLink.HalfPrimaryBeamLinks)
-                {
-                    primary.Beams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
-                }
-            }
             HalfPrimaryBeamLinks.AddRange(halfPrimaryBeamLink.HalfPrimaryBeamLinks);
         }
         private IEnumerable<ThIfcElement> FilterNotPrimaryBeams(List<ThIfcElement> totalBeams)
