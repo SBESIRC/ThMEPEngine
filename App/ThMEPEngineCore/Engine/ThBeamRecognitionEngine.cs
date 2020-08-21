@@ -54,7 +54,6 @@ namespace ThMEPEngineCore.Engine
                         if (findDbText.Count == 1)
                         {
                             Elements.Add(CreateIfcBeam(beam, findDbText[0].TextString));
-                            //acadDatabase.ModelSpace.Add(ThPolylineExtension.CreateRectangle(findDbText[0].GeometricExtents));
                         }
                         else
                         {
@@ -62,9 +61,6 @@ namespace ThMEPEngineCore.Engine
                         }
                     }
                 }
-
-                //释放获取的梁断
-                beamCollection.Dispose();
             }
         }
 
@@ -101,6 +97,7 @@ namespace ThMEPEngineCore.Engine
             }
             return thIfcBeam;
         }
+
         public void SimilarityBeamRemove()
         {
             List<ThIfcElement> duplicateCollection = new List<ThIfcElement>();
@@ -115,8 +112,8 @@ namespace ThMEPEngineCore.Engine
                         ThIfcElement thIfcElement = FilterByOutline(dbObj);
                         if(thIfcElement.Uuid!= m.Uuid)
                         {
-                            double measure = baseOutline.Measure(thIfcElement.Outline as Polyline);
-                            if (measure >= 0.9)
+                            double measure = baseOutline.SimilarityMeasure(thIfcElement.Outline as Polyline);
+                            if (measure >= ThMEPEngineCoreCommon.SIMILARITYMEASURETOLERANCE)
                             {
                                 duplicateCollection.Add(thIfcElement);
                             }

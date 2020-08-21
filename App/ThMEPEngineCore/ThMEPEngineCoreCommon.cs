@@ -32,5 +32,8 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_S_BEAM = "结构梁";
         public static string BUILDELEMENT_CATEGORY_S_WALL = "结构墙";
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
+
+        // 公差
+        public static double SIMILARITYMEASURETOLERANCE = 0.9;
     }
 }
