@@ -12,7 +12,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThBeamRecognitionEngine : ThModelRecognitionEngine, IDisposable
+    public class ThBeamRecognitionEngine : ThBuildingElementRecognitionEngine, IDisposable
     {
         public ThBeamRecognitionEngine()
         {

@@ -143,7 +143,7 @@ namespace ThMEPEngineCore
         public void ThExtractBeamType()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var thBeamTypeRecogitionEngine = new ThBeamTypeRecogitionEngine())
+            using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
             {
                 thBeamTypeRecogitionEngine.Recognize(Active.Database);
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n=>acadDatabase.ModelSpace.Add(n.Outline)));

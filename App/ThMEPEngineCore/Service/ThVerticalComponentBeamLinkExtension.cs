@@ -13,8 +13,8 @@ namespace ThMEPEngineCore.Service
     public class ThVerticalComponentBeamLinkExtension : ThBeamLinkExtension
     {
         public List<ThBeamLink> BeamLinks { get; private set; }
-        private List<ThIfcElement> UnDefinedBeams = new List<ThIfcElement>();
-        public ThVerticalComponentBeamLinkExtension(List<ThIfcElement> undefinedBeams)
+        private List<ThIfcBuildingElement> UnDefinedBeams = new List<ThIfcBuildingElement>();
+        public ThVerticalComponentBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams)
         {
             BeamLinks = new List<ThBeamLink>();
             UnDefinedBeams = undefinedBeams;

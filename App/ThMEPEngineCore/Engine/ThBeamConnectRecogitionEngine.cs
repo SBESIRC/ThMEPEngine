@@ -8,7 +8,7 @@ using Linq2Acad;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThBeamTypeRecogitionEngine:IDisposable
+    public class ThBeamConnectRecogitionEngine:IDisposable
     {
         public List<ThBeamLink> PrimaryBeamLinks { get; set; } = new List<ThBeamLink>();
         public List<ThBeamLink> HalfPrimaryBeamLinks { get; set; } = new List<ThBeamLink>();
@@ -18,7 +18,7 @@ namespace ThMEPEngineCore.Engine
         public ThColumnRecognitionEngine thColumnRecognitionEngine;
         public ThBeamRecognitionEngine thBeamRecognitionEngine;
         public ThShearWallRecognitionEngine thShearWallRecognitionEngine;
-        public ThBeamTypeRecogitionEngine()
+        public ThBeamConnectRecogitionEngine()
         {
         }
         public void Dispose()
@@ -83,7 +83,7 @@ namespace ThMEPEngineCore.Engine
         private void FindMultiBeamLinkInTwoVerComponent()
         {
             //主梁：两端均为竖向构件
-            List<ThIfcElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
             ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension(unPrimaryBeams)
             {
                 ColumnEngine = thColumnRecognitionEngine,
@@ -96,7 +96,7 @@ namespace ThMEPEngineCore.Engine
         private void FindHalfPrimaryBeamLink()
         {
             //半主梁：一端为竖向构件，另一端为主梁
-            List<ThIfcElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
             ThHalfPrimaryBeamLinkExtension halfPrimaryBeamLink = new ThHalfPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
             {
                 ColumnEngine = thColumnRecognitionEngine,
@@ -106,7 +106,8 @@ namespace ThMEPEngineCore.Engine
             halfPrimaryBeamLink.CreateHalfPrimaryBeamLink();
             HalfPrimaryBeamLinks.AddRange(halfPrimaryBeamLink.HalfPrimaryBeamLinks);
         }
-        private IEnumerable<ThIfcElement> FilterNotPrimaryBeams(List<ThIfcElement> totalBeams)
+
+        private IEnumerable<ThIfcBuildingElement> FilterNotPrimaryBeams(List<ThIfcBuildingElement> totalBeams)
         {
             return totalBeams.Where(o => o is ThIfcBeam thIfcBeam && 
             thIfcBeam.ComponentType != BeamComponentType.PrimaryBeam);

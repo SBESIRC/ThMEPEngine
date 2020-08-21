@@ -7,11 +7,11 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThShearWallRecognitionEngine : ThModelRecognitionEngine, IDisposable
+    public class ThShearWallRecognitionEngine : ThBuildingElementRecognitionEngine, IDisposable
     {
         public ThShearWallRecognitionEngine()
         {
-            Elements = new List<ThIfcElement>();
+            Elements = new List<ThIfcBuildingElement>();
         }
 
         public void Dispose()

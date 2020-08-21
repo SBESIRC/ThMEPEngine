@@ -12,11 +12,11 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThColumnRecognitionEngine : ThModelRecognitionEngine, IDisposable
+    public class ThColumnRecognitionEngine : ThBuildingElementRecognitionEngine, IDisposable
     {
         public ThColumnRecognitionEngine()
         {
-            Elements = new List<ThIfcElement>();
+            Elements = new List<ThIfcBuildingElement>();
         }
 
         public void Dispose()

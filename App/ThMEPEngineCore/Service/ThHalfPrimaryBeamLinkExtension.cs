@@ -12,10 +12,10 @@ namespace ThMEPEngineCore.Service
 {
     public class ThHalfPrimaryBeamLinkExtension : ThBeamLinkExtension
     {
-        private List<ThIfcElement> UnDefinedBeams { get; set; }
+        private List<ThIfcBuildingElement> UnDefinedBeams { get; set; }
         private List<ThBeamLink> PrimaryBeamLinks { get; set; }
         public List<ThBeamLink> HalfPrimaryBeamLinks { get; private set; }
-        public ThHalfPrimaryBeamLinkExtension(List<ThIfcElement> undefinedBeams, List<ThBeamLink> primaryBeamLinks)
+        public ThHalfPrimaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, List<ThBeamLink> primaryBeamLinks)
         {
             UnDefinedBeams = undefinedBeams;
             PrimaryBeamLinks = primaryBeamLinks;
