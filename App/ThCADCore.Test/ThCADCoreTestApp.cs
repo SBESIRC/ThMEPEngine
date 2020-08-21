@@ -372,6 +372,25 @@ namespace ThCADCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThSimplify", CommandFlags.Modal)]
+        public void ThSimplify()
+        {
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var obj = acadDatabase.Element<Polyline>(result.ObjectId);
+                var pline = obj.TopologyPreservingSimplify(1);
+                pline.ColorIndex = 1;
+                acadDatabase.ModelSpace.Add(pline);
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "ThOrientation", CommandFlags.Modal)]
         public void ThOrientation()
         {
