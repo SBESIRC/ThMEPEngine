@@ -196,28 +196,5 @@ namespace ThMEPEngineCore.Service
             linkElements = linkElements.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.Undefined).ToList();
             return linkElements;
         }
-        private List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt)
-        {
-            List<ThIfcBeam> links = new List<ThIfcBeam>();
-            DBObjectCollection linkObjs = new DBObjectCollection();
-            Polyline portEnvelop = null;
-            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
-            {
-                portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
-            }
-            else
-            {
-                //portEnvelop = CreatePortEnvelop(portPt);
-            }
-            linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(portEnvelop);
-            if (linkObjs.Count > 0)
-            {
-                foreach (DBObject dbObj in linkObjs)
-                {
-                    links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
-                }
-            }
-            return links;
-        }
     }
 }

@@ -245,14 +245,5 @@ namespace ThMEPEngineCore.Service
                 return CreatePortEnvelop(thIfcArcBeam.EndTangent.Negate(), portPt, beamWidth, distance);
             }
         }
-        protected bool OverlapFilter(ThIfcElement first, ThIfcElement second)
-        {
-            if (first.Outline is Polyline firstPolyline &&
-                second.Outline is Polyline secondPolyline)
-            {
-                return firstPolyline.Overlaps(secondPolyline);
-            }
-            return false;
-        }
     }
 }

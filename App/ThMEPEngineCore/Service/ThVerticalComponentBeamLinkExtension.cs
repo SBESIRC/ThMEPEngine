@@ -42,6 +42,13 @@ namespace ThMEPEngineCore.Service
                 }
             }
         }
+
+        private bool IsUndefinedBeam(ThIfcBeam beam)
+        {
+            return UnDefinedBeams.Where(o => beam.Uuid == o.Uuid).Any() &&
+                beam.ComponentType == BeamComponentType.Undefined;
+        }
+
         private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
@@ -52,7 +59,9 @@ namespace ThMEPEngineCore.Service
             //端点连接的梁
             List<ThIfcBeam> linkElements = QueryPortLinkBeams(beamLink[0],portPt);
             //过滤不存在于beamLink中的梁
-            linkElements = linkElements.Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
+            linkElements = linkElements
+                .Where(m => IsUndefinedBeam(m))
+                .Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count==0)
             {
                 return portPt;
@@ -101,7 +110,9 @@ namespace ThMEPEngineCore.Service
             //端点连接的梁
             List<ThIfcBeam> linkElements = QueryPortLinkBeams(beamLink[beamLink.Count-1], portPt);
             //过滤不存在于beamLink中的梁
-            linkElements = linkElements.Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
+            linkElements = linkElements
+                .Where(m => IsUndefinedBeam(m))
+                .Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count == 0)
             {
                 return portPt;
@@ -139,29 +150,6 @@ namespace ThMEPEngineCore.Service
                 }
             }
             return portPt;
-        }
-        protected List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt)
-        {
-            List<ThIfcBeam> links = new List<ThIfcBeam>();
-            DBObjectCollection linkObjs = new DBObjectCollection();
-            Polyline portEnvelop = null;
-            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
-            {
-                portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
-            }
-            else
-            {
-                //portEnvelop = CreatePortEnvelop(portPt);
-            }
-            linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(portEnvelop);
-            if (linkObjs.Count > 0)
-            {
-                foreach (DBObject dbObj in linkObjs)
-                {
-                    links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
-                }
-            }
-            return links.Where(m => UnDefinedBeams.Where(n => m.Uuid == n.Uuid && m.ComponentType!=BeamComponentType.PrimaryBeam).Any()).ToList();
         }
     }
 }
