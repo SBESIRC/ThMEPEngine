@@ -12,7 +12,7 @@ namespace ThMEPEngineCore.Engine
         /// </summary>
         public List<ThIfcBuildingElement> Elements { get; set; }
         /// <summary>
-        /// 去重后唯一的柱子
+        /// 去重后唯一的构件
         /// </summary>
         public List<ThIfcBuildingElement> ValidElements { get; set; }
         protected ThBuildingElementRecognitionEngine()

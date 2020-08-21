@@ -10,23 +10,26 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThHalfPrimaryBeamLinkExtension : ThBeamLinkExtension
+    public class ThOverhangingPrimaryBeamLinkExtension : ThBeamLinkExtension
     {
         private List<ThIfcBuildingElement> UnDefinedBeams { get; set; }
         private List<ThBeamLink> PrimaryBeamLinks { get; set; }
-        public List<ThBeamLink> HalfPrimaryBeamLinks { get; private set; }
-        public ThHalfPrimaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, List<ThBeamLink> primaryBeamLinks)
+        public List<ThBeamLink> HalfPrimaryBeamLinks { get; set; }
+        public List<ThBeamLink> OverhangingPrimaryBeamLinks { get; private set; }
+        public ThOverhangingPrimaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, 
+            List<ThBeamLink> primaryBeamLinks, List<ThBeamLink> halfPrimaryBeamLinks)
         {
             UnDefinedBeams = undefinedBeams;
             PrimaryBeamLinks = primaryBeamLinks;
-            HalfPrimaryBeamLinks = new List<ThBeamLink>();
+            HalfPrimaryBeamLinks = halfPrimaryBeamLinks;
+            OverhangingPrimaryBeamLinks = new List<ThBeamLink>();
         }        
-        public void CreateHalfPrimaryBeamLink()
+        public void CreateOverhangingPrimaryBeamLink()
         {
             for (int i = 0; i < UnDefinedBeams.Count; i++)
             {
                 ThIfcBeam currentBeam = UnDefinedBeams[i] as ThIfcBeam;
-                if (currentBeam.ComponentType == BeamComponentType.PrimaryBeam)
+                if (currentBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam)
                 {
                     continue;
                 }
@@ -38,45 +41,33 @@ namespace ThMEPEngineCore.Service
                 thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count-1], backPt);
                 if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count > 0)
                 {
-                    // 末端连接竖向构件                    
-                    thBeamLink.Start = QueryPortLinkPrimaryBeams(linkElements[0], prePt);
+                    // 末端连接竖向构件
+                    if (QueryPortLinkPrimaryBeams(linkElements[0], prePt).Count==0 &&
+                        QueryPortLinkHalfPrimaryBeams(linkElements[0], prePt).Count == 0)
+                    {
+                        thBeamLink.Start = QueryPortLinkUndefinedBeams(linkElements[0], prePt, false).Cast<ThIfcBuildingElement>().ToList();
+                    }
                 }
                 else if (thBeamLink.Start.Count > 0 && thBeamLink.End.Count == 0)
                 {
                     // 起始端连接竖向构件
-                    thBeamLink.End = QueryPortLinkPrimaryBeams(linkElements[linkElements.Count - 1], backPt);
+                    if (QueryPortLinkPrimaryBeams(linkElements[linkElements.Count - 1], backPt).Count == 0 &&
+                        QueryPortLinkHalfPrimaryBeams(linkElements[linkElements.Count - 1], backPt).Count == 0)
+                    {
+                        thBeamLink.End = QueryPortLinkUndefinedBeams(linkElements[0], prePt, false).Cast<ThIfcBuildingElement>().ToList();
+                    }
                 }
                 else
                 {
                     continue;
                 }
-                if (JudgeHalfPrimaryBeam(thBeamLink))
+                if (JudgeOverhangingPrimaryBeam(thBeamLink))
                 {
                     thBeamLink.Beams = linkElements;
-                    thBeamLink.Beams.ForEach(o => o.ComponentType = BeamComponentType.HalfPrimaryBeam);
-                    HalfPrimaryBeamLinks.Add(thBeamLink);
+                    thBeamLink.Beams.ForEach(o => o.ComponentType = BeamComponentType.OverhangingPrimaryBeam);
+                    OverhangingPrimaryBeamLinks.Add(thBeamLink);
                 }
             }
-        }
-        private List<ThIfcBuildingElement> QueryPortLinkPrimaryBeams(ThIfcBeam thIfcBeam,Point3d portPt)
-        {
-            List<ThIfcBeam> thIfcBeams= QueryPortLinkBeams(thIfcBeam, portPt);
-            thIfcBeams= thIfcBeams.Where(o => o.ComponentType == BeamComponentType.PrimaryBeam).ToList();
-            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
-            {
-                thIfcBeams.Where(o =>
-                {
-                    if (o is ThIfcLineBeam otherLineBeam)
-                    {
-                        return !TwoBeamIsParallel(thIfcLineBeam, otherLineBeam);
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                });
-            }
-            return thIfcBeams.Cast<ThIfcBuildingElement>().ToList();
         }
         private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
@@ -84,28 +75,20 @@ namespace ThMEPEngineCore.Service
             if(QueryPortLinkElements(beamLink[0],portPt).Count>0)
             {
                 return portPt;
-            }           
-            List<ThIfcBeam> linkElements = FilterPortLinkBeams(beamLink[0], portPt);
+            }
+            //梁端部连接的主梁或半主梁，则停止查找
+            if (QueryPortLinkPrimaryBeams(beamLink[0], portPt).Count > 0 ||
+               QueryPortLinkHalfPrimaryBeams(beamLink[0], portPt).Count > 0)
+            {
+                return portPt;
+            }
+            //查找平行于当前梁的未定义梁
+            List<ThIfcBeam> linkElements = QueryPortLinkUndefinedBeams(beamLink[0], portPt);
             //过滤不在beamLink中的梁
             linkElements = linkElements.Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count == 0)
             {
                 return portPt;
-            }
-            if (beamLink[0] is ThIfcLineBeam currentLineBeam)
-            {
-                linkElements = linkElements.Where(o =>
-                {
-                    if (o is ThIfcLineBeam otherLineBeam)
-                    {
-                        return TwoBeamIsParallel(currentLineBeam, otherLineBeam);
-                    }
-                    else if (o is ThIfcArcBeam otherArcBeam)
-                    {
-                        return true;
-                    }
-                    return false;
-                }).ToList();
             }
             if(linkElements.Count==1)
             {
@@ -129,27 +112,18 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
-            List<ThIfcBeam> linkElements = FilterPortLinkBeams(beamLink[beamLink.Count - 1], portPt);
+            //梁端部连接的主梁或半主梁，则停止查找
+            if (QueryPortLinkPrimaryBeams(beamLink[beamLink.Count - 1], portPt).Count > 0 ||
+               QueryPortLinkHalfPrimaryBeams(beamLink[beamLink.Count - 1], portPt).Count > 0)
+            {
+                return portPt;
+            }
+            List<ThIfcBeam> linkElements = QueryPortLinkUndefinedBeams(beamLink[beamLink.Count - 1], portPt);
             //过滤不存在于beamLink中的梁
             linkElements = linkElements.Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count == 0)
             {
                 return portPt;
-            }
-            if (beamLink[beamLink.Count-1] is ThIfcLineBeam currentLineBeam)
-            {
-                linkElements = linkElements.Where(o =>
-                {
-                    if (o is ThIfcLineBeam otherLineBeam)
-                    {
-                        return TwoBeamIsParallel(currentLineBeam, otherLineBeam);
-                    }
-                    else if (o is ThIfcArcBeam otherArcBeam)
-                    {
-                        return true;
-                    }
-                    return false;
-                }).ToList();
             }
             if (linkElements.Count == 1)
             {
@@ -166,7 +140,7 @@ namespace ThMEPEngineCore.Service
             }
             return portPt;
         }
-        private List<ThIfcBeam> FilterPortLinkBeams(ThIfcBeam currentBeam, Point3d portPt)
+        private List<ThIfcBeam> QueryPortLinkPrimaryBeams(ThIfcBeam currentBeam, Point3d portPt)
         {
             //查找端点处连接的梁
             List<ThIfcBeam> linkElements = QueryPortLinkBeams(currentBeam, portPt);
@@ -187,37 +161,61 @@ namespace ThMEPEngineCore.Service
                     }
                 }).ToList();
             }
-            if (primaryBeams.Count > 0)
+            return primaryBeams;
+        }
+        private List<ThIfcBeam> QueryPortLinkHalfPrimaryBeams(ThIfcBeam currentBeam, Point3d portPt)
+        {
+            //查找端点处连接的梁
+            List<ThIfcBeam> linkElements = QueryPortLinkBeams(currentBeam, portPt);           
+            List<ThIfcBeam> halfPrimaryBeams = linkElements.Where(m => HalfPrimaryBeamLinks.Where(n => n.Beams.Where(k => k.Uuid == m.Uuid).Any()).Any()).ToList();
+            //TODO 后续根据需要是否要对主梁进行方向筛选
+            if (currentBeam is ThIfcLineBeam thIfcLineBeam)
             {
-                return new List<ThIfcBeam>();
-            }
+                halfPrimaryBeams = halfPrimaryBeams.Where(o =>
+                {
+                    if (o is ThIfcLineBeam otherLineBeam)
+                    {
+                        return !TwoBeamIsParallel(thIfcLineBeam, otherLineBeam);
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }).ToList();
+            }           
+            return halfPrimaryBeams;
+        }
+        private List<ThIfcBeam> QueryPortLinkUndefinedBeams(ThIfcBeam currentBeam, Point3d portPt,bool isParallel=true)
+        {
+            //查找端点处连接的梁
+            List<ThIfcBeam> linkElements = QueryPortLinkBeams(currentBeam, portPt);
             //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
             linkElements = linkElements.Where(m => UnDefinedBeams.Where(n => m.Uuid == n.Uuid).Any()).ToList();
+            //只收集是非定义的梁
             linkElements = linkElements.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.Undefined).ToList();
-            return linkElements;
-        }
-        private List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt)
-        {
-            List<ThIfcBeam> links = new List<ThIfcBeam>();
-            DBObjectCollection linkObjs = new DBObjectCollection();
-            Polyline portEnvelop = null;
-            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
+            if (currentBeam is ThIfcLineBeam lineBeam)
             {
-                portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
-            }
-            else
-            {
-                //portEnvelop = CreatePortEnvelop(portPt);
-            }
-            linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(portEnvelop);
-            if (linkObjs.Count > 0)
-            {
-                foreach (DBObject dbObj in linkObjs)
+                linkElements = linkElements.Where(o =>
                 {
-                    links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
-                }
+                    if (o is ThIfcLineBeam otherLineBeam)
+                    {
+                        if(isParallel)
+                        {
+                            return TwoBeamIsParallel(lineBeam, otherLineBeam);
+                        }
+                        else
+                        {
+                            return !TwoBeamIsParallel(lineBeam, otherLineBeam);
+                        }
+                    }
+                    else if (o is ThIfcArcBeam otherArcBeam)
+                    {
+                        return true;
+                    }
+                    return false;
+                }).ToList();
             }
-            return links;
+            return linkElements;
         }
     }
 }

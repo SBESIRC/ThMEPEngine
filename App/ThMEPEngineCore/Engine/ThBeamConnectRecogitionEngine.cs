@@ -50,6 +50,9 @@ namespace ThMEPEngineCore.Engine
 
             // Pass Three 在剩余梁中找出连接竖向构件的半主梁
             FindHalfPrimaryBeamLink();
+
+            // Pass Four 在剩余梁中找出单端连接竖向构件的悬梁
+            FindOverhangingPrimaryBeamLink();
         }
         private void CreateSpatialIndex()
         {
@@ -106,11 +109,29 @@ namespace ThMEPEngineCore.Engine
             halfPrimaryBeamLink.CreateHalfPrimaryBeamLink();
             HalfPrimaryBeamLinks.AddRange(halfPrimaryBeamLink.HalfPrimaryBeamLinks);
         }
-
+        private void FindOverhangingPrimaryBeamLink()
+        {
+            //悬挑主梁：一端为竖向构件，另一端无主梁或竖向构件,且无延续构件
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            ThOverhangingPrimaryBeamLinkExtension thOverhangingPrimaryBeamLinkExtension =
+                new ThOverhangingPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks)
+                {
+                    ColumnEngine = thColumnRecognitionEngine,
+                    BeamEngine = thBeamRecognitionEngine,
+                    ShearWallEngine = thShearWallRecognitionEngine
+                };
+            thOverhangingPrimaryBeamLinkExtension.CreateOverhangingPrimaryBeamLink();
+            OverhangingPrimaryBeamLinks.AddRange(thOverhangingPrimaryBeamLinkExtension.OverhangingPrimaryBeamLinks);
+        }
         private IEnumerable<ThIfcBuildingElement> FilterNotPrimaryBeams(List<ThIfcBuildingElement> totalBeams)
         {
             return totalBeams.Where(o => o is ThIfcBeam thIfcBeam && 
             thIfcBeam.ComponentType != BeamComponentType.PrimaryBeam);
+        }
+        private IEnumerable<ThIfcBuildingElement> FilterUndefinedBeams(List<ThIfcBuildingElement> totalBeams)
+        {
+            return totalBeams.Where(o => o is ThIfcBeam thIfcBeam &&
+            thIfcBeam.ComponentType == BeamComponentType.Undefined);
         }
     }
 }

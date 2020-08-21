@@ -108,9 +108,9 @@ namespace ThMEPEngineCore.Service
             var endLinkBeam = thBeamLink.End.Where(o => o is ThIfcBeam);
             return startLinkBeam.Any() && endLinkBeam.Any();
         }
-        protected List<ThIfcElement> QueryPortLinkElements(ThIfcBeam thIfcBeam, Point3d portPt)
+        protected List<ThIfcBuildingElement> QueryPortLinkElements(ThIfcBeam thIfcBeam, Point3d portPt)
         {
-            List<ThIfcElement> links = new List<ThIfcElement>();
+            List<ThIfcBuildingElement> links = new List<ThIfcBuildingElement>();
             DBObjectCollection linkObjs = new DBObjectCollection();
             Polyline portEnvelop = null;
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
@@ -195,6 +195,29 @@ namespace ThMEPEngineCore.Service
 
             return firstBeam.Direction.IsCodirectionalTo(secondBeam.Direction) ||
                    firstBeam.Direction.IsCodirectionalTo(secondBeam.Direction.Negate());
+        }
+        protected List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt)
+        {
+            List<ThIfcBeam> links = new List<ThIfcBeam>();
+            DBObjectCollection linkObjs = new DBObjectCollection();
+            Polyline portEnvelop = null;
+            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
+            {
+                portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
+            }
+            else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
+            {
+                portEnvelop = GetArcBeamPortEnvelop(thIfcArcBeam, portPt);
+            }
+            linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(portEnvelop);
+            if (linkObjs.Count > 0)
+            {
+                foreach (DBObject dbObj in linkObjs)
+                {
+                    links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
+                }
+            }
+            return links;
         }
         protected Polyline GetLineBeamPortEnvelop(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
         {
