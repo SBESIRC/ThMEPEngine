@@ -77,46 +77,6 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static DBObjectCollection Difference(this Polyline region, DBObjectCollection curves)
-        {
-            var objs = new DBObjectCollection();
-            var geometry = region.ToNTSPolygon().Difference(curves.UnionGeometries());
-            if (geometry.IsEmpty)
-            {
-                return objs;
-            }
-            if (geometry is IPolygon polygon)
-            {
-                objs.Add(polygon.Shell.ToDbPolyline());
-                foreach(var hole in polygon.Holes)
-                {
-                    objs.Add(hole.ToDbPolyline());
-                }
-            }
-            else if (geometry is IMultiPolygon mPolygon)
-            {
-                foreach(IPolygon subPolygon in mPolygon.Geometries)
-                {
-                    objs.Add(subPolygon.Shell.ToDbPolyline());
-                    foreach (var hole in subPolygon.Holes)
-                    {
-                        objs.Add(hole.ToDbPolyline());
-                    }
-                }
-            }
-            return objs;
-        }
-
-        public static bool Contains(this Polyline thisPline, Polyline otherPline)
-        {
-            return thisPline.ToNTSPolygon().Contains(otherPline.ToNTSPolygon());
-        }
-
-        public static bool Overlaps(this Polyline thisPline, Polyline otherPline)
-        {
-            return thisPline.ToNTSPolygon().Overlaps(otherPline.ToNTSPolygon());
-        }
-
         public static bool Contains(this Polyline thisPline, Point3d pt)
         {
             return thisPline.PointInPolygon(pt) == LocateStatus.Interior;
