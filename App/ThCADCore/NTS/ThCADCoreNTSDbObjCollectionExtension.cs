@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using GeoAPI.Geometries;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Operation.Union;
@@ -194,6 +196,13 @@ namespace ThCADCore.NTS
                 }
             }
             return results;
+        }
+
+        public static DBObjectCollection ToDBCollection(this IList<IGeometry> geometries)
+        {
+            var objs = new DBObjectCollection();
+            geometries.Cast<ILineString>().ForEach(o => objs.Add(o.ToDbPolyline()));
+            return objs;
         }
     }
 }
