@@ -35,13 +35,6 @@ namespace ThCADCore.NTS
             return line;
         }
 
-        public static Curve Simplify(this ILineString lineString)
-        {
-            var simplifier = new DouglasPeuckerLineSimplifier(lineString.Coordinates);
-            var result = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(simplifier.Simplify());
-            return result.ToDbline();
-        }
-
         public static Polyline ToDbPolyline(this ILinearRing linearRing)
         {
             var pline = new Polyline()

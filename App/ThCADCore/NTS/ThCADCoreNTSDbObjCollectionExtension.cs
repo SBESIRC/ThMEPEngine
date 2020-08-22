@@ -184,7 +184,7 @@ namespace ThCADCore.NTS
                     // 合并后的图元需要刷成合并前的图元的属性
                     // 假设合并的图元都有相同的属性
                     // 这里用集合中的第一个图元“刷”到合并后的图元
-                    var result = lineString.Simplify();
+                    var result = lineString.ToDbPolyline();
                     result.SetPropertiesFrom(lines[0] as Entity);
                     results.Add(result);
                 }

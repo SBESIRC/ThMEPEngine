@@ -386,7 +386,7 @@ namespace ThCADCore.Test
                 }
 
                 var obj = acadDatabase.Element<Polyline>(result.ObjectId);
-                var pline = obj.TopologyPreservingSimplify(1);
+                var pline = obj.TPSimplify(1);
                 pline.ColorIndex = 1;
                 acadDatabase.ModelSpace.Add(pline);
             }
