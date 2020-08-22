@@ -1,7 +1,7 @@
 ﻿using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
-using NFox.Cad.Collections;
+using ThCADCore.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
@@ -375,7 +375,6 @@ namespace ThCADCore.Test
         [CommandMethod("TIANHUACAD", "ThSimplify", CommandFlags.Modal)]
         public void ThSimplify()
         {
-
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var result = Active.Editor.GetEntity("请选择对象");
@@ -388,6 +387,26 @@ namespace ThCADCore.Test
                 var pline = obj.TopologyPreservingSimplify(1);
                 pline.ColorIndex = 1;
                 acadDatabase.ModelSpace.Add(pline);
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThPreprocess", CommandFlags.Modal)]
+        public void ThPreprocess()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach(Polyline segment in pline.Preprocess())
+                {
+                    segment.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(segment);
+                }
             }
         }
 
