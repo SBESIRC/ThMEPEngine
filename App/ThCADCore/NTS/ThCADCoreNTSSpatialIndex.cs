@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
 using GeoAPI.Geometries;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using NetTopologySuite.Index.Strtree;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThCADCore.NTS
 {
@@ -55,8 +55,7 @@ namespace ThCADCore.NTS
                 }
                 else if (obj is DBText text)
                 {
-                    var boundary = ThPolylineExtension.CreateRectangle(text.GeometricExtents);
-                    var geometry = boundary.ToNTSLineString();
+                    var geometry = text.GeometricExtents.ToNTSPolygon();
                     if (!Geometries.Keys.Contains(geometry))
                     {
                         Geometries.Add(geometry, text);

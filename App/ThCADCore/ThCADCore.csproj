@@ -38,6 +38,7 @@
     <Compile Include="NTS\ThCADCoreNTSPolygonizer.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolylineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSPrecisionReducer.cs" />
+    <Compile Include="NTS\ThCADCoreNTSRectangleExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSRegionExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSService.cs" />
     <Compile Include="NTS\ThCADCoreNTSSimplify.cs" />

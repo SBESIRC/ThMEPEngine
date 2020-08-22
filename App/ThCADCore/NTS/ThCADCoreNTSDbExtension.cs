@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Linq;
 using GeoAPI.Geometries;
-using GeometryExtensions;
-using NetTopologySuite.Simplify;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
 using System.Collections.Generic;
@@ -167,17 +165,6 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static List<LineSegment> LineSegments(this Polyline polyLine)
-        {
-            var lineSegments = new List<LineSegment>();
-            foreach(var segment in new PolylineSegmentCollection(polyLine))
-            {
-                lineSegments.Add(new LineSegment(segment.StartPoint.ToNTSCoordinate(),
-                    segment.EndPoint.ToNTSCoordinate()));
-            }
-            return lineSegments;
-        }
-
         public static IPolygon ToNTSPolygon(this Polyline polyLine)
         {
             var polygons = polyLine.Polygonize();
@@ -292,12 +279,6 @@ namespace ThCADCore.NTS
         public static bool IsCCW(this Polyline pline)
         {
             return Orientation.IsCCW(pline.ToNTSLineString().Coordinates);
-        }
-
-        public static Envelope ToEnvelope(this Extents3d extents)
-        {
-            return new Envelope(extents.MinPoint.ToNTSCoordinate(),
-                extents.MaxPoint.ToNTSCoordinate());
         }
     }
 }
