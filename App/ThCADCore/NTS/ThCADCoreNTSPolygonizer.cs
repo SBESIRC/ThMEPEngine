@@ -20,7 +20,7 @@ namespace ThCADCore.NTS
         public static ICollection<IGeometry> Polygonize(this Polyline polyline)
         {
             var polygonizer = new Polygonizer();
-            polygonizer.Add(polyline.ToNTSLineString());
+            polygonizer.Add(polyline.ToNTSNodedLineString());
             return polygonizer.GetPolygons();
         }
 

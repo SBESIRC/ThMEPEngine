@@ -108,8 +108,8 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThBoundary", CommandFlags.Modal)]
-        public void ThBoundary()
+        [CommandMethod("TIANHUACAD", "ThCBoundary", CommandFlags.Modal)]
+        public void ThCompositeBoundary()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -128,6 +128,25 @@ namespace ThCADCore.Test
                 {
                     acadDatabase.ModelSpace.Add(obj as Entity);
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThBoundary", CommandFlags.Modal)]
+        public void ThBoundary()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var obj = acadDatabase.Element<Entity>(result.ObjectId);
+                var polygon = obj.ToNTSPolygon();
+                var boundary = polygon.Shell.ToDbPolyline();
+                boundary.ColorIndex = 1;
+                acadDatabase.ModelSpace.Add(boundary);
             }
         }
 
@@ -151,23 +170,6 @@ namespace ThCADCore.Test
                 {
                     acadDatabase.ModelSpace.Add(obj as Entity);
                 }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "ThRegionBoundary", CommandFlags.Modal)]
-        public void ThRegionBoundary()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var region = acadDatabase.Element<Region>(result.ObjectId);
-                var polygon = region.ToNTSPolygon();
-                acadDatabase.ModelSpace.Add(polygon.Shell.ToDbPolyline());
             }
         }
 

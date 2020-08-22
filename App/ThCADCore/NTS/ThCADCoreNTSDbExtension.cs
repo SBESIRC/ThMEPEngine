@@ -7,6 +7,7 @@ using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
@@ -121,6 +122,11 @@ namespace ThCADCore.NTS
                 plines.Add(polygon.Shell.ToDbPolyline());
             }
             return plines;
+        }
+
+        public static IGeometry ToNTSNodedLineString(this Polyline polyline)
+        {
+            return UnaryUnionOp.Union(polyline.ToNTSLineString());
         }
 
         public static IGeometry ToNTSLineString(this Polyline polyLine)
