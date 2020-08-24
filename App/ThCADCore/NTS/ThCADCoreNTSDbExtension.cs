@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Linq;
+using NetTopologySuite;
 using GeoAPI.Geometries;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
 using System.Collections.Generic;
+using NetTopologySuite.Precision;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -163,6 +165,15 @@ namespace ThCADCore.NTS
                 // 首尾端点不一致的情况
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
             }
+        }
+
+        public static IGeometry ToNTSLineStringEx(this Polyline polyLine)
+        {
+            var geometry = polyLine.ToNTSLineString();
+            // 精度模型选用Fixed模型（四舍五入，仅保留整数部分）
+            var model = NtsGeometryServices.Instance.CreatePrecisionModel(PrecisionModels.Fixed);
+            var operation = new PrecisionReducerCoordinateOperation(model, false);
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(operation.Edit(geometry.Coordinates, geometry));
         }
 
         public static IPolygon ToNTSPolygon(this Polyline polyLine)

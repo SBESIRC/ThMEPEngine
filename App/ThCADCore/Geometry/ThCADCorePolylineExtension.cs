@@ -12,7 +12,7 @@ namespace ThCADCore.Geometry
         {
             // 剔除重复点（在一定公差范围内）
             // 鉴于主要的使用场景是建筑底图，选择1毫米作为公差
-            var result = TopologyPreservingSimplifier.Simplify(polyline.ToNTSLineString(), 1.0);
+            var result = TopologyPreservingSimplifier.Simplify(polyline.ToNTSLineStringEx(), 1.0);
 
             // 合并线段
             var merger = new LineMerger();
