@@ -24,6 +24,13 @@ namespace ThCADCore.NTS
             return polygonizer.GetPolygons();
         }
 
+        public static ICollection<IGeometry> Polygonize(this IGeometry geometry)
+        {
+            var polygonizer = new Polygonizer();
+            polygonizer.Add(UnaryUnionOp.Union(geometry));
+            return polygonizer.GetPolygons();
+        }
+
         public static DBObjectCollection Polygons(this DBObjectCollection lines)
         {
             var objs = new DBObjectCollection();
