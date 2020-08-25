@@ -1,5 +1,8 @@
 ﻿using GeoAPI.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Predicate;
+using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using AcPolyline = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
 namespace ThCADCore.NTS
 {
@@ -35,22 +38,14 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        public static bool Contains(this Polyline thisPline, Polyline otherPline)
+        public static bool Contains(this AcPolygon polygon, AcPolyline other)
         {
-            // Geometry A contains Geometry B if no points of B lie in the exterior of A, 
-            // and at least one point of the interior of B lies in the interior of A
-            return thisPline.ToNTSPolygon().Contains(otherPline.ToNTSPolygon());
+            return RectangleContains.Contains(polygon.ToNTSPolygon(), other.ToNTSLineString());
         }
 
-        public static bool Covers(this Polyline thisPline, Polyline otherPline)
+        public static bool Intersects(this AcPolygon polygon, AcPolyline other)
         {
-            // Geometry A covers Geometry B if no points of B lie in the exterior of A
-            return thisPline.ToNTSPolygon().Covers(otherPline.ToNTSPolygon());
-        }
-
-        public static bool Overlaps(this Polyline thisPline, Polyline otherPline)
-        {
-            return thisPline.ToNTSPolygon().Overlaps(otherPline.ToNTSPolygon());
+            return RectangleIntersects.Intersects(polygon.ToNTSPolygon(), other.ToNTSLineString());
         }
     }
 }
