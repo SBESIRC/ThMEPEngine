@@ -77,6 +77,11 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static bool Intersects(this Polyline polyline, Polyline other)
+        {
+            return polyline.ToNTSLineString().Intersects(other.ToNTSLineString());
+        }
+
         public static bool Contains(this Polyline thisPline, Point3d pt)
         {
             return thisPline.PointInPolygon(pt) == LocateStatus.Interior;
