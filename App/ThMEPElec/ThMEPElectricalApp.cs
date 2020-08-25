@@ -2,6 +2,7 @@
 using Linq2Acad;
 using ThMEPElectrical.Core;
 using ThMEPElectrical.Assistant;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical
 {
@@ -26,6 +27,26 @@ namespace ThMEPElectrical
                 var packageManager = new PackageManager();
                 var polys = packageManager.DoMainBeamProfiles();
                 DrawUtils.DrawProfile(polys.Polylines2Curves(), "MainBeamProfiles");
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THMainBeamPlace", CommandFlags.Modal)]
+        public void ThProfilesPlace()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoMainBeamPlace();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THMainBeamRect", CommandFlags.Modal)]
+        public void ThProfilesRect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoMainBeamRect();
             }
         }
     }
