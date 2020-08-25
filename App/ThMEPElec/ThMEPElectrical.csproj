@@ -27,12 +27,30 @@
   <ItemGroup>
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="Business\CalculateDetection.cs" />
+    <Compile Include="Business\CalculateLayout.cs" />
+    <Compile Include="Business\CalculatePlacePoint.cs" />
+    <Compile Include="Business\PolygonProfilePlace.cs" />
+    <Compile Include="Business\RectProfilePlace.cs" />
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
-    <Compile Include="GeomUtils.cs" />
+    <Compile Include="Geometry\CoordinateTransform.cs" />
+    <Compile Include="Geometry\GeomUtils.cs" />
+    <Compile Include="Geometry\MinRectangle.cs" />
+    <Compile Include="Layout\ILayout.cs" />
+    <Compile Include="Layout\MainBeamLayout.cs" />
+    <Compile Include="Layout\MainBeamPolygonLayout.cs" />
+    <Compile Include="Layout\MainBeamRectangleLayout.cs" />
+    <Compile Include="Layout\MainSecondBeamLayout.cs" />
+    <Compile Include="Layout\SensorLayout.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\DetectionRegion.cs" />
+    <Compile Include="Model\LayoutMap.cs" />
+    <Compile Include="Model\LayoutProfileData.cs" />
+    <Compile Include="Model\PlaceInputProfileData.cs" />
+    <Compile Include="Model\PlaceParameter.cs" />
+    <Compile Include="Model\PlacePoint.cs" />
+    <Compile Include="Model\PlaceRect.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -54,7 +72,9 @@
       <Name>ExtensionTools</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="View\" />
+  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
