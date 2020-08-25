@@ -33,13 +33,5 @@ namespace ThMEPEngineCore.CAD
         {
             return new Point3d((pt1.X + pt2.X) / 2.0, (pt1.Y + pt2.Y) / 2.0, (pt1.Z + pt2.Z) / 2.0);
         }
-        public static bool IntersectWithEx(this Entity firstEntity, Entity secondEntity)
-        {
-            Point3dCollection pts = new Point3dCollection();
-            Plane zeroPlane = new Plane(Point3d.Origin, Vector3d.XAxis, Vector3d.YAxis);
-            firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, zeroPlane, pts, IntPtr.Zero, IntPtr.Zero);
-            zeroPlane.Dispose();
-            return pts.Count > 0 ? true : false;
-        }
     }
 }

@@ -122,7 +122,7 @@ namespace ThMEPEngineCore.Service
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和柱是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.IntersectWithEx(o) || portEnvelop.IntersectWithEx(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.Intersects(o) || portEnvelop.Intersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ColumnEngine.FilterByOutline(dbObj));
@@ -138,7 +138,7 @@ namespace ThMEPEngineCore.Service
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和剪力墙是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.IntersectWithEx(o) || portEnvelop.IntersectWithEx(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.Intersects(o) || portEnvelop.Intersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ShearWallEngine.FilterByOutline(dbObj));
