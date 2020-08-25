@@ -42,19 +42,29 @@ namespace ThMEPEngineCore.Service
                 if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count > 0)
                 {
                     // 末端连接竖向构件
-                    if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks,linkElements[0], prePt).Count==0 &&
-                        QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks,linkElements[0], prePt).Count == 0)
+                    List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[0], prePt);
+                    if (linkPrimaryBeams.Count==0)
                     {
-                        thBeamLink.Start = QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[0], prePt, false).Cast<ThIfcBuildingElement>().ToList();
+                        thBeamLink.Start.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[0], prePt));
+                        thBeamLink.Start.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[0], prePt, false).ToList());
+                    }
+                    else
+                    {
+                        thBeamLink.Start.AddRange(linkPrimaryBeams);
                     }
                 }
                 else if (thBeamLink.Start.Count > 0 && thBeamLink.End.Count == 0)
                 {
+                    List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[linkElements.Count - 1], backPt);
                     // 起始端连接竖向构件
-                    if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks,linkElements[linkElements.Count - 1], backPt).Count == 0 &&
-                        QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks,linkElements[linkElements.Count - 1], backPt).Count == 0)
+                    if (linkPrimaryBeams.Count == 0)
                     {
-                        thBeamLink.End = QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[linkElements.Count - 1], backPt, false).Cast<ThIfcBuildingElement>().ToList();
+                        thBeamLink.End.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[linkElements.Count - 1], backPt));
+                        thBeamLink.End.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[linkElements.Count - 1], backPt, false).ToList());
+                    }
+                    else
+                    {
+                        thBeamLink.End.AddRange(linkPrimaryBeams);
                     }
                 }
                 else

@@ -75,20 +75,16 @@ namespace ThMEPEngineCore.Service
                 return false;
             }
             var startLinkComponent = thBeamLink.Start.Where(o => o.GetType() == typeof(ThIfcColumn) || o.GetType() == typeof(ThIfcWall));
-            if (startLinkComponent.Any())
+            if (startLinkComponent.Any()) 
             {
-                if (thBeamLink.End.Count==0)
-                {
-                    return true;
-                }
+                //起始端有竖向构件,末端连接半主梁、未定义梁
+                return !thBeamLink.End.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam).Any();
             }
             var endLinkComponent = thBeamLink.End.Where(o => o is ThIfcColumn || o is ThIfcWall);
             if (endLinkComponent.Any())
             {
-                if (thBeamLink.Start.Count==0)
-                {
-                    return true;
-                }
+                //末端有竖向构件,起始端连接半主梁、未定义梁
+                return !thBeamLink.Start.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam).Any();
             }
             return false;
         }
@@ -104,8 +100,12 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            var startLinkBeam = thBeamLink.Start.Where(o => o is ThIfcBeam);
-            var endLinkBeam = thBeamLink.End.Where(o => o is ThIfcBeam);
+            var startLinkBeam = thBeamLink.Start.Where(o => o is ThIfcBeam thIfcBeam &&
+            (thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam || thIfcBeam.ComponentType == BeamComponentType.HalfPrimaryBeam ||
+            thIfcBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam));
+            var endLinkBeam = thBeamLink.End.Where(o => o is ThIfcBeam thIfcBeam && 
+            (thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam || thIfcBeam.ComponentType == BeamComponentType.HalfPrimaryBeam ||
+            thIfcBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam));
             return startLinkBeam.Any() && endLinkBeam.Any();
         }
 

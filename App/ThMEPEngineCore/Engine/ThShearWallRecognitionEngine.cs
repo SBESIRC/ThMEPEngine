@@ -35,35 +35,9 @@ namespace ThMEPEngineCore.Engine
                 {
                     if(o is Polyline polyline && polyline.Length>0.0)
                     {
-                        Elements.Add(CreateWallEntity(polyline));
+                        Elements.Add(ThIfcWall.CreateWallEntity(polyline.Clone() as Polyline));
                     }
                 });
-            }
-        }
-        private ThIfcWall CreateWallEntity(Polyline wallGeometry)
-        {
-            var geometry = wallGeometry.ToNTSLineString();
-            if (geometry.IsSimple)
-            {
-                return ThIfcWall.CreateWallEntity(wallGeometry.Clone() as Polyline);
-            }
-            DBObjectCollection dbObjs = wallGeometry.Preprocess();
-            List<Polyline> polylines = new List<Polyline>(); 
-            foreach (DBObject dbObj in dbObjs)
-            {
-                if (dbObj is Polyline polyline && polyline.Closed)
-                {
-                    polylines.Add(polyline);
-                }
-            }
-            if(polylines.Count==0)
-            {
-                return ThIfcWall.CreateWallEntity(wallGeometry.Clone() as Polyline);
-            }
-            else
-            {
-                var newWallGeometry = polylines.OrderByDescending(o => o.Area).FirstOrDefault();
-                return ThIfcWall.CreateWallEntity(newWallGeometry);
             }
         }
     }
