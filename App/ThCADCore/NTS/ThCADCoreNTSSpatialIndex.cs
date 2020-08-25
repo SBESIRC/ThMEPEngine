@@ -77,10 +77,66 @@ namespace ThCADCore.NTS
             Engine.Insert(geometry.EnvelopeInternal, geometry);
         }
 
+        /// <summary>
+        /// Crossing selection
+        /// </summary>
+        /// <param name="pt1"></param>
+        /// <param name="pt2"></param>
+        /// <returns></returns>
+        /// All the objects within this dashed window, 
+        /// as well as objects touching the boundary of the window, 
+        /// will be included in the selection set
         public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
         {
             var extents = new Extents3d(pt1, pt2);
             return Query(extents.ToEnvelope());
+        }
+
+        /// <summary>
+        /// Crossing selection
+        /// </summary>
+        /// <param name="points"></param>
+        /// <returns></returns>
+        /// All the objects within this dashed window, 
+        /// as well as objects touching the boundary of the window, 
+        /// will be included in the selection set
+        public DBObjectCollection SelectCrossingPolygon(Point3dCollection points)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Window selection
+        /// </summary>
+        /// <param name="pt1"></param>
+        /// <param name="pt2"></param>
+        /// <returns></returns>
+        /// All the objects which are completely inside the solid window will be selected
+        public DBObjectCollection SelectWindow(Point3d pt1, Point3d pt2)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Window selection
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <returns></returns>
+        /// All the objects which are completely inside the solid window will be selected
+        public DBObjectCollection SelectWindowPolygon(Point3dCollection polygon)
+        {
+            throw new NotSupportedException();
+        }
+
+        /// <summary>
+        /// Fence Selection
+        /// </summary>
+        /// <param name="fence"></param>
+        /// <returns></returns>
+        /// all objects touching that fence will be included in the selection set
+        public DBObjectCollection SelectFence(Point3dCollection fence)
+        {
+            throw new NotSupportedException();
         }
 
         public DBObjectCollection SelectFence(Curve curve)
