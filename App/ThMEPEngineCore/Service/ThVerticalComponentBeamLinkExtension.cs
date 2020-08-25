@@ -42,13 +42,6 @@ namespace ThMEPEngineCore.Service
                 }
             }
         }
-
-        private bool IsUndefinedBeam(ThIfcBeam beam)
-        {
-            return UnDefinedBeams.Where(o => beam.Uuid == o.Uuid).Any() &&
-                beam.ComponentType == BeamComponentType.Undefined;
-        }
-
         private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
@@ -58,9 +51,9 @@ namespace ThMEPEngineCore.Service
             }
             //端点连接的梁
             List<ThIfcBeam> linkElements = QueryPortLinkBeams(beamLink[0],portPt);
-            //过滤不存在于beamLink中的梁
+            //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
             linkElements = linkElements
-                .Where(m => IsUndefinedBeam(m))
+                .Where(m => IsUndefinedBeam(UnDefinedBeams,m))
                 .Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count==0)
             {
@@ -109,9 +102,9 @@ namespace ThMEPEngineCore.Service
             }
             //端点连接的梁
             List<ThIfcBeam> linkElements = QueryPortLinkBeams(beamLink[beamLink.Count-1], portPt);
-            //过滤不存在于beamLink中的梁
+            //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
             linkElements = linkElements
-                .Where(m => IsUndefinedBeam(m))
+                .Where(m => IsUndefinedBeam(UnDefinedBeams, m))
                 .Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count == 0)
             {

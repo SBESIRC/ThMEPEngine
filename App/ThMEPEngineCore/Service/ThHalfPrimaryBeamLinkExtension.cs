@@ -85,9 +85,15 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }           
-            List<ThIfcBeam> linkElements = FilterPortLinkBeams(beamLink[0], portPt);
-            //过滤不在beamLink中的梁
-            linkElements = linkElements.Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
+            List<ThIfcBeam> linkElements = QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[0], portPt);
+            if(linkElements.Count>0)
+            {
+                return portPt;
+            }
+            //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
+            linkElements = linkElements
+                .Where(m => IsUndefinedBeam(UnDefinedBeams, m))
+                .Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count == 0)
             {
                 return portPt;
@@ -129,9 +135,15 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
-            List<ThIfcBeam> linkElements = FilterPortLinkBeams(beamLink[beamLink.Count - 1], portPt);
-            //过滤不存在于beamLink中的梁
-            linkElements = linkElements.Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
+            List<ThIfcBeam> linkElements = QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[beamLink.Count - 1], portPt);
+            if (linkElements.Count > 0)
+            {
+                return portPt;
+            }
+            //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
+            linkElements = linkElements
+                .Where(m => IsUndefinedBeam(UnDefinedBeams, m))
+                .Where(m => !beamLink.Where(n => n.Uuid == m.Uuid).Any()).ToList();
             if (linkElements.Count == 0)
             {
                 return portPt;
@@ -165,36 +177,6 @@ namespace ThMEPEngineCore.Service
                 }
             }
             return portPt;
-        }
-        private List<ThIfcBeam> FilterPortLinkBeams(ThIfcBeam currentBeam, Point3d portPt)
-        {
-            //查找端点处连接的梁
-            List<ThIfcBeam> linkElements = QueryPortLinkBeams(currentBeam, portPt);
-            //端点处连接的梁中是否含有主梁
-            List<ThIfcBeam> primaryBeams = linkElements.Where(m => PrimaryBeamLinks.Where(n => n.Beams.Where(k => k.Uuid == m.Uuid).Any()).Any()).ToList();
-            //TODO 后续根据需要是否要对主梁进行方向筛选
-            if (currentBeam is ThIfcLineBeam thIfcLineBeam)
-            {
-                primaryBeams=primaryBeams.Where(o =>
-                {
-                    if (o is ThIfcLineBeam otherLineBeam)
-                    {
-                        return !TwoBeamIsParallel(thIfcLineBeam, otherLineBeam);
-                    }
-                    else
-                    {
-                        return true;
-                    }
-                }).ToList();
-            }
-            if (primaryBeams.Count > 0)
-            {
-                return new List<ThIfcBeam>();
-            }
-            //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
-            linkElements = linkElements.Where(m => UnDefinedBeams.Where(n => m.Uuid == n.Uuid).Any()).ToList();
-            linkElements = linkElements.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.Undefined).ToList();
-            return linkElements;
         }
     }
 }

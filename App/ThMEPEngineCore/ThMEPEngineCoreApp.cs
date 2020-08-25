@@ -1,20 +1,16 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using System;
 using System.IO;
 using System.Collections;
 using System.Web.Script.Serialization;
-using System;
-using ThMEPEngineCore.xBIM;
-using Xbim.Ifc4.ProductExtension;
-using Xbim.Ifc4.SharedBldgElements;
-using Xbim.IO;
-using ThMEPEngineCore.Service;
-using System.Collections.Generic;
 using Linq2Acad;
 using AcHelper;
+using Xbim.IO;
+using Xbim.Ifc4.ProductExtension;
+using Xbim.Ifc4.SharedBldgElements;
+using Autodesk.AutoCAD.Runtime;
+using ThMEPEngineCore.xBIM;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.BeamInfo.Model;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore
 {

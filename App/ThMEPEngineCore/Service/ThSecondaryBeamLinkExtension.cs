@@ -10,26 +10,44 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThOverhangingPrimaryBeamLinkExtension : ThBeamLinkExtension
+    public class ThSecondaryBeamLinkExtension : ThBeamLinkExtension
     {
+        /// <summary>
+        /// 未定义的梁 (外部传入)
+        /// </summary>
         private List<ThIfcBuildingElement> UnDefinedBeams { get; set; }
+        /// <summary>
+        /// 主梁段（外部传入）
+        /// </summary>
         private List<ThBeamLink> PrimaryBeamLinks { get; set; }
+        /// <summary>
+        /// 半主梁（外部传入）
+        /// </summary>
         private List<ThBeamLink> HalfPrimaryBeamLinks { get; set; }
-        public List<ThBeamLink> OverhangingPrimaryBeamLinks { get; private set; }
-        public ThOverhangingPrimaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, 
-            List<ThBeamLink> primaryBeamLinks, List<ThBeamLink> halfPrimaryBeamLinks)
+        /// <summary>
+        /// 悬挑主梁（外部传入）
+        /// </summary>
+        private List<ThBeamLink> OverhangingPrimaryBeamLinks { get; set; }
+        /// <summary>
+        /// 次梁段 （返回）
+        /// </summary>
+        public List<ThBeamLink> SecondaryBeamLinks { get; private set; }
+
+        public ThSecondaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, List<ThBeamLink> primaryBeamLinks,
+            List<ThBeamLink> halfPrimaryBeamLinks, List<ThBeamLink> overhangingPrimaryBeamLinks)
         {
             UnDefinedBeams = undefinedBeams;
             PrimaryBeamLinks = primaryBeamLinks;
             HalfPrimaryBeamLinks = halfPrimaryBeamLinks;
-            OverhangingPrimaryBeamLinks = new List<ThBeamLink>();
+            OverhangingPrimaryBeamLinks = overhangingPrimaryBeamLinks;
+            SecondaryBeamLinks = new List<ThBeamLink>();
         }        
-        public void CreateOverhangingPrimaryBeamLink()
+        public void CreateSecondaryBeamLink()
         {
             for (int i = 0; i < UnDefinedBeams.Count; i++)
             {
                 ThIfcBeam currentBeam = UnDefinedBeams[i] as ThIfcBeam;
-                if (currentBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam)
+                if (currentBeam.ComponentType == BeamComponentType.SecondaryBeam)
                 {
                     continue;
                 }
@@ -39,33 +57,25 @@ namespace ThMEPEngineCore.Service
                 Point3d backPt = BackFindBeamLink(currentBeam.EndPoint, linkElements);
                 thBeamLink.Start = QueryPortLinkElements(linkElements[0], prePt);
                 thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count-1], backPt);
-                if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count > 0)
+                if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count == 0)
                 {
-                    // 末端连接竖向构件
-                    if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks,linkElements[0], prePt).Count==0 &&
-                        QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks,linkElements[0], prePt).Count == 0)
-                    {
-                        thBeamLink.Start = QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[0], prePt, false).Cast<ThIfcBuildingElement>().ToList();
-                    }
-                }
-                else if (thBeamLink.Start.Count > 0 && thBeamLink.End.Count == 0)
-                {
-                    // 起始端连接竖向构件
-                    if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks,linkElements[linkElements.Count - 1], backPt).Count == 0 &&
-                        QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks,linkElements[linkElements.Count - 1], backPt).Count == 0)
-                    {
-                        thBeamLink.End = QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[linkElements.Count - 1], backPt, false).Cast<ThIfcBuildingElement>().ToList();
-                    }
+                    thBeamLink.Start.AddRange(QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[0], prePt));
+                    thBeamLink.Start.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[0], prePt));
+                    thBeamLink.Start.AddRange(QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, linkElements[0], prePt));
+
+                    thBeamLink.End.AddRange(QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[linkElements.Count - 1], backPt));
+                    thBeamLink.End.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[linkElements.Count - 1], backPt));
+                    thBeamLink.End.AddRange(QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, linkElements[linkElements.Count - 1], backPt));
                 }
                 else
                 {
                     continue;
                 }
-                if (JudgeOverhangingPrimaryBeam(thBeamLink))
+                if (JudgeSecondaryPrimaryBeam(thBeamLink))
                 {
                     thBeamLink.Beams = linkElements;
-                    thBeamLink.Beams.ForEach(o => o.ComponentType = BeamComponentType.OverhangingPrimaryBeam);
-                    OverhangingPrimaryBeamLinks.Add(thBeamLink);
+                    thBeamLink.Beams.ForEach(o => o.ComponentType = BeamComponentType.SecondaryBeam);
+                    SecondaryBeamLinks.Add(thBeamLink);
                 }
             }
         }
@@ -76,9 +86,10 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
-            //梁端部连接的主梁或半主梁，则停止查找
+            //梁端部连接的主梁、半主梁或悬挑主梁，则停止查找
             if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[0], portPt).Count > 0 ||
-               QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, beamLink[0], portPt).Count > 0)
+               QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, beamLink[0], portPt).Count > 0 ||
+               QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, beamLink[0], portPt).Count > 0)
             {
                 return portPt;
             }
@@ -114,7 +125,8 @@ namespace ThMEPEngineCore.Service
             }
             //梁端部连接的主梁或半主梁，则停止查找
             if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[beamLink.Count - 1], portPt).Count > 0 ||
-               QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks,beamLink[beamLink.Count - 1], portPt).Count > 0)
+               QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks,beamLink[beamLink.Count - 1], portPt).Count > 0 ||
+               QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, beamLink[beamLink.Count - 1], portPt).Count > 0)
             {
                 return portPt;
             }
