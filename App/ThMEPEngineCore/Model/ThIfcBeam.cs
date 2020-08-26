@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +18,18 @@ namespace ThMEPEngineCore.Model
         public double Width { get; set; }
         public double Height { get; set; }
         public BeamComponentType ComponentType { get; set; } = BeamComponentType.Undefined;
+        public double ActualWidth
+        {
+            get
+            {
+                if (Outline != null)
+                {
+                    Polyline beamGeometry = Outline as Polyline;
+                    return beamGeometry.GetPoint3dAt(0).DistanceTo(beamGeometry.GetPoint3dAt(1));
+                }
+                return 0.0;
+            }
+        }
     }
     public enum BeamComponentType
     {

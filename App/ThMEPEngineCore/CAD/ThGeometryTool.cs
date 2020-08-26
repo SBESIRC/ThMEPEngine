@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -32,6 +31,14 @@ namespace ThMEPEngineCore.CAD
         public static Point3d GetMidPt(Point3d pt1, Point3d pt2)
         {
             return new Point3d((pt1.X + pt2.X) / 2.0, (pt1.Y + pt2.Y) / 2.0, (pt1.Z + pt2.Z) / 2.0);
+        }
+        public static Point3d GetProjectPtOnLine(this Point3d outerPt, Point3d startPt,Point3d endPt)
+        {
+            Vector3d firstVec = startPt.GetVectorTo(endPt);
+            Vector3d secondVec = startPt.GetVectorTo(outerPt);
+            double angle = firstVec.GetAngleTo(secondVec);
+            double distance = Math.Cos(angle) * secondVec.Length;
+            return startPt + firstVec.GetNormal().MultiplyBy(distance);
         }
     }
 }
