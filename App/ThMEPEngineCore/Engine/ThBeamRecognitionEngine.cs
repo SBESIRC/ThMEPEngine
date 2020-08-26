@@ -105,7 +105,7 @@ namespace ThMEPEngineCore.Engine
             {
                 if (!duplicateCollection.Where(n => n.Uuid == m.Uuid).Any())
                 {
-                    DBObjectCollection dbObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(m.Outline as Curve);
+                    DBObjectCollection dbObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(m.Outline as Polyline);
                     Polyline baseOutline = m.Outline as Polyline;
                     foreach (DBObject dbObj in dbObjs)
                     {

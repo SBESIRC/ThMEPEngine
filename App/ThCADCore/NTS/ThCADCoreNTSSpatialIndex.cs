@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using NetTopologySuite.Index.Strtree;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Predicate;
 
 namespace ThCADCore.NTS
 {
@@ -80,75 +81,70 @@ namespace ThCADCore.NTS
         /// <summary>
         /// Crossing selection
         /// </summary>
-        /// <param name="pt1"></param>
-        /// <param name="pt2"></param>
+        /// <param name="polyline"></param>
         /// <returns></returns>
-        /// All the objects within this dashed window, 
-        /// as well as objects touching the boundary of the window, 
-        /// will be included in the selection set
-        public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
+        public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
         {
-            var extents = new Extents3d(pt1, pt2);
-            return Query(extents.ToEnvelope());
+            var polygon = polyline.ToNTSPolygon();
+            var objs = new DBObjectCollection();
+            foreach (Polyline item in Query(polygon.EnvelopeInternal))
+            {
+                if (polygon.Intersects(item.ToNTSLineString()))
+                {
+                    objs.Add(item);
+                }
+            }
+            return objs;
         }
 
         /// <summary>
         /// Crossing selection
         /// </summary>
-        /// <param name="points"></param>
-        /// <returns></returns>
-        /// All the objects within this dashed window, 
-        /// as well as objects touching the boundary of the window, 
-        /// will be included in the selection set
-        public DBObjectCollection SelectCrossingPolygon(Point3dCollection points)
-        {
-            throw new NotSupportedException();
-        }
-
-        /// <summary>
-        /// Window selection
-        /// </summary>
         /// <param name="pt1"></param>
         /// <param name="pt2"></param>
         /// <returns></returns>
-        /// All the objects which are completely inside the solid window will be selected
-        public DBObjectCollection SelectWindow(Point3d pt1, Point3d pt2)
+        public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
         {
-            throw new NotSupportedException();
+            var extents = new Extents3d(pt1, pt2);
+            var polygon = extents.ToNTSPolygon();
+            var objs = new DBObjectCollection();
+            foreach (Polyline item in Query(polygon.EnvelopeInternal))
+            {
+                if (polygon.Intersects(item.ToNTSLineString()))
+                {
+                    objs.Add(item);
+                }
+            }
+            return objs;
         }
 
         /// <summary>
         /// Window selection
         /// </summary>
-        /// <param name="polygon"></param>
+        /// <param name="polyline"></param>
         /// <returns></returns>
-        /// All the objects which are completely inside the solid window will be selected
-        public DBObjectCollection SelectWindowPolygon(Point3dCollection polygon)
+        public DBObjectCollection SelectWindowPolygon(Polyline polyline)
         {
-            throw new NotSupportedException();
+            var polygon = polyline.ToNTSPolygon();
+            var objs = new DBObjectCollection();
+            foreach (Polyline item in Query(polygon.EnvelopeInternal))
+            {
+                if (polygon.Contains(item.ToNTSLineString()))
+                {
+                    objs.Add(item);
+                }
+            }
+            return objs;
         }
 
         /// <summary>
         /// Fence Selection
         /// </summary>
-        /// <param name="fence"></param>
+        /// <param name="polyline"></param>
         /// <returns></returns>
-        /// all objects touching that fence will be included in the selection set
-        public DBObjectCollection SelectFence(Point3dCollection fence)
+        public DBObjectCollection SelectFence(Polyline polyline)
         {
-            throw new NotSupportedException();
-        }
-
-        public DBObjectCollection SelectFence(Curve curve)
-        {
-            if (curve is Polyline polyline)
-            { 
-                return Query(polyline.ToNTSLineString().EnvelopeInternal);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            return Query(polyline.ToNTSLineString().EnvelopeInternal);
         }
 
         public DBObjectCollection SelectAll()

@@ -457,15 +457,12 @@ namespace ThCADCore.Test
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
+       
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-
                 var frame = acadDatabase.Element<Polyline>(result2.ObjectId);
-                var pt1 = frame.GeometricExtents.MinPoint;
-                var pt2 = frame.GeometricExtents.MaxPoint;
-                foreach (Entity item in spatialIndex.SelectCrossingWindow(pt1, pt2))
+                foreach (Entity item in spatialIndex.SelectWindowPolygon(frame))
                 {
-                    item.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(item);
+                    item.Highlight();
                 }
             }
         }
