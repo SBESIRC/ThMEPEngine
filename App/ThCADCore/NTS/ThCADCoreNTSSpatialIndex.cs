@@ -78,6 +78,60 @@ namespace ThCADCore.NTS
             Engine.Insert(geometry.EnvelopeInternal, geometry);
         }
 
+        private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPolygon polygon)
+        {
+            var results = new DBObjectCollection();
+            foreach (Entity item in objs)
+            {
+                if (item is Polyline polyline)
+                {
+                    if (polygon.Intersects(polyline.ToNTSLineString()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is DBText dBText)
+                {
+                    if (polygon.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            return results;
+        }
+
+        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPolygon polygon)
+        {
+            var results = new DBObjectCollection();
+            foreach (Entity item in objs)
+            {
+                if (item is Polyline polyline)
+                {
+                    if (polygon.Contains(polyline.ToNTSLineString()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is DBText dBText)
+                {
+                    if (polygon.Contains(dBText.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            return results;
+        }
+
         /// <summary>
         /// Crossing selection
         /// </summary>
@@ -86,15 +140,7 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
         {
             var polygon = polyline.ToNTSPolygon();
-            var objs = new DBObjectCollection();
-            foreach (Polyline item in Query(polygon.EnvelopeInternal))
-            {
-                if (polygon.Intersects(item.ToNTSLineString()))
-                {
-                    objs.Add(item);
-                }
-            }
-            return objs;
+            return CrossingFilter(Query(polygon.EnvelopeInternal), polygon);
         }
 
         /// <summary>
@@ -107,15 +153,7 @@ namespace ThCADCore.NTS
         {
             var extents = new Extents3d(pt1, pt2);
             var polygon = extents.ToNTSPolygon();
-            var objs = new DBObjectCollection();
-            foreach (Polyline item in Query(polygon.EnvelopeInternal))
-            {
-                if (polygon.Intersects(item.ToNTSLineString()))
-                {
-                    objs.Add(item);
-                }
-            }
-            return objs;
+            return CrossingFilter(Query(polygon.EnvelopeInternal), polygon);
         }
 
         /// <summary>
@@ -126,15 +164,7 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectWindowPolygon(Polyline polyline)
         {
             var polygon = polyline.ToNTSPolygon();
-            var objs = new DBObjectCollection();
-            foreach (Polyline item in Query(polygon.EnvelopeInternal))
-            {
-                if (polygon.Contains(item.ToNTSLineString()))
-                {
-                    objs.Add(item);
-                }
-            }
-            return objs;
+            return WindowFilter(Query(polygon.EnvelopeInternal), polygon);
         }
 
         /// <summary>
