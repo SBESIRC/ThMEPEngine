@@ -12,12 +12,12 @@ namespace ThMEPEngineCore.Service
 {
     public class ThVerticalComponentBeamLinkExtension : ThBeamLinkExtension
     {
-        public List<ThBeamLink> BeamLinks { get; private set; }
+        private List<ThBeamLink> PrimaryBeamLinks { get; set; }
         private List<ThIfcBuildingElement> UnDefinedBeams = new List<ThIfcBuildingElement>();
-        public ThVerticalComponentBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams)
+        public ThVerticalComponentBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, List<ThBeamLink> primaryBeamLinks)
         {
-            BeamLinks = new List<ThBeamLink>();
             UnDefinedBeams = undefinedBeams;
+            PrimaryBeamLinks = primaryBeamLinks;
         }
         public void CreatePrimaryBeamLink()
         {
@@ -38,7 +38,7 @@ namespace ThMEPEngineCore.Service
                 {
                     thBeamLink.Beams = linkElements;
                     thBeamLink.Beams.ForEach(o => o.ComponentType = BeamComponentType.PrimaryBeam);
-                    BeamLinks.Add(thBeamLink);
+                    PrimaryBeamLinks.Add(thBeamLink);
                 }
             }
         }
@@ -46,6 +46,11 @@ namespace ThMEPEngineCore.Service
         {
             //端点连接竖向构件则返回
             if (QueryPortLinkElements(beamLink[0],portPt).Count>0)
+            {
+                return portPt;
+            }
+            List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, beamLink[0], portPt);
+            if (linkPrimaryBeams.Count > 0)
             {
                 return portPt;
             }
@@ -65,7 +70,7 @@ namespace ThMEPEngineCore.Service
                 {
                     if (o is ThIfcLineBeam otherLineBeam)
                     {
-                        return TwoBeamIsParallel(currentLineBeam, otherLineBeam);
+                        return TwoBeamCenterLineIsClosed(currentLineBeam, otherLineBeam);
                     }
                     else if (o is ThIfcArcBeam otherArcBeam)
                     {
@@ -100,6 +105,11 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
+            List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, beamLink[beamLink.Count - 1], portPt);
+            if (linkPrimaryBeams.Count > 0)
+            {
+                return portPt;
+            }
             //端点连接的梁
             List<ThIfcBeam> linkElements = QueryPortLinkBeams(beamLink[beamLink.Count-1], portPt);
             //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
@@ -116,7 +126,7 @@ namespace ThMEPEngineCore.Service
                 {
                     if (o is ThIfcLineBeam otherLineBeam)
                     {
-                        return TwoBeamIsParallel(currentLineBeam, otherLineBeam);
+                        return TwoBeamCenterLineIsClosed(currentLineBeam, otherLineBeam);
                     }
                     else if (o is ThIfcArcBeam otherArcBeam)
                     {

@@ -14,12 +14,12 @@ namespace ThMEPEngineCore.Model
         public List<ThIfcBuildingElement> Start { get; set; } = new List<ThIfcBuildingElement>();
         public List<ThIfcBuildingElement> End { get; set; } = new List<ThIfcBuildingElement>();
         public List<ThIfcBeam> Beams { get; set; } = new List<ThIfcBeam>();
-        public Polyline CreateExtendBeamOutline(double extendDis)
+        public Tuple<Polyline,Point3d,Point3d> CreateExtendBeamOutline(double extendDis)
         {
             Polyline polyline=new Polyline();
             if(Beams.Count==0 || Beams.Where(o => o is ThIfcArcBeam).Any())
             {
-                return polyline;
+                return Tuple.Create(polyline, Point3d.Origin, Point3d.Origin);
             }
             double maxWidth = Beams.Select(o => o.ActualWidth).OrderByDescending(o => o).FirstOrDefault();
             Point3d firstBeamSpt = Beams[0].StartPoint;
@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.Model
             Point3d pt4 = newSpt + perpendVec.GetNormal().MultiplyBy(maxWidth / 2.0);
             Point3d pt3 = newEpt + perpendVec.GetNormal().MultiplyBy(maxWidth / 2.0);
             Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
-            return pts.CreatePolyline();
+            return Tuple.Create(pts.CreatePolyline(), newSpt, newEpt);
         }
     }
 }

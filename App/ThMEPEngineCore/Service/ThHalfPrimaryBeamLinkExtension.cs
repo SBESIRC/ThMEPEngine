@@ -85,11 +85,12 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }           
-            List<ThIfcBeam> linkElements = QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[0], portPt);
-            if(linkElements.Count>0)
+            List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[0], portPt);
+            if(linkPrimaryBeams.Count>0)
             {
                 return portPt;
             }
+            var linkElements = QueryPortLinkBeams(beamLink[0], portPt);
             //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
             linkElements = linkElements
                 .Where(m => IsUndefinedBeam(UnDefinedBeams, m))
@@ -104,7 +105,7 @@ namespace ThMEPEngineCore.Service
                 {
                     if (o is ThIfcLineBeam otherLineBeam)
                     {
-                        return TwoBeamIsParallel(currentLineBeam, otherLineBeam);
+                        return TwoBeamCenterLineIsClosed(currentLineBeam, otherLineBeam);
                     }
                     else if (o is ThIfcArcBeam otherArcBeam)
                     {
@@ -135,11 +136,12 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
-            List<ThIfcBeam> linkElements = QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[beamLink.Count - 1], portPt);
-            if (linkElements.Count > 0)
+            List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks,beamLink[beamLink.Count - 1], portPt);
+            if (linkPrimaryBeams.Count > 0)
             {
                 return portPt;
             }
+            var linkElements = QueryPortLinkBeams(beamLink[beamLink.Count - 1], portPt);
             //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
             linkElements = linkElements
                 .Where(m => IsUndefinedBeam(UnDefinedBeams, m))
@@ -154,7 +156,7 @@ namespace ThMEPEngineCore.Service
                 {
                     if (o is ThIfcLineBeam otherLineBeam)
                     {
-                        return TwoBeamIsParallel(currentLineBeam, otherLineBeam);
+                        return TwoBeamCenterLineIsClosed(currentLineBeam, otherLineBeam);
                     }
                     else if (o is ThIfcArcBeam otherArcBeam)
                     {

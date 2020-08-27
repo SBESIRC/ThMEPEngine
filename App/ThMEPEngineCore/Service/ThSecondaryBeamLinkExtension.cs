@@ -15,23 +15,23 @@ namespace ThMEPEngineCore.Service
         /// <summary>
         /// 未定义的梁 (外部传入)
         /// </summary>
-        private List<ThIfcBuildingElement> UnDefinedBeams { get; set; }
+        protected List<ThIfcBuildingElement> UnDefinedBeams { get; set; }
         /// <summary>
         /// 主梁段（外部传入）
         /// </summary>
-        private List<ThBeamLink> PrimaryBeamLinks { get; set; }
+        protected List<ThBeamLink> PrimaryBeamLinks { get; set; }
         /// <summary>
         /// 半主梁（外部传入）
         /// </summary>
-        private List<ThBeamLink> HalfPrimaryBeamLinks { get; set; }
+        protected List<ThBeamLink> HalfPrimaryBeamLinks { get; set; }
         /// <summary>
         /// 悬挑主梁（外部传入）
         /// </summary>
-        private List<ThBeamLink> OverhangingPrimaryBeamLinks { get; set; }
+        protected List<ThBeamLink> OverhangingPrimaryBeamLinks { get; set; }
         /// <summary>
         /// 次梁段 （返回）
         /// </summary>
-        public List<ThBeamLink> SecondaryBeamLinks { get; private set; }
+        public List<ThBeamLink> SecondaryBeamLinks { get; protected set; }
 
         public ThSecondaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, List<ThBeamLink> primaryBeamLinks,
             List<ThBeamLink> halfPrimaryBeamLinks, List<ThBeamLink> overhangingPrimaryBeamLinks)
@@ -79,7 +79,7 @@ namespace ThMEPEngineCore.Service
                 }
             }
         }
-        private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
+        protected Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
             if(QueryPortLinkElements(beamLink[0],portPt).Count>0)
@@ -116,7 +116,7 @@ namespace ThMEPEngineCore.Service
             }
             return portPt; 
         }
-        private Point3d BackFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
+        protected Point3d BackFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
             if (QueryPortLinkElements(beamLink[beamLink.Count - 1],portPt).Count > 0)

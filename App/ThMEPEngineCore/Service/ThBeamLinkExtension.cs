@@ -108,6 +108,27 @@ namespace ThMEPEngineCore.Service
             thIfcBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam));
             return startLinkBeam.Any() && endLinkBeam.Any();
         }
+        public bool JudgeSubSecondaryPrimaryBeam(ThBeamLink thBeamLink)
+        {
+            //后期根据规则调整
+            if (JudgePrimaryBeam(thBeamLink))
+            {
+                return false;
+            }
+            var startLinkComponent = thBeamLink.Start.Where(o => o is ThIfcColumn || o is ThIfcWall);
+            var endLinkComponent = thBeamLink.End.Where(o => o is ThIfcColumn || o is ThIfcWall);
+            if (startLinkComponent.Any() || endLinkComponent.Any())
+            {
+                return false;
+            }
+            var startLinkBeam = thBeamLink.Start.Where(o => o is ThIfcBeam thIfcBeam &&
+            (thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam || thIfcBeam.ComponentType == BeamComponentType.HalfPrimaryBeam ||
+            thIfcBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam || thIfcBeam.ComponentType == BeamComponentType.SecondaryBeam));
+            var endLinkBeam = thBeamLink.End.Where(o => o is ThIfcBeam thIfcBeam &&
+            (thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam || thIfcBeam.ComponentType == BeamComponentType.HalfPrimaryBeam ||
+            thIfcBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam || thIfcBeam.ComponentType == BeamComponentType.SecondaryBeam));
+            return startLinkBeam.Any() && endLinkBeam.Any();
+        }
 
         protected List<ThIfcBuildingElement> QueryPortLinkElements(ThIfcBeam thIfcBeam, Point3d portPt)
         {
@@ -201,6 +222,15 @@ namespace ThMEPEngineCore.Service
         {
             return firstBeam.Direction.IsParallelToEx(secondBeam.Direction);
         }
+        protected bool TwoBeamCenterLineIsClosed(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam, double tolerance = 10.0)
+        {
+            if (TwoBeamIsParallel(firstBeam, secondBeam))
+            {
+                var projectPt = secondBeam.StartPoint.GetProjectPtOnLine(firstBeam.StartPoint, firstBeam.EndPoint);
+                return secondBeam.StartPoint.DistanceTo(projectPt) <= tolerance;
+            }
+            return false;
+        }
         protected bool TwoBeamIsCollinear(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
         {
 
@@ -212,19 +242,22 @@ namespace ThMEPEngineCore.Service
             List<ThIfcBeam> links = new List<ThIfcBeam>();
             DBObjectCollection linkObjs = new DBObjectCollection();
             Polyline portEnvelop = null;
+            Polyline portMirrorEnvelop = null;
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {
                 portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
+                portMirrorEnvelop = GetLineBeamPortMirrorEnvelop(thIfcLineBeam, portPt);
             }
             else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
             {
                 portEnvelop = GetArcBeamPortEnvelop(thIfcArcBeam, portPt);
+                portMirrorEnvelop = GetArcBeamPortMirrorEnvelop(thIfcArcBeam, portPt);
             }
             linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(portEnvelop);
             if (linkObjs.Count > 0)
             {
-                //TODO 是否判断梁与周边的梁是否相交
-                foreach (DBObject dbObj in linkObjs)
+                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.Intersects(o) || portEnvelop.Intersects(o));
+                foreach (DBObject dbObj in overlapObjs)
                 {
                     links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
                 }
@@ -294,7 +327,7 @@ namespace ThMEPEngineCore.Service
             List<ThIfcBeam> linkElements = QueryPortLinkBeams(currentBeam, portPt);
             //端点处连接的梁中是否含有主梁
             List<ThIfcBeam> primaryBeams = linkElements.Where(m => PrimaryBeamLinks.Where(n => n.Beams.Where(k => k.Uuid == m.Uuid).Any()).Any()).ToList();
-            //TODO 后续根据需要是否要对主梁进行方向筛选
+            //后续根据需要是否要对主梁进行方向筛选
             if (currentBeam is ThIfcLineBeam thIfcLineBeam)
             {
                 primaryBeams = primaryBeams.Where(o =>
@@ -387,6 +420,38 @@ namespace ThMEPEngineCore.Service
             }
             return overhangingPrimaryBeams;
         }
+        protected List<ThIfcBeam> QueryPortLinkSecondaryBeams(List<ThBeamLink> SecondaryBeams, ThIfcBeam currentBeam, Point3d portPt, bool? isParallel = false)
+        {
+            //查找端点处连接的梁
+            List<ThIfcBeam> linkElements = QueryPortLinkBeams(currentBeam, portPt);
+            List<ThIfcBeam> secondaryBeams = linkElements.Where(m => SecondaryBeams.Where(n => n.Beams.Where(k => k.Uuid == m.Uuid).Any()).Any()).ToList();
+            if (currentBeam is ThIfcLineBeam thIfcLineBeam)
+            {
+                secondaryBeams = secondaryBeams.Where(o =>
+                {
+                    if (o is ThIfcLineBeam otherLineBeam)
+                    {
+                        if (isParallel == true)
+                        {
+                            return TwoBeamIsParallel(thIfcLineBeam, otherLineBeam);
+                        }
+                        else if (isParallel == false)
+                        {
+                            return !TwoBeamIsParallel(thIfcLineBeam, otherLineBeam);
+                        }
+                        else
+                        {
+                            return true;
+                        }
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }).ToList();
+            }
+            return secondaryBeams;
+        }
         protected List<ThIfcBeam> QueryPortLinkUndefinedBeams(List<ThIfcBuildingElement> UnDefinedBeams,ThIfcBeam currentBeam, Point3d portPt, bool? isParallel = true)
         {
             //查找端点处连接的梁
@@ -403,7 +468,7 @@ namespace ThMEPEngineCore.Service
                     {
                         if (isParallel==true)
                         {
-                            return TwoBeamIsParallel(lineBeam, otherLineBeam);
+                            return TwoBeamCenterLineIsClosed(lineBeam, otherLineBeam);
                         }
                         else if(isParallel == false)
                         {

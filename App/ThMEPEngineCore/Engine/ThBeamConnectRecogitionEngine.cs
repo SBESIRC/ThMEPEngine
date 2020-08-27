@@ -56,6 +56,12 @@ namespace ThMEPEngineCore.Engine
 
             // Pass Five 在剩余梁中找出两端搭在主梁、半主梁和悬挑柱梁上的次梁
             FindSecondaryBeamLink();
+
+            // Pass Six 在剩余梁中找出两端搭在主梁、半主梁、悬挑柱梁或次梁上的次次梁
+            FindSubSecondaryBeamLink();
+
+            // Pass Seven 对BeamLink中的Beams属性进行梁合并
+            MergeBeamLinks();
         }
         private void CreateSpatialIndex()
         {
@@ -90,14 +96,13 @@ namespace ThMEPEngineCore.Engine
         {
             //主梁：两端均为竖向构件
             List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
-            ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension(unPrimaryBeams)
+            ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
             {
                 ColumnEngine = thColumnRecognitionEngine,
                 BeamEngine = thBeamRecognitionEngine,
                 ShearWallEngine = thShearWallRecognitionEngine
             };
             multiBeamLink.CreatePrimaryBeamLink();
-            PrimaryBeamLinks.AddRange(multiBeamLink.BeamLinks);
         }
         private void FindHalfPrimaryBeamLink()
         {
@@ -128,10 +133,10 @@ namespace ThMEPEngineCore.Engine
         }
         private void FindSecondaryBeamLink()
         {
-            //次梁：两端搭在主梁、半主梁和悬挑柱梁上的梁
+            //次梁：两端搭在主梁、半主梁、悬挑柱梁上的梁
             List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(thBeamRecognitionEngine.ValidElements).ToList();
             ThSecondaryBeamLinkExtension thSecondaryBeamLinkExtension =
-                new ThSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks,OverhangingPrimaryBeamLinks)
+                new ThSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks, OverhangingPrimaryBeamLinks)
                 {
                     ColumnEngine = thColumnRecognitionEngine,
                     BeamEngine = thBeamRecognitionEngine,
@@ -139,6 +144,26 @@ namespace ThMEPEngineCore.Engine
                 };
             thSecondaryBeamLinkExtension.CreateSecondaryBeamLink();
             SecondaryBeamLinks.AddRange(thSecondaryBeamLinkExtension.SecondaryBeamLinks);
+        }
+        private void FindSubSecondaryBeamLink()
+        {
+            //次次梁：两端搭在主梁、半主梁、悬挑柱梁或次梁上的梁
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            ThSubSecondaryBeamLinkExtension thSubSecondaryBeamLinkExtension =
+                new ThSubSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks, OverhangingPrimaryBeamLinks, SecondaryBeamLinks)
+                {
+                    ColumnEngine = thColumnRecognitionEngine,
+                    BeamEngine = thBeamRecognitionEngine,
+                    ShearWallEngine = thShearWallRecognitionEngine
+                };
+            thSubSecondaryBeamLinkExtension.CreateSubSecondaryBeamLink();
+        }
+        private void MergeBeamLinks()
+        {
+            PrimaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
+            HalfPrimaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
+            OverhangingPrimaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
+            SecondaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
         }
         private IEnumerable<ThIfcBuildingElement> FilterNotPrimaryBeams(List<ThIfcBuildingElement> totalBeams)
         {

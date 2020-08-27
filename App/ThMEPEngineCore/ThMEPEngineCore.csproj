@@ -32,7 +32,6 @@
     <Compile Include="BeamInfo\Business\GetBeamMarkInfo.cs" />
     <Compile Include="BeamInfo\Business\MarkingService.cs" />
     <Compile Include="BeamInfo\Business\ThBeamCommon.cs" />
-    <Compile Include="BeamInfo\Business\ThBeamGeExtension.cs" />
     <Compile Include="BeamInfo\Business\ThBeamGeometryPreprocessor.cs" />
     <Compile Include="BeamInfo\Model\ArcBeam.cs" />
     <Compile Include="BeamInfo\Model\Beam.cs" />
@@ -104,6 +103,8 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
+    <Compile Include="Service\ThBeamLinkMerge.cs" />
+    <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThOverhangingPrimaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThShearWallLayerManager.cs" />
