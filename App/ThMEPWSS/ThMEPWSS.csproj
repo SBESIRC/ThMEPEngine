@@ -4,7 +4,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{23BDCB34-13A0-4435-AEC6-AD6F92CD312F}</ProjectGuid>
+    <ProjectGuid>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>ThMEPWSS</RootNamespace>
@@ -24,13 +24,27 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bussiness\LayoutBussiness\LayoutService.cs" />
+    <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
+    <Compile Include="Model\SprayDataService.cs" />
+    <Compile Include="Model\SprayLayoutData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Service\GridService.cs" />
+    <Compile Include="Service\InsertSprayService.cs" />
     <Compile Include="ThMEPWSSApp.cs" />
+    <Compile Include="ThWSSCommon.cs" />
+    <Compile Include="Uitl\GeoUtils.cs" />
+    <Compile Include="Uitl\OrientedBoundingBox.cs" />
   </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
       <Name>DotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADCore.Test\ThCADCore.Test.csproj">
+      <Project>{6076b322-959e-46b1-aa98-adb363b10438}</Project>
+      <Name>ThCADCore.Test</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
       <Project>{c6ac9e68-9059-4ddd-8fa7-58e2656d572e}</Project>

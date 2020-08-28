@@ -21,6 +21,10 @@ namespace ThCADCore.NTS
                     objs.Add(lineString.ToDbPolyline());
                 }
             }
+            else if (result is ILineString lineStr)
+            {
+                objs.Add(lineStr.ToDbPolyline());
+            }
             else
             {
                 throw new NotSupportedException();
