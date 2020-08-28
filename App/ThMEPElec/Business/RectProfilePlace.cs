@@ -89,11 +89,19 @@ namespace ThMEPElectrical.Business
             var verticalCount = Math.Ceiling(leftLine.Length / m_parameter.VerticalMaxGap);
             var verticalGap = leftLine.Length / verticalCount;
 
+            var horizontalCount = Math.Ceiling(bottomLine.Length / m_parameter.HorizontalMaxGap);
+
             // 布置一行的
             if (verticalCount == 1)
             {
-                var midLine = GeomUtils.MoveLine(bottomLine, Vector3d.YAxis, leftLine.Length * 0.5);
-                OneRowPlace(midLine, placeRectInfo, leftLine.Length * 0.5);
+                var horizontalMidLine = GeomUtils.MoveLine(bottomLine, Vector3d.YAxis, leftLine.Length * 0.5);
+                OneRowPlace(horizontalMidLine, placeRectInfo, leftLine.Length * 0.5);
+            }
+            else if (horizontalCount == 1)
+            {
+                var pts = OneColRectPlace.MakeOneColPlaceRect(m_parameter, placeRectInfo);
+                if (pts != null && pts.Count != 0)
+                    m_singlePlacePts.AddRange(pts);
             }
             else
             {
@@ -172,12 +180,21 @@ namespace ThMEPElectrical.Business
             var horizontalMaxGap = m_parameter.ProtectArea / 4.0 / verticalA * 2;
             // 左下顶点
             var leftBottomPtCircle = new Circle(leftBottomPt, Vector3d.ZAxis, vertexProtectRadius);
-            var leftFirstPt = CalculateIntersectPt(leftBottomPtCircle, line);
+            var tempLeftFirstPt = CalculateIntersectPt(leftBottomPtCircle, line);
+
+            if (!tempLeftFirstPt.HasValue)
+                return null;
+
+            var leftFirstPt = tempLeftFirstPt.Value;
 
             // 右下顶点
             var rightBottomCircle = new Circle(rightBottomPt, Vector3d.ZAxis, vertexProtectRadius);
-            var rightLastPt = CalculateIntersectPt(rightBottomCircle, line);
+            var tempRightLastPt = CalculateIntersectPt(rightBottomCircle, line);
 
+            if (!tempRightLastPt.HasValue)
+                return null;
+
+            var rightLastPt = tempRightLastPt.Value;
             // 计算水平间隔长度
             var horizontalLength = (rightLastPt - leftFirstPt).Length;
 
@@ -200,7 +217,7 @@ namespace ThMEPElectrical.Business
             return ptLst;
         }
 
-        private Point3d CalculateIntersectPt(Circle circle, Line line)
+        private Point3d? CalculateIntersectPt(Circle circle, Line line)
         {
             var ptLst = new Point3dCollection();
             circle.IntersectWith(line, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);
@@ -209,7 +226,7 @@ namespace ThMEPElectrical.Business
                 return ptLst[0];
             }
 
-            return ptLst[0];
+            return null;
         }
     }
 }

@@ -29,6 +29,9 @@
     <Compile Include="Business\CalculateDetection.cs" />
     <Compile Include="Business\CalculateLayout.cs" />
     <Compile Include="Business\CalculatePlacePoint.cs" />
+    <Compile Include="Business\MultiSegmentPlace.cs" />
+    <Compile Include="Business\OneColMultiSegmentsPlace.cs" />
+    <Compile Include="Business\OneColRectPlace.cs" />
     <Compile Include="Business\PolygonProfilePlace.cs" />
     <Compile Include="Business\RectProfilePlace.cs" />
     <Compile Include="CAD\DBExtract.cs" />
@@ -50,6 +53,7 @@
     <Compile Include="Model\PlaceInputProfileData.cs" />
     <Compile Include="Model\PlaceParameter.cs" />
     <Compile Include="Model\PlacePoint.cs" />
+    <Compile Include="Model\PlacePointProArea.cs" />
     <Compile Include="Model\PlaceRect.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

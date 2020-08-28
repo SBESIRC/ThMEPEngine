@@ -81,5 +81,32 @@ namespace ThCADCore.NTS
         {
             return thisPline.PointInPolygon(pt) == LocateStatus.Interior;
         }
+
+        public static Polyline Intersect(this Polyline thisPolyline, Polyline polySec)
+        {
+            var polygonFir = thisPolyline.ToNTSPolygon();
+
+            var polygonSec = polySec.ToNTSPolygon();
+
+            if (polygonFir == null || polygonSec == null)
+            {
+                return null;
+            }
+
+            // 检查是否相交
+            if (!polygonFir.Intersects(polygonSec))
+            {
+                return null;
+            }
+
+            // 若相交，则计算相交部分
+            var rGeometry = polygonFir.Intersection(polygonSec);
+            if (rGeometry is IPolygon polygon)
+            {
+                return polygon.Shell.ToDbPolyline();
+            }
+
+            return null;
+        }
     }
 }

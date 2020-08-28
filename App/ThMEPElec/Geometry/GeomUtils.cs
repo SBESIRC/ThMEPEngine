@@ -152,6 +152,9 @@ namespace ThMEPElectrical.Geometry
 
         public static Line MoveLine(Line srcLine, Vector3d moveDir, double moveDis)
         {
+            if (IsAlmostNearZero(moveDis))
+                return srcLine;
+
             var ptS = srcLine.StartPoint;
             var ptE = srcLine.EndPoint;
 
@@ -195,6 +198,28 @@ namespace ThMEPElectrical.Geometry
             var rightLine = new Line(rightBottomPt, rightTopPt);
             var placeRect = new PlaceRect(bottomLine, leftLine, topLine, rightLine);
             return placeRect;
+        }
+
+        /// <summary>
+        /// 计算多段线内一点
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <returns></returns>
+        public static Point3d? GetCenterPt(Polyline poly)
+        {
+            var ptLst = poly.Polyline2Point2d();
+            ptLst.Remove(ptLst.Last());
+
+            if (ptLst.Count < 3)
+                return null;
+
+            double xSum = 0.0;
+            double ySum = 0.0;
+
+            ptLst.ForEach(e => { xSum += e.X; });
+            ptLst.ForEach(e => { ySum += e.Y; });
+
+            return new Point3d(xSum / ptLst.Count, ySum / ptLst.Count, 0);
         }
     }
 }

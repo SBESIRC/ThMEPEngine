@@ -56,10 +56,11 @@ namespace ThMEPElectrical.Business
             coordinateTransform.DataTrans();
             var transPostPoly = coordinateTransform.TransPolyline;
             var matrixs = coordinateTransform.TransMatrixs;
+            DrawUtils.DrawProfile(new List<Curve>() { transPostPoly }, "transPostPoly");
 
             // 原始多段线进行矩阵转换后的数据
             var srcPoly = GeometryTrans.TransByMatrix(m_layoutProfileData.SrcPolyline, matrixs);
-
+            DrawUtils.DrawProfile(new List<Curve>() { srcPoly }, "srcPoly");
             // 布置矩形信息
             var placeRectInfo = GeomUtils.CalculateProfileRectInfo(transPostPoly);
 
@@ -119,7 +120,7 @@ namespace ThMEPElectrical.Business
         private List<Point3d> OneRowPlace(Line midLine, PlaceRect placeRectInfo, double verticalA)
         {
             var ptNodes = BottomRowPlacePts(midLine, placeRectInfo, verticalA);
-            
+
             if (ptNodes != null && ptNodes.Count != 0)
             {
                 var pts = ptNodes.Select(e => e.InsertPt).ToList();
@@ -246,6 +247,7 @@ namespace ThMEPElectrical.Business
         {
             var ptLst = new Point3dCollection();
             circle.IntersectWith(line, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);
+
             if (ptLst.Count == 1)
             {
                 return ptLst[0];
@@ -255,7 +257,7 @@ namespace ThMEPElectrical.Business
                 return (ptLst[0].X < ptLst[1].X) ? ptLst[1] : ptLst[0];
             }
 
-            throw new Exception(ptLst.Count.ToString());
+            return Point3d.Origin;
         }
 
         private Point3d CalculateRightIntersectPt(Circle circle, Line line)
@@ -270,7 +272,7 @@ namespace ThMEPElectrical.Business
             {
                 return (ptLst[0].X < ptLst[1].X) ? ptLst[0] : ptLst[1];
             }
-            
+
             throw new Exception(ptLst.Count.ToString());
         }
 
@@ -333,6 +335,8 @@ namespace ThMEPElectrical.Business
                 return placePoints.First();
 
             var leftPlacePoint = placePoints.First();
+            if (!leftPlacePoint.IsMoved)
+                return leftPlacePoint;
 
             for (int i = 1; i < placePoints.Count; i++)
             {
@@ -361,6 +365,8 @@ namespace ThMEPElectrical.Business
                 return placePoints.First();
 
             var rightPlacePoint = placePoints.Last();
+            if (!rightPlacePoint.IsMoved)
+                return rightPlacePoint;
 
             // 倒数第二个起
             for (int i = placePoints.Count - 2; i > 0; i--)
@@ -384,13 +390,142 @@ namespace ThMEPElectrical.Business
         /// <param name="placeRectInfo"></param>
         /// <param name="verticalA"></param>
         /// <returns></returns>
-        private List<PlacePoint> NextRowPlacePts(Line upLine, List<PlacePoint> placePts, PlaceRect placeRectInfo, double verticalA)
+        private List<PlacePoint> NextRowPlacePts(Line upLine, List<PlacePoint> placePts, PlaceRect placeRectInfo, double verticalGap)
+        {
+            var protectRadius = m_parameter.ProtectRadius;
+            var verticalA = verticalGap / 2;
+
+            // 计算最大水平间隔
+            var horizontalMaxGap = m_parameter.ProtectArea / 4.0 / verticalA * 2;
+
+            var leftPlaceNode = GetLeftPlacePoint(placePts); // 左边第一个插入点
+            var rightPlaceNode = GetRightPlacePoint(placePts); // 右边第一个插入点
+            if (GeomUtils.Point3dIsEqualPoint3d(leftPlaceNode.InsertPt, rightPlaceNode.InsertPt))
+                return null;
+
+            var leftBottomPt = leftPlaceNode.InsertPt;
+            var rightBottomPt = rightPlaceNode.InsertPt;
+
+            // upLine 是当前 placePts的所在行位置的上面一行
+            var upLineDown = GeomUtils.MoveLine(upLine, Vector3d.YAxis, -verticalGap);
+
+            // upLineDown 是 placePts 的所在行位置
+            // 左下顶点
+            var leftBottomPtCircle = new Circle(leftBottomPt, Vector3d.ZAxis, protectRadius);
+            var leftCircleEdgePt = LeftEdgeIntersect(leftBottomPtCircle, placeRectInfo.srcPolyline);
+
+            var leftEdgeCircle = new Circle(leftCircleEdgePt, Vector3d.ZAxis, protectRadius);
+            var tempLeftFirstPt = CalculateLeftIntersectPt(leftEdgeCircle, upLine);
+
+            if (tempLeftFirstPt.IsEqualTo(Point3d.Origin))
+            {
+                var midPt = IntersectMidPt(placeRectInfo.srcPolyline, upLine);
+                if (midPt.IsEqualTo(Point3d.Origin))
+                {
+                    midPt = GeomUtils.GetMidPoint(upLine.StartPoint, upLine.EndPoint);
+                }
+
+                return new List<PlacePoint>() { new PlacePoint(midPt, false) };
+            }
+            
+            // 左下顶点确定的上面第一个左边的顶点
+            var leftFirstPtNode = CalculateValidPoint(tempLeftFirstPt, upLineDown, placeRectInfo.srcPolyline);
+
+            // 右下顶点
+            var rightBottomCircle = new Circle(rightBottomPt, Vector3d.ZAxis, protectRadius);
+            var rightCircleEdgePt = RightEdgeIntersect(rightBottomCircle, placeRectInfo.srcPolyline);
+
+            var rightEdgeCircle = new Circle(rightCircleEdgePt, Vector3d.ZAxis, protectRadius);
+            var tempRightLastPt = CalculateRightIntersectPt(rightEdgeCircle, upLine);
+
+            // 右下顶点确定的上面第一个右边顶点
+            var rightLastPtNode = CalculateValidPoint(tempRightLastPt, upLineDown, placeRectInfo.srcPolyline);
+
+            // 计算水平间隔长度
+            var horizontalLength = (leftFirstPtNode.InsertPt - rightLastPtNode.InsertPt).Length;
+
+            var horizontalCount = Math.Ceiling(horizontalLength / horizontalMaxGap);
+
+            // 整数布置后的水平间隔距离
+            var horizontalPosGap = horizontalLength / horizontalCount;
+
+            var ptLst = new List<PlacePoint>();
+            ptLst.Add(leftFirstPtNode);
+
+            for (int i = 1; i < horizontalCount; i++)
+            {
+                var moveGap = i * horizontalPosGap;
+                var pt = tempLeftFirstPt + Vector3d.XAxis * moveGap;
+                var validPt = CalculateValidPoint(pt, upLineDown, placeRectInfo.srcPolyline);
+                ptLst.Add(validPt);
+            }
+
+            ptLst.Add(rightLastPtNode);
+            return ptLst;
+        }
+
+        private List<Point3d> CurveIntersectCurve(Curve curveFir, Curve curveSec)
+        {
+            var ptCol = new Point3dCollection();
+            curveFir.IntersectWith(curveSec, Intersect.OnBothOperands, ptCol, (IntPtr)0, (IntPtr)0);
+
+            return ptCol.toPointList();
+        }
+
+        private Point3d IntersectMidPt(Curve curveFir, Curve curveSec)
+        {
+            var ptLst = CurveIntersectCurve(curveFir, curveSec);
+
+            if (ptLst.Count != 0)
+            {
+                ptLst.Sort((p1, p2) => { return p1.Y.CompareTo(p2.Y); });
+                return GeomUtils.GetMidPoint(ptLst.First(), ptLst.Last());
+            }
+
+            return Point3d.Origin;
+        }
+
+        public Point3d LeftEdgeIntersect(Curve curveFir, Curve curveSec)
+        {
+            var ptLst = CurveIntersectCurve(curveFir, curveSec);
+
+            if (ptLst.Count != 0)
+            {
+                ptLst.Sort((p1, p2) => { return p1.Y.CompareTo(p2.Y); });
+                return ptLst.Last();
+            }
+
+            return Point3d.Origin;
+        }
+
+        public Point3d RightEdgeIntersect(Curve curveFir, Curve curveSec)
+        {
+            var ptLst = CurveIntersectCurve(curveFir, curveSec);
+
+            if (ptLst.Count != 0)
+            {
+                ptLst.Sort((p1, p2) => { return p1.Y.CompareTo(p2.Y); });
+                return ptLst.First();
+            }
+
+            return Point3d.Origin;
+        }
+
+        /// <summary>
+        /// 基于上一行的布置
+        /// </summary>
+        /// <param name="bottomLine"></param>
+        /// <param name="placePts"></param>
+        /// <param name="placeRectInfo"></param>
+        /// <param name="verticalA"></param>
+        /// <returns></returns>
+        private List<PlacePoint> NextRowPlacePts1(Line upLine, List<PlacePoint> placePts, PlaceRect placeRectInfo, double verticalA)
         {
             var protectRadius = m_parameter.ProtectRadius;
 
             // 计算最大水平间隔
             var horizontalMaxGap = m_parameter.ProtectArea / 4.0 / verticalA * 2;
-            
+
             var leftPlaceNode = GetLeftPlacePoint(placePts); // 左边第一个插入点
             var rightPlaceNode = GetRightPlacePoint(placePts); // 右边第一个插入点
             if (GeomUtils.Point3dIsEqualPoint3d(leftPlaceNode.InsertPt, rightPlaceNode.InsertPt))

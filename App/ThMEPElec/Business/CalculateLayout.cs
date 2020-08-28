@@ -51,7 +51,7 @@ namespace ThMEPElectrical.Business
 
                 var areaAddRatio = (Math.Abs(postMinRect.Area) - Math.Abs(mainBeamProfile.Area)) / Math.Abs(mainBeamProfile.Area);
 
-                if (areaAddRatio < 0.5)
+                if (areaAddRatio < 0.1)
                 {
                     // 矩形布置
                     LayoutSensor = new MainBeamRectangleLayout(m_placeInputProfileData, m_parameter, postMinRect);

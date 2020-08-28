@@ -26,7 +26,7 @@ namespace ThMEPElectrical.Layout
 
             var layoutData = new LayoutProfileData(m_inputProfileData.MainBeamOuterProfile, m_postMainBeamPoly);
             // 单个布置
-            m_placePoints = PolygonProfilePlace.MakePolygonProfilePoints(layoutData, m_parameter);
+            m_placePoints = MultiSegmentPlace.MakePolygonProfilePoints(layoutData, m_parameter);
 
             return PlacePoints;
         }

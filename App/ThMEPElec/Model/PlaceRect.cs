@@ -20,8 +20,10 @@ namespace ThMEPElectrical.Model
         public Line RightLine; // 右边
 
         public Point3d LeftBottomPt; // 左下点
+        public Point3d LeftTopPt; // 左上点
 
         public Point3d RightBottomPt; // 右下点
+        public Point3d RightTopPt; // 右上点
 
         public Polyline srcPolyline; // 原始的经过矩阵转换后的多段线
 
@@ -34,8 +36,10 @@ namespace ThMEPElectrical.Model
             RightLine = rightLine;
 
             LeftBottomPt = bottomLine.StartPoint;
+            LeftTopPt = leftLine.EndPoint;
 
             RightBottomPt = bottomLine.EndPoint;
+            RightTopPt = rightLine.EndPoint;
 
             srcPolyline = srcPoly;
         }
