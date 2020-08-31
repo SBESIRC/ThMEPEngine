@@ -64,6 +64,7 @@
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
     <Compile Include="Model\Electrical\ThIfcLamp.cs" />
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />
+    <Compile Include="Model\Relationship\ThIfcRelConnectsElements.cs" />
     <Compile Include="Model\ThBeamLink.cs" />
     <Compile Include="Model\ThIfcAlarm.cs" />
     <Compile Include="Model\Electrical\ThIfcAudioVisualAppliance.cs" />
