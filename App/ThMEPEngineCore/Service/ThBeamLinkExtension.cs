@@ -267,6 +267,9 @@ namespace ThMEPEngineCore.Service
         protected Polyline GetLineBeamPortEnvelop(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
         {
             double beamWidth = GetPolylineWidth(thIfcLineBeam.Outline as Polyline, portPt);
+            //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
+            //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
+            beamWidth *= 1.05;
             double distance = GenerateExpandDistance(thIfcLineBeam);
             if (portPt.DistanceTo(thIfcLineBeam.StartPoint) < portPt.DistanceTo(thIfcLineBeam.EndPoint))
             {
@@ -280,6 +283,9 @@ namespace ThMEPEngineCore.Service
         protected Polyline GetLineBeamPortMirrorEnvelop(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
         {
             double beamWidth = GetPolylineWidth(thIfcLineBeam.Outline as Polyline, portPt);
+            //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
+            //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
+            beamWidth *= 1.05;
             double distance = GenerateExpandDistance(thIfcLineBeam);
             double beamLength = thIfcLineBeam.StartPoint.DistanceTo(thIfcLineBeam.EndPoint);
             if (distance > beamLength / 2.0)
@@ -298,6 +304,9 @@ namespace ThMEPEngineCore.Service
         protected Polyline GetArcBeamPortEnvelop(ThIfcArcBeam thIfcArcBeam, Point3d portPt)
         {
             double beamWidth = GetPolylineWidth(thIfcArcBeam.Outline as Polyline, portPt);
+            //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
+            //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
+            beamWidth *= 1.05;
             double distance = GenerateExpandDistance(thIfcArcBeam);
             if (portPt.DistanceTo(thIfcArcBeam.StartPoint) < portPt.DistanceTo(thIfcArcBeam.EndPoint))
             {
@@ -311,6 +320,9 @@ namespace ThMEPEngineCore.Service
         protected Polyline GetArcBeamPortMirrorEnvelop(ThIfcArcBeam thIfcArcBeam, Point3d portPt)
         {
             double beamWidth = GetPolylineWidth(thIfcArcBeam.Outline as Polyline, portPt);
+            //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
+            //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
+            beamWidth *= 1.05;
             double distance = GenerateExpandDistance(thIfcArcBeam);
             if (portPt.DistanceTo(thIfcArcBeam.StartPoint) < portPt.DistanceTo(thIfcArcBeam.EndPoint))
             {

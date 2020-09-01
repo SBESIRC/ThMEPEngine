@@ -106,6 +106,9 @@
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
     <Compile Include="Service\ThBeamLinkMerge.cs" />
+    <Compile Include="Engine\ThSplitBeamEngine.cs" />
+    <Compile Include="Service\ThSplitBeamSevice.cs" />
+    <Compile Include="Service\ThSplitLinearBeamSevice.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThOverhangingPrimaryBeamLinkExtension.cs" />

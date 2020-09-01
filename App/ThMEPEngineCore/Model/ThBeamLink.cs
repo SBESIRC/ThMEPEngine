@@ -35,9 +35,10 @@ namespace ThMEPEngineCore.Model
             Point3d newSpt = ptList[0] - vec.GetNormal().MultiplyBy(extendDis);
             Point3d newEpt = ptList[ptList.Count - 1] + vec.GetNormal().MultiplyBy(extendDis);
             Point3d pt1 = newSpt - perpendVec.GetNormal().MultiplyBy(maxWidth/2.0);
-            Point3d pt2 = newEpt - perpendVec.GetNormal().MultiplyBy(maxWidth / 2.0);
-            Point3d pt4 = newSpt + perpendVec.GetNormal().MultiplyBy(maxWidth / 2.0);
+            Point3d pt2 = newSpt + perpendVec.GetNormal().MultiplyBy(maxWidth / 2.0);
             Point3d pt3 = newEpt + perpendVec.GetNormal().MultiplyBy(maxWidth / 2.0);
+            Point3d pt4 = newEpt - perpendVec.GetNormal().MultiplyBy(maxWidth / 2.0);
+            
             Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
             return Tuple.Create(pts.CreatePolyline(), newSpt, newEpt);
         }

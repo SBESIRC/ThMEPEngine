@@ -63,6 +63,17 @@ namespace ThMEPEngineCore.Engine
                 }
             }
         }
+        public void Split(ThColumnRecognitionEngine thColumnRecognitionEngine,
+            ThShearWallRecognitionEngine thShearWallRecognitionEngine)
+        {
+            //后处理1：分割梁段
+            ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(
+                thColumnRecognitionEngine.ValidElements,
+                thShearWallRecognitionEngine.ValidElements,
+                Elements);
+            thSplitBeams.Split();
+            Elements = thSplitBeams.BeamElements;
+        }
 
         private ThIfcBeam CreateIfcBeam(Beam beam, string spec = "")
         {

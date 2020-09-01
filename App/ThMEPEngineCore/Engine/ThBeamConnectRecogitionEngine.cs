@@ -26,25 +26,32 @@ namespace ThMEPEngineCore.Engine
             //TODO
         }
         public void Recognize(Database database)
-        {
+        {         
             // 启动柱识别引擎
             thColumnRecognitionEngine = new ThColumnRecognitionEngine();
             thColumnRecognitionEngine.Recognize(database);
-
-            // 启动梁识别引擎
-            thBeamRecognitionEngine = new ThBeamRecognitionEngine();
-            thBeamRecognitionEngine.Recognize(database);
 
             // 启动墙识别引擎
             thShearWallRecognitionEngine = new ThShearWallRecognitionEngine();
             thShearWallRecognitionEngine.Recognize(database);
 
             // 创建空间索引
-            CreateSpatialIndex();
+            CreateColumnSpatialIndex();
+            CreateWallSpatialIndex();
+            
+            // 启动梁识别引擎
+            thBeamRecognitionEngine = new ThBeamRecognitionEngine();
+            thBeamRecognitionEngine.Recognize(database); 
+            
+            //梁分割
+            thBeamRecognitionEngine.Split(thColumnRecognitionEngine, thShearWallRecognitionEngine); 
+
+            //创建梁空间索引
+            CreateBeamSpatialIndex();
 
             // Pass One 通过单根梁过滤
             FindSingleBeamLinkTwoVerComponent();
-
+           
             // Pass Two 在剩余梁中找出两个柱子或墙之间有多根梁的梁段
             FindMultiBeamLinkInTwoVerComponent();
 
@@ -53,28 +60,34 @@ namespace ThMEPEngineCore.Engine
 
             // Pass Four 在剩余梁中找出单端连接竖向构件的悬梁
             FindOverhangingPrimaryBeamLink();
-
+            
             // Pass Five 在剩余梁中找出两端搭在主梁、半主梁和悬挑柱梁上的次梁
             FindSecondaryBeamLink();
 
             // Pass Six 在剩余梁中找出两端搭在主梁、半主梁、悬挑柱梁或次梁上的次次梁
             FindSubSecondaryBeamLink();
-
+            
             // Pass Seven 对BeamLink中的Beams属性进行梁合并
             MergeBeamLinks();
         }
-        private void CreateSpatialIndex()
+        private void CreateColumnSpatialIndex()
         {
             ThSpatialIndexManager.Instance.CreateColumnSpaticalIndex(thColumnRecognitionEngine.Collect());
             var columnGeometries = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectAll();
             thColumnRecognitionEngine.UpdateValidElements(columnGeometries);
+        }
+        private void CreateWallSpatialIndex()
+        {
+            ThSpatialIndexManager.Instance.CreateWallSpaticalIndex(thShearWallRecognitionEngine.Collect());
+            var wallGeometries = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectAll();
+            thShearWallRecognitionEngine.UpdateValidElements(wallGeometries);
+        }
+        private void CreateBeamSpatialIndex()
+        {
             ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(thBeamRecognitionEngine.Collect());
             var beamGeometries = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectAll();
             thBeamRecognitionEngine.UpdateValidElements(beamGeometries);
             thBeamRecognitionEngine.SimilarityBeamRemove();
-            ThSpatialIndexManager.Instance.CreateWallSpaticalIndex(thShearWallRecognitionEngine.Collect());
-            var wallGeometries = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectAll();
-            thShearWallRecognitionEngine.UpdateValidElements(wallGeometries);
         }
         private void FindSingleBeamLinkTwoVerComponent()
         {

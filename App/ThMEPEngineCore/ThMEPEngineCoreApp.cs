@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 using System.Web.Script.Serialization;
 using Linq2Acad;
 using AcHelper;
@@ -8,9 +9,12 @@ using Xbim.IO;
 using Xbim.Ifc4.ProductExtension;
 using Xbim.Ifc4.SharedBldgElements;
 using Autodesk.AutoCAD.Runtime;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.xBIM;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore
 {
@@ -138,10 +142,16 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
         public void ThExtractBeamConnect()
         {
+            List<ThBeamLink> totalBeamLinks = new List<ThBeamLink>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
             {
+                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
                 thBeamTypeRecogitionEngine.Recognize(Active.Database);
+                stopwatch.Stop();
+                TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
+                Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds+"秒");
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex=1));
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 2));
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 3));
@@ -151,7 +161,85 @@ namespace ThMEPEngineCore
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(n.Outline)));
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(n.Outline)));
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(n.Outline)));
+
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
+                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
+                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
+                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
             }
         }
+        private DBText CreateBeamMarkText(ThIfcBeam thIfcBeam)
+        {
+            string message = "";
+            message += "Type：" + thIfcBeam.ComponentType + "，";
+            message += "W：" + thIfcBeam.Width + "，";
+            message += "H：" + thIfcBeam.Height;
+            DBText dbText = new DBText();
+            dbText.TextString = message;
+            dbText.Position = ThGeometryTool.GetMidPt(thIfcBeam.StartPoint, thIfcBeam.EndPoint);
+            dbText.HorizontalMode = TextHorizontalMode.TextCenter;
+            dbText.Layer = "0";
+            return dbText;
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractBeamConnectEx", CommandFlags.Modal)]
+        public void ThExtractBeamConnectEx()
+        {
+            List<ThBeamLink> totalBeamLinks = new List<ThBeamLink>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
+            {
+                thBeamTypeRecogitionEngine.Recognize(Active.Database);
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m =>
+                {
+                   var outline = m.CreateExtendBeamOutline(50.0);
+                    outline.Item1.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(outline.Item1);
+                });
+                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m =>
+                {
+                    var outline = m.CreateExtendBeamOutline(50.0);
+                    outline.Item1.ColorIndex = 2;
+                    acadDatabase.ModelSpace.Add(outline.Item1);
+                });
+                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m =>
+                {
+                    var outline = m.CreateExtendBeamOutline(50.0);
+                    outline.Item1.ColorIndex = 3;
+                    acadDatabase.ModelSpace.Add(outline.Item1);
+                });
+                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m =>
+                {
+                    var outline = m.CreateExtendBeamOutline(50.0);
+                    outline.Item1.ColorIndex = 4;
+                    acadDatabase.ModelSpace.Add(outline.Item1);
+                });
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractDivideBeam", CommandFlags.Modal)]
+        public void ThExtractDivdeBeam()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                ThIfcLineBeam thIfcLineBeam = new ThIfcLineBeam();
+                thIfcLineBeam.StartPoint = Active.Editor.GetPoint("\n Select beam start point：").Value;
+                thIfcLineBeam.EndPoint = Active.Editor.GetPoint("\n Select beam end point：").Value;
+                thIfcLineBeam.Direction = thIfcLineBeam.StartPoint.GetVectorTo(thIfcLineBeam.EndPoint);
+                thIfcLineBeam.Outline = acadDatabase.Element<Polyline>(Active.Editor.GetEntity("\n Select beam outline：").ObjectId);                
+                thIfcLineBeam.ComponentType = BeamComponentType.PrimaryBeam;
+                thIfcLineBeam.Width = 300;
+                thIfcLineBeam.Height = 400;
+                thIfcLineBeam.Uuid = Guid.NewGuid().ToString();
+                var components = Active.Editor.GetSelection();
+                DBObjectCollection dbObjs = new DBObjectCollection();
+                foreach(ObjectId objId in components.Value.GetObjectIds())
+                {
+                    dbObjs.Add(acadDatabase.Element<Polyline>(objId));
+                }
+                ThSplitLinearBeamSevice thSplitLineBeam = new ThSplitLinearBeamSevice(thIfcLineBeam, dbObjs);
+                thSplitLineBeam.Split();
+                thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex=1);
+                thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+            }
+        } 
     }
 }

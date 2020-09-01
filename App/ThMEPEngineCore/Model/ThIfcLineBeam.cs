@@ -10,5 +10,12 @@ namespace ThMEPEngineCore.Model
     public class ThIfcLineBeam :ThIfcBeam
     {
         public Vector3d Direction { get; set; }
+        public double Length
+        {
+            get
+            {
+                return StartPoint.DistanceTo(EndPoint);
+            }
+        }
     }
 }
