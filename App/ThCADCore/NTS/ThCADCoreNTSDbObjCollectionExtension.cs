@@ -51,27 +51,27 @@ namespace ThCADCore.NTS
 
         public static IGeometry ToNTSNodedLineStrings(this DBObjectCollection curves, double chord = 5.0)
         {
-            IGeometry nodedLineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
+            var geometries = new List<IGeometry>();
             foreach (DBObject curve in curves)
             {
                 if (curve is Line line)
                 {
-                    nodedLineString = nodedLineString.Union(line.ToNTSLineString());
+                    geometries.Add(line.ToNTSLineString());
                 }
                 else if (curve is Polyline polyline)
                 {
-                    nodedLineString = nodedLineString.Union(polyline.ToNTSLineString());
+                    geometries.Add(polyline.ToNTSLineString());
                 }
                 else if (curve is Arc arc)
                 {
-                    nodedLineString = nodedLineString.Union(arc.TessellateWithChord(chord));
+                    geometries.Add(arc.TessellateWithChord(chord));
                 }
                 else
                 {
                     throw new NotSupportedException();
                 }
             }
-            return nodedLineString;
+            return UnaryUnionOp.Union(geometries);
         }
 
         public static List<IGeometry> ToNTSLineStrings(this DBObjectCollection curves, double chord = 5.0)

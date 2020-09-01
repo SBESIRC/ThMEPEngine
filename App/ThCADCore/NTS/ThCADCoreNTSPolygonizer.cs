@@ -19,9 +19,11 @@ namespace ThCADCore.NTS
 
         public static ICollection<IGeometry> Polygonize(this Polyline polyline)
         {
-            var polygonizer = new Polygonizer();
-            polygonizer.Add(polyline.ToNTSNodedLineString());
-            return polygonizer.GetPolygons();
+            var lines = new DBObjectCollection()
+            {
+                polyline,
+            };
+            return lines.Polygonize();
         }
 
         public static ICollection<IGeometry> Polygonize(this IGeometry geometry)
@@ -34,9 +36,7 @@ namespace ThCADCore.NTS
         public static DBObjectCollection Polygons(this DBObjectCollection lines)
         {
             var objs = new DBObjectCollection();
-            var polygonizer = new Polygonizer();
-            polygonizer.Add(lines.ToNTSNodedLineStrings());
-            foreach (IPolygon polygon in polygonizer.GetPolygons())
+            foreach (IPolygon polygon in lines.Polygonize())
             {
                 objs.Add(polygon.Shell.ToDbPolyline());
             }
@@ -48,10 +48,8 @@ namespace ThCADCore.NTS
             using (var ov = new ThCADCoreNTSPrecisionReducer())
             {
                 var polygons = new List<IPolygon>();
-                var polygonizer = new Polygonizer();
                 var boundaries = new DBObjectCollection();
-                polygonizer.Add(lines.ToNTSNodedLineStrings());
-                var geometry = CascadedPolygonUnion.Union(polygonizer.GetPolygons());
+                var geometry = CascadedPolygonUnion.Union(lines.Polygonize());
                 if (geometry == null)
                 {
                     return boundaries;
@@ -88,10 +86,8 @@ namespace ThCADCore.NTS
 
         public static List<IPolygon> OutlineGeometries(this DBObjectCollection lines)
         {
-            var polygonizer = new Polygonizer();
             var geometries = new List<IPolygon>();
-            polygonizer.Add(lines.ToNTSNodedLineStrings());
-            var geometry = CascadedPolygonUnion.Union(polygonizer.GetPolygons());
+            var geometry = CascadedPolygonUnion.Union(lines.Polygonize());
             if (geometry == null)
             {
                 return geometries;
