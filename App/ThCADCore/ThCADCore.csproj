@@ -26,6 +26,7 @@
   <ItemGroup>
     <Compile Include="NTS\ThCADCoreNTSCenterlineBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSEntityExtension.cs" />
+    <Compile Include="NTS\ThCADCoreNTSExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSDbExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSDbObjCollectionExtension.cs" />
