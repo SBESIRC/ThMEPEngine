@@ -44,9 +44,25 @@ namespace ThMEPElectrical.Assistant
             return ptLst;
         }
 
+        public static List<Point3d> Pt2stoPt3ds(this List<Point2d> pt2dS)
+        {
+            if (pt2dS == null || pt2dS.Count == 0)
+                return null;
+
+            var ptS = new List<Point3d>();
+            pt2dS.ForEach(pt => ptS.Add(pt.point3D()));
+
+            return ptS;
+        }
+
         public static Point2d Point2D(this Point3d pt)
         {
             return new Point2d(pt.X, pt.Y);
+        }
+
+        public static Point3d point3D(this Point2d pt)
+        {
+            return new Point3d(pt.X, pt.Y, 0);
         }
 
         public static Line Line3dLine(this LineSegment3d line3d)
@@ -156,5 +172,29 @@ namespace ThMEPElectrical.Assistant
 
             return curves;
         }
+
+        public static Polyline Points2Poly(List<Point3d> pts)
+        {
+            if (pts == null || pts.Count < 3)
+                return null;
+
+            var ptFirst = pts.First();
+            var ptLast = pts.Last();
+
+            if (GeomUtils.Point3dIsEqualPoint3d(ptFirst, ptLast))
+                pts.Remove(ptLast);
+
+            var poly = new Polyline()
+            {
+                Closed = true
+            };
+
+            for (int i = 0; i < pts.Count; i++)
+            {
+                poly.AddVertexAt(i, pts[i].ToPoint2D(), 0, 0, 0);
+            }
+            return poly;
+        }
+
     }
 }

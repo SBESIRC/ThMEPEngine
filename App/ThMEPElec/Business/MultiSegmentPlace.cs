@@ -34,7 +34,7 @@ namespace ThMEPElectrical.Business
         }
 
         /// <summary>
-        /// 异形布置
+        /// 带有坐标系的异形布置
         /// </summary>
         /// <param name="layoutProfileData"></param>
         /// <param name="parameter"></param>
@@ -48,6 +48,37 @@ namespace ThMEPElectrical.Business
             return polygonPlace.PlacePts;
         }
 
+        /// <summary>
+        /// ABB异形布置
+        /// </summary>
+        /// <param name="layoutProfileData"></param>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public static List<Point3d> MakeABBPolygonProfilePoints(LayoutProfileData layoutProfileData, PlaceParameter parameter)
+        {
+            var polygonPlace = new MultiSegmentPlace(layoutProfileData, parameter);
+
+            polygonPlace.DoABBPlace();
+
+            return polygonPlace.PlacePts;
+        }
+        
+
+        private void DoABBPlace()
+        {
+            // 坐标转换
+            var postPoly = m_layoutProfileData.PostPolyline;
+
+            //DrawUtils.DrawProfile(new List<Curve>() { transPostPoly }, "transPostPoly");
+            //DrawUtils.DrawProfile(new List<Curve>() { srcTransPoly }, "srcTransPoly");
+            // 布置矩形信息
+            var placeRectInfo = GeomUtils.CalculateProfileRectInfo(postPoly);
+
+            placeRectInfo.srcPolyline = m_layoutProfileData.SrcPolyline;
+
+            // 计算布置点
+            m_singlePlacePts = CalculatePts(placeRectInfo);
+        }
 
         private void DoPlace()
         {

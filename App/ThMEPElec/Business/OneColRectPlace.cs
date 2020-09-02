@@ -19,6 +19,12 @@ namespace ThMEPElectrical.Business
 
         private PlaceRect m_placeRectInfo;
 
+        /// <summary>
+        /// ABB坐标系一列计算
+        /// </summary>
+        /// <param name="parameter"></param>
+        /// <param name="placeRectInfo"></param>
+        /// <returns></returns>
         public static List<Point3d> MakeOneColPlaceRect(PlaceParameter parameter, PlaceRect placeRectInfo)
         {
             var oneColPlace = new OneColRectPlace(parameter, placeRectInfo);

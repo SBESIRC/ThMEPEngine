@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Layout;
 using ThMEPElectrical.Geometry;
+using ThMEPElectrical.Assistant;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Business
 {
@@ -47,8 +49,11 @@ namespace ThMEPElectrical.Business
             {
                 var mainBeamProfile = m_placeInputProfileData.MainBeamOuterProfile;
 
-                var postMinRect = MinRectangle.Calculate(mainBeamProfile);
+                DrawUtils.DrawProfile(new List<Curve>() { mainBeamProfile }, "mainBeamProfile");
+                // 生成ABB多段线
+                var postMinRect = ABBRectangle.MakeABBPolyline(mainBeamProfile);
 
+                DrawUtils.DrawProfile(new List<Curve>() { postMinRect }, "postMinRect");
                 var areaAddRatio = (Math.Abs(postMinRect.Area) - Math.Abs(mainBeamProfile.Area)) / Math.Abs(mainBeamProfile.Area);
 
                 if (areaAddRatio < 0.1)

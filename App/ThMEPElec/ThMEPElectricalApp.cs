@@ -30,7 +30,7 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THMainBeamPlace", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THABBPlace", CommandFlags.Modal)]
         public void ThProfilesPlace()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -40,13 +40,23 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THMainBeamRect", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THOBBRect", CommandFlags.Modal)]
         public void ThProfilesRect()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var packageManager = new PackageManager();
                 packageManager.DoMainBeamRect();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THABBRect", CommandFlags.Modal)]
+        public void ThABBRect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoMainBeamABBRect();
             }
         }
     }

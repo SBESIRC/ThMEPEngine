@@ -16,7 +16,7 @@ namespace ThMEPElectrical.Business
     /// <summary>
     /// 根据输入参数主次梁的信息和界面输入约束参数进行布置
     /// </summary>
-    public class CalculatePlacePoint
+    public class PlacePointCalculator
     {
         private List<PlaceInputProfileData> m_placeInputDatas = null;
         private PlaceParameter m_placeParameter = null;
@@ -31,12 +31,12 @@ namespace ThMEPElectrical.Business
 
         public static List<Point3d> MakeCalculatePlacePoints(List<PlaceInputProfileData> inputDatas, PlaceParameter parameter)
         {
-            var calculatePlacePoint = new CalculatePlacePoint(inputDatas, parameter);
+            var calculatePlacePoint = new PlacePointCalculator(inputDatas, parameter);
             calculatePlacePoint.DoPlace();
             return calculatePlacePoint.PlacePoints;
         }
 
-        private CalculatePlacePoint(List<PlaceInputProfileData> inputDatas, PlaceParameter parameter)
+        private PlacePointCalculator(List<PlaceInputProfileData> inputDatas, PlaceParameter parameter)
         {
             m_placeInputDatas = inputDatas;
             m_placeParameter = parameter;

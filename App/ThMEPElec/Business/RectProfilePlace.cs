@@ -32,13 +32,47 @@ namespace ThMEPElectrical.Business
             m_parameter = placeParameter;
         }
 
-
+        /// <summary>
+        /// 带有坐标系的布置
+        /// </summary>
+        /// <param name="layoutData"></param>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
         public static List<Point3d> MakeRectProfilePlacePoints(LayoutProfileData layoutData, PlaceParameter parameter)
         {
             var singleProfilePlace = new RectProfilePlace(layoutData, parameter);
             singleProfilePlace.Do();
 
             return singleProfilePlace.SinglePlacePts;
+        }
+
+        /// <summary>
+        /// ABB矩形布置
+        /// </summary>
+        /// <param name="layoutData"></param>
+        /// <param name="parameter"></param>
+        /// <returns></returns>
+        public static List<Point3d> MakeABBRectProfilePlacePoints(LayoutProfileData layoutData, PlaceParameter parameter)
+        {
+            var singleProfilePlace = new RectProfilePlace(layoutData, parameter);
+            singleProfilePlace.DoABB();
+
+            return singleProfilePlace.SinglePlacePts;
+        }
+
+        /// <summary>
+        /// ABB计算
+        /// </summary>
+        private void DoABB()
+        {
+            // 坐标转化
+            var postPoly = m_layoutProfile.PostPolyline;
+
+            // 布置矩形信息
+            var placeRectInfo = GeomUtils.CalculateProfileRectInfo(postPoly);
+
+            // 计算布置点
+            CalculatePts(placeRectInfo);
         }
 
         private void Do()
