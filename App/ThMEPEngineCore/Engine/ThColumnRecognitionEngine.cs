@@ -47,7 +47,7 @@ namespace ThMEPEngineCore.Engine
             // 对于矩形柱，直接保留
             // 对于内部有图案的矩形柱，获取其外轮廓矩形
             var arcs = new DBObjectCollection();
-            var lines = new DBObjectCollection();
+            var lines = new DBObjectCollection();            
             var circles = new DBObjectCollection();
             foreach (Curve curve in curves)
             {
@@ -57,7 +57,14 @@ namespace ThMEPEngineCore.Engine
                 }
                 else if (curve is Polyline polyline)
                 {
-                    lines.Add(polyline);
+                    if(JudgePolylineIsClosed(polyline))
+                    {
+                        columnOutlines.Add(polyline.Clone() as Curve);
+                    }
+                    else
+                    {
+                        lines.Add(polyline);
+                    }
                 }
                 else if(curve is Circle)
                 {
@@ -74,7 +81,6 @@ namespace ThMEPEngineCore.Engine
             {
                 columnOutlines.Add(pline);
             }
-
             // 对于圆，获取其外接矩形，转化成矩形柱
             foreach (Circle circle in circles)
             {
@@ -89,6 +95,20 @@ namespace ThMEPEngineCore.Engine
                 columnOutlines.Add(ThDrawTool.CreatePolyline(pts));
             }
             return columnOutlines;
+        }
+        private bool JudgePolylineIsClosed(Polyline polyline, double tolerance = 1.0)
+        {
+           if(polyline.Closed)
+            {
+                return true;
+            }
+            Point3d firstPt = polyline.GetPoint3dAt(0);
+            Point3d lastPt = polyline.GetPoint3dAt(polyline.NumberOfVertices-1);
+            if(firstPt.DistanceTo(lastPt)<= tolerance)
+            {
+                return true;
+            }
+            return false;
         }
     }
 }
