@@ -77,6 +77,12 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static bool IsClosed(this Polyline polyline)
+        {
+            var geometry = polyline.ToNTSLineString() as ILineString;
+            return geometry.IsClosed;
+        }
+
         public static bool Contains(this Polyline thisPline, Point3d pt)
         {
             return thisPline.PointInPolygon(pt) == LocateStatus.Interior;

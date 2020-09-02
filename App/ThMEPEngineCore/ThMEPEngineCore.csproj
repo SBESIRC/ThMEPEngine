@@ -25,6 +25,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithm\ThMEPFrameService.cs" />
+    <Compile Include="Algorithm\ThMEPModelManager.cs" />
     <Compile Include="BeamInfo\Business\CalBeamIntersectService.cs" />
     <Compile Include="BeamInfo\Business\CalBeamStruService.cs" />
     <Compile Include="BeamInfo\Business\CalSpanBeamInfo.cs" />
