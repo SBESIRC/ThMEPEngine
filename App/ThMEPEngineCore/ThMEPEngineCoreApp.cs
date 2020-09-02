@@ -246,26 +246,15 @@ namespace ThMEPEngineCore
                 thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
         }
-        [CommandMethod("TIANHUACAD", "TestSpatialIndex", CommandFlags.Modal)]
-        public void TestSpatialIndex()
+
+        [CommandMethod("TIANHUACAD", "ThExtractLaneLine", CommandFlags.Modal)]
+        public void ThExtractLaneLine()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
-                var selRes = Active.Editor.GetSelection();
-                DBObjectCollection dbObjs = new DBObjectCollection();
-                foreach(var item in selRes.Value.GetObjectIds())
-                {
-                    dbObjs.Add(acadDatabase.Element<Polyline>(item));
-                }
-                var ntsSpatialindex = ThSpatialIndexService.CreateBeamSpatialIndex(dbObjs);
-                var entityRes = Active.Editor.GetEntity("\n select a port");
-                Polyline port = acadDatabase.Element<Polyline>(entityRes.ObjectId);
-
-                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                stopwatch.Start();
-                DBObjectCollection linkObjs = ntsSpatialindex.SelectFence(port);
-                stopwatch.Stop();
-                Active.Editor.WriteMessage("Find " + linkObjs.Count + "个"  + "Query used " + stopwatch.Elapsed.TotalSeconds+" seconds!");
+                laneLineEngine.Recognize(Active.Database);
+                laneLineEngine.LaneCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
 #if DEBUG

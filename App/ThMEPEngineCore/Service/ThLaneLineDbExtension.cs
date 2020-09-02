@@ -8,21 +8,21 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThStructureColumnDbExtension : ThStructureDbExtension,IDisposable
+    public class ThLaneLineDbExtension : ThOtherDbExtension,IDisposable
     {
-        public List<Curve> ColumnCurves { get; set; }
-        public ThStructureColumnDbExtension(Database db):base(db)
+        public List<Curve> LaneCurves { get; set; }
+        public ThLaneLineDbExtension(Database db):base(db)
         {
-            LayerFilter = ThColumnLayerManager.GeometryXrefLayers(db);
-            ColumnCurves = new List<Curve>();
+            LayerFilter = ThLaneLineLayerManager.GeometryXrefLayers(db);
+            LaneCurves = new List<Curve>();
         }
         public void Dispose()
         {
-            foreach (var curve in ColumnCurves)
+            foreach (var curve in LaneCurves)
             {
                 curve.Dispose();
             }
-            ColumnCurves.Clear();
+            LaneCurves.Clear();
         }
         public override void BuildElementCurves()
         {
@@ -35,11 +35,8 @@ namespace ThMEPEngineCore.Service
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
                         if (btr.IsFromExternalReference || btr.IsFromOverlayReference)
                         {
-                            //if (ThStructureUtils.IsColumnXref(btr.PathName))
-                            //{                                
-                            //}
                             var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                            ColumnCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
+                            LaneCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
                         }
                     }
                 }
