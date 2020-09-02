@@ -15,6 +15,11 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using NFox.Cad.Collections;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.BeamInfo;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore
 {
@@ -240,6 +245,110 @@ namespace ThMEPEngineCore
                 thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex=1);
                 thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
-        } 
+        }
+        [CommandMethod("TIANHUACAD", "TestSpatialIndex", CommandFlags.Modal)]
+        public void TestSpatialIndex()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var selRes = Active.Editor.GetSelection();
+                DBObjectCollection dbObjs = new DBObjectCollection();
+                foreach(var item in selRes.Value.GetObjectIds())
+                {
+                    dbObjs.Add(acadDatabase.Element<Polyline>(item));
+                }
+                var ntsSpatialindex = ThSpatialIndexService.CreateBeamSpatialIndex(dbObjs);
+                var entityRes = Active.Editor.GetEntity("\n select a port");
+                Polyline port = acadDatabase.Element<Polyline>(entityRes.ObjectId);
+
+                System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
+                stopwatch.Start();
+                DBObjectCollection linkObjs = ntsSpatialindex.SelectFence(port);
+                stopwatch.Stop();
+                Active.Editor.WriteMessage("Find " + linkObjs.Count + "个"  + "Query used " + stopwatch.Elapsed.TotalSeconds+" seconds!");
+            }
+        }
+#if DEBUG
+        /// <summary>
+        /// 提取指定区域内的梁信息
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THGETBEAMINFO", CommandFlags.Modal)]
+        public void THGETBEAMINFO()
+        {
+            // 选择楼层区域
+            // 暂时只支持矩形区域
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                DBObjectCollection curves = new DBObjectCollection();
+                var selRes = Active.Editor.GetSelection();
+                foreach (ObjectId objId in selRes.Value.GetObjectIds())
+                {
+                    curves.Add(acadDatabase.Element<Curve>(objId));
+                }
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
+                Point3d pt1 = Active.Editor.GetPoint("select left down point: ").Value;
+                Point3d pt2 = Active.Editor.GetPoint("select right up point: ").Value;
+                DBObjectCollection filterCurves = spatialIndex.SelectCrossingWindow(pt1, pt2);
+                ThDistinguishBeamInfo thDisBeamInfo = new ThDistinguishBeamInfo();
+                var beams = thDisBeamInfo.CalBeamStruc(filterCurves);
+                foreach (var beam in beams)
+                {
+                    acadDatabase.ModelSpace.Add(beam.BeamBoundary);
+                }
+            }
+        }
+        /// <summary>
+        /// 提取所选图元的梁信息
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THGETBEAMINFO2", CommandFlags.Modal)]
+        public void THGETBEAMINFO2()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 选择对象
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    RejectObjectsOnLockedLayers = true,
+                };
+
+                // 梁线的图元类型
+                // 暂时不支持弧梁
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Line)).DxfName,
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                // 梁线的图元图层
+                var layers = ThBeamLayerManager.GeometryLayers(acdb.Database);
+                var filterlist = OpFilter.Bulid(o =>
+                    o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
+                    o.Dxf((int)DxfCode.LayerName) == string.Join(",", layers.ToArray()));
+                var entSelected = Active.Editor.GetSelection(options, filterlist);
+                if (entSelected.Status != PromptStatus.OK)
+                {
+                    return;
+                };
+
+                // 执行操作
+                DBObjectCollection dBObjects = new DBObjectCollection();
+                foreach (ObjectId obj in entSelected.Value.GetObjectIds())
+                {
+                    var entity = acdb.Element<Entity>(obj);
+                    dBObjects.Add(entity.GetTransformedCopy(Matrix3d.Identity));
+                }
+
+                ThDistinguishBeamInfo thDisBeamCommand = new ThDistinguishBeamInfo();
+                var beams = thDisBeamCommand.CalBeamStruc(dBObjects);
+                using (var acadDatabase = AcadDatabase.Active())
+                {
+                    foreach (var beam in beams)
+                    {
+                        acadDatabase.ModelSpace.Add(beam.BeamBoundary);
+                    }
+                }
+            }
+        }
+#endif
     }
 }
