@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Test
 {
@@ -32,6 +33,29 @@ namespace ThMEPEngineCore.Test
 
                 var hyperlinks = acadDatabase.Element<Entity>(result.ObjectId).Hyperlinks;
                 var buildElement = ThPropertySet.CreateWithHyperlink(hyperlinks[0].Description);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "TestFrame", CommandFlags.Modal)]
+        public void TestFrame()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+
+                ThMEPFrameService.Instance.InitializeWithDb(acadDatabase.Database);
+                var result_element = ThMEPFrameService.Instance.RegionsFromFrame(frame);
+                
+                foreach (Entity item in result_element)
+                {
+                    item.ColorIndex = 2;
+                    item.Highlight();
+                    acadDatabase.ModelSpace.Add(item);
+                }
             }
         }
     }
