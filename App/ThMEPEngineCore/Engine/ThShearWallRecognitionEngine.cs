@@ -1,15 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Linq2Acad;
-using NetTopologySuite.Operation.Linemerge;
-using NetTopologySuite.Operation.Union;
-using NetTopologySuite.Simplify;
-using System;
-using System.Linq;
-using System.Collections.Generic;
-using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using ThCADCore.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {

@@ -24,7 +24,6 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Geometry\ThCADCorePolylineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSCenterlineBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSEntityExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
@@ -87,5 +86,6 @@
   <ItemGroup>
     <PackageReference Include="NetTopologySuite" Version="1.15.3" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

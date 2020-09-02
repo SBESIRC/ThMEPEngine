@@ -5,9 +5,9 @@ using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Linemerge;
 
-namespace ThCADCore.Geometry
+namespace ThMEPEngineCore.Algorithm
 {
-    public static class ThCADCorePolylineExtension
+    public static class ThMEPCurvePreprocessor
     {
         /// <summary>
         /// 预处理多段线
