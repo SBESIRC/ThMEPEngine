@@ -113,9 +113,12 @@ namespace ThCADCore.NTS
         public static DBObjectCollection Outline(this DBObjectCollection lines)
         {
             var objs = new DBObjectCollection();
-            foreach (var geometry in lines.OutlineGeometries())
+            if (lines.Count > 0)
             {
-                objs.Add(geometry.Shell.ToDbPolyline());
+                foreach (var geometry in lines.OutlineGeometries())
+                {
+                    objs.Add(geometry.Shell.ToDbPolyline());
+                }
             }
             return objs;
         }

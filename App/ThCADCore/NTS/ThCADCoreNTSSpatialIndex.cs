@@ -4,19 +4,22 @@ using GeoAPI.Geometries;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using GeoAPI.Geometries.Prepared;
 using NetTopologySuite.Index.Strtree;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Operation.Predicate;
+using NetTopologySuite.Geometries.Prepared;
 
 namespace ThCADCore.NTS
 {
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
         private STRtree<IGeometry> Engine { get; set; }
+        private PreparedGeometryFactory Factory { get; set; }
         private Dictionary<IGeometry, DBObject> Geometries { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
             Engine = new STRtree<IGeometry>();
+            Factory = new PreparedGeometryFactory();
             Initialize(objs);
         }
 
@@ -78,21 +81,21 @@ namespace ThCADCore.NTS
             Engine.Insert(geometry.EnvelopeInternal, geometry);
         }
 
-        private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPolygon polygon)
+        private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
         {
             var results = new DBObjectCollection();
             foreach (Entity item in objs)
             {
                 if (item is Polyline polyline)
                 {
-                    if (polygon.Intersects(polyline.ToNTSLineString()))
+                    if (preparedGeometry.Intersects(polyline.ToNTSLineString()))
                     {
                         results.Add(item);
                     }
                 }
                 else if (item is DBText dBText)
                 {
-                    if (polygon.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
+                    if (preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
                     {
                         results.Add(item);
                     }
@@ -105,21 +108,21 @@ namespace ThCADCore.NTS
             return results;
         }
 
-        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPolygon polygon)
+        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
         {
             var results = new DBObjectCollection();
             foreach (Entity item in objs)
             {
                 if (item is Polyline polyline)
                 {
-                    if (polygon.Contains(polyline.ToNTSLineString()))
+                    if (preparedGeometry.Contains(polyline.ToNTSLineString()))
                     {
                         results.Add(item);
                     }
                 }
                 else if (item is DBText dBText)
                 {
-                    if (polygon.Contains(dBText.GeometricExtents.ToNTSPolygon()))
+                    if (preparedGeometry.Contains(dBText.GeometricExtents.ToNTSPolygon()))
                     {
                         results.Add(item);
                     }
@@ -139,8 +142,8 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
         {
-            var polygon = polyline.ToNTSPolygon();
-            return CrossingFilter(Query(polygon.EnvelopeInternal), polygon);
+            var geometry = polyline.ToNTSPolygon();
+            return CrossingFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
         }
 
         /// <summary>
@@ -152,8 +155,8 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
         {
             var extents = new Extents3d(pt1, pt2);
-            var polygon = extents.ToNTSPolygon();
-            return CrossingFilter(Query(polygon.EnvelopeInternal), polygon);
+            var geometry = extents.ToNTSPolygon();
+            return CrossingFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
         }
 
         /// <summary>
@@ -163,8 +166,8 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectWindowPolygon(Polyline polyline)
         {
-            var polygon = polyline.ToNTSPolygon();
-            return WindowFilter(Query(polygon.EnvelopeInternal), polygon);
+            var geometry = polyline.ToNTSPolygon();
+            return WindowFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
         }
 
         /// <summary>
