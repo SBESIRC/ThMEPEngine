@@ -93,6 +93,13 @@ namespace ThCADCore.NTS
                         results.Add(item);
                     }
                 }
+                if (item is Line line)
+                {
+                    if (preparedGeometry.Intersects(line.ToNTSLineString()))
+                    {
+                        results.Add(item);
+                    }
+                }
                 else if (item is DBText dBText)
                 {
                     if (preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
