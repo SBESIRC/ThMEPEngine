@@ -120,6 +120,11 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
             return CreateRectangle(pt1,pt2,pt3,pt4);
         }
+
+        public static Vector3d Direction(this Line line)
+        {
+            return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
+        }
     }
 
 }

@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.BeamInfo.Utils;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore.BeamInfo.Business
 {
@@ -104,27 +105,27 @@ namespace ThMEPEngineCore.BeamInfo.Business
             {
                 Entity entity = _acdb.Element<Entity>(objId);
                 MarkingInfo markingInfo = new MarkingInfo();
-                if (entity is Line)
+                if (entity is Line line)
                 {
                     if (type == MarkingType.All || type == MarkingType.Line)
                     {
-                        Vector3d markDir = (entity as Line).Delta.GetNormal();
+                        Vector3d markDir = line.Direction();
                         markingInfo.Marking = entity;
                         markingInfo.Type = MarkingType.Line;
                         markingInfo.MarkingNormal = markDir;
                         markLst.Add(markingInfo);
                     }
                 }
-                else if (entity is DBText)
+                else if (entity is DBText dBText)
                 {
                     if (type == MarkingType.All || type == MarkingType.Text)
                     {
-                        Vector3d markDir = Vector3d.XAxis.RotateBy((entity as DBText).Rotation, Vector3d.ZAxis);
+                        Vector3d markDir = Vector3d.XAxis.RotateBy(dBText.Rotation, Vector3d.ZAxis);
                         markingInfo.Marking = entity;
                         markingInfo.Type = MarkingType.Text;
                         markingInfo.MarkingNormal = markDir;
-                        markingInfo.AlignmentPoint = (entity as DBText).AlignmentPoint;
-                        markingInfo.Position = (entity as DBText).Position;
+                        markingInfo.AlignmentPoint = dBText.AlignmentPoint;
+                        markingInfo.Position = dBText.Position;
                         markLst.Add(markingInfo);
                     }
                 }

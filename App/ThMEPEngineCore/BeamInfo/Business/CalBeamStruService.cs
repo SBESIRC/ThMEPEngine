@@ -7,6 +7,7 @@ using ThMEPEngineCore.BeamInfo.Utils;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 
 namespace ThMEPEngineCore.BeamInfo.Business
@@ -30,7 +31,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     if (obj is Line line)
                     {
                         // 忽略Z值不为零的情况
-                        var lNormal = line.Delta.GetNormal();
+                        var lNormal = line.Direction();
                         if (!lNormal.IsEqualTo(new Vector3d(lNormal.X, lNormal.Y, 0.0)))
                         {
                             continue;
