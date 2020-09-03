@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Geometry;
+using ThMEPElectrical.PostProcess.Adjustor;
 
 namespace ThMEPElectrical.Business
 {
@@ -45,6 +46,7 @@ namespace ThMEPElectrical.Business
 
         private List<Point3d> OneColPlace()
         {
+            var ptLst = new List<Point3d>();
             var moveDis = m_placeRectInfo.BottomLine.Length * 0.5;
             var verticalMidLine = GeomUtils.MoveLine(m_placeRectInfo.LeftLine, Vector3d.XAxis, moveDis);
 
@@ -56,7 +58,7 @@ namespace ThMEPElectrical.Business
             var leftBottomCircle = new Circle(leftBottomPt, Vector3d.ZAxis, vertexProtectRadius);
             var leftBottomFirstPtNode = CalculateIntersectPt(leftBottomCircle, verticalMidLine);
             if (!leftBottomFirstPtNode.HasValue)
-                return null;
+                return ptLst;
 
             var leftBottomFirstPt = leftBottomFirstPtNode.Value;
 
@@ -64,7 +66,7 @@ namespace ThMEPElectrical.Business
             var leftTopCircle = new Circle(leftTopPt, Vector3d.ZAxis, vertexProtectRadius);
             var leftTopLastPtNode = CalculateIntersectPt(leftTopCircle, verticalMidLine);
             if (!leftTopLastPtNode.HasValue)
-                return null;
+                return ptLst;
 
             var leftTopLastPt = leftTopLastPtNode.Value;
             var verticalMaxGap = m_parameter.ProtectArea / 4.0 / moveDis * 2;
@@ -74,7 +76,6 @@ namespace ThMEPElectrical.Business
             var verticalCount = Math.Ceiling(verticalLength / verticalMaxGap);
             var verticalPosGap = verticalLength / verticalCount;
 
-            var ptLst = new List<Point3d>();
             ptLst.Add(leftBottomFirstPt);
             for (int i = 1; i < verticalCount; i++)
             {
@@ -84,6 +85,11 @@ namespace ThMEPElectrical.Business
             }
 
             ptLst.Add(leftTopLastPt);
+
+            if (ptLst.Count == 2)
+            {
+                ptLst = RegularPlacePointAdjustor.MakeRegularPlacePointAdjustor(verticalMidLine, ptLst);
+            }
 
             return ptLst;
         }

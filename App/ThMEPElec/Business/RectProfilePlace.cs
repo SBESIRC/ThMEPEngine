@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Geometry;
+using ThMEPElectrical.PostProcess.Adjustor;
 
 namespace ThMEPElectrical.Business
 {
@@ -155,14 +156,19 @@ namespace ThMEPElectrical.Business
 
             // 最低行的数据
             var bottomLine = GeomUtils.MoveLine(placeRectInfo.BottomLine, Vector3d.YAxis, verticalA);
-            var pts = BottomRowPlacePts(bottomLine, placeRectInfo, verticalA);
+            var srcPts = BottomRowPlacePts(bottomLine, placeRectInfo, verticalA);
+            if (srcPts.Count == 2)
+            {
+                // 规则约束调整，美观调整，距离调整等
+                srcPts = RegularPlacePointAdjustor.MakeRegularPlacePointAdjustor(bottomLine, srcPts);
+            }
 
-            m_singlePlacePts.AddRange(pts);
-            
+            m_singlePlacePts.AddRange(srcPts);
+
             // 计算所有列的数据
             for (int i = 1; i < verticalCount; i++)
             {
-                var movePts = MovePts(pts, Vector3d.YAxis, i * verticalGap);
+                var movePts = MovePts(srcPts, Vector3d.YAxis, i * verticalGap);
                 if (movePts != null || movePts.Count != 0)
                     m_singlePlacePts.AddRange(movePts);
             }
@@ -200,12 +206,22 @@ namespace ThMEPElectrical.Business
         private void OneRowPlace(Line midLine, PlaceRect placeRectInfo, double verticalA)
         {
             var ptLst = BottomRowPlacePts(midLine, placeRectInfo, verticalA);
-            m_singlePlacePts.AddRange(ptLst);
+
+            if (ptLst.Count != 2)
+            {
+                m_singlePlacePts.AddRange(ptLst);
+                return;
+            }
+
+            // 规则约束调整，美观调整，距离调整等
+            var adjustorPts = RegularPlacePointAdjustor.MakeRegularPlacePointAdjustor(midLine, ptLst);
+            m_singlePlacePts.AddRange(adjustorPts);
         }
 
 
         private List<Point3d> BottomRowPlacePts(Line line, PlaceRect placeRectInfo, double verticalA)
         {
+            var ptLst = new List<Point3d>();
             var vertexProtectRadius = m_parameter.FirstBottomProtectRadius;
             var leftBottomPt = placeRectInfo.LeftBottomPt;
             var rightBottomPt = placeRectInfo.RightBottomPt;
@@ -217,7 +233,7 @@ namespace ThMEPElectrical.Business
             var tempLeftFirstPt = CalculateIntersectPt(leftBottomPtCircle, line);
 
             if (!tempLeftFirstPt.HasValue)
-                return null;
+                return ptLst;
 
             var leftFirstPt = tempLeftFirstPt.Value;
 
@@ -226,7 +242,7 @@ namespace ThMEPElectrical.Business
             var tempRightLastPt = CalculateIntersectPt(rightBottomCircle, line);
 
             if (!tempRightLastPt.HasValue)
-                return null;
+                return ptLst;
 
             var rightLastPt = tempRightLastPt.Value;
             // 计算水平间隔长度
@@ -237,7 +253,6 @@ namespace ThMEPElectrical.Business
             // 整数布置后的水平间隔距离
             var horizontalPosGap = horizontalLength / horizontalCount;
 
-            var ptLst = new List<Point3d>();
             ptLst.Add(leftFirstPt);
 
             for (int i = 1; i < horizontalCount; i++)

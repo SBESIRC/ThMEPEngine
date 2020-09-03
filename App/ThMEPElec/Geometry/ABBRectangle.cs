@@ -41,9 +41,6 @@ namespace ThMEPElectrical.Geometry
         private void Do()
         {
             var pts = m_srcPoly.Polyline2Point2d();
-            var pt3ds = pts.Pt2stoPt3ds();
-            var circles = GeometryTrans.Points2Circles(pt3ds, 100, Vector3d.ZAxis);
-            DrawUtils.DrawProfile(GeometryTrans.Circles2Curves(circles), "kkkk");
             CalculateBounds(pts);
         }
 
@@ -72,8 +69,6 @@ namespace ThMEPElectrical.Geometry
             pts.Add(rightTopPt);
             pts.Add(leftTopPt);
 
-            var circles = GeometryTrans.Points2Circles(pts, 100, Vector3d.ZAxis);
-            DrawUtils.DrawProfile(GeometryTrans.Circles2Curves(circles), "pl2pt");
             m_boundPoly = GeometryTrans.Points2Poly(pts);
         }
     }

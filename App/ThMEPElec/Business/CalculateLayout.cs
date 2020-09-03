@@ -49,11 +49,9 @@ namespace ThMEPElectrical.Business
             {
                 var mainBeamProfile = m_placeInputProfileData.MainBeamOuterProfile;
 
-                DrawUtils.DrawProfile(new List<Curve>() { mainBeamProfile }, "mainBeamProfile");
                 // 生成ABB多段线
                 var postMinRect = ABBRectangle.MakeABBPolyline(mainBeamProfile);
 
-                DrawUtils.DrawProfile(new List<Curve>() { postMinRect }, "postMinRect");
                 var areaAddRatio = (Math.Abs(postMinRect.Area) - Math.Abs(mainBeamProfile.Area)) / Math.Abs(mainBeamProfile.Area);
 
                 if (areaAddRatio < 0.1)

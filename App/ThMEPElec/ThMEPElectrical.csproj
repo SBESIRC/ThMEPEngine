@@ -56,6 +56,11 @@
     <Compile Include="Model\PlacePoint.cs" />
     <Compile Include="Model\PlacePointProArea.cs" />
     <Compile Include="Model\PlaceRect.cs" />
+    <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
+    <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
+    <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
+    <Compile Include="PostProcess\PlacePointAdjustor.cs" />
+    <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

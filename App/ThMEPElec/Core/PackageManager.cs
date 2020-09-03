@@ -48,14 +48,10 @@ namespace ThMEPElectrical.Core
                 return ptLst;
             }
 
-            DrawUtils.DrawProfile(polylines.Polylines2Curves(), "polylines");
-
             // 转到UCS
             var wcs2Ucs = Active.Editor.WCS2UCS();
             var ucs2Wcs = Active.Editor.UCS2WCS();
-
             polylines.ForEach(o => o.TransformBy(wcs2Ucs));
-            DrawUtils.DrawProfile(polylines.Polylines2Curves(), "ucsTransPolylines");
 
             // 插入点的计算
             PlaceParameter placePara = new PlaceParameter();

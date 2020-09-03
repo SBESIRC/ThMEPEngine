@@ -79,37 +79,15 @@ namespace ThMEPElectrical.Business
             if (m_layoutLst.Count == 0)
                 return;
 
-            // 布置
-            foreach (var singleLayout in m_layoutLst)
-            {
-                if (singleLayout is MainBeamRectangleLayout rectLayout)
-                {
-                    var pts = rectLayout.CalculatePlace();
-
-                    if (pts != null && pts.Count != 0)
-                    {
-                        m_placePoints.AddRange(pts);
-                    }
-                }
-                else if (singleLayout is MainBeamPolygonLayout polygonLayout)
-                {
-                    var pts = polygonLayout.CalculatePlace();
-
-                    if (pts != null && pts.Count != 0)
-                    {
-                        m_placePoints.AddRange(pts);
-                    }
-                }
-                else if (singleLayout is MainSecondBeamLayout secondBeamLayout)
-                {
-                    var pts = secondBeamLayout.CalculatePlace();
-
-                    if (pts != null && pts.Count != 0)
-                    {
-                        m_placePoints.AddRange(pts);
-                    }
-                }
-            }
+            // 布置计算
+            m_layoutLst.ForEach(layout =>
+           {
+               var pts = layout.CalculatePlace();
+               if (pts != null && pts.Count != 0)
+               {
+                   m_placePoints.AddRange(pts);
+               }
+           });
         }
 
         /// <summary>
