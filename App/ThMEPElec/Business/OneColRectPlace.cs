@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Geometry;
-using ThMEPElectrical.PostProcess.Adjustor;
+using ThMEPElectrical.PostProcess;
 
 namespace ThMEPElectrical.Business
 {
@@ -88,7 +88,7 @@ namespace ThMEPElectrical.Business
 
             if (ptLst.Count == 2)
             {
-                ptLst = RegularPlacePointAdjustor.MakeRegularPlacePointAdjustor(verticalMidLine, ptLst);
+                ptLst = PlacePointAdjustor.MakePlacePointAdjustor( ptLst, verticalMidLine, ShapeConstraintType.REGULARSHAPE);
             }
 
             return ptLst;

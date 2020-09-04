@@ -48,7 +48,7 @@ namespace ThMEPElectrical.PostProcess
         /// <param name="posLine"></param>
         /// <param name="distanceConstraint"></param>
         /// <param name="shapeConstraintType"></param>
-        public PlacePointAdjustor(List<Point3d> srcPts, Line posLine, double distanceConstraint, ShapeConstraintType shapeConstraintType)
+        public PlacePointAdjustor(List<Point3d> srcPts, Line posLine, ShapeConstraintType shapeConstraintType, double distanceConstraint = 0)
         {
             m_srcPts = srcPts;
             m_posLine = posLine;
@@ -79,9 +79,9 @@ namespace ThMEPElectrical.PostProcess
         /// <param name="distanceConstraint"></param>
         /// <param name="shapeConstraintType"> 根据约束的类型使用相应的计算方法</param>
         /// <returns></returns>
-        public static List<Point3d> MakePlacePointAdjustor(List<Point3d> srcPts, Line posLine, double distanceConstraint, ShapeConstraintType shapeConstraintType)
+        public static List<Point3d> MakePlacePointAdjustor(List<Point3d> srcPts, Line posLine, ShapeConstraintType shapeConstraintType, double distanceConstraint = 0)
         {
-            var placePointAdjustor = new PlacePointAdjustor(srcPts, posLine, distanceConstraint, shapeConstraintType);
+            var placePointAdjustor = new PlacePointAdjustor(srcPts, posLine, shapeConstraintType, distanceConstraint);
             placePointAdjustor.Do();
             return placePointAdjustor.PostPoints;
         }

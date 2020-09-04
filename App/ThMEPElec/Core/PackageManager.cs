@@ -63,11 +63,10 @@ namespace ThMEPElectrical.Core
             // 转到WCS
             if (ptLst.Count > 0)
             {
+                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
+
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
-                var centerCircles = GeometryTrans.Points2Circles(ptLst, 100, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                var centerCurves = GeometryTrans.Circles2Curves(centerCircles);
-                DrawUtils.DrawProfile(centerCurves, "centerCurves", Color.FromRgb(0, 255, 0));
                 DrawUtils.DrawProfile(curves, "placePoints");
             }
 

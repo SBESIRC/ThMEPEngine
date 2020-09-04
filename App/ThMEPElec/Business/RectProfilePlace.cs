@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Geometry;
-using ThMEPElectrical.PostProcess.Adjustor;
+using ThMEPElectrical.PostProcess;
 
 namespace ThMEPElectrical.Business
 {
@@ -160,7 +160,7 @@ namespace ThMEPElectrical.Business
             if (srcPts.Count == 2)
             {
                 // 规则约束调整，美观调整，距离调整等
-                srcPts = RegularPlacePointAdjustor.MakeRegularPlacePointAdjustor(bottomLine, srcPts);
+                srcPts = PlacePointAdjustor.MakePlacePointAdjustor(srcPts, bottomLine, ShapeConstraintType.REGULARSHAPE);
             }
 
             m_singlePlacePts.AddRange(srcPts);
@@ -214,7 +214,7 @@ namespace ThMEPElectrical.Business
             }
 
             // 规则约束调整，美观调整，距离调整等
-            var adjustorPts = RegularPlacePointAdjustor.MakeRegularPlacePointAdjustor(midLine, ptLst);
+            var adjustorPts = PlacePointAdjustor.MakePlacePointAdjustor(ptLst, midLine, ShapeConstraintType.REGULARSHAPE);
             m_singlePlacePts.AddRange(adjustorPts);
         }
 

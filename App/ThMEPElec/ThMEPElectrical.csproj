@@ -26,6 +26,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\GeometryTrans.cs" />
+    <Compile Include="Block\BlockInsertDBExtension.cs" />
+    <Compile Include="Business\BlockInsertor.cs" />
     <Compile Include="Business\CalculateDetection.cs" />
     <Compile Include="Business\CalculateLayout.cs" />
     <Compile Include="Business\PlacePointCalculator.cs" />
