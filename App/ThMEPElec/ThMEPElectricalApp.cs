@@ -40,6 +40,16 @@ namespace ThMEPElectrical
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THABBMultiPlace", CommandFlags.Modal)]
+        public void ThMultiPlace()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoMultiWallMainBeamPlace();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THOBBRect", CommandFlags.Modal)]
         public void ThProfilesRect()
         {
