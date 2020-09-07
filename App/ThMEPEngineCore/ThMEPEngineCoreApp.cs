@@ -20,6 +20,7 @@ using NFox.Cad.Collections;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.BeamInfo;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Model.Segment;
 
 namespace ThMEPEngineCore
 {
@@ -220,32 +221,6 @@ namespace ThMEPEngineCore
                 });
             }
         }
-        [CommandMethod("TIANHUACAD", "ThExtractDivideBeam", CommandFlags.Modal)]
-        public void ThExtractDivdeBeam()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                ThIfcLineBeam thIfcLineBeam = new ThIfcLineBeam();
-                thIfcLineBeam.StartPoint = Active.Editor.GetPoint("\n Select beam start point：").Value;
-                thIfcLineBeam.EndPoint = Active.Editor.GetPoint("\n Select beam end point：").Value;
-                thIfcLineBeam.Direction = thIfcLineBeam.StartPoint.GetVectorTo(thIfcLineBeam.EndPoint);
-                thIfcLineBeam.Outline = acadDatabase.Element<Polyline>(Active.Editor.GetEntity("\n Select beam outline：").ObjectId);                
-                thIfcLineBeam.ComponentType = BeamComponentType.PrimaryBeam;
-                thIfcLineBeam.Width = 300;
-                thIfcLineBeam.Height = 400;
-                thIfcLineBeam.Uuid = Guid.NewGuid().ToString();
-                var components = Active.Editor.GetSelection();
-                DBObjectCollection dbObjs = new DBObjectCollection();
-                foreach(ObjectId objId in components.Value.GetObjectIds())
-                {
-                    dbObjs.Add(acadDatabase.Element<Polyline>(objId));
-                }
-                ThSplitLinearBeamSevice thSplitLineBeam = new ThSplitLinearBeamSevice(thIfcLineBeam, dbObjs);
-                thSplitLineBeam.Split();
-                thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex=1);
-                thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "ThExtractLaneLine", CommandFlags.Modal)]
         public void ThExtractLaneLine()
@@ -255,6 +230,68 @@ namespace ThMEPEngineCore
             {
                 laneLineEngine.Recognize(Active.Database);
                 laneLineEngine.LaneCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractDivideBeam", CommandFlags.Modal)]
+        public void ThExtractDivdeBeam()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                ThIfcLineBeam thIfcLineBeam = new ThIfcLineBeam();
+                thIfcLineBeam.StartPoint = Active.Editor.GetPoint("\n Select beam start point：").Value;
+                thIfcLineBeam.EndPoint = Active.Editor.GetPoint("\n Select beam end point：").Value;
+                thIfcLineBeam.Direction = thIfcLineBeam.StartPoint.GetVectorTo(thIfcLineBeam.EndPoint);
+                thIfcLineBeam.Outline = acadDatabase.Element<Polyline>(Active.Editor.GetEntity("\n Select beam outline：").ObjectId);
+                thIfcLineBeam.ComponentType = BeamComponentType.PrimaryBeam;
+                thIfcLineBeam.Width = 300;
+                thIfcLineBeam.Height = 400;
+                thIfcLineBeam.Uuid = Guid.NewGuid().ToString();
+                var components = Active.Editor.GetSelection();
+                List<ThSegment> segments = new List<ThSegment>();
+                foreach (ObjectId objId in components.Value.GetObjectIds())
+                {
+                    ThSegmentService thSegmentService = new ThSegmentService(acadDatabase.Element<Polyline>(objId));
+                    thSegmentService.SegmentAll();
+                    segments.AddRange(thSegmentService.Segments);
+                }                
+                ThSplitLinearBeamService thSplitLineBeam = new ThSplitLinearBeamService(thIfcLineBeam, segments);
+                thSplitLineBeam.Split();
+                thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex = 1);
+                thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThTestSegment", CommandFlags.Modal)]
+        public void ThTestSegment()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var entRes = Active.Editor.GetEntity("\n select a polyline");
+                Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
+
+                Point3dCollection pts = new Point3dCollection();
+                while (true)
+                {
+                    var ptres = Active.Editor.GetPoint("\n select inters pt");
+                    if (ptres.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                    {
+                        pts.Add(ptres.Value);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                ThSegmentServiceExtension thSegmentServiceExtension = new ThSegmentServiceExtension(polyline);
+                thSegmentServiceExtension.FindPairSegment(pts);
+
+                thSegmentServiceExtension.LinearPairPts.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(new Line(o.Item1, o.Item2));
+                });
+                thSegmentServiceExtension.ArcPairPts.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(new Line(o.Item1, o.Item2));
+                });
             }
         }
 #if DEBUG

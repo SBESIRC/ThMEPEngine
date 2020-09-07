@@ -5,39 +5,20 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Segment;
 
 namespace ThMEPEngineCore.Service
 {
-    public abstract class ThSplitBeamSevice
+    public abstract class ThSplitBeamService
     {
-        protected DBObjectCollection Components { get; set; }
         public List<ThIfcBeam> SplitBeams { get; private set; }
-        protected List<Tuple<Polyline, Point3d, Point3d>> IntersectAreas { get; set; }
-        protected ThSplitBeamSevice(DBObjectCollection components)
+        protected List<ThSegment> Segments { get; set; }
+        protected ThSplitBeamService(List<ThSegment> segments)
         {
-            Components = components;
             SplitBeams = new List<ThIfcBeam>();
-            IntersectAreas = new List<Tuple<Polyline, Point3d, Point3d>>();
+            Segments = segments;
         }
-        public abstract void Split();
-        /// <summary>
-        /// 打断直梁中心线
-        /// </summary>
-        /// <param name="breakPoints">在线内，相互无交集</param>
-        /// <returns></returns>
-        protected List<Tuple<Point3d, Point3d>> BreakBeamCenterLine(
-            Point3d startPt, Point3d endPt, List<Tuple<Point3d, Point3d>> breakPoints)
-        {
-            List<Tuple<Point3d, Point3d>> pts = new List<Tuple<Point3d, Point3d>>();
-            Point3d lineSp = startPt;
-            for (int i = 0; i < breakPoints.Count; i++)
-            {
-                pts.Add(Tuple.Create(lineSp, breakPoints[i].Item1));
-                lineSp = breakPoints[i].Item2;
-            }
-            pts.Add(Tuple.Create(lineSp, endPt));
-            return pts;
-        }
+        public abstract void Split();        
         protected Point3dCollection IntersectWithEx(Entity firstEntity, Entity secondEntity)
         {
             Point3dCollection pts = new Point3dCollection();
@@ -45,21 +26,6 @@ namespace ThMEPEngineCore.Service
             firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, zeroPlane, pts, IntPtr.Zero, IntPtr.Zero);
             zeroPlane.Dispose();
             return pts;
-        }
-        protected bool ValidateIntersectPts(Point3dCollection intersPts, ThIfcLineBeam thIfcLineBeam, double tolerance = 1.0)
-        {
-            bool valid = true;
-            foreach (Point3d pt in intersPts)
-            {
-                Point3d projectPt = pt.GetProjectPtOnLine(thIfcLineBeam.StartPoint, thIfcLineBeam.EndPoint);
-                if (projectPt.DistanceTo(thIfcLineBeam.StartPoint) <= tolerance ||
-                    projectPt.DistanceTo(thIfcLineBeam.EndPoint) <= tolerance)
-                {
-                    valid = false;
-                    break;
-                }
-            }
-            return valid;
         }
         protected bool CheckTwoLineUnIntersect(Point3d firstSpt, Point3d firstEpt, Point3d secondSpt, Point3d secondEpt)
         {
@@ -88,21 +54,38 @@ namespace ThMEPEngineCore.Service
                 Outline = pts.CreatePolyline()
             };
             return newLineBeam;
-        }
-        protected Point3dCollection OrderbyPts(Point3dCollection pts)
+        }        
+        public static Polyline CreateExtendOutline(ThIfcLineBeam thIfcLineBeam, double tolerance)
         {
-            List<Point3d> ptList = new List<Point3d>();
-            foreach(Point3d pt in pts)
+            Vector3d direction = thIfcLineBeam.StartPoint.GetVectorTo(thIfcLineBeam.EndPoint);
+            Vector3d perpendDir = direction.GetPerpendicularVector();
+            double width = thIfcLineBeam.ActualWidth + tolerance * 2;
+            Point3d pt1 = thIfcLineBeam.StartPoint - perpendDir.GetNormal().MultiplyBy(width / 2.0);
+            Point3d pt2 = thIfcLineBeam.StartPoint + perpendDir.GetNormal().MultiplyBy(width / 2.0);
+            Point3d pt3 = pt2 + direction.GetNormal().MultiplyBy(thIfcLineBeam.Length);
+            Point3d pt4 = pt1 + direction.GetNormal().MultiplyBy(thIfcLineBeam.Length);
+            Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
+            return pts.CreatePolyline();
+        }
+
+        public static Polyline CreateExtendOutline(ThIfcArcBeam thIfcArcBeam, double tolerance)
+        {
+            return thIfcArcBeam.Outline.Clone() as Polyline;
+        }
+        public static Polyline CreateExtendOutline(ThIfcBuildingElement thIfcBuildingElement, double tolerance=50.0)
+        {
+            if (thIfcBuildingElement is ThIfcLineBeam thIfcLineBeam)
             {
-                ptList.Add(pt);
+                return CreateExtendOutline(thIfcLineBeam, tolerance);
             }
-            Point3d basePt = ptList.OrderBy(o => o.Y).ThenBy(o => o.X).FirstOrDefault();
-            ptList.Remove(basePt);
-            Point3dCollection sortPts = new Point3dCollection();
-            ptList.OrderBy(o => Math.Cos(basePt.GetVectorTo(o).GetAngleTo(
-                Vector3d.XAxis, Vector3d.ZAxis))).ToList().ForEach(o=> sortPts.Add(o));
-            sortPts.Insert(0, basePt);
-            return sortPts;
+            else if (thIfcBuildingElement is ThIfcArcBeam thIfcArcBeam)
+            {
+                return CreateExtendOutline(thIfcArcBeam, tolerance);
+            }
+            else
+            {
+                return thIfcBuildingElement.Outline.Clone() as Polyline;
+            }
         }
     }
 }

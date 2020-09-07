@@ -17,6 +17,7 @@ namespace ThMEPEngineCore.Model
         public Point3d EndPoint { get; set; }
         public double Width { get; set; }
         public double Height { get; set; }
+        public Vector3d Normal { get; set; }
         public BeamComponentType ComponentType { get; set; } = BeamComponentType.Undefined;
         public double ActualWidth
         {

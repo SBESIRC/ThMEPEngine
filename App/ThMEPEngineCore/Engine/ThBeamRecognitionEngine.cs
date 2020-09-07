@@ -68,9 +68,9 @@ namespace ThMEPEngineCore.Engine
         {
             //后处理1：分割梁段
             ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(
-                thColumnRecognitionEngine.ValidElements,
-                thShearWallRecognitionEngine.ValidElements,
-                Elements);
+                thColumnRecognitionEngine,
+                thShearWallRecognitionEngine,
+                this);
             thSplitBeams.Split();
             Elements = thSplitBeams.BeamElements;
         }

@@ -14,6 +14,7 @@ namespace ThMEPEngineCore.Model
         /// </summary>
         public Vector3d StartTangent { get; set; }
         public Vector3d EndTangent { get; set; }
+        public double Radius { get; set; }
         public ThIfcArcBeam()
         {
         }

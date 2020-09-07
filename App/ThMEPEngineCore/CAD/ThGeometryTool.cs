@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -28,9 +29,9 @@ namespace ThMEPEngineCore.CAD
             double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
             return (angle < tolerance) || ((180.0 - angle) < tolerance);
         }
-        public static Point3d GetMidPt(Point3d pt1, Point3d pt2)
+        public static Point3d GetMidPt(this Point3d pt1, Point3d pt2)
         {
-            return new Point3d((pt1.X + pt2.X) / 2.0, (pt1.Y + pt2.Y) / 2.0, (pt1.Z + pt2.Z) / 2.0);
+            return pt1 + pt1.GetVectorTo(pt2) * 0.5;
         }
         public static Point3d GetProjectPtOnLine(this Point3d outerPt, Point3d startPt,Point3d endPt)
         {
@@ -39,6 +40,20 @@ namespace ThMEPEngineCore.CAD
             double angle = firstVec.GetAngleTo(secondVec);
             double distance = Math.Cos(angle) * secondVec.Length;
             return startPt + firstVec.GetNormal().MultiplyBy(distance);
+        }
+        public static bool IsParallelUncollinear(this Line firstEnt, Line secondEnt)
+        {
+            Vector3d firstVec = firstEnt.StartPoint.GetVectorTo(firstEnt.EndPoint);
+            Vector3d secondVec = secondEnt.StartPoint.GetVectorTo(secondEnt.EndPoint);
+            if (firstVec.IsParallelToEx(secondVec))
+            {
+                Vector3d otherVec = firstEnt.StartPoint.GetVectorTo(secondEnt.StartPoint);
+                double angle = firstVec.GetAngleTo(otherVec);
+                angle = angle / Math.PI * 180.0;
+                angle %= 180.0;
+                return !(Math.Abs(angle - 0.0) <= 1.0 || Math.Abs(angle - 180.0) <= 1.0);
+            }
+            return false;
         }
     }
 }

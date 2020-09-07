@@ -41,10 +41,10 @@ namespace ThMEPEngineCore.Engine
             
             // 启动梁识别引擎
             thBeamRecognitionEngine = new ThBeamRecognitionEngine();
-            thBeamRecognitionEngine.Recognize(database); 
-            
+            thBeamRecognitionEngine.Recognize(database);
+
             //梁分割
-            thBeamRecognitionEngine.Split(thColumnRecognitionEngine, thShearWallRecognitionEngine); 
+            thBeamRecognitionEngine.Split(thColumnRecognitionEngine, thShearWallRecognitionEngine);
 
             //创建梁空间索引
             CreateBeamSpatialIndex();

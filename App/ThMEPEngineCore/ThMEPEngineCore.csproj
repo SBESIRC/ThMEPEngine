@@ -70,6 +70,9 @@
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsElements.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsPathElements.cs" />
+    <Compile Include="Model\Segment\ThArcSegment.cs" />
+    <Compile Include="Model\Segment\ThLinearSegment.cs" />
+    <Compile Include="Model\Segment\ThSegment.cs" />
     <Compile Include="Model\ThBeamLink.cs" />
     <Compile Include="Model\ThIfcAlarm.cs" />
     <Compile Include="Model\Electrical\ThIfcAudioVisualAppliance.cs" />
@@ -115,9 +118,12 @@
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThOtherDbExtension.cs" />
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
-    <Compile Include="Service\ThSplitBeamSevice.cs" />
-    <Compile Include="Service\ThSplitLinearBeamSevice.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
+    <Compile Include="Service\ThSegmentService.cs" />
+    <Compile Include="Service\ThSegmentServiceExtension.cs" />
+    <Compile Include="Service\ThSplitArcBeamService.cs" />
+    <Compile Include="Service\ThSplitBeamService.cs" />
+    <Compile Include="Service\ThSplitLinearBeamService.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThOverhangingPrimaryBeamLinkExtension.cs" />

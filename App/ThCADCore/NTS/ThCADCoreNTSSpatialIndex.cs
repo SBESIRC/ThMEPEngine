@@ -93,7 +93,7 @@ namespace ThCADCore.NTS
                         results.Add(item);
                     }
                 }
-                if (item is Line line)
+                else if (item is Line line)
                 {
                     if (preparedGeometry.Intersects(line.ToNTSLineString()))
                     {
