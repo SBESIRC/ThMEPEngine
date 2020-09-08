@@ -31,6 +31,11 @@ namespace ThMEPEngineCore.Algorithm
             ShearWallEngine = new ThShearWallRecognitionEngine();
         }
 
+        public void LoadFromDatabase(Database database)
+        {
+            LoadFromDatabase(database, new Point3dCollection());
+        }
+
         public void LoadFromDatabase(Database database, Point3dCollection polygon)
         {
             BeamEngine.Recognize(database, polygon);

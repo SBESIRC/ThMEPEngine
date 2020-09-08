@@ -1,11 +1,10 @@
 ﻿using System;
 using ThCADCore.NTS;
-using GeoAPI.Geometries;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -22,6 +21,13 @@ namespace ThMEPEngineCore.Algorithm
         public static ThMEPFrameService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
+        public void InitializeWithDb(Database database)
+        {
+            ThMEPModelManager.Instance.Initialize();
+            ThMEPModelManager.Instance.LoadFromDatabase(database);
+            ThMEPModelManager.Instance.CreateSpatialIndex();
+        }
+
         public void InitializeWithDb(Database database, Point3dCollection polygon)
         {
             ThMEPModelManager.Instance.Initialize();
@@ -31,7 +37,6 @@ namespace ThMEPEngineCore.Algorithm
 
         public DBObjectCollection RegionsFromFrame(Polyline frame)
         {
-            // Select Crossing Polygon => 筛选出框线内所有梁柱墙（包括与框线不相交的梁柱墙）
             var objs_query = new DBObjectCollection();
             var fence_beam = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectCrossingPolygon(frame);
             var fence_column = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(frame);
@@ -75,12 +80,7 @@ namespace ThMEPEngineCore.Algorithm
             {
                 element_polyline.Add(element.Outline);
             }
-            var objs = new DBObjectCollection();
-            foreach (Entity polyline in frame.Difference(element_polyline))
-            {
-                objs.Add(polyline);
-            }
-            return (objs);
+            return frame.Difference(element_polyline);
         }
 
         private Polyline CreateExtendBeamOutline(ThIfcLineBeam lineBeam , double extendDis)

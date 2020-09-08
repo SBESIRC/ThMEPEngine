@@ -1,16 +1,12 @@
-﻿using System;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
-using GeoAPI.Geometries;
 using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
-using ThMEPEngineCore.Model.Segment;
 using ThMEPEngineCore.BeamInfo.Utils;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Operation.Distance;
 
 namespace ThMEPEngineCore.Test
 {
