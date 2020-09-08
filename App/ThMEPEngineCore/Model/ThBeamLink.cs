@@ -43,4 +43,52 @@ namespace ThMEPEngineCore.Model
             return Tuple.Create(pts.CreatePolyline(), newSpt, newEpt);
         }
     }
+    public class ThSingleBeamLink
+    {
+        public List<ThIfcBuildingElement> StartVerComponents { get; set; } = new List<ThIfcBuildingElement>();
+        public List<ThIfcBuildingElement> EndVerComponents { get; set; } = new List<ThIfcBuildingElement>();
+        public List<ThIfcBeam> StartBeams { get; set; } = new List<ThIfcBeam>();
+        public List<ThIfcBeam> EndBeams { get; set; } = new List<ThIfcBeam>();
+        public ThIfcBeam Beam { get; set; }
+
+        public List<ThIfcBuildingElement> GetPortVerComponents(Point3d pt)
+        {
+            if (pt.DistanceTo(Beam.StartPoint) <= 1.0)
+            {
+                return StartVerComponents;
+            }
+            else if (pt.DistanceTo(Beam.EndPoint) <= 1.0)
+            {
+                return EndVerComponents;
+            }
+            else
+            {
+                return new List<ThIfcBuildingElement>();
+            }
+        }
+        public List<ThIfcBeam> GetPortBeams(Point3d pt)
+        {
+            if (pt.DistanceTo(Beam.StartPoint) <= 1.0)
+            {
+                return StartBeams;
+            }
+            else if (pt.DistanceTo(Beam.EndPoint) <= 1.0)
+            {
+                return EndBeams;
+            }
+            else
+            {
+                return new List<ThIfcBeam>();
+            }
+        }
+        public bool IsUnconnected()
+        {
+            if(StartVerComponents.Count==0 && EndVerComponents.Count==0 &&
+                StartBeams.Count==0 && EndBeams.Count==0)
+            {
+                return true;
+            }
+            return false;
+        }
+    }
 }

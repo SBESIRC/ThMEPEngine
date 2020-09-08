@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.BeamInfo.Business;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Service
@@ -34,8 +35,10 @@ namespace ThMEPEngineCore.Service
                 List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
                 Point3d prePt = PreFindBeamLink(currentBeam.StartPoint, linkElements);
                 Point3d backPt = BackFindBeamLink(currentBeam.EndPoint, linkElements);
-                thBeamLink.Start = QueryPortLinkElements(linkElements[0], prePt);
-                thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count - 1], backPt);
+                ThSingleBeamLink startLink = ConnectionEngine.QuerySingleBeamLink(linkElements[0]);
+                thBeamLink.Start = startLink.GetPortVerComponents(prePt);
+                ThSingleBeamLink endLink = ConnectionEngine.QuerySingleBeamLink(linkElements[linkElements.Count - 1]);
+                thBeamLink.End = endLink.GetPortVerComponents(backPt);
                 if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count == 0)
                 {
                     thBeamLink.Start.AddRange(QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[0], prePt));

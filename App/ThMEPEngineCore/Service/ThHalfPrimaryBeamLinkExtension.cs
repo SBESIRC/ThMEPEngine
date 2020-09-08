@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.BeamInfo.Business;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Service
@@ -30,12 +31,14 @@ namespace ThMEPEngineCore.Service
                 {
                     continue;
                 }
-                ThBeamLink thBeamLink = new ThBeamLink();
+                ThBeamLink thBeamLink = new ThBeamLink();               
                 List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
                 Point3d prePt = PreFindBeamLink(currentBeam.StartPoint, linkElements);
                 Point3d backPt = BackFindBeamLink(currentBeam.EndPoint, linkElements);
-                thBeamLink.Start = QueryPortLinkElements(linkElements[0], prePt);
-                thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count-1], backPt);
+                ThSingleBeamLink startBeamLink = ConnectionEngine.QuerySingleBeamLink(linkElements[0]);
+                thBeamLink.Start = startBeamLink.GetPortVerComponents(prePt);
+                ThSingleBeamLink endBeamLink = ConnectionEngine.QuerySingleBeamLink(linkElements[linkElements.Count - 1]);
+                thBeamLink.End = endBeamLink.GetPortVerComponents(backPt);
                 if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count > 0)
                 {
                     // 末端连接竖向构件                    
@@ -60,7 +63,8 @@ namespace ThMEPEngineCore.Service
         }
         private List<ThIfcBuildingElement> QueryPortLinkPrimaryBeams(ThIfcBeam thIfcBeam,Point3d portPt)
         {
-            List<ThIfcBeam> thIfcBeams= QueryPortLinkBeams(thIfcBeam, portPt);
+            ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(thIfcBeam); 
+            List<ThIfcBeam> thIfcBeams= thSingleBeamLink.GetPortBeams(portPt);
             thIfcBeams= thIfcBeams.Where(o => o.ComponentType == BeamComponentType.PrimaryBeam).ToList();
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {
@@ -81,7 +85,8 @@ namespace ThMEPEngineCore.Service
         private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
-            if(QueryPortLinkElements(beamLink[0],portPt).Count>0)
+            ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(beamLink[0]);
+            if (thSingleBeamLink.GetPortVerComponents(portPt).Count > 0)
             {
                 return portPt;
             }           
@@ -90,7 +95,7 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
-            var linkElements = QueryPortLinkBeams(beamLink[0], portPt);
+            var linkElements = thSingleBeamLink.GetPortBeams(portPt);
             //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
             linkElements = linkElements
                 .Where(m => IsUndefinedBeam(UnDefinedBeams, m))
@@ -132,7 +137,8 @@ namespace ThMEPEngineCore.Service
         private Point3d BackFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
-            if (QueryPortLinkElements(beamLink[beamLink.Count - 1],portPt).Count > 0)
+            ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(beamLink[beamLink.Count - 1]);
+            if (thSingleBeamLink.GetPortVerComponents(portPt).Count > 0)
             {
                 return portPt;
             }
@@ -141,7 +147,7 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
-            var linkElements = QueryPortLinkBeams(beamLink[beamLink.Count - 1], portPt);
+            var linkElements = thSingleBeamLink.GetPortBeams(portPt); 
             //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
             linkElements = linkElements
                 .Where(m => IsUndefinedBeam(UnDefinedBeams, m))

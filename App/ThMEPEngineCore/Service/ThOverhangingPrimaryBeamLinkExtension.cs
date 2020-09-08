@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.BeamInfo.Business;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Service
@@ -37,8 +38,10 @@ namespace ThMEPEngineCore.Service
                 List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
                 Point3d prePt = PreFindBeamLink(currentBeam.StartPoint, linkElements);
                 Point3d backPt = BackFindBeamLink(currentBeam.EndPoint, linkElements);
-                thBeamLink.Start = QueryPortLinkElements(linkElements[0], prePt);
-                thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count-1], backPt);
+                ThSingleBeamLink startBeamLink = ConnectionEngine.QuerySingleBeamLink(linkElements[0]);
+                thBeamLink.Start = startBeamLink.GetPortVerComponents(prePt);
+                ThSingleBeamLink endBeamLink = ConnectionEngine.QuerySingleBeamLink(linkElements[linkElements.Count - 1]);
+                thBeamLink.End = endBeamLink.GetPortVerComponents(backPt);
                 if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count > 0)
                 {
                     // 末端连接竖向构件
@@ -82,7 +85,8 @@ namespace ThMEPEngineCore.Service
         private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
-            if(QueryPortLinkElements(beamLink[0],portPt).Count>0)
+            ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(beamLink[0]);
+            if(thSingleBeamLink.GetPortVerComponents(portPt).Count>0)
             {
                 return portPt;
             }
@@ -118,7 +122,8 @@ namespace ThMEPEngineCore.Service
         private Point3d BackFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
-            if (QueryPortLinkElements(beamLink[beamLink.Count - 1],portPt).Count > 0)
+            ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(beamLink[beamLink.Count - 1]);
+            if (thSingleBeamLink.GetPortVerComponents(portPt).Count > 0)
             {
                 return portPt;
             }
