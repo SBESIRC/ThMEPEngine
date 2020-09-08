@@ -79,8 +79,8 @@ namespace ThMEPEngineCore.Test
                     objs.Add(acadDatabase.Element<Arc>(obj));
                 }
 
-                Polyline polyline = ThArcBeamOutliner.Outline(objs[0], objs[1]);
-                polyline.ColorIndex = 2;
+                Polyline polyline = ThArcBeamOutliner.TessellatedOutline(objs[0], objs[1]);
+                polyline.ColorIndex = 1;
                 acadDatabase.ModelSpace.Add(polyline);
             }
         }
