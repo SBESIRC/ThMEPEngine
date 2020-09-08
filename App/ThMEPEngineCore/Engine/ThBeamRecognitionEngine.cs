@@ -9,6 +9,7 @@ using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -23,17 +24,31 @@ namespace ThMEPEngineCore.Engine
             //ToDo
         }
 
-        public override void Recognize(Database database)
+        public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var beamDbExtension = new ThStructureBeamDbExtension(database))
             {
                 //获取梁线
                 beamDbExtension.BuildElementCurves();
-
+                List<Curve> curves = new List<Curve>();
+                if (polygon.Count > 0)
+                {
+                    DBObjectCollection dbObjs = new DBObjectCollection();
+                    beamDbExtension.BeamCurves.ForEach(o => dbObjs.Add(o));
+                    ThCADCoreNTSSpatialIndex beamCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                    foreach (var filterObj in beamCurveSpatialIndex.SelectCrossingPolygon(polygon))
+                    {
+                        curves.Add(filterObj as Curve);
+                    }
+                }
+                else
+                {
+                    curves = beamDbExtension.BeamCurves;
+                }
                 //获取梁段
                 DBObjectCollection beamCollection = new DBObjectCollection();
-                beamDbExtension.BeamCurves.ForEach(o => beamCollection.Add(o));
+                curves.ForEach(o => beamCollection.Add(o));
                 ThDistinguishBeamInfo thDisBeamInfo = new ThDistinguishBeamInfo();
                 var beams = thDisBeamInfo.CalBeamStruc(beamCollection);
 
@@ -42,12 +57,11 @@ namespace ThMEPEngineCore.Engine
                 {
                     // 获取图纸中的梁标注
                     beamTextDbExtension.BuildElementTexts();
-
                     // 为梁标注文字建立空间索引
                     DBObjectCollection dbtexts = new DBObjectCollection();
                     beamTextDbExtension.BeamTexts.ForEach(o => dbtexts.Add(o));
                     var dbTextSpatialIndex = ThSpatialIndexService.CreateTextSpatialIndex(dbtexts);
-                    foreach(var beam in beams)
+                    foreach (var beam in beams)
                     {
                         ThBeamMarkingService thBeamMarkingService = new ThBeamMarkingService(beam);
                         List<DBText> findDbText = thBeamMarkingService.Match(dbTextSpatialIndex);

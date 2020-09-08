@@ -26,17 +26,32 @@ namespace ThMEPEngineCore.Engine
             //ToDo
         }
 
-        public override void Recognize(Database database)
+        public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var columnDbExtension = new ThStructureColumnDbExtension(database))
             {
                 columnDbExtension.BuildElementCurves();
-                List<Curve> columnOutlines = PrecessColumn(columnDbExtension.ColumnCurves);
+                List<Curve> curves = new List<Curve>();
+                if(polygon.Count > 0)
+                {
+                    DBObjectCollection dbObjs = new DBObjectCollection();
+                    columnDbExtension.ColumnCurves.ForEach(o => dbObjs.Add(o));
+                    ThCADCoreNTSSpatialIndex columnCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                    foreach(var filterObj in columnCurveSpatialIndex.SelectCrossingPolygon(polygon))
+                    {
+                        curves.Add(filterObj as Curve);
+                    }
+                }
+                else
+                {
+                    curves = columnDbExtension.ColumnCurves;
+                }
+                List<Curve> columnOutlines = PrecessColumn(curves);
                 columnOutlines.ForEach(o=> Elements.Add(ThIfcColumn.CreateColumnEntity(o)));
             }
         }
-        public List<Curve> PrecessColumn(List<Curve> curves)
+        private List<Curve> PrecessColumn(List<Curve> curves)
         {
             List<Curve> columnOutlines = new List<Curve>();
             // 构成柱的几何图元包括：

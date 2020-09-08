@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -19,7 +20,7 @@ namespace ThMEPEngineCore.Engine
         {
             Elements = new List<ThIfcBuildingElement>();
         }
-        public abstract void Recognize(Database database);
+        public abstract void Recognize(Database database, Point3dCollection polygon);
         public DBObjectCollection Collect()
         {
             DBObjectCollection dbObjs = new DBObjectCollection();

@@ -21,6 +21,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.BeamInfo;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model.Segment;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore
 {
@@ -109,10 +110,12 @@ namespace ThMEPEngineCore
         public void ThExtractColumn()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var columnDbExtension = new ThStructureColumnDbExtension(Active.Database))
+            using (var columnRecognitionEngine = new ThColumnRecognitionEngine())
             {
-                columnDbExtension.BuildElementCurves();
-                columnDbExtension.ColumnCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
+                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
+                columnRecognitionEngine.Recognize(acadDatabase.Database, range.Vertices());
+                columnRecognitionEngine.Elements.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
         }
         [CommandMethod("TIANHUACAD", "THExtractBeam", CommandFlags.Modal)]
@@ -121,7 +124,9 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
             {
-                beamEngine.Recognize(Active.Database);
+                var rangeRes=Active.Editor.GetEntity("\nSelect a range polyline");
+                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
+                beamEngine.Recognize(Active.Database, range.Vertices());
                 beamEngine.Elements.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
         }
@@ -139,10 +144,12 @@ namespace ThMEPEngineCore
         public void THExtractShearWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var shearWallDbExtension = new ThStructureShearWallDbExtension(Active.Database))
+            using (var shearWallEngine = new ThShearWallRecognitionEngine())
             {
-                shearWallDbExtension.BuildElementCurves();
-                shearWallDbExtension.ShearWallCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
+                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
+                shearWallEngine.Recognize(acadDatabase.Database, range.Vertices());
+                shearWallEngine.Elements.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
         }
         [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
@@ -152,9 +159,11 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
             {
+                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
+                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
-                thBeamTypeRecogitionEngine.Recognize(Active.Database);
+                thBeamTypeRecogitionEngine.Recognize(Active.Database, range.Vertices());
                 stopwatch.Stop();
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
                 Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds+"秒");
@@ -194,7 +203,9 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
             {
-                thBeamTypeRecogitionEngine.Recognize(Active.Database);
+                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
+                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
+                thBeamTypeRecogitionEngine.Recognize(Active.Database, range.Vertices());
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m =>
                 {
                    var outline = m.CreateExtendBeamOutline(50.0);

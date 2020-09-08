@@ -22,10 +22,10 @@ namespace ThMEPEngineCore.Algorithm
         public static ThMEPFrameService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-        public void InitializeWithDb(Database database)
+        public void InitializeWithDb(Database database, Point3dCollection polygon)
         {
             ThMEPModelManager.Instance.Initialize();
-            ThMEPModelManager.Instance.LoadFromDatabase(database);
+            ThMEPModelManager.Instance.LoadFromDatabase(database, polygon);
             ThMEPModelManager.Instance.CreateSpatialIndex();
         }
 

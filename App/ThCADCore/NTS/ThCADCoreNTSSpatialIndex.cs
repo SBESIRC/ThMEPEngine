@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetARX;
 using System.Linq;
 using GeoAPI.Geometries;
 using Dreambuild.AutoCAD;
@@ -151,6 +152,16 @@ namespace ThCADCore.NTS
         {
             var geometry = polyline.ToNTSPolygon();
             return CrossingFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
+        }
+
+        public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
+        {
+            var pline = new Polyline()
+            {
+                Closed = true,
+            };
+            pline.CreatePolyline(polygon);
+            return SelectCrossingPolygon(pline);
         }
 
         /// <summary>

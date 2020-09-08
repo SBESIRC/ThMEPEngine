@@ -2,6 +2,7 @@
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -30,11 +31,11 @@ namespace ThMEPEngineCore.Algorithm
             ShearWallEngine = new ThShearWallRecognitionEngine();
         }
 
-        public void LoadFromDatabase(Database database)
+        public void LoadFromDatabase(Database database, Point3dCollection polygon)
         {
-            BeamEngine.Recognize(database);
-            ColumnEngine.Recognize(database);
-            ShearWallEngine.Recognize(database);
+            BeamEngine.Recognize(database, polygon);
+            ColumnEngine.Recognize(database, polygon);
+            ShearWallEngine.Recognize(database, polygon);
         }
 
         public void CreateSpatialIndex()

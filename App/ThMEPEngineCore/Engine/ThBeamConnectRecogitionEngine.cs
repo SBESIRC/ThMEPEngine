@@ -5,6 +5,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -26,16 +27,16 @@ namespace ThMEPEngineCore.Engine
         {
             //TODO
         }
-        public void Recognize(Database database)
+        public void Recognize(Database database, Point3dCollection polygon)
         {
             SingleBeamLinks = new List<ThSingleBeamLink>();
             // 启动柱识别引擎
             thColumnRecognitionEngine = new ThColumnRecognitionEngine();
-            thColumnRecognitionEngine.Recognize(database);
+            thColumnRecognitionEngine.Recognize(database, polygon);
 
             // 启动墙识别引擎
             thShearWallRecognitionEngine = new ThShearWallRecognitionEngine();
-            thShearWallRecognitionEngine.Recognize(database);
+            thShearWallRecognitionEngine.Recognize(database, polygon);
 
             // 创建空间索引
             CreateColumnSpatialIndex();
@@ -43,7 +44,7 @@ namespace ThMEPEngineCore.Engine
             
             // 启动梁识别引擎
             thBeamRecognitionEngine = new ThBeamRecognitionEngine();
-            thBeamRecognitionEngine.Recognize(database);
+            thBeamRecognitionEngine.Recognize(database, polygon);
 
             //梁分割
             thBeamRecognitionEngine.Split(thColumnRecognitionEngine, thShearWallRecognitionEngine);
