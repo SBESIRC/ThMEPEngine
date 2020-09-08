@@ -1,10 +1,16 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
+using GeoAPI.Geometries;
 using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using ThMEPEngineCore.Model.Segment;
+using ThMEPEngineCore.BeamInfo.Utils;
+using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Distance;
 
 namespace ThMEPEngineCore.Test
 {
@@ -53,6 +59,29 @@ namespace ThMEPEngineCore.Test
                     segment.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(segment);
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThArcBeamOutline", CommandFlags.Modal)]
+        public void ThArcBeamOutline()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new List<Arc>();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Arc>(obj));
+                }
+
+                Polyline polyline = ThArcBeamOutliner.Outline(objs[0], objs[1]);
+                polyline.ColorIndex = 2;
+                acadDatabase.ModelSpace.Add(polyline);
             }
         }
 

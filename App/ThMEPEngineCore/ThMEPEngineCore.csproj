@@ -47,6 +47,7 @@
     <Compile Include="BeamInfo\ThDistinguishBeamInfo.cs" />
     <Compile Include="BeamInfo\Utils\CalBeamIntersect.cs" />
     <Compile Include="BeamInfo\Utils\GetObjectUtils.cs" />
+    <Compile Include="BeamInfo\Utils\ThArcBeamOutliner.cs" />
     <Compile Include="BeamInfo\Utils\ThOverkillDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureUtils.cs" />
