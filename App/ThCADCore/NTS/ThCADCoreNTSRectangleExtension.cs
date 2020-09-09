@@ -1,5 +1,5 @@
-﻿using GeoAPI.Geometries;
-using NetTopologySuite.Utilities;
+﻿using NetTopologySuite.Utilities;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
@@ -12,7 +12,7 @@ namespace ThCADCore.NTS
                 extents.MaxPoint.ToNTSCoordinate());
         }
 
-        public static IPolygon ToNTSPolygon(this Extents3d extents)
+        public static Polygon ToNTSPolygon(this Extents3d extents)
         {
             var shapeFactory = new GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
             {

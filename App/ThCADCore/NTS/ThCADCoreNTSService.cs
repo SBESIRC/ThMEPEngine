@@ -1,5 +1,5 @@
-﻿using GeoAPI.Geometries;
-using NetTopologySuite;
+﻿using NetTopologySuite;
+using NetTopologySuite.Geometries;
 
 namespace ThCADCore.NTS
 {
@@ -20,9 +20,9 @@ namespace ThCADCore.NTS
         public bool PrecisionReduce { get; set; }
 
 
-        private IGeometryFactory geometryFactory;
-        private IGeometryFactory defaultGeometryFactory;
-        public IGeometryFactory GeometryFactory
+        private GeometryFactory geometryFactory;
+        private GeometryFactory defaultGeometryFactory;
+        public GeometryFactory GeometryFactory
         {
             get
             {
@@ -46,8 +46,8 @@ namespace ThCADCore.NTS
             }
         }
 
-        private IPrecisionModel precisionModel;
-        public IPrecisionModel PrecisionModel
+        private PrecisionModel precisionModel;
+        public PrecisionModel PrecisionModel
         {
             get
             {

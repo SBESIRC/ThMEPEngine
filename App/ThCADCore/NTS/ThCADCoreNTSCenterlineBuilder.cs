@@ -1,7 +1,7 @@
-﻿using GeoAPI.Geometries;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -10,8 +10,8 @@ namespace ThCADCore.NTS
         public static DBObjectCollection Centerline(Polyline polyline, double interpolationDistance)
         {
             var geometry = polyline.ToNTSPolygon();
-            var lineStrings = new List<IGeometry>();
-            foreach (IPolygon polygon in polyline.VoronoiDiagram(interpolationDistance).Geometries)
+            var lineStrings = new List<Geometry>();
+            foreach (Polygon polygon in polyline.VoronoiDiagram(interpolationDistance).Geometries)
             {
                 var iterator = new LinearIterator(polygon.Shell);
                 for (; iterator.HasNext();iterator.Next())
@@ -27,14 +27,14 @@ namespace ThCADCore.NTS
                 }
             }
             var centerlines = new DBObjectCollection();
-            foreach(ILineString lineString in lineStrings)
+            foreach(LineString lineString in lineStrings)
             {
                 centerlines.Add(lineString.ToDbPolyline());
             }
             return centerlines;
         }
 
-        private static IGeometry CreateLineString(LinearIterator iterator)
+        private static Geometry CreateLineString(LinearIterator iterator)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(new Coordinate[]
             {

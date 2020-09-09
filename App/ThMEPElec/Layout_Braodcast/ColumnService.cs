@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -100,7 +101,7 @@ namespace ThMEPElectrical.Layout_Braodcast
         public List<ColumnModel> GetColumn(Line line, Polyline linePoly, List<ColumnModel> columns)
         {
             List<ColumnModel> columnLst = new List<ColumnModel>();
-            var cols = columns.Where(x => linePoly.IndexedPointInPolygon(x.columnCenterPt) == LocateStatus.Interior).ToList();
+            var cols = columns.Where(x => linePoly.IndexedContains(x.columnCenterPt)).ToList();
             foreach (var col in cols)
             {
                 CalColumnLayoutPoint(col, line);
@@ -126,7 +127,7 @@ namespace ThMEPElectrical.Layout_Braodcast
                 columnPts.Add(columnPoly.GetPoint3dAt(i));
             }
 
-            var interPoint = intersectLine.Intersection(columnPoly);
+			var interPoint = intersectLine.Intersection(columnPoly);
             columnPts = columnPts.OrderBy(x => x.DistanceTo(interPoint)).ToList();
             Point3d p1 = columnPts[0];
             Point3d p2 = columnPts[1];

@@ -1,16 +1,15 @@
 ﻿using System;
-using GeoAPI.Geometries;
 using NetTopologySuite.Densify;
-using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Triangulate;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSTriangulate
     {
-        public static IGeometryCollection VoronoiDiagram(this Polyline polyline, double distanceTolerance)
+        public static GeometryCollection VoronoiDiagram(this Polyline polyline, double distanceTolerance)
         {
             var lineString = polyline.ToNTSLineString();
             var voronoiDiagram = new VoronoiDiagramBuilder();
@@ -23,7 +22,7 @@ namespace ThCADCore.NTS
             var objs = new DBObjectCollection();
             foreach (var geometry in polyline.VoronoiDiagram(distanceTolerance).Geometries)
             {
-                if (geometry is IPolygon polygon)
+                if (geometry is Polygon polygon)
                 {
                     objs.Add(polygon.Shell.ToDbPolyline());
                 }
@@ -43,7 +42,7 @@ namespace ThCADCore.NTS
             var triangles = delaunayTriangulation.GetTriangles(ThCADCoreNTSService.Instance.GeometryFactory);
             foreach (var geometry in triangles.Geometries)
             {
-                if (geometry is IPolygon polygon)
+                if (geometry is Polygon polygon)
                 {
                     objs.Add(polygon.Shell.ToDbPolyline());
                 }
@@ -65,7 +64,7 @@ namespace ThCADCore.NTS
             var triangles = builder.GetTriangles(ThCADCoreNTSService.Instance.GeometryFactory);
             foreach (var geometry in triangles.Geometries)
             {
-                if (geometry is IPolygon polygon)
+                if (geometry is Polygon polygon)
                 {
                     objs.Add(polygon.Shell.ToDbPolyline());
                 }
@@ -85,7 +84,7 @@ namespace ThCADCore.NTS
             var triangles = delaunayTriangulation.GetTriangles(ThCADCoreNTSService.Instance.GeometryFactory);
             foreach (var geometry in triangles.Geometries)
             {
-                if (geometry is IPolygon polygon)
+                if (geometry is Polygon polygon)
                 {
                     objs.Add(polygon.Shell.ToDbPolyline());
                 }

@@ -130,25 +130,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThBoundary", CommandFlags.Modal)]
-        public void ThBoundary()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var obj = acadDatabase.Element<Entity>(result.ObjectId);
-                var polygon = obj.ToNTSPolygon();
-                var boundary = polygon.Shell.ToDbPolyline();
-                boundary.ColorIndex = 1;
-                acadDatabase.ModelSpace.Add(boundary);
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThOutline", CommandFlags.Modal)]
         public void ThOutline()
         {
@@ -240,6 +221,26 @@ namespace ThCADCore.Test
                 foreach (var obj in objs.Polygons())
                 {
                     acadDatabase.ModelSpace.Add(obj as Entity);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThPreprocess", CommandFlags.Modal)]
+        public void ThPreprocess()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach (Polyline segment in pline.Preprocess())
+                {
+                    segment.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(segment);
                 }
             }
         }

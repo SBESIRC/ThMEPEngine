@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using NetTopologySuite;
-using GeoAPI.Geometries;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
 using System.Collections.Generic;
@@ -14,7 +13,7 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSDbExtension
     {
-        public static Polyline ToDbPolyline(this ILineString lineString)
+        public static Polyline ToDbPolyline(this LineString lineString)
         {
             var pline = new Polyline();
             for(int i = 0; i < lineString.Coordinates.Length; i++)
@@ -25,7 +24,7 @@ namespace ThCADCore.NTS
             return pline;
         }
 
-        public static Line ToDbline(this ILineString lineString)
+        public static Line ToDbline(this LineString lineString)
         {
             var line = new Line
             {
@@ -35,7 +34,7 @@ namespace ThCADCore.NTS
             return line;
         }
 
-        public static Polyline ToDbPolyline(this ILinearRing linearRing)
+        public static Polyline ToDbPolyline(this LinearRing linearRing)
         {
             var pline = new Polyline()
             {
@@ -48,35 +47,35 @@ namespace ThCADCore.NTS
             return pline;
         }
 
-        public static List<Polyline> ToDbPolylines(this IPolygon polygon)
+        public static List<Polyline> ToDbPolylines(this Polygon polygon)
         {
             var plines = new List<Polyline>();
             plines.Add(polygon.Shell.ToDbPolyline());
-            foreach(ILinearRing hole in polygon.Holes)
+            foreach(LinearRing hole in polygon.Holes)
             {
                 plines.Add(hole.ToDbPolyline());
             }
             return plines;
         }
 
-        public static List<Polyline> ToDbPolylines(this IMultiLineString geometries)
+        public static List<Polyline> ToDbPolylines(this MultiLineString geometries)
         {
             var plines = new List<Polyline>();
             foreach(var geometry in geometries.Geometries)
             {
-                if (geometry is ILineString lineString)
+                if (geometry is LineString lineString)
                 {
                     plines.Add(lineString.ToDbPolyline());
                 }
-                else if (geometry is ILinearRing linearRing)
+                else if (geometry is LinearRing linearRing)
                 {
                     plines.Add(linearRing.ToDbPolyline());
                 }
-                else if (geometry is IPolygon polygon)
+                else if (geometry is Polygon polygon)
                 {
                     plines.AddRange(polygon.ToDbPolylines());
                 }
-                else if (geometry is IMultiLineString multiLineString)
+                else if (geometry is MultiLineString multiLineString)
                 {
                     plines.AddRange(multiLineString.ToDbPolylines());
                 }
@@ -97,32 +96,32 @@ namespace ThCADCore.NTS
             };
         }
 
-        public static List<Region> ToDbRegions(this IMultiPolygon mPolygon)
+        public static List<Region> ToDbRegions(this MultiPolygon mPolygon)
         {
             var regions = new List<Region>();
-            foreach (IPolygon polygon in mPolygon.Geometries)
+            foreach (Polygon polygon in mPolygon.Geometries)
             {
                 regions.Add(polygon.ToDbRegion());
             }
             return regions;
         }
 
-        public static List<Polyline> ToDbPolylines(this IMultiPolygon mPolygon)
+        public static List<Polyline> ToDbPolylines(this MultiPolygon mPolygon)
         {
             var plines = new List<Polyline>();
-            foreach (IPolygon polygon in mPolygon.Geometries)
+            foreach (Polygon polygon in mPolygon.Geometries)
             {
                 plines.Add(polygon.Shell.ToDbPolyline());
             }
             return plines;
         }
 
-        public static IGeometry ToNTSNodedLineString(this Polyline polyline)
+        public static Geometry ToNTSNodedLineString(this Polyline polyline)
         {
             return UnaryUnionOp.Union(polyline.ToNTSLineString());
         }
 
-        public static IGeometry ToNTSLineString(this Polyline polyLine)
+        public static Geometry ToNTSLineString(this Polyline polyLine)
         {
             var points = new List<Coordinate>();
             for (int i = 0; i < polyLine.NumberOfVertices; i++)
@@ -166,39 +165,12 @@ namespace ThCADCore.NTS
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
             }
         }
-
-        public static IGeometry ToNTSLineStringEx(this Polyline polyLine)
-        {
-            var geometry = polyLine.ToNTSLineString();
-            // 精度模型选用Fixed模型（四舍五入，仅保留整数部分）
-            var model = NtsGeometryServices.Instance.CreatePrecisionModel(PrecisionModels.Fixed);
-            var operation = new PrecisionReducerCoordinateOperation(model, false);
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(operation.Edit(geometry.Coordinates, geometry));
-        }
-
-        public static IGeometry ToNTSLineString(this Curve curve)
-        {
-            if (curve is Line line)
-            {
-                return line.ToNTSLineString();
-            }
-            else if (curve is Polyline polyline)
-            {
-                return polyline.ToNTSLineString();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-
-        }
-
-        public static IPolygon ToNTSPolygon(this Polyline polyLine)
+        public static Polygon ToNTSPolygon(this Polyline polyLine)
         {
             var polygons = polyLine.Polygonize();
             if (polygons.Count == 1)
             {
-                return polygons.First() as IPolygon;
+                return polygons.First() as Polygon;
             }
             else if (polygons.Count == 0)
             {
@@ -210,7 +182,16 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static IPolygon ToNTSPolygon(this Circle circle, int numPoints)
+        public static Geometry ToNTSLineStringEx(this Polyline polyLine)
+        {
+            var geometry = polyLine.ToNTSLineString();
+            // 精度模型选用Fixed模型（四舍五入，仅保留整数部分）
+            var model = NtsGeometryServices.Instance.CreatePrecisionModel(PrecisionModels.Fixed);
+            var operation = new PrecisionReducerCoordinateOperation(model, false);
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(operation.Edit(geometry.Coordinates, geometry));
+        }
+
+        public static Polygon ToNTSPolygon(this Circle circle, int numPoints)
         {
             // 获取圆的外接矩形
             var shapeFactory = new GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
@@ -222,7 +203,7 @@ namespace ThCADCore.NTS
             return shapeFactory.CreateCircle();
         }
 
-        public static ILineString ToNTSLineString(this Line line)
+        public static LineString ToNTSLineString(this Line line)
         {
             var points = new List<Coordinate>
             {
@@ -232,7 +213,7 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
         }
 
-        public static ILineString ToNTSLineString(this Arc arc, int numPoints)
+        public static LineString ToNTSLineString(this Arc arc, int numPoints)
         {
             var shapeFactory = new GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
             {
@@ -242,14 +223,19 @@ namespace ThCADCore.NTS
             };
             return shapeFactory.CreateArc(arc.StartAngle, arc.TotalAngle);
         }
-        
+
+        public static Point ToNTSPoint(this DBPoint point)
+        {
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(point.Position.ToNTSCoordinate());
+        }
+
         /// <summary>
         /// 按弦长细化
         /// </summary>
         /// <param name="arc"></param>
         /// <param name="chord"></param>
         /// <returns></returns>
-        public static ILineString TessellateWithChord(this Arc arc, double chord)
+        public static LineString TessellateWithChord(this Arc arc, double chord)
         {
             // 根据弦长，半径，计算对应的弧长
             // Chord Length = 2 * Radius * sin(angle / 2.0)
@@ -270,7 +256,7 @@ namespace ThCADCore.NTS
         /// <param name="arc"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static ILineString TessellateWithArc(this Arc arc, double length)
+        public static LineString TessellateWithArc(this Arc arc, double length)
         {
             if (arc.Length < length)
             {

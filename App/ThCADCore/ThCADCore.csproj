@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <Import Project="..\TIANHUA.CSharp.General.targets" />
+  <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -32,7 +32,6 @@
     <Compile Include="NTS\ThCADCoreNTSDbObjCollectionExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSLineExtension.cs" />
-    <Compile Include="NTS\ThCADCoreNTSLocate.cs" />
     <Compile Include="NTS\ThCADCoreNTSMatch.cs" />
     <Compile Include="NTS\ThCADCoreNTSOperation.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolygonizer.cs" />
@@ -85,7 +84,7 @@
     </When>
   </Choose>
   <ItemGroup>
-    <PackageReference Include="NetTopologySuite" Version="1.15.3" />
+    <PackageReference Include="NetTopologySuite" Version="2.1.0" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using Linq2Acad;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.BeamInfo.Utils;

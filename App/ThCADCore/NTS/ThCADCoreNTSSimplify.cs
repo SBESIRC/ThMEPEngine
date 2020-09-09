@@ -1,6 +1,6 @@
 ﻿using System;
-using GeoAPI.Geometries;
 using NetTopologySuite.Simplify;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
@@ -24,7 +24,7 @@ namespace ThCADCore.NTS
         public static Polyline TPSimplify(this Polyline pline, double distanceTolerance)
         {
             var result = TopologyPreservingSimplifier.Simplify(pline.ToNTSLineString(), distanceTolerance);
-            if (result is ILineString lineString)
+            if (result is LineString lineString)
             {
                 return lineString.ToDbPolyline();
             }

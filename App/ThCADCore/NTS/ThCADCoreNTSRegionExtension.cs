@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using GeoAPI.Geometries;
 using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.AutoCAD.Utility.ExtensionTools;
 
@@ -9,7 +9,7 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSRegionExtension
     {
-        public static IPolygon ToNTSPolygon(this Region region)
+        public static Polygon ToNTSPolygon(this Region region)
         {
             // 暂时不支持"复杂面域"
             var plines = region.ToPolylines();
@@ -23,7 +23,7 @@ namespace ThCADCore.NTS
             return pline.ToNTSPolygon();
         }
 
-        public static Region ToDbRegion(this IPolygon polygon)
+        public static Region ToDbRegion(this Polygon polygon)
         {
             try
             {
@@ -58,7 +58,7 @@ namespace ThCADCore.NTS
 
             // 若相交，则计算共用部分
             var rGeometry = pGeometry.Union(sGeometry);
-            if (rGeometry is IPolygon polygon)
+            if (rGeometry is Polygon polygon)
             {
                 return polygon.ToDbRegion();
             }
@@ -83,7 +83,7 @@ namespace ThCADCore.NTS
 
             // 若相交，则计算相交部分
             var rGeometry = pGeometry.Intersection(sGeometry);
-            if (rGeometry is IPolygon polygon)
+            if (rGeometry is Polygon polygon)
             {
                 return polygon.ToDbRegion();
             }
@@ -109,11 +109,11 @@ namespace ThCADCore.NTS
 
             // 若相交，则计算在pRegion，但不在sRegion的部分
             var rGeometry = pGeometry.Difference(sGeometry);
-            if (rGeometry is IPolygon polygon)
+            if (rGeometry is Polygon polygon)
             {
                 regions.Add(polygon.Shell.ToDbPolyline());
             }
-            else if (rGeometry is IMultiPolygon mPolygon)
+            else if (rGeometry is MultiPolygon mPolygon)
             {
                 regions.AddRange(mPolygon.ToDbPolylines());
             }
@@ -125,7 +125,7 @@ namespace ThCADCore.NTS
             return regions;
         }
 
-        public static IGeometry Intersect(this Region pRegion, Region sRegion)
+        public static Geometry Intersect(this Region pRegion, Region sRegion)
         {
             var pGeometry = pRegion.ToNTSPolygon();
             var sGeometry = sRegion.ToNTSPolygon();
@@ -164,11 +164,11 @@ namespace ThCADCore.NTS
 
                 // 若相交，则计算在pRegion，但不在sRegion的部分
                 var rGeometry = pGeometry.Difference(sGeometry);
-                if (rGeometry is IPolygon polygon)
+                if (rGeometry is Polygon polygon)
                 {
                     regions.Add(polygon.Shell.ToDbPolyline());
                 }
-                else if (rGeometry is IMultiPolygon mPolygon)
+                else if (rGeometry is MultiPolygon mPolygon)
                 {
                     regions.AddRange(mPolygon.ToDbPolylines());
                 }
@@ -188,7 +188,7 @@ namespace ThCADCore.NTS
 
         public static List<Polyline> Differences(this Region pRegion, DBObjectCollection sRegions)
         {
-            var pGeometrys = new List<IPolygon>();
+            var pGeometrys = new List<Polygon>();
             try
             {
                 pGeometrys.Add(pRegion.ToNTSPolygon());
@@ -210,14 +210,14 @@ namespace ThCADCore.NTS
 
                         // 若相交，则计算在pRegion，但不在sRegion的部分
                         var rGeometry = pGeometry.Difference(sGeometry);
-                        if (rGeometry is IPolygon polygon)
+                        if (rGeometry is Polygon polygon)
                         {
-                            pGeometrys = new List<IPolygon>() { polygon };
+                            pGeometrys = new List<Polygon>() { polygon };
                         }
-                        else if (rGeometry is IMultiPolygon mPolygon)
+                        else if (rGeometry is MultiPolygon mPolygon)
                         {
-                            pGeometrys = new List<IPolygon>();
-                            foreach (IPolygon rPolygon in mPolygon.Geometries)
+                            pGeometrys = new List<Polygon>();
+                            foreach (Polygon rPolygon in mPolygon.Geometries)
                             {
                                 pGeometrys.Add(rPolygon);
                             }

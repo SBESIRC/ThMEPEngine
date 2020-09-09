@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
-using GeoAPI.Geometries;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Linemerge;
@@ -13,9 +13,9 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSDbObjCollectionExtension
     {
-        public static IMultiPolygon ToNTSMultiPolygon(this DBObjectCollection objs)
+        public static MultiPolygon ToNTSMultiPolygon(this DBObjectCollection objs)
         {
-            var polygons = new List<IPolygon>();
+            var polygons = new List<Polygon>();
             foreach (Entity entity in objs)
             {
                 if (entity is Polyline polyline)
@@ -34,9 +34,9 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
         }
 
-        public static List<IGeometry> ToNTSPolygons(this DBObjectCollection objs)
+        public static List<Geometry> ToNTSPolygons(this DBObjectCollection objs)
         {
-            var polygons = new List<IGeometry>();
+            var polygons = new List<Geometry>();
             foreach (Polyline polyline in objs)
             {
                 polygons.Add(polyline.ToNTSPolygon());
@@ -44,14 +44,14 @@ namespace ThCADCore.NTS
             return polygons;
         }
 
-        public static IGeometryCollection ToNTSPolygonCollection(this DBObjectCollection objs)
+        public static GeometryCollection ToNTSPolygonCollection(this DBObjectCollection objs)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection(objs.ToNTSPolygons().ToArray());
         }
 
-        public static IGeometry ToNTSNodedLineStrings(this DBObjectCollection curves, double chord = 5.0)
+        public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves, double chord = 5.0)
         {
-            var geometries = new List<IGeometry>();
+            var geometries = new List<Geometry>();
             foreach (DBObject curve in curves)
             {
                 if (curve is Line line)
@@ -74,9 +74,9 @@ namespace ThCADCore.NTS
             return UnaryUnionOp.Union(geometries);
         }
 
-        public static List<IGeometry> ToNTSLineStrings(this DBObjectCollection curves, double chord = 5.0)
+        public static List<Geometry> ToNTSLineStrings(this DBObjectCollection curves, double chord = 5.0)
         {
-            var geometries = new List<IGeometry>();
+            var geometries = new List<Geometry>();
             foreach (DBObject curve in curves)
             {
                 if (curve is Line line)
@@ -99,7 +99,7 @@ namespace ThCADCore.NTS
             return geometries;
         }
 
-        public static IGeometry UnionGeometries(this DBObjectCollection curves)
+        public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
             // The buffer(0) trick is sometimes faster, 
             // but can be less robust and can sometimes take a long time to complete. 
@@ -116,13 +116,13 @@ namespace ThCADCore.NTS
         {
             var objs = new DBObjectCollection();
             var result = CascadedPolygonUnion.Union(curves.ToNTSPolygons().ToArray());
-            if (result is IPolygon bufferPolygon)
+            if (result is Polygon bufferPolygon)
             {
                 objs.Add(bufferPolygon.Shell.ToDbPolyline());
             }
-            else if (result is IMultiPolygon mPolygon)
+            else if (result is MultiPolygon mPolygon)
             {
-                foreach (IPolygon item in mPolygon.Geometries)
+                foreach (Polygon item in mPolygon.Geometries)
                 {
                     objs.Add(item.Shell.ToDbPolyline());
                 }
@@ -142,7 +142,7 @@ namespace ThCADCore.NTS
             // "Dissolved" means that any duplicate (i.e. coincident) line segments or 
             // portions of line segments will be reduced to a single line segment in the result.
             var results = UnaryUnionOp.Union(curves.ToNTSLineStrings());
-            if (results is IMultiLineString geometries)
+            if (results is MultiLineString geometries)
             {
                 var objs = new DBObjectCollection();
                 geometries.ToDbPolylines().ForEach(o => objs.Add(o));
@@ -158,7 +158,7 @@ namespace ThCADCore.NTS
         {
             var geometry = curves.Combine(chord);
             var rectangle = MinimumDiameter.GetMinimumRectangle(geometry);
-            if (rectangle is IPolygon polygon)
+            if (rectangle is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();
             }
@@ -168,7 +168,7 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static IGeometry Combine(this DBObjectCollection curves, double chord = 5.0)
+        public static Geometry Combine(this DBObjectCollection curves, double chord = 5.0)
         {
             var geometries = curves.ToNTSLineStrings(chord);
             return GeometryCombiner.Combine(geometries);
@@ -181,7 +181,7 @@ namespace ThCADCore.NTS
             var results = new DBObjectCollection();
             foreach (var geometry in merger.GetMergedLineStrings())
             {
-                if (geometry is ILineString lineString)
+                if (geometry is LineString lineString)
                 {
                     // 合并后的图元需要刷成合并前的图元的属性
                     // 假设合并的图元都有相同的属性
@@ -198,10 +198,10 @@ namespace ThCADCore.NTS
             return results;
         }
 
-        public static DBObjectCollection ToDBCollection(this IList<IGeometry> geometries)
+        public static DBObjectCollection ToDBCollection(this IList<Geometry> geometries)
         {
             var objs = new DBObjectCollection();
-            geometries.Cast<ILineString>().ForEach(o => objs.Add(o.ToDbPolyline()));
+            geometries.Cast<LineString>().ForEach(o => objs.Add(o.ToDbPolyline()));
             return objs;
         }
     }

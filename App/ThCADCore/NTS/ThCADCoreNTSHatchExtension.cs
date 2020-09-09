@@ -1,6 +1,6 @@
-﻿using GeoAPI.Geometries;
+﻿using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
-using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.BoundaryRepresentation;
 
@@ -8,12 +8,12 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSHatchExtension
     {
-        public static IPolygon ConvexHull(this Hatch hatch)
+        public static Polygon ConvexHull(this Hatch hatch)
         {
             var pts = hatch.Vertices();
             var convexHull = new ConvexHull(pts.ToArray(), 
                 ThCADCoreNTSService.Instance.GeometryFactory);
-            return convexHull.GetConvexHull() as IPolygon;
+            return convexHull.GetConvexHull() as Polygon;
         }
 
         private static List<Coordinate> Vertices(this Hatch hatch)

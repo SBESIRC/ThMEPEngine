@@ -1,8 +1,10 @@
 ﻿using System;
-using GeoAPI.Geometries;
-using Autodesk.AutoCAD.Geometry;
+using NetTopologySuite.Simplify;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Union;
+using NetTopologySuite.Operation.Linemerge;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
@@ -18,15 +20,15 @@ namespace ThCADCore.NTS
         public static Polyline MinimumBoundingBox(this Polyline polyline)
         {
             var geometry = polyline.ToNTSLineString().Envelope;
-            if (geometry is ILineString lineString)
+            if (geometry is LineString lineString)
             {
                 return lineString.ToDbPolyline();
             }
-            else if (geometry is ILinearRing linearRing)
+            else if (geometry is LinearRing linearRing)
             {
                 return linearRing.ToDbPolyline();
             }
-            else if (geometry is IPolygon polygon)
+            else if (geometry is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();
             }
@@ -40,7 +42,7 @@ namespace ThCADCore.NTS
         {
             var geom = polyline.ToNTSLineString();
             var rectangle = MinimumDiameter.GetMinimumRectangle(geom);
-            if (rectangle is IPolygon polygon)
+            if (rectangle is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();
             }
@@ -54,7 +56,7 @@ namespace ThCADCore.NTS
         {
             var convexHull = new ConvexHull(polyline.ToNTSLineString());
             var geometry = convexHull.GetConvexHull();
-            if (geometry is IPolygon polygon)
+            if (geometry is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();
             }
@@ -67,7 +69,7 @@ namespace ThCADCore.NTS
         public static Polyline GetOctagonalEnvelope(this Polyline polyline)
         {
             var geometry = OctagonalEnvelope.GetOctagonalEnvelope(polyline.ToNTSLineString());
-            if (geometry is IPolygon polygon)
+            if (geometry is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();
             }
@@ -79,13 +81,8 @@ namespace ThCADCore.NTS
 
         public static bool IsClosed(this Polyline polyline)
         {
-            var geometry = polyline.ToNTSLineString() as ILineString;
+            var geometry = polyline.ToNTSLineString() as LineString;
             return geometry.IsClosed;
-        }
-
-        public static bool Contains(this Polyline thisPline, Point3d pt)
-        {
-            return thisPline.PointInPolygon(pt) == LocateStatus.Interior;
         }
 
         public static Polyline Intersect(this Polyline thisPolyline, Polyline polySec)
@@ -107,12 +104,31 @@ namespace ThCADCore.NTS
 
             // 若相交，则计算相交部分
             var rGeometry = polygonFir.Intersection(polygonSec);
-            if (rGeometry is IPolygon polygon)
+            if (rGeometry is Polygon polygon)
             {
                 return polygon.Shell.ToDbPolyline();
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// 预处理多段线
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static DBObjectCollection Preprocess(this Polyline polyline)
+        {
+            // 剔除重复点（在一定公差范围内）
+            // 鉴于主要的使用场景是建筑底图，选择1毫米作为公差
+            var result = TopologyPreservingSimplifier.Simplify(polyline.ToNTSLineStringEx(), 1.0);
+
+            // 合并线段
+            var merger = new LineMerger();
+            merger.Add(UnaryUnionOp.Union(result));
+
+            // 返回结果
+            return merger.GetMergedLineStrings().ToDBCollection();
         }
     }
 }

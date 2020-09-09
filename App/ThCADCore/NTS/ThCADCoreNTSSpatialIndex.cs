@@ -1,25 +1,24 @@
 ﻿using System;
 using DotNetARX;
 using System.Linq;
-using GeoAPI.Geometries;
 using Dreambuild.AutoCAD;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using GeoAPI.Geometries.Prepared;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
-using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries.Prepared;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
-        private STRtree<IGeometry> Engine { get; set; }
+        private STRtree<Geometry> Engine { get; set; }
         private PreparedGeometryFactory Factory { get; set; }
-        private Dictionary<IGeometry, DBObject> Geometries { get; set; }
+        private Dictionary<Geometry, DBObject> Geometries { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
-            Engine = new STRtree<IGeometry>();
+            Engine = new STRtree<Geometry>();
             Factory = new PreparedGeometryFactory();
             Initialize(objs);
         }
@@ -31,7 +30,7 @@ namespace ThCADCore.NTS
 
         private void Initialize(DBObjectCollection objs)
         {
-            Geometries = new Dictionary<IGeometry, DBObject>();
+            Geometries = new Dictionary<Geometry, DBObject>();
             foreach (Entity obj in objs)
             {
                 if (obj is Line line)
@@ -48,14 +47,6 @@ namespace ThCADCore.NTS
                     if (!Geometries.Keys.Contains(geometry))
                     {
                         Geometries.Add(geometry, polyline);
-                    }
-                }
-                else if (obj is Circle circle)
-                {
-                    var geometry = circle.ToNTSPolygon();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, circle);
                     }
                 }
                 else if (obj is DBText text)
@@ -77,7 +68,7 @@ namespace ThCADCore.NTS
             }
         }
 
-        private void AddGeometry(IGeometry geometry)
+        private void AddGeometry(Geometry geometry)
         {
             Engine.Insert(geometry.EnvelopeInternal, geometry);
         }
@@ -225,7 +216,7 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection NearestNeighbours(Curve curve, int num)
         {
-            IGeometry geometry = null;
+            Geometry geometry = null;
             if (curve is Line line)
             {
                 geometry = line.ToNTSLineString();

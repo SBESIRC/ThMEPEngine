@@ -1,8 +1,8 @@
 ﻿using System;
-using GeoAPI.Geometries;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
-using NTSJoinStyle = GeoAPI.Operation.Buffer.JoinStyle;
+using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace ThCADCore.NTS
 {
@@ -11,17 +11,17 @@ namespace ThCADCore.NTS
         public static DBObjectCollection Trim(this Polyline polyline, Curve curve)
         {
             var objs = new DBObjectCollection();
-            var other = curve.ToNTSLineString();
+            var other = curve.ToNTSGeometry();
             var polygon = polyline.ToNTSPolygon();
             var result = polygon.Intersection(other);
-            if (result is IMultiLineString lineStrings)
+            if (result is MultiLineString lineStrings)
             {
-                foreach (ILineString lineString in lineStrings.Geometries)
+                foreach (LineString lineString in lineStrings.Geometries)
                 {
                     objs.Add(lineString.ToDbPolyline());
                 }
             }
-            else if (result is ILineString lineStr)
+            else if (result is LineString lineStr)
             {
                 if (lineStr.StartPoint != null && lineStr.EndPoint != null)
                 {
@@ -48,13 +48,13 @@ namespace ThCADCore.NTS
             {
                 return objs;
             }
-            if (buffer is IPolygon bufferPolygon)
+            if (buffer is Polygon bufferPolygon)
             {
                 objs.Add(bufferPolygon.Shell.ToDbPolyline());
             }
-            else if (buffer is IMultiPolygon mPolygon)
+            else if (buffer is MultiPolygon mPolygon)
             {
-                foreach(IPolygon item in mPolygon.Geometries)
+                foreach(Polygon item in mPolygon.Geometries)
                 {
                     objs.Add(item.Shell.ToDbPolyline());
                 }

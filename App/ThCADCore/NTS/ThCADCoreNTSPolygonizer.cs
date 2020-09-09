@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Linq;
-using GeoAPI.Geometries;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Polygonize;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSPolygonizer
     {
-        public static ICollection<IGeometry> Polygonize(this DBObjectCollection lines)
+        public static ICollection<Geometry> Polygonize(this DBObjectCollection lines)
         {
             var polygonizer = new Polygonizer();
             polygonizer.Add(lines.ToNTSNodedLineStrings());
             return polygonizer.GetPolygons();
         }
 
-        public static ICollection<IGeometry> Polygonize(this Polyline polyline)
+        public static ICollection<Geometry> Polygonize(this Polyline polyline)
         {
             var lines = new DBObjectCollection()
             {
@@ -26,7 +26,7 @@ namespace ThCADCore.NTS
             return lines.Polygonize();
         }
 
-        public static ICollection<IGeometry> Polygonize(this IGeometry geometry)
+        public static ICollection<Geometry> Polygonize(this Geometry geometry)
         {
             var polygonizer = new Polygonizer();
             polygonizer.Add(UnaryUnionOp.Union(geometry));
@@ -36,7 +36,7 @@ namespace ThCADCore.NTS
         public static DBObjectCollection Polygons(this DBObjectCollection lines)
         {
             var objs = new DBObjectCollection();
-            foreach (IPolygon polygon in lines.Polygonize())
+            foreach (Polygon polygon in lines.Polygonize())
             {
                 objs.Add(polygon.Shell.ToDbPolyline());
             }
@@ -47,18 +47,18 @@ namespace ThCADCore.NTS
         {
             using (var ov = new ThCADCoreNTSPrecisionReducer())
             {
-                var polygons = new List<IPolygon>();
+                var polygons = new List<Polygon>();
                 var boundaries = new DBObjectCollection();
                 var geometry = CascadedPolygonUnion.Union(lines.Polygonize());
                 if (geometry == null)
                 {
                     return boundaries;
                 }
-                if (geometry is IMultiPolygon mPolygon)
+                if (geometry is MultiPolygon mPolygon)
                 {
                     foreach (var item in mPolygon.Geometries)
                     {
-                        if (item is IPolygon polygon)
+                        if (item is Polygon polygon)
                         {
                             polygons.Add(polygon);
                         }
@@ -68,7 +68,7 @@ namespace ThCADCore.NTS
                         }
                     }
                 }
-                else if (geometry is IPolygon polygon)
+                else if (geometry is Polygon polygon)
                 {
                     polygons.Add(polygon);
                 }
@@ -84,21 +84,21 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static List<IPolygon> OutlineGeometries(this DBObjectCollection lines)
+        public static List<Polygon> OutlineGeometries(this DBObjectCollection lines)
         {
-            var geometries = new List<IPolygon>();
+            var geometries = new List<Polygon>();
             var geometry = CascadedPolygonUnion.Union(lines.Polygonize());
             if (geometry == null)
             {
                 return geometries;
             }
-            if (geometry is IPolygon polygon)
+            if (geometry is Polygon polygon)
             {
                 geometries.Add(polygon);
             }
-            else if (geometry is IMultiPolygon mPolygon)
+            else if (geometry is MultiPolygon mPolygon)
             {
-                foreach (IPolygon subPolygon in mPolygon.Geometries)
+                foreach (Polygon subPolygon in mPolygon.Geometries)
                 {
                     geometries.Add(subPolygon);
                 }
@@ -125,18 +125,18 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection FindLoops(this DBObjectCollection lines)
         {
-            var polygons = new List<IPolygon>();
+            var polygons = new List<Polygon>();
             var polygonizer = new Polygonizer();
             var loops = new DBObjectCollection();
             polygonizer.Add(lines.ToNTSNodedLineStrings());
             var geometries = polygonizer.GetPolygons().ToList();
             foreach (var geometry in geometries)
             {
-                if (geometry is IMultiPolygon mPolygon)
+                if (geometry is MultiPolygon mPolygon)
                 {
                     foreach (var item in mPolygon.Geometries)
                     {
-                        if (item is IPolygon polygon)
+                        if (item is Polygon polygon)
                         {
                             polygons.Add(polygon);
                         }
@@ -146,7 +146,7 @@ namespace ThCADCore.NTS
                         }
                     }
                 }
-                else if (geometry is IPolygon polygon)
+                else if (geometry is Polygon polygon)
                 {
                     polygons.Add(polygon);
                 }

@@ -1,24 +1,24 @@
-﻿using GeoAPI.Geometries;
+﻿using NetTopologySuite.Geometries;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSExtension
     {
-        public static IPolygon ToPolygon(this ILinearRing linearRing)
+        public static Polygon ToPolygon(this LinearRing linearRing)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(linearRing);
         }
 
-        public static IMultiLineString ToNTSMultiLineString(this IPolygon polygon)
+        public static MultiLineString ToNTSMultiLineString(this Polygon polygon)
         {
             if (polygon.NumInteriorRings == 0)
             {
-                var lineStrings = new ILineString[] { polygon.ExteriorRing };
+                var lineStrings = new LineString[] { polygon.ExteriorRing };
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings);
             }
             else
             {
-                return polygon.Boundary as IMultiLineString;
+                return polygon.Boundary as MultiLineString;
             }
         }
     }
