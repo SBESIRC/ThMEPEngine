@@ -9,8 +9,9 @@ using ThMEPElectrical.Assistant;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.Geometry;
 using ThCADCore.NTS;
+using ThMEPElectrical.PostProcess;
 
-namespace ThMEPElectrical.Business
+namespace ThMEPElectrical.Business.MainBeam
 {
     /// <summary>
     /// 异形排布计算
@@ -62,7 +63,7 @@ namespace ThMEPElectrical.Business
 
             return polygonPlace.PlacePts;
         }
-        
+
 
         private void DoABBPlace()
         {
@@ -124,6 +125,19 @@ namespace ThMEPElectrical.Business
             var leftBottomPt = placeRectInfo.LeftBottomPt;
             var rightBottomPt = placeRectInfo.RightBottomPt;
 
+            var leftLine = placeRectInfo.LeftLine;
+            var bottomLine = placeRectInfo.BottomLine;
+
+            var rectArea = leftLine.Length * bottomLine.Length;
+
+            // 一个可以布置完的
+            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
+            {
+                var center = GeomUtils.GetCenterPt(placeRectInfo.srcPolyline);
+                if (center.HasValue)
+                    return new List<Point3d>() { center.Value };
+            }
+
             // 计算最大水平间隔
             var horizontalMaxGap = m_parameter.ProtectArea / 4.0 / verticalA * 2;
 
@@ -155,20 +169,62 @@ namespace ThMEPElectrical.Business
             // 整数布置后的水平间隔距离
             var horizontalPosGap = horizontalLength / horizontalCount;
 
+            var placeNodes = new List<PlacePoint>();
             var placePoints = new List<Point3d>();
-            placePoints.Add(leftFirstPtNode.InsertPt);
+            placeNodes.Add(leftFirstPtNode);
 
             for (int i = 1; i < horizontalCount; i++)
             {
                 var moveGap = i * horizontalPosGap;
                 var pt = leftFirstPt + Vector3d.XAxis * moveGap;
                 var validPt = CalculateValidPoint(pt, placeRectInfo);
-                placePoints.Add(validPt.InsertPt);
+                placeNodes.Add(validPt);
             }
 
-            placePoints.Add(rightLastPtNode.InsertPt);
+            placeNodes.Add(rightLastPtNode);
+            placeNodes.ForEach(e => placePoints.Add(e.InsertPt));
+
+            // 是否需要进行后处理判断
+            if (IsNeedPostProcess(placeNodes))
+            {
+                var validMidLine = CalculateMidLine(midLine, placeRectInfo.srcPolyline);
+                placePoints = PlacePointAdjustor.MakePlacePointAdjustor(placePoints, validMidLine, ShapeConstraintType.NONREGULARSHAPE);
+            }
 
             return placePoints;
+        }
+
+        private Line CalculateMidLine(Line first, Polyline sec)
+        {
+            var pts = GeomUtils.CurveIntersectCurve(first, sec);
+            if (pts.Count < 2)
+                return first;
+
+            var startPt = first.StartPoint;
+            pts.Sort((p1, p2) => { return p1.DistanceTo(startPt).CompareTo(p2.DistanceTo(startPt)); });
+
+            return new Line(pts.First(), pts.Last());
+        }
+
+        /// <summary>
+        /// 是否需要进行后处理调整
+        /// </summary>
+        /// <param name="placeNodes"></param>
+        /// <returns></returns>
+        private bool IsNeedPostProcess(List<PlacePoint> placeNodes)
+        {
+            if (placeNodes.Count == 2)
+            {
+                foreach (var singlePlaceNode in placeNodes)
+                {
+                    if (singlePlaceNode.IsMoved)
+                        return false;
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -205,15 +261,6 @@ namespace ThMEPElectrical.Business
             }
         }
 
-
-        private List<Point3d> CurveIntersectCurve(Curve curveFir, Curve curveSec)
-        {
-            var ptCol = new Point3dCollection();
-            curveFir.IntersectWith(curveSec, Intersect.OnBothOperands, ptCol, (IntPtr)0, (IntPtr)0);
-
-            return ptCol.toPointList();
-        }
-
         /// <summary>
         /// 垂直方向上面计算有效的点
         /// </summary>
@@ -222,7 +269,7 @@ namespace ThMEPElectrical.Business
         /// <returns></returns>
         private Point3d? IntersectMidPtVertical(Curve curveFir, Curve curveSec)
         {
-            var ptLst = CurveIntersectCurve(curveFir, curveSec);
+            var ptLst = GeomUtils.CurveIntersectCurve(curveFir, curveSec);
 
             if (ptLst.Count != 0)
             {
@@ -235,7 +282,7 @@ namespace ThMEPElectrical.Business
 
         public Point3d? LeftEdgeIntersectHorizontal(Curve curveFir, Curve curveSec)
         {
-            var ptLst = CurveIntersectCurve(curveFir, curveSec);
+            var ptLst = GeomUtils.CurveIntersectCurve(curveFir, curveSec);
 
             if (ptLst.Count != 0)
             {
@@ -248,7 +295,7 @@ namespace ThMEPElectrical.Business
 
         public Point3d? RightEdgeIntersectHorizontal(Curve curveFir, Curve curveSec)
         {
-            var ptLst = CurveIntersectCurve(curveFir, curveSec);
+            var ptLst = GeomUtils.CurveIntersectCurve(curveFir, curveSec);
 
             if (ptLst.Count != 0)
             {
@@ -284,6 +331,7 @@ namespace ThMEPElectrical.Business
 
                 //DrawUtils.DrawProfile(new List<Curve>() { intersectPoly }, "intersectPoly");
                 var placeRect = GeomUtils.CalculateProfileRectInfo(intersectPoly);
+                //DrawUtils.DrawProfile(new List<Curve>() { splitPoly }, "splitPoly");
                 placeRect.srcPolyline = intersectPoly;
                 oneRowPlaceRectInfos.Add(placeRect);
             }

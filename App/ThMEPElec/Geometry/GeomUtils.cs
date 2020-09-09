@@ -221,5 +221,25 @@ namespace ThMEPElectrical.Geometry
 
             return new Point3d(xSum / ptLst.Count, ySum / ptLst.Count, 0);
         }
+
+        public static Line CalculateMidLine(Line first, Polyline sec)
+        {
+            var pts = CurveIntersectCurve(first, sec);
+            if (pts.Count < 2)
+                return first;
+
+            var startPt = first.StartPoint;
+            pts.Sort((p1, p2) => { return p1.DistanceTo(startPt).CompareTo(p2.DistanceTo(startPt)); });
+
+            return new Line(pts.First(), pts.Last());
+        }
+
+        public static List<Point3d> CurveIntersectCurve(Curve curveFir, Curve curveSec)
+        {
+            var ptCol = new Point3dCollection();
+            curveFir.IntersectWith(curveSec, Intersect.OnBothOperands, ptCol, (IntPtr)0, (IntPtr)0);
+
+            return ptCol.toPointList();
+        }
     }
 }

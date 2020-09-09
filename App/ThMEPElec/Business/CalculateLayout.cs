@@ -44,16 +44,15 @@ namespace ThMEPElectrical.Business
             if (m_placeInputProfileData == null)
                 LayoutSensor = null;
 
+            var mainBeamProfile = m_placeInputProfileData.MainBeamOuterProfile;
+            // 生成ABB多段线
+            var postMinRect = ABBRectangle.MakeABBPolyline(mainBeamProfile);
+
+            var areaAddRatio = (Math.Abs(postMinRect.Area) - Math.Abs(mainBeamProfile.Area)) / Math.Abs(mainBeamProfile.Area);
+
             // 判断布置方式
             if (m_placeInputProfileData.SecondBeamProfiles == null || m_placeInputProfileData.SecondBeamProfiles.Count == 0)
             {
-                var mainBeamProfile = m_placeInputProfileData.MainBeamOuterProfile;
-
-                // 生成ABB多段线
-                var postMinRect = ABBRectangle.MakeABBPolyline(mainBeamProfile);
-
-                var areaAddRatio = (Math.Abs(postMinRect.Area) - Math.Abs(mainBeamProfile.Area)) / Math.Abs(mainBeamProfile.Area);
-
                 if (areaAddRatio < 0.1)
                 {
                     // 矩形布置
@@ -65,10 +64,19 @@ namespace ThMEPElectrical.Business
                     LayoutSensor = new MainBeamPolygonLayout(m_placeInputProfileData, m_parameter, postMinRect);
                 }
             }
-            else
+            else if (m_placeInputProfileData.SecondBeamProfiles.Count > 0)
             {
-                // 主次梁布置
-                LayoutSensor = new MainSecondBeamLayout(m_placeInputProfileData, m_parameter);
+                //主次梁分类计算布置方式
+                if (areaAddRatio < 0.1)
+                {
+                    // 主次梁矩形布置
+                    LayoutSensor = new MainSecondBeamRectangleLayout(m_placeInputProfileData, m_parameter, postMinRect);
+                }
+                else
+                {
+                    // 主次梁异形布置
+                    LayoutSensor = new MainSecondBeamPolygonLayout(m_placeInputProfileData, m_parameter, postMinRect);
+                }
             }
         }
     }

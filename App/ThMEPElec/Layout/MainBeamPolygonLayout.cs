@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThMEPElectrical.Business;
+using ThMEPElectrical.Business.MainBeam;
 using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.Layout

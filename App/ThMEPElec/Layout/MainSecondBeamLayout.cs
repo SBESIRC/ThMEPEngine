@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPElectrical.Model;
 
@@ -13,6 +14,15 @@ namespace ThMEPElectrical.Layout
     /// </summary>
     public class MainSecondBeamLayout : SensorLayout
     {
+        /// <summary>
+        /// ABB处理后的多段线
+        /// </summary>
+        protected Polyline PostPoly
+        {
+            get;
+            set;
+        }
+
         public override List<Point3d> CalculatePlace()
         {
             return PlacePoints;

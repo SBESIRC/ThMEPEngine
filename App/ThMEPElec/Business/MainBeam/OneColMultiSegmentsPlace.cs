@@ -8,9 +8,9 @@ using System.Threading.Tasks;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.Model;
+using ThMEPElectrical.PostProcess;
 
-
-namespace ThMEPElectrical.Business
+namespace ThMEPElectrical.Business.MainBeam
 {
     /// <summary>
     /// 一列异形布置
@@ -55,10 +55,10 @@ namespace ThMEPElectrical.Business
                 return null;
 
             var tempLeftBottomFirstPt = CalculateValidPoint(tempLeftBottomFirstPtNode.Value, m_placeRectInfo);
-            if (!tempLeftBottomFirstPt.HasValue)
+            if (tempLeftBottomFirstPt == null)
                 return null;
 
-            var leftBottomFirstPt = tempLeftBottomFirstPt.Value;
+            var leftBottomFirstPt = tempLeftBottomFirstPt.InsertPt;
 
             // 左上顶点
             var leftTopCircle = new Circle(leftTopPt, Vector3d.ZAxis, vertexProtectRadius);
@@ -67,10 +67,10 @@ namespace ThMEPElectrical.Business
                 return null;
 
             var tempLeftTopLastPt = CalculateValidPoint(tempLeftTopLastPtNode.Value, m_placeRectInfo);
-            if (!tempLeftTopLastPt.HasValue)
+            if (tempLeftTopLastPt == null)
                 return null;
 
-            var leftTopLastPt = tempLeftTopLastPt.Value;
+            var leftTopLastPt = tempLeftTopLastPt.InsertPt;
 
             var verticalMaxGap = m_parameter.ProtectArea / 4.0 / moveDis * 2;
 
@@ -80,7 +80,8 @@ namespace ThMEPElectrical.Business
             var verticalPosGap = verticalLength / verticalCount;
 
             var ptLst = new List<Point3d>();
-            ptLst.Add(leftBottomFirstPt);
+            var placeNodes = new List<PlacePoint>();
+            placeNodes.Add(tempLeftBottomFirstPt);
 
             var tempStartPt = tempLeftBottomFirstPtNode.Value;
             for (int i = 1; i < verticalCount; i++)
@@ -88,15 +89,45 @@ namespace ThMEPElectrical.Business
                 var moveGap = i * verticalPosGap;
                 var tempMidPt = tempStartPt + Vector3d.YAxis * moveGap;
                 var ptNode = CalculateValidPoint(tempMidPt, m_placeRectInfo);
-                if (!ptNode.HasValue)
+                if (ptNode == null)
                     continue;
 
-                ptLst.Add(ptNode.Value);
+                placeNodes.Add(ptNode);
             }
 
-            ptLst.Add(leftTopLastPt);
+            placeNodes.Add(tempLeftTopLastPt);
+
+            placeNodes.ForEach(e => ptLst.Add(e.InsertPt));
+
+            // 是否需要进行后处理判断
+            if (IsNeedPostProcess(placeNodes))
+            {
+                var validVerticalMidLine = GeomUtils.CalculateMidLine(verticalMidLine, m_placeRectInfo.srcPolyline);
+                ptLst = PlacePointAdjustor.MakePlacePointAdjustor(ptLst, validVerticalMidLine, ShapeConstraintType.NONREGULARSHAPE);
+            }
 
             return ptLst;
+        }
+
+        /// <summary>
+        /// 是否需要进行后处理调整
+        /// </summary>
+        /// <param name="placeNodes"></param>
+        /// <returns></returns>
+        private bool IsNeedPostProcess(List<PlacePoint> placeNodes)
+        {
+            if (placeNodes.Count == 2)
+            {
+                foreach (var singlePlaceNode in placeNodes)
+                {
+                    if (singlePlaceNode.IsMoved)
+                        return false;
+                }
+
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -105,13 +136,13 @@ namespace ThMEPElectrical.Business
         /// <param name="pt"></param>
         /// <param name="placeRectInfo"></param>
         /// <returns></returns>
-        private Point3d? CalculateValidPoint(Point3d pt, PlaceRect placeRectInfo)
+        private PlacePoint CalculateValidPoint(Point3d pt, PlaceRect placeRectInfo)
         {
             var srcPoly = placeRectInfo.srcPolyline;
 
             if (GeomUtils.PtInLoop(srcPoly, pt.ToPoint2D()))
             {
-                return pt;
+                return new PlacePoint(pt, false);
             }
             else
             {
@@ -129,7 +160,7 @@ namespace ThMEPElectrical.Business
                 if (!midPt.HasValue)
                     return null;
 
-                return midPt.Value;
+                return new PlacePoint(midPt.Value, true);
             }
         }
 
@@ -141,7 +172,7 @@ namespace ThMEPElectrical.Business
         /// <returns></returns>
         private Point3d? IntersectMidPtHorizontal(Curve curveFir, Curve curveSec)
         {
-            var ptLst = CurveIntersectCurve(curveFir, curveSec);
+            var ptLst = GeomUtils.CurveIntersectCurve(curveFir, curveSec);
 
             if (ptLst.Count != 0)
             {
@@ -152,13 +183,6 @@ namespace ThMEPElectrical.Business
             return null;
         }
 
-        private List<Point3d> CurveIntersectCurve(Curve curveFir, Curve curveSec)
-        {
-            var ptCol = new Point3dCollection();
-            curveFir.IntersectWith(curveSec, Intersect.OnBothOperands, ptCol, (IntPtr)0, (IntPtr)0);
-
-            return ptCol.toPointList();
-        }
 
         private Point3d? CalculateIntersectPt(Circle circle, Line line)
         {

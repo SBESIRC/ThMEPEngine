@@ -9,7 +9,7 @@ using ThMEPElectrical.Model;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.PostProcess;
 
-namespace ThMEPElectrical.Business
+namespace ThMEPElectrical.Business.MainBeam
 {
     /// <summary>
     /// 一列矩形布置

@@ -32,11 +32,11 @@
     <Compile Include="Business\CalculateLayout.cs" />
     <Compile Include="Business\EntityPicker.cs" />
     <Compile Include="Business\PlacePointCalculator.cs" />
-    <Compile Include="Business\MultiSegmentPlace.cs" />
-    <Compile Include="Business\OneColMultiSegmentsPlace.cs" />
-    <Compile Include="Business\OneColRectPlace.cs" />
+    <Compile Include="Business\MainBeam\MultiSegmentPlace.cs" />
+    <Compile Include="Business\MainBeam\OneColMultiSegmentsPlace.cs" />
+    <Compile Include="Business\MainBeam\OneColRectPlace.cs" />
     <Compile Include="Business\PolygonProfilePlace.cs" />
-    <Compile Include="Business\RectProfilePlace.cs" />
+    <Compile Include="Business\MainBeam\RectProfilePlace.cs" />
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
@@ -49,6 +49,8 @@
     <Compile Include="Layout\MainBeamPolygonLayout.cs" />
     <Compile Include="Layout\MainBeamRectangleLayout.cs" />
     <Compile Include="Layout\MainSecondBeamLayout.cs" />
+    <Compile Include="Layout\MainSecondBeamPolygonLayout.cs" />
+    <Compile Include="Layout\MainSecondBeamRectangleLayout.cs" />
     <Compile Include="Layout\SensorLayout.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\DetectionRegion.cs" />
@@ -59,6 +61,7 @@
     <Compile Include="Model\PlacePoint.cs" />
     <Compile Include="Model\PlacePointProArea.cs" />
     <Compile Include="Model\PlaceRect.cs" />
+    <Compile Include="PostProcess\Adjustor\NonRegularPlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
@@ -86,6 +89,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Folder Include="Business\MainSecondBeam\" />
     <Folder Include="View\" />
   </ItemGroup>
   <Choose>

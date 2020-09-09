@@ -66,6 +66,9 @@ namespace ThMEPElectrical.PostProcess
                 case ShapeConstraintType.REGULARSHAPE:
                     PostPoints = RegularPlacePointAdjustor.MakeRegularPlacePointAdjustor(m_posLine, m_srcPts);
                     break;
+                case ShapeConstraintType.NONREGULARSHAPE:
+                    PostPoints = NonRegularPlacePointAdjustor.MakeNonRegularPlacePointAdjustor(m_posLine, m_srcPts);
+                    break;
                 default:
                     throw new NotSupportedException();
             }
