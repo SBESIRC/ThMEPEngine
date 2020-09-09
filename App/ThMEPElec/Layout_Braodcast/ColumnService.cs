@@ -1,6 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using GeoAPI.Geometries;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -127,9 +126,7 @@ namespace ThMEPElectrical.Layout_Braodcast
                 columnPts.Add(columnPoly.GetPoint3dAt(i));
             }
 
-            var ntsLine = intersectLine.ToNTSLineString();
-            var ntsPolyline = columnPoly.ToNTSLineString();
-            var interPoint = (ntsLine.Intersection(ntsPolyline) as IPoint).ToAcGePoint3d();
+            var interPoint = intersectLine.Intersection(columnPoly);
             columnPts = columnPts.OrderBy(x => x.DistanceTo(interPoint)).ToList();
             Point3d p1 = columnPts[0];
             Point3d p2 = columnPts[1];
