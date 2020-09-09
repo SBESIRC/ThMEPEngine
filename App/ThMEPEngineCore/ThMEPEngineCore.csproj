@@ -200,6 +200,8 @@
   <ItemGroup>
     <PackageReference Include="Xbim.Essentials" Version="5.1.297" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="Utils\" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

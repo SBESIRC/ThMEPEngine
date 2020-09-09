@@ -52,7 +52,12 @@
     <Compile Include="Layout\MainSecondBeamPolygonLayout.cs" />
     <Compile Include="Layout\MainSecondBeamRectangleLayout.cs" />
     <Compile Include="Layout\SensorLayout.cs" />
+    <Compile Include="Layout_Braodcast\ColumnService.cs" />
+    <Compile Include="Layout_Braodcast\InsertBroadcastService.cs" />
+    <Compile Include="Layout_Braodcast\LayoutService.cs" />
+    <Compile Include="Layout_Braodcast\ParkingLinesService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
+    <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionRegion.cs" />
     <Compile Include="Model\LayoutMap.cs" />
     <Compile Include="Model\LayoutProfileData.cs" />
@@ -67,6 +72,7 @@
     <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

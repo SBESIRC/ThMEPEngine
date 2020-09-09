@@ -176,6 +176,23 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(operation.Edit(geometry.Coordinates, geometry));
         }
 
+        public static IGeometry ToNTSLineString(this Curve curve)
+        {
+            if (curve is Line line)
+            {
+                return line.ToNTSLineString();
+            }
+            else if (curve is Polyline polyline)
+            {
+                return polyline.ToNTSLineString();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+
+        }
+
         public static IPolygon ToNTSPolygon(this Polyline polyLine)
         {
             var polygons = polyLine.Polygonize();
@@ -193,12 +210,12 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static IPolygon ToNTSPolygon(this Circle circle)
+        public static IPolygon ToNTSPolygon(this Circle circle, int numPoints)
         {
             // 获取圆的外接矩形
             var shapeFactory = new GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
             {
-                NumPoints = 4,
+                NumPoints = numPoints,
                 Size = 2 * circle.Radius,
                 Centre = circle.Center.ToNTSCoordinate(),
             };
@@ -225,7 +242,7 @@ namespace ThCADCore.NTS
             };
             return shapeFactory.CreateArc(arc.StartAngle, arc.TotalAngle);
         }
-
+        
         /// <summary>
         /// 按弦长细化
         /// </summary>

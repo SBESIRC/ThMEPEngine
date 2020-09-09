@@ -8,7 +8,7 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSOperation
     {
-        public static DBObjectCollection Trim(this Polyline polyline, Polyline curve)
+        public static DBObjectCollection Trim(this Polyline polyline, Curve curve)
         {
             var objs = new DBObjectCollection();
             var other = curve.ToNTSLineString();
@@ -23,7 +23,10 @@ namespace ThCADCore.NTS
             }
             else if (result is ILineString lineStr)
             {
-                objs.Add(lineStr.ToDbPolyline());
+                if (lineStr.StartPoint != null && lineStr.EndPoint != null)
+                {
+                    objs.Add(lineStr.ToDbPolyline());
+                }
             }
             else
             {
