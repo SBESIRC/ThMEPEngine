@@ -41,7 +41,7 @@
     <Compile Include="BeamInfo\Model\LineBeam.cs" />
     <Compile Include="BeamInfo\Model\MarkingInfo.cs" />
     <Compile Include="BeamInfo\Model\MergeLineBeam.cs" />
-    <Compile Include="BeamInfo\Model\ThBeamZone.cs" />
+    <Compile Include="BeamInfo\Model\ThBeamSpanZone.cs" />
     <Compile Include="BeamInfo\Model\ThCentralizedMarking.cs" />
     <Compile Include="BeamInfo\Model\ThOriginMarkingcs.cs" />
     <Compile Include="BeamInfo\ThDistinguishBeamInfo.cs" />
