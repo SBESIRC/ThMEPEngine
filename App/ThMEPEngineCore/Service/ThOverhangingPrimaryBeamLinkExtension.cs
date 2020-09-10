@@ -17,15 +17,75 @@ namespace ThMEPEngineCore.Service
         private List<ThBeamLink> PrimaryBeamLinks { get; set; }
         private List<ThBeamLink> HalfPrimaryBeamLinks { get; set; }
         public List<ThBeamLink> OverhangingPrimaryBeamLinks { get; private set; }
-        public ThOverhangingPrimaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams, 
+        public ThOverhangingPrimaryBeamLinkExtension(List<ThIfcBuildingElement> undefinedBeams,
             List<ThBeamLink> primaryBeamLinks, List<ThBeamLink> halfPrimaryBeamLinks)
         {
             UnDefinedBeams = undefinedBeams;
             PrimaryBeamLinks = primaryBeamLinks;
             HalfPrimaryBeamLinks = halfPrimaryBeamLinks;
             OverhangingPrimaryBeamLinks = new List<ThBeamLink>();
-        }        
+        }
         public void CreateOverhangingPrimaryBeamLink()
+        {
+            HandleSingleOverhangingPrimaryBeamLink();
+            HandleMultiOverhangingPrimaryBeamLink();
+        }
+        private void HandleSingleOverhangingPrimaryBeamLink()
+        {
+            for (int i = 0; i < UnDefinedBeams.Count; i++)
+            {
+                ThIfcBeam currentBeam = UnDefinedBeams[i] as ThIfcBeam;
+                if (currentBeam.ComponentType == BeamComponentType.OverhangingPrimaryBeam)
+                {
+                    continue;
+                }
+                ThSingleBeamLink beamLink = ConnectionEngine.QuerySingleBeamLink(currentBeam);
+                ThBeamLink thBeamLink = new ThBeamLink();
+                thBeamLink.Start = beamLink.GetPortVerComponents(currentBeam.StartPoint);
+                thBeamLink.End = beamLink.GetPortVerComponents(currentBeam.EndPoint);
+                if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count > 0)
+                {
+                    // 末端连接竖向构件
+                    List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, currentBeam, currentBeam.StartPoint);
+                    if (linkPrimaryBeams.Count == 0)
+                    {
+                        thBeamLink.Start.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, currentBeam, currentBeam.StartPoint));
+                        thBeamLink.Start.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams, currentBeam, currentBeam.StartPoint, true).ToList());
+                    }
+                    else
+                    {
+                        thBeamLink.Start.AddRange(linkPrimaryBeams);
+                    }
+                }
+                else if (thBeamLink.Start.Count > 0 && thBeamLink.End.Count == 0)
+                {
+                    List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, currentBeam, currentBeam.EndPoint);
+                    // 起始端连接竖向构件
+                    if (linkPrimaryBeams.Count == 0)
+                    {
+                        thBeamLink.End.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, currentBeam, currentBeam.EndPoint));
+                        thBeamLink.End.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams, currentBeam, currentBeam.EndPoint, true).ToList());
+                    }
+                    else
+                    {
+                        thBeamLink.End.AddRange(linkPrimaryBeams);
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+                if (JudgeOverhangingPrimaryBeam(thBeamLink))
+                {
+                    thBeamLink.Beams = new List<ThIfcBeam> { currentBeam };
+                    thBeamLink.Beams.ForEach(o => o.ComponentType = BeamComponentType.OverhangingPrimaryBeam);
+                    OverhangingPrimaryBeamLinks.Add(thBeamLink);
+                }
+            }
+            UnDefinedBeams = UnDefinedBeams.Where(o => o is ThIfcBeam thIfcBeam &&
+            thIfcBeam.ComponentType == BeamComponentType.Undefined).ToList();
+        }
+        private void HandleMultiOverhangingPrimaryBeamLink()
         {
             for (int i = 0; i < UnDefinedBeams.Count; i++)
             {
@@ -46,10 +106,10 @@ namespace ThMEPEngineCore.Service
                 {
                     // 末端连接竖向构件
                     List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[0], prePt);
-                    if (linkPrimaryBeams.Count==0)
+                    if (linkPrimaryBeams.Count == 0)
                     {
                         thBeamLink.Start.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[0], prePt));
-                        thBeamLink.Start.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[0], prePt, false).ToList());
+                        thBeamLink.Start.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams, linkElements[0], prePt, false).ToList());
                     }
                     else
                     {
@@ -63,7 +123,7 @@ namespace ThMEPEngineCore.Service
                     if (linkPrimaryBeams.Count == 0)
                     {
                         thBeamLink.End.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[linkElements.Count - 1], backPt));
-                        thBeamLink.End.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams,linkElements[linkElements.Count - 1], backPt, false).ToList());
+                        thBeamLink.End.AddRange(QueryPortLinkUndefinedBeams(UnDefinedBeams, linkElements[linkElements.Count - 1], backPt, false).ToList());
                     }
                     else
                     {

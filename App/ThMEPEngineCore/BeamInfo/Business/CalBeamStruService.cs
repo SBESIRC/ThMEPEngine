@@ -8,11 +8,11 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.AutoCAD.Utility.ExtensionTools;
-
+using ThMEPEngineCore.Interface;
 
 namespace ThMEPEngineCore.BeamInfo.Business
 {
-    public class CalBeamStruService
+    public class CalBeamStruService: ICalculateBeam
     {
         /// <summary>
         /// 将梁线按照规则分类成很多类

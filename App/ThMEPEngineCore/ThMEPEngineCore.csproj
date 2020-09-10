@@ -62,6 +62,7 @@
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
+    <Compile Include="Interface\ICalculateBeam.cs" />
     <Compile Include="IO\ThDwgReader.cs" />
     <Compile Include="IO\ThDwgWriter.cs" />
     <Compile Include="IO\ThJsonReader.cs" />

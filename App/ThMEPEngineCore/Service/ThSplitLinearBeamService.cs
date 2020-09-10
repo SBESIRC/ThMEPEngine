@@ -49,6 +49,10 @@ namespace ThMEPEngineCore.Service
             List<Tuple<Polyline, Point3d, Point3d>> intersectAreas = new List<Tuple<Polyline, Point3d, Point3d>>();
             foreach (var segment in Segments)
             {
+                if(segment is ThArcSegment)
+                {
+                    continue;
+                }
                 Point3dCollection intersectPts = IntersectWithEx(LineBeam.Outline, segment.Extend(LineBeam.ActualWidth*2.0));
                 intersectPts=OrderbyPts(intersectPts);
                 if (intersectPts.Count!=4 || !ValidateIntersectPts(intersectPts, LineBeam))

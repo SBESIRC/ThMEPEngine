@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using ThMEPEngineCore.Model.Segment;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.BeamInfo.Business;
 
 namespace ThMEPEngineCore.Service
 {
@@ -53,7 +54,7 @@ namespace ThMEPEngineCore.Service
             ShearWallEngine.ValidElements.ForEach(o =>
             {
                 ThSegmentService thSegmentService = new ThSegmentService(o.Outline as Polyline);
-                thSegmentService.SegmentAll();
+                thSegmentService.SegmentAll(new CalBeamStruService());
                 ShearWallSegDic.Add(o, thSegmentService.Segments);
             });
         }
@@ -62,7 +63,7 @@ namespace ThMEPEngineCore.Service
             ColumnEngine.ValidElements.ForEach(o =>
             {
                 ThSegmentService thSegmentService = new ThSegmentService(o.Outline as Polyline);
-                thSegmentService.SegmentAll();
+                thSegmentService.SegmentAll(new CalBeamStruService());
                 ColumnSegDic.Add(o, thSegmentService.Segments);
             });
         }

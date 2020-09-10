@@ -22,6 +22,7 @@ using ThMEPEngineCore.BeamInfo;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model.Segment;
 using TianHua.AutoCAD.Utility.ExtensionTools;
+using ThMEPEngineCore.BeamInfo.Business;
 
 namespace ThMEPEngineCore
 {
@@ -262,7 +263,7 @@ namespace ThMEPEngineCore
                 foreach (ObjectId objId in components.Value.GetObjectIds())
                 {
                     ThSegmentService thSegmentService = new ThSegmentService(acadDatabase.Element<Polyline>(objId));
-                    thSegmentService.SegmentAll();
+                    thSegmentService.SegmentAll(new CalBeamStruService());
                     segments.AddRange(thSegmentService.Segments);
                 }                
                 ThSplitLinearBeamService thSplitLineBeam = new ThSplitLinearBeamService(thIfcLineBeam, segments);
@@ -279,30 +280,13 @@ namespace ThMEPEngineCore
                 var entRes = Active.Editor.GetEntity("\n select a polyline");
                 Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
 
-                Point3dCollection pts = new Point3dCollection();
-                while (true)
-                {
-                    var ptres = Active.Editor.GetPoint("\n select inters pt");
-                    if (ptres.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-                    {
-                        pts.Add(ptres.Value);
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-                ThSegmentServiceExtension thSegmentServiceExtension = new ThSegmentServiceExtension(polyline);
-                thSegmentServiceExtension.FindPairSegment(pts);
+                var otherRes = Active.Editor.GetEntity("\nselect a polyline");
+                Polyline otherPolyline = acadDatabase.Element<Polyline>(otherRes.ObjectId);
+                bool res = polyline.Intersects(otherPolyline);
 
-                thSegmentServiceExtension.LinearPairPts.ForEach(o =>
-                {
-                    acadDatabase.ModelSpace.Add(new Line(o.Item1, o.Item2));
-                });
-                thSegmentServiceExtension.ArcPairPts.ForEach(o =>
-                {
-                    acadDatabase.ModelSpace.Add(new Line(o.Item1, o.Item2));
-                });
+                ThSegmentService thSegmentService = new ThSegmentService(polyline);
+                thSegmentService.SegmentAll(new CalBeamStruService());
+                thSegmentService.Segments.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
         }
 #if DEBUG

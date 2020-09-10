@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.BeamInfo.Business;
 using Linq2Acad;
+using ThMEPEngineCore.Interface;
 
 namespace ThMEPEngineCore.Service
 {
@@ -20,7 +21,7 @@ namespace ThMEPEngineCore.Service
             Outline = polyline;
             Segments = new List<ThSegment>();
         }
-        public void Segment(Point3dCollection intersPts)
+        public void Segment(Point3dCollection intersPts) 
         {
             if (intersPts.Count > 1)
             {
@@ -31,7 +32,7 @@ namespace ThMEPEngineCore.Service
                 arcBeams.ForEach(o => Segments.Add(CreateSegment(o)));               
             }
         }
-        public void SegmentAll()
+        public void SegmentAll(ICalculateBeam calculateBeam)
         {
             DBObjectCollection dbObjs = new DBObjectCollection();
             Outline.Explode(dbObjs);
@@ -47,8 +48,7 @@ namespace ThMEPEngineCore.Service
                     validObjs.Add(arc);
                 }
             }
-            CalBeamStruService calBeamStruService = new CalBeamStruService();
-            var beams = calBeamStruService.GetBeamInfo(validObjs);
+            var beams = calculateBeam.GetBeamInfo(validObjs);
             beams.ForEach(o => Segments.Add(CreateSegment(o)));
             foreach(DBObject dbObj in dbObjs)
             {

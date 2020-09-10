@@ -25,7 +25,7 @@ namespace ThMEPEngineCore.Service
 
         public ThBeamLink CreateSinglePrimaryBeamLink(ThIfcBeam Beam)
         {
-            ThBeamLink beamLink = new ThBeamLink();
+            ThBeamLink beamLink = new ThBeamLink();            
             ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(Beam);
             beamLink.Start = thSingleBeamLink.StartVerComponents;
             beamLink.End = thSingleBeamLink.EndVerComponents;
@@ -272,7 +272,7 @@ namespace ThMEPEngineCore.Service
             double beamWidth = GetPolylineWidth(thIfcLineBeam.Outline as Polyline, portPt);
             //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
             //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
-            beamWidth *= 1.05;
+            beamWidth *= 1.01;
             double distance = GenerateExpandDistance(thIfcLineBeam);
             if (portPt.DistanceTo(thIfcLineBeam.StartPoint) < portPt.DistanceTo(thIfcLineBeam.EndPoint))
             {
@@ -288,7 +288,7 @@ namespace ThMEPEngineCore.Service
             double beamWidth = GetPolylineWidth(thIfcLineBeam.Outline as Polyline, portPt);
             //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
             //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
-            beamWidth *= 1.05;
+            beamWidth *= 1.01;
             double distance = GenerateExpandDistance(thIfcLineBeam);
             double beamLength = thIfcLineBeam.StartPoint.DistanceTo(thIfcLineBeam.EndPoint);
             if (distance > beamLength / 2.0)

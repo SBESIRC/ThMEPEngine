@@ -51,11 +51,6 @@ namespace ThMEPEngineCore.Service
             {
                 return portPt;
             }
-            List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, beamLink[0], portPt);
-            if (linkPrimaryBeams.Count > 0)
-            {
-                return portPt;
-            }
             //端点连接的梁
             List<ThIfcBeam> linkElements = thSingleBeamLink.GetPortBeams(portPt);
             //从端点连接的梁中过滤只存在于UnDefinedBeams集合里的梁
@@ -105,11 +100,6 @@ namespace ThMEPEngineCore.Service
             //端点连接竖向构件则返回
             ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(beamLink[beamLink.Count - 1]);
             if (thSingleBeamLink.GetPortVerComponents(portPt).Count > 0)
-            {
-                return portPt;
-            }
-            List<ThIfcBeam> linkPrimaryBeams = QueryPortLinkPrimaryBeams(PrimaryBeamLinks, beamLink[beamLink.Count - 1], portPt);
-            if (linkPrimaryBeams.Count > 0)
             {
                 return portPt;
             }
