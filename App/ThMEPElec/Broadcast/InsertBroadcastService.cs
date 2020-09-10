@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 using ThMEPElectrical.Model;
 using TianHua.AutoCAD.Utility.ExtensionTools;
 
-namespace ThMEPElectrical.Layout_Braodcast
+namespace ThMEPElectrical.Broadcast
 {
     public static class InsertBroadcastService
     {

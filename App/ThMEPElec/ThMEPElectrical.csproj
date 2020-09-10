@@ -51,10 +51,10 @@
     <Compile Include="Layout\MainSecondBeamPolygonLayout.cs" />
     <Compile Include="Layout\MainSecondBeamRectangleLayout.cs" />
     <Compile Include="Layout\SensorLayout.cs" />
-    <Compile Include="Layout_Braodcast\ColumnService.cs" />
-    <Compile Include="Layout_Braodcast\InsertBroadcastService.cs" />
-    <Compile Include="Layout_Braodcast\LayoutService.cs" />
-    <Compile Include="Layout_Braodcast\ParkingLinesService.cs" />
+    <Compile Include="Broadcast\ColumnService.cs" />
+    <Compile Include="Broadcast\InsertBroadcastService.cs" />
+    <Compile Include="Broadcast\LayoutService.cs" />
+    <Compile Include="Broadcast\ParkingLinesService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionRegion.cs" />

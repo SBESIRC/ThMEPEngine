@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.Model;
 
-namespace ThMEPElectrical.Layout_Braodcast
+namespace ThMEPElectrical.Broadcast
 {
     public class ColumnService
     {
@@ -127,7 +127,7 @@ namespace ThMEPElectrical.Layout_Braodcast
                 columnPts.Add(columnPoly.GetPoint3dAt(i));
             }
 
-			var interPoint = intersectLine.Intersection(columnPoly);
+            var interPoint = intersectLine.Intersection(columnPoly);
             columnPts = columnPts.OrderBy(x => x.DistanceTo(interPoint)).ToList();
             Point3d p1 = columnPts[0];
             Point3d p2 = columnPts[1];

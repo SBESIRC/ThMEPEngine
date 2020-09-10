@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.Model;
 
-namespace ThMEPElectrical.Layout_Braodcast
+namespace ThMEPElectrical.Broadcast
 {
     public class LayoutService
     {

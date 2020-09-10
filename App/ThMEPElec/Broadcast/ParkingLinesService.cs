@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 
-namespace ThMEPElectrical.Layout_Braodcast
+namespace ThMEPElectrical.Broadcast
 {
     public class ParkingLinesService
     {
