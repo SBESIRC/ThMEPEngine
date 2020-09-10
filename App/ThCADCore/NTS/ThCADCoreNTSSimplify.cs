@@ -14,9 +14,12 @@ namespace ThCADCore.NTS
             return result.ToDbPolyline();
         }
 
-        public static Polyline DPSimplify(this Polyline pline)
+        public static Polyline DPSimplify(this Polyline pline, double distanceTolerance)
         {
-            var simplifier = new DouglasPeuckerLineSimplifier(pline.ToNTSLineString().Coordinates);
+            var simplifier = new DouglasPeuckerLineSimplifier(pline.ToNTSLineString().Coordinates)
+            {
+                DistanceTolerance = distanceTolerance,
+            };
             var result = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(simplifier.Simplify());
             return result.ToDbPolyline();
         }
