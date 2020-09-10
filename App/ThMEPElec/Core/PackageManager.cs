@@ -33,7 +33,7 @@ namespace ThMEPElectrical.Core
             var dataExtract = new DBExtract();
             dataExtract.GetCurves();
 
-            var calculateDect = new CalculateDetection(dataExtract.Walls.First(), dataExtract.SubtractCurves);
+            var calculateDect = new DetectionCalculator(dataExtract.Walls.First(), dataExtract.SubtractCurves);
 
             var mainBeamProfiles = calculateDect.CalculateMainBeamProfiles();
             return mainBeamProfiles;
@@ -52,10 +52,111 @@ namespace ThMEPElectrical.Core
 
             foreach (var poly in wallPolylines)
             {
-                var dectCalculator = new CalculateDetection(poly, dataExtract.SubtractCurves);
+                var dectCalculator = new DetectionCalculator(poly, dataExtract.SubtractCurves);
                 resPolylines.AddRange(dectCalculator.CalculateMainBeamProfiles());
             }
             return resPolylines;
+        }
+
+        /// <summary>
+        /// 计算主次梁的梁跨信息
+        /// </summary>
+        /// <returns></returns>
+        public List<PlaceInputProfileData> DoMainSecondBeamProfiles()
+        {
+            // 用户选择
+            var wallPolylines = EntityPicker.MakeUserPickEntities();
+
+            var inputProfileDatas = new List<PlaceInputProfileData>();
+
+            // 数据读取
+            var dataExtract = new DBExtract();
+            dataExtract.GetCurves();
+
+            var secondBeams = dataExtract.SecondBeams;
+            var beamProfiles = new List<BeamProfile>();
+            secondBeams.ForEach(e => beamProfiles.Add(new BeamProfile(e)));
+
+            foreach (var poly in wallPolylines)
+            {
+                // 外墙，内洞，次梁
+                var profileDatas = DetectionCalculator.MakeDetectionData(poly, dataExtract.SubtractCurves, beamProfiles);
+
+                // 主次梁信息
+                inputProfileDatas.AddRange(profileDatas);
+            }
+
+            return inputProfileDatas;
+        }
+
+        /// <summary>
+        /// 计算主次梁的布置点集
+        /// </summary>
+        /// <returns></returns>
+        public List<Point3d> DoMainSecondBeamPlacePoints()
+        {
+            var ptLst = new List<Point3d>();
+            var inputProfileDatas = DoMainSecondBeamProfiles();
+            if (inputProfileDatas.Count == 0)
+                return ptLst;
+
+            // 转到UCS
+            var wcs2Ucs = Active.Editor.WCS2UCS();
+            var ucs2Wcs = Active.Editor.UCS2WCS();
+
+            // 插入点的计算
+            PlaceParameter placePara = new PlaceParameter();
+            var transformPlaceInputDatas = TransformProfileDatas(inputProfileDatas, wcs2Ucs);
+            
+            var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, placePara);
+            tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
+
+            // 转到WCS
+            if (ptLst.Count > 0)
+            {
+                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
+
+                var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
+                var curves = GeometryTrans.Circles2Curves(circles);
+                DrawUtils.DrawProfile(curves, "placePoints");
+            }
+
+            return ptLst;
+        }
+
+        /// <summary>
+        /// 主次梁信息坐标转换
+        /// </summary>
+        /// <param name="inputProfileDatas"></param>
+        /// <returns></returns>
+        private List<PlaceInputProfileData> TransformProfileDatas(List<PlaceInputProfileData> inputProfileDatas, Matrix3d matrix)
+        {
+            var resProfileDatas = new List<PlaceInputProfileData>();
+
+            foreach (var singleProfileData in inputProfileDatas)
+            {
+                resProfileDatas.Add(TransformProfileData(singleProfileData, matrix));
+            }
+
+            return resProfileDatas;
+        }
+        
+        private PlaceInputProfileData TransformProfileData(PlaceInputProfileData profileData, Matrix3d matrix)
+        {
+            var mainBeam = profileData.MainBeamOuterProfile;
+            var secondBeams = profileData.SecondBeamProfiles;
+            secondBeams.ForEach(e => 
+            {
+                e.UpgradeOpen();
+                e.TransformBy(matrix);
+                e.DowngradeOpen();
+            });
+
+            mainBeam.UpgradeOpen();
+            mainBeam.TransformBy(matrix);
+            mainBeam.DowngradeOpen();
+
+            return new PlaceInputProfileData(mainBeam, secondBeams);
         }
 
         /// <summary>

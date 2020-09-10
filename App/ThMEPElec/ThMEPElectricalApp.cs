@@ -5,7 +5,6 @@ using ThMEPElectrical.Assistant;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using NFox.Cad.Collections;
-using Autodesk.AutoCAD.DatabaseServices;
 using AcHelper;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -153,6 +152,16 @@ namespace ThMEPElectrical
             {
                 var packageManager = new PackageManager();
                 packageManager.DoMainBeamABBRect();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THMSABBMultiPlace", CommandFlags.Modal)]
+        public void THMSABBMultiPlace()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoMainSecondBeamPlacePoints();
             }
         }
     }

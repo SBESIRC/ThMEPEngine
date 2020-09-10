@@ -15,11 +15,17 @@ namespace ThMEPElectrical.Model
 
     public class BeamProfile
     {
-        public BeamType Type; // 主次梁
+        //public BeamType Type; // 主次梁
 
         public Polyline Profile; // 梁的轮廓
 
         public double Height;   // 梁的高度
+
+        public BeamProfile(Polyline poly, double height = 500)
+        {
+            Profile = poly;
+            Height = height;
+        }
     }
 
 }

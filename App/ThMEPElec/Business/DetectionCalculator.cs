@@ -7,27 +7,91 @@ using System.Threading.Tasks;
 using ThMEPElectrical.Model;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPElectrical.Assistant;
 
 namespace ThMEPElectrical.Business
 {
     // 计算探测区域
-    public class CalculateDetection
+    public class DetectionCalculator
     {
-        private Polyline OuterProfile = null;
-        private List<Polyline> InnerProfiles = null;
-        private List<BeamProfile> SecondBeams = null;
+        private Polyline m_wallProfile = null;
+        private List<Polyline> m_innerProfiles = null;
+        private List<BeamProfile> m_secondBeams = null;
 
-        public static void MakeDetections(Polyline polyline, List<Polyline> polylines, List<BeamProfile> secondBeams)
+        /// <summary>
+        /// 梁跨数据信息
+        /// </summary>
+        public List<PlaceInputProfileData> BeamSpanProfileData
         {
-            var dectection = new CalculateDetection(polyline, polylines, secondBeams);
-
+            get;
+            set;
         }
 
-        public CalculateDetection(Polyline wallProfile, List<Polyline> innerHoles, List<BeamProfile> secondBeams = null)
+        /// <summary>
+        /// 计算主梁或者次梁的数据结构
+        /// </summary>
+        /// <param name="polyline"> 墙</param>
+        /// <param name="polylines">内轮廓</param>
+        /// <param name="secondBeams"> 次梁</param>
+        public static List<PlaceInputProfileData> MakeDetectionData(Polyline polyline, List<Polyline> polylines, List<BeamProfile> secondBeams)
         {
-            OuterProfile = wallProfile;
-            InnerProfiles = innerHoles;
-            SecondBeams = secondBeams;
+            var detection = new DetectionCalculator(polyline, polylines, secondBeams);
+            detection.DoBeamSpan();
+            return detection.BeamSpanProfileData;
+        }
+
+        public DetectionCalculator(Polyline wallProfile, List<Polyline> innerHoles, List<BeamProfile> secondBeams = null)
+        {
+            m_wallProfile = wallProfile;
+            m_innerProfiles = innerHoles;
+            m_secondBeams = secondBeams;
+        }
+
+        /// <summary>
+        /// 计算梁跨信息
+        /// </summary>
+        public void DoBeamSpan()
+        {
+            //主梁
+            var mainBeamProfiles = CalculateMainBeamProfiles();
+
+            // 主次梁关系
+            var detectRegion = CalculateDetectionRelations(mainBeamProfiles);
+
+            // 数据转换
+            BeamSpanProfileData = DetectRegion2ProfileData(detectRegion);
+            DrawUtils.DrawGroup(BeamSpanProfileData);
+        }
+
+        /// <summary>
+        /// 数据转换
+        /// </summary>
+        /// <param name="srcRegions"></param>
+        /// <returns></returns>
+        private List<PlaceInputProfileData> DetectRegion2ProfileData(List<DetectionRegion> srcRegions)
+        {
+            var inputProfileDatas = new List<PlaceInputProfileData>();
+            srcRegions.ForEach(e => inputProfileDatas.Add(new PlaceInputProfileData(e.DetectionProfile, BeamProfiles2Polylines(e.secondBeams))));
+            return inputProfileDatas;
+        }
+
+        private List<Polyline> BeamProfiles2Polylines(List<BeamProfile> srcPolylines)
+        {
+            var polys = new List<Polyline>();
+            srcPolylines.ForEach(e => polys.Add(e.Profile));
+            return polys;
+        }
+
+        /// <summary>
+        /// 轮廓预处理筛选
+        /// </summary>
+        /// <param name="wallPoly"></param>
+        /// <param name="srcPolylines"></param>
+        /// <returns></returns>
+        public List<Polyline> PreProcessProfiles(Polyline wallPoly, List<Polyline> srcPolylines)
+        {
+            var resPolys = new List<Polyline>();
+            return resPolys;
         }
 
         public void Do()
@@ -160,7 +224,7 @@ namespace ThMEPElectrical.Business
                 detectRegions.Add(detectRegion);
 
                 // 次梁
-                foreach (var secondBeam in SecondBeams)
+                foreach (var secondBeam in m_secondBeams)
                 {
                     var secondBeamProfile = secondBeam.Profile;
 
@@ -233,13 +297,13 @@ namespace ThMEPElectrical.Business
         public List<Polyline> CalculateMainBeamProfiles()
         {
             var dbLst = new DBObjectCollection();
-            foreach (var profile in InnerProfiles)
+            foreach (var profile in m_innerProfiles)
             {
                 dbLst.Add(profile);
             }
 
             var resProfiles = new List<Polyline>();
-            foreach (Polyline item in OuterProfile.Difference(dbLst))
+            foreach (Polyline item in m_wallProfile.Difference(dbLst))
             {
                 resProfiles.Add(item);
             }
