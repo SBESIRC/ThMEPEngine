@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <!-- Include wxi files -->
+    <?include Variable.wxi ?>
+    <!-- Codepage 936 for Simplified Chinese characters -->
+    <Product Id="$(var.ProductCode)" Name="$(var.Name)" Codepage="936" Language="2052" Version="$(var.Version)" Manufacturer="$(var.Manufacturer)" UpgradeCode="$(var.UpgradeCode)">
+        <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Description="$(var.Description)" Manufacturer="$(var.Manufacturer)" Platform="x64" />
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+        <MediaTemplate EmbedCab="yes" />
+        <Feature Id="ProductFeature" Title="ThCADInstaller" Level="1">
+            <ComponentGroupRef Id="ProductComponents" />
+            <ComponentGroupRef Id="ProductComponentsSupport" />
+            <ComponentGroupRef Id="ProductComponentsAppWin64" />
+            <ComponentGroupRef Id="ProductComponentsAppExternal" />
+            <ComponentGroupRef Id="ProductComponentsAppInternal" />
+        </Feature>
+        <UIRef Id="WixUI_Minimal"/>
+        <WixVariable Id="WixUILicenseRtf" Value="License_zh-CN.rtf" />
+    </Product>
+    <Fragment>
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="ProgramFiles64Folder">
+                <Directory Id="Autodesk" Name="Autodesk">
+                    <Directory Id="ApplicationPlugins" Name="ApplicationPlugins">
+                        <Directory Id="INSTALLFOLDER" Name="ThCADPlugin.bundle">
+                            <Directory Id="DIR_Autoloader_Contents" Name="Contents">
+                                <Directory Id="DIR_Autoloader_Contents_App_Win64" Name="Win64">
+                                    <Directory Id="DIR_Autoloader_Contents_App_Win64_R18" Name="2012">
+                                    </Directory>
+                                    <Directory Id="DIR_Autoloader_Contents_App_Win64_R19" Name="2014">
+                                    </Directory>
+                                    <Directory Id="DIR_Autoloader_Contents_App_Win64_R20" Name="2016">
+                                    </Directory>
+                                    <Directory Id="DIR_Autoloader_Contents_App_Win64_R22" Name="2018">
+                                    </Directory>
+                                </Directory>
+                                <Directory Id="DIR_Autoloader_Contents_Support" Name="Support">
+                                </Directory>
+                                <Directory Id="DIR_Autoloader_Contents_Standards" Name="Standards">
+                                </Directory>
+                                <Directory Id="DIR_Autoloader_Contents_Plotters" Name="Plotters">
+                                </Directory>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+    </Fragment>
+    <Fragment>
+        <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+            <!--
+            <Component Id="CMP_Autoloader_PackageContents" Guid="5C172780-B69A-4940-8585-D14489C6538E" Win64="yes">
+                <File Id="FILE_Autoloader_PackageContents" Source="$(var.AutoloaderPath)\PackageContents.xml" KeyPath="yes" />
+            </Component>
+            -->
+            <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
+            <!-- <Component Id="ProductComponent"> -->
+            <!-- TODO: Insert files, registry keys, and other resources here. -->
+            <!-- </Component> -->
+        </ComponentGroup>
+    </Fragment>
+</Wix>
