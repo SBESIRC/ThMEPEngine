@@ -106,7 +106,6 @@
     <Compile Include="Model\ThIfcSpatialElement.cs" />
     <Compile Include="Model\ThIfcSpatialStructureElement.cs" />
     <Compile Include="Model\ThIfcSpatialZone.cs" />
-    <Compile Include="Model\ThIfcStoreService.cs" />
     <Compile Include="Model\ThIfcWall.cs" />
     <Compile Include="Model\ThIfcWallStandardCase.cs" />
     <Compile Include="Model\ThIfcWindow.cs" />
@@ -146,7 +145,6 @@
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThProjectDirStructureUtils.cs" />
-    <Compile Include="xBIM\ThModelExtension.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
@@ -197,11 +195,5 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <PackageReference Include="Xbim.Essentials" Version="5.1.297" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Utils\" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

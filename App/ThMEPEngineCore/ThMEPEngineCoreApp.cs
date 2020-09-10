@@ -5,24 +5,20 @@ using System.Collections.Generic;
 using System.Web.Script.Serialization;
 using Linq2Acad;
 using AcHelper;
-using Xbim.IO;
-using Xbim.Ifc4.ProductExtension;
-using Xbim.Ifc4.SharedBldgElements;
-using Autodesk.AutoCAD.Runtime;
+using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.xBIM;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using NFox.Cad.Collections;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.BeamInfo;
-using ThCADCore.NTS;
 using ThMEPEngineCore.Model.Segment;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 using ThMEPEngineCore.BeamInfo.Business;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad.Collections;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore
 {
@@ -38,75 +34,6 @@ namespace ThMEPEngineCore
             //
         }
 
-        [CommandMethod("TIANHUACAD", "THEXTRACTMODEL", CommandFlags.Modal)]
-        public void ThExtractModel()
-        {
-            JavaScriptSerializer _JavaScriptSerializer = new JavaScriptSerializer();
-            var _JsonBlocks = ReadTxt(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Blocks.json"));
-            ArrayList _ListBlocks = _JavaScriptSerializer.Deserialize<ArrayList>(_JsonBlocks);
-
-
-            var _JsonElementTypes = ReadTxt(Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "ElementTypes.json"));
-            ArrayList _ListElementTypes = _JavaScriptSerializer.Deserialize<ArrayList>(_JsonElementTypes);
-        }
-
-        [CommandMethod("TIANHUACAD", "THCREATEWALL", CommandFlags.Modal)]
-        public void ThCreateWall()
-        {
-            using (var model = ThModelExtension.CreateAndInitModel("HelloWall"))
-            {
-                if (model != null)
-                {
-                    IfcBuilding building = ThModelExtension.CreateBuilding(model, "Default Building");
-                    IfcWallStandardCase wall = ThModelExtension.CreateWall(model, 4000, 300, 2400);
-
-                    //if (wall != null) AddPropertiesToWall(model, wall);
-                    using (var txn = model.BeginTransaction("Add Wall"))
-                    {
-                        building.AddElement(wall);
-                        txn.Commit();
-                    }
-
-                    if (wall != null)
-                    {
-                        try
-                        {
-                            Console.WriteLine("Standard Wall successfully created....");
-                            //write the Ifc File
-                            model.SaveAs(Path.Combine(
-                                Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "HelloWallIfc4.ifc"), StorageType.Ifc);
-                            Console.WriteLine("HelloWallIfc4.ifc has been successfully written");
-                        }
-                        catch (System.Exception e)
-                        {
-                            Console.WriteLine("Failed to save HelloWall.ifc");
-                            Console.WriteLine(e.Message);
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("Failed to initialise the model");
-                }
-            }
-        }
-
-        private string ReadTxt(string _Path)
-        {
-            try
-            {
-                using (StreamReader _StreamReader = File.OpenText(_Path))
-                {
-                    return _StreamReader.ReadToEnd();
-                }
-            }
-            catch
-            {
-                return string.Empty;
-            }
-        }
         [CommandMethod("TIANHUACAD", "THExtractColumn", CommandFlags.Modal)]
         public void ThExtractColumn()
         {
