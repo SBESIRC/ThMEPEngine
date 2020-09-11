@@ -6,10 +6,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThBeamLinkMerge
+    public class ThBeamMerger
     {
         public ThBeamLink BeamLink { get; private set; }
-        public ThBeamLinkMerge(ThBeamLink thBeamLink)
+        public ThBeamMerger(ThBeamLink thBeamLink)
         {
             BeamLink = thBeamLink;
         }

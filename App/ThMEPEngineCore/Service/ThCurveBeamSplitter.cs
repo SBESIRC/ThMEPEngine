@@ -9,11 +9,11 @@ using ThMEPEngineCore.Model.Segment;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThSplitArcBeamService : ThSplitBeamService, IDisposable
+    public class ThCurveBeamSplitter : ThBeamSplitter, IDisposable
     {
         private ThIfcArcBeam arcBeam { get; set; }
         private Arc CenterLine { get; set; }
-        public ThSplitArcBeamService(ThIfcArcBeam thIfcArcBeam,List<ThSegment> segments):base(segments)
+        public ThCurveBeamSplitter(ThIfcArcBeam thIfcArcBeam,List<ThSegment> segments):base(segments)
         {
             arcBeam = thIfcArcBeam;
         }

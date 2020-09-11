@@ -114,7 +114,7 @@
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
-    <Compile Include="Service\ThBeamLinkMerge.cs" />
+    <Compile Include="Service\ThBeamMerger.cs" />
     <Compile Include="Engine\ThSplitBeamEngine.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThOtherDbExtension.cs" />
@@ -122,9 +122,9 @@
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
     <Compile Include="Service\ThSegmentService.cs" />
     <Compile Include="Service\ThSegmentServiceExtension.cs" />
-    <Compile Include="Service\ThSplitArcBeamService.cs" />
-    <Compile Include="Service\ThSplitBeamService.cs" />
-    <Compile Include="Service\ThSplitLinearBeamService.cs" />
+    <Compile Include="Service\ThCurveBeamSplitter.cs" />
+    <Compile Include="Service\ThBeamSplitter.cs" />
+    <Compile Include="Service\ThLinealBeamSplitter.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThOverhangingPrimaryBeamLinkExtension.cs" />

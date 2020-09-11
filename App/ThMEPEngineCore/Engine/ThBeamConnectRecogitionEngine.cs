@@ -213,10 +213,10 @@ namespace ThMEPEngineCore.Engine
         }
         private void MergeBeamLinks()
         {
-            PrimaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
-            HalfPrimaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
-            OverhangingPrimaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
-            SecondaryBeamLinks.ForEach(o => new ThBeamLinkMerge(o).Merge());
+            PrimaryBeamLinks.ForEach(o => new ThBeamMerger(o).Merge());
+            HalfPrimaryBeamLinks.ForEach(o => new ThBeamMerger(o).Merge());
+            OverhangingPrimaryBeamLinks.ForEach(o => new ThBeamMerger(o).Merge());
+            SecondaryBeamLinks.ForEach(o => new ThBeamMerger(o).Merge());
         }
         private IEnumerable<ThIfcBuildingElement> FilterNotPrimaryBeams(List<ThIfcBuildingElement> totalBeams)
         {

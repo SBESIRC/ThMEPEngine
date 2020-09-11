@@ -10,12 +10,12 @@ using ThMEPEngineCore.Model.Segment;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThSplitLinearBeamService: ThSplitBeamService, IDisposable
+    public class ThLinealBeamSplitter: ThBeamSplitter, IDisposable
     {
         private ThIfcLineBeam LineBeam { get; set; }       
         private Line CenterLine { get; set; }
        
-        public ThSplitLinearBeamService(ThIfcLineBeam thIfcLineBeam, List<ThSegment> segments) :base(segments)
+        public ThLinealBeamSplitter(ThIfcLineBeam thIfcLineBeam, List<ThSegment> segments) :base(segments)
         {
             LineBeam = thIfcLineBeam;
             CenterLine = new Line(LineBeam.StartPoint, LineBeam.EndPoint);

@@ -9,11 +9,11 @@ using ThMEPEngineCore.Model.Segment;
 
 namespace ThMEPEngineCore.Service
 {
-    public abstract class ThSplitBeamService
+    public abstract class ThBeamSplitter
     {
         public List<ThIfcBeam> SplitBeams { get; private set; }
         protected List<ThSegment> Segments { get; set; }
-        protected ThSplitBeamService(List<ThSegment> segments)
+        protected ThBeamSplitter(List<ThSegment> segments)
         {
             SplitBeams = new List<ThIfcBeam>();
             Segments = segments;

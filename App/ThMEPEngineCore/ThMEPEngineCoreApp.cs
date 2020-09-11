@@ -193,7 +193,7 @@ namespace ThMEPEngineCore
                     thSegmentService.SegmentAll(new CalBeamStruService());
                     segments.AddRange(thSegmentService.Segments);
                 }                
-                ThSplitLinearBeamService thSplitLineBeam = new ThSplitLinearBeamService(thIfcLineBeam, segments);
+                ThLinealBeamSplitter thSplitLineBeam = new ThLinealBeamSplitter(thIfcLineBeam, segments);
                 thSplitLineBeam.Split();
                 thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex = 1);
                 thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));

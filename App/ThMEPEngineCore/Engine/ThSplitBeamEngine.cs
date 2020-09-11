@@ -80,7 +80,7 @@ namespace ThMEPEngineCore.Service
             Dictionary<ThIfcBuildingElement, List<ThSegment>> beamWallComponentDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             BeamElements.ForEach(o =>
             {
-                Polyline outline = ThSplitBeamService.CreateExtendOutline(o);
+                Polyline outline = ThBeamSplitter.CreateExtendOutline(o);
                 DBObjectCollection wallComponents = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectCrossingPolygon(outline);
                 if(wallComponents.Count>0)
                 {
@@ -105,14 +105,14 @@ namespace ThMEPEngineCore.Service
             List<ThIfcBeam> divideBeams = new List<ThIfcBeam>();
             foreach (var item in beamWallComponentDic)
             {
-                ThSplitBeamService thSplitBeam=null;
+                ThBeamSplitter thSplitBeam=null;
                 if (item.Key is ThIfcLineBeam thIfcLineBeam)
                 {
-                    thSplitBeam = new ThSplitLinearBeamService(thIfcLineBeam, item.Value);                    
+                    thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam, item.Value);                    
                 }
                 else if(item.Key is ThIfcArcBeam thIfcArcBeam)
                 {
-                    thSplitBeam = new ThSplitArcBeamService(thIfcArcBeam, item.Value);
+                    thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam, item.Value);
                 }
                 thSplitBeam.Split();
                 if (thSplitBeam.SplitBeams.Count > 1)
@@ -132,7 +132,7 @@ namespace ThMEPEngineCore.Service
             Dictionary<ThIfcBuildingElement, List<ThSegment>> beamColumnComponentDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             BeamElements.ForEach(o =>
             {
-                Polyline outline = ThSplitBeamService.CreateExtendOutline(o);
+                Polyline outline = ThBeamSplitter.CreateExtendOutline(o);
                 DBObjectCollection columnComponents = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(outline);
                 if (columnComponents.Count > 0)
                 {
@@ -154,14 +154,14 @@ namespace ThMEPEngineCore.Service
             List<ThIfcBeam> divideBeams = new List<ThIfcBeam>();
             foreach (var item in beamColumnComponentDic)
             {
-                ThSplitBeamService thSplitBeam = null;
+                ThBeamSplitter thSplitBeam = null;
                 if (item.Key is ThIfcLineBeam thIfcLineBeam)
                 {
-                    thSplitBeam = new ThSplitLinearBeamService(thIfcLineBeam, item.Value);
+                    thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam, item.Value);
                 }
                 else if (item.Key is ThIfcArcBeam thIfcArcBeam)
                 {
-                    thSplitBeam = new ThSplitArcBeamService(thIfcArcBeam, item.Value);
+                    thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam, item.Value);
                 }
                 thSplitBeam.Split();
                 if (thSplitBeam.SplitBeams.Count > 1)
@@ -183,7 +183,7 @@ namespace ThMEPEngineCore.Service
             List<ThIfcBuildingElement> inValidBeams = new List<ThIfcBuildingElement>();
             foreach(var beam in restBeams)
             {
-                Polyline outline = ThSplitBeamService.CreateExtendOutline(beam);
+                Polyline outline = ThBeamSplitter.CreateExtendOutline(beam);
                 DBObjectCollection passComponents = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectCrossingPolygon(outline);
                 if (passComponents.Count == 0)
                 {
@@ -200,14 +200,14 @@ namespace ThMEPEngineCore.Service
                         passSegments.Add(CreateSegment(thIfcBeam));
                     }
                 });
-                ThSplitBeamService thSplitBeam = null;
+                ThBeamSplitter thSplitBeam = null;
                 if (beam is ThIfcLineBeam thIfcLineBeam)
                 {
-                    thSplitBeam = new ThSplitLinearBeamService(thIfcLineBeam, passSegments);
+                    thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam, passSegments);
                 }
                 else if (beam is ThIfcArcBeam thIfcArcBeam)
                 {
-                    thSplitBeam = new ThSplitArcBeamService(thIfcArcBeam, passSegments);
+                    thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam, passSegments);
                 }
                 thSplitBeam.Split();
                 if (thSplitBeam.SplitBeams.Count > 1)
