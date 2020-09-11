@@ -1,13 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcBeamStandardCase : ThIfcBeam
     {
         //
+        public override Polyline Extend(double length, double width)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

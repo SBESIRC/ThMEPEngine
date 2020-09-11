@@ -51,16 +51,14 @@ namespace ThMEPEngineCore.Service
                 if (currentBeam.ComponentType == BeamComponentType.SecondaryBeam)
                 {
                     continue;
-                }
+                }                
                 ThBeamLink thBeamLink = new ThBeamLink();
                 List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
                 Point3d prePt = PreFindBeamLink(currentBeam.StartPoint, linkElements);
                 Point3d backPt = BackFindBeamLink(currentBeam.EndPoint, linkElements);
                 ThSingleBeamLink startLink = ConnectionEngine.QuerySingleBeamLink(linkElements[0]);
-                thBeamLink.Start = startLink.GetPortVerComponents(prePt);
                 ThSingleBeamLink endLink = ConnectionEngine.QuerySingleBeamLink(linkElements[linkElements.Count - 1]);
-                thBeamLink.End = endLink.GetPortVerComponents(backPt);
-                if (thBeamLink.Start.Count == 0 && thBeamLink.End.Count == 0)
+                if (startLink.GetPortVerComponents(prePt).Count == 0 && endLink.GetPortVerComponents(backPt).Count == 0)
                 {
                     thBeamLink.Start.AddRange(QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[0], prePt));
                     thBeamLink.Start.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[0], prePt));
@@ -82,7 +80,7 @@ namespace ThMEPEngineCore.Service
                 }
             }
         }
-        protected Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
+        private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
             ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(beamLink[0]);
@@ -120,7 +118,7 @@ namespace ThMEPEngineCore.Service
             }
             return portPt; 
         }
-        protected Point3d BackFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
+        private Point3d BackFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回
             ThSingleBeamLink thSingleBeamLink = ConnectionEngine.QuerySingleBeamLink(beamLink[beamLink.Count - 1]);

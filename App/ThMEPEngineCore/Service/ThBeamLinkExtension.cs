@@ -81,13 +81,13 @@ namespace ThMEPEngineCore.Service
             var startLinkComponent = thBeamLink.Start.Where(o => o.GetType() == typeof(ThIfcColumn) || o.GetType() == typeof(ThIfcWall));
             if (startLinkComponent.Any()) 
             {
-                //起始端有竖向构件,末端连接半主梁、未定义梁
+                //起始端有竖向构件,末端非主梁
                 return !thBeamLink.End.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam).Any();
             }
             var endLinkComponent = thBeamLink.End.Where(o => o is ThIfcColumn || o is ThIfcWall);
             if (endLinkComponent.Any())
             {
-                //末端有竖向构件,起始端连接半主梁、未定义梁
+                //末端有竖向构件,起始端非主梁
                 return !thBeamLink.Start.Where(o => o is ThIfcBeam thIfcBeam && thIfcBeam.ComponentType == BeamComponentType.PrimaryBeam).Any();
             }
             return false;
@@ -143,7 +143,7 @@ namespace ThMEPEngineCore.Service
                 Polyline portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
                 Polyline portMirrorEnvelop = GetLineBeamPortMirrorEnvelop(thIfcLineBeam, portPt);
                 // 先判断是否搭接在柱上
-                linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectFence(portEnvelop);
+                linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(portEnvelop);
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和柱是“重叠(Overlap)”的
@@ -180,11 +180,11 @@ namespace ThMEPEngineCore.Service
         {
             if (beam.Width > 120)
             {
-                return 500.0; //enlargeTimes * beam.Width;
+                return beam.Width; //enlargeTimes * beam.Width;
             }
             else
             {
-                return 500.0;
+                return beam.ActualWidth;
             }
         }
         protected Polyline CreatePortEnvelop(Vector3d dir,Point3d portPt,double width, double distance)
@@ -222,7 +222,7 @@ namespace ThMEPEngineCore.Service
             }
             return segments.OrderBy(o => o.MidPoint.DistanceTo(pt)).FirstOrDefault().Length;
         }
-        protected bool TwoBeamIsParallel(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
+        public bool TwoBeamIsParallel(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
         {
             return firstBeam.Direction.IsParallelToEx(secondBeam.Direction);
         }
@@ -235,10 +235,10 @@ namespace ThMEPEngineCore.Service
             }
             return false;
         }
-        protected bool TwoBeamIsCollinear(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
+        public bool TwoBeamIsCollinear(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
         {
-            return firstBeam.Direction.IsCodirectionalTo(secondBeam.Direction) ||
-                   firstBeam.Direction.IsCodirectionalTo(secondBeam.Direction.Negate());
+            return ThGeometryTool.IsCollinearEx(firstBeam.StartPoint,firstBeam.EndPoint,
+                secondBeam.StartPoint,secondBeam.EndPoint);
         }
         public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt)
         {

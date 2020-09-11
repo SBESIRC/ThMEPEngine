@@ -1,9 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
@@ -17,6 +13,11 @@ namespace ThMEPEngineCore.Model
         public double Radius { get; set; }
         public ThIfcArcBeam()
         {
+        }
+        public override Polyline Extend(double length, double width)
+        {
+            //TODO
+            return this.Outline.Clone() as Polyline;
         }
     }
 }

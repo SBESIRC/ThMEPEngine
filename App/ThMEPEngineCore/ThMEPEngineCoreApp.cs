@@ -160,7 +160,6 @@ namespace ThMEPEngineCore
                 });
             }
         }
-
         [CommandMethod("TIANHUACAD", "ThExtractLaneLine", CommandFlags.Modal)]
         public void ThExtractLaneLine()
         {
@@ -179,7 +178,6 @@ namespace ThMEPEngineCore
                 ThIfcLineBeam thIfcLineBeam = new ThIfcLineBeam();
                 thIfcLineBeam.StartPoint = Active.Editor.GetPoint("\n Select beam start point：").Value;
                 thIfcLineBeam.EndPoint = Active.Editor.GetPoint("\n Select beam end point：").Value;
-                thIfcLineBeam.Direction = thIfcLineBeam.StartPoint.GetVectorTo(thIfcLineBeam.EndPoint);
                 thIfcLineBeam.Outline = acadDatabase.Element<Polyline>(Active.Editor.GetEntity("\n Select beam outline：").ObjectId);
                 thIfcLineBeam.ComponentType = BeamComponentType.PrimaryBeam;
                 thIfcLineBeam.Width = 300;
@@ -210,7 +208,6 @@ namespace ThMEPEngineCore
                 var otherRes = Active.Editor.GetEntity("\nselect a polyline");
                 Polyline otherPolyline = acadDatabase.Element<Polyline>(otherRes.ObjectId);
                 bool res = polyline.Intersects(otherPolyline);
-
                 ThSegmentService thSegmentService = new ThSegmentService(polyline);
                 thSegmentService.SegmentAll(new CalBeamStruService());
                 thSegmentService.Segments.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));

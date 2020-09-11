@@ -1,14 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcBeam : ThIfcBuildingElement
+    public abstract class ThIfcBeam : ThIfcBuildingElement
     {
         public ThIfcBeam()
         {
@@ -31,6 +26,7 @@ namespace ThMEPEngineCore.Model
                 return 0.0;
             }
         }
+        public abstract Polyline Extend(double length,double width);
     }
     public enum BeamComponentType
     {

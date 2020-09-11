@@ -91,22 +91,18 @@ namespace ThMEPEngineCore.Engine
 
         private ThIfcBeam CreateIfcBeam(Beam beam, string spec = "")
         {
-            ThIfcBeam thIfcBeam;
+            ThIfcBeam thIfcBeam=null;
             if (beam is LineBeam)
             {
                 thIfcBeam = new ThIfcLineBeam()
                 {
-                    Direction = beam.BeamNormal
+                    Normal = beam.BeamNormal
                 };
             }
             else if (beam is ArcBeam)
             {
                 thIfcBeam = new ThIfcArcBeam();
-            }
-            else
-            {
-                thIfcBeam = new ThIfcBeam();
-            }
+            }            
             thIfcBeam.Uuid = Guid.NewGuid().ToString();
             thIfcBeam.StartPoint = beam.StartPoint;
             thIfcBeam.EndPoint = beam.EndPoint;

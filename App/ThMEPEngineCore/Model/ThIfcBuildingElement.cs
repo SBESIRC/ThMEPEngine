@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcBuildingElement : ThIfcElement
+    public abstract class ThIfcBuildingElement : ThIfcElement
     {
     }
 }

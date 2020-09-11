@@ -33,7 +33,6 @@ namespace ThMEPEngineCore.Service
                     Outline = beamOutLine.Item1,
                     Width = maxW,
                     Height = maxH,
-                    Direction = beamOutLine.Item2.GetVectorTo(beamOutLine.Item3),
                     ComponentType = BeamLink.Beams[0].ComponentType
                 };
                 BeamLink.Beams.ForEach(o => o.Outline.Dispose());

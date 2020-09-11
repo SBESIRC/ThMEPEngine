@@ -233,13 +233,17 @@ namespace ThMEPEngineCore.Service
             var beamSpatialIndex = ThSpatialIndexService.CreateBeamSpatialIndex(dbObjs);
             for (int i = 0; i < BeamElements.Count; i++)
             {
-                DBObjectCollection passComponents = beamSpatialIndex.
-                   SelectCrossingPolygon(BeamElements[i].Outline as Polyline);
-                passComponents.Remove(BeamElements[i].Outline);
-                if (passComponents.Count==0)
+                if (BeamElements[i] is ThIfcBeam thIfcbeam)
                 {
-                    unIntersectBeams.Add(BeamElements[i]);
-                }
+                    Polyline extendOutLine = thIfcbeam.Extend(0, 0.01 * thIfcbeam.ActualWidth);
+                    DBObjectCollection passComponents = beamSpatialIndex.SelectCrossingPolygon(extendOutLine);
+                    extendOutLine.Dispose();
+                    passComponents.Remove(BeamElements[i].Outline);
+                    if (passComponents.Count == 0)
+                    {
+                        unIntersectBeams.Add(BeamElements[i]);
+                    }
+                } 
             }
             return unIntersectBeams;
         }

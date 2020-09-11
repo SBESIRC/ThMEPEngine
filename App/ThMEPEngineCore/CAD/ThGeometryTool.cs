@@ -41,17 +41,26 @@ namespace ThMEPEngineCore.CAD
             double distance = Math.Cos(angle) * secondVec.Length;
             return startPt + firstVec.GetNormal().MultiplyBy(distance);
         }
-        public static bool IsParallelUncollinear(this Line firstEnt, Line secondEnt)
+        public static bool IsCollinearEx(Point3d firstSp,Point3d firstEp,
+            Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
         {
-            Vector3d firstVec = firstEnt.StartPoint.GetVectorTo(firstEnt.EndPoint);
-            Vector3d secondVec = secondEnt.StartPoint.GetVectorTo(secondEnt.EndPoint);
-            if (firstVec.IsParallelToEx(secondVec))
+            Vector3d firstVec = firstSp.GetVectorTo(firstEp);
+            Vector3d secondVec = secondSp.GetVectorTo(secondEp);
+            if (firstVec.IsParallelToEx(secondVec, tolerance))
             {
-                Vector3d otherVec = firstEnt.StartPoint.GetVectorTo(secondEnt.StartPoint);
+                Vector3d otherVec;
+                if (firstSp.DistanceTo(secondEp)>0.0)
+                {
+                    otherVec = firstSp.GetVectorTo(secondEp);
+                }
+                else
+                {
+                    otherVec = firstSp.GetVectorTo(secondSp);
+                }
                 double angle = firstVec.GetAngleTo(otherVec);
                 angle = angle / Math.PI * 180.0;
                 angle %= 180.0;
-                return !(Math.Abs(angle - 0.0) <= 1.0 || Math.Abs(angle - 180.0) <= 1.0);
+                return (Math.Abs(angle) <= tolerance || Math.Abs(angle - 180.0) <= tolerance);
             }
             return false;
         }

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Engine
@@ -72,7 +71,10 @@ namespace ThMEPEngineCore.Engine
 
             // Pass Six 在剩余梁中找出两端搭在主梁、半主梁、悬挑柱梁或次梁上的次次梁
             FindSubSecondaryBeamLink();
-            
+
+            // Pass Seven 把悬挑梁末端连接的未定义梁去除
+            RemoveUndefinedFromOverhanging();
+
             // Pass Seven 对BeamLink中的Beams属性进行梁合并
             MergeBeamLinks();
         }
@@ -112,9 +114,9 @@ namespace ThMEPEngineCore.Engine
                     thSingleBeamLink.StartVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.StartPoint);
                     thSingleBeamLink.EndVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.EndPoint);
                     thSingleBeamLink.StartBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.StartPoint);
+                    thSingleBeamLink.StartBeams = ThFilterPortLinkBeams.Filter(thIfcBeam, thIfcBeam.StartPoint, thSingleBeamLink.StartBeams);
                     thSingleBeamLink.EndBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.EndPoint);
-                    thSingleBeamLink.StartBeams = thSingleBeamLink.StartBeams.Where(o => o.Uuid != thIfcBeam.Uuid).ToList();
-                    thSingleBeamLink.EndBeams = thSingleBeamLink.EndBeams.Where(o => o.Uuid != thIfcBeam.Uuid).ToList();
+                    thSingleBeamLink.EndBeams = ThFilterPortLinkBeams.Filter(thIfcBeam, thIfcBeam.EndPoint, thSingleBeamLink.EndBeams);                    
                 }
                 SingleBeamLinks.Add(thSingleBeamLink);
             }            
@@ -210,6 +212,23 @@ namespace ThMEPEngineCore.Engine
                     ShearWallEngine = thShearWallRecognitionEngine
                 };
             thSubSecondaryBeamLinkExtension.CreateSubSecondaryBeamLink();
+        }
+        private void RemoveUndefinedFromOverhanging()
+        {
+            OverhangingPrimaryBeamLinks.ForEach(m =>
+            {
+                m.Beams = m.Beams.Where(n => n.ComponentType != BeamComponentType.Undefined).ToList();
+                var uuids = new List<string>();
+                m.Beams = m.Beams.Where(n =>
+                {
+                    if (uuids.IndexOf(n.Uuid) < 0)
+                    {
+                        uuids.Add(n.Uuid);
+                        return true;
+                    }
+                    return false;
+                }).ToList();
+            });
         }
         private void MergeBeamLinks()
         {

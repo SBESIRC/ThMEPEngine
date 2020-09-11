@@ -42,6 +42,8 @@ namespace ThMEPEngineCore.Model
             Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
             return Tuple.Create(pts.CreatePolyline(), newSpt, newEpt);
         }
+        public bool StartHasVerticalComponent=> Start.Where(o => o is ThIfcWall || o is ThIfcColumn).Any();
+        public bool EndHasVerticalComponent=> End.Where(o => o is ThIfcWall || o is ThIfcColumn).Any();
     }
     public class ThSingleBeamLink
     {

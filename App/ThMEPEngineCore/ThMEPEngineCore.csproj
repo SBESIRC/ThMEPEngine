@@ -117,6 +117,7 @@
     <Compile Include="Service\ThBeamMerger.cs" />
     <Compile Include="Engine\ThSplitBeamEngine.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
+    <Compile Include="Service\ThFilterPortLinkBeams.cs" />
     <Compile Include="Service\ThOtherDbExtension.cs" />
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />

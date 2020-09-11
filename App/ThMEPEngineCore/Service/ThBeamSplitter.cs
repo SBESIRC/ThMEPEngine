@@ -47,7 +47,6 @@ namespace ThMEPEngineCore.Service
                 Uuid = Guid.NewGuid().ToString(),
                 StartPoint = startPt,
                 EndPoint = endPt,
-                Direction = direction,
                 Width = thIfcLineBeam.Width,
                 Height = thIfcLineBeam.Height,
                 ComponentType = thIfcLineBeam.ComponentType,
@@ -55,33 +54,12 @@ namespace ThMEPEngineCore.Service
             };
             return newLineBeam;
         }        
-        public static Polyline CreateExtendOutline(ThIfcLineBeam thIfcLineBeam, double tolerance)
-        {
-            Vector3d direction = thIfcLineBeam.StartPoint.GetVectorTo(thIfcLineBeam.EndPoint);
-            Vector3d perpendDir = direction.GetPerpendicularVector();
-            double width = thIfcLineBeam.ActualWidth + tolerance * 2;
-            Point3d pt1 = thIfcLineBeam.StartPoint - perpendDir.GetNormal().MultiplyBy(width / 2.0);
-            Point3d pt2 = thIfcLineBeam.StartPoint + perpendDir.GetNormal().MultiplyBy(width / 2.0);
-            Point3d pt3 = pt2 + direction.GetNormal().MultiplyBy(thIfcLineBeam.Length);
-            Point3d pt4 = pt1 + direction.GetNormal().MultiplyBy(thIfcLineBeam.Length);
-            Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
-            return pts.CreatePolyline();
-        }
-
-        public static Polyline CreateExtendOutline(ThIfcArcBeam thIfcArcBeam, double tolerance)
-        {
-            return thIfcArcBeam.Outline.Clone() as Polyline;
-        }
         public static Polyline CreateExtendOutline(ThIfcBuildingElement thIfcBuildingElement, double tolerance=50.0)
         {
-            if (thIfcBuildingElement is ThIfcLineBeam thIfcLineBeam)
+            if (thIfcBuildingElement is ThIfcBeam thIfcBeam)
             {
-                return CreateExtendOutline(thIfcLineBeam, tolerance);
-            }
-            else if (thIfcBuildingElement is ThIfcArcBeam thIfcArcBeam)
-            {
-                return CreateExtendOutline(thIfcArcBeam, tolerance);
-            }
+                return thIfcBeam.Extend(0.0, tolerance);
+            }            
             else
             {
                 return thIfcBuildingElement.Outline.Clone() as Polyline;
