@@ -1,4 +1,5 @@
-﻿using ThCADCore.NTS;
+﻿using System;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -6,48 +7,72 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public class ThMEPModelManager
+    [Flags]
+    public enum BuildElement
     {
-        //==============SINGLETON============
-        //fourth version from:
-        //http://csharpindepth.com/Articles/General/Singleton.aspx
-        private static readonly ThMEPModelManager instance = new ThMEPModelManager() { };
-        // Explicit static constructor to tell C# compiler
-        // not to mark type as beforefieldinit    
-        static ThMEPModelManager() { }
-        internal ThMEPModelManager() { }
-        public static ThMEPModelManager Instance { get { return instance; } }
-        //-------------SINGLETON-----------------
+        Beam = 0b_0000_0000,
+        Column = 0b_0000_0001,
+        ShearWall = 0b_0000_0010,
+        All = Beam | Column | ShearWall,
+    }
 
-        public ThBeamRecognitionEngine BeamEngine { get; set; }
-        public ThColumnRecognitionEngine ColumnEngine { get; set; }
-        public ThShearWallRecognitionEngine ShearWallEngine { get; set; }
-        private ThCADCoreNTSSpatialIndex SpaialIndex { get; set; }
-
-        public void Initialize()
+    public class ThMEPModelManager : IDisposable
+    {
+        public ThMEPModelManager(Database database)
         {
-            BeamEngine = new ThBeamRecognitionEngine();
-            ColumnEngine = new ThColumnRecognitionEngine();
-            ShearWallEngine = new ThShearWallRecognitionEngine();
+            HostDb = database;
+            BeamEngine = null;
+            ColumnEngine = null;
+            ShearWallEngine = null;
         }
 
-        public void LoadFromDatabase(Database database)
+        public void Dispose()
         {
-            LoadFromDatabase(database, new Point3dCollection());
         }
 
-        public void LoadFromDatabase(Database database, Point3dCollection polygon)
-        {
-            BeamEngine.Recognize(database, polygon);
-            ColumnEngine.Recognize(database, polygon);
-            ShearWallEngine.Recognize(database, polygon);
-        }
+        public Database HostDb { get; private set; }
+        public ThBeamRecognitionEngine BeamEngine { get; private set; }
+        public ThColumnRecognitionEngine ColumnEngine { get; private set; }
+        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; }
 
         public void CreateSpatialIndex()
         {
-            ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(BeamEngine.Collect()); 
-            ThSpatialIndexManager.Instance.CreateColumnSpaticalIndex(ColumnEngine.Collect());
-            ThSpatialIndexManager.Instance.CreateWallSpaticalIndex(ShearWallEngine.Collect());
+            if (BeamEngine != null)
+            {
+                ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(BeamEngine.Collect());
+            }
+            if (ColumnEngine != null)
+            {
+                ThSpatialIndexManager.Instance.CreateColumnSpaticalIndex(ColumnEngine.Collect());
+            }
+            if (ShearWallEngine != null)
+            {
+                ThSpatialIndexManager.Instance.CreateWallSpaticalIndex(ShearWallEngine.Collect());
+            }
+        }
+
+        public void Acquire(BuildElement elements)
+        {
+            Acquire(elements, new Point3dCollection());
+        }
+
+        public void Acquire(BuildElement elements, Point3dCollection polygon)
+        {
+            if ((elements & BuildElement.Beam) == BuildElement.Beam)
+            {
+                BeamEngine = new ThBeamRecognitionEngine();
+                BeamEngine.Recognize(HostDb, polygon);
+            }
+            if ((elements & BuildElement.Column) == BuildElement.Column)
+            {
+                ColumnEngine = new ThColumnRecognitionEngine();
+                ColumnEngine.Recognize(HostDb, polygon);
+            }
+            if ((elements & BuildElement.ShearWall) == BuildElement.ShearWall)
+            {
+                ShearWallEngine = new ThShearWallRecognitionEngine();
+                ShearWallEngine.Recognize(HostDb, polygon);
+            }
         }
     }
 }

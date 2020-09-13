@@ -8,36 +8,21 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public class ThMEPFrameService
+    public class ThMEPFrameService : IDisposable
     {
-        //==============SINGLETON============
-        //fourth version from:
-        //http://csharpindepth.com/Articles/General/Singleton.aspx
-        private static readonly ThMEPFrameService instance = new ThMEPFrameService() {  };
-        // Explicit static constructor to tell C# compiler
-        // not to mark type as beforefieldinit    
-        static ThMEPFrameService() { }
-        internal ThMEPFrameService() { }
-        public static ThMEPFrameService Instance { get { return instance; } }
-        //-------------SINGLETON-----------------
-
-        public void InitializeWithDb(Database database)
+        private ThMEPModelManager ModelManager { get; set; }
+        public ThMEPFrameService(ThMEPModelManager manager)
         {
-            ThMEPModelManager.Instance.Initialize();
-            ThMEPModelManager.Instance.LoadFromDatabase(database);
-            ThMEPModelManager.Instance.CreateSpatialIndex();
+            ModelManager = manager;
         }
 
-        public void InitializeWithDb(Database database, Point3dCollection polygon)
+        public void Dispose()
         {
-            ThMEPModelManager.Instance.Initialize();
-            ThMEPModelManager.Instance.LoadFromDatabase(database, polygon);
-            ThMEPModelManager.Instance.CreateSpatialIndex();
+            //
         }
 
         public DBObjectCollection RegionsFromFrame(Polyline frame)
         {
-            var objs_query = new DBObjectCollection();
             var fence_beam = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectCrossingPolygon(frame);
             var fence_column = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(frame);
             var fence_wall = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectCrossingPolygon(frame);
@@ -49,7 +34,7 @@ namespace ThMEPEngineCore.Algorithm
             {
                 if (polyline.IsClosed())
                 {
-                    var beamElement = ThMEPModelManager.Instance.BeamEngine.FilterByOutline(polyline) as ThIfcBeam;
+                    var beamElement = ModelManager.BeamEngine.FilterByOutline(polyline) as ThIfcBeam;
                     queryBeamElements.Add(Tuple.Create(beamElement, CreateExtendBeamOutline(beamElement as ThIfcLineBeam,100.0)));
                 }
             }
@@ -57,14 +42,14 @@ namespace ThMEPEngineCore.Algorithm
             {
                 if (polyline.IsClosed())
                 {
-                    queryColumnElements.Add(ThMEPModelManager.Instance.ColumnEngine.FilterByOutline(polyline) as ThIfcColumn);
+                    queryColumnElements.Add(ModelManager.ColumnEngine.FilterByOutline(polyline) as ThIfcColumn);
                 }
             }
             foreach (Polyline polyline in fence_wall)
             {
                 if (polyline.IsClosed())
                 {
-                    queryWallElements.Add(ThMEPModelManager.Instance.ShearWallEngine.FilterByOutline(polyline));
+                    queryWallElements.Add(ModelManager.ShearWallEngine.FilterByOutline(polyline));
                 }
             }
             var element_polyline = new DBObjectCollection();

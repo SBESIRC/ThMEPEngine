@@ -86,6 +86,7 @@ namespace ThMEPEngineCore.Test
         public void TestFrame()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var modelManager = new ThMEPModelManager(Active.Database))
             {
                 var result = Active.Editor.GetEntity("请选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -94,13 +95,14 @@ namespace ThMEPEngineCore.Test
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
 
-                ThMEPFrameService.Instance.InitializeWithDb(acadDatabase.Database);
-                var result_element = ThMEPFrameService.Instance.RegionsFromFrame(frame);
-                
+                modelManager.Acquire(BuildElement.All);
+                modelManager.CreateSpatialIndex();
+
+                var frameService = new ThMEPFrameService(modelManager);
+                var result_element = frameService.RegionsFromFrame(frame);
                 foreach (Entity item in result_element)
                 {
                     item.ColorIndex = 2;
-                    item.Highlight();
                     acadDatabase.ModelSpace.Add(item);
                 }
             }
