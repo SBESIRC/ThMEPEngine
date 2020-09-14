@@ -35,5 +35,8 @@ namespace ThMEPEngineCore
 
         // 公差
         public static double SIMILARITYMEASURETOLERANCE = 0.9;
+
+        //梁信封圈搜索长度
+        public static double BeamEnvelopSearchLength = 600.0;
     }
 }

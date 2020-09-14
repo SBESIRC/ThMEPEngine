@@ -140,14 +140,13 @@ namespace ThMEPEngineCore.Service
             DBObjectCollection linkObjs = new DBObjectCollection();
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {
-                Polyline portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
-                Polyline portMirrorEnvelop = GetLineBeamPortMirrorEnvelop(thIfcLineBeam, portPt);
+                Polyline portSearchEnvelop = GetLineBeamPortSearchEnvelop(thIfcLineBeam, portPt);
                 // 先判断是否搭接在柱上
-                linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(portEnvelop);
+                linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和柱是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.Intersects(o) || portEnvelop.Intersects(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.Intersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ColumnEngine.FilterByOutline(dbObj));
@@ -159,11 +158,11 @@ namespace ThMEPEngineCore.Service
                 }
 
                 // 再判断是否搭接在剪力墙上
-                linkObjs = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectFence(portEnvelop);
+                linkObjs = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和剪力墙是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.Intersects(o) || portEnvelop.Intersects(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.Intersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ShearWallEngine.FilterByOutline(dbObj));
@@ -174,17 +173,6 @@ namespace ThMEPEngineCore.Service
             else
             {
                 throw new NotSupportedException();
-            }
-        }
-        protected double GenerateExpandDistance(ThIfcBeam beam)
-        {
-            if (beam.Width > 120)
-            {
-                return beam.Width; //enlargeTimes * beam.Width;
-            }
-            else
-            {
-                return beam.ActualWidth;
             }
         }
         protected Polyline CreatePortEnvelop(Vector3d dir,Point3d portPt,double width, double distance)
@@ -244,27 +232,25 @@ namespace ThMEPEngineCore.Service
         {
             List<ThIfcBeam> links = new List<ThIfcBeam>();
             DBObjectCollection linkObjs = new DBObjectCollection();
-            Polyline portEnvelop = null;
-            Polyline portMirrorEnvelop = null;
+            Polyline portSearchEnvelop = null;
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
-            {
-                portEnvelop = GetLineBeamPortEnvelop(thIfcLineBeam, portPt);
-                portMirrorEnvelop = GetLineBeamPortMirrorEnvelop(thIfcLineBeam, portPt);
+            {               
+                portSearchEnvelop = GetLineBeamPortSearchEnvelop(thIfcLineBeam, portPt);
             }
             else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
-            {
-                portEnvelop = GetArcBeamPortEnvelop(thIfcArcBeam, portPt);
-                portMirrorEnvelop = GetArcBeamPortMirrorEnvelop(thIfcArcBeam, portPt);
+            {               
+                portSearchEnvelop = GetArcBeamPortSearchEnvelop(thIfcArcBeam, portPt);
             }
-            linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(portEnvelop);
+            linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
             if (linkObjs.Count > 0)
             {
-                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portMirrorEnvelop.Intersects(o) || portEnvelop.Intersects(o));
+                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.Intersects(o));
                 foreach (DBObject dbObj in overlapObjs)
                 {
                     links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
                 }
             }
+            links = links.Where(o => o.Uuid != thIfcBeam.Uuid).ToList();
             return links;
         }
         protected Polyline GetLineBeamPortEnvelop(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
@@ -273,7 +259,7 @@ namespace ThMEPEngineCore.Service
             //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
             //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
             beamWidth *= 1.01;
-            double distance = GenerateExpandDistance(thIfcLineBeam);
+            double distance = ThMEPEngineCoreCommon.BeamEnvelopSearchLength;
             if (portPt.DistanceTo(thIfcLineBeam.StartPoint) < portPt.DistanceTo(thIfcLineBeam.EndPoint))
             {
                 return CreatePortEnvelop(thIfcLineBeam.Direction.Negate(), portPt, beamWidth, distance);
@@ -283,26 +269,21 @@ namespace ThMEPEngineCore.Service
                 return CreatePortEnvelop(thIfcLineBeam.Direction, portPt, beamWidth, distance);
             }
         }
-        protected Polyline GetLineBeamPortMirrorEnvelop(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
+        protected Polyline GetLineBeamPortSearchEnvelop(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
         {
             double beamWidth = GetPolylineWidth(thIfcLineBeam.Outline as Polyline, portPt);
             //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
             //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
             beamWidth *= 1.01;
-            double distance = GenerateExpandDistance(thIfcLineBeam);
-            double beamLength = thIfcLineBeam.StartPoint.DistanceTo(thIfcLineBeam.EndPoint);
-            if (distance > beamLength / 2.0)
+            double distance = ThMEPEngineCoreCommon.BeamEnvelopSearchLength;
+            if (distance > thIfcLineBeam.Length / 2.0)
             {
-                distance = beamLength / 2.0;
+                distance = thIfcLineBeam.Length / 2.0;
             }
-            if (portPt.DistanceTo(thIfcLineBeam.StartPoint) < portPt.DistanceTo(thIfcLineBeam.EndPoint))
-            {
-                return CreatePortEnvelop(thIfcLineBeam.Direction, portPt, beamWidth, distance);
-            }
-            else
-            {
-                return CreatePortEnvelop(thIfcLineBeam.Direction.Negate(), portPt, beamWidth, distance);
-            }
+            Vector3d direction = thIfcLineBeam.Direction;           
+            Point3d sp = portPt - direction.GetNormal().MultiplyBy(distance);
+            Point3d ep = portPt + direction.GetNormal().MultiplyBy(distance);
+            return CreatePortEnvelop(sp.GetVectorTo(ep),sp,beamWidth, sp.DistanceTo(ep));
         }
         protected Polyline GetArcBeamPortEnvelop(ThIfcArcBeam thIfcArcBeam, Point3d portPt)
         {
@@ -310,7 +291,7 @@ namespace ThMEPEngineCore.Service
             //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
             //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
             beamWidth *= 1.05;
-            double distance = GenerateExpandDistance(thIfcArcBeam);
+            double distance = ThMEPEngineCoreCommon.BeamEnvelopSearchLength; 
             if (portPt.DistanceTo(thIfcArcBeam.StartPoint) < portPt.DistanceTo(thIfcArcBeam.EndPoint))
             {
                 return CreatePortEnvelop(thIfcArcBeam.StartTangent.Negate(), portPt, beamWidth, distance);
@@ -320,21 +301,25 @@ namespace ThMEPEngineCore.Service
                 return CreatePortEnvelop(thIfcArcBeam.EndTangent.Negate(), portPt, beamWidth, distance);
             }
         }
-        protected Polyline GetArcBeamPortMirrorEnvelop(ThIfcArcBeam thIfcArcBeam, Point3d portPt)
+        protected Polyline GetArcBeamPortSearchEnvelop(ThIfcArcBeam thIfcArcBeam, Point3d portPt)
         {
             double beamWidth = GetPolylineWidth(thIfcArcBeam.Outline as Polyline, portPt);
             //在梁宽和柱宽完全一致且完美贴合在一起的情况下，找不到连接的柱子
             //这里暂时我们采用一个"Workaround"，将梁宽扩大后，就可以找到了。
             beamWidth *= 1.05;
-            double distance = GenerateExpandDistance(thIfcArcBeam);
-            if (portPt.DistanceTo(thIfcArcBeam.StartPoint) < portPt.DistanceTo(thIfcArcBeam.EndPoint))
+            double distance = ThMEPEngineCoreCommon.BeamEnvelopSearchLength; 
+            Vector3d direction;
+            if (thIfcArcBeam.StartPoint.DistanceTo(portPt)<=1.0)
             {
-                return CreatePortEnvelop(thIfcArcBeam.StartTangent, portPt, beamWidth, distance);
+                direction = thIfcArcBeam.StartTangent;
             }
             else
             {
-                return CreatePortEnvelop(thIfcArcBeam.EndTangent, portPt, beamWidth, distance);
+                direction = thIfcArcBeam.EndTangent;
             }
+            Point3d sp = portPt - direction.GetNormal().MultiplyBy(distance);
+            Point3d ep = portPt + direction.GetNormal().MultiplyBy(distance);
+            return CreatePortEnvelop(sp.GetVectorTo(ep), sp, beamWidth, sp.DistanceTo(ep)); ;
         }
         protected List<ThIfcBeam> QueryPortLinkPrimaryBeams(List<ThBeamLink> PrimaryBeamLinks,ThIfcBeam currentBeam, Point3d portPt,bool? isParallel = false)
         {

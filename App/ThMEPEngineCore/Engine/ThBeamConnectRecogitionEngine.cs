@@ -26,6 +26,12 @@ namespace ThMEPEngineCore.Engine
         {
             //TODO
         }
+        public static ThBeamConnectRecogitionEngine ExecuteRecognize(Database database, Point3dCollection polygon)
+        {
+            ThBeamConnectRecogitionEngine beamConnectEngine = new ThBeamConnectRecogitionEngine();
+            beamConnectEngine.Recognize(database, polygon);
+            return beamConnectEngine;
+        }
         public void Recognize(Database database, Point3dCollection polygon)
         {
             SingleBeamLinks = new List<ThSingleBeamLink>();
@@ -109,7 +115,7 @@ namespace ThMEPEngineCore.Engine
             {
                 ThSingleBeamLink thSingleBeamLink = new ThSingleBeamLink();
                 if(element is ThIfcBeam thIfcBeam)
-                {
+                {                    
                     thSingleBeamLink.Beam = thIfcBeam;
                     thSingleBeamLink.StartVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.StartPoint);
                     thSingleBeamLink.EndVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.EndPoint);

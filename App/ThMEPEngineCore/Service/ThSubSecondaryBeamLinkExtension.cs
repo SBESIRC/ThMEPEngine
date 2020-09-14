@@ -72,8 +72,7 @@ namespace ThMEPEngineCore.Service
             //梁端部连接的主梁、半主梁、悬挑主梁、次梁，则停止查找
             if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks, beamLink[0], portPt).Count > 0 ||
                QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, beamLink[0], portPt).Count > 0 ||
-               QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, beamLink[0], portPt).Count > 0 ||
-               QueryPortLinkSecondaryBeams(SecondaryBeamLinks, beamLink[0],portPt).Count>0)
+               QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, beamLink[0], portPt).Count > 0)
             {
                 return portPt;
             }
@@ -110,8 +109,7 @@ namespace ThMEPEngineCore.Service
             //梁端部连接的主梁或半主梁，则停止查找
             if (QueryPortLinkPrimaryBeams(PrimaryBeamLinks, beamLink[beamLink.Count - 1], portPt).Count > 0 ||
                QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, beamLink[beamLink.Count - 1], portPt).Count > 0 ||
-               QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, beamLink[beamLink.Count - 1], portPt).Count > 0 ||
-               QueryPortLinkSecondaryBeams(SecondaryBeamLinks, beamLink[beamLink.Count - 1], portPt).Count > 0)
+               QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, beamLink[beamLink.Count - 1], portPt).Count > 0)
             {
                 return portPt;
             }

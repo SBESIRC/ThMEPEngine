@@ -34,8 +34,7 @@ namespace ThMEPEngineCore.Service
                     Width = maxW,
                     Height = maxH,
                     ComponentType = BeamLink.Beams[0].ComponentType
-                };
-                BeamLink.Beams.ForEach(o => o.Outline.Dispose());
+                };                
                 BeamLink.Beams = new List<ThIfcBeam>();
                 BeamLink.Beams.Add(thIfcLineBeam);
             }

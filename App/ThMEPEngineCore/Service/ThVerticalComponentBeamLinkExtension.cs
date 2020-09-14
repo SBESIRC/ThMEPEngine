@@ -28,7 +28,7 @@ namespace ThMEPEngineCore.Service
                 if (currentBeam.ComponentType == BeamComponentType.PrimaryBeam)
                 {
                     continue;
-                }
+                }                
                 ThBeamLink thBeamLink = new ThBeamLink();
                 List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
                 Point3d prePt = PreFindBeamLink(currentBeam.StartPoint, linkElements);

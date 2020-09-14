@@ -95,7 +95,7 @@ namespace ThMEPEngineCore
                 stopwatch.Stop();
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
                 Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds+"秒");
-                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex=1));
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex=1));                
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 2));
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 3));
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 4));
@@ -204,9 +204,19 @@ namespace ThMEPEngineCore
             {
                 var entRes = Active.Editor.GetEntity("\n select a polyline");
                 Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
-
+                DBObjectCollection objs = new DBObjectCollection();
+                objs.Add(acadDatabase.Element<Polyline>(entRes.ObjectId));
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 var otherRes = Active.Editor.GetEntity("\nselect a polyline");
                 Polyline otherPolyline = acadDatabase.Element<Polyline>(otherRes.ObjectId);
+                Point3dCollection pts = new Point3dCollection();
+                for(int i=0;i<otherPolyline.NumberOfVertices;i++)
+                {
+                    pts.Add(otherPolyline.GetPoint3dAt(0));
+                }
+                var selObjs=thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pts);
+
+
                 bool res = polyline.Intersects(otherPolyline);
                 ThSegmentService thSegmentService = new ThSegmentService(polyline);
                 thSegmentService.SegmentAll(new CalBeamStruService());
