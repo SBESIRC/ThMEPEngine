@@ -37,8 +37,8 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThBraodcast", CommandFlags.Modal)]
-        public void ThBraodcast()
+        [CommandMethod("TIANHUACAD", "THFBS", CommandFlags.Modal)]
+        public void ThBroadcast()
         {
             PromptSelectionOptions options = new PromptSelectionOptions()
             {

@@ -5,7 +5,6 @@
     <?if $(var.Configuration) = Debug ?>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
         <?define OutputPath_R18_Debug="bin\Debug" ?>
-        <?define OutputPath_Obj_R18_Debug="obj\Debug" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Debug" Guid="{BC2244CD-2528-476C-9F8A-615CF85219DD}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\DotNetARX.dll" />
         </Component>
@@ -18,10 +17,12 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPEngineCore_Debug" Guid="{DF6F6996-AE0A-4667-9276-4C66EEE2BA20}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPEngineCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPEngineCore.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Debug" Guid="{11DB422C-065A-4277-AEFD-7024231BB298}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPElectrical.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-        <?define OutputPath_Obj_R19_Debug="obj\Debug-NET40" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" Guid="{652C0C81-7F6E-48E1-9E86-D5418B66270C}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\DotNetARX.dll" />
         </Component>
@@ -34,10 +35,12 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Debug" Guid="{9E3C992C-CD1C-4EA4-A507-672089ECA84C}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPEngineCore.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" Guid="{ABE87E98-D9F8-420A-B9E6-279E883B12DC}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPElectrical.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
-        <?define OutputPath_Obj_R20_Debug="obj\Debug-NET45" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Debug" Guid="{5C985F88-0E14-4928-842D-99EC072F6BDE}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\DotNetARX.dll" />
         </Component>
@@ -50,10 +53,12 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPEngineCore_Debug" Guid="{ED4943CF-313F-4F22-9830-DEA0D05BBB19}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPEngineCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPEngineCore.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" Guid="{33F3ECAF-87C3-4497-8639-EA2DB3084BB9}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPElectrical.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
-        <?define OutputPath_Obj_R22_Debug="obj\Debug-NET46" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_DotNetARX_Debug" Guid="{2FF6A7C9-CB92-48C2-A3C8-5E8B3061F3FD}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\DotNetARX.dll" />
         </Component>
@@ -66,11 +71,13 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Debug" Guid="{39047948-C27E-4F19-AB27-77185FCC8708}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPEngineCore.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" Guid="{E8A46F90-FFDC-4C9B-BBE7-744D253FAF88}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPElectrical.dll" />
+        </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
         <?define OutputPath_R18_Release="bin\Release" ?>
-        <?define OutputPath_Obj_R18_Release="obj\Release" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Release" Guid="{5542D087-CB7E-46D6-9D29-DFCD27A041B5}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\DotNetARX.dll" />
         </Component>
@@ -83,10 +90,12 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPEngineCore_Release" Guid="{8461A9F2-0DC2-48DE-9CD7-31EDA7B51843}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPEngineCore.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Release" Guid="{AF924156-5885-4E08-8D07-39855C11EEC6}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPElectrical.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-        <?define OutputPath_Obj_R19_Release="obj\Release-NET40" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" Guid="{7CE2FEBF-8952-44D2-AF6D-DED21C9BE21B}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\DotNetARX.dll" />
         </Component>
@@ -99,10 +108,12 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Release" Guid="{7725BE77-D2CE-42B5-A99D-1B8E4FE102C7}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPEngineCore.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" Guid="{6CB2ED62-B3D7-4674-8929-28B7D2E3EBFC}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPElectrical.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Release="bin\Release-NET45" ?>
-        <?define OutputPath_Obj_R20_Release="obj\Release-NET45" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Release" Guid="{8C8E9A40-6823-4C76-802F-CDD0136A1123}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\DotNetARX.dll" />
         </Component>
@@ -115,10 +126,12 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPEngineCore_Release" Guid="{8228CDCE-782D-43F3-97E3-8B165B382E5E}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPEngineCore.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" Guid="{76CACBAF-0C3F-474D-BAD4-DE392FA2B753}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPElectrical.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Release="bin\Release-NET46" ?>
-        <?define OutputPath_Obj_R22_Release="obj\Release-NET46" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_DotNetARX_Release" Guid="{3DCDEC67-9FC5-4811-96F3-D5D2BB627F67}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\DotNetARX.dll" />
         </Component>
@@ -130,6 +143,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" Guid="{DBAEF337-B4D1-4FC8-B732-92924F2BB095}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPEngineCore.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" Guid="{41E6F720-4924-44E0-8A13-BA224FA45456}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPElectrical.dll" />
         </Component>
     </DirectoryRef>
     <?endif?>
@@ -153,7 +169,11 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExtensionTools_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CADCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Debug" />
-      <?elseif $(var.Configuration) = Release ?>
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" />
+        <?elseif $(var.Configuration) = Release ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ExtensionTools_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_CADCore_Release" />
@@ -170,6 +190,10 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExtensionTools_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CADCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" />
       <?endif?>
     </ComponentGroup>
   </Fragment>

@@ -1,14 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using System.IO;
 using DotNetARX;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPElectrical.Model;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPElectrical.Broadcast
@@ -21,7 +18,7 @@ namespace ThMEPElectrical.Broadcast
         {
             using (var db = AcadDatabase.Active())
             {
-                db.Database.ImportModel(ThMEPCommon.BroadcastDwgName);
+                db.Database.ImportModel();
                 foreach (var col in insertPts)
                 {
                     db.Database.InsertModel(col.layoutPoint + col.layoutDirection * scaleNum * 1.5, col.layoutDirection, new Dictionary<string, string>(){
@@ -52,15 +49,19 @@ namespace ThMEPElectrical.Broadcast
             }
         }
 
-        public static void ImportModel(this Database database, string name)
+        public static void ImportModel(this Database database)
         {
-            var filePath = Path.Combine(ThCADCommon.SupportPath(), name);
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(filePath, DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThMEPCommon.BroadcastBlockName), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPCommon.BroadcastLayerName), false);
             }
+        }
+
+        private static string BlockDwgPath()
+        {
+            return Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.BroadcastDwgName);
         }
     }
 }

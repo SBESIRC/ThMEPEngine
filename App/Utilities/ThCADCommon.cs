@@ -112,7 +112,7 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
         {
             return Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                @"Autodesk\ApplicationPlugins\ThCADPlugin.bundle\Contents");
+                @"Autodesk\ApplicationPlugins\ThMEPPlugin.bundle\Contents");
         }
     }
 }
