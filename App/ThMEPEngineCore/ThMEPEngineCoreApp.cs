@@ -258,9 +258,9 @@ namespace ThMEPEngineCore
                 };
 
                 // 梁线的图元类型
-                // 暂时不支持弧梁
                 var dxfNames = new string[]
                 {
+                    RXClass.GetClass(typeof(Arc)).DxfName,
                     RXClass.GetClass(typeof(Line)).DxfName,
                     RXClass.GetClass(typeof(Polyline)).DxfName,
                 };

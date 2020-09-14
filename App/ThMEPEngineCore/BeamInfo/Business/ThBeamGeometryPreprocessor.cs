@@ -61,14 +61,19 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     }
                     else
                     {
-                        //
                         objs.Add(new Line(line.StartPoint.TransformBy(matrix), line.EndPoint.TransformBy(matrix)));
                     }
                 }
                 else if (curve is Arc arc)
                 {
-                    // TODO: 
-                    //暂时不支持圆弧
+                    if (arc.Normal.IsParallelTo(Vector3d.ZAxis))
+                    {
+                        objs.Add(arc);
+                    }
+                    else
+                    {
+                        objs.Add(new Arc(arc.Center.TransformBy(matrix), arc.Radius, arc.StartAngle, arc.EndAngle));
+                    }
                 }
                 else
                 {

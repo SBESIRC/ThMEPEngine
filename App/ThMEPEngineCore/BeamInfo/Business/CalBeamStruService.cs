@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     if (obj is Line line)
                     {
                         // 忽略Z值不为零的情况
-                        var lNormal = line.Direction();
+                        var lNormal = Direction(line);
                         if (!lNormal.IsEqualTo(new Vector3d(lNormal.X, lNormal.Y, 0.0)))
                         {
                             continue;
@@ -72,10 +72,15 @@ namespace ThMEPEngineCore.BeamInfo.Business
                 }
 
                 // 处理弧梁
-                allBeam.AddRange(GetArcBeamObject(arcs));
+                allBeam.AddRange(GetArcBeamObject(arcs, 1500));
             }
 
             return allBeam;
+        }
+
+        private Vector3d Direction(Line line)
+        {
+            return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
         }
 
         /// <summary>
@@ -219,61 +224,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             return beamLst;
         }
 
-        /// <summary>
-        /// 获取弧梁
-        /// </summary>
-        /// <param name="arcs"></param>
-        /// <returns></returns>
-        private List<ArcBeam> GetArcBeamObject(List<Arc> arcs)
-        {
-            List<ArcBeam> beamLst = new List<ArcBeam>();
-            arcs = arcs.OrderByDescending(x => x.Length).ToList();
-            Arc firArc = arcs.First();
-            while (arcs.Count > 0)
-            {
-                Point3d sP = firArc.StartPoint;
-                Point3d eP = firArc.EndPoint;
-                Point3d midP = new Point3d((sP.X + eP.X) / 2, (sP.Y + eP.Y) / 2, (sP.Z + eP.Z) / 2);
-                Vector3d xDir = (sP - eP).GetNormal();
-                Vector3d zDir = Vector3d.ZAxis;
-                Vector3d yDir = Vector3d.ZAxis.CrossProduct(xDir);
-                Matrix3d trans = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, 0,
-                    xDir.Y, yDir.Y, zDir.Y, 0,
-                    xDir.Z, yDir.Z, zDir.Z, 0,
-                    0.0, 0.0, 0.0, 1.0});
-                arcs.ForEach(x => x.TransformBy(trans.Inverse()));
-                arcs.Remove(firArc);
-
-                double maxX = firArc.StartPoint.X;
-                double minX = firArc.EndPoint.X;
-                if (maxX < minX)
-                {
-                    maxX = firArc.EndPoint.X;
-                    minX = firArc.StartPoint.X;
-                }
-
-                firArc.TransformBy(trans);
-                var arcLst = arcs.Where(x => minX < x.StartPoint.X && x.StartPoint.X < maxX
-                    && minX < x.EndPoint.X && x.EndPoint.X < maxX).ToList();
-                foreach (var thisLine in arcLst)
-                {
-                    thisLine.TransformBy(trans);
-                    ArcBeam beam = new ArcBeam(firArc, thisLine);
-                    beamLst.Add(beam);
-                    arcs.Remove(thisLine);
-                }
-                arcs.ForEach(x => x.TransformBy(trans));
-                if (arcs.Count > 0)
-                {
-                    firArc = arcs.First();
-                }
-            }
-
-            return beamLst;
-        }
-
-        public static List<Tuple<Arc, Arc>> ArcBeamPairsExtract(List<Arc> arcs, double DistThreshold = 1500)
+        private List<Tuple<Arc, Arc>> ArcBeamPairsExtract(List<Arc> arcs, double DistThreshold)
         {
             var arcSegments = new List<Tuple<Arc, Arc>>();
 
@@ -305,7 +256,8 @@ namespace ThMEPEngineCore.BeamInfo.Business
             return arcsMerge;
         }
 
-        private static List<Tuple<Arc, Arc>> ArcMergeEx(List<Tuple<Arc, Arc>> arcs)
+        // 检测Arc对中，是否有可合并的两段Arc
+        private List<Tuple<Arc, Arc>> ArcMergeEx(List<Tuple<Arc, Arc>> arcs)
         {
             for (int i = 0; i < arcs.Count; i++)
             {
@@ -345,7 +297,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
         }
 
         // 合并两段共圆心同半径的Arc
-        private static Arc ArcMerge(Arc arc1, Arc arc2)
+        private Arc ArcMerge(Arc arc1, Arc arc2)
         {
             var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
             var endAngle_1 = (arc1.StartAngle > arc1.EndAngle) ? (arc1.EndAngle + 8 * Math.Atan(1) - startAngle) : arc1.EndAngle - startAngle;
@@ -356,7 +308,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
         }
 
         // 计算两段弧的重合角度
-        private static double ArcOverlapAngle(Arc arc1, Arc arc2)
+        private double ArcOverlapAngle(Arc arc1, Arc arc2)
         {
             var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
             var startAngle_1 = arc1.StartAngle - startAngle;
@@ -371,10 +323,10 @@ namespace ThMEPEngineCore.BeamInfo.Business
         /// </summary>
         /// <param name="arcs"></param>
         /// <returns></returns>
-        private List<ArcBeam> GetArcBeamObjectEx(List<Arc> arcs)
+        private List<ArcBeam> GetArcBeamObject(List<Arc> arcs, double distThreshold)
         {
-            var arcPairs = ArcBeamPairsExtract(arcs);
             List<ArcBeam> beam = new List<ArcBeam>();
+            var arcPairs = ArcBeamPairsExtract(arcs, distThreshold);
             arcPairs.ForEach(o => beam.Add(new ArcBeam(o.Item1, o.Item2)));
             return beam;
         }
