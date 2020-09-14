@@ -12,7 +12,7 @@ namespace ThMEPElectrical.Layout
     /// <summary>
     /// 主次梁布置
     /// </summary>
-    public class MainSecondBeamLayout : SensorLayout
+    public abstract class MainSecondBeamLayout : SensorLayout
     {
         /// <summary>
         /// ABB处理后的多段线

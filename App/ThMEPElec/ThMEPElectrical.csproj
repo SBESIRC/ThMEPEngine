@@ -29,7 +29,7 @@
     <Compile Include="Block\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
     <Compile Include="Business\DetectionCalculator.cs" />
-    <Compile Include="Business\CalculateLayout.cs" />
+    <Compile Include="Business\LayoutCalculator.cs" />
     <Compile Include="Business\EntityPicker.cs" />
     <Compile Include="Business\PlacePointCalculator.cs" />
     <Compile Include="Business\MainBeam\MultiSegmentPlace.cs" />
@@ -48,8 +48,8 @@
     <Compile Include="Layout\MainBeamPolygonLayout.cs" />
     <Compile Include="Layout\MainBeamRectangleLayout.cs" />
     <Compile Include="Layout\MainSecondBeamLayout.cs" />
-    <Compile Include="Layout\MainSecondBeamPolygonLayout.cs" />
-    <Compile Include="Layout\MainSecondBeamRectangleLayout.cs" />
+    <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamPolygonLayout.cs" />
+    <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamRectLayout.cs" />
     <Compile Include="Layout\SensorLayout.cs" />
     <Compile Include="Broadcast\ColumnService.cs" />
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
@@ -60,6 +60,7 @@
     <Compile Include="Model\DetectionRegion.cs" />
     <Compile Include="Model\LayoutMap.cs" />
     <Compile Include="Model\LayoutProfileData.cs" />
+    <Compile Include="Model\MainSecondBeamRegion.cs" />
     <Compile Include="Model\PlaceInputProfileData.cs" />
     <Compile Include="Model\PlaceParameter.cs" />
     <Compile Include="Model\PlacePoint.cs" />
@@ -69,6 +70,8 @@
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
     <Compile Include="ThMEPCommon.cs" />
@@ -94,7 +97,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Business\MainSecondBeam\" />
     <Folder Include="View\" />
   </ItemGroup>
   <Choose>

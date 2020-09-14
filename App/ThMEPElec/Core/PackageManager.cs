@@ -14,6 +14,7 @@ using ThMEPElectrical.Geometry;
 using AcHelper;
 using GeometryExtensions;
 using Autodesk.AutoCAD.ApplicationServices;
+using Linq2Acad;
 
 namespace ThMEPElectrical.Core
 {
@@ -107,7 +108,7 @@ namespace ThMEPElectrical.Core
             // 插入点的计算
             PlaceParameter placePara = new PlaceParameter();
             var transformPlaceInputDatas = TransformProfileDatas(inputProfileDatas, wcs2Ucs);
-            
+
             var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, placePara);
             tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
 
@@ -140,22 +141,18 @@ namespace ThMEPElectrical.Core
 
             return resProfileDatas;
         }
-        
+
         private PlaceInputProfileData TransformProfileData(PlaceInputProfileData profileData, Matrix3d matrix)
         {
             var mainBeam = profileData.MainBeamOuterProfile;
             var secondBeams = profileData.SecondBeamProfiles;
-            secondBeams.ForEach(e => 
+
+            secondBeams.ForEach(e =>
             {
-                e.UpgradeOpen();
                 e.TransformBy(matrix);
-                e.DowngradeOpen();
             });
 
-            mainBeam.UpgradeOpen();
             mainBeam.TransformBy(matrix);
-            mainBeam.DowngradeOpen();
-
             return new PlaceInputProfileData(mainBeam, secondBeams);
         }
 
@@ -180,7 +177,7 @@ namespace ThMEPElectrical.Core
             // 插入点的计算
             PlaceParameter placePara = new PlaceParameter();
             var placeInputDatas = new List<PlaceInputProfileData>();
-            polylines.ForEach(e => { placeInputDatas.Add(new PlaceInputProfileData(e)); });
+            polylines.ForEach(e => { placeInputDatas.Add(new PlaceInputProfileData(e, null)); });
             var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(placeInputDatas, placePara);
             tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
 
@@ -218,7 +215,7 @@ namespace ThMEPElectrical.Core
             // 插入点的计算
             PlaceParameter placePara = new PlaceParameter();
             var placeInputDatas = new List<PlaceInputProfileData>();
-            polylines.ForEach(e => { placeInputDatas.Add(new PlaceInputProfileData(e)); });
+            polylines.ForEach(e => { placeInputDatas.Add(new PlaceInputProfileData(e, null)); });
             var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(placeInputDatas, placePara);
             tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
 

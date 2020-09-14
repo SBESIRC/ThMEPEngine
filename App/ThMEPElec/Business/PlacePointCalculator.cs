@@ -97,7 +97,7 @@ namespace ThMEPElectrical.Business
         /// <returns></returns>
         private SensorLayout SelectLayout(PlaceInputProfileData placeData, PlaceParameter parameter)
         {
-            var layout = CalculateLayout.MakeLayout(placeData, parameter);
+            var layout = LayoutCalculator.MakeLayout(placeData, parameter);
             return layout;
         }
     }
