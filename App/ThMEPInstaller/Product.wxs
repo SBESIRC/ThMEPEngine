@@ -7,7 +7,7 @@
         <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" Description="$(var.Description)" Manufacturer="$(var.Manufacturer)" Platform="x64" />
         <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <MediaTemplate EmbedCab="yes" />
-        <Feature Id="ProductFeature" Title="ThCADInstaller" Level="1">
+        <Feature Id="ProductFeature" Title="ThMEPInstaller" Level="1">
             <ComponentGroupRef Id="ProductComponents" />
             <ComponentGroupRef Id="ProductComponentsSupport" />
             <ComponentGroupRef Id="ProductComponentsAppWin64" />
@@ -49,7 +49,7 @@
     </Fragment>
     <Fragment>
         <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-            <Component Id="CMP_Autoloader_PackageContents" Guid="5C172780-B69A-4940-8585-D14489C6538E" Win64="yes">
+            <Component Id="CMP_Autoloader_PackageContents" Guid="7AD46714-B159-407E-A7CC-9F0608701245" Win64="yes">
                 <File Id="FILE_Autoloader_PackageContents" Source="$(var.AutoloaderPath)\PackageContents.xml" KeyPath="yes" />
             </Component>
             <!-- TODO: Remove the comments around this Component element and the ComponentRef below in order to add resources to this installer. -->
