@@ -40,8 +40,11 @@ namespace ThMEPEngineCore.BeamInfo.Utils
         public static Polyline TessellatedOutline(Arc arc1, Arc arc2)
         {
             //提取包络两段arc的Angle范围
-            double startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
-            double endAngle = Math.Max(arc1.EndAngle, arc2.EndAngle);
+            var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
+            var endAngle_1 = (arc1.StartAngle > arc1.EndAngle) ? (arc1.EndAngle + 8 * Math.Atan(1) - startAngle) : arc1.EndAngle - startAngle;
+            var endAngle_2 = (arc2.StartAngle > arc2.EndAngle) ? (arc2.EndAngle + 8 * Math.Atan(1) - startAngle) : arc2.EndAngle - startAngle;
+            var endAngle = Math.Max(endAngle_1, endAngle_2) + startAngle;
+            endAngle = (endAngle > 8 * Math.Atan(1)) ? (endAngle - 8 * Math.Atan(1)) : endAngle;
 
             //将输入的两段arc转换为PolylineSegmentCollection
             var arc_1 = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
@@ -74,8 +77,11 @@ namespace ThMEPEngineCore.BeamInfo.Utils
         public static Polyline Outline(Arc arc1, Arc arc2)
         {
             //提取包络两段arc的Angle范围
-            double startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
-            double endAngle = Math.Max(arc1.EndAngle, arc2.EndAngle);
+            var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
+            var endAngle_1 = (arc1.StartAngle > arc1.EndAngle) ? (arc1.EndAngle + 8 * Math.Atan(1) - startAngle) : arc1.EndAngle - startAngle;
+            var endAngle_2 = (arc2.StartAngle > arc2.EndAngle) ? (arc2.EndAngle + 8 * Math.Atan(1) - startAngle) : arc2.EndAngle - startAngle;
+            var endAngle = Math.Max(endAngle_1, endAngle_2) + startAngle;
+            endAngle = (endAngle > 8 * Math.Atan(1)) ? (endAngle - 8 * Math.Atan(1)) : endAngle;
 
             //将输入的两段arc转换为PolylineSegment
             Arc arc_1 = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);

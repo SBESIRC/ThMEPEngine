@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.BeamInfo.Business;
 
 namespace ThMEPEngineCore.Test
 {
@@ -104,6 +105,38 @@ namespace ThMEPEngineCore.Test
                 {
                     item.ColorIndex = 2;
                     acadDatabase.ModelSpace.Add(item);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThArcBeamExtraction", CommandFlags.Modal)]
+        public void ThArcBeamExtraction()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+
+                var arcs = new List<Arc>();
+                foreach (var item in objs)
+                {
+                    if (item is Arc) arcs.Add(item as Arc);
+                }
+
+                foreach (var item in CalBeamStruService.ArcBeamPairsExtract(arcs))
+                {
+                    Polyline polyline = ThArcBeamOutliner.TessellatedOutline(item.Item1, item.Item2);
+                    polyline.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(polyline);
                 }
             }
         }

@@ -1,6 +1,7 @@
 ﻿using System;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.BeamInfo.Utils;
 
 namespace ThMEPEngineCore.BeamInfo.Model
 {
@@ -54,30 +55,9 @@ namespace ThMEPEngineCore.BeamInfo.Model
         {
             get
             {
-                if (UpBeamLine == null || DownBeamLine == null)
-                {
-                    return null;
-                }
-
-                double upBluge = Math.Tan((UpBeamLine as Arc).TotalAngle / 4);
-                double downBluge = Math.Tan((DownBeamLine as Arc).TotalAngle / 4);
-                Polyline resPolyline = new Polyline(4)
-                {
-                    Closed = true,
-                };
-                resPolyline.AddVertexAt(0, new Point2d(UpBeamLine.StartPoint.X, UpBeamLine.StartPoint.Y), upBluge, 0, 0);
-                resPolyline.AddVertexAt(1, new Point2d(UpBeamLine.EndPoint.X, UpBeamLine.EndPoint.Y), 0, 0, 0);
-                if (UpBeamLine.EndPoint.DistanceTo(DownBeamLine.StartPoint) < UpBeamLine.EndPoint.DistanceTo(DownBeamLine.EndPoint))
-                {
-                    resPolyline.AddVertexAt(2, new Point2d(DownBeamLine.StartPoint.X, DownBeamLine.StartPoint.Y), downBluge, 0, 0);
-                    resPolyline.AddVertexAt(3, new Point2d(DownBeamLine.EndPoint.X, DownBeamLine.EndPoint.Y), 0, 0, 0);
-                }
-                else
-                {
-                    resPolyline.AddVertexAt(2, new Point2d(DownBeamLine.EndPoint.X, DownBeamLine.EndPoint.Y), -downBluge, 0, 0);
-                    resPolyline.AddVertexAt(3, new Point2d(DownBeamLine.StartPoint.X, DownBeamLine.StartPoint.Y), 0, 0, 0);
-                }
-                return resPolyline;
+                var arc_1 = UpBeamLine as Arc;
+                var arc_2 = DownBeamLine as Arc;
+                return ThArcBeamOutliner.Outline(arc_1, arc_2);
             }
         }
 
