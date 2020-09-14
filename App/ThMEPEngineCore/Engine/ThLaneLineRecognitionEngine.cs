@@ -8,10 +8,10 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThLaneLineRecognitionEngine : IDisposable
     {
-        public List<Curve> LaneCurves;
+        public List<Curve> Lanes { get; private set; }
         public ThLaneLineRecognitionEngine()
         {
-            LaneCurves = new List<Curve>();
+            Lanes = new List<Curve>();
         }
         public void Dispose()
         {            
@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.Engine
                 {
                     if (o.GetLength() > 0.0)
                     {
-                        LaneCurves.Add(o.Clone() as Curve);
+                        Lanes.Add(o.Clone() as Curve);
                     }
                 });
             }

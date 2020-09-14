@@ -167,7 +167,7 @@ namespace ThMEPEngineCore
             using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
                 laneLineEngine.Recognize(Active.Database);
-                laneLineEngine.LaneCurves.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                laneLineEngine.Lanes.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
         [CommandMethod("TIANHUACAD", "ThExtractDivideBeam", CommandFlags.Modal)]

@@ -9,7 +9,10 @@ using AcHelper;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPElectrical.Model;
+using ThMEPEngineCore.Engine;
 using ThMEPElectrical.Broadcast;
+using TianHua.AutoCAD.Utility.ExtensionTools;
+using System.Linq;
 
 namespace ThMEPElectrical
 {
@@ -40,75 +43,51 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "THFBS", CommandFlags.Modal)]
         public void ThBroadcast()
         {
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                SingleOnly = true,
-                AllowDuplicates = false,
-                MessageForAdding = "选择区域",
-                RejectObjectsOnLockedLayers = true,
-            };
-            var filterlist = OpFilter.Bulid(o =>
-              o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Polyline)).DxfName);
-            var result = Active.Editor.GetSelection(options, filterlist);
-            if (result.Status != PromptStatus.OK)
-            {
-                return;
-            }
-
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                foreach (ObjectId frame in result.Value.GetObjectIds())
+                // 获取车道线
+                var laneLineEngine = new ThLaneLineRecognitionEngine();
+                laneLineEngine.Recognize(acdb.Database);
+                // 暂时假设车道线绘制符合要求
+                var lanes = laneLineEngine.Lanes.Cast<Line>().ToList();
+                if (lanes.Count == 0)
                 {
-                    var plBack = acdb.Element<Polyline>(frame).Clone() as Polyline;
-                    Point3dCollection points = new Point3dCollection();
-                    for (int i = 0; i < plBack.NumberOfVertices; i++)
-                    {
-                        points.Add(plBack.GetPoint3dAt(i));
-                    }
+                    return;
+                }
 
-                    SelectionFilter selectionFilter = new SelectionFilter(
-                        new TypedValue[] {
-                            new TypedValue((int)DxfCode.LayerName, "AD-SIGN"),
-                            new TypedValue((int)DxfCode.Start, "ARC,LINE,Polyline,LWPOLYLINE"),
-                        });
-                    var parkingRes = Active.Editor.SelectCrossingPolygon(points, selectionFilter);
-                    if (parkingRes.Status != PromptStatus.OK)
-                    {
-                        return;
-                    }
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var filterlist = OpFilter.Bulid(o =>
+                  o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Polyline)).DxfName);
+                var result = Active.Editor.GetSelection(options, filterlist);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
 
-                    List<Line> parkingPoly = new List<Line>();
-                    foreach (var colId in parkingRes.Value.GetObjectIds())
-                    {
-                        parkingPoly.Add(acdb.Element<Line>(colId).Clone() as Line);
-                    }
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
 
-                    ParkingLinesService parkingLinesService = new ParkingLinesService();
-                    var parkingLines = parkingLinesService.CreateParkingLines(plBack, parkingPoly, out List<List<Line>> otherPLines);
+                    var parkingLinesService = new ParkingLinesService();
+                    var parkingLines = parkingLinesService.CreateParkingLines(frame, lanes, out List<List<Line>> otherPLines);
 
-                    SelectionFilter selectionColumnFilter = new SelectionFilter(
-                       new TypedValue[] {
-                            new TypedValue((int)DxfCode.LayerName, "S_COLU"),
-                            new TypedValue((int)DxfCode.Start, RXClass.GetClass(typeof(Polyline)).DxfName),
-                       });
-                    var columRes = Active.Editor.SelectWindowPolygon(points, selectionColumnFilter);
-                    if (columRes.Status != PromptStatus.OK)
-                    {
-                        return;
-                    }
-
-                    List<Polyline> columPoly = new List<Polyline>();
-                    foreach (var colId in columRes.Value.GetObjectIds())
-                    {
-                        columPoly.Add(acdb.Element<Polyline>(colId).Clone() as Polyline);
-                    }
+                    var columnEngine = new ThColumnRecognitionEngine();
+                    columnEngine.Recognize(acdb.Database, frame.Vertices());
+                    var columPoly = columnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
 
                     ColumnService columnService = new ColumnService();
                     columnService.HandleColumns(parkingLines, otherPLines, columPoly, 
-                        out Dictionary<List<Line>, List<ColumnModel>> mainColumns, out Dictionary<List<Line>, List<ColumnModel>> otherColumns);
+                        out Dictionary<List<Line>, List<ColumnModel>> mainColumns, 
+                        out Dictionary<List<Line>, List<ColumnModel>> otherColumns);
 
                     LayoutService layoutService = new LayoutService();
-                    var layoutCols = layoutService.LayoutBraodcast(plBack, mainColumns, otherColumns);
+                    var layoutCols = layoutService.LayoutBraodcast(frame, mainColumns, otherColumns);
 
                     InsertBroadcastService.InsertSprayBlock(layoutCols);
                 }

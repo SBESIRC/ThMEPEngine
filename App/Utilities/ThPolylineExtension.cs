@@ -76,23 +76,17 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             Point3dCollection vertices = new Point3dCollection();
             for (int i = 0; i < pLine.NumberOfVertices; i++)
             {
+                // 暂时不考虑“圆弧”的情况
                 vertices.Add(pLine.GetPoint3dAt(i));
             }
-            return vertices;
-        }
 
-        public static bool IsClosed(this Polyline pLine, Tolerance tolerance)
-        {            
-            // 最少三个顶点才能形成一个闭环
-            var vertices = pLine.Vertices();
-            if (vertices.Count < 3)
+            // 对于处于“闭合”状态的多段线，要保证其首尾点一致
+            if (pLine.Closed && !vertices[0].Equals(vertices[vertices.Count - 1]))
             {
-                return false;
+                vertices.Add(vertices[0]);
             }
 
-            // 比较第一个顶点和最后一个顶点，若他们重合，则多段线闭合；否则不闭合
-            var enumerator = vertices.Cast<Point3d>();
-            return enumerator.First().IsEqualTo(enumerator.Last(), tolerance);
+            return vertices;
         }
 
         public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
