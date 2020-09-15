@@ -35,23 +35,26 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
             return singleAdjustor.PostPoints;
         }
 
-        public override void Do()
+        protected override void DefinePosPointsInfo()
         {
-            // 有效区域
-            var polylines = m_mainSecondBeamRegion.ValidRegions;
+            m_mediumNodes.Add(new MediumNode(m_mainSecondBeamRegion.PlacePoints.First(), PointPosType.LeftTopPoint));
+        }
 
-            // 原始的布置点
-            var srcPt = m_mainSecondBeamRegion.PlacePoints.First();
+        protected override Point3d? PostMovePoint(List<Polyline> validPolys, MediumNode mediumNode)
+        {
+            var pt = mediumNode.Point;
+            var pts = new List<Point3d>(); // 不同方向上的点集
+            var pointNode = CalculateClosetPoints(validPolys, pt);
+            var closestPt = pointNode.NearestPt;
+            pts.AddRange(pointNode.NearestPts);
 
-            if (IsValidPoint(polylines, srcPt))
-            {
-                PostPoints.Add(srcPt);
-            }
-            else
-            {
-                // 选择最近的点
-                PostPoints.Add(CalculateClosetPoint(polylines, srcPt));
-            }
+            if (pts.Count == 1)
+                return pts.First();
+
+            // 定义点集所在的象限
+            var quadrantNode = DefineQuadrantInfo(pts, mediumNode);
+
+            return SelectPoint(quadrantNode);
         }
     }
 }
