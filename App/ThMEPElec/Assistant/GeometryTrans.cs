@@ -50,7 +50,7 @@ namespace ThMEPElectrical.Assistant
                 return null;
 
             var ptS = new List<Point3d>();
-            pt2dS.ForEach(pt => ptS.Add(pt.point3D()));
+            pt2dS.ForEach(pt => ptS.Add(pt.Point3D()));
 
             return ptS;
         }
@@ -60,7 +60,7 @@ namespace ThMEPElectrical.Assistant
             return new Point2d(pt.X, pt.Y);
         }
 
-        public static Point3d point3D(this Point2d pt)
+        public static Point3d Point3D(this Point2d pt)
         {
             return new Point3d(pt.X, pt.Y, 0);
         }
@@ -123,7 +123,7 @@ namespace ThMEPElectrical.Assistant
             return pt;
         }
 
-        public static List<Point3d> toPointList(this Point3dCollection ptCollection)
+        public static List<Point3d> ToPointList(this Point3dCollection ptCollection)
         {
             var ptLst = new List<Point3d>();
             
@@ -195,6 +195,5 @@ namespace ThMEPElectrical.Assistant
             }
             return poly;
         }
-
     }
 }

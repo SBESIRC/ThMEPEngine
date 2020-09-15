@@ -14,19 +14,12 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
     /// <summary>
     /// 主次梁单个调整器
     /// </summary>
-    public class MainSecondBeamSingleAdjustor
+    public class MainSecondBeamSingleAdjustor : PointMoveAdjustor
     {
-        private MainSecondBeamRegion m_mainSecondBeamRegion;
-
-        public List<Point3d> PlacePoints
-        {
-            get;
-            private set;
-        } = new List<Point3d>();
 
         public MainSecondBeamSingleAdjustor(MainSecondBeamRegion beamSpanInfo)
+            : base(beamSpanInfo)
         {
-            m_mainSecondBeamRegion = beamSpanInfo;
         }
 
         /// <summary>
@@ -39,10 +32,10 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
         {
             var singleAdjustor = new MainSecondBeamSingleAdjustor(beamSpanInfo);
             singleAdjustor.Do();
-            return singleAdjustor.PlacePoints;
+            return singleAdjustor.PostPoints;
         }
 
-        public void Do()
+        public override void Do()
         {
             // 有效区域
             var polylines = m_mainSecondBeamRegion.ValidRegions;
@@ -52,51 +45,13 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
 
             if (IsValidPoint(polylines, srcPt))
             {
-                PlacePoints.Add(srcPt);
+                PostPoints.Add(srcPt);
             }
             else
             {
                 // 选择最近的点
-                PlacePoints.Add(CalculateClosetPoint(polylines, srcPt));
+                PostPoints.Add(CalculateClosetPoint(polylines, srcPt));
             }
-        }
-
-        /// <summary>
-        /// 计算最近的有效点
-        /// </summary>
-        /// <param name="srcPolys"></param>
-        /// <param name="srcPt"></param>
-        /// <returns></returns>
-        private Point3d CalculateClosetPoint(List<Polyline> srcPolys, Point3d srcPt)
-        {
-            var closestPts = new List<Point3d>();
-
-            foreach (var singlePoly in srcPolys)
-            {
-                closestPts.Add(singlePoly.GetClosestPointTo(srcPt, false));
-            }
-
-            closestPts.Sort((pt1, pt2) =>
-            {
-                return pt1.DistanceTo(srcPt).CompareTo(pt2.DistanceTo(srcPt));
-            }
-            );
-
-            return closestPts.First();
-        }
-
-        private bool IsValidPoint(List<Polyline> srcPolys, Point3d srcPt)
-        {
-            foreach (var singlePoly in srcPolys)
-            {
-                if (GeomUtils.PtInLoop(singlePoly, srcPt.Point2D()))
-                    return true;
-            }
-
-            return false;
         }
     }
-
-
-
 }

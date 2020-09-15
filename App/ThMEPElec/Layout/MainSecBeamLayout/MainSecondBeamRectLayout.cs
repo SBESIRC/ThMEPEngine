@@ -43,6 +43,10 @@ namespace ThMEPElectrical.Layout.MainSecBeamLayout
             {
                 m_placePoints = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.SINGLEPLACE);
             }
+            else if (m_placePoints.Count == 2)
+            {
+                m_placePoints = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.MEDIUMPLACE);
+            }
 
             return m_placePoints;
         }
@@ -67,7 +71,7 @@ namespace ThMEPElectrical.Layout.MainSecBeamLayout
                     resProfiles.Add(offsetPoly);
             }
 
-            DrawUtils.DrawProfile(resProfiles.Polylines2Curves(), "resProfiles");
+            //DrawUtils.DrawProfile(resProfiles.Polylines2Curves(), "resProfiles");
             return new MainSecondBeamRegion(resProfiles, srcPts);
         }
     }

@@ -48,6 +48,11 @@ namespace ThMEPElectrical.PostProcess
                 case MSPlaceAdjustorType.SINGLEPLACE:
                     PostPoints = MainSecondBeamSingleAdjustor.MakeSecondBeamSingleAdjustor(m_beamSecondBeamRegion);
                     break;
+
+                case MSPlaceAdjustorType.MEDIUMPLACE:
+                    PostPoints = MainSecondBeamMediumAdjustor.MakeMainSecondBeamMediumAdjustor(m_beamSecondBeamRegion);
+                    break;
+
                 default:
                     throw new NotSupportedException();
             }

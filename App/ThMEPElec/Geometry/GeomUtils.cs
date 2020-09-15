@@ -239,7 +239,12 @@ namespace ThMEPElectrical.Geometry
             var ptCol = new Point3dCollection();
             curveFir.IntersectWith(curveSec, Intersect.OnBothOperands, ptCol, (IntPtr)0, (IntPtr)0);
 
-            return ptCol.toPointList();
+            return ptCol.ToPointList();
+        }
+
+        public static double Rad2Angle(double rad)
+        {
+            return rad / Math.PI * 180;
         }
     }
 }

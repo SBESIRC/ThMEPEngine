@@ -66,11 +66,14 @@
     <Compile Include="Model\PlacePoint.cs" />
     <Compile Include="Model\PlacePointProArea.cs" />
     <Compile Include="Model\PlaceRect.cs" />
+    <Compile Include="Model\PointPosType.cs" />
     <Compile Include="PostProcess\Adjustor\NonRegularPlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamMediumAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\PointMoveAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
