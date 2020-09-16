@@ -14,8 +14,9 @@ namespace ThMEPEngineCore.IO
         public static void OutputBeams(List<ThIfcBeam> thIfcBeams)
         {
             // serialize JSON directly to a file
-            string fileName = System.Environment.CurrentDirectory + "Beam.json";
-            using (StreamWriter file = File.CreateText(@"c:\movie.json"))
+            string time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
+            string fileName = System.Environment.CurrentDirectory + "\\Beam"+ time+".json";
+            using (StreamWriter file = File.CreateText(fileName))
             {
                 JsonSerializer serializer = new JsonSerializer();
                 serializer.Serialize(file, thIfcBeams);
