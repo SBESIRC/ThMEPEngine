@@ -2,7 +2,6 @@
 using ThCADCore.NTS;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.BeamInfo.Utils
@@ -39,33 +38,30 @@ namespace ThMEPEngineCore.BeamInfo.Utils
 
         public static Polyline TessellatedOutline(Arc arc1, Arc arc2)
         {
-            //提取包络两段arc的Angle范围
-            var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
-            var endAngle_1 = (arc1.StartAngle > arc1.EndAngle) ? (arc1.EndAngle + 8 * Math.Atan(1) - startAngle) : arc1.EndAngle - startAngle;
-            var endAngle_2 = (arc2.StartAngle > arc2.EndAngle) ? (arc2.EndAngle + 8 * Math.Atan(1) - startAngle) : arc2.EndAngle - startAngle;
-            var endAngle = Math.Max(endAngle_1, endAngle_2) + startAngle;
-            endAngle = (endAngle > 8 * Math.Atan(1)) ? (endAngle - 8 * Math.Atan(1)) : endAngle;
+            var overlapEstimate = GetObjectUtils.OverlapAngle(arc1, arc2);
+            var startAngle = overlapEstimate.Item2;
+            var endAngle = overlapEstimate.Item3;
 
             //将输入的两段arc转换为PolylineSegmentCollection
             var arc_1 = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
             var arc_2 = new Arc(arc2.Center, arc2.Radius, startAngle, endAngle);
-            var lineString1 = arc_1.TessellateWithChord(arc_1.Radius * (Math.Sin(Math.PI / 72.0))).ToDbPolyline();
-            var lineString2 = arc_2.TessellateWithChord(arc_2.Radius * (Math.Sin(Math.PI / 72.0))).ToDbPolyline();
+            var arcPolyLine1 = arc_1.TessellateWithChord(arc_1.Radius * (Math.Sin(Math.PI / 360.0))).ToDbPolyline();
+            var arcPolyLine2 = arc_2.TessellateWithChord(arc_2.Radius * (Math.Sin(Math.PI / 360.0))).ToDbPolyline();
 
             // 获取两段新的arc的端点形成两段PolylineSegement
-            PolylineSegment lineSegment_1 = new PolylineSegment(lineString1.EndPoint.ToPoint2D(), lineString2.EndPoint.ToPoint2D());
-            PolylineSegment lineSegment_2 = new PolylineSegment(lineString2.StartPoint.ToPoint2D(), lineString1.StartPoint.ToPoint2D());
+            PolylineSegment lineSegment_1 = new PolylineSegment(arcPolyLine1.EndPoint.ToPoint2D(), arcPolyLine2.EndPoint.ToPoint2D());
+            PolylineSegment lineSegment_2 = new PolylineSegment(arcPolyLine2.StartPoint.ToPoint2D(), arcPolyLine1.StartPoint.ToPoint2D());
 
             // 用多段线封闭成一个封闭区域
             var segmentCollection = new PolylineSegmentCollection();
-            var lineSegments_1 = new PolylineSegmentCollection(lineString1);
+            var lineSegments_1 = new PolylineSegmentCollection(arcPolyLine1);
             foreach (var segment in lineSegments_1)
             {
                 segmentCollection.Add(segment);
             }
             segmentCollection.Add(lineSegment_1);
-            lineString2.ReverseCurve();
-            var lineSegments_2 = new PolylineSegmentCollection(lineString2);
+            arcPolyLine2.ReverseCurve();
+            var lineSegments_2 = new PolylineSegmentCollection(arcPolyLine2);
             foreach (var segment in lineSegments_2)
             {
                 segmentCollection.Add(segment);
@@ -76,12 +72,9 @@ namespace ThMEPEngineCore.BeamInfo.Utils
 
         public static Polyline Outline(Arc arc1, Arc arc2)
         {
-            //提取包络两段arc的Angle范围
-            var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
-            var endAngle_1 = (arc1.StartAngle > arc1.EndAngle) ? (arc1.EndAngle + 8 * Math.Atan(1) - startAngle) : arc1.EndAngle - startAngle;
-            var endAngle_2 = (arc2.StartAngle > arc2.EndAngle) ? (arc2.EndAngle + 8 * Math.Atan(1) - startAngle) : arc2.EndAngle - startAngle;
-            var endAngle = Math.Max(endAngle_1, endAngle_2) + startAngle;
-            endAngle = (endAngle > 8 * Math.Atan(1)) ? (endAngle - 8 * Math.Atan(1)) : endAngle;
+            var overlapEstimate = GetObjectUtils.OverlapAngle(arc1, arc2);
+            var startAngle = overlapEstimate.Item2;
+            var endAngle = overlapEstimate.Item3;
 
             //将输入的两段arc转换为PolylineSegment
             Arc arc_1 = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);

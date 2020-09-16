@@ -10,7 +10,6 @@ using System.Collections.Generic;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.BeamInfo.Utils;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 using ThMEPEngineCore.Interface;
 
 namespace ThMEPEngineCore.BeamInfo.Business
@@ -72,7 +71,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                 }
 
                 // 处理弧梁
-                allBeam.AddRange(GetArcBeamObject(arcs, 1500));
+                allBeam.AddRange(GetArcBeamObject(arcs, 1500, 0.5));
             }
 
             return allBeam;
@@ -224,15 +223,34 @@ namespace ThMEPEngineCore.BeamInfo.Business
             return beamLst;
         }
 
-        private List<Tuple<Arc, Arc>> ArcBeamPairsExtract(List<Arc> arcs, double DistThreshold)
+        private List<Tuple<Arc, Arc>> ArcBeamPairsExtract(List<Arc> arcs, double DistThreshold, double overlapAngleThreshold)
         {
             var arcSegments = new List<Tuple<Arc, Arc>>();
 
+            // 过滤过短的Arc
+            foreach (var item in arcs)
+            {
+                if (item.Length <= 10) arcs.Remove(item);
+            }
+
+            // 如果出现重复弧线，则删除重复段，防止出现重复弧梁
+            for (int i = 0; i < arcs.Count; i++)
+            {
+                for (int j = i + 1; j < arcs.Count; j++)
+                {
+                    if (IsRepeteArcs(arcs[i], arcs[j]))
+                    {
+                        arcs[i] = (arcs[i].Length >= arcs[j].Length) ? (GetObjectUtils.ArcMerge(arcs[i], arcs[j])) : (arcs[i] = GetObjectUtils.ArcMerge(arcs[j], arcs[i]));
+                        arcs.RemoveAt(j);
+                    }
+                }
+            }
+
             // 检测两条Arc是否构成Arc对
-            for (int i = 0, count = arcs.Count; i < count; i++)
+            for (int i = 0; i < arcs.Count; i++)
             {
                 // 将Arc_i转换成polyline，并取出每一个端点
-                var polyline = arcs[i].TessellateWithChord(arcs[i].Radius * (Math.Sin(Math.PI / 360.0))).ToDbPolyline();
+                var polyline = arcs[i].TessellateWithChord(arcs[i].Radius * (Math.Sin(Math.PI / 1440.0))).ToDbPolyline();
                 var polylineSegments = new PolylineSegmentCollection(polyline);
                 var pt1 = new List<Point2d>();
                 foreach (var segment in polylineSegments)
@@ -240,55 +258,60 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     pt1.Add(segment.StartPoint);
                 }
                 pt1.Add(polylineSegments.EndPoint);
-                for (int j = i + 1; j < count; j++)
+                for (int j = i + 1; j < arcs.Count; j++)
                 {
                     // 计算两个Arc间的距离（近似）
                     var dist = pt1.Min(pt => arcs[j].GetDistToPoint(pt.ToPoint3d()));
-                    //判断两条曲边是否构成同一曲梁 => 判定条件： 曲边间距 <= DistThreshold，曲边不相交，扇形区域有重合且重合范围大于小段弧的一半
-                    if (dist <= DistThreshold && dist > 1 && ArcOverlapAngle(arcs[i], arcs[j]) >= 0.5 * Math.Min(arcs[i].TotalAngle, arcs[j].TotalAngle))
+                    var overlapEstimate = GetObjectUtils.OverlapAngle(arcs[i], arcs[j]);
+                    //判断两条曲边是否构成同一曲梁 => 判定条件： 曲边间距 <= DistThreshold，曲边不相交，扇形区域有重合且重合范围大于小段弧长的overlapAngleThreshold
+                    if ((dist <= DistThreshold) && (dist > arcs[i].Radius * (Math.Sin(Math.PI / 1440.0))) && overlapEstimate.Item1 &&
+                        overlapEstimate.Item4 >= overlapAngleThreshold * Math.Min(arcs[i].TotalAngle, arcs[j].TotalAngle))
                     {
                         arcSegments.Add(Tuple.Create(arcs[i], arcs[j]));
                     }
                 }
             }
             // 合并可合并的Arcs
-            var arcsMerge = ArcMergeEx(arcSegments);
-            return arcsMerge;
+            return MergeArcs(arcSegments);
         }
 
-        // 检测Arc对中，是否有可合并的两段Arc
-        private List<Tuple<Arc, Arc>> ArcMergeEx(List<Tuple<Arc, Arc>> arcs)
+        // 检测Arc对中，是否有可合并的两对Arc
+        private List<Tuple<Arc, Arc>> MergeArcs(List<Tuple<Arc, Arc>> arcs)
         {
             for (int i = 0; i < arcs.Count; i++)
             {
                 for (int j = i + 1; j < arcs.Count; j++)
                 {
-                    if (arcs[i].Item1 == arcs[j].Item1 
+                    if (arcs[i].Item1 == arcs[j].Item1
                         && arcs[i].Item2.Center.DistanceTo(arcs[j].Item2.Center) <= 1e-4
-                        && (arcs[i].Item2.Radius - arcs[j].Item2.Radius) <= 1e-4)
+                        && (arcs[i].Item2.Radius - arcs[j].Item2.Radius) <= 1e-4
+                        && GetObjectUtils.OverlapAngle(arcs[i].Item2, arcs[j].Item2).Item1)
                     {
-                        arcs[i] = Tuple.Create(arcs[i].Item1,ArcMerge(arcs[i].Item2, arcs[j].Item2));
+                        arcs[i] = Tuple.Create(arcs[i].Item1, GetObjectUtils.ArcMerge(arcs[i].Item2, arcs[j].Item2));
                         arcs.Remove(arcs[j]);
                     }
                     else if (arcs[i].Item1 == arcs[j].Item2
                         && arcs[i].Item2.Center.DistanceTo(arcs[j].Item1.Center) <= 1e-4
-                        && (arcs[i].Item2.Radius - arcs[j].Item1.Radius) <= 1e-4)
+                        && (arcs[i].Item2.Radius - arcs[j].Item1.Radius) <= 1e-4
+                        && GetObjectUtils.OverlapAngle(arcs[i].Item2, arcs[j].Item1).Item1)
                     {
-                        arcs[i] = Tuple.Create(arcs[i].Item1, ArcMerge(arcs[i].Item2, arcs[j].Item1));
+                        arcs[i] = Tuple.Create(arcs[i].Item1, GetObjectUtils.ArcMerge(arcs[i].Item2, arcs[j].Item1));
                         arcs.Remove(arcs[j]);
                     }
-                    else if (arcs[i].Item2 == arcs[j].Item1 
+                    else if (arcs[i].Item2 == arcs[j].Item1
                         && arcs[i].Item1.Center.DistanceTo(arcs[j].Item2.Center) <= 1e-4
-                        && (arcs[i].Item1.Radius - arcs[j].Item2.Radius) <= 1e-4)
+                        && (arcs[i].Item1.Radius - arcs[j].Item2.Radius) <= 1e-4
+                        && GetObjectUtils.OverlapAngle(arcs[i].Item1, arcs[j].Item2).Item1)
                     {
-                        arcs[i] = Tuple.Create(ArcMerge(arcs[i].Item1, arcs[j].Item2), arcs[i].Item2);
+                        arcs[i] = Tuple.Create(GetObjectUtils.ArcMerge(arcs[i].Item1, arcs[j].Item2), arcs[i].Item2);
                         arcs.Remove(arcs[j]);
                     }
                     else if (arcs[i].Item2 == arcs[j].Item2
                         && arcs[i].Item1.Center.DistanceTo(arcs[j].Item1.Center) <= 1e-4
-                        && (arcs[i].Item1.Radius - arcs[j].Item1.Radius) <= 1e-4)
+                        && (arcs[i].Item1.Radius - arcs[j].Item1.Radius) <= 1e-4
+                        && GetObjectUtils.OverlapAngle(arcs[i].Item1, arcs[j].Item1).Item1)
                     {
-                        arcs[i] = Tuple.Create(ArcMerge(arcs[i].Item1, arcs[j].Item1), arcs[i].Item2);
+                        arcs[i] = Tuple.Create(GetObjectUtils.ArcMerge(arcs[i].Item1, arcs[j].Item1), arcs[i].Item2);
                         arcs.Remove(arcs[j]);
                     }
                 }
@@ -296,26 +319,50 @@ namespace ThMEPEngineCore.BeamInfo.Business
             return arcs;
         }
 
-        // 合并两段共圆心同半径的Arc
-        private Arc ArcMerge(Arc arc1, Arc arc2)
+        // 判断Arcs是否重复
+        private bool IsRepeteArcs(Arc arc1, Arc arc2)
         {
-            var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
-            var endAngle_1 = (arc1.StartAngle > arc1.EndAngle) ? (arc1.EndAngle + 8 * Math.Atan(1) - startAngle) : arc1.EndAngle - startAngle;
-            var endAngle_2 = (arc2.StartAngle > arc2.EndAngle) ? (arc2.EndAngle + 8 * Math.Atan(1) - startAngle) : arc2.EndAngle - startAngle;
-            var endAngle = Math.Max(endAngle_1, endAngle_2) + startAngle;
-            endAngle = (endAngle > 8 * Math.Atan(1)) ? (endAngle - 8 * Math.Atan(1)) : endAngle;
-            return new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
-        }
+            var overlapEstimate = GetObjectUtils.OverlapAngle(arc1, arc2);
+            var startAngle = overlapEstimate.Item2;
+            var endAngle = overlapEstimate.Item3;
 
-        // 计算两段弧的重合角度
-        private double ArcOverlapAngle(Arc arc1, Arc arc2)
-        {
-            var startAngle = Math.Min(arc1.StartAngle, arc2.StartAngle);
-            var startAngle_1 = arc1.StartAngle - startAngle;
-            var startAngle_2 = arc2.StartAngle - startAngle;
-            var endAngle_1 = (arc1.StartAngle > arc1.EndAngle) ? (arc1.EndAngle + 8 * Math.Atan(1) - startAngle) : arc1.EndAngle - startAngle;
-            var endAngle_2 = (arc2.StartAngle > arc2.EndAngle) ? (arc2.EndAngle + 8 * Math.Atan(1) - startAngle) : arc2.EndAngle - startAngle;
-            return Math.Min(endAngle_1, endAngle_2) - Math.Max(startAngle_1, startAngle_2);
+            // 排除两段Arc没有重叠区域的情况
+            if (!overlapEstimate.Item1) return false;
+
+            // 排除两段Arc仅仅首尾相接的情况
+            if (overlapEstimate.Item4 == 0.0 && startAngle == endAngle) return false;
+
+            // 计算两段Arc重叠范围内的最大距离 
+            // 目前取出重叠范围的算法有问题，应当保证取出的重叠范围的length相近
+            var arc1_new = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
+            var arc2_new = new Arc(arc2.Center, arc2.Radius, startAngle, endAngle);
+
+            // 排除重叠长度过小的情况
+            if (arc1_new.Length <= 10 || arc2_new.Length <= 10)  return false;
+
+            if (arc1_new.Length > arc2_new.Length)
+            {
+                var arc_temp = arc2_new;
+                arc2_new = arc1_new;
+                arc1_new = arc_temp;
+            }
+
+            var polyline = arc1_new.TessellateWithChord(arc1_new.Radius * (Math.Sin(Math.PI / 1440.0))).ToDbPolyline();
+            var polylineSegments = new PolylineSegmentCollection(polyline);
+            var pt1 = new List<Point2d>();
+            foreach (var segment in polylineSegments)
+            {
+                pt1.Add(segment.StartPoint);
+            }
+            pt1.Add(polylineSegments.EndPoint);
+            var dist_max = pt1.Max(pt => arc2_new.GetDistToPoint(pt.ToPoint3d()));
+            //var dist_start = arc1_new.StartPoint.DistanceTo(arc2_new.StartPoint);
+            //var dist_end = arc1_new.EndPoint.DistanceTo(arc2_new.EndPoint);
+            if (dist_max <= arc1_new.Radius * (Math.Sin(Math.PI / 1440.0)))
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>
@@ -323,10 +370,10 @@ namespace ThMEPEngineCore.BeamInfo.Business
         /// </summary>
         /// <param name="arcs"></param>
         /// <returns></returns>
-        private List<ArcBeam> GetArcBeamObject(List<Arc> arcs, double distThreshold)
+        private List<ArcBeam> GetArcBeamObject(List<Arc> arcs, double distThreshold, double overlapAngleThreshold)
         {
             List<ArcBeam> beam = new List<ArcBeam>();
-            var arcPairs = ArcBeamPairsExtract(arcs, distThreshold);
+            var arcPairs = ArcBeamPairsExtract(arcs, distThreshold, overlapAngleThreshold);
             arcPairs.ForEach(o => beam.Add(new ArcBeam(o.Item1, o.Item2)));
             return beam;
         }
