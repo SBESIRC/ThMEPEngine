@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,9 @@ namespace ThMEPEngineCore.Model
 {
     public abstract class ThIfcElement : ThIfcProduct
     {
+        [JsonIgnore]
         public Entity Outline { get; set; }
+        [JsonIgnore]
         public string Uuid { get; set; }        
     }
 }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Model
 {
@@ -91,6 +92,34 @@ namespace ThMEPEngineCore.Model
                 return true;
             }
             return false;
+        }
+        public void UpdateStartLink()
+        {
+            StartBeams = ThFilterPortLinkBeams.Filter(Beam, Beam.StartPoint, StartBeams);
+            //bool startPtInComponent = StartVerComponents.Where(o => (o.Outline as Polyline).PointInPolylineEx(Beam.StartPoint, 1.0) == 1).Any();
+            //if (!startPtInComponent)
+            //{
+            //    bool startHasLinkedBeam = StartBeams.Where(o => o.StartPoint.DistanceTo(Beam.StartPoint) <= 10.0 ||
+            // o.EndPoint.DistanceTo(Beam.StartPoint) <= 10.0).Any();
+            //    if (startHasLinkedBeam)
+            //    {
+            //        StartVerComponents = new List<ThIfcBuildingElement>();
+            //    }
+            //}
+        }
+        public void UpdateEndLink()
+        {
+            EndBeams = ThFilterPortLinkBeams.Filter(Beam, Beam.EndPoint, EndBeams);
+            //bool endPtInComponent = EndVerComponents.Where(o => (o.Outline as Polyline).PointInPolylineEx(Beam.EndPoint, 1.0) == 1).Any();
+            //if (!endPtInComponent)
+            //{
+            //    bool endHasLinkedBeam = EndBeams.Where(o => o.StartPoint.DistanceTo(Beam.EndPoint) <= 10.0 ||
+            //                          o.EndPoint.DistanceTo(Beam.EndPoint) <= 10.0).Any();
+            //    if (endHasLinkedBeam)
+            //    {
+            //        EndVerComponents = new List<ThIfcBuildingElement>();
+            //    }
+            //}
         }
     }
 }

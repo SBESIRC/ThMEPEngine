@@ -1,8 +1,5 @@
 ﻿using System;
-using System.IO;
-using System.Collections;
 using System.Collections.Generic;
-using System.Web.Script.Serialization;
 using Linq2Acad;
 using AcHelper;
 using ThCADCore.NTS;
@@ -19,6 +16,8 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using NFox.Cad.Collections;
 using TianHua.AutoCAD.Utility.ExtensionTools;
+using Newtonsoft.Json;
+using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore
 {
@@ -109,6 +108,14 @@ namespace ThMEPEngineCore
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
+
+                List<ThIfcBeam> allBeams = new List<ThIfcBeam>();
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
+                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
+                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
+                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
+
+                ThJsonWriter.OutputBeams(allBeams);
             }
         }
         private DBText CreateBeamMarkText(ThIfcBeam thIfcBeam)
@@ -215,12 +222,72 @@ namespace ThMEPEngineCore
                     pts.Add(otherPolyline.GetPoint3dAt(0));
                 }
                 var selObjs=thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pts);
-
-
                 bool res = polyline.Intersects(otherPolyline);
                 ThSegmentService thSegmentService = new ThSegmentService(polyline);
                 thSegmentService.SegmentAll(new CalBeamStruService());
                 thSegmentService.Segments.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThTestPointIn", CommandFlags.Modal)]
+        public void ThTestPointIn()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var entRes = Active.Editor.GetEntity("\n select a polyline");
+                Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
+                var ptRes = Active.Editor.GetPoint("\n select a point");
+                int isIn = polyline.PointInPolylineEx(ptRes.Value,1.0);
+                if (isIn==0)
+                {
+                    Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline上");
+                }
+                else if (isIn == 1)
+                {
+                    Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline内");
+                }
+                else if(isIn == -1)
+                {
+                    Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline外");
+                }
+                Ray ray = new Ray();
+                ray.BasePoint = Point3d.Origin;
+                ray.SecondPoint = new Point3d(1000, 0, 0);
+                ray.UnitDir = Vector3d.XAxis;
+                acadDatabase.ModelSpace.Add(ray);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThJson", CommandFlags.Modal)]
+        public void ThJson()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                ThIfcLineBeam thIfcLineBeam1 = new ThIfcLineBeam()
+                {
+                    StartPoint=new Point3d(100, 100, 0),
+                    EndPoint=new Point3d(1100,1100,0),
+                    Normal=Vector3d.ZAxis,
+                    Width=500,
+                    Height=400,
+                    ComponentType=BeamComponentType.PrimaryBeam
+                };
+                ThIfcLineBeam thIfcLineBeam2 = new ThIfcLineBeam()
+                {
+                    StartPoint = new Point3d(200, 200, 0),
+                    EndPoint = new Point3d(1200, 1200, 0),
+                    Normal = Vector3d.ZAxis,
+                    Width = 600,
+                    Height = 400,
+                    ComponentType = BeamComponentType.PrimaryBeam
+                };
+                List<ThIfcLineBeam> items = new List<ThIfcLineBeam>()
+                {
+                    thIfcLineBeam1,
+                    thIfcLineBeam2
+                };
+                string json = JsonConvert.SerializeObject(items, Formatting.Indented,new JsonSerializerSettings()
+                {
+                    ReferenceLoopHandling= ReferenceLoopHandling.Ignore
+                });
             }
         }
 #if DEBUG

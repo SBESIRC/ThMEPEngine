@@ -64,5 +64,85 @@ namespace ThMEPEngineCore.CAD
             }
             return false;
         }
+        /// <summary>
+        /// 判断点是否再Polyline内
+        /// 0.点在polyline上    1.点在polyline内    -1.点在polyline外
+        /// </summary>
+        /// <returns></returns>
+        public static int PointInPolylineEx(this Polyline polyline, Point3d pt, double tol)
+        {
+            int positionIndex = -1;
+            Point3d closestP = polyline.GetClosestPointTo(pt, false);
+            if (Math.Abs(closestP.DistanceTo(pt)) < tol)
+            {
+                return 0;
+            }
+            Point3d minPt = polyline.GeometricExtents.MinPoint;
+            Point3d maxPt = polyline.GeometricExtents.MaxPoint;
+            if (pt.X < minPt.X || pt.X > maxPt.X || pt.Y < minPt.Y || pt.Y > maxPt.Y)
+            {
+                return -1;
+            }
+            List<LineSegment3d> linesegments = new List<LineSegment3d>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                if (polyline.GetSegmentType(i) == SegmentType.Line)
+                {
+                    linesegments.Add(polyline.GetLineSegmentAt(i));
+                }
+            }
+            bool doMark = true;
+            double increAng = 5.0 / 180.0 * Math.PI;
+            Ray ray = new Ray();
+            ray.BasePoint = pt;
+            ray.UnitDir = Vector3d.XAxis;
+            int count = (int)Math.Round(Math.PI * 2 / increAng);
+            int index = 0;
+            while (doMark)
+            {
+                Point3d otherPt = ray.BasePoint + ray.UnitDir.MultiplyBy(100.0);
+                if (linesegments.Where(o => ThGeometryTool.IsCollinearEx(
+                     ray.BasePoint, otherPt, o.StartPoint, o.EndPoint, 1.0)).Any())
+                {
+                    Matrix3d mt = Matrix3d.Rotation(increAng, Vector3d.ZAxis, pt);
+                    ray.TransformBy(mt);
+                    if (index++ == count)
+                    {
+                        break;
+                    }
+                }
+                else
+                {
+                    Point3dCollection points = new Point3dCollection();
+                    polyline.IntersectWith(ray, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
+                    BeamInfo.Utils.GetObjectUtils.FilterEqualPoints(points, 1.0);
+                    List<Point3d> intersectPts = new List<Point3d>();
+                    foreach(Point3d ptItem in points)
+                    {
+                        Point3d nearPt = polyline.GetClosestPointTo(ptItem, false);
+                        if (nearPt.DistanceTo(ptItem) < tol)
+                        {
+                            intersectPts.Add(ptItem);
+                        }
+                    }
+                    if (intersectPts.Count > 2)
+                    {
+                        Matrix3d mt = Matrix3d.Rotation(increAng, Vector3d.ZAxis, pt);
+                        ray.TransformBy(mt);
+                        if (index++ == count)
+                        {
+                            break;
+                        }
+                    }
+                    else
+                    {
+                        positionIndex = intersectPts.Count % 2 == 0 ? -1 : 1;
+                        break;
+                    }
+                }
+            }
+            ray.Dispose();
+            return positionIndex;
+        }
     }
 }

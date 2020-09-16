@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -115,14 +117,15 @@ namespace ThMEPEngineCore.Engine
             {
                 ThSingleBeamLink thSingleBeamLink = new ThSingleBeamLink();
                 if(element is ThIfcBeam thIfcBeam)
-                {                    
+                {                   
                     thSingleBeamLink.Beam = thIfcBeam;
                     thSingleBeamLink.StartVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.StartPoint);
                     thSingleBeamLink.EndVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.EndPoint);
                     thSingleBeamLink.StartBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.StartPoint);
-                    thSingleBeamLink.StartBeams = ThFilterPortLinkBeams.Filter(thIfcBeam, thIfcBeam.StartPoint, thSingleBeamLink.StartBeams);
+                    thSingleBeamLink.UpdateStartLink();
+
                     thSingleBeamLink.EndBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.EndPoint);
-                    thSingleBeamLink.EndBeams = ThFilterPortLinkBeams.Filter(thIfcBeam, thIfcBeam.EndPoint, thSingleBeamLink.EndBeams);                    
+                    thSingleBeamLink.UpdateEndLink();
                 }
                 SingleBeamLinks.Add(thSingleBeamLink);
             }            
