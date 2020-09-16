@@ -129,7 +129,7 @@ namespace ThMEPEngineCore.Engine
             {
                 if (!duplicateCollection.Where(n => n.Uuid == m.Uuid).Any())
                 {
-                    DBObjectCollection dbObjs = spatialIndexManager.BeamSpatialIndex.SelectFence(m.Outline as Polyline);
+                    DBObjectCollection dbObjs = spatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(m.Outline as Polyline);
                     Polyline baseOutline = m.Outline as Polyline;
                     foreach (DBObject dbObj in dbObjs)
                     {

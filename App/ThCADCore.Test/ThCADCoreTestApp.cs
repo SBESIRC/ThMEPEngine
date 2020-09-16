@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
 using StraightSkeletonNet;
 using Vector2d = StraightSkeletonNet.Primitives.Vector2d;
+using System.Linq;
 
 namespace ThCADCore.Test
 {
@@ -465,17 +466,39 @@ namespace ThCADCore.Test
                     return;
                 }
 
+                var options = new PromptKeywordOptions("\n请指定选择方式")
+                {
+                    AllowNone = true
+                };
+                options.Keywords.Add("Window", "Window", "Window(W)");
+                options.Keywords.Add("Crossing", "Crossing", "Crossing(C)");
+                options.Keywords.Add("Fence", "Fence", "Fence(F)");
+                options.Keywords.Default = "Window";
+                var result3 = Active.Editor.GetKeywords(options);
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
                 var objs = new DBObjectCollection();
                 foreach (var obj in result.Value.GetObjectIds())
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
-       
+
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 var frame = acadDatabase.Element<Polyline>(result2.ObjectId);
-                foreach (Entity item in spatialIndex.SelectWindowPolygon(frame))
+                if (result3.StringResult == "Window")
                 {
-                    item.Highlight();
+                    spatialIndex.SelectWindowPolygon(frame).Cast<Entity>().ForEachDbObject(o => o.Highlight());
+                }
+                else if (result3.StringResult == "Crossing")
+                {
+                    spatialIndex.SelectCrossingPolygon(frame).Cast<Entity>().ForEachDbObject(o => o.Highlight());
+                }
+                else if (result3.StringResult == "Fence")
+                {
+                    spatialIndex.SelectFence(frame).Cast<Entity>().ForEachDbObject(o => o.Highlight());
                 }
             }
         }

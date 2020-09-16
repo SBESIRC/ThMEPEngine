@@ -134,6 +134,33 @@ namespace ThCADCore.NTS
             return results;
         }
 
+        private DBObjectCollection FenceFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
+        {
+            var results = new DBObjectCollection();
+            foreach(Entity item in objs)
+            {
+                if (item is Polyline polyline)
+                {
+                    if (preparedGeometry.Intersects(polyline.ToNTSLineString()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is DBText dBText)
+                {
+                    if (preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            return results;
+        }
+
         /// <summary>
         /// Crossing selection
         /// </summary>
@@ -186,7 +213,8 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectFence(Polyline polyline)
         {
-            return Query(polyline.ToNTSLineString().EnvelopeInternal);
+            var geometry = polyline.ToNTSLineString();
+            return FenceFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
         }
 
         public DBObjectCollection SelectAll()
