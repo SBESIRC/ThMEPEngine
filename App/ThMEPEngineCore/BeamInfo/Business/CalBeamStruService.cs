@@ -5,12 +5,12 @@ using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Interface;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.BeamInfo.Utils;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Interface;
 
 namespace ThMEPEngineCore.BeamInfo.Business
 {
@@ -33,7 +33,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     if (obj is Line line)
                     {
                         // 忽略Z值不为零的情况
-                        var lNormal = Direction(line);
+                        var lNormal = GetObjectUtils.Direction(line);
                         if (!lNormal.IsEqualTo(new Vector3d(lNormal.X, lNormal.Y, 0.0)))
                         {
                             continue;
@@ -75,11 +75,6 @@ namespace ThMEPEngineCore.BeamInfo.Business
             }
 
             return allBeam;
-        }
-
-        private Vector3d Direction(Line line)
-        {
-            return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
         }
 
         /// <summary>
@@ -332,21 +327,79 @@ namespace ThMEPEngineCore.BeamInfo.Business
             // 排除两段Arc仅仅首尾相接的情况
             if (overlapEstimate.Item4 == 0.0 && startAngle == endAngle) return false;
 
-            // 计算两段Arc重叠范围内的最大距离 
-            // 目前取出重叠范围的算法有问题，应当保证取出的重叠范围的length相近
+            // 计算两段Arc最小重叠范围
             var arc1_new = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
             var arc2_new = new Arc(arc2.Center, arc2.Radius, startAngle, endAngle);
 
-            // 排除重叠长度过小的情况
-            if (arc1_new.Length <= 10 || arc2_new.Length <= 10)  return false;
-
-            if (arc1_new.Length > arc2_new.Length)
+            // 创建弧形与弧的圆心构成的扇形
+            double arcBulge1 = GetObjectUtils.BulgeFromCurve(arc1_new, false);
+            PolylineSegment arcSegment_1 = new PolylineSegment(arc1_new.StartPoint.ToPoint2D(), arc1_new.EndPoint.ToPoint2D(), arcBulge1);
+            var segmentCollection_1 = new PolylineSegmentCollection()
             {
-                var arc_temp = arc2_new;
-                arc2_new = arc1_new;
-                arc1_new = arc_temp;
-            }
+                arcSegment_1,
+                new PolylineSegment(arc1_new.EndPoint.ToPoint2D(),arc1_new.Center.ToPoint2D()),
+                new PolylineSegment(arc1_new.Center.ToPoint2D(),arc1_new.StartPoint.ToPoint2D()),
+            };
+            var sector_1 = segmentCollection_1.ToPolyline().ToNTSPolygon();
 
+            double arcBulge2 = GetObjectUtils.BulgeFromCurve(arc2_new, false);
+            PolylineSegment arcSegment_2 = new PolylineSegment(arc2_new.StartPoint.ToPoint2D(), arc2_new.EndPoint.ToPoint2D(), arcBulge2);
+            var segmentCollection_2 = new PolylineSegmentCollection()
+            {
+                arcSegment_2,
+                new PolylineSegment(arc2_new.EndPoint.ToPoint2D(),arc2_new.Center.ToPoint2D()),
+                new PolylineSegment(arc2_new.Center.ToPoint2D(),arc2_new.StartPoint.ToPoint2D()),
+            };
+            var sector_2 = segmentCollection_2.ToPolyline().ToNTSPolygon();
+
+            // 挖去弧的圆心，防止对后续求交造成影响
+            var line1_2start = new Line(arc1_new.Center.GetMidPt(arc2_new.StartPoint), arc2_new.StartPoint);
+            var line1_2end = new Line(arc1_new.Center.GetMidPt(arc2_new.EndPoint), arc2_new.EndPoint);
+            var line2_1start = new Line(arc2_new.Center.GetMidPt(arc1_new.StartPoint), arc1_new.StartPoint);
+            var line2_1end = new Line(arc2_new.Center.GetMidPt(arc1_new.EndPoint), arc1_new.EndPoint);
+
+            var startAngle_1 = startAngle;
+            var endAngle_1 = endAngle;
+            var startAngle_2 = startAngle;
+            var endAngle_2 = endAngle;
+
+            // 判断扇形与线是否有交点
+            if (sector_1.Intersects(line1_2start.ToNTSGeometry()))
+            {
+                var line1_start = new Line(arc1_new.Center, arc1_new.StartPoint);
+                startAngle_1 = startAngle + GetObjectUtils.Direction(line1_2start).GetAngleTo(GetObjectUtils.Direction(line1_start));
+                startAngle_1 = (startAngle_1 > 8 * Math.Atan(1)) ? (startAngle_1 - 8 * Math.Atan(1)) : startAngle_1;
+                startAngle_1 = (startAngle_1 < 0) ? (startAngle_1 + 8 * Math.Atan(1)) : startAngle_1;
+            }
+            if (sector_1.Intersects(line1_2end.ToNTSGeometry()))
+            {
+                var line1_end = new Line(arc1_new.Center, arc1_new.EndPoint);
+                endAngle_1 = endAngle - GetObjectUtils.Direction(line1_2end).GetAngleTo(GetObjectUtils.Direction(line1_end));
+                endAngle_1 = (endAngle_1 > 8 * Math.Atan(1)) ? (endAngle_1 - 8 * Math.Atan(1)) : endAngle_1;
+                endAngle_1 = (endAngle_1 < 0) ? (endAngle_1 + 8 * Math.Atan(1)) : endAngle_1;
+            }
+            arc1_new = new Arc(arc1.Center, arc1.Radius, startAngle_1, endAngle_1);
+
+            if (sector_2.Intersects(line2_1start.ToNTSGeometry()))
+            {
+                var line2_start = new Line(arc2_new.Center, arc2_new.StartPoint);
+                startAngle_2 = startAngle + GetObjectUtils.Direction(line2_1start).GetAngleTo(GetObjectUtils.Direction(line2_start));
+                startAngle_2 = (startAngle_2 > 8 * Math.Atan(1)) ? (startAngle_2 - 8 * Math.Atan(1)) : startAngle_2;
+                startAngle_2 = (startAngle_2 < 0) ? (startAngle_2 + 8 * Math.Atan(1)) : startAngle_2;
+            }
+            if (sector_2.Intersects(line2_1end.ToNTSGeometry()))
+            {
+                var line2_end = new Line(arc2_new.Center, arc2_new.EndPoint);
+                endAngle_2 = endAngle - GetObjectUtils.Direction(line2_1end).GetAngleTo(GetObjectUtils.Direction(line2_end));
+                endAngle_2 = (endAngle_2 > 8 * Math.Atan(1)) ? (endAngle_2 - 8 * Math.Atan(1)) : endAngle_2;
+                endAngle_2 = (endAngle_2 < 0) ? (endAngle_2 + 8 * Math.Atan(1)) : endAngle_2;
+            }
+            arc2_new = new Arc(arc2.Center, arc2.Radius, startAngle_2, endAngle_2);
+
+            // 排除重叠长度过小的情况
+            if (arc1_new.Length <= 10 || arc2_new.Length <= 10) return false;
+
+            // 计算两段Arc重叠范围内的最大距离
             var polyline = arc1_new.TessellateWithChord(arc1_new.Radius * (Math.Sin(Math.PI / 1440.0))).ToDbPolyline();
             var polylineSegments = new PolylineSegmentCollection(polyline);
             var pt1 = new List<Point2d>();
@@ -356,9 +409,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             }
             pt1.Add(polylineSegments.EndPoint);
             var dist_max = pt1.Max(pt => arc2_new.GetDistToPoint(pt.ToPoint3d()));
-            //var dist_start = arc1_new.StartPoint.DistanceTo(arc2_new.StartPoint);
-            //var dist_end = arc1_new.EndPoint.DistanceTo(arc2_new.EndPoint);
-            if (dist_max <= arc1_new.Radius * (Math.Sin(Math.PI / 1440.0)))
+            if (dist_max <= Math.Max(arc1_new.Radius * (Math.Sin(Math.PI / 1440.0)),20.0))
             {
                 return true;
             }

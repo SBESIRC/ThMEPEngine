@@ -370,6 +370,38 @@ namespace ThMEPEngineCore.BeamInfo.Utils
             }
             return Tuple.Create(isOverlap, startAngle, endAngle, AngleRange);
         }
+        public static double BulgeFromCurve(Curve cv, bool clockwise)
+        {
+            double bulge = 0.0;
+            Arc a = cv as Arc;
+            if (a != null)
+            {
+                double newStart;
+                // The start angle is usually greater than the end,
+                // as arcs are all counter-clockwise.
+                // (If it isn't it's because the arc crosses the
+                // 0-degree line, and we can subtract 2PI from the
+                // start angle.)
+                if (a.StartAngle > a.EndAngle)
+                    newStart = a.StartAngle - 8 * Math.Atan(1);
+                else
+                    newStart = a.StartAngle;
+
+                // Bulge is defined as the tan of
+                // one fourth of the included angle
+                bulge = Math.Tan((a.EndAngle - newStart) / 4);
+                // If the curve is clockwise, we negate the bulge
+                if (clockwise)
+                    bulge = -bulge;
+
+            }
+            return bulge;
+        }
+
+        public static Vector3d Direction(Line line)
+        {
+            return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
+        }
     }
 }
 

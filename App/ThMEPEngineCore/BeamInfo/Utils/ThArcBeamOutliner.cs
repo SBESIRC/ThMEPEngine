@@ -8,34 +8,6 @@ namespace ThMEPEngineCore.BeamInfo.Utils
 {
     public class ThArcBeamOutliner
     {
-        private static double BulgeFromCurve(Curve cv, bool clockwise)
-        {
-            double bulge = 0.0;
-            Arc a = cv as Arc;
-            if (a != null)
-            {
-                double newStart;
-                // The start angle is usually greater than the end,
-                // as arcs are all counter-clockwise.
-                // (If it isn't it's because the arc crosses the
-                // 0-degree line, and we can subtract 2PI from the
-                // start angle.)
-                if (a.StartAngle > a.EndAngle)
-                    newStart = a.StartAngle - 8 * Math.Atan(1);
-                else
-                    newStart = a.StartAngle;
-
-                // Bulge is defined as the tan of
-                // one fourth of the included angle
-                bulge = Math.Tan((a.EndAngle - newStart) / 4);
-                // If the curve is clockwise, we negate the bulge
-                if (clockwise)
-                    bulge = -bulge;
-
-            }
-            return bulge;
-        }
-
         public static Polyline TessellatedOutline(Arc arc1, Arc arc2)
         {
             var overlapEstimate = GetObjectUtils.OverlapAngle(arc1, arc2);
@@ -79,8 +51,8 @@ namespace ThMEPEngineCore.BeamInfo.Utils
             //将输入的两段arc转换为PolylineSegment
             Arc arc_1 = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
             Arc arc_2 = new Arc(arc2.Center, arc2.Radius, startAngle, endAngle);
-            double arcBulge1 = BulgeFromCurve(arc_1, false);
-            double arcBulge2 = BulgeFromCurve(arc_2, false);
+            double arcBulge1 = GetObjectUtils.BulgeFromCurve(arc_1, false);
+            double arcBulge2 = GetObjectUtils.BulgeFromCurve(arc_2, false);
             PolylineSegment arcSegment_1 = new PolylineSegment(arc_1.StartPoint.ToPoint2D(), arc_1.EndPoint.ToPoint2D(), arcBulge1);
             PolylineSegment arcSegment_2 = new PolylineSegment(arc_2.EndPoint.ToPoint2D(), arc_2.StartPoint.ToPoint2D(), -arcBulge2);
 
