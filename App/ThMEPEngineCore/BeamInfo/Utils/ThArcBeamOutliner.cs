@@ -3,6 +3,7 @@ using ThCADCore.NTS;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore.BeamInfo.Utils
 {
@@ -10,7 +11,7 @@ namespace ThMEPEngineCore.BeamInfo.Utils
     {
         public static Polyline TessellatedOutline(Arc arc1, Arc arc2)
         {
-            var overlapEstimate = GetObjectUtils.OverlapAngle(arc1, arc2);
+            var overlapEstimate = arc1.OverlapAngle(arc2);
             var startAngle = overlapEstimate.Item2;
             var endAngle = overlapEstimate.Item3;
 
@@ -44,15 +45,15 @@ namespace ThMEPEngineCore.BeamInfo.Utils
 
         public static Polyline Outline(Arc arc1, Arc arc2)
         {
-            var overlapEstimate = GetObjectUtils.OverlapAngle(arc1, arc2);
+            var overlapEstimate = arc1.OverlapAngle(arc2);
             var startAngle = overlapEstimate.Item2;
             var endAngle = overlapEstimate.Item3;
 
             //将输入的两段arc转换为PolylineSegment
             Arc arc_1 = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
             Arc arc_2 = new Arc(arc2.Center, arc2.Radius, startAngle, endAngle);
-            double arcBulge1 = GetObjectUtils.BulgeFromCurve(arc_1, false);
-            double arcBulge2 = GetObjectUtils.BulgeFromCurve(arc_2, false);
+            double arcBulge1 = arc_1.BulgeFromCurve(false);
+            double arcBulge2 = arc_2.BulgeFromCurve(false);
             PolylineSegment arcSegment_1 = new PolylineSegment(arc_1.StartPoint.ToPoint2D(), arc_1.EndPoint.ToPoint2D(), arcBulge1);
             PolylineSegment arcSegment_2 = new PolylineSegment(arc_2.EndPoint.ToPoint2D(), arc_2.StartPoint.ToPoint2D(), -arcBulge2);
 

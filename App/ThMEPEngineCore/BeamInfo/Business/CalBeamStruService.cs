@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.BeamInfo.Utils;
 using Autodesk.AutoCAD.DatabaseServices;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore.BeamInfo.Business
 {
@@ -33,7 +34,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     if (obj is Line line)
                     {
                         // 忽略Z值不为零的情况
-                        var lNormal = GetObjectUtils.Direction(line);
+                        var lNormal = line.Direction();
                         if (!lNormal.IsEqualTo(new Vector3d(lNormal.X, lNormal.Y, 0.0)))
                         {
                             continue;
@@ -235,7 +236,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                 {
                     if (IsRepeteArcs(arcs[i], arcs[j]))
                     {
-                        arcs[i] = (arcs[i].Length >= arcs[j].Length) ? (GetObjectUtils.ArcMerge(arcs[i], arcs[j])) : (arcs[i] = GetObjectUtils.ArcMerge(arcs[j], arcs[i]));
+                        arcs[i] = (arcs[i].Length >= arcs[j].Length) ? (arcs[i].ArcMerge(arcs[j])) : (arcs[i] = arcs[j].ArcMerge(arcs[i]));
                         arcs.RemoveAt(j);
                     }
                 }
@@ -257,7 +258,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                 {
                     // 计算两个Arc间的距离（近似）
                     var dist = pt1.Min(pt => arcs[j].GetDistToPoint(pt.ToPoint3d()));
-                    var overlapEstimate = GetObjectUtils.OverlapAngle(arcs[i], arcs[j]);
+                    var overlapEstimate = arcs[i].OverlapAngle(arcs[j]);
                     //判断两条曲边是否构成同一曲梁 => 判定条件： 曲边间距 <= DistThreshold，曲边不相交，扇形区域有重合且重合范围大于小段弧长的overlapAngleThreshold
                     if ((dist <= DistThreshold) && (dist > arcs[i].Radius * (Math.Sin(Math.PI / 1440.0))) && overlapEstimate.Item1 &&
                         overlapEstimate.Item4 >= overlapAngleThreshold * Math.Min(arcs[i].TotalAngle, arcs[j].TotalAngle))
@@ -280,33 +281,33 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     if (arcs[i].Item1 == arcs[j].Item1
                         && arcs[i].Item2.Center.DistanceTo(arcs[j].Item2.Center) <= 1e-4
                         && (arcs[i].Item2.Radius - arcs[j].Item2.Radius) <= 1e-4
-                        && GetObjectUtils.OverlapAngle(arcs[i].Item2, arcs[j].Item2).Item1)
+                        && arcs[i].Item2.OverlapAngle(arcs[j].Item2).Item1)
                     {
-                        arcs[i] = Tuple.Create(arcs[i].Item1, GetObjectUtils.ArcMerge(arcs[i].Item2, arcs[j].Item2));
+                        arcs[i] = Tuple.Create(arcs[i].Item1, arcs[i].Item2.ArcMerge(arcs[j].Item2));
                         arcs.Remove(arcs[j]);
                     }
                     else if (arcs[i].Item1 == arcs[j].Item2
                         && arcs[i].Item2.Center.DistanceTo(arcs[j].Item1.Center) <= 1e-4
                         && (arcs[i].Item2.Radius - arcs[j].Item1.Radius) <= 1e-4
-                        && GetObjectUtils.OverlapAngle(arcs[i].Item2, arcs[j].Item1).Item1)
+                        && arcs[i].Item2.OverlapAngle(arcs[j].Item1).Item1)
                     {
-                        arcs[i] = Tuple.Create(arcs[i].Item1, GetObjectUtils.ArcMerge(arcs[i].Item2, arcs[j].Item1));
+                        arcs[i] = Tuple.Create(arcs[i].Item1, arcs[i].Item2.ArcMerge(arcs[j].Item1));
                         arcs.Remove(arcs[j]);
                     }
                     else if (arcs[i].Item2 == arcs[j].Item1
                         && arcs[i].Item1.Center.DistanceTo(arcs[j].Item2.Center) <= 1e-4
                         && (arcs[i].Item1.Radius - arcs[j].Item2.Radius) <= 1e-4
-                        && GetObjectUtils.OverlapAngle(arcs[i].Item1, arcs[j].Item2).Item1)
+                        && arcs[i].Item1.OverlapAngle(arcs[j].Item2).Item1)
                     {
-                        arcs[i] = Tuple.Create(GetObjectUtils.ArcMerge(arcs[i].Item1, arcs[j].Item2), arcs[i].Item2);
+                        arcs[i] = Tuple.Create(arcs[i].Item1.ArcMerge(arcs[j].Item2), arcs[i].Item2);
                         arcs.Remove(arcs[j]);
                     }
                     else if (arcs[i].Item2 == arcs[j].Item2
                         && arcs[i].Item1.Center.DistanceTo(arcs[j].Item1.Center) <= 1e-4
                         && (arcs[i].Item1.Radius - arcs[j].Item1.Radius) <= 1e-4
-                        && GetObjectUtils.OverlapAngle(arcs[i].Item1, arcs[j].Item1).Item1)
+                        && arcs[i].Item1.OverlapAngle(arcs[j].Item1).Item1)
                     {
-                        arcs[i] = Tuple.Create(GetObjectUtils.ArcMerge(arcs[i].Item1, arcs[j].Item1), arcs[i].Item2);
+                        arcs[i] = Tuple.Create(arcs[i].Item1.ArcMerge(arcs[j].Item1), arcs[i].Item2);
                         arcs.Remove(arcs[j]);
                     }
                 }
@@ -317,7 +318,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
         // 判断Arcs是否重复
         private bool IsRepeteArcs(Arc arc1, Arc arc2)
         {
-            var overlapEstimate = GetObjectUtils.OverlapAngle(arc1, arc2);
+            var overlapEstimate = arc1.OverlapAngle(arc2);
             var startAngle = overlapEstimate.Item2;
             var endAngle = overlapEstimate.Item3;
 
@@ -332,7 +333,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             var arc2_new = new Arc(arc2.Center, arc2.Radius, startAngle, endAngle);
 
             // 创建弧形与弧的圆心构成的扇形
-            double arcBulge1 = GetObjectUtils.BulgeFromCurve(arc1_new, false);
+            double arcBulge1 = arc1_new.BulgeFromCurve(false);
             PolylineSegment arcSegment_1 = new PolylineSegment(arc1_new.StartPoint.ToPoint2D(), arc1_new.EndPoint.ToPoint2D(), arcBulge1);
             var segmentCollection_1 = new PolylineSegmentCollection()
             {
@@ -342,7 +343,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             };
             var sector_1 = segmentCollection_1.ToPolyline().ToNTSPolygon();
 
-            double arcBulge2 = GetObjectUtils.BulgeFromCurve(arc2_new, false);
+            double arcBulge2 = arc2_new.BulgeFromCurve(false);
             PolylineSegment arcSegment_2 = new PolylineSegment(arc2_new.StartPoint.ToPoint2D(), arc2_new.EndPoint.ToPoint2D(), arcBulge2);
             var segmentCollection_2 = new PolylineSegmentCollection()
             {
@@ -367,14 +368,14 @@ namespace ThMEPEngineCore.BeamInfo.Business
             if (sector_1.Intersects(line1_2start.ToNTSGeometry()))
             {
                 var line1_start = new Line(arc1_new.Center, arc1_new.StartPoint);
-                startAngle_1 = startAngle + GetObjectUtils.Direction(line1_2start).GetAngleTo(GetObjectUtils.Direction(line1_start));
+                startAngle_1 = startAngle + line1_2start.Direction().GetAngleTo(line1_start.Direction());
                 startAngle_1 = (startAngle_1 > 8 * Math.Atan(1)) ? (startAngle_1 - 8 * Math.Atan(1)) : startAngle_1;
                 startAngle_1 = (startAngle_1 < 0) ? (startAngle_1 + 8 * Math.Atan(1)) : startAngle_1;
             }
             if (sector_1.Intersects(line1_2end.ToNTSGeometry()))
             {
                 var line1_end = new Line(arc1_new.Center, arc1_new.EndPoint);
-                endAngle_1 = endAngle - GetObjectUtils.Direction(line1_2end).GetAngleTo(GetObjectUtils.Direction(line1_end));
+                endAngle_1 = endAngle - line1_2end.Direction().GetAngleTo(line1_end.Direction());
                 endAngle_1 = (endAngle_1 > 8 * Math.Atan(1)) ? (endAngle_1 - 8 * Math.Atan(1)) : endAngle_1;
                 endAngle_1 = (endAngle_1 < 0) ? (endAngle_1 + 8 * Math.Atan(1)) : endAngle_1;
             }
@@ -383,14 +384,14 @@ namespace ThMEPEngineCore.BeamInfo.Business
             if (sector_2.Intersects(line2_1start.ToNTSGeometry()))
             {
                 var line2_start = new Line(arc2_new.Center, arc2_new.StartPoint);
-                startAngle_2 = startAngle + GetObjectUtils.Direction(line2_1start).GetAngleTo(GetObjectUtils.Direction(line2_start));
+                startAngle_2 = startAngle + line2_1start.Direction().GetAngleTo(line2_start.Direction());
                 startAngle_2 = (startAngle_2 > 8 * Math.Atan(1)) ? (startAngle_2 - 8 * Math.Atan(1)) : startAngle_2;
                 startAngle_2 = (startAngle_2 < 0) ? (startAngle_2 + 8 * Math.Atan(1)) : startAngle_2;
             }
             if (sector_2.Intersects(line2_1end.ToNTSGeometry()))
             {
                 var line2_end = new Line(arc2_new.Center, arc2_new.EndPoint);
-                endAngle_2 = endAngle - GetObjectUtils.Direction(line2_1end).GetAngleTo(GetObjectUtils.Direction(line2_end));
+                endAngle_2 = endAngle - line2_1end.Direction().GetAngleTo(line2_end.Direction());
                 endAngle_2 = (endAngle_2 > 8 * Math.Atan(1)) ? (endAngle_2 - 8 * Math.Atan(1)) : endAngle_2;
                 endAngle_2 = (endAngle_2 < 0) ? (endAngle_2 + 8 * Math.Atan(1)) : endAngle_2;
             }
