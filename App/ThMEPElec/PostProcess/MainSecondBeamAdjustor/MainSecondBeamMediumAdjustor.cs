@@ -82,56 +82,5 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
                 m_mediumNodes.Add(new MediumNode(firstPt, PointPosType.RightTopPoint));
             }
         }
-
-        /// <summary>
-        /// 移动后的点
-        /// </summary>
-        /// <param name="validPolys"></param>
-        /// <param name="pt"></param>
-        /// <returns></returns>
-        protected override Point3d? PostMovePoint(List<Polyline> validPolys, MediumNode mediumNode)
-        {
-            var pt = mediumNode.Point;
-            var pts = new List<Point3d>(); // 不同方向上的点集
-            var pointNode = CalculateClosetPoints(validPolys, pt);
-            var closestPt = pointNode.NearestPt;
-            pts.AddRange(pointNode.NearestPts);
-            var constraintDis = pt.DistanceTo(closestPt) * 2;
-
-            double disGap = 10e6;
-            var lineEndPts = new List<Point3d>();
-            // 水平向左
-            var extendEndPt = pt - Vector3d.XAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-            // 竖直向上
-            extendEndPt = pt + Vector3d.YAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-
-            // 水平向右
-            extendEndPt = pt + Vector3d.XAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-            // 竖直向下
-            extendEndPt = pt - Vector3d.YAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-
-            // 计算不同方向上的距离和点集关系
-            foreach (var endPt in lineEndPts)
-            {
-                var endLine = new Line(pt, endPt);
-                var dirClosestPt = CalculateDirectionClosestPoint(endLine, validPolys, pt);
-                if (dirClosestPt.HasValue && !pts.Contains(dirClosestPt.Value) && pt.DistanceTo(dirClosestPt.Value) < constraintDis)
-                {
-                    pts.Add(dirClosestPt.Value);
-                }
-            }
-
-            if (pts.Count == 1)
-                return pts.First();
-
-            // 定义点集所在的象限
-            var quadrantNode = DefineQuadrantInfo(pts, mediumNode);
-
-            return SelectPoint(quadrantNode);
-        }
     }
 }

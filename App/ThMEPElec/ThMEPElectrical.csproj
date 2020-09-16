@@ -71,6 +71,7 @@
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamLargeAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamMediumAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\PointMoveAdjustor.cs" />

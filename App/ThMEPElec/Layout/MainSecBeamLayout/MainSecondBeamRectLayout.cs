@@ -47,6 +47,10 @@ namespace ThMEPElectrical.Layout.MainSecBeamLayout
             {
                 m_placePoints = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.MEDIUMPLACE);
             }
+            else if (m_placePoints.Count == 4)
+            {
+                m_placePoints = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.LARGEPLACE);
+            }
 
             return m_placePoints;
         }

@@ -53,6 +53,10 @@ namespace ThMEPElectrical.PostProcess
                     PostPoints = MainSecondBeamMediumAdjustor.MakeMainSecondBeamMediumAdjustor(m_beamSecondBeamRegion);
                     break;
 
+                case MSPlaceAdjustorType.LARGEPLACE:
+                    PostPoints = MainSecondBeamLargeAdjustor.MakeMainSecondBeamMediumAdjustor(m_beamSecondBeamRegion);
+                    break;
+
                 default:
                     throw new NotSupportedException();
             }

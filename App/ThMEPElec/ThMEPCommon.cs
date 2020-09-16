@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPElectrical
 {
@@ -13,6 +14,7 @@ namespace ThMEPElectrical
         public static readonly string BroadcastDwgName = "消防应急广播.dwg";     //消防应急广播图纸名
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";     //图块可见性
         public static readonly string BroadcastBlockName = "E-BFAS410-4";     //消防应急广播图块名
+        public static readonly Point3d NullPoint3d = new Point3d(double.NaN, double.NaN, 0);
     }
 }
 
