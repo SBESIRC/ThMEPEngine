@@ -8,24 +8,21 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public class ThMEPFrameService : IDisposable
+    public class ThMEPFrameService
     {
         private ThMEPModelManager ModelManager { get; set; }
-        public ThMEPFrameService(ThMEPModelManager manager)
+        private ThSpatialIndexManager SpatialIndexManager { get; set; }
+        public ThMEPFrameService(ThMEPModelManager manager, ThSpatialIndexManager spatialIndexManager)
         {
             ModelManager = manager;
-        }
-
-        public void Dispose()
-        {
-            //
+            SpatialIndexManager = spatialIndexManager;
         }
 
         public DBObjectCollection RegionsFromFrame(Polyline frame)
         {
-            var fence_beam = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectCrossingPolygon(frame);
-            var fence_column = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(frame);
-            var fence_wall = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectCrossingPolygon(frame);
+            var fence_beam = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(frame);
+            var fence_column = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(frame);
+            var fence_wall = SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(frame);
 
             List<ThIfcColumn> queryColumnElements = new List<ThIfcColumn>();
             List<ThIfcBuildingElement> queryWallElements = new List<ThIfcBuildingElement>();
@@ -67,7 +64,6 @@ namespace ThMEPEngineCore.Algorithm
             }
             return frame.Difference(element_polyline);
         }
-
         private Polyline CreateExtendBeamOutline(ThIfcLineBeam lineBeam , double extendDis)
         {
             Polyline polyline = new Polyline()

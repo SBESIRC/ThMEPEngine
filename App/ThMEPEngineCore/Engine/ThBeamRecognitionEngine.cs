@@ -21,7 +21,6 @@ namespace ThMEPEngineCore.Engine
 
         public void Dispose()
         {
-            //ToDo
         }
 
         public override void Recognize(Database database, Point3dCollection polygon)
@@ -77,14 +76,18 @@ namespace ThMEPEngineCore.Engine
                 }
             }
         }
-        public void Split(ThColumnRecognitionEngine thColumnRecognitionEngine,
-            ThShearWallRecognitionEngine thShearWallRecognitionEngine)
+
+        public void Split(
+            ThColumnRecognitionEngine thColumnRecognitionEngine,
+            ThShearWallRecognitionEngine thShearWallRecognitionEngine,
+            ThSpatialIndexManager thSpatialIndexManager)
         {
             //后处理1：分割梁段
             ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(
+                this,
                 thColumnRecognitionEngine,
                 thShearWallRecognitionEngine,
-                this);
+                thSpatialIndexManager);
             thSplitBeams.Split();
             Elements = thSplitBeams.BeamElements;
         }
@@ -119,14 +122,14 @@ namespace ThMEPEngineCore.Engine
             return thIfcBeam;
         }
 
-        public void SimilarityBeamRemove()
+        public void SimilarityBeamRemove(ThSpatialIndexManager spatialIndexManager)
         {
             List<ThIfcElement> duplicateCollection = new List<ThIfcElement>();
             ValidElements.ForEach(m =>
             {
                 if (!duplicateCollection.Where(n => n.Uuid == m.Uuid).Any())
                 {
-                    DBObjectCollection dbObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectFence(m.Outline as Polyline);
+                    DBObjectCollection dbObjs = spatialIndexManager.BeamSpatialIndex.SelectFence(m.Outline as Polyline);
                     Polyline baseOutline = m.Outline as Polyline;
                     foreach (DBObject dbObj in dbObjs)
                     {

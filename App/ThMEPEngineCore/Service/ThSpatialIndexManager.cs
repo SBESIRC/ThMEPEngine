@@ -8,12 +8,26 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThSpatialIndexManager
+    public class ThSpatialIndexManager : IDisposable
     {
-        private static readonly ThSpatialIndexManager instance = new ThSpatialIndexManager();
-        static ThSpatialIndexManager() { }
-        internal ThSpatialIndexManager() { }
-        public static ThSpatialIndexManager Instance { get { return instance; } }
+        public ThSpatialIndexManager()
+        {
+        }
+        public void Dispose()
+        {
+            if (BeamSpatialIndex != null)
+            {
+                BeamSpatialIndex.Dispose();
+            }
+            if (ColumnSpatialIndex != null)
+            {
+                ColumnSpatialIndex.Dispose();
+            }
+            if (WallSpatialIndex != null)
+            {
+                WallSpatialIndex.Dispose();
+            }
+        }
         public ThCADCoreNTSSpatialIndex WallSpatialIndex { get; private set; }
         public ThCADCoreNTSSpatialIndex ColumnSpatialIndex { get; private set; }
         public ThCADCoreNTSSpatialIndex BeamSpatialIndex { get; private set; }

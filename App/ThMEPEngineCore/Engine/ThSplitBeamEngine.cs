@@ -16,18 +16,23 @@ namespace ThMEPEngineCore.Service
     {
         private ThColumnRecognitionEngine ColumnEngine { get; set; }
         private ThShearWallRecognitionEngine ShearWallEngine { get; set; }
-        private ThBeamRecognitionEngine BeamEngine;
+        private ThBeamRecognitionEngine BeamEngine { get; set; }
+        private ThSpatialIndexManager SpatialIndexManager { get; set; }
+
         public List<ThIfcBuildingElement> BeamElements { get; set; }
         protected Dictionary<ThIfcBuildingElement, List<ThSegment>> ShearWallSegDic;
         protected Dictionary<ThIfcBuildingElement, List<ThSegment>> ColumnSegDic;
 
-        public ThSplitBeamEngine(ThColumnRecognitionEngine thColumnRecognitionEngine,
+        public ThSplitBeamEngine(
+            ThBeamRecognitionEngine thBeamRecognitionEngine,
+            ThColumnRecognitionEngine thColumnRecognitionEngine,
             ThShearWallRecognitionEngine thShearWallRecognitionEngine, 
-            ThBeamRecognitionEngine thBeamRecognitionEngine)
+            ThSpatialIndexManager thSpatialIndexManager)
         {
             ColumnEngine = thColumnRecognitionEngine;
             ShearWallEngine = thShearWallRecognitionEngine;
             BeamEngine = thBeamRecognitionEngine;
+            SpatialIndexManager = thSpatialIndexManager;
             BeamElements = BeamEngine.Elements;
             ShearWallSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             ColumnSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
@@ -81,7 +86,7 @@ namespace ThMEPEngineCore.Service
             BeamElements.ForEach(o =>
             {
                 Polyline outline = ThBeamSplitter.CreateExtendOutline(o);
-                DBObjectCollection wallComponents = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectCrossingPolygon(outline);
+                DBObjectCollection wallComponents = SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
                 if(wallComponents.Count>0)
                 {
                     List<ThSegment> passSegments = new List<ThSegment>();
@@ -133,7 +138,7 @@ namespace ThMEPEngineCore.Service
             BeamElements.ForEach(o =>
             {
                 Polyline outline = ThBeamSplitter.CreateExtendOutline(o);
-                DBObjectCollection columnComponents = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(outline);
+                DBObjectCollection columnComponents = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(outline);
                 if (columnComponents.Count > 0)
                 {
                     List<ThSegment> passSegments = new List<ThSegment>();
@@ -177,14 +182,14 @@ namespace ThMEPEngineCore.Service
         private void SplitBeamPassBeams()
         {
             BeamEngine.Elements = BeamElements;
-            ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(BeamEngine.Collect());
+            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Collect());
             var unintersectBeams = FilterBeamUnIntersectOtherBeams();
             List<ThIfcBuildingElement> restBeams = BeamElements.Where(m=> !unintersectBeams.Where(n=>m.Uuid==n.Uuid).Any()).ToList();
             List<ThIfcBuildingElement> inValidBeams = new List<ThIfcBuildingElement>();
             foreach(var beam in restBeams)
             {
                 Polyline outline = ThBeamSplitter.CreateExtendOutline(beam);
-                DBObjectCollection passComponents = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectCrossingPolygon(outline);
+                DBObjectCollection passComponents = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(outline);
                 if (passComponents.Count == 0)
                 {
                     unintersectBeams.Add(beam);

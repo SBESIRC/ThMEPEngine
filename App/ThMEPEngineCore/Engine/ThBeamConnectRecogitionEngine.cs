@@ -8,23 +8,26 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThBeamConnectRecogitionEngine:IDisposable
+    public class ThBeamConnectRecogitionEngine : IDisposable
     {
         public List<ThBeamLink> PrimaryBeamLinks { get; set; } = new List<ThBeamLink>();
         public List<ThBeamLink> HalfPrimaryBeamLinks { get; set; } = new List<ThBeamLink>();
         public List<ThBeamLink> OverhangingPrimaryBeamLinks { get; set; } = new List<ThBeamLink>();
         public List<ThBeamLink> SecondaryBeamLinks { get; set; } = new List<ThBeamLink>();
         public List<ThSingleBeamLink> SingleBeamLinks { get; set; } = new List<ThSingleBeamLink>();
+        public ThSpatialIndexManager SpatialIndexManager { get; set; } = new ThSpatialIndexManager();
 
-        public ThColumnRecognitionEngine thColumnRecognitionEngine;
-        public ThBeamRecognitionEngine thBeamRecognitionEngine;
-        public ThShearWallRecognitionEngine thShearWallRecognitionEngine;
+        public ThColumnRecognitionEngine ColumnEngine { get; private set; }
+        public ThBeamRecognitionEngine BeamEngine { get; private set; }
+        public ThShearWallRecognitionEngine ShearWallEngine { get; private set; }
+
         public ThBeamConnectRecogitionEngine()
         {
         }
+
         public void Dispose()
         {
-            //TODO
+            SpatialIndexManager.Dispose();
         }
         public static ThBeamConnectRecogitionEngine ExecuteRecognize(Database database, Point3dCollection polygon)
         {
@@ -34,25 +37,24 @@ namespace ThMEPEngineCore.Engine
         }
         public void Recognize(Database database, Point3dCollection polygon)
         {
-            SingleBeamLinks = new List<ThSingleBeamLink>();
             // 启动柱识别引擎
-            thColumnRecognitionEngine = new ThColumnRecognitionEngine();
-            thColumnRecognitionEngine.Recognize(database, polygon);
+            ColumnEngine = new ThColumnRecognitionEngine();
+            ColumnEngine.Recognize(database, polygon);
 
             // 启动墙识别引擎
-            thShearWallRecognitionEngine = new ThShearWallRecognitionEngine();
-            thShearWallRecognitionEngine.Recognize(database, polygon);
+            ShearWallEngine = new ThShearWallRecognitionEngine();
+            ShearWallEngine.Recognize(database, polygon);
 
             // 创建空间索引
             CreateColumnSpatialIndex();
             CreateWallSpatialIndex();
-            
+
             // 启动梁识别引擎
-            thBeamRecognitionEngine = new ThBeamRecognitionEngine();
-            thBeamRecognitionEngine.Recognize(database, polygon);
+            BeamEngine = new ThBeamRecognitionEngine();
+            BeamEngine.Recognize(database, polygon);
 
             //梁分割
-            thBeamRecognitionEngine.Split(thColumnRecognitionEngine, thShearWallRecognitionEngine);
+            BeamEngine.Split(ColumnEngine, ShearWallEngine, SpatialIndexManager);
 
             //创建梁空间索引
             CreateBeamSpatialIndex();
@@ -86,32 +88,30 @@ namespace ThMEPEngineCore.Engine
         }
         private void CreateColumnSpatialIndex()
         {
-            ThSpatialIndexManager.Instance.CreateColumnSpaticalIndex(thColumnRecognitionEngine.Collect());
-            var columnGeometries = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectAll();
-            thColumnRecognitionEngine.UpdateValidElements(columnGeometries);
+            SpatialIndexManager.CreateColumnSpaticalIndex(ColumnEngine.Collect());
+            var columnGeometries = SpatialIndexManager.ColumnSpatialIndex.SelectAll();
+            ColumnEngine.UpdateValidElements(columnGeometries);
         }
         private void CreateWallSpatialIndex()
         {
-            ThSpatialIndexManager.Instance.CreateWallSpaticalIndex(thShearWallRecognitionEngine.Collect());
-            var wallGeometries = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectAll();
-            thShearWallRecognitionEngine.UpdateValidElements(wallGeometries);
+            SpatialIndexManager.CreateWallSpaticalIndex(ShearWallEngine.Collect());
+            var wallGeometries = SpatialIndexManager.WallSpatialIndex.SelectAll();
+            ShearWallEngine.UpdateValidElements(wallGeometries);
         }
         private void CreateBeamSpatialIndex()
         {
-            ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(thBeamRecognitionEngine.Collect());
-            var beamGeometries = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectAll();
-            thBeamRecognitionEngine.UpdateValidElements(beamGeometries);
-            thBeamRecognitionEngine.SimilarityBeamRemove();
+            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Collect());
+            var beamGeometries = SpatialIndexManager.BeamSpatialIndex.SelectAll();
+            BeamEngine.UpdateValidElements(beamGeometries);
+            BeamEngine.SimilarityBeamRemove(SpatialIndexManager);
         }
         private void CreateSingleBeamLink()
         {
             ThBeamLinkExtension thBeamLinkExtension = new ThBeamLinkExtension()
             {
-                ColumnEngine = thColumnRecognitionEngine,
-                ShearWallEngine = thShearWallRecognitionEngine,
-                BeamEngine = thBeamRecognitionEngine
+                ConnectionEngine = this,
             };
-            foreach (var element in thBeamRecognitionEngine.ValidElements)
+            foreach (var element in BeamEngine.ValidElements)
             {
                 ThSingleBeamLink thSingleBeamLink = new ThSingleBeamLink();
                 if(element is ThIfcBeam thIfcBeam)
@@ -133,13 +133,11 @@ namespace ThMEPEngineCore.Engine
         }
         private void FindSingleBeamLinkTwoVerComponent()
         {
-            foreach (ThIfcElement beamElement in thBeamRecognitionEngine.ValidElements)
+            foreach (ThIfcElement beamElement in BeamEngine.ValidElements)
             {
                 ThBeamLinkExtension thBeamLinkExtension = new ThBeamLinkExtension()
                 {
                     ConnectionEngine = this,
-                    ColumnEngine = thColumnRecognitionEngine,
-                    ShearWallEngine = thShearWallRecognitionEngine,
                 };
                 ThBeamLink thBeamLink = thBeamLinkExtension.CreateSinglePrimaryBeamLink(beamElement as ThIfcBeam);
                 if (thBeamLink.Beams.Count > 0)
@@ -151,26 +149,20 @@ namespace ThMEPEngineCore.Engine
         private void FindMultiBeamLinkInTwoVerComponent()
         {           
             //主梁：两端均为竖向构件
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.ValidElements).ToList();
             ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
             {
                 ConnectionEngine = this,
-                ColumnEngine = thColumnRecognitionEngine,
-                BeamEngine = thBeamRecognitionEngine,
-                ShearWallEngine = thShearWallRecognitionEngine
             };
             multiBeamLink.CreatePrimaryBeamLink();            
         }
         private void FindHalfPrimaryBeamLink()
         {           
             //半主梁：一端为竖向构件，另一端为主梁
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.ValidElements).ToList();
             ThHalfPrimaryBeamLinkExtension halfPrimaryBeamLink = new ThHalfPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
             {
                 ConnectionEngine = this,
-                ColumnEngine = thColumnRecognitionEngine,
-                BeamEngine = thBeamRecognitionEngine,
-                ShearWallEngine = thShearWallRecognitionEngine
             };
             halfPrimaryBeamLink.CreateHalfPrimaryBeamLink();
             HalfPrimaryBeamLinks.AddRange(halfPrimaryBeamLink.HalfPrimaryBeamLinks);            
@@ -178,14 +170,11 @@ namespace ThMEPEngineCore.Engine
         private void FindOverhangingPrimaryBeamLink()
         {
             //悬挑主梁：一端为竖向构件，另一端无主梁或竖向构件,且无延续构件
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.ValidElements).ToList();
             ThOverhangingPrimaryBeamLinkExtension thOverhangingPrimaryBeamLinkExtension =
                 new ThOverhangingPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks)
                 {
                     ConnectionEngine = this,
-                    ColumnEngine = thColumnRecognitionEngine,
-                    BeamEngine = thBeamRecognitionEngine,
-                    ShearWallEngine = thShearWallRecognitionEngine
                 };
             thOverhangingPrimaryBeamLinkExtension.CreateOverhangingPrimaryBeamLink();
             OverhangingPrimaryBeamLinks.AddRange(thOverhangingPrimaryBeamLinkExtension.OverhangingPrimaryBeamLinks);
@@ -193,14 +182,11 @@ namespace ThMEPEngineCore.Engine
         private void FindSecondaryBeamLink()
         {
             //次梁：两端搭在主梁、半主梁、悬挑柱梁上的梁
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.ValidElements).ToList();
             ThSecondaryBeamLinkExtension thSecondaryBeamLinkExtension =
                 new ThSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks, OverhangingPrimaryBeamLinks)
                 {
                     ConnectionEngine = this,
-                    ColumnEngine = thColumnRecognitionEngine,
-                    BeamEngine = thBeamRecognitionEngine,
-                    ShearWallEngine = thShearWallRecognitionEngine
                 };
             thSecondaryBeamLinkExtension.CreateSecondaryBeamLink();
             SecondaryBeamLinks.AddRange(thSecondaryBeamLinkExtension.SecondaryBeamLinks);
@@ -208,14 +194,11 @@ namespace ThMEPEngineCore.Engine
         private void FindSubSecondaryBeamLink()
         {
             //次次梁：两端搭在主梁、半主梁、悬挑柱梁或次梁上的梁
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(thBeamRecognitionEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.ValidElements).ToList();
             ThSubSecondaryBeamLinkExtension thSubSecondaryBeamLinkExtension =
                 new ThSubSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks, OverhangingPrimaryBeamLinks, SecondaryBeamLinks)
                 {
                     ConnectionEngine = this,
-                    ColumnEngine = thColumnRecognitionEngine,
-                    BeamEngine = thBeamRecognitionEngine,
-                    ShearWallEngine = thShearWallRecognitionEngine
                 };
             thSubSecondaryBeamLinkExtension.CreateSubSecondaryBeamLink();
         }

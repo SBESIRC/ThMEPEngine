@@ -21,35 +21,28 @@ namespace ThMEPEngineCore.Algorithm
         public ThMEPModelManager(Database database)
         {
             HostDb = database;
-            BeamEngine = null;
-            ColumnEngine = null;
-            ShearWallEngine = null;
         }
 
         public void Dispose()
         {
+            if (BeamEngine != null)
+            {
+                BeamEngine.Dispose();
+            }
+            if (ColumnEngine != null)
+            {
+                ColumnEngine.Dispose();
+            }
+            if (ShearWallEngine != null)
+            {
+                ShearWallEngine.Dispose();
+            }
         }
 
         public Database HostDb { get; private set; }
         public ThBeamRecognitionEngine BeamEngine { get; private set; }
         public ThColumnRecognitionEngine ColumnEngine { get; private set; }
         public ThShearWallRecognitionEngine ShearWallEngine { get; private set; }
-
-        public void CreateSpatialIndex()
-        {
-            if (BeamEngine != null)
-            {
-                ThSpatialIndexManager.Instance.CreateBeamSpaticalIndex(BeamEngine.Collect());
-            }
-            if (ColumnEngine != null)
-            {
-                ThSpatialIndexManager.Instance.CreateColumnSpaticalIndex(ColumnEngine.Collect());
-            }
-            if (ShearWallEngine != null)
-            {
-                ThSpatialIndexManager.Instance.CreateWallSpaticalIndex(ShearWallEngine.Collect());
-            }
-        }
 
         public void Acquire(BuildElement elements)
         {

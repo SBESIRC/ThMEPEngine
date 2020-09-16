@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.BeamInfo.Business;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Test
 {
@@ -96,10 +97,17 @@ namespace ThMEPEngineCore.Test
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
 
+                // 获取数据模型
                 modelManager.Acquire(BuildElement.All);
-                modelManager.CreateSpatialIndex();
 
-                var frameService = new ThMEPFrameService(modelManager);
+                // 创建空间索引
+                var spatialIndexManager = new ThSpatialIndexManager();
+                spatialIndexManager.CreateBeamSpaticalIndex(modelManager.BeamEngine.Collect());
+                spatialIndexManager.CreateColumnSpaticalIndex(modelManager.ColumnEngine.Collect());
+                spatialIndexManager.CreateWallSpaticalIndex(modelManager.ShearWallEngine.Collect());
+
+                // 提取区域
+                var frameService = new ThMEPFrameService(modelManager, spatialIndexManager);
                 var result_element = frameService.RegionsFromFrame(frame);
                 foreach (Entity item in result_element)
                 {

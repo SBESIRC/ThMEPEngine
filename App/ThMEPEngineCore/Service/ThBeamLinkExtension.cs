@@ -1,23 +1,46 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using ThCADCore.NTS;
-
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.BeamInfo.Business;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThBeamLinkExtension
     {
-        public ThColumnRecognitionEngine ColumnEngine { get; set; }
-        public ThBeamRecognitionEngine BeamEngine { get; set; }
-        public ThShearWallRecognitionEngine ShearWallEngine { get; set; }
         public ThBeamConnectRecogitionEngine ConnectionEngine { get; set; }
+        private ThColumnRecognitionEngine ColumnEngine
+        {
+            get
+            {
+                return ConnectionEngine.ColumnEngine;
+            }
+        }
+        private ThBeamRecognitionEngine BeamEngine
+        {
+            get
+            {
+                return ConnectionEngine.BeamEngine;
+            }
+        }
+        private ThShearWallRecognitionEngine ShearWallEngine
+        {
+            get
+            {
+                return ConnectionEngine.ShearWallEngine;
+            }
+        }
+        private ThSpatialIndexManager SpatialIndexManager
+        {
+            get
+            {
+                return ConnectionEngine.SpatialIndexManager;
+            }
+        }
 
         public ThBeamLinkExtension()
         {
@@ -142,7 +165,7 @@ namespace ThMEPEngineCore.Service
             {
                 Polyline portSearchEnvelop = GetLineBeamPortSearchEnvelop(thIfcLineBeam, portPt);
                 // 先判断是否搭接在柱上
-                linkObjs = ThSpatialIndexManager.Instance.ColumnSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
+                linkObjs = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和柱是“重叠(Overlap)”的
@@ -158,7 +181,7 @@ namespace ThMEPEngineCore.Service
                 }
 
                 // 再判断是否搭接在剪力墙上
-                linkObjs = ThSpatialIndexManager.Instance.WallSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
+                linkObjs = SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和剪力墙是“重叠(Overlap)”的
@@ -241,7 +264,7 @@ namespace ThMEPEngineCore.Service
             {               
                 portSearchEnvelop = GetArcBeamPortSearchEnvelop(thIfcArcBeam, portPt);
             }
-            linkObjs = ThSpatialIndexManager.Instance.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
+            linkObjs = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
             if (linkObjs.Count > 0)
             {
                 var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.Intersects(o));
