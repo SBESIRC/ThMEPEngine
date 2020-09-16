@@ -41,26 +41,6 @@ namespace ThMEPEngineCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThPreprocess", CommandFlags.Modal)]
-        public void ThPreprocess()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Polyline segment in pline.Preprocess())
-                {
-                    segment.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(segment);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThArcBeamOutline", CommandFlags.Modal)]
         public void ThArcBeamOutline()
         {

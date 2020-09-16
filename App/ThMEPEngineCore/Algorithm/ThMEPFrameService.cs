@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
@@ -16,6 +17,17 @@ namespace ThMEPEngineCore.Algorithm
         {
             ModelManager = manager;
             SpatialIndexManager = spatialIndexManager;
+        }
+
+        public static Polyline Normalize(Polyline frame)
+        {
+            // 处理框线不闭合的情况
+            var clone = frame.Clone() as Polyline;
+            clone.Closed = true;
+
+            // 处理共线和自交的情况
+            var results = clone.PreprocessAsPolygon();
+            return results.Cast<Polyline>().OrderByDescending(o => o.Area).First();
         }
 
         public DBObjectCollection RegionsFromFrame(Polyline frame)

@@ -68,11 +68,11 @@ namespace ThCADCore.NTS
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public static DBObjectCollection PreprocessEx(this Polyline polyline)
+        public static DBObjectCollection PreprocessAsPolygon(this Polyline polyline)
         {
             // 剔除重复点（在一定公差范围内）
             // 鉴于主要的使用场景是建筑底图，选择1毫米作为公差
-            var result = TopologyPreservingSimplifier.Simplify(polyline.ToNTSLineStringEx(), 1.0);
+            var result = TopologyPreservingSimplifier.Simplify(polyline.ToFixedNTSLineString(), 1.0);
 
             // 自相交处理
             var polygons = result.Polygonize();

@@ -182,15 +182,6 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static Geometry ToNTSLineStringEx(this Polyline polyLine)
-        {
-            var geometry = polyLine.ToNTSLineString();
-            // 精度模型选用Fixed模型（四舍五入，仅保留整数部分）
-            var model = NtsGeometryServices.Instance.CreatePrecisionModel(PrecisionModels.Fixed);
-            var operation = new PrecisionReducerCoordinateOperation(model, false);
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(operation.Edit(geometry.Coordinates, geometry));
-        }
-
         public static Polygon ToNTSPolygon(this Circle circle, int numPoints)
         {
             // 获取圆的外接矩形
