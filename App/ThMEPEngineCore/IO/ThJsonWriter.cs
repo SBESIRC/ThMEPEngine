@@ -1,11 +1,8 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Newtonsoft.Json;
 using ThMEPEngineCore.Model;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.IO
 {
@@ -13,9 +10,7 @@ namespace ThMEPEngineCore.IO
     {
         public static void OutputBeams(List<ThIfcBeam> thIfcBeams)
         {
-            // serialize JSON directly to a file
-            string time = DateTime.Now.ToString("yyyy-MM-dd HH-mm-ss");
-            string fileName = System.Environment.CurrentDirectory + "\\Beam"+ time+".json";
+            var fileName = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Beam.result.json");
             using (StreamWriter file = File.CreateText(fileName))
             {
                 JsonSerializer serializer = new JsonSerializer();
