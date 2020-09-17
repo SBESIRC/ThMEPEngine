@@ -37,11 +37,8 @@ namespace ThMEPEngineCore.Service
                             continue;
                         }
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
-                        if (btr.IsFromExternalReference || btr.IsFromOverlayReference)
-                        {
-                            var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                            ShearWallCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
-                        }
+                        var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        ShearWallCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
                     }
                 }
             }

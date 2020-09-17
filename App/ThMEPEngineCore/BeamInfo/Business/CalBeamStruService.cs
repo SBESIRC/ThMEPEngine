@@ -87,6 +87,11 @@ namespace ThMEPEngineCore.BeamInfo.Business
         /// <returns></returns>
         private List<LineBeam> GetLineBeamObject(List<Line> linList, Vector3d lineDir, double tolerance)
         {
+            linList=linList.Where(o => o.Length >= 1.0).ToList();
+            if(linList.Count==0)
+            {
+                return new List<LineBeam>();
+            }
             Vector3d zDir = Vector3d.ZAxis;
             Vector3d yDir = Vector3d.ZAxis.CrossProduct(lineDir);
             Matrix3d trans = new Matrix3d(new double[]{

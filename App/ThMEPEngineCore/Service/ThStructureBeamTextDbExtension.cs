@@ -41,14 +41,8 @@ namespace ThMEPEngineCore.Service
                             continue;
                         }
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
-                        if (btr.IsFromExternalReference || btr.IsFromOverlayReference)
-                        {
-                            if (ThStructureUtils.IsBeamXref(btr.PathName))
-                            {
-                                var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                                BeamTexts.AddRange(BuildElementTexts(blkRef, mcs2wcs));
-                            }
-                        }
+                        var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
+                        BeamTexts.AddRange(BuildElementTexts(blkRef, mcs2wcs));
                     }
                 }
             }
