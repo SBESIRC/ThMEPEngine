@@ -7,8 +7,6 @@ namespace ThMEPEngineCore.BeamInfo.Business
 {
     public class ThBeamGeometryPreprocessor
     {
-        static readonly double beamCurveShortestLength = 100;
-
         /// <summary>
         /// 分解曲线
         /// </summary>
@@ -107,7 +105,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             DBObjectCollection objs = new DBObjectCollection();
             foreach (Curve curve in curves)
             {
-                if (curve.GetLength() > beamCurveShortestLength)
+                if (curve.GetLength() > ThBeamCommon.beam_length_tolerance)
                 {
                     objs.Add(curve);
                 }

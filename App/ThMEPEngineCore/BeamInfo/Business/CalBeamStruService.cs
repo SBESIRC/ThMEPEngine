@@ -67,7 +67,9 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     var objs = new DBObjectCollection();
                     lineDic.Value.ForEachDbObject(o => objs.Add(o));
                     var results = objs.GetMergeOverlappingCurves(new Tolerance(1, 1));
-                    var res = GetLineBeamObject(results.Cast<Line>().ToList(), lineDic.Key, 100);
+                    //过滤极短的线段，这些“碎线”可能是由于合并重叠线段时产出的
+                    var filters = results.Cast<Line>().Where(o => o.Length >= ThBeamCommon.beam_length_tolerance);
+                    var res = GetLineBeamObject(filters.ToList(), lineDic.Key, 100);
                     allBeam.AddRange(res);
                 }
 
@@ -87,11 +89,6 @@ namespace ThMEPEngineCore.BeamInfo.Business
         /// <returns></returns>
         private List<LineBeam> GetLineBeamObject(List<Line> linList, Vector3d lineDir, double tolerance)
         {
-            linList=linList.Where(o => o.Length >= 1.0).ToList();
-            if(linList.Count==0)
-            {
-                return new List<LineBeam>();
-            }
             Vector3d zDir = Vector3d.ZAxis;
             Vector3d yDir = Vector3d.ZAxis.CrossProduct(lineDir);
             Matrix3d trans = new Matrix3d(new double[]{

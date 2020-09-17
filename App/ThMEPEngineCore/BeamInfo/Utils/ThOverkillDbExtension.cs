@@ -125,7 +125,11 @@ namespace ThMEPEngineCore.BeamInfo.Utils
                         firCurve = colLine;
                         i = -1;
                     }
-                    resCurves.Add(firCurve);
+
+                    if (firCurve.Length > 0)
+                    {
+                        resCurves.Add(firCurve);
+                    }
                 }
                 return resCurves;
             }
