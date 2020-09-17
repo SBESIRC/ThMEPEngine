@@ -29,8 +29,8 @@ namespace ThMEPWSS
             //throw new System.NotImplementedException();
         }
 
-        [CommandMethod("TIANHUACAD", "THGETGRID", CommandFlags.Modal)]
-        public void ThGetGridModel()
+        [CommandMethod("TIANHUACAD", "THPTLAYOUT", CommandFlags.Modal)]
+        public void ThPTLayout()
         {
             PromptSelectionOptions options = new PromptSelectionOptions()
             {

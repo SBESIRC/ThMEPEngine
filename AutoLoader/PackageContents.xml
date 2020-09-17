@@ -96,4 +96,40 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
             </Commands>
         </ComponentEntry>
     </Components>
+    <!--Assembly App, ThMEPWSS, 2012 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
+        <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THPTLAYOUT" Global="THPTLAYOUT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPWSS, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THPTLAYOUT" Global="THPTLAYOUT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPWSS, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THPTLAYOUT" Global="THPTLAYOUT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPWSS, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THPTLAYOUT" Global="THPTLAYOUT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
 </ApplicationPackage>
