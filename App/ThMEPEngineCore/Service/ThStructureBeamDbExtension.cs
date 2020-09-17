@@ -32,6 +32,10 @@ namespace ThMEPEngineCore.Service
                 {
                     if (ent is BlockReference blkRef)
                     {
+                        if (blkRef.BlockTableRecord.IsNull)
+                        {
+                            continue;
+                        }
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
                         if (btr.IsFromExternalReference || btr.IsFromOverlayReference)
                         {
@@ -62,6 +66,10 @@ namespace ThMEPEngineCore.Service
                         var dbObj = acadDatabase.Element<Entity>(objId);
                         if (dbObj is BlockReference blockObj)
                         {
+                            if (blockObj.BlockTableRecord.IsNull)
+                            {
+                                continue;
+                            }
                             if (blockObj.IsBuildElementBlockReference())
                             {
                                 var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
