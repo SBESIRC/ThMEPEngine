@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,8 @@ namespace ThMEPWSS.Bussiness
 {
     public class GridService
     {
-        public readonly double tol = 800;
+        readonly double tol = 10;
+        readonly double minSpace = 4500;
 
         /// <summary>
         /// 构建柱轴网
@@ -22,11 +24,25 @@ namespace ThMEPWSS.Bussiness
             List<Point3d> points = GetColumCenter(colums);
             Matrix3d matrix = GeoUtils.GetGridMatrix(polyline, out Line longLine, out Line shortLine);
 
+            var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, longLine, shortLine));
+            var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, longLine, shortLine));
+
             List<KeyValuePair<Vector3d, List<Polyline>>> gridPolys = new List<KeyValuePair<Vector3d, List<Polyline>>>()
             {
-                CreateGridLine(matrix, points, longLine, shortLine),
-                CreateGridLine(RotateMatrix(matrix), points, longLine, shortLine),
+                firGrids,
+                secGrids,
             };
+
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (var item in gridPolys)
+                {
+                    foreach (var sss in item.Value)
+                    {
+                        acdb.ModelSpace.Add(sss);
+                    }
+                }
+            }
             return gridPolys;
         }
 
@@ -75,10 +91,10 @@ namespace ThMEPWSS.Bussiness
                     points.Remove(sp);
                 }
 
-                if (groupPts.Count <= 1)
-                {
-                    continue;
-                }
+                //if (groupPts.Count <= 1)
+                //{
+                //    continue;
+                //}
 
                 groupPts.Add(new Point3d(sp.X, maxY, 0));
                 groupPts.Add(new Point3d(sp.X, minY, 0));
@@ -135,6 +151,60 @@ namespace ThMEPWSS.Bussiness
             }
 
             return resPoints;
+        }
+
+        /// <summary>
+        /// 去掉离得过近的轴网线
+        /// </summary>
+        /// <param name="grids"></param>
+        private KeyValuePair<Vector3d, List<Polyline>> MoveClosedGrid(KeyValuePair<Vector3d, List<Polyline>> grids)
+        {
+            var gridLines = grids.Value;
+            int index = 0;
+            int indexJ = 1;
+            List<Polyline> removePolys = new List<Polyline>();
+            while (index < gridLines.Count)
+            {
+                if (indexJ >= gridLines.Count)
+                {
+                    break;
+                }
+                var poly = gridLines[index];
+                var nextPoly = gridLines[indexJ];
+                var sPt = poly.GetPoint3dAt(0);
+                var closetPt = nextPoly.GetClosestPointTo(sPt, false);
+
+                if (sPt.DistanceTo(closetPt) < minSpace)
+                {
+                    if (index == 0)
+                    {
+                        removePolys.Add(nextPoly);
+                    }
+                    else if (indexJ == gridLines.Count - 1)
+                    {
+                        removePolys.Add(poly);
+                    }
+                    else
+                    {
+                        if (poly.NumberOfVertices > nextPoly.NumberOfVertices)
+                        {
+                            removePolys.Add(nextPoly);
+                        }
+                        else
+                        {
+                            removePolys.Add(poly);
+                            index = indexJ;
+                        }
+                    }
+                }
+                else
+                {
+                    index = indexJ;
+                }
+                indexJ++;
+            }
+
+            return new KeyValuePair<Vector3d, List<Polyline>>(grids.Key, gridLines.Except(removePolys).ToList());
         }
     }
 }

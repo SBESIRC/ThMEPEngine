@@ -39,7 +39,7 @@ namespace ThMEPWSS.Utils
         /// <returns></returns>
         public static Matrix3d GetGridMatrix(Polyline polyline, out Line longLine, out Line shortLine)
         {
-            Polyline obbPoly = OrientedBoundingBox.Calculate(polyline);
+            Polyline obbPoly = ThCADCoreNTSPolylineExtension.MinimumBoundingBox(polyline);
             List<Line> lineLst = new List<Line>();
             for (int i = 0; i < obbPoly.NumberOfVertices; i++)
             {
@@ -85,6 +85,42 @@ namespace ThMEPWSS.Utils
                 }
             }
             return roomSprays;
+        }
+
+        /// <summary>
+        /// 判断喷淋是否在polyline内
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="spray"></param>
+        /// <returns></returns>
+        public static bool IsInPolyline(this Polyline polyline, SprayLayoutData spray)
+        {
+            if (polyline.Contains(spray.Position))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 移动polyline
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="length"></param>
+        /// <param name="moveDir"></param>
+        /// <returns></returns>
+        public static Polyline MovePolyline(this Polyline polyline, double length, Vector3d moveDir)
+        {
+            bool isClosed = polyline.Closed;
+            Polyline newPolyline = new Polyline() { Closed = isClosed };
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                var pt = (polyline.GetPoint3dAt(i) + moveDir * length).ToPoint2D();
+                newPolyline.AddVertexAt(0, pt, 0, 0, 0);
+            }
+
+            return newPolyline;
         }
     }
 }

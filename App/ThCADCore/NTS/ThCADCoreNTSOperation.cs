@@ -28,6 +28,16 @@ namespace ThCADCore.NTS
                     objs.Add(lineStr.ToDbPolyline());
                 }
             }
+            else if (result is GeometryCollection collection)
+            {
+                foreach (var col in collection.Geometries)
+                {
+                    if (col is LineString line)
+                    {
+                        objs.Add(line.ToDbPolyline());
+                    }
+                }
+            }
             else
             {
                 throw new NotSupportedException();

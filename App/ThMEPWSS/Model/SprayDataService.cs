@@ -52,6 +52,42 @@ namespace ThMEPWSS.Model
         }
 
         /// <summary>
+        /// 创建喷淋对象
+        /// </summary>
+        /// <param name="point"></param>
+        /// <param name="vLine"></param>
+        /// <param name="tLine"></param>
+        /// <param name="vDir"></param>
+        /// <param name="tDir"></param>
+        /// <param name="sideLength"></param>
+        /// <returns></returns>
+        public static SprayLayoutData CreateSprayModelsByRay(Point3d point, Vector3d vDir, Vector3d tDir, double sideLength)
+        {
+            // 计算保护半径
+            // 暂时只支持矩形保护半径
+            var curve = new Polyline()
+            {
+                Closed = true,
+            };
+            double distance = Math.Sqrt(2) * (sideLength / 2.0);
+            var vertices = new Point3dCollection()
+            {
+                Point3d.Origin + distance * (vDir + tDir).GetNormal(),
+                Point3d.Origin + distance * (vDir - tDir).GetNormal(),
+                Point3d.Origin - distance * (vDir + tDir).GetNormal(),
+                Point3d.Origin - distance * (vDir - tDir).GetNormal()
+            };
+            CreatePolyline(curve, vertices);
+
+            var offset = Matrix3d.Displacement(point.GetAsVector());
+            var spray = SprayLayoutData.Create(point, curve.GetTransformedCopy(offset) as Curve);
+            spray.mainDir = vDir;
+            spray.otherDir = tDir;
+
+            return spray;
+        }
+
+        /// <summary>
         /// 通过三维点集合创建多段线
         /// </summary>
         /// <param name="pline">多段线对象</param>

@@ -1,6 +1,7 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -38,7 +39,13 @@ namespace ThMEPEngineCore.Engine
                     DBObjectCollection dbObjs = new DBObjectCollection();
                     columnDbExtension.ColumnCurves.ForEach(o => dbObjs.Add(o));
                     ThCADCoreNTSSpatialIndex columnCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    foreach(var filterObj in columnCurveSpatialIndex.SelectCrossingPolygon(polygon))
+
+                    var pline = new Polyline()
+                    {
+                        Closed = true,
+                    };
+                    pline.CreatePolyline(polygon);
+                    foreach (var filterObj in columnCurveSpatialIndex.SelectWindowPolygon(pline))
                     {
                         curves.Add(filterObj as Curve);
                     }

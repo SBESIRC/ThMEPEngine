@@ -55,7 +55,7 @@ namespace ThMEPElectrical.Broadcast
                 }
 
                 double lineLength = thisLines.Sum(x => x.Length);
-                if (oneProtect < lineLength && lineLength < protectRange)
+                if (oneProtect < lineLength && num == 1)
                 {
                     num++;
                 }

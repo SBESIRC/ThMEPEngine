@@ -7,93 +7,38 @@ using System.Linq;
 using System.Text;
 using ThCADCore.NTS;
 using ThMEPWSS.Model;
+using ThMEPWSS.Service;
+using ThWSS.Bussiness;
 
 namespace ThMEPWSS.Bussiness.LayoutBussiness
 {
     public class RayLayoutService
     {
-        protected double sideLength = 3400;
-        protected double sideMinLength = 0;
-        protected double maxLength = 1800;
-        protected double minLength = 100;
-        protected double raduisLength = 1800;
-        protected double moveLength = 200;
+        protected readonly double sideLength = 3400;
+        protected readonly double sideMinLength = 0;
+        protected readonly double maxLength = 1800;
+        protected readonly double minLength = 100;
+        protected readonly double raduisLength = 1800;
+        protected readonly double moveLength = 200;
+        protected readonly double spacing = 100;
 
-        public List<List<SprayLayoutData>> LayoutSpray(Polyline polyline, List<Polyline> colums)
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums)
         {
-            polyline.Closed = true;
             //获取柱轴网
             GridService gridService = new GridService();
-            var allGrid = gridService.CreateGrid(polyline, colums);
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                foreach (var item in allGrid)
-                {
-                    foreach (var sss in item.Value)
-                    {
-                        //acdb.ModelSpace.Add(sss);
-                    }
-                }
-            }
+            var allGrids = gridService.CreateGrid(polyline, colums);
 
-            Matrix3d layoutMatrix = new Matrix3d(new double[]{
-                    allGrid[0].Key.X, allGrid[1].Key.X, Vector3d.ZAxis.X, 0,
-                    allGrid[0].Key.Y, allGrid[1].Key.Y, Vector3d.ZAxis.Y, 0,
-                    allGrid[0].Key.Z, allGrid[1].Key.Z, Vector3d.ZAxis.Z, 0,
-                    0.0, 0.0, 0.0, 1.0});
+            //计算布置网格线
+            CalLayoutGrid(polyline, allGrids, out List<List<Polyline>> tLines, out List<List<Polyline>> vLines, out Vector3d tDir, out Vector3d vDir);
 
-            //计算可布置区域
-            var range = CalLayoutRange(allGrid[0].Value, allGrid[1].Value, layoutMatrix);
-            List<double> sLongValue = range[0];
-            List<double> eLongValue = range[1];
-            List<double> sShortValue = range[2];
-            List<double> eShortValue = range[3];
-
-            var p1 = new Point3d(sLongValue[0], eShortValue[0], 0);
-            var p2 = new Point3d(sLongValue[sLongValue.Count - 1], eShortValue[0], 0);
-            var p3 = new Point3d(sLongValue[0], eShortValue[eShortValue.Count - 1], 0);
-            //计算排布方向
-            Vector3d tDir = (p2 - p1).GetNormal();   //横向方向
-            Vector3d vDir = (p3 - p1).GetNormal();   //纵向方向 
-            //计算排布长宽
-            double length = allGrid[1].Value[0].Length;      //横向长度
-            double width = allGrid[0].Value[0].Length;        //纵向长度
-
-            List<List<Polyline>> tLines = new List<List<Polyline>>();
-            List<List<Polyline>> vLines = new List<List<Polyline>>();
-            //计算横向布置线
-            for (int i = 0; i < sLongValue.Count; i++)
-            {
-                Point3d pt = new Point3d(sLongValue[i], eShortValue[0], 0);
-                var resLines = LayoutPoints(pt, tDir, vDir, Math.Abs(sLongValue[i] - eLongValue[i]), width);
-                resLines.ForEach(x => x.TransformBy(layoutMatrix));
-                List<Polyline> polys = new List<Polyline>();
-                foreach (var line in resLines)
-                {
-                    polys.AddRange(polyline.Trim(line).Cast<Polyline>().ToList());
-                }
-                tLines.Add(polys);
-            }
-            //计算竖向布置线
-            for (int i = 0; i < sShortValue.Count; i++)
-            {
-                Point3d pt = new Point3d(sLongValue[0], eShortValue[i], 0);
-                var resLines = LayoutPoints(pt, vDir, tDir, Math.Abs(sShortValue[i] - eShortValue[i]), length);
-                resLines.ForEach(x => x.TransformBy(layoutMatrix));
-                List<Polyline> polys = new List<Polyline>();
-                foreach (var line in resLines)
-                {
-                    polys.AddRange(polyline.Trim(line).Cast<Polyline>().ToList());
-                }
-                vLines.Add(polys);
-            }
-            
+            //打印布置网格线
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 foreach (var item in tLines)
                 {
                     foreach (var sss in item)
                     {
+                        sss.ColorIndex = 1;
                         acdb.ModelSpace.Add(sss);
                     }
                 }
@@ -102,12 +47,152 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 {
                     foreach (var sss in item)
                     {
+                        sss.ColorIndex = 1;
                         acdb.ModelSpace.Add(sss);
                     }
                 }
             }
 
+            //计算喷淋布置点
+            var sprays = SprayDataOperateService.CalSprayPoint(tLines, vLines, vDir, tDir, sideLength);
+
+            //List<SprayLayoutData> roomSprays = new List<SprayLayoutData>();
+            //foreach (var lpts in sprayPts)
+            //{
+            //    roomSprays.AddRange(GeoUtils.CalRoomSpray(plBack, lpts, out List<SprayLayoutData> outsideSpary));
+            //}
+
+            //躲次梁
+            AvoidBeamService beamService = new AvoidBeamService();
+            beamService.AvoidBeam(polyline, sprays);
+
+            //放置喷头
+            InsertSprayService.InsertSprayBlock(sprays.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
+
             return null;
+        }
+
+        /// <summary>
+        /// 计算布置网格线
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="columnGrids"></param>
+        /// <param name="tLines"></param>
+        /// <param name="vLines"></param>
+        private void CalLayoutGrid(Polyline polyline, List<KeyValuePair<Vector3d, List<Polyline>>> columnGrids, out List<List<Polyline>> tLines,
+            out List<List<Polyline>> vLines, out Vector3d tDir, out Vector3d vDir)
+        {
+            Matrix3d layoutMatrix = new Matrix3d(new double[]{
+                    columnGrids[0].Key.X, columnGrids[1].Key.X, Vector3d.ZAxis.X, 0,
+                    columnGrids[0].Key.Y, columnGrids[1].Key.Y, Vector3d.ZAxis.Y, 0,
+                    columnGrids[0].Key.Z, columnGrids[1].Key.Z, Vector3d.ZAxis.Z, 0,
+                    0.0, 0.0, 0.0, 1.0});
+
+            //计算可布置区域
+            var range = CalLayoutRange(columnGrids[0].Value, columnGrids[1].Value, layoutMatrix);
+            List<double> sLongValue = range[0];
+            List<double> eLongValue = range[1];
+            List<double> sShortValue = range[2];
+            List<double> eShortValue = range[3];
+
+            var p1 = new Point3d(sLongValue[0], sShortValue[0], 0);
+            var p2 = new Point3d(eLongValue[0], sShortValue[0], 0);
+            var p3 = new Point3d(sLongValue[0], eShortValue[0], 0);
+            //计算排布方向
+            tDir = (p2 - p1).GetNormal();   //横向方向
+            vDir = -(p3 - p1).GetNormal();   //纵向方向 
+            //计算排布长宽
+            double length = columnGrids[1].Value[0].Length;      //横向长度
+            double width = columnGrids[0].Value[0].Length;        //纵向长度
+
+            List<Polyline> resVLines = new List<Polyline>();
+            List<Polyline> resTLines = new List<Polyline>();
+            //计算横向布置线
+            for (int i = 0; i < sLongValue.Count; i++)
+            {
+                Point3d pt = new Point3d(sLongValue[i], eShortValue[0], 0);
+                var resLines = LayoutPoints(pt, tDir, vDir, Math.Abs(sLongValue[i] - eLongValue[i]), width);
+                resLines.ForEach(x => x.TransformBy(layoutMatrix));
+                resTLines.AddRange(resLines);
+            }
+            //计算竖向布置线
+            for (int i = 0; i < sShortValue.Count; i++)
+            {
+                Point3d pt = new Point3d(sLongValue[0], eShortValue[i], 0);
+                var resLines = LayoutPoints(pt, vDir, tDir, Math.Abs(sShortValue[i] - eShortValue[i]), length);
+                resLines.ForEach(x => x.TransformBy(layoutMatrix));
+                resVLines.AddRange(resLines);
+            }
+
+            //校验喷淋布置线
+            CheckLayoutLine(resTLines);
+            CheckLayoutLine(resVLines);
+
+            //调整线间距
+            var sp = new Point3d(sLongValue[0], eShortValue[0], 0).TransformBy(layoutMatrix);
+            AdjustmentLayoutLines(resTLines, sp);
+            AdjustmentLayoutLines(resVLines, sp);
+
+            tLines = resTLines.Select(x => polyline.Trim(x).Cast<Polyline>().ToList()).ToList();
+            vLines = resVLines.Select(x => polyline.Trim(x).Cast<Polyline>().ToList()).ToList();
+        }
+
+        /// <summary>
+        /// 校验防止喷淋布置太近
+        /// </summary>
+        /// <param name="polylines"></param>
+        private void CheckLayoutLine(List<Polyline> polylines)
+        {
+            List<int> removeNum = new List<int>();
+            for (int i = 1; i < polylines.Count - 1; i++)
+            {
+                var prevPoly = polylines[i - 1];
+                var thisPoly = polylines[i];
+                var nextPoly = polylines[i + 1];
+
+                var closetPt = prevPoly.GetClosestPointTo(nextPoly.StartPoint, true);
+                if (closetPt.DistanceTo(nextPoly.StartPoint) < sideLength)
+                {
+                    removeNum.Add(i);
+                    i++;
+                }
+            }
+
+            foreach (var num in removeNum)
+            {
+                polylines.RemoveAt(num);
+            }
+        }
+
+        /// <summary>
+        /// 调整布置线间距为100的倍数
+        /// </summary>
+        /// <param name="polylines"></param>
+        /// <param name="sPt"></param>
+        private void AdjustmentLayoutLines(List<Polyline> polylines, Point3d sPt)
+        {
+            for (int i = 0; i < polylines.Count; i++)
+            {
+                var closetPt = polylines[i].GetClosestPointTo(sPt, true);
+                double length = closetPt.DistanceTo(sPt);
+                double newLength = Math.Round(length / spacing) * spacing;
+                if (length != newLength)
+                {
+                    double moveLength = length - newLength;
+                    Vector3d moveDir = (sPt - closetPt).GetNormal();
+                    var sp = polylines[i].GetPoint3dAt(0) + moveLength * moveDir;
+                    var ep = polylines[i].GetPoint3dAt(polylines[i].NumberOfVertices - 1) + moveLength * moveDir;
+                    Polyline polyline = new Polyline();
+                    polyline.AddVertexAt(0, sp.ToPoint2D(), 0, 0, 0);
+                    polyline.AddVertexAt(1, ep.ToPoint2D(), 0, 0, 0);
+                    polylines[i] = polyline;
+                    sPt = sp;
+                }
+                else
+                {
+                    sPt = closetPt;
+                }
+            }
         }
 
         /// <summary>
