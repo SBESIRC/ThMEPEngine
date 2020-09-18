@@ -31,6 +31,26 @@ namespace ThMEPEngineCore.Service
                         {
                             return false;
                         }
+                        if (layerName.Contains("OTHE"))
+                        {
+                            return false;
+                        }
+                        if (layerName.Contains("CAP"))
+                        {
+                            return false;
+                        }
+                        if (layerName.Contains("TEXT"))
+                        {
+                            return false;
+                        }
+                        if (layerName.Contains("DETL"))
+                        {
+                            return false;
+                        }
+                        if (layerName.Contains("TPTN"))
+                        {
+                            return false;
+                        }
                         // 返回指定的图层
                         return true;
                     }).ForEachDbObject(o => layers.Add(o.Name));

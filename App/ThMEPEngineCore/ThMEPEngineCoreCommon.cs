@@ -35,8 +35,25 @@ namespace ThMEPEngineCore
 
         // 公差
         public static double SIMILARITYMEASURETOLERANCE = 0.9;
-
-        //梁信封圈搜索长度
-        public static double BeamEnvelopSearchLength = 600.0;
+        /// <summary>
+        /// 梁端口绘制密封圈扩展宽度
+        /// </summary>
+        public static double BeamExtensionRatio = 1.01;
+        /// <summary>
+        /// 梁分割，梁宽度延伸比例
+        /// </summary>
+        public static double BeamIntersectionRatio = 2.0;
+        /// <summary>
+        /// 梁边界与其它物体靠近的距离
+        /// </summary>
+        public static double BeamIntersectExtentionTolerance = 50.0;
+        /// <summary>
+        /// 梁间隔容差
+        /// </summary>
+        public static double BeamIntervalTolerance = 600.0;
+        /// <summary>
+        /// 梁与竖向构件连接容差
+        /// </summary>
+        public static double BeamConnectionTolerance = 600.0;
     }
 }

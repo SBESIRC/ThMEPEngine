@@ -54,7 +54,7 @@ namespace ThMEPEngineCore.Service
             };
             return newLineBeam;
         }        
-        public static Polyline CreateExtendOutline(ThIfcBuildingElement thIfcBuildingElement, double tolerance=50.0)
+        public static Polyline CreateExtendOutline(ThIfcBuildingElement thIfcBuildingElement, double tolerance)
         {
             if (thIfcBuildingElement is ThIfcBeam thIfcBeam)
             {

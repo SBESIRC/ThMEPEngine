@@ -53,7 +53,8 @@ namespace ThMEPEngineCore.Service
                 {
                     continue;
                 }
-                Point3dCollection intersectPts = IntersectWithEx(LineBeam.Outline, segment.Extend(LineBeam.ActualWidth*2.0));
+                Point3dCollection intersectPts = IntersectWithEx(LineBeam.Outline, segment.Extend(
+                    LineBeam.ActualWidth* ThMEPEngineCoreCommon.BeamIntersectionRatio));
                 intersectPts=OrderbyPts(intersectPts);
                 if (intersectPts.Count!=4 || !ValidateIntersectPts(intersectPts, LineBeam))
                 {

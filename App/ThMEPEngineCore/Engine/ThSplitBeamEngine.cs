@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.Service
             Dictionary<ThIfcBuildingElement, List<ThSegment>> beamWallComponentDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             BeamElements.ForEach(o =>
             {
-                Polyline outline = ThBeamSplitter.CreateExtendOutline(o);
+                Polyline outline = ThBeamSplitter.CreateExtendOutline(o,ThMEPEngineCoreCommon.BeamIntersectExtentionTolerance);
                 DBObjectCollection wallComponents = SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
                 if(wallComponents.Count>0)
                 {
@@ -137,7 +137,7 @@ namespace ThMEPEngineCore.Service
             Dictionary<ThIfcBuildingElement, List<ThSegment>> beamColumnComponentDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             BeamElements.ForEach(o =>
             {
-                Polyline outline = ThBeamSplitter.CreateExtendOutline(o);
+                Polyline outline = ThBeamSplitter.CreateExtendOutline(o,ThMEPEngineCoreCommon.BeamIntersectExtentionTolerance);
                 DBObjectCollection columnComponents = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(outline);
                 if (columnComponents.Count > 0)
                 {
@@ -188,7 +188,7 @@ namespace ThMEPEngineCore.Service
             List<ThIfcBuildingElement> inValidBeams = new List<ThIfcBuildingElement>();
             foreach(var beam in restBeams)
             {
-                Polyline outline = ThBeamSplitter.CreateExtendOutline(beam);
+                Polyline outline = ThBeamSplitter.CreateExtendOutline(beam,ThMEPEngineCoreCommon.BeamIntersectExtentionTolerance);
                 DBObjectCollection passComponents = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(outline);
                 if (passComponents.Count == 0)
                 {

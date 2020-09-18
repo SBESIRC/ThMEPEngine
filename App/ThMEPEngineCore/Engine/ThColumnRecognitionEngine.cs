@@ -39,7 +39,6 @@ namespace ThMEPEngineCore.Engine
                     DBObjectCollection dbObjs = new DBObjectCollection();
                     columnDbExtension.ColumnCurves.ForEach(o => dbObjs.Add(o));
                     ThCADCoreNTSSpatialIndex columnCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-
                     var pline = new Polyline()
                     {
                         Closed = true,

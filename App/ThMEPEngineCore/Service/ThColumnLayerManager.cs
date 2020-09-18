@@ -92,6 +92,12 @@ namespace ThMEPEngineCore.Service
                             return false;
                         }
 
+                        // 继续判断是否包含DIMS
+                        if (layerName.Contains("OTHE"))
+                        {
+                            return false;
+                        }
+                        
                         // 返回指定的图层
                         return true;
                     }).ForEachDbObject(o => layers.Add(o.Name));
