@@ -33,7 +33,10 @@ namespace ThMEPEngineCore.CAD
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             Point3d pt = (Point3d)value;
-            writer.WriteValue(pt.ToString());
+            string x = String.Format("{0:0.0000}", pt.X);
+            string y = String.Format("{0:0.0000}", pt.Y);
+            string z = String.Format("{0:0.0000}", pt.Z);
+            writer.WriteValue(x+","+y+","+z);
         }
     }
 }
