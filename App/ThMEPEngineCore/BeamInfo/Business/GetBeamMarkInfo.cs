@@ -74,7 +74,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     int res = CheckFlagLine(beam, line, 20);
                     if (res != 0)
                     {
-                        Vector3d lineDir = line.Direction();
+                        Vector3d lineDir = line.LineDirection();
                         if (Math.Abs(lineDir.DotProduct(beam.BeamNormal)) < 0.01)
                         {
                             var textMarksOfLine = markingService.GetMarking(line.StartPoint, line.EndPoint, lineDir, 100, MarkingType.Text)
@@ -92,7 +92,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                             if (lineResLineMark.Count > 0)
                             {
                                 Line secLine = lineResLineMark.First().Marking as Line;
-                                Vector3d secLineDir = secLine.Direction();
+                                Vector3d secLineDir = secLine.LineDirection();
                                 var textMarksOfLine = markingService.GetMarking(secLine.StartPoint, secLine.EndPoint, secLineDir, 200, MarkingType.Text)
                                         .Where(x => Math.Abs(x.MarkingNormal.DotProduct(secLineDir)) < Tolerance.Global.EqualPoint).ToList();
                                 centralizeMark = CheckFlagTextMarkings(secLineDir, textMarksOfLine);

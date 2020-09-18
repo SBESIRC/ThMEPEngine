@@ -109,7 +109,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                 {
                     if (type == MarkingType.All || type == MarkingType.Line)
                     {
-                        Vector3d markDir = line.Direction();
+                        Vector3d markDir = line.LineDirection();
                         markingInfo.Marking = entity;
                         markingInfo.Type = MarkingType.Line;
                         markingInfo.MarkingNormal = markDir;

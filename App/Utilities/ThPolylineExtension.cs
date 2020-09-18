@@ -65,7 +65,7 @@ namespace TianHua.AutoCAD.Utility.ExtensionTools
             return CreateRectangle(pt1,pt2,pt3,pt4);
         }
 
-        public static Vector3d Direction(this Line line)
+        public static Vector3d LineDirection(this Line line)
         {
             return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
         }

@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     if (obj is Line line)
                     {
                         // 忽略Z值不为零的情况
-                        var lNormal = line.Direction();
+                        var lNormal = line.LineDirection();
                         if (!lNormal.IsEqualTo(new Vector3d(lNormal.X, lNormal.Y, 0.0)))
                         {
                             continue;
@@ -373,14 +373,14 @@ namespace ThMEPEngineCore.BeamInfo.Business
             if (sector_1.Intersects(line1_2start.ToNTSGeometry()))
             {
                 var line1_start = new Line(arc1_new.Center, arc1_new.StartPoint);
-                startAngle_1 = startAngle + line1_2start.Direction().GetAngleTo(line1_start.Direction());
+                startAngle_1 = startAngle + line1_2start.LineDirection().GetAngleTo(line1_start.LineDirection());
                 startAngle_1 = (startAngle_1 > 8 * Math.Atan(1)) ? (startAngle_1 - 8 * Math.Atan(1)) : startAngle_1;
                 startAngle_1 = (startAngle_1 < 0) ? (startAngle_1 + 8 * Math.Atan(1)) : startAngle_1;
             }
             if (sector_1.Intersects(line1_2end.ToNTSGeometry()))
             {
                 var line1_end = new Line(arc1_new.Center, arc1_new.EndPoint);
-                endAngle_1 = endAngle - line1_2end.Direction().GetAngleTo(line1_end.Direction());
+                endAngle_1 = endAngle - line1_2end.LineDirection().GetAngleTo(line1_end.LineDirection());
                 endAngle_1 = (endAngle_1 > 8 * Math.Atan(1)) ? (endAngle_1 - 8 * Math.Atan(1)) : endAngle_1;
                 endAngle_1 = (endAngle_1 < 0) ? (endAngle_1 + 8 * Math.Atan(1)) : endAngle_1;
             }
@@ -389,14 +389,14 @@ namespace ThMEPEngineCore.BeamInfo.Business
             if (sector_2.Intersects(line2_1start.ToNTSGeometry()))
             {
                 var line2_start = new Line(arc2_new.Center, arc2_new.StartPoint);
-                startAngle_2 = startAngle + line2_1start.Direction().GetAngleTo(line2_start.Direction());
+                startAngle_2 = startAngle + line2_1start.LineDirection().GetAngleTo(line2_start.LineDirection());
                 startAngle_2 = (startAngle_2 > 8 * Math.Atan(1)) ? (startAngle_2 - 8 * Math.Atan(1)) : startAngle_2;
                 startAngle_2 = (startAngle_2 < 0) ? (startAngle_2 + 8 * Math.Atan(1)) : startAngle_2;
             }
             if (sector_2.Intersects(line2_1end.ToNTSGeometry()))
             {
                 var line2_end = new Line(arc2_new.Center, arc2_new.EndPoint);
-                endAngle_2 = endAngle - line2_1end.Direction().GetAngleTo(line2_end.Direction());
+                endAngle_2 = endAngle - line2_1end.LineDirection().GetAngleTo(line2_end.LineDirection());
                 endAngle_2 = (endAngle_2 > 8 * Math.Atan(1)) ? (endAngle_2 - 8 * Math.Atan(1)) : endAngle_2;
                 endAngle_2 = (endAngle_2 < 0) ? (endAngle_2 + 8 * Math.Atan(1)) : endAngle_2;
             }
