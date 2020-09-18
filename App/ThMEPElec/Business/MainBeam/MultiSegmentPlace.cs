@@ -18,17 +18,17 @@ namespace ThMEPElectrical.Business.MainBeam
     /// </summary>
     public class MultiSegmentPlace
     {
-        private LayoutProfileData m_layoutProfileData; // 轮廓数据
-        private PlaceParameter m_parameter; // 用户界面输入的参数数据
+        protected LayoutProfileData m_layoutProfileData; // 轮廓数据
+        protected PlaceParameter m_parameter; // 用户界面输入的参数数据
 
-        private List<Point3d> m_singlePlacePts; // 插入点集
+        protected List<Point3d> m_singlePlacePts; // 插入点集
 
-        private List<Point3d> PlacePts
+        protected List<Point3d> PlacePts
         {
             get { return m_singlePlacePts; }
         }
 
-        private MultiSegmentPlace(LayoutProfileData layoutProfileData, PlaceParameter parameter)
+        protected MultiSegmentPlace(LayoutProfileData layoutProfileData, PlaceParameter parameter)
         {
             m_layoutProfileData = layoutProfileData;
             m_parameter = parameter;
@@ -65,7 +65,7 @@ namespace ThMEPElectrical.Business.MainBeam
         }
 
 
-        private void DoABBPlace()
+        protected void DoABBPlace()
         {
             // 坐标转换
             var postPoly = m_layoutProfileData.PostPolyline;
@@ -119,7 +119,7 @@ namespace ThMEPElectrical.Business.MainBeam
         /// <param name="placeRectInfo"></param>
         /// <param name="verticalA"></param>
         /// <returns></returns>
-        private List<Point3d> OneRowPlace(Line midLine, PlaceRect placeRectInfo, double verticalA)
+        protected virtual List<Point3d> OneRowPlace(Line midLine, PlaceRect placeRectInfo, double verticalA)
         {
             var vertexProtectRadius = m_parameter.FirstBottomProtectRadius;
             var leftBottomPt = placeRectInfo.LeftBottomPt;
@@ -313,7 +313,7 @@ namespace ThMEPElectrical.Business.MainBeam
         /// <param name="verticalCount"></param>
         /// <param name="verticalGap"></param>
         /// <returns></returns>
-        private List<Point3d> MultiOneRowPlacePts(PlaceRect placeRectInfo, double verticalCount, double verticalGap)
+        protected virtual List<Point3d> MultiOneRowPlacePts(PlaceRect placeRectInfo, double verticalCount, double verticalGap)
         {
             var srcPostPoly = placeRectInfo.srcPolyline;
 
@@ -355,7 +355,7 @@ namespace ThMEPElectrical.Business.MainBeam
         /// <param name="polyFir"></param>
         /// <param name="polySec"></param>
         /// <returns></returns>
-        private Polyline GenerateIntersectRegion(Polyline polyFir, Polyline polySec)
+        protected Polyline GenerateIntersectRegion(Polyline polyFir, Polyline polySec)
         {
             return polyFir.Intersect(polySec);
         }
@@ -367,7 +367,7 @@ namespace ThMEPElectrical.Business.MainBeam
         /// <param name="moveDir"></param>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        private Polyline GenerateSplitPolyline(Line bottomLine, Vector3d moveDir, double moveLength)
+        protected Polyline GenerateSplitPolyline(Line bottomLine, Vector3d moveDir, double moveLength)
         {
             var ptLst = new List<Point3d>();
             var bottomStart = bottomLine.StartPoint;
@@ -399,10 +399,10 @@ namespace ThMEPElectrical.Business.MainBeam
         /// 计算布置点
         /// </summary>
         /// <param name="placeRectInfo"></param>
-        private List<Point3d> CalculatePts(PlaceRect placeRectInfo)
+        protected virtual List<Point3d> CalculatePts(PlaceRect placeRectInfo)
         {
             if (placeRectInfo == null)
-                return null;
+                return new List<Point3d>();
 
             // 原始的经过变化过的多段线
             var srcTransPoly = placeRectInfo.srcPolyline;

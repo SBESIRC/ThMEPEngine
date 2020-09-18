@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Business.MainBeam;
 
-namespace ThMEPElectrical.Layout
+namespace ThMEPElectrical.Layout.MBeamLayout
 {
     // 主梁矩形布置
     public class MainBeamRectangleLayout : MainBeamLayout

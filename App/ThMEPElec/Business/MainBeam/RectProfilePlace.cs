@@ -17,17 +17,17 @@ namespace ThMEPElectrical.Business.MainBeam
     /// </summary>
     public class RectProfilePlace
     {
-        private LayoutProfileData m_layoutProfile = null; // 轮廓
-        private PlaceParameter m_parameter = null; // 界面用户输入参数
+        protected LayoutProfileData m_layoutProfile = null; // 轮廓
+        protected PlaceParameter m_parameter = null; // 界面用户输入参数
 
-        private List<Point3d> m_singlePlacePts = new List<Point3d>(); // 插入点
+        protected List<Point3d> m_singlePlacePts = new List<Point3d>(); // 插入点
 
-        private List<Point3d> SinglePlacePts
+        protected List<Point3d> SinglePlacePts
         {
             get { return m_singlePlacePts; }
         }
 
-        private RectProfilePlace(LayoutProfileData poly, PlaceParameter placeParameter)
+        protected RectProfilePlace(LayoutProfileData poly, PlaceParameter placeParameter)
         {
             m_layoutProfile = poly;
             m_parameter = placeParameter;
@@ -64,7 +64,7 @@ namespace ThMEPElectrical.Business.MainBeam
         /// <summary>
         /// ABB计算
         /// </summary>
-        private void DoABB()
+        protected virtual void DoABB()
         {
             // 坐标转化
             var postPoly = m_layoutProfile.PostPolyline;

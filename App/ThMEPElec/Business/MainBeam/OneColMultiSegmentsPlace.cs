@@ -27,20 +27,21 @@ namespace ThMEPElectrical.Business.MainBeam
             return oneColPlace.DoPlace();
         }
 
-        private OneColMultiSegmentsPlace(PlaceParameter parameter, PlaceRect placeRectInfo)
+        protected OneColMultiSegmentsPlace(PlaceParameter parameter, PlaceRect placeRectInfo)
         {
             m_parameter = parameter;
             m_placeRectInfo = placeRectInfo;
         }
 
-        private List<Point3d> DoPlace()
+        protected List<Point3d> DoPlace()
         {
             var pts = OneColPlace();
             return pts;
         }
 
-        private List<Point3d> OneColPlace()
+        protected virtual List<Point3d> OneColPlace()
         {
+            var ptLst = new List<Point3d>();
             var moveDis = m_placeRectInfo.BottomLine.Length * 0.5;
             var verticalMidLine = GeomUtils.MoveLine(m_placeRectInfo.LeftLine, Vector3d.XAxis, moveDis);
 
@@ -52,11 +53,11 @@ namespace ThMEPElectrical.Business.MainBeam
             var leftBottomCircle = new Circle(leftBottomPt, Vector3d.ZAxis, vertexProtectRadius);
             var tempLeftBottomFirstPtNode = CalculateIntersectPt(leftBottomCircle, verticalMidLine);
             if (!tempLeftBottomFirstPtNode.HasValue)
-                return null;
+                return ptLst;
 
             var tempLeftBottomFirstPt = CalculateValidPoint(tempLeftBottomFirstPtNode.Value, m_placeRectInfo);
             if (tempLeftBottomFirstPt == null)
-                return null;
+                return ptLst;
 
             var leftBottomFirstPt = tempLeftBottomFirstPt.InsertPt;
 
@@ -64,11 +65,11 @@ namespace ThMEPElectrical.Business.MainBeam
             var leftTopCircle = new Circle(leftTopPt, Vector3d.ZAxis, vertexProtectRadius);
             var tempLeftTopLastPtNode = CalculateIntersectPt(leftTopCircle, verticalMidLine);
             if (!tempLeftTopLastPtNode.HasValue)
-                return null;
+                return ptLst;
 
             var tempLeftTopLastPt = CalculateValidPoint(tempLeftTopLastPtNode.Value, m_placeRectInfo);
             if (tempLeftTopLastPt == null)
-                return null;
+                return ptLst;
 
             var leftTopLastPt = tempLeftTopLastPt.InsertPt;
 
@@ -79,7 +80,6 @@ namespace ThMEPElectrical.Business.MainBeam
             var verticalCount = Math.Ceiling(verticalLength / verticalMaxGap);
             var verticalPosGap = verticalLength / verticalCount;
 
-            var ptLst = new List<Point3d>();
             var placeNodes = new List<PlacePoint>();
             placeNodes.Add(tempLeftBottomFirstPt);
 

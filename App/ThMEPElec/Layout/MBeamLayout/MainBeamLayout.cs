@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPElectrical.Model;
 
-namespace ThMEPElectrical.Layout
+namespace ThMEPElectrical.Layout.MBeamLayout
 {
     // 主梁布置
     public abstract class MainBeamLayout : SensorLayout

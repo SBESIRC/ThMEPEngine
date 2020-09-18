@@ -7,10 +7,11 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPElectrical.Business.MainBeam;
 using ThMEPElectrical.Model;
+using ThMEPElectrical.Business.MainSecondBeam;
 
 namespace ThMEPElectrical.Layout.MainSecBeamLayout
 {
-    //次梁
+    //次梁异形处理
     public class MainSecondBeamPolygonLayout : MainSecondBeamLayout
     {
         public MainSecondBeamPolygonLayout(PlaceInputProfileData inputProfileDatas, PlaceParameter parameter, Polyline poly)
@@ -25,8 +26,9 @@ namespace ThMEPElectrical.Layout.MainSecBeamLayout
                 return new List<Point3d>();
 
             var layoutData = new LayoutProfileData(m_inputProfileData.MainBeamOuterProfile, PostPoly);
-            // 单个布置
-            m_placePoints = MultiSegmentPlace.MakeABBPolygonProfilePoints(layoutData, m_parameter);
+
+            // 主次梁异形布置
+            m_placePoints = MSBeamNoRegularPlacer.MakeMSNoRegularPlacer(layoutData, m_parameter, m_inputProfileData);
 
             return PlacePoints;
         }

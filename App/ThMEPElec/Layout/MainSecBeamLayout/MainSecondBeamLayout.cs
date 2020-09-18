@@ -5,9 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThCADCore.NTS;
 using ThMEPElectrical.Model;
 
-namespace ThMEPElectrical.Layout
+namespace ThMEPElectrical.Layout.MainSecBeamLayout
 {
     /// <summary>
     /// 主次梁布置

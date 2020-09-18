@@ -10,6 +10,7 @@ using ThMEPElectrical.Assistant;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using ThMEPElectrical.Layout.MainSecBeamLayout;
+using ThMEPElectrical.Layout.MBeamLayout;
 
 namespace ThMEPElectrical.Business
 {

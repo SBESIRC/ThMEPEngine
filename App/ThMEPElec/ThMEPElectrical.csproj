@@ -36,6 +36,9 @@
     <Compile Include="Business\MainBeam\OneColMultiSegmentsPlace.cs" />
     <Compile Include="Business\MainBeam\OneColRectPlace.cs" />
     <Compile Include="Business\MainBeam\RectProfilePlace.cs" />
+    <Compile Include="Business\MainSecondBeam\MSBeamNoRegularOneColPlacer.cs" />
+    <Compile Include="Business\MainSecondBeam\MSBeamNoRegularPlacer.cs" />
+    <Compile Include="Business\MainSecondBeam\MSBeamRectPlacer.cs" />
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
@@ -44,10 +47,10 @@
     <Compile Include="Geometry\GeomUtils.cs" />
     <Compile Include="Geometry\MinRectangle.cs" />
     <Compile Include="Layout\ILayout.cs" />
-    <Compile Include="Layout\MainBeamLayout.cs" />
-    <Compile Include="Layout\MainBeamPolygonLayout.cs" />
-    <Compile Include="Layout\MainBeamRectangleLayout.cs" />
-    <Compile Include="Layout\MainSecondBeamLayout.cs" />
+    <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
+    <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />
+    <Compile Include="Layout\MBeamLayout\MainBeamRectangleLayout.cs" />
+    <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamLayout.cs" />
     <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamPolygonLayout.cs" />
     <Compile Include="Layout\MainSecBeamLayout\MainSecondBeamRectLayout.cs" />
     <Compile Include="Layout\SensorLayout.cs" />

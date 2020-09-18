@@ -91,7 +91,7 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
         /// <summary>
         /// 处理后的插入点信息
         /// </summary>
-        protected List<Point3d> PostPoints
+        public List<Point3d> PostPoints
         {
             get;
             set;

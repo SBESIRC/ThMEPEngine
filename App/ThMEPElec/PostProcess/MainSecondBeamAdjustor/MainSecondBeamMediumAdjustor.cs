@@ -36,7 +36,7 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
     }
 
     /// <summary>
-    /// 主次梁两个调整
+    /// 主次梁两个水平调整
     /// </summary>
     class MainSecondBeamMediumAdjustor : PointMoveAdjustor
     {
@@ -50,7 +50,15 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
         /// <returns></returns>
         public static List<Point3d> MakeMainSecondBeamMediumAdjustor(MainSecondBeamRegion beamSpanInfo)
         {
-            var mediumAdjustor = new MainSecondBeamMediumAdjustor(beamSpanInfo);
+            var firPt = beamSpanInfo.PlacePoints[0];
+            var secPt = beamSpanInfo.PlacePoints[1];
+            var deltaX = Math.Abs(firPt.X - secPt.X);
+            var deltaY = Math.Abs(firPt.Y - secPt.Y);
+
+            PointMoveAdjustor mediumAdjustor = new MainSecondBeamMediumAdjustor(beamSpanInfo);
+            if (deltaX < deltaY)
+                mediumAdjustor = new MainSecondBeamMediumVerticalAdjustor(beamSpanInfo);
+
             mediumAdjustor.Do();
             return mediumAdjustor.PostPoints;
         }
@@ -60,8 +68,6 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
         {
             m_srcPts = m_mainSecondBeamRegion.PlacePoints;
         }
-
-
 
         /// <summary>
         /// 点集定义
@@ -81,6 +87,98 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
                 m_mediumNodes.Add(new MediumNode(secPt, PointPosType.LeftTopPoint));
                 m_mediumNodes.Add(new MediumNode(firstPt, PointPosType.RightTopPoint));
             }
+        }
+    }
+
+    /// <summary>
+    /// 垂直两个点移动调整
+    /// </summary>
+    internal class MainSecondBeamMediumVerticalAdjustor : PointMoveAdjustor
+    {
+        // 原始点集
+        private List<Point3d> m_srcPts;
+
+        public MainSecondBeamMediumVerticalAdjustor(MainSecondBeamRegion beamSpanInfo)
+            : base(beamSpanInfo)
+        {
+            m_srcPts = beamSpanInfo.PlacePoints;
+        }
+
+        protected override void DefinePosPointsInfo()
+        {
+            var firstPt = m_srcPts[0];
+            var secPt = m_srcPts[1];
+
+            if (firstPt.Y > secPt.Y)
+            {
+                m_mediumNodes.Add(new MediumNode(firstPt, PointPosType.LeftTopPoint));
+                m_mediumNodes.Add(new MediumNode(secPt, PointPosType.RightBottomPoint));
+            }
+            else
+            {
+                m_mediumNodes.Add(new MediumNode(secPt, PointPosType.LeftTopPoint));
+                m_mediumNodes.Add(new MediumNode(firstPt, PointPosType.RightBottomPoint));
+            }
+        }
+
+        protected override Point3d SelectPoint(QuadrantNode quadrantNode)
+        {
+            // 选择
+            var mediumNode = quadrantNode.MediumNode;
+            if (mediumNode.PointType == PointPosType.LeftTopPoint)
+            {
+                // 1号点
+                // 第二象限
+                if (quadrantNode.SecondQuadrant.Count > 0)
+                    return quadrantNode.SecondQuadrant.Last();
+
+                // 第三象限
+                if (quadrantNode.ThirdQuadrant.Count > 0)
+                {
+                    return quadrantNode.ThirdQuadrant.First();
+                }
+
+                // 第一象限
+                if (quadrantNode.FirstQuadrant.Count > 0)
+                {
+                    return quadrantNode.FirstQuadrant.Last();
+                }
+
+                // 第四象限
+                if (quadrantNode.FourthQuadrant.Count > 0)
+                {
+                    return quadrantNode.FourthQuadrant.First();
+                }
+            }
+            else if (mediumNode.PointType == PointPosType.RightBottomPoint)
+            {
+                // 4号点
+                // 第四象限
+                if (quadrantNode.FourthQuadrant.Count > 0)
+                {
+                    return quadrantNode.FourthQuadrant.Last();
+                }
+
+                // 第一象限
+                if (quadrantNode.FirstQuadrant.Count > 0)
+                {
+                    return quadrantNode.FirstQuadrant.First();
+                }
+
+                //第三象限
+                if (quadrantNode.ThirdQuadrant.Count > 0)
+                {
+                    return quadrantNode.ThirdQuadrant.Last();
+                }
+
+                //第二象限
+                if (quadrantNode.SecondQuadrant.Count > 0)
+                {
+                    return quadrantNode.SecondQuadrant.Last();
+                }
+            }
+
+            return ThMEPCommon.NullPoint3d;
         }
     }
 }

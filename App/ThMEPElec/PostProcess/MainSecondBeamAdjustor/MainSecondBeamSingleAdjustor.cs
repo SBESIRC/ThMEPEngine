@@ -45,7 +45,7 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
             var pt = mediumNode.Point;
             var pts = new List<Point3d>(); // 不同方向上的点集
             var pointNode = CalculateClosetPoints(validPolys, pt);
-            var closestPt = pointNode.NearestPt;
+
             pts.AddRange(pointNode.NearestPts);
 
             if (pts.Count == 1)

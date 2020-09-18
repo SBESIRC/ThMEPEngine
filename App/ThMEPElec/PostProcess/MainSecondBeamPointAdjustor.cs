@@ -18,7 +18,7 @@ namespace ThMEPElectrical.PostProcess
     }
 
     /// <summary>
-    /// 主次梁调整分发器
+    /// 主次梁 矩形 调整分发器
     /// </summary>
     public class MainSecondBeamPointAdjustor
     {
