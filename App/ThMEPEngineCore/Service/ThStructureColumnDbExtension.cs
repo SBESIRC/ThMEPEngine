@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
@@ -41,7 +42,64 @@ namespace ThMEPEngineCore.Service
                         ColumnCurves.AddRange(BuildElementCurves(blkRef, mcs2wcs));
                     }
                 }
+                FilterCirlces();
+                FiltePolyline2ds();
+                FiltePolyline3ds();
             }
+        }
+        private void FilterCirlces()
+        {
+            var circles = ColumnCurves.Where(o => o is Circle).ToList();
+            List<Polyline> polylines = circles.Select(o => CreatePolyline(o as Circle)).ToList();
+            ColumnCurves = ColumnCurves.Where(o => !(o is Circle)).ToList();
+            ColumnCurves.AddRange(polylines);
+            circles.ForEach(o => o.Dispose());
+        }
+        private void FiltePolyline2ds()
+        {
+            var poyline2ds = ColumnCurves.Where(o => o is Polyline2d).ToList();
+            List<Polyline> polylines = poyline2ds.Select(o => CreatePolyline(o as Polyline2d)).ToList();
+            ColumnCurves = ColumnCurves.Where(o => !(o is Polyline2d)).ToList();
+            ColumnCurves.AddRange(polylines);
+            poyline2ds.ForEach(o => o.Dispose());
+        }
+        private void FiltePolyline3ds()
+        {
+            var poyline3ds = ColumnCurves.Where(o => o is Polyline3d).ToList();
+            List<Polyline> polylines = poyline3ds.Select(o => CreatePolyline(o as Polyline3d)).ToList();
+            ColumnCurves = ColumnCurves.Where(o => !(o is Polyline3d)).ToList();
+            ColumnCurves.AddRange(polylines);
+            poyline3ds.ForEach(o => o.Dispose());
+        }
+        private Polyline CreatePolyline(Circle circle)
+        {             
+            Point3d pt1 = circle.Center + new Vector3d(-1.0 * circle.Radius, -1.0 * circle.Radius, 0.0);
+            Point3d pt2 = circle.Center + new Vector3d(circle.Radius, -1.0 * circle.Radius, 0.0);
+            Point3d pt3 = circle.Center + new Vector3d(circle.Radius, circle.Radius, 0.0);
+            Point3d pt4 = circle.Center + new Vector3d(-1.0 * circle.Radius, circle.Radius, 0.0);
+            Point3dCollection pts = new Point3dCollection()
+            {
+                pt1,pt2,pt3,pt4
+            };
+            return pts.CreatePolyline();
+        }
+        private Polyline CreatePolyline(Polyline2d polyline2d)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            foreach (Point3d pt in polyline2d.GetPoints())
+            {
+                pts.Add(pt);
+            }
+            return pts.CreatePolyline();
+        }
+        private Polyline CreatePolyline(Polyline3d polyline3d)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            foreach (Point3d pt in polyline3d.GetPoints())
+            {
+                pts.Add(pt);
+            }
+            return pts.CreatePolyline();
         }
         private IEnumerable<Curve> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)
         {
