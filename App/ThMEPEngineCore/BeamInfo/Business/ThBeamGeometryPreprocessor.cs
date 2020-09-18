@@ -105,7 +105,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             DBObjectCollection objs = new DBObjectCollection();
             foreach (Curve curve in curves)
             {
-                if (curve.GetLength() > ThBeamCommon.beam_length_tolerance)
+                if (curve.GetLength() > ThMEPEngineCoreCommon.BeamMinimumLength)
                 {
                     objs.Add(curve);
                 }

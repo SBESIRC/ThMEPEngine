@@ -33,7 +33,6 @@
     <Compile Include="BeamInfo\Business\FillBeamInfo.cs" />
     <Compile Include="BeamInfo\Business\GetBeamMarkInfo.cs" />
     <Compile Include="BeamInfo\Business\MarkingService.cs" />
-    <Compile Include="BeamInfo\Business\ThBeamCommon.cs" />
     <Compile Include="BeamInfo\Business\ThBeamGeometryPreprocessor.cs" />
     <Compile Include="BeamInfo\Model\ArcBeam.cs" />
     <Compile Include="BeamInfo\Model\Beam.cs" />

@@ -68,13 +68,12 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     lineDic.Value.ForEachDbObject(o => objs.Add(o));
                     var results = objs.GetMergeOverlappingCurves(new Tolerance(1, 1));
                     //过滤极短的线段，这些“碎线”可能是由于合并重叠线段时产出的
-                    var filters = results.Cast<Line>().Where(o => o.Length >= ThBeamCommon.beam_length_tolerance);
-                    if(filters.Count()==0)
+                    var filters = ThBeamGeometryPreprocessor.FilterCurves(results);
+                    if (filters.Count > 0)
                     {
-                        continue;
+                        var res = GetLineBeamObject(filters.Cast<Line>().ToList(), lineDic.Key, 100);
+                        allBeam.AddRange(res);
                     }
-                    var res = GetLineBeamObject(filters.ToList(), lineDic.Key, 100);
-                    allBeam.AddRange(res);
                 }
 
                 // 处理弧梁

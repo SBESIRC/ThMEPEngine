@@ -34,26 +34,30 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
 
         // 公差
-        public static double SIMILARITYMEASURETOLERANCE = 0.9;
+        public const double SIMILARITYMEASURETOLERANCE = 0.9;
         /// <summary>
         /// 梁端口绘制密封圈扩展宽度
         /// </summary>
-        public static double BeamExtensionRatio = 1.01;
+        public const double BeamExtensionRatio = 1.01;
         /// <summary>
         /// 梁分割，梁宽度延伸比例
         /// </summary>
-        public static double BeamIntersectionRatio = 2.0;
+        public const double BeamIntersectionRatio = 2.0;
         /// <summary>
         /// 梁边界与其它物体靠近的距离
         /// </summary>
-        public static double BeamIntersectExtentionTolerance = 50.0;
+        public const double BeamIntersectExtentionTolerance = 50.0;
         /// <summary>
         /// 梁间隔容差
         /// </summary>
-        public static double BeamIntervalTolerance = 600.0;
+        public const double BeamIntervalTolerance = 600.0;
         /// <summary>
         /// 梁与竖向构件连接容差
         /// </summary>
-        public static double BeamConnectionTolerance = 600.0;
+        public const double BeamConnectionTolerance = 600.0;
+        /// <summary>
+        /// 最短梁长
+        /// </summary>
+        public const double BeamMinimumLength = 100.0;
     }
 }
