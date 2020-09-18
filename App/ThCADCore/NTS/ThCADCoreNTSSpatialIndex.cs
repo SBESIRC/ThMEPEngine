@@ -78,16 +78,16 @@ namespace ThCADCore.NTS
             var results = new DBObjectCollection();
             foreach (Entity item in objs)
             {
-                if (item is Polyline polyline)
+                if (item is Line line)
                 {
-                    if (preparedGeometry.Intersects(polyline.ToNTSLineString()))
+                    if (preparedGeometry.Intersects(line.ToNTSLineString()))
                     {
                         results.Add(item);
                     }
                 }
-                else if (item is Line line)
+                else if (item is Polyline polyline)
                 {
-                    if (preparedGeometry.Intersects(line.ToNTSLineString()))
+                    if (preparedGeometry.Intersects(polyline.ToNTSLineString()))
                     {
                         results.Add(item);
                     }
@@ -112,7 +112,14 @@ namespace ThCADCore.NTS
             var results = new DBObjectCollection();
             foreach (Entity item in objs)
             {
-                if (item is Polyline polyline)
+                if (item is Line line)
+                {
+                    if (preparedGeometry.Contains(line.ToNTSLineString()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is Polyline polyline)
                 {
                     if (preparedGeometry.Contains(polyline.ToNTSLineString()))
                     {
@@ -139,7 +146,14 @@ namespace ThCADCore.NTS
             var results = new DBObjectCollection();
             foreach(Entity item in objs)
             {
-                if (item is Polyline polyline)
+                if (item is Line line)
+                {
+                    if (preparedGeometry.Intersects(line.ToNTSLineString()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is Polyline polyline)
                 {
                     if (preparedGeometry.Intersects(polyline.ToNTSLineString()))
                     {
