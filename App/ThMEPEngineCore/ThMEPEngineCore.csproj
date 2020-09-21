@@ -64,6 +64,7 @@
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
+    <Compile Include="Features\ThBeamFeature.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
     <Compile Include="IO\ThBeamGeoJsonReader.cs" />
     <Compile Include="IO\ThDwgReader.cs" />
@@ -202,6 +203,8 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="NetTopologySuite.Features" Version="2.1.0" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
