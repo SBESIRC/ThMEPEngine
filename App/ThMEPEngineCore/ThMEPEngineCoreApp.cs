@@ -121,14 +121,31 @@ namespace ThMEPEngineCore
         private DBText CreateBeamMarkText(ThIfcBeam thIfcBeam)
         {
             string message = "";
-            message += "Type：" + thIfcBeam.ComponentType + "，";
-            message += "W：" + thIfcBeam.Width + "，";
-            message += "H：" + thIfcBeam.Height;
+            string beamtype = "未定义";
+            switch(thIfcBeam.ComponentType)
+            {
+                case BeamComponentType.PrimaryBeam:
+                    beamtype = "主梁";
+                    break;
+                case BeamComponentType.HalfPrimaryBeam:
+                    beamtype = "半主梁";
+                    break;
+                case BeamComponentType.OverhangingPrimaryBeam:
+                    beamtype = "悬挑主梁";
+                    break;
+                case BeamComponentType.SecondaryBeam:
+                    beamtype = "次梁";
+                    break;
+            }
+            message += beamtype + "，";
+            message += thIfcBeam.Width + "，";
+            message += thIfcBeam.Height;
             DBText dbText = new DBText();
             dbText.TextString = message;
             dbText.Position = ThGeometryTool.GetMidPt(thIfcBeam.StartPoint, thIfcBeam.EndPoint);
-            dbText.HorizontalMode = TextHorizontalMode.TextCenter;
+            dbText.Rotation = thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint).GetAngleTo(Vector3d.XAxis);
             dbText.Layer = "0";
+            dbText.Height = 200;
             return dbText;
         }
         [CommandMethod("TIANHUACAD", "ThExtractBeamConnectEx", CommandFlags.Modal)]
