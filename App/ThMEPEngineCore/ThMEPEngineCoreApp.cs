@@ -17,7 +17,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.AutoCAD.Utility.ExtensionTools;
-using NFox.Cad.Collections;
+using NFox.Cad;
 using Newtonsoft.Json;
 
 namespace ThMEPEngineCore
@@ -333,10 +333,8 @@ namespace ThMEPEngineCore
                 };
                 // 梁线的图元图层
                 var layers = ThBeamLayerManager.GeometryLayers(acdb.Database);
-                var filterlist = OpFilter.Bulid(o =>
-                    o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames) &
-                    o.Dxf((int)DxfCode.LayerName) == string.Join(",", layers.ToArray()));
-                var entSelected = Active.Editor.GetSelection(options, filterlist);
+                var filter = ThSelectionFilterTool.Build(dxfNames, layers.ToArray());
+                var entSelected = Active.Editor.GetSelection(options, filter);
                 if (entSelected.Status != PromptStatus.OK)
                 {
                     return;

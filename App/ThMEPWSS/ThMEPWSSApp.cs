@@ -4,7 +4,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
-using NFox.Cad.Collections;
+using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThMEPEngineCore.Algorithm;
@@ -38,9 +38,12 @@ namespace ThMEPWSS
                 MessageForAdding = "选择区域",
                 RejectObjectsOnLockedLayers = true,
             };
-             var filterlist = OpFilter.Bulid(o =>
-              o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Polyline)).DxfName);
-            var result = Active.Editor.GetSelection(options, filterlist);
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            var filter = ThSelectionFilterTool.Build(dxfNames);
+            var result = Active.Editor.GetSelection(options, filter);
             if (result.Status != PromptStatus.OK)
             {
                 return;

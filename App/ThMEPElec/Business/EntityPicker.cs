@@ -2,13 +2,14 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
-using NFox.Cad.Collections;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using Linq2Acad;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPElectrical.Business
 {
@@ -28,11 +29,16 @@ namespace ThMEPElectrical.Business
                 MessageForAdding = "选择墙轮廓",
                 RejectObjectsOnLockedLayers = true,
             };
-
-            var filterlist = OpFilter.Bulid(o =>
-                o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Polyline)).DxfName
-                & o.Dxf((int)DxfCode.LayerName) == WallLayer);
-            var result = Active.Editor.GetSelection(options, filterlist);
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            var layerNames = new string[]
+            {
+                WallLayer,
+            };
+            var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
+            var result = Active.Editor.GetSelection(options, filter);
             if (result.Status != PromptStatus.OK)
             {
                 return polylines;
