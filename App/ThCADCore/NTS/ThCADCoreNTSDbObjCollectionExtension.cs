@@ -168,6 +168,51 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static DBObjectCollection TrimBy(this DBObjectCollection curves, Polyline polygon)
+        {
+            var objs = new DBObjectCollection();
+            var result = polygon.ToNTSPolygon().Intersection(curves.ToMultiLineString());
+            if (result is MultiLineString lineStrings)
+            {
+                foreach (LineString lineString in lineStrings.Geometries)
+                {
+                    objs.Add(lineString.ToDbPolyline());
+                }
+            }
+            else if (result is LineString lineStr)
+            {
+                if (lineStr.StartPoint != null && lineStr.EndPoint != null)
+                {
+                    objs.Add(lineStr.ToDbPolyline());
+                }
+            }
+            else if (result is GeometryCollection collection)
+            {
+                foreach (var col in collection.Geometries)
+                {
+                    if (col is LineString line)
+                    {
+                        objs.Add(line.ToDbPolyline());
+                    }
+                }
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return objs;
+        }
+
+        public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
+        {
+            var geometries = new List<LineString>();
+            foreach(Curve curve in curves)
+            {
+                geometries.Add(curve.ToNTSLineString());
+            }
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(geometries.ToArray());
+        }
+
         public static Geometry Combine(this DBObjectCollection curves, double chord = 5.0)
         {
             var geometries = curves.ToNTSLineStrings(chord);

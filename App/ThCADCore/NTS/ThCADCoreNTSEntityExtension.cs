@@ -14,7 +14,7 @@ namespace ThCADCore.NTS
             }
             else if (obj is Curve curve)
             {
-                return curve.ToNTSGeometry();
+                return curve.ToNTSLineString();
             }
             else if (obj is Region region)
             {
@@ -25,7 +25,7 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
         }
-        public static Geometry ToNTSGeometry(this Curve curve)
+        public static LineString ToNTSLineString(this Curve curve)
         {
             if (curve is Line line)
             {
@@ -33,7 +33,7 @@ namespace ThCADCore.NTS
             }
             else if (curve is Polyline polyline)
             {
-                return polyline.ToNTSLineString();
+                return polyline.ToNTSLineString() as LineString;
             }
             else
             {
