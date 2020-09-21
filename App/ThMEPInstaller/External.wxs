@@ -8,11 +8,23 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Debug" Guid="{ADC356B3-F7A5-4429-A457-3013DB17BD22}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\NetTopologySuite.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Features_Debug" Guid="{8A0D59A0-E286-4AFF-AEFD-9D0DC7CD0375}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_Features_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Debug" Guid="{2D616846-41E1-4A6F-B4C3-2C47C1D8FFA6}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Debug" Guid="{96A0549E-DEB1-43AA-B852-44475ADC8E74}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Debug" Guid="{9264C8B4-12E9-4B6C-B019-1602927A112C}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Features_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" Guid="{30161577-A902-4A60-9EC1-31FC99C32992}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
@@ -20,11 +32,23 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Debug" Guid="{032A4C04-801A-4BE4-B320-1F69B54CF725}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Debug" Guid="{D4F0F740-081B-457E-9781-59E58AA77659}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_Features_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Debug" Guid="{DA6175FA-0859-4CAE-9E84-8C2F825552BE}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Debug" Guid="{7512B50D-5B5E-410D-A455-878DAC901823}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NetTopologySuite.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Features_Debug" Guid="{A9A72296-24FF-4EAF-B93B-061CEECE1F59}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_Features_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Debug" Guid="{3A0598C8-7085-4638-849B-F1E787AA5C11}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
@@ -57,11 +81,23 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Release" Guid="{2FC9718A-2D33-47D4-B0E9-396966B74D60}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\NetTopologySuite.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Features_Release" Guid="{E1961CD2-FC1A-44C1-9A10-D960AAC6AFDB}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_Features_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Release" Guid="{7FDF5124-23C4-45F8-8531-2F5AE3D873F5}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\NetTopologySuite.IO.GeoJSON.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Release="bin\Release-NET40" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" Guid="{EC1C4E50-FB56-41DD-8B1D-3272B0901BAD}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" Guid="{18ACD20E-A9F9-4C57-A2DB-C6FD5E7D8EBE}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" Guid="{58B4CEB2-6EB7-4D57-888E-C6EE80567182}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
@@ -69,11 +105,23 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" Guid="{96FB0AAE-8BE9-4336-B3BD-6C77A15DF5DA}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Release" Guid="{3C6471B5-E0B9-4EB3-93B8-344597F3ED5A}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_Features_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Release" Guid="{4979709C-F7D6-4D3D-AA32-A306A5AA308C}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.IO.GeoJSON.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Release="bin\Release-NET46" ?>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Release" Guid="{E8F86512-91E7-4586-945A-F28D513F50F9}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NetTopologySuite.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Features_Release" Guid="{ABB596AF-F702-4740-8A69-68DDE1647533}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_Features_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NetTopologySuite.Features.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Release" Guid="{FBE5DBA6-1A5D-4980-9A28-C8480CBF96D1}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
@@ -109,6 +157,14 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Features_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Features_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Debug" />
@@ -118,6 +174,14 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Features_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Features_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Features_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_Features_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Release" />
