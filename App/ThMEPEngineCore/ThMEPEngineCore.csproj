@@ -65,6 +65,7 @@
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
+    <Compile Include="Features\ThBeamFeatureCollection.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
     <Compile Include="IO\ThBeamGeoJsonReader.cs" />
     <Compile Include="IO\ThDwgReader.cs" />

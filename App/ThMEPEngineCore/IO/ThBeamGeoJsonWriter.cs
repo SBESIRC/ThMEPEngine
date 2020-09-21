@@ -1,14 +1,16 @@
 ﻿using System;
 using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Features;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.IO
 {
     public class ThBeamGeoJsonWriter : GeoJsonWriter
     {
-        public string Write(ThIfcLineBeam lineBeam)
+        public string Write(List<ThIfcBeam> beams)
         {
-            throw new NotSupportedException();
+            return base.Write(ThBeamFeatureCollection.Construct(beams));
         }
     }
 }

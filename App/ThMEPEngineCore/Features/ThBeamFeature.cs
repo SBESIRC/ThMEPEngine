@@ -1,19 +1,25 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NetTopologySuite.Features;
+﻿using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using NetTopologySuite.Features;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Features
 {
     public class ThBeamFeature
     {
-        public Feature Impl { get; private set; }
-        public ThBeamFeature(ThIfcLineBeam lineBeam)
+        public static Feature Construct(ThIfcBeam beam)
         {
-            Impl = new Feature();
+            var poly = beam.Outline as Polyline;
+            if (poly != null)
+            {
+                var geometry = poly.ToNTSPolygon();
+                return new Feature()
+                {
+                    Geometry = geometry,
+                    BoundingBox = geometry.EnvelopeInternal,
+                };
+            }
+            return null;
         }
     }
 }
