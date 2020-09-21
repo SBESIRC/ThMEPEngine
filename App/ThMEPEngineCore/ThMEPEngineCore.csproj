@@ -65,8 +65,10 @@
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
+    <Compile Include="IO\ThBeamGeoJsonReader.cs" />
     <Compile Include="IO\ThDwgReader.cs" />
     <Compile Include="IO\ThDwgWriter.cs" />
+    <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
     <Compile Include="IO\ThJsonReader.cs" />
     <Compile Include="IO\ThJsonWriter.cs" />
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
