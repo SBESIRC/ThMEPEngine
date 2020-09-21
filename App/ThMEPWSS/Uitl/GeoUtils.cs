@@ -122,15 +122,5 @@ namespace ThMEPWSS.Utils
 
             return newPolyline;
         }
-
-        /// <summary>
-        /// 线段的方向
-        /// </summary>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public static Vector3d LineDirection(this Line line)
-        {
-            return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
-        }
     }
 }
