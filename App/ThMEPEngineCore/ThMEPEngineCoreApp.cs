@@ -290,7 +290,7 @@ namespace ThMEPEngineCore
                 });
             }
         }
-#if DEBUG
+
         /// <summary>
         /// 提取指定区域内的梁信息
         /// </summary>
@@ -371,6 +371,5 @@ namespace ThMEPEngineCore
                 }
             }
         }
-#endif
     }
 }
