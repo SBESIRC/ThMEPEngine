@@ -1,6 +1,7 @@
 ﻿using System;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
+using NetTopologySuite.Operation.Distance;
 using Autodesk.AutoCAD.DatabaseServices;
 using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
@@ -43,6 +44,11 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
             return objs;
+        }
+
+        public static double IndexedDistance(this Polyline polyline, Curve curve)
+        {
+            return IndexedFacetDistance.Distance(polyline.ToNTSLineString(), curve.ToNTSLineString());
         }
 
         public static DBObjectCollection Buffer(this Polyline polyline, double distance)
