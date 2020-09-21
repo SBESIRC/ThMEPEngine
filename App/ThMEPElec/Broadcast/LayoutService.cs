@@ -15,7 +15,7 @@ namespace ThMEPElectrical.Broadcast
     {
         readonly double protectRange = 27000;
         readonly double oneProtect = 21000;
-        readonly double columnDis = 8000;
+
         public List<ColumnModel> LayoutBraodcast(Polyline roomPoly, Dictionary<List<Line>, List<ColumnModel>> mainColumns, Dictionary<List<Line>, List<ColumnModel>> otherColumns)
         {
             List<ColumnModel> layoutColumns = new List<ColumnModel>();
