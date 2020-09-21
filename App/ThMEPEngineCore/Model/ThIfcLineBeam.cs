@@ -1,13 +1,11 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using Newtonsoft.Json;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcLineBeam :ThIfcBeam
     {
-        [JsonIgnore]
         public Vector3d Direction 
         { 
             get
@@ -15,7 +13,6 @@ namespace ThMEPEngineCore.Model
                 return this.StartPoint.GetVectorTo(this.EndPoint);
             }
         }
-        [JsonIgnore]
         public double Length
         {
             get

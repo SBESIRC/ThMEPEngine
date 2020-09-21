@@ -1,4 +1,5 @@
 ﻿using System;
+using Newtonsoft.Json;
 using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Features;
@@ -8,9 +9,9 @@ namespace ThMEPEngineCore.IO
 {
     public class ThBeamGeoJsonWriter : GeoJsonWriter
     {
-        public string Write(List<ThIfcBeam> beams)
+        public void Write(List<ThIfcBeam> beams, JsonWriter writer)
         {
-            return base.Write(ThBeamFeatureCollection.Construct(beams));
+            Write(ThBeamFeatureCollection.Construct(beams), writer);
         }
     }
 }

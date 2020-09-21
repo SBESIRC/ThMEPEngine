@@ -1,7 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Newtonsoft.Json;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Model
 {
@@ -10,19 +8,12 @@ namespace ThMEPEngineCore.Model
         public ThIfcBeam()
         {
         }
-        [JsonConverter(typeof(Point3dConverter))]
         public Point3d StartPoint { get; set; }
-        [JsonConverter(typeof(Point3dConverter))]
         public Point3d EndPoint { get; set; }
-        [JsonProperty]
         public double Width { get; set; }
-        [JsonProperty]
         public double Height { get; set; }
-        [JsonConverter(typeof(Vector3dConverter))]
         public Vector3d Normal { get; set; }
-        [JsonConverter(typeof(BeamTypeConverter))]
         public BeamComponentType ComponentType { get; set; } = BeamComponentType.Undefined;
-        [JsonIgnore]
         public double ActualWidth
         {
             get

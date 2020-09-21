@@ -71,8 +71,6 @@
     <Compile Include="IO\ThDwgReader.cs" />
     <Compile Include="IO\ThDwgWriter.cs" />
     <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
-    <Compile Include="IO\ThJsonReader.cs" />
-    <Compile Include="IO\ThJsonWriter.cs" />
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
     <Compile Include="Model\Electrical\ThIfcLamp.cs" />
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />

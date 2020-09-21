@@ -1,8 +1,10 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
-using Linq2Acad;
 using AcHelper;
+using Linq2Acad;
 using ThCADCore.NTS;
+using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Engine;
@@ -14,10 +16,9 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad.Collections;
 using TianHua.AutoCAD.Utility.ExtensionTools;
+using NFox.Cad.Collections;
 using Newtonsoft.Json;
-using ThMEPEngineCore.IO;
 
 namespace ThMEPEngineCore
 {
@@ -115,7 +116,14 @@ namespace ThMEPEngineCore
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
 
-                ThJsonWriter.OutputBeams(allBeams);
+                // 输出GeoJson文件
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "Beams.geojson")))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson))
+                {
+                    var geoJsonWriter = new ThBeamGeoJsonWriter();
+                    geoJsonWriter.Write(allBeams, writer);
+                }
             }
         }
         private DBText CreateBeamMarkText(ThIfcBeam thIfcBeam)
@@ -273,41 +281,6 @@ namespace ThMEPEngineCore
                 acadDatabase.ModelSpace.Add(ray);
             }
         }
-        [CommandMethod("TIANHUACAD", "ThJson", CommandFlags.Modal)]
-        public void ThJson()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                ThIfcLineBeam thIfcLineBeam1 = new ThIfcLineBeam()
-                {
-                    StartPoint=new Point3d(100, 100, 0),
-                    EndPoint=new Point3d(1100,1100,0),
-                    Normal=Vector3d.ZAxis,
-                    Width=500,
-                    Height=400,
-                    ComponentType=BeamComponentType.PrimaryBeam
-                };
-                ThIfcLineBeam thIfcLineBeam2 = new ThIfcLineBeam()
-                {
-                    StartPoint = new Point3d(200, 200, 0),
-                    EndPoint = new Point3d(1200, 1200, 0),
-                    Normal = Vector3d.ZAxis,
-                    Width = 600,
-                    Height = 400,
-                    ComponentType = BeamComponentType.PrimaryBeam
-                };
-                List<ThIfcLineBeam> items = new List<ThIfcLineBeam>()
-                {
-                    thIfcLineBeam1,
-                    thIfcLineBeam2
-                };
-                string json = JsonConvert.SerializeObject(items, Formatting.Indented,new JsonSerializerSettings()
-                {
-                    ReferenceLoopHandling= ReferenceLoopHandling.Ignore
-                });
-            }
-        }
-
         /// <summary>
         /// 提取指定区域内的梁信息
         /// </summary>
