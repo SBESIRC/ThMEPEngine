@@ -24,6 +24,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonReader.cs" />
+    <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonWriter.cs" />
     <Compile Include="NTS\ThCADCoreNTSCenterlineBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSDistance.cs" />
     <Compile Include="NTS\ThCADCoreNTSEntityExtension.cs" />
@@ -87,6 +89,7 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="NetTopologySuite" Version="2.1.0" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="2.0.3" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
