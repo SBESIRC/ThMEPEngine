@@ -44,7 +44,7 @@ namespace ThMEPEngineCore.Engine
                         Closed = true,
                     };
                     pline.CreatePolyline(polygon);
-                    foreach (var filterObj in columnCurveSpatialIndex.SelectWindowPolygon(pline))
+                    foreach (var filterObj in columnCurveSpatialIndex.SelectCrossingPolygon(pline))
                     {
                         curves.Add(filterObj as Curve);
                     }
