@@ -78,6 +78,51 @@ namespace ThMEPWSS.Service
         }
 
         /// <summary>
+        /// 计算喷淋布置点
+        /// </summary>
+        /// <param name="tLines"></param>
+        /// <param name="vLines"></param>
+        /// <param name="vDir"></param>
+        /// <param name="tDir"></param>
+        /// <returns></returns>
+        public static List<SprayLayoutData> CalSprayPoint(List<Polyline> tLines, List<Polyline> vLines)
+        {
+            List<SprayLayoutData> layoutPts = new List<SprayLayoutData>();
+            foreach (var tLine in tLines)
+            {
+                foreach (var vLine in vLines)
+                {
+                    Point3dCollection points = new Point3dCollection();
+                    tLine.IntersectWith(vLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
+                    layoutPts.AddRange(SprayDataService.CreateSprayModels(points.Cast<Point3d>().ToList()));
+                }
+            }
+
+            return layoutPts;
+        }
+
+        /// <summary>
+        /// 计算喷淋布置点
+        /// </summary>
+        /// <param name="sprayPts"></param>
+        /// <param name="vDir"></param>
+        /// <param name="tDir"></param>
+        /// <param name="sideLength"></param>
+        /// <returns></returns>
+        public static List<SprayLayoutData> CalSprayPoint(List<Point3d> sprayPts, Vector3d vDir, Vector3d tDir, double sideLength)
+        {
+            List<SprayLayoutData> layoutPts = new List<SprayLayoutData>();
+            foreach (var spray in sprayPts)
+            {
+                var sprayData = SprayDataService.CreateSprayModelsByRay(spray, vDir, tDir, sideLength);
+                layoutPts.Add(sprayData);
+            }
+
+            return layoutPts;
+        }
+
+
+        /// <summary>
         /// 计算相交处布置点
         /// </summary>
         /// <param name="polylines"></param>
@@ -307,6 +352,16 @@ namespace ThMEPWSS.Service
 
                 spray.Position = CalSprayPoint(spray.vLine, spray.tLine);
             }
+        }
+
+        /// <summary>
+        /// 获取所有喷淋线
+        /// </summary>
+        /// <param name="sprays"></param>
+        /// <returns></returns>
+        public static List<Polyline> CalAllSprayLines(List<SprayLayoutData> sprays)
+        {
+            return sprays.SelectMany(x => new List<Polyline>() { x.vLine, x.tLine }).Distinct().ToList();
         }
     }
 }

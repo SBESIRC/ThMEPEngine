@@ -25,7 +25,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bussiness\AvoidBeamService.cs" />
+    <Compile Include="Bussiness\CalSprayBlindAreaService.cs" />
     <Compile Include="Bussiness\CheckProtectService.cs" />
+    <Compile Include="Bussiness\GenerateSpraysService.cs" />
     <Compile Include="Bussiness\LayoutBussiness\LayoutService.cs" />
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Model\SprayDataService.cs" />
@@ -33,8 +35,10 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CheckService.cs" />
     <Compile Include="Service\GridService.cs" />
+    <Compile Include="Service\InsertSprayLinesService.cs" />
     <Compile Include="Service\InsertSprayService.cs" />
     <Compile Include="Service\SprayDataOperateService.cs" />
+    <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
     <Compile Include="ThMEPWSSApp.cs" />
     <Compile Include="ThWSSCommon.cs" />
     <Compile Include="Uitl\GeoUtils.cs" />

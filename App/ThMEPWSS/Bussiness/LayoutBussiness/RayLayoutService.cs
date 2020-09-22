@@ -8,7 +8,7 @@ using System.Text;
 using ThCADCore.NTS;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
-using ThWSS.Bussiness;
+using ThCADExtension;
 
 namespace ThMEPWSS.Bussiness.LayoutBussiness
 {
@@ -31,31 +31,10 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             //计算布置网格线
             CalLayoutGrid(polyline, allGrids, out List<List<Polyline>> tLines, out List<List<Polyline>> vLines, out Vector3d tDir, out Vector3d vDir);
 
-            //打印布置网格线
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                foreach (var item in tLines)
-                {
-                    foreach (var sss in item)
-                    {
-                        sss.ColorIndex = 1;
-                        acdb.ModelSpace.Add(sss);
-                    }
-                }
-
-                foreach (var item in vLines)
-                {
-                    foreach (var sss in item)
-                    {
-                        sss.ColorIndex = 1;
-                        acdb.ModelSpace.Add(sss);
-                    }
-                }
-            }
-
             //计算喷淋布置点
             var sprays = SprayDataOperateService.CalSprayPoint(tLines, vLines, vDir, tDir, sideLength);
 
+            //边界保护
             CheckProtectService checkProtectService = new CheckProtectService();
             checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength);
 
@@ -63,8 +42,8 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             AvoidBeamService beamService = new AvoidBeamService();
             //beamService.AvoidBeam(polyline, sprays);
 
-            //放置喷头
-            InsertSprayService.InsertSprayBlock(sprays.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
+            //打印布置网格线
+            InsertSprayLinesService.InsertSprayLines(SprayDataOperateService.CalAllSprayLines(sprays));
 
             return null;
         }

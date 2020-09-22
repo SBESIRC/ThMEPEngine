@@ -54,6 +54,24 @@ namespace ThMEPWSS.Model
         /// <summary>
         /// 创建喷淋对象
         /// </summary>
+        /// <param name="layoutP"></param>
+        /// <returns></returns>
+        public static List<SprayLayoutData> CreateSprayModels(List<Point3d> layoutP)
+        {
+            var sprays = new List<SprayLayoutData>();
+            foreach (var point in layoutP)
+            {
+                var offset = Matrix3d.Displacement(point.GetAsVector());
+                var spray = SprayLayoutData.Create(point, null);
+                sprays.Add(spray);
+            }
+
+            return sprays;
+        }
+
+        /// <summary>
+        /// 创建喷淋对象
+        /// </summary>
         /// <param name="point"></param>
         /// <param name="vLine"></param>
         /// <param name="tLine"></param>

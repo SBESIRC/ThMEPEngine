@@ -97,11 +97,11 @@ namespace ThMEPWSS.Bussiness
                     {
                         SprayDataOperateService.UpdateSpraysLine(allSprays, thisLine, moveLine);
                     }
-                    using (AcadDatabase acdb = AcadDatabase.Active())
-                    {
-                        moveLine.ColorIndex = 3;
-                        acdb.ModelSpace.Add(moveLine);
-                    }
+                    //using (AcadDatabase acdb = AcadDatabase.Active())
+                    //{
+                    //    moveLine.ColorIndex = 3;
+                    //    acdb.ModelSpace.Add(moveLine);
+                    //}
                 }
             }
         }
