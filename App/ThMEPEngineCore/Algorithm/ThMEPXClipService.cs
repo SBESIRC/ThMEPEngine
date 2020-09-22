@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -52,10 +53,17 @@ namespace ThMEPEngineCore.Algorithm
             {
                 Closed = true,
             };
-            poly.SetDatabaseDefaults(database);
-            for (int i = 0; i < vertices.Count; i++)
+            if (vertices.Count == 2)
             {
-                poly.AddVertexAt(0, vertices[i], 0, 0, 0);
+                poly.CreateRectangle(vertices[0], vertices[1]);
+            }
+            else if (vertices.Count > 2)
+            {
+                poly.CreatePolyline(vertices);
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
             poly.TransformBy(mat);
             return poly;
