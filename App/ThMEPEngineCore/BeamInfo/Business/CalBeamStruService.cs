@@ -206,7 +206,10 @@ namespace ThMEPEngineCore.BeamInfo.Business
                             UpBeamLine = linePair,
                             DownBeamLine = plineDic
                         };
-                        beamLst.Add(beam);
+                        if(beam.StartPoint.DistanceTo(beam.EndPoint)>=1.0)
+                        {
+                            beamLst.Add(beam);
+                        }
                         linList.Remove(plineDic);
                     }
                 }

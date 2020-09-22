@@ -15,15 +15,18 @@ namespace ThMEPEngineCore.BeamInfo.Model
             {
                 BeamNormal = ResetBeamDirection(firstLine.StartPoint.GetVectorTo(firstLine.EndPoint).GetNormal());
                 List<Line> lines = CreateOutLine(firstLine, secondLine, BeamNormal);
-                UpStartPoint = lines[0].StartPoint;
-                UpEndPoint = lines[0].EndPoint;
-                DownStartPoint = lines[1].StartPoint;
-                DownEndPoint = lines[1].EndPoint;
-                BeamSPointSolid = CreatePolyline(UpStartPoint, DownStartPoint, -BeamNormal, 10);
-                BeamEPointSolid = CreatePolyline(UpEndPoint, DownEndPoint, BeamNormal, 10);
-                StartPoint = ThGeometryTool.GetMidPt(UpStartPoint, DownStartPoint);
-                EndPoint = ThGeometryTool.GetMidPt(UpEndPoint, DownEndPoint);
-                lines.ForEach(o => o.Dispose());
+                if(lines.Count==2)
+                {
+                    UpStartPoint = lines[0].StartPoint;
+                    UpEndPoint = lines[0].EndPoint;
+                    DownStartPoint = lines[1].StartPoint;
+                    DownEndPoint = lines[1].EndPoint;
+                    BeamSPointSolid = CreatePolyline(UpStartPoint, DownStartPoint, -BeamNormal, 10);
+                    BeamEPointSolid = CreatePolyline(UpEndPoint, DownEndPoint, BeamNormal, 10);
+                    StartPoint = ThGeometryTool.GetMidPt(UpStartPoint, DownStartPoint);
+                    EndPoint = ThGeometryTool.GetMidPt(UpEndPoint, DownEndPoint);
+                    lines.ForEach(o => o.Dispose());
+                }               
             }
         }
         private Vector3d ResetBeamDirection(Vector3d originBeamDir,double tolerance=1.0)
@@ -69,14 +72,31 @@ namespace ThMEPEngineCore.BeamInfo.Model
             Point3d firstEndPt = first.EndPoint.TransformBy(wcsToUcs);
             Point3d secondStartPt = second.StartPoint.TransformBy(wcsToUcs);
             Point3d secondEndPt = second.EndPoint.TransformBy(wcsToUcs);
-            List<double> zValues = new List<double> { firstStartPt.Z, firstEndPt.Z, secondStartPt.Z, secondEndPt.Z };
-            double minZ = zValues.OrderBy(o => o).FirstOrDefault();
-            double maxZ = zValues.OrderByDescending(o => o).FirstOrDefault();
-            firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, minZ);
-            firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, maxZ);
 
-            secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, minZ);
-            secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, maxZ);
+            double firstMinZ = Math.Min(firstStartPt.Z, firstEndPt.Z);
+            double firstMaxZ = Math.Max(firstStartPt.Z, firstEndPt.Z);
+            double secondMinZ = Math.Min(secondStartPt.Z, secondEndPt.Z);
+            double secondMaxZ = Math.Max(secondStartPt.Z, secondEndPt.Z);
+            if(secondMinZ >= firstMaxZ || secondMaxZ <= firstMinZ)
+            {
+                return new List<Line>();
+            }
+            double z1 = firstMinZ;
+            double z2 = firstMaxZ;
+            if(secondMinZ > firstMinZ && secondMinZ< firstMaxZ)
+            {
+                z1 = secondMinZ;
+            }
+            if (secondMaxZ > firstMinZ && secondMaxZ < firstMaxZ)
+            {
+                z2 = secondMaxZ;
+            }
+
+            firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, z1);
+            firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, z2);
+            secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, z1);
+            secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, z2);
+
             firstStartPt = firstStartPt.TransformBy(ucsToWcs);
             firstEndPt = firstEndPt.TransformBy(ucsToWcs);
             secondStartPt = secondStartPt.TransformBy(ucsToWcs);
