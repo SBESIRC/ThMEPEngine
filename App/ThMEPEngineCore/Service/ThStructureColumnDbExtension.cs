@@ -1,11 +1,13 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
+﻿using System;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
@@ -109,6 +111,7 @@ namespace ThMEPEngineCore.Service
                 var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                 if (IsBuildElementBlock(blockTableRecord))
                 {
+                    var xclip = blockReference.XClipInfo();
                     foreach (var objId in blockTableRecord)
                     {
                         var dbObj = acadDatabase.Element<Entity>(objId);
@@ -126,9 +129,20 @@ namespace ThMEPEngineCore.Service
                         }
                         else if(dbObj is Curve curve)
                         {
-                            if(CheckLayerValid(curve))
+                            if (CheckLayerValid(curve))
                             {
-                                curves.Add(curve.GetTransformedCopy(matrix) as Curve);
+                                var wcsCurve = curve.GetTransformedCopy(matrix) as Curve;
+                                if (xclip.IsValid)
+                                {
+                                    if (xclip.Polygon.Contains(wcsCurve))
+                                    {
+                                        curves.Add(wcsCurve);
+                                    }
+                                }
+                                else
+                                {
+                                    curves.Add(wcsCurve);
+                                }
                             }
                         }
                     }

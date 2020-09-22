@@ -41,26 +41,26 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        public static bool Contains(this AcPolygon polygon, AcPolyline other)
-        {
-            return RectangleContains.Contains(polygon.ToNTSPolygon(), other.ToNTSLineString());
-        }
-
-        public static bool Intersects(this AcPolygon polygon, AcPolyline other)
-        {
-            return RectangleIntersects.Intersects(polygon.ToNTSPolygon(), other.ToNTSLineString());
-        }
-
         public static bool Contains(this AcPolygon polygon, Point3d pt)
         {
             var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
         }
 
-        public static bool IndexedContains(this AcPolygon polyline, Point3d pt)
+        public static bool IndexedContains(this AcPolygon polygon, Point3d pt)
         {
-            var locator = new IndexedPointInAreaLocator(polyline.ToNTSPolygon());
+            var locator = new IndexedPointInAreaLocator(polygon.ToNTSPolygon());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
+        }
+
+        public static bool Contains(this AcPolygon polygon, Curve curve)
+        {
+            return polygon.ToNTSPolygon().Contains(curve.ToNTSGeometry());
+        }
+
+        public static bool Intersects(this AcPolygon polygon, Curve curve)
+        {
+            return polygon.ToNTSPolygon().Intersects(curve.ToNTSGeometry());
         }
 
         /// <summary>

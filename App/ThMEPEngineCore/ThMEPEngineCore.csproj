@@ -27,6 +27,8 @@
   <ItemGroup>
     <Compile Include="Algorithm\ThMEPFrameService.cs" />
     <Compile Include="Algorithm\ThMEPModelManager.cs" />
+    <Compile Include="Algorithm\ThMEPXClipInfo.cs" />
+    <Compile Include="Algorithm\ThMEPXClipService.cs" />
     <Compile Include="BeamInfo\Business\CalBeamIntersectService.cs" />
     <Compile Include="BeamInfo\Business\CalBeamStruService.cs" />
     <Compile Include="BeamInfo\Business\CalSpanBeamInfo.cs" />
