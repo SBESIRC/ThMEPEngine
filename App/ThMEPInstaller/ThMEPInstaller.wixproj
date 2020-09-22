@@ -21,11 +21,13 @@
     <Cultures>zh-CN</Cultures>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="App.wxs" />
+    <Compile Include="AppCore.wxs" />
+    <Compile Include="Electrical.wxs" />
     <Compile Include="External.wxs" />
     <Compile Include="Internal.wxs" />
     <Compile Include="Product.wxs" />
     <Compile Include="Support.wxs" />
+    <Compile Include="WSS.wxs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="License_zh-CN.rtf" />

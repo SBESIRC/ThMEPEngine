@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include Variable.wxi ?>
+	<Fragment>
+		<?if $(var.Configuration) = Debug ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+			<?define OutputPath_R18_Debug="bin\Debug" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Debug" Guid="{11DB422C-065A-4277-AEFD-7024231BB298}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" Guid="{ABE87E98-D9F8-420A-B9E6-279E883B12DC}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" Guid="{33F3ECAF-87C3-4497-8639-EA2DB3084BB9}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" Guid="{E8A46F90-FFDC-4C9B-BBE7-744D253FAF88}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<?elseif $(var.Configuration) = Release ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+			<?define OutputPath_R18_Release="bin\Release" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Release" Guid="{AF924156-5885-4E08-8D07-39855C11EEC6}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" Guid="{6CB2ED62-B3D7-4674-8929-28B7D2E3EBFC}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" Guid="{76CACBAF-0C3F-474D-BAD4-DE392FA2B753}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Release="bin\Release-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" Guid="{41E6F720-4924-44E0-8A13-BA224FA45456}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPElectrical.dll" />
+			</Component>
+		</DirectoryRef>
+		<?endif?>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ProductComponentsElectricalWin64">
+			<?if $(var.Configuration) = Debug ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Debug" />
+			<?elseif $(var.Configuration) = Release ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPElectrical_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPElectrical_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPElectrical_Release" />
+			<?endif?>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

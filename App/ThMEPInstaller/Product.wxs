@@ -10,9 +10,11 @@
         <Feature Id="ProductFeature" Title="ThMEPInstaller" Level="1">
             <ComponentGroupRef Id="ProductComponents" />
             <ComponentGroupRef Id="ProductComponentsSupport" />
-            <ComponentGroupRef Id="ProductComponentsAppWin64" />
+            <ComponentGroupRef Id="ProductComponentsAppCoreWin64" />
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />
+            <ComponentGroupRef Id="ProductComponentsWSSWin64" />
+            <ComponentGroupRef Id="ProductComponentsElectricalWin64" />
         </Feature>
         <UIRef Id="WixUI_Minimal"/>
         <WixVariable Id="WixUILicenseRtf" Value="License_zh-CN.rtf" />
