@@ -48,13 +48,17 @@ namespace ThMEPEngineCore
         /// </summary>
         public const double BeamIntersectExtentionTolerance = 50.0;
         /// <summary>
-        /// 梁间隔容差
+        /// 梁与梁间隔最大容差
         /// </summary>
-        public const double BeamIntervalTolerance = 600.0;
+        public const double BeamIntervalMaximumTolerance = 600.0;
+        /// <summary>
+        /// 梁与梁连接的最小查找距离
+        /// </summary>
+        public const double BeamIntervalMinimumTolerance = 20.0;
         /// <summary>
         /// 梁与竖向构件连接容差
         /// </summary>
-        public const double BeamConnectionTolerance = 600.0;
+        public const double BeamComponentConnectionTolerance = 600.0;
         /// <summary>
         /// 最短梁长
         /// </summary>

@@ -120,14 +120,22 @@ namespace ThMEPEngineCore.Engine
                 if(element is ThIfcBeam thIfcBeam)
                 {
                     thSingleBeamLink.Beam = thIfcBeam;
-                    thSingleBeamLink.StartVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.StartPoint);
-                    thSingleBeamLink.EndVerComponents = thBeamLinkExtension.QueryPortLinkElements(thIfcBeam, thIfcBeam.EndPoint);
-                    thSingleBeamLink.StartBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.StartPoint);
+                    thSingleBeamLink.StartVerComponents = thBeamLinkExtension.QueryPortLinkElements(
+                        thIfcBeam, thIfcBeam.StartPoint,ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
+                    thSingleBeamLink.EndVerComponents = thBeamLinkExtension.QueryPortLinkElements(
+                        thIfcBeam, thIfcBeam.EndPoint, ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
 
-                    thSingleBeamLink.UpdateStartLink();
+                    thSingleBeamLink.StartBeams = thBeamLinkExtension.QueryPortLinkBeams(
+                        thIfcBeam, thIfcBeam.StartPoint, ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance);
+                    thSingleBeamLink.UpdateStartLink(thBeamLinkExtension);
+                    thSingleBeamLink.EndBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.EndPoint, 
+                        ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance);
+                    thSingleBeamLink.UpdateEndLink(thBeamLinkExtension);
 
-                    thSingleBeamLink.EndBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.EndPoint);
-                    thSingleBeamLink.UpdateEndLink();
+                    var beamLinkStartBeams = thBeamLinkExtension.QueryPortLinkBeams(
+                        thIfcBeam, thIfcBeam.StartPoint, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
+                    var beamLinkEndBeams = thBeamLinkExtension.QueryPortLinkBeams(
+                        thIfcBeam, thIfcBeam.EndPoint, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
                 }
                 SingleBeamLinks.Add(thSingleBeamLink);
             }            

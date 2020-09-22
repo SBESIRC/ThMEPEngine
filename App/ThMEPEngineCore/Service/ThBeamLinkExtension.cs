@@ -157,14 +157,14 @@ namespace ThMEPEngineCore.Service
             return startLinkBeam.Any() && endLinkBeam.Any();
         }
 
-        public List<ThIfcBuildingElement> QueryPortLinkElements(ThIfcBeam thIfcBeam, Point3d portPt)
+        public List<ThIfcBuildingElement> QueryPortLinkElements(ThIfcBeam thIfcBeam, Point3d portPt,double beamConnectionTolerance)
         {
             List<ThIfcBuildingElement> links = new List<ThIfcBuildingElement>();
             DBObjectCollection linkObjs = new DBObjectCollection();
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {
                 Polyline portSearchEnvelop = GetLineBeamPortSearchEnvelop(thIfcLineBeam, portPt,
-                    ThMEPEngineCoreCommon.BeamExtensionRatio, ThMEPEngineCoreCommon.BeamConnectionTolerance);
+                    ThMEPEngineCoreCommon.BeamExtensionRatio, beamConnectionTolerance);
                 // 先判断是否搭接在柱上
                 linkObjs = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
                 if (linkObjs.Count > 0)
@@ -252,7 +252,7 @@ namespace ThMEPEngineCore.Service
             return ThGeometryTool.IsCollinearEx(firstBeam.StartPoint,firstBeam.EndPoint,
                 secondBeam.StartPoint,secondBeam.EndPoint);
         }
-        public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt)
+        public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt, double beamIntervalTolerance)
         {
             List<ThIfcBeam> links = new List<ThIfcBeam>();
             DBObjectCollection linkObjs = new DBObjectCollection();
@@ -260,12 +260,12 @@ namespace ThMEPEngineCore.Service
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {               
                 portSearchEnvelop = GetLineBeamPortSearchEnvelop(thIfcLineBeam, portPt,
-                    ThMEPEngineCoreCommon.BeamExtensionRatio,ThMEPEngineCoreCommon.BeamIntervalTolerance);
+                    ThMEPEngineCoreCommon.BeamExtensionRatio, beamIntervalTolerance);
             }
             else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
             {               
                 portSearchEnvelop = GetArcBeamPortSearchEnvelop(thIfcArcBeam, portPt, 
-                    ThMEPEngineCoreCommon.BeamExtensionRatio, ThMEPEngineCoreCommon.BeamIntervalTolerance);
+                    ThMEPEngineCoreCommon.BeamExtensionRatio, beamIntervalTolerance);
             }
             linkObjs = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
             if (linkObjs.Count > 0)

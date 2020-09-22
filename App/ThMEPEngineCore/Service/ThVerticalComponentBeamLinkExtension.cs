@@ -33,8 +33,8 @@ namespace ThMEPEngineCore.Service
                 List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
                 Point3d prePt = PreFindBeamLink(currentBeam.StartPoint, linkElements);
                 Point3d backPt = BackFindBeamLink(currentBeam.EndPoint, linkElements);
-                thBeamLink.Start = QueryPortLinkElements(linkElements[0], prePt);
-                thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count - 1], backPt);
+                thBeamLink.Start = QueryPortLinkElements(linkElements[0], prePt,ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
+                thBeamLink.End = QueryPortLinkElements(linkElements[linkElements.Count - 1], backPt, ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
                 if (JudgePrimaryBeam(thBeamLink))
                 {
                     thBeamLink.Beams = linkElements;
