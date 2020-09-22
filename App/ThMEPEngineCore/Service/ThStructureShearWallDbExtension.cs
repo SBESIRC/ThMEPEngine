@@ -79,9 +79,10 @@ namespace ThMEPEngineCore.Service
                                 var wcsCurve = curve.GetTransformedCopy(matrix) as Curve;
                                 if (xclip.IsValid)
                                 {
-                                    foreach (Curve item in xclip.Polygon.Clip(wcsCurve, xclip.Inverted))
+                                    // 暂时不裁剪剪力墙
+                                    if (xclip.Polygon.Contains(wcsCurve))
                                     {
-                                        curves.Add(item);
+                                        curves.Add(wcsCurve);
                                     }
                                 }
                                 else
