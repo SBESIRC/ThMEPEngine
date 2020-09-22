@@ -25,6 +25,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bussiness\AvoidBeamService.cs" />
+    <Compile Include="Bussiness\CheckProtectService.cs" />
     <Compile Include="Bussiness\LayoutBussiness\LayoutService.cs" />
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Model\SprayDataService.cs" />

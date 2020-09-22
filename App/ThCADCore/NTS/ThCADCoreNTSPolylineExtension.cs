@@ -130,5 +130,16 @@ namespace ThCADCore.NTS
             // 返回结果
             return merger.GetMergedLineStrings().ToDBCollection();
         }
+
+        /// <summary>
+        /// 两个polyline之间的距离
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static double Distance(this Polyline polyline, Polyline other)
+        {
+            return polyline.ToNTSLineString().Distance(other.ToNTSLineString());
+        }
     }
 }

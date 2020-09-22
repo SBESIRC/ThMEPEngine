@@ -97,6 +97,20 @@ namespace ThMEPWSS.Service
         }
 
         /// <summary>
+        /// 计算相交处布置点
+        /// </summary>
+        /// <param name="vLine"></param>
+        /// <param name="tLine"></param>
+        /// <returns></returns>
+        public static Point3d CalSprayPoint(Polyline vLine, Polyline tLine)
+        {
+            Point3dCollection points = new Point3dCollection();
+            vLine.IntersectWith(tLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
+
+            return points[0];
+        }
+
+        /// <summary>
         /// 获取所有同向排布线
         /// </summary>
         /// <param name="dir"></param>
@@ -134,6 +148,96 @@ namespace ThMEPWSS.Service
             else
             {
                 return sprayLayoutData.tLine;
+            }
+        }
+
+        /// <summary>
+        /// 找到不同向线
+        /// </summary>
+        /// <param name="sprayLayoutData"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static Polyline GetOtherPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        {
+            if (sprayLayoutData.JudgeMainLine(dir))
+            {
+                return sprayLayoutData.tLine;
+            }
+            else
+            {
+                return sprayLayoutData.vLine;
+            }
+        }
+
+        /// <summary>
+        /// 找到此方向线前一根线
+        /// </summary>
+        /// <param name="sprayLayoutData"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static Polyline GetPrePolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        {
+            if (sprayLayoutData.JudgeMainLine(dir))
+            {
+                return sprayLayoutData.prevVLine;
+            }
+            else
+            {
+                return sprayLayoutData.prevTLine;
+            }
+        }
+
+        /// <summary>
+        /// 找到其他方向线前一根线
+        /// </summary>
+        /// <param name="sprayLayoutData"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static Polyline GetOtherPrePolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        {
+            if (sprayLayoutData.JudgeMainLine(dir))
+            {
+                return sprayLayoutData.prevTLine;
+            }
+            else
+            {
+                return sprayLayoutData.prevVLine;
+            }
+        }
+
+        /// <summary>
+        /// 找到此方向后一根线
+        /// </summary>
+        /// <param name="sprayLayoutData"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static Polyline GetNextPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        {
+            if (sprayLayoutData.JudgeMainLine(dir))
+            {
+                return sprayLayoutData.nextVLine;
+            }
+            else
+            {
+                return sprayLayoutData.nextTLine;
+            }
+        }
+
+        /// <summary>
+        /// 找到其他方向后一根线
+        /// </summary>
+        /// <param name="sprayLayoutData"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static Polyline GetOtherNextPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        {
+            if (sprayLayoutData.JudgeMainLine(dir))
+            {
+                return sprayLayoutData.nextTLine;
+            }
+            else
+            {
+                return sprayLayoutData.nextVLine;
             }
         }
 
@@ -179,6 +283,30 @@ namespace ThMEPWSS.Service
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 更新喷淋点的信息
+        /// </summary>
+        /// <param name="sprays"></param>
+        /// <param name="originLine"></param>
+        /// <param name="newLine"></param>
+        public static void UpdateSpraysLine(List<SprayLayoutData> sprays, Polyline originLine, Polyline newLine)
+        {
+            var resSprays = sprays.Where(x => x.tLine == originLine || x.vLine == originLine).ToList();
+            foreach (var spray in resSprays)
+            {
+                if (spray.vLine == originLine) 
+                {
+                    spray.vLine = newLine;
+                }
+                if (spray.tLine == originLine)
+                {
+                    spray.tLine = newLine;
+                }
+
+                spray.Position = CalSprayPoint(spray.vLine, spray.tLine);
+            }
         }
     }
 }

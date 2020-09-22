@@ -56,15 +56,12 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             //计算喷淋布置点
             var sprays = SprayDataOperateService.CalSprayPoint(tLines, vLines, vDir, tDir, sideLength);
 
-            //List<SprayLayoutData> roomSprays = new List<SprayLayoutData>();
-            //foreach (var lpts in sprayPts)
-            //{
-            //    roomSprays.AddRange(GeoUtils.CalRoomSpray(plBack, lpts, out List<SprayLayoutData> outsideSpary));
-            //}
+            CheckProtectService checkProtectService = new CheckProtectService();
+            checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength);
 
             //躲次梁
             AvoidBeamService beamService = new AvoidBeamService();
-            beamService.AvoidBeam(polyline, sprays);
+            //beamService.AvoidBeam(polyline, sprays);
 
             //放置喷头
             InsertSprayService.InsertSprayBlock(sprays.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
