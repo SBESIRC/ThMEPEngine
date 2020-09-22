@@ -8,8 +8,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Debug" Guid="{BC2244CD-2528-476C-9F8A-615CF85219DD}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ExtensionTools_Debug" Guid="{99DC3D60-A401-476D-B056-70EC0401EE71}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ExtensionTools_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_CADExtension_Debug" Guid="{85F5B32F-B76D-427C-BB2C-077576E14E63}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_CADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ThCADExtension_Debug" Guid="{DAE53661-DC56-46A4-9914-C9E15C2F5E4F}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ThCADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_CADCore_Debug" Guid="{63026B83-B8CF-4B89-9179-78568EEA64E5}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_CADCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThCADCore.dll" />
@@ -29,8 +32,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" Guid="{652C0C81-7F6E-48E1-9E86-D5418B66270C}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExtensionTools_Debug" Guid="{84C0C0CB-ABFC-4877-8809-EC5FE4EBF4AB}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExtensionTools_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Debug" Guid="{86580C3C-F423-4BF1-A04D-DD700AD5BA06}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Debug" Guid="{53FD95A6-283E-4B1F-8016-F9284D166BF3}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThCADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Debug" Guid="{82BA6CA4-8E6B-4B30-BE2D-38DBBE44A365}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThCADCore.dll" />
@@ -50,8 +56,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Debug" Guid="{5C985F88-0E14-4928-842D-99EC072F6BDE}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ExtensionTools_Debug" Guid="{AA669B6F-D88B-4960-BE5B-EE3A274319FA}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ExtensionTools_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_CADExtension_Debug" Guid="{06730A08-4F8A-49EF-9044-80FBBF391612}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_CADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThCADExtension_Debug" Guid="{8B597B41-04B1-4B9E-9961-8D6E33F8729B}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThCADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_CADCore_Debug" Guid="{AF3B84EF-6757-4492-9C4B-4CCF8077E082}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_CADCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThCADCore.dll" />
@@ -71,8 +80,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_DotNetARX_Debug" Guid="{2FF6A7C9-CB92-48C2-A3C8-5E8B3061F3FD}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_DotNetARX_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ExtensionTools_Debug" Guid="{E52CB3C0-BD17-4FA5-AE13-163D8B406CE2}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ExtensionTools_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_CADExtension_Debug" Guid="{41044FA7-40FA-4EA4-93E4-A4E64D02BCDB}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_CADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThCADExtension_Debug" Guid="{50BA64F9-7CD6-4804-9F3D-96854979A622}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThCADExtension_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_CADCore_Debug" Guid="{664DC39E-301E-4764-A973-1B0E20538086}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_CADCore_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThCADCore.dll" />
@@ -93,8 +105,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Release" Guid="{5542D087-CB7E-46D6-9D29-DFCD27A041B5}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ExtensionTools_Release" Guid="{4D956140-472E-41D5-AE7F-7585BC2E1E0F}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ExtensionTools_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_CADExtension_Release" Guid="{E129DFF7-0D2F-4540-BCB0-EC737780A106}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_CADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ThCADExtension_Release" Guid="{31F68B9B-D5AD-4976-9AC8-09A844F8E981}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ThCADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_CADCore_Release" Guid="{3D323C13-6BAF-4D00-9D44-28924B96752E}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_CADCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThCADCore.dll" />
@@ -114,8 +129,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" Guid="{7CE2FEBF-8952-44D2-AF6D-DED21C9BE21B}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExtensionTools_Release" Guid="{4CA738C6-2385-46C4-9F1D-7FE40DF98E71}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExtensionTools_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Release" Guid="{05BB74E9-471A-48F9-B62C-3E043891B800}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Release" Guid="{417EF65F-ABD4-405D-92DF-7C0909A61AC9}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThCADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Release" Guid="{622B0795-71EF-4695-A8C3-0027E0EF6F88}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_CADCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThCADCore.dll" />
@@ -135,8 +153,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Release" Guid="{8C8E9A40-6823-4C76-802F-CDD0136A1123}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ExtensionTools_Release" Guid="{9EFDCCB2-CEF5-4150-8B42-EF410CFE3468}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ExtensionTools_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_CADExtension_Release" Guid="{BB230E56-C891-4B9B-A233-ED22316E4CEE}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_CADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThCADExtension_Release" Guid="{C3947B93-1A9C-4043-917C-72F617557D2D}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThCADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_CADCore_Release" Guid="{993A3748-0D9F-42B8-AFAB-9910F0ED4FC7}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_CADCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThCADCore.dll" />
@@ -156,8 +177,11 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_DotNetARX_Release" Guid="{3DCDEC67-9FC5-4811-96F3-D5D2BB627F67}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_DotNetARX_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\DotNetARX.dll" />
         </Component>
-        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ExtensionTools_Release" Guid="{3A91AED9-3D73-4D76-9436-1D8383121EB2}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ExtensionTools_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ExtensionTools.dll" />
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_CADExtension_Release" Guid="{EE43D41A-8582-4D92-A5B3-F7AA64C90DA0}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_CADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\CADExtension.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThCADExtension_Release" Guid="{14CECA1A-CE05-45E7-B6F3-AE31475E332D}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThCADExtension_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThCADExtension.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_CADCore_Release" Guid="{B5EB690B-D3EF-4E7F-BBF9-A6B3B583F50A}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_CADCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThCADCore.dll" />
@@ -178,19 +202,23 @@
     <ComponentGroup Id="ProductComponentsAppWin64">
       <?if $(var.Configuration) = Debug ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ExtensionTools_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_CADExtension_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ThCADExtension_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_CADCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPEngineCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExtensionTools_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExtensionTools_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CADExtension_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThCADExtension_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CADCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPEngineCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_DotNetARX_Debug" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExtensionTools_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CADExtension_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThCADExtension_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CADCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Debug" />
@@ -203,19 +231,24 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPWSS_Debug" />
         <?elseif $(var.Configuration) = Release ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ExtensionTools_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_CADExtension_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ThCADExtension_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_CADCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPEngineCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_DotNetARX_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExtensionTools_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADExtension_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThCADExtension_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_CADCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_DotNetARX_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExtensionTools_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CADExtension_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThCADExtension_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_CADCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPEngineCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_DotNetARX_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExtensionTools_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CADExtension_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThCADExtension_Release" />
+        
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_CADCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPElectrical_Release" />

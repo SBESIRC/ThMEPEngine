@@ -1,7 +1,6 @@
 ﻿using System;
 using DotNetARX;
 using System.Linq;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
@@ -234,7 +233,10 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectAll()
         {
             var objs = new DBObjectCollection();
-            Geometries.Values.ForEach(o => objs.Add(o));
+            foreach(var item in Geometries.Values)
+            {
+                objs.Add(item);
+            }
             return objs;
         }
 
@@ -273,13 +275,16 @@ namespace ThCADCore.NTS
             }
 
             var objs = new DBObjectCollection();
-            Engine.NearestNeighbour(
+            var neighbours = Engine.NearestNeighbour(
                 geometry.EnvelopeInternal,
                 geometry,
                 new GeometryItemDistance(),
                 num)
-                .Where(o => !o.EqualsExact(geometry))
-                .ForEach(o => objs.Add(Geometries[o]));
+                .Where(o => !o.EqualsExact(geometry));
+            foreach(var neighbour in neighbours)
+            {
+                objs.Add(Geometries[neighbour]);
+            }
             return objs;
         }
     }

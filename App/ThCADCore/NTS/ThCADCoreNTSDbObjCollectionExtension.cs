@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -246,7 +245,10 @@ namespace ThCADCore.NTS
         public static DBObjectCollection ToDBCollection(this IList<Geometry> geometries)
         {
             var objs = new DBObjectCollection();
-            geometries.Cast<LineString>().ForEach(o => objs.Add(o.ToDbPolyline()));
+            foreach(LineString geometry in geometries)
+            {
+                objs.Add(geometry.ToDbPolyline());
+            }
             return objs;
         }
     }

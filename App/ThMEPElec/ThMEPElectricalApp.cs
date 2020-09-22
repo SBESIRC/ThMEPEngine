@@ -11,8 +11,8 @@ using System.Collections.Generic;
 using ThMEPElectrical.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPElectrical.Broadcast;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 using System.Linq;
+using ThCADExtension;
 
 namespace ThMEPElectrical
 {

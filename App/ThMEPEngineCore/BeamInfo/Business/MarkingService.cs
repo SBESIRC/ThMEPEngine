@@ -1,4 +1,5 @@
 ﻿using Linq2Acad;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
@@ -6,7 +7,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.BeamInfo.Utils;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore.BeamInfo.Business
 {

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using StraightSkeletonNet;
 using Vector2d = StraightSkeletonNet.Primitives.Vector2d;
 using System.Linq;
+using ThCADExtension;
 
 namespace ThCADCore.Test
 {
@@ -520,44 +521,6 @@ namespace ThCADCore.Test
                     neighbour.UpgradeOpen();
                     neighbour.ColorIndex = 1;
                     neighbour.DowngradeOpen();
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "ThLoops", CommandFlags.Modal)]
-        public void ThLoops()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    if(acadDatabase.Element<Entity>(obj) is Curve curve)
-                    {
-                        objs.Add(curve);
-                    }
-                    else if(acadDatabase.Element<Entity>(obj) is BlockReference br)
-                    {
-                        DBObjectCollection explodeObjs = new DBObjectCollection();
-                        TianHua.AutoCAD.Utility.ExtensionTools.ThBlockReferenceExtensions.Burst(br, explodeObjs);
-                        foreach(DBObject dbObj in explodeObjs)
-                        {
-                            if(dbObj is Curve curveEnt)
-                            {
-                                objs.Add(curveEnt);
-                            }
-                        }
-                    }
-                }
-                foreach (var obj in objs.FindLoops())
-                {
-                    acadDatabase.ModelSpace.Add(obj as Entity);
                 }
             }
         }

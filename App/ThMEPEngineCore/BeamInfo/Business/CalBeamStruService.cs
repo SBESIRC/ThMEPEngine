@@ -2,6 +2,7 @@
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using ThMEPEngineCore.CAD;
@@ -11,7 +12,6 @@ using System.Collections.Generic;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.BeamInfo.Utils;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore.BeamInfo.Business
 {

@@ -16,9 +16,9 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 using NFox.Cad;
 using Newtonsoft.Json;
+using ThCADExtension;
 
 namespace ThMEPEngineCore
 {

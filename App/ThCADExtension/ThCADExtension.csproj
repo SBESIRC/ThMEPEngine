@@ -4,24 +4,53 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{177B4E6A-7482-4D77-9A31-4AF641802AE7}</ProjectGuid>
+    <ProjectGuid>{2ABCDB6E-F0C9-44C1-960F-31D494EF9738}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ThMEPEngineCore.Test</RootNamespace>
-    <AssemblyName>ThMEPEngineCore.Test</AssemblyName>
+    <RootNamespace>ThCADExtension</RootNamespace>
+    <AssemblyName>ThCADExtension</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="COMTool.cs" />
+    <Compile Include="InvokeTool.cs" />
+    <Compile Include="PointCollector.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThAppTools.cs" />
+    <Compile Include="ThArcExtension.cs" />
+    <Compile Include="ThBlockReferenceExtensions.cs" />
+    <Compile Include="ThCADCommon.cs" />
+    <Compile Include="ThCUITools.cs" />
+    <Compile Include="ThCurveExtension.cs" />
+    <Compile Include="ThDisposableSet.cs" />
+    <Compile Include="ThEditorExtension.cs" />
+    <Compile Include="ThEntTool.cs" />
+    <Compile Include="ThGeExtension.cs" />
+    <Compile Include="ThHatchTool.cs" />
+    <Compile Include="ThMPolygonTool.cs" />
+    <Compile Include="ThPickTool.cs" />
+    <Compile Include="ThPoint3dCollectionExtensions.cs" />
+    <Compile Include="ThPolylineExtension.cs" />
+    <Compile Include="ThRegionTool.cs" />
+    <Compile Include="ThSelectionFilterTool.cs" />
+    <Compile Include="ThStringTools.cs" />
+    <Compile Include="ThTextTool.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -32,18 +61,6 @@
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
       <Name>DotNetARX</Name>
     </ProjectReference>
-    <ProjectReference Include="..\ThCADCore\ThCADCore.csproj">
-      <Project>{C6AC9E68-9059-4DDD-8FA7-58E2656D572E}</Project>
-      <Name>ThCADCore</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
-      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
-      <Name>ThMEPEngineCore</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ThMEPEngineCoreTestApp.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
@@ -51,11 +68,21 @@
         <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
         <PackageReference Include="AutoCAD-2012.Net.Interop.x64" Version="1.0.0" />
       </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2014'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
         <PackageReference Include="AutoCAD-2014.Net.Interop.x64" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2016'))">
@@ -63,12 +90,22 @@
         <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
         <PackageReference Include="AutoCAD-2016.Net.Interop.x86" Version="1.0.0" />
       </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2018'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
         <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
         <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
   </Choose>

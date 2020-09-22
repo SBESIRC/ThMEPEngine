@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
+using ThCADExtension;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThCADCore.NTS
 {

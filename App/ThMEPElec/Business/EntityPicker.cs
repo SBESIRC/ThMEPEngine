@@ -9,7 +9,7 @@ using Linq2Acad;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using TianHua.AutoCAD.Utility.ExtensionTools;
+using ThCADExtension;
 
 namespace ThMEPElectrical.Business
 {

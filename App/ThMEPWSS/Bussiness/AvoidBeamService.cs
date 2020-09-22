@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using ThCADExtension;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
@@ -13,7 +14,6 @@ using ThMEPWSS.Model;
 using ThMEPWSS.Service;
 using ThMEPWSS.Utils;
 using ThWSS.Bussiness;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPWSS.Bussiness
 {

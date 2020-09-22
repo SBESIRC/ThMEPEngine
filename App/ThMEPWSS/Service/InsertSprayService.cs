@@ -3,8 +3,8 @@ using Linq2Acad;
 using System.IO;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 using DotNetARX;
+using ThCADExtension;
 
 namespace ThWSS.Bussiness
 {

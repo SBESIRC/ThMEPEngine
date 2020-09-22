@@ -1,9 +1,9 @@
 ﻿using System;
 using ThCADCore.NTS;
+using ThCADExtension;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore.BeamInfo.Utils
 {

@@ -6,7 +6,7 @@ using ThMEPElectrical.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.AutoCAD.Utility.ExtensionTools;
+using ThCADExtension;
 
 namespace ThMEPElectrical.Broadcast
 {

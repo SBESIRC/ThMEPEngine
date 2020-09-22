@@ -3,8 +3,8 @@ using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
-using TianHua.AutoCAD.Utility.ExtensionTools;
 
 namespace ThMEPEngineCore.Service
 {
