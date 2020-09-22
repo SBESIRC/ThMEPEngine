@@ -114,32 +114,26 @@ namespace ThMEPEngineCore.Service
         }
         public static List<string> AnnotationXrefLayers(Database database)
         {
+            List<string> layerSuffix = new List<string> { "S_BEAM_TEXT_HORZ", "S_BEAM_TEXT_VERT", "S_BEAM_WALL_TEXT",
+                "S_BEAM_SECD_TEXT_HORZ", "S_BEAM_SECD_TEXT_VERT"," S_BEAM_XL_TEXT_HORZ","S_BEAM_XL_TEXT_VERT"};
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var layers = new List<string>();
-                acadDatabase.Layers.Where(o =>
+                acadDatabase.Layers.Where(m =>
                 {
-                    var layerName = ThStructureUtils.OriginalFromXref(o.Name).ToUpper();
-                    if (layerName.Contains("SD_BEAM_TEXT"))
+                    var layerName = ThStructureUtils.OriginalFromXref(m.Name).ToUpper();
+                    return layerSuffix.Where(o =>
                     {
-                        return true;
-                    }
-
-                    if (layerName.Contains("S_BEAM_SECD_TEXT"))
-                    {
-                        return true;
-                    }
-
-                    if (layerName.Contains("S_BEAM_XL_TEXT"))
-                    {
-                        return true;
-                    }
-
-                    if (layerName.Contains("S_BEAM_WALL_TEXT"))
-                    {
-                        return true;
-                    }
-                    return false;
+                        int index = layerName.LastIndexOf(o);
+                        if (index != -1)
+                        {
+                            if (index + o.Length == layerName.Length)
+                            {
+                                return true;
+                            }
+                        }
+                        return false;
+                    }).Any();
                 }).ForEachDbObject(o => layers.Add(o.Name));
                 return layers;
             }
