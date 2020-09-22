@@ -56,6 +56,11 @@ namespace ThCADCore.NTS
             var geometry = curve.ToNTSGeometry();
             var polygon = polyline.ToNTSPolygon();
             var result = ClipGeometry(polygon, geometry, inverted);
+            if (result.IsEmpty)
+            {
+                return objs;
+            }
+
             if (result is MultiLineString lineStrings)
             {
                 foreach (LineString lineString in lineStrings.Geometries)
