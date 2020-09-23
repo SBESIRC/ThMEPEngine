@@ -86,6 +86,27 @@ namespace ThMEPEngineCore.Engine
             // Pass Seven 对BeamLink中的Beams属性进行梁合并
             MergeBeamLinks();
         }
+        public void Split(Database database, Point3dCollection polygon)
+        {
+            // 启动柱识别引擎
+            ColumnEngine = new ThColumnRecognitionEngine();
+            ColumnEngine.Recognize(database, polygon);
+
+            // 启动墙识别引擎
+            ShearWallEngine = new ThShearWallRecognitionEngine();
+            ShearWallEngine.Recognize(database, polygon);
+
+            // 创建空间索引
+            CreateColumnSpatialIndex();
+            CreateWallSpatialIndex();
+
+            // 启动梁识别引擎
+            BeamEngine = new ThBeamRecognitionEngine();
+            BeamEngine.Recognize(database, polygon);
+
+            //梁分割
+            BeamEngine.Split(ColumnEngine, ShearWallEngine, SpatialIndexManager);
+        }
         private void CreateColumnSpatialIndex()
         {
             SpatialIndexManager.CreateColumnSpaticalIndex(ColumnEngine.Collect());
