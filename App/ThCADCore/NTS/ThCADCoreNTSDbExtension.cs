@@ -220,43 +220,6 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(point.Position.ToNTSCoordinate());
         }
 
-        /// <summary>
-        /// 按弦长细化
-        /// </summary>
-        /// <param name="arc"></param>
-        /// <param name="chord"></param>
-        /// <returns></returns>
-        public static LineString TessellateWithChord(this Arc arc, double chord)
-        {
-            // 根据弦长，半径，计算对应的弧长
-            // Chord Length = 2 * Radius * sin(angle / 2.0)
-            // Arc Length = Radius * angle (angle in radians)
-            if (chord > 2 * arc.Radius )
-            {
-                return null;
-            }
-
-            double radius = arc.Radius;
-            double angle = 2 * Math.Asin(chord / (2 * radius));
-            return arc.TessellateWithArc(radius * angle);
-        }
-
-        /// <summary>
-        /// 按弧长细化
-        /// </summary>
-        /// <param name="arc"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public static LineString TessellateWithArc(this Arc arc, double length)
-        {
-            if (arc.Length < length)
-            {
-                return null;
-            }
-
-            return arc.ToNTSLineString(Convert.ToInt32(Math.Floor(arc.Length / length)) + 1);
-        }
-
         public static bool IsCCW(this Polyline pline)
         {
             return Orientation.IsCCW(pline.ToNTSLineString().Coordinates);

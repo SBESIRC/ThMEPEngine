@@ -27,6 +27,7 @@
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonReader.cs" />
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonWriter.cs" />
     <Compile Include="NTS\ThCADCoreNTSCenterlineBuilder.cs" />
+    <Compile Include="NTS\ThCADCoreNTSCurveExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSDistance.cs" />
     <Compile Include="NTS\ThCADCoreNTSEntityExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSExtension.cs" />

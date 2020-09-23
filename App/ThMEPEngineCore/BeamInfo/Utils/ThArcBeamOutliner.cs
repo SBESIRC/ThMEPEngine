@@ -18,8 +18,8 @@ namespace ThMEPEngineCore.BeamInfo.Utils
             //将输入的两段arc转换为PolylineSegmentCollection
             var arc_1 = new Arc(arc1.Center, arc1.Radius, startAngle, endAngle);
             var arc_2 = new Arc(arc2.Center, arc2.Radius, startAngle, endAngle);
-            var arcPolyLine1 = arc_1.TessellateWithChord(arc_1.Radius * (Math.Sin(Math.PI / 360.0))).ToDbPolyline();
-            var arcPolyLine2 = arc_2.TessellateWithChord(arc_2.Radius * (Math.Sin(Math.PI / 360.0))).ToDbPolyline();
+            var arcPolyLine1 = arc_1.TessellateArcWithChord(arc_1.Radius * (Math.Sin(Math.PI / 360.0)));
+            var arcPolyLine2 = arc_2.TessellateArcWithChord(arc_2.Radius * (Math.Sin(Math.PI / 360.0)));
 
             // 获取两段新的arc的端点形成两段PolylineSegement
             PolylineSegment lineSegment_1 = new PolylineSegment(arcPolyLine1.EndPoint.ToPoint2D(), arcPolyLine2.EndPoint.ToPoint2D());

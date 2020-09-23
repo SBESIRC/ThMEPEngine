@@ -76,7 +76,7 @@ namespace ThCADExtension
         /// <param name="poly"></param>
         /// <param name="chord"></param>
         /// <returns></returns>
-        public static Polyline TessellateWithChord(this Polyline poly, double chord)
+        public static Polyline TessellatePolylineWithChord(this Polyline poly, double chord)
         {
             var polyline = new PolylineSegmentCollection(poly);
             var TessellatePolyline = new PolylineSegmentCollection();
@@ -99,7 +99,7 @@ namespace ThCADExtension
                     else 
                     {
                         var angle = 2 * Math.Asin(chord / (2 * circulararc.Radius));
-                        var ArcSegment = segment.TessellateWithAngle(angle);
+                        var ArcSegment = segment.DoTessellate(angle);
                         foreach (var item in ArcSegment)
                         {
                             TessellatePolyline.Add(item);
@@ -116,7 +116,7 @@ namespace ThCADExtension
         /// <param name="poly"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static Polyline TessellateWithArc(this Polyline poly, double length)
+        public static Polyline TessellatePolylineWithArc(this Polyline poly, double length)
         {
             var polyline = new PolylineSegmentCollection(poly);
             var TessellatePolyline = new PolylineSegmentCollection();
@@ -139,7 +139,7 @@ namespace ThCADExtension
                     else
                     {
                         var angle = length / circulararc.Radius;
-                        var ArcSegment = segment.TessellateWithAngle(angle);
+                        var ArcSegment = segment.DoTessellate(angle);
                         foreach (var item in ArcSegment)
                         {
                             TessellatePolyline.Add(item);
@@ -202,7 +202,7 @@ namespace ThCADExtension
         /// <param name="segment"></param>
         /// <param name="angle"></param>
         /// <returns></returns>
-        private static PolylineSegmentCollection TessellateWithAngle(this PolylineSegment segment, double angle)
+        private static PolylineSegmentCollection DoTessellate(this PolylineSegment segment, double angle)
         {
             var TessellateArc = new PolylineSegmentCollection();
             var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);

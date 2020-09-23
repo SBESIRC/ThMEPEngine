@@ -254,7 +254,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             for (int i = 0; i < arcs.Count; i++)
             {
                 // 将Arc_i转换成polyline，并取出每一个端点
-                var polyline = arcs[i].TessellateWithChord(arcs[i].Radius * (Math.Sin(Math.PI / 1440.0))).ToDbPolyline();
+                var polyline = arcs[i].TessellateArcWithChord(arcs[i].Radius * (Math.Sin(Math.PI / 1440.0)));
                 var polylineSegments = new PolylineSegmentCollection(polyline);
                 var pt1 = new List<Point2d>();
                 foreach (var segment in polylineSegments)
@@ -409,7 +409,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             if (arc1_new.Length <= 10 || arc2_new.Length <= 10) return false;
 
             // 计算两段Arc重叠范围内的最大距离
-            var polyline = arc1_new.TessellateWithChord(arc1_new.Radius * (Math.Sin(Math.PI / 1440.0))).ToDbPolyline();
+            var polyline = arc1_new.TessellateArcWithChord(arc1_new.Radius * (Math.Sin(Math.PI / 1440.0)));
             var polylineSegments = new PolylineSegmentCollection(polyline);
             var pt1 = new List<Point2d>();
             foreach (var segment in polylineSegments)
