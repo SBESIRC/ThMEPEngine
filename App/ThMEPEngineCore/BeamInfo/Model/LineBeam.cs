@@ -55,14 +55,7 @@ namespace ThMEPEngineCore.BeamInfo.Model
                 return Vector3d.XAxis.RotateBy(rotateAng, Vector3d.ZAxis);
             }
         }
-        /// <summary>
-        /// 调整梁线方向
-        /// </summary>
-        /// <param name="first"></param>
-        /// <param name="second"></param>
-        /// <param name="beamDir"></param>
-        /// <returns></returns>
-        private List<Line> CreateOutLine(Line first,Line second,Vector3d beamDir)
+        private List<Line> CreateOutLine(Line first, Line second, Vector3d beamDir)
         {
             Vector3d upRight = beamDir.RotateBy(Math.PI / 2.0, Vector3d.ZAxis);
             Plane plane = new Plane(first.StartPoint, beamDir);
@@ -72,40 +65,31 @@ namespace ThMEPEngineCore.BeamInfo.Model
             Point3d firstEndPt = first.EndPoint.TransformBy(wcsToUcs);
             Point3d secondStartPt = second.StartPoint.TransformBy(wcsToUcs);
             Point3d secondEndPt = second.EndPoint.TransformBy(wcsToUcs);
-
             double firstMinZ = Math.Min(firstStartPt.Z, firstEndPt.Z);
             double firstMaxZ = Math.Max(firstStartPt.Z, firstEndPt.Z);
             double secondMinZ = Math.Min(secondStartPt.Z, secondEndPt.Z);
             double secondMaxZ = Math.Max(secondStartPt.Z, secondEndPt.Z);
-            if(secondMinZ >= firstMaxZ || secondMaxZ <= firstMinZ)
+            if (secondMinZ >= firstMaxZ || secondMaxZ <= firstMinZ)
             {
                 return new List<Line>();
             }
-            double z1 = firstMinZ;
-            double z2 = firstMaxZ;
-            if(secondMinZ > firstMinZ && secondMinZ< firstMaxZ)
-            {
-                z1 = secondMinZ;
-            }
-            if (secondMaxZ > firstMinZ && secondMaxZ < firstMaxZ)
-            {
-                z2 = secondMaxZ;
-            }
+            List<double> zValues = new List<double> { firstStartPt.Z, firstEndPt.Z, secondStartPt.Z, secondEndPt.Z };
+            double minZ = zValues.OrderBy(o => o).FirstOrDefault();
+            double maxZ = zValues.OrderByDescending(o => o).FirstOrDefault();
+            firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, minZ);
+            firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, maxZ);
 
-            firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, z1);
-            firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, z2);
-            secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, z1);
-            secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, z2);
-
+            secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, minZ);
+            secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, maxZ);
             firstStartPt = firstStartPt.TransformBy(ucsToWcs);
             firstEndPt = firstEndPt.TransformBy(ucsToWcs);
             secondStartPt = secondStartPt.TransformBy(ucsToWcs);
             secondEndPt = secondEndPt.TransformBy(ucsToWcs);
             plane.Dispose();
-            Point3d firstMidPt = ThGeometryTool.GetMidPt(firstStartPt , firstEndPt);
+            Point3d firstMidPt = ThGeometryTool.GetMidPt(firstStartPt, firstEndPt);
             Point3d secondMidPt = ThGeometryTool.GetMidPt(secondStartPt, secondEndPt);
             Vector3d midVec = firstMidPt.GetVectorTo(secondMidPt);
-            if(midVec.DotProduct(upRight)<0.0)
+            if (midVec.DotProduct(upRight) < 0.0)
             {
                 return new List<Line>
                 {
@@ -122,7 +106,6 @@ namespace ThMEPEngineCore.BeamInfo.Model
                 };
             }
         }
-
         public override Polyline BeamBoundary
         {
             get
