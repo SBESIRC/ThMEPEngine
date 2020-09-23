@@ -63,6 +63,16 @@ namespace ThCADCore.NTS
             return polygon.ToNTSPolygon().Intersects(curve.ToNTSGeometry());
         }
 
+        public static bool RectIntersects(this AcPolygon polygon, Curve curve)
+        {
+            return RectangleIntersects.Intersects(polygon.ToNTSPolygon(), curve.ToNTSGeometry());
+        }
+
+        public static bool RectleContains(this AcPolygon polygon, Curve curve)
+        {
+            return RectangleContains.Contains(polygon.ToNTSPolygon(), curve.ToNTSGeometry());
+        }
+
         /// <summary>
         /// 预处理封闭多段线
         /// </summary>
