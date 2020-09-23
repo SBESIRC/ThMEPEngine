@@ -119,7 +119,12 @@ namespace ThMEPEngineCore
                 // 输出GeoJson文件
                 var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "Beams.geojson")))
-                using (JsonTextWriter writer = new JsonTextWriter(geoJson))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                {
+                    Indentation = 4,
+                    IndentChar = ' ',
+                    Formatting = Formatting.Indented,
+                })
                 {
                     var geoJsonWriter = new ThBeamGeoJsonWriter();
                     geoJsonWriter.Write(allBeams, writer);
