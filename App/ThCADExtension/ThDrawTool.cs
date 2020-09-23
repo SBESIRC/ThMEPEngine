@@ -9,27 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ThCADExtension
-{   
-    public class DrawProfileData
-    {
-        public List<Polyline> MainProfiles { get; private set; }
-
-        // 包含次梁构成的轮廓，可能没有次梁轮廓
-        public List<Polyline> AuxiliaryProfiles { get; private set; }
-
-        public DrawProfileData(List<Polyline> polys)
-        {
-            MainProfiles = polys;
-            AuxiliaryProfiles = new List<Polyline>();
-        }
-
-        public DrawProfileData(List<Polyline> polys, List<Polyline> auxiliaryProfiles)
-        {
-            MainProfiles = polys;
-            AuxiliaryProfiles = auxiliaryProfiles;
-        }
-    }
-
+{       
     public static class ThDrawTool
     {
         public static List<ObjectId> DrawProfile(List<Curve> curves, string LayerName, Color color = null)
@@ -76,8 +56,8 @@ namespace ThCADExtension
             var mainProfiles = inputProfileData.MainProfiles;
             var auxiliaryProfiles = inputProfileData.AuxiliaryProfiles;
 
-            var mainIds = DrawProfile(mainProfiles.Polylines2Curves(), "MainProfile", Color.FromRgb(255, 0, 0));
-            var secondBeamIds = DrawProfile(auxiliaryProfiles.Polylines2Curves(), "AuxiliaryProfile", Color.FromRgb(0, 255, 0));
+            var mainIds = DrawProfile(mainProfiles.Polylines2Curves(), "MainProfile", inputProfileData.MainProfileColor);
+            var secondBeamIds = DrawProfile(auxiliaryProfiles.Polylines2Curves(), "AuxiliaryProfile", inputProfileData.AuxiliaryColor);
 
             var totalIds = new ObjectIdList();
             totalIds.AddRange(mainIds);
@@ -101,6 +81,28 @@ namespace ThCADExtension
             }
 
             return curves;
+        }
+    }
+    public class DrawProfileData
+    {
+        public List<Polyline> MainProfiles { get; private set; }
+
+        // 包含次梁构成的轮廓，可能没有次梁轮廓
+        public List<Polyline> AuxiliaryProfiles { get; private set; }
+
+        public Color MainProfileColor { get; set; }
+        public Color AuxiliaryColor { get; set; }
+
+        public DrawProfileData(List<Polyline> polys)
+        {
+            MainProfiles = polys;
+            AuxiliaryProfiles = new List<Polyline>();
+        }
+
+        public DrawProfileData(List<Polyline> polys, List<Polyline> auxiliaryProfiles)
+        {
+            MainProfiles = polys;
+            AuxiliaryProfiles = auxiliaryProfiles;
         }
     }
 }
