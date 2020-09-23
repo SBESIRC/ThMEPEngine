@@ -62,9 +62,17 @@ namespace ThMEPEngineCore.Engine
                     var dbTextSpatialIndex = ThSpatialIndexService.CreateTextSpatialIndex(dbtexts);
                     foreach (var beam in beams)
                     {
-                        ThBeamMarkingService thBeamMarkingService = new ThBeamMarkingService(beam);
+                        ThBeamMarkingService thBeamMarkingService=null;
+                        if (beam is LineBeam lineBeam)
+                        {
+                            thBeamMarkingService = new ThLineBeamMarkingService(lineBeam);
+                        }
+                        else if(beam is ArcBeam arcBeam)
+                        {
+                            thBeamMarkingService = new ThArcBeamMarkingService(arcBeam);
+                        }
                         List<DBText> findDbText = thBeamMarkingService.Match(dbTextSpatialIndex);
-                        if (findDbText.Count == 1)
+                        if (findDbText.Count > 0)
                         {
                             Elements.Add(CreateIfcBeam(beam, findDbText[0].TextString));
                         }

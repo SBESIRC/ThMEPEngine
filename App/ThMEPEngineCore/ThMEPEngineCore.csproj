@@ -118,12 +118,14 @@
     <Compile Include="Model\ThIfcWindowStandardCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
+    <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
     <Compile Include="Service\ThBeamMerger.cs" />
     <Compile Include="Engine\ThSplitBeamEngine.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThFilterPortLinkBeams.cs" />
+    <Compile Include="Service\ThLineBeamMarkingService.cs" />
     <Compile Include="Service\ThOtherDbExtension.cs" />
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
