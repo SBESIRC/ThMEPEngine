@@ -1,11 +1,11 @@
 ﻿using NetTopologySuite.Simplify;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Algorithm.Locate;
 using NetTopologySuite.Operation.Predicate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
-using AcPolyline = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
 namespace ThCADCore.NTS
 {
@@ -71,6 +71,22 @@ namespace ThCADCore.NTS
         public static bool RectleContains(this AcPolygon polygon, Curve curve)
         {
             return RectangleContains.Contains(polygon.ToNTSPolygon(), curve.ToNTSGeometry());
+        }
+
+        public static DBObjectCollection SplitBy(this AcPolygon polygon, Curve curve)
+        {
+            var geometries = new Geometry[]
+            {
+                polygon.ToNTSPolygon(),
+                curve.ToNTSLineString()
+            };
+
+            var objs = new DBObjectCollection();
+            foreach (Polygon geometry in UnaryUnionOp.Union(geometries).Polygonize())
+            {
+                objs.Add(geometry.Shell.ToDbPolyline());
+            }
+            return objs;
         }
 
         /// <summary>
