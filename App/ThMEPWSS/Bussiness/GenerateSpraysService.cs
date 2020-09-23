@@ -12,8 +12,6 @@ namespace ThMEPWSS.Bussiness
 {
     public class GenerateSpraysService
     {
-        readonly double spacing = 3400;
-
         public void GenerateSprays(List<Polyline> sprayLines)
         {
             var classLines = ClassifySprayLines(sprayLines);
