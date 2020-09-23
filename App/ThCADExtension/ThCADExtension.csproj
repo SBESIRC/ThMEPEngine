@@ -39,7 +39,6 @@
     <Compile Include="ThCUITools.cs" />
     <Compile Include="ThCurveExtension.cs" />
     <Compile Include="ThDisposableSet.cs" />
-    <Compile Include="ThDrawTool.cs" />
     <Compile Include="ThEditorExtension.cs" />
     <Compile Include="ThEntTool.cs" />
     <Compile Include="ThGeExtension.cs" />
