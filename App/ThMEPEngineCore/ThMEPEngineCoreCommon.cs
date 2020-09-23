@@ -63,5 +63,10 @@ namespace ThMEPEngineCore
         /// 最短梁长
         /// </summary>
         public const double BeamMinimumLength = 100.0;
+        /// <summary>
+        /// 梁旁边文字查找放大系数（梁宽的倍数）
+        /// </summary>
+
+        public const double BeamTextSearchTimes = 1.0;
     }
 }
