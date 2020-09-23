@@ -167,18 +167,14 @@ namespace ThCADCore.NTS
         }
         public static Polygon ToNTSPolygon(this Polyline polyLine)
         {
-            var polygons = polyLine.Polygonize();
-            if (polygons.Count == 1)
+            var geometry = polyLine.ToNTSLineString();
+            if (geometry is LinearRing ring)
             {
-                return polygons.First() as Polygon;
-            }
-            else if (polygons.Count == 0)
-            {
-                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(ring);
             }
             else
             {
-                throw new NotSupportedException();
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
             }
         }
 
