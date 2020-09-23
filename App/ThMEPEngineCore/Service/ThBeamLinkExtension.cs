@@ -305,10 +305,19 @@ namespace ThMEPEngineCore.Service
             {
                 beamExtendDis = thIfcLineBeam.Length / 2.0;
             }
-            Vector3d direction = thIfcLineBeam.Direction;           
-            Point3d sp = portPt - direction.GetNormal().MultiplyBy(beamExtendDis);
-            Point3d ep = portPt + direction.GetNormal().MultiplyBy(beamExtendDis);
-            return CreatePortEnvelop(sp.GetVectorTo(ep),sp,beamWidth, sp.DistanceTo(ep));
+            Vector3d direction = thIfcLineBeam.Direction; 
+            if(portPt.DistanceTo(thIfcLineBeam.StartPoint)<=1.0)
+            {
+                Point3d sp = portPt + direction.GetNormal().MultiplyBy(beamExtendDis * 0.5);
+                Point3d ep = portPt - direction.GetNormal().MultiplyBy(beamExtendDis);
+                return CreatePortEnvelop(sp.GetVectorTo(ep), sp, beamWidth, sp.DistanceTo(ep));
+            }
+            else
+            {
+                Point3d sp = portPt - direction.GetNormal().MultiplyBy(beamExtendDis * 0.5);
+                Point3d ep = portPt + direction.GetNormal().MultiplyBy(beamExtendDis);
+                return CreatePortEnvelop(sp.GetVectorTo(ep), sp, beamWidth, sp.DistanceTo(ep));
+            }
         }
         protected Polyline GetArcBeamPortEnvelop(ThIfcArcBeam thIfcArcBeam, Point3d portPt,double beamExtendDis)
         {
