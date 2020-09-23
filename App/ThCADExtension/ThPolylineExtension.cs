@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using DotNetARX;
+using GeometryExtensions;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
- 
+
 namespace ThCADExtension
 {
     public static class ThPolylineExtension
@@ -68,6 +68,143 @@ namespace ThCADExtension
         public static Vector3d LineDirection(this Line line)
         {
             return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
+        }
+
+        /// <summary>
+        /// 根据弦长分割Polyline中的弧段
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="chord"></param>
+        /// <returns></returns>
+        public static Polyline TessellateWithChord(this Polyline poly, double chord)
+        {
+            var polyline = new PolylineSegmentCollection(poly);
+            var TessellatePolyline = new PolylineSegmentCollection();
+            foreach (var segment in polyline)
+            {
+                // 分割段是直线
+                if (segment.IsLinear)
+                {
+                    TessellatePolyline.Add(segment);
+                }
+                // 分割线是弧线
+                else
+                {
+                    var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);
+                    // 排除弦长大于弧直径的情况
+                    if (chord > 2 * circulararc.Radius)
+                    {
+                        TessellatePolyline.Add(new PolylineSegment(segment.StartPoint, segment.EndPoint));
+                    }
+                    else 
+                    {
+                        var angle = 2 * Math.Asin(chord / (2 * circulararc.Radius));
+                        var ArcSegment = segment.TessellateWithAngle(angle);
+                        foreach (var item in ArcSegment)
+                        {
+                            TessellatePolyline.Add(item);
+                        }
+                    }
+                }
+            }
+            return TessellatePolyline.ToPolyline();
+        }
+
+        /// <summary>
+        /// 根据弧长分割Polyline中的弧段
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Polyline TessellateWithArc(this Polyline poly, double length)
+        {
+            var polyline = new PolylineSegmentCollection(poly);
+            var TessellatePolyline = new PolylineSegmentCollection();
+            foreach (var segment in polyline)
+            {
+                // 分割线是直线
+                if (segment.IsLinear)
+                {
+                    TessellatePolyline.Add(segment);
+                }
+                // 分割线是弧线
+                else
+                {
+                    var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);
+                    // 排除分割长度大于弧的周长的情况
+                    if (length >= 2 * Math.PI * circulararc.Radius)
+                    {
+                        TessellatePolyline.Add(new PolylineSegment(segment.StartPoint, segment.EndPoint));
+                    }
+                    else
+                    {
+                        var angle = length / circulararc.Radius;
+                        var ArcSegment = segment.TessellateWithAngle(angle);
+                        foreach (var item in ArcSegment)
+                        {
+                            TessellatePolyline.Add(item);
+                        }
+                    }
+                }
+            }
+            return TessellatePolyline.ToPolyline();
+        }
+
+        /// <summary>
+        /// 根据角度分割弧段
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="angle"></param>
+        /// <returns></returns>
+        private static PolylineSegmentCollection TessellateWithAngle(this PolylineSegment segment, double angle)
+        {
+            var TessellateArc = new PolylineSegmentCollection();
+            var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);
+            var angleRange = 4 * Math.Atan(segment.Bulge);
+            // 判断弧线是否是顺时针方向
+            int IsClockwise = (segment.Bulge < 0.0) ? -1 : 1;
+            if (angle >= (angleRange * IsClockwise))
+            {
+                TessellateArc.Add(new PolylineSegment(segment.StartPoint, segment.EndPoint));
+            }
+            else
+            {
+                // 如果方向向量与y轴正方向的角度 小于等于90° 则方向向量在一三象限或x轴上，此时方向向量与x轴的角度不需要变化，否则需要 2PI - 与x轴角度
+                double StartAng = (circulararc.Center.GetVectorTo(segment.StartPoint).GetAngleTo(new Vector2d(0.0, 1.0)) <= Math.PI / 2.0) ?
+                    circulararc.Center.GetVectorTo(segment.StartPoint).GetAngleTo(new Vector2d(1.0, 0.0)) :
+                    (Math.PI * 2.0 - circulararc.Center.GetVectorTo(segment.StartPoint).GetAngleTo(new Vector2d(1.0, 0.0)));
+
+                double EndAng = (circulararc.Center.GetVectorTo(segment.EndPoint).GetAngleTo(new Vector2d(0.0, 1.0)) <= Math.PI / 2.0) ?
+                    circulararc.Center.GetVectorTo(segment.EndPoint).GetAngleTo(new Vector2d(1.0, 0.0)) :
+                    (Math.PI * 2.0 - circulararc.Center.GetVectorTo(segment.EndPoint).GetAngleTo(new Vector2d(1.0, 0.0)));
+                int num = Convert.ToInt32(Math.Floor(angleRange * IsClockwise / angle)) + 1;
+
+                for (int i = 1; i <= num; i++)
+                {
+                    var startAngle = StartAng + (i - 1) * angle * IsClockwise;
+                    var endAngle = StartAng + i * angle * IsClockwise;
+                    if (i == num)
+                    {
+                        endAngle = EndAng;
+                    }
+                    startAngle = (startAngle > 8 * Math.Atan(1)) ? startAngle - 8 * Math.Atan(1) : startAngle;
+                    startAngle = (startAngle < 0.0) ? startAngle + 8 * Math.Atan(1) : startAngle;
+                    endAngle = (endAngle > 8 * Math.Atan(1)) ? endAngle - 8 * Math.Atan(1) : endAngle;
+                    endAngle = (endAngle < 0.0) ? endAngle + 8 * Math.Atan(1) : endAngle;
+                    // Arc的构建方向是逆时针的，所以如果是顺时针的弧段，需要反向构建
+                    if (segment.Bulge < 0.0)
+                    {
+                        var arc = new Arc(circulararc.Center.ToPoint3d(), circulararc.Radius, endAngle, startAngle);
+                        TessellateArc.Add(new PolylineSegment(arc.EndPoint.ToPoint2d(), arc.StartPoint.ToPoint2d()));
+                    }
+                    else
+                    {
+                        var arc = new Arc(circulararc.Center.ToPoint3d(), circulararc.Radius, startAngle, endAngle);
+                        TessellateArc.Add(new PolylineSegment(arc.StartPoint.ToPoint2d(), arc.EndPoint.ToPoint2d()));
+                    }
+                }
+            }
+            return TessellateArc;
         }
     }
 

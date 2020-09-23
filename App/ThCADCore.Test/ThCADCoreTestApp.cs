@@ -583,5 +583,36 @@ namespace ThCADCore.Test
 
             }
         }
+
+        [CommandMethod("TIANHUACAD", "ThPolylineTessellate", CommandFlags.Modal)]
+        public void ThPolylineTessellate()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                foreach (var item in objs)
+                {
+                    if (item is Polyline poly)
+                    {
+                        var polyline_Chord = ThPolylineExtension.TessellateWithChord(poly,100);
+                        polyline_Chord.ColorIndex = 2;
+                        acadDatabase.ModelSpace.Add(polyline_Chord);
+                        var polyline_Arc = ThPolylineExtension.TessellateWithArc(poly, 150);
+                        polyline_Arc.ColorIndex = 1;
+                        acadDatabase.ModelSpace.Add(polyline_Arc);
+                    }
+                }
+            }
+        }
+
     }
 }
