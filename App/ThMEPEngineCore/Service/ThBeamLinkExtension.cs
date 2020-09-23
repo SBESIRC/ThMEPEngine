@@ -170,7 +170,7 @@ namespace ThMEPEngineCore.Service
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和柱是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.Intersects(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.RectIntersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ColumnEngine.FilterByOutline(dbObj));
@@ -186,7 +186,7 @@ namespace ThMEPEngineCore.Service
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和剪力墙是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.Intersects(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.RectIntersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ShearWallEngine.FilterByOutline(dbObj));
@@ -270,7 +270,7 @@ namespace ThMEPEngineCore.Service
             linkObjs = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelop);
             if (linkObjs.Count > 0)
             {
-                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.Intersects(o));
+                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelop.RectIntersects(o));
                 foreach (DBObject dbObj in overlapObjs)
                 {
                     links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
