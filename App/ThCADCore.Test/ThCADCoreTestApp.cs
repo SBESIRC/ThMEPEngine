@@ -606,9 +606,18 @@ namespace ThCADCore.Test
                         var polyline_Chord = ThPolylineExtension.TessellateWithChord(poly,100);
                         polyline_Chord.ColorIndex = 2;
                         acadDatabase.ModelSpace.Add(polyline_Chord);
-                        var polyline_Arc = ThPolylineExtension.TessellateWithArc(poly, 150);
+                        var polyline_Arc = ThPolylineExtension.TessellateWithArc(poly, 100);
                         polyline_Arc.ColorIndex = 1;
                         acadDatabase.ModelSpace.Add(polyline_Arc);
+                    }
+                    else if(item is Arc arc)
+                    {
+                        var arc_Chord = ThPolylineExtension.TessellateArcWithChord(arc, 100);
+                        arc_Chord.ColorIndex = 2;
+                        acadDatabase.ModelSpace.Add(arc_Chord);
+                        var arc_Arc = ThPolylineExtension.TessellateArcWithArc(arc, 100);
+                        arc_Arc.ColorIndex = 1;
+                        acadDatabase.ModelSpace.Add(arc_Arc);
                     }
                 }
             }

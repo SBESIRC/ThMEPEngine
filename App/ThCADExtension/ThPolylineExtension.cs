@@ -150,8 +150,54 @@ namespace ThCADExtension
             return TessellatePolyline.ToPolyline();
         }
 
+        public static Polyline TessellateArcWithChord(this Arc arc, double chord)
+        {
+            if (chord > 2 * arc.Radius)
+            {
+                var arcPolyline = new PolylineSegment(arc.StartPoint.ToPoint2d(), arc.EndPoint.ToPoint2d());
+                return new PolylineSegmentCollection(arcPolyline).ToPolyline();
+            }
+            else
+            {
+                var angle = 2 * Math.Asin(chord / (2 * arc.Radius));
+                var length = angle * arc.Radius;
+                return arc.TessellateArcWithArc(length);
+            }
+        }
+
+        public static Polyline TessellateArcWithArc(this Arc arc, double length)
+        {
+            if (length >= arc.Length)
+            {
+                var arcPolyline = new PolylineSegment(arc.StartPoint.ToPoint2d(), arc.EndPoint.ToPoint2d());
+                return new PolylineSegmentCollection(arcPolyline).ToPolyline();
+            }
+            else
+            {
+                var segmentCollection = new PolylineSegmentCollection();
+                var angle = length / arc.Radius;
+                int num = Convert.ToInt32(Math.Floor(arc.TotalAngle / angle)) + 1;
+                for (int i = 1; i <= num; i++)
+                {
+                    var startAngle = arc.StartAngle + (i - 1) * angle;
+                    var endAngle = arc.StartAngle + i * angle;
+                    if (i == num)
+                    {
+                        endAngle = arc.EndAngle;
+                    }
+                    startAngle = (startAngle > 8 * Math.Atan(1)) ? startAngle - 8 * Math.Atan(1) : startAngle;
+                    startAngle = (startAngle < 0.0) ? startAngle + 8 * Math.Atan(1) : startAngle;
+                    endAngle = (endAngle > 8 * Math.Atan(1)) ? endAngle - 8 * Math.Atan(1) : endAngle;
+                    endAngle = (endAngle < 0.0) ? endAngle + 8 * Math.Atan(1) : endAngle;
+                    var arcSegment = new Arc(arc.Center, arc.Radius, startAngle, endAngle);
+                    segmentCollection.Add(new PolylineSegment(arcSegment.StartPoint.ToPoint2d(), arcSegment.EndPoint.ToPoint2d()));
+                }
+                return segmentCollection.ToPolyline();
+            }
+        }
+
         /// <summary>
-        /// 根据角度分割弧段
+        /// 根据角度分割弧段(保证起始点终止点不变)
         /// </summary>
         /// <param name="segment"></param>
         /// <param name="angle"></param>
@@ -207,7 +253,6 @@ namespace ThCADExtension
             return TessellateArc;
         }
     }
-
 }
 
 
