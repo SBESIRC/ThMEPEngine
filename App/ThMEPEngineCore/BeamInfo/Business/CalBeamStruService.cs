@@ -137,11 +137,22 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     }
 
                     //  两根线有重叠关系(大部分重叠)
-                    if ((xMinX <= lMaxX && xMaxX >= lMinX) &&
-                        (Math.Abs(xMaxX - lMaxX) < firLine.Length / 2 ||
-                        Math.Abs(xMinX - lMinX) < firLine.Length / 2))
+                    if (xMinX <= lMaxX && xMaxX >= lMinX)
                     {
-                        return true;
+                        if (firLine.Length > x.Length)
+                        {
+                            if (xMaxX - lMaxX < x.Length / 2 || xMinX - lMinX < x.Length / 2)
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            if (lMaxX - xMaxX < firLine.Length / 2 || lMinX - xMinX < firLine.Length / 2)
+                            {
+                                return true;
+                            }
+                        }
                     }
 
                     // 不可能配成梁的线
@@ -206,7 +217,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                             UpBeamLine = linePair,
                             DownBeamLine = plineDic
                         };
-                        if(beam.StartPoint.DistanceTo(beam.EndPoint)>=1.0)
+                        if (beam.StartPoint.DistanceTo(beam.EndPoint) >= 1.0)
                         {
                             beamLst.Add(beam);
                         }
@@ -418,7 +429,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
             }
             pt1.Add(polylineSegments.EndPoint);
             var dist_max = pt1.Max(pt => arc2_new.GetDistToPoint(pt.ToPoint3d()));
-            if (dist_max <= Math.Max(arc1_new.Radius * (Math.Sin(Math.PI / 1440.0)),20.0))
+            if (dist_max <= Math.Max(arc1_new.Radius * (Math.Sin(Math.PI / 1440.0)), 20.0))
             {
                 return true;
             }
