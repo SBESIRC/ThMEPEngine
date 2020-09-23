@@ -13,7 +13,13 @@ namespace ThMEPEngineCore.Service
         {
             BeamLink = thBeamLink;
         }
-        public void Merge()
+        public static ThBeamMerger Merge(ThBeamLink thBeamLink)
+        {
+            ThBeamMerger thBeamMerger = new ThBeamMerger(thBeamLink);
+            thBeamMerger.Merge();
+            return thBeamMerger;
+        }
+        private void Merge()
         {
             if (BeamLink.Beams.Count <= 1)
             {
