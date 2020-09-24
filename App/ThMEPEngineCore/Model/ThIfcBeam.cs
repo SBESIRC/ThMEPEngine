@@ -7,7 +7,7 @@ namespace ThMEPEngineCore.Model
     {
         public ThIfcBeam()
         {
-            Height = 500.0;
+            Height = ThMEPEngineCoreCommon.BeamDefaultHeight;
         }
         public Point3d StartPoint { get; set; }
         public Point3d EndPoint { get; set; }
