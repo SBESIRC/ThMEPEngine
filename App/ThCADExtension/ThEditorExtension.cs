@@ -1,18 +1,10 @@
-﻿using System;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
-#if ACAD2012
-    using System.Drawing;
-#else
-    using System.Windows;
-#endif
-using ThCADExtension;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcRegion = Autodesk.AutoCAD.DatabaseServices.Region;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThCADExtension
 {
