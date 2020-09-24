@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Linq;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -205,7 +206,7 @@ namespace ThCADCore.NTS
         public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
         {
             var geometries = new List<LineString>();
-            foreach(Curve curve in curves)
+            foreach (Curve curve in curves)
             {
                 geometries.Add(curve.ToNTSLineString());
             }
@@ -242,12 +243,40 @@ namespace ThCADCore.NTS
             return results;
         }
 
-        public static DBObjectCollection ToDBCollection(this IList<Geometry> geometries)
+        public static List<DBObject> ToDbObjects(this Geometry geometry)
         {
-            var objs = new DBObjectCollection();
-            foreach(LineString geometry in geometries)
+            var objs = new List<DBObject>();
+            if (geometry.IsEmpty)
             {
-                objs.Add(geometry.ToDbPolyline());
+                return objs;
+            }
+            if (geometry is LineString lineString)
+            {
+                objs.Add(lineString.ToDbPolyline());
+            }
+            else if (geometry is LinearRing linearRing)
+            {
+                objs.Add(linearRing.ToDbPolyline());
+            }
+            else if (geometry is Polygon polygon)
+            {
+                objs.AddRange(polygon.ToDbPolylines());
+            }
+            else if (geometry is MultiLineString lineStrings)
+            {
+                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+            }
+            else if (geometry is MultiPolygon polygons)
+            {
+                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+            }
+            else if (geometry is GeometryCollection geometries)
+            {
+                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+            }
+            else
+            {
+                throw new NotSupportedException();
             }
             return objs;
         }

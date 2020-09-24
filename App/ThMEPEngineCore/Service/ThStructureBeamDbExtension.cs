@@ -80,7 +80,8 @@ namespace ThMEPEngineCore.Service
                                 var wcsCurve = curve.GetTransformedCopy(matrix) as Curve;
                                 if (xclip.IsValid)
                                 {
-                                    foreach (Curve item in xclip.Polygon.Clip(wcsCurve, xclip.Inverted))
+                                    var clipper = new ThCADCoreNTSGeometryClipper(xclip.Polygon);
+                                    foreach (Curve item in clipper.Clip(wcsCurve, xclip.Inverted))
                                     {
                                         curves.Add(item);
                                     }  

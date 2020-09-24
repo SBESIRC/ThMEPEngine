@@ -1,4 +1,7 @@
 ﻿using System;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using NetTopologySuite.Simplify;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -128,7 +131,9 @@ namespace ThCADCore.NTS
             merger.Add(UnaryUnionOp.Union(result));
 
             // 返回结果
-            return merger.GetMergedLineStrings().ToDBCollection();
+            var objs = new List<DBObject>();
+            merger.GetMergedLineStrings().ForEach(g => objs.AddRange(g.ToDbObjects()));
+            return objs.ToCollection<DBObject>();
         }
 
         /// <summary>
