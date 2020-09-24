@@ -194,43 +194,7 @@ namespace ThMEPEngineCore
             dbText.Layer = "0";
             dbText.Height = 200;
             return dbText;
-        }
-        [CommandMethod("TIANHUACAD", "ThExtractBeamConnectEx", CommandFlags.Modal)]
-        public void ThExtractBeamConnectEx()
-        {
-            List<ThBeamLink> totalBeamLinks = new List<ThBeamLink>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
-            {
-                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
-                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
-                thBeamTypeRecogitionEngine.Recognize(Active.Database, range.Vertices());
-                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m =>
-                {
-                   var outline = m.CreateExtendBeamOutline(50.0);
-                    outline.Item1.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(outline.Item1);
-                });
-                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m =>
-                {
-                    var outline = m.CreateExtendBeamOutline(50.0);
-                    outline.Item1.ColorIndex = 2;
-                    acadDatabase.ModelSpace.Add(outline.Item1);
-                });
-                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m =>
-                {
-                    var outline = m.CreateExtendBeamOutline(50.0);
-                    outline.Item1.ColorIndex = 3;
-                    acadDatabase.ModelSpace.Add(outline.Item1);
-                });
-                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m =>
-                {
-                    var outline = m.CreateExtendBeamOutline(50.0);
-                    outline.Item1.ColorIndex = 4;
-                    acadDatabase.ModelSpace.Add(outline.Item1);
-                });
-            }
-        }
+        }        
         [CommandMethod("TIANHUACAD", "ThExtractLaneLine", CommandFlags.Modal)]
         public void ThExtractLaneLine()
         {

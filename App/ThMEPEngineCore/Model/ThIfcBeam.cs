@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Interop;
 
 namespace ThMEPEngineCore.Model
 {
@@ -28,6 +29,7 @@ namespace ThMEPEngineCore.Model
             }
         }
         public abstract Polyline Extend(double length,double width);
+        public abstract Polyline ExtendBoth(double startExtendLength, double endExtendLength);
     }
     public enum BeamComponentType
     {

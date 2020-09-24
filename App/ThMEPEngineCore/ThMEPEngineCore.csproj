@@ -123,6 +123,7 @@
     <Compile Include="Service\ThBeamLinkExtension.cs" />
     <Compile Include="Service\ThBeamMerger.cs" />
     <Compile Include="Engine\ThSplitBeamEngine.cs" />
+    <Compile Include="Service\ThBeamLinkSnapService.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThFilterPortLinkBeams.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />

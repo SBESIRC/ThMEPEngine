@@ -31,6 +31,25 @@ namespace ThMEPEngineCore.Model
             Point3d pt2 = newSp + perpendDir.GetNormal().MultiplyBy(actualwidth / 2.0+ widthIncrement);
             Point3d pt3 = pt2 + Direction.GetNormal().MultiplyBy(newSp.DistanceTo(newEp));
             Point3d pt4 = pt1 + Direction.GetNormal().MultiplyBy(newSp.DistanceTo(newEp));
+            StartPoint = newSp;
+            EndPoint = newEp;
+            Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
+            return pts.CreatePolyline();
+        }
+
+        public override Polyline ExtendBoth(double startExtendLength, double endExtendLength)
+        {
+            Polyline outline = this.Outline as Polyline;
+            Vector3d perpendDir = outline.GetPoint3dAt(0).GetVectorTo(outline.GetPoint3dAt(1));
+            double actualwidth = perpendDir.Length;
+            Point3d newSp = this.StartPoint - Direction.GetNormal().MultiplyBy(startExtendLength);
+            Point3d newEp = this.EndPoint + Direction.GetNormal().MultiplyBy(endExtendLength);
+            Point3d pt1 = newSp - perpendDir.GetNormal().MultiplyBy(actualwidth / 2.0);
+            Point3d pt2 = newSp + perpendDir.GetNormal().MultiplyBy(actualwidth / 2.0);
+            Point3d pt3 = pt2 + Direction.GetNormal().MultiplyBy(newSp.DistanceTo(newEp));
+            Point3d pt4 = pt1 + Direction.GetNormal().MultiplyBy(newSp.DistanceTo(newEp));
+            StartPoint = newSp;
+            EndPoint = newEp;
             Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
             return pts.CreatePolyline();
         }

@@ -83,8 +83,18 @@ namespace ThMEPEngineCore.Engine
             // Pass Seven 把悬挑梁末端连接的未定义梁去除
             RemoveUndefinedFromOverhanging();
 
-            // Pass Seven 对BeamLink中的Beams属性进行梁合并
+            // Pass Eight 对BeamLink中的Beams属性进行梁合并
             MergeBeamLinks();
+
+            // Pass Nine 梁吸附到相邻物体上
+            SnapBeams();
+        }
+        private void SnapBeams()
+        {
+            PrimaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
+            HalfPrimaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
+            OverhangingPrimaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
+            SecondaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
         }
         public void Split(Database database, Point3dCollection polygon)
         {

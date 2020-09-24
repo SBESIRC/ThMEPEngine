@@ -10,5 +10,10 @@ namespace ThMEPEngineCore.Model
         {
             throw new NotImplementedException();
         }
+
+        public override Polyline ExtendBoth(double startExtendLength, double endExtendLength)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

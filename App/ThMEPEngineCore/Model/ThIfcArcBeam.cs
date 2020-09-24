@@ -19,5 +19,10 @@ namespace ThMEPEngineCore.Model
             //TODO
             return this.Outline.Clone() as Polyline;
         }
+
+        public override Polyline ExtendBoth(double startExtendLength, double endExtendLength)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
