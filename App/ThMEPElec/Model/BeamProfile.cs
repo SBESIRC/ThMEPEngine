@@ -7,25 +7,19 @@ using System.Threading.Tasks;
 
 namespace ThMEPElectrical.Model
 {
-    public enum BeamType
+    /// <summary>
+    /// 记录次梁的轮廓以及次梁的高度
+    /// </summary>
+    public class SecondBeamProfileInfo
     {
-        MainBeam,  // 主梁
-        SecondBeam // 次梁
-    }
+        public Polyline Profile; // 次梁的轮廓
 
-    public class BeamProfile
-    {
-        //public BeamType Type; // 主次梁
+        public double Height;   // 次梁的高度
 
-        public Polyline Profile; // 梁的轮廓
-
-        public double Height;   // 梁的高度
-
-        public BeamProfile(Polyline poly, double height = 500)
+        public SecondBeamProfileInfo(Polyline poly, double height = 500)
         {
             Profile = poly;
             Height = height;
         }
     }
-
 }

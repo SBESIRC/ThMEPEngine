@@ -18,7 +18,6 @@ namespace ThMEPElectrical.Business
     /// </summary>
     public class EntityPicker
     {
-        public const string WallLayer = "outerWall";
         // 选择的图元
         public static List<Polyline> MakeUserPickEntities()
         {
@@ -29,15 +28,13 @@ namespace ThMEPElectrical.Business
                 MessageForAdding = "选择墙轮廓",
                 RejectObjectsOnLockedLayers = true,
             };
+
             var dxfNames = new string[]
             {
                 RXClass.GetClass(typeof(Polyline)).DxfName,
             };
-            var layerNames = new string[]
-            {
-                WallLayer,
-            };
-            var filter = ThSelectionFilterTool.Build(dxfNames, layerNames);
+
+            var filter = ThSelectionFilterTool.Build(dxfNames);
             var result = Active.Editor.GetSelection(options, filter);
             if (result.Status != PromptStatus.OK)
             {

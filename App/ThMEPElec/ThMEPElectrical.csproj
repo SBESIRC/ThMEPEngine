@@ -39,7 +39,9 @@
     <Compile Include="Business\MainSecondBeam\MSBeamNoRegularOneColPlacer.cs" />
     <Compile Include="Business\MainSecondBeam\MSBeamNoRegularPlacer.cs" />
     <Compile Include="Business\MainSecondBeam\MSBeamRectPlacer.cs" />
+    <Compile Include="Business\PreWindowSelector.cs" />
     <Compile Include="CAD\DBExtract.cs" />
+    <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />

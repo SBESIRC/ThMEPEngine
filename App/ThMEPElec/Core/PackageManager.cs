@@ -15,6 +15,9 @@ using AcHelper;
 using GeometryExtensions;
 using Autodesk.AutoCAD.ApplicationServices;
 using Linq2Acad;
+using ThMEPEngineCore.Engine;
+using ThCADExtension;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical.Core
 {
@@ -65,29 +68,74 @@ namespace ThMEPElectrical.Core
         /// <returns></returns>
         public List<PlaceInputProfileData> DoMainSecondBeamProfiles()
         {
+            // 前置数据读取器
+            var infoReader = new InfoReader();
+            infoReader.Do();
+
             // 用户选择
             var wallPolylines = EntityPicker.MakeUserPickEntities();
-
             var inputProfileDatas = new List<PlaceInputProfileData>();
 
-            // 数据读取
-            var dataExtract = new DBExtract();
-            dataExtract.GetCurves();
-
-            var secondBeams = dataExtract.SecondBeams;
-            var beamProfiles = new List<BeamProfile>();
-            secondBeams.ForEach(e => beamProfiles.Add(new BeamProfile(e)));
-
+            // 外墙轮廓数据
             foreach (var poly in wallPolylines)
             {
-                // 外墙，内洞，次梁
-                var profileDatas = DetectionCalculator.MakeDetectionData(poly, dataExtract.SubtractCurves, beamProfiles);
+                var wallPtCollection = poly.Vertices();
+                var innerHoles = GetValidProfiles(infoReader.RecognizeMainBeamColumnWalls, wallPtCollection);
+                var secondBeams = GetValidProfileInfos(infoReader.RecognizeSecondBeams, wallPtCollection);
 
+                // 外墙，内洞，次梁
+                var profileDatas = DetectionCalculator.MakeDetectionData(poly, innerHoles, secondBeams);
                 // 主次梁信息
                 inputProfileDatas.AddRange(profileDatas);
             }
 
             return inputProfileDatas;
+        }
+
+        private List<Polyline> GetValidProfiles(List<Polyline> srcPolylines, Point3dCollection window)
+        {
+            var polylines = new List<Polyline>();
+            DBObjectCollection dbObjs = new DBObjectCollection();
+            srcPolylines.ForEach(o => dbObjs.Add(o));
+            ThCADCoreNTSSpatialIndex SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+            foreach (var filterObj in SpatialIndex.SelectCrossingPolygon(window))
+            {
+                if (filterObj is Polyline poly)
+                    polylines.Add(poly);
+            }
+
+            return polylines;
+        }
+        
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="beamProfileInfos"></param>
+        /// <param name="window"></param>
+        /// <returns></returns>
+        private List<SecondBeamProfileInfo> GetValidProfileInfos(List<SecondBeamProfileInfo> beamProfileInfos, Point3dCollection window)
+        {
+            var secondBeamInfos = new List<SecondBeamProfileInfo>();
+            var polyWindow = window.ToPolyline();
+            foreach (var singleSecondBeamInfo in beamProfileInfos)
+            {
+                if (RelatedPolyline(polyWindow, singleSecondBeamInfo.Profile))
+                    secondBeamInfos.Add(singleSecondBeamInfo);
+            }
+
+            return secondBeamInfos;
+        }
+
+        private bool RelatedPolyline(Polyline polyFir, Polyline PolySec)
+        {
+            var ptCollection = PolySec.Vertices();
+            foreach (Point3d pt in ptCollection)
+            {
+                if (GeomUtils.PtInLoop(polyFir, pt.ToPoint2D()))
+                    return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -97,6 +145,8 @@ namespace ThMEPElectrical.Core
         public List<Point3d> DoMainSecondBeamPlacePoints()
         {
             var ptLst = new List<Point3d>();
+
+            // 计算主次梁结构关系
             var inputProfileDatas = DoMainSecondBeamProfiles();
             if (inputProfileDatas.Count == 0)
                 return ptLst;

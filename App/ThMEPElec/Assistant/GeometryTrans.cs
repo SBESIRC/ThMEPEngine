@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -135,6 +136,14 @@ namespace ThMEPElectrical.Assistant
             return ptLst;
         }
 
+        public static Polyline ToPolyline(this Point3dCollection ptCollection)
+        {
+            var poly = new Polyline();
+            poly.Closed = true;
+            poly.CreatePolyline(ptCollection);
+            return poly;
+        }
+        
         /// <summary>
         /// 根据点集，半径，绘制圆
         /// </summary>

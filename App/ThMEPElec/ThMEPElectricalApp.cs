@@ -150,7 +150,7 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THMSABBMultiPlace", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFDL", CommandFlags.Modal)]
         public void THMSABBMultiPlace()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

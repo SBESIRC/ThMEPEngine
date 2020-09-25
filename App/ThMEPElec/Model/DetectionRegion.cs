@@ -10,7 +10,7 @@ namespace ThMEPElectrical.Model
     public class DetectionRegion
     {
         public Polyline DetectionProfile = null; //探测区域轮廓
-        public List<BeamProfile> secondBeams = new List<BeamProfile>(); // 每个探测区域中的相关的次梁
+        public List<SecondBeamProfileInfo> secondBeams = new List<SecondBeamProfileInfo>(); // 每个探测区域中的相关的次梁
         public bool IsHasInBeams = false;
     }
 }

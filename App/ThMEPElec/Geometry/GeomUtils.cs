@@ -246,5 +246,57 @@ namespace ThMEPElectrical.Geometry
         {
             return rad / Math.PI * 180;
         }
+
+        /// <summary>
+        /// 获取框选范围的点的集合
+        /// </summary>
+        /// <param name="ptFir"></param>
+        /// <param name="ptSec"></param>
+        /// <returns></returns>
+        public static Point3dCollection CalculateRectangleFromPoints(Point3d ptFir, Point3d ptSec)
+        {
+            var point3dCollection = new Point3dCollection();
+            double xMin;
+            double xMax;
+
+            double yMin;
+            double yMax;
+            if (ptFir.X < ptSec.X)
+            {
+                xMin = ptFir.X;
+                xMax = ptSec.X;
+            }
+            else
+            {
+                xMin = ptSec.X;
+                xMax = ptFir.X;
+            }
+
+            if (ptFir.Y < ptSec.Y)
+            {
+                yMin = ptFir.Y;
+                yMax = ptSec.Y;
+            }
+            else
+            {
+                yMin = ptSec.Y;
+                yMax = ptFir.Y;
+            }
+
+            var leftBottmPt = new Point3d(xMin, yMin, 0);
+            var rightBottomPt = new Point3d(xMax, yMin, 0);
+
+            var leftTopPt = new Point3d(xMin, yMax, 0);
+
+            var rightTopPt = new Point3d(xMax, yMax, 0);
+
+            point3dCollection.Add(leftBottmPt);
+            point3dCollection.Add(rightBottomPt);
+            point3dCollection.Add(rightTopPt);
+            point3dCollection.Add(leftTopPt);
+
+
+            return point3dCollection;
+        }
     }
 }

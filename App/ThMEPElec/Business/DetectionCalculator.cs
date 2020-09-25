@@ -16,7 +16,7 @@ namespace ThMEPElectrical.Business
     {
         private Polyline m_wallProfile = null;
         private List<Polyline> m_innerProfiles = null;
-        private List<BeamProfile> m_secondBeams = null;
+        private List<SecondBeamProfileInfo> m_secondBeamInfos = null;
 
         /// <summary>
         /// 梁跨数据信息
@@ -33,18 +33,18 @@ namespace ThMEPElectrical.Business
         /// <param name="polyline"> 墙</param>
         /// <param name="polylines">内轮廓</param>
         /// <param name="secondBeams"> 次梁</param>
-        public static List<PlaceInputProfileData> MakeDetectionData(Polyline polyline, List<Polyline> polylines, List<BeamProfile> secondBeams)
+        public static List<PlaceInputProfileData> MakeDetectionData(Polyline polyline, List<Polyline> polylines, List<SecondBeamProfileInfo> secondBeams)
         {
             var detection = new DetectionCalculator(polyline, polylines, secondBeams);
             detection.DoBeamSpan();
             return detection.BeamSpanProfileData;
         }
 
-        public DetectionCalculator(Polyline wallProfile, List<Polyline> innerHoles, List<BeamProfile> secondBeams = null)
+        public DetectionCalculator(Polyline wallProfile, List<Polyline> innerHoles, List<SecondBeamProfileInfo> secondBeams = null)
         {
             m_wallProfile = wallProfile;
             m_innerProfiles = innerHoles;
-            m_secondBeams = secondBeams;
+            m_secondBeamInfos = secondBeams;
         }
 
         /// <summary>
@@ -52,14 +52,17 @@ namespace ThMEPElectrical.Business
         /// </summary>
         public void DoBeamSpan()
         {
-            //主梁
+            // 外墙边界轮廓扣减后的主梁构成的轮廓
             var mainBeamProfiles = CalculateMainBeamProfiles();
 
             // 主次梁关系
-            var detectRegion = CalculateDetectionRelations(mainBeamProfiles);
+            var detectRegion = CalculateDetectionRelations(mainBeamProfiles, m_secondBeamInfos);
+
+            // 根据主次梁的高度信息进行区域的划分, 如次梁高度 > 600mm的
+            var divideDetectRegion = DivisionMainDetectionRegion(detectRegion);
 
             // 数据转换
-            BeamSpanProfileData = DetectRegion2ProfileData(detectRegion);
+            BeamSpanProfileData = DetectRegion2ProfileData(divideDetectRegion);
             DrawUtils.DrawGroup(BeamSpanProfileData);
         }
 
@@ -75,33 +78,17 @@ namespace ThMEPElectrical.Business
             return inputProfileDatas;
         }
 
-        private List<Polyline> BeamProfiles2Polylines(List<BeamProfile> srcPolylines)
+        /// <summary>
+        /// 次梁信息提取次梁轮廓
+        /// </summary>
+        /// <param name="srcPolylines"></param>
+        /// <returns></returns>
+        private List<Polyline> BeamProfiles2Polylines(List<SecondBeamProfileInfo> srcPolylines)
         {
             var polys = new List<Polyline>();
             srcPolylines.ForEach(e => polys.Add(e.Profile));
             return polys;
         }
-
-        /// <summary>
-        /// 轮廓预处理筛选
-        /// </summary>
-        /// <param name="wallPoly"></param>
-        /// <param name="srcPolylines"></param>
-        /// <returns></returns>
-        public List<Polyline> PreProcessProfiles(Polyline wallPoly, List<Polyline> srcPolylines)
-        {
-            var resPolys = new List<Polyline>();
-            return resPolys;
-        }
-
-        public void Do()
-        {
-            var mainBeamProfiles = CalculateMainBeamProfiles();
-
-            var detectRegion = CalculateDetectionRelations(mainBeamProfiles);
-
-        }
-
 
         /// <summary>
         /// 对次梁高度大于600高度的进行再次划分
@@ -138,11 +125,11 @@ namespace ThMEPElectrical.Business
                 var singleDetectRegion = calculateMidRegions.First();
                 calculateMidRegions.RemoveAt(0);
 
-                var resRegion = Division(singleDetectRegion, ref calculateMidRegions);
+                var resRegions = Division(singleDetectRegion, ref calculateMidRegions);
 
-                if (resRegion != null)
+                if (resRegions.Count != 0)
                 {
-                    resDetectRegions.Add(resRegion);
+                    resDetectRegions.AddRange(resRegions);
                 }
             }
 
@@ -150,52 +137,80 @@ namespace ThMEPElectrical.Business
         }
 
         /// <summary>
-        /// 细分
+        /// 对当前一个数据进行，分别收集不再需要细分的数据和需要细分的数据
         /// </summary>
         /// <param name="detectRegion"></param>
         /// <returns></returns>
-        private DetectionRegion Division(DetectionRegion detectRegion, ref List<DetectionRegion> srcDetectRegion)
+        private List<DetectionRegion> Division(DetectionRegion detectRegion, ref List<DetectionRegion> srcDetectRegions)
         {
-            if (detectRegion.secondBeams.Count == 0)
-                return detectRegion;
-
+            // 收集不再需要进行再次划分的探测区域
             var resDivisionRegions = new List<DetectionRegion>();
-            var secondBeams = detectRegion.secondBeams;
-
-            var validBeam = GetValidBeamProfile(secondBeams);
-
-
-            return detectRegion;
-        }
-
-        private List<DetectionRegion> Division1(DetectionRegion detectRegion)
-        {
             if (detectRegion.secondBeams.Count == 0)
-                return new List<DetectionRegion>() { detectRegion };
-
-            var resDivisionRegions = new List<DetectionRegion>();
-            var secondBeams = detectRegion.secondBeams;
-
-            var validBeam = GetValidBeamProfile(secondBeams);
-
-            if (validBeam == null)
             {
-                return new List<DetectionRegion>() { detectRegion };
+                resDivisionRegions.Add(detectRegion);
+                return resDivisionRegions;
+            }
+
+            var secondBeams = detectRegion.secondBeams;
+            var mainBeamPoly = detectRegion.DetectionProfile;
+            var greaterHeightBeamInfo = GetValidBeamProfile(secondBeams);
+
+            if (greaterHeightBeamInfo == null)
+            {
+                resDivisionRegions.Add(detectRegion);
             }
             else
             {
-
+                // 划分
+                var resPolys = DividePolylines(mainBeamPoly, greaterHeightBeamInfo.Profile);
+                var divideRegions = CalculateDetectionRelations(resPolys, secondBeams);
+                foreach (var divideRegion in divideRegions)
+                {
+                    if (IsNeedDivide(divideRegion))
+                        srcDetectRegions.Add(divideRegion);
+                    else
+                        resDivisionRegions.Add(divideRegion);
+                }
             }
 
             return resDivisionRegions;
         }
 
+        private bool IsNeedDivide(DetectionRegion detectRegion)
+        {
+            var secondBeamInfos = detectRegion.secondBeams;
+            if (secondBeamInfos.Count == 0)
+                return false;
+
+            var greaterHeightBeamInfo = GetValidBeamProfile(secondBeamInfos);
+
+            if (greaterHeightBeamInfo != null)
+                return true;
+
+            return false;
+        }
+
+
+        private List<Polyline> DividePolylines(Polyline poly, Polyline innerPoly)
+        {
+            var dbLst = new DBObjectCollection();
+            dbLst.Add(innerPoly);
+
+            var resProfiles = new List<Polyline>();
+            foreach (Polyline item in poly.Difference(dbLst))
+            {
+                resProfiles.Add(item);
+            }
+
+            return resProfiles;
+        }
+
         /// <summary>
-        /// 找到第一个大于600高度的次梁， 没有返回空
+        /// 找到第一个大于600高度的次梁， 没有返回空， 从原有的集合中删除已经找到的梁信息
         /// </summary>
         /// <param name="srcBeamProfiles"></param>
         /// <returns></returns>
-        private BeamProfile GetValidBeamProfile(List<BeamProfile> srcBeamProfiles)
+        private SecondBeamProfileInfo GetValidBeamProfile(List<SecondBeamProfileInfo> srcBeamProfiles)
         {
             foreach (var singleBeamProfile in srcBeamProfiles)
             {
@@ -209,7 +224,12 @@ namespace ThMEPElectrical.Business
             return null;
         }
 
-        public List<DetectionRegion> CalculateDetectionRelations(List<Polyline> profiles)
+        /// <summary>
+        /// 计算主次梁构成的关系组
+        /// </summary>
+        /// <param name="profiles"></param>
+        /// <returns></returns>
+        public List<DetectionRegion> CalculateDetectionRelations(List<Polyline> profiles, List<SecondBeamProfileInfo> secondBeamInfos)
         {
             var detectRegions = new List<DetectionRegion>();
 
@@ -224,7 +244,7 @@ namespace ThMEPElectrical.Business
                 detectRegions.Add(detectRegion);
 
                 // 次梁
-                foreach (var secondBeam in m_secondBeams)
+                foreach (var secondBeam in secondBeamInfos)
                 {
                     var secondBeamProfile = secondBeam.Profile;
 

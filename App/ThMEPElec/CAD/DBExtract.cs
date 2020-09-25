@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPElectrical.CAD
 {
@@ -45,6 +46,7 @@ namespace ThMEPElectrical.CAD
             // 临时数据
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                //ThBeamConnectRecogitionEngine.ExecuteRecognize(acadDatabase.Database,)
                 foreach (var mainBeam in acadDatabase.ModelSpace.OfType<Polyline>().Where(o => { return o.Layer.Contains("Main_beam"); }).ToList())
                 {
                     MainBeams.Add(mainBeam.Clone() as Polyline);
