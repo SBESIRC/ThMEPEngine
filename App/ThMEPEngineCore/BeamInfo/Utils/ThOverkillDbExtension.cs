@@ -111,7 +111,11 @@ namespace ThMEPEngineCore.BeamInfo.Utils
                             overlopCuv = tempCuv3d.Overlap(firCuv3d, tolerance);
                             if (overlopCuv == null)
                             {
-                                continue;
+                                overlopCuv = firCuv3d.Overlap(tempCuv3d, tolerance);
+                                if (overlopCuv == null)
+                                {
+                                    continue;
+                                }
                             }
                         }
 

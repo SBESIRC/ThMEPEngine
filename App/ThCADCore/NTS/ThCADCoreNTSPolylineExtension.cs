@@ -146,5 +146,16 @@ namespace ThCADCore.NTS
         {
             return polyline.ToNTSLineString().Distance(other.ToNTSLineString());
         }
+
+        /// <summary>
+        /// polyline与line之间的距离
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="other"></param>
+        /// <returns></returns>
+        public static double Distance(this Polyline polyline, Line line)
+        {
+            return polyline.ToNTSLineString().Distance(line.ToNTSLineString());
+        }
     }
 }

@@ -78,7 +78,7 @@ namespace ThMEPWSS.Service
         }
 
         /// <summary>
-        /// 计算喷淋布置点
+        /// 计算喷淋布置点(只有原点信息)
         /// </summary>
         /// <param name="tLines"></param>
         /// <param name="vLines"></param>
@@ -121,7 +121,6 @@ namespace ThMEPWSS.Service
             return layoutPts;
         }
 
-
         /// <summary>
         /// 计算相交处布置点
         /// </summary>
@@ -151,7 +150,10 @@ namespace ThMEPWSS.Service
         {
             Point3dCollection points = new Point3dCollection();
             vLine.IntersectWith(tLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
-
+            if (points.Count <= 0)
+            {
+                //return null;
+            }
             return points[0];
         }
 
@@ -341,16 +343,28 @@ namespace ThMEPWSS.Service
             var resSprays = sprays.Where(x => x.tLine == originLine || x.vLine == originLine).ToList();
             foreach (var spray in resSprays)
             {
+                Point3dCollection points = new Point3dCollection();
                 if (spray.vLine == originLine) 
                 {
-                    spray.vLine = newLine;
+                    spray.tLine.IntersectWith(originLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
+                    if (points.Count > 0)
+                    {
+                        spray.vLine = newLine;
+                    }
                 }
                 if (spray.tLine == originLine)
                 {
-                    spray.tLine = newLine;
+                    spray.vLine.IntersectWith(originLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
+                    if (points.Count > 0)
+                    {
+                        spray.tLine = newLine;
+                    }
                 }
 
-                spray.Position = CalSprayPoint(spray.vLine, spray.tLine);
+                if (points.Count > 0)
+                {
+                    spray.Position = points[0];
+                }
             }
         }
 

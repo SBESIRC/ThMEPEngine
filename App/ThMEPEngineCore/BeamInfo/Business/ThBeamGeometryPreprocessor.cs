@@ -2,10 +2,12 @@
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.BeamInfo.Business
 {
-    public class ThBeamGeometryPreprocessor
+    public static class ThBeamGeometryPreprocessor
     {
         /// <summary>
         /// 分解曲线
@@ -112,6 +114,48 @@ namespace ThMEPEngineCore.BeamInfo.Business
             }
 
             return objs;
+        }
+
+        public static DBObjectCollection MergeConnectCurves(this DBObjectCollection curves, Tolerance tolerance)
+        {
+            DBObjectCollection resCurves = new DBObjectCollection();
+            while (curves.Count > 0)
+            {
+                var firCurve = curves[0] as Line;
+                curves.Remove(firCurve);
+
+                for (int i = 0; i < curves.Count; i++)
+                {
+                    Line tempLine = curves[i] as Line;
+                    if (tempLine.StartPoint.IsEqualTo(firCurve.StartPoint) ||
+                        tempLine.StartPoint.IsEqualTo(firCurve.EndPoint) ||
+                        tempLine.EndPoint.IsEqualTo(firCurve.StartPoint) ||
+                        tempLine.EndPoint.IsEqualTo(firCurve.EndPoint))
+                    {
+                        List<Point3d> points = new List<Point3d>();
+                        points.Add(firCurve.StartPoint);
+                        points.Add(firCurve.EndPoint);
+                        points.Add(tempLine.StartPoint);
+                        points.Add(tempLine.EndPoint);
+                        points = points.OrderBy(x => x.X + x.Y).ToList();
+                        Point3d sp = points.First();
+                        Point3d ep = points.Last();
+
+                        firCurve.StartPoint = sp;
+                        firCurve.EndPoint = ep;
+
+                        curves.Remove(curves[i]);
+                        i = -1;
+                    }
+                }
+
+                if (firCurve.Length > 0)
+                {
+                    resCurves.Add(firCurve);
+                }
+            }
+
+            return resCurves;
         }
     }
 }

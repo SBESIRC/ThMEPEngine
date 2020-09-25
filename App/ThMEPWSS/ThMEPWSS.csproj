@@ -26,10 +26,12 @@
   <ItemGroup>
     <Compile Include="Bussiness\AvoidBeamService.cs" />
     <Compile Include="Bussiness\CalSprayBlindAreaService.cs" />
+    <Compile Include="Bussiness\CalSprayBlindLineAreaService.cs" />
     <Compile Include="Bussiness\CheckProtectService.cs" />
     <Compile Include="Bussiness\GenerateSpraysService.cs" />
     <Compile Include="Bussiness\LayoutBussiness\LayoutService.cs" />
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
+    <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Model\SprayDataService.cs" />
     <Compile Include="Model\SprayLayoutData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

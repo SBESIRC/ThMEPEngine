@@ -112,8 +112,11 @@ namespace ThMEPWSS
                         }
                     }
 
-                    GenerateSpraysService generateSpraysService = new GenerateSpraysService();
-                    generateSpraysService.GenerateSprays(sprayLines);
+                    GenerateSpraysPointService generateSpraysService = new GenerateSpraysPointService();
+                    var sprayData = generateSpraysService.GenerateSprays(sprayLines);
+
+                    //放置喷头
+                    InsertSprayService.InsertSprayBlock(sprayData.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
                 }
             }
         }
@@ -140,30 +143,101 @@ namespace ThMEPWSS
 
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                foreach (ObjectId frame in result.Value.GetObjectIds())
+                PromptKeywordOptions keywordOps = new PromptKeywordOptions("\n 请选择需要打印盲区的对象[喷淋点位盲区（S）/喷淋布置线盲区（L）]");
+                keywordOps.Keywords.Add("S");
+                keywordOps.Keywords.Add("L");
+                keywordOps.Keywords.Default = "L";
+                var resKey = Active.Editor.GetKeywords(keywordOps);
+                if (resKey.Status == PromptStatus.OK)
                 {
-                    var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
-
-                    var filterlist = OpFilter.Bulid(o =>
-                    o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.SprayLayerName &
-                    o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(BlockReference)).DxfName);
-
-                    var sprayLines = new List<BlockReference>();
-                    var resLines = Active.Editor.SelectByPolyline(
-                    frame,
-                    PolygonSelectionMode.Crossing,
-                    filterlist);
-                    if (resLines.Status == PromptStatus.OK)
+                    switch (resKey.StringResult)
                     {
-                        foreach (ObjectId obj in resLines.Value.GetObjectIds())
-                        {
-                            sprayLines.Add(acdb.Element<BlockReference>(obj));
-                        }
+                        case "S":
+                            CalSprayBlindArea(result, acdb);
+                            break;
+                        case "L":
+                            CalSprayLineBlindArea(result, acdb);
+                            break;
+                        default:
+                            Active.Editor.WriteMessage("\n 输入了无效数字");
+                            break;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 计算喷淋布置点盲区
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="acdb"></param>
+        private void CalSprayBlindArea(PromptSelectionResult result, AcadDatabase acdb)
+        {
+            foreach (ObjectId frame in result.Value.GetObjectIds())
+            {
+                var plBack = acdb.Element<Polyline>(frame);
+                var plFrame = ThMEPFrameService.Normalize(plBack);
+
+                var filterlist = OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.SprayLayerName &
+                o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(BlockReference)).DxfName);
+
+                var sprayLines = new List<BlockReference>();
+                var resLines = Active.Editor.SelectByPolyline(
+                frame,
+                PolygonSelectionMode.Crossing,
+                filterlist);
+                if (resLines.Status == PromptStatus.OK)
+                {
+                    foreach (ObjectId obj in resLines.Value.GetObjectIds())
+                    {
+                        sprayLines.Add(acdb.Element<BlockReference>(obj));
                     }
 
                     CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService();
                     calSprayBlindAreaService.CalSprayBlindArea(sprayLines, plFrame);
+                }
+                else
+                {
+                    Active.Editor.WriteMessage("\n 喷淋暂未生成");
+                }
+            }
+        }
+
+        /// <summary>
+        /// 计算喷淋布置线盲区
+        /// </summary>
+        /// <param name="result"></param>
+        /// <param name="acdb"></param>
+        private void CalSprayLineBlindArea(PromptSelectionResult result, AcadDatabase acdb)
+        {
+            foreach (ObjectId frame in result.Value.GetObjectIds())
+            {
+                var plBack = acdb.Element<Polyline>(frame);
+                var plFrame = ThMEPFrameService.Normalize(plBack);
+
+                var filterlist = OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.Layout_Line_LayerName &
+                o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Polyline)).DxfName);
+
+                var sprayLines = new List<Polyline>();
+                var resLines = Active.Editor.SelectByPolyline(
+                frame,
+                PolygonSelectionMode.Crossing,
+                filterlist);
+                if (resLines.Status == PromptStatus.OK)
+                {
+                    foreach (ObjectId obj in resLines.Value.GetObjectIds())
+                    {
+                        sprayLines.Add(acdb.Element<Polyline>(obj));
+                    }
+
+                    CalSprayBlindLineAreaService calSprayBlindAreaService = new CalSprayBlindLineAreaService();
+                    calSprayBlindAreaService.CalSprayBlindArea(sprayLines, plFrame);
+                }
+                else
+                {
+                    Active.Editor.WriteMessage("\n 喷淋布置线暂未生成");
                 }
             }
         }

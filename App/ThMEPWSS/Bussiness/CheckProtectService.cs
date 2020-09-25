@@ -16,7 +16,7 @@ namespace ThMEPWSS.Bussiness
 {
     public class CheckProtectService
     {
-        readonly double minSpacing = 100;
+        readonly double minSpacing = 400;
         readonly double moveLength = 100;
 
         public void CheckBoundarySprays(Polyline polyline, List<SprayLayoutData> sprays, double length)
@@ -93,15 +93,18 @@ namespace ThMEPWSS.Bussiness
                 {
                     var thisLine = firSpray.Value.First().GetOtherPolylineByDir(moveDir.Value);
                     var moveLine = thisLine.MovePolyline(moveLength, moveDir.Value);
-                    if (CheckMoveLineSpcing(firSpray.Value.First(), moveDir.Value, moveLine, maxSpacing * 2))
+                    if (CheckMoveLineSpcing(firSpray.Value.First(), moveDir.Value, moveLine, maxSpacing * 2) &&
+                        CheckLegalityWithBoundary(sprayLst.Select(x => x.Key).ToList(), moveLine, maxSpacing))
                     {
                         SprayDataOperateService.UpdateSpraysLine(allSprays, thisLine, moveLine);
                     }
-                    //using (AcadDatabase acdb = AcadDatabase.Active())
-                    //{
-                    //    moveLine.ColorIndex = 3;
-                    //    acdb.ModelSpace.Add(moveLine);
-                    //}
+
+                    using (AcadDatabase acdb = AcadDatabase.Active())
+                    {
+                        //Polyline tempLine = moveLine.Clone() as Polyline;
+                        //tempLine.ColorIndex = 3;
+                        //acdb.ModelSpace.Add(tempLine);
+                    }
                 }
             }
         }
@@ -133,6 +136,27 @@ namespace ThMEPWSS.Bussiness
         }
 
         /// <summary>
+        /// 校核移动线之后距离边界是否正常
+        /// </summary>
+        /// <param name="sprayLines"></param>
+        /// <param name="moveLine"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
+        private bool CheckLegalityWithBoundary(List<Line> sprayLines, Polyline moveLine, double maxLength)
+        {
+            bool checkRes = true;
+            foreach (var line in sprayLines)
+            {
+                double distance = moveLine.Distance(line);
+                if (distance < minSpacing || distance > maxLength)
+                {
+                    return false;
+                }
+            }
+            return checkRes;
+        }
+
+        /// <summary>
         /// 获取喷淋线的移动信息
         /// </summary>
         /// <param name="spray"></param>
@@ -151,13 +175,14 @@ namespace ThMEPWSS.Bussiness
             Vector3d lineDir = (spray.Key.StartPoint - spray.Key.EndPoint).GetNormal();
             Vector3d dir = (spray.Key.GetClosestPointTo(firSpray.Position, true) - firSpray.Position).GetNormal();
             moveDir = Math.Abs(firSpray.mainDir.DotProduct(lineDir)) > Math.Abs(firSpray.otherDir.DotProduct(lineDir)) ? firSpray.otherDir : firSpray.mainDir;
-            length = moveLength;
+            length = 0;
             isIn = true;
             needMove = false;
             if (sortValue.First() < minSpacing)
             {
                 moveDir = moveDir.DotProduct(dir) > 0 ? -moveDir : moveDir;
                 needMove = true;
+                length = Math.Ceiling((minSpacing - sortValue.First()) / moveLength) * moveLength;
             }
             if (sortValue.Last() > maxSpacing)
             {
@@ -187,7 +212,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="sprays"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public Dictionary<Line, List<SprayLayoutData>> GetBoundarySpray(Polyline polyline, List<SprayLayoutData> sprays, double length)
+        private Dictionary<Line, List<SprayLayoutData>> GetBoundarySpray(Polyline polyline, List<SprayLayoutData> sprays, double length)
         {
             List<Line> lines = new List<Line>();
             for (int i = 0; i < polyline.NumberOfVertices; i++)
@@ -215,7 +240,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="polylines"></param>
         /// <param name="columns"></param>
         /// <returns></returns>
-        public List<SprayLayoutData> GetSprays(Line line, Polyline linePoly, List<SprayLayoutData> sprays)
+        private List<SprayLayoutData> GetSprays(Line line, Polyline linePoly, List<SprayLayoutData> sprays)
         {
             var resPrays = sprays.Where(x => linePoly.IndexedContains(x.Position)).ToList();
 
@@ -246,7 +271,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="line"></param>
         /// <param name="distance"></param>
         /// <returns></returns>
-        public Polyline expandLine(Line line, double distance)
+        private Polyline expandLine(Line line, double distance)
         {
             Vector3d lineDir = line.Delta.GetNormal();
             Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);

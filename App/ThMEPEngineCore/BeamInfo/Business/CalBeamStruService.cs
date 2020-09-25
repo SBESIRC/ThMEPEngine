@@ -67,6 +67,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     var objs = new DBObjectCollection();
                     lineDic.Value.ForEachDbObject(o => objs.Add(o));
                     var results = objs.GetMergeOverlappingCurves(new Tolerance(1, 1));
+                    results = results.MergeConnectCurves(new Tolerance(1, 1));
                     //过滤极短的线段，这些“碎线”可能是由于合并重叠线段时产出的
                     var filters = ThBeamGeometryPreprocessor.FilterCurves(results);
                     if (filters.Count > 0)
@@ -141,14 +142,14 @@ namespace ThMEPEngineCore.BeamInfo.Business
                     {
                         if (firLine.Length > x.Length)
                         {
-                            if (xMaxX - lMaxX < x.Length / 2 || xMinX - lMinX < x.Length / 2)
+                            if ((xMaxX + xMinX) / 2 <= lMaxX && (xMaxX + xMinX) / 2 >= lMinX)
                             {
                                 return true;
                             }
                         }
                         else
                         {
-                            if (lMaxX - xMaxX < firLine.Length / 2 || lMinX - xMinX < firLine.Length / 2)
+                            if ((lMinX + lMaxX) / 2 <= xMaxX && (lMinX + lMaxX) / 2 >= xMinX)
                             {
                                 return true;
                             }
