@@ -134,7 +134,7 @@ namespace ThMEPEngineCore.Service
                                 var wcsCurve = curve.GetTransformedCopy(matrix) as Curve;
                                 if (xclip.IsValid)
                                 {
-                                    if (xclip.Polygon.Contains(wcsCurve))
+                                    if (xclip.Contains(wcsCurve))
                                     {
                                         curves.Add(wcsCurve);
                                     }

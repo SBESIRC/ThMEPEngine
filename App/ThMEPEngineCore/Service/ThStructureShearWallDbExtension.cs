@@ -80,7 +80,7 @@ namespace ThMEPEngineCore.Service
                                 if (xclip.IsValid)
                                 {
                                     // 暂时不裁剪剪力墙
-                                    if (xclip.Polygon.Contains(wcsCurve))
+                                    if (xclip.Contains(wcsCurve))
                                     {
                                         curves.Add(wcsCurve);
                                     }

@@ -43,7 +43,7 @@ namespace ThCADCore.NTS
             return RectangleIntersects.Intersects(polygon.ToNTSPolygon(), curve.ToNTSGeometry());
         }
 
-        public static bool RectleContains(this AcPolygon polygon, Curve curve)
+        public static bool RectContains(this AcPolygon polygon, Curve curve)
         {
             return RectangleContains.Contains(polygon.ToNTSPolygon(), curve.ToNTSGeometry());
         }
