@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetARX;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;

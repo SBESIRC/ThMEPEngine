@@ -1,6 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Interop;
 
 namespace ThMEPEngineCore.Model
 {
