@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Linq;
-using NetTopologySuite;
+using Dreambuild.AutoCAD;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
 using System.Collections.Generic;
-using NetTopologySuite.Precision;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
@@ -16,7 +13,7 @@ namespace ThCADCore.NTS
         public static Polyline ToDbPolyline(this LineString lineString)
         {
             var pline = new Polyline();
-            for(int i = 0; i < lineString.Coordinates.Length; i++)
+            for (int i = 0; i < lineString.Coordinates.Length; i++)
             {
                 pline.AddVertexAt(i, lineString.Coordinates[i].ToAcGePoint2d(), 0, 0, 0);
             }
@@ -51,7 +48,7 @@ namespace ThCADCore.NTS
         {
             var plines = new List<Polyline>();
             plines.Add(polygon.Shell.ToDbPolyline());
-            foreach(LinearRing hole in polygon.Holes)
+            foreach (LinearRing hole in polygon.Holes)
             {
                 plines.Add(hole.ToDbPolyline());
             }
@@ -61,7 +58,7 @@ namespace ThCADCore.NTS
         public static List<Polyline> ToDbPolylines(this MultiLineString geometries)
         {
             var plines = new List<Polyline>();
-            foreach(var geometry in geometries.Geometries)
+            foreach (var geometry in geometries.Geometries)
             {
                 if (geometry is LineString lineString)
                 {
@@ -116,9 +113,42 @@ namespace ThCADCore.NTS
             return plines;
         }
 
-        public static Geometry ToNTSNodedLineString(this Polyline polyline)
+        public static List<DBObject> ToDbObjects(this Geometry geometry)
         {
-            return UnaryUnionOp.Union(polyline.ToNTSLineString());
+            var objs = new List<DBObject>();
+            if (geometry.IsEmpty)
+            {
+                return objs;
+            }
+            if (geometry is LineString lineString)
+            {
+                objs.Add(lineString.ToDbPolyline());
+            }
+            else if (geometry is LinearRing linearRing)
+            {
+                objs.Add(linearRing.ToDbPolyline());
+            }
+            else if (geometry is Polygon polygon)
+            {
+                objs.AddRange(polygon.ToDbPolylines());
+            }
+            else if (geometry is MultiLineString lineStrings)
+            {
+                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+            }
+            else if (geometry is MultiPolygon polygons)
+            {
+                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+            }
+            else if (geometry is GeometryCollection geometries)
+            {
+                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return objs;
         }
 
         public static Geometry ToNTSLineString(this Polyline polyLine)
@@ -131,7 +161,7 @@ namespace ThCADCore.NTS
             }
 
             // 对于处于“闭合”状态的多段线，要保证其首尾点一致
-            if(polyLine.Closed && !points[0].Equals(points[points.Count - 1]))
+            if (polyLine.Closed && !points[0].Equals(points[points.Count - 1]))
             {
                 points.Add(points[0]);
             }

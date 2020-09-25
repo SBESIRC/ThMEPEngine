@@ -1,6 +1,5 @@
 ﻿using System;
 using NFox.Cad;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -168,41 +167,6 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static DBObjectCollection TrimBy(this DBObjectCollection curves, Polyline polygon)
-        {
-            var objs = new DBObjectCollection();
-            var result = polygon.ToNTSPolygon().Intersection(curves.ToMultiLineString());
-            if (result is MultiLineString lineStrings)
-            {
-                foreach (LineString lineString in lineStrings.Geometries)
-                {
-                    objs.Add(lineString.ToDbPolyline());
-                }
-            }
-            else if (result is LineString lineStr)
-            {
-                if (lineStr.StartPoint != null && lineStr.EndPoint != null)
-                {
-                    objs.Add(lineStr.ToDbPolyline());
-                }
-            }
-            else if (result is GeometryCollection collection)
-            {
-                foreach (var col in collection.Geometries)
-                {
-                    if (col is LineString line)
-                    {
-                        objs.Add(line.ToDbPolyline());
-                    }
-                }
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
-        }
-
         public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
         {
             var geometries = new List<LineString>();
@@ -243,42 +207,9 @@ namespace ThCADCore.NTS
             return results;
         }
 
-        public static List<DBObject> ToDbObjects(this Geometry geometry)
+        public static DBObjectCollection ToDbCollection(this Geometry geometry)
         {
-            var objs = new List<DBObject>();
-            if (geometry.IsEmpty)
-            {
-                return objs;
-            }
-            if (geometry is LineString lineString)
-            {
-                objs.Add(lineString.ToDbPolyline());
-            }
-            else if (geometry is LinearRing linearRing)
-            {
-                objs.Add(linearRing.ToDbPolyline());
-            }
-            else if (geometry is Polygon polygon)
-            {
-                objs.AddRange(polygon.ToDbPolylines());
-            }
-            else if (geometry is MultiLineString lineStrings)
-            {
-                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
-            }
-            else if (geometry is MultiPolygon polygons)
-            {
-                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
-            }
-            else if (geometry is GeometryCollection geometries)
-            {
-                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
+            return geometry.ToDbObjects().ToCollection<DBObject>();
         }
     }
 }

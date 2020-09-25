@@ -1,6 +1,4 @@
-﻿using System;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Buffer;
+﻿using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Distance;
 using Autodesk.AutoCAD.DatabaseServices;
 using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
@@ -21,33 +19,11 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection Buffer(this Polyline polyline, double distance)
         {
-            var objs = new DBObjectCollection();
-            var polygon = polyline.ToNTSPolygon();
-            var parameters = new BufferParameters()
+            var buffer = new BufferOp(polyline.ToNTSPolygon(), new BufferParameters()
             {
                 JoinStyle = NTSJoinStyle.Mitre,
-            };
-            var buffer = BufferOp.Buffer(polygon, distance, parameters);
-            if (buffer.IsEmpty)
-            {
-                return objs;
-            }
-            if (buffer is Polygon bufferPolygon)
-            {
-                objs.Add(bufferPolygon.Shell.ToDbPolyline());
-            }
-            else if (buffer is MultiPolygon mPolygon)
-            {
-                foreach(Polygon item in mPolygon.Geometries)
-                {
-                    objs.Add(item.Shell.ToDbPolyline());
-                }
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
+            });
+            return buffer.GetResultGeometry(distance).ToDbCollection();
         }
     }
 }

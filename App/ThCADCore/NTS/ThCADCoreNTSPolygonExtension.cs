@@ -11,34 +11,9 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSPolygonExtension
     {
-        public static DBObjectCollection Difference(this Polyline region, DBObjectCollection curves)
+        public static DBObjectCollection Difference(this AcPolygon polygon, DBObjectCollection curves)
         {
-            var objs = new DBObjectCollection();
-            var geometry = region.ToNTSPolygon().Difference(curves.UnionGeometries());
-            if (geometry.IsEmpty)
-            {
-                return objs;
-            }
-            if (geometry is Polygon polygon)
-            {
-                objs.Add(polygon.Shell.ToDbPolyline());
-                foreach (var hole in polygon.Holes)
-                {
-                    objs.Add(hole.ToDbPolyline());
-                }
-            }
-            else if (geometry is MultiPolygon mPolygon)
-            {
-                foreach (Polygon subPolygon in mPolygon.Geometries)
-                {
-                    objs.Add(subPolygon.Shell.ToDbPolyline());
-                    foreach (var hole in subPolygon.Holes)
-                    {
-                        objs.Add(hole.ToDbPolyline());
-                    }
-                }
-            }
-            return objs;
+            return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection();
         }
 
         public static bool Contains(this AcPolygon polygon, Point3d pt)
