@@ -4,6 +4,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.Service
 {
@@ -30,28 +31,29 @@ namespace ThMEPEngineCore.Service
                 var currentBeam = BeamLink.Beams[i];
                 if (i == 0)
                 {
-                    startExtendDis = SnapTo(currentBeam, currentBeam.StartPoint,
-                        BeamLink.Start.Count > 0 ? BeamLink.Start[0] : null);
+                    startExtendDis = SnapTo(currentBeam, currentBeam.StartPoint, BeamLink.Start);
                     if (BeamLink.Beams.Count == 1)
                     {
-                        endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint,
-                        BeamLink.End.Count > 0 ? BeamLink.End[0] : null);
+                        endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint,BeamLink.End);
                     }
                     else
                     {
-                        endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint, BeamLink.Beams[i + 1]);
+                        endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint, 
+                            new List<ThIfcBuildingElement> { BeamLink.Beams[i + 1] });
                     }
                 }
                 else if (i == BeamLink.Beams.Count - 1)
                 {
-                    endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint,
-                        BeamLink.End.Count > 0 ? BeamLink.End[0] : null);
-                    startExtendDis = SnapTo(currentBeam, currentBeam.StartPoint, BeamLink.Beams[i - 1]);
+                    endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint,BeamLink.End);
+                    startExtendDis = SnapTo(currentBeam, currentBeam.StartPoint,
+                        new List<ThIfcBuildingElement> { BeamLink.Beams[i - 1] });
                 }
                 else
                 {
-                    startExtendDis = SnapTo(currentBeam, currentBeam.StartPoint, BeamLink.Beams[i - 1]);
-                    endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint, BeamLink.Beams[i + 1]);
+                    startExtendDis = SnapTo(currentBeam, currentBeam.StartPoint,
+                        new List<ThIfcBuildingElement> { BeamLink.Beams[i - 1] });
+                    endExtendDis = SnapTo(currentBeam, currentBeam.EndPoint,
+                        new List<ThIfcBuildingElement> { BeamLink.Beams[i + 1] });
                 }
                 if (startExtendDis > 0 || endExtendDis > 0)
                 {
@@ -59,15 +61,15 @@ namespace ThMEPEngineCore.Service
                 }
             }
         }
-        private double SnapTo(ThIfcBeam currentBeam, Point3d portPt, ThIfcBuildingElement neighbor)
+        private double SnapTo(ThIfcBeam currentBeam, Point3d portPt, List<ThIfcBuildingElement> neighbors)
         {
             if (currentBeam is ThIfcLineBeam thIfcLineBeam)
             {
-                return SnapTo(thIfcLineBeam, portPt, neighbor);
+                return SnapTo(thIfcLineBeam, portPt, neighbors);
             }
             else if (currentBeam is ThIfcArcBeam thIfcArcBeam)
             {
-                return SnapTo(thIfcArcBeam, portPt, neighbor);
+                return SnapTo(thIfcArcBeam, portPt, neighbors);
             }
             else
             {
@@ -81,9 +83,10 @@ namespace ThMEPEngineCore.Service
             return rectangle.RectIntersects(neighbor.Outline as Curve);
         }
 
-        private double SnapTo(ThIfcLineBeam lineBeam, Point3d portPt, ThIfcBuildingElement neighbor)
+        private double SnapTo(ThIfcLineBeam lineBeam, Point3d portPt, List<ThIfcBuildingElement> neighbors)
         {
             double extendDis = 0.0;
+            var neighbor = FindClosestNeighbor(lineBeam, portPt, neighbors);
             if (neighbor != null && !Intersects(lineBeam, neighbor))
             {
                 Point3dCollection intersectPts = new Point3dCollection();
@@ -103,9 +106,52 @@ namespace ThMEPEngineCore.Service
             }
             return extendDis;
         }
-        private double SnapTo(ThIfcArcBeam arcBeam, Point3d portPt, ThIfcBuildingElement neighbor)
+        private double SnapTo(ThIfcArcBeam arcBeam, Point3d portPt, List<ThIfcBuildingElement> neighbors)
         {
             return 0.0;
+        }
+        private ThIfcBuildingElement FindClosestNeighbor(ThIfcBeam thIfcBeam, Point3d portPt, List<ThIfcBuildingElement> neighbors)
+        {
+            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
+            {
+                return FindClosestNeighbor(thIfcLineBeam, portPt, neighbors);
+            }
+            else if(thIfcBeam is ThIfcArcBeam thIfcArcBeam)
+            {
+                return FindClosestNeighbor(thIfcArcBeam, portPt, neighbors);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        private ThIfcBuildingElement FindClosestNeighbor(ThIfcLineBeam thIfcLineBeam, Point3d portPt, List<ThIfcBuildingElement> neighbors)
+        {
+           if(neighbors.Where(o => Intersects(thIfcLineBeam, o)).Any())
+            {
+                return null;
+            }
+           else
+            {
+                Line centerLine = new Line(thIfcLineBeam.StartPoint,thIfcLineBeam.EndPoint);
+                List<Tuple<ThIfcBuildingElement, Point3d>> intersects = new List<Tuple<ThIfcBuildingElement, Point3d>>();
+                foreach(var neighbor in neighbors)
+                {
+                    Point3dCollection intersectPts = new Point3dCollection();                    
+                    centerLine.IntersectWith(neighbor.Outline, Intersect.ExtendThis, intersectPts, IntPtr.Zero, IntPtr.Zero);
+                    if (intersectPts.Count > 0)
+                    {
+                        var closestPt = intersectPts.Cast<Point3d>()
+                            .OrderBy(o => portPt.DistanceTo(o)).First();
+                        intersects.Add(Tuple.Create(neighbor, closestPt));
+                    }
+                }
+                return intersects.Count > 0 ? intersects.OrderBy(o => portPt.DistanceTo(o.Item2)).First().Item1 : null;
+            }
+        }
+        private ThIfcBuildingElement FindClosestNeighbor(ThIfcArcBeam thIfcArcBeam, Point3d portPt, List<ThIfcBuildingElement> neighbors)
+        {
+            return null;
         }
     }
 }
