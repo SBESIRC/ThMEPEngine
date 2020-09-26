@@ -33,7 +33,7 @@ namespace ThCADCore.NTS
             }
             else if (curve is Polyline polyline)
             {
-                return polyline.ToNTSLineString() as LineString;
+                return polyline.ToNTSLineString();
             }
             else
             {

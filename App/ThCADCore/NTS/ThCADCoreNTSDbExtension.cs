@@ -151,7 +151,7 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        public static Geometry ToNTSLineString(this Polyline polyLine)
+        public static LineString ToNTSLineString(this Polyline polyLine)
         {
             var points = new List<Coordinate>();
             for (int i = 0; i < polyLine.NumberOfVertices; i++)
@@ -175,11 +175,11 @@ namespace ThCADCore.NTS
                     return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
                 }
 
-                // 三个点，其中起点和终点重合
+                // 二个点，其中起点和终点重合
                 // 多段线退化成一个点
                 if (points.Count == 2)
                 {
-                    return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPointFromCoords(points.ToArray());
+                    return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
                 }
 
                 // 首尾端点一致的情况
