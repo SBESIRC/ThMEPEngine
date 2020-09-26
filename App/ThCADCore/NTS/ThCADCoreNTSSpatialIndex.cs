@@ -48,6 +48,14 @@ namespace ThCADCore.NTS
                         Geometries.Add(geometry, polyline);
                     }
                 }
+                else if (obj is Arc arc)
+                {
+                    var geometry = arc.GeometricExtents.ToNTSPolygon();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, arc);
+                    }
+                }
                 else if (obj is DBText text)
                 {
                     var geometry = text.GeometricExtents.ToNTSPolygon();
@@ -143,7 +151,7 @@ namespace ThCADCore.NTS
         private DBObjectCollection FenceFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
         {
             var results = new DBObjectCollection();
-            foreach(Entity item in objs)
+            foreach (Entity item in objs)
             {
                 if (item is Line line)
                 {
@@ -233,7 +241,7 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectAll()
         {
             var objs = new DBObjectCollection();
-            foreach(var item in Geometries.Values)
+            foreach (var item in Geometries.Values)
             {
                 objs.Add(item);
             }
@@ -243,7 +251,7 @@ namespace ThCADCore.NTS
         private DBObjectCollection Query(Envelope envelope)
         {
             var objs = new DBObjectCollection();
-            foreach(var geometry in Engine.Query(envelope))
+            foreach (var geometry in Engine.Query(envelope))
             {
                 if (Geometries.ContainsKey(geometry))
                 {
@@ -281,7 +289,7 @@ namespace ThCADCore.NTS
                 new GeometryItemDistance(),
                 num)
                 .Where(o => !o.EqualsExact(geometry));
-            foreach(var neighbour in neighbours)
+            foreach (var neighbour in neighbours)
             {
                 objs.Add(Geometries[neighbour]);
             }
