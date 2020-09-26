@@ -135,27 +135,5 @@ namespace ThCADCore.NTS
             merger.GetMergedLineStrings().ForEach(g => objs.AddRange(g.ToDbObjects()));
             return objs.ToCollection<DBObject>();
         }
-
-        /// <summary>
-        /// 两个polyline之间的距离
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="other"></param>
-        /// <returns></returns>
-        public static double Distance(this Polyline polyline, Polyline other)
-        {
-            return polyline.ToNTSLineString().Distance(other.ToNTSLineString());
-        }
-
-        /// <summary>
-        /// polyline与line之间的距离
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="other"></param>
-        /// <returns></returns>
-        public static double Distance(this Polyline polyline, Line line)
-        {
-            return polyline.ToNTSLineString().Distance(line.ToNTSLineString());
-        }
     }
 }
