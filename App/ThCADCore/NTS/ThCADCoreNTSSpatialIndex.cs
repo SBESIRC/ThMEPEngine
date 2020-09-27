@@ -56,6 +56,14 @@ namespace ThCADCore.NTS
                         Geometries.Add(geometry, arc);
                     }
                 }
+                else if (obj is Circle circle)
+                {
+                    var geometry = circle.GeometricExtents.ToNTSPolygon();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, circle);
+                    }
+                }
                 else if (obj is DBText text)
                 {
                     var geometry = text.GeometricExtents.ToNTSPolygon();
@@ -106,6 +114,20 @@ namespace ThCADCore.NTS
                         results.Add(item);
                     }
                 }
+                else if (item is Arc arc)
+                {
+                    if (preparedGeometry.Intersects(arc.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is Circle circle)
+                {
+                    if (preparedGeometry.Intersects(circle.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -136,6 +158,20 @@ namespace ThCADCore.NTS
                 else if (item is DBText dBText)
                 {
                     if (preparedGeometry.Contains(dBText.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is Arc arc)
+                {
+                    if (preparedGeometry.Contains(arc.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is Circle circle)
+                {
+                    if (preparedGeometry.Contains(circle.GeometricExtents.ToNTSPolygon()))
                     {
                         results.Add(item);
                     }
