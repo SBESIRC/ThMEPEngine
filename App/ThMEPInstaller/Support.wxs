@@ -6,6 +6,9 @@
           <Component Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" Guid="{709830D4-071F-4060-A5D8-0FDF02030EB5}" Win64="yes">
               <File Id="FILE_Autoloader_PackageContents_Support_Block_Broadcast" Source="$(var.AutoloaderContentsPath)\Support\消防应急广播.dwg" KeyPath="yes" />
           </Component>
+          <Component Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" Guid="{D8BBCB17-68E6-4898-A97E-D7D4DC8DC032}" Win64="yes">
+              <File Id="FILE_Autoloader_PackageContents_Support_Block_Sensor" Source="$(var.AutoloaderContentsPath)\Support\烟感温感图块.dwg" KeyPath="yes" />
+          </Component>
           <Component Id="CMP_Autoloader_PackageContents_Support_Block_Spray" Guid="{3672DEE5-E3ED-4E05-BCF6-7ED249249922}" Win64="yes">
               <File Id="FILE_Autoloader_PackageContents_Support_Block_Spray" Source="$(var.AutoloaderContentsPath)\Support\给排水.喷淋.dwg" KeyPath="yes" />
           </Component>
@@ -14,6 +17,7 @@
     <Fragment>
         <ComponentGroup Id="ProductComponentsSupport">
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
+            <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
             <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
         </ComponentGroup>
     </Fragment>

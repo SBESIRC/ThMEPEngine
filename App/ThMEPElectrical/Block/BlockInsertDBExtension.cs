@@ -1,30 +1,18 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
+﻿using Linq2Acad;
 using DotNetARX;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.Geometry;
 using System.IO;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Block
 {
     public static class BlockInsertDBExtension
     {
-        public const string SENSOR_LAYER = "E-FAS-DEVC";
-        public const string BLOCK_FILE = "烟感温感图块.dwg";
-        public const string SMOKE_SENSOR_BLOCK_NAME = "E-BFAS110";
-        public const string TEMPERATURE_SENSOR_BLOCK_NAME = "E-BFAS120";
-
         public static string BlockDwgPath(this Database database)
         {
-            var fileName = database.Filename;
-            var fileInfo = new FileInfo(fileName);
-            var fileDirectoryName = fileInfo.DirectoryName;
-
-            return Path.Combine(fileDirectoryName, BLOCK_FILE);
+            return Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.SENSORDWGNAME);
         }
 
         public static void InsertModel(this Database database, List<Point3d> insertPts, string name, Scale3d scale)
@@ -33,7 +21,7 @@ namespace ThMEPElectrical.Block
             {
                 foreach (var pt in insertPts)
                 {
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(SENSOR_LAYER, name, pt, scale, 0.0);
+                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(ThMEPCommon.SENSORLAYERNMAE,name,pt,scale,0.0);
                 }
             }
         }
@@ -44,7 +32,7 @@ namespace ThMEPElectrical.Block
             using (AcadDatabase blockDb = AcadDatabase.Open(database.BlockDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(SENSOR_LAYER), false);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPCommon.SENSORLAYERNMAE), false);
             }
         }
     }

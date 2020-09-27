@@ -14,6 +14,17 @@ namespace ThMEPElectrical
         public static readonly string BroadcastDwgName = "消防应急广播.dwg";     //消防应急广播图纸名
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";     //图块可见性
         public static readonly string BroadcastBlockName = "E-BFAS410-4";     //消防应急广播图块名
+
+
+        // 烟感温感
+        public const string SENSORLAYERNMAE = "E-FAS-DEVC";
+        public const string SENSORDWGNAME = "烟感温感图块.dwg";
+        public const string SMOKE_SENSOR_BLOCK_NAME = "E-BFAS110";
+        public const string TEMPERATURE_SENSOR_BLOCK_NAME = "E-BFAS120";
+
+
+        // 常量
+        public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);
         public static readonly Point3d NullPoint3d = new Point3d(double.NaN, double.NaN, 0);
     }
 }

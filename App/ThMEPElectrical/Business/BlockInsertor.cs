@@ -51,13 +51,13 @@ namespace ThMEPElectrical.Business
             {
                 if (Sensor == SensorType.SMOKESENSOR)
                 {
-                    db.Database.ImportModel(BlockInsertDBExtension.SMOKE_SENSOR_BLOCK_NAME);
-                    db.Database.InsertModel(InsertPts, BlockInsertDBExtension.SMOKE_SENSOR_BLOCK_NAME, new Scale3d(100, 100, 100));
+                    db.Database.ImportModel(ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME);
+                    db.Database.InsertModel(InsertPts, ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale);
                 }
                 else
                 {
-                    db.Database.ImportModel(BlockInsertDBExtension.TEMPERATURE_SENSOR_BLOCK_NAME);
-                    db.Database.InsertModel(InsertPts, BlockInsertDBExtension.TEMPERATURE_SENSOR_BLOCK_NAME, new Scale3d(100, 100, 100));
+                    db.Database.ImportModel(ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME);
+                    db.Database.InsertModel(InsertPts, ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale);
                 }
             }
         }
