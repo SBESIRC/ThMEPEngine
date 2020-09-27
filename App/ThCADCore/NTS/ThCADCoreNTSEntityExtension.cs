@@ -35,6 +35,10 @@ namespace ThCADCore.NTS
             {
                 return polyline.ToNTSLineString();
             }
+            else if (curve is Polyline2d poly2d)
+            {
+                return poly2d.ToNTSLineString();
+            }
             else
             {
                 throw new NotSupportedException();

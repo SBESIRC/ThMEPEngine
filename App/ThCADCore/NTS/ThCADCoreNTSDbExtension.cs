@@ -195,6 +195,14 @@ namespace ThCADCore.NTS
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
             }
         }
+
+        public static LineString ToNTSLineString(this Polyline2d poly2d)
+        {
+            var poly = new Polyline();
+            poly.ConvertFrom(poly2d, false);
+            return poly.ToNTSLineString();
+        }
+
         public static Polygon ToNTSPolygon(this Polyline polyLine)
         {
             var geometry = polyLine.ToNTSLineString();
