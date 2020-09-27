@@ -66,6 +66,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFBS" Global="THFBS" />
+                <Command Local="THFDL" Global="THFDL" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -75,6 +76,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFBS" Global="THFBS" />
+                <Command Local="THFDL" Global="THFDL" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -84,6 +86,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFBS" Global="THFBS" />
+                <Command Local="THFDL" Global="THFDL" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -93,6 +96,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THFBS" Global="THFBS" />
+                <Command Local="THFDL" Global="THFDL" />
             </Commands>
         </ComponentEntry>
     </Components>
