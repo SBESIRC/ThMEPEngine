@@ -1,5 +1,6 @@
 ﻿using NetTopologySuite;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Geometries.Prepared;
 
 namespace ThCADCore.NTS
 {
@@ -43,6 +44,19 @@ namespace ThCADCore.NTS
                     }
                     return defaultGeometryFactory;
                 }
+            }
+        }
+
+        private PreparedGeometryFactory preparedGeometryFactory;
+        public PreparedGeometryFactory PreparedGeometryFactory
+        {
+            get
+            {
+                if (preparedGeometryFactory == null)
+                {
+                    preparedGeometryFactory = new PreparedGeometryFactory();
+                }
+                return preparedGeometryFactory;
             }
         }
 

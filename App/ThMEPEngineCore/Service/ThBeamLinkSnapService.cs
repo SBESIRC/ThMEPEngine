@@ -80,7 +80,7 @@ namespace ThMEPEngineCore.Service
         private bool Intersects(ThIfcLineBeam lineBeam, ThIfcBuildingElement neighbor)
         {
             var rectangle = lineBeam.Outline as Polyline;
-            return rectangle.RectIntersects(neighbor.Outline as Curve);
+            return rectangle.Intersects(neighbor.Outline as Curve);
         }
 
         private double SnapTo(ThIfcLineBeam lineBeam, Point3d portPt, List<ThIfcBuildingElement> neighbors)

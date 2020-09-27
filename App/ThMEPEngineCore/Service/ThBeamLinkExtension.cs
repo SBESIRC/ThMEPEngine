@@ -165,12 +165,13 @@ namespace ThMEPEngineCore.Service
             {
                 Polyline portSearchEnvelope = GetLineBeamPortSearchEnvelope(thIfcLineBeam, portPt,
                     ThMEPEngineCoreCommon.BeamExtensionRatio, beamConnectionTolerance);
+                var preparedEnvelope = new ThCADCoreNTSPreparedPolygon(portSearchEnvelope);
                 // 先判断是否搭接在柱上
                 linkObjs = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(portSearchEnvelope);
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和柱是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelope.RectIntersects(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => preparedEnvelope.Intersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ColumnEngine.FilterByOutline(dbObj));
@@ -186,7 +187,7 @@ namespace ThMEPEngineCore.Service
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和剪力墙是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelope.RectIntersects(o));
+                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => preparedEnvelope.Intersects(o));
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ShearWallEngine.FilterByOutline(dbObj));
@@ -254,9 +255,8 @@ namespace ThMEPEngineCore.Service
         }
         public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt, double beamIntervalTolerance)
         {
-            List<ThIfcBeam> links = new List<ThIfcBeam>();
-            DBObjectCollection linkObjs = new DBObjectCollection();
             Polyline portSearchEnvelope = null;
+            List<ThIfcBeam> links = new List<ThIfcBeam>();
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {               
                 portSearchEnvelope = GetLineBeamPortSearchEnvelope(thIfcLineBeam, portPt,
@@ -267,17 +267,21 @@ namespace ThMEPEngineCore.Service
                 portSearchEnvelope = GetArcBeamPortSearchEnvelope(thIfcArcBeam, portPt, 
                     ThMEPEngineCoreCommon.BeamExtensionRatio, beamIntervalTolerance);
             }
-            linkObjs = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelope);
+            else
+            {
+                throw new NotSupportedException();
+            }
+            var preparedEnvelope = new ThCADCoreNTSPreparedPolygon(portSearchEnvelope);
+            var linkObjs = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelope);
             if (linkObjs.Count > 0)
             {
-                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => portSearchEnvelope.RectIntersects(o));
+                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => preparedEnvelope.Intersects(o));
                 foreach (DBObject dbObj in overlapObjs)
                 {
                     links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
                 }
             }
-            links = links.Where(o => o.Uuid != thIfcBeam.Uuid).ToList();
-            return links;
+            return links.Where(o => o.Uuid != thIfcBeam.Uuid).ToList();
         }
         protected Polyline GetLineBeamPortEnvelope(ThIfcLineBeam thIfcLineBeam, Point3d portPt,
             double beamExtendRadio,double beamExtendLength)
