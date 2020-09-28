@@ -62,6 +62,8 @@
     <Compile Include="CAD\Vector3dConverter.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
+    <Compile Include="Engine\ThMergeBeamEngine.cs" />
+    <Compile Include="Engine\ThSnapBeamEngine.cs" />
     <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />

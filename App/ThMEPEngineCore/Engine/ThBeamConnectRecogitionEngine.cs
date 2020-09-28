@@ -53,8 +53,23 @@ namespace ThMEPEngineCore.Engine
             BeamEngine = new ThBeamRecognitionEngine();
             BeamEngine.Recognize(database, polygon);
 
-            //梁分割
-            BeamEngine.Split(ColumnEngine, ShearWallEngine, SpatialIndexManager);
+            // 预处理梁端
+            {
+                // 删除相识的梁端
+
+                // 连接梁端
+
+                // 按柱，墙分割梁端
+                BeamEngine.Split(ColumnEngine, ShearWallEngine, SpatialIndexManager);
+
+                // 梁端的延伸
+                BeamEngine.Snap(ColumnEngine, ShearWallEngine, SpatialIndexManager);
+
+                // 梁端的合并
+                BeamEngine.Merge(SpatialIndexManager);
+
+                // 删除相识的梁端
+            }
 
             //创建梁空间索引
             CreateBeamSpatialIndex();
@@ -134,7 +149,7 @@ namespace ThMEPEngineCore.Engine
             SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Collect());
             var beamGeometries = SpatialIndexManager.BeamSpatialIndex.SelectAll();
             BeamEngine.UpdateValidElements(beamGeometries);
-            BeamEngine.SimilarityBeamRemove(SpatialIndexManager);
+            BeamEngine.Measure(SpatialIndexManager);
             DBObjectCollection dbObjs = new DBObjectCollection();
             BeamEngine.ValidElements.ForEach(o=>dbObjs.Add(o.Outline));
             SpatialIndexManager.CreateBeamSpaticalIndex(dbObjs);

@@ -8,9 +8,10 @@ using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using ThMEPEngineCore.Model.Segment;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.BeamInfo.Business;
 
-namespace ThMEPEngineCore.Service
+namespace ThMEPEngineCore.Engine
 {
     public class ThSplitBeamEngine:IDisposable
     {
@@ -37,7 +38,7 @@ namespace ThMEPEngineCore.Service
             ShearWallSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             ColumnSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
         }
-        public virtual void Split()
+        public void Split()
         {
             //创建剪力墙Segment
             BuildShearwallSegment();

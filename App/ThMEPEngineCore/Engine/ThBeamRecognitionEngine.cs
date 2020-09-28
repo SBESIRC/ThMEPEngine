@@ -100,6 +100,55 @@ namespace ThMEPEngineCore.Engine
             Elements = thSplitBeams.BeamElements;
         }
 
+        public void Snap(
+            ThColumnRecognitionEngine thColumnRecognitionEngine,
+            ThShearWallRecognitionEngine thShearWallRecognitionEngine,
+            ThSpatialIndexManager thSpatialIndexManager)
+        {
+            ThSnapBeamEngine thSnapBeams = new ThSnapBeamEngine(
+                this,
+                thColumnRecognitionEngine,
+                thShearWallRecognitionEngine,
+                thSpatialIndexManager);
+            thSnapBeams.Snap();
+            Elements = thSnapBeams.BeamElements;
+        }
+
+        public void Merge(ThSpatialIndexManager thSpatialIndexManager)
+        {
+            ThMergeBeamEngine thMergeBeams = new ThMergeBeamEngine(
+                this,
+                thSpatialIndexManager);
+            thMergeBeams.Merge();
+            Elements = thMergeBeams.BeamElements;
+
+        }
+        public void Measure(ThSpatialIndexManager spatialIndexManager)
+        {
+            List<ThIfcElement> duplicateCollection = new List<ThIfcElement>();
+            ValidElements.ForEach(m =>
+            {
+                if (!duplicateCollection.Where(n => n.Uuid == m.Uuid).Any())
+                {
+                    DBObjectCollection dbObjs = spatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(m.Outline as Polyline);
+                    Polyline baseOutline = m.Outline as Polyline;
+                    foreach (DBObject dbObj in dbObjs)
+                    {
+                        ThIfcElement thIfcElement = FilterByOutline(dbObj);
+                        if (thIfcElement.Uuid != m.Uuid)
+                        {
+                            double measure = baseOutline.SimilarityMeasure(thIfcElement.Outline as Polyline);
+                            if (measure >= ThMEPEngineCoreCommon.SIMILARITYMEASURETOLERANCE)
+                            {
+                                duplicateCollection.Add(thIfcElement);
+                            }
+                        }
+                    }
+                }
+            });
+            ValidElements = ValidElements.Where(m => !duplicateCollection.Where(n => n.Uuid == m.Uuid).Any()).ToList();
+        }
+
         private ThIfcBeam CreateIfcBeam(Beam beam, string spec = "")
         {
             ThIfcBeam thIfcBeam=null;
@@ -128,32 +177,6 @@ namespace ThMEPEngineCore.Engine
                 }
             }
             return thIfcBeam;
-        }
-
-        public void SimilarityBeamRemove(ThSpatialIndexManager spatialIndexManager)
-        {
-            List<ThIfcElement> duplicateCollection = new List<ThIfcElement>();
-            ValidElements.ForEach(m =>
-            {
-                if (!duplicateCollection.Where(n => n.Uuid == m.Uuid).Any())
-                {
-                    DBObjectCollection dbObjs = spatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(m.Outline as Polyline);
-                    Polyline baseOutline = m.Outline as Polyline;
-                    foreach (DBObject dbObj in dbObjs)
-                    {
-                        ThIfcElement thIfcElement = FilterByOutline(dbObj);
-                        if(thIfcElement.Uuid!= m.Uuid)
-                        {
-                            double measure = baseOutline.SimilarityMeasure(thIfcElement.Outline as Polyline);
-                            if (measure >= ThMEPEngineCoreCommon.SIMILARITYMEASURETOLERANCE)
-                            {
-                                duplicateCollection.Add(thIfcElement);
-                            }
-                        }
-                    }
-                }
-            });
-            ValidElements=ValidElements.Where(m => !duplicateCollection.Where(n => n.Uuid == m.Uuid).Any()).ToList();
         }
     }
 }
