@@ -16,10 +16,8 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad;
 using Newtonsoft.Json;
 using ThCADExtension;
-using DotNetARX;
 
 namespace ThMEPEngineCore
 {
@@ -41,10 +39,19 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var columnRecognitionEngine = new ThColumnRecognitionEngine())
             {
-                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
-                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
-                columnRecognitionEngine.Recognize(acadDatabase.Database, range.Vertices());
-                columnRecognitionEngine.Elements.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                columnRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                columnRecognitionEngine.Elements.ForEach(o =>
+                {
+                    var curve = o.Outline as Curve;
+                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                });
             }
         }
         [CommandMethod("TIANHUACAD", "THExtractBeam", CommandFlags.Modal)]
@@ -53,10 +60,19 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
             {
-                var rangeRes=Active.Editor.GetEntity("\nSelect a range polyline");
-                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
-                beamEngine.Recognize(Active.Database, range.Vertices());
-                beamEngine.Elements.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                beamEngine.Recognize(Active.Database, frame.Vertices());
+                beamEngine.Elements.ForEach(o =>
+                {
+                    var curve = o.Outline as Curve;
+                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                });
             }
         }
         [CommandMethod("TIANHUACAD", "THExtractBeamText", CommandFlags.Modal)]
@@ -75,10 +91,19 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var shearWallEngine = new ThShearWallRecognitionEngine())
             {
-                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
-                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
-                shearWallEngine.Recognize(acadDatabase.Database, range.Vertices());
-                shearWallEngine.Elements.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                shearWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                shearWallEngine.Elements.ForEach(o =>
+                {
+                    var curve = o.Outline as Curve;
+                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                });
             }
         }
         [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
@@ -88,27 +113,48 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
             {
-                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
-                if(rangeRes.Status!=PromptStatus.OK)
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
-                thBeamTypeRecogitionEngine.Recognize(Active.Database, range.Vertices());
+                thBeamTypeRecogitionEngine.Recognize(Active.Database, frame.Vertices());
                 stopwatch.Stop();
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
-                Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds+"秒");
-                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex=1));                
-                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 2));
-                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 3));
-                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => n.Outline.ColorIndex = 4));
+                Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds + "秒");
 
-                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n=>acadDatabase.ModelSpace.Add(n.Outline)));
-                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(n.Outline)));
-                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(n.Outline)));
-                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(n.Outline)));
+                thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var curve = n.Outline as Curve;
+                    var clone = curve.WashClone();
+                    acadDatabase.ModelSpace.Add(clone);
+                    clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_PRIMARY;
+                }));
+                thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var curve = n.Outline as Curve;
+                    var clone = curve.WashClone();
+                    acadDatabase.ModelSpace.Add(clone);
+                    clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_HALFPRIMARY;
+                }));
+                thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var curve = n.Outline as Curve;
+                    var clone = curve.WashClone();
+                    acadDatabase.ModelSpace.Add(clone);
+                    clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_OVERHANGINGPRIMARY;
+                }));
+                thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => m.Beams.ForEach(n =>
+                {
+                    var curve = n.Outline as Curve;
+                    var clone = curve.WashClone();
+                    acadDatabase.ModelSpace.Add(clone);
+                    clone.ColorIndex = ThMEPEngineCoreCommon.COLORINDEX_BEAM_SECONDARY;
+                }));
 
                 thBeamTypeRecogitionEngine.PrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => m.Beams.ForEach(n => acadDatabase.ModelSpace.Add(CreateBeamMarkText(n))));
@@ -144,7 +190,7 @@ namespace ThMEPEngineCore
             using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
             {
                 var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
-                if(rangeRes.Status==PromptStatus.OK)
+                if (rangeRes.Status == PromptStatus.OK)
                 {
                     Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
                     System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
@@ -162,14 +208,14 @@ namespace ThMEPEngineCore
                             acadDatabase.ModelSpace.Add(o.Outline);
                         }
                     });
-                } 
+                }
             }
         }
         private DBText CreateBeamMarkText(ThIfcBeam thIfcBeam)
         {
             string message = "";
             string beamtype = "未定义";
-            switch(thIfcBeam.ComponentType)
+            switch (thIfcBeam.ComponentType)
             {
                 case BeamComponentType.PrimaryBeam:
                     beamtype = "主梁";
@@ -194,7 +240,7 @@ namespace ThMEPEngineCore
             dbText.Layer = "0";
             dbText.Height = 200;
             return dbText;
-        }        
+        }
         [CommandMethod("TIANHUACAD", "ThExtractLaneLine", CommandFlags.Modal)]
         public void ThExtractLaneLine()
         {
@@ -225,7 +271,7 @@ namespace ThMEPEngineCore
                     ThSegmentService thSegmentService = new ThSegmentService(acadDatabase.Element<Polyline>(objId));
                     thSegmentService.SegmentAll(new CalBeamStruService());
                     segments.AddRange(thSegmentService.Segments);
-                }                
+                }
                 ThLinealBeamSplitter thSplitLineBeam = new ThLinealBeamSplitter(thIfcLineBeam, segments);
                 thSplitLineBeam.Split();
                 thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex = 1);
@@ -245,11 +291,11 @@ namespace ThMEPEngineCore
                 var otherRes = Active.Editor.GetEntity("\nselect a polyline");
                 Polyline otherPolyline = acadDatabase.Element<Polyline>(otherRes.ObjectId);
                 Point3dCollection pts = new Point3dCollection();
-                for(int i=0;i<otherPolyline.NumberOfVertices;i++)
+                for (int i = 0; i < otherPolyline.NumberOfVertices; i++)
                 {
                     pts.Add(otherPolyline.GetPoint3dAt(0));
                 }
-                var selObjs=thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pts);
+                var selObjs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pts);
                 bool res = polyline.Intersects(otherPolyline);
                 ThSegmentService thSegmentService = new ThSegmentService(polyline);
                 thSegmentService.SegmentAll(new CalBeamStruService());
@@ -264,8 +310,8 @@ namespace ThMEPEngineCore
                 var entRes = Active.Editor.GetEntity("\n select a polyline");
                 Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
                 var ptRes = Active.Editor.GetPoint("\n select a point");
-                int isIn = polyline.PointInPolylineEx(ptRes.Value,1.0);
-                if (isIn==0)
+                int isIn = polyline.PointInPolylineEx(ptRes.Value, 1.0);
+                if (isIn == 0)
                 {
                     Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline上");
                 }
@@ -273,7 +319,7 @@ namespace ThMEPEngineCore
                 {
                     Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline内");
                 }
-                else if(isIn == -1)
+                else if (isIn == -1)
                 {
                     Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline外");
                 }

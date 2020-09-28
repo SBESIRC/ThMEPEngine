@@ -33,6 +33,12 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_S_WALL = "结构墙";
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
 
+        // 颜色
+        public const int COLORINDEX_BEAM_PRIMARY = 1;
+        public const int COLORINDEX_BEAM_HALFPRIMARY = 2;
+        public const int COLORINDEX_BEAM_OVERHANGINGPRIMARY = 3;
+        public const int COLORINDEX_BEAM_SECONDARY = 4;
+
         // 公差
         public const double SIMILARITYMEASURETOLERANCE = 0.9;
         /// <summary>

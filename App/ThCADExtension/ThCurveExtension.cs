@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
@@ -147,6 +148,11 @@ namespace ThCADExtension
         public static LinearEntity3d ToGeLine(this Line line)
         {
             return new Line3d(line.StartPoint, line.EndPoint);
+        }
+
+        public static Curve WashClone(this Curve curve)
+        {
+            return curve.ToCurve3d().ToCurve();
         }
     }
 }
