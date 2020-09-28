@@ -1,12 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using ThMEPWSS.Utils;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPWSS.Bussiness
+namespace ThMEPEngineCore.Operation
 {
     public class GridService
     {
@@ -22,28 +20,16 @@ namespace ThMEPWSS.Bussiness
         public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums)
         {
             List<Point3d> points = GetColumCenter(colums);
-            Matrix3d matrix = GeoUtils.GetGridMatrix(polyline, out Line longLine, out Line shortLine);
+            Matrix3d matrix = ThMEPEngineCoreGeUtils.GetGridMatrix(polyline, out Line longLine, out Line shortLine);
 
             var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, longLine, shortLine));
             var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, longLine, shortLine));
 
-            List<KeyValuePair<Vector3d, List<Polyline>>> gridPolys = new List<KeyValuePair<Vector3d, List<Polyline>>>()
+            return new List<KeyValuePair<Vector3d, List<Polyline>>>()
             {
                 firGrids,
                 secGrids,
             };
-
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                foreach (var item in gridPolys)
-                {
-                    foreach (var sss in item.Value)
-                    {
-                        acdb.ModelSpace.Add(sss);
-                    }
-                }
-            }
-            return gridPolys;
         }
 
         /// <summary>
@@ -58,7 +44,7 @@ namespace ThMEPWSS.Bussiness
         {
             points = points.Select(x => x.TransformBy(matrix.Inverse())).ToList();
             List<Point3d> linePts = new List<Point3d>() { longLine.StartPoint, longLine.EndPoint, shortLine.StartPoint, shortLine.EndPoint };
-            List<Point3d> polyPts = GeoUtils.CalBoundingBox(linePts);
+            List<Point3d> polyPts = ThMEPEngineCoreGeUtils.CalBoundingBox(linePts);
             polyPts = polyPts.Select(x => x.TransformBy(matrix.Inverse())).ToList();
             double minY = polyPts.First().Y;
             double maxY = polyPts.Last().Y;
@@ -146,7 +132,7 @@ namespace ThMEPWSS.Bussiness
                     points.Add(col.GetPoint3dAt(i));
                 }
 
-                List<Point3d> ptsLst = GeoUtils.CalBoundingBox(points);
+                List<Point3d> ptsLst = ThMEPEngineCoreGeUtils.CalBoundingBox(points);
                 resPoints.Add(new Point3d((ptsLst.First().X + ptsLst.Last().X) / 2, (ptsLst.First().Y + ptsLst.Last().Y) / 2, 0));
             }
 

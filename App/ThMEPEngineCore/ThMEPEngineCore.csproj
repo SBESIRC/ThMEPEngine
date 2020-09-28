@@ -118,6 +118,7 @@
     <Compile Include="Model\ThIfcWallStandardCase.cs" />
     <Compile Include="Model\ThIfcWindow.cs" />
     <Compile Include="Model\ThIfcWindowStandardCase.cs" />
+    <Compile Include="Operation\GridService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
@@ -156,7 +157,7 @@
     <Compile Include="Service\ThVerticalComponentBeamLinkExtension.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
-    <Compile Include="ThProjectDirStructureUtils.cs" />
+    <Compile Include="ThMEPEngineCoreGeUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

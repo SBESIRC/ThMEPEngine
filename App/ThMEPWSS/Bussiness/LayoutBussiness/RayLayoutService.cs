@@ -9,6 +9,7 @@ using ThCADCore.NTS;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
 using ThCADExtension;
+using ThMEPEngineCore.Operation;
 
 namespace ThMEPWSS.Bussiness.LayoutBussiness
 {
