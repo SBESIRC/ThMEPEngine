@@ -78,7 +78,7 @@ namespace ThMEPEngineCore.BeamInfo.Business
                 }
 
                 // 处理弧梁
-                allBeam.AddRange(GetArcBeamObject(arcs, 1500, 0.5));
+                //allBeam.AddRange(GetArcBeamObject(arcs, 1500, 0.5));
             }
 
             return allBeam;
