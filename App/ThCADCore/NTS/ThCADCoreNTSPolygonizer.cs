@@ -45,7 +45,7 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection Boundaries(this DBObjectCollection lines)
         {
-            using (var ov = new ThCADCoreNTSPrecisionReducer())
+            using (var ov = new ThCADCoreNTSFixedPrecision())
             {
                 var polygons = new List<Polygon>();
                 var boundaries = new DBObjectCollection();

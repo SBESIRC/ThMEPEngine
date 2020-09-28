@@ -2,11 +2,10 @@
 
 namespace ThCADCore.NTS
 {
-    public class ThCADCoreNTSPrecisionReducer : IDisposable
+    public class ThCADCoreNTSFixedPrecision : IDisposable
     {
-        public ThCADCoreNTSPrecisionReducer(double scale = 0.0)
+        public ThCADCoreNTSFixedPrecision()
         {
-            ThCADCoreNTSService.Instance.Scale = scale;
             ThCADCoreNTSService.Instance.PrecisionReduce = true;
         }
 
