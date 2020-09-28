@@ -44,6 +44,7 @@
     <Compile Include="ThGeExtension.cs" />
     <Compile Include="ThHatchTool.cs" />
     <Compile Include="ThLayerTool.cs" />
+    <Compile Include="ThMatrix3dExtension.cs" />
     <Compile Include="ThMPolygonTool.cs" />
     <Compile Include="ThPickTool.cs" />
     <Compile Include="ThPoint3dCollectionExtensions.cs" />
