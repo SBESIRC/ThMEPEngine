@@ -46,6 +46,7 @@
     <Compile Include="NTS\ThCADCoreNTSPreparedExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSRectangleExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSRegionExtension.cs" />
+    <Compile Include="NTS\ThCADCoreNTSRelateExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSService.cs" />
     <Compile Include="NTS\ThCADCoreNTSSimplify.cs" />
     <Compile Include="NTS\ThCADCoreNTSSpatialIndex.cs" />
