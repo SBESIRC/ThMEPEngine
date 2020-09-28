@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
@@ -17,15 +18,6 @@ namespace ThCADCore.NTS
             return polygonizer.GetPolygons();
         }
 
-        public static ICollection<Geometry> Polygonize(this Polyline polyline)
-        {
-            var lines = new DBObjectCollection()
-            {
-                polyline,
-            };
-            return lines.Polygonize();
-        }
-
         public static ICollection<Geometry> Polygonize(this Geometry geometry)
         {
             var polygonizer = new Polygonizer();
@@ -35,12 +27,15 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection Polygons(this DBObjectCollection lines)
         {
-            var objs = new DBObjectCollection();
-            foreach (Polygon polygon in lines.Polygonize())
+            using (var ov = new ThCADCoreNTSFixedPrecision())
             {
-                objs.Add(polygon.Shell.ToDbPolyline());
+                var objs = new List<DBObject>();
+                foreach (Polygon polygon in lines.Polygonize())
+                {
+                    objs.AddRange(polygon.ToDbPolylines());
+                }
+                return objs.ToCollection();
             }
-            return objs;
         }
 
         public static DBObjectCollection Boundaries(this DBObjectCollection lines)
