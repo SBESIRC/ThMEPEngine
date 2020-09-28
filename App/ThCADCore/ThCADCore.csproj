@@ -41,7 +41,6 @@
     <Compile Include="NTS\ThCADCoreNTSOperation.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolygonizer.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolylineExtension.cs" />
-    <Compile Include="NTS\ThCADCoreNTSPrecisionExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSFixedPrecision.cs" />
     <Compile Include="NTS\ThCADCoreNTSPreparedExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSRectangleExtension.cs" />

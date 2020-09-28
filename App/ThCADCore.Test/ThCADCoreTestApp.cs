@@ -112,6 +112,7 @@ namespace ThCADCore.Test
         [CommandMethod("TIANHUACAD", "ThCBoundary", CommandFlags.Modal)]
         public void ThCompositeBoundary()
         {
+            using (var ov = new ThCADCoreNTSFixedPrecision())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var result = Active.Editor.GetSelection();
@@ -207,6 +208,7 @@ namespace ThCADCore.Test
         [CommandMethod("TIANHUACAD", "ThPolygonizer", CommandFlags.Modal)]
         public void ThPolygonizer()
         {
+            using (var ov = new ThCADCoreNTSFixedPrecision())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var result = Active.Editor.GetSelection();
