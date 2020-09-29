@@ -33,6 +33,7 @@ namespace ThMEPWSS
             //throw new System.NotImplementedException();
         }
 
+        #region 喷淋布置
         [CommandMethod("TIANHUACAD", "THPLPTA", CommandFlags.Modal)]
         public void ThAutomaticLayoutSpray()
         {
@@ -222,26 +223,30 @@ namespace ThMEPWSS
 
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                PromptKeywordOptions keywordOps = new PromptKeywordOptions("\n 请选择需要打印盲区的对象[喷淋点位盲区（S）/喷淋布置线盲区（L）]");
-                keywordOps.Keywords.Add("S");
-                keywordOps.Keywords.Add("L");
-                keywordOps.Keywords.Default = "L";
-                var resKey = Active.Editor.GetKeywords(keywordOps);
-                if (resKey.Status == PromptStatus.OK)
+                if (!CalSprayBlindArea(result, acdb))
                 {
-                    switch (resKey.StringResult)
-                    {
-                        case "S":
-                            CalSprayBlindArea(result, acdb);
-                            break;
-                        case "L":
-                            CalSprayLineBlindArea(result, acdb);
-                            break;
-                        default:
-                            Active.Editor.WriteMessage("\n 输入了无效数字");
-                            break;
-                    }
+                    CalSprayLineBlindArea(result, acdb);
                 }
+                //PromptKeywordOptions keywordOps = new PromptKeywordOptions("\n 请选择需要打印盲区的对象[喷淋点位盲区（S）/喷淋布置线盲区（L）]");
+                //keywordOps.Keywords.Add("S");
+                //keywordOps.Keywords.Add("L");
+                //keywordOps.Keywords.Default = "L";
+                //var resKey = Active.Editor.GetKeywords(keywordOps);
+                //if (resKey.Status == PromptStatus.OK)
+                //{
+                //    switch (resKey.StringResult)
+                //    {
+                //        case "S":
+                //            CalSprayBlindArea(result, acdb);
+                //            break;
+                //        case "L":
+                //            CalSprayLineBlindArea(result, acdb);
+                //            break;
+                //        default:
+                //            Active.Editor.WriteMessage("\n 输入了无效数字");
+                //            break;
+                //    }
+                //}
             }
         }
 
@@ -250,7 +255,7 @@ namespace ThMEPWSS
         /// </summary>
         /// <param name="result"></param>
         /// <param name="acdb"></param>
-        private void CalSprayBlindArea(PromptSelectionResult result, AcadDatabase acdb)
+        private bool CalSprayBlindArea(PromptSelectionResult result, AcadDatabase acdb)
         {
             foreach (ObjectId frame in result.Value.GetObjectIds())
             {
@@ -282,8 +287,11 @@ namespace ThMEPWSS
                 else
                 {
                     Active.Editor.WriteMessage("\n 喷淋暂未生成");
+                    return false;
                 }
             }
+
+            return true;
         }
 
         /// <summary>
@@ -326,5 +334,8 @@ namespace ThMEPWSS
                 }
             }
         }
+        #endregion
+
+
     }
 }

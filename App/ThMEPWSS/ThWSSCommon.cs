@@ -13,5 +13,6 @@ namespace ThWSS
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";
         public static readonly string Layout_Line_LayerName = "AI-Sprinkler-Axis";
         public static readonly string BlindArea_LayerName = "AI-Sprinkler-Blind";
+        public static readonly string PipeLine_LayerName = "AI-Sprinkler-Blind";
     }
 }
