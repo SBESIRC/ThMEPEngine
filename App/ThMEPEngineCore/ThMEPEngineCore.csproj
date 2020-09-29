@@ -70,11 +70,17 @@
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
     <Compile Include="Features\ThBeamFeatureCollection.cs" />
+    <Compile Include="Features\ThColumnFeature.cs" />
+    <Compile Include="Features\ThColumnFeatureCollection.cs" />
+    <Compile Include="Features\ThShearWallFeatureCollection.cs" />
+    <Compile Include="Features\ThThShearWallFeature.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
     <Compile Include="IO\ThBeamGeoJsonReader.cs" />
+    <Compile Include="IO\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\ThDwgReader.cs" />
     <Compile Include="IO\ThDwgWriter.cs" />
     <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
+    <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
     <Compile Include="Model\Electrical\ThIfcLamp.cs" />
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />

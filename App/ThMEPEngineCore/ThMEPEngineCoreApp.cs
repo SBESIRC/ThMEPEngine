@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Collections.Generic;
 using AcHelper;
 using Linq2Acad;
@@ -168,6 +169,7 @@ namespace ThMEPEngineCore
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
 
                 // 输出GeoJson文件
+                // 梁
                 var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "Beams.geojson")))
                 using (JsonTextWriter writer = new JsonTextWriter(geoJson)
@@ -179,6 +181,34 @@ namespace ThMEPEngineCore
                 {
                     var geoJsonWriter = new ThBeamGeoJsonWriter();
                     geoJsonWriter.Write(allBeams, writer);
+                }
+
+                // 柱
+                var columns = thBeamTypeRecogitionEngine.ColumnEngine.Elements.Cast<ThIfcColumn>();
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "Columns.geojson")))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                {
+                    Indentation = 4,
+                    IndentChar = ' ',
+                    Formatting = Formatting.Indented,
+                })
+                {
+                    var geoJsonWriter = new ThColumnGeoJsonWriter();
+                    geoJsonWriter.Write(columns.ToList(), writer);
+                }
+
+                // 剪力墙
+                var shearWalls = thBeamTypeRecogitionEngine.ShearWallEngine.Elements.Cast<ThIfcWall>();
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "ShearWalls.geojson")))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                {
+                    Indentation = 4,
+                    IndentChar = ' ',
+                    Formatting = Formatting.Indented,
+                })
+                {
+                    var geoJsonWriter = new ThShearWallGeoJsonWriter();
+                    geoJsonWriter.Write(shearWalls.ToList(), writer);
                 }
             }
         }

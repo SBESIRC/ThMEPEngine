@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Linq;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
-using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Operation
 {
