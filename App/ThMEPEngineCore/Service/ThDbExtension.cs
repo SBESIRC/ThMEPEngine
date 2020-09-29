@@ -48,5 +48,9 @@ namespace ThMEPEngineCore.Service
         {
             return blockReference.BlockTableRecord.IsValid;
         }
+        protected bool IsBuildElement(Entity entity)
+        {
+            return entity.ObjectId.IsValid;
+        }
     }
 }

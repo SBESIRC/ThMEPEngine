@@ -75,15 +75,12 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Hatch hatch)
                             {
-                                if (CheckLayerValid(hatch))
+                                if (IsBuildElement(hatch) && CheckLayerValid(hatch))
                                 {
-                                    // 暂时只支持一个由多段线围成的填充
+                                    // 暂时不支持有“洞”的填充
                                     var polys = hatch.ToPolylines();
-                                    if (polys.Count == 1)
-                                    {
-                                        polys[0].TransformBy(matrix);
-                                        curves.Add(polys[0]);
-                                    }
+                                    polys.ForEachDbObject(o => o.TransformBy(matrix));
+                                    curves.AddRange(polys);
                                 }
                             }
                         }
