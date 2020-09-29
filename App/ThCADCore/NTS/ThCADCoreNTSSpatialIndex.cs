@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using System.Linq;
 using System.Collections.Generic;
@@ -98,153 +99,81 @@ namespace ThCADCore.NTS
 
         private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
         {
-            var results = new DBObjectCollection();
-            foreach (Entity item in objs)
-            {
-                if (item is Line line)
-                {
-                    if (preparedGeometry.Intersects(line.ToNTSLineString()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Polyline polyline)
-                {
-                    if (preparedGeometry.Intersects(polyline.ToNTSLineString()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is DBText dBText)
-                {
-                    if (preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Arc arc)
-                {
-                    if (preparedGeometry.Intersects(arc.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Circle circle)
-                {
-                    if (preparedGeometry.Intersects(circle.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Hatch hatch)
-                {
-                    if (preparedGeometry.Intersects(hatch.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return results;
-        }
-
-        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
-        {
-            var results = new DBObjectCollection();
-            foreach (Entity item in objs)
-            {
-                if (item is Line line)
-                {
-                    if (preparedGeometry.Contains(line.ToNTSLineString()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Polyline polyline)
-                {
-                    if (preparedGeometry.Contains(polyline.ToNTSLineString()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is DBText dBText)
-                {
-                    if (preparedGeometry.Contains(dBText.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Arc arc)
-                {
-                    if (preparedGeometry.Contains(arc.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Circle circle)
-                {
-                    if (preparedGeometry.Contains(circle.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Hatch hatch)
-                {
-                    if (preparedGeometry.Contains(item.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return results;
+            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
         }
 
         private DBObjectCollection FenceFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
         {
-            var results = new DBObjectCollection();
-            foreach (Entity item in objs)
+            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
+        }
+
+        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
+        {
+            return objs.Cast<Entity>().Where(o => Contains(preparedGeometry, o)).ToCollection();
+        }
+
+        private bool Contains(IPreparedGeometry preparedGeometry, Entity entity)
+        {
+            if (entity is Line line)
             {
-                if (item is Line line)
-                {
-                    if (preparedGeometry.Intersects(line.ToNTSLineString()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Polyline polyline)
-                {
-                    if (preparedGeometry.Intersects(polyline.ToNTSLineString()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is DBText dBText)
-                {
-                    if (preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else if (item is Hatch hatch)
-                {
-                    if (preparedGeometry.Intersects(item.GeometricExtents.ToNTSPolygon()))
-                    {
-                        results.Add(item);
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
+                return preparedGeometry.Contains(line.ToNTSLineString());
             }
-            return results;
+            else if (entity is Polyline polyline)
+            {
+                return preparedGeometry.Contains(polyline.ToNTSLineString());
+            }
+            else if (entity is DBText dBText)
+            {
+                return preparedGeometry.Contains(dBText.GeometricExtents.ToNTSPolygon());
+            }
+            else if (entity is Arc arc)
+            {
+                return preparedGeometry.Contains(arc.GeometricExtents.ToNTSPolygon());
+            }
+            else if (entity is Circle circle)
+            {
+                return preparedGeometry.Contains(circle.GeometricExtents.ToNTSPolygon());
+            }
+            else if (entity is Hatch hatch)
+            {
+                return preparedGeometry.Contains(hatch.GeometricExtents.ToNTSPolygon());
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        private bool Intersects(IPreparedGeometry preparedGeometry, Entity entity)
+        {
+            if (entity is Line line)
+            {
+                return preparedGeometry.Intersects(line.ToNTSLineString());
+            }
+            else if (entity is Polyline polyline)
+            {
+                return preparedGeometry.Intersects(polyline.ToNTSLineString());
+            }
+            else if (entity is DBText dBText)
+            {
+                return preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon());
+            }
+            else if (entity is Arc arc)
+            {
+                return preparedGeometry.Intersects(arc.GeometricExtents.ToNTSPolygon());
+            }
+            else if (entity is Circle circle)
+            {
+                return preparedGeometry.Intersects(circle.GeometricExtents.ToNTSPolygon());
+            }
+            else if (entity is Hatch hatch)
+            {
+                return preparedGeometry.Intersects(hatch.GeometricExtents.ToNTSPolygon());
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         /// <summary>
