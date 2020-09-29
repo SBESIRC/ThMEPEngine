@@ -47,55 +47,48 @@ namespace ThMEPEngineCore.Service
         }
         private IEnumerable<Curve> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)
         {
-            List<Curve> curves = new List<Curve>();
-            if(blockReference.BlockTableRecord==ObjectId.Null)
-            {
-                return curves;
-            }
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                if (IsBuildElementBlock(blockTableRecord))
+                List<Curve> curves = new List<Curve>();
+                if (IsBuildElementBlockReference(blockReference))
                 {
-                    var xclip = blockReference.XClipInfo();
-                    foreach (var objId in blockTableRecord)
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    if (IsBuildElementBlock(blockTableRecord))
                     {
-                        var dbObj = acadDatabase.Element<Entity>(objId);
-                        if (dbObj is BlockReference blockObj)
+                        foreach (var objId in blockTableRecord)
                         {
-                            if (blockObj.BlockTableRecord.IsNull)
+                            var dbObj = acadDatabase.Element<Entity>(objId);
+                            if (dbObj is BlockReference blockObj)
                             {
-                                continue;
+                                if (blockObj.BlockTableRecord.IsNull)
+                                {
+                                    continue;
+                                }
+                                if (blockObj.IsBuildElementBlockReference())
+                                {
+                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                    curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
+                                }
                             }
-                            if (blockObj.IsBuildElementBlockReference())
+                            else if (dbObj is Curve curve)
                             {
-                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
+                                if (CheckLayerValid(curve))
+                                {
+                                    curves.Add(curve.GetTransformedCopy(matrix) as Curve);
+                                }
                             }
                         }
-                        else if (dbObj is Curve curve)
+
+                        var xclip = blockReference.XClipInfo();
+                        if (xclip.IsValid)
                         {
-                            if (CheckLayerValid(curve))
-                            {
-                                var wcsCurve = curve.GetTransformedCopy(matrix) as Curve;
-                                if (xclip.IsValid)
-                                {
-                                    var clipper = new ThCADCoreNTSGeometryClipper(xclip.Polygon);
-                                    foreach (Curve item in clipper.Clip(wcsCurve, xclip.Inverted))
-                                    {
-                                        curves.Add(item);
-                                    }  
-                                }
-                                else
-                                {
-                                    curves.Add(wcsCurve);
-                                }
-                            }
+                            xclip.TransformBy(matrix);
+                            return curves.Where(o => xclip.Contains(o));
                         }
                     }
                 }
+                return curves;
             }
-            return curves;
         }
         public override void BuildElementTexts()
         {

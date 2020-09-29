@@ -1,6 +1,7 @@
 ﻿using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries.Prepared;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -32,6 +33,14 @@ namespace ThMEPEngineCore.Algorithm
                     preparedPolygon = PreparedGeometryFactory.Prepare(Polygon.ToNTSPolygon());
                 }
                 return preparedPolygon;
+            }
+        }
+
+        public void TransformBy(Matrix3d mat)
+        {
+            if (IsValid)
+            {
+                Polygon.TransformBy(mat);
             }
         }
     }

@@ -34,10 +34,9 @@ namespace ThMEPEngineCore.Algorithm
                                 bool isInverted = fil.Inverted;
 #endif
 
-                                var polygon = acadDatabase.Database.XClipPolygon(fil.Definition.GetPoints(),
-                                    fil.ClipSpaceToWorldCoordinateSystemTransform);
-                                xClipInfo.Polygon = polygon;
-                                xClipInfo.Inverted = isInverted;
+                                // 暂时只支持裁剪外部
+                                xClipInfo.Inverted = false;
+                                xClipInfo.Polygon = XClipPolygon(fil);
                             }
                         }
                     }
@@ -46,9 +45,9 @@ namespace ThMEPEngineCore.Algorithm
             }
         }
 
-
-        private static Polyline XClipPolygon(this Database database, Point2dCollection vertices, Matrix3d mat)
+        private static Polyline XClipPolygon(SpatialFilter filter)
         {
+            var vertices = filter.Definition.GetPoints();
             var poly = new Polyline()
             {
                 Closed = true,
@@ -65,7 +64,8 @@ namespace ThMEPEngineCore.Algorithm
             {
                 throw new NotSupportedException();
             }
-            poly.TransformBy(mat);
+            poly.TransformBy(filter.ClipSpaceToWorldCoordinateSystemTransform);
+            poly.TransformBy(filter.OriginalInverseBlockTransform);
             return poly;
         }
     }

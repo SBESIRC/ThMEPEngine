@@ -44,5 +44,9 @@ namespace ThMEPEngineCore.Service
 
             return true;
         }
+        protected bool IsBuildElementBlockReference(BlockReference blockReference)
+        {
+            return blockReference.BlockTableRecord.IsValid;
+        }
     }
 }
