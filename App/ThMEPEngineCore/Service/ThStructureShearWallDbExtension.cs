@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Service
         public List<Curve> ShearWallCurves { get; set; }
         public ThStructureShearWallDbExtension(Database db):base(db)
         {
-            LayerFilter = ThShearWallLayerManager.GeometryXrefLayers(db);
+            LayerFilter = ThShearWallLayerManager.CurveXrefLayers(db);
             ShearWallCurves = new List<Curve>();
         }
         public void Dispose()

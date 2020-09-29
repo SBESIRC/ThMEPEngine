@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Service
         public List<Curve> ColumnCurves { get; set; }
         public ThStructureColumnDbExtension(Database db):base(db)
         {
-            LayerFilter = ThColumnLayerManager.GeometryXrefLayers(db);
+            LayerFilter = ThColumnLayerManager.CurveXrefLayers(db);
             ColumnCurves = new List<Curve>();
         }
         public void Dispose()
