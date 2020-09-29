@@ -23,7 +23,7 @@ namespace ThMEPWSS.Service
         /// <param name="dir"></param>
         /// <param name="dis"></param>
         /// <returns></returns>
-        public bool CheckSprayData(Polyline sprayPoly, List<SprayLayoutData> sprays, Vector3d dir, double dis)
+        public bool CheckSprayData(Line sprayPoly, List<SprayLayoutData> sprays, Vector3d dir, double dis)
         {
             var polys = SprayDataOperateService.GetAllSanmeDirLines(dir, sprays);
             var pts = SprayDataOperateService.CalSprayPoint(polys, sprayPoly);

@@ -32,7 +32,7 @@ namespace ThMEPWSS.Model
                 Point3d.Origin - distance * (vDir - tDir).GetNormal()
             };
             CreatePolyline(curve, vertices);
-
+            
             var sprays = new List<List<SprayLayoutData>>();
             foreach (var points in layoutP)
             {

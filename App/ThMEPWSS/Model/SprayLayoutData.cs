@@ -14,12 +14,12 @@ namespace ThMEPWSS.Model
         public Point3d Position { get; set; }
         public Vector3d mainDir { get; set; }    //排布主方向
         public Vector3d otherDir { get; set; }   //排布次方向
-        public Polyline vLine { get; set; }          //所在排布竖线
-        public Polyline tLine { get; set; }          //所在排布横线
-        public Polyline nextVLine { get; set; }      //前一条排布竖线
-        public Polyline nextTLine { get; set; }      //前一条排布横线
-        public Polyline prevVLine { get; set; }      //后一条排布竖线
-        public Polyline prevTLine { get; set; }      //后一条排布横线
+        public Line vLine { get; set; }          //所在排布竖线
+        public Line tLine { get; set; }          //所在排布横线
+        public Line nextVLine { get; set; }      //前一条排布竖线
+        public Line nextTLine { get; set; }      //前一条排布横线
+        public Line prevVLine { get; set; }      //后一条排布竖线
+        public Line prevTLine { get; set; }      //后一条排布横线
         public static SprayLayoutData Create(Point3d pos, Curve radii)
         {
             return new SprayLayoutData()

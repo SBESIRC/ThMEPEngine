@@ -11,7 +11,7 @@ namespace ThMEPWSS.Bussiness
     public class CalSprayBlindLineAreaService : SprayBlindService
     {
         readonly double length = 3400;
-        public void CalSprayBlindArea(List<Polyline> sprayLines, Polyline polyline)
+        public void CalSprayBlindArea(List<Line> sprayLines, Polyline polyline)
         {
             GenerateSpraysPointService generateSpraysService = new GenerateSpraysPointService();
             var sprayData = generateSpraysService.GenerateSprays(sprayLines, length);

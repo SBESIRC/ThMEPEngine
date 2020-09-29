@@ -93,7 +93,8 @@ namespace ThMEPWSS.Bussiness
                 {
                     var thisLine = firSpray.Value.First().GetOtherPolylineByDir(moveDir.Value);
                     var moveLine = thisLine.MovePolyline(moveLength, moveDir.Value);
-                    if (CheckMoveLineSpcing(firSpray.Value.First(), moveDir.Value, moveLine, maxSpacing * 2) &&
+                    var resSprays = allSprays.Where(x => x.tLine == thisLine || x.vLine == thisLine).ToList();
+                    if (CheckMoveLineSpcing(resSprays, moveDir.Value, moveLine, maxSpacing * 2) &&
                         CheckLegalityWithBoundary(sprayLst.Select(x => x.Key).ToList(), moveLine, maxSpacing))
                     {
                         SprayDataOperateService.UpdateSpraysLine(allSprays, thisLine, moveLine);
@@ -117,22 +118,30 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveLine"></param>
         /// <param name="maxLength"></param>
         /// <returns></returns>
-        private bool CheckMoveLineSpcing(SprayLayoutData spray, Vector3d moveDir, Polyline moveLine, double maxLength)
+        private bool CheckMoveLineSpcing(List<SprayLayoutData> sprays, Vector3d moveDir, Line moveLine, double maxLength)
         {
-            bool checkRes = true;
-            var nextLine = spray.GetOtherNextPolylineByDir(moveDir);
-            if (nextLine != null)
+            foreach (var spray in sprays)
             {
-                checkRes = moveLine.Distance(nextLine) <= maxLength;
-            }
+                var nextLine = spray.GetOtherNextPolylineByDir(moveDir);
+                if (nextLine != null)
+                {
+                    if (moveLine.IndexedDistance(nextLine) > maxLength)
+                    {
+                        return false;
+                    }
+                }
 
-            var prevLine = spray.GetOtherPrePolylineByDir(moveDir);
-            if (prevLine != null)
-            {
-                checkRes = moveLine.Distance(prevLine) <= maxLength;
+                var prevLine = spray.GetOtherPrePolylineByDir(moveDir);
+                if (prevLine != null)
+                {
+                    if (moveLine.IndexedDistance(prevLine) > maxLength)
+                    {
+                        return false;
+                    }
+                }
             }
-
-            return checkRes;
+            
+            return true;
         }
 
         /// <summary>
@@ -142,12 +151,12 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveLine"></param>
         /// <param name="maxLength"></param>
         /// <returns></returns>
-        private bool CheckLegalityWithBoundary(List<Line> sprayLines, Polyline moveLine, double maxLength)
+        private bool CheckLegalityWithBoundary(List<Line> sprayLines, Line moveLine, double maxLength)
         {
             bool checkRes = true;
             foreach (var line in sprayLines)
             {
-                double distance = moveLine.Distance(line);
+                double distance = moveLine.IndexedDistance(line);
                 if (distance < minSpacing || distance > maxLength)
                 {
                     return false;
@@ -200,7 +209,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveDir"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        private Polyline MoveSprayLine(SprayLayoutData spray, Vector3d moveDir, double length)
+        private Line MoveSprayLine(SprayLayoutData spray, Vector3d moveDir, double length)
         {
             return spray.GetOtherPolylineByDir(moveDir).MovePolyline(length, moveDir);
         }

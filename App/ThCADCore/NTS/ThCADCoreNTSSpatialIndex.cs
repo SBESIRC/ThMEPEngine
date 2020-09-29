@@ -72,6 +72,14 @@ namespace ThCADCore.NTS
                         Geometries.Add(geometry, text);
                     }
                 }
+                else if (obj is Hatch hatch)
+                {
+                    var geometry = hatch.GeometricExtents.ToNTSPolygon();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, hatch);
+                    }
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -128,6 +136,13 @@ namespace ThCADCore.NTS
                         results.Add(item);
                     }
                 }
+                else if (item is Hatch hatch)
+                {
+                    if (preparedGeometry.Intersects(hatch.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -176,6 +191,13 @@ namespace ThCADCore.NTS
                         results.Add(item);
                     }
                 }
+                else if (item is Hatch hatch)
+                {
+                    if (preparedGeometry.Contains(item.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -206,6 +228,13 @@ namespace ThCADCore.NTS
                 else if (item is DBText dBText)
                 {
                     if (preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon()))
+                    {
+                        results.Add(item);
+                    }
+                }
+                else if (item is Hatch hatch)
+                {
+                    if (preparedGeometry.Intersects(item.GeometricExtents.ToNTSPolygon()))
                     {
                         results.Add(item);
                     }

@@ -36,6 +36,7 @@
     <Compile Include="Model\SprayLayoutData.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CheckService.cs" />
+    <Compile Include="Service\ClearComponentService.cs" />
     <Compile Include="Service\InsertSprayLinesService.cs" />
     <Compile Include="Service\InsertSprayService.cs" />
     <Compile Include="Service\SprayDataOperateService.cs" />

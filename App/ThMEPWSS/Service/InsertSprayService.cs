@@ -29,7 +29,7 @@ namespace ThWSS.Bussiness
                         insertPoint,
                         new Scale3d(1, 1, 1),
                         0);
-                    blockId.SetDynBlockValue(ThWSSCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY, SprayVisibilityPropValue(type));
+                    //blockId.SetDynBlockValue(ThWSSCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY, SprayVisibilityPropValue(type));
                 }
             }
         }

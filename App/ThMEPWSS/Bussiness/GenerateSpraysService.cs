@@ -18,7 +18,7 @@ namespace ThMEPWSS.Bussiness
         /// </summary>
         /// <param name="sprayLines"></param>
         /// <returns></returns>
-        public List<SprayLayoutData> GenerateSprays(List<Polyline> sprayLines)
+        public List<SprayLayoutData> GenerateSprays(List<Line> sprayLines)
         {
             var classLines = ClassifySprayLines(sprayLines);
             if (classLines == null)
@@ -35,7 +35,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="sprayLines"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public List<SprayLayoutData> GenerateSprays(List<Polyline> sprayLines, double length)
+        public List<SprayLayoutData> GenerateSprays(List<Line> sprayLines, double length)
         {
             var classLines = ClassifySprayLines(sprayLines);
             if (classLines == null || classLines.Count <= 1)
@@ -43,10 +43,10 @@ namespace ThMEPWSS.Bussiness
                 return new List<SprayLayoutData>();
             }
 
-            var mainPoly = classLines[0].First();
-            var otherPoly = classLines[1].First();
-            Vector3d mainDir = (mainPoly.GetPoint3dAt(0) - mainPoly.GetPoint3dAt(mainPoly.NumberOfVertices - 1)).GetNormal();
-            Vector3d otherDir = (otherPoly.GetPoint3dAt(0) - otherPoly.GetPoint3dAt(otherPoly.NumberOfVertices - 1)).GetNormal();
+            var mainLine = classLines[0].First();
+            var otherLine = classLines[1].First();
+            Vector3d mainDir = (mainLine.EndPoint - mainLine.StartPoint).GetNormal();
+            Vector3d otherDir = (otherLine.EndPoint - otherLine.StartPoint).GetNormal();
 
             var sprayPts = SprayDataOperateService.CalSprayPoint(classLines[0], classLines[1]).Select(x => x.Position).ToList();
             return SprayDataOperateService.CalSprayPoint(sprayPts, mainDir, otherDir, length);
@@ -57,19 +57,19 @@ namespace ThMEPWSS.Bussiness
         /// </summary>
         /// <param name="sprayLines"></param>
         /// <returns></returns>
-        private List<List<Polyline>> ClassifySprayLines(List<Polyline> sprayLines)
+        private List<List<Line>> ClassifySprayLines(List<Line> sprayLines)
         {
             if (sprayLines.Count <= 0)
             {
                 return null; ;
             }
 
-            Vector3d mainDir = (sprayLines.First().GetPoint3dAt(0) - sprayLines.First().GetPoint3dAt(sprayLines.First().NumberOfVertices - 1)).GetNormal();
-            List<Polyline> mainLine = new List<Polyline>();
-            List<Polyline> otherLines = new List<Polyline>();
+            Vector3d mainDir = (sprayLines.First().EndPoint - sprayLines.First().StartPoint).GetNormal();
+            List<Line> mainLine = new List<Line>();
+            List<Line> otherLines = new List<Line>();
             foreach (var line in sprayLines)
             {
-                Vector3d lineDir = (line.GetPoint3dAt(0) - line.GetPoint3dAt(line.NumberOfVertices - 1)).GetNormal();
+                Vector3d lineDir = (line.EndPoint - line.StartPoint).GetNormal();
                 if (lineDir == mainDir || lineDir == -mainDir)
                 {
                     mainLine.Add(line);
@@ -80,7 +80,7 @@ namespace ThMEPWSS.Bussiness
                 }
             }
 
-            return new List<List<Polyline>>() { mainLine, otherLines };
+            return new List<List<Line>>() { mainLine, otherLines };
         }
     }
 }

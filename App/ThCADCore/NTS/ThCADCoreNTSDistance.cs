@@ -15,14 +15,14 @@ namespace ThCADCore.NTS
             return distance.Distance;
         }
 
-        public static double Distance(this Polyline polyline, Curve curve)
+        public static double Distance(this Curve line, Curve curve)
         {
-            return polyline.ToNTSLineString().Distance(curve.ToNTSLineString());
+            return line.ToNTSLineString().Distance(curve.ToNTSLineString());
         }
 
-        public static double IndexedDistance(this Polyline polyline, Curve curve)
+        public static double IndexedDistance(this Curve line, Curve curve)
         {
-            return IndexedFacetDistance.Distance(polyline.ToNTSLineString(), curve.ToNTSLineString());
+            return IndexedFacetDistance.Distance(line.ToNTSLineString(), curve.ToNTSLineString());
         }
     }
 }

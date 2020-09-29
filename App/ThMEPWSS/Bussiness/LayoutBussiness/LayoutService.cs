@@ -19,11 +19,11 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected double raduisLength = 1800;
         protected double moveLength = 200;
 
-        public List<List<SprayLayoutData>> LayoutSpray(Polyline polyline, List<Polyline> colums)
+        public List<List<SprayLayoutData>> LayoutSpray(Polyline polyline, List<Polyline> colums, double gridSpacing)
         {
             //获取柱轴网
             GridService gridService = new GridService();
-            var allGrid = gridService.CreateGrid(polyline, colums);
+            var allGrid = gridService.CreateGrid(polyline, colums, gridSpacing);
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 foreach (var item in allGrid)

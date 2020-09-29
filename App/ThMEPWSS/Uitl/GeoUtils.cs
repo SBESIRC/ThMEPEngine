@@ -53,23 +53,17 @@ namespace ThMEPWSS.Utils
         }
 
         /// <summary>
-        /// 移动polyline
+        /// 移动line
         /// </summary>
         /// <param name="polyline"></param>
         /// <param name="length"></param>
         /// <param name="moveDir"></param>
         /// <returns></returns>
-        public static Polyline MovePolyline(this Polyline polyline, double length, Vector3d moveDir)
+        public static Line MovePolyline(this Line line, double length, Vector3d moveDir)
         {
-            bool isClosed = polyline.Closed;
-            Polyline newPolyline = new Polyline() { Closed = isClosed };
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                var pt = (polyline.GetPoint3dAt(i) + moveDir * length).ToPoint2D();
-                newPolyline.AddVertexAt(0, pt, 0, 0, 0);
-            }
-
-            return newPolyline;
+            var startPt = line.StartPoint + moveDir * length;
+            var endPt = line.EndPoint + moveDir * length;
+            return new Line(startPt, endPt);
         }
     }
 }

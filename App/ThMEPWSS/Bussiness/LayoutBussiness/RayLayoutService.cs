@@ -23,14 +23,14 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double moveLength = 200;
         protected readonly double spacing = 100;
 
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums)
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, double gridSpacing, bool CreateLine = true)
         {
             //获取柱轴网
             GridService gridService = new GridService();
-            var allGrids = gridService.CreateGrid(polyline, colums);
+            var allGrids = gridService.CreateGrid(polyline, colums, gridSpacing);
 
             //计算布置网格线
-            CalLayoutGrid(polyline, allGrids, out List<List<Polyline>> tLines, out List<List<Polyline>> vLines, out Vector3d tDir, out Vector3d vDir);
+            CalLayoutGrid(polyline, allGrids, out List<List<Line>> tLines, out List<List<Line>> vLines, out Vector3d tDir, out Vector3d vDir);
 
             //计算喷淋布置点
             var sprays = SprayDataOperateService.CalSprayPoint(tLines, vLines, vDir, tDir, sideLength);
@@ -39,14 +39,23 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             CheckProtectService checkProtectService = new CheckProtectService();
             checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength);
 
-            //躲次梁
-            AvoidBeamService beamService = new AvoidBeamService();
+            ////躲次梁
+            //AvoidBeamService beamService = new AvoidBeamService();
             //beamService.AvoidBeam(polyline, sprays);
 
-            //打印布置网格线
-            InsertSprayLinesService.InsertSprayLines(SprayDataOperateService.CalAllSprayLines(sprays));
+            if (CreateLine)
+            {
+                //打印布置网格线
+                InsertSprayLinesService.InsertSprayLines(SprayDataOperateService.CalAllSprayLines(sprays));
+            }
+            else
+            {
+                //计算喷淋点
+                GenerateSpraysPointService spraysPointService = new GenerateSpraysPointService();
+                sprays = spraysPointService.GenerateSprays(SprayDataOperateService.CalAllSprayLines(sprays));
+            }
 
-            return null;
+            return sprays;
         }
 
         /// <summary>
@@ -56,8 +65,8 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         /// <param name="columnGrids"></param>
         /// <param name="tLines"></param>
         /// <param name="vLines"></param>
-        private void CalLayoutGrid(Polyline polyline, List<KeyValuePair<Vector3d, List<Polyline>>> columnGrids, out List<List<Polyline>> tLines,
-            out List<List<Polyline>> vLines, out Vector3d tDir, out Vector3d vDir)
+        private void CalLayoutGrid(Polyline polyline, List<KeyValuePair<Vector3d, List<Polyline>>> columnGrids, out List<List<Line>> tLines,
+            out List<List<Line>> vLines, out Vector3d tDir, out Vector3d vDir)
         {
             Matrix3d layoutMatrix = new Matrix3d(new double[]{
                     columnGrids[0].Key.X, columnGrids[1].Key.X, Vector3d.ZAxis.X, 0,
@@ -110,8 +119,12 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             AdjustmentLayoutLines(resTLines, sp);
             AdjustmentLayoutLines(resVLines, sp);
 
-            tLines = resTLines.Select(x => polyline.Trim(x).Cast<Polyline>().ToList()).ToList();
-            vLines = resVLines.Select(x => polyline.Trim(x).Cast<Polyline>().ToList()).ToList();
+            tLines = resTLines.Select(x => polyline.Trim(x).Cast<Polyline>()
+                .Select(y => new Line(y.StartPoint, y.EndPoint))
+                .ToList()).ToList();
+            vLines = resVLines.Select(x => polyline.Trim(x).Cast<Polyline>()
+                .Select(y => new Line(y.StartPoint, y.EndPoint))
+                .ToList()).ToList();
         }
 
         /// <summary>
@@ -124,11 +137,9 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             for (int i = 1; i < polylines.Count - 1; i++)
             {
                 var prevPoly = polylines[i - 1];
-                var thisPoly = polylines[i];
                 var nextPoly = polylines[i + 1];
 
-                var closetPt = prevPoly.GetClosestPointTo(nextPoly.StartPoint, true);
-                if (closetPt.DistanceTo(nextPoly.StartPoint) < sideLength)
+                if (prevPoly.Distance(nextPoly) < sideLength)
                 {
                     removeNum.Add(i);
                     i++;

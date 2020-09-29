@@ -19,7 +19,7 @@ namespace ThMEPWSS.Service
         /// <param name="vDir"></param>
         /// <param name="tDir"></param>
         /// <returns></returns>
-        public static List<SprayLayoutData> CalSprayPoint(List<List<Polyline>> tLines, List<List<Polyline>> vLines, Vector3d vDir, Vector3d tDir, double sideLength)
+        public static List<SprayLayoutData> CalSprayPoint(List<List<Line>> tLines, List<List<Line>> vLines, Vector3d vDir, Vector3d tDir, double sideLength)
         {
             List<SprayLayoutData> layoutPts = new List<SprayLayoutData>();
             for (int i = 0; i < tLines.Count; i++)
@@ -41,28 +41,28 @@ namespace ThMEPWSS.Service
                                 Point3dCollection testPts = new Point3dCollection();
                                 if (i > 0)
                                 {
-                                    if (IsIntersect(vLine, tLines[i - 1], out Polyline interEntity))
+                                    if (IsIntersect(vLine, tLines[i - 1], out Line interEntity))
                                     {
                                         spray.prevTLine = interEntity;
                                     }
                                 }
                                 if (i < tLines.Count - 1)
                                 {
-                                    if (IsIntersect(vLine, tLines[i + 1], out Polyline interEntity))
+                                    if (IsIntersect(vLine, tLines[i + 1], out Line interEntity))
                                     {
                                         spray.nextTLine = interEntity;
                                     }
                                 }
                                 if (j > 0)
                                 {
-                                    if (IsIntersect(tLine, vLines[j - 1], out Polyline interEntity))
+                                    if (IsIntersect(tLine, vLines[j - 1], out Line interEntity))
                                     {
                                         spray.prevVLine = interEntity;
                                     }
                                 }
                                 if (j < vLines.Count - 1)
                                 {
-                                    if (IsIntersect(tLine, vLines[j + 1], out Polyline interEntity))
+                                    if (IsIntersect(tLine, vLines[j + 1], out Line interEntity))
                                     {
                                         spray.nextVLine = interEntity;
                                     }
@@ -85,7 +85,7 @@ namespace ThMEPWSS.Service
         /// <param name="vDir"></param>
         /// <param name="tDir"></param>
         /// <returns></returns>
-        public static List<SprayLayoutData> CalSprayPoint(List<Polyline> tLines, List<Polyline> vLines)
+        public static List<SprayLayoutData> CalSprayPoint(List<Line> tLines, List<Line> vLines)
         {
             List<SprayLayoutData> layoutPts = new List<SprayLayoutData>();
             foreach (var tLine in tLines)
@@ -127,7 +127,7 @@ namespace ThMEPWSS.Service
         /// <param name="polylines"></param>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public static List<Point3d> CalSprayPoint(List<Polyline> polylines, Polyline polyline)
+        public static List<Point3d> CalSprayPoint(List<Line> polylines, Line polyline)
         {
             List<Point3d> pts = new List<Point3d>();
             foreach (var poly in polylines)
@@ -163,7 +163,7 @@ namespace ThMEPWSS.Service
         /// <param name="dir"></param>
         /// <param name="sprays"></param>
         /// <returns></returns>
-        public static List<Polyline> GetAllSanmeDirLines(Vector3d dir, List<SprayLayoutData> sprays)
+        public static List<Line> GetAllSanmeDirLines(Vector3d dir, List<SprayLayoutData> sprays)
         {
             if (sprays.Count <= 0)
             {
@@ -186,7 +186,7 @@ namespace ThMEPWSS.Service
         /// <param name="sprayLayoutData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static Polyline GetPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        public static Line GetPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
         {
             if (sprayLayoutData.JudgeMainLine(dir))
             {
@@ -204,7 +204,7 @@ namespace ThMEPWSS.Service
         /// <param name="sprayLayoutData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static Polyline GetOtherPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        public static Line GetOtherPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
         {
             if (sprayLayoutData.JudgeMainLine(dir))
             {
@@ -222,7 +222,7 @@ namespace ThMEPWSS.Service
         /// <param name="sprayLayoutData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static Polyline GetPrePolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        public static Line GetPrePolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
         {
             if (sprayLayoutData.JudgeMainLine(dir))
             {
@@ -240,7 +240,7 @@ namespace ThMEPWSS.Service
         /// <param name="sprayLayoutData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static Polyline GetOtherPrePolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        public static Line GetOtherPrePolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
         {
             if (sprayLayoutData.JudgeMainLine(dir))
             {
@@ -258,7 +258,7 @@ namespace ThMEPWSS.Service
         /// <param name="sprayLayoutData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static Polyline GetNextPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        public static Line GetNextPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
         {
             if (sprayLayoutData.JudgeMainLine(dir))
             {
@@ -276,7 +276,7 @@ namespace ThMEPWSS.Service
         /// <param name="sprayLayoutData"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public static Polyline GetOtherNextPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
+        public static Line GetOtherNextPolylineByDir(this SprayLayoutData sprayLayoutData, Vector3d dir)
         {
             if (sprayLayoutData.JudgeMainLine(dir))
             {
@@ -315,7 +315,7 @@ namespace ThMEPWSS.Service
         /// <param name="otherEnts"></param>
         /// <param name="interEntity"></param>
         /// <returns></returns>
-        public static bool IsIntersect(Polyline entity, List<Polyline> otherEnts, out Polyline interEntity)
+        public static bool IsIntersect(Line entity, List<Line> otherEnts, out Line interEntity)
         {
             interEntity = null;
             Point3dCollection testPts = new Point3dCollection();
@@ -338,26 +338,51 @@ namespace ThMEPWSS.Service
         /// <param name="sprays"></param>
         /// <param name="originLine"></param>
         /// <param name="newLine"></param>
-        public static void UpdateSpraysLine(List<SprayLayoutData> sprays, Polyline originLine, Polyline newLine)
+        public static void UpdateSpraysLine(List<SprayLayoutData> sprays, Line originLine, Line newLine)
         {
             var resSprays = sprays.Where(x => x.tLine == originLine || x.vLine == originLine).ToList();
+            var resPreSprays = sprays.Where(x => x.prevTLine == originLine || x.prevVLine == originLine).ToList();
+            var resNextSprays = sprays.Where(x => x.nextTLine == originLine || x.nextVLine == originLine).ToList();
             foreach (var spray in resSprays)
             {
                 Point3dCollection points = new Point3dCollection();
                 if (spray.vLine == originLine) 
                 {
+                    var preSpray = resPreSprays.Where(x => x.tLine == spray.tLine).FirstOrDefault();
+                    var nextSpray = resNextSprays.Where(x => x.tLine == spray.tLine).FirstOrDefault();
                     spray.tLine.IntersectWith(originLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
                     if (points.Count > 0)
                     {
                         spray.vLine = newLine;
+                        if (preSpray != null)
+                        {
+                            preSpray.prevVLine = newLine;
+                        }
+
+                        if (nextSpray != null)
+                        {
+                            nextSpray.nextVLine = newLine;
+                        }
                     }
                 }
+
                 if (spray.tLine == originLine)
                 {
+                    var preSpray = resPreSprays.Where(x => x.vLine == spray.vLine).FirstOrDefault();
+                    var nextSpray = resNextSprays.Where(x => x.vLine == spray.vLine).FirstOrDefault();
                     spray.vLine.IntersectWith(originLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
                     if (points.Count > 0)
                     {
                         spray.tLine = newLine;
+                        if (preSpray != null)
+                        {
+                            preSpray.prevTLine = newLine;
+                        }
+
+                        if (nextSpray != null)
+                        {
+                            nextSpray.nextTLine = newLine;
+                        }
                     }
                 }
 
@@ -373,9 +398,10 @@ namespace ThMEPWSS.Service
         /// </summary>
         /// <param name="sprays"></param>
         /// <returns></returns>
-        public static List<Polyline> CalAllSprayLines(List<SprayLayoutData> sprays)
+        public static List<Line> CalAllSprayLines(List<SprayLayoutData> sprays)
         {
-            return sprays.SelectMany(x => new List<Polyline>() { x.vLine, x.tLine }).Distinct().ToList();
+            return sprays.SelectMany(x => new List<Line>() { x.vLine, x.tLine }).Distinct().ToList();
         }
     }
 }
+

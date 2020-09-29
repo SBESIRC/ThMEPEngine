@@ -3,13 +3,15 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Operation
 {
     public class GridService
     {
         readonly double tol = 10;
-        readonly double minSpace = 4500;
+        double minSpace = 4500;
 
         /// <summary>
         /// 构建柱轴网
@@ -17,8 +19,10 @@ namespace ThMEPEngineCore.Operation
         /// <param name="points"></param>
         /// <param name="xLength"></param>
         /// <param name="yLength"></param>
-        public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums)
+        public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums, double spacingValue)
         {
+            minSpace = spacingValue;
+
             List<Point3d> points = GetColumCenter(colums);
             Matrix3d matrix = ThMEPEngineCoreGeUtils.GetGridMatrix(polyline, out Line longLine, out Line shortLine);
 
@@ -160,7 +164,7 @@ namespace ThMEPEngineCore.Operation
                 var sPt = poly.GetPoint3dAt(0);
                 var closetPt = nextPoly.GetClosestPointTo(sPt, false);
 
-                if (sPt.DistanceTo(closetPt) < minSpace)
+                if (poly.Distance(nextPoly) < minSpace)
                 {
                     if (index == 0)
                     {
@@ -172,7 +176,8 @@ namespace ThMEPEngineCore.Operation
                     }
                     else
                     {
-                        if (poly.NumberOfVertices > nextPoly.NumberOfVertices)
+                        //removePolys.Add(nextPoly);
+                        if (poly.NumberOfVertices >= nextPoly.NumberOfVertices)
                         {
                             removePolys.Add(nextPoly);
                         }
@@ -182,6 +187,48 @@ namespace ThMEPEngineCore.Operation
                             index = indexJ;
                         }
                     }
+                }
+                else
+                {
+                    index = indexJ;
+                }
+                indexJ++;
+            }
+
+            return new KeyValuePair<Vector3d, List<Polyline>>(grids.Key, gridLines.Except(removePolys).ToList());
+        }
+
+        /// <summary>
+        /// 去掉离得过近的轴网线(边界线不参与合并)
+        /// </summary>
+        /// <param name="grids"></param>
+        private KeyValuePair<Vector3d, List<Polyline>> MoveClosedGridNoBoundary(KeyValuePair<Vector3d, List<Polyline>> grids)
+        {
+            var gridLines = grids.Value;
+            int index = 1;
+            int indexJ = 2;
+            List<Polyline> removePolys = new List<Polyline>();
+            while (index < gridLines.Count - 1)
+            {
+                if (indexJ >= gridLines.Count - 1)
+                {
+                    break;
+                }
+                var poly = gridLines[index];
+                var nextPoly = gridLines[indexJ];
+
+                if (poly.Distance(nextPoly) < minSpace)
+                {
+                    removePolys.Add(nextPoly);
+                    //if (poly.NumberOfVertices > nextPoly.NumberOfVertices)
+                    //{
+                    //    removePolys.Add(nextPoly);
+                    //}
+                    //else
+                    //{
+                    //    removePolys.Add(poly);
+                    //    index = indexJ;
+                    //}
                 }
                 else
                 {

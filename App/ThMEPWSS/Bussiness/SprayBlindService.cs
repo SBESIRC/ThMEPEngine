@@ -35,12 +35,29 @@ namespace ThMEPWSS.Bussiness
         {
             using (var db = AcadDatabase.Active())
             {
-                LayerTools.AddLayer(db.Database, ThWSSCommon.BlindArea_LayerName);
+                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.BlindArea_LayerName);
+
                 foreach (var area in blindArea)
                 {
                     area.Layer = ThWSSCommon.BlindArea_LayerName;
-                    area.ColorIndex = 211;
+                    area.ColorIndex = 10;
                     db.ModelSpace.Add(area);
+                    
+                    // 外圈轮廓
+                    ObjectIdCollection objIdColl = new ObjectIdCollection();
+                    objIdColl.Add(area.Id);
+
+                    // 填充面积框线
+                    Hatch hatch = new Hatch();
+                    hatch.LayerId = layerId;
+                    db.ModelSpace.Add(hatch);
+                    hatch.ColorIndex = 10;
+                    hatch.SetHatchPattern(HatchPatternType.PreDefined, "Solid");
+                    hatch.Associative = true;
+                    hatch.AppendLoop(HatchLoopTypes.Outermost, objIdColl);
+
+                    // 重新生成Hatch纹理
+                    hatch.EvaluateHatch(true);
                 }
             }
         }
