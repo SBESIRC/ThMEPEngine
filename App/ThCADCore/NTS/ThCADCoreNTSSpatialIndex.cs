@@ -1,7 +1,10 @@
 ﻿using System;
 using NFox.Cad;
 using DotNetARX;
+using Linq2Acad;
 using System.Linq;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
@@ -14,95 +17,16 @@ namespace ThCADCore.NTS
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
         private STRtree<Geometry> Engine { get; set; }
-        private PreparedGeometryFactory Factory { get; set; }
         private Dictionary<Geometry, DBObject> Geometries { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
-            Engine = new STRtree<Geometry>();
-            Factory = new PreparedGeometryFactory();
-            Initialize(objs);
+            Geometries = new Dictionary<Geometry, DBObject>();
+            Update(objs, new DBObjectCollection());
         }
 
         public void Dispose()
         {
             //
-        }
-
-        private void Initialize(DBObjectCollection objs)
-        {
-            Geometries = new Dictionary<Geometry, DBObject>();
-            foreach (Entity obj in objs)
-            {
-                if (obj is Line line)
-                {
-                    var geometry = line.ToNTSLineString();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, line);
-                    }
-                }
-                else if (obj is Polyline polyline)
-                {
-                    var geometry = polyline.ToNTSLineString();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, polyline);
-                    }
-                }
-                else if (obj is Arc arc)
-                {
-                    var geometry = arc.GeometricExtents.ToNTSPolygon();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, arc);
-                    }
-                }
-                else if (obj is Circle circle)
-                {
-                    var geometry = circle.GeometricExtents.ToNTSPolygon();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, circle);
-                    }
-                }
-                else if (obj is DBText text)
-                {
-                    var geometry = text.GeometricExtents.ToNTSPolygon();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, text);
-                    }
-                }
-                else if (obj is Hatch hatch)
-                {
-                    var geometry = hatch.GeometricExtents.ToNTSPolygon();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, hatch);
-                    }
-                }
-                else if (obj is Solid solid)
-                {
-                    var geometry = solid.GeometricExtents.ToNTSPolygon();
-                    if (!Geometries.Keys.Contains(geometry))
-                    {
-                        Geometries.Add(geometry, solid);
-                    }
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            foreach (var geometry in Geometries.Keys)
-            {
-                AddGeometry(geometry);
-            }
-        }
-
-        private void AddGeometry(Geometry geometry)
-        {
-            Engine.Insert(geometry.EnvelopeInternal, geometry);
         }
 
         private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
@@ -122,33 +46,43 @@ namespace ThCADCore.NTS
 
         private bool Contains(IPreparedGeometry preparedGeometry, Entity entity)
         {
-            if (entity is Line line)
+            return preparedGeometry.Contains(ToNTSGeometry(entity));
+        }
+
+        private bool Intersects(IPreparedGeometry preparedGeometry, Entity entity)
+        {
+            return preparedGeometry.Intersects(ToNTSGeometry(entity));
+        }
+
+        private Geometry ToNTSGeometry(DBObject obj)
+        {
+            if (obj is Line line)
             {
-                return preparedGeometry.Contains(line.ToNTSLineString());
+                return line.ToNTSLineString();
             }
-            else if (entity is Polyline polyline)
+            else if (obj is Polyline polyline)
             {
-                return preparedGeometry.Contains(polyline.ToNTSLineString());
+                return polyline.ToNTSLineString();
             }
-            else if (entity is DBText dBText)
+            else if (obj is Arc arc)
             {
-                return preparedGeometry.Contains(dBText.GeometricExtents.ToNTSPolygon());
+                return arc.GeometricExtents.ToNTSPolygon();
             }
-            else if (entity is Arc arc)
+            else if (obj is Circle circle)
             {
-                return preparedGeometry.Contains(arc.GeometricExtents.ToNTSPolygon());
+                return circle.GeometricExtents.ToNTSPolygon();
             }
-            else if (entity is Circle circle)
+            else if (obj is DBText text)
             {
-                return preparedGeometry.Contains(circle.GeometricExtents.ToNTSPolygon());
+                return text.GeometricExtents.ToNTSPolygon();
             }
-            else if (entity is Hatch hatch)
+            else if (obj is Hatch hatch)
             {
-                return preparedGeometry.Contains(hatch.GeometricExtents.ToNTSPolygon());
+                return hatch.GeometricExtents.ToNTSPolygon();
             }
-            else if (entity is Solid solid)
+            else if (obj is Solid solid)
             {
-                return preparedGeometry.Contains(solid.GeometricExtents.ToNTSPolygon());
+                return solid.GeometricExtents.ToNTSPolygon();
             }
             else
             {
@@ -156,40 +90,28 @@ namespace ThCADCore.NTS
             }
         }
 
-        private bool Intersects(IPreparedGeometry preparedGeometry, Entity entity)
+        /// <summary>
+        /// 更新索引
+        /// </summary>
+        /// <param name="adds"></param>
+        /// <param name="removals"></param>
+        public void Update(DBObjectCollection adds, DBObjectCollection removals)
         {
-            if (entity is Line line)
+            // 添加新的对象
+            adds.Cast<DBObject>().ForEachDbObject(o =>
             {
-                return preparedGeometry.Intersects(line.ToNTSLineString());
-            }
-            else if (entity is Polyline polyline)
-            {
-                return preparedGeometry.Intersects(polyline.ToNTSLineString());
-            }
-            else if (entity is DBText dBText)
-            {
-                return preparedGeometry.Intersects(dBText.GeometricExtents.ToNTSPolygon());
-            }
-            else if (entity is Arc arc)
-            {
-                return preparedGeometry.Intersects(arc.GeometricExtents.ToNTSPolygon());
-            }
-            else if (entity is Circle circle)
-            {
-                return preparedGeometry.Intersects(circle.GeometricExtents.ToNTSPolygon());
-            }
-            else if (entity is Hatch hatch)
-            {
-                return preparedGeometry.Intersects(hatch.GeometricExtents.ToNTSPolygon());
-            }
-            else if (entity is Solid solid)
-            {
-                return preparedGeometry.Intersects(solid.GeometricExtents.ToNTSPolygon());
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+                var geometry = ToNTSGeometry(o);
+                if (!Geometries.Keys.Contains(geometry))
+                {
+                    Geometries.Add(geometry, o);
+                }
+            });
+            // 移除删除对象
+            Geometries.RemoveAll((k, v) => removals.Contains(v));
+
+            // 创建新的索引
+            Engine = new STRtree<Geometry>();
+            Geometries.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
         }
 
         /// <summary>
@@ -200,7 +122,9 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
         {
             var geometry = polyline.ToNTSPolygon();
-            return CrossingFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
+            return CrossingFilter(
+                Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
 
         public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
@@ -223,7 +147,8 @@ namespace ThCADCore.NTS
         {
             var extents = new Extents3d(pt1, pt2);
             var geometry = extents.ToNTSPolygon();
-            return CrossingFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
+            return CrossingFilter(Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
 
         /// <summary>
@@ -234,7 +159,8 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectWindowPolygon(Polyline polyline)
         {
             var geometry = polyline.ToNTSPolygon();
-            return WindowFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
+            return WindowFilter(Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
 
         /// <summary>
@@ -245,7 +171,8 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectFence(Polyline polyline)
         {
             var geometry = polyline.ToNTSLineString();
-            return FenceFilter(Query(geometry.EnvelopeInternal), Factory.Create(geometry));
+            return FenceFilter(Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
 
         public DBObjectCollection SelectAll()
