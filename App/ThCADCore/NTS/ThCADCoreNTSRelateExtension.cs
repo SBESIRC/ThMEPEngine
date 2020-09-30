@@ -30,5 +30,12 @@ namespace ThCADCore.NTS
                 return Matrix.IsOverlaps(NTSDimension.Surface, NTSDimension.Surface);
             }
         }
+        public bool IsWithIn
+        {
+            get
+            {
+                return Matrix.IsWithin();
+            }
+        }
     }
 }

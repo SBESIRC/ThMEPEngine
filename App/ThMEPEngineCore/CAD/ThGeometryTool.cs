@@ -144,5 +144,17 @@ namespace ThMEPEngineCore.CAD
             ray.Dispose();
             return positionIndex;
         }
+        public static bool IsIntersects(this Entity firstEnt, Entity secondEnt)
+        {            
+            return firstEnt.IntersectWithEx(secondEnt).Count > 0 ? true : false;
+        }
+        public static Point3dCollection IntersectWithEx(this Entity firstEntity, Entity secondEntity)
+        {
+            Point3dCollection pts = new Point3dCollection();
+            Plane plane = new Plane(Point3d.Origin, Vector3d.ZAxis);
+            firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, plane, pts, IntPtr.Zero, IntPtr.Zero);
+            plane.Dispose();
+            return pts;
+        }
     }
 }

@@ -87,7 +87,7 @@ namespace ThMEPEngineCore.Service
         {
             double extendDis = 0.0;
             var neighbor = FindClosestNeighbor(lineBeam, portPt, neighbors);
-            if (neighbor != null && !Intersects(lineBeam, neighbor))
+            if (neighbor != null)
             {
                 Point3dCollection intersectPts = new Point3dCollection();
                 Line centerLine = new Line(lineBeam.StartPoint, lineBeam.EndPoint);
@@ -135,17 +135,17 @@ namespace ThMEPEngineCore.Service
             {
                 Line centerLine = new Line(thIfcLineBeam.StartPoint,thIfcLineBeam.EndPoint);
                 List<Tuple<ThIfcBuildingElement, Point3d>> intersects = new List<Tuple<ThIfcBuildingElement, Point3d>>();
-                foreach(var neighbor in neighbors)
+                neighbors.ForEach(o =>
                 {
-                    Point3dCollection intersectPts = new Point3dCollection();                    
-                    centerLine.IntersectWith(neighbor.Outline, Intersect.ExtendThis, intersectPts, IntPtr.Zero, IntPtr.Zero);
+                    Point3dCollection intersectPts = new Point3dCollection();
+                    centerLine.IntersectWith(o.Outline, Intersect.ExtendThis, intersectPts, IntPtr.Zero, IntPtr.Zero);
                     if (intersectPts.Count > 0)
                     {
                         var closestPt = intersectPts.Cast<Point3d>()
-                            .OrderBy(o => portPt.DistanceTo(o)).First();
-                        intersects.Add(Tuple.Create(neighbor, closestPt));
+                            .OrderBy(m => portPt.DistanceTo(m)).First();
+                        intersects.Add(Tuple.Create(o, closestPt));
                     }
-                }
+                });
                 return intersects.Count > 0 ? intersects.OrderBy(o => portPt.DistanceTo(o.Item2)).First().Item1 : null;
             }
         }

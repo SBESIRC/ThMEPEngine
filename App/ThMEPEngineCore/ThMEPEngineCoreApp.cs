@@ -438,5 +438,48 @@ namespace ThMEPEngineCore
                 }
             }
         }
+        [CommandMethod("TIANHUACAD", "ThTestSplitBeam", CommandFlags.Modal)]
+        public void ThTestSplitBeam()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var entRes = Active.Editor.GetEntity("\n 选择梁的外轮廓");
+                if(entRes.Status!=PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
+                var startRes = Active.Editor.GetPoint("\n 选择梁的起点");
+                if (startRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var endRes = Active.Editor.GetPoint("\n 选择梁的终点");
+                if (endRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }    
+                var outlineRes = Active.Editor.GetSelection();
+                if (outlineRes.Status == PromptStatus.OK)
+                {
+                    List<ThSegment> segments = new List<ThSegment>();
+                    var outline = acadDatabase.Element<Polyline>(entRes.ObjectId);
+                    var thIfcLineBeam = new ThIfcLineBeam()
+                    {
+                        StartPoint = startRes.Value,
+                        EndPoint = endRes.Value,
+                        Outline = outline.Clone() as Polyline
+                    };
+                    foreach (var objId in outlineRes.Value.GetObjectIds())
+                    {
+                        var segment = acadDatabase.Element<Polyline>(objId);
+                        segments.Add(new ThLinearSegment { Outline = segment.Clone() as Polyline });
+                    }
+                    ThLinealBeamSplitter thLinealBeamSplitter = new ThLinealBeamSplitter(thIfcLineBeam as ThIfcLineBeam, segments);
+                    thLinealBeamSplitter.Split();
+                    thLinealBeamSplitter.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+                }
+            }
+        }
     }
 }

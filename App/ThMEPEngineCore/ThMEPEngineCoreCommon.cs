@@ -77,5 +77,9 @@ namespace ThMEPEngineCore
         /// 梁高（默认值）
         /// </summary>
         public const double BeamDefaultHeight = 500.0;
+        /// <summary>
+        /// 梁内缩距离
+        /// </summary>
+        public const double BeamBufferDistance = 5.0;
     }
 }

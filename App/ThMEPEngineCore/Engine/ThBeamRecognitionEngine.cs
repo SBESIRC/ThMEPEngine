@@ -90,7 +90,6 @@ namespace ThMEPEngineCore.Engine
             ThShearWallRecognitionEngine thShearWallRecognitionEngine,
             ThSpatialIndexManager thSpatialIndexManager)
         {
-            //后处理1：分割梁段
             ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(
                 this,
                 thColumnRecognitionEngine,

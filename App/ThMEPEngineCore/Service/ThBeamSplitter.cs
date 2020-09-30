@@ -11,22 +11,14 @@ namespace ThMEPEngineCore.Service
 {
     public abstract class ThBeamSplitter
     {
-        public List<ThIfcBeam> SplitBeams { get; private set; }
+        public List<ThIfcBeam> SplitBeams { get; protected set; }
         protected List<ThSegment> Segments { get; set; }
         protected ThBeamSplitter(List<ThSegment> segments)
         {
             SplitBeams = new List<ThIfcBeam>();
             Segments = segments;
         }
-        public abstract void Split();        
-        protected Point3dCollection IntersectWithEx(Entity firstEntity, Entity secondEntity)
-        {
-            Point3dCollection pts = new Point3dCollection();
-            Plane zeroPlane = new Plane(Point3d.Origin, Vector3d.XAxis, Vector3d.YAxis);
-            firstEntity.IntersectWith(secondEntity, Intersect.OnBothOperands, zeroPlane, pts, IntPtr.Zero, IntPtr.Zero);
-            zeroPlane.Dispose();
-            return pts;
-        }
+        public abstract void Split();       
         protected bool CheckTwoLineUnIntersect(Point3d firstSpt, Point3d firstEpt, Point3d secondSpt, Point3d secondEpt)
         {
             double firstLength = firstSpt.DistanceTo(firstEpt);

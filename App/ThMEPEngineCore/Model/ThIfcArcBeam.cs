@@ -1,10 +1,16 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcArcBeam : ThIfcBeam
+    public class ThIfcArcBeam : ThIfcBeam, ICloneable
     {
+        public object Clone()
+        {
+            throw new NotImplementedException();
+        }
+
         /// <summary>
         /// 起始端
         /// </summary>
