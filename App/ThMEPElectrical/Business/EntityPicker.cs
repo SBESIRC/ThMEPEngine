@@ -45,7 +45,9 @@ namespace ThMEPElectrical.Business
             {
                 foreach (ObjectId polyId in result.Value.GetObjectIds())
                 {
-                    polylines.Add(db.CurrentSpace.Element(polyId) as Polyline);
+                    var curPoly = db.CurrentSpace.Element(polyId).Clone() as Polyline;
+                    curPoly.Closed = true;
+                    polylines.Add(curPoly);
                 }
             }
 

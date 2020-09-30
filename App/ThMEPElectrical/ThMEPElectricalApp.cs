@@ -13,6 +13,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPElectrical.Broadcast;
 using System.Linq;
 using ThCADExtension;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical
 {
@@ -147,6 +148,28 @@ namespace ThMEPElectrical
             {
                 var packageManager = new PackageManager();
                 packageManager.DoMainBeamABBRect();
+            }
+        }
+
+        // 梁吊顶
+        [CommandMethod("TIANHUACAD", "THBeamCeil", CommandFlags.Modal)]
+        public void THNoBeamMultiPlace()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoGridBeamPlacePoints();
+            }
+        }
+
+        // 楼层
+        [CommandMethod("TIANHUACAD", "THNoBeamStorey", CommandFlags.Modal)]
+        public void THNoBeamStorey()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoNoBeamPlacePoints();
             }
         }
 

@@ -16,6 +16,8 @@ namespace ThMEPElectrical.Model
 
         public double Height;   // 次梁的高度
 
+        public bool IsUsed = false;
+
         public SecondBeamProfileInfo(Polyline poly, double height = 500)
         {
             Profile = poly;

@@ -2,7 +2,6 @@
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Algorithm.Locate;
-using NetTopologySuite.Operation.Predicate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
@@ -75,6 +74,11 @@ namespace ThCADCore.NTS
                 objs.Add(polygon.Shell.ToDbPolyline());
             }
             return objs;
+        }
+
+        public static DBObjectCollection GeometryIntersection(this AcPolygon polyFirst, AcPolygon polySec)
+        {
+            return polyFirst.ToNTSPolygon().Intersection(polySec.ToNTSPolygon()).ToDbCollection();
         }
     }
 }

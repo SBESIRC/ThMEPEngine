@@ -18,6 +18,7 @@ using Linq2Acad;
 using ThMEPEngineCore.Engine;
 using ThCADExtension;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Operation;
 
 namespace ThMEPElectrical.Core
 {
@@ -37,7 +38,7 @@ namespace ThMEPElectrical.Core
             var dataExtract = new DBExtract();
             dataExtract.GetCurves();
 
-            var calculateDect = new DetectionCalculator(dataExtract.Walls.First(), dataExtract.SubtractCurves);
+            var calculateDect = new BeamDetectionCalculator(dataExtract.Walls.First(), dataExtract.SubtractCurves);
 
             var mainBeamProfiles = calculateDect.CalculateMainBeamProfiles();
             return mainBeamProfiles;
@@ -56,7 +57,7 @@ namespace ThMEPElectrical.Core
 
             foreach (var poly in wallPolylines)
             {
-                var dectCalculator = new DetectionCalculator(poly, dataExtract.SubtractCurves);
+                var dectCalculator = new BeamDetectionCalculator(poly, dataExtract.SubtractCurves);
                 resPolylines.AddRange(dectCalculator.CalculateMainBeamProfiles());
             }
             return resPolylines;
@@ -84,7 +85,7 @@ namespace ThMEPElectrical.Core
                 var secondBeams = GetValidProfileInfos(infoReader.RecognizeSecondBeams, wallPtCollection);
 
                 // 外墙，内洞，次梁
-                var profileDatas = DetectionCalculator.MakeDetectionData(poly, innerHoles, secondBeams);
+                var profileDatas = BeamDetectionCalculator.MakeDetectionData(poly, innerHoles, secondBeams);
                 // 主次梁信息
                 inputProfileDatas.AddRange(profileDatas);
             }
@@ -106,7 +107,7 @@ namespace ThMEPElectrical.Core
 
             return polylines;
         }
-        
+
         /// <summary>
         /// 
         /// </summary>
@@ -136,6 +137,162 @@ namespace ThMEPElectrical.Core
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 无梁楼盖布置
+        /// </summary>
+        /// <returns></returns>
+        public List<Point3d> DoNoBeamPlacePoints()
+        {
+            var ptLst = new List<Point3d>();
+
+            // 计算轴网和梁结构关系
+            var inputProfileDatas = DoNoBeamStoreyProfiles();
+            if (inputProfileDatas.Count == 0)
+                return ptLst;
+
+            // 转到UCS
+            var wcs2Ucs = Active.Editor.WCS2UCS();
+            var ucs2Wcs = Active.Editor.UCS2WCS();
+
+            // 插入点的计算
+            PlaceParameter placePara = new PlaceParameter();
+            var transformPlaceInputDatas = TransformProfileDatas(inputProfileDatas, wcs2Ucs);
+
+            var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, placePara);
+            tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
+
+            // 转到WCS
+            if (ptLst.Count > 0)
+            {
+                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
+
+                var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
+                var curves = GeometryTrans.Circles2Curves(circles);
+                DrawUtils.DrawProfile(curves, "placePoints");
+            }
+
+            return ptLst;
+        }
+
+        /// <summary>
+        /// 有梁吊顶布置
+        /// </summary>
+        /// <returns></returns>
+        public List<Point3d> DoGridBeamPlacePoints()
+        {
+            var ptLst = new List<Point3d>();
+
+            // 计算轴网和梁结构关系
+            var inputProfileDatas = DoGridBeamProfiles();
+            if (inputProfileDatas.Count == 0)
+                return ptLst;
+
+            // 转到UCS
+            var wcs2Ucs = Active.Editor.WCS2UCS();
+            var ucs2Wcs = Active.Editor.UCS2WCS();
+
+            // 插入点的计算
+            PlaceParameter placePara = new PlaceParameter();
+            var transformPlaceInputDatas = TransformProfileDatas(inputProfileDatas, wcs2Ucs);
+
+            var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, placePara);
+            tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
+
+            // 转到WCS
+            if (ptLst.Count > 0)
+            {
+                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
+
+                var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
+                var curves = GeometryTrans.Circles2Curves(circles);
+                DrawUtils.DrawProfile(curves, "placePoints");
+            }
+            return ptLst;
+        }
+
+        /// <summary>
+        /// 计算无梁楼盖的信息
+        /// </summary>
+        /// <returns></returns>
+        public List<PlaceInputProfileData> DoNoBeamStoreyProfiles()
+        {
+            // 前置数据读取器
+            var infoReader = new InfoReader();
+            infoReader.PickColumns(); // 提取柱子
+
+            // 用户选择
+            var wallPolylines = EntityPicker.MakeUserPickEntities();
+            var inputProfileDatas = new List<PlaceInputProfileData>();
+            var gridPolys = new List<Polyline>();
+
+            // 外墙轮廓数据
+            foreach (var poly in wallPolylines)
+            {
+                var wallPtCollection = poly.Vertices();
+
+                var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
+                var gridCalculator = new GridService();
+
+                //轴网线
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, ThMEPCommon.spacingValue);
+                gridPolys.Clear();
+                gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
+                //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
+                //return inputProfileDatas;
+                // 外墙，内洞，轴网
+                var profileDatas = NoBeamStoreyDetectionCalculator.MakeNoBeamStoreyDetectionCalculator(gridPolys, validColumns, poly);
+                // 轴网 + 相关次梁信息
+                inputProfileDatas.AddRange(profileDatas);
+            }
+
+            return inputProfileDatas;
+        }
+
+        /// <summary>
+        /// 计算梁吊顶的信息
+        /// </summary>
+        /// <returns></returns>
+        public List<PlaceInputProfileData> DoGridBeamProfiles()
+        {
+            // 前置数据读取器
+            var infoReader = new InfoReader();
+            infoReader.Do();
+
+            // 用户选择
+            var wallPolylines = EntityPicker.MakeUserPickEntities();
+            var inputProfileDatas = new List<PlaceInputProfileData>();
+            var gridPolys = new List<Polyline>();
+
+            var innerHoles = new List<Polyline>();
+            // 外墙轮廓数据
+            foreach (var poly in wallPolylines)
+            {
+                var wallPtCollection = poly.Vertices();
+                innerHoles.Clear();
+                // 所有的内部洞数据
+                innerHoles.AddRange(infoReader.RecognizeMainBeamColumnWalls);
+                infoReader.RecognizeSecondBeams.ForEach(e => innerHoles.Add(e.Profile));
+
+                var validHoles = GetValidProfiles(innerHoles, wallPtCollection);
+
+                var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
+                var gridCalculator = new GridService();
+
+                //轴网线
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, ThMEPCommon.spacingValue);
+                gridPolys.Clear();
+                gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
+                //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "tet");
+                //return inputProfileDatas;
+                // 外墙，内洞，轴网
+                var profileDatas = GridDetectionCalculator.MakeGridDetectionCalculator(poly, gridPolys, validHoles);
+                // 轴网 + 相关次梁信息
+                inputProfileDatas.AddRange(profileDatas);
+            }
+
+            return inputProfileDatas;
         }
 
         /// <summary>

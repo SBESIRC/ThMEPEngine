@@ -1,0 +1,92 @@
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ThMEPElectrical.Model;
+using ThCADCore.NTS;
+using ThMEPElectrical.Assistant;
+using NFox.Cad;
+
+namespace ThMEPElectrical.Business
+{
+    /// <summary>
+    /// 轴网生成大的轮廓
+    /// </summary>
+    class GridDetectionCalculator : DetectionCalculator
+    {
+        private List<Polyline> m_gridPolys; // 原始的轴网线
+        private List<Polyline> m_holes; // 内部洞相关数据
+
+        public GridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes)
+            : base(wallPoly)
+        {
+            m_gridPolys = gridPolys;
+            m_holes = holes;
+        }
+
+        public static List<PlaceInputProfileData> MakeGridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes)
+        {
+            var gridDetectionCalculator = new GridDetectionCalculator(wallPoly, gridPolys, holes);
+            gridDetectionCalculator.Do();
+
+            return gridDetectionCalculator.RegionBeamSpanProfileData;
+        }
+
+        public void Do()
+        {
+            // 计算第一次的区域
+            var gridProfiles = CalculateRegions(m_gridPolys);
+            //DrawUtils.DrawProfile(gridProfiles.Polylines2Curves(), "gridRegions");
+            //RegionBeamSpanProfileData = new List<PlaceInputProfileData>();
+            //return;
+            var innerRelatedInfos = new List<SecondBeamProfileInfo>();
+            m_holes.ForEach(e => innerRelatedInfos.Add(new SecondBeamProfileInfo(e)));
+            DrawUtils.DrawProfile(m_holes.Polylines2Curves(), "relatedCurves");
+            // 计算关系组
+            var detectRegions = CalculateDetectionRelations(gridProfiles, innerRelatedInfos);
+
+            // 数据转换
+            RegionBeamSpanProfileData = DetectRegion2ProfileData(detectRegions);
+            DrawUtils.DrawGroup(RegionBeamSpanProfileData);
+        }
+
+        protected override List<DetectionRegion> CalculateDetectionRelations(List<Polyline> profiles, List<SecondBeamProfileInfo> secondBeamInfos)
+        {
+            var baseDetectionRegions = base.CalculateDetectionRelations(profiles, secondBeamInfos);
+
+            var mainPolys = CalculateMainProfiles(baseDetectionRegions);
+
+            var polyProfileInfos = new List<SecondBeamProfileInfo>();
+            secondBeamInfos.ForEach(e =>
+            {
+                if (!e.IsUsed)
+                {
+                    polyProfileInfos.Add(e);
+                }
+            });
+
+            return base.CalculateDetectionRelations(mainPolys, polyProfileInfos);
+        }
+
+        private List<Polyline> CalculateMainProfiles(List<DetectionRegion> regionGroups)
+        {
+            var polys = new List<Polyline>();
+            var innerPolys = new DBObjectCollection();
+            foreach (var group in regionGroups)
+            {
+                innerPolys.Clear();
+                var profile = group.DetectionProfile;
+                group.secondBeams.ForEach(e => innerPolys.Add(e.Profile));
+                foreach (Polyline item in profile.Difference(innerPolys))
+                {
+                    polys.Add(item);
+                }
+            }
+
+            return polys;
+        }
+
+    }
+}

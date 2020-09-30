@@ -28,7 +28,10 @@
     <Compile Include="Assistant\GeometryTrans.cs" />
     <Compile Include="Block\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
-    <Compile Include="Business\DetectionCalculator.cs" />
+    <Compile Include="Business\DetectionRegion\BeamDetectionCalculator.cs" />
+    <Compile Include="Business\DetectionRegion\DetectionCalculator.cs" />
+    <Compile Include="Business\DetectionRegion\GridDetectionCalculator.cs" />
+    <Compile Include="Business\DetectionRegion\NoBeamStoreyDetectionCalculator.cs" />
     <Compile Include="Business\LayoutCalculator.cs" />
     <Compile Include="Business\EntityPicker.cs" />
     <Compile Include="Business\PlacePointCalculator.cs" />
