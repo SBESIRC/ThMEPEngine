@@ -171,7 +171,7 @@ namespace ThMEPEngineCore
                 // 输出GeoJson文件
                 // 梁
                 var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "Beams.geojson")))
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.beam.geojson", Active.DocumentName))))
                 using (JsonTextWriter writer = new JsonTextWriter(geoJson)
                 {
                     Indentation = 4,
@@ -185,7 +185,7 @@ namespace ThMEPEngineCore
 
                 // 柱
                 var columns = thBeamTypeRecogitionEngine.ColumnEngine.Elements.Cast<ThIfcColumn>();
-                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "Columns.geojson")))
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.column.geojson", Active.DocumentName))))
                 using (JsonTextWriter writer = new JsonTextWriter(geoJson)
                 {
                     Indentation = 4,
@@ -199,7 +199,7 @@ namespace ThMEPEngineCore
 
                 // 剪力墙
                 var shearWalls = thBeamTypeRecogitionEngine.ShearWallEngine.Elements.Cast<ThIfcWall>();
-                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, "ShearWalls.geojson")))
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.shearwall.geojson", Active.DocumentName))))
                 using (JsonTextWriter writer = new JsonTextWriter(geoJson)
                 {
                     Indentation = 4,
