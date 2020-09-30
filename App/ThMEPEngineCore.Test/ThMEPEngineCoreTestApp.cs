@@ -1,15 +1,14 @@
 ﻿using AcHelper;
 using Linq2Acad;
-using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.BeamInfo.Utils;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.BeamInfo.Business;
-using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Test
 {
@@ -68,28 +67,18 @@ namespace ThMEPEngineCore.Test
         public void TestFrame()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var modelManager = new ThMEPModelManager(Active.Database))
             {
-                var result = Active.Editor.GetEntity("请选择框线");
+                var result = Active.Editor.GetEntity("\n请选择框线");
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
 
-                // 获取数据模型
-                modelManager.Acquire(BuildElement.All);
-
-                // 创建空间索引
-                var spatialIndexManager = new ThSpatialIndexManager();
-                spatialIndexManager.CreateBeamSpaticalIndex(modelManager.BeamEngine.Collect());
-                spatialIndexManager.CreateColumnSpaticalIndex(modelManager.ColumnEngine.Collect());
-                spatialIndexManager.CreateWallSpaticalIndex(modelManager.ShearWallEngine.Collect());
-
-                // 提取区域
-                var frameService = new ThMEPFrameService(modelManager, spatialIndexManager);
-                var result_element = frameService.RegionsFromFrame(frame);
-                foreach (Entity item in result_element)
+                var engine = new ThBeamConnectRecogitionEngine();
+                engine.Recognize(acadDatabase.Database, new Point3dCollection());
+                var frameService = new ThMEPFrameService(engine);
+                var frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach (Entity item in frameService.RegionsFromFrame(frame))
                 {
                     item.ColorIndex = 2;
                     acadDatabase.ModelSpace.Add(item);
