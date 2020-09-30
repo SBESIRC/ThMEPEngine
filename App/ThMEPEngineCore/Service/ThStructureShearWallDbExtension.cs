@@ -1,21 +1,22 @@
 ﻿using System;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThStructureShearWallDbExtension : ThStructureDbExtension,IDisposable
+    public class ThStructureShearWallDbExtension : ThStructureDbExtension, IDisposable
     {
         public List<Curve> ShearWallCurves { get; set; }
-        public ThStructureShearWallDbExtension(Database db):base(db)
+        public ThStructureShearWallDbExtension(Database db) : base(db)
         {
-            LayerFilter = ThShearWallLayerManager.CurveXrefLayers(db);
+            LayerFilter = ThShearWallLayerManager.HatchXrefLayers(db);
             ShearWallCurves = new List<Curve>();
         }
         public void Dispose()
@@ -26,11 +27,12 @@ namespace ThMEPEngineCore.Service
             }
             ShearWallCurves.Clear();
         }
+
         public override void BuildElementCurves()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                foreach(var ent in acadDatabase.ModelSpace)
+                foreach (var ent in acadDatabase.ModelSpace)
                 {
                     if (ent is BlockReference blkRef)
                     {
@@ -45,6 +47,7 @@ namespace ThMEPEngineCore.Service
                 }
             }
         }
+
         private IEnumerable<Curve> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
@@ -70,11 +73,23 @@ namespace ThMEPEngineCore.Service
                                     curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
                                 }
                             }
-                            else if (dbObj is Curve curve)
+                            else if (dbObj is Hatch hatch)
                             {
-                                if (CheckLayerValid(curve))
+                                if (IsBuildElement(hatch) && CheckLayerValid(hatch))
                                 {
-                                    curves.Add(curve.GetTransformedCopy(matrix) as Curve);
+                                    // 暂时不支持有“洞”的填充
+                                    var polys = hatch.ToPolylines();
+                                    polys.ForEachDbObject(o => o.TransformBy(matrix));
+                                    curves.AddRange(polys);
+                                }
+                            }
+                            else if (dbObj is Solid solid)
+                            {
+                                if (IsBuildElement(solid) && CheckLayerValid(solid))
+                                {
+                                    var poly = solid.ToPolyline();
+                                    poly.TransformBy(matrix);
+                                    curves.Add(poly);
                                 }
                             }
                         }
@@ -90,6 +105,7 @@ namespace ThMEPEngineCore.Service
                 return curves;
             }
         }
+
         public override void BuildElementTexts()
         {
             throw new NotImplementedException();

@@ -146,7 +146,7 @@
     <Compile Include="Service\ThBeamSplitter.cs" />
     <Compile Include="Service\ThLinealBeamSplitter.cs" />
     <Compile Include="Service\ThStructureColumnHatchExtension.cs" />
-    <Compile Include="Service\ThStructureShearWallHatchExtension.cs" />
+    <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThOverhangingPrimaryBeamLinkExtension.cs" />
@@ -156,7 +156,6 @@
     <Compile Include="Service\ThBeamMarkingService.cs" />
     <Compile Include="Service\ThSpatialIndexManager.cs" />
     <Compile Include="Service\ThSpatialIndexService.cs" />
-    <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamTextDbExtension.cs" />
     <Compile Include="Service\ThStructureColumnDbExtension.cs" />

@@ -51,6 +51,7 @@
     <Compile Include="ThPolylineExtension.cs" />
     <Compile Include="ThRegionTool.cs" />
     <Compile Include="ThSelectionFilterTool.cs" />
+    <Compile Include="ThSolidTool.cs" />
     <Compile Include="ThStringTools.cs" />
     <Compile Include="ThTextTool.cs" />
   </ItemGroup>

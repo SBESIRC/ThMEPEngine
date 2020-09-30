@@ -81,6 +81,14 @@ namespace ThCADCore.NTS
                         Geometries.Add(geometry, hatch);
                     }
                 }
+                else if (obj is Solid solid)
+                {
+                    var geometry = solid.GeometricExtents.ToNTSPolygon();
+                    if (!Geometries.Keys.Contains(geometry))
+                    {
+                        Geometries.Add(geometry, solid);
+                    }
+                }
                 else
                 {
                     throw new NotSupportedException();
@@ -138,6 +146,10 @@ namespace ThCADCore.NTS
             {
                 return preparedGeometry.Contains(hatch.GeometricExtents.ToNTSPolygon());
             }
+            else if (entity is Solid solid)
+            {
+                return preparedGeometry.Contains(solid.GeometricExtents.ToNTSPolygon());
+            }
             else
             {
                 throw new NotSupportedException();
@@ -169,6 +181,10 @@ namespace ThCADCore.NTS
             else if (entity is Hatch hatch)
             {
                 return preparedGeometry.Intersects(hatch.GeometricExtents.ToNTSPolygon());
+            }
+            else if (entity is Solid solid)
+            {
+                return preparedGeometry.Intersects(solid.GeometricExtents.ToNTSPolygon());
             }
             else
             {

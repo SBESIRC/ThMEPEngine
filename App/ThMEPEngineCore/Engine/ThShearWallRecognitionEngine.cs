@@ -24,7 +24,7 @@ namespace ThMEPEngineCore.Engine
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var shearWallDbExtension = new ThStructureShearWallHatchExtension(database))
+            using (var shearWallDbExtension = new ThStructureShearWallDbExtension(database))
             {
                 shearWallDbExtension.BuildElementCurves();
                 List<Curve> curves = new List<Curve>();
