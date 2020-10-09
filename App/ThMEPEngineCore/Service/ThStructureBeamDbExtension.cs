@@ -7,6 +7,7 @@ using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Service
 {
@@ -77,8 +78,17 @@ namespace ThMEPEngineCore.Service
                                     curves.Add(curve.GetTransformedCopy(matrix) as Curve);
                                 }
                             }
+                            else if(dbObj is Mline mline)
+                            {
+                                if (CheckLayerValid(mline))
+                                {
+                                    var mlineCopy = mline.GetTransformedCopy(matrix) as Mline;
+                                    DBObjectCollection mlineCurves = new DBObjectCollection();
+                                    mlineCopy.Explode(mlineCurves);
+                                    mlineCurves.Cast<Curve>().ForEach(o=>curves.Add(o));
+                                }
+                            }
                         }
-
                         var xclip = blockReference.XClipInfo();
                         if (xclip.IsValid)
                         {
