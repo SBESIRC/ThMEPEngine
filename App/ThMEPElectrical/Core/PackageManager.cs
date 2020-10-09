@@ -251,6 +251,36 @@ namespace ThMEPElectrical.Core
         }
 
         /// <summary>
+        /// 轴网测试
+        /// </summary>
+        public void DoGridTestProfiles()
+        {
+            // 前置数据读取器
+            var infoReader = new InfoReader();
+            infoReader.PickColumns(); // 提取柱子
+
+            // 用户选择
+            var wallPolylines = EntityPicker.MakeUserPickEntities();
+            var gridPolys = new List<Polyline>();
+
+            // 外墙轮廓数据
+            foreach (var poly in wallPolylines)
+            {
+                var wallPtCollection = poly.Vertices();
+
+                var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
+                var gridCalculator = new GridService();
+
+                //轴网线
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, ThMEPCommon.spacingValue);
+                gridPolys.Clear();
+                gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
+                DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
+            }
+        }
+
+
+        /// <summary>
         /// 计算梁吊顶的信息
         /// </summary>
         /// <returns></returns>

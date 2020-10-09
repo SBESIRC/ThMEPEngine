@@ -151,6 +151,17 @@ namespace ThMEPElectrical
             }
         }
 
+        // 轴网
+        [CommandMethod("TIANHUACAD", "THZY", CommandFlags.Modal)]
+        public void THDoGridTestProfiles()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager();
+                packageManager.DoGridTestProfiles();
+            }
+        }
+
         // 梁吊顶
         [CommandMethod("TIANHUACAD", "THBeamCeil", CommandFlags.Modal)]
         public void THNoBeamMultiPlace()
