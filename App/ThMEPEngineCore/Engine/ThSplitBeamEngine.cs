@@ -101,7 +101,7 @@ namespace ThMEPEngineCore.Engine
             BeamElements.ForEach(o =>
             {
                 var beam = o as ThIfcBeam;
-                Polyline outline = ThBeamSplitter.CreateExtendOutline(o, -ThMEPEngineCoreCommon.BeamBufferDistance);
+                Polyline outline = beam.Extend(0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
                 DBObjectCollection wallComponents = SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
                 if (wallComponents.Count > 0)
                 {
@@ -162,7 +162,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThSegment> GetBeamCrossColumns(ThIfcBeam thIfcBeam)
         {            
             List<ThSegment> crossSegments = new List<ThSegment>();
-            Polyline outline = ThBeamSplitter.CreateExtendOutline(thIfcBeam, -ThMEPEngineCoreCommon.BeamBufferDistance);
+            Polyline outline = thIfcBeam.Extend(0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
             DBObjectCollection columnComponents = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(outline);
             if (columnComponents.Count > 0)
             {
@@ -181,9 +181,9 @@ namespace ThMEPEngineCore.Engine
             var unintersectBeams = FilterBeamUnIntersectOtherBeams();
             List<ThIfcBuildingElement> restBeams = BeamElements.Where(m=> !unintersectBeams.Where(n=>m.Uuid==n.Uuid).Any()).ToList();
             List<ThIfcBuildingElement> inValidBeams = new List<ThIfcBuildingElement>();
-            foreach(var beam in restBeams)
+            foreach(ThIfcBeam beam in restBeams)
             {
-                Polyline outline = ThBeamSplitter.CreateExtendOutline(beam,ThMEPEngineCoreCommon.BeamIntersectExtentionTolerance);
+                Polyline outline = beam.Extend(0.0, ThMEPEngineCoreCommon.BeamIntersectExtentionTolerance);
                 DBObjectCollection passComponents = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(outline);
                 if (passComponents.Count == 0)
                 {
