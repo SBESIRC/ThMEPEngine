@@ -45,35 +45,33 @@ namespace ThMEPEngineCore.Engine
             ShearWallEngine = new ThShearWallRecognitionEngine();
             ShearWallEngine.Recognize(database, polygon);
 
-            // 创建空间索引
-            CreateColumnSpatialIndex();
-            CreateWallSpatialIndex();
-
             // 启动梁识别引擎
             BeamEngine = new ThBeamRecognitionEngine();
             BeamEngine.Recognize(database, polygon);
 
+            // 创建空间索引
+            CreateWallSpatialIndex();
+            CreateBeamSpatialIndex();
+            CreateColumnSpatialIndex();
+
             // 预处理梁端
             {
-                // 删除相识的梁端
-
                 // 连接梁端
-                BeamEngine.Join(SpatialIndexManager);
 
                 // 按柱，墙分割梁端
-                BeamEngine.Split(ColumnEngine, ShearWallEngine, SpatialIndexManager);
+                ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(this);
+                thSplitBeams.Split();
+                CreateBeamSpatialIndex();
 
-                // 梁端的延伸
-                BeamEngine.Snap(ColumnEngine, ShearWallEngine, SpatialIndexManager);
+                // 梁端到竖向构件的延伸
+                ThSnapBeamEngine thSnapBeams = new ThSnapBeamEngine(this);
+                thSnapBeams.Snap();
+                CreateBeamSpatialIndex();
 
                 // 梁端的合并
-                BeamEngine.Merge(SpatialIndexManager);
-
-                // 删除相识的梁端
+                ThMergeBeamEngine thMergeBeams = new ThMergeBeamEngine(this);
+                thMergeBeams.Merge();
             }
-
-            //创建梁空间索引
-            CreateBeamSpatialIndex();
 
             //建立单根梁两端连接的物体列表
             CreateSingleBeamLink();
@@ -101,59 +99,26 @@ namespace ThMEPEngineCore.Engine
 
             // Pass Eight 对BeamLink中的Beams属性进行梁合并
             MergeBeamLinks();
-
-            // Pass Nine 梁吸附到相邻物体上
-            SnapBeams();
-        }
-        private void SnapBeams()
-        {
-            PrimaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
-            HalfPrimaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
-            OverhangingPrimaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
-            SecondaryBeamLinks.ForEach(o => ThBeamLinkSnapService.Snap(o));
-        }
-        public void Split(Database database, Point3dCollection polygon)
-        {
-            // 启动柱识别引擎
-            ColumnEngine = new ThColumnRecognitionEngine();
-            ColumnEngine.Recognize(database, polygon);
-
-            // 启动墙识别引擎
-            ShearWallEngine = new ThShearWallRecognitionEngine();
-            ShearWallEngine.Recognize(database, polygon);
-
-            // 创建空间索引
-            CreateColumnSpatialIndex();
-            CreateWallSpatialIndex();
-
-            // 启动梁识别引擎
-            BeamEngine = new ThBeamRecognitionEngine();
-            BeamEngine.Recognize(database, polygon);
-
-            //梁分割
-            BeamEngine.Split(ColumnEngine, ShearWallEngine, SpatialIndexManager);
         }
         private void CreateColumnSpatialIndex()
         {
             SpatialIndexManager.CreateColumnSpaticalIndex(ColumnEngine.Geometries);
-            var columnGeometries = SpatialIndexManager.ColumnSpatialIndex.SelectAll();
-            ColumnEngine.UpdateValidElements(columnGeometries);
+            ColumnEngine.UpdateWithSpatialIndex(SpatialIndexManager.ColumnSpatialIndex);
         }
         private void CreateWallSpatialIndex()
         {
             SpatialIndexManager.CreateWallSpaticalIndex(ShearWallEngine.Geometries);
-            var wallGeometries = SpatialIndexManager.WallSpatialIndex.SelectAll();
-            ShearWallEngine.UpdateValidElements(wallGeometries);
+            ShearWallEngine.UpdateWithSpatialIndex(SpatialIndexManager.WallSpatialIndex);
         }
         private void CreateBeamSpatialIndex()
         {
             SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Geometries);
-            var beamGeometries = SpatialIndexManager.BeamSpatialIndex.SelectAll();
-            BeamEngine.UpdateValidElements(beamGeometries);
-            BeamEngine.Measure(SpatialIndexManager);
-            DBObjectCollection dbObjs = new DBObjectCollection();
-            BeamEngine.ValidElements.ForEach(o=>dbObjs.Add(o.Outline));
-            SpatialIndexManager.CreateBeamSpaticalIndex(dbObjs);
+            BeamEngine.UpdateWithSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
+        }
+        private void SimilarityMeasure()
+        {
+            var thSimilarityMeasureEngine = new ThSimilarityMeasureEngine(this);
+            thSimilarityMeasureEngine.SimilarityMeasure();
         }
         private void CreateSingleBeamLink()
         {
@@ -161,7 +126,7 @@ namespace ThMEPEngineCore.Engine
             {
                 ConnectionEngine = this,
             };
-            foreach (var element in BeamEngine.ValidElements)
+            foreach (var element in BeamEngine.Elements)
             {
                 ThSingleBeamLink thSingleBeamLink = new ThSingleBeamLink();
                 if(element is ThIfcBeam thIfcBeam)
@@ -193,7 +158,7 @@ namespace ThMEPEngineCore.Engine
         }
         private void FindSingleBeamLinkTwoVerComponent()
         {
-            foreach (ThIfcElement beamElement in BeamEngine.ValidElements)
+            foreach (ThIfcElement beamElement in BeamEngine.Elements)
             {
                 ThBeamLinkExtension thBeamLinkExtension = new ThBeamLinkExtension()
                 {
@@ -209,7 +174,7 @@ namespace ThMEPEngineCore.Engine
         private void FindMultiBeamLinkInTwoVerComponent()
         {           
             //主梁：两端均为竖向构件
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.Elements).ToList();
             ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
             {
                 ConnectionEngine = this,
@@ -219,7 +184,7 @@ namespace ThMEPEngineCore.Engine
         private void FindHalfPrimaryBeamLink()
         {           
             //半主梁：一端为竖向构件，另一端为主梁
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.Elements).ToList();
             ThHalfPrimaryBeamLinkExtension halfPrimaryBeamLink = new ThHalfPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
             {
                 ConnectionEngine = this,
@@ -230,7 +195,7 @@ namespace ThMEPEngineCore.Engine
         private void FindOverhangingPrimaryBeamLink()
         {
             //悬挑主梁：一端为竖向构件，另一端无主梁或竖向构件,且无延续构件
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.Elements).ToList();
             ThOverhangingPrimaryBeamLinkExtension thOverhangingPrimaryBeamLinkExtension =
                 new ThOverhangingPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks)
                 {
@@ -242,7 +207,7 @@ namespace ThMEPEngineCore.Engine
         private void FindSecondaryBeamLink()
         {
             //次梁：两端搭在主梁、半主梁、悬挑柱梁上的梁
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.Elements).ToList();
             ThSecondaryBeamLinkExtension thSecondaryBeamLinkExtension =
                 new ThSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks, OverhangingPrimaryBeamLinks)
                 {
@@ -254,7 +219,7 @@ namespace ThMEPEngineCore.Engine
         private void FindSubSecondaryBeamLink()
         {
             //次次梁：两端搭在主梁、半主梁、悬挑柱梁或次梁上的梁
-            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.ValidElements).ToList();
+            List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.Elements).ToList();
             ThSubSecondaryBeamLinkExtension thSubSecondaryBeamLinkExtension =
                 new ThSubSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks, OverhangingPrimaryBeamLinks, SecondaryBeamLinks)
                 {

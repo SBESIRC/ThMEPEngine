@@ -7,6 +7,7 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
 
 namespace ThMEPEngineCore.Service
 {
@@ -256,7 +257,6 @@ namespace ThMEPEngineCore.Service
         public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt, double beamIntervalTolerance)
         {
             Polyline portSearchEnvelope = null;
-            List<ThIfcBeam> links = new List<ThIfcBeam>();
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {               
                 portSearchEnvelope = GetLineBeamPortSearchEnvelope(thIfcLineBeam, portPt,
@@ -273,15 +273,14 @@ namespace ThMEPEngineCore.Service
             }
             var preparedEnvelope = new ThCADCoreNTSPreparedPolygon(portSearchEnvelope);
             var linkObjs = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(portSearchEnvelope);
-            if (linkObjs.Count > 0)
-            {
-                var overlapObjs = linkObjs.Cast<Polyline>().Where(o => preparedEnvelope.Intersects(o));
-                foreach (DBObject dbObj in overlapObjs)
-                {
-                    links.Add(BeamEngine.FilterByOutline(dbObj) as ThIfcBeam);
-                }
-            }
-            return links.Where(o => o.Uuid != thIfcBeam.Uuid).ToList();
+            var overlapObjs = linkObjs.Cast<Polyline>()
+                .Where(o => preparedEnvelope.Intersects(o))
+                .ToCollection();
+            return BeamEngine.Elements
+                .Where(o => overlapObjs.Contains(o.Outline))
+                .Where(o => o.Uuid != thIfcBeam.Uuid)
+                .Cast<ThIfcBeam>()
+                .ToList();
         }
         protected Polyline GetLineBeamPortEnvelope(ThIfcLineBeam thIfcLineBeam, Point3d portPt,
             double beamExtendRadio,double beamExtendLength)

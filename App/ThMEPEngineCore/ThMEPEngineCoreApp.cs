@@ -212,35 +212,6 @@ namespace ThMEPEngineCore
                 }
             }
         }
-        [CommandMethod("TIANHUACAD", "ThSplitBeam", CommandFlags.Modal)]
-        public void ThSplitBeam()
-        {
-            List<ThBeamLink> totalBeamLinks = new List<ThBeamLink>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
-            {
-                var rangeRes = Active.Editor.GetEntity("\nSelect a range polyline");
-                if (rangeRes.Status == PromptStatus.OK)
-                {
-                    Polyline range = acadDatabase.Element<Polyline>(rangeRes.ObjectId);
-                    System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
-                    stopwatch.Start();
-                    thBeamTypeRecogitionEngine.Split(Active.Database, range.Vertices());
-                    stopwatch.Stop();
-                    TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
-                    Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds + "秒");
-                    var layer = acadDatabase.Element<LayerTableRecord>(acadDatabase.Database.Clayer);
-                    thBeamTypeRecogitionEngine.BeamEngine.Elements.ForEach(o =>
-                    {
-                        if (o.Outline != null && !o.Outline.IsDisposed)
-                        {
-                            o.Outline.Layer = layer.Name;
-                            acadDatabase.ModelSpace.Add(o.Outline);
-                        }
-                    });
-                }
-            }
-        }
         private DBText CreateBeamMarkText(ThIfcBeam thIfcBeam)
         {
             string message = "";

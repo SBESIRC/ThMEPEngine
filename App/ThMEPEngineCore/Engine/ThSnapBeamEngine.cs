@@ -15,28 +15,60 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThSnapBeamEngine
     {
-        private ThColumnRecognitionEngine ColumnEngine { get; set; }
-        private ThShearWallRecognitionEngine ShearWallEngine { get; set; }
-        private ThBeamRecognitionEngine BeamEngine { get; set; }
-        private ThSpatialIndexManager SpatialIndexManager { get; set; }
-        public List<ThIfcBuildingElement> BeamElements { get; set; }
-
-        public ThSnapBeamEngine(
-            ThBeamRecognitionEngine thBeamRecognitionEngine,
-            ThColumnRecognitionEngine thColumnRecognitionEngine,
-            ThShearWallRecognitionEngine thShearWallRecognitionEngine,
-            ThSpatialIndexManager thSpatialIndexManager)
+        private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
+        private ThBeamLinkExtension ThBeamLinkEx;
+        public ThSnapBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
         {
-            ColumnEngine = thColumnRecognitionEngine;
-            ShearWallEngine = thShearWallRecognitionEngine;
-            BeamEngine = thBeamRecognitionEngine;
-            SpatialIndexManager = thSpatialIndexManager;
-            BeamElements = BeamEngine.Elements;
+            BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;
+            ThBeamLinkEx = new ThBeamLinkExtension
+            {
+                ConnectionEngine = BeamConnectRecogitionEngine
+            };
         }
 
         public void Snap()
         {
-            //
+            BeamConnectRecogitionEngine.BeamEngine.Elements.ForEach(o => Snap(o as ThIfcBeam));
+        }
+        private void Snap(ThIfcBeam thifcBeam)
+        {
+            if(thifcBeam is ThIfcLineBeam thIfcLineBeam)
+            {
+                Snap(thIfcLineBeam);
+            }
+            else if(thifcBeam is ThIfcArcBeam thIfcArcBeam)
+            {
+                Snap(thIfcArcBeam);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        private void Snap(ThIfcLineBeam thIfcLineBeam)
+        {            
+            ThBeamLink thBeamLink = new ThBeamLink();
+            thBeamLink.Beams.Add(thIfcLineBeam);
+            thBeamLink.Start = GetPortLinkObjs(thIfcLineBeam, thIfcLineBeam.StartPoint);
+            thBeamLink.End= GetPortLinkObjs(thIfcLineBeam, thIfcLineBeam.EndPoint);
+            ThBeamLinkSnapService.Snap(thBeamLink);
+        }
+        private List<ThIfcBuildingElement> GetPortLinkObjs(ThIfcBeam thIfcBeam,Point3d portPt)
+        {
+            List<ThIfcBuildingElement> results = new List<ThIfcBuildingElement>();
+            var linkBeams = ThBeamLinkEx.QueryPortLinkBeams(thIfcBeam,
+                portPt, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
+            if (linkBeams.Count == 0)
+            {
+                var linkComponents = ThBeamLinkEx.QueryPortLinkElements(thIfcBeam,
+                portPt, ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
+                linkComponents.ForEach(o => results.Add(o));
+            }
+            return results;
+        }
+        private void Snap(ThIfcArcBeam thIfcArcBeam)
+        {
+            throw new NotSupportedException();
         }
     }
 }

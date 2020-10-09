@@ -15,26 +15,16 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThSplitBeamEngine:IDisposable
     {
-        private ThColumnRecognitionEngine ColumnEngine { get; set; }
-        private ThShearWallRecognitionEngine ShearWallEngine { get; set; }
-        private ThBeamRecognitionEngine BeamEngine { get; set; }
-        private ThSpatialIndexManager SpatialIndexManager { get; set; }
+        private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
 
         public List<ThIfcBuildingElement> BeamElements { get; set; }
         protected Dictionary<ThIfcBuildingElement, List<ThSegment>> ShearWallSegDic;
         protected Dictionary<ThIfcBuildingElement, List<ThSegment>> ColumnSegDic;
 
-        public ThSplitBeamEngine(
-            ThBeamRecognitionEngine thBeamRecognitionEngine,
-            ThColumnRecognitionEngine thColumnRecognitionEngine,
-            ThShearWallRecognitionEngine thShearWallRecognitionEngine, 
-            ThSpatialIndexManager thSpatialIndexManager)
+        public ThSplitBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
         {
-            ColumnEngine = thColumnRecognitionEngine;
-            ShearWallEngine = thShearWallRecognitionEngine;
-            BeamEngine = thBeamRecognitionEngine;
-            SpatialIndexManager = thSpatialIndexManager;
-            BeamElements = BeamEngine.Elements;
+            BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;           
+            BeamElements = BeamConnectRecogitionEngine.BeamEngine.Elements;
             ShearWallSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             ColumnSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
         }
@@ -51,10 +41,12 @@ namespace ThMEPEngineCore.Engine
 
             //将梁长度过小的排除
             FilterSmallBeams();
+
+            BeamConnectRecogitionEngine.BeamEngine.Elements = this.BeamElements;
         }
         private void BuildShearwallSegment()
         {
-            ShearWallEngine.ValidElements.ForEach(o =>
+            BeamConnectRecogitionEngine.ShearWallEngine.Elements.ForEach(o =>
             {
                 ThSegmentService thSegmentService = new ThSegmentService(o.Outline as Polyline);
                 thSegmentService.SegmentAll(new CalBeamStruService());
@@ -102,11 +94,11 @@ namespace ThMEPEngineCore.Engine
             {
                 var beam = o as ThIfcBeam;
                 Polyline outline = beam.Extend(0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
-                DBObjectCollection wallComponents = SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
+                DBObjectCollection wallComponents = BeamConnectRecogitionEngine.SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
                 if (wallComponents.Count > 0)
                 {
                     List<ThSegment> passSegments = new List<ThSegment>();
-                    var intersectShearWalls = ShearWallEngine.FilterByOutline(wallComponents).ToList();
+                    var intersectShearWalls = BeamConnectRecogitionEngine.ShearWallEngine.FilterByOutline(wallComponents).ToList();
                     intersectShearWalls.ForEach(m =>
                     {
                         foreach (var item in ShearWallSegDic)
@@ -163,67 +155,17 @@ namespace ThMEPEngineCore.Engine
         {            
             List<ThSegment> crossSegments = new List<ThSegment>();
             Polyline outline = thIfcBeam.Extend(0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
-            DBObjectCollection columnComponents = SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(outline);
+            DBObjectCollection columnComponents = BeamConnectRecogitionEngine.SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(outline);
             if (columnComponents.Count > 0)
             {
-                var intersectColumns = ColumnEngine.FilterByOutline(columnComponents).ToList();
+                var intersectColumns = BeamConnectRecogitionEngine.ColumnEngine.FilterByOutline(columnComponents).ToList();
                 intersectColumns.ForEach(o =>
                 {
                     crossSegments.Add(new ThLinearSegment { Outline = o.Outline as Polyline });
                 });
             }
             return crossSegments;
-        }
-        private void SplitBeamPassBeams()
-        {
-            BeamEngine.Elements = BeamElements;
-            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Geometries);
-            var unintersectBeams = FilterBeamUnIntersectOtherBeams();
-            List<ThIfcBuildingElement> restBeams = BeamElements.Where(m=> !unintersectBeams.Where(n=>m.Uuid==n.Uuid).Any()).ToList();
-            List<ThIfcBuildingElement> inValidBeams = new List<ThIfcBuildingElement>();
-            foreach(ThIfcBeam beam in restBeams)
-            {
-                Polyline outline = beam.Extend(0.0, ThMEPEngineCoreCommon.BeamIntersectExtentionTolerance);
-                DBObjectCollection passComponents = SpatialIndexManager.BeamSpatialIndex.SelectCrossingPolygon(outline);
-                if (passComponents.Count == 0)
-                {
-                    unintersectBeams.Add(beam);
-                    continue;
-                }
-                List<ThSegment> passSegments = new List<ThSegment>();
-                var intersectBeams = BeamEngine.FilterByOutline(passComponents).ToList();
-                intersectBeams = intersectBeams.Where(o => o.Uuid != beam.Uuid).ToList();
-                intersectBeams.ForEach(o =>
-                {
-                    if (o is ThIfcBeam thIfcBeam)
-                    {
-                        passSegments.Add(CreateSegment(thIfcBeam));
-                    }
-                });
-                ThBeamSplitter thSplitBeam = null;
-                if (beam is ThIfcLineBeam thIfcLineBeam)
-                {
-                    thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam, passSegments);
-                }
-                else if (beam is ThIfcArcBeam thIfcArcBeam)
-                {
-                    thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam, passSegments);
-                }
-                thSplitBeam.Split();
-                if (thSplitBeam.SplitBeams.Count > 1)
-                {
-                    inValidBeams.Add(beam);  //分段成功,将原始梁段存进 “inValidBeams”中，便于回收
-                    unintersectBeams.AddRange(thSplitBeam.SplitBeams);
-                }
-                else
-                {
-                    unintersectBeams.Add(beam);
-                }
-            }            
-            inValidBeams.ForEach(o => o.Outline.Dispose());
-            BeamElements.Clear();
-            BeamElements = unintersectBeams;
-        }
+        }        
         private List<ThIfcBuildingElement> FilterBeamUnIntersectOtherBeams()
         {
             // 过滤梁段不与其它梁相交的情况

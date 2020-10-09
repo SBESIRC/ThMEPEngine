@@ -15,10 +15,6 @@ namespace ThMEPEngineCore.Engine
         /// </summary>
         public List<ThIfcBuildingElement> Elements { get; set; }
         /// <summary>
-        /// 去重后唯一的构件
-        /// </summary>
-        public List<ThIfcBuildingElement> ValidElements { get; set; }
-        /// <summary>
         /// 几何图元集合
         /// </summary>
         public DBObjectCollection Geometries
@@ -41,11 +37,6 @@ namespace ThMEPEngineCore.Engine
         {
             return Elements.Where(o => o.Outline.Equals(obj)).FirstOrDefault();
         }
-        public void UpdateValidElements(DBObjectCollection objs)
-        {
-            ValidElements = new List<ThIfcBuildingElement>();
-            ValidElements.AddRange(FilterByOutline(objs));
-        }
         public void UpdateSpatialIndex(ThCADCoreNTSSpatialIndex spatialIndex)
         {
             var objs = Geometries.Cast<DBObject>();
@@ -53,6 +44,12 @@ namespace ThMEPEngineCore.Engine
             var adds = objs.Where(o => !siObjs.Contains(o)).ToCollection();
             var removals = siObjs.Where(o => !objs.Contains(o)).ToCollection();
             spatialIndex.Update(adds, removals);
+        }
+        public void UpdateWithSpatialIndex(ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            var objs = Geometries.Cast<DBObject>();
+            var siObjs = spatialIndex.Geometries.Values;
+            Elements = Elements.Where(o => siObjs.Contains(o.Outline)).ToList();
         }
     }
 }

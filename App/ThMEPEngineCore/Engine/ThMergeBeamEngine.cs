@@ -13,19 +13,13 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThMergeBeamEngine
     {
-        private ThBeamRecognitionEngine BeamEngine { get; set; }
-        private ThSpatialIndexManager SpatialIndexManager { get; set; }
-
+        private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
         public List<ThIfcBuildingElement> BeamElements { get; set; }
 
-        public ThMergeBeamEngine(
-            ThBeamRecognitionEngine thBeamRecognitionEngine,
-            ThSpatialIndexManager thSpatialIndexManager)
+        public ThMergeBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
         {
-            BeamEngine = thBeamRecognitionEngine;
-            SpatialIndexManager = thSpatialIndexManager;
-            BeamElements = BeamEngine.Elements;
-
+            BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;
+            BeamElements = thBeamConnectRecogitionEngine.BeamEngine.Elements;
         }
 
         public void Merge()
