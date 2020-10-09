@@ -1,12 +1,25 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using System;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcLineBeam : ThIfcBeam, ICloneable
     {
+        public static ThIfcLineBeam Create(Polyline polyline)
+        {
+            var vertices = polyline.Vertices();
+            return new ThIfcLineBeam()
+            {
+                Outline = polyline,
+                Uuid = Guid.NewGuid().ToString(),
+                EndPoint = ThGeometryTool.GetMidPt(vertices[2], vertices[3]),
+                StartPoint = ThGeometryTool.GetMidPt(vertices[0], vertices[1]),
+            };
+        }
+
         public object Clone()
         {
             return new ThIfcLineBeam()
