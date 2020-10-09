@@ -85,6 +85,15 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        public void Join(ThSpatialIndexManager thSpatialIndexManager)
+        {
+            ThJoinBeamEngine thJoinBeamEngine = new ThJoinBeamEngine(
+                this,
+                thSpatialIndexManager);
+            thJoinBeamEngine.Join();
+            Elements = thJoinBeamEngine.BeamElements;
+        }
+
         public void Split(
             ThColumnRecognitionEngine thColumnRecognitionEngine,
             ThShearWallRecognitionEngine thShearWallRecognitionEngine,
@@ -113,6 +122,14 @@ namespace ThMEPEngineCore.Engine
             Elements = thSnapBeams.BeamElements;
         }
 
+        public void MergeOverlap(ThSpatialIndexManager thSpatialIndexManager)
+        {
+            var thMergeOverlapBeamEngine = new ThMergeOverlapBeamEngine(
+                this,
+                thSpatialIndexManager);
+            thMergeOverlapBeamEngine.MergeOverlap();
+            Elements = thMergeOverlapBeamEngine.BeamElements;
+        }
         public void Merge(ThSpatialIndexManager thSpatialIndexManager)
         {
             ThMergeBeamEngine thMergeBeams = new ThMergeBeamEngine(
@@ -120,7 +137,6 @@ namespace ThMEPEngineCore.Engine
                 thSpatialIndexManager);
             thMergeBeams.Merge();
             Elements = thMergeBeams.BeamElements;
-
         }
         public void Measure(ThSpatialIndexManager spatialIndexManager)
         {

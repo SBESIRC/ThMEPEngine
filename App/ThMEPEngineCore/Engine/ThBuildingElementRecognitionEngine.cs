@@ -1,8 +1,10 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using NFox.Cad;
+using System.Linq;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -16,17 +18,21 @@ namespace ThMEPEngineCore.Engine
         /// 去重后唯一的构件
         /// </summary>
         public List<ThIfcBuildingElement> ValidElements { get; set; }
+        /// <summary>
+        /// 几何图元集合
+        /// </summary>
+        public DBObjectCollection Geometries
+        {
+            get
+            {
+                return Elements.Select(e => e.Outline).ToCollection();
+            }
+        }
         protected ThBuildingElementRecognitionEngine()
         {
             Elements = new List<ThIfcBuildingElement>();
         }
         public abstract void Recognize(Database database, Point3dCollection polygon);
-        public DBObjectCollection Collect()
-        {
-            DBObjectCollection dbObjs = new DBObjectCollection();
-            Elements.ForEach(o => dbObjs.Add(o.Outline));
-            return dbObjs;
-        }
         public IEnumerable<ThIfcBuildingElement> FilterByOutline(DBObjectCollection objs)
         {
             return Elements.Where(o => objs.Contains(o.Outline));
@@ -39,6 +45,14 @@ namespace ThMEPEngineCore.Engine
         {
             ValidElements = new List<ThIfcBuildingElement>();
             ValidElements.AddRange(FilterByOutline(objs));
+        }
+        public void UpdateSpatialIndex(ThCADCoreNTSSpatialIndex spatialIndex)
+        {
+            var objs = Geometries.Cast<DBObject>();
+            var siObjs = spatialIndex.Geometries.Values;
+            var adds = objs.Where(o => !siObjs.Contains(o)).ToCollection();
+            var removals = siObjs.Where(o => !objs.Contains(o)).ToCollection();
+            spatialIndex.Update(adds, removals);
         }
     }
 }

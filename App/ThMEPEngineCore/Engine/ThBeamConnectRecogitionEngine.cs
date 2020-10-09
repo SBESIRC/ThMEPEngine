@@ -58,6 +58,7 @@ namespace ThMEPEngineCore.Engine
                 // 删除相识的梁端
 
                 // 连接梁端
+                BeamEngine.Join(SpatialIndexManager);
 
                 // 按柱，墙分割梁端
                 BeamEngine.Split(ColumnEngine, ShearWallEngine, SpatialIndexManager);
@@ -134,19 +135,19 @@ namespace ThMEPEngineCore.Engine
         }
         private void CreateColumnSpatialIndex()
         {
-            SpatialIndexManager.CreateColumnSpaticalIndex(ColumnEngine.Collect());
+            SpatialIndexManager.CreateColumnSpaticalIndex(ColumnEngine.Geometries);
             var columnGeometries = SpatialIndexManager.ColumnSpatialIndex.SelectAll();
             ColumnEngine.UpdateValidElements(columnGeometries);
         }
         private void CreateWallSpatialIndex()
         {
-            SpatialIndexManager.CreateWallSpaticalIndex(ShearWallEngine.Collect());
+            SpatialIndexManager.CreateWallSpaticalIndex(ShearWallEngine.Geometries);
             var wallGeometries = SpatialIndexManager.WallSpatialIndex.SelectAll();
             ShearWallEngine.UpdateValidElements(wallGeometries);
         }
         private void CreateBeamSpatialIndex()
         {
-            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Collect());
+            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Geometries);
             var beamGeometries = SpatialIndexManager.BeamSpatialIndex.SelectAll();
             BeamEngine.UpdateValidElements(beamGeometries);
             BeamEngine.Measure(SpatialIndexManager);

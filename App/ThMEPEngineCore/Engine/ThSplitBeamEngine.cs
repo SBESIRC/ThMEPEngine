@@ -177,7 +177,7 @@ namespace ThMEPEngineCore.Engine
         private void SplitBeamPassBeams()
         {
             BeamEngine.Elements = BeamElements;
-            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Collect());
+            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Geometries);
             var unintersectBeams = FilterBeamUnIntersectOtherBeams();
             List<ThIfcBuildingElement> restBeams = BeamElements.Where(m=> !unintersectBeams.Where(n=>m.Uuid==n.Uuid).Any()).ToList();
             List<ThIfcBuildingElement> inValidBeams = new List<ThIfcBuildingElement>();

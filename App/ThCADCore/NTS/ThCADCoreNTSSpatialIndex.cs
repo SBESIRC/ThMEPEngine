@@ -17,7 +17,7 @@ namespace ThCADCore.NTS
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
         private STRtree<Geometry> Engine { get; set; }
-        private Dictionary<Geometry, DBObject> Geometries { get; set; }
+        public Dictionary<Geometry, DBObject> Geometries { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
             Geometries = new Dictionary<Geometry, DBObject>();
