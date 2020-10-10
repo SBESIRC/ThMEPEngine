@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThColumnLayerManager
+    public class ThStructureColumnLayerManager
     {
         public static List<string> CurveXrefLayers(Database database)
         {
@@ -76,7 +76,12 @@ namespace ThMEPEngineCore.Service
 
         private static bool IsColumnHatchLayer(string name)
         {
-            return ThStructureUtils.OriginalFromXref(name).ToUpper().EndsWith("S_COLU_HACH");
+            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('_').Reverse().ToArray();
+            if (patterns.Count() < 3)
+            {
+                return false;
+            }
+            return (patterns[0] == "HACH") && (patterns[1] == "COLU") && (patterns[2] == "S");
         }
     }
 }

@@ -17,7 +17,7 @@ namespace ThMEPEngineCore.Service
         public List<Curve> ColumnCurves { get; set; }
         public ThStructureColumnHatchExtension(Database db) : base(db)
         {
-            LayerFilter = ThColumnLayerManager.HatchXrefLayers(db);
+            LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(db);
             ColumnCurves = new List<Curve>();
         }
         public void Dispose()

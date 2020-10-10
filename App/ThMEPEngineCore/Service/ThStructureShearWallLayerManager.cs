@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThShearWallLayerManager
+    public class ThStructureShearWallLayerManager
     {
         public static List<string> CurveXrefLayers(Database database)
         {
@@ -68,7 +68,12 @@ namespace ThMEPEngineCore.Service
 
         private static bool IsShearWallHatchLayer(string name)
         {
-            return ThStructureUtils.OriginalFromXref(name).ToUpper().EndsWith("S_WALL_HACH");
+            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('_').Reverse().ToArray();
+            if (patterns.Count() < 3)
+            {
+                return false;
+            }
+            return (patterns[0] == "HACH") && (patterns[1] == "WALL") && (patterns[2] == "S");
         }
     }
 }

@@ -153,9 +153,9 @@
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThOverhangingPrimaryBeamLinkExtension.cs" />
-    <Compile Include="Service\ThShearWallLayerManager.cs" />
+    <Compile Include="Service\ThStructureShearWallLayerManager.cs" />
     <Compile Include="Service\ThBeamLayerManager.cs" />
-    <Compile Include="Service\ThColumnLayerManager.cs" />
+    <Compile Include="Service\ThStructureColumnLayerManager.cs" />
     <Compile Include="Service\ThBeamMarkingService.cs" />
     <Compile Include="Service\ThSpatialIndexManager.cs" />
     <Compile Include="Service\ThSpatialIndexService.cs" />
