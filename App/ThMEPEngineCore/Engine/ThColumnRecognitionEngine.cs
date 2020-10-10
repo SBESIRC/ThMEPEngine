@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.Engine
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var columnDbExtension = new ThStructureColumnHatchExtension(database))
+            using (var columnDbExtension = new ThStructureColumnDbExtension(database))
             {
                 columnDbExtension.BuildElementCurves();
                 List<Curve> curves = new List<Curve>();
