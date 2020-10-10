@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore
 {
@@ -39,7 +36,10 @@ namespace ThMEPEngineCore
         public const int COLORINDEX_BEAM_OVERHANGINGPRIMARY = 3;
         public const int COLORINDEX_BEAM_SECONDARY = 4;
 
-        // 公差
+        // 全局公差
+        public static Tolerance GEOMETRY_TOLERANCE = new Tolerance(1.0, 1.0);
+
+        // 相似度公差
         public const double SIMILARITYMEASURETOLERANCE = 0.9;
         /// <summary>
         /// 梁端口绘制密封圈扩展宽度

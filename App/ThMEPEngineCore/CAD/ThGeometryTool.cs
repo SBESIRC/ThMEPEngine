@@ -24,10 +24,23 @@ namespace ThMEPEngineCore.CAD
                 new Point3d(maxX, maxY, 0)
             };
         }
-        public static bool IsParallelToEx(this Vector3d vector, Vector3d other, double tolerance = 1.0)
+        public static bool IsParallelToEx(this Vector3d vector, Vector3d other)
         {
-            double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
-            return (angle < tolerance) || ((180.0 - angle) < tolerance);
+            return vector.IsParallelTo(other, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
+        }
+        public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
+            Point3d secondSp, Point3d secondEp)
+        {
+            Line3d first = new Line3d(firstSp, firstEp);
+            Line3d second = new Line3d(secondSp, secondEp);
+            return first.IsColinearTo(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
+        }
+        public static bool IsParallelToEx(Point3d firstSp, Point3d firstEp,
+            Point3d secondSp, Point3d secondEp)
+        {
+            Line3d first = new Line3d(firstSp, firstEp);
+            Line3d second = new Line3d(secondSp, secondEp);
+            return first.IsParallelTo(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
         }
         public static Point3d GetMidPt(this Point3d pt1, Point3d pt2)
         {
@@ -40,29 +53,6 @@ namespace ThMEPEngineCore.CAD
             double angle = firstVec.GetAngleTo(secondVec);
             double distance = Math.Cos(angle) * secondVec.Length;
             return startPt + firstVec.GetNormal().MultiplyBy(distance);
-        }
-        public static bool IsCollinearEx(Point3d firstSp,Point3d firstEp,
-            Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
-        {
-            Vector3d firstVec = firstSp.GetVectorTo(firstEp);
-            Vector3d secondVec = secondSp.GetVectorTo(secondEp);
-            if (firstVec.IsParallelToEx(secondVec, tolerance))
-            {
-                Vector3d otherVec;
-                if (firstSp.DistanceTo(secondEp)>0.0)
-                {
-                    otherVec = firstSp.GetVectorTo(secondEp);
-                }
-                else
-                {
-                    otherVec = firstSp.GetVectorTo(secondSp);
-                }
-                double angle = firstVec.GetAngleTo(otherVec);
-                angle = angle / Math.PI * 180.0;
-                angle %= 180.0;
-                return (Math.Abs(angle) <= tolerance || Math.Abs(angle - 180.0) <= tolerance);
-            }
-            return false;
         }
         /// <summary>
         /// 判断点是否再Polyline内
@@ -102,7 +92,7 @@ namespace ThMEPEngineCore.CAD
             {
                 Point3d otherPt = ray.BasePoint + ray.UnitDir.MultiplyBy(100.0);
                 if (linesegments.Where(o => ThGeometryTool.IsCollinearEx(
-                     ray.BasePoint, otherPt, o.StartPoint, o.EndPoint, 1.0)).Any())
+                     ray.BasePoint, otherPt, o.StartPoint, o.EndPoint)).Any())
                 {
                     Matrix3d mt = Matrix3d.Rotation(increAng, Vector3d.ZAxis, pt);
                     ray.TransformBy(mt);
