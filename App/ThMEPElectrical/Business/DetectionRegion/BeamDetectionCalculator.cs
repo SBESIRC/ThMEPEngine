@@ -149,10 +149,13 @@ namespace ThMEPElectrical.Business
             if (secondBeamInfos.Count == 0)
                 return false;
 
-            var greaterHeightBeamInfo = GetValidBeamProfile(secondBeamInfos);
-
-            if (greaterHeightBeamInfo != null)
-                return true;
+            foreach (var singleBeamProfile in secondBeamInfos)
+            {
+                if (singleBeamProfile.Height > 600)
+                {
+                    return true;
+                }
+            }
 
             return false;
         }

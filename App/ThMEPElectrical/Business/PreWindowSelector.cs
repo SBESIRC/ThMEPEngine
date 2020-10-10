@@ -1,6 +1,8 @@
-﻿using Autodesk.AutoCAD.ApplicationServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using GeometryExtensions;
 using ThMEPElectrical.Geometry;
 
 namespace ThMEPElectrical.Business
@@ -28,8 +30,9 @@ namespace ThMEPElectrical.Business
                 return null;
             Point3d secondPt = ppr.Value;
 
+            var ucs2wcs = Active.Editor.UCS2WCS();
             //框线范围
-            var points = GeomUtils.CalculateRectangleFromPoints(firstPt, secondPt);
+            var points = GeomUtils.CalculateRectangleFromPoints(firstPt.TransformBy(ucs2wcs), secondPt.TransformBy(ucs2wcs));
             return points;
         }
     }

@@ -71,7 +71,7 @@ namespace ThMEPElectrical.Business.MainBeam
 
             // 布置矩形信息
             var placeRectInfo = GeomUtils.CalculateProfileRectInfo(postPoly);
-
+            placeRectInfo.srcPolyline = m_layoutProfile.SrcPolyline;
             // 计算布置点
             CalculatePts(placeRectInfo);
         }
@@ -116,8 +116,7 @@ namespace ThMEPElectrical.Business.MainBeam
             // 一个可以布置完的
             if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
             {
-                var center = GeomUtils.GetMidPoint(bottomLine.EndPoint, leftLine.EndPoint);
-                m_singlePlacePts.Add(center);
+                m_singlePlacePts.AddRange(GeomUtils.CalculateCentroidFromPoly(placeRectInfo.srcPolyline));
                 return;
             }
 

@@ -62,7 +62,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
             var resProfiles = new List<Polyline>();
             foreach (Polyline item in mainBeam.Difference(dbLst))
             {
-                foreach (Polyline offsetPoly in item.Buffer(-500))
+                foreach (Polyline offsetPoly in item.Buffer(ThMEPCommon.ShrinkDistance))
                     resProfiles.Add(offsetPoly);
             }
 

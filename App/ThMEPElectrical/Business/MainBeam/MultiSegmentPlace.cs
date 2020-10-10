@@ -133,9 +133,7 @@ namespace ThMEPElectrical.Business.MainBeam
             // 一个可以布置完的
             if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
             {
-                var center = GeomUtils.GetCenterPt(placeRectInfo.srcPolyline);
-                if (center.HasValue)
-                    return new List<Point3d>() { center.Value };
+                return GeomUtils.CalculateCentroidFromPoly(placeRectInfo.srcPolyline);
             }
 
             // 计算最大水平间隔
@@ -415,9 +413,7 @@ namespace ThMEPElectrical.Business.MainBeam
             // 一个可以布置完的
             if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
             {
-                var center = GeomUtils.GetCenterPt(srcTransPoly);
-                if (center.HasValue)
-                    return new List<Point3d>() { center.Value };
+                return GeomUtils.CalculateCentroidFromPoly(srcTransPoly);
             }
 
             // 垂直个数

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Business;
 using ThMEPElectrical.Model;
 using ThMEPEngineCore.Engine;
@@ -46,14 +47,17 @@ namespace ThMEPElectrical.CAD
 
         public void Do()
         {
-            var preWindow = SelectPreWindow();
+            var preWindow = PreWindowSelector.GetSelectRectPoints();
+            //var preWindowPoly = preWindow.ToPolyline();
+            //DrawUtils.DrawProfile(new List<Curve>() { preWindowPoly }, "prePoly");
             ComponentPicker(preWindow);
-
         }
 
         public void PickColumns()
         {
             var preWindow = PreWindowSelector.GetSelectRectPoints();
+            //var preWindowPoly = preWindow.ToPolyline();
+            //DrawUtils.DrawProfile(new List<Curve>() { preWindowPoly }, "prePoly");
             ColumnPicker(preWindow);
         }
 
@@ -76,16 +80,6 @@ namespace ThMEPElectrical.CAD
                         Columns.Add(columnPoly);
                 });
             }
-        }
-
-        /// <summary>
-        /// 用户选择预选框
-        /// </summary>
-        /// <returns></returns>
-        private Point3dCollection SelectPreWindow()
-        {
-            var preWindPoints = PreWindowSelector.GetSelectRectPoints();
-            return preWindPoints;
         }
 
         /// <summary>

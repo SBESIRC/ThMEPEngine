@@ -27,6 +27,8 @@ namespace ThMEPElectrical
         public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);
         public static readonly Point3d NullPoint3d = new Point3d(double.NaN, double.NaN, 0);
         public static readonly double spacingValue = 4500;
+
+        public static readonly double ShrinkDistance = -500; // 内缩距离
     }
 }
 

@@ -21,7 +21,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
         private PlaceInputProfileData m_placeInputProfileData; // 有效区域和点集数据
 
         public MSBeamNoRegularPlacer(LayoutProfileData layoutProfileData, PlaceParameter parameter, PlaceInputProfileData placeInputProfileData)
-            :base(layoutProfileData, parameter)
+            : base(layoutProfileData, parameter)
         {
             m_placeInputProfileData = placeInputProfileData;
         }
@@ -52,18 +52,17 @@ namespace ThMEPElectrical.Business.MainSecondBeam
             // 一个可以布置完的
             if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
             {
-                var center = GeomUtils.GetCenterPt(srcTransPoly);
-                if (center.HasValue)
-                {
-                    points.Add(center.Value);
-                    // 计算有效的可布置区域
-                    var mainBeamSpanRegion = CalculateBeamSpanRegion(m_placeInputProfileData.MainBeamOuterProfile, m_placeInputProfileData.SecondBeamProfiles, points);
-                    if (points.Count == 1)
-                    {
-                        points = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.SINGLEPLACE);
-                    }
+                points = GeomUtils.CalculateCentroidFromPoly(srcTransPoly);
+                if (points.Count < 1)
                     return points;
+
+                // 计算有效的可布置区域
+                var mainBeamSpanRegion = CalculateBeamSpanRegion(m_placeInputProfileData.MainBeamOuterProfile, m_placeInputProfileData.SecondBeamProfiles, points);
+                if (points.Count == 1)
+                {
+                    points = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.SINGLEPLACE);
                 }
+                return points;
             }
 
             // 垂直个数
@@ -125,7 +124,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
             var resProfiles = new List<Polyline>();
             foreach (Polyline item in mainBeam.Difference(dbLst))
             {
-                foreach (Polyline offsetPoly in item.Buffer(-500))
+                foreach (Polyline offsetPoly in item.Buffer(ThMEPCommon.ShrinkDistance))
                     resProfiles.Add(offsetPoly);
             }
 

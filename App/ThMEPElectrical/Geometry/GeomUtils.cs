@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using DotNetARX;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Model;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical.Geometry
 {
@@ -297,6 +298,31 @@ namespace ThMEPElectrical.Geometry
 
 
             return point3dCollection;
+        }
+
+        /// <summary>
+        /// 计算几何中心
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <returns></returns>
+        public static List<Point3d> CalculateCentroidFromPoly(Polyline poly)
+        {
+            var polys = new List<Curve>();
+            foreach (Polyline offsetPoly in poly.Buffer(ThMEPCommon.ShrinkDistance))
+                polys.Add(offsetPoly);
+
+            var ptLst = new List<Point3d>();
+            if (polys.Count < 1)
+                return ptLst;
+
+            var regions = RegionTools.CreateRegion(polys.ToArray());
+            
+            foreach (var region in regions)
+            {
+                ptLst.Add(region.GetCentroid().Point3D());
+            }
+
+            return ptLst;
         }
     }
 }

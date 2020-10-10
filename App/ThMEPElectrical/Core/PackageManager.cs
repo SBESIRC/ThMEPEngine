@@ -84,6 +84,8 @@ namespace ThMEPElectrical.Core
                 var innerHoles = GetValidProfiles(infoReader.RecognizeMainBeamColumnWalls, wallPtCollection);
                 var secondBeams = GetValidProfileInfos(infoReader.RecognizeSecondBeams, wallPtCollection);
 
+                //DrawUtils.DrawProfile(SecondBeamProfile2Polyline(infoReader.RecognizeSecondBeams).Polylines2Curves(), "secondBeams");
+                //DrawUtils.DrawProfile(infoReader.RecognizeMainBeamColumnWalls.Polylines2Curves(), "mainBeamInnerColumn");
                 // 外墙，内洞，次梁
                 var profileDatas = BeamDetectionCalculator.MakeDetectionData(poly, innerHoles, secondBeams);
                 // 主次梁信息
@@ -91,6 +93,13 @@ namespace ThMEPElectrical.Core
             }
 
             return inputProfileDatas;
+        }
+
+        private List<Polyline> SecondBeamProfile2Polyline(List<SecondBeamProfileInfo> secondBeamProfiles)
+        {
+            var polys = new List<Polyline>();
+            secondBeamProfiles.ForEach(e => polys.Add(e.Profile));
+            return polys;
         }
 
         private List<Polyline> GetValidProfiles(List<Polyline> srcPolylines, Point3dCollection window)
@@ -267,10 +276,11 @@ namespace ThMEPElectrical.Core
             foreach (var poly in wallPolylines)
             {
                 var wallPtCollection = poly.Vertices();
-
+                DrawUtils.DrawProfile(infoReader.Columns.Polylines2Curves(), "validColumns");
                 var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
                 var gridCalculator = new GridService();
 
+                //DrawUtils.DrawProfile(validColumns.Polylines2Curves(), "validColumns");
                 //轴网线
                 var gridInfo = gridCalculator.CreateGrid(poly, validColumns, ThMEPCommon.spacingValue);
                 gridPolys.Clear();
