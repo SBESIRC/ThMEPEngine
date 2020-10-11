@@ -61,12 +61,12 @@ namespace ThMEPEngineCore.Engine
                 // 按柱，墙分割梁端
                 ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(this);
                 thSplitBeams.Split();
-                CreateBeamSpatialIndex();
+                SyncBeamSpatialIndex();
 
                 // 梁端到竖向构件的延伸
                 ThSnapBeamEngine thSnapBeams = new ThSnapBeamEngine(this);
                 thSnapBeams.Snap();
-                CreateBeamSpatialIndex();
+                SyncBeamSpatialIndex();
 
                 // 梁端的合并
                 ThMergeBeamEngine thMergeBeams = new ThMergeBeamEngine(this);
@@ -87,7 +87,7 @@ namespace ThMEPEngineCore.Engine
 
             // Pass Four 在剩余梁中找出单端连接竖向构件的悬梁
             FindOverhangingPrimaryBeamLink();
-            
+
             // Pass Five 在剩余梁中找出两端搭在主梁、半主梁和悬挑柱梁上的次梁
             FindSecondaryBeamLink();
 
@@ -115,6 +115,12 @@ namespace ThMEPEngineCore.Engine
             SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Geometries);
             BeamEngine.UpdateWithSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
         }
+        private void SyncBeamSpatialIndex()
+        {
+            BeamEngine.UpdateSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
+            BeamEngine.UpdateWithSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
+        }
+
         private void SimilarityMeasure()
         {
             var thSimilarityMeasureEngine = new ThSimilarityMeasureEngine(this);
@@ -129,18 +135,18 @@ namespace ThMEPEngineCore.Engine
             foreach (var element in BeamEngine.Elements)
             {
                 ThSingleBeamLink thSingleBeamLink = new ThSingleBeamLink();
-                if(element is ThIfcBeam thIfcBeam)
+                if (element is ThIfcBeam thIfcBeam)
                 {
                     thSingleBeamLink.Beam = thIfcBeam;
                     thSingleBeamLink.StartVerComponents = thBeamLinkExtension.QueryPortLinkElements(
-                        thIfcBeam, thIfcBeam.StartPoint,ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
+                        thIfcBeam, thIfcBeam.StartPoint, ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
                     thSingleBeamLink.EndVerComponents = thBeamLinkExtension.QueryPortLinkElements(
                         thIfcBeam, thIfcBeam.EndPoint, ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
 
                     thSingleBeamLink.StartBeams = thBeamLinkExtension.QueryPortLinkBeams(
                         thIfcBeam, thIfcBeam.StartPoint, ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance);
                     thSingleBeamLink.UpdateStartLink(thBeamLinkExtension);
-                    thSingleBeamLink.EndBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.EndPoint, 
+                    thSingleBeamLink.EndBeams = thBeamLinkExtension.QueryPortLinkBeams(thIfcBeam, thIfcBeam.EndPoint,
                         ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance);
                     thSingleBeamLink.UpdateEndLink(thBeamLinkExtension);
 
@@ -150,7 +156,7 @@ namespace ThMEPEngineCore.Engine
                         thIfcBeam, thIfcBeam.EndPoint, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
                 }
                 SingleBeamLinks.Add(thSingleBeamLink);
-            }            
+            }
         }
         public ThSingleBeamLink QuerySingleBeamLink(ThIfcBeam thIfcBeam)
         {
@@ -172,17 +178,17 @@ namespace ThMEPEngineCore.Engine
             }
         }
         private void FindMultiBeamLinkInTwoVerComponent()
-        {           
+        {
             //主梁：两端均为竖向构件
             List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.Elements).ToList();
             ThVerticalComponentBeamLinkExtension multiBeamLink = new ThVerticalComponentBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
             {
                 ConnectionEngine = this,
             };
-            multiBeamLink.CreatePrimaryBeamLink();            
+            multiBeamLink.CreatePrimaryBeamLink();
         }
         private void FindHalfPrimaryBeamLink()
-        {           
+        {
             //半主梁：一端为竖向构件，另一端为主梁
             List<ThIfcBuildingElement> unPrimaryBeams = FilterNotPrimaryBeams(BeamEngine.Elements).ToList();
             ThHalfPrimaryBeamLinkExtension halfPrimaryBeamLink = new ThHalfPrimaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks)
@@ -190,7 +196,7 @@ namespace ThMEPEngineCore.Engine
                 ConnectionEngine = this,
             };
             halfPrimaryBeamLink.CreateHalfPrimaryBeamLink();
-            HalfPrimaryBeamLinks.AddRange(halfPrimaryBeamLink.HalfPrimaryBeamLinks);            
+            HalfPrimaryBeamLinks.AddRange(halfPrimaryBeamLink.HalfPrimaryBeamLinks);
         }
         private void FindOverhangingPrimaryBeamLink()
         {
@@ -253,7 +259,7 @@ namespace ThMEPEngineCore.Engine
         }
         private IEnumerable<ThIfcBuildingElement> FilterNotPrimaryBeams(List<ThIfcBuildingElement> totalBeams)
         {
-            return totalBeams.Where(o => o is ThIfcBeam thIfcBeam && 
+            return totalBeams.Where(o => o is ThIfcBeam thIfcBeam &&
             thIfcBeam.ComponentType != BeamComponentType.PrimaryBeam);
         }
         private IEnumerable<ThIfcBuildingElement> FilterUndefinedBeams(List<ThIfcBuildingElement> totalBeams)
