@@ -56,7 +56,7 @@ namespace ThCADExtension
             return pline;
         }
 
-        public static Polyline CreateRectangle(Extents3d extents)
+        public static Polyline ToRectangle(this Extents3d extents)
         {
             Point3d pt1 = extents.MinPoint;
             Point3d pt3 = extents.MaxPoint;

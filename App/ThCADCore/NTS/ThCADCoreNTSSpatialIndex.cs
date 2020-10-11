@@ -146,9 +146,7 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
         {
             var extents = new Extents3d(pt1, pt2);
-            var geometry = extents.ToNTSPolygon();
-            return CrossingFilter(Query(geometry.EnvelopeInternal),
-                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
+            return SelectCrossingPolygon(extents.ToRectangle());
         }
 
         /// <summary>
@@ -205,27 +203,14 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection NearestNeighbours(Curve curve, int num)
         {
-            Geometry geometry = null;
-            if (curve is Line line)
-            {
-                geometry = line.ToNTSLineString();
-            }
-            else if (curve is Polyline polyline)
-            {
-                geometry = polyline.ToNTSLineString();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-
-            var objs = new DBObjectCollection();
+            var geometry = ToNTSGeometry(curve);
             var neighbours = Engine.NearestNeighbour(
                 geometry.EnvelopeInternal,
                 geometry,
                 new GeometryItemDistance(),
                 num)
                 .Where(o => !o.EqualsExact(geometry));
+            var objs = new DBObjectCollection();
             foreach (var neighbour in neighbours)
             {
                 objs.Add(Geometries[neighbour]);
