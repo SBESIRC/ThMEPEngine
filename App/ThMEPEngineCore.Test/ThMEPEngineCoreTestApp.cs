@@ -85,6 +85,34 @@ namespace ThMEPEngineCore.Test
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THPOLYGONPARTITION", CommandFlags.Modal)]
+        public void THPolygonPartition()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Polyline>(obj));
+                }
+                foreach (Polyline item in objs)
+                {
+                    var polylines = ThShearWallRecognitionEngine.PolygonPartition(item);
+                    //polylines.ColorIndex = 1;
+                    //acadDatabase.ModelSpace.Add(polylines);
+                    foreach (var obj in polylines)
+                    {
+                        obj.ColorIndex = 1;
+                        acadDatabase.ModelSpace.Add(obj);
+                    }
+                }
+            }
+        }
     }
 }
-
