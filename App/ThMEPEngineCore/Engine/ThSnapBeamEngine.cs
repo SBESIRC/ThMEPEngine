@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.Engine
         {
             List<ThIfcBuildingElement> results = new List<ThIfcBuildingElement>();
             var linkBeams = ThBeamLinkEx.QueryPortLinkBeams(thIfcBeam,
-                portPt, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
+                portPt, 0.5, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
             if (linkBeams.Count == 0)
             {
                 var linkComponents = ThBeamLinkEx.QueryPortLinkElements(thIfcBeam,

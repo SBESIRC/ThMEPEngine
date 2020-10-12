@@ -254,18 +254,18 @@ namespace ThMEPEngineCore.Service
             return ThGeometryTool.IsCollinearEx(firstBeam.StartPoint,firstBeam.EndPoint,
                 secondBeam.StartPoint,secondBeam.EndPoint);
         }
-        public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt, double beamIntervalTolerance)
+        public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt,double beamExtensionRatio,double beamIntervalTolerance)
         {
             Polyline portSearchEnvelope = null;
             if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
             {               
                 portSearchEnvelope = GetLineBeamPortSearchEnvelope(thIfcLineBeam, portPt,
-                    ThMEPEngineCoreCommon.BeamExtensionRatio, beamIntervalTolerance);
+                    beamExtensionRatio, beamIntervalTolerance);
             }
             else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
             {               
-                portSearchEnvelope = GetArcBeamPortSearchEnvelope(thIfcArcBeam, portPt, 
-                    ThMEPEngineCoreCommon.BeamExtensionRatio, beamIntervalTolerance);
+                portSearchEnvelope = GetArcBeamPortSearchEnvelope(thIfcArcBeam, portPt,
+                    beamExtensionRatio, beamIntervalTolerance);
             }
             else
             {
