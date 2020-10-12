@@ -13,6 +13,7 @@ namespace ThMEPEngineCore.Features
             if (poly != null)
             {
                 var geometry = poly.ToNTSPolygon();
+                geometry.Normalize();
                 return new Feature()
                 {
                     Geometry = geometry,
