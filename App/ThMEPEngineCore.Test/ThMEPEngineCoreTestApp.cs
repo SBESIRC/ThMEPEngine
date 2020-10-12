@@ -103,7 +103,7 @@ namespace ThMEPEngineCore.Test
                 }
                 foreach (Polyline item in objs)
                 {
-                    var polylines = ThShearWallRecognitionEngine.PolygonPartition(item);
+                    var polylines = ThMEPPolygonPartitioner.PolygonPartition(item);
                     //polylines.ColorIndex = 1;
                     //acadDatabase.ModelSpace.Add(polylines);
                     foreach (var obj in polylines)
