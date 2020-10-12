@@ -56,37 +56,55 @@ namespace ThCADCore.NTS
 
         private Geometry ToNTSGeometry(DBObject obj)
         {
-            if (obj is Line line)
+            using (var ov = new ThCADCoreNTSFixedPrecision())
             {
-                return line.ToNTSLineString();
+                if (obj is Line line)
+                {
+                    return line.ToNTSLineString();
+                }
+                else if (obj is Polyline polyline)
+                {
+                    return polyline.ToNTSLineString();
+                }
+                else if (obj is Arc arc)
+                {
+                    return arc.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is Circle circle)
+                {
+                    return circle.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is DBText text)
+                {
+                    return text.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is Hatch hatch)
+                {
+                    return hatch.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is Solid solid)
+                {
+                    return solid.GeometricExtents.ToNTSPolygon();
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }
-            else if (obj is Polyline polyline)
+        }
+
+        private Polygon ToNTSPolygon(DBObject obj)
+        {
+            using (var ov = new ThCADCoreNTSFixedPrecision())
             {
-                return polyline.ToNTSLineString();
-            }
-            else if (obj is Arc arc)
-            {
-                return arc.GeometricExtents.ToNTSPolygon();
-            }
-            else if (obj is Circle circle)
-            {
-                return circle.GeometricExtents.ToNTSPolygon();
-            }
-            else if (obj is DBText text)
-            {
-                return text.GeometricExtents.ToNTSPolygon();
-            }
-            else if (obj is Hatch hatch)
-            {
-                return hatch.GeometricExtents.ToNTSPolygon();
-            }
-            else if (obj is Solid solid)
-            {
-                return solid.GeometricExtents.ToNTSPolygon();
-            }
-            else
-            {
-                throw new NotSupportedException();
+                if (obj is Polyline poly)
+                {
+                    return poly.ToNTSPolygon();
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }
         }
 
@@ -121,7 +139,7 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
         {
-            var geometry = polyline.ToNTSPolygon();
+            var geometry = ToNTSPolygon(polyline);
             return CrossingFilter(
                 Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
@@ -156,7 +174,7 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectWindowPolygon(Polyline polyline)
         {
-            var geometry = polyline.ToNTSPolygon();
+            var geometry = ToNTSPolygon(polyline);
             return WindowFilter(Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
@@ -168,7 +186,7 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public DBObjectCollection SelectFence(Polyline polyline)
         {
-            var geometry = polyline.ToNTSLineString();
+            var geometry = ToNTSGeometry(polyline);
             return FenceFilter(Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
