@@ -1,9 +1,12 @@
 ﻿using System;
+using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
+using AcHelper;
 
 namespace ThMEPEngineCore.Operation
 {
@@ -18,15 +21,39 @@ namespace ThMEPEngineCore.Operation
         /// <param name="points"></param>
         /// <param name="xLength"></param>
         /// <param name="yLength"></param>
-        public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums, double spacingValue)
+        public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums, Vector3d xDir, double spacingValue)
         {
             minSpace = spacingValue;
 
             List<Point3d> points = GetColumCenter(colums);
-            Matrix3d matrix = ThMEPEngineCoreGeUtils.GetGridMatrix(polyline, out Line longLine, out Line shortLine);
+            Matrix3d matrix = ThMEPEngineCoreGeUtils.GetGridMatrix(Vector3d.XAxis);
 
-            var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, longLine, shortLine));
-            var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, longLine, shortLine));
+            var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, polyline));
+            var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, polyline));
+#if DEBUG
+            var rotateAngle = xDir.GetAngleTo(Vector3d.XAxis);
+            string GridLineLayer = "AD-Gird";     //轴网线图层
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                LayerTools.AddLayer(acdb.Database, GridLineLayer);
+                foreach (var fGird in firGrids.Value)
+                {
+                    var rotateGrid = fGird.Clone() as Polyline;
+                    rotateGrid.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse());
+                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
+                    rotateGrid.Layer = GridLineLayer;
+                    acdb.ModelSpace.Add(rotateGrid);
+                }
+                foreach (var sGird in secGrids.Value)
+                {
+                    var rotateGrid = sGird.Clone() as Polyline;
+                    rotateGrid.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse());
+                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
+                    rotateGrid.Layer = GridLineLayer;
+                    acdb.ModelSpace.Add(rotateGrid);
+                }
+            }
+#endif
 
             return new List<KeyValuePair<Vector3d, List<Polyline>>>()
             {
@@ -43,10 +70,15 @@ namespace ThMEPEngineCore.Operation
         /// <param name="longLine"></param>
         /// <param name="shortLine"></param>
         /// <returns></returns>
-        public KeyValuePair<Vector3d, List<Polyline>> CreateGridLine(Matrix3d matrix, List<Point3d> points, Line longLine, Line shortLine)
+        public KeyValuePair<Vector3d, List<Polyline>> CreateGridLine(Matrix3d matrix, List<Point3d> points, Polyline polyline)
         {
             points = points.Select(x => x.TransformBy(matrix.Inverse())).ToList();
-            List<Point3d> linePts = new List<Point3d>() { longLine.StartPoint, longLine.EndPoint, shortLine.StartPoint, shortLine.EndPoint };
+            List<Point3d> linePts = new List<Point3d>();
+            for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
+            {
+                linePts.Add(polyline.GetPoint3dAt(i));
+            }
+
             List<Point3d> polyPts = ThMEPEngineCoreGeUtils.CalBoundingBox(linePts);
             polyPts = polyPts.Select(x => x.TransformBy(matrix.Inverse())).ToList();
             double minY = polyPts.First().Y;
@@ -79,11 +111,6 @@ namespace ThMEPEngineCore.Operation
                     groupPts.Add(sp);
                     points.Remove(sp);
                 }
-
-                //if (groupPts.Count <= 1)
-                //{
-                //    continue;
-                //}
 
                 groupPts.Add(new Point3d(sp.X, maxY, 0));
                 groupPts.Add(new Point3d(sp.X, minY, 0));

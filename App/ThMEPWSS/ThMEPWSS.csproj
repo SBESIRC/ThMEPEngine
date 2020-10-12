@@ -40,6 +40,7 @@
     <Compile Include="Service\ClearComponentService.cs" />
     <Compile Include="Service\InsertSprayLinesService.cs" />
     <Compile Include="Service\InsertSprayService.cs" />
+    <Compile Include="Service\RotateTransformService.cs" />
     <Compile Include="Service\SprayDataOperateService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
     <Compile Include="ThMEPWSSApp.cs" />

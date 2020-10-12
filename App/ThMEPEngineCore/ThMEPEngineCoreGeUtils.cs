@@ -1,5 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,23 +37,10 @@ namespace ThMEPEngineCore
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public static Matrix3d GetGridMatrix(Polyline polyline, out Line longLine, out Line shortLine)
+        public static Matrix3d GetGridMatrix(Vector3d xDir)
         {
-            Polyline obbPoly = ThCADCoreNTSPolylineExtension.MinimumBoundingBox(polyline);
-            List<Line> lineLst = new List<Line>();
-            for (int i = 0; i < obbPoly.NumberOfVertices; i++)
-            {
-                var current = obbPoly.GetPoint2dAt(i);
-                var next = obbPoly.GetPoint2dAt((i + 1) % obbPoly.NumberOfVertices);
-                lineLst.Add(new Line(new Point3d(current.X, current.Y, 0), new Point3d(next.X, next.Y, 0)));
-            }
-
-            longLine = lineLst.OrderByDescending(x => x.Length).First();
-            Point3d endP = longLine.EndPoint;
-            shortLine = lineLst.Where(x => x.StartPoint.IsEqualTo(endP)).First();
-
-            Vector3d longDir = longLine.Delta.GetNormal();
-            Vector3d shortDir = shortLine.Delta.GetNormal();
+            Vector3d longDir = xDir;
+            Vector3d shortDir = longDir.CrossProduct(Vector3d.ZAxis);
 
             Matrix3d matrix = new Matrix3d(new double[]{
                     longDir.X, shortDir.X, Vector3d.ZAxis.X, 0,

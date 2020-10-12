@@ -3,6 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
 using System.Collections.Generic;
@@ -13,9 +14,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.Bussiness;
 using ThMEPWSS.Bussiness.LayoutBussiness;
-using ThMEPWSS.Model;
 using ThMEPWSS.Service;
-using ThMEPWSS.Utils;
 using ThWSS;
 using ThWSS.Bussiness;
 
@@ -62,6 +61,8 @@ namespace ThMEPWSS
             //    gridSpacing = doubleResult.Value;
             //}
 
+            var xDir = CalLayoutDirection();
+            RotateTransformService.xDir = xDir;
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 foreach (ObjectId frame in result.Value.GetObjectIds())
@@ -78,14 +79,20 @@ namespace ThMEPWSS
                     columnEngine.Recognize(acdb.Database, plFrame.Vertices());
                     var columPoly = columnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
 
+                    //转换usc
+                    RotateTransformService.RotatePolyline(plFrame);
+                    RotateTransformService.RotatePolyline(columPoly);
+
+                    //生成喷头
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, 4500, false);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, xDir, 4500, false);
 
                     //放置喷头
                     InsertSprayService.InsertSprayBlock(sprayPts.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
 
+                    RotateTransformService.RotateInversePolyline(plFrame);
                     //打印喷淋点盲区
-                    CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService();
+                    CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(xDir);
                     calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame);
                 }
             }
@@ -111,14 +118,8 @@ namespace ThMEPWSS
                 return;
             }
 
-            //double gridSpacing = 4500;
-            //PromptDoubleOptions promptDouble = new PromptDoubleOptions("请输入轴网间距");
-            //PromptDoubleResult doubleResult = Active.Editor.GetDouble(promptDouble);
-            //if (doubleResult.Status == PromptStatus.OK)
-            //{
-            //    gridSpacing = doubleResult.Value;
-            //}
-
+            var xDir = CalLayoutDirection();
+            RotateTransformService.xDir = xDir;
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 foreach (ObjectId frame in result.Value.GetObjectIds())
@@ -135,9 +136,15 @@ namespace ThMEPWSS
                     columnEngine.Recognize(acdb.Database, plFrame.Vertices());
                     var columPoly = columnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
 
+                    //转换usc
+                    plFrame.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                    columPoly.ForEach(x => x.TransformBy(Active.Editor.CurrentUserCoordinateSystem));
+                    RotateTransformService.RotatePolyline(plFrame);
+                    RotateTransformService.RotatePolyline(columPoly);
+
                     //生成喷淋对象
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, 4500);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, xDir, 4500);
                 }
             }
         }
@@ -227,26 +234,6 @@ namespace ThMEPWSS
                 {
                     CalSprayLineBlindArea(result, acdb);
                 }
-                //PromptKeywordOptions keywordOps = new PromptKeywordOptions("\n 请选择需要打印盲区的对象[喷淋点位盲区（S）/喷淋布置线盲区（L）]");
-                //keywordOps.Keywords.Add("S");
-                //keywordOps.Keywords.Add("L");
-                //keywordOps.Keywords.Default = "L";
-                //var resKey = Active.Editor.GetKeywords(keywordOps);
-                //if (resKey.Status == PromptStatus.OK)
-                //{
-                //    switch (resKey.StringResult)
-                //    {
-                //        case "S":
-                //            CalSprayBlindArea(result, acdb);
-                //            break;
-                //        case "L":
-                //            CalSprayLineBlindArea(result, acdb);
-                //            break;
-                //        default:
-                //            Active.Editor.WriteMessage("\n 输入了无效数字");
-                //            break;
-                //    }
-                //}
             }
         }
 
@@ -259,6 +246,9 @@ namespace ThMEPWSS
         {
             foreach (ObjectId frame in result.Value.GetObjectIds())
             {
+                var xDir = CalLayoutDirection();
+                RotateTransformService.xDir = xDir;
+
                 var plBack = acdb.Element<Polyline>(frame);
                 var plFrame = ThMEPFrameService.Normalize(plBack);
 
@@ -281,7 +271,7 @@ namespace ThMEPWSS
                         sprayLines.Add(acdb.Element<BlockReference>(obj));
                     }
 
-                    CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService();
+                    CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(xDir);
                     calSprayBlindAreaService.CalSprayBlindArea(sprayLines, plFrame);
                 }
                 else
@@ -293,7 +283,7 @@ namespace ThMEPWSS
 
             return true;
         }
-
+        
         /// <summary>
         /// 计算喷淋布置线盲区
         /// </summary>
@@ -334,8 +324,77 @@ namespace ThMEPWSS
                 }
             }
         }
+
+        /// <summary>
+        /// 计算排布方向
+        /// </summary>
+        /// <returns></returns>
+        private Vector3d CalLayoutDirection() 
+        {
+            PromptPointOptions options = new PromptPointOptions("请选择排布方向起始点");
+            var sResult = Active.Editor.GetPoint(options);
+
+            if (sResult.Status == PromptStatus.OK)
+            {
+                var startPt = sResult.Value;
+                var transPt = startPt.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+                var endPt = Interaction.GetLineEndPoint("请选择终止点", transPt);
+
+                transPt = transPt.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse());
+                endPt = endPt.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse());
+                return (endPt - transPt).GetNormal();
+            }
+
+            return Vector3d.XAxis;
+        }
         #endregion
 
+        [CommandMethod("TIANHUACAD", "THLG", CommandFlags.Modal)]
+        public void ThConnectPipe()
+        {
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择区域",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Polyline)).DxfName,
+            };
+            var filter = ThSelectionFilterTool.Build(dxfNames);
+            var result = Active.Editor.GetSelection(options, filter);
+            if (result.Status != PromptStatus.OK)
+            {
+                return;
+            }
 
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (ObjectId frame in result.Value.GetObjectIds())
+                {
+                    var plBack = acdb.Element<Polyline>(frame);
+                    var plFrame = ThMEPFrameService.Normalize(plBack);
+
+                    var filterlist = OpFilter.Bulid(o =>
+                        o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.PipeLine_LayerName &
+                        o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Line)).DxfName);
+
+                    var dBObjectCollection = new DBObjectCollection();
+                    var allLines = Active.Editor.SelectAll(filterlist);
+                    if (allLines.Status == PromptStatus.OK)
+                    {
+                        foreach (ObjectId obj in allLines.Value.GetObjectIds())
+                        {
+                            dBObjectCollection.Add(acdb.Element<Line>(obj));
+                        }
+
+                        ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
+                        var pipeLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(plFrame).Cast<Line>().ToList();
+
+                    }
+                }
+            }
+        }
     }
 }

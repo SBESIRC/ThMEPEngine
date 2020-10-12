@@ -10,6 +10,7 @@ using ThMEPWSS.Model;
 using ThMEPWSS.Service;
 using ThCADExtension;
 using ThMEPEngineCore.Operation;
+using AcHelper;
 
 namespace ThMEPWSS.Bussiness.LayoutBussiness
 {
@@ -22,12 +23,12 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double raduisLength = 1800;
         protected readonly double moveLength = 200;
         protected readonly double spacing = 100;
-
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, double gridSpacing, bool CreateLine = true)
+        
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, Vector3d xDir, double gridSpacing, bool CreateLine = true)
         {
             //获取柱轴网
             GridService gridService = new GridService();
-            var allGrids = gridService.CreateGrid(polyline, colums, gridSpacing);
+            var allGrids = gridService.CreateGrid(polyline, colums, xDir, gridSpacing);
 
             //计算布置网格线
             CalLayoutGrid(polyline, allGrids, out List<List<Line>> tLines, out List<List<Line>> vLines, out Vector3d tDir, out Vector3d vDir);
@@ -43,16 +44,19 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             //AvoidBeamService beamService = new AvoidBeamService();
             //beamService.AvoidBeam(polyline, sprays);
 
+            var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays);
+            RotateTransformService.RotateInverseLines(sprayLines);
             if (CreateLine)
             {
                 //打印布置网格线
-                InsertSprayLinesService.InsertSprayLines(SprayDataOperateService.CalAllSprayLines(sprays));
+                sprayLines.ForEach(x => x.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse()));
+                InsertSprayLinesService.InsertSprayLines(sprayLines);
             }
             else
             {
                 //计算喷淋点
                 GenerateSpraysPointService spraysPointService = new GenerateSpraysPointService();
-                sprays = spraysPointService.GenerateSprays(SprayDataOperateService.CalAllSprayLines(sprays));
+                sprays = spraysPointService.GenerateSprays(sprayLines);
             }
 
             return sprays;

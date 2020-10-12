@@ -23,7 +23,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         {
             //获取柱轴网
             GridService gridService = new GridService();
-            var allGrid = gridService.CreateGrid(polyline, colums, gridSpacing);
+            var allGrid = new List<KeyValuePair<Vector3d, List<Polyline>>>();// gridService.CreateGrid(polyline, colums, gridSpacing);
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 foreach (var item in allGrid)

@@ -50,7 +50,7 @@ namespace ThMEPWSS.Service
                 sprays.ForEach(x => objs.Add(x));
 
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Line>().ToList();
+                var sprayLines = thCADCoreNTSSpatialIndex.SelectWindowPolygon(polyline).Cast<Line>().ToList();
 
                 foreach (var sLine in sprayLines)
                 {

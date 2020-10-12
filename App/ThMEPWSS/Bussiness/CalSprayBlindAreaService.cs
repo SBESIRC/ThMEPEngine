@@ -17,11 +17,18 @@ namespace ThMEPWSS.Bussiness
 {
     public class CalSprayBlindAreaService : SprayBlindService
     {
+        Vector3d vDir;
+        Vector3d tDir;
         readonly double length = 3400;
+
+        public CalSprayBlindAreaService(Vector3d xDir)
+        {
+            vDir = xDir;
+            tDir = xDir.CrossProduct(Vector3d.ZAxis);
+        }
+
         public void CalSprayBlindArea(List<BlockReference> sprays, Polyline polyline)
         {
-            Vector3d vDir = Vector3d.XAxis;
-            Vector3d tDir = Vector3d.YAxis;
             var sprayPts = sprays.Select(x => x.Position).ToList();
             var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, length);
             var blindArea = GetBlindArea(sprayData, polyline);
@@ -32,8 +39,6 @@ namespace ThMEPWSS.Bussiness
 
         public void CalSprayBlindArea(List<SprayLayoutData> sprays, Polyline polyline)
         {
-            Vector3d vDir = Vector3d.XAxis;
-            Vector3d tDir = Vector3d.YAxis;
             var sprayPts = sprays.Select(x => x.Position).ToList();
             var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, length);
             var blindArea = GetBlindArea(sprayData, polyline);
