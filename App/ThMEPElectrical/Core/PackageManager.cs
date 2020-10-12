@@ -69,13 +69,17 @@ namespace ThMEPElectrical.Core
         /// <returns></returns>
         public List<PlaceInputProfileData> DoMainSecondBeamProfiles()
         {
-            // 前置数据读取器
-            var infoReader = new InfoReader();
-            infoReader.Do();
+            var inputProfileDatas = new List<PlaceInputProfileData>();
+            var preWindow = PreWindowSelector.GetSelectRectPoints();
+            if (preWindow == null)
+                return inputProfileDatas;
 
             // 用户选择
             var wallPolylines = EntityPicker.MakeUserPickEntities();
-            var inputProfileDatas = new List<PlaceInputProfileData>();
+
+            // 前置数据读取器
+            var infoReader = new InfoReader(preWindow);
+            infoReader.Do();
 
             // 外墙轮廓数据
             foreach (var poly in wallPolylines)
@@ -227,13 +231,17 @@ namespace ThMEPElectrical.Core
         /// <returns></returns>
         public List<PlaceInputProfileData> DoNoBeamStoreyProfiles()
         {
-            // 前置数据读取器
-            var infoReader = new InfoReader();
-            infoReader.PickColumns(); // 提取柱子
-
-            // 用户选择
-            var wallPolylines = EntityPicker.MakeUserPickEntities();
             var inputProfileDatas = new List<PlaceInputProfileData>();
+            // 用户选择
+            var preWindow = PreWindowSelector.GetSelectRectPoints();
+            if (preWindow == null)
+                return inputProfileDatas;
+
+            var wallPolylines = EntityPicker.MakeUserPickEntities();
+
+            // 前置数据读取器
+            var infoReader = new InfoReader(preWindow);
+            infoReader.PickColumns(); // 提取柱子
             var gridPolys = new List<Polyline>();
 
             // 外墙轮廓数据
@@ -264,12 +272,15 @@ namespace ThMEPElectrical.Core
         /// </summary>
         public void DoGridTestProfiles()
         {
-            // 前置数据读取器
-            var infoReader = new InfoReader();
-            infoReader.PickColumns(); // 提取柱子
-
             // 用户选择
+            var preWindow = PreWindowSelector.GetSelectRectPoints();
+            if (preWindow == null)
+                return;
             var wallPolylines = EntityPicker.MakeUserPickEntities();
+
+            // 前置数据读取器
+            var infoReader = new InfoReader(preWindow);
+            infoReader.PickColumns(); // 提取柱子
             var gridPolys = new List<Polyline>();
 
             // 外墙轮廓数据
@@ -296,13 +307,18 @@ namespace ThMEPElectrical.Core
         /// <returns></returns>
         public List<PlaceInputProfileData> DoGridBeamProfiles()
         {
-            // 前置数据读取器
-            var infoReader = new InfoReader();
-            infoReader.Do();
-
+            var inputProfileDatas = new List<PlaceInputProfileData>();
+            var preWindow = PreWindowSelector.GetSelectRectPoints();
+            if (preWindow == null)
+                return inputProfileDatas;
             // 用户选择
             var wallPolylines = EntityPicker.MakeUserPickEntities();
-            var inputProfileDatas = new List<PlaceInputProfileData>();
+
+            // 前置数据读取器
+            var infoReader = new InfoReader(preWindow);
+            infoReader.Do();
+
+
             var gridPolys = new List<Polyline>();
 
             var innerHoles = new List<Polyline>();
@@ -311,7 +327,7 @@ namespace ThMEPElectrical.Core
             {
                 var wallPtCollection = poly.Vertices();
                 innerHoles.Clear();
-                // 所有的内部洞数据
+                // 所有的内部洞数据, 收集主次梁-柱子剪力墙等数据
                 innerHoles.AddRange(infoReader.RecognizeMainBeamColumnWalls);
                 infoReader.RecognizeSecondBeams.ForEach(e => innerHoles.Add(e.Profile));
 

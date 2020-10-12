@@ -18,6 +18,7 @@ namespace ThMEPElectrical.CAD
     /// </summary>
     public class InfoReader
     {
+        private Point3dCollection m_preWindow; // 预处理窗口
         public List<Polyline> RecognizeMainBeamColumnWalls
         {
             get;
@@ -30,7 +31,6 @@ namespace ThMEPElectrical.CAD
             set;
         } = new List<SecondBeamProfileInfo>(); // 次梁
 
-
         /// <summary>
         /// 无梁读取柱子
         /// </summary>
@@ -40,25 +40,19 @@ namespace ThMEPElectrical.CAD
             set;
         } = new List<Polyline>(); // 柱子
 
-        public InfoReader()
+        public InfoReader(Point3dCollection preWindow)
         {
-
+            m_preWindow = preWindow;
         }
 
         public void Do()
         {
-            var preWindow = PreWindowSelector.GetSelectRectPoints();
-            //var preWindowPoly = preWindow.ToPolyline();
-            //DrawUtils.DrawProfile(new List<Curve>() { preWindowPoly }, "prePoly");
-            ComponentPicker(preWindow);
+            ComponentPicker(m_preWindow);
         }
 
         public void PickColumns()
         {
-            var preWindow = PreWindowSelector.GetSelectRectPoints();
-            //var preWindowPoly = preWindow.ToPolyline();
-            //DrawUtils.DrawProfile(new List<Curve>() { preWindowPoly }, "prePoly");
-            ColumnPicker(preWindow);
+            ColumnPicker(m_preWindow);
         }
 
         /// <summary>

@@ -8,6 +8,7 @@ using ThMEPElectrical.Model;
 using ThCADCore.NTS;
 using ThMEPElectrical.Assistant;
 using NFox.Cad;
+using ThMEPElectrical.Geometry;
 
 namespace ThMEPElectrical.Business
 {
@@ -43,7 +44,7 @@ namespace ThMEPElectrical.Business
             //return;
             var innerRelatedInfos = new List<SecondBeamProfileInfo>();
             m_holes.ForEach(e => innerRelatedInfos.Add(new SecondBeamProfileInfo(e)));
-            DrawUtils.DrawProfile(m_holes.Polylines2Curves(), "relatedCurves");
+            //DrawUtils.DrawProfile(m_holes.Polylines2Curves(), "relatedCurves");
             // 计算关系组
             var detectRegions = CalculateDetectionRelations(gridProfiles, innerRelatedInfos);
 
@@ -52,41 +53,47 @@ namespace ThMEPElectrical.Business
             DrawUtils.DrawGroup(RegionBeamSpanProfileData);
         }
 
+
         protected override List<DetectionRegion> CalculateDetectionRelations(List<Polyline> profiles, List<SecondBeamProfileInfo> secondBeamInfos)
         {
-            var baseDetectionRegions = base.CalculateDetectionRelations(profiles, secondBeamInfos);
+            var detectRegions = new List<DetectionRegion>();
 
-            var mainPolys = CalculateMainProfiles(baseDetectionRegions);
-
-            var polyProfileInfos = new List<SecondBeamProfileInfo>();
-            secondBeamInfos.ForEach(e =>
+            // 探测区域
+            foreach (var profile in profiles)
             {
-                if (!e.IsUsed)
+                var detectRegion = new DetectionRegion()
                 {
-                    polyProfileInfos.Add(e);
-                }
-            });
+                    DetectionProfile = profile
+                };
 
-            return base.CalculateDetectionRelations(mainPolys, polyProfileInfos);
-        }
+                detectRegions.Add(detectRegion);
 
-        private List<Polyline> CalculateMainProfiles(List<DetectionRegion> regionGroups)
-        {
-            var polys = new List<Polyline>();
-            var innerPolys = new DBObjectCollection();
-            foreach (var group in regionGroups)
-            {
-                innerPolys.Clear();
-                var profile = group.DetectionProfile;
-                group.secondBeams.ForEach(e => innerPolys.Add(e.Profile));
-                foreach (Polyline item in profile.Difference(innerPolys))
+                // 内部扣减区域
+                foreach (var secondBeam in secondBeamInfos)
                 {
-                    polys.Add(item);
+                    var secondBeamProfile = secondBeam.Profile;
+
+                    if (IsIntersectOrContains(profile, secondBeamProfile))
+                    {
+                        secondBeam.IsUsed = true;
+                        detectRegion.secondBeams.Add(secondBeam);
+                    }
                 }
             }
 
-            return polys;
+            return detectRegions;
         }
 
+        private bool IsIntersectOrContains(Polyline firPoly, Polyline secPoly)
+        {
+            var ptLst = secPoly.Polyline2Point2d();
+            foreach (var pt in ptLst)
+            {
+                if (GeomUtils.PtInLoop(firPoly, pt))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }
