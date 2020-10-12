@@ -12,13 +12,16 @@ namespace ThMEPEngineCore.Features
             var poly = beam.Outline as Polyline;
             if (poly != null)
             {
-                var geometry = poly.ToNTSPolygon();
-                geometry.Normalize();
-                return new Feature()
+                using (var ov = new ThCADCoreNTSFixedPrecision())
                 {
-                    Geometry = geometry,
-                    BoundingBox = geometry.EnvelopeInternal,
-                };
+                    var geometry = poly.ToNTSPolygon();
+                    geometry.Normalize();
+                    return new Feature()
+                    {
+                        Geometry = geometry,
+                        BoundingBox = geometry.EnvelopeInternal,
+                    };
+                }
             }
             return null;
         }
