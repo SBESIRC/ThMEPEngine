@@ -26,7 +26,8 @@ namespace ThMEPEngineCore.CAD
         }
         public static bool IsParallelToEx(this Vector3d vector, Vector3d other)
         {
-            return vector.IsParallelTo(other, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
+            double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
+            return (angle < ThMEPEngineCoreCommon.ANGLE_TOLERANCE) || ((180.0 - angle) < ThMEPEngineCoreCommon.ANGLE_TOLERANCE);
         }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
