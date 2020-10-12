@@ -96,9 +96,11 @@ namespace ThMEPEngineCore.Model
         public void UpdateStartLink(ThBeamLinkExtension thBeamLinkExtension)
         {
             StartBeams = ThFilterPortLinkBeams.Filter(Beam, Beam.StartPoint, StartBeams);
-            var linkBeams = thBeamLinkExtension.QueryPortLinkBeams(Beam,
-                Beam.StartPoint, 0.5, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
-            if(linkBeams.Count>0)
+            var startLinkVerComponents = thBeamLinkExtension.QueryPortLinkElements(
+                   Beam, Beam.StartPoint, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
+            //在指定最小范围内若没有竖向构件相连，且有相连的梁则清空按最大范围查找的竖向构件
+            if (startLinkVerComponents.Count == 0
+                && ThFilterPortLinkBeams.HasLinkedBeam(Beam, Beam.StartPoint, StartBeams))
             {
                 StartVerComponents = new List<ThIfcBuildingElement>();
             }
@@ -106,9 +108,11 @@ namespace ThMEPEngineCore.Model
         public void UpdateEndLink(ThBeamLinkExtension thBeamLinkExtension)
         {
             EndBeams = ThFilterPortLinkBeams.Filter(Beam, Beam.EndPoint, EndBeams);
-            var linkBeams = thBeamLinkExtension.QueryPortLinkBeams(Beam,
-                Beam.EndPoint, 0.5, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
-            if (linkBeams.Count > 0)
+            var endLinkVerComponents = thBeamLinkExtension.QueryPortLinkElements(
+                Beam, Beam.EndPoint, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
+            //在指定最小范围内若没有竖向构件相连，且有相连的梁则清空按最大范围查找的竖向构件
+            if (endLinkVerComponents.Count == 0
+                && ThFilterPortLinkBeams.HasLinkedBeam(Beam, Beam.EndPoint, EndBeams))
             {
                 EndVerComponents = new List<ThIfcBuildingElement>();
             }
