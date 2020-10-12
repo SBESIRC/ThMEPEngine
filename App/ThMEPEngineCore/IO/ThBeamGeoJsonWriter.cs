@@ -1,5 +1,7 @@
-﻿using System;
+﻿using System.Linq;
+using ThCADCore.NTS;
 using Newtonsoft.Json;
+using Dreambuild.AutoCAD;
 using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Features;
@@ -11,7 +13,8 @@ namespace ThMEPEngineCore.IO
     {
         public void Write(List<ThIfcBeam> beams, JsonWriter writer)
         {
-            Write(ThBeamFeatureCollection.Construct(beams), writer);
+            ThBeamFeatureCollection.Construct(beams)
+                .OrderBy(o => o.Geometry, new ThCADCoreNTSGeometryComparer()).ForEach(o => Write(o, writer));
         }
     }
 }
