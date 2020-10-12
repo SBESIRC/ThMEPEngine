@@ -19,6 +19,8 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
 using ThCADExtension;
+using NFox.Cad;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore
 {
@@ -167,6 +169,10 @@ namespace ThMEPEngineCore
                 thBeamTypeRecogitionEngine.HalfPrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
                 thBeamTypeRecogitionEngine.OverhangingPrimaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
                 thBeamTypeRecogitionEngine.SecondaryBeamLinks.ForEach(m => allBeams.AddRange(m.Beams));
+
+                // 按梁的中心点排序
+                Point3d center = allBeams.Select(o => o.Outline.GetCenter()).ToCollection().CenterPoint();
+                allBeams.Sort(new ThIfcBeamComparer(center));
 
                 // 输出GeoJson文件
                 // 梁

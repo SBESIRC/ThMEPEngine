@@ -96,6 +96,7 @@
     <Compile Include="Model\Electrical\ThIfcAudioVisualAppliance.cs" />
     <Compile Include="Model\ThIfcArcBeam.cs" />
     <Compile Include="Model\ThIfcBeam.cs" />
+    <Compile Include="Model\ThIfcBeamComparer.cs" />
     <Compile Include="Model\ThIfcBeamStandardCase.cs" />
     <Compile Include="Model\ThIfcBuilding.cs" />
     <Compile Include="Model\ThIfcBuildingElement.cs" />
