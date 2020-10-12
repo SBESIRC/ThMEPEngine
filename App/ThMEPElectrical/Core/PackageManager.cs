@@ -253,7 +253,7 @@ namespace ThMEPElectrical.Core
                 var gridCalculator = new GridService();
 
                 //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, ThMEPCommon.spacingValue);
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
@@ -293,7 +293,7 @@ namespace ThMEPElectrical.Core
 
                 //DrawUtils.DrawProfile(validColumns.Polylines2Curves(), "validColumns");
                 //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, ThMEPCommon.spacingValue);
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
@@ -337,7 +337,7 @@ namespace ThMEPElectrical.Core
                 var gridCalculator = new GridService();
 
                 //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, ThMEPCommon.spacingValue);
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "tet");
