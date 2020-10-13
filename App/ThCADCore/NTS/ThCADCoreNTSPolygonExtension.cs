@@ -53,6 +53,11 @@ namespace ThCADCore.NTS
             return objs;
         }
 
+        public static bool IsRectangle(this AcPolygon polygon)
+        {
+            return polygon.ToNTSPolygon().IsRectangle;
+        }
+
         /// <summary>
         /// 预处理封闭多段线
         /// </summary>

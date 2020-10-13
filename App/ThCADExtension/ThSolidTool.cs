@@ -54,5 +54,14 @@ namespace ThCADExtension
 
             return pl;
         }
+
+        public static Solid ToSolid(this Polyline polyline)
+        {
+            return new Solid(
+                polyline.GetPoint3dAt(0),
+                polyline.GetPoint3dAt(1),
+                polyline.GetPoint3dAt(3),
+                polyline.GetPoint3dAt(2));
+        }
     }
 }

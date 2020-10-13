@@ -1,5 +1,6 @@
 ﻿using System;
 using Linq2Acad;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -80,8 +81,25 @@ namespace ThMEPEngineCore.Service
                                 {
                                     // 暂时不支持有“洞”的填充
                                     var polys = hatch.ToPolylines();
-                                    polys.ForEachDbObject(o => o.TransformBy(matrix));
-                                    curves.AddRange(polys);
+                                    polys.ForEachDbObject(o =>
+                                    {
+                                        // 设计师会为矩形柱使用非比例的缩放
+                                        // 从而获得不同形状的矩形柱
+                                        // 考虑到多段线不能使用非比例的缩放
+                                        // 这里采用一个变通方法：
+                                        //  将矩形柱转化成实线，缩放后再转回多段线
+                                        if (o.IsRectangle())
+                                        {
+                                            var solid = o.ToSolid();
+                                            solid.TransformBy(matrix);
+                                            curves.Add(solid.ToPolyline());
+                                        }
+                                        else
+                                        {
+                                            o.TransformBy(matrix);
+                                            curves.Add(o);
+                                        }
+                                    });
                                 }
                             }
                             else if (dbObj is Solid solid)
