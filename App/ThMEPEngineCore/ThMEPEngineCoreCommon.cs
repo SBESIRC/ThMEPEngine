@@ -37,7 +37,8 @@ namespace ThMEPEngineCore
         public const int COLORINDEX_BEAM_SECONDARY = 4;
 
         // 全局公差
-        public static double ANGLE_TOLERANCE = 1.0;
+        public static double LOOSE_PARALLEL_ANGLE = 1.0;
+        public static double LOOSE_COLINEAR_DISTANCE = 1.0;
         public static Tolerance GEOMETRY_TOLERANCE = new Tolerance(1.0, 1.0);
 
         // 相似度公差

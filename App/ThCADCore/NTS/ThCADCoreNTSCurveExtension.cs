@@ -49,5 +49,10 @@ namespace ThCADCore.NTS
         {
             return polyline.TessellatePolylineWithArc(length).ToNTSLineString();
         }
+
+        public static bool Overlaps(this Curve curve, Curve other)
+        {
+            return curve.ToNTSLineString().Overlaps(other.ToNTSLineString());
+        }
     }
 }

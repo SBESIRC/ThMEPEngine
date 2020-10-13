@@ -201,6 +201,23 @@ namespace ThCADCore.NTS
             return objs;
         }
 
+        public void AddTag(DBObject obj, object tag)
+        {
+            if (Geometries.ContainsValue(obj))
+            {
+                Geometries.Where(o => o.Value == obj).First().Key.UserData = tag;
+            }
+        }
+
+        public object Tag(DBObject obj)
+        {
+            if (!Geometries.ContainsValue(obj))
+            {
+                return null;
+            }
+            return Geometries.Where(o => o.Value == obj).First().Key.UserData;
+        }
+
         private DBObjectCollection Query(Envelope envelope)
         {
             var objs = new DBObjectCollection();

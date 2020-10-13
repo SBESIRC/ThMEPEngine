@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.CAD
         public static bool IsParallelToEx(this Vector3d vector, Vector3d other)
         {
             double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
-            return (angle < ThMEPEngineCoreCommon.ANGLE_TOLERANCE) || ((180.0 - angle) < ThMEPEngineCoreCommon.ANGLE_TOLERANCE);
+            return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
         }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
@@ -36,12 +36,19 @@ namespace ThMEPEngineCore.CAD
             Line3d second = new Line3d(secondSp, secondEp);
             return first.IsColinearTo(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
         }
-        public static bool IsParallelToEx(Point3d firstSp, Point3d firstEp,
+        public static bool IsLooseParallel(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
         {
             Line3d first = new Line3d(firstSp, firstEp);
             Line3d second = new Line3d(secondSp, secondEp);
             return first.IsParallelTo(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
+        }
+        public static bool IsLooseOverlap(Point3d firstSp, Point3d firstEp,
+            Point3d secondSp, Point3d secondEp)
+        {
+            Line3d first = new Line3d(firstSp, firstEp);
+            Line3d second = new Line3d(secondSp, secondEp);
+            return first.Overlap(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE) != null;
         }
         public static Point3d GetMidPt(this Point3d pt1, Point3d pt2)
         {

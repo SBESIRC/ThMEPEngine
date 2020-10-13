@@ -27,6 +27,7 @@ namespace ThMEPEngineCore.Model
                 return 0.0;
             }
         }
+        public abstract Curve Centerline();
         public abstract Polyline Extend(double length,double width);
         public abstract Polyline ExtendBoth(double startExtendLength, double endExtendLength);
     }

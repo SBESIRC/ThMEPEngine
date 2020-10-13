@@ -1,33 +1,121 @@
-﻿using ThCADCore.NTS;
+﻿using System;
+using NFox.Cad;
+using Linq2Acad;
+using System.Linq;
+using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThMergeOverlapBeamEngine
+    public class ThMergeOverlapBeamEngine : ThBuildingElementPreprocessEngine
     {
-        private ThBeamRecognitionEngine BeamEngine { get; set; }
-
         public List<ThIfcBuildingElement> BeamElements { get; set; }
 
-        public ThMergeOverlapBeamEngine(
-            ThBeamRecognitionEngine thBeamRecognitionEngine,
-            ThSpatialIndexManager thSpatialIndexManager)
+        private IEnumerable<ThIfcLineBeam> LineBeams
         {
-            BeamEngine = thBeamRecognitionEngine;
-            BeamElements = thBeamRecognitionEngine.Elements;
+            get
+            {
+                return BeamEngine.Elements.Where(o => o is ThIfcLineBeam).Cast<ThIfcLineBeam>();
+            }
         }
 
-        public void MergeOverlap()
+        private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
+
+        private ThCADCoreNTSSpatialIndex SpatialIndex
         {
-            var results = new List<ThIfcBuildingElement>();
-            foreach (Polyline outline in BeamEngine.Geometries.Boundaries())
+            get
             {
-                results.Add(ThIfcLineBeam.Create(outline.GetMinimumRectangle()));
+                return BeamConnectRecogitionEngine.SpatialIndexManager.BeamSpatialIndex;
             }
-            BeamElements = results;
+        }
+
+        private ThBeamRecognitionEngine BeamEngine
+        {
+            get
+            {
+                return BeamConnectRecogitionEngine.BeamEngine;
+            }
+        }
+
+        public ThMergeOverlapBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
+        {
+            BeamElements = new List<ThIfcBuildingElement>();
+            BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;
+        }
+
+        private bool IsParallel(ThIfcLineBeam beam, ThIfcLineBeam other)
+        {
+            return ThGeometryTool.IsLooseParallel(
+                beam.StartPoint,
+                beam.EndPoint,
+                other.StartPoint,
+                other.EndPoint);
+        }
+
+        private bool IsOverlap(ThIfcLineBeam beam, ThIfcLineBeam other)
+        {
+            return ThGeometryTool.IsLooseOverlap(
+                beam.StartPoint,
+                beam.EndPoint,
+                other.StartPoint,
+                other.EndPoint);
+        }
+
+        public void Merge()
+        {
+            foreach (var beam in LineBeams)
+            {
+                var poly = beam.Outline as Polyline;
+                var objs = SpatialIndex.SelectCrossingPolygon(poly);
+                if (objs.Count == 1)
+                {
+                    continue;
+                }
+                var beams = BeamEngine.FilterByOutline(objs)
+                    .Cast<ThIfcLineBeam>()
+                    .Where(o => IsParallel(beam, o))
+                    .Where(o => IsOverlap(beam, o));
+                if (beams.Count() == 1)
+                {
+                    continue;
+                }
+                var tagBeams = beams.Where(o => SpatialIndex.Tag(o.Outline) != null);
+                if (tagBeams.Count() == 0)
+                {
+                    var tag = Guid.NewGuid().ToString();
+                    beams.ForEach(o => SpatialIndex.AddTag(o.Outline, tag));
+                }
+                else
+                {
+                    var tag = SpatialIndex.Tag(tagBeams.First().Outline);
+                    beams.ForEach(o => SpatialIndex.AddTag(o.Outline, tag));
+                }
+            }
+            var groups = LineBeams.GroupBy(o => SpatialIndex.Tag(o.Outline));
+            foreach (var group in groups)
+            {
+                if (group.Key == null)
+                {
+                    group.ForEach(o => BeamElements.Add(o));
+                }
+                else
+                {
+                    using (var ov = new ThCADCoreNTSFixedPrecision())
+                    {
+                        var outlines = group.Select(o => o.Outline).ToCollection().Boundaries();
+                        outlines.Cast<Polyline>().ForEachDbObject(o =>
+                        {
+                            var rectangle = o.GetMinimumRectangle();
+                            BeamElements.Add(ThIfcLineBeam.Create(rectangle));
+                        });
+                    }
+                }
+            }
+            BeamEngine.Elements = BeamElements;
         }
     }
 }

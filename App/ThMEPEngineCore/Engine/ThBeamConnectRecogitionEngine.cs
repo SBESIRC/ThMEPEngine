@@ -56,6 +56,11 @@ namespace ThMEPEngineCore.Engine
 
             // 预处理梁端
             {
+                // 梁端的合并
+                var mergeEngine = new ThMergeOverlapBeamEngine(this);
+                mergeEngine.Merge();
+                SyncBeamSpatialIndex();
+
                 // 连接梁端
 
                 // 按柱，墙分割梁端
@@ -67,10 +72,6 @@ namespace ThMEPEngineCore.Engine
                 ThSnapBeamEngine thSnapBeams = new ThSnapBeamEngine(this);
                 thSnapBeams.Snap();
                 SyncBeamSpatialIndex();
-
-                // 梁端的合并
-                ThMergeBeamEngine thMergeBeams = new ThMergeBeamEngine(this);
-                thMergeBeams.Merge();
             }
 
             //建立单根梁两端连接的物体列表

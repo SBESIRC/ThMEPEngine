@@ -1,8 +1,12 @@
 ﻿using System;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
+using ThCADCore.NTS;
+using GeometryExtensions;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.BeamInfo.Model;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
@@ -10,13 +14,18 @@ namespace ThMEPEngineCore.Model
     {
         public static ThIfcLineBeam Create(Polyline polyline)
         {
-            var vertices = polyline.Vertices();
+            var segments = new PolylineSegmentCollection(polyline);
+            var enumerable = segments.Where(o => o.IsLinear).OrderByDescending(o => o.ToLineSegment().Length);
+            var beam = new LineBeam(
+                new Line(enumerable.ElementAt(0).StartPoint.ToPoint3d(), enumerable.ElementAt(0).EndPoint.ToPoint3d()),
+                new Line(enumerable.ElementAt(1).StartPoint.ToPoint3d(), enumerable.ElementAt(1).EndPoint.ToPoint3d()));
             return new ThIfcLineBeam()
             {
-                Outline = polyline,
+                EndPoint = beam.EndPoint,
+                Normal = beam.BeamNormal,
+                Outline = beam.BeamBoundary,
+                StartPoint = beam.StartPoint,
                 Uuid = Guid.NewGuid().ToString(),
-                EndPoint = ThGeometryTool.GetMidPt(vertices[2], vertices[3]),
-                StartPoint = ThGeometryTool.GetMidPt(vertices[0], vertices[1]),
             };
         }
 
@@ -33,6 +42,11 @@ namespace ThMEPEngineCore.Model
                 Height = this.Height,
                 ComponentType = this.ComponentType,
             };
+        }
+
+        public override Curve Centerline()
+        {
+            return new Line(StartPoint, EndPoint);
         }
 
         public Vector3d Direction 
