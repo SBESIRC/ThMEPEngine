@@ -433,7 +433,7 @@ namespace ThMEPElectrical.Business.MainBeam
             else if (horizontalCount == 1)
             {
                 // 一列布置
-                return OneColMultiSegmentsPlace.MakeOneColPlacePolygon(m_parameter, placeRectInfo);
+                return OneColMultiSegmentsPlaceEx.MakeOneColPlacePolygon(m_parameter, placeRectInfo);
             }
             else
             {

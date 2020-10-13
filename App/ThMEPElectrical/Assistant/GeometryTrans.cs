@@ -45,6 +45,41 @@ namespace ThMEPElectrical.Assistant
             return ptLst;
         }
 
+        public static Point3dCollection Points2PointCollection(this List<Point2d> pts)
+        {
+            var ptCollection = new Point3dCollection();
+            foreach (var pt in pts)
+            {
+                ptCollection.Add(pt.Point3D());
+            }
+
+            return ptCollection;
+        }
+
+        public static List<Point2d> RemoveNearSamePoints(this Polyline poly)
+        {
+            var ptLst = new List<Point2d>();
+            for (int i = 0; i < poly.NumberOfVertices; i++)
+            {
+                var pt = poly.GetPoint2dAt(i);
+                if (!ptLst.Contains(pt))
+                    ptLst.Add(pt);
+            }
+
+            var firstPt = ptLst.First();
+            var lastPt = ptLst.Last();
+            if (GeomUtils.Point2dIsEqualPoint2d(firstPt, lastPt))
+                return ptLst;
+
+            ptLst.Add(lastPt);
+            return ptLst;
+        }
+
+        public static Polyline PolylineWithNoSamePoints(this Polyline poly)
+        {
+            return poly.RemoveNearSamePoints().Points2PointCollection().ToPolyline();
+        }
+
         public static List<Point3d> Pt2stoPt3ds(this List<Point2d> pt2dS)
         {
             if (pt2dS == null || pt2dS.Count == 0)
@@ -127,7 +162,7 @@ namespace ThMEPElectrical.Assistant
         public static List<Point3d> ToPointList(this Point3dCollection ptCollection)
         {
             var ptLst = new List<Point3d>();
-            
+
             foreach (Point3d pt in ptCollection)
             {
                 ptLst.Add(pt);
@@ -143,7 +178,7 @@ namespace ThMEPElectrical.Assistant
             poly.CreatePolyline(ptCollection);
             return poly;
         }
-        
+
         /// <summary>
         /// 根据点集，半径，绘制圆
         /// </summary>
@@ -173,7 +208,7 @@ namespace ThMEPElectrical.Assistant
                 return null;
 
             var curves = new List<Curve>();
-            
+
             foreach (var circle in circles)
             {
                 curves.Add(circle);

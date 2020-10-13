@@ -29,6 +29,7 @@ namespace ThMEPElectrical
         public static readonly double spacingValue = 4500;
 
         public static readonly double ShrinkDistance = -500; // 内缩距离
+        public static readonly double ShrinkSmallDistance = -3; // 误差内缩距离
     }
 }
 

@@ -9,6 +9,7 @@ using DotNetARX;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Model;
 using ThCADCore.NTS;
+using ThMEPElectrical.PostProcess;
 
 namespace ThMEPElectrical.Geometry
 {
@@ -24,7 +25,7 @@ namespace ThMEPElectrical.Geometry
 
             double area = 0.0;
             var ptCount = ptLst.Count;
-            
+
             for (int i = 0; i < ptCount; i++)
             {
                 var curPoint = ptLst[i];
@@ -300,6 +301,50 @@ namespace ThMEPElectrical.Geometry
             return point3dCollection;
         }
 
+        public static Polyline BufferPoly(Polyline polyline)
+        {
+            var polys = new List<Polyline>();
+            foreach (Polyline offsetPoly in polyline.Buffer(ThMEPCommon.ShrinkSmallDistance))
+                polys.Add(offsetPoly);
+
+            if (polys.Count == 0)
+                return null;
+            polys.Sort((p1, p2) =>
+            {
+                return p1.Area.CompareTo(p2.Area);
+            });
+            return polys.Last();
+        }
+        /// <summary>
+        /// 计算轮廓的矩形布置信息
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <returns></returns>
+        public static Polyline CalculateRectPoly(List<Point3d> srcPts)
+        {
+            var pts = new Point3dCollection();
+
+            var xLst = srcPts.Select(e => e.X).ToList();
+            var yLst = srcPts.Select(e => e.Y).ToList();
+
+            var xMin = xLst.Min();
+            var yMin = yLst.Min();
+
+            var xMax = xLst.Max();
+            var yMax = yLst.Max();
+            
+            var leftBottmPt = new Point3d(xMin, yMin, 0);
+            var rightBottomPt = new Point3d(xMax, yMin, 0);
+            var leftTopPt = new Point3d(xMin, yMax, 0);
+            var rightTopPt = new Point3d(xMax, yMax, 0);
+
+            pts.Add(leftBottmPt);
+            pts.Add(rightBottomPt);
+            pts.Add(rightTopPt);
+            pts.Add(leftTopPt);
+            return pts.ToPolyline();
+        }
+
         /// <summary>
         /// 计算几何中心
         /// </summary>
@@ -307,21 +352,40 @@ namespace ThMEPElectrical.Geometry
         /// <returns></returns>
         public static List<Point3d> CalculateCentroidFromPoly(Polyline poly)
         {
-            var polys = new List<Curve>();
-            foreach (Polyline offsetPoly in poly.Buffer(ThMEPCommon.ShrinkDistance))
-                polys.Add(offsetPoly);
-
             var ptLst = new List<Point3d>();
-            if (polys.Count < 1)
+            var postPoly = BufferPoly(poly);
+            if (postPoly == null)
                 return ptLst;
 
-            var regions = RegionTools.CreateRegion(polys.ToArray());
-            
+            postPoly = postPoly.RemoveNearSamePoints().Points2PointCollection().ToPolyline();
+            var regions = RegionTools.CreateRegion(new Curve[] { postPoly });
+
             foreach (var region in regions)
             {
                 ptLst.Add(region.GetCentroid().Point3D());
             }
 
+            if (ptLst.Count < 1)
+            {
+                var centerPt = GetCenterPt(postPoly);
+                if (centerPt.HasValue)
+                    ptLst.Add(centerPt.Value);
+                else
+                    return ptLst;
+            }
+
+            // 距离500的边界调整
+            var polys = new List<Polyline>();
+            foreach (Polyline offsetPoly in postPoly.Buffer(ThMEPCommon.ShrinkDistance))
+                polys.Add(offsetPoly);
+            if (polys.Count > 0)
+            {
+                var mainRegion = new MainSecondBeamRegion(polys, ptLst);
+                return MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainRegion, MSPlaceAdjustorType.SINGLEPLACE);
+            }
+
+            // 无效布置点
+            ptLst.Clear();
             return ptLst;
         }
     }

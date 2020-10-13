@@ -15,7 +15,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
     /// <summary>
     /// 异形一列布置位置move调整
     /// </summary>
-    internal class MSBeamNoRegularOneColPlacer : OneColMultiSegmentsPlace
+    internal class MSBeamNoRegularOneColPlacer : OneColMultiSegmentsPlaceEx
     {
         private PlaceInputProfileData m_inputProfileData;
         public MSBeamNoRegularOneColPlacer(PlaceParameter parameter, PlaceRect placeRectInfo, PlaceInputProfileData inputProfileData)
