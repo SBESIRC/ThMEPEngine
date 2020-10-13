@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.CAD
             double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
             return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
         }
-        public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
+        public static bool IsLooseCollinear(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
         {
             Line3d first = new Line3d(firstSp, firstEp);
@@ -99,7 +99,7 @@ namespace ThMEPEngineCore.CAD
             while (doMark)
             {
                 Point3d otherPt = ray.BasePoint + ray.UnitDir.MultiplyBy(100.0);
-                if (linesegments.Where(o => ThGeometryTool.IsCollinearEx(
+                if (linesegments.Where(o => ThGeometryTool.IsLooseCollinear(
                      ray.BasePoint, otherPt, o.StartPoint, o.EndPoint)).Any())
                 {
                     Matrix3d mt = Matrix3d.Rotation(increAng, Vector3d.ZAxis, pt);

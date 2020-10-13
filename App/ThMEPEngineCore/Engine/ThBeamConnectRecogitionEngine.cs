@@ -54,21 +54,24 @@ namespace ThMEPEngineCore.Engine
             CreateBeamSpatialIndex();
             CreateColumnSpatialIndex();
 
-            // 预处理梁端
+            // 预处理梁段
             {
-                // 梁端的合并
-                var mergeEngine = new ThMergeOverlapBeamEngine(this);
+                // 梁到梁的延伸
+                var extendEngine = new ThExtendBeamEngine(this);
+                extendEngine.Extend();
+                SyncBeamSpatialIndex();
+
+                // 梁的合并
+                var mergeEngine = new ThMergeBeamEngine(this);
                 mergeEngine.Merge();
                 SyncBeamSpatialIndex();
 
-                // 连接梁端
-
-                // 按柱，墙分割梁端
+                // 按柱，墙分割梁
                 ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(this);
                 thSplitBeams.Split();
                 SyncBeamSpatialIndex();
 
-                // 梁端到竖向构件的延伸
+                // 梁到竖向构件的延伸
                 ThSnapBeamEngine thSnapBeams = new ThSnapBeamEngine(this);
                 thSnapBeams.Snap();
                 SyncBeamSpatialIndex();

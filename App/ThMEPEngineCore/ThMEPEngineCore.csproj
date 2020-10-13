@@ -64,7 +64,8 @@
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
-    <Compile Include="Engine\ThMergeOverlapBeamEngine.cs" />
+    <Compile Include="Engine\ThExtendBeamEngine.cs" />
+    <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
     <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
@@ -139,7 +140,6 @@
     <Compile Include="Service\ThBeamLinkSnapService.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThFilterPortLinkBeams.cs" />
-    <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
     <Compile Include="Service\ThOtherDbExtension.cs" />

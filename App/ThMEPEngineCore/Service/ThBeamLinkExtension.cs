@@ -251,7 +251,7 @@ namespace ThMEPEngineCore.Service
         }
         public bool TwoBeamIsCollinear(ThIfcLineBeam firstBeam, ThIfcLineBeam secondBeam)
         {
-            return ThGeometryTool.IsCollinearEx(firstBeam.StartPoint,firstBeam.EndPoint,
+            return ThGeometryTool.IsLooseCollinear(firstBeam.StartPoint,firstBeam.EndPoint,
                 secondBeam.StartPoint,secondBeam.EndPoint);
         }
         public List<ThIfcBeam> QueryPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt,double beamExtensionRatio,double beamIntervalTolerance)

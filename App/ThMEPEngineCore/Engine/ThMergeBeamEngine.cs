@@ -4,14 +4,13 @@ using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThMergeOverlapBeamEngine : ThBuildingElementPreprocessEngine
+    public class ThMergeBeamEngine : ThBuildingElementPreprocessEngine
     {
         public List<ThIfcBuildingElement> BeamElements { get; set; }
 
@@ -41,28 +40,10 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        public ThMergeOverlapBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
+        public ThMergeBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
         {
             BeamElements = new List<ThIfcBuildingElement>();
             BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;
-        }
-
-        private bool IsParallel(ThIfcLineBeam beam, ThIfcLineBeam other)
-        {
-            return ThGeometryTool.IsLooseParallel(
-                beam.StartPoint,
-                beam.EndPoint,
-                other.StartPoint,
-                other.EndPoint);
-        }
-
-        private bool IsOverlap(ThIfcLineBeam beam, ThIfcLineBeam other)
-        {
-            return ThGeometryTool.IsLooseOverlap(
-                beam.StartPoint,
-                beam.EndPoint,
-                other.StartPoint,
-                other.EndPoint);
         }
 
         public void Merge()
