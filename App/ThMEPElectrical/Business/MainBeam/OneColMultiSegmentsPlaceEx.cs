@@ -103,7 +103,7 @@ namespace ThMEPElectrical.Business.MainBeam
         private List<Point3d> CalculateCentroidPoint(List<Point3d> srcPts, PlaceRect placeRectInfo)
         {
             var pts = new List<Point3d>();
-            var width = placeRectInfo.BottomLine.Length;
+            var width = placeRectInfo.BottomLine.Length + 10;
             var midStartPoint = GeomUtils.GetMidPoint(placeRectInfo.LeftBottomPt, placeRectInfo.RightBottomPt);
             var midEndPoint = GeomUtils.GetMidPoint(placeRectInfo.LeftTopPt, placeRectInfo.RightTopPt);
 
@@ -154,36 +154,36 @@ namespace ThMEPElectrical.Business.MainBeam
         private List<Polyline> SplitRegions(List<Polyline> srcPolys, Polyline dividePoly)
         {
             var polys = new List<Polyline>();
+
             foreach (var poly in srcPolys)
             {
-                var obs = poly.GeometryIntersection(dividePoly);
-                polys.Add(UnionPoly(obs));
+                var resPoly = GenerateIntersectRegion(poly, dividePoly);
+                if (resPoly != null)
+
+                polys.Add(resPoly);
             }
 
             return polys;
         }
 
-        /// <summary>
-        /// 多个简单合并
-        /// </summary>
-        /// <param name="objs"></param>
-        /// <returns></returns>
-        private Polyline UnionPoly(DBObjectCollection objs)
+        protected Polyline GenerateIntersectRegion(Polyline polyFir, Polyline polySec)
         {
-            if (objs.Count == 1)
+            var polyLst = new List<Polyline>();
+            foreach (DBObject singlePolygon in polyFir.GeometryIntersection(polySec))
             {
-                return objs[0] as Polyline;
+                if (singlePolygon is Polyline validPoly)
+                    polyLst.Add(validPoly);
             }
-            else
-            {
-                var pts = new List<Point3d>();
-                foreach(Polyline poly in objs)
-                {
-                    pts.AddRange(poly.Polyline2Point2d().Pt2stoPt3ds());
-                }
 
-                return GeomUtils.CalculateRectPoly(pts);
-            }
+            if (polyLst.Count == 0)
+                return null;
+
+            polyLst.Sort((p1, p2) =>
+            {
+                return p1.Area.CompareTo(p2.Area);
+            });
+
+            return polyLst.Last();
         }
 
         /// <summary>

@@ -69,6 +69,23 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static Polyline ConvexHull(this List<Point3d> srcPts)
+        {
+            var coordinates = new List<Coordinate>();
+            srcPts.ForEach(e => coordinates.Add(e.ToNTSCoordinate()));
+
+            var convexHull = new ConvexHull(coordinates.ToArray(), ThCADCoreNTSService.Instance.GeometryFactory);
+            var geometry = convexHull.GetConvexHull();
+            if (geometry is Polygon polygon)
+            {
+                return polygon.Shell.ToDbPolyline();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public static Polyline GetOctagonalEnvelope(this Polyline polyline)
         {
             var geometry = OctagonalEnvelope.GetOctagonalEnvelope(polyline.ToNTSLineString());

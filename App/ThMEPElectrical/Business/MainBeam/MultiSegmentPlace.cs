@@ -321,13 +321,13 @@ namespace ThMEPElectrical.Business.MainBeam
             for (int i = 0; i < verticalCount; i++)
             {
                 var curBottomLine = GeomUtils.MoveLine(bottomLine, Vector3d.YAxis, i * verticalGap);
-                var splitPoly = GenerateSplitPolyline(curBottomLine, Vector3d.YAxis, verticalGap);
+                var splitPoly = GenerateSplitPolyline(curBottomLine, Vector3d.YAxis, verticalGap + 10);
                 var intersectPoly = GenerateIntersectRegion(splitPoly, srcPostPoly);
 
                 if (intersectPoly == null)
                     continue;
 
-                //DrawUtils.DrawProfile(new List<Curve>() { intersectPoly }, "intersectPoly");
+                DrawUtils.DrawProfile(new List<Curve>() { intersectPoly }, "intersectPoly");
                 var placeRect = GeomUtils.CalculateProfileRectInfo(intersectPoly);
                 //DrawUtils.DrawProfile(new List<Curve>() { splitPoly }, "splitPoly");
                 placeRect.srcPolyline = intersectPoly;
@@ -355,7 +355,22 @@ namespace ThMEPElectrical.Business.MainBeam
         /// <returns></returns>
         protected Polyline GenerateIntersectRegion(Polyline polyFir, Polyline polySec)
         {
-            return polyFir.Intersect(polySec);
+            var polyLst = new List<Polyline>();
+            foreach (DBObject singlePolygon in polyFir.GeometryIntersection(polySec))
+            {
+                if (singlePolygon is Polyline validPoly)
+                    polyLst.Add(validPoly);
+            }
+
+            if (polyLst.Count == 0)
+                return null;
+
+            polyLst.Sort((p1, p2) =>
+            {
+                return p1.Area.CompareTo(p2.Area);
+            });
+
+            return polyLst.Last();
         }
 
         /// <summary>
