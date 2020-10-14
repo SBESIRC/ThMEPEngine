@@ -61,6 +61,31 @@ namespace ThMEPEngineCore.Service
                 }
             }
         }
+        public void FindRestBeamLink()
+        {
+            for (int i = 0; i < UnDefinedBeams.Count; i++)
+            {
+                ThIfcBeam currentBeam = UnDefinedBeams[i] as ThIfcBeam;
+                if (currentBeam.ComponentType == BeamComponentType.SecondaryBeam)
+                {
+                    continue;
+                }
+                ThBeamLink thBeamLink = new ThBeamLink();
+                List<ThIfcBeam> linkElements = new List<ThIfcBeam>() { currentBeam };
+                thBeamLink.Start.AddRange(QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[0], currentBeam.StartPoint));
+                thBeamLink.Start.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[0], currentBeam.StartPoint));
+                thBeamLink.Start.AddRange(QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, linkElements[0], currentBeam.StartPoint));
+                thBeamLink.Start.AddRange(QueryPortLinkSecondaryBeams(SecondaryBeamLinks, linkElements[0], currentBeam.StartPoint));
+
+                thBeamLink.End.AddRange(QueryPortLinkPrimaryBeams(PrimaryBeamLinks, linkElements[linkElements.Count - 1], currentBeam.EndPoint));
+                thBeamLink.End.AddRange(QueryPortLinkHalfPrimaryBeams(HalfPrimaryBeamLinks, linkElements[linkElements.Count - 1], currentBeam.EndPoint));
+                thBeamLink.End.AddRange(QueryPortLinkOverhangingPrimaryBeams(OverhangingPrimaryBeamLinks, linkElements[linkElements.Count - 1], currentBeam.EndPoint));
+                thBeamLink.End.AddRange(QueryPortLinkSecondaryBeams(SecondaryBeamLinks, linkElements[linkElements.Count - 1], currentBeam.EndPoint));
+                thBeamLink.Beams = linkElements;
+                thBeamLink.Beams.ForEach(o => o.ComponentType = BeamComponentType.SecondaryBeam);
+                SecondaryBeamLinks.Add(thBeamLink);
+            }
+        }
         private Point3d PreFindBeamLink(Point3d portPt, List<ThIfcBeam> beamLink)
         {
             //端点连接竖向构件则返回

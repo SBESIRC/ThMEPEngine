@@ -19,5 +19,6 @@ namespace ThMEPEngineCore.Service
             SplitBeams = new List<ThIfcBeam>();
         }
         public abstract void Split();
+        public abstract void SplitTType();
     }
 }

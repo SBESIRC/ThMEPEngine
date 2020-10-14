@@ -19,8 +19,6 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
 using ThCADExtension;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore
 {
@@ -121,7 +119,6 @@ namespace ThMEPEngineCore
                 {
                     return;
                 }
-
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
@@ -446,10 +443,16 @@ namespace ThMEPEngineCore
                     foreach (var objId in outlineRes.Value.GetObjectIds())
                     {
                         var segment = acadDatabase.Element<Polyline>(objId);
-                        segments.Add(new ThLinearSegment { Outline = segment.Clone() as Polyline });
+                        segments.Add(
+                            new ThLinearSegment
+                            {
+                                Outline = segment.Clone() as Polyline,
+                                StartPoint = Active.Editor.GetPoint("\n选择梁的起点").Value,
+                                EndPoint = Active.Editor.GetPoint("\n选择梁的终点").Value,
+                            });
                     }
                     ThLinealBeamSplitter thLinealBeamSplitter = new ThLinealBeamSplitter(thIfcLineBeam as ThIfcLineBeam, segments);
-                    thLinealBeamSplitter.Split();
+                    thLinealBeamSplitter.SplitTType();
                     thLinealBeamSplitter.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
                 }
             }

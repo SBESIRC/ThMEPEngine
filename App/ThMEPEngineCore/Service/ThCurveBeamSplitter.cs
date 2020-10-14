@@ -25,5 +25,10 @@ namespace ThMEPEngineCore.Service
         {
             throw new NotImplementedException();
         }
+
+        public override void SplitTType()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

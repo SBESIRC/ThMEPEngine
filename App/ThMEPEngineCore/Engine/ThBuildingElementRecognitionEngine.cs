@@ -51,5 +51,9 @@ namespace ThMEPEngineCore.Engine
             var siObjs = spatialIndex.Geometries.Values;
             Elements = Elements.Where(o => siObjs.Contains(o.Outline)).ToList();
         }
+        public void Remove(string uuid)
+        {
+            Elements = Elements.Where(o => o.Uuid != uuid).ToList();
+        }
     }
 }

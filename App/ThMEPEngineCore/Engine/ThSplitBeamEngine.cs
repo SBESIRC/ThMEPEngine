@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using ThMEPEngineCore.Model.Segment;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using System.Collections.Generic;
+using ThMEPEngineCore.Model.Segment;
 using ThMEPEngineCore.BeamInfo.Business;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -188,44 +184,7 @@ namespace ThMEPEngineCore.Engine
                 } 
             }
             return unIntersectBeams;
-        }
-        private ThSegment CreateSegment(ThIfcBeam thIfcBeam)
-        {
-            if(thIfcBeam is ThIfcLineBeam thIfcLineBeam)
-            {
-                return CreateSegment(thIfcLineBeam);
-            }
-            else if(thIfcBeam is ThIfcArcBeam thIfcArcBeam)
-            {
-                return CreateSegment(thIfcArcBeam);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-        private ThLinearSegment CreateSegment(ThIfcLineBeam thIfclineBeam)
-        {
-            ThLinearSegment thLinearSegment = new ThLinearSegment();
-            thLinearSegment.StartPoint = thIfclineBeam.StartPoint;
-            thLinearSegment.EndPoint = thIfclineBeam.EndPoint;
-            thLinearSegment.Outline = thIfclineBeam.Outline as Polyline;
-            thLinearSegment.Width = thIfclineBeam.ActualWidth;
-            return thLinearSegment;
-        }
-        private ThArcSegment CreateSegment(ThIfcArcBeam thIfcArcBeam)
-        {
-            ThArcSegment thArcSegment = new ThArcSegment();
-            thArcSegment.StartPoint = thIfcArcBeam.StartPoint;
-            thArcSegment.EndPoint = thIfcArcBeam.EndPoint;
-            thArcSegment.Outline = thIfcArcBeam.Outline as Polyline;
-            thArcSegment.Width = thIfcArcBeam.ActualWidth;
-            thArcSegment.StartTangent = thIfcArcBeam.StartTangent;
-            thArcSegment.EndTangent = thIfcArcBeam.EndTangent;
-            thArcSegment.Radius = thIfcArcBeam.Radius;
-            thArcSegment.Normal = thIfcArcBeam.Normal;
-            return thArcSegment;
-        }
+        }        
         public void Dispose()
         {
             foreach(var segItem in ShearWallSegDic)

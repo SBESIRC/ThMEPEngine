@@ -21,6 +21,9 @@ namespace ThMEPEngineCore.Service
         {
             LineBeam = thIfcLineBeam;
         }
+        public void Dispose()
+        {
+        }
         public override void Split()
         {
             List<ThIfcLineBeam> beamContainer = new List<ThIfcLineBeam>() { LineBeam };
@@ -29,7 +32,7 @@ namespace ThMEPEngineCore.Service
                 Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>> beamDic = new Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>>();
                 beamContainer.ForEach(n =>
                 {                    
-                    ThLinealBeamSplitterExtension splitEx = new ThLinealBeamSplitterExtension(n, m.Outline);
+                    ThLinealBeamSplitterExtension splitEx = new ThLinealBeamSplitterExtension(n, m);
                     splitEx.Split();
                     beamDic.Add(n, splitEx.SplitBeams);                    
                 });
@@ -49,8 +52,33 @@ namespace ThMEPEngineCore.Service
             beamContainer.Where(o=>o.Uuid!=LineBeam.Uuid && 
             o.Length>= ThMEPEngineCoreCommon.BeamMinimumLength).ForEach(o => SplitBeams.Add(o));
         }
-        public void Dispose()
-        {            
-        }        
+        public override void SplitTType()
+        {
+            List<ThIfcLineBeam> beamContainer = new List<ThIfcLineBeam>() { LineBeam };
+            Segments.ForEach(m =>
+            {
+                Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>> beamDic = new Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>>();
+                beamContainer.ForEach(n =>
+                {
+                    ThLinealBeamSplitterExtension splitEx = new ThLinealBeamSplitterExtension(n, m);
+                    splitEx.SplitTType();
+                    beamDic.Add(n, splitEx.SplitBeams);
+                });
+                beamContainer.Clear();
+                beamDic.ForEach(o =>
+                {
+                    if (o.Value.Count > 0)
+                    {
+                        beamContainer.AddRange(o.Value);
+                    }
+                    else
+                    {
+                        beamContainer.Add(o.Key);
+                    }
+                });
+            });
+            beamContainer.Where(o => o.Uuid != LineBeam.Uuid &&
+            o.Length >= ThMEPEngineCoreCommon.BeamMinimumLength).ForEach(o => SplitBeams.Add(o));
+        }
     }
 }
