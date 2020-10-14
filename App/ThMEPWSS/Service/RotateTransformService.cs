@@ -28,10 +28,11 @@ namespace ThMEPWSS.Service
             polylines.ForEach(x => x.Rotate(Point3d.Origin, -CalRotateAngle()));
             //using (AcadDatabase acdb = AcadDatabase.Active())
             //{
-            //    polylines.ForEach(x=> {
-            //            var s = x.Clone() as Polyline;
-            //            acdb.ModelSpace.Add(s);
-            //        });
+            //    polylines.ForEach(x =>
+            //    {
+            //        var s = x.Clone() as Polyline;
+            //        acdb.ModelSpace.Add(s);
+            //    });
             //}
         }
 

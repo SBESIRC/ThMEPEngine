@@ -49,7 +49,6 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             if (CreateLine)
             {
                 //打印布置网格线
-                sprayLines.ForEach(x => x.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse()));
                 InsertSprayLinesService.InsertSprayLines(sprayLines);
             }
             else

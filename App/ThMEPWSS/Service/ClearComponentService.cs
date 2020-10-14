@@ -49,8 +49,9 @@ namespace ThMEPWSS.Service
                     .Where(o => o.Layer == ThWSSCommon.Layout_Line_LayerName);
                 sprays.ForEach(x => objs.Add(x));
 
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var sprayLines = thCADCoreNTSSpatialIndex.SelectWindowPolygon(polyline).Cast<Line>().ToList();
+                var sprayLines = thCADCoreNTSSpatialIndex.SelectWindowPolygon(bufferPoly).Cast<Line>().ToList();
 
                 foreach (var sLine in sprayLines)
                 {

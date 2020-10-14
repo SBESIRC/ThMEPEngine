@@ -39,7 +39,6 @@ namespace ThMEPEngineCore.Operation
                 foreach (var fGird in firGrids.Value)
                 {
                     var rotateGrid = fGird.Clone() as Polyline;
-                    rotateGrid.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse());
                     rotateGrid.Rotate(Point3d.Origin, rotateAngle);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);
@@ -47,7 +46,6 @@ namespace ThMEPEngineCore.Operation
                 foreach (var sGird in secGrids.Value)
                 {
                     var rotateGrid = sGird.Clone() as Polyline;
-                    rotateGrid.TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse());
                     rotateGrid.Rotate(Point3d.Origin, rotateAngle);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);

@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
@@ -27,10 +28,9 @@ namespace ThMEPWSS.Bussiness
             tDir = xDir.CrossProduct(Vector3d.ZAxis);
         }
 
-        public void CalSprayBlindArea(List<BlockReference> sprays, Polyline polyline)
+        public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline)
         {
-            var sprayPts = sprays.Select(x => x.Position).ToList();
-            var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, length);
+            var sprayData = SprayDataOperateService.CalSprayPoint(sprays, vDir, tDir, length);
             var blindArea = GetBlindArea(sprayData, polyline);
 
             //打印盲区
