@@ -112,17 +112,17 @@ namespace ThMEPEngineCore.Engine
         }
         private void CreateColumnSpatialIndex()
         {
-            SpatialIndexManager.CreateColumnSpaticalIndex(ColumnEngine.Geometries);
+            SpatialIndexManager.CreateColumnSpatialIndex(ColumnEngine.Geometries);
             ColumnEngine.UpdateWithSpatialIndex(SpatialIndexManager.ColumnSpatialIndex);
         }
         private void CreateWallSpatialIndex()
         {
-            SpatialIndexManager.CreateWallSpaticalIndex(ShearWallEngine.Geometries);
+            SpatialIndexManager.CreateWallSpatialIndex(ShearWallEngine.Geometries);
             ShearWallEngine.UpdateWithSpatialIndex(SpatialIndexManager.WallSpatialIndex);
         }
         private void CreateBeamSpatialIndex()
         {
-            SpatialIndexManager.CreateBeamSpaticalIndex(BeamEngine.Geometries);
+            SpatialIndexManager.CreateBeamSpatialIndex(BeamEngine.Geometries);
             BeamEngine.UpdateWithSpatialIndex(SpatialIndexManager.BeamSpatialIndex);
         }
         public void SyncBeamSpatialIndex()

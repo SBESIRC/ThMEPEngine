@@ -32,15 +32,15 @@ namespace ThMEPEngineCore.Service
         public ThCADCoreNTSSpatialIndex ColumnSpatialIndex { get; private set; }
         public ThCADCoreNTSSpatialIndex BeamSpatialIndex { get; private set; }
 
-        public void CreateWallSpaticalIndex(DBObjectCollection wallObjs)
+        public void CreateWallSpatialIndex(DBObjectCollection wallObjs)
         {
             WallSpatialIndex = ThSpatialIndexService.CreatWallSpatialIndex(wallObjs);
         }
-        public void CreateBeamSpaticalIndex(DBObjectCollection beamObjs)
+        public void CreateBeamSpatialIndex(DBObjectCollection beamObjs)
         {
             BeamSpatialIndex = ThSpatialIndexService.CreateBeamSpatialIndex(beamObjs);
         }
-        public void CreateColumnSpaticalIndex(DBObjectCollection beamObjs)
+        public void CreateColumnSpatialIndex(DBObjectCollection beamObjs)
         {
             ColumnSpatialIndex = ThSpatialIndexService.CreateBeamSpatialIndex(beamObjs);
         }
