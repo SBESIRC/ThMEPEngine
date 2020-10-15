@@ -29,6 +29,13 @@ namespace ThMEPEngineCore.Model
             };
         }
 
+        public static ThIfcLineBeam Create(ThIfcBeamAnnotation annotation)
+        {
+            var outline = CreatOutline(annotation.StartPoint, annotation.EndPoint, annotation.Size.X);
+            outline.TransformBy(annotation.Matrix);
+            return Create(outline);
+        }
+
         public object Clone()
         {
             return new ThIfcLineBeam()

@@ -58,8 +58,8 @@ namespace ThMEPEngineCore
         [CommandMethod("TIANHUACAD", "THExtractBeam", CommandFlags.Modal)]
         public void ThExtractBeam()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
+            using (var acadDatabase = AcadDatabase.Active())
+            using (var beamEngine = new ThBeamRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)

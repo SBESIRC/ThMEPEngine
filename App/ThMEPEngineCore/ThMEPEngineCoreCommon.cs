@@ -30,6 +30,11 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_S_WALL = "结构墙";
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
 
+        // 梁标注
+        public static string BEAM_GEOMETRY_SIZE = "Beam_Geometry_Size";
+        public static string BEAM_GEOMETRY_ENDPOINT = "Beam_Geometry_Endpoint";
+        public static string BEAM_GEOMETRY_STARTPOINT = "Beam_Geometry_StartPoint";
+
         // 颜色
         public const int COLORINDEX_BEAM_PRIMARY = 1;
         public const int COLORINDEX_BEAM_HALFPRIMARY = 2;
