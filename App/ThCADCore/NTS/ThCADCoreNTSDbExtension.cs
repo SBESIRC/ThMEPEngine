@@ -1,4 +1,5 @@
 ﻿using System;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
@@ -10,6 +11,9 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSDbExtension
     {
+        private const double TESSELLATE_ARC_LENGTH = 1000;
+
+
         public static Polyline ToDbPolyline(this LineString lineString)
         {
             var pline = new Polyline();
@@ -151,12 +155,12 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        public static LineString ToNTSLineString(this Polyline polyLine)
+        public static LineString ToNTSLineString(this Polyline poly)
         {
             var points = new List<Coordinate>();
+            var polyLine = poly.HasBulges ? poly.TessellatePolylineWithArc(TESSELLATE_ARC_LENGTH) : poly;
             for (int i = 0; i < polyLine.NumberOfVertices; i++)
             {
-                // 暂时不考虑“圆弧”的情况
                 points.Add(polyLine.GetPoint3dAt(i).ToNTSCoordinate());
             }
 
