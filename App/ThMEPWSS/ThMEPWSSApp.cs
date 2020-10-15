@@ -247,6 +247,7 @@ namespace ThMEPWSS
                     var plBack = acdb.Element<Polyline>(frame);
                     var plFrame = ThMEPFrameService.Normalize(plBack);
 
+                    var bufferPoly = plFrame.Buffer(1)[0] as Polyline;
                     //清除原有构件
                     plFrame.ClearBlindArea();
                     if (!CalSprayBlindArea(plFrame, acdb))
@@ -313,7 +314,7 @@ namespace ThMEPWSS
                 }
 
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
-                var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(plFrame).Cast<Line>().ToList();
+                var sprayLines = thCADCoreNTSSpatialIndex.SelectWindowPolygon(plFrame).Cast<Line>().ToList();
 
                 CalSprayBlindLineAreaService calSprayBlindAreaService = new CalSprayBlindLineAreaService();
                 calSprayBlindAreaService.CalSprayBlindArea(sprayLines, plFrame);
