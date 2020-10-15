@@ -321,7 +321,7 @@ namespace ThMEPElectrical.Business.MainBeam
             for (int i = 0; i < verticalCount; i++)
             {
                 var curBottomLine = GeomUtils.MoveLine(bottomLine, Vector3d.YAxis, i * verticalGap);
-                var splitPoly = GenerateSplitPolyline(curBottomLine, Vector3d.YAxis, verticalGap + 10);
+                var splitPoly = GenerateSplitPolyline(curBottomLine, Vector3d.YAxis, verticalGap);
                 var intersectPoly = GenerateIntersectRegion(splitPoly, srcPostPoly);
 
                 if (intersectPoly == null)
@@ -405,7 +405,10 @@ namespace ThMEPElectrical.Business.MainBeam
                 poly.AddVertexAt(i, ptLst[i].ToPoint2D(), 0, 0, 0);
             }
 
-            return poly;
+            var bufferPoly = GeomUtils.BufferPoly(poly);
+            if (bufferPoly == null)
+                return poly;
+            return bufferPoly;
         }
 
         /// <summary>

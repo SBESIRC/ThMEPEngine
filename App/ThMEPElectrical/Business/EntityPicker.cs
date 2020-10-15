@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
+using ThMEPElectrical.Geometry;
 
 namespace ThMEPElectrical.Business
 {
@@ -47,7 +48,9 @@ namespace ThMEPElectrical.Business
                 {
                     var curPoly = db.CurrentSpace.Element(polyId).Clone() as Polyline;
                     curPoly.Closed = true;
-                    polylines.Add(curPoly);
+                    var bufferPoly = GeomUtils.BufferPoly(curPoly);
+                    if (bufferPoly != null)
+                        polylines.Add(bufferPoly);
                 }
             }
 
