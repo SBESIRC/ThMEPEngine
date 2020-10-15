@@ -26,17 +26,26 @@ namespace ThMEPEngineCore.Algorithm
                         if (fildict.Contains(SPATIAL_KEY))
                         {
                             SpatialFilter fil = acadDatabase.Element<SpatialFilter>(fildict.GetAt(SPATIAL_KEY));
-                            if (fil != null && fil.Definition.Enabled)
+                            try
                             {
+                                if (fil != null && fil.Definition.Enabled)
+                                {
 #if ACAD2012 || ACAD2014
-                                bool isInverted = false;
+                                    bool isInverted = false;
 #else
-                                bool isInverted = fil.Inverted;
+                                    bool isInverted = fil.Inverted;
 #endif
 
-                                // 暂时只支持裁剪外部
-                                xClipInfo.Inverted = false;
-                                xClipInfo.Polygon = XClipPolygon(fil);
+                                    // 暂时只支持裁剪外部
+                                    xClipInfo.Inverted = false;
+                                    xClipInfo.Polygon = XClipPolygon(fil);
+                                }
+                            }
+                            catch
+                            {
+                                // 在获取SpatialFilter.Definition时会抛出eNullObjectPointer异常
+                                // 由于具体的原因未知，我们只能暂时捕捉这个异常，不做任何处理
+                                // 由于无法正确获取SpatialFilter的信息，我们将忽略掉这个XClip
                             }
                         }
                     }
