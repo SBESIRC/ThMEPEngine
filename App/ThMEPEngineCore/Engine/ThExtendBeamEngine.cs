@@ -4,6 +4,7 @@ using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -58,9 +59,8 @@ namespace ThMEPEngineCore.Engine
                     1.0,
                     ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance)
                     .Cast<ThIfcLineBeam>()
-                    .Where(o => IsParallel(thIfcBeam, o))
-                    .Where(o => !IsOverlap(thIfcBeam, o))
                     .Where(o => IsCollinear(thIfcBeam, o))
+                    .Where(o => !IsOverlap(thIfcBeam, o))
                     .Any();
 
                 bool bExtendEnd = LinkExtension.QueryPortLinkBeams(
@@ -69,9 +69,8 @@ namespace ThMEPEngineCore.Engine
                     1.0,
                     ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance)
                     .Cast<ThIfcLineBeam>()
-                    .Where(o => IsParallel(thIfcBeam, o))
-                    .Where(o => !IsOverlap(thIfcBeam, o))
                     .Where(o => IsCollinear(thIfcBeam, o))
+                    .Where(o => !IsOverlap(thIfcBeam, o))
                     .Any();
 
                 if (bExtendStart || bExtendEnd)

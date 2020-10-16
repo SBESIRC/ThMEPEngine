@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -46,9 +47,12 @@ namespace ThMEPEngineCore.CAD
         public static bool IsLooseOverlap(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
         {
-            Line3d first = new Line3d(firstSp, firstEp);
-            Line3d second = new Line3d(secondSp, secondEp);
-            return first.Overlap(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE) != null;
+            using (var ov = new ThCADCoreNTSFixedPrecision())
+            {
+                var first = new Line(firstSp, firstEp);
+                var second = new Line(secondSp, secondEp);
+                return first.Overlaps(second);
+            }
         }
         public static Point3d GetMidPt(this Point3d pt1, Point3d pt2)
         {
@@ -168,6 +172,6 @@ namespace ThMEPEngineCore.CAD
                 }
             }
             return false;
-        }
+        }        
     }
 }

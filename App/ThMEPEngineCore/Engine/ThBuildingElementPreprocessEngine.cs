@@ -7,16 +7,18 @@ namespace ThMEPEngineCore.Engine
     {
         protected bool IsParallel(ThIfcLineBeam beam, ThIfcLineBeam other)
         {
-            return ThGeometryTool.IsLooseParallel(
-                beam.StartPoint,
-                beam.EndPoint,
-                other.StartPoint,
-                other.EndPoint);
+            return (beam.Uuid == other.Uuid) ||
+                ThGeometryTool.IsLooseParallel(
+                    beam.StartPoint,
+                    beam.EndPoint,
+                    other.StartPoint,
+                    other.EndPoint);
         }
 
         protected bool IsCollinear(ThIfcLineBeam beam, ThIfcLineBeam other)
         {
-            return ThGeometryTool.IsLooseCollinear(
+            return (beam.Uuid == other.Uuid) ||
+                ThGeometryTool.IsLooseCollinear(
                 beam.StartPoint,
                 beam.EndPoint,
                 other.StartPoint,
@@ -25,11 +27,12 @@ namespace ThMEPEngineCore.Engine
 
         protected bool IsOverlap(ThIfcLineBeam beam, ThIfcLineBeam other)
         {
-            return ThGeometryTool.IsLooseOverlap(
-                beam.StartPoint,
-                beam.EndPoint,
-                other.StartPoint,
-                other.EndPoint);
+            return (beam.Uuid == other.Uuid) ||
+                    ThGeometryTool.IsLooseOverlap(
+                    beam.StartPoint,
+                    beam.EndPoint,
+                    other.StartPoint,
+                    other.EndPoint);
         }
     }
 }
