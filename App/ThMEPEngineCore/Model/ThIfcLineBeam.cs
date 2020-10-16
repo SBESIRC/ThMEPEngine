@@ -28,14 +28,19 @@ namespace ThMEPEngineCore.Model
                 Uuid = Guid.NewGuid().ToString(),
             };
         }
-
         public static ThIfcLineBeam Create(ThIfcBeamAnnotation annotation)
         {
             var outline = CreatOutline(annotation.StartPoint, annotation.EndPoint, annotation.Size.X);
             outline.TransformBy(annotation.Matrix);
             return Create(outline);
         }
-
+        public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam,double startExtend,double endExtend)
+        {
+            var newLineBeam=olderLineBeam.Clone() as ThIfcLineBeam;
+            Point3d newSp = olderLineBeam.StartPoint + olderLineBeam.Direction.GetNormal().MultiplyBy(startExtend);
+            Point3d newEp = olderLineBeam.EndPoint + olderLineBeam.Direction.GetNormal().MultiplyBy(endExtend);
+            return newLineBeam;
+        }
         public object Clone()
         {
             return new ThIfcLineBeam()

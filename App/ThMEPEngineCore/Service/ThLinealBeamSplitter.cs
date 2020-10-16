@@ -17,23 +17,23 @@ namespace ThMEPEngineCore.Service
     {
         private ThIfcLineBeam LineBeam { get; set; }       
        
-        public ThLinealBeamSplitter(ThIfcLineBeam thIfcLineBeam, List<ThSegment> segments) :base(segments)
+        public ThLinealBeamSplitter(ThIfcLineBeam thIfcLineBeam)
         {
             LineBeam = thIfcLineBeam;
         }
         public void Dispose()
         {
         }
-        public override void Split()
+        public override void Split(List<Polyline> outlines)
         {
             List<ThIfcLineBeam> beamContainer = new List<ThIfcLineBeam>() { LineBeam };
-            Segments.ForEach(m =>
+            outlines.ForEach(m =>
             {
                 Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>> beamDic = new Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>>();
                 beamContainer.ForEach(n =>
                 {                    
-                    ThLinealBeamSplitterExtension splitEx = new ThLinealBeamSplitterExtension(n, m);
-                    splitEx.Split();
+                    ThLinealBeamSplitterExtension splitEx = new ThLinealBeamSplitterExtension(n);
+                    splitEx.Split(m);
                     beamDic.Add(n, splitEx.SplitBeams);                    
                 });
                 beamContainer.Clear();
@@ -52,16 +52,16 @@ namespace ThMEPEngineCore.Service
             beamContainer.Where(o=>o.Uuid!=LineBeam.Uuid && 
             o.Length>= ThMEPEngineCoreCommon.BeamMinimumLength).ForEach(o => SplitBeams.Add(o));
         }
-        public override void SplitTType()
+        public override void SplitTType(List<ThIfcBeam> beams)
         {
             List<ThIfcLineBeam> beamContainer = new List<ThIfcLineBeam>() { LineBeam };
-            Segments.ForEach(m =>
+            beams.ForEach(m =>
             {
                 Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>> beamDic = new Dictionary<ThIfcLineBeam, List<ThIfcLineBeam>>();
                 beamContainer.ForEach(n =>
                 {
-                    ThLinealBeamSplitterExtension splitEx = new ThLinealBeamSplitterExtension(n, m);
-                    splitEx.SplitTType();
+                    ThLinealBeamSplitterExtension splitEx = new ThLinealBeamSplitterExtension(n);
+                    splitEx.SplitTType(m);
                     beamDic.Add(n, splitEx.SplitBeams);
                 });
                 beamContainer.Clear();

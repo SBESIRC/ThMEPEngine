@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Service
     {
         private ThIfcArcBeam arcBeam { get; set; }
         private Arc CenterLine { get; set; }
-        public ThCurveBeamSplitter(ThIfcArcBeam thIfcArcBeam,List<ThSegment> segments):base(segments)
+        public ThCurveBeamSplitter(ThIfcArcBeam thIfcArcBeam)
         {
             arcBeam = thIfcArcBeam;
         }
@@ -21,12 +21,12 @@ namespace ThMEPEngineCore.Service
         {            
         }
 
-        public override void Split()
+        public override void Split(List<Polyline> outlines)
         {
             throw new NotImplementedException();
         }
 
-        public override void SplitTType()
+        public override void SplitTType(List<ThIfcBeam> beams)
         {
             throw new NotImplementedException();
         }

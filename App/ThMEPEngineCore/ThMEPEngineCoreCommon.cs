@@ -88,5 +88,9 @@ namespace ThMEPEngineCore
         /// 梁内缩距离
         /// </summary>
         public const double BeamBufferDistance = 5.0;
+        /// <summary>
+        /// 梁延伸距离（解决NTS精度）
+        /// </summary>
+        public const double BeamExtendDistance = 2.5;
     }
 }

@@ -12,13 +12,11 @@ namespace ThMEPEngineCore.Service
     public abstract class ThBeamSplitter
     {
         public List<ThIfcBeam> SplitBeams { get; protected set; }
-        protected List<ThSegment> Segments { get; set; }
-        protected ThBeamSplitter(List<ThSegment> segments)
+        protected ThBeamSplitter()
         {
-            Segments = segments;
             SplitBeams = new List<ThIfcBeam>();
         }
-        public abstract void Split();
-        public abstract void SplitTType();
+        public abstract void Split(List<Polyline> outlines);
+        public abstract void SplitTType(List<ThIfcBeam> beams);
     }
 }

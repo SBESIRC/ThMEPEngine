@@ -19,6 +19,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore
 {
@@ -257,23 +258,26 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ThIfcLineBeam thIfcLineBeam = new ThIfcLineBeam();
-                thIfcLineBeam.StartPoint = Active.Editor.GetPoint("\n Select beam start point：").Value;
-                thIfcLineBeam.EndPoint = Active.Editor.GetPoint("\n Select beam end point：").Value;
-                thIfcLineBeam.Outline = acadDatabase.Element<Polyline>(Active.Editor.GetEntity("\n Select beam outline：").ObjectId);
+                var beamOutline = acadDatabase.Element<Polyline>(Active.Editor.GetEntity("\n Select beam outline：").ObjectId);
+                thIfcLineBeam.Outline = beamOutline;
+                thIfcLineBeam.StartPoint = beamOutline.GetPoint3dAt(0).GetMidPt(beamOutline.GetPoint3dAt(1));
+                thIfcLineBeam.EndPoint = beamOutline.GetPoint3dAt(2).GetMidPt(beamOutline.GetPoint3dAt(3));
                 thIfcLineBeam.ComponentType = BeamComponentType.PrimaryBeam;
                 thIfcLineBeam.Width = 300;
                 thIfcLineBeam.Height = 400;
                 thIfcLineBeam.Uuid = Guid.NewGuid().ToString();
                 var components = Active.Editor.GetSelection();
-                List<ThSegment> segments = new List<ThSegment>();
+                if(components.Status!=PromptStatus.OK)
+                {
+                    return;
+                }
+                List<Polyline> crossObjs = new List<Polyline>();
                 foreach (ObjectId objId in components.Value.GetObjectIds())
                 {
-                    ThSegmentService thSegmentService = new ThSegmentService(acadDatabase.Element<Polyline>(objId));
-                    thSegmentService.SegmentAll(new CalBeamStruService());
-                    segments.AddRange(thSegmentService.Segments);
+                    crossObjs.Add(acadDatabase.Element<Polyline>(objId));
                 }
-                ThLinealBeamSplitter thSplitLineBeam = new ThLinealBeamSplitter(thIfcLineBeam, segments);
-                thSplitLineBeam.Split();
+                ThLinealBeamSplitter thSplitLineBeam = new ThLinealBeamSplitter(thIfcLineBeam);
+                thSplitLineBeam.Split(crossObjs);
                 thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex = 1);
                 thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
@@ -300,6 +304,28 @@ namespace ThMEPEngineCore
                 ThSegmentService thSegmentService = new ThSegmentService(polyline);
                 thSegmentService.SegmentAll(new CalBeamStruService());
                 thSegmentService.Segments.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThTestDifference", CommandFlags.Modal)]
+        public void ThTestDifference()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var beamRes = Active.Editor.GetEntity("\n select a beam outline");
+                if(beamRes.Status!=PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline beamOutline = acadDatabase.Element<Polyline>(beamRes.ObjectId);
+                var segmentRes = Active.Editor.GetSelection();
+                if (segmentRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                DBObjectCollection segments = new DBObjectCollection();
+                segmentRes.Value.GetObjectIds().ForEach(o => segments.Add(acadDatabase.Element<Polyline>(o)));
+                var diffObjs=ThCADCoreNTSPolygonExtension.Difference(beamOutline, segments);
+                diffObjs.Cast<Entity>().ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
         [CommandMethod("TIANHUACAD", "ThTestPointIn", CommandFlags.Modal)]
@@ -432,7 +458,7 @@ namespace ThMEPEngineCore
                 var outlineRes = Active.Editor.GetSelection();
                 if (outlineRes.Status == PromptStatus.OK)
                 {
-                    List<ThSegment> segments = new List<ThSegment>();
+                    List<ThIfcBeam> passBeams = new List<ThIfcBeam>();
                     var outline = acadDatabase.Element<Polyline>(entRes.ObjectId);
                     var thIfcLineBeam = new ThIfcLineBeam()
                     {
@@ -443,16 +469,18 @@ namespace ThMEPEngineCore
                     foreach (var objId in outlineRes.Value.GetObjectIds())
                     {
                         var segment = acadDatabase.Element<Polyline>(objId);
-                        segments.Add(
-                            new ThLinearSegment
+                        passBeams.Add(
+                            new ThIfcLineBeam
                             {
+                                Uuid=Guid.NewGuid().ToString(),
                                 Outline = segment.Clone() as Polyline,
                                 StartPoint = Active.Editor.GetPoint("\n选择梁的起点").Value,
                                 EndPoint = Active.Editor.GetPoint("\n选择梁的终点").Value,
+                                Normal=Vector3d.ZAxis
                             });
                     }
-                    ThLinealBeamSplitter thLinealBeamSplitter = new ThLinealBeamSplitter(thIfcLineBeam as ThIfcLineBeam, segments);
-                    thLinealBeamSplitter.SplitTType();
+                    ThLinealBeamSplitter thLinealBeamSplitter = new ThLinealBeamSplitter(thIfcLineBeam as ThIfcLineBeam);
+                    thLinealBeamSplitter.SplitTType(passBeams);
                     thLinealBeamSplitter.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
                 }
             }

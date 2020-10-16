@@ -122,15 +122,16 @@ namespace ThMEPEngineCore.Engine
         }
         private void SplitCrossedBeam(ThIfcLineBeam primaryBeam, ThIfcLineBeam undefinedBeam)
         {
-            List<ThSegment> passSegments = new List<ThSegment>();
-            passSegments.Add(CreateSegment(primaryBeam));
-            ThBeamSplitter thSplitBeam = new ThLinealBeamSplitter(undefinedBeam, passSegments);
-            thSplitBeam.Split();
-            if(thSplitBeam.SplitBeams.Count>1)
+            List<Polyline> passBeams = new List<Polyline>();
+            passBeams.Add(primaryBeam.Outline as Polyline);
+            ThBeamSplitter thSplitBeam = new ThLinealBeamSplitter(undefinedBeam);
+            thSplitBeam.Split(passBeams);
+            if(thSplitBeam.SplitBeams.Count>0)
             {
                 var splitBeams=thSplitBeam.SplitBeams.Where(o =>
                 {
-                    ThCADCoreNTSRelate thCADCoreNTSRelate = new ThCADCoreNTSRelate(passSegments[0].Outline, o.Outline as Polyline);
+                    ThCADCoreNTSRelate thCADCoreNTSRelate = new ThCADCoreNTSRelate(
+                        primaryBeam.Outline as Polyline, o.Outline as Polyline);
                     return !thCADCoreNTSRelate.IsWithIn;
                 }).ToList();                
                 BeamConnectRecognitionEngine.BeamEngine.Remove(undefinedBeam.Uuid);
@@ -153,15 +154,13 @@ namespace ThMEPEngineCore.Engine
         }
         private void SplitTTypeBeam(ThIfcLineBeam primaryBeam, ThIfcLineBeam undefinedBeam)
         {
-            List<ThSegment> passSegments = new List<ThSegment>();
-            passSegments.Add(CreateSegment(primaryBeam));
-            ThBeamSplitter thSplitBeam = new ThLinealBeamSplitter(undefinedBeam, passSegments);
-            thSplitBeam.SplitTType();
-            if (thSplitBeam.SplitBeams.Count > 1)
-            {
+            ThBeamSplitter thSplitBeam = new ThLinealBeamSplitter(undefinedBeam);
+            thSplitBeam.SplitTType(new List<ThIfcBeam>() { primaryBeam });
+            if (thSplitBeam.SplitBeams.Count > 0)
+            {                
                 var splitBeams = thSplitBeam.SplitBeams.Where(o =>
                 {
-                    ThCADCoreNTSRelate thCADCoreNTSRelate = new ThCADCoreNTSRelate(passSegments[0].Outline, o.Outline as Polyline);
+                    ThCADCoreNTSRelate thCADCoreNTSRelate = new ThCADCoreNTSRelate(primaryBeam.Outline as Polyline, o.Outline as Polyline);
                     return !thCADCoreNTSRelate.IsWithIn;
                 }).ToList();
                 BeamConnectRecognitionEngine.BeamEngine.Remove(undefinedBeam.Uuid);
@@ -197,42 +196,6 @@ namespace ThMEPEngineCore.Engine
             }
             return false;
         }
-        private ThSegment CreateSegment(ThIfcBeam thIfcBeam)
-        {
-            if (thIfcBeam is ThIfcLineBeam thIfcLineBeam)
-            {
-                return CreateSegment(thIfcLineBeam);
-            }
-            else if (thIfcBeam is ThIfcArcBeam thIfcArcBeam)
-            {
-                return CreateSegment(thIfcArcBeam);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-        private ThLinearSegment CreateSegment(ThIfcLineBeam thIfclineBeam)
-        {
-            ThLinearSegment thLinearSegment = new ThLinearSegment();
-            thLinearSegment.StartPoint = thIfclineBeam.StartPoint;
-            thLinearSegment.EndPoint = thIfclineBeam.EndPoint;
-            thLinearSegment.Outline = thIfclineBeam.Outline as Polyline;
-            thLinearSegment.Width = thIfclineBeam.ActualWidth;
-            return thLinearSegment;
-        }
-        private ThArcSegment CreateSegment(ThIfcArcBeam thIfcArcBeam)
-        {
-            ThArcSegment thArcSegment = new ThArcSegment();
-            thArcSegment.StartPoint = thIfcArcBeam.StartPoint;
-            thArcSegment.EndPoint = thIfcArcBeam.EndPoint;
-            thArcSegment.Outline = thIfcArcBeam.Outline as Polyline;
-            thArcSegment.Width = thIfcArcBeam.ActualWidth;
-            thArcSegment.StartTangent = thIfcArcBeam.StartTangent;
-            thArcSegment.EndTangent = thIfcArcBeam.EndTangent;
-            thArcSegment.Radius = thIfcArcBeam.Radius;
-            thArcSegment.Normal = thIfcArcBeam.Normal;
-            return thArcSegment;
-        }
+
     }
 }

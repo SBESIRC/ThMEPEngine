@@ -154,5 +154,20 @@ namespace ThMEPEngineCore.CAD
             plane.Dispose();
             return pts;
         }
+        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt)
+        {
+            Vector3d vec = lineSp.GetVectorTo(lineEp);
+            Plane plane = new Plane(lineSp, vec);
+            Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
+            Point3d newPt=outerPt.TransformBy(wcsToUcs);
+            if(newPt.X<=0.0001 && newPt.Y <= 0.0001)
+            {
+                if(newPt.Z>=0 && newPt.Z<= lineSp.DistanceTo(lineEp))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

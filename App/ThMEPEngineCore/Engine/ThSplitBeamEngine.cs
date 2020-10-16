@@ -13,22 +13,15 @@ namespace ThMEPEngineCore.Engine
     {
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
 
-        public List<ThIfcBuildingElement> BeamElements { get; set; }
-        protected Dictionary<ThIfcBuildingElement, List<ThSegment>> ShearWallSegDic;
-        protected Dictionary<ThIfcBuildingElement, List<ThSegment>> ColumnSegDic;
+        public List<ThIfcBeam> BeamElements { get; set; }
 
         public ThSplitBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
         {
             BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;           
-            BeamElements = BeamConnectRecogitionEngine.BeamEngine.Elements;
-            ShearWallSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
-            ColumnSegDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
+            BeamElements = BeamConnectRecogitionEngine.BeamEngine.Elements.Cast<ThIfcBeam>().ToList();
         }
         public void Split()
         {
-            //创建剪力墙Segment
-            BuildShearwallSegment();
-
             //处理梁穿过剪力墙竖向构件
             SplitBeamPassWalls();
 
@@ -37,17 +30,6 @@ namespace ThMEPEngineCore.Engine
 
             //将梁长度过小的排除
             FilterSmallBeams();
-
-            BeamConnectRecogitionEngine.BeamEngine.Elements = this.BeamElements;
-        }
-        private void BuildShearwallSegment()
-        {
-            BeamConnectRecogitionEngine.ShearWallEngine.Elements.ForEach(o =>
-            {
-                ThSegmentService thSegmentService = new ThSegmentService(o.Outline as Polyline);
-                thSegmentService.SegmentAll(new CalBeamStruService());
-                ShearWallSegDic.Add(o, thSegmentService.Segments);
-            });
         }
         private void FilterSmallBeams(double tolerance=10.0)
         {
@@ -57,99 +39,66 @@ namespace ThMEPEngineCore.Engine
         }
         private void SplitBeamPassWalls()
         {
-            var beamWallComponentDic = BeamCrossWallSegments();
-            List<string> uuids = new List<string>();     
-            List<ThIfcBeam> divideBeams = new List<ThIfcBeam>();
-            foreach (var item in beamWallComponentDic)
-            {
-                ThBeamSplitter thSplitBeam=null;
-                if (item.Key is ThIfcLineBeam thIfcLineBeam)
-                {                    
-                    thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam, item.Value);                    
-                }
-                else if(item.Key is ThIfcArcBeam thIfcArcBeam)
-                {
-                    thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam, item.Value);
-                }
-                thSplitBeam.Split();
-                if (thSplitBeam.SplitBeams.Count > 1)
-                {
-                    uuids.Add(item.Key.Uuid); //记录要移除的梁UUID
-                    divideBeams.AddRange(thSplitBeam.SplitBeams);
-                }
-            }            
-            BeamElements.Where(o => uuids.IndexOf(o.Uuid) >= 0).ToList().ForEach(o => o.Outline.Dispose());
-            BeamElements = BeamElements.Where(o => uuids.IndexOf(o.Uuid) < 0).ToList();
-            BeamElements.AddRange(divideBeams);
-        }
-        private Dictionary<ThIfcBuildingElement, List<ThSegment>> BeamCrossWallSegments()
-        {
-            //搜索与梁相交的墙段
-            var beamWallComponentDic = new Dictionary<ThIfcBuildingElement, List<ThSegment>>();
             BeamElements.ForEach(o =>
-            {
-                var beam = o as ThIfcBeam;
-                Polyline outline = beam.Extend(0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
-                DBObjectCollection wallComponents = BeamConnectRecogitionEngine.SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
-                if (wallComponents.Count > 0)
                 {
-                    List<ThSegment> passSegments = new List<ThSegment>();
-                    var intersectShearWalls = BeamConnectRecogitionEngine.ShearWallEngine.FilterByOutline(wallComponents).ToList();
-                    intersectShearWalls.ForEach(m =>
-                    {
-                        foreach (var item in ShearWallSegDic)
-                        {
-                            if (item.Key.Uuid == m.Uuid)
-                            {
-                                passSegments.AddRange(item.Value);
-                            }
-                        }
-                    });
-                    if (passSegments.Count > 0)
-                    {
-                        beamWallComponentDic.Add(o, passSegments);
-                    }
-                }
-            });
-            return beamWallComponentDic;
-        }
-        private void SplitBeamPassColumns()
-        {
-            List<string> uuids = new List<string>();
-            List<ThIfcBeam> divideBeams = new List<ThIfcBeam>();
-            BeamElements.ForEach(o =>
-            {      
-                var crossSegments = GetBeamCrossColumns(o as ThIfcBeam);
-                if (crossSegments.Count > 0)
-                {
+                    List<Polyline> passWalls = BeamCrossWallOutlines(o);
                     ThBeamSplitter thSplitBeam = null;
                     if (o is ThIfcLineBeam thIfcLineBeam)
-                    {                        
-                        thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam, crossSegments);
+                    {
+                        thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam);
                     }
                     else if (o is ThIfcArcBeam thIfcArcBeam)
                     {
-                        thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam, crossSegments);
+                        thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam);
                     }
-                    thSplitBeam.Split();
-                    if (thSplitBeam.SplitBeams.Count > 1)
-                    {
-                        uuids.Add(o.Uuid); //记录要移除的梁UUID
-                        divideBeams.AddRange(thSplitBeam.SplitBeams);
+                    thSplitBeam.Split(passWalls);
+                    if (thSplitBeam.SplitBeams.Count > 0)
+                    {     
+                        BeamConnectRecogitionEngine.BeamEngine.Remove(o.Uuid);
+                        BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(thSplitBeam.SplitBeams);
+                        BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
                     }
+                });
+        }        
+        private void SplitBeamPassColumns()
+        {
+            BeamElements.ForEach(o =>
+            {      
+                var passColumns = BeamCrossColumnOutlines(o as ThIfcBeam);
+                ThBeamSplitter thSplitBeam = null;
+                if (o is ThIfcLineBeam thIfcLineBeam)
+                {
+                    thSplitBeam = new ThLinealBeamSplitter(thIfcLineBeam);
+                }
+                else if (o is ThIfcArcBeam thIfcArcBeam)
+                {
+                    thSplitBeam = new ThCurveBeamSplitter(thIfcArcBeam);
+                }
+                thSplitBeam.Split(passColumns);
+                if (thSplitBeam.SplitBeams.Count > 1)
+                {
+                    BeamConnectRecogitionEngine.BeamEngine.Remove(o.Uuid);
+                    BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(thSplitBeam.SplitBeams);
+                    BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
                 }
             });
-            foreach(var item in BeamElements)
-            {
-                var beam = item as ThIfcBeam;                
-            }
-            BeamElements.Where(o => uuids.IndexOf(o.Uuid) >= 0).ToList().ForEach(o => o.Outline.Dispose());
-            BeamElements = BeamElements.Where(o => uuids.IndexOf(o.Uuid) < 0).ToList();
-            BeamElements.AddRange(divideBeams);
         }
-        private List<ThSegment> GetBeamCrossColumns(ThIfcBeam thIfcBeam)
+        private List<Polyline> BeamCrossWallOutlines(ThIfcBeam thIfcBeam)
+        {
+            List<Polyline> passWalls = new List<Polyline>();
+            //搜索与梁相交的墙段
+            Polyline outline = thIfcBeam.Extend(0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
+            DBObjectCollection wallComponents = BeamConnectRecogitionEngine.SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
+            if (wallComponents.Count > 0)
+            {
+                var intersectShearWalls = BeamConnectRecogitionEngine.ShearWallEngine.FilterByOutline(wallComponents).ToList();
+                intersectShearWalls.ForEach(m => passWalls.Add(m.Outline as Polyline));
+            }
+            return passWalls;
+        }
+        private List<Polyline> BeamCrossColumnOutlines(ThIfcBeam thIfcBeam)
         {            
-            List<ThSegment> crossSegments = new List<ThSegment>();
+            List<Polyline> passColumns = new List<Polyline>();
             Polyline outline = thIfcBeam.Extend(0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
             DBObjectCollection columnComponents = BeamConnectRecogitionEngine.SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(outline);
             if (columnComponents.Count > 0)
@@ -157,10 +106,10 @@ namespace ThMEPEngineCore.Engine
                 var intersectColumns = BeamConnectRecogitionEngine.ColumnEngine.FilterByOutline(columnComponents).ToList();
                 intersectColumns.ForEach(o =>
                 {
-                    crossSegments.Add(new ThLinearSegment { Outline = o.Outline as Polyline });
+                    passColumns.Add(o.Outline as Polyline);
                 });
             }
-            return crossSegments;
+            return passColumns;
         }        
         private List<ThIfcBuildingElement> FilterBeamUnIntersectOtherBeams()
         {
@@ -187,14 +136,6 @@ namespace ThMEPEngineCore.Engine
         }        
         public void Dispose()
         {
-            foreach(var segItem in ShearWallSegDic)
-            {
-                segItem.Value.ForEach(o => o.Outline.Dispose());
-            }
-            foreach (var segItem in ColumnSegDic)
-            {
-                segItem.Value.ForEach(o => o.Outline.Dispose());
-            }
         }
     }
 }
