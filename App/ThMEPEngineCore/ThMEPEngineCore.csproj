@@ -58,6 +58,7 @@
     <Compile Include="CAD\ThGeometryTool.cs" />
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
+    <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
     <Compile Include="Engine\ThBeamBreakEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />

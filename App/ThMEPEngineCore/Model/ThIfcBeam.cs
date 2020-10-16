@@ -30,16 +30,6 @@ namespace ThMEPEngineCore.Model
         public abstract Curve Centerline();
         public abstract Polyline Extend(double length,double width);
         public abstract Polyline ExtendBoth(double startExtendLength, double endExtendLength);
-        public void Locate(Point3d startPt,Point3d endPt)
-        {
-            if ((this.StartPoint.DistanceTo(startPt) <= 10.0 &&
-                                          this.EndPoint.DistanceTo(endPt) <= 10.0) ||
-                                          (this.StartPoint.DistanceTo(endPt) <= 10.0 &&
-                                          this.EndPoint.DistanceTo(startPt) <= 10.0))
-            {
-                string debug = "";
-            }
-        }
     }
     public enum BeamComponentType
     {
