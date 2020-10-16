@@ -56,7 +56,7 @@ namespace ThMEPEngineCore.Engine
                     thIfcBeam,
                     thIfcBeam.StartPoint,
                     1.0,
-                    ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance)
+                    ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance)
                     .Cast<ThIfcLineBeam>()
                     .Where(o => IsParallel(thIfcBeam, o))
                     .Where(o => !IsOverlap(thIfcBeam, o))
@@ -67,7 +67,7 @@ namespace ThMEPEngineCore.Engine
                     thIfcBeam,
                     thIfcBeam.EndPoint,
                     1.0,
-                    ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance)
+                    ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance)
                     .Cast<ThIfcLineBeam>()
                     .Where(o => IsParallel(thIfcBeam, o))
                     .Where(o => !IsOverlap(thIfcBeam, o))
@@ -76,8 +76,8 @@ namespace ThMEPEngineCore.Engine
 
                 if (bExtendStart || bExtendEnd)
                 {
-                    double endDistance = bExtendEnd ? ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance : 0.0;
-                    double startDistance = bExtendStart ? ThMEPEngineCoreCommon.BeamIntervalMaximumTolerance : 0.0;
+                    double endDistance = bExtendEnd ? ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance : 0.0;
+                    double startDistance = bExtendStart ? ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance : 0.0;
                     BeamElements.Add(ThIfcLineBeam.Create(thIfcBeam.ExtendBoth(startDistance, endDistance)));
                 }
                 else
