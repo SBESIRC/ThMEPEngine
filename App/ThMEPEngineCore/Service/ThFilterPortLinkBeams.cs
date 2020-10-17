@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 
@@ -77,7 +78,7 @@ namespace ThMEPEngineCore.Service
         private void FilterLineBeam(ThIfcLineBeam thIfcLineBeam)
         {
             var parallelBeams = LinkedBeams.Where(o => o is ThIfcLineBeam beam &&
-            ThGeometryTool.IsLooseCollinear(thIfcLineBeam.StartPoint, thIfcLineBeam.EndPoint,
+            ThMEPNTSExtension.IsLooseCollinear(thIfcLineBeam.StartPoint, thIfcLineBeam.EndPoint,
             beam.StartPoint, beam.EndPoint)).ToList();
             if (IsStartPort)
             {
@@ -101,7 +102,7 @@ namespace ThMEPEngineCore.Service
             {
                 if (o is ThIfcLineBeam lineBeam)               
                 {
-                    if (ThGeometryTool.IsLooseCollinear(thIfcLineBeam.StartPoint, thIfcLineBeam.EndPoint, lineBeam.StartPoint, lineBeam.EndPoint))
+                    if (ThMEPNTSExtension.IsLooseCollinear(thIfcLineBeam.StartPoint, thIfcLineBeam.EndPoint, lineBeam.StartPoint, lineBeam.EndPoint))
                     {
                         if (lineBeam.StartPoint.DistanceTo(PortPt) <= ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance)
                         {
@@ -147,7 +148,7 @@ namespace ThMEPEngineCore.Service
             {
                 if (o is ThIfcLineBeam lineBeam)
                 {
-                    if(ThGeometryTool.IsLooseCollinear(PortPt, extendPt, lineBeam.StartPoint, lineBeam.EndPoint))
+                    if(ThMEPNTSExtension.IsLooseCollinear(PortPt, extendPt, lineBeam.StartPoint, lineBeam.EndPoint))
                     {
                         if (lineBeam.StartPoint.DistanceTo(PortPt) <= ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance)
                         {

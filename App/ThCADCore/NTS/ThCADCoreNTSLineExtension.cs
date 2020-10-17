@@ -1,5 +1,6 @@
 ﻿using System;
 using Autodesk.AutoCAD.Geometry;
+using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -7,14 +8,14 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSLineExtension
     {
-        public static bool CoveredBy(this Line line, Line other)
+        public static bool IsCollinear(this Line line, Line other)
         {
-            return line.ToNTSLineString().CoveredBy(other.ToNTSLineString());
-        }
-
-        public static bool CoveredBy(this Line line, Polyline other)
-        {
-            return line.ToNTSLineString().CoveredBy(other.ToNTSLineString());
+            var p1 = line.StartPoint.ToNTSCoordinate();
+            var p2 = line.EndPoint.ToNTSCoordinate();
+            var q1 = other.StartPoint.ToNTSCoordinate();
+            var q2 = other.EndPoint.ToNTSCoordinate();
+            return Orientation.Index(p1, q1, q2) == OrientationIndex.Collinear
+                && Orientation.Index(p2, q1, q2) == OrientationIndex.Collinear;
         }
 
         public static Point3d Intersection(this Line line, Polyline other)

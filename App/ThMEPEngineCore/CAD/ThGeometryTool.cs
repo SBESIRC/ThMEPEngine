@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -30,29 +29,29 @@ namespace ThMEPEngineCore.CAD
             double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
             return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
         }
-        public static bool IsLooseCollinear(Point3d firstSp, Point3d firstEp,
+        public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
         {
-            Line3d first = new Line3d(firstSp, firstEp);
-            Line3d second = new Line3d(secondSp, secondEp);
-            return first.IsColinearTo(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
-        }
-        public static bool IsLooseParallel(Point3d firstSp, Point3d firstEp,
-            Point3d secondSp, Point3d secondEp)
-        {
-            Line3d first = new Line3d(firstSp, firstEp);
-            Line3d second = new Line3d(secondSp, secondEp);
-            return first.IsParallelTo(second, ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE);
-        }
-        public static bool IsLooseOverlap(Point3d firstSp, Point3d firstEp,
-            Point3d secondSp, Point3d secondEp)
-        {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
+            Vector3d firstVec = firstSp.GetVectorTo(firstEp);
+            Vector3d secondVec = secondSp.GetVectorTo(secondEp);
+            if (firstVec.IsParallelToEx(secondVec))
             {
-                var first = new Line(firstSp, firstEp);
-                var second = new Line(secondSp, secondEp);
-                return first.Overlaps(second);
+                Vector3d otherVec;
+                if (firstSp.DistanceTo(secondEp) > 0.0)
+                {
+                    otherVec = firstSp.GetVectorTo(secondEp);
+                }
+                else
+                {
+                    otherVec = firstSp.GetVectorTo(secondSp);
+                }
+                double angle = firstVec.GetAngleTo(otherVec);
+                angle = angle / Math.PI * 180.0;
+                angle %= 180.0;
+                return (Math.Abs(angle) <= ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) 
+                    || Math.Abs(angle - 180.0) <= ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE;
             }
+            return false;
         }
         public static Point3d GetMidPt(this Point3d pt1, Point3d pt2)
         {
@@ -103,7 +102,7 @@ namespace ThMEPEngineCore.CAD
             while (doMark)
             {
                 Point3d otherPt = ray.BasePoint + ray.UnitDir.MultiplyBy(100.0);
-                if (linesegments.Where(o => ThGeometryTool.IsLooseCollinear(
+                if (linesegments.Where(o => IsCollinearEx(
                      ray.BasePoint, otherPt, o.StartPoint, o.EndPoint)).Any())
                 {
                     Matrix3d mt = Matrix3d.Rotation(increAng, Vector3d.ZAxis, pt);
