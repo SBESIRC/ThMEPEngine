@@ -68,6 +68,7 @@
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
+    <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
     <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />

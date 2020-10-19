@@ -1,12 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using ThCADExtension;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -64,11 +62,16 @@ namespace ThMEPEngineCore.Engine
                 extendEngine.Extend();
                 SyncBeamSpatialIndex();
 
+                // 梁到梁的Join
+                var joinEngine = new ThJoinBeamEngine(this);
+                joinEngine.Join();
+                SyncBeamSpatialIndex();
+
                 // 梁的合并
                 var mergeEngine = new ThMergeBeamEngine(this);
                 mergeEngine.Merge();
                 SyncBeamSpatialIndex();
-               
+
                 // 按柱，墙分割梁
                 ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(this);
                 thSplitBeams.Split();
@@ -141,7 +144,7 @@ namespace ThMEPEngineCore.Engine
             BeamEngine.Elements.ForEach(o =>
             {
                 if (o is ThIfcBeam thIfcBeam)
-                {                    
+                {
                     SingleBeamLinks.Add(CreateSingleBeamLink(thIfcBeam));
                 }
             });
@@ -176,7 +179,7 @@ namespace ThMEPEngineCore.Engine
             SingleBeamLinks = SingleBeamLinks.Where(o => o.Beam.Uuid != thIfcBeam.Uuid).ToList();
         }
         public void AddSingleBeamLink(ThIfcBeam thIfcBeam)
-        {            
+        {
             SingleBeamLinks.Add(CreateSingleBeamLink(thIfcBeam));
         }
         private void FindSingleBeamLinkTwoVerComponent()
@@ -235,7 +238,7 @@ namespace ThMEPEngineCore.Engine
         {
             //次梁：两端搭在主梁、半主梁、悬挑柱梁上的梁
             ThBeamBreakEngine thBeamBreakEngine = new ThBeamBreakEngine(OverhangingPrimaryBeamLinks, this);
-            thBeamBreakEngine.Break();            
+            thBeamBreakEngine.Break();
             List<ThIfcBuildingElement> unPrimaryBeams = FilterUndefinedBeams(BeamEngine.Elements).ToList();
             ThSecondaryBeamLinkExtension thSecondaryBeamLinkExtension =
                 new ThSecondaryBeamLinkExtension(unPrimaryBeams, PrimaryBeamLinks, HalfPrimaryBeamLinks, OverhangingPrimaryBeamLinks)

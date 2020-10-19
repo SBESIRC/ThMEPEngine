@@ -13,7 +13,7 @@ using ThMEPEngineCore.BeamInfo.Business;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThSnapBeamEngine
+    public class ThSnapBeamEngine : ThBuildingElementPreprocessEngine
     {
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
         private ThBeamLinkExtension ThBeamLinkEx;

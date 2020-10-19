@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThSplitBeamEngine:IDisposable
+    public class ThSplitBeamEngine : ThBuildingElementPreprocessEngine
     {
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
 
