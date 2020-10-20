@@ -40,7 +40,7 @@ namespace ThMEPEngineCore
         public static Matrix3d GetGridMatrix(Vector3d xDir)
         {
             Vector3d longDir = xDir;
-            Vector3d shortDir = longDir.CrossProduct(Vector3d.ZAxis);
+            Vector3d shortDir = Vector3d.ZAxis.CrossProduct(longDir);
 
             Matrix3d matrix = new Matrix3d(new double[]{
                     longDir.X, shortDir.X, Vector3d.ZAxis.X, 0,

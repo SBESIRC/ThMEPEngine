@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
@@ -48,7 +49,12 @@ namespace ThMEPWSS.Service
 
         private static double CalRotateAngle()
         {
-            return xDir.GetAngleTo(Vector3d.XAxis);
+            var angle = xDir.GetAngleTo(Vector3d.XAxis);
+            if (Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis.Y < 0)
+            {
+                angle = -angle;
+            }
+            return angle;
         }
     }
 }

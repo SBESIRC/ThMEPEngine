@@ -18,11 +18,12 @@ namespace ThMEPWSS.Bussiness
     {
         readonly double minSpacing = 400;
         readonly double moveLength = 100;
+        public bool tempRes = true;  //临时测试用
 
-        public void CheckBoundarySprays(Polyline polyline, List<SprayLayoutData> sprays, double length)
+        public void CheckBoundarySprays(Polyline polyline, List<SprayLayoutData> sprays, double length, double minLength)
         {
             var bSprays = GetBoundarySpray(polyline, sprays, length);
-            AdjustSprayLine(bSprays, length / 2, sprays);
+            AdjustSprayLine(bSprays, sprays, length / 2, minLength);
         }
 
         /// <summary>
@@ -30,7 +31,7 @@ namespace ThMEPWSS.Bussiness
         /// </summary>
         /// <param name="sprays"></param>
         /// <param name="maxSpacing"></param>
-        public void AdjustSprayLine(Dictionary<Line, List<SprayLayoutData>> sprays, double maxSpacing, List<SprayLayoutData> allSprays)
+        public void AdjustSprayLine(Dictionary<Line, List<SprayLayoutData>> sprays, List<SprayLayoutData> allSprays, double maxSpacing, double minLength)
         {
             while (sprays.Count > 0)
             {
@@ -94,10 +95,12 @@ namespace ThMEPWSS.Bussiness
                     var thisLine = firSpray.Value.First().GetOtherPolylineByDir(moveDir.Value);
                     var moveLine = thisLine.MovePolyline(moveLength, moveDir.Value);
                     var resSprays = allSprays.Where(x => x.tLine == thisLine || x.vLine == thisLine).ToList();
-                    if (CheckMoveLineSpcing(resSprays, moveDir.Value, moveLine, maxSpacing * 2) &&
-                        CheckLegalityWithBoundary(sprayLst.Select(x => x.Key).ToList(), moveLine, maxSpacing))
+                    if (CheckLegalityWithBoundary(sprayLst.Select(x => x.Key).ToList(), moveLine, maxSpacing))
                     {
-                        SprayDataOperateService.UpdateSpraysLine(allSprays, thisLine, moveLine);
+                        if (CheckMoveLineSpcing(allSprays, resSprays, moveDir.Value, moveLine, maxSpacing * 2, minLength, tempRes))
+                        {
+                            SprayDataOperateService.UpdateSpraysLine(allSprays, thisLine, moveLine);
+                        }
                     }
 
                     using (AcadDatabase acdb = AcadDatabase.Active())
@@ -118,30 +121,85 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveLine"></param>
         /// <param name="maxLength"></param>
         /// <returns></returns>
-        private bool CheckMoveLineSpcing(List<SprayLayoutData> sprays, Vector3d moveDir, Line moveLine, double maxLength)
+        private bool CheckMoveLineSpcing(List<SprayLayoutData> allSprays, List<SprayLayoutData> sprays, Vector3d moveDir, Line moveLine, double maxLength, double minLength, bool isAdjust)
         {
+            Dictionary<Line, Line> matterLines = new Dictionary<Line, Line>();
             foreach (var spray in sprays)
             {
                 var nextLine = spray.GetOtherNextPolylineByDir(moveDir);
                 if (nextLine != null)
                 {
-                    if (moveLine.IndexedDistance(nextLine) > maxLength)
+                    double distance = moveLine.IndexedDistance(nextLine);
+                    if (distance > maxLength || distance < minLength)
                     {
-                        return false;
+                        var dir = (nextLine.StartPoint - moveLine.StartPoint).GetNormal().DotProduct(moveDir) > 0 ? -moveDir : moveDir;
+                        dir = distance < minLength ? -dir : dir;
+                        if (isAdjust && MoveAdjacentPolyline(allSprays, nextLine, dir, distance, maxLength, minLength, out Line mLine))
+                        {
+                            if (!matterLines.Keys.Contains(nextLine))
+                            {
+                                matterLines.Add(nextLine, mLine);
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     }
                 }
 
                 var prevLine = spray.GetOtherPrePolylineByDir(moveDir);
                 if (prevLine != null)
                 {
-                    if (moveLine.IndexedDistance(prevLine) > maxLength)
+                    double distance = moveLine.IndexedDistance(prevLine);
+                    if (distance > maxLength || distance < minLength)
                     {
-                        return false;
+                        var dir = (prevLine.StartPoint - moveLine.StartPoint).GetNormal().DotProduct(moveDir) > 0 ? -moveDir : moveDir;
+                        dir = distance < minLength ? -dir : dir;
+                        if (isAdjust && MoveAdjacentPolyline(allSprays, prevLine, dir, distance, maxLength, minLength, out Line mLine))
+                        {
+                            if (!matterLines.Keys.Contains(prevLine))
+                            {
+                                matterLines.Add(prevLine, mLine);
+                            }
+                        }
+                        else
+                        {
+                            return false;
+                        }
                     }
                 }
             }
-            
+
+            foreach (var lineDic in matterLines)
+            {
+                SprayDataOperateService.UpdateSpraysLine(allSprays, lineDic.Key, lineDic.Value);
+            }
             return true;
+        }
+
+        /// <summary>
+        /// 移动相邻喷淋线
+        /// </summary>
+        /// <param name="allSprays"></param>
+        /// <param name="thisLine"></param>
+        /// <param name="moveDir"></param>
+        /// <param name="moveLength"></param>
+        /// <param name="maxLength"></param>
+        /// <param name="mLine"></param>
+        /// <returns></returns>
+        private bool MoveAdjacentPolyline(List<SprayLayoutData> allSprays, Line thisLine, Vector3d moveDir, double moveLength, double maxLength, double minLength, out Line mLine)
+        {
+            mLine = null;
+            var resSprays = allSprays.Where(x => x.tLine == thisLine || x.vLine == thisLine).ToList();
+            var moveLine = thisLine.MovePolyline(moveLength - maxLength, moveDir);
+            if(CheckMoveLineSpcing(allSprays, resSprays, moveDir, moveLine, maxLength, minLength, false))
+            {
+                mLine = moveLine;
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -232,6 +290,11 @@ namespace ThMEPWSS.Bussiness
             Dictionary<Line, List<SprayLayoutData>> sprayDic = new Dictionary<Line, List<SprayLayoutData>>(); 
             foreach (var line in lines)
             {
+                if (line.Length <= 300)
+                {
+                    continue;
+                }
+
                 var linePoly = expandLine(line, length);
                 var resSprays = GetSprays(line, linePoly, sprays);
                 if (resSprays.Count > 0)

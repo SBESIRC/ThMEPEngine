@@ -65,5 +65,22 @@ namespace ThMEPWSS.Utils
             var endPt = line.EndPoint + moveDir * length;
             return new Line(startPt, endPt);
         }
+
+        /// <summary>
+        /// 判断是否是同一根线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="otherLine"></param>
+        /// <returns></returns>
+        public static bool IsSameLine(this Line line, Line otherLine)
+        {
+            if (line == null || otherLine == null)
+            {
+                return false;
+            }
+
+            return (line.StartPoint.IsEqualTo(otherLine.StartPoint) && line.EndPoint.IsEqualTo(otherLine.EndPoint))
+               || (line.EndPoint.IsEqualTo(otherLine.StartPoint) && line.StartPoint.IsEqualTo(otherLine.EndPoint));
+        }
     }
 }

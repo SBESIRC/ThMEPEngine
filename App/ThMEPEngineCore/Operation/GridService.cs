@@ -39,14 +39,14 @@ namespace ThMEPEngineCore.Operation
                 foreach (var fGird in firGrids.Value)
                 {
                     var rotateGrid = fGird.Clone() as Polyline;
-                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
+                    rotateGrid.Rotate(Point3d.Origin, -rotateAngle);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);
                 }
                 foreach (var sGird in secGrids.Value)
                 {
                     var rotateGrid = sGird.Clone() as Polyline;
-                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
+                    rotateGrid.Rotate(Point3d.Origin, -rotateAngle);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);
                 }
@@ -179,14 +179,12 @@ namespace ThMEPEngineCore.Operation
             List<Polyline> removePolys = new List<Polyline>();
             while (index < gridLines.Count)
             {
-                if (indexJ >= gridLines.Count)
+                if (indexJ >= gridLines.Count || gridLines.Count <= 2)
                 {
                     break;
                 }
                 var poly = gridLines[index];
                 var nextPoly = gridLines[indexJ];
-                var sPt = poly.GetPoint3dAt(0);
-                var closetPt = nextPoly.GetClosestPointTo(sPt, false);
 
                 if (poly.Distance(nextPoly) < minSpace)
                 {

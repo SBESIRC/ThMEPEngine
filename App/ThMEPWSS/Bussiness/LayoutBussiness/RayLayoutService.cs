@@ -23,6 +23,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double raduisLength = 1800;
         protected readonly double moveLength = 200;
         protected readonly double spacing = 100;
+        public bool tempRes = true;  //临时测试使用
         
         public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, Vector3d xDir, double gridSpacing, bool CreateLine = true)
         {
@@ -38,13 +39,17 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 
             //边界保护
             CheckProtectService checkProtectService = new CheckProtectService();
-            checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength);
+            checkProtectService.tempRes = tempRes;
+            checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
 
             ////躲次梁
             //AvoidBeamService beamService = new AvoidBeamService();
             //beamService.AvoidBeam(polyline, sprays);
 
-            var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays);
+            var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays)
+                .SelectMany(x => polyline.Trim(x).Cast<Polyline>()
+                .Select(y => new Line(y.StartPoint, y.EndPoint))
+                .ToList()).ToList();
             RotateTransformService.RotateInverseLines(sprayLines);
             if (CreateLine)
             {
@@ -122,10 +127,11 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             AdjustmentLayoutLines(resTLines, sp);
             AdjustmentLayoutLines(resVLines, sp);
 
-            tLines = resTLines.Select(x => polyline.Trim(x).Cast<Polyline>()
+            var sPolyline = polyline.Buffer(-1)[0] as Polyline;
+            tLines = resTLines.Select(x => sPolyline.Trim(x).Cast<Polyline>()
                 .Select(y => new Line(y.StartPoint, y.EndPoint))
                 .ToList()).ToList();
-            vLines = resVLines.Select(x => polyline.Trim(x).Cast<Polyline>()
+            vLines = resVLines.Select(x => sPolyline.Trim(x).Cast<Polyline>()
                 .Select(y => new Line(y.StartPoint, y.EndPoint))
                 .ToList()).ToList();
         }
@@ -211,8 +217,11 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 sLongValue.Add(minX);
                 eLongValue.Add(maxX);
             }
-            eLongValue.RemoveAt(0);
-            sLongValue.RemoveAt(sLongValue.Count - 1);
+            if (eLongValue.Count > 1)
+            {
+                eLongValue.RemoveAt(0);
+                sLongValue.RemoveAt(sLongValue.Count - 1);
+            }
 
             List<double> sShortValue = new List<double>();
             List<double> eShortValue = new List<double>();
@@ -230,8 +239,11 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 sShortValue.Add(maxY);
                 eShortValue.Add(minY);
             }
-            sShortValue.RemoveAt(0);
-            eShortValue.RemoveAt(eShortValue.Count - 1);
+            if (sShortValue.Count > 1)
+            {
+                sShortValue.RemoveAt(0);
+                eShortValue.RemoveAt(eShortValue.Count - 1);
+            }
 
             return new List<List<double>>() { sLongValue, eLongValue, sShortValue, eShortValue };
         }

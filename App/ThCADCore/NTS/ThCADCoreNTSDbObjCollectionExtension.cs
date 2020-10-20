@@ -113,6 +113,11 @@ namespace ThCADCore.NTS
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
+            if (curves.Count <= 0)
+            {
+                return curves;
+            }
+
             var objs = new DBObjectCollection();
             var result = CascadedPolygonUnion.Union(curves.ToNTSPolygons().ToArray());
             if (result is Polygon bufferPolygon)

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPWSS.Model;
+using ThMEPWSS.Utils;
 
 namespace ThMEPWSS.Service
 {
@@ -340,16 +341,16 @@ namespace ThMEPWSS.Service
         /// <param name="newLine"></param>
         public static void UpdateSpraysLine(List<SprayLayoutData> sprays, Line originLine, Line newLine)
         {
-            var resSprays = sprays.Where(x => x.tLine == originLine || x.vLine == originLine).ToList();
-            var resPreSprays = sprays.Where(x => x.prevTLine == originLine || x.prevVLine == originLine).ToList();
-            var resNextSprays = sprays.Where(x => x.nextTLine == originLine || x.nextVLine == originLine).ToList();
+            var resSprays = sprays.Where(x => x.tLine.IsSameLine(originLine) || x.vLine.IsSameLine(originLine)).ToList();
+            var resPreSprays = sprays.Where(x => x.prevTLine.IsSameLine(originLine) || x.prevVLine.IsSameLine(originLine)).ToList();
+            var resNextSprays = sprays.Where(x => x.nextTLine.IsSameLine(originLine) || x.nextVLine.IsSameLine(originLine)).ToList();
             foreach (var spray in resSprays)
             {
                 Point3dCollection points = new Point3dCollection();
-                if (spray.vLine == originLine) 
+                if (spray.vLine.IsSameLine(originLine))
                 {
-                    var preSpray = resPreSprays.Where(x => x.tLine == spray.tLine).FirstOrDefault();
-                    var nextSpray = resNextSprays.Where(x => x.tLine == spray.tLine).FirstOrDefault();
+                    var preSpray = resPreSprays.Where(x => x.tLine.IsSameLine(spray.tLine)).FirstOrDefault();
+                    var nextSpray = resNextSprays.Where(x => x.tLine.IsSameLine(spray.tLine)).FirstOrDefault();
                     spray.tLine.IntersectWith(originLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
                     if (points.Count > 0)
                     {
@@ -366,10 +367,10 @@ namespace ThMEPWSS.Service
                     }
                 }
 
-                if (spray.tLine == originLine)
+                if (spray.tLine.IsSameLine(originLine))
                 {
-                    var preSpray = resPreSprays.Where(x => x.vLine == spray.vLine).FirstOrDefault();
-                    var nextSpray = resNextSprays.Where(x => x.vLine == spray.vLine).FirstOrDefault();
+                    var preSpray = resPreSprays.Where(x => x.vLine.IsSameLine(spray.vLine)).FirstOrDefault();
+                    var nextSpray = resNextSprays.Where(x => x.vLine.IsSameLine(spray.vLine)).FirstOrDefault();
                     spray.vLine.IntersectWith(originLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
                     if (points.Count > 0)
                     {
