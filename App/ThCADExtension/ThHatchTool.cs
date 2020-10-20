@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -8,10 +9,11 @@ namespace ThCADExtension
 {
     public static class ThHatchTool
     {
+        // https://forums.autodesk.com/t5/net/restore-hatch-boundaries-if-they-have-been-lost-with-net/td-p/3779514
         // https://adndevblog.typepad.com/autocad/2012/04/perimeter-of-a-hatch-using-objectarx-and-autocad-net-api.html
-        public static List<Polyline> ToPolylines(this Hatch hatch)
+        public static List<Curve> Boundaries(this Hatch hatch)
         {
-            var plines = new List<Polyline>();
+            var curves = new List<Curve>();
             for (int index = 0; index < hatch.NumberOfLoops; index++)
             {
                 var hatchLoop = hatch.GetLoopAt(index);
@@ -23,11 +25,20 @@ namespace ThCADExtension
                     {
                         pline.AddVertexAt(i, vertices[i].Vertex, vertices[i].Bulge, 0, 0);
                     }
-                    plines.Add(pline);
+                    curves.Add(pline);
                 }
                 else
                 {
-                    Plane plane = hatch.GetPlane();
+                    // 单独处理圆的情况
+                    if (hatchLoop.Curves.Count == 1
+                        && hatchLoop.Curves[0].IsClosed()
+                        && hatchLoop.Curves[0] is CircularArc2d circularArc)
+                    {
+                        curves.Add(circularArc.ToCircle());
+                        continue;
+                    }
+
+                    // 暂时只处理线和圆弧组合的情况
                     var segments = new PolylineSegmentCollection();
                     foreach (Curve2d cv in hatchLoop.Curves)
                     {
@@ -43,25 +54,30 @@ namespace ThCADExtension
                         {
                             segments.Add(new PolylineSegment(arc2d));
                         }
-                        else if (ellipse2d != null)
-                        {
-                            NurbCurve2d nurbCurve = new NurbCurve2d(ellipse2d);
-                            segments.AddRange(nurbCurve.ToPolylineSegments(plane));
-                        }
-                        else if (spline2d != null)
-                        {
-                            segments.AddRange(spline2d.ToPolylineSegments(plane));
-                        }
                         else
                         {
                             throw new NotSupportedException();
                         }
+                        //else if (ellipse2d != null)
+                        //{
+                        //    var eclipse = ellipse2d.ToCurve();
+                        //    segments.AddRange(new PolylineSegmentCollection(eclipse));
+                        //}
+                        //else if (spline2d != null)
+                        //{
+                        //    var poly = spline2d.ToCurve().ToPolyline() as Polyline;
+                        //    segments.AddRange(new PolylineSegmentCollection(poly));
+                        //}
+                        //else
+                        //{
+                        //    throw new NotSupportedException();
+                        //}
                     }
                     segments.Join();
-                    plines.Add(segments.ToPolyline());
+                    curves.Add(segments.ToPolyline());
                 }
             }
-            return plines;
+            return curves;
         }
     }
 }

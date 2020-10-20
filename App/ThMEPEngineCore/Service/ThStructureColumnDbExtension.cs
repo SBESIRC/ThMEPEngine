@@ -80,24 +80,33 @@ namespace ThMEPEngineCore.Service
                                 if (IsBuildElement(hatch) && CheckLayerValid(hatch))
                                 {
                                     // 暂时不支持有“洞”的填充
-                                    var polys = hatch.ToPolylines();
-                                    polys.ForEachDbObject(o =>
+                                    hatch.Boundaries().ForEachDbObject(o =>
                                     {
-                                        // 设计师会为矩形柱使用非比例的缩放
-                                        // 从而获得不同形状的矩形柱
-                                        // 考虑到多段线不能使用非比例的缩放
-                                        // 这里采用一个变通方法：
-                                        //  将矩形柱转化成实线，缩放后再转回多段线
-                                        if (o.IsRectangle())
+                                        if (o is Polyline poly)
                                         {
-                                            var solid = o.ToSolid();
-                                            solid.TransformBy(matrix);
-                                            curves.Add(solid.ToPolyline());
+                                            // 设计师会为矩形柱使用非比例的缩放
+                                            // 从而获得不同形状的矩形柱
+                                            // 考虑到多段线不能使用非比例的缩放
+                                            // 这里采用一个变通方法：
+                                            //  将矩形柱转化成实线，缩放后再转回多段线
+                                            if (poly.IsRectangle())
+                                            {
+                                                var solid = poly.ToSolid();
+                                                solid.TransformBy(matrix);
+                                                curves.Add(solid.ToPolyline());
+                                            }
+                                            else
+                                            {
+                                                poly.TransformBy(matrix);
+                                                curves.Add(poly);
+                                            }
                                         }
-                                        else
+                                        else if (o is Circle circle)
                                         {
-                                            o.TransformBy(matrix);
-                                            curves.Add(o);
+                                            // 圆形柱
+                                            var polyCircle = circle.ToPolyCircle();
+                                            polyCircle.TransformBy(matrix);
+                                            curves.Add(polyCircle);
                                         }
                                     });
                                 }

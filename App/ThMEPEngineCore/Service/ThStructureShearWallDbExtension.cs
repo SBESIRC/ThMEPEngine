@@ -78,9 +78,11 @@ namespace ThMEPEngineCore.Service
                                 if (IsBuildElement(hatch) && CheckLayerValid(hatch))
                                 {
                                     // 暂时不支持有“洞”的填充
-                                    var polys = hatch.ToPolylines();
-                                    polys.ForEachDbObject(o => o.TransformBy(matrix));
-                                    curves.AddRange(polys);
+                                    hatch.Boundaries().ForEachDbObject(o =>
+                                    {
+                                        o.TransformBy(matrix);
+                                        curves.Add(o);
+                                    });
                                 }
                             }
                             else if (dbObj is Solid solid)
