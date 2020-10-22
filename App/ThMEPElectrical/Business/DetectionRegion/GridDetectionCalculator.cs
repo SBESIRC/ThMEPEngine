@@ -93,6 +93,9 @@ namespace ThMEPElectrical.Business
                     return true;
             }
 
+            if (firPoly.Intersects(secPoly))
+                return true;
+
             return false;
         }
     }

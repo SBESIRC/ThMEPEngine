@@ -138,6 +138,9 @@ namespace ThMEPElectrical.Business.MainBeam
 
             // 计算最大水平间隔
             var horizontalMaxGap = m_parameter.ProtectArea / 4.0 / verticalA * 2;
+            var extremalMaxGap = Math.Sqrt(Math.Pow(m_parameter.ProtectRadius, 2) - Math.Pow(verticalA, 2)) * 2;
+            if (horizontalMaxGap > extremalMaxGap)
+                horizontalMaxGap = extremalMaxGap;
 
             // 左下顶点
             var leftBottomPtCircle = new Circle(leftBottomPt, Vector3d.ZAxis, vertexProtectRadius);
@@ -189,7 +192,33 @@ namespace ThMEPElectrical.Business.MainBeam
                 placePoints = PlacePointAdjustor.MakePlacePointAdjustor(placePoints, validMidLine, ShapeConstraintType.NONREGULARSHAPE);
             }
 
-            return placePoints;
+            return CalculateRegionPoints(placeRectInfo.srcPolyline, placePoints);
+        }
+
+        private List<Point3d> CalculateRegionPoints(Polyline srcPoly, List<Point3d> pts)
+        {
+            // 计算内轮廓和偏移计算
+            var resProfiles = new List<Polyline>();
+            foreach (Polyline offsetPoly in srcPoly.Buffer(ThMEPCommon.ShrinkDistance))
+                resProfiles.Add(offsetPoly);
+
+            var mainBeamRegion = new MainSecondBeamRegion(resProfiles, pts);
+            List<Point3d> resPts;
+
+            if (pts.Count == 1)
+            {
+                resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.SINGLEPLACE);
+            }
+            else if (pts.Count == 2)
+            {
+                resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.MEDIUMPLACE);
+            }
+            else
+            {
+                resPts = pts;
+            }
+
+            return resPts;
         }
 
         private Line CalculateMidLine(Line first, Polyline sec)
