@@ -128,7 +128,7 @@ namespace ThMEPElectrical.CAD
                     secondBeamInfo.Beams.ForEach(singleBeamInfo =>
                     {
                         if (singleBeamInfo.Outline is Polyline secondBeamPoly)
-                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(secondBeamPoly, singleBeamInfo.Height));
+                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(secondBeamPoly, singleBeamInfo.Height - ThMEPCommon.StoreyHeight));
                     });
                 });
 
@@ -138,7 +138,7 @@ namespace ThMEPElectrical.CAD
                     halfBeamInfo.Beams.ForEach(singleHalfBeam =>
                     {
                         if (singleHalfBeam.Outline is Polyline halfBeamPoly)
-                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(halfBeamPoly, singleHalfBeam.Height));
+                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(halfBeamPoly, singleHalfBeam.Height - ThMEPCommon.StoreyHeight));
                     });
                 });
             }

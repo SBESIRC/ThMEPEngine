@@ -76,6 +76,8 @@ namespace ThMEPElectrical.Core
 
             // 用户选择
             var wallPolylines = EntityPicker.MakeUserPickEntities();
+            if (wallPolylines.Count == 0)
+                return inputProfileDatas;
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow);
@@ -238,6 +240,8 @@ namespace ThMEPElectrical.Core
                 return inputProfileDatas;
 
             var wallPolylines = EntityPicker.MakeUserPickEntities();
+            if (wallPolylines.Count == 0)
+                return inputProfileDatas;
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow);
@@ -254,6 +258,7 @@ namespace ThMEPElectrical.Core
 
                 //轴网线
                 var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
+                gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
@@ -277,6 +282,8 @@ namespace ThMEPElectrical.Core
             if (preWindow == null)
                 return;
             var wallPolylines = EntityPicker.MakeUserPickEntities();
+            if (wallPolylines.Count == 0)
+                return;
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow);
@@ -287,19 +294,64 @@ namespace ThMEPElectrical.Core
             foreach (var poly in wallPolylines)
             {
                 var wallPtCollection = poly.Vertices();
-                DrawUtils.DrawProfile(infoReader.Columns.Polylines2Curves(), "validColumns");
                 var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
                 var gridCalculator = new GridService();
 
-                //DrawUtils.DrawProfile(validColumns.Polylines2Curves(), "validColumns");
+                DrawUtils.DrawProfile(validColumns.Polylines2Curves(), "validColumns");
                 //轴网线
                 var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
+                gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
             }
         }
 
+        public List<KeyValuePair<Vector3d, List<Polyline>>> BothExtendPolys(List<KeyValuePair<Vector3d, List<Polyline>>> gridInfo)
+        {
+            var resGridInfos = new List<KeyValuePair<Vector3d, List<Polyline>>>();
+            if (gridInfo.Count == 0)
+                return resGridInfos;
+
+            for (int i = 0; i < gridInfo.Count; i++)
+            {
+                var pairData = gridInfo[i];
+                var polys = pairData.Value;
+                var resPolys = new List<Polyline>();
+                foreach (var poly in polys)
+                {
+                    var firstPoint = poly.GetPoint2dAt(0);
+                    var lastPoint = poly.GetPoint2dAt(poly.NumberOfVertices - 1);
+                    var extend = (lastPoint - firstPoint).GetNormal() * ThMEPCommon.GridPolyExtendLength;
+                    var resfirstPoint = firstPoint - extend;
+                    
+                    var reslastPoint = lastPoint + extend;
+
+                    var resPoly = new Polyline();
+                    for (int j = 0; j < poly.NumberOfVertices; j++)
+                    {
+                        if (j == 0)
+                        {
+                            resPoly.AddVertexAt(j, resfirstPoint, 0, 0, 0);
+                        }
+                        else if (j == poly.NumberOfVertices - 1)
+                        {
+                            resPoly.AddVertexAt(j, reslastPoint, 0, 0, 0);
+                        }
+                        else
+                        {
+                            resPoly.AddVertexAt(j, poly.GetPoint2dAt(j), 0, 0, 0);
+                        }
+                    }
+
+                    resPolys.Add(resPoly);
+                }
+
+                resGridInfos.Add(new KeyValuePair<Vector3d, List<Polyline>>(pairData.Key, resPolys));
+            }
+
+            return resGridInfos;
+        }
 
         /// <summary>
         /// 计算梁吊顶的信息
@@ -313,11 +365,12 @@ namespace ThMEPElectrical.Core
                 return inputProfileDatas;
             // 用户选择
             var wallPolylines = EntityPicker.MakeUserPickEntities();
+            if (wallPolylines.Count == 0)
+                return inputProfileDatas;
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow);
             infoReader.Do();
-
 
             var gridPolys = new List<Polyline>();
 
@@ -338,6 +391,7 @@ namespace ThMEPElectrical.Core
 
                 //轴网线
                 var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
+                gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "tet");
