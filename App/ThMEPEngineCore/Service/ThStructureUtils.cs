@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Service
             }
 
             // 未绑定外参
-            if (xrefLayer.Matches("|"))
+            if (Regex.IsMatch(xrefLayer, "|"))
             {
                 return xrefLayer.Substring(xrefLayer.LastIndexOf('|') + 1);
             }
