@@ -1,8 +1,8 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
@@ -32,9 +32,15 @@ namespace ThMEPEngineCore.Engine
                     other.EndPoint);
         }
 
+        protected bool SameWidth(ThIfcLineBeam beam, ThIfcLineBeam other)
+        {
+            return Math.Abs(beam.Width - other.Width) <= ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE.EqualPoint;
+        }
+
         protected List<ThIfcLineBeam> MergeBeams(List<ThIfcLineBeam> beams)
         {
             var results = new List<ThIfcLineBeam>();
+            var height = beams.Max(o => o.Height);
             beams.Select(o => o.Outline)
                 .ToCollection()
                 .LooseBoundaries()
@@ -42,7 +48,7 @@ namespace ThMEPEngineCore.Engine
                 .ForEachDbObject(o =>
                 {
                     var rectangle = o.GetMinimumRectangle();
-                    results.Add(ThIfcLineBeam.Create(rectangle, beams.First().Height));
+                    results.Add(ThIfcLineBeam.Create(rectangle, height));
                 });
             return results;
         }

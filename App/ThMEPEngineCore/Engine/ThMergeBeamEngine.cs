@@ -57,6 +57,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 var beams = BeamEngine.FilterByOutline(objs)
                     .Cast<ThIfcLineBeam>()
+                    .Where(o => SameWidth(beam, o))
                     .Where(o => IsCollinear(beam, o))
                     .Where(o => IsOverlap(beam, o));
                 if (beams.Count() == 1)
