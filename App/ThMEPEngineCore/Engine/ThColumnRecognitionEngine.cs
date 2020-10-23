@@ -1,7 +1,10 @@
 ﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
@@ -39,8 +42,8 @@ namespace ThMEPEngineCore.Engine
                 {
                     curves = columnDbExtension.ColumnCurves;
                 }
-                List<Curve> columnOutlines = PrecessColumn(curves);
-                columnOutlines.ForEach(o => Elements.Add(ThIfcColumn.CreateColumnEntity(o)));
+                curves.ToCollection().UnionPolygons().Cast<Curve>()
+                    .ForEach(o => Elements.Add(ThIfcColumn.CreateColumnEntity(o)));
             }
         }
         private List<Curve> PrecessColumn(List<Curve> curves)
