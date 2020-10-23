@@ -43,7 +43,7 @@ namespace ThMEPEngineCore.Engine
             var height = beams.Max(o => o.Height);
             beams.Select(o => o.Outline)
                 .ToCollection()
-                .LooseBoundaries()
+                .LooseUnion()
                 .Cast<Polyline>()
                 .ForEachDbObject(o =>
                 {

@@ -28,11 +28,11 @@ namespace ThMEPEngineCore.Algorithm
             }
         }
 
-        public static DBObjectCollection LooseBoundaries(this DBObjectCollection objs)
+        public static DBObjectCollection LooseUnion(this DBObjectCollection objs)
         {
             using (var ov = new ThCADCoreNTSFixedPrecision())
             {
-                return objs.Boundaries();
+                return objs.UnionPolygons();
             }
         }
     }
