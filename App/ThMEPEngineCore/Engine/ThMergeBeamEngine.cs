@@ -1,6 +1,5 @@
 ﻿using System;
 using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
@@ -32,7 +31,7 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        private ThBeamRecognitionEngine BeamEngine
+        private ThBuildingElementRecognitionEngine BeamEngine
         {
             get
             {
@@ -85,15 +84,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 else
                 {
-                    using (var ov = new ThCADCoreNTSFixedPrecision())
-                    {
-                        var outlines = group.Select(o => o.Outline).ToCollection().Boundaries();
-                        outlines.Cast<Polyline>().ForEachDbObject(o =>
-                        {
-                            var rectangle = o.GetMinimumRectangle();
-                            BeamElements.Add(ThIfcLineBeam.Create(rectangle));
-                        });
-                    }
+                    BeamElements.AddRange(MergeBeams(group.ToList()));
                 }
             }
             BeamEngine.Elements = BeamElements;

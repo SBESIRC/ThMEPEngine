@@ -1,4 +1,5 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
@@ -8,15 +9,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public abstract class ThBuildingElementRecognitionEngine
+    public abstract class ThBuildingElementRecognitionEngine : IDisposable
     {
-        /// <summary>
-        /// 从图纸中提取出来的对象的集合
-        /// </summary>
         public List<ThIfcBuildingElement> Elements { get; set; }
-        /// <summary>
-        /// 几何图元集合
-        /// </summary>
         public DBObjectCollection Geometries
         {
             get
@@ -24,9 +19,12 @@ namespace ThMEPEngineCore.Engine
                 return Elements.Select(e => e.Outline).ToCollection();
             }
         }
-        protected ThBuildingElementRecognitionEngine()
+        public ThBuildingElementRecognitionEngine()
         {
             Elements = new List<ThIfcBuildingElement>();
+        }
+        public void Dispose()
+        {
         }
         public abstract void Recognize(Database database, Point3dCollection polygon);
         public IEnumerable<ThIfcBuildingElement> FilterByOutline(DBObjectCollection objs)
@@ -50,10 +48,6 @@ namespace ThMEPEngineCore.Engine
             var objs = Geometries.Cast<DBObject>();
             var siObjs = spatialIndex.Geometries.Values;
             Elements = Elements.Where(o => siObjs.Contains(o.Outline)).ToList();
-        }
-        public void Remove(string uuid)
-        {
-            Elements = Elements.Where(o => o.Uuid != uuid).ToList();
         }
     }
 }

@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
@@ -173,7 +174,7 @@ namespace ThMEPWSS.Bussiness
         {
             List<ThIfcBeam> beams = new List<ThIfcBeam>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
+            using (var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine())
             {
                 beamEngine.Recognize(Active.Database, polyline.Vertices());
 

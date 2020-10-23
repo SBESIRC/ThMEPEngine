@@ -60,7 +60,7 @@ namespace ThMEPEngineCore
         public void ThExtractBeam()
         {
             using (var acadDatabase = AcadDatabase.Active())
-            using (var beamEngine = new ThBeamRecognitionEngine())
+            using (var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -237,7 +237,15 @@ namespace ThMEPEngineCore
             DBText dbText = new DBText();
             dbText.TextString = message;
             dbText.Position = ThGeometryTool.GetMidPt(thIfcBeam.StartPoint, thIfcBeam.EndPoint);
-            dbText.Rotation = thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint).GetAngleTo(Vector3d.XAxis);
+            Vector3d dir=Vector3d.XAxis.CrossProduct(thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint));
+            if(dir.Z>=0)
+            {
+                dbText.Rotation = thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint).GetAngleTo(Vector3d.XAxis);
+            }
+            else
+            {
+                dbText.Rotation = thIfcBeam.EndPoint.GetVectorTo(thIfcBeam.StartPoint).GetAngleTo(Vector3d.XAxis)+Math.PI;
+            }
             dbText.Layer = "0";
             dbText.Height = 200;
             return dbText;
@@ -250,36 +258,6 @@ namespace ThMEPEngineCore
             {
                 laneLineEngine.Recognize(Active.Database);
                 laneLineEngine.Lanes.ForEach(o => acadDatabase.ModelSpace.Add(o));
-            }
-        }
-        [CommandMethod("TIANHUACAD", "ThExtractDivideBeam", CommandFlags.Modal)]
-        public void ThExtractDivdeBeam()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                ThIfcLineBeam thIfcLineBeam = new ThIfcLineBeam();
-                var beamOutline = acadDatabase.Element<Polyline>(Active.Editor.GetEntity("\n Select beam outline：").ObjectId);
-                thIfcLineBeam.Outline = beamOutline;
-                thIfcLineBeam.StartPoint = beamOutline.GetPoint3dAt(0).GetMidPt(beamOutline.GetPoint3dAt(1));
-                thIfcLineBeam.EndPoint = beamOutline.GetPoint3dAt(2).GetMidPt(beamOutline.GetPoint3dAt(3));
-                thIfcLineBeam.ComponentType = BeamComponentType.PrimaryBeam;
-                thIfcLineBeam.Width = 300;
-                thIfcLineBeam.Height = 400;
-                thIfcLineBeam.Uuid = Guid.NewGuid().ToString();
-                var components = Active.Editor.GetSelection();
-                if(components.Status!=PromptStatus.OK)
-                {
-                    return;
-                }
-                List<Polyline> crossObjs = new List<Polyline>();
-                foreach (ObjectId objId in components.Value.GetObjectIds())
-                {
-                    crossObjs.Add(acadDatabase.Element<Polyline>(objId));
-                }
-                ThLinealBeamSplitter thSplitLineBeam = new ThLinealBeamSplitter(thIfcLineBeam);
-                thSplitLineBeam.Split(crossObjs);
-                thSplitLineBeam.SplitBeams.ForEach(o => o.Outline.ColorIndex = 1);
-                thSplitLineBeam.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
             }
         }
         [CommandMethod("TIANHUACAD", "ThTestSegment", CommandFlags.Modal)]
@@ -431,57 +409,6 @@ namespace ThMEPEngineCore
                     {
                         acadDatabase.ModelSpace.Add(beam.BeamBoundary);
                     }
-                }
-            }
-        }
-        [CommandMethod("TIANHUACAD", "ThTestSplitBeam", CommandFlags.Modal)]
-        public void ThTestSplitBeam()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var entRes = Active.Editor.GetEntity("\n 选择梁的外轮廓");
-                if(entRes.Status!=PromptStatus.OK)
-                {
-                    return;
-                }
-                Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
-                var startRes = Active.Editor.GetPoint("\n 选择梁的起点");
-                if (startRes.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var endRes = Active.Editor.GetPoint("\n 选择梁的终点");
-                if (endRes.Status != PromptStatus.OK)
-                {
-                    return;
-                }    
-                var outlineRes = Active.Editor.GetSelection();
-                if (outlineRes.Status == PromptStatus.OK)
-                {
-                    List<ThIfcBeam> passBeams = new List<ThIfcBeam>();
-                    var outline = acadDatabase.Element<Polyline>(entRes.ObjectId);
-                    var thIfcLineBeam = new ThIfcLineBeam()
-                    {
-                        StartPoint = startRes.Value,
-                        EndPoint = endRes.Value,
-                        Outline = outline.Clone() as Polyline
-                    };
-                    foreach (var objId in outlineRes.Value.GetObjectIds())
-                    {
-                        var segment = acadDatabase.Element<Polyline>(objId);
-                        passBeams.Add(
-                            new ThIfcLineBeam
-                            {
-                                Uuid=Guid.NewGuid().ToString(),
-                                Outline = segment.Clone() as Polyline,
-                                StartPoint = Active.Editor.GetPoint("\n选择梁的起点").Value,
-                                EndPoint = Active.Editor.GetPoint("\n选择梁的终点").Value,
-                                Normal=Vector3d.ZAxis
-                            });
-                    }
-                    ThLinealBeamSplitter thLinealBeamSplitter = new ThLinealBeamSplitter(thIfcLineBeam as ThIfcLineBeam);
-                    thLinealBeamSplitter.SplitTType(passBeams);
-                    thLinealBeamSplitter.SplitBeams.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
                 }
             }
         }

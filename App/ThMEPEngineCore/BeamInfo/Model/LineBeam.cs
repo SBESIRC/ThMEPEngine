@@ -9,6 +9,16 @@ namespace ThMEPEngineCore.BeamInfo.Model
 {
     public class LineBeam : Beam
     {
+        public double Width
+        {
+            get
+            {
+                var p1 = new Point2d(UpStartPoint.X, UpStartPoint.Y);
+                var p2 = new Point2d(DownStartPoint.X, DownStartPoint.Y);
+                return p1.GetDistanceTo(p2);
+            }
+        }
+
         public LineBeam(Curve newUpLine, Curve newDownLine)
         {
             if(newUpLine is Line firstLine && newDownLine is Line secondLine)
@@ -29,15 +39,15 @@ namespace ThMEPEngineCore.BeamInfo.Model
                 }               
             }
         }
-        private Vector3d ResetBeamDirection(Vector3d originBeamDir,double tolerance=1.0)
+        private Vector3d ResetBeamDirection(Vector3d originBeamDir)
         {
             double angle = Vector3d.XAxis.GetAngleTo(originBeamDir, Vector3d.ZAxis) /Math.PI*180.0;
             angle %= 360.0;
-            if (Math.Abs(angle-0.0)<= tolerance || Math.Abs(angle - 180.0) <= tolerance)
+            if (Vector3d.XAxis.IsParallelTo(originBeamDir))
             {
                 return Vector3d.XAxis;
             }
-            else if(Math.Abs(angle - 90.0) <= tolerance || Math.Abs(angle - 270.0) <= tolerance)
+            else if(Vector3d.YAxis.IsParallelTo(originBeamDir))
             {
                 return Vector3d.YAxis;
             }
@@ -77,10 +87,10 @@ namespace ThMEPEngineCore.BeamInfo.Model
             double minZ = zValues.OrderBy(o => o).FirstOrDefault();
             double maxZ = zValues.OrderByDescending(o => o).FirstOrDefault();
             firstStartPt = new Point3d(firstStartPt.X, firstStartPt.Y, minZ);
-            firstEndPt = new Point3d(firstEndPt.X, firstEndPt.Y, maxZ);
+            firstEndPt = firstStartPt + Vector3d.ZAxis.MultiplyBy(maxZ - minZ); 
 
             secondStartPt = new Point3d(secondStartPt.X, secondStartPt.Y, minZ);
-            secondEndPt = new Point3d(secondEndPt.X, secondEndPt.Y, maxZ);
+            secondEndPt = secondStartPt + Vector3d.ZAxis.MultiplyBy(maxZ - minZ);
             firstStartPt = firstStartPt.TransformBy(ucsToWcs);
             firstEndPt = firstEndPt.TransformBy(ucsToWcs);
             secondStartPt = secondStartPt.TransformBy(ucsToWcs);

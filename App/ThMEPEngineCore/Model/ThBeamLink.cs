@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Model
             {
                 return Tuple.Create(polyline, Point3d.Origin, Point3d.Origin);
             }
-            double maxWidth = Beams.Select(o => o.ActualWidth).OrderByDescending(o => o).FirstOrDefault();
+            double maxWidth = Beams.Select(o => o.Width).OrderByDescending(o => o).FirstOrDefault();
             Point3d firstBeamSpt = Beams[0].StartPoint;
             Point3d firstBeamEpt = Beams[0].EndPoint;
             List<Point3d> ptList = new List<Point3d>();

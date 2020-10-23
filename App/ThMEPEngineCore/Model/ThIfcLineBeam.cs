@@ -7,59 +7,14 @@ using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.BeamInfo.Model;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcLineBeam : ThIfcBeam, ICloneable
+    public sealed class ThIfcLineBeam : ThIfcBeam
     {
-        public static ThIfcLineBeam Create(Polyline polyline)
+        public Vector3d Direction
         {
-            var segments = new PolylineSegmentCollection(polyline);
-            var enumerable = segments.Where(o => o.IsLinear).OrderByDescending(o => o.ToLineSegment().Length);
-            var beam = new LineBeam(
-                new Line(enumerable.ElementAt(0).StartPoint.ToPoint3d(), enumerable.ElementAt(0).EndPoint.ToPoint3d()),
-                new Line(enumerable.ElementAt(1).StartPoint.ToPoint3d(), enumerable.ElementAt(1).EndPoint.ToPoint3d()));
-            return new ThIfcLineBeam()
-            {
-                EndPoint = beam.EndPoint,
-                Normal = beam.BeamNormal,
-                Outline = beam.BeamBoundary,
-                StartPoint = beam.StartPoint,
-                Uuid = Guid.NewGuid().ToString(),
-            };
-        }
-        public static ThIfcLineBeam Create(ThIfcBeamAnnotation annotation)
-        {
-            var outline = CreatOutline(annotation.StartPoint, annotation.EndPoint, annotation.Size.X);
-            outline.TransformBy(annotation.Matrix);
-            return Create(outline);
-        }
-        public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam,double startExtend,double endExtend)
-        {
-            return Create(olderLineBeam.ExtendBoth(startExtend, endExtend));
-        }
-        public object Clone()
-        {
-            return new ThIfcLineBeam()
-            {
-                StartPoint = this.StartPoint,
-                EndPoint = this.EndPoint,
-                Normal = this.Normal,
-                Uuid = Guid.NewGuid().ToString(),
-                Outline = this.Outline.Clone() as Entity,
-                Width = this.Width,
-                Height = this.Height,
-                ComponentType = this.ComponentType,
-            };
-        }
-
-        public override Curve Centerline()
-        {
-            return new Line(StartPoint, EndPoint);
-        }
-
-        public Vector3d Direction 
-        { 
             get
             {
                 return this.StartPoint.GetVectorTo(this.EndPoint);
@@ -72,33 +27,42 @@ namespace ThMEPEngineCore.Model
                 return StartPoint.DistanceTo(EndPoint);
             }
         }
-        public override Polyline Extend(double lengthIncrement,double widthIncrement)
+
+        private ThIfcLineBeam()
         {
-            Polyline outline = this.Outline as Polyline;
-            double actualwidth = outline.GetPoint3dAt(0).DistanceTo(outline.GetPoint3dAt(1));
-            StartPoint = StartPoint - Direction.GetNormal().MultiplyBy(lengthIncrement);
-            EndPoint = EndPoint + Direction.GetNormal().MultiplyBy(lengthIncrement);           
-            return CreatOutline(StartPoint, EndPoint, actualwidth);
+            //
         }
-        public override Polyline ExtendBoth(double startExtendLength, double endExtendLength)
+
+        public static ThIfcLineBeam Create(Polyline polyline, double height = 0.0)
         {
-            Polyline outline = this.Outline as Polyline;
-            Vector3d perpendDir = outline.GetPoint3dAt(0).GetVectorTo(outline.GetPoint3dAt(1));
-            double actualwidth = perpendDir.Length;
-            StartPoint = this.StartPoint - Direction.GetNormal().MultiplyBy(startExtendLength);
-            EndPoint = this.EndPoint + Direction.GetNormal().MultiplyBy(endExtendLength);
-            return CreatOutline(StartPoint, EndPoint, actualwidth);
+            var segments = new PolylineSegmentCollection(polyline);
+            var enumerable = segments.Where(o => o.IsLinear).OrderByDescending(o => o.ToLineSegment().Length);
+            var beam = new LineBeam(
+                new Line(enumerable.ElementAt(0).StartPoint.ToPoint3d(), enumerable.ElementAt(0).EndPoint.ToPoint3d()),
+                new Line(enumerable.ElementAt(1).StartPoint.ToPoint3d(), enumerable.ElementAt(1).EndPoint.ToPoint3d()));
+            return new ThIfcLineBeam()
+            {
+                Height = height,
+                Width = beam.Width,
+                EndPoint = beam.EndPoint,
+                Outline = beam.BeamBoundary,
+                StartPoint = beam.StartPoint,
+                Uuid = Guid.NewGuid().ToString(),
+            };
         }
-        public static Polyline CreatOutline(Point3d startPt, Point3d endPt,double width)
+        public static ThIfcLineBeam Create(ThIfcBeamAnnotation annotation)
         {
-            Vector3d direction = startPt.GetVectorTo(endPt);
-            Vector3d perpendDir = direction.GetPerpendicularVector();
-            Point3d pt1 = startPt - perpendDir.GetNormal().MultiplyBy(width / 2.0);
-            Point3d pt2 = startPt + perpendDir.GetNormal().MultiplyBy(width / 2.0);
-            Point3d pt3 = pt2 + direction.GetNormal().MultiplyBy(startPt.DistanceTo(endPt));
-            Point3d pt4 = pt1 + direction.GetNormal().MultiplyBy(startPt.DistanceTo(endPt));
-            Point3dCollection pts = new Point3dCollection() { pt1, pt2, pt3, pt4 };
-            return pts.CreatePolyline();
+            var outline = ThLineBeamOutliner.CreatOutline(annotation.StartPoint, annotation.EndPoint, annotation.Size.X);
+            outline.TransformBy(annotation.Matrix);
+            return Create(outline, annotation.Size.Y);
+        }
+        public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam,double startExtend,double endExtend)
+        {
+            return Create(ThLineBeamOutliner.ExtendBoth(olderLineBeam, startExtend, endExtend), olderLineBeam.Height);
+        }
+        public static ThIfcLineBeam Create(ThIfcLineBeam olderLineBeam, Point3d startPt, Point3d endPt)
+        {
+            return Create(ThLineBeamOutliner.CreatOutline(startPt, endPt, olderLineBeam.Width), olderLineBeam.Height);
         }
     }
 }

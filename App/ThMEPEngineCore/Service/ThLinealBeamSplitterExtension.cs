@@ -18,10 +18,13 @@ namespace ThMEPEngineCore.Service
     {
         private ThIfcLineBeam LineBeam { get; set; }
         public List<ThIfcLineBeam> SplitBeams { get; private set; }
+        private Polyline BeamNarrowOutline { get; set; }
+        private const double BeamNarrowRatio = 0.25;
         public ThLinealBeamSplitterExtension(ThIfcLineBeam lineBeam)
         {
             LineBeam = lineBeam;
             SplitBeams = new List<ThIfcLineBeam>();
+            BeamNarrowOutline = ThLineBeamOutliner.Extend(lineBeam, 0, -lineBeam.Width * BeamNarrowRatio);
         }
         public void Split(Polyline outline)
         {
@@ -42,13 +45,14 @@ namespace ThMEPEngineCore.Service
                     ThCADCoreNTSRelate cadCoreNTSRelateOne = new ThCADCoreNTSRelate(outline, o.Outline as Polyline);
                     return !cadCoreNTSRelateOne.IsCovers && !cadCoreNTSRelateOne.IsWithIn;
                 }).ToList();
-                SplitBeams=SplitBeams.Where(o => Math.Abs(o.ActualWidth - LineBeam.ActualWidth) <= 1.0).ToList();
+                SplitBeams=SplitBeams.Where(o => Math.Abs(o.Width - LineBeam.Width) <= 1.0).ToList();
                 SplitBeams= SplitBeams.Where(o=> Math.Abs(o.Length - LineBeam.Length) > 1.0).ToList();
             }            
         }        
         public void SplitTType(ThIfcBeam splitBeam)
         {
-            Polyline extentOutline = splitBeam.ExtendBoth(2.0 * LineBeam.ActualWidth, 2.0 * LineBeam.ActualWidth);
+            var extentOutline = ThLineBeamOutliner.ExtendBoth(
+                splitBeam as ThIfcLineBeam, 2.0 * LineBeam.Width, 2.0 * LineBeam.Width);
             var intersectPts = ThGeometryTool.IntersectWithEx(LineBeam.Outline as Polyline, extentOutline);
             if (intersectPts.Count == 4 && 
                 IsPerpendicular(splitBeam, intersectPts))
@@ -95,25 +99,38 @@ namespace ThMEPEngineCore.Service
         
         private void HandleOverLaps(Polyline outline)
         {
-            var pts = LineBeam.Outline.IntersectWithEx(outline);
+            var pts = BeamNarrowOutline.IntersectWithEx(outline);
             if (pts.Count == 1)
             {
                 return;
             }
             DBObjectCollection outlines = new DBObjectCollection();
             outlines.Add(outline);
-            var lineBeamOutline = LineBeam.Outline as Polyline;
-            var differObjs = ThCADCoreNTSPolygonExtension.Difference(lineBeamOutline, outlines);
+            var differObjs = ThCADCoreNTSPolygonExtension.Difference(BeamNarrowOutline, outlines);
             var newBeamOutlines = differObjs.Cast<Polyline>().ToList();
-            if(newBeamOutlines.Count==1 && newBeamOutlines[0].Area== lineBeamOutline.Area)
-            {
-                return;
-            }
             newBeamOutlines.ForEach(o =>
             {
                 var rectangle = o.GetMinimumRectangle();
-                SplitBeams.Add(ThIfcLineBeam.Create(rectangle));
+                var tempBeam = ThIfcLineBeam.Create(rectangle);
+                if(!IsSamePositionBeam(tempBeam))
+                {
+                    SplitBeams.Add(ThIfcLineBeam.Create(LineBeam, tempBeam.StartPoint, tempBeam.EndPoint));
+                }
             });
+        }
+        private bool IsSamePositionBeam(ThIfcLineBeam thIfcLineBeam)
+        {
+            if(LineBeam.StartPoint.DistanceTo(thIfcLineBeam.StartPoint)<=1.0 &&
+               LineBeam.EndPoint.DistanceTo(thIfcLineBeam.EndPoint) <= 1.0)
+            {
+                return true;
+            }
+            if (LineBeam.StartPoint.DistanceTo(thIfcLineBeam.EndPoint) <= 1.0 &&
+               LineBeam.EndPoint.DistanceTo(thIfcLineBeam.StartPoint) <= 1.0)
+            {
+                return true;
+            }
+            return false;
         }
         private List<Point3d> ProjectionPoints(Point3dCollection points)
         {
@@ -156,14 +173,9 @@ namespace ThMEPEngineCore.Service
             });
             SplitBeams.Add(CreateLineBeam(startPt, LineBeam.EndPoint));
         }
-        private ThIfcLineBeam CreateLineBeam(Point3d startPt,Point3d endPt)
+        private ThIfcLineBeam CreateLineBeam(Point3d startPt, Point3d endPt)
         {
-            var beamOutline = ThIfcLineBeam.CreatOutline(startPt, endPt, LineBeam.ActualWidth);
-            var clone = LineBeam.Clone() as ThIfcLineBeam;
-            clone.StartPoint = startPt;
-            clone.EndPoint = endPt;
-            clone.Outline = beamOutline;
-            return clone;
+            return ThIfcLineBeam.Create(LineBeam, startPt, endPt);
         }
     }
 }

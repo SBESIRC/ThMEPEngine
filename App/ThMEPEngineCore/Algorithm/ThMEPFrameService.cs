@@ -77,24 +77,7 @@ namespace ThMEPEngineCore.Algorithm
         }
         private Polyline CreateExtendBeamOutline(ThIfcLineBeam lineBeam , double extendDis)
         {
-            Polyline polyline = new Polyline()
-            {
-                Closed = true
-            };
-            Vector3d vec = lineBeam.StartPoint.GetVectorTo(lineBeam.EndPoint);
-            Vector3d perpendVec = vec.GetPerpendicularVector();
-            Point3d newSpt = lineBeam.StartPoint - vec.GetNormal().MultiplyBy(extendDis);
-            Point3d newEpt = lineBeam.EndPoint + vec.GetNormal().MultiplyBy(extendDis);
-            Point3d pt1 = newSpt - perpendVec.GetNormal().MultiplyBy(lineBeam.ActualWidth / 2.0);
-            Point3d pt2 = newSpt + perpendVec.GetNormal().MultiplyBy(lineBeam.ActualWidth / 2.0);
-            Point3d pt3 = newEpt + perpendVec.GetNormal().MultiplyBy(lineBeam.ActualWidth / 2.0);
-            Point3d pt4 = newEpt - perpendVec.GetNormal().MultiplyBy(lineBeam.ActualWidth / 2.0);
-
-            polyline.AddVertexAt(0, new Point2d(pt1.X, pt1.Y), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(1, new Point2d(pt2.X, pt2.Y), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(2, new Point2d(pt3.X, pt3.Y), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(3, new Point2d(pt4.X, pt4.Y), 0.0, 0.0, 0.0);
-            return polyline;
+            return ThLineBeamOutliner.ExtendBoth(lineBeam, extendDis, extendDis);
         }
     }
 }

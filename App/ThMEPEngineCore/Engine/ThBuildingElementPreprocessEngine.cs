@@ -1,6 +1,12 @@
-﻿using ThMEPEngineCore.CAD;
+﻿using NFox.Cad;
+using Linq2Acad;
+using System.Linq;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -24,6 +30,21 @@ namespace ThMEPEngineCore.Engine
                     beam.EndPoint,
                     other.StartPoint,
                     other.EndPoint);
+        }
+
+        protected List<ThIfcLineBeam> MergeBeams(List<ThIfcLineBeam> beams)
+        {
+            var results = new List<ThIfcLineBeam>();
+            beams.Select(o => o.Outline)
+                .ToCollection()
+                .LooseBoundaries()
+                .Cast<Polyline>()
+                .ForEachDbObject(o =>
+                {
+                    var rectangle = o.GetMinimumRectangle();
+                    results.Add(ThIfcLineBeam.Create(rectangle, beams.First().Height));
+                });
+            return results;
         }
     }
 }

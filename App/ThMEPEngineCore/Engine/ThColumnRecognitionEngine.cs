@@ -1,32 +1,18 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using DotNetARX;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThColumnRecognitionEngine : ThBuildingElementRecognitionEngine, IDisposable
+    public class ThColumnRecognitionEngine : ThBuildingElementRecognitionEngine
     {
-        public ThColumnRecognitionEngine()
-        {
-            Elements = new List<ThIfcBuildingElement>();
-        }
-
-        public void Dispose()
-        {
-            //ToDo
-        }
-
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -34,7 +20,7 @@ namespace ThMEPEngineCore.Engine
             {
                 columnDbExtension.BuildElementCurves();
                 List<Curve> curves = new List<Curve>();
-                if(polygon.Count > 0)
+                if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
                     columnDbExtension.ColumnCurves.ForEach(o => dbObjs.Add(o));
@@ -54,7 +40,7 @@ namespace ThMEPEngineCore.Engine
                     curves = columnDbExtension.ColumnCurves;
                 }
                 List<Curve> columnOutlines = PrecessColumn(curves);
-                columnOutlines.ForEach(o=> Elements.Add(ThIfcColumn.CreateColumnEntity(o)));
+                columnOutlines.ForEach(o => Elements.Add(ThIfcColumn.CreateColumnEntity(o)));
             }
         }
         private List<Curve> PrecessColumn(List<Curve> curves)
@@ -68,7 +54,7 @@ namespace ThMEPEngineCore.Engine
             // 对于矩形柱，直接保留
             // 对于内部有图案的矩形柱，获取其外轮廓矩形
             var arcs = new DBObjectCollection();
-            var lines = new DBObjectCollection();            
+            var lines = new DBObjectCollection();
             var circles = new DBObjectCollection();
             foreach (Curve curve in curves)
             {
@@ -78,7 +64,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 else if (curve is Polyline polyline)
                 {
-                    if(JudgePolylineIsClosed(polyline))
+                    if (JudgePolylineIsClosed(polyline))
                     {
                         columnOutlines.Add(polyline.Clone() as Curve);
                     }
@@ -87,7 +73,7 @@ namespace ThMEPEngineCore.Engine
                         lines.Add(polyline);
                     }
                 }
-                else if(curve is Circle)
+                else if (curve is Circle)
                 {
                     circles.Add(curve);
                 }
@@ -107,7 +93,7 @@ namespace ThMEPEngineCore.Engine
             {
                 Point3d pt1 = circle.GeometricExtents.MinPoint;
                 Point3d pt3 = circle.GeometricExtents.MaxPoint;
-                Point3d pt2 = new Point3d(pt3.X,pt1.Y,pt1.Z);
+                Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
                 Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
                 Point3dCollection pts = new Point3dCollection()
                 {
@@ -119,13 +105,13 @@ namespace ThMEPEngineCore.Engine
         }
         private bool JudgePolylineIsClosed(Polyline polyline, double tolerance = 1.0)
         {
-           if(polyline.Closed)
+            if (polyline.Closed)
             {
                 return true;
             }
             Point3d firstPt = polyline.GetPoint3dAt(0);
-            Point3d lastPt = polyline.GetPoint3dAt(polyline.NumberOfVertices-1);
-            if(firstPt.DistanceTo(lastPt)<= tolerance)
+            Point3d lastPt = polyline.GetPoint3dAt(polyline.NumberOfVertices - 1);
+            if (firstPt.DistanceTo(lastPt) <= tolerance)
             {
                 return true;
             }

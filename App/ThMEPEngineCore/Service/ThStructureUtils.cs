@@ -2,6 +2,7 @@
 using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPEngineCore.Service
 {
@@ -19,8 +20,20 @@ namespace ThMEPEngineCore.Service
 
         public static string OriginalFromXref(string xrefLayer)
         {
-            int index = xrefLayer.LastIndexOf('|');
-            return (index >= 0) ? xrefLayer.Substring(index + 1) : xrefLayer;
+            // 已绑定外参
+            if (xrefLayer.Matches("*`$#`$*"))
+            {
+                return xrefLayer.Substring(xrefLayer.LastIndexOf('$') + 1);
+            }
+
+            // 未绑定外参
+            if (xrefLayer.Matches("|"))
+            {
+                return xrefLayer.Substring(xrefLayer.LastIndexOf('|') + 1);
+            }
+
+            // 其他非外参
+            return xrefLayer;
         }
 
         /// <summary>

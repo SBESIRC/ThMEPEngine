@@ -24,7 +24,7 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
-        private ThBeamRecognitionEngine BeamEngine
+        private ThBuildingElementRecognitionEngine BeamEngine
         {
             get
             {
@@ -77,7 +77,7 @@ namespace ThMEPEngineCore.Engine
                 {
                     double endDistance = bExtendEnd ? ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance : 0.0;
                     double startDistance = bExtendStart ? ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance : 0.0;
-                    BeamElements.Add(ThIfcLineBeam.Create(thIfcBeam.ExtendBoth(startDistance, endDistance)));
+                    BeamElements.Add(ThIfcLineBeam.Create(thIfcBeam, startDistance, endDistance));
                 }
                 else
                 {

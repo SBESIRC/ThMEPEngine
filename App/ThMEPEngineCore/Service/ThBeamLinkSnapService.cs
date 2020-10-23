@@ -2,6 +2,7 @@
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Extension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
@@ -57,7 +58,7 @@ namespace ThMEPEngineCore.Service
                 }
                 if (startExtendDis > 0 || endExtendDis > 0)
                 {
-                    currentBeam.Outline = currentBeam.ExtendBoth(startExtendDis, endExtendDis);
+                    currentBeam.ExtendBoth(startExtendDis, endExtendDis);
                 }
             }
         }

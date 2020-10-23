@@ -18,6 +18,11 @@ namespace ThCADCore.NTS
                 && Orientation.Index(p2, q1, q2) == OrientationIndex.Collinear;
         }
 
+        public static bool Overlaps(this Line line, Line other)
+        {
+            return line.ToNTSLineString().Overlaps(other.ToNTSLineString());
+        }
+
         public static Point3d Intersection(this Line line, Polyline other)
         {
             var geometry = line.ToNTSLineString().Intersection(other.ToNTSLineString());

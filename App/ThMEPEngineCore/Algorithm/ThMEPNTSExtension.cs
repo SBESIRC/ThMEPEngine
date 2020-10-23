@@ -28,5 +28,12 @@ namespace ThMEPEngineCore.Algorithm
             }
         }
 
+        public static DBObjectCollection LooseBoundaries(this DBObjectCollection objs)
+        {
+            using (var ov = new ThCADCoreNTSFixedPrecision())
+            {
+                return objs.Boundaries();
+            }
+        }
     }
 }

@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Service
                 return ConnectionEngine.ColumnEngine;
             }
         }
-        private ThBeamRecognitionEngine BeamEngine
+        private ThBuildingElementRecognitionEngine BeamEngine
         {
             get
             {

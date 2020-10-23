@@ -1,9 +1,5 @@
-﻿using System;
-using Linq2Acad;
-using System.Linq;
+﻿using Linq2Acad;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
-using GeometryExtensions;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
@@ -12,18 +8,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThShearWallRecognitionEngine : ThBuildingElementRecognitionEngine, IDisposable
+    public class ThShearWallRecognitionEngine : ThBuildingElementRecognitionEngine
     {
-        public ThShearWallRecognitionEngine()
-        {
-            Elements = new List<ThIfcBuildingElement>();
-        }
-
-        public void Dispose()
-        {
-            //ToDo
-        }
-
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
