@@ -68,6 +68,7 @@ namespace ThMEPWSS.Service
                                         spray.nextVLine = interEntity;
                                     }
                                 }
+                                
                                 layoutPts.Add(spray);
                             }
                         }
@@ -369,6 +370,7 @@ namespace ThMEPWSS.Service
 
                 if (spray.tLine.IsSameLine(originLine))
                 {
+                    points.Clear();
                     var preSpray = resPreSprays.Where(x => x.vLine.IsSameLine(spray.vLine)).FirstOrDefault();
                     var nextSpray = resNextSprays.Where(x => x.vLine.IsSameLine(spray.vLine)).FirstOrDefault();
                     spray.vLine.IntersectWith(originLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
@@ -387,6 +389,8 @@ namespace ThMEPWSS.Service
                     }
                 }
 
+                points.Clear();
+                spray.tLine.IntersectWith(spray.vLine, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
                 if (points.Count > 0)
                 {
                     spray.Position = points[0];
@@ -402,6 +406,23 @@ namespace ThMEPWSS.Service
         public static List<Line> CalAllSprayLines(List<SprayLayoutData> sprays)
         {
             return sprays.SelectMany(x => new List<Line>() { x.vLine, x.tLine }).Distinct().ToList();
+        }
+
+        /// <summary>
+        /// 获取该喷淋前后左右四个喷淋
+        /// </summary>
+        /// <param name="spray"></param>
+        /// <param name="allSprays"></param>
+        /// <returns></returns>
+        public static List<SprayLayoutData> GetAroundSprays(this SprayLayoutData spray, List<SprayLayoutData> allSprays)
+        {
+            List<SprayLayoutData> aroundSprays = new List<SprayLayoutData>();
+            aroundSprays.Add(allSprays.FirstOrDefault(x => x.vLine.IsSameLine(spray.prevVLine) && x.tLine.IsSameLine(spray.tLine)));
+            aroundSprays.Add(allSprays.FirstOrDefault(x => x.vLine.IsSameLine(spray.nextVLine) && x.tLine.IsSameLine(spray.tLine)));
+            aroundSprays.Add(allSprays.FirstOrDefault(x => x.tLine.IsSameLine(spray.prevTLine) && x.vLine.IsSameLine(spray.vLine)));
+            aroundSprays.Add(allSprays.FirstOrDefault(x => x.tLine.IsSameLine(spray.nextTLine) && x.vLine.IsSameLine(spray.vLine)));
+
+            return aroundSprays.Where(x => x != null).ToList();
         }
     }
 }

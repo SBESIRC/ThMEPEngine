@@ -16,6 +16,7 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using System;
 using DotNetARX;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPElectrical
 {
@@ -40,6 +41,52 @@ namespace ThMEPElectrical
                 var packageManager = new PackageManager();
                 var polys = packageManager.DoMainBeamProfiles();
                 DrawUtils.DrawProfile(polys. Polylines2Curves(), "MainBeamProfiles");
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPL", CommandFlags.Modal)]
+        public void ThParkingline()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    var objs = new DBObjectCollection();
+                    var pLines = acdb.ModelSpace
+                        .OfType<Curve>()
+                        .Where(o => o.Layer == "AD-SIGN");
+                    pLines.ForEach(x => objs.Add(x));
+
+                    ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    var lanes = thCADCoreNTSSpatialIndex.SelectWindowPolygon(frame).Cast<Curve>().ToList();
+
+                    var parkingLinesService = new ParkingLinesService();
+                    var parkingLines = parkingLinesService.CreateParkingLines(frame, lanes);
+
+                    foreach (var line in parkingLines)
+                    {
+                        acdb.ModelSpace.Add(line.Clone() as Curve);
+                    }
+                }
             }
         }
 

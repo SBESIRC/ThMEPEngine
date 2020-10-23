@@ -24,6 +24,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />
     <Compile Include="Bussiness\CalSprayBlindAreaService.cs" />
     <Compile Include="Bussiness\CalSprayBlindLineAreaService.cs" />

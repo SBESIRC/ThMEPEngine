@@ -15,6 +15,53 @@ namespace ThMEPElectrical.Broadcast
         double pointTol = 1200;
         double tol = 0.9;
 
+        public List<Line> CreateParkingLines(Polyline roomPoly, List<Curve> parkingLines)
+        {
+            List<Line> pLines = new List<Line>();
+            foreach (var pline in parkingLines)
+            {
+                if (pline is Line line)
+                {
+                    pLines.Add(new Line(line.StartPoint, line.EndPoint));
+                }
+                else if (pline is Arc arc)
+                {
+                    Point3d ePt = arc.StartPoint;
+                    Point3d sPt = arc.EndPoint;
+                    Point3d centerPt = arc.Center;
+                    Point3d middlePt = new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0);
+                    Vector3d eDir = (ePt - centerPt).GetNormal();
+                    Vector3d sDir = (sPt - centerPt).GetNormal();
+                    Vector3d moveDir = (middlePt - centerPt).GetNormal();
+                    double angle = sDir.GetAngleTo(eDir);
+                    double length = ePt.DistanceTo(centerPt) / Math.Cos(angle / 2);
+
+                    Point3d cPt = centerPt + length * moveDir;
+                    pLines.Add(new Line(sPt, cPt));
+                    pLines.Add(new Line(ePt, cPt));
+                }
+                else if (pline is Polyline polyline)
+                {
+                    for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
+                    {
+                        pLines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt(i + 1)));
+                    }
+                }
+            }
+
+            var resLines = HandleLines(pLines);
+            resLines = resLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint)).ToList()).ToList();
+            //using (AcadDatabase acdb = AcadDatabase.Active())
+            //{
+            //    foreach (var item in resLines)
+            //    {
+            //        acdb.ModelSpace.Add(item);
+            //    }
+            //}
+
+            return pLines;
+        }
+
         public List<List<Line>> CreateParkingLines(Polyline roomPoly, List<Line> parkingLines, out List<List<Line>> otherPLins)
         {
             #region

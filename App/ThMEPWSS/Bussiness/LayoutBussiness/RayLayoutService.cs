@@ -23,9 +23,8 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double raduisLength = 1800;
         protected readonly double moveLength = 200;
         protected readonly double spacing = 100;
-        public bool tempRes = true;  //临时测试使用
         
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, Vector3d xDir, double gridSpacing, bool CreateLine = true)
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, Vector3d xDir, double gridSpacing, bool avoid, bool CreateLine = true)//avoid临时测试用
         {
             //获取柱轴网
             GridService gridService = new GridService();
@@ -36,15 +35,17 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 
             //计算喷淋布置点
             var sprays = SprayDataOperateService.CalSprayPoint(tLines, vLines, vDir, tDir, sideLength);
-
+            
             //边界保护
             CheckProtectService checkProtectService = new CheckProtectService();
-            checkProtectService.tempRes = tempRes;
-            checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
-
-            ////躲次梁
-            //AvoidBeamService beamService = new AvoidBeamService();
-            //beamService.AvoidBeam(polyline, sprays);
+            if (avoid)
+            {
+                checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
+            }
+            
+            //躲次梁
+            AvoidBeamByPointService avoidService = new AvoidBeamByPointService();
+            avoidService.AvoidBeam(polyline, sprays, colums, sideLength, maxLength);
 
             var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays)
                 .SelectMany(x => polyline.Trim(x).Cast<Polyline>()
@@ -56,12 +57,12 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 //打印布置网格线
                 InsertSprayLinesService.InsertSprayLines(sprayLines);
             }
-            else
-            {
-                //计算喷淋点
-                GenerateSpraysPointService spraysPointService = new GenerateSpraysPointService();
-                sprays = spraysPointService.GenerateSprays(sprayLines);
-            }
+            //else
+            //{
+            //    //计算喷淋点
+            //    GenerateSpraysPointService spraysPointService = new GenerateSpraysPointService();
+            //    sprays = spraysPointService.GenerateSprays(sprayLines);
+            //}
 
             return sprays;
         }

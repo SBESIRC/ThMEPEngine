@@ -88,7 +88,7 @@ namespace ThMEPWSS
 
                     //生成喷头
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, false);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, true, false);
 
                     //放置喷头
                     InsertSprayService.InsertSprayBlock(sprayPts.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
@@ -154,7 +154,7 @@ namespace ThMEPWSS
                     
                     //生成喷淋对象
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, true);
                 }
             }
         }
@@ -375,14 +375,6 @@ namespace ThMEPWSS
                 return;
             }
 
-            //double gridSpacing = 4500;
-            //PromptDoubleOptions promptDouble = new PromptDoubleOptions("请输入轴网间距");
-            //PromptDoubleResult doubleResult = Active.Editor.GetDouble(promptDouble);
-            //if (doubleResult.Status == PromptStatus.OK)
-            //{
-            //    gridSpacing = doubleResult.Value;
-            //}
-
             if (!CalWCSLayoutDirection(ref RotateTransformService.xDir))
             {
                 return;
@@ -410,8 +402,7 @@ namespace ThMEPWSS
 
                     //生成喷头
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    layoutDemo.tempRes = false;
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, false);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, false, false);
 
                     //放置喷头
                     InsertSprayService.InsertSprayBlock(sprayPts.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);

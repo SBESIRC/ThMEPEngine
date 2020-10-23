@@ -18,7 +18,6 @@ namespace ThMEPWSS.Bussiness
     {
         readonly double minSpacing = 400;
         readonly double moveLength = 100;
-        public bool tempRes = true;  //临时测试用
 
         public void CheckBoundarySprays(Polyline polyline, List<SprayLayoutData> sprays, double length, double minLength)
         {
@@ -97,7 +96,7 @@ namespace ThMEPWSS.Bussiness
                     var resSprays = allSprays.Where(x => x.tLine == thisLine || x.vLine == thisLine).ToList();
                     if (CheckLegalityWithBoundary(sprayLst.Select(x => x.Key).ToList(), moveLine, maxSpacing))
                     {
-                        if (CheckMoveLineSpcing(allSprays, resSprays, moveDir.Value, moveLine, maxSpacing * 2, minLength, tempRes))
+                        if (CheckMoveLineSpcing(allSprays, resSprays, moveDir.Value, moveLine, maxSpacing * 2, minLength, true))
                         {
                             SprayDataOperateService.UpdateSpraysLine(allSprays, thisLine, moveLine);
                         }
