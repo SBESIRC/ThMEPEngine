@@ -8,7 +8,7 @@ namespace ThMEPEngineCore.Service
     {
         public static Scale2d Size(string str)
         {
-            var match = Regex.Match(str, @"^(\d*[.]?\d*)x(\d*[.]?\d*)/?(\d*[.]?\d*)$");
+            var match = Regex.Match(str, @"^(\d*[.]?\d*)x(\d*[.]?\d*)");
             if (!match.Success)
             {
                 return new Scale2d();
