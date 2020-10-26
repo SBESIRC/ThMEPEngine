@@ -10,6 +10,7 @@ using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Business;
 using ThMEPElectrical.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Extension;
 
 namespace ThMEPElectrical.CAD
 {
@@ -86,11 +87,13 @@ namespace ThMEPElectrical.CAD
             {
                 // 接口，提取主梁，次梁，柱子，剪力墙等数据
                 var beamConnectEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(acadDatabase.Database, ptCollection);
+
                 // 主梁 = 主梁 + 悬挑主梁
                 beamConnectEngine.PrimaryBeamLinks.ForEach(mainBeamInfo =>
                 {
                     mainBeamInfo.Beams.ForEach(beamInfo =>
                     {
+                        beamInfo.ExtendBoth(ThMEPCommon.ExtendBeamLength, ThMEPCommon.ExtendBeamLength);
                         if (beamInfo.Outline is Polyline mainBeamPoly)
                             RecognizeMainBeamColumnWalls.Add(mainBeamPoly);
                     });
@@ -101,6 +104,7 @@ namespace ThMEPElectrical.CAD
                 {
                     overHangingBeamInfo.Beams.ForEach(beamInfo =>
                     {
+                        beamInfo.ExtendBoth(ThMEPCommon.ExtendBeamLength, ThMEPCommon.ExtendBeamLength);
                         if (beamInfo.Outline is Polyline overBeamPoly)
                             RecognizeMainBeamColumnWalls.Add(overBeamPoly);
                     });
@@ -127,6 +131,7 @@ namespace ThMEPElectrical.CAD
                 {
                     secondBeamInfo.Beams.ForEach(singleBeamInfo =>
                     {
+                        singleBeamInfo.ExtendBoth(ThMEPCommon.ExtendBeamLength, ThMEPCommon.ExtendBeamLength);
                         if (singleBeamInfo.Outline is Polyline secondBeamPoly)
                             RecognizeSecondBeams.Add(new SecondBeamProfileInfo(secondBeamPoly, singleBeamInfo.Height - ThMEPCommon.StoreyHeight));
                     });
@@ -137,6 +142,7 @@ namespace ThMEPElectrical.CAD
                 {
                     halfBeamInfo.Beams.ForEach(singleHalfBeam =>
                     {
+                        singleHalfBeam.ExtendBoth(ThMEPCommon.ExtendBeamLength, ThMEPCommon.ExtendBeamLength);
                         if (singleHalfBeam.Outline is Polyline halfBeamPoly)
                             RecognizeSecondBeams.Add(new SecondBeamProfileInfo(halfBeamPoly, singleHalfBeam.Height - ThMEPCommon.StoreyHeight));
                     });

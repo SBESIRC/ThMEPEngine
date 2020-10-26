@@ -15,6 +15,7 @@ namespace ThMEPElectrical.PostProcess
         SINGLEPLACE = 1, // 一个布置
         MEDIUMPLACE = 2, // 二个布置
         LARGEPLACE = 4, // 四个布置
+        REGULARPLACE = 8, // 通用的位置调整逻辑
     }
 
     /// <summary>
@@ -55,6 +56,10 @@ namespace ThMEPElectrical.PostProcess
 
                 case MSPlaceAdjustorType.LARGEPLACE:
                     PostPoints = MainSecondBeamLargeAdjustor.MakeMainSecondBeamMediumAdjustor(m_beamSecondBeamRegion);
+                    break;
+
+                case MSPlaceAdjustorType.REGULARPLACE:
+                    PostPoints = RegularPointMoveAdjustor.MakeRegularPointMoveAdjustor(m_beamSecondBeamRegion);
                     break;
 
                 default:

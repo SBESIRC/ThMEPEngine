@@ -47,6 +47,10 @@ namespace ThMEPElectrical.Business.MainSecondBeam
             {
                 points = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.MEDIUMPLACE);
             }
+            else
+            {
+                points = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.REGULARPLACE);
+            }
             
             return points;
         }

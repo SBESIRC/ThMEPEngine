@@ -215,7 +215,7 @@ namespace ThMEPElectrical.Business.MainBeam
             }
             else
             {
-                resPts = pts;
+                resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.REGULARPLACE);
             }
 
             return resPts;

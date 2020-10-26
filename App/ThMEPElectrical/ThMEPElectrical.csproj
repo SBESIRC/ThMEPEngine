@@ -84,6 +84,7 @@
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamMediumAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\PointMoveAdjustor.cs" />
+    <Compile Include="PostProcess\MainSecondBeamAdjustor\RegularPointMoveAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />

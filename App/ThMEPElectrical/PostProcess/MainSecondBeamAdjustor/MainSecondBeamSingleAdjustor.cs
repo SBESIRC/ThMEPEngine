@@ -40,6 +40,12 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
             m_mediumNodes.Add(new MediumNode(m_mainSecondBeamRegion.PlacePoints.First(), PointPosType.LeftTopPoint));
         }
 
+        /// <summary>
+        /// 每个node点的位置调整
+        /// </summary>
+        /// <param name="validPolys"></param>
+        /// <param name="mediumNode"></param>
+        /// <returns></returns>
         protected override Point3d PostMovePoint(List<Polyline> validPolys, MediumNode mediumNode)
         {
             var pt = mediumNode.Point;

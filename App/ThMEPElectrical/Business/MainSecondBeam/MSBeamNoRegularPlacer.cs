@@ -82,7 +82,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
             else if (horizontalCount == 1)
             {
                 // 一列布置
-                return OneColMultiSegmentsPlace.MakeOneColPlacePolygon(m_parameter, placeRectInfo);
+                return MSBeamNoRegularOneColPlacer.MakeMSBeamNoRegularOneColPlacer(m_parameter, placeRectInfo, m_placeInputProfileData);
             }
             else
             {
@@ -103,6 +103,10 @@ namespace ThMEPElectrical.Business.MainSecondBeam
             else if (points.Count == 2)
             {
                 points = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.MEDIUMPLACE);
+            }
+            else
+            {
+                points = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.REGULARPLACE);
             }
 
             return points;
