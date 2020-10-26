@@ -21,11 +21,11 @@ namespace ThMEPEngineCore
         {
             if (Convert.ToInt16(Application.GetSystemVariable("USERR1")) == 0)
             {
-                return new ThRawBeamRecognitionEngine();
+                return new ThBeamRecognitionEngine();
             }
             else
             {
-                return new ThBeamRecognitionEngine();
+                return new ThRawBeamRecognitionEngine();
             }
         }
     }
