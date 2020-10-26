@@ -92,5 +92,9 @@ namespace ThMEPEngineCore
         /// 梁延伸距离（解决NTS精度）
         /// </summary>
         public const double BeamExtendDistance = 2.5;
+        /// <summary>
+        /// 剪力墙偏移距离（解决NTS精度）
+        /// </summary>
+        public const double ShearWallBufferDistance=2.5;
     }
 }

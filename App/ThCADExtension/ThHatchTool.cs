@@ -20,7 +20,10 @@ namespace ThCADExtension
                 if (hatchLoop.IsPolyline)
                 {
                     var vertices = hatchLoop.Polyline;
-                    var pline = new Polyline(vertices.Count);
+                    var pline = new Polyline(vertices.Count)
+                    {
+                        Closed = true,
+                    };
                     for (int i = 0; i < vertices.Count; i++)
                     {
                         pline.AddVertexAt(i, vertices[i].Vertex, vertices[i].Bulge, 0, 0);

@@ -33,9 +33,14 @@ namespace ThMEPEngineCore.Engine
                 }
                 curves.ForEach(o =>
                 {
-                    if (o is Polyline polyline && polyline.Length > 0.0)
+                    if (o is Polyline polyline && polyline.Area > 0.0)
                     {
-                        Elements.Add(ThIfcWall.CreateWallEntity(polyline.Clone() as Polyline));
+                        var bufferObjs = polyline.Buffer(ThMEPEngineCoreCommon.ShearWallBufferDistance);
+                        if (bufferObjs.Count == 1)
+                        {
+                            var outline = bufferObjs[0] as Polyline;
+                            Elements.Add(ThIfcWall.CreateWallEntity(outline));
+                        }
                     }
                 });
             }
