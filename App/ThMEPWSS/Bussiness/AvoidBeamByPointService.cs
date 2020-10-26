@@ -10,7 +10,9 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
@@ -30,7 +32,8 @@ namespace ThMEPWSS.Bussiness
             minSpacing = minValue;
 
             //获得所有梁
-            var allBeams = GetBeam(polyline);
+            var allBeams = GetBeam(polyline).Cast<ThIfcLineBeam>().ToList();
+            allBeams.ForEach(x => x.ExtendBoth(20, 20));
 
             //计算可布置区域
             var layoutAreas = GetLayoutArea(polyline, allBeams, columnPolys);
@@ -60,9 +63,7 @@ namespace ThMEPWSS.Bussiness
         {
             foreach (var spray in moveSprays)
             {
-                var lAreas = GetSprayLayoutArea(spray, layoutAreas);
-                lAreas = lAreas.OrderBy(x => x.Distance(spray.Position)).Take(2).ToList();
-                if(!GetMoveInfo(lAreas, allSprays, spray))
+                if(!GetMoveInfo(layoutAreas, allSprays, spray))
                 {
                     var sprayCircle = new Circle(spray.Position, Vector3d.ZAxis, sprayWidth);
                     using (AcadDatabase db = AcadDatabase.Active())
@@ -71,11 +72,6 @@ namespace ThMEPWSS.Bussiness
                         db.ModelSpace.Add(sprayCircle);
                     }
                 }
-
-                //if (spray.Position.DistanceTo(new Point3d(-3738593.8598, 1112654.5059, 0)) < 10)
-                //{
-                //    var s = 1;
-                //}
             }
         }
 
@@ -86,10 +82,13 @@ namespace ThMEPWSS.Bussiness
         /// <param name="allSprays"></param>
         /// <param name="spray"></param>
         /// <returns></returns>
-        private bool GetMoveInfo(List<Polyline> areas, List<SprayLayoutData> allSprays, SprayLayoutData spray)
+        private bool GetMoveInfo(List<Polyline> layoutAreas, List<SprayLayoutData> allSprays, SprayLayoutData spray)
         {
+            //计算可布置区域
+            var lAreas = GetSprayLayoutArea(spray, layoutAreas).OrderBy(x => x.Distance(spray.Position)).Take(2).ToList();
+
             //检测主要方向上是否能移动
-            foreach (var area in areas)
+            foreach (var area in lAreas)
             {
                 List<Point3d> intersectPTs = new List<Point3d>();
                 Line tempLine = new Line(spray.Position + spray.mainDir * spcing, spray.Position - spray.mainDir * spcing);
@@ -101,9 +100,9 @@ namespace ThMEPWSS.Bussiness
                 if (intersectPTs.Count > 0)
                 {
                     var closePt = intersectPTs.OrderBy(x => x.DistanceTo(spray.Position)).First();
-                    double moveLength = Math.Ceiling(closePt.DistanceTo(spray.Position) / 100) * 100;
+                    double moveLength = closePt.DistanceTo(spray.Position);
                     Vector3d moveDir = (closePt - spray.Position).GetNormal();
-                    if (CheckMoveResult(allSprays, spray, area, moveDir, moveLength))
+                    if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, moveLength, 100))
                     {
                         return true;
                     }
@@ -111,7 +110,7 @@ namespace ThMEPWSS.Bussiness
                     {
                         //再用50的倍数尝试
                         moveLength = Math.Ceiling(closePt.DistanceTo(spray.Position) / 50) * 50;
-                        if (CheckMoveResult(allSprays, spray, area, moveDir, moveLength))
+                        if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, moveLength, 50))
                         {
                             return true;
                         }
@@ -120,7 +119,7 @@ namespace ThMEPWSS.Bussiness
             }
 
             //主要方向无法移动就“斜”移
-            foreach (var area in areas)
+            foreach (var area in lAreas)
             {
                 List<Point3d> resPTs = new List<Point3d>();
                 resPTs.Add(area.GetClosestPointTo(spray.Position, true));
@@ -128,19 +127,14 @@ namespace ThMEPWSS.Bussiness
                 var closePt = resPTs.OrderBy(x => x.DistanceTo(spray.Position)).First();
                 Vector3d moveDir = (closePt - spray.Position).GetNormal();
                 double distance = closePt.DistanceTo(spray.Position);
-                double moveLength = Math.Sqrt(Math.Pow(Math.Ceiling(Math.Abs(distance * moveDir.X) / 100) * 100, 2) 
-                    + Math.Pow(Math.Ceiling(Math.Abs(distance * moveDir.Y) / 100) * 100, 2));
-
-                if (CheckMoveResult(allSprays, spray, area, moveDir, moveLength))
+                if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, distance, 100))
                 {
                     return true;
                 }
                 else
                 {
                     //50的倍数尝试
-                    moveLength = Math.Sqrt(Math.Pow(Math.Ceiling(Math.Abs(distance * moveDir.X) / 50) * 50, 2)
-                    + Math.Pow(Math.Ceiling(Math.Abs(distance * moveDir.Y) / 50) * 50, 2));
-                    if (CheckMoveResult(allSprays, spray, area, moveDir, moveLength))
+                    if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, distance, 50))
                     {
                         return true;
                     }
@@ -158,28 +152,97 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveDir"></param>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        private bool CheckMoveResult(List<SprayLayoutData> allSprays, SprayLayoutData spray, Polyline area, Vector3d moveDir, double moveLength)
+        private bool CheckMoveResult(List<SprayLayoutData> allSprays, List<Polyline> allAreas, SprayLayoutData spray, Polyline area, Vector3d moveDir, double moveLength, double index)
         {
-            var newPosition = spray.Position + moveDir * moveLength;
+            double xValue = Math.Ceiling(Math.Abs(moveDir.X) * moveLength / index) * index;
+            double yValue = Math.Ceiling(Math.Abs(moveDir.Y) * moveLength / index) * index;
+            Vector3d xDir = moveDir.X > 0 ? Vector3d.XAxis : -Vector3d.XAxis;
+            Vector3d yDir = moveDir.Y > 0 ? Vector3d.YAxis : -Vector3d.YAxis;
+
+            var newPosition = spray.Position + xValue * xDir + yValue * yDir;
             if (!area.Contains(newPosition))
             {
                 return false;
             }
 
+            List<SprayLayoutData> checkSprays = new List<SprayLayoutData>();
             var aroundSprays = spray.GetAroundSprays(allSprays);
             foreach (var aSpray in aroundSprays)
             {
-                double distance = newPosition.DistanceTo(aSpray.Position);
-                Vector3d compareDir = (aSpray.Position - newPosition).GetNormal();
-                double compareX = Math.Abs(compareDir.X) > Math.Abs(compareDir.Y) ? Math.Abs(compareDir.X) : Math.Abs(compareDir.Y);
-                double compareValue = distance * compareX;
-                if (compareValue < minSpacing || compareValue > maxSpacing)
+                //校验喷淋是否满足间距
+                CheckService checkService = new CheckService();
+                if (!checkService.CheckSprayPtDistance(aSpray.Position, newPosition, maxSpacing, minSpacing))
                 {
-                    return false;
+                    checkSprays.Add(aSpray);
                 }
             }
 
-            spray.Position = newPosition;
+            //尝试调整周围有问题的点
+            if (AdjustAroundSprays(allSprays, checkSprays, newPosition, allAreas))
+            {
+                spray.Position = newPosition;
+                return true;
+            }
+            
+            return false;
+        }
+
+        /// <summary>
+        /// 联动适应周围点
+        /// </summary>
+        /// <param name="allSprays"></param>
+        /// <param name="checkSprays"></param>
+        /// <param name="newPosition"></param>
+        /// <param name="allAreas"></param>
+        /// <returns></returns>
+        private bool AdjustAroundSprays(List<SprayLayoutData> allSprays, List<SprayLayoutData> checkSprays, Point3d newPosition, List<Polyline> allAreas)
+        {
+            Dictionary<SprayLayoutData, Point3d> sprayDic = new Dictionary<SprayLayoutData, Point3d>();
+            foreach (var cSpray in checkSprays)
+            {
+                var compareDir = (cSpray.Position - newPosition).GetNormal();
+                var compareValue = cSpray.Position.DistanceTo(newPosition);
+                double moveLength = 0;
+                Vector3d moveDir = Vector3d.XAxis;
+                if (Math.Abs(compareDir.X) > Math.Abs(compareDir.Y))
+                {
+                    double maxLength = (maxSpacing - compareValue * Math.Abs(compareDir.X)) / 100 * 100;
+                    double minLength = (minSpacing - compareValue * Math.Abs(compareDir.X)) / 100 * 100;
+                    moveLength = Math.Abs(maxLength) < Math.Abs(minLength) ? maxLength : minLength;
+                    moveDir = Vector3d.XAxis.DotProduct(compareDir) > 0 ? Vector3d.XAxis : -Vector3d.XAxis;
+                }
+                else
+                {
+                    double maxLength = (maxSpacing - compareValue * Math.Abs(compareDir.Y)) / 100 * 100;
+                    double minLength = (minSpacing - compareValue * Math.Abs(compareDir.Y)) / 100 * 100;
+                    moveLength = Math.Abs(maxLength) < Math.Abs(minLength) ? maxLength : minLength;
+                    moveDir = Vector3d.YAxis.DotProduct(compareDir) > 0 ? Vector3d.YAxis : -Vector3d.YAxis;
+                }
+
+                Point3d movePosition = cSpray.Position + moveLength * moveDir;
+                if (allAreas.Where(x=>x.Contains(movePosition)).Count() <= 0)
+                {
+                    return false;
+                }
+
+                var aroundSprays = cSpray.GetAroundSprays(allSprays);
+                foreach (var aSpray in aroundSprays)
+                {
+                    //校验喷淋是否满足间距
+                    CheckService checkService = new CheckService();
+                    if (!checkService.CheckSprayPtDistance(aSpray.Position, movePosition, maxSpacing, minSpacing))
+                    {
+                        return false;
+                    }
+                }
+
+                sprayDic.Add(cSpray, movePosition);
+            }
+
+            foreach (var sDic in sprayDic)
+            {
+                sDic.Key.Position = sDic.Value;
+            }
             return true;
         }
 
@@ -218,7 +281,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="polyline"></param>
         /// <param name="allBeams"></param>
         /// <returns></returns>
-        private List<Polyline> GetLayoutArea(Polyline polyline, List<ThIfcBeam> allBeams, List<Polyline> columnPoly)
+        private List<Polyline> GetLayoutArea(Polyline polyline, List<ThIfcLineBeam> allBeams, List<Polyline> columnPoly)
         {
             DBObjectCollection dBObjects = new DBObjectCollection();
             foreach (var beam in allBeams)
@@ -243,7 +306,7 @@ namespace ThMEPWSS.Bussiness
         {
             List<ThIfcBeam> beams = new List<ThIfcBeam>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThBeamRecognitionEngine beamEngine = new ThBeamRecognitionEngine())
+            using (var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine())
             {
                 beamEngine.Recognize(Active.Database, polyline.Vertices());
 

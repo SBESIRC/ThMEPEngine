@@ -18,6 +18,7 @@ namespace ThMEPWSS.Bussiness
     {
         readonly double minSpacing = 400;
         readonly double moveLength = 100;
+        readonly double maxMoveLength = 200;
 
         public void CheckBoundarySprays(Polyline polyline, List<SprayLayoutData> sprays, double length, double minLength)
         {
@@ -91,6 +92,10 @@ namespace ThMEPWSS.Bussiness
 
                 if (needMove)
                 {
+                    if (moveLength > maxMoveLength)
+                    {
+                        continue;
+                    }
                     var thisLine = firSpray.Value.First().GetOtherPolylineByDir(moveDir.Value);
                     var moveLine = thisLine.MovePolyline(moveLength, moveDir.Value);
                     var resSprays = allSprays.Where(x => x.tLine == thisLine || x.vLine == thisLine).ToList();
@@ -100,13 +105,6 @@ namespace ThMEPWSS.Bussiness
                         {
                             SprayDataOperateService.UpdateSpraysLine(allSprays, thisLine, moveLine);
                         }
-                    }
-
-                    using (AcadDatabase acdb = AcadDatabase.Active())
-                    {
-                        //Polyline tempLine = moveLine.Clone() as Polyline;
-                        //tempLine.ColorIndex = 3;
-                        //acdb.ModelSpace.Add(tempLine);
                     }
                 }
             }

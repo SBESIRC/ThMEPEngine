@@ -41,5 +41,23 @@ namespace ThMEPWSS.Service
 
             return true;
         }
+
+        /// <summary>
+        /// 判断两个喷淋点是否满足间距
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="newPosition"></param>
+        /// <param name="maxSpacing"></param>
+        /// <param name="minSpacing"></param>
+        /// <returns></returns>
+        public bool CheckSprayPtDistance(Point3d position, Point3d newPosition, double maxSpacing, double minSpacing)
+        {
+            double distance = newPosition.DistanceTo(position);
+            Vector3d compareDir = (position - newPosition).GetNormal();
+            double compareX = Math.Abs(compareDir.X) > Math.Abs(compareDir.Y) ? Math.Abs(compareDir.X) : Math.Abs(compareDir.Y);
+            double compareValue = distance * compareX;
+
+            return compareValue >= minSpacing && compareValue <= maxSpacing;
+        }
     }
 }
