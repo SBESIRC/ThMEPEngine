@@ -179,6 +179,40 @@ namespace ThCADCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThDifference", CommandFlags.Modal | CommandFlags.UsePickSet)]
+        public void ThDifference()
+        {
+            using (var ov = new ThCADCoreNTSFixedPrecision())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetEntity("\n请选择框线");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Polyline>(obj));
+                }
+
+                var frame = result2.ObjectId;
+                var frameObj = acadDatabase.Element<Polyline>(frame);
+                foreach (Entity obj in frameObj.Difference(objs))
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj as Entity);
+                }
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "ThBuffer", CommandFlags.Modal)]
         public void ThBuffer()
         {
