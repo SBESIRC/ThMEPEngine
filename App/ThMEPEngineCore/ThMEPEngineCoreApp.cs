@@ -113,7 +113,6 @@ namespace ThMEPEngineCore
         {
             List<ThBeamLink> totalBeamLinks = new List<ThBeamLink>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var thBeamTypeRecogitionEngine = new ThBeamConnectRecogitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -123,7 +122,8 @@ namespace ThMEPEngineCore
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 System.Diagnostics.Stopwatch stopwatch = new System.Diagnostics.Stopwatch();
                 stopwatch.Start();
-                thBeamTypeRecogitionEngine.Recognize(Active.Database, frame.Vertices());
+                var thBeamTypeRecogitionEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(
+                    Active.Database, frame.Vertices());
                 stopwatch.Stop();
                 TimeSpan timespan = stopwatch.Elapsed; //  获取当前实例测量得出的总时间
                 Active.Editor.WriteMessage("\n本次使用了：" + timespan.TotalSeconds + "秒");

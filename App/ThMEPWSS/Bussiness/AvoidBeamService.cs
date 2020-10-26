@@ -198,11 +198,10 @@ namespace ThMEPWSS.Bussiness
         public List<ThIfcBeam> GetSecondBeam(Polyline polyline)
         {
             List<ThIfcBeam> beams = new List<ThIfcBeam>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThBeamConnectRecogitionEngine beamEngine = new ThBeamConnectRecogitionEngine())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())            
             {
-                beamEngine.Recognize(Active.Database, polyline.Vertices());
-
+                var beamEngine = ThBeamConnectRecogitionEngine.ExecuteRecognize(
+                    Active.Database, polyline.Vertices());
                 foreach (var beam in beamEngine.SecondaryBeamLinks)
                 {
                     foreach (var secondBeam in beam.Beams)

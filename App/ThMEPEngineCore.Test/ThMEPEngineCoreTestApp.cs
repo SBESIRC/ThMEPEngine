@@ -73,9 +73,8 @@ namespace ThMEPEngineCore.Test
                 {
                     return;
                 }
-
-                var engine = new ThBeamConnectRecogitionEngine();
-                engine.Recognize(acadDatabase.Database, new Point3dCollection());
+                var engine = ThBeamConnectRecogitionEngine.ExecuteRecognize(
+                    acadDatabase.Database, new Point3dCollection());
                 var frameService = new ThMEPFrameService(engine);
                 var frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 foreach (Entity item in frameService.RegionsFromFrame(frame))

@@ -30,13 +30,19 @@ namespace ThMEPEngineCore.Engine
         {
             SpatialIndexManager.Dispose();
         }
+        public static ThBeamConnectRecogitionEngine ExecutePreprocess(Database database, Point3dCollection polygon)
+        {
+            ThBeamConnectRecogitionEngine beamConnectEngine = new ThBeamConnectRecogitionEngine();
+            beamConnectEngine.Preprocess(database, polygon);
+            return beamConnectEngine;
+        }
         public static ThBeamConnectRecogitionEngine ExecuteRecognize(Database database, Point3dCollection polygon)
         {
             ThBeamConnectRecogitionEngine beamConnectEngine = new ThBeamConnectRecogitionEngine();
             beamConnectEngine.Recognize(database, polygon);
             return beamConnectEngine;
         }
-        public void Recognize(Database database, Point3dCollection polygon)
+        private void Preprocess(Database database, Point3dCollection polygon)
         {
             // 启动柱识别引擎
             ColumnEngine = new ThColumnRecognitionEngine();
@@ -82,6 +88,11 @@ namespace ThMEPEngineCore.Engine
                 thSnapBeams.Snap();
                 SyncBeamSpatialIndex();
             }
+        }
+        private void Recognize(Database database, Point3dCollection polygon)
+        {
+            // 预处理
+            Preprocess(database, polygon);
 
             //建立单根梁两端连接的物体列表
             CreateSingleBeamLink();
