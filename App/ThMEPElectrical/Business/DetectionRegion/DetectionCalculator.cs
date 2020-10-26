@@ -7,6 +7,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPElectrical.Assistant;
+using ThMEPElectrical.Geometry;
 using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.Business
@@ -53,7 +55,7 @@ namespace ThMEPElectrical.Business
                 {
                     var secondBeamProfile = secondBeam.Profile;
 
-                    if (IsIntersect(profile, secondBeamProfile))
+                    if (IsIntersectOrContains(profile, secondBeamProfile))
                     {
                         secondBeam.IsUsed = true;
                         detectRegion.secondBeams.Add(secondBeam);
@@ -62,6 +64,21 @@ namespace ThMEPElectrical.Business
             }
 
             return detectRegions;
+        }
+
+        protected bool IsIntersectOrContains(Polyline firPoly, Polyline secPoly)
+        {
+            var ptLst = secPoly.Polyline2Point2d();
+            foreach (var pt in ptLst)
+            {
+                if (GeomUtils.PtInLoop(firPoly, pt))
+                    return true;
+            }
+
+            if (firPoly.Intersects(secPoly))
+                return true;
+
+            return false;
         }
 
         /// <summary>

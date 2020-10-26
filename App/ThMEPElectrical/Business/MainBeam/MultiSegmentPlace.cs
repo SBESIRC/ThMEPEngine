@@ -203,21 +203,7 @@ namespace ThMEPElectrical.Business.MainBeam
                 resProfiles.Add(offsetPoly);
 
             var mainBeamRegion = new MainSecondBeamRegion(resProfiles, pts);
-            List<Point3d> resPts;
-
-            if (pts.Count == 1)
-            {
-                resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.SINGLEPLACE);
-            }
-            else if (pts.Count == 2)
-            {
-                resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.MEDIUMPLACE);
-            }
-            else
-            {
-                resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.REGULARPLACE);
-            }
-
+            var resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.REGULARPLACE);
             return resPts;
         }
 

@@ -9,6 +9,7 @@ using ThMEPElectrical.Model;
 using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.PostProcess;
+using ThCADCore.NTS;
 
 namespace ThMEPElectrical.Business.MainBeam
 {
@@ -141,6 +142,20 @@ namespace ThMEPElectrical.Business.MainBeam
             {
                 MultiRowPlace(placeRectInfo, verticalCount, verticalGap);
             }
+
+            m_singlePlacePts = CalculateRegionPoints(placeRectInfo.srcPolyline, m_singlePlacePts);
+        }
+
+        private List<Point3d> CalculateRegionPoints(Polyline srcPoly, List<Point3d> pts)
+        {
+            // 计算内轮廓和偏移计算
+            var resProfiles = new List<Polyline>();
+            foreach (Polyline offsetPoly in srcPoly.Buffer(ThMEPCommon.ShrinkDistance))
+                resProfiles.Add(offsetPoly);
+
+            var mainBeamRegion = new MainSecondBeamRegion(resProfiles, pts);
+            var resPts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamRegion, MSPlaceAdjustorType.REGULARPLACE);
+            return resPts;
         }
 
         /// <summary>

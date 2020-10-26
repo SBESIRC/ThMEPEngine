@@ -83,20 +83,5 @@ namespace ThMEPElectrical.Business
 
             return detectRegions;
         }
-
-        private bool IsIntersectOrContains(Polyline firPoly, Polyline secPoly)
-        {
-            var ptLst = secPoly.Polyline2Point2d();
-            foreach (var pt in ptLst)
-            {
-                if (GeomUtils.PtInLoop(firPoly, pt))
-                    return true;
-            }
-
-            if (firPoly.Intersects(secPoly))
-                return true;
-
-            return false;
-        }
     }
 }
