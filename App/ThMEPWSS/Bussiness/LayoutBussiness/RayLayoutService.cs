@@ -11,6 +11,7 @@ using ThMEPWSS.Service;
 using ThCADExtension;
 using ThMEPEngineCore.Operation;
 using AcHelper;
+using ThMEPWSS.Bussiness.BoundaryProtectBussiness;
 
 namespace ThMEPWSS.Bussiness.LayoutBussiness
 {
@@ -36,13 +37,16 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
             //计算喷淋布置点
             var sprays = SprayDataOperateService.CalSprayPoint(tLines, vLines, vDir, tDir, sideLength);
             
-            //边界保护
-            CheckProtectService checkProtectService = new CheckProtectService();
             if (avoid)
-            {
+            {   //边界保护（调整线）
+                CheckProtectService checkProtectService = new CheckProtectService();
                 checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
+
+                //边界保护（调整点）
+                CheckProtectByPointsService checkProtectByPointsService = new CheckProtectByPointsService();
+                checkProtectByPointsService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
             }
-            
+
             //躲次梁
             AvoidBeamByPointService avoidService = new AvoidBeamByPointService();
             avoidService.AvoidBeam(polyline, sprays, colums, sideLength, maxLength);

@@ -90,7 +90,7 @@ namespace ThMEPWSS
 
                     //生成喷头
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, true, false);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4000, true, false);
 
                     //放置喷头
                     InsertSprayService.InsertSprayBlock(sprayPts.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);

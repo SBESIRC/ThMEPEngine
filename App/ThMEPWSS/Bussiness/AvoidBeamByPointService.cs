@@ -14,6 +14,7 @@ using ThMEPEngineCore;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Model;
+using ThMEPWSS.Bussiness.BoundaryProtectBussiness;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
 
@@ -25,8 +26,9 @@ namespace ThMEPWSS.Bussiness
         double maxSpacing = 3400;
         double minSpacing = 100;
         double sprayWidth = 200;
+        KeyValuePair<SprayLayoutData, Point3d> sprayDic;  //记录变化的喷淋信息
 
-        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys,  double maxValue, double minValue)
+        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, double maxValue, double minValue)
         {
             maxSpacing = maxValue;
             minSpacing = minValue;
@@ -49,8 +51,12 @@ namespace ThMEPWSS.Bussiness
             //计算出不合法的喷淋点位
             var moveSprays = CalIllegalSpary(sprays, layoutAreas);
 
+            //计算出边界喷淋
+            BoundaryProtestService protestService = new BoundaryProtestService();
+            var bSprays = protestService.GetBoundarySpray(polyline, sprays, maxSpacing);
+
             //移动并校核喷淋
-            MoveSpray(moveSprays, layoutAreas, sprays);
+            MoveSpray(moveSprays, layoutAreas, sprays, bSprays);
         }
 
         /// <summary>
@@ -59,12 +65,22 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveSprays"></param>
         /// <param name="layoutAreas"></param>
         /// <param name="allSprays"></param>
-        private void MoveSpray(List<SprayLayoutData> moveSprays, List<Polyline> layoutAreas, List<SprayLayoutData> allSprays)
+        private void MoveSpray(List<SprayLayoutData> moveSprays, List<Polyline> layoutAreas, List<SprayLayoutData> allSprays, Dictionary<Line, List<SprayLayoutData>> bSprays)
         {
             foreach (var spray in moveSprays)
             {
-                if(!GetMoveInfo(layoutAreas, allSprays, spray))
+                sprayDic = new KeyValuePair<SprayLayoutData, Point3d>();
+                if (GetMoveInfo(layoutAreas, allSprays, spray, bSprays, out List<KeyValuePair<SprayLayoutData, Point3d>> moveInfo))
                 {
+                    //更新喷淋点位
+                    foreach (var mInfo in moveInfo)
+                    {
+                        mInfo.Key.Position = mInfo.Value;
+                    }
+                }
+                else
+                {
+                    //打印有问题的但无法移动的喷淋点位
                     var sprayCircle = new Circle(spray.Position, Vector3d.ZAxis, sprayWidth);
                     using (AcadDatabase db = AcadDatabase.Active())
                     {
@@ -82,10 +98,19 @@ namespace ThMEPWSS.Bussiness
         /// <param name="allSprays"></param>
         /// <param name="spray"></param>
         /// <returns></returns>
-        private bool GetMoveInfo(List<Polyline> layoutAreas, List<SprayLayoutData> allSprays, SprayLayoutData spray)
+        private bool GetMoveInfo(List<Polyline> layoutAreas, List<SprayLayoutData> allSprays, SprayLayoutData spray, Dictionary<Line, List<SprayLayoutData>> bSprays, 
+            out List<KeyValuePair<SprayLayoutData, Point3d>> moveInfo)
         {
+            moveInfo = null;
+            var bLines = bSprays.Where(x => x.Value.Contains(spray)).Select(x => x.Key).ToList();
+            bool isBoundary = false;
+            if (bLines.Count > 0)
+            {
+                isBoundary = true;
+            }
+
             //计算可布置区域
-            var lAreas = GetSprayLayoutArea(spray, layoutAreas).OrderBy(x => x.Distance(spray.Position)).Take(2).ToList();
+            var lAreas = GetSprayLayoutArea(spray, layoutAreas).OrderBy(x => x.Distance(spray.Position)).ToList();
 
             //检测主要方向上是否能移动
             foreach (var area in lAreas)
@@ -97,22 +122,56 @@ namespace ThMEPWSS.Bussiness
                 tempLine = new Line(spray.Position + spray.otherDir * spcing, spray.Position - spray.otherDir * spcing);
                 intersectPTs.AddRange(area.Intersect(tempLine, Intersect.ExtendArgument));
 
-                if (intersectPTs.Count > 0)
+                intersectPTs = intersectPTs.OrderBy(x => x.DistanceTo(spray.Position)).ToList();
+                foreach (var interPt in intersectPTs)
                 {
-                    var closePt = intersectPTs.OrderBy(x => x.DistanceTo(spray.Position)).First();
-                    double moveLength = closePt.DistanceTo(spray.Position);
-                    Vector3d moveDir = (closePt - spray.Position).GetNormal();
-                    if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, moveLength, 100))
+                    var newPosition = MoveSpray(spray, interPt, 100);
+                    if (CheckMoveResult(allSprays, layoutAreas, spray, area, newPosition, out List<KeyValuePair<SprayLayoutData, Point3d>> movePtInfo))
                     {
-                        return true;
+                        if (isBoundary)
+                        {
+                            if (CheckMovePointWithLine(newPosition, bLines))
+                            {
+                                moveInfo = movePtInfo;
+                                return true;
+                            }
+                            else
+                            {
+                                moveInfo = movePtInfo;
+                            }
+                        }
+                        else
+                        {
+                            moveInfo = movePtInfo;
+                            return true;
+                        }
                     }
                     else
                     {
                         //再用50的倍数尝试
-                        moveLength = Math.Ceiling(closePt.DistanceTo(spray.Position) / 50) * 50;
-                        if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, moveLength, 50))
+                        newPosition = MoveSpray(spray, interPt, 50);
+                        if (CheckMoveResult(allSprays, layoutAreas, spray, area, newPosition, out movePtInfo))
                         {
-                            return true;
+                            if (isBoundary)
+                            {
+                                if (CheckMovePointWithLine(newPosition, bLines))
+                                {
+                                    moveInfo = movePtInfo;
+                                    return true;
+                                }
+                                else
+                                {
+                                    if (moveInfo == null || moveInfo.Count <= 0)
+                                    {
+                                        moveInfo = movePtInfo;
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                moveInfo = movePtInfo;
+                                return true;
+                            }
                         }
                     }
                 }
@@ -125,23 +184,107 @@ namespace ThMEPWSS.Bussiness
                 resPTs.Add(area.GetClosestPointTo(spray.Position, true));
 
                 var closePt = resPTs.OrderBy(x => x.DistanceTo(spray.Position)).First();
-                Vector3d moveDir = (closePt - spray.Position).GetNormal();
-                double distance = closePt.DistanceTo(spray.Position);
-                if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, distance, 100))
+                var newPosition = MoveSpray(spray, closePt, 100);
+                if (CheckMoveResult(allSprays, layoutAreas, spray, area, newPosition, out List<KeyValuePair<SprayLayoutData, Point3d>> movePtInfo))
                 {
-                    return true;
+                    if (isBoundary)
+                    {
+                        if (CheckMovePointWithLine(newPosition, bLines))
+                        {
+                            moveInfo = movePtInfo;
+                            return true;
+                        }
+                        else
+                        {
+                            if (moveInfo == null || moveInfo.Count <= 0)
+                            {
+                                moveInfo = movePtInfo;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        moveInfo = movePtInfo;
+                        return true;
+                    }
                 }
                 else
                 {
                     //50的倍数尝试
-                    if (CheckMoveResult(allSprays, layoutAreas, spray, area, moveDir, distance, 50))
+                    newPosition = MoveSpray(spray, closePt, 50);
+                    if (CheckMoveResult(allSprays, layoutAreas, spray, area, newPosition, out movePtInfo))
                     {
-                        return true;
+                        if (isBoundary)
+                        {
+                            if (CheckMovePointWithLine(newPosition, bLines))
+                            {
+                                moveInfo = movePtInfo;
+                                return true;
+                            }
+                            else
+                            {
+                                if (moveInfo == null || moveInfo.Count <= 0)
+                                {
+                                    moveInfo = movePtInfo;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            moveInfo = movePtInfo;
+                            return true;
+                        }
                     }
                 }
             }
 
+            if (moveInfo != null && moveInfo.Count > 0)
+            {
+                return true;
+            }
             return false;
+        }
+
+        /// <summary>
+        /// 边界喷淋要考虑边界距离
+        /// </summary>
+        /// <param name="position"></param>
+        /// <param name="bLine"></param>
+        /// <returns></returns>
+        private bool CheckMovePointWithLine(Point3d position, List<Line> bLines)
+        {
+            foreach (var bLine in bLines)
+            {
+                Point3d closetPt = bLine.GetClosestPointTo(position, true);
+                double length = closetPt.DistanceTo(position);
+                if (length > maxSpacing / 2)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// 计算喷淋移动点位
+        /// </summary>
+        /// <param name="spray"></param>
+        /// <param name="pt"></param>
+        /// <param name="index"></param>
+        /// <returns></returns>
+        private Point3d MoveSpray(SprayLayoutData spray, Point3d pt, double index)
+        {
+            Vector3d moveDir = (pt - spray.Position).GetNormal();
+            double distance = pt.DistanceTo(spray.Position);
+
+            double xValue = Math.Ceiling(Math.Abs(moveDir.X) * distance / index) * index;
+            double yValue = Math.Ceiling(Math.Abs(moveDir.Y) * distance / index) * index;
+            Vector3d xDir = moveDir.X > 0 ? Vector3d.XAxis : -Vector3d.XAxis;
+            Vector3d yDir = moveDir.Y > 0 ? Vector3d.YAxis : -Vector3d.YAxis;
+
+            var newPosition = spray.Position + xValue * xDir + yValue * yDir;
+            return newPosition;
         }
 
         /// <summary>
@@ -152,14 +295,10 @@ namespace ThMEPWSS.Bussiness
         /// <param name="moveDir"></param>
         /// <param name="moveLength"></param>
         /// <returns></returns>
-        private bool CheckMoveResult(List<SprayLayoutData> allSprays, List<Polyline> allAreas, SprayLayoutData spray, Polyline area, Vector3d moveDir, double moveLength, double index)
+        private bool CheckMoveResult(List<SprayLayoutData> allSprays, List<Polyline> allAreas, SprayLayoutData spray, Polyline area, Point3d newPosition,
+            out List<KeyValuePair<SprayLayoutData, Point3d>> movePtInfo)
         {
-            double xValue = Math.Ceiling(Math.Abs(moveDir.X) * moveLength / index) * index;
-            double yValue = Math.Ceiling(Math.Abs(moveDir.Y) * moveLength / index) * index;
-            Vector3d xDir = moveDir.X > 0 ? Vector3d.XAxis : -Vector3d.XAxis;
-            Vector3d yDir = moveDir.Y > 0 ? Vector3d.YAxis : -Vector3d.YAxis;
-
-            var newPosition = spray.Position + xValue * xDir + yValue * yDir;
+            movePtInfo = new List<KeyValuePair<SprayLayoutData, Point3d>>();
             if (!area.Contains(newPosition))
             {
                 return false;
@@ -178,12 +317,12 @@ namespace ThMEPWSS.Bussiness
             }
 
             //尝试调整周围有问题的点
-            if (AdjustAroundSprays(allSprays, checkSprays, newPosition, allAreas))
+            if (AdjustAroundSprays(allSprays, checkSprays, newPosition, allAreas, movePtInfo))
             {
-                spray.Position = newPosition;
+                movePtInfo.Add(new KeyValuePair<SprayLayoutData, Point3d>(spray, newPosition));
                 return true;
             }
-            
+
             return false;
         }
 
@@ -195,9 +334,9 @@ namespace ThMEPWSS.Bussiness
         /// <param name="newPosition"></param>
         /// <param name="allAreas"></param>
         /// <returns></returns>
-        private bool AdjustAroundSprays(List<SprayLayoutData> allSprays, List<SprayLayoutData> checkSprays, Point3d newPosition, List<Polyline> allAreas)
+        private bool AdjustAroundSprays(List<SprayLayoutData> allSprays, List<SprayLayoutData> checkSprays, Point3d newPosition, List<Polyline> allAreas, 
+            List<KeyValuePair<SprayLayoutData, Point3d>> movePtInfo)
         {
-            Dictionary<SprayLayoutData, Point3d> sprayDic = new Dictionary<SprayLayoutData, Point3d>();
             foreach (var cSpray in checkSprays)
             {
                 var compareDir = (cSpray.Position - newPosition).GetNormal();
@@ -220,7 +359,7 @@ namespace ThMEPWSS.Bussiness
                 }
 
                 Point3d movePosition = cSpray.Position + moveLength * moveDir;
-                if (allAreas.Where(x=>x.Contains(movePosition)).Count() <= 0)
+                if (allAreas.Where(x => x.Contains(movePosition)).Count() <= 0)
                 {
                     return false;
                 }
@@ -236,12 +375,7 @@ namespace ThMEPWSS.Bussiness
                     }
                 }
 
-                sprayDic.Add(cSpray, movePosition);
-            }
-
-            foreach (var sDic in sprayDic)
-            {
-                sDic.Key.Position = sDic.Value;
+                movePtInfo.Add(new KeyValuePair<SprayLayoutData, Point3d>(cSpray, movePosition));
             }
             return true;
         }
@@ -260,7 +394,7 @@ namespace ThMEPWSS.Bussiness
             polyline.AddVertexAt(0, (spray.Position - spray.mainDir * sprayRange + spray.otherDir * sprayRange).ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, (spray.Position - spray.mainDir * sprayRange - spray.otherDir * sprayRange).ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, (spray.Position + spray.mainDir * sprayRange - spray.otherDir * sprayRange).ToPoint2D(), 0, 0, 0);
-            
+
             return layoutAreas.Where(x => x.Intersects(polyline)).ToList();
         }
 

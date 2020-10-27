@@ -26,9 +26,11 @@
   <ItemGroup>
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />
+    <Compile Include="Bussiness\BoundaryProtectBussiness\BoundaryProtestService.cs" />
+    <Compile Include="Bussiness\BoundaryProtectBussiness\CheckProtectByPointsService.cs" />
     <Compile Include="Bussiness\CalSprayBlindAreaService.cs" />
     <Compile Include="Bussiness\CalSprayBlindLineAreaService.cs" />
-    <Compile Include="Bussiness\CheckProtectService.cs" />
+    <Compile Include="Bussiness\BoundaryProtectBussiness\CheckProtectService.cs" />
     <Compile Include="Bussiness\ConnectingPipeBussiness\ConnectingPipeService.cs" />
     <Compile Include="Bussiness\GenerateSpraysService.cs" />
     <Compile Include="Bussiness\LayoutBussiness\LayoutService.cs" />

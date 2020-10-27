@@ -12,9 +12,9 @@ using ThMEPWSS.Service;
 using ThMEPWSS.Utils;
 using ThWSS.Bussiness;
 
-namespace ThMEPWSS.Bussiness
+namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
 {
-    public class CheckProtectService
+    public class CheckProtectService : BoundaryProtestService
     {
         readonly double minSpacing = 400;
         readonly double moveLength = 100;
@@ -255,106 +255,6 @@ namespace ThMEPWSS.Bussiness
                 moveDir = moveDir.DotProduct(dir) > 0 ? moveDir : -moveDir;
                 length = Math.Ceiling((sortValue.Last() - maxSpacing) / moveLength) * moveLength;
             }
-        }
-
-        /// <summary>
-        /// 移动喷淋线
-        /// </summary>
-        /// <param name="spray"></param>
-        /// <param name="moveDir"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        private Line MoveSprayLine(SprayLayoutData spray, Vector3d moveDir, double length)
-        {
-            return spray.GetOtherPolylineByDir(moveDir).MovePolyline(length, moveDir);
-        }
-
-        /// <summary>
-        /// 获取边界喷淋
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="sprays"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        private Dictionary<Line, List<SprayLayoutData>> GetBoundarySpray(Polyline polyline, List<SprayLayoutData> sprays, double length)
-        {
-            List<Line> lines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
-            }
-
-            Dictionary<Line, List<SprayLayoutData>> sprayDic = new Dictionary<Line, List<SprayLayoutData>>(); 
-            foreach (var line in lines)
-            {
-                if (line.Length <= 300)
-                {
-                    continue;
-                }
-
-                var linePoly = expandLine(line, length);
-                var resSprays = GetSprays(line, linePoly, sprays);
-                if (resSprays.Count > 0)
-                {
-                    sprayDic.Add(line, resSprays);
-                }
-            }
-
-            return sprayDic;
-        }
-
-        /// <summary>
-        /// 获取附近的喷淋点
-        /// </summary>
-        /// <param name="polylines"></param>
-        /// <param name="columns"></param>
-        /// <returns></returns>
-        private List<SprayLayoutData> GetSprays(Line line, Polyline linePoly, List<SprayLayoutData> sprays)
-        {
-            var resPrays = sprays.Where(x => linePoly.IndexedContains(x.Position)).ToList();
-
-            List<SprayLayoutData> closetPolys = new List<SprayLayoutData>();
-            var nerstSpray = resPrays.OrderBy(x =>
-            {
-                var closetPt = line.GetClosestPointTo(x.Position, false);
-                return closetPt.DistanceTo(x.Position);
-            }).FirstOrDefault();
-            if (nerstSpray != null)
-            {
-                var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
-                var sprayDir = nerstSpray.mainDir;
-                if (Math.Abs(lineDir.DotProduct(nerstSpray.mainDir)) < Math.Abs(lineDir.DotProduct(nerstSpray.otherDir)))
-                {
-                    sprayDir = nerstSpray.otherDir;
-                }
-
-                var sprayLine = nerstSpray.GetPolylineByDir(sprayDir);
-                closetPolys.AddRange(resPrays.Where(x => x.vLine == sprayLine || x.tLine == sprayLine));
-            }
-            return closetPolys;
-        }
-
-        /// <summary>
-        /// 扩张line成polyline
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
-        private Polyline expandLine(Line line, double distance)
-        {
-            Vector3d lineDir = line.Delta.GetNormal();
-            Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
-            Point3d p1 = line.StartPoint + moveDir * distance;
-            Point3d p2 = line.EndPoint + moveDir * distance;
-            Point3d p3 = line.EndPoint - moveDir * distance;
-            Point3d p4 = line.StartPoint - moveDir * distance;
-
-            Polyline polyline = new Polyline() { Closed = true };
-            polyline.AddVertexAt(0, p1.ToPoint2D(), 0, 0, 0);
-            polyline.AddVertexAt(0, p2.ToPoint2D(), 0, 0, 0);
-            polyline.AddVertexAt(0, p3.ToPoint2D(), 0, 0, 0);
-            polyline.AddVertexAt(0, p4.ToPoint2D(), 0, 0, 0);
-            return polyline;
         }
     }
 }

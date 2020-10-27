@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Operation
     public class GridService
     {
         readonly double tol = 10;
-        double minSpace = 4500;
+        double minSpace = 4000;
 
         /// <summary>
         /// 构建柱轴网
@@ -174,8 +174,8 @@ namespace ThMEPEngineCore.Operation
         private KeyValuePair<Vector3d, List<Polyline>> MoveClosedGrid(KeyValuePair<Vector3d, List<Polyline>> grids)
         {
             var gridLines = grids.Value;
-            int index = 0;
-            int indexJ = 1;
+            int index = 1;
+            int indexJ = 2;
             List<Polyline> removePolys = new List<Polyline>();
             while (index < gridLines.Count)
             {
