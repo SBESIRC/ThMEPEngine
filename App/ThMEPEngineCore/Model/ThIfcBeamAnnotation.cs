@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Model
 {
@@ -13,11 +14,20 @@ namespace ThMEPEngineCore.Model
 
         public Dictionary<string, string> Attributes { get; private set; }
 
+        public Extents3d GeometricExtents { get; private set; }
+
         public ThIfcBeamAnnotation(DBText dBText, Matrix3d matrix)
         {
             Matrix = matrix;
             TextString = dBText.TextString;
+            GenerateBoundary(dBText, matrix);
             Attributes = ParseAnnotationText(dBText.Hyperlinks[0].DisplayString);
+        }
+
+        private void GenerateBoundary(DBText dBText, Matrix3d matrix)
+        {
+            GeometricExtents = dBText.GeometricExtents;
+            GeometricExtents.TransformBy(matrix);
         }
 
         public Point3d StartPoint

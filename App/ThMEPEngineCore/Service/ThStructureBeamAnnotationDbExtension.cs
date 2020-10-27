@@ -4,6 +4,8 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 
@@ -76,13 +78,19 @@ namespace ThMEPEngineCore.Service
                         }
                         else if (dbObj is DBText dbtext)
                         {
-                            if (CheckLayerValid(dbtext) && 
-                                IsBuildElement(dbtext) && 
+                            if (CheckLayerValid(dbtext) &&
+                                IsBuildElement(dbtext) &&
                                 IsAnnotation(dbtext))
                             {
                                 annotations.Add(new ThIfcBeamAnnotation(dbtext, matrix));
                             }
                         }
+                    }
+                    var xclip = blockReference.XClipInfo();
+                    if (xclip.IsValid)
+                    {
+                        xclip.TransformBy(matrix);
+                        return annotations.Where(o => xclip.Contains(o.GeometricExtents.ToRectangle()));
                     }
                 }
             }

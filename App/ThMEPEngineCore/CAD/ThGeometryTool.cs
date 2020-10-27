@@ -3,6 +3,7 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -171,6 +172,15 @@ namespace ThMEPEngineCore.CAD
                 }
             }
             return false;
-        }        
+        }     
+        public static Polyline TextOBB(this DBText dBText)
+        {
+            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, Vector3d.ZAxis, dBText.Position);
+            DBText newText = dBText.GetTransformedCopy(clockwiseMat) as DBText;
+            Polyline obb = newText.GeometricExtents.ToRectangle();
+            Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, Vector3d.ZAxis, dBText.Position);
+            obb.TransformBy(counterClockwiseMat);
+            return obb;
+        }
     }
 }
