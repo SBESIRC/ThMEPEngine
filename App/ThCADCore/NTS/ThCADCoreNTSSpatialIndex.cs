@@ -66,14 +66,6 @@ namespace ThCADCore.NTS
                 {
                     return polyline.ToNTSLineString();
                 }
-                else if (obj is Polyline2d polyline2d)
-                {
-                    return polyline2d.ToNTSLineString();
-                }
-                else if(obj is Polyline3d polyline3d)
-                {
-                    return polyline3d.ToNTSLineString();
-                }                
                 else if (obj is Arc arc)
                 {
                     return arc.GeometricExtents.ToNTSPolygon();

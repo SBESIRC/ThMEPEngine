@@ -5,7 +5,6 @@ using NetTopologySuite.Algorithm;
 using NetTopologySuite.Utilities;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
@@ -212,17 +211,6 @@ namespace ThCADCore.NTS
         {
             var poly = new Polyline();
             poly.ConvertFrom(poly2d, false);
-            return poly.ToNTSLineString();
-        }
-
-        public static LineString ToNTSLineString(this Polyline3d poly3d)
-        {
-            var poly = new Polyline();
-            int i = 0;
-            foreach (Point3d pt in poly3d.GetPoints())
-            {
-                poly.AddVertexAt(i++, new Point2d(pt.X, pt.Y), 0, 0, 0);
-            }
             return poly.ToNTSLineString();
         }
 
