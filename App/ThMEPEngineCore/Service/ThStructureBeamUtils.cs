@@ -8,7 +8,7 @@ namespace ThMEPEngineCore.Service
     {
         public static Scale2d Size(string str)
         {
-            var match = Regex.Match(str, @"^(\d*[.]?\d*)x(\d*[.]?\d*)");
+            var match = BeamAnnotaionMatch(str);
             if (!match.Success)
             {
                 return new Scale2d();
@@ -17,6 +17,19 @@ namespace ThMEPEngineCore.Service
                 Convert.ToDouble(match.Groups[1].Value),
                 Convert.ToDouble(match.Groups[2].Value));
         }
+
+        private static Match BeamAnnotaionMatch(string str)
+        {
+            var match = Regex.Match(str, @"^(\s*\d*[.]?\d*\s*)[xX](\s*\d*[.]?\d*)");
+            return match;
+        }
+
+        public static bool IsBeamAnnotaion(string str)
+        {
+            var match = BeamAnnotaionMatch(str);
+            return match.Success;
+        }
+
 
         public static Point3d Coordinate(string text)
         {

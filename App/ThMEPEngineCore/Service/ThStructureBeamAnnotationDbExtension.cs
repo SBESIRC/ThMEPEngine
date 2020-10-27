@@ -104,7 +104,7 @@ namespace ThMEPEngineCore.Service
 
         private bool IsAnnotation(DBText dbtext)
         {
-            return dbtext.TextString.Contains('x');
+            return ThStructureBeamUtils.IsBeamAnnotaion(dbtext.TextString);
         }
     }
 }
