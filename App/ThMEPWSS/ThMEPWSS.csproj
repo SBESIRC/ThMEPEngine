@@ -36,6 +36,10 @@
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Model\SprayDataService.cs" />
     <Compile Include="Model\SprayLayoutData.cs" />
+    <Compile Include="Pipe\ThWGeUtils.cs" />
+    <Compile Include="Pipe\ThWKitchenPipeEngine.cs" />
+    <Compile Include="Pipe\ThWPipeParameters.cs" />
+    <Compile Include="Pipe\ThWPipeZone.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CheckService.cs" />
     <Compile Include="Service\ClearComponentService.cs" />

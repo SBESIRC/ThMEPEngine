@@ -16,7 +16,9 @@ using ThMEPWSS.Bussiness;
 using ThMEPWSS.Bussiness.LayoutBussiness;
 using ThMEPWSS.Service;
 using ThWSS;
+using ThMEPWSS.Pipe;
 using ThWSS.Bussiness;
+
 
 namespace ThMEPWSS
 {
@@ -460,6 +462,52 @@ namespace ThMEPWSS
                         var pipeLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(plFrame).Cast<Line>().ToList();
 
                     }
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPIPE", CommandFlags.Modal)]
+        public void ThPipe()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result2 = Active.Editor.GetEntity("\n选择管井");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result3 = Active.Editor.GetEntity("\n选择台盆");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result4 = Active.Editor.GetEntity("\n选择排气管");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var zone = new ThWPipeZone();
+                var parameters = new ThWPipeParameters(1, 100);
+                Polyline Pype = acadDatabase.Element<Polyline>(result4.ObjectId);
+                Polyline Boundry = acadDatabase.Element<Polyline>(result.ObjectId);
+                Polyline Outline = acadDatabase.Element<Polyline>(result2.ObjectId);
+                BlockReference Basinline = acadDatabase.Element<BlockReference>(result3.ObjectId);
+                var engine = new ThWKitchenPipeEngine()
+                {
+                    Zone = zone,
+                    Parameters = parameters,
+                };
+
+                engine.Run(Boundry, Outline,Basinline,Pype);
+                foreach (Point3d pt in engine.Pipes)
+                {
+                    acadDatabase.ModelSpace.Add(new DBPoint(pt));
                 }
             }
         }
