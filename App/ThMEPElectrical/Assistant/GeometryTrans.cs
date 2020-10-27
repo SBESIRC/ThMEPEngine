@@ -179,6 +179,19 @@ namespace ThMEPElectrical.Assistant
             return poly;
         }
 
+        public static Polyline GenerateSmallInValidPoly()
+        {
+            var pts = new Point3dCollection()
+            {
+                new Point3d(0, 0,0),
+                new Point3d(100, 0, 0),
+                new Point3d(100, 100, 0),
+                new Point3d(0, 100, 0)
+            };
+
+            return pts.ToPolyline();
+        }
+
         /// <summary>
         /// 根据点集，半径，绘制圆
         /// </summary>

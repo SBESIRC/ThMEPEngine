@@ -131,7 +131,8 @@ namespace ThMEPElectrical.Business.MainBeam
             var rectArea = leftLine.Length * bottomLine.Length;
 
             // 一个可以布置完的
-            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
+            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea
+                && GeomUtils.IsValidSinglePlace(leftLine.Length, bottomLine.Length, m_parameter.ProtectRadius))
             {
                 return GeomUtils.CalculateCentroidFromPoly(placeRectInfo.srcPolyline);
             }
@@ -319,14 +320,109 @@ namespace ThMEPElectrical.Business.MainBeam
             return null;
         }
 
+        protected List<Polyline> GenerateIntersectRegions(Polyline polyFir, Polyline polySec)
+        {
+            var polyLst = new List<Polyline>();
+            foreach (DBObject singlePolygon in polyFir.GeometryIntersection(polySec))
+            {
+                if (singlePolygon is Polyline validPoly)
+                    polyLst.Add(validPoly);
+            }
+
+            if (polyLst.Count == 0)
+            {
+                polyLst.Add(GeometryTrans.GenerateSmallInValidPoly());
+                return polyLst;
+            }
+
+            var resPolys = new List<Polyline>();
+            foreach (var singlePoly in polyLst)
+            {
+                if (singlePoly.Area > 15 * 1e6)
+                    resPolys.Add(singlePoly);
+            }
+
+            if (resPolys.Count == 0)
+            {
+                resPolys.Add(GeometryTrans.GenerateSmallInValidPoly());
+            }
+
+            return resPolys;
+        }
+
         /// <summary>
-        /// 多行处理
+        /// 分割后可能生成一行的数据信息
+        /// </summary>
+        /// <param name="bottomLine"></param>
+        /// <param name="moveDir"></param>
+        /// <param name="moveLength"></param>
+        /// <param name="srcShape"></param>
+        /// <returns></returns>
+        private List<PlaceRect> SplitRegularShapeIntoPlaceRectInfos(Line bottomLine, Vector3d moveDir, double moveLength, Polyline srcShape)
+        {
+            var placeRectInfos = new List<PlaceRect>();
+            var splitPoly = GenerateSplitPolyline(bottomLine, moveDir, moveLength); // 生成分割矩形
+            var resSplitPolys = GenerateIntersectRegions(splitPoly, srcShape);
+            DrawUtils.DrawProfile(resSplitPolys.Polylines2Curves(), "intersectPoly");
+
+            foreach (var singleResPoly in resSplitPolys)
+            {
+                var placeRect = GeomUtils.CalculateProfileRectInfo(singleResPoly);
+                placeRect.srcPolyline = singleResPoly;
+                placeRectInfos.Add(placeRect);
+            }
+
+            return placeRectInfos;
+        }
+
+        /// <summary>
+        /// 通用异形分割和布置处理，主要是多行的情况处理，单行肯定是连通的
         /// </summary>
         /// <param name="placeRectInfo"></param>
         /// <param name="verticalCount"></param>
         /// <param name="verticalGap"></param>
         /// <returns></returns>
         protected virtual List<Point3d> MultiOneRowPlacePts(PlaceRect placeRectInfo, double verticalCount, double verticalGap)
+        {
+            var srcPostPoly = placeRectInfo.srcPolyline;
+
+            var bottomLine = placeRectInfo.BottomLine;
+            var oneRowPlaceRectInfos = new List<List<PlaceRect>>(); // 每一行可能是多个分割后的布置图形，由于太异形导致的
+            var ptLst = new List<Point3d>();
+            for (int i = 0; i < verticalCount; i++)
+            {
+                var curBottomLine = GeomUtils.MoveLine(bottomLine, Vector3d.YAxis, i * verticalGap);
+                var onePlaceRectInfos = SplitRegularShapeIntoPlaceRectInfos(curBottomLine, Vector3d.YAxis, verticalGap, srcPostPoly);
+                // 增加每一行的矩形信息
+                oneRowPlaceRectInfos.Add(onePlaceRectInfos);
+            }
+
+            for (int i = 0; i < oneRowPlaceRectInfos.Count; i++)
+            {
+                var curPlaceRects = oneRowPlaceRectInfos[i];
+                var midPosGap = verticalGap * 0.5;
+                
+                // 一行分割图形处理
+                foreach (var singleRectInfo in curPlaceRects)
+                {
+                    var midLine = GeomUtils.MoveLine(singleRectInfo.BottomLine, Vector3d.YAxis, midPosGap);
+                    var oneRowPts = OneRowPlace(midLine, singleRectInfo, midPosGap);
+                    if (oneRowPts != null && oneRowPts.Count != 0)
+                        ptLst.AddRange(oneRowPts);
+                }
+            }
+
+            return ptLst;
+        }
+
+        /// <summary>
+        /// 通用异形分割和布置处理，主要是多行的情况处理，单行肯定是连通的
+        /// </summary>
+        /// <param name="placeRectInfo"></param>
+        /// <param name="verticalCount"></param>
+        /// <param name="verticalGap"></param>
+        /// <returns></returns>
+        protected List<Point3d> MultiOneRowPlacePtsBack(PlaceRect placeRectInfo, double verticalCount, double verticalGap)
         {
             var srcPostPoly = placeRectInfo.srcPolyline;
 
@@ -344,7 +440,6 @@ namespace ThMEPElectrical.Business.MainBeam
 
                 DrawUtils.DrawProfile(new List<Curve>() { intersectPoly }, "intersectPoly");
                 var placeRect = GeomUtils.CalculateProfileRectInfo(intersectPoly);
-                //DrawUtils.DrawProfile(new List<Curve>() { splitPoly }, "splitPoly");
                 placeRect.srcPolyline = intersectPoly;
                 oneRowPlaceRectInfos.Add(placeRect);
             }
@@ -444,7 +539,8 @@ namespace ThMEPElectrical.Business.MainBeam
             var rectArea = leftLine.Length * bottomLine.Length;
 
             // 一个可以布置完的
-            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
+            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea
+                && GeomUtils.IsValidSinglePlace(leftLine.Length, bottomLine.Length, m_parameter.ProtectRadius))
             {
                 return GeomUtils.CalculateCentroidFromPoly(srcTransPoly);
             }

@@ -115,7 +115,8 @@ namespace ThMEPElectrical.Business.MainBeam
             var rectArea = leftLine.Length * bottomLine.Length;
 
             // 一个可以布置完的
-            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea)
+            if (leftLine.Length < 2 * m_parameter.ProtectRadius && bottomLine.Length < 2 * m_parameter.ProtectRadius && rectArea < m_parameter.ProtectArea
+                && GeomUtils.IsValidSinglePlace(leftLine.Length, bottomLine.Length, m_parameter.ProtectRadius))
             {
                 m_singlePlacePts.AddRange(GeomUtils.CalculateCentroidFromPoly(placeRectInfo.srcPolyline));
                 return;

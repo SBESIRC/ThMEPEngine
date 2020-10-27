@@ -345,6 +345,13 @@ namespace ThMEPElectrical.Geometry
             return pts.ToPolyline();
         }
 
+        public static bool IsValidSinglePlace(double hLength, double wLength, double rLength)
+        {
+            if (Math.Pow(hLength, 2) + Math.Pow(wLength, 2) < Math.Pow(rLength, 2) * 4)
+                return true;
+
+            return false;
+        }
         /// <summary>
         /// 计算几何中心
         /// </summary>
