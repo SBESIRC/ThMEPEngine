@@ -22,6 +22,10 @@ namespace ThMEPEngineCore.Service
         {
             return LayerFilter.Where(o => string.Compare(curve.Layer, o, true) == 0).Any();
         }
+        protected bool CheckCurveValid(Curve curve)
+        {
+            return (curve is Line) || (curve is Arc) || (curve is Polyline);
+        }
         protected bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
             // 暂时不支持动态块，外部参照，覆盖
