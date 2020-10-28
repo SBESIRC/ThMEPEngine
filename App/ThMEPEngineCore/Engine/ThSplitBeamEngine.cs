@@ -16,12 +16,9 @@ namespace ThMEPEngineCore.Engine
     {
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
 
-        public List<ThIfcBeam> BeamElements { get; set; }
-
         public ThSplitBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
         {
             BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;           
-            BeamElements = BeamConnectRecogitionEngine.BeamEngine.Elements.Cast<ThIfcBeam>().ToList();
         }
         public void Split()
         {
@@ -134,19 +131,25 @@ namespace ThMEPEngineCore.Engine
         {
             throw new NotSupportedException();
         }
-        private void FilterSmallBeams(double tolerance=10.0)
+        private void FilterSmallBeams()
         {
-            var removeBeams = BeamElements.Where(o => o is ThIfcLineBeam thIfcLinearBeam && thIfcLinearBeam.Length <= tolerance).ToList();
-            removeBeams.ForEach(o=>o.Outline.Dispose());
-            BeamElements = BeamElements.Where(m => !removeBeams.Where(n => m.Uuid == n.Uuid).Any()).ToList();
+            BeamConnectRecogitionEngine.BeamEngine.Elements=
+                BeamConnectRecogitionEngine.BeamEngine.Elements.Where(o =>
+            {
+                if (o is ThIfcLineBeam thIfcLinearBeam && thIfcLinearBeam.Length < ThMEPEngineCoreCommon.BeamMinimumLength)
+                {
+                    return false;
+                }
+                return true;
+            }).ToList();
         }
         private void SplitBeamPassWalls()
         {
-            List<ThIfcBeam> removeBeams = new List<ThIfcBeam>();
+            List<string> removeUuids = new List<string>();
             List<ThIfcBeam> addBeams = new List<ThIfcBeam>();
-            BeamElements.ForEach(o =>
+            BeamConnectRecogitionEngine.BeamEngine.Elements.ForEach(o =>
                 {
-                    List<Polyline> passWalls = BeamCrossWallOutlines(o);
+                    List<Polyline> passWalls = BeamCrossWallOutlines(o as ThIfcBeam);
                     ThBeamSplitter thSplitBeam = null;
                     if (o is ThIfcLineBeam thIfcLineBeam)
                     {
@@ -159,20 +162,21 @@ namespace ThMEPEngineCore.Engine
                     thSplitBeam.Split(passWalls);
                     if (thSplitBeam.SplitBeams.Count > 0)
                     {
-                        removeBeams.Add(o);
+                        removeUuids.Add(o.Uuid);
                         addBeams.AddRange(thSplitBeam.SplitBeams);
                     }
                 });
-            removeBeams.ForEach(o => BeamConnectRecogitionEngine.BeamEngine.Elements.Remove(o));
+            BeamConnectRecogitionEngine.BeamEngine.Elements=
+                BeamConnectRecogitionEngine.BeamEngine.Elements.Where(o => removeUuids.IndexOf(o.Uuid) < 0).ToList();
             BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(addBeams);
             BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
         }        
         private void SplitBeamPassColumns()
         {
-            List<ThIfcBeam> removeBeams = new List<ThIfcBeam>();
+            List<string> removeUuids = new List<string>();
             List<ThIfcBeam> addBeams = new List<ThIfcBeam>();
-            BeamElements.ForEach(o =>
-            {      
+            BeamConnectRecogitionEngine.BeamEngine.Elements.ForEach(o =>
+            {
                 var passColumns = BeamCrossColumnOutlines(o as ThIfcBeam);
                 ThBeamSplitter thSplitBeam = null;
                 if (o is ThIfcLineBeam thIfcLineBeam)
@@ -186,11 +190,12 @@ namespace ThMEPEngineCore.Engine
                 thSplitBeam.Split(passColumns);
                 if (thSplitBeam.SplitBeams.Count > 1)
                 {
-                    removeBeams.Add(o);
+                    removeUuids.Add(o.Uuid);
                     addBeams.AddRange(thSplitBeam.SplitBeams);
                 }
             });
-            removeBeams.ForEach(o => BeamConnectRecogitionEngine.BeamEngine.Elements.Remove(o));
+            BeamConnectRecogitionEngine.BeamEngine.Elements =
+                BeamConnectRecogitionEngine.BeamEngine.Elements.Where(o => removeUuids.IndexOf(o.Uuid) < 0).ToList();
             BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(addBeams);
             BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
         }

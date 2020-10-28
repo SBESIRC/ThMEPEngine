@@ -144,11 +144,35 @@ namespace ThMEPElectrical.Core
 
         private bool RelatedPolyline(Polyline polyFir, Polyline PolySec)
         {
+            if (IsIntersect(polyFir, PolySec))
+                return true;
+
             var ptCollection = PolySec.Vertices();
             foreach (Point3d pt in ptCollection)
             {
                 if (GeomUtils.PtInLoop(polyFir, pt.ToPoint2D()))
                     return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 包含的不算
+        /// </summary>
+        /// <param name="firstPly"></param>
+        /// <param name="secPly"></param>
+        /// <returns></returns>
+        private bool IsIntersect(Polyline firstPly, Polyline secPly)
+        {
+            if (GeomUtils.IsIntersectValid(firstPly, secPly))
+            {
+                var ptLst = new Point3dCollection();
+                firstPly.IntersectWith(secPly, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);
+                if (ptLst.Count != 0)
+                {
+                    return true;
+                }
             }
 
             return false;

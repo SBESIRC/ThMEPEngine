@@ -18,6 +18,12 @@ namespace ThMEPEngineCore.Algorithm
             }
         }
 
+        public bool Contains(Point3d point)
+        {
+            var dbpoint = new DBPoint(point);
+            return PreparedPolygon.Contains(dbpoint.ToNTSPoint());
+        }
+
         public bool Contains(Curve curve)
         {
             return PreparedPolygon.Contains(curve.ToNTSGeometry());

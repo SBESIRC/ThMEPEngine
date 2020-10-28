@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Model;
 
 namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
@@ -80,6 +81,11 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
                 {
                     pts.Add(dirClosestPt.Value);
                 }
+            }
+
+            if (pts.Count == 0)
+            {
+                return ThMEPCommon.NullPoint3d;
             }
 
             if (pts.Count == 1)

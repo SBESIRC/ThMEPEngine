@@ -172,6 +172,8 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
 
             var nearestPt = closestPts.First();
             var nearestPts = closestPts.Where(pt => pt.DistanceTo(srcPt) < nearestPt.DistanceTo(srcPt) * 2).ToList();
+            if (nearestPts.Count == 0)
+                nearestPts.Add(nearestPt);
             return new PointNode(nearestPt, nearestPts);
         }
 

@@ -235,6 +235,7 @@ namespace ThMEPEngineCore
             message += thIfcBeam.Width + "，";
             message += thIfcBeam.Height;
             DBText dbText = new DBText();
+            dbText.SetDatabaseDefaults(Active.Database);
             dbText.TextString = message;
             dbText.Position = ThGeometryTool.GetMidPt(thIfcBeam.StartPoint, thIfcBeam.EndPoint);
             Vector3d dir=Vector3d.XAxis.CrossProduct(thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint));
