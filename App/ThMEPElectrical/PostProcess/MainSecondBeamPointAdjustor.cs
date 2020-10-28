@@ -76,6 +76,9 @@ namespace ThMEPElectrical.PostProcess
         /// <returns></returns>
         public static List<Point3d> MakeMainBeamPointAdjustor(MainSecondBeamRegion beamSpanInfo, MSPlaceAdjustorType placeAdjustorType)
         {
+            if (beamSpanInfo.ValidRegions.Count == 0)
+                return new List<Point3d>();
+
             var mainBeamPointAdjustor = new MainSecondBeamPointAdjustor(beamSpanInfo, placeAdjustorType);
             mainBeamPointAdjustor.Distribute();
             return mainBeamPointAdjustor.PostPoints;

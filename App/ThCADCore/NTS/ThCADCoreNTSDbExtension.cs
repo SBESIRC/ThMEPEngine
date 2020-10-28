@@ -148,6 +148,10 @@ namespace ThCADCore.NTS
             {
                 geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
             }
+            else if (geometry is Point)
+            {
+                return objs;
+            }
             else
             {
                 throw new NotSupportedException();
