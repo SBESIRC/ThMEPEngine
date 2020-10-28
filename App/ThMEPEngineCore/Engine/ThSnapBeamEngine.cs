@@ -53,11 +53,14 @@ namespace ThMEPEngineCore.Engine
             thBeamLink.End= GetPortLinkObjs(thIfcLineBeam, thIfcLineBeam.EndPoint);
             ThBeamLinkSnapService.Snap(thBeamLink);
         }
+        private void Snap(ThIfcArcBeam thIfcArcBeam)
+        {
+            throw new NotSupportedException();
+        }
         private List<ThIfcBuildingElement> GetPortLinkObjs(ThIfcBeam thIfcBeam,Point3d portPt)
         {
             List<ThIfcBuildingElement> results = new List<ThIfcBuildingElement>();
-            var linkBeams = ThBeamLinkEx.QueryPortLinkBeams(thIfcBeam,
-                portPt, 0.5, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
+            var linkBeams = GetPortLinkBeams(thIfcBeam, portPt);
             if (linkBeams.Count == 0)
             {
                 var linkComponents = ThBeamLinkEx.QueryPortLinkElements(thIfcBeam,
@@ -66,9 +69,41 @@ namespace ThMEPEngineCore.Engine
             }
             return results;
         }
-        private void Snap(ThIfcArcBeam thIfcArcBeam)
+        private List<ThIfcBeam> GetPortLinkBeams(ThIfcBeam thIfcBeam, Point3d portPt)
+        {
+            if(thIfcBeam is ThIfcLineBeam lineBeam)
+            {
+                return GetPortLinkBeams(lineBeam, portPt);
+            }
+            else if(thIfcBeam is ThIfcArcBeam arcBeam)
+            {
+                return GetPortLinkBeams(arcBeam, portPt);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        private List<ThIfcBeam> GetPortLinkBeams(ThIfcLineBeam thIfcLineBeam, Point3d portPt)
+        {
+            var linkBeams = ThBeamLinkEx.QueryPortLinkBeams(thIfcLineBeam,
+                   portPt, 0.5, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
+            return linkBeams.Where(o=>
+            {
+                if(o is ThIfcLineBeam lineBeam) 
+                {
+                    return ThStructureBeamUtils.IsLooseCollinear(thIfcLineBeam, lineBeam);
+                }
+                else
+                {
+                    return ThStructureBeamUtils.IsLooseCollinear(thIfcLineBeam, portPt, o as ThIfcArcBeam);
+                }
+            }).ToList();
+        }
+
+        private List<ThIfcBeam> GetPortLinkBeams(ThIfcArcBeam thIfcArcBeam, Point3d portPt)
         {
             throw new NotSupportedException();
-        }
+        }   
     }
 }
