@@ -10,8 +10,6 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThExtendBeamEngine : ThBuildingElementPreprocessEngine
     {
-        private List<ThIfcBuildingElement> BeamElements { get; set; }
-
         private ThBeamLinkExtension LinkExtension { get; set; }
 
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
@@ -50,7 +48,7 @@ namespace ThMEPEngineCore.Engine
 
         public void Extend()
         {
-            BeamElements = new List<ThIfcBuildingElement>();
+            var beamElements = new List<ThIfcBuildingElement>();
             foreach (var thIfcBeam in LineBeams)
             {
                 bool bExtendStart = LinkExtension.QueryPortLinkBeams(
@@ -77,14 +75,14 @@ namespace ThMEPEngineCore.Engine
                 {
                     double endDistance = bExtendEnd ? ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance : 0.0;
                     double startDistance = bExtendStart ? ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance : 0.0;
-                    BeamElements.Add(ThIfcLineBeam.Create(thIfcBeam, startDistance, endDistance));
+                    beamElements.Add(ThIfcLineBeam.Create(thIfcBeam, startDistance, endDistance));
                 }
                 else
                 {
-                    BeamElements.Add(thIfcBeam);
+                    beamElements.Add(thIfcBeam);
                 }
             }
-            BeamEngine.Elements = BeamElements;
+            BeamEngine.Elements = beamElements;
         }
     }
 }

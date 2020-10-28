@@ -10,17 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 namespace ThMEPEngineCore.Engine
 {
     public class ThMergeBeamEngine : ThBuildingElementPreprocessEngine
-    {
-        public List<ThIfcBuildingElement> BeamElements { get; set; }
-
-        private IEnumerable<ThIfcLineBeam> LineBeams
-        {
-            get
-            {
-                return BeamEngine.Elements.Where(o => o is ThIfcLineBeam).Cast<ThIfcLineBeam>();
-            }
-        }
-
+    { 
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
 
         private ThCADCoreNTSSpatialIndex SpatialIndex
@@ -39,14 +29,22 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        private IEnumerable<ThIfcLineBeam> LineBeams
+        {
+            get
+            {
+                return BeamEngine.Elements.Where(o => o is ThIfcLineBeam).Cast<ThIfcLineBeam>();
+            }
+        }
+
         public ThMergeBeamEngine(ThBeamConnectRecogitionEngine thBeamConnectRecogitionEngine)
         {
-            BeamElements = new List<ThIfcBuildingElement>();
             BeamConnectRecogitionEngine = thBeamConnectRecogitionEngine;
         }
 
         public void Merge()
         {
+            var beamElements = new List<ThIfcBuildingElement>();
             foreach (var beam in LineBeams)
             {
                 var poly = beam.Outline as Polyline;
@@ -81,14 +79,14 @@ namespace ThMEPEngineCore.Engine
             {
                 if (group.Key == null)
                 {
-                    group.ForEach(o => BeamElements.Add(o));
+                    group.ForEach(o => beamElements.Add(o));
                 }
                 else
                 {
-                    BeamElements.AddRange(MergeBeams(group.ToList()));
+                    beamElements.AddRange(MergeBeams(group.ToList()));
                 }
             }
-            BeamEngine.Elements = BeamElements;
+            BeamEngine.Elements = beamElements;
         }
     }
 }
