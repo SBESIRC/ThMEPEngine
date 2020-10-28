@@ -148,9 +148,9 @@ namespace ThCADCore.NTS
             {
                 geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
             }
-            else if (geometry is Point)
+            else if (geometry is Point point) 
             {
-                return objs;
+                objs.Add(point.ToDbPoint());
             }
             else
             {
@@ -267,6 +267,11 @@ namespace ThCADCore.NTS
         public static Point ToNTSPoint(this DBPoint point)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(point.Position.ToNTSCoordinate());
+        }
+
+        public static DBPoint ToDbPoint(this Point point)
+        {
+            return new DBPoint(point.ToAcGePoint3d());
         }
 
         public static bool IsCCW(this Polyline pline)
