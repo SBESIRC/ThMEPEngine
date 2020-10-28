@@ -13,7 +13,7 @@ namespace ThMEPWSS.Pipe
     {
         public ThWPipeZone Zone { get; set; }
         public Point3dCollection Pipes { get; set; }
-        public ThWPipeParameters Parameters { get; set; }
+        public ThWKitchenPipeParameters Parameters { get; set; }
         public ThWKitchenPipeEngine()
         {
             Pipes = new Point3dCollection();

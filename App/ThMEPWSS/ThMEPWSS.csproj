@@ -40,8 +40,10 @@
     <Compile Include="Model\SprayLayoutData.cs" />
     <Compile Include="Pipe\ThWGeUtils.cs" />
     <Compile Include="Pipe\ThWKitchenPipeEngine.cs" />
-    <Compile Include="Pipe\ThWPipeParameters.cs" />
+    <Compile Include="Pipe\ThWKitchenPipeParameters.cs" />
+    <Compile Include="Pipe\ThWToiletPipeParameters.cs" />
     <Compile Include="Pipe\ThWPipeZone.cs" />
+    <Compile Include="Pipe\ThWToiletPipeEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CheckService.cs" />
     <Compile Include="Service\ClearComponentService.cs" />

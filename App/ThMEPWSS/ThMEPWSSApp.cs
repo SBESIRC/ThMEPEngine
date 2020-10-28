@@ -63,7 +63,7 @@ namespace ThMEPWSS
             //    gridSpacing = doubleResult.Value;
             //}
 
-            if(!CalWCSLayoutDirection(ref RotateTransformService.xDir))
+            if (!CalWCSLayoutDirection(ref RotateTransformService.xDir))
             {
                 return;
             }
@@ -153,7 +153,7 @@ namespace ThMEPWSS
                     //{
                     //    acdb.ModelSpace.Add(item);
                     //}
-                    
+
                     //生成喷淋对象
                     RayLayoutService layoutDemo = new RayLayoutService();
                     var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, true);
@@ -465,7 +465,7 @@ namespace ThMEPWSS
                 }
             }
         }
-
+        //厨房立管
         [CommandMethod("TIANHUACAD", "THPIPE", CommandFlags.Modal)]
         public void ThPipe()
         {
@@ -482,18 +482,18 @@ namespace ThMEPWSS
                     return;
                 }
                 var result3 = Active.Editor.GetEntity("\n选择台盆");
-                if (result2.Status != PromptStatus.OK)
+                if (result3.Status != PromptStatus.OK)
                 {
                     return;
                 }
                 var result4 = Active.Editor.GetEntity("\n选择排气管");
-                if (result2.Status != PromptStatus.OK)
+                if (result4.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
                 var zone = new ThWPipeZone();
-                var parameters = new ThWPipeParameters(1, 100);
+                var parameters = new ThWKitchenPipeParameters(1, 100);
                 Polyline Pype = acadDatabase.Element<Polyline>(result4.ObjectId);
                 Polyline Boundry = acadDatabase.Element<Polyline>(result.ObjectId);
                 Polyline Outline = acadDatabase.Element<Polyline>(result2.ObjectId);
@@ -504,10 +504,54 @@ namespace ThMEPWSS
                     Parameters = parameters,
                 };
 
-                engine.Run(Boundry, Outline,Basinline,Pype);
+                engine.Run(Boundry, Outline, Basinline, Pype);
                 foreach (Point3d pt in engine.Pipes)
                 {
                     acadDatabase.ModelSpace.Add(new DBPoint(pt));
+                    acadDatabase.ModelSpace.Add(new Circle() { Radius = 50, Center = pt });
+                }
+            }
+        }
+        //卫生间立管
+        [CommandMethod("TIANHUACAD", "THPIPE1", CommandFlags.Modal)]
+        public void ThPipe1()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result2 = Active.Editor.GetEntity("\n选择管井");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result3 = Active.Editor.GetEntity("\n选择马桶");
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+              
+                var zone = new ThWPipeZone();
+                var parameters = new ThWToiletPipeParameters(1,1, 150);
+
+                Polyline urinal = acadDatabase.Element<Polyline>(result3.ObjectId);
+                Polyline boundry = acadDatabase.Element<Polyline>(result.ObjectId);
+                Polyline outline = acadDatabase.Element<Polyline>(result2.ObjectId);
+               
+                var engine = new ThWToiletPipeEngine()
+                {
+                    Zone = zone,
+                    Parameters = parameters,
+                };
+
+                engine.Run(boundry, outline, urinal);
+                for (int i=0;i<parameters.Number;i++)
+                {
+                    acadDatabase.ModelSpace.Add(new DBPoint (engine.Pipes[i]));
+                    acadDatabase.ModelSpace.Add(new Circle() { Radius = parameters.Diameter[i]/2,Center= engine.Pipes[i] });
                 }
             }
         }
