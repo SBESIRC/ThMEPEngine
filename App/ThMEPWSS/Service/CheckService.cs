@@ -43,6 +43,33 @@ namespace ThMEPWSS.Service
         }
 
         /// <summary>
+        /// 校验边界防止产生新盲区
+        /// </summary>
+        /// <param name="boundarys"></param>
+        /// <param name="position"></param>
+        /// <param name="newPosition"></param>
+        /// <param name="maxLenghth"></param>
+        /// <returns></returns>
+        public bool CheckBoundaryLines(List<Line> boundarys, Point3d position, Point3d newPosition, double maxLenghth)
+        {
+            foreach (var bLine in boundarys)
+            {
+                Point3d closetPt = bLine.GetClosestPointTo(position, true);
+                double length = closetPt.DistanceTo(position);
+
+                Point3d newClosetPt = bLine.GetClosestPointTo(newPosition, true);
+                double newLength = newClosetPt.DistanceTo(newPosition);
+
+                if (length <= maxLenghth && newLength > maxLenghth)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// 判断两个喷淋点是否满足间距
         /// </summary>
         /// <param name="position"></param>

@@ -23,7 +23,19 @@ namespace ThMEPWSS.Bussiness
         /// <returns></returns>
         public List<Polyline> GetBlindArea(List<SprayLayoutData> sprays, Polyline polyline)
         {
-            var sprayArea = SprayLayoutDataUtils.Radii(sprays);
+            //计算喷淋实际保护区域
+            List<Polyline> protectArea = sprays.SelectMany(x =>
+            {
+                var objs = new DBObjectCollection();
+                objs.Add(x.Radii);
+                return polyline.Intersection(objs)
+                .Cast<Polyline>()
+                .Where(y => y.Contains(x.Position))
+                .SelectMany(z => z.Buffer(1).Cast<Polyline>());
+            }).ToList();
+            //List<Polyline> protectArea = sprays.Select(x => x.Radii).Cast<Polyline>().ToList();
+
+            var sprayArea = SprayLayoutDataUtils.Radii(protectArea);
             return polyline.Difference(sprayArea).Cast<Polyline>().ToList();
         }
 

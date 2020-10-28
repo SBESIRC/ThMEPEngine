@@ -18,23 +18,11 @@ namespace ThMEPWSS.Service
         public static void RotatePolyline(Polyline polyline)
         {
             polyline.Rotate(Point3d.Origin, -CalRotateAngle());
-            //using (AcadDatabase acdb = AcadDatabase.Active())
-            //{
-            //    acdb.ModelSpace.Add(polyline.Clone() as Polyline);
-            //}
         }
 
         public static void RotatePolyline(List<Polyline> polylines)
         {
             polylines.ForEach(x => x.Rotate(Point3d.Origin, -CalRotateAngle()));
-            //using (AcadDatabase acdb = AcadDatabase.Active())
-            //{
-            //    polylines.ForEach(x =>
-            //    {
-            //        var s = x.Clone() as Polyline;
-            //        acdb.ModelSpace.Add(s);
-            //    });
-            //}
         }
 
         public static void RotateInversePolyline(Polyline polyline)
@@ -45,6 +33,16 @@ namespace ThMEPWSS.Service
         public static void RotateInverseLines(List<Line> lines)
         {
             lines.ForEach(x => x.Rotate(Point3d.Origin, CalRotateAngle()));
+        }
+
+        public static Point3d RotateInversePoint(Point3d point)
+        {
+            return point.RotateBy(CalRotateAngle(), Vector3d.ZAxis, Point3d.Origin);
+        }
+
+        public static Vector3d RotateInverseVecter(Vector3d vec)
+        {
+            return vec.RotateBy(CalRotateAngle(), Vector3d.ZAxis);
         }
 
         private static double CalRotateAngle()

@@ -16,10 +16,10 @@ namespace ThMEPWSS.Utils
         /// </summary>
         /// <param name="sprays"></param>
         /// <returns></returns>
-        public static DBObjectCollection Radii(List<SprayLayoutData> sprays)
+        public static DBObjectCollection Radii(List<Polyline> sprays)
         {
             var objs = new DBObjectCollection();
-            foreach (var curve in sprays.Select(o => o.Radii))
+            foreach (var curve in sprays)
             {
                 objs.Add(curve);
             }

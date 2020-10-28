@@ -56,6 +56,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 .Select(y => new Line(y.StartPoint, y.EndPoint))
                 .ToList()).ToList();
             RotateTransformService.RotateInverseLines(sprayLines);
+            sprays.ForEach(x => x.Position = RotateTransformService.RotateInversePoint(x.Position));
             if (CreateLine)
             {
                 //打印布置网格线
@@ -265,11 +266,16 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         /// <returns></returns>
         private List<Polyline> LayoutPoints(Point3d pt, Vector3d dir, Vector3d otherDir, double length, double width)
         {
+            List<Polyline> lines = new List<Polyline>();
+            if (length <= 500)
+            {
+                return lines;
+            }
+
             double remainder, num, moveLength;
             //竖向排布条件
             CalLayoutWay(length, out remainder, out num, out moveLength);
 
-            List<Polyline> lines = new List<Polyline>();
             Point3d tSPt = pt + remainder * dir;
             for (int i = 0; i <= num; i++)
             {
@@ -280,6 +286,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 lines.Add(polyline);
                 tSPt = tSPt + dir * moveLength;
             }
+            
             return lines;
         }
 

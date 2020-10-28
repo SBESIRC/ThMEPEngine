@@ -15,10 +15,22 @@ namespace ThCADCore.NTS
             return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection();
         }
 
+        public static DBObjectCollection Intersection(this AcPolygon polygon, DBObjectCollection curves)
+        {
+            return polygon.ToNTSPolygon().Intersection(curves.UnionGeometries()).ToDbCollection();
+        }
+
         public static bool Contains(this AcPolygon polygon, Point3d pt)
         {
             var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());
             return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
+        }
+
+        public static bool ContainsOrOnBoundary(this AcPolygon polygon, Point3d pt)
+        {
+            var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());
+            var locateRes = locator.Locate(pt.ToNTSCoordinate());
+            return locateRes == Location.Interior || locateRes == Location.Boundary;
         }
 
         public static bool IndexedContains(this AcPolygon polygon, Point3d pt)

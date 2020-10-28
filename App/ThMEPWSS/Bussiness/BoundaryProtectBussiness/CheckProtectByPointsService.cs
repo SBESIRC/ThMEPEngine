@@ -26,7 +26,7 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
 
             //获取边界的喷淋
             var bSprays = GetBoundarySpray(polyline, sprays, sprayMaxSpacing);
-
+            
             //调整边界喷淋
             AdjustSprayPosition(bSprays, sprays);
         }
@@ -42,26 +42,32 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
             {
                 foreach (var spray in sprayLst.Value)
                 {
-                    if (spray.Position.DistanceTo(new Point3d(-3714901.732, 1051704.8935, 0)) < 10)
-                    {
-                        var s = 10;
-                    }
                     CalMoveSprayInfo(spray, sprayLst.Key, out Vector3d dir, out double length, out bool needMove);
                     if (needMove)
                     {
                         bool moveRes = true;
                         Point3d newPosition = spray.Position + dir * length;
+
+                        CheckService checkService = new CheckService();
                         var aroundSprays = spray.GetAroundSprays(allSprays);
                         foreach (var aSpray in aroundSprays)
                         {
-                            //校验喷淋是否满足间距
-                            CheckService checkService = new CheckService();
+                            //校验喷淋间是否满足间距
                             if (!checkService.CheckSprayPtDistance(aSpray.Position, newPosition, sprayMaxSpacing, sprayMinSpcing))
                             {
                                 moveRes = false;
                                 break;
                             }
                         }
+
+                        //校验喷淋与边界是否满足间距
+                        var bLines = sprays.Where(x => x.Value.Contains(spray)).Select(x => x.Key).ToList();
+                        if (!checkService.CheckBoundaryLines(bLines, spray.Position, newPosition, lineMaxSpacing))
+                        {
+                            moveRes = false;
+                            break;
+                        }
+
                         if (moveRes)
                         {
                             spray.Position = newPosition;

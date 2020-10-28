@@ -69,6 +69,7 @@ namespace ThMEPWSS.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var bufferPoly = polyline.Buffer(-1)[0] as Polyline;
                 var objs = new DBObjectCollection();
                 var blindLines = acadDatabase.ModelSpace
                     .OfType<Polyline>()
@@ -76,7 +77,7 @@ namespace ThMEPWSS.Service
                 blindLines.ForEach(x => objs.Add(x));
 
                 ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var bLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+                var bLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Polyline>().ToList();
                 foreach (var line in bLines)
                 {
                     line.UpgradeOpen();
@@ -90,7 +91,7 @@ namespace ThMEPWSS.Service
                 blindSolid.ForEachDbObject(o => objs.Add(o));
 
                 thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var hatchs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Hatch>().ToList();
+                var hatchs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Hatch>().ToList();
                 foreach (Hatch bSolid in hatchs)
                 {
                     bSolid.UpgradeOpen();

@@ -26,7 +26,6 @@ namespace ThMEPWSS.Bussiness
         double maxSpacing = 3400;
         double minSpacing = 100;
         double sprayWidth = 200;
-        KeyValuePair<SprayLayoutData, Point3d> sprayDic;  //记录变化的喷淋信息
 
         public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, double maxValue, double minValue)
         {
@@ -39,15 +38,7 @@ namespace ThMEPWSS.Bussiness
 
             //计算可布置区域
             var layoutAreas = GetLayoutArea(polyline, allBeams, columnPolys);
-#if DEBUG
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                foreach (var item in layoutAreas)
-                {
-                    acdb.ModelSpace.Add(item);
-                }
-            }
-#endif
+
             //计算出不合法的喷淋点位
             var moveSprays = CalIllegalSpary(sprays, layoutAreas);
 
@@ -57,6 +48,24 @@ namespace ThMEPWSS.Bussiness
 
             //移动并校核喷淋
             MoveSpray(moveSprays, layoutAreas, sprays, bSprays);
+
+            //计算出校核之后任然不合法的喷淋点位
+            var errorSprays = CalIllegalSpary(sprays, layoutAreas);
+
+#if DEBUG
+            //打印可布置区域
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (var item in layoutAreas)
+                {
+                    RotateTransformService.RotateInversePolyline(item);
+                    acdb.ModelSpace.Add(item);
+                }
+            }
+#endif
+
+            //打印错误喷淋点位
+            PrintErrorSpray(errorSprays);
         }
 
         /// <summary>
@@ -69,23 +78,12 @@ namespace ThMEPWSS.Bussiness
         {
             foreach (var spray in moveSprays)
             {
-                sprayDic = new KeyValuePair<SprayLayoutData, Point3d>();
                 if (GetMoveInfo(layoutAreas, allSprays, spray, bSprays, out List<KeyValuePair<SprayLayoutData, Point3d>> moveInfo))
                 {
                     //更新喷淋点位
                     foreach (var mInfo in moveInfo)
                     {
                         mInfo.Key.Position = mInfo.Value;
-                    }
-                }
-                else
-                {
-                    //打印有问题的但无法移动的喷淋点位
-                    var sprayCircle = new Circle(spray.Position, Vector3d.ZAxis, sprayWidth);
-                    using (AcadDatabase db = AcadDatabase.Active())
-                    {
-                        sprayCircle.ColorIndex = 1;
-                        db.ModelSpace.Add(sprayCircle);
                     }
                 }
             }
@@ -112,6 +110,7 @@ namespace ThMEPWSS.Bussiness
             //计算可布置区域
             var lAreas = GetSprayLayoutArea(spray, layoutAreas).OrderBy(x => x.Distance(spray.Position)).ToList();
 
+            CheckService checkService = new CheckService();
             //检测主要方向上是否能移动
             foreach (var area in lAreas)
             {
@@ -130,14 +129,17 @@ namespace ThMEPWSS.Bussiness
                     {
                         if (isBoundary)
                         {
-                            if (CheckMovePointWithLine(newPosition, bLines))
+                            if (checkService.CheckBoundaryLines(bLines, spray.Position, newPosition, maxSpacing / 2))
                             {
                                 moveInfo = movePtInfo;
                                 return true;
                             }
                             else
                             {
-                                moveInfo = movePtInfo;
+                                if (moveInfo == null || moveInfo.Count <= 0)
+                                {
+                                    moveInfo = movePtInfo;
+                                }
                             }
                         }
                         else
@@ -154,7 +156,7 @@ namespace ThMEPWSS.Bussiness
                         {
                             if (isBoundary)
                             {
-                                if (CheckMovePointWithLine(newPosition, bLines))
+                                if (checkService.CheckBoundaryLines(bLines, spray.Position, newPosition, maxSpacing / 2))
                                 {
                                     moveInfo = movePtInfo;
                                     return true;
@@ -189,7 +191,7 @@ namespace ThMEPWSS.Bussiness
                 {
                     if (isBoundary)
                     {
-                        if (CheckMovePointWithLine(newPosition, bLines))
+                        if (checkService.CheckBoundaryLines(bLines, spray.Position, newPosition, maxSpacing / 2))
                         {
                             moveInfo = movePtInfo;
                             return true;
@@ -216,7 +218,7 @@ namespace ThMEPWSS.Bussiness
                     {
                         if (isBoundary)
                         {
-                            if (CheckMovePointWithLine(newPosition, bLines))
+                            if (checkService.CheckBoundaryLines(bLines, spray.Position, newPosition, maxSpacing / 2))
                             {
                                 moveInfo = movePtInfo;
                                 return true;
@@ -243,27 +245,6 @@ namespace ThMEPWSS.Bussiness
                 return true;
             }
             return false;
-        }
-
-        /// <summary>
-        /// 边界喷淋要考虑边界距离
-        /// </summary>
-        /// <param name="position"></param>
-        /// <param name="bLine"></param>
-        /// <returns></returns>
-        private bool CheckMovePointWithLine(Point3d position, List<Line> bLines)
-        {
-            foreach (var bLine in bLines)
-            {
-                Point3d closetPt = bLine.GetClosestPointTo(position, true);
-                double length = closetPt.DistanceTo(position);
-                if (length > maxSpacing / 2)
-                {
-                    return false;
-                }
-            }
-
-            return true;
         }
 
         /// <summary>
@@ -299,7 +280,7 @@ namespace ThMEPWSS.Bussiness
             out List<KeyValuePair<SprayLayoutData, Point3d>> movePtInfo)
         {
             movePtInfo = new List<KeyValuePair<SprayLayoutData, Point3d>>();
-            if (!area.Contains(newPosition))
+            if (!area.ContainsOrOnBoundary(newPosition))
             {
                 return false;
             }
@@ -359,7 +340,7 @@ namespace ThMEPWSS.Bussiness
                 }
 
                 Point3d movePosition = cSpray.Position + moveLength * moveDir;
-                if (allAreas.Where(x => x.Contains(movePosition)).Count() <= 0)
+                if (allAreas.Where(x => x.ContainsOrOnBoundary(movePosition)).Count() <= 0)
                 {
                     return false;
                 }
@@ -395,7 +376,7 @@ namespace ThMEPWSS.Bussiness
             polyline.AddVertexAt(0, (spray.Position - spray.mainDir * sprayRange - spray.otherDir * sprayRange).ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, (spray.Position + spray.mainDir * sprayRange - spray.otherDir * sprayRange).ToPoint2D(), 0, 0, 0);
 
-            return layoutAreas.Where(x => x.Intersects(polyline)).ToList();
+            return layoutAreas.Where(x => x.Intersects(polyline) || polyline.Contains(x)).ToList();
         }
 
         /// <summary>
@@ -406,7 +387,7 @@ namespace ThMEPWSS.Bussiness
         /// <returns></returns>
         private List<SprayLayoutData> CalIllegalSpary(List<SprayLayoutData> sprays, List<Polyline> layoutAreas)
         {
-            return sprays.Where(x => layoutAreas.Where(y => y.Contains(x.Position)).Count() <= 0).ToList();
+            return sprays.Where(x => layoutAreas.Where(y => y.ContainsOrOnBoundary(x.Position)).Count() <= 0).ToList();
         }
 
         /// <summary>
@@ -436,13 +417,15 @@ namespace ThMEPWSS.Bussiness
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public List<ThIfcBeam> GetBeam(Polyline polyline)
+        private List<ThIfcBeam> GetBeam(Polyline polyline)
         {
+            var newPolyline = polyline.Clone() as Polyline;
+            RotateTransformService.RotateInversePolyline(newPolyline);
             List<ThIfcBeam> beams = new List<ThIfcBeam>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine())
             {
-                beamEngine.Recognize(Active.Database, polyline.Vertices());
+                beamEngine.Recognize(Active.Database, newPolyline.Vertices());
 
                 foreach (var beam in beamEngine.Elements)
                 {
@@ -453,7 +436,26 @@ namespace ThMEPWSS.Bussiness
                 }
             }
 
+            RotateTransformService.RotatePolyline(beams.Select(x => x.Outline as Polyline).ToList());
             return beams;
+        }
+
+        /// <summary>
+        /// 打印出无法移动的错误喷淋
+        /// </summary>
+        /// <param name="errorSprays"></param>
+        private void PrintErrorSpray(List<SprayLayoutData> errorSprays)
+        {
+            //打印有问题的但无法移动的喷淋点位
+            foreach (var spray in errorSprays)
+            {
+                var sprayCircle = new Circle(spray.Position, Vector3d.ZAxis, sprayWidth);
+                using (AcadDatabase db = AcadDatabase.Active())
+                {
+                    sprayCircle.ColorIndex = 1;
+                    db.ModelSpace.Add(sprayCircle);
+                }
+            }
         }
     }
 }

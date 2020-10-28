@@ -156,7 +156,7 @@ namespace ThMEPWSS
                     
                     //生成喷淋对象
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4500, true);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columPoly, RotateTransformService.xDir, 4000, true);
                 }
             }
         }

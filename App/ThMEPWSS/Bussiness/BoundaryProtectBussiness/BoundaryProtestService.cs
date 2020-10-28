@@ -106,7 +106,7 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
         public Polyline expandLine(Line line, double distance)
         {
             Vector3d lineDir = line.Delta.GetNormal();
-            Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
+            Vector3d moveDir = RotateTransformService.RotateInverseVecter(Vector3d.ZAxis.CrossProduct(lineDir));
             Point3d p1 = line.StartPoint + moveDir * distance;
             Point3d p2 = line.EndPoint + moveDir * distance;
             Point3d p3 = line.EndPoint - moveDir * distance;
@@ -117,6 +117,7 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
             polyline.AddVertexAt(0, p2.ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, p3.ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, p4.ToPoint2D(), 0, 0, 0);
+            
             return polyline;
         }
     }
