@@ -12,22 +12,16 @@ namespace ThMEPEngineCore.Model
 
         public Matrix3d Matrix { get; private set; }
 
-        public Dictionary<string, string> Attributes { get; private set; }
+        public Point3d Position { get; set; }
 
-        public Extents3d GeometricExtents { get; private set; }
+        public Dictionary<string, string> Attributes { get; private set; }
 
         public ThIfcBeamAnnotation(DBText dBText, Matrix3d matrix)
         {
             Matrix = matrix;
+            Position = dBText.Position;
             TextString = dBText.TextString;
-            GenerateBoundary(dBText, matrix);
             Attributes = ParseAnnotationText(dBText.Hyperlinks[0].DisplayString);
-        }
-
-        private void GenerateBoundary(DBText dBText, Matrix3d matrix)
-        {
-            GeometricExtents = dBText.GeometricExtents;
-            GeometricExtents.TransformBy(matrix);
         }
 
         public Point3d StartPoint

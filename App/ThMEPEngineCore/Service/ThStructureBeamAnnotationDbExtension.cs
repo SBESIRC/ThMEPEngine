@@ -90,7 +90,7 @@ namespace ThMEPEngineCore.Service
                     if (xclip.IsValid)
                     {
                         xclip.TransformBy(matrix);
-                        return annotations.Where(o => xclip.Contains(o.GeometricExtents.ToRectangle()));
+                        return annotations.Where(o => xclip.Contains(o.Position.TransformBy(o.Matrix)));
                     }
                 }
             }
