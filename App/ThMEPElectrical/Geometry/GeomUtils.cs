@@ -352,6 +352,44 @@ namespace ThMEPElectrical.Geometry
 
             return false;
         }
+
+        public static bool IsIntersectValid(Polyline firstPly, Polyline secPly)
+        {
+            // first
+            var firstExtend3d = firstPly.Bounds.Value;
+            var firMinPt = firstExtend3d.MinPoint;
+            var firMaxPt = firstExtend3d.MaxPoint;
+            double firLeftX = firMinPt.X;
+            double firLeftY = firMinPt.Y;
+            double firRightX = firMaxPt.X;
+            double firRightY = firMaxPt.Y;
+
+            //second
+            var secExtend3d = secPly.Bounds.Value;
+            var secMinPt = secExtend3d.MinPoint;
+            var secMaxPt = secExtend3d.MaxPoint;
+            double secLeftX = secMinPt.X;
+            double secLeftY = secMinPt.Y;
+            double secRightX = secMaxPt.X;
+            double secRightY = secMaxPt.Y;
+
+            firLeftX -= 0.1;
+            firLeftY -= 0.1;
+            firRightX += 0.1;
+            firRightY += 0.1;
+
+            secLeftX -= 0.1;
+            secLeftY -= 0.1;
+            secRightX += 0.1;
+            secRightY += 0.1;
+
+            if (Math.Min(firRightX, secRightX) >= Math.Max(firLeftX, secLeftX)
+                && Math.Min(firRightY, secRightY) >= Math.Max(firLeftY, secLeftY))
+                return true;
+
+            return false;
+        }
+
         /// <summary>
         /// 计算几何中心
         /// </summary>
