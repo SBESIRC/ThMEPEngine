@@ -172,7 +172,15 @@ namespace ThMEPEngineCore.CAD
                 }
             }
             return false;
-        }     
+        }
+        public static bool IsProjectionPtInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt)
+        {
+            Vector3d vec = lineSp.GetVectorTo(lineEp);
+            Plane plane = new Plane(lineSp, vec);
+            Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
+            Point3d newPt = outerPt.TransformBy(wcsToUcs);
+            return newPt.Z >= 0 && newPt.Z <= lineSp.DistanceTo(lineEp);
+        }
         public static Polyline TextOBB(this DBText dBText)
         {
             Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, Vector3d.ZAxis, dBText.Position);

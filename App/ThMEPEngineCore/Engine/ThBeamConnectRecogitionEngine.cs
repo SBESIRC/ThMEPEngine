@@ -81,12 +81,10 @@ namespace ThMEPEngineCore.Engine
                 // 按柱，墙分割梁
                 ThSplitBeamEngine thSplitBeams = new ThSplitBeamEngine(this);
                 thSplitBeams.Split();
-                SyncBeamSpatialIndex();
 
                 // 梁到竖向构件的延伸
                 ThSnapBeamEngine thSnapBeams = new ThSnapBeamEngine(this);
                 thSnapBeams.Snap();
-                SyncBeamSpatialIndex();
             }
         }
         private void Recognize(Database database, Point3dCollection polygon)

@@ -166,10 +166,13 @@ namespace ThMEPEngineCore.Engine
                         addBeams.AddRange(thSplitBeam.SplitBeams);
                     }
                 });
-            BeamConnectRecogitionEngine.BeamEngine.Elements=
+            if(addBeams.Count>0)
+            {
+                BeamConnectRecogitionEngine.BeamEngine.Elements =
                 BeamConnectRecogitionEngine.BeamEngine.Elements.Where(o => removeUuids.IndexOf(o.Uuid) < 0).ToList();
-            BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(addBeams);
-            BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
+                BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(addBeams);
+                BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
+            }
         }        
         private void SplitBeamPassColumns()
         {
@@ -194,10 +197,13 @@ namespace ThMEPEngineCore.Engine
                     addBeams.AddRange(thSplitBeam.SplitBeams);
                 }
             });
-            BeamConnectRecogitionEngine.BeamEngine.Elements =
+            if(addBeams.Count>0)
+            {
+                BeamConnectRecogitionEngine.BeamEngine.Elements =
                 BeamConnectRecogitionEngine.BeamEngine.Elements.Where(o => removeUuids.IndexOf(o.Uuid) < 0).ToList();
-            BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(addBeams);
-            BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
+                BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(addBeams);
+                BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
+            }
         }
         private List<Polyline> BeamCrossWallOutlines(ThIfcBeam thIfcBeam)
         {
