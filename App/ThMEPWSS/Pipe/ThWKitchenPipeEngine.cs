@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPWSS.Pipe
 {
@@ -23,45 +24,64 @@ namespace ThMEPWSS.Pipe
         }
         public void Run(Polyline boundary, Polyline outline, BlockReference basinline, Polyline pype)
         {
-            var pt = FindInsideVertex(boundary, outline);
-            var dir = GetDirection(boundary, outline, pt);
-            Pipes.Add(pt + dir * 100);
-            //如果管井和台盆不共边，则需要添加一个管子
-            if (Commonline(boundary,outline,basinline))
+            if (OutlineInBoundary(boundary, outline))
             {
-                Pipes.Add(Addpipe(boundary,basinline,pype));
+                var pt = FindInsideVertex(boundary, outline);
+                var dir = GetDirection(boundary, outline, pt);
+                Pipes.Add(pt + dir * 100);
+
+                //如果管井和台盆不共边，则需要添加一个管子
+                if (Commonline(boundary, outline, basinline))
+                {
+                    Pipes.Add(Addpipe(boundary, basinline, pype));
+                }
+            }
+            else
+            {
+                Pipes.Add(Addpipe(boundary, basinline, pype));
             }
 
         }
-
-        private Point3d FindInsideVertex(Polyline boundary, Polyline outline)
-        { 
+        private static bool OutlineInBoundary(Polyline boundary, Polyline outline)
+        {
             var vertices = outline.Vertices();
-            
+            Line line = new Line(vertices[0], vertices[1]);
+            var pts = new Point3dCollection();
+            outline.IntersectWith(line, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
+            if (vertices[0].GetVectorTo(pts[0]).IsCodirectionalTo(vertices[0].GetVectorTo(pts[1])))
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
+        }
+        private Point3d FindInsideVertex(Polyline boundary, Polyline outline)
+        {
+            var vertices = outline.Vertices();
+
             Point3d center = outline.GetCenter();
-           
-            Point3d Ray_bou=Point3d.Origin;
+            Point3d Ray_bou = Point3d.Origin;
             var pts = new Point3dCollection();
             List<int> num = new List<int>();
             List<double> dst = new List<double>();
-            int index = 0;
-            double temp = double.MaxValue;
             for (int i = 0; i < vertices.Count - 1; i++)
             {
                 Point3d midpoint = GetMidPoint(vertices[i], vertices[i + 1]);
-             
-                Ray_bou= boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;
-                
+
+                Ray_bou = boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;
+
                 dst.Add(midpoint.DistanceTo(Ray_bou));
-                
-               
+
+
             }
 
-            for (int i=0; i<2; i++)
+            for (int i = 0; i < 2; i++)
             {
-                if (dst[i]<dst[i+2])
+                if (dst[i] < dst[i + 2])
                 {
-                   num.Add(i);
+                    num.Add(i);
                 }
                 else
                 {
@@ -77,29 +97,28 @@ namespace ThMEPWSS.Pipe
         {
             return pt1 + pt1.GetVectorTo(pt2) * 0.5;
         }
-        private  Vector3d GetDirection(Polyline boundary, Polyline outline, Point3d pt)
+        private Vector3d GetDirection(Polyline boundary, Polyline outline, Point3d pt)
         {
             var vertices = outline.Vertices();
-            var dir= pt.GetVectorTo(vertices[2]).GetNormal() + (vertices[2]).GetVectorTo(vertices[1]).GetNormal();
+            var dir = pt.GetVectorTo(vertices[2]).GetNormal() + (vertices[2]).GetVectorTo(vertices[1]).GetNormal();
             for (int i = 0; i < vertices.Count - 2; i++)
             {
                 if (vertices[i] == pt)
                 {
                     dir = pt.GetVectorTo(vertices[i + 1]).GetNormal() + (vertices[i + 1]).GetVectorTo(vertices[i + 2]).GetNormal();
-                }  
-                
+                }
+
             }
             return dir;
         }
-        private  static bool Commonline(Polyline boundary , Polyline outline, BlockReference basinline)
+        private static bool Commonline(Polyline boundary, Polyline outline, BlockReference basinline)
         {
             var pt = boundary.ToCurve3d().GetClosestPointTo(basinline.Position).Point;
-            
-            int a=0;
+            int a = 0;
             var vertices = boundary.Vertices();
-            for (int i = 0; i < vertices.Count-1 ; i++)
+            for (int i = 0; i < vertices.Count - 1; i++)
             {
-                if(pt.GetVectorTo(vertices[i]).GetNormal()==-pt.GetVectorTo(vertices[i+1]).GetNormal())
+                if (pt.GetVectorTo(vertices[i]).GetNormal() == -pt.GetVectorTo(vertices[i + 1]).GetNormal())
                 {
                     a = i;
                 }
@@ -109,7 +128,7 @@ namespace ThMEPWSS.Pipe
             Point3d evaluate1 = Point3d.Origin;
             if (a > 0)
             {
-                var dir1 = (vertices[a]).GetVectorTo((vertices[a-1])).GetNormal();
+                var dir1 = (vertices[a]).GetVectorTo((vertices[a - 1])).GetNormal();
                 evaluate = vertices[a] + 70.0 * dir1;
                 evaluate1 = vertices[a + 1] + 70.0 * dir1;
             }
@@ -129,19 +148,19 @@ namespace ThMEPWSS.Pipe
         {
             var pt = boundary.ToCurve3d().GetClosestPointTo(basinline.Position).Point;
 
-            int a =0;
+            int a = 0;
             var vertices = boundary.Vertices();
             for (int i = 0; i < vertices.Count - 1; i++)
             {
                 if (pt.GetVectorTo(vertices[i]).GetNormal() == -pt.GetVectorTo(vertices[i + 1]).GetNormal())
                 {
                     a = i;
-               }
+                }
             }
-            
+
             var dir = vertices[a].GetVectorTo(vertices[a + 1]).GetNormal();
             var dir1 = Vector3d.XAxis;
-            Point3d evaluate = Point3d.Origin;    
+            Point3d evaluate = Point3d.Origin;
             Point3d evaluate_1 = Point3d.Origin;
             Point3d evaluate_2 = Point3d.Origin;
             Point3d evaluate_3 = Point3d.Origin;
@@ -149,16 +168,16 @@ namespace ThMEPWSS.Pipe
             {
                 dir1 = (vertices[a]).GetVectorTo((vertices[a - 1])).GetNormal();
                 evaluate = vertices[a] + 70.0 * dir;
-                evaluate_1 = vertices[a -1] + 70.0 * dir;
+                evaluate_1 = vertices[a - 1] + 70.0 * dir;
                 evaluate_2 = vertices[a] - 10.0 * dir;
-                evaluate_3 = vertices[a - 1]- 10.0 * dir;
+                evaluate_3 = vertices[a - 1] - 10.0 * dir;
             }
             else
             {
                 dir1 = (vertices[1]).GetVectorTo((vertices[2])).GetNormal();
                 evaluate = vertices[0] + 70.0 * dir;
                 evaluate_1 = vertices[1] + 70.0 * dir;
-                evaluate_2= vertices[0] -10.0 * dir;
+                evaluate_2 = vertices[0] - 10.0 * dir;
                 evaluate_3 = vertices[1] - 10.0 * dir;
             }
 
@@ -168,10 +187,10 @@ namespace ThMEPWSS.Pipe
             Line line2 = new Line(evaluate_2, evaluate_3);
             pype.IntersectWith(line1, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
             pype.IntersectWith(line2, Intersect.ExtendArgument, pts1, (IntPtr)0, (IntPtr)0);
-            if ((pts.Count >0)|| (pts1.Count > 0))
-            {            
+            if ((pts.Count > 0) || (pts1.Count > 0))
+            {
                 return vertices[a + 1] + 100.0 * (-dir + dir1);
-            } 
+            }
             else
             {
                 return vertices[a] + 100.0 * (dir + dir1);

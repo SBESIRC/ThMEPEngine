@@ -555,5 +555,81 @@ namespace ThMEPWSS
                 }
             }
         }
+        [CommandMethod("TIANHUACAD", "THPIPECOMPOSITE", CommandFlags.Modal)]
+        public void Thpipecomposite()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择厨房框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result2 = Active.Editor.GetEntity("\n选择厨房管井/框线外管井");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result3 = Active.Editor.GetEntity("\n选择厨房台盆");
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result4 = Active.Editor.GetEntity("\n选择厨房排烟管");
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result5 = Active.Editor.GetEntity("\n选择卫生间框线");
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result6 = Active.Editor.GetEntity("\n选择卫生间管井");
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result7 = Active.Editor.GetEntity("\n选择卫生间坐便器");
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline boundary = acadDatabase.Element<Polyline>(result.ObjectId);
+                Polyline outline = acadDatabase.Element<Polyline>(result2.ObjectId);
+                Polyline pype = acadDatabase.Element<Polyline>(result4.ObjectId);              
+                Polyline boundary1 = acadDatabase.Element<Polyline>(result5.ObjectId);
+                Polyline outline1 = acadDatabase.Element<Polyline>(result6.ObjectId);
+                Polyline urinal = acadDatabase.Element<Polyline>(result7.ObjectId);
+                BlockReference basinline = acadDatabase.Element<BlockReference>(result3.ObjectId);
+
+                var zone = new ThWPipeZone();
+                var toiletEngine = new ThWToiletPipeEngine()
+                {
+                    Zone = zone,
+                    Parameters = new ThWToiletPipeParameters(1, 1, 150),
+                };
+                var kitchenEngine = new ThWKitchenPipeEngine()
+                {
+                    Zone = zone,
+                    Parameters = new ThWKitchenPipeParameters(1, 100),
+                };
+                var compositeEngine = new ThWCompositePipeEngine(kitchenEngine, toiletEngine);
+                compositeEngine.Run(boundary, outline, basinline,  pype, boundary1, outline1,  urinal);
+                foreach (Point3d pt in compositeEngine.KitchenPipes)
+                {
+                    acadDatabase.ModelSpace.Add(new DBPoint(pt));
+                    acadDatabase.ModelSpace.Add(new Circle() { Radius = 50, Center = pt });
+                }
+                for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
+                {
+                    var toilet = compositeEngine.ToiletPipes[i];
+                    var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
+                    acadDatabase.ModelSpace.Add(new DBPoint(toilet));
+                    acadDatabase.ModelSpace.Add(new Circle() { Radius = radius, Center = toilet });
+                }
+            }
+        }
     }
 }
