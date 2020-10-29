@@ -38,9 +38,9 @@ namespace ThMEPWSS.Pipe
         { 
             var vertices = outline.Vertices();
             
-            Point3d center = new Point3d((vertices[0].X+ vertices[2].X)/2, (vertices[0].Y + vertices[2].Y) / 2, 0);
+            Point3d center = outline.GetCenter();
            
-            var Ray_bou=new Point3dCollection();
+            Point3d Ray_bou=Point3d.Origin;
             var pts = new Point3dCollection();
             List<int> num = new List<int>();
             List<double> dst = new List<double>();
@@ -49,18 +49,12 @@ namespace ThMEPWSS.Pipe
             for (int i = 0; i < vertices.Count - 1; i++)
             {
                 Point3d midpoint = GetMidPoint(vertices[i], vertices[i + 1]);
-                Ray ray = new Ray() { BasePoint=center,SecondPoint= midpoint };
-                boundary.IntersectWith(ray, Intersect.ExtendArgument, Ray_bou, (IntPtr)0, (IntPtr)0);
-                for (int j = 0; j < Ray_bou.Count; j++)
-                {
-                    var distance = midpoint.DistanceTo(Ray_bou[j]);
-                    if (temp> distance)
-                    {
-                        temp = distance;
-                        index = j;
-                    }
-                }
-                dst.Add(midpoint.DistanceTo(Ray_bou[index]));
+             
+                Ray_bou= boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;
+                
+                dst.Add(midpoint.DistanceTo(Ray_bou));
+                
+               
             }
 
             for (int i=0; i<2; i++)
@@ -93,6 +87,7 @@ namespace ThMEPWSS.Pipe
                 {
                     dir = pt.GetVectorTo(vertices[i + 1]).GetNormal() + (vertices[i + 1]).GetVectorTo(vertices[i + 2]).GetNormal();
                 }  
+                
             }
             return dir;
         }

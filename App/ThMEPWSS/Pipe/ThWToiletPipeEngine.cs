@@ -35,7 +35,7 @@ namespace ThMEPWSS.Pipe
         }
         private int index_a(Polyline boundary, Polyline outline)
         {
-            List<double> distance = new List<double>();
+          
             var vertices = outline.Vertices();
             Point3d midpoint = Point3d.Origin;
             double dst = double.MaxValue;
@@ -43,14 +43,23 @@ namespace ThMEPWSS.Pipe
             for (int i = 0; i < vertices.Count - 1; i++)
             {
                 midpoint = vertices[i] + vertices[i].GetVectorTo(vertices[i+1]) * 0.5;
-                Point3d reference_p = boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;
-                distance.Add(midpoint.DistanceTo(reference_p));
+                Point3d reference_p = boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;              
                 if (dst > midpoint.DistanceTo(reference_p))
                 {
                     dst = midpoint.DistanceTo(reference_p);
                     a = i;
+                } 
+                else if (dst==midpoint.DistanceTo(reference_p))
+                {
+                    dst = midpoint.DistanceTo(reference_p);
+                    if (vertices[i].DistanceTo(vertices[i+1])> vertices[a].DistanceTo(vertices[a+1]))
+                    {
+                        a = i;
+                    }
+
                 }
             }
+
             return a;
         }
    
@@ -84,10 +93,11 @@ namespace ThMEPWSS.Pipe
             }
             return c;
         }
-        private Point3d FindInsideVertex(int a, Polyline outline,Vector3d dir )
+        private Point3d FindInsideVertex(int a,Polyline outline,Vector3d dir )
         { 
             Point3d pt =Point3d.Origin;             
-            var vertices = outline.Vertices();
+            var vertices = outline.Vertices();       
+
             if (a > 0)
             {
                 if (dir.IsCodirectionalTo(vertices[a].GetVectorTo(vertices[a + 1])))
@@ -101,7 +111,7 @@ namespace ThMEPWSS.Pipe
             }
             else
             {
-                if (dir == vertices[0].GetVectorTo(vertices[1]).GetNormal())
+                if (dir.IsCodirectionalTo(vertices[0].GetVectorTo(vertices[1])))
                 {
                     pt = vertices[0] + (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal()) * 100;
                 }
@@ -130,15 +140,30 @@ namespace ThMEPWSS.Pipe
                 {
                     sum1+= vertices1[i].DistanceTo(vertices1[i + 1]);
                 }
-                sum2 = vertices[b+1].DistanceTo(base_point);
-                sum3 = vertices[c].DistanceTo(base_point1);                
+                sum2 = vertices1[b+1].DistanceTo(base_point);
+                sum3 = vertices1[c].DistanceTo(base_point1);                
                 if (sum1-sum2 - sum3<sum)
                 {
-                    return vertices[a].GetVectorTo(vertices[a + 1]).GetNormal();
+                    if (vertices1[c + 1].GetVectorTo(vertices1[c]).IsCodirectionalTo(vertices[a + 1].GetVectorTo(vertices[a])))
+                    {
+                        return vertices[a].GetVectorTo(vertices[a+1]).GetNormal();
+                    }
+                    else
+                    {
+                        return vertices[a+1].GetVectorTo(vertices[a]).GetNormal();
+                    }
                 }
                 else
                 {
-                    return vertices[a+1].GetVectorTo(vertices[a]).GetNormal();
+                    if (vertices1[c + 1].GetVectorTo(vertices1[c]).IsCodirectionalTo(vertices[a + 1].GetVectorTo(vertices[a])))
+                    {
+                        return vertices[a + 1].GetVectorTo(vertices[a]).GetNormal();
+                    }
+                    else
+                    {
+                        return vertices[a].GetVectorTo(vertices[a + 1]).GetNormal();
+
+                    }
                 }
                 
             }
@@ -148,15 +173,29 @@ namespace ThMEPWSS.Pipe
                 {
                     sum1 += vertices1[i].DistanceTo(vertices1[i + 1]);
                 }
-                sum2 = vertices[b].DistanceTo(base_point);
-                sum3 = vertices[c+1].DistanceTo(base_point1);
+                sum2 = vertices1[b].DistanceTo(base_point);
+                sum3 = vertices1[c+1].DistanceTo(base_point1);
                 if (sum1 - sum2 - sum3 < sum)
                 {
-                    return vertices[a + 1].GetVectorTo(vertices[a]).GetNormal();
+                    if (vertices1[c + 1].GetVectorTo(vertices1[c]).IsCodirectionalTo(vertices[a + 1].GetVectorTo(vertices[a])))
+                    {
+                        return vertices[a+1].GetVectorTo(vertices[a]).GetNormal();
+                    }
+                    else
+                    {
+                        return vertices[a].GetVectorTo(vertices[a+1]).GetNormal();
+                    }
                 }
                 else
                 {
-                    return vertices[a].GetVectorTo(vertices[a + 1]).GetNormal();
+                    if (vertices1[c + 1].GetVectorTo(vertices1[c]).IsCodirectionalTo(vertices[a + 1].GetVectorTo(vertices[a])))
+                    {
+                        return vertices[a].GetVectorTo(vertices[a+1]).GetNormal();
+                    }
+                    else
+                    {
+                        return vertices[a+1].GetVectorTo(vertices[a]).GetNormal();
+                    }
                 }
             }
             else
