@@ -19,6 +19,7 @@
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
@@ -35,6 +36,7 @@
     <Compile Include="ThAppTools.cs" />
     <Compile Include="ThArcExtension.cs" />
     <Compile Include="ThBlockReferenceExtensions.cs" />
+    <Compile Include="ThBlockTool.cs" />
     <Compile Include="ThCADCommon.cs" />
     <Compile Include="ThCircleExtension.cs" />
     <Compile Include="ThCUITools.cs" />
