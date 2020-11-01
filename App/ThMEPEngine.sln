@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPElectrical", "ThMEPEle
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPHAVC", "ThMEPHAVC\ThMEPHAVC.csproj", "{B49B0155-F4A7-4928-A539-66882A6EC79A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPHostableUi", "ThMEPHostableUi\ThMEPHostableUi.csproj", "{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -195,12 +197,28 @@ Global
 		{B49B0155-F4A7-4928-A539-66882A6EC79A}.Release-NET45|Any CPU.Build.0 = Release-NET45|Any CPU
 		{B49B0155-F4A7-4928-A539-66882A6EC79A}.Release-NET46|Any CPU.ActiveCfg = Release-NET46|Any CPU
 		{B49B0155-F4A7-4928-A539-66882A6EC79A}.Release-NET46|Any CPU.Build.0 = Release-NET46|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug-NET40|Any CPU.ActiveCfg = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug-NET40|Any CPU.Build.0 = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug-NET45|Any CPU.ActiveCfg = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug-NET45|Any CPU.Build.0 = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug-NET46|Any CPU.ActiveCfg = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Debug-NET46|Any CPU.Build.0 = Debug|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release-NET40|Any CPU.ActiveCfg = Release|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release-NET40|Any CPU.Build.0 = Release|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release-NET45|Any CPU.ActiveCfg = Release|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release-NET45|Any CPU.Build.0 = Release|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release-NET46|Any CPU.ActiveCfg = Release|Any CPU
+		{98C9079E-5944-43C9-A9D4-1F0CCAA12CDF}.Release-NET46|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		        SolutionGuid = {BACE1130-D315-4658-B063-566B4F1EBA5B}
 		SolutionGuid = {4DC31E7F-3F21-4F0B-B4C8-C20B040E84EF}
+		        SolutionGuid = {BACE1130-D315-4658-B063-566B4F1EBA5B}
 	EndGlobalSection
 EndGlobal
