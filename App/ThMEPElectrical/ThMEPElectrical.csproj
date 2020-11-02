@@ -113,6 +113,10 @@
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TianHua.Electrical.UI\TianHua.Electrical.UI.csproj">
+      <Project>{537e996d-c4a0-4c7d-8277-adf5ea7f9d76}</Project>
+      <Name>TianHua.Electrical.UI</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Folder Include="View\" />
