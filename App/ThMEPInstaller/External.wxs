@@ -26,6 +26,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_Catel_Core_Debug" Guid="{5C40D878-20E8-475C-B18E-9D3D6BC74392}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\Catel.Core.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_EPPlus_Debug" Guid="{AFD776D4-B27C-4235-BEBA-C76AE5334280}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R18_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\EPPlus.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
@@ -49,6 +52,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" Guid="{B0FC1F73-6293-4EA9-A045-FCFC530BDCF6}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Catel.Core.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" Guid="{E89533EA-5033-4401-98AA-AB95C1990841}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\EPPlus.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
@@ -74,6 +80,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Debug" Guid="{16974276-52A7-48F4-B347-70C368EFF767}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Catel.Core.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" Guid="{41A86DB9-B06A-4630-AFB7-D1B34C559E49}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\EPPlus.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -97,6 +106,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" Guid="{A32EDBD6-AE8A-41B2-94DA-79D79FC571DF}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Catel.Core.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" Guid="{35C3DEE7-AF2A-495C-A72A-DE2D96C6F42A}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\EPPlus.dll" />
         </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
@@ -123,6 +135,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_Catel_Core_Release" Guid="{F5D919D7-4881-4C87-B91F-5029A8D7761E}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\Catel.Core.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_EPPlus_Release" Guid="{D5A653C5-2CA6-4448-9986-4AAF2E04BBFB}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R18_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\EPPlus.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Release="bin\Release-NET40" ?>
@@ -146,7 +161,10 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" Guid="{7197DE3B-A941-4213-B6CF-B62729D83B0D}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Catel.Core.dll" />
-        </Component>		
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" Guid="{3D99CBBA-2951-4C2C-84BC-67450D37F4F5}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R19_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\EPPlus.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -171,6 +189,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Release" Guid="{F9899FF7-8F25-4BC5-A669-946BF9EF7447}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Catel.Core.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Release" Guid="{1A953CCD-9883-4B72-81BA-D5D8A4FB7EBD}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R20_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\EPPlus.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Release="bin\Release-NET46" ?>
@@ -194,6 +215,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" Guid="{8D8968EC-0CFD-4BA2-87D5-BACDE65838BA}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Catel.Core.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Release" Guid="{0675244C-1263-47C1-A6C3-BCC4546D0EC9}" Win64="yes">
+          <File Id="FILE_Autoloader_Contents_App_Win64_R22_EPPlus_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\EPPlus.dll" />
         </Component>
     </DirectoryRef>
     <?endif?>
@@ -229,6 +253,10 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_EPPlus_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Debug" />
         <?elseif $(var.Configuration) = Release ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
@@ -258,6 +286,10 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_EPPlus_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_EPPlus_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_EPPlus_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_EPPlus_Release" />
       <?endif?>
     </ComponentGroup>
   </Fragment>
