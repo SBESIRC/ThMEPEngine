@@ -65,8 +65,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
         <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THFBS" Global="THFBS" />
-                <Command Local="THFDL" Global="THFDL" />
+                <Command Local="THYWG" Global="THYWG" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -75,8 +74,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THFBS" Global="THFBS" />
-                <Command Local="THFDL" Global="THFDL" />
+                <Command Local="THYWG" Global="THYWG" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -85,8 +83,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THFBS" Global="THFBS" />
-                <Command Local="THFDL" Global="THFDL" />
+                <Command Local="THYWG" Global="THYWG" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -95,8 +92,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THFBS" Global="THFBS" />
-                <Command Local="THFDL" Global="THFDL" />
+                <Command Local="THYWG" Global="THYWG" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -105,10 +101,9 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
         <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLZX" Global="THPLZX" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLPTA" Global="THPLPTA" />
+                <Command Local="THPLKQ" Global="THPLKQ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -117,10 +112,9 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLZX" Global="THPLZX" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLPTA" Global="THPLPTA" />
+                <Command Local="THPLKQ" Global="THPLKQ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -129,10 +123,9 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLZX" Global="THPLZX" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLPTA" Global="THPLPTA" />
+                <Command Local="THPLKQ" Global="THPLKQ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -141,10 +134,9 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLZX" Global="THPLZX" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLPTA" Global="THPLPTA" />
+                <Command Local="THPLKQ" Global="THPLKQ" />
             </Commands>
         </ComponentEntry>
     </Components>

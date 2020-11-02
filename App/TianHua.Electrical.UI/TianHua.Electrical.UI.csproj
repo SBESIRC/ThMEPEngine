@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="fmFireBlockConver.cs">
       <SubType>Form</SubType>
     </Compile>
