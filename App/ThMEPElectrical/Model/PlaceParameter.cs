@@ -20,6 +20,8 @@ namespace ThMEPElectrical.Model
         public double ProtectArea = 60 * 1e6;
         public double ProtectRadius = 5.8 * 1e3;
 
+        public double RoofThickness = 250.0;
+
         public double FirstBottomProtectRadius = 5.3 * 1e3;
 
         public double VerticalMaxGap = 10.5 * 1e3;

@@ -24,9 +24,11 @@ namespace ThMEPElectrical.Core
 {
     public class PackageManager
     {
-        public PackageManager()
+        private PlaceParameter Parameter { get; set; }
+
+        public PackageManager(PlaceParameter parameter)
         {
-            ;
+            Parameter = parameter;
         }
 
         /// <summary>
@@ -80,7 +82,7 @@ namespace ThMEPElectrical.Core
                 return inputProfileDatas;
 
             // 前置数据读取器
-            var infoReader = new InfoReader(preWindow);
+            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.Do();
 
             // 外墙轮廓数据
@@ -196,18 +198,17 @@ namespace ThMEPElectrical.Core
             var ucs2Wcs = Active.Editor.UCS2WCS();
 
             // 插入点的计算
-            PlaceParameter placePara = new PlaceParameter();
             var transformPlaceInputDatas = TransformProfileDatas(inputProfileDatas, wcs2Ucs);
 
-            var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, placePara);
+            var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, Parameter);
             tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
 
             // 转到WCS
             if (ptLst.Count > 0)
             {
-                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
+                BlockInsertor.MakeBlockInsert(tempPts, Parameter.sensorType);
 
-                var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
+                var circles = GeometryTrans.Points2Circles(ptLst, Parameter.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
                 DrawUtils.DrawProfile(curves, "placePoints");
             }
@@ -268,7 +269,7 @@ namespace ThMEPElectrical.Core
                 return inputProfileDatas;
 
             // 前置数据读取器
-            var infoReader = new InfoReader(preWindow);
+            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.PickColumns(); // 提取柱子
             var gridPolys = new List<Polyline>();
 
@@ -310,7 +311,7 @@ namespace ThMEPElectrical.Core
                 return;
 
             // 前置数据读取器
-            var infoReader = new InfoReader(preWindow);
+            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.PickColumns(); // 提取柱子
             var gridPolys = new List<Polyline>();
 
@@ -393,7 +394,7 @@ namespace ThMEPElectrical.Core
                 return inputProfileDatas;
 
             // 前置数据读取器
-            var infoReader = new InfoReader(preWindow);
+            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.Do();
 
             var gridPolys = new List<Polyline>();

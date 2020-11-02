@@ -31,8 +31,6 @@ namespace ThMEPElectrical
         public static readonly double ShrinkDistance = -500; // 内缩距离
         public static readonly double ShrinkSmallDistance = -3; // 误差内缩距离
         public static readonly double GridPolyExtendLength = 500; // 轴网两端延伸距离
-        public static readonly double StoreyHeight = 250; // 楼高扣减高度
-
         public static readonly double ExtendBeamLength = 20; // 梁的延伸长度
     }
 }

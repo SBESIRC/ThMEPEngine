@@ -19,6 +19,7 @@ namespace ThMEPElectrical.CAD
     /// </summary>
     public class InfoReader
     {
+        private double m_roofThickness;
         private Point3dCollection m_preWindow; // 预处理窗口
         public List<Polyline> RecognizeMainBeamColumnWalls
         {
@@ -41,9 +42,10 @@ namespace ThMEPElectrical.CAD
             set;
         } = new List<Polyline>(); // 柱子
 
-        public InfoReader(Point3dCollection preWindow)
+        public InfoReader(Point3dCollection preWindow, double roofThickness)
         {
             m_preWindow = preWindow;
+            m_roofThickness = roofThickness;
         }
 
         public void Do()
@@ -133,7 +135,7 @@ namespace ThMEPElectrical.CAD
                     {
                         singleBeamInfo.ExtendBoth(ThMEPCommon.ExtendBeamLength, ThMEPCommon.ExtendBeamLength);
                         if (singleBeamInfo.Outline is Polyline secondBeamPoly)
-                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(secondBeamPoly, singleBeamInfo.Height - ThMEPCommon.StoreyHeight));
+                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(secondBeamPoly, singleBeamInfo.Height - m_roofThickness));
                     });
                 });
 
@@ -144,7 +146,7 @@ namespace ThMEPElectrical.CAD
                     {
                         singleHalfBeam.ExtendBoth(ThMEPCommon.ExtendBeamLength, ThMEPCommon.ExtendBeamLength);
                         if (singleHalfBeam.Outline is Polyline halfBeamPoly)
-                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(halfBeamPoly, singleHalfBeam.Height - ThMEPCommon.StoreyHeight));
+                            RecognizeSecondBeams.Add(new SecondBeamProfileInfo(halfBeamPoly, singleHalfBeam.Height - m_roofThickness));
                     });
                 });
             }
