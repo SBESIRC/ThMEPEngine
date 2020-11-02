@@ -1,0 +1,226 @@
+[
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": false,
+        "MinVolume": "12.2",
+        "WindSpeedNature": "0.94"
+    },
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": true,
+        "MinVolume": "5.2",
+        "WindSpeedNature": "0.64"
+    },
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": false,
+        "MinVolume": "17.6",
+        "WindSpeedNature": "1.06"
+    },
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": true,
+        "MinVolume": "7.8",
+        "WindSpeedNature": "0.78"
+    },
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": false,
+        "MinVolume": "15",
+        "WindSpeedNature": "1.01"
+    },
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": true,
+        "MinVolume": "7",
+        "WindSpeedNature": "0.74"
+    },
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "仓库",
+        "HasSprinkler": false,
+        "MinVolume": "30.1",
+        "WindSpeedNature": "1.26"
+    },
+    {
+        "SpaceNetHeight": "6",
+        "SpaceType": "仓库",
+        "HasSprinkler": true,
+        "MinVolume": "9.3",
+        "WindSpeedNature": "0.84"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": false,
+        "MinVolume": "13.9",
+        "WindSpeedNature": "0.94"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": true,
+        "MinVolume": "6.3",
+        "WindSpeedNature": "0.64"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": false,
+        "MinVolume": "19.6",
+        "WindSpeedNature": "1.06"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": true,
+        "MinVolume": "9.1",
+        "WindSpeedNature": "0.78"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": false,
+        "MinVolume": "16.8",
+        "WindSpeedNature": "1.01"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": true,
+        "MinVolume": "8.2",
+        "WindSpeedNature": "0.74"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "仓库",
+        "HasSprinkler": false,
+        "MinVolume": "32.8",
+        "WindSpeedNature": "1.26"
+    },
+    {
+        "SpaceNetHeight": "7",
+        "SpaceType": "仓库",
+        "HasSprinkler": true,
+        "MinVolume": "10.8",
+        "WindSpeedNature": "0.84"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": false,
+        "MinVolume": "15.8",
+        "WindSpeedNature": "0.94"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": true,
+        "MinVolume": "7.4",
+        "WindSpeedNature": "0.64"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": false,
+        "MinVolume": "21.8",
+        "WindSpeedNature": "1.06"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": true,
+        "MinVolume": "10.6",
+        "WindSpeedNature": "0.78"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": false,
+        "MinVolume": "18.9",
+        "WindSpeedNature": "1.01"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": true,
+        "MinVolume": "9.6",
+        "WindSpeedNature": "0.74"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "仓库",
+        "HasSprinkler": false,
+        "MinVolume": "35.4",
+        "WindSpeedNature": "1.26"
+    },
+    {
+        "SpaceNetHeight": "8",
+        "SpaceType": "仓库",
+        "HasSprinkler": true,
+        "MinVolume": "12.4",
+        "WindSpeedNature": "0.84"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": false,
+        "MinVolume": "17.8",
+        "WindSpeedNature": "0.94"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "办公室,学校",
+        "HasSprinkler": true,
+        "MinVolume": "8.7",
+        "WindSpeedNature": "0.64"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": false,
+        "MinVolume": "24.2",
+        "WindSpeedNature": "1.06"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "商店,展览厅",
+        "HasSprinkler": true,
+        "MinVolume": "12.2",
+        "WindSpeedNature": "0.78"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": false,
+        "MinVolume": "21.1",
+        "WindSpeedNature": "1.01"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "厂房,其他公建",
+        "HasSprinkler": true,
+        "MinVolume": "11.1",
+        "WindSpeedNature": "0.74"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "仓库",
+        "HasSprinkler": false,
+        "MinVolume": "38.5",
+        "WindSpeedNature": "1.26"
+    },
+    {
+        "SpaceNetHeight": "9",
+        "SpaceType": "仓库",
+        "HasSprinkler": true,
+        "MinVolume": "14.2",
+        "WindSpeedNature": "0.84"
+    }
+]

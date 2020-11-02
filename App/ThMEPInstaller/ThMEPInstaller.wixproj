@@ -22,8 +22,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AppCore.wxs" />
+    <Compile Include="DevExpress.wxs" />
     <Compile Include="Electrical.wxs" />
     <Compile Include="External.wxs" />
+    <Compile Include="FanSelection.wxs" />
     <Compile Include="Internal.wxs" />
     <Compile Include="Product.wxs" />
     <Compile Include="Support.wxs" />

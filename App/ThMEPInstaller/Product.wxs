@@ -14,7 +14,9 @@
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />
             <ComponentGroupRef Id="ProductComponentsWSSWin64" />
+            <ComponentGroupRef Id="ProductComponentsDevExpress" />
             <ComponentGroupRef Id="ProductComponentsElectricalWin64" />
+            <ComponentGroupRef Id="ProductComponentsFanSelectionWin64" />
         </Feature>
         <UIRef Id="WixUI_Minimal"/>
         <WixVariable Id="WixUILicenseRtf" Value="License_zh-CN.rtf" />
@@ -37,6 +39,7 @@
                                     </Directory>
                                 </Directory>
                                 <Directory Id="DIR_Autoloader_Contents_Support" Name="Support">
+                                    <Directory Id="DIR_Autoloader_Contents_Support_DesignData" Name="DesignData" />
                                 </Directory>
                                 <Directory Id="DIR_Autoloader_Contents_Standards" Name="Standards">
                                 </Directory>

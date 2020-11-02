@@ -14,6 +14,18 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Debug" Guid="{2D616846-41E1-4A6F-B4C3-2C47C1D8FFA6}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Debug" Guid="{4E7B0086-D9E9-4BF0-A57B-D842A7A70BB7}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_Debug" Guid="{07BB85BC-ABA3-40D2-A883-23DFD6522878}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ExcelDataReader_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_DataSet_Debug" Guid="{17D1961C-B1E7-460D-91A6-94EB6780DD8A}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ExcelDataReader_DataSet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_Catel_Core_Debug" Guid="{5C40D878-20E8-475C-B18E-9D3D6BC74392}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\Catel.Core.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
@@ -25,6 +37,18 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" Guid="{30161577-A902-4A60-9EC1-31FC99C32992}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" Guid="{467B1BA7-E779-4B52-96F1-20C101D7931A}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Debug" Guid="{1017FD4A-7F87-45F8-88F6-1464E06610EC}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" Guid="{1EAC766A-4E4A-4578-AB2A-13AF41A3BDA5}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" Guid="{B0FC1F73-6293-4EA9-A045-FCFC530BDCF6}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Catel.Core.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
@@ -38,6 +62,18 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Debug" Guid="{DA6175FA-0859-4CAE-9E84-8C2F825552BE}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Debug" Guid="{AE197DD3-8B72-481A-B851-27648456487C}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_Debug" Guid="{8F8EFA82-4943-4EB1-A81E-971C58746D5E}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ExcelDataReader_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Debug" Guid="{2DEB133C-7965-46D3-9488-78D31B4EF2A8}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Debug" Guid="{16974276-52A7-48F4-B347-70C368EFF767}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Catel.Core.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -50,31 +86,19 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Debug" Guid="{3A0598C8-7085-4638-849B-F1E787AA5C11}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Debug" Guid="{F7EE2BD2-9C4E-4F8A-BBE6-E45B93BD548F}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_Debug" Guid="{05822245-6BAE-4DDA-8076-62BE5E4F2955}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ExcelDataReader_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_DataSet_Debug" Guid="{83F6E269-32C6-44C4-BFC5-AD4BF97644E2}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ExcelDataReader_DataSet_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" Guid="{A32EDBD6-AE8A-41B2-94DA-79D79FC571DF}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Catel.Core.dll" />
+        </Component>
     </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-      <?define OutputPath_R18_Debug="bin\Debug" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Debug" Guid="{4E7B0086-D9E9-4BF0-A57B-D842A7A70BB7}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\Newtonsoft.Json.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" Guid="{467B1BA7-E779-4B52-96F1-20C101D7931A}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\Newtonsoft.Json.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-      <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Debug" Guid="{AE197DD3-8B72-481A-B851-27648456487C}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\Newtonsoft.Json.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-      <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Debug" Guid="{F7EE2BD2-9C4E-4F8A-BBE6-E45B93BD548F}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\Newtonsoft.Json.dll" />
-      </Component>
-    </DirectoryRef>    
     <?elseif $(var.Configuration) = Release ?>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
         <?define OutputPath_R18_Release="bin\Release" ?>
@@ -86,6 +110,18 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Release" Guid="{7FDF5124-23C4-45F8-8531-2F5AE3D873F5}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\NetTopologySuite.IO.GeoJSON.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Release" Guid="{A7CE9430-0577-44BA-907A-473FC47C7D17}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_Release" Guid="{0A1F8560-4386-491F-8416-29BF9E1B9534}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ExcelDataReader_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_DataSet_Release" Guid="{086C8C61-FFF6-4CDB-A4AD-353664150437}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ExcelDataReader_DataSet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_Catel_Core_Release" Guid="{F5D919D7-4881-4C87-B91F-5029A8D7761E}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\Catel.Core.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
@@ -99,6 +135,18 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" Guid="{58B4CEB2-6EB7-4D57-888E-C6EE80567182}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" Guid="{3249A12B-1398-4CE1-AA80-D06CB4E4E8A2}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Release" Guid="{993494F4-6139-464D-8E0F-1FE7E230CE2E}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" Guid="{38D2142E-4B26-432E-8FD5-0D0A5CE1ECED}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" Guid="{7197DE3B-A941-4213-B6CF-B62729D83B0D}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Catel.Core.dll" />
+        </Component>		
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
         <?define OutputPath_R20_Release="bin\Release-NET45" ?>
@@ -110,6 +158,18 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Release" Guid="{4979709C-F7D6-4D3D-AA32-A306A5AA308C}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\NetTopologySuite.IO.GeoJSON.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Release" Guid="{4EA2444C-DEC2-4E77-B611-CB295B7C3BE3}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_Release" Guid="{F1CD1E49-1312-4EF0-8FB1-1004765E42F9}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ExcelDataReader_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Release" Guid="{EEFC6684-D4AC-4A51-A887-1907F8AFC594}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Release" Guid="{F9899FF7-8F25-4BC5-A669-946BF9EF7447}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Catel.Core.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -123,30 +183,18 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Release" Guid="{FBE5DBA6-1A5D-4980-9A28-C8480CBF96D1}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_NTS_IO_GEOJSON_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\NetTopologySuite.IO.GeoJSON.dll" />
         </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-      <?define OutputPath_R18_Release="bin\Release" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Release" Guid="{A7CE9430-0577-44BA-907A-473FC47C7D17}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\Newtonsoft.Json.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
-      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" Guid="{3249A12B-1398-4CE1-AA80-D06CB4E4E8A2}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\Newtonsoft.Json.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
-      <?define OutputPath_R20_Release="bin\Release-NET45" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Release" Guid="{4EA2444C-DEC2-4E77-B611-CB295B7C3BE3}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\Newtonsoft.Json.dll" />
-      </Component>
-    </DirectoryRef>
-    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
-      <?define OutputPath_R22_Release="bin\Release-NET46" ?>
-      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Release" Guid="{9486AE9B-2B31-482D-BB57-D056D856D9CF}" Win64="yes">
-        <File Id="FILE_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Newtonsoft.Json.dll" />
-      </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Release" Guid="{9486AE9B-2B31-482D-BB57-D056D856D9CF}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Newtonsoft.Json.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_Release" Guid="{9F77A23F-B9AD-48DA-B002-ECA18B227120}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ExcelDataReader_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ExcelDataReader.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_DataSet_Release" Guid="{2DCE477C-03C5-4294-9922-15A84F4E0E20}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ExcelDataReader_DataSet_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ExcelDataReader.DataSet.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" Guid="{8D8968EC-0CFD-4BA2-87D5-BACDE65838BA}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\Catel.Core.dll" />
+        </Component>
     </DirectoryRef>
     <?endif?>
   </Fragment>
@@ -169,7 +217,19 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Debug" />
-      <?elseif $(var.Configuration) = Release ?>
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_DataSet_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_DataSet_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_Catel_Core_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Debug" />
+        <?elseif $(var.Configuration) = Release ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NTS_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NTS_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NTS_Release" />
@@ -185,7 +245,19 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_NewtonsoftJson_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_NewtonsoftJson_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_NewtonsoftJson_Release" />
-        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Release" />      
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_NewtonsoftJson_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ExcelDataReader_DataSet_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ExcelDataReader_DataSet_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ExcelDataReader_DataSet_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ExcelDataReader_DataSet_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_Catel_Core_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Catel_Core_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Catel_Core_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Catel_Core_Release" />
       <?endif?>
     </ComponentGroup>
   </Fragment>
