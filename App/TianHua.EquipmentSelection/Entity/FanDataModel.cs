@@ -339,6 +339,11 @@ namespace TianHua.FanSelection
         /// </summary>
         public bool IsInputMotorPower { get; set; }
 
- 
+        /// <summary>
+        /// 是否清除—逻辑删除
+        /// </summary>
+        public bool IsErased { get; set; }
+
+
     }
 }

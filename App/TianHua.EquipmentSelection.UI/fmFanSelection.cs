@@ -1191,6 +1191,8 @@ namespace TianHua.FanSelection.UI
 
             var _FilterString = @" Scenario =  '" + FuncStr.NullToStr(ComBoxScene.EditValue) + "'";
 
+            _FilterString += @" AND IsErased = false ";
+
             TreeList.ActiveFilterString = _FilterString;
 
             if (m_ListFan == null) { m_ListFan = new List<FanDataModel>(); }
@@ -2423,16 +2425,67 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelCopied(ThModelCopyMessage message)
         {
-            // TODO: 处理风机块复制事件
-            // 
-            // 发送CAD命令
-            //var parameters = new Object[] { FuncJson.Serialize(_FanDataModel) };
-            //CommandHandlerBase.ExecuteFromCommandLine(false, "THFJINPLACEEDITBLOCK", parameters);
+            if (message == null || message.Data.ModelMapping == null || message.Data.ModelMapping.Count == 0) { return; }
+            foreach (var _Key in message.Data.ModelMapping.Keys)
+            {
+                var _Value = message.Data.ModelMapping[_Key];
+
+                var _Fan = m_ListFan.Find(p => p.ID == _Key);
+                if (_Fan == null) { return; }
+                List<FanDataModel> _ListTemp = new List<FanDataModel>();
+                string _Guid = _Value;
+                var _Json = FuncJson.Serialize(_Fan);
+                var _FanDataModel = FuncJson.Deserialize<FanDataModel>(_Json);
+
+                _FanDataModel.ID = _Guid;
+                _FanDataModel.PID = "0";
+                _FanDataModel.Name = _FanDataModel.Name;
+                _FanDataModel.InstallFloor = SetFanDataModelByFloor(_FanDataModel);
+                _ListTemp.Add(_FanDataModel);
+
+                var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+                if (_SonFan != null)
+                {
+                    var _SonJson = FuncJson.Serialize(_SonFan);
+                    var _SonFanData = FuncJson.Deserialize<FanDataModel>(_SonJson);
+
+                    _SonFanData.ID = Guid.NewGuid().ToString();
+                    _SonFanData.PID = _Guid;
+                    _ListTemp.Add(_SonFanData);
+                }
+                var _Inidex = m_ListFan.IndexOf(_Fan);
+                m_ListFan.InsertRange(_Inidex + 1, _ListTemp);
+
+
+                _ListTemp.ForEach(p => {
+                    var _Parameters = new Object[] { FuncJson.Serialize(p) };
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFJINPLACEEDITBLOCK", _Parameters);
+                });
+  
+
+                TreeList.RefreshDataSource();
+                this.TreeList.ExpandAll();
+                m_fmOverView.DataSourceChanged(m_ListFan);
+
+            }
+
         }
 
         private void OnModelDeleted(ThModelDeleteMessage message)
         {
             // TODO: 处理风机块删除事件
+            if (message == null || FuncStr.NullToStr(message.Data.Model) == string.Empty) { return; }
+
+            var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(message.Data.Model));
+
+            if (_Fan == null) { return; }
+
+            _Fan.IsErased = message.Data.Erased;
+
+            TreeList.RefreshDataSource();
+
+            this.TreeList.ExpandAll();
+
         }
     }
 }
