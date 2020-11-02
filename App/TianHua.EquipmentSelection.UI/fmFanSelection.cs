@@ -2473,7 +2473,6 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelDeleted(ThModelDeleteMessage message)
         {
-            // TODO: 处理风机块删除事件
             if (message == null || FuncStr.NullToStr(message.Data.Model) == string.Empty) { return; }
 
             var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(message.Data.Model));
@@ -2485,7 +2484,6 @@ namespace TianHua.FanSelection.UI
             TreeList.RefreshDataSource();
 
             this.TreeList.ExpandAll();
-
         }
     }
 }

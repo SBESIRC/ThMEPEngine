@@ -50,6 +50,7 @@ namespace TianHua.FanSelection.UI.CAD
             if (form is fmFanSelection fm)
             {
                 ThModelCopyMessage.Register(fm, fm.OnModelCopiedHandler);
+                ThModelDeleteMessage.Register(fm, fm.OnModelDeletedHandler);
             }
         }
 
@@ -58,6 +59,7 @@ namespace TianHua.FanSelection.UI.CAD
             if (form is fmFanSelection fm)
             {
                 ThModelCopyMessage.Unregister(fm, fm.OnModelCopiedHandler);
+                ThModelDeleteMessage.Unregister(fm, fm.OnModelDeletedHandler);
             }
         }
 
