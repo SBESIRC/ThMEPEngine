@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+using ThMEPElectrical;
+using AcHelper.Commands;
+using ThMEPElectrical.Model;
 using TianHua.Publics.BaseCode;
+using System.Collections.Generic;
+using DevExpress.XtraEditors;
 
 namespace TianHua.Electrical.UI
 {
@@ -187,6 +184,46 @@ namespace TianHua.Electrical.UI
             m_SmokeLayout.RoomHeight = FuncStr.NullToStr(ComBoxHeight.Text);
 
             m_SmokeLayout.SlopeRoof = FuncStr.NullToStr(ComBoxSlope.Text);
+
+
+            // 设置参数
+            ThMEPElectricalService.Instance.Parameter = new PlaceParameter()
+            {
+                RoofThickness = m_SmokeLayout.RoofThickness,
+            };
+            // 发送命令
+            switch(m_SmokeLayout.LayoutLogic)
+            {
+                case "无吊顶避梁":
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFDL");
+                    break;
+                case "有吊顶避梁":
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFDCP");
+                    break;
+                case "无梁楼盖":
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFDFS");
+                    break;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        private void CheckProtect_CheckedChanged(object sender, EventArgs e)
+        {
+            var checkbox = (CheckEdit)sender;
+            var parameters = new string[]
+            {
+                checkbox.Checked ? "_ON" : "_OFF",
+                "E-FD-PR", 
+                "\n", 
+                "\n"
+            };
+            CommandHandlerBase.ExecuteFromCommandLine(false, "-LAYER", parameters);
+        }
+
+        private void BtnLayout_Click(object sender, EventArgs e)
+        {
+            //
         }
     }
 }

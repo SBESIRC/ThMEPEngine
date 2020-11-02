@@ -236,7 +236,7 @@
             this.RidNoCeiling.Size = new System.Drawing.Size(192, 25);
             this.RidNoCeiling.TabIndex = 11;
             this.RidNoCeiling.TabStop = true;
-            this.RidNoCeiling.Text = "无吊顶壁梁";
+            this.RidNoCeiling.Text = "无吊顶避梁";
             this.RidNoCeiling.UseVisualStyleBackColor = true;
             this.RidNoCeiling.CheckedChanged += new System.EventHandler(this.RidNoCeiling_CheckedChanged);
             // 
@@ -247,7 +247,7 @@
             this.RidCeiling.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
             this.RidCeiling.Size = new System.Drawing.Size(192, 25);
             this.RidCeiling.TabIndex = 12;
-            this.RidCeiling.Text = "有吊顶壁梁";
+            this.RidCeiling.Text = "有吊顶避梁";
             this.RidCeiling.UseVisualStyleBackColor = true;
             this.RidCeiling.CheckedChanged += new System.EventHandler(this.RidCeiling_CheckedChanged);
             // 
@@ -258,7 +258,7 @@
             this.RidNoBeam.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
             this.RidNoBeam.Size = new System.Drawing.Size(192, 25);
             this.RidNoBeam.TabIndex = 13;
-            this.RidNoBeam.Text = "无梁盖楼";
+            this.RidNoBeam.Text = "无梁楼盖";
             this.RidNoBeam.UseVisualStyleBackColor = true;
             this.RidNoBeam.CheckedChanged += new System.EventHandler(this.RidNoBeam_CheckedChanged);
             // 
@@ -547,6 +547,7 @@
             this.CheckProtect.Size = new System.Drawing.Size(196, 19);
             this.CheckProtect.StyleController = this.layoutControl1;
             this.CheckProtect.TabIndex = 20;
+            this.CheckProtect.CheckedChanged += new System.EventHandler(this.CheckProtect_CheckedChanged);
             // 
             // TxtRoofThickness
             // 
@@ -575,6 +576,7 @@
             this.BtnLayout.StyleController = this.layoutControl1;
             this.BtnLayout.TabIndex = 10;
             this.BtnLayout.Text = "布置UCS";
+            this.BtnLayout.Click += new System.EventHandler(this.BtnLayout_Click);
             // 
             // PicSmoke
             // 
