@@ -102,19 +102,23 @@ namespace TianHua.FanSelection.UI
         [CommandMethod("TIANHUACAD", "THFJBLOCK", CommandFlags.NoHistory)]
         public void ThEquipmentBlock()
         {
+            UnSubscribeToDbEvents(Active.Database);
             using (var cmd = new ThModelBlockCommand())
             {
                 cmd.Execute();
             }
+            SubscribeToDbEvents(Active.Database);
         }
 
         [CommandMethod("TIANHUACAD", "THFJINPLACEEDITBLOCK", CommandFlags.NoHistory)]
         public void ThEquipmentInPlaceEditBlock()
         {
+            UnSubscribeToDbEvents(Active.Database);
             using (var cmd = new ThModelInPlaceEditBlockCommand())
             {
                 cmd.Execute();
             }
+            SubscribeToDbEvents(Active.Database);
         }
 
         private ObjectId GetSelectedEntity()
