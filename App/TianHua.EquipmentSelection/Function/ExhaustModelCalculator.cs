@@ -368,6 +368,10 @@ namespace TianHua.FanSelection.Function
         public static int RoundUpToFifty(int orgvalue)
         {
             int remaindernumber = orgvalue % 100;
+            if (remaindernumber == 0)
+            {
+                return orgvalue;
+            }
             return remaindernumber > 50 ? orgvalue - remaindernumber + 100 : orgvalue - remaindernumber + 50;
         }
 

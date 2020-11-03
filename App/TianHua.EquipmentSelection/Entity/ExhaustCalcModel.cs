@@ -164,5 +164,10 @@ namespace TianHua.FanSelection.Model
         /// 最大允许排烟量
         /// </summary>
         public string MaxSmokeExtraction { get; set; }
+
+        /// <summary>
+        /// 用户输入的估算风量
+        /// </summary>
+        public string EstimateAirVolum { get; set; }
     }
 }
