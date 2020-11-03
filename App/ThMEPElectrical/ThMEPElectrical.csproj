@@ -49,6 +49,7 @@
     <Compile Include="Business\Procedure\WallDataPicker.cs" />
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
+    <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPElectricalService.cs" />
+    <Compile Include="ThMEPElectricalUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">

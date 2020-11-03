@@ -120,7 +120,7 @@ namespace ThMEPElectrical.Core
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, 250);
@@ -160,7 +160,7 @@ namespace ThMEPElectrical.Core
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, 0);
             infoReader.Do();

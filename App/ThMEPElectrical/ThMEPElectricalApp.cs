@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
+using ThMEPElectrical.CAD;
 using ThMEPElectrical.Core;
 using ThMEPElectrical.Assistant;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,9 +15,9 @@ using ThMEPElectrical.Broadcast;
 using System.Linq;
 using ThCADExtension;
 using ThCADCore.NTS;
-using System;
 using DotNetARX;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 
 namespace ThMEPElectrical
 {
@@ -135,8 +136,8 @@ namespace ThMEPElectrical
                     var columPoly = columnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
 
                     ColumnService columnService = new ColumnService();
-                    columnService.HandleColumns(parkingLines, otherPLines, columPoly, 
-                        out Dictionary<List<Line>, List<ColumnModel>> mainColumns, 
+                    columnService.HandleColumns(parkingLines, otherPLines, columPoly,
+                        out Dictionary<List<Line>, List<ColumnModel>> mainColumns,
                         out Dictionary<List<Line>, List<ColumnModel>> otherColumns);
 
                     LayoutService layoutService = new LayoutService();
@@ -270,6 +271,36 @@ namespace ThMEPElectrical
             {
                 var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
                 packageManager.DoMainSecondBeamPlacePointsWithUcs();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THUCSCOMPASS", CommandFlags.Modal)]
+        public void ThUcsCompass()
+        {
+            while (true)
+            {
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                {
+                    Active.Database.ImportCompassBlock(
+                        ThMEPCommon.UCS_COMPASS_BLOCK_NAME,
+                        ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+                    var objId = Active.Database.InsertCompassBlock(
+                        ThMEPCommon.UCS_COMPASS_BLOCK_NAME,
+                        ThMEPCommon.UCS_COMPASS_LAYER_NAME,
+                        null);
+                    var ucs2Wcs = Active.Editor.UCS2WCS();
+                    var compass = acadDatabase.Element<BlockReference>(objId, true);
+                    compass.TransformBy(ucs2Wcs);
+                    var jig = new ThCompassDrawJig(Point3d.Origin.TransformBy(ucs2Wcs));
+                    jig.AddEntity(compass);
+                    PromptResult pr = Active.Editor.Drag(jig);
+                    if (pr.Status != PromptStatus.OK)
+                    {
+                        compass.Erase();
+                        break;
+                    }
+                    jig.TransformEntities();
+                }
             }
         }
     }

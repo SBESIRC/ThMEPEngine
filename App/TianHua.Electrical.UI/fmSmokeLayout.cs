@@ -223,7 +223,7 @@ namespace TianHua.Electrical.UI
 
         private void BtnLayout_Click(object sender, EventArgs e)
         {
-            //
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THUCSCOMPASS");
         }
     }
 }
