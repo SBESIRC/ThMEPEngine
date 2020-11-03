@@ -38,6 +38,12 @@
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Model\SprayDataService.cs" />
     <Compile Include="Model\SprayLayoutData.cs" />
+    <Compile Include="Pipe\Engine\ThToiletContainerRecognitionEngine.cs" />
+    <Compile Include="Pipe\Model\ThToiletContainer.cs" />
+    <Compile Include="Pipe\Service\ThToiletFloorDrainService.cs" />
+    <Compile Include="Pipe\Service\ThToiletContainerService.cs" />
+    <Compile Include="Pipe\Service\ThToiletClosestoolService.cs" />
+    <Compile Include="Pipe\Service\ThToiletDrainwellService.cs" />
     <Compile Include="Pipe\ThWCompositePipeEngine.cs" />
     <Compile Include="Pipe\ThWGeUtils.cs" />
     <Compile Include="Pipe\ThWKitchenPipeEngine.cs" />
