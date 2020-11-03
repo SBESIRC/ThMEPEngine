@@ -39,7 +39,10 @@ namespace TianHua.FanSelection.UI.CAD
 
                 // 在位编辑风机
                 ThFanSelectionEngine.ReplaceModelsInplace(_FanDataModel);
-                return;
+
+                // 参数变化
+                // 暂时没有处理的一个场景：编号变化
+                ThFanSelectionEngine.ModifyModels(_FanDataModel);
             }
         }
     }
