@@ -122,13 +122,19 @@ namespace ThCADCore.NTS
             var result = CascadedPolygonUnion.Union(curves.ToNTSPolygons().ToArray());
             if (result is Polygon bufferPolygon)
             {
-                objs.Add(bufferPolygon.Shell.ToDbPolyline());
+                foreach (var poly in bufferPolygon.ToDbPolylines())
+                {
+                    objs.Add(poly);
+                }
             }
             else if (result is MultiPolygon mPolygon)
             {
                 foreach (Polygon item in mPolygon.Geometries)
                 {
-                    objs.Add(item.Shell.ToDbPolyline());
+                    foreach (var poly in item.ToDbPolylines())
+                    {
+                        objs.Add(poly);
+                    }
                 }
             }
             else

@@ -3,6 +3,7 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -21,7 +22,7 @@ namespace ThMEPWSS.Bussiness
         /// <param name="sprays"></param>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public List<Polyline> GetBlindArea(List<SprayLayoutData> sprays, Polyline polyline)
+        public List<Polyline> GetBlindArea(List<SprayLayoutData> sprays, Polyline polyline, List<Polyline> holes)
         {
             //计算喷淋实际保护区域
             List<Polyline> protectArea = sprays.SelectMany(x =>
@@ -33,10 +34,25 @@ namespace ThMEPWSS.Bussiness
                 .Where(y => y.Contains(x.Position))
                 .SelectMany(z => z.Buffer(1).Cast<Polyline>());
             }).ToList();
-            //List<Polyline> protectArea = sprays.Select(x => x.Radii).Cast<Polyline>().ToList();
 
-            var sprayArea = SprayLayoutDataUtils.Radii(protectArea);
-            return polyline.Difference(sprayArea).Cast<Polyline>().ToList();
+            var sprayArea = SprayLayoutDataUtils.Radii(protectArea).Cast<Polyline>().OrderByDescending(x => x.Area).ToList();
+            Polyline frame = sprayArea.First();
+            DBObjectCollection dBObjects = new DBObjectCollection();
+            dBObjects.Add(frame);
+            //计算边界盲区
+            List<Polyline> blindAreas = new List<Polyline>();
+            blindAreas.AddRange(polyline.Difference(dBObjects).Cast<Polyline>().ToList());
+
+            //计算洞口盲区
+            sprayArea.Remove(frame);
+            dBObjects.Clear();
+            holes.ForEach(x => dBObjects.Add(x));
+            foreach (var holeArea in sprayArea)
+            {
+                blindAreas.AddRange(holeArea.Difference(dBObjects).Cast<Polyline>().ToList());
+            }
+            
+            return blindAreas;
         }
 
         /// <summary>
@@ -48,6 +64,7 @@ namespace ThMEPWSS.Bussiness
             using (var db = AcadDatabase.Active())
             {
                 var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.BlindArea_LayerName);
+                db.Database.UnFrozenLayer(ThWSSCommon.BlindArea_LayerName);
 
                 foreach (var area in blindArea.Where(x => x.Area > 1))
                 {
@@ -67,9 +84,11 @@ namespace ThMEPWSS.Bussiness
                     hatch.SetHatchPattern(HatchPatternType.PreDefined, "Solid");
                     hatch.Associative = true;
                     hatch.AppendLoop(HatchLoopTypes.Outermost, objIdColl);
-
                     // 重新生成Hatch纹理
                     hatch.EvaluateHatch(true);
+
+                    ObjectIdList ids = new ObjectIdList(new ObjectId[2] { area.Id, hatch.Id });
+                    db.Database.CreateGroup(area.Id.ToString(), ids);
                 }
             }
         }

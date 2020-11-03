@@ -12,6 +12,7 @@ namespace ThMEPWSS.Model
     {
         public Curve Radii { get; set; }
         public Point3d Position { get; set; }
+        public Point3d OriginPt { get; set; }    //原始生成喷淋原始点位
         public Vector3d mainDir { get; set; }    //排布主方向
         public Vector3d otherDir { get; set; }   //排布次方向
         public Line vLine { get; set; }          //所在排布竖线
@@ -26,6 +27,7 @@ namespace ThMEPWSS.Model
             {
                 Radii = radii,
                 Position = pos,
+                OriginPt = pos,
             };
         }
     }

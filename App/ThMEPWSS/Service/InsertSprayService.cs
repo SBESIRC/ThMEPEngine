@@ -19,6 +19,9 @@ namespace ThWSS.Bussiness
             using (var db = AcadDatabase.Active())
             {
                 LayerTools.AddLayer(db.Database, ThWSSCommon.SprayLayerName);
+                db.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
+                db.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
+                db.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
                 var filePath = Path.Combine(ThCADCommon.SupportPath(), ThWSSCommon.SprayDwgName);
                 db.Database.ImportBlocksFromDwg(filePath);
                 foreach (var insertPoint in insertPts)

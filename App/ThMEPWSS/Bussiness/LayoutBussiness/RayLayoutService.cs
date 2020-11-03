@@ -25,38 +25,36 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double moveLength = 200;
         protected readonly double spacing = 100;
         
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, Vector3d xDir, double gridSpacing, bool avoid, bool CreateLine = true)//avoid临时测试用
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, Vector3d xDir, bool CreateLine = true)
         {
             //获取柱轴网
             GridService gridService = new GridService();
-            var allGrids = gridService.CreateGrid(polyline, colums, xDir, gridSpacing);
+            var allGrids = gridService.CreateGrid(polyline, colums, xDir, 4000);
 
             //计算布置网格线
             CalLayoutGrid(polyline, allGrids, out List<List<Line>> tLines, out List<List<Line>> vLines, out Vector3d tDir, out Vector3d vDir);
 
             //计算喷淋布置点
             var sprays = SprayDataOperateService.CalSprayPoint(tLines, vLines, vDir, tDir, sideLength);
-            
-            if (avoid)
-            {   //边界保护（调整线）
-                CheckProtectService checkProtectService = new CheckProtectService();
-                checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
 
-                //边界保护（调整点）
-                CheckProtectByPointsService checkProtectByPointsService = new CheckProtectByPointsService();
-                checkProtectByPointsService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
-            }
+            //边界保护（调整线）
+            CheckProtectService checkProtectService = new CheckProtectService();
+            checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
+
+            //边界保护（调整点）
+            CheckProtectByPointsService checkProtectByPointsService = new CheckProtectByPointsService();
+            checkProtectByPointsService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
 
             //躲次梁
             AvoidBeamByPointService avoidService = new AvoidBeamByPointService();
-            avoidService.AvoidBeam(polyline, sprays, colums, sideLength, maxLength);
+            avoidService.AvoidBeam(polyline, sprays, colums, beams, sideLength, maxLength);
 
             var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays)
                 .SelectMany(x => polyline.Trim(x).Cast<Polyline>()
                 .Select(y => new Line(y.StartPoint, y.EndPoint))
                 .ToList()).ToList();
             RotateTransformService.RotateInverseLines(sprayLines);
-            sprays.ForEach(x => x.Position = RotateTransformService.RotateInversePoint(x.Position));
+            sprays.ForEach(x => { x.Position = RotateTransformService.RotateInversePoint(x.Position); x.OriginPt = RotateTransformService.RotateInversePoint(x.OriginPt); });
             if (CreateLine)
             {
                 //打印布置网格线
@@ -267,7 +265,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         private List<Polyline> LayoutPoints(Point3d pt, Vector3d dir, Vector3d otherDir, double length, double width)
         {
             List<Polyline> lines = new List<Polyline>();
-            if (length <= 500)
+            if (length <= 600)
             {
                 return lines;
             }

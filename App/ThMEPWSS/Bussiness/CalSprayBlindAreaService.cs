@@ -28,20 +28,20 @@ namespace ThMEPWSS.Bussiness
             tDir = xDir.CrossProduct(Vector3d.ZAxis);
         }
 
-        public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline)
+        public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline, List<Polyline> holes)
         {
             var sprayData = SprayDataOperateService.CalSprayPoint(sprays, vDir, tDir, length);
-            var blindArea = GetBlindArea(sprayData, polyline);
+            var blindArea = GetBlindArea(sprayData, polyline, holes);
 
             //打印盲区
             InsertBlindArea(blindArea);
         }
 
-        public void CalSprayBlindArea(List<SprayLayoutData> sprays, Polyline polyline)
+        public void CalSprayBlindArea(List<SprayLayoutData> sprays, Polyline polyline, List<Polyline> holes)
         {
             var sprayPts = sprays.Select(x => x.Position).ToList();
             var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, length);
-            var blindArea = GetBlindArea(sprayData, polyline);
+            var blindArea = GetBlindArea(sprayData, polyline, holes);
 
             //打印盲区
             InsertBlindArea(blindArea);

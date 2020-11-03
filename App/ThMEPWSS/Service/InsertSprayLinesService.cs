@@ -17,11 +17,12 @@ namespace ThMEPWSS.Service
             using (var db = AcadDatabase.Active())
             {
                 LayerTools.AddLayer(db.Database, ThWSSCommon.Layout_Line_LayerName);
+                db.Database.UnFrozenLayer(ThWSSCommon.Layout_Line_LayerName);
                 var lineData = sprayLines.Select(x => new Line(x.StartPoint, x.EndPoint)).ToList();
                 foreach (var line in lineData)
                 {
                     line.Layer = ThWSSCommon.Layout_Line_LayerName;
-                    line.ColorIndex = 130;
+                    line.ColorIndex = 4;
                     db.ModelSpace.Add(line);
                 }
             }

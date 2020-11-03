@@ -27,17 +27,13 @@ namespace ThMEPWSS.Bussiness
         double minSpacing = 100;
         double sprayWidth = 200;
 
-        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, double maxValue, double minValue)
+        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, List<Polyline> beamPolys, double maxValue, double minValue)
         {
             maxSpacing = maxValue;
             minSpacing = minValue;
 
-            //获得所有梁
-            var allBeams = GetBeam(polyline).Cast<ThIfcLineBeam>().ToList();
-            allBeams.ForEach(x => x.ExtendBoth(20, 20));
-
             //计算可布置区域
-            var layoutAreas = GetLayoutArea(polyline, allBeams, columnPolys);
+            var layoutAreas = CreateLayoutAreaService.GetLayoutArea(polyline, beamPolys, columnPolys, spcing);
 
             //计算出不合法的喷淋点位
             var moveSprays = CalIllegalSpary(sprays, layoutAreas);
@@ -52,20 +48,11 @@ namespace ThMEPWSS.Bussiness
             //计算出校核之后任然不合法的喷淋点位
             var errorSprays = CalIllegalSpary(sprays, layoutAreas);
 
-#if DEBUG
             //打印可布置区域
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                foreach (var item in layoutAreas)
-                {
-                    RotateTransformService.RotateInversePolyline(item);
-                    acdb.ModelSpace.Add(item);
-                }
-            }
-#endif
+            MarkService.PrintLayoutArea(layoutAreas);
 
             //打印错误喷淋点位
-            PrintErrorSpray(errorSprays);
+            MarkService.PrintErrorSpray(errorSprays);
         }
 
         /// <summary>
@@ -388,74 +375,6 @@ namespace ThMEPWSS.Bussiness
         private List<SprayLayoutData> CalIllegalSpary(List<SprayLayoutData> sprays, List<Polyline> layoutAreas)
         {
             return sprays.Where(x => layoutAreas.Where(y => y.ContainsOrOnBoundary(x.Position)).Count() <= 0).ToList();
-        }
-
-        /// <summary>
-        /// 计算可布置区域
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="allBeams"></param>
-        /// <returns></returns>
-        private List<Polyline> GetLayoutArea(Polyline polyline, List<ThIfcLineBeam> allBeams, List<Polyline> columnPoly)
-        {
-            DBObjectCollection dBObjects = new DBObjectCollection();
-            foreach (var beam in allBeams)
-            {
-                dBObjects.Add(beam.Outline as Polyline);
-            }
-
-            foreach (var cPoly in columnPoly)
-            {
-                dBObjects.Add(cPoly);
-            }
-            var layoutAreas = polyline.Difference(dBObjects).Cast<Polyline>().SelectMany(x => x.Buffer(-spcing).Cast<Polyline>()).Where(x => x.Area > 0).ToList();
-            return layoutAreas;
-        }
-
-        /// <summary>
-        /// 获得所有梁
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        private List<ThIfcBeam> GetBeam(Polyline polyline)
-        {
-            var newPolyline = polyline.Clone() as Polyline;
-            RotateTransformService.RotateInversePolyline(newPolyline);
-            List<ThIfcBeam> beams = new List<ThIfcBeam>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var beamEngine = ThMEPEngineCoreService.Instance.CreateBeamEngine())
-            {
-                beamEngine.Recognize(Active.Database, newPolyline.Vertices());
-
-                foreach (var beam in beamEngine.Elements)
-                {
-                    if (beam is ThIfcBeam thBeam)
-                    {
-                        beams.Add(thBeam);
-                    }
-                }
-            }
-
-            RotateTransformService.RotatePolyline(beams.Select(x => x.Outline as Polyline).ToList());
-            return beams;
-        }
-
-        /// <summary>
-        /// 打印出无法移动的错误喷淋
-        /// </summary>
-        /// <param name="errorSprays"></param>
-        private void PrintErrorSpray(List<SprayLayoutData> errorSprays)
-        {
-            //打印有问题的但无法移动的喷淋点位
-            foreach (var spray in errorSprays)
-            {
-                var sprayCircle = new Circle(spray.Position, Vector3d.ZAxis, sprayWidth);
-                using (AcadDatabase db = AcadDatabase.Active())
-                {
-                    sprayCircle.ColorIndex = 1;
-                    db.ModelSpace.Add(sprayCircle);
-                }
-            }
         }
     }
 }

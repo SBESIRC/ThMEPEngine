@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
@@ -21,6 +22,9 @@ namespace ThMEPWSS.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
                 var objs = new DBObjectCollection();
                 var sprays = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
@@ -43,6 +47,9 @@ namespace ThMEPWSS.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.Layout_Line_LayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.Layout_Line_LayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.Layout_Line_LayerName);
                 var objs = new DBObjectCollection();
                 var sprays = acadDatabase.ModelSpace
                     .OfType<Line>()
@@ -69,6 +76,9 @@ namespace ThMEPWSS.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.BlindArea_LayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.BlindArea_LayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.BlindArea_LayerName);
                 var bufferPoly = polyline.Buffer(-1)[0] as Polyline;
                 var objs = new DBObjectCollection();
                 var blindLines = acadDatabase.ModelSpace
@@ -96,6 +106,133 @@ namespace ThMEPWSS.Service
                 {
                     bSolid.UpgradeOpen();
                     bSolid.Erase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除有问题的喷头标记
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static void ClearErrorSprayMark(this Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.Layout_Error_Spray_LayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.Layout_Error_Spray_LayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.Layout_Error_Spray_LayerName);
+                var bufferPoly = polyline.Buffer(-1)[0] as Polyline;
+                var objs = new DBObjectCollection();
+                var errorCircles = acadDatabase.ModelSpace
+                    .OfType<Circle>()
+                    .Where(o => o.Layer == ThWSSCommon.Layout_Error_Spray_LayerName);
+                errorCircles.ForEach(x => objs.Add(x));
+
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var eCircle = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Circle>().ToList();
+                foreach (var circle in eCircle)
+                {
+                    circle.UpgradeOpen();
+                    circle.Erase();
+                }
+                objs.Clear();
+
+                var blindSolid = acadDatabase.ModelSpace
+                    .OfType<Hatch>()
+                    .Where(o => o.Layer == ThWSSCommon.Layout_Error_Spray_LayerName);
+                blindSolid.ForEachDbObject(o => objs.Add(o));
+
+                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var hatchs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Hatch>().ToList();
+                foreach (Hatch bSolid in hatchs)
+                {
+                    bSolid.UpgradeOpen();
+                    bSolid.Erase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 清除移动后喷淋位置对比标记
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static void ClearMoveSprayMark(this Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.Layout_Origin_Spray_LayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.Layout_Origin_Spray_LayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.Layout_Origin_Spray_LayerName);
+                var bufferPoly = polyline.Buffer(-1)[0] as Polyline;
+                var objs = new DBObjectCollection();
+                var errorCircles = acadDatabase.ModelSpace
+                    .OfType<Circle>()
+                    .Where(o => o.Layer == ThWSSCommon.Layout_Origin_Spray_LayerName);
+                errorCircles.ForEach(x => objs.Add(x));
+
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var eCircle = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Circle>().ToList();
+                foreach (var circle in eCircle)
+                {
+                    circle.UpgradeOpen();
+                    circle.Erase();
+                }
+                objs.Clear();
+
+                var blindSolid = acadDatabase.ModelSpace
+                    .OfType<Hatch>()
+                    .Where(o => o.Layer == ThWSSCommon.Layout_Origin_Spray_LayerName);
+                blindSolid.ForEachDbObject(o => objs.Add(o));
+
+                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var hatchs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Hatch>().ToList();
+                foreach (Hatch bSolid in hatchs)
+                {
+                    bSolid.UpgradeOpen();
+                    bSolid.Erase();
+                }
+                objs.Clear();
+
+                var connectPoly = acadDatabase.ModelSpace
+                   .OfType<Polyline>()
+                   .Where(o => o.Layer == ThWSSCommon.Layout_Origin_Spray_LayerName);
+                connectPoly.ForEach(x => objs.Add(x));
+
+                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var cLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Polyline>().ToList();
+                foreach (var line in cLines)
+                {
+                    line.UpgradeOpen();
+                    line.Erase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 清除可布置区域
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static void ClearLayouArea(this Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.Layout_Area_LayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.Layout_Area_LayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.Layout_Area_LayerName);
+                var objs = new DBObjectCollection();
+                var layoutAreas = acadDatabase.ModelSpace
+                    .OfType<Polyline>()
+                    .Where(o => o.Layer == ThWSSCommon.Layout_Area_LayerName);
+                layoutAreas.ForEach(x => objs.Add(x));
+
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var areaPolys = thCADCoreNTSSpatialIndex.SelectWindowPolygon(bufferPoly).Cast<Polyline>().ToList();
+
+                foreach (var area in areaPolys)
+                {
+                    area.UpgradeOpen();
+                    area.Erase();
                 }
             }
         }

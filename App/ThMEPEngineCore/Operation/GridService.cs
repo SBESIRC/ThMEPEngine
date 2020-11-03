@@ -32,6 +32,10 @@ namespace ThMEPEngineCore.Operation
             var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, polyline));
 #if DEBUG
             var rotateAngle = xDir.GetAngleTo(Vector3d.XAxis);
+            if (xDir.Y < 0)
+            {
+                rotateAngle = -rotateAngle;
+            }
             string GridLineLayer = "AD-Gird";     //轴网线图层
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -39,14 +43,14 @@ namespace ThMEPEngineCore.Operation
                 foreach (var fGird in firGrids.Value)
                 {
                     var rotateGrid = fGird.Clone() as Polyline;
-                    rotateGrid.Rotate(Point3d.Origin, -rotateAngle);
+                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);
                 }
                 foreach (var sGird in secGrids.Value)
                 {
                     var rotateGrid = sGird.Clone() as Polyline;
-                    rotateGrid.Rotate(Point3d.Origin, -rotateAngle);
+                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);
                 }

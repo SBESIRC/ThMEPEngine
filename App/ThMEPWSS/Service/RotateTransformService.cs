@@ -48,7 +48,7 @@ namespace ThMEPWSS.Service
         private static double CalRotateAngle()
         {
             var angle = xDir.GetAngleTo(Vector3d.XAxis);
-            if (Active.Editor.CurrentUserCoordinateSystem.CoordinateSystem3d.Xaxis.Y < 0)
+            if (xDir.Y < 0)
             {
                 angle = -angle;
             }

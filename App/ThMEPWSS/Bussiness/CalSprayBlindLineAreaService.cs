@@ -17,7 +17,7 @@ namespace ThMEPWSS.Bussiness
             var sprayData = generateSpraysService.GenerateSprays(sprayLines, length);
 
             //获取盲区
-            var blindArea = GetBlindArea(sprayData, polyline);
+            var blindArea = GetBlindArea(sprayData, polyline, new List<Polyline>());
 
             //打印盲区
             InsertBlindArea(blindArea);
