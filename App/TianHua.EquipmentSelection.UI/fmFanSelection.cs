@@ -1832,7 +1832,7 @@ namespace TianHua.FanSelection.UI
                 _Sheet.Cells[i, 4] = p.CalcAirVolume;
                 _Sheet.Cells[i, 5] = p.FanDelivery;
                 _Sheet.Cells[i, 6] = p.Pa;
-                _Sheet.Cells[i, 7] = FuncStr.NullToInt(p.StaticPa);
+                _Sheet.Cells[i, 7] = p.StaticPa;
                 _Sheet.Cells[i, 8] = p.FanEnergyLevel;
                 _Sheet.Cells[i, 9] = p.FanEfficiency;
                 _Sheet.Cells[i, 10] = p.FanRpm;
@@ -1973,7 +1973,7 @@ namespace TianHua.FanSelection.UI
 
                        _ExportFanPara.Pa = FuncStr.NullToStr(p.WindResis) + "/" + FuncStr.NullToStr(_SonFan.WindResis);
 
-                       _ExportFanPara.StaticPa = FuncStr.NullToStr((p.DuctResistance + p.Damper) * p.SelectionFactor) + "/" + FuncStr.NullToStr((_SonFan.DuctResistance + _SonFan.Damper) * _SonFan.SelectionFactor);
+                       _ExportFanPara.StaticPa = FuncStr.NullToInt(FuncStr.NullToStr((p.DuctResistance + p.Damper) * p.SelectionFactor)) + "/" + FuncStr.NullToInt(FuncStr.NullToStr((_SonFan.DuctResistance + _SonFan.Damper) * _SonFan.SelectionFactor));
 
                    }
                }
@@ -2318,23 +2318,23 @@ namespace TianHua.FanSelection.UI
             string _ErrorStr = string.Empty;
             if (_FocusedColumn.FieldName == "InstallSpace")
             {
-                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr(e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario);
+                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr( e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum);
             }
 
             if (_FocusedColumn.FieldName == "InstallFloor")
             {
-                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == FuncStr.NullToStr(e.Value) && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario);
+                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == FuncStr.NullToStr(e.Value) && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum);
             }
-            //if (_FocusedColumn.FieldName == "VentNum")
-            //{
-            //    _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario);
+            if (_FocusedColumn.FieldName == "VentNum")
+            {
+                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == FuncStr.NullToStr(e.Value));
 
-            //    var _Calculator = new VentSNCalculator(FuncStr.NullToStr(e.Value));
-            //    if (_Calculator.SerialNumbers.Count > 0)
-            //    {
-            //        _ListVentNum = _Calculator.SerialNumbers;
-            //    }
-            //}
+                //var _Calculator = new VentSNCalculator(FuncStr.NullToStr(e.Value));
+                //if (_Calculator.SerialNumbers.Count > 0)
+                //{
+                //    _ListVentNum = _Calculator.SerialNumbers;
+                //}
+            }
 
             if (_List != null && _List.Count > 0)
             {
@@ -2457,11 +2457,12 @@ namespace TianHua.FanSelection.UI
                 m_ListFan.InsertRange(_Inidex + 1, _ListTemp);
 
 
-                _ListTemp.ForEach(p => {
+                _ListTemp.ForEach(p =>
+                {
                     var _Parameters = new Object[] { FuncJson.Serialize(p) };
                     CommandHandlerBase.ExecuteFromCommandLine(false, "THFJINPLACEEDITBLOCK", _Parameters);
                 });
-  
+
 
                 TreeList.RefreshDataSource();
                 this.TreeList.ExpandAll();
