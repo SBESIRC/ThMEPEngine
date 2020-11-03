@@ -120,6 +120,7 @@ namespace TianHua.FanSelection.UI.CAD
 
                     // 写入修改后的属性
                     objId.ModifyModelAttributes(dataModel.Attributes());
+                    objId.SetModelNumber(dataModel.InstallFloor, model.ObjectId.GetModelNumber());
 
                     // 更新规格和型号
                     UpdateModelName(objId, dataModel);
