@@ -276,5 +276,14 @@ namespace TianHua.FanSelection.UI
             subview.Refresh();
             UpdateWithModel();
         }
+
+        private void DoorTypeChanged(object sender, EventArgs e)
+        {
+            gridView1.PostEditor();
+            gridView2.PostEditor();
+            gridView3.PostEditor();
+            subview.Refresh();
+            UpdateWithModel();
+        }
     }
 }
