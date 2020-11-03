@@ -2409,8 +2409,9 @@ namespace TianHua.FanSelection.UI
                 var _Json = FuncJson.Serialize(_Fan);
                 var _FanDataModel = FuncJson.Deserialize<FanDataModel>(_Json);
 
-                _FanDataModel.ID = _Guid;
                 _FanDataModel.PID = "0";
+                _FanDataModel.ID = _Guid;
+                _FanDataModel.IsErased = false;
                 _FanDataModel.Name = _FanDataModel.Name;
                 _FanDataModel.InstallFloor = SetFanDataModelByFloor(_FanDataModel);
                 _ListTemp.Add(_FanDataModel);
