@@ -190,7 +190,7 @@ namespace TianHua.FanSelection.UI
                 for (int i = 0; i < _List.Count; i++)
                 {
                     if (i == 0)
-                        _FilterString = @"  Scenario =  '" + FuncStr.NullToStr(_List[i]) + "'";
+                        _FilterString = @" ( Scenario =  '" + FuncStr.NullToStr(_List[i]) + "'";
                     else
                         _FilterString += @" OR Scenario =  '" + FuncStr.NullToStr(_List[i]) + "'";
                 }
@@ -198,6 +198,8 @@ namespace TianHua.FanSelection.UI
             }
 
             if (_FilterString == string.Empty) { _FilterString = " 1 <> 1 "; }
+
+            _FilterString += @") AND IsErased = false ";
 
             return _FilterString;
         }
@@ -662,6 +664,7 @@ namespace TianHua.FanSelection.UI
 
 
             InitListFan();
+            _Edit_EditValueChanged(null, null);
         }
 
         private void TreeList_MouseDown(object sender, MouseEventArgs e)
