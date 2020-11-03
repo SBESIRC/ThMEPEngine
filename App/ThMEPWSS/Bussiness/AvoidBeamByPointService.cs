@@ -27,7 +27,7 @@ namespace ThMEPWSS.Bussiness
         double minSpacing = 100;
         double sprayWidth = 200;
 
-        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, List<Polyline> beamPolys, double maxValue, double minValue)
+        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, List<Polyline> beamPolys, double maxValue, double minValue, Matrix3d matrix)
         {
             maxSpacing = maxValue;
             minSpacing = minValue;
@@ -49,10 +49,10 @@ namespace ThMEPWSS.Bussiness
             var errorSprays = CalIllegalSpary(sprays, layoutAreas);
 
             //打印可布置区域
-            MarkService.PrintLayoutArea(layoutAreas);
+            MarkService.PrintLayoutArea(layoutAreas, matrix);
 
             //打印错误喷淋点位
-            MarkService.PrintErrorSpray(errorSprays);
+            MarkService.PrintErrorSpray(errorSprays, matrix);
         }
 
         /// <summary>

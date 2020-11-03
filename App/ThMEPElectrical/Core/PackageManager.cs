@@ -182,7 +182,7 @@ namespace ThMEPElectrical.Core
                 DrawUtils.DrawProfile(GeometryTrans.MatrixSystemCurves(pairInfo.OriginMatrix, 100), "drawMatrix");
                 //轴网线
                 var gridCalculator = new GridService();
-                var gridInfo = gridCalculator.CreateGrid(pairInfo.ExternalProfile, validColumns, pairInfo.OriginMatrix.CoordinateSystem3d.Xaxis, ThMEPCommon.spacingValue);
+                var gridInfo = gridCalculator.CreateGrid(pairInfo.ExternalProfile, validColumns, new Matrix3d(), ThMEPCommon.spacingValue);
                 gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
@@ -373,7 +373,7 @@ namespace ThMEPElectrical.Core
                 var gridCalculator = new GridService();
 
                 //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, new Matrix3d(), ThMEPCommon.spacingValue);
                 gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
@@ -415,7 +415,7 @@ namespace ThMEPElectrical.Core
 
                 DrawUtils.DrawProfile(validColumns.Polylines2Curves(), "validColumns");
                 //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, new Matrix3d(), ThMEPCommon.spacingValue);
                 gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
@@ -506,7 +506,7 @@ namespace ThMEPElectrical.Core
                 var gridCalculator = new GridService();
 
                 //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, Vector3d.XAxis, ThMEPCommon.spacingValue);
+                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, new Matrix3d(), ThMEPCommon.spacingValue);
                 gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));

@@ -14,7 +14,11 @@ namespace ThMEPWSS.Service
 {
     public static class MarkService
     {
-        public static void PrintErrorSpray(List<SprayLayoutData> errorSprays)
+        /// <summary>
+        /// 打印错误喷淋点位
+        /// </summary>
+        /// <param name="errorSprays"></param>
+        public static void PrintErrorSpray(List<SprayLayoutData> errorSprays, Matrix3d matrix)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -25,12 +29,13 @@ namespace ThMEPWSS.Service
                 //打印有问题的但无法移动的喷淋点位
                 foreach (var spray in errorSprays)
                 {
-                    var sprayInnerCircle = new Circle(spray.Position, Vector3d.ZAxis, 300);
+                    var transPt = spray.Position.TransformBy(matrix);
+                    var sprayInnerCircle = new Circle(transPt, Vector3d.ZAxis, 300);
                     sprayInnerCircle.ColorIndex = 30;
                     sprayInnerCircle.LayerId = layerId;
                     acdb.ModelSpace.Add(sprayInnerCircle);
 
-                    var sprayOuterCircle = new Circle(spray.Position, Vector3d.ZAxis, 400);
+                    var sprayOuterCircle = new Circle(transPt, Vector3d.ZAxis, 400);
                     sprayOuterCircle.ColorIndex = 30;
                     sprayOuterCircle.LayerId = layerId;
                     acdb.ModelSpace.Add(sprayOuterCircle);
@@ -111,7 +116,7 @@ namespace ThMEPWSS.Service
         /// 打印可布置区域
         /// </summary>
         /// <param name="polylines"></param>
-        public static void PrintLayoutArea(List<Polyline> polylines)
+        public static void PrintLayoutArea(List<Polyline> polylines, Matrix3d matrix)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -121,7 +126,7 @@ namespace ThMEPWSS.Service
                 acdb.Database.UnOffLayer(ThWSSCommon.Layout_Area_LayerName);
                 foreach (var area in polylines)
                 {
-                    RotateTransformService.RotateInversePolyline(area);
+                    area.TransformBy(matrix);
                     area.ColorIndex = 3;
                     area.LayerId = layerId;
                     acdb.ModelSpace.Add(area);

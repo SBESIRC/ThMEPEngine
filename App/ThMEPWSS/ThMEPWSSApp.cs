@@ -20,6 +20,7 @@ using ThMEPWSS.Pipe;
 using ThWSS.Bussiness;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Extension;
+using System;
 
 namespace ThMEPWSS
 {
@@ -56,7 +57,7 @@ namespace ThMEPWSS
                 return;
             }
 
-            if (!CalWCSLayoutDirection(ref RotateTransformService.xDir))
+            if (!CalWCSLayoutDirection(out Matrix3d matrix))
             {
                 return;
             }
@@ -80,14 +81,14 @@ namespace ThMEPWSS
                     GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
 
                     //转换usc
-                    RotateTransformService.RotatePolyline(plFrame);
-                    RotateTransformService.RotatePolyline(columns);
-                    RotateTransformService.RotatePolyline(beams);
-                    RotateTransformService.RotatePolyline(walls);
-                    
+                    plFrame.TransformBy(matrix.Inverse());
+                    columns.ForEach(x => x.TransformBy(matrix.Inverse()));
+                    beams.ForEach(x => x.TransformBy(matrix.Inverse()));
+                    walls.ForEach(x => x.TransformBy(matrix.Inverse()));
+
                     //生成喷头
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columns, beams, RotateTransformService.xDir, false);
+                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columns, beams, matrix, false);
 
                     //放置喷头
                     InsertSprayService.InsertSprayBlock(sprayPts.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
@@ -95,9 +96,9 @@ namespace ThMEPWSS
                     //打印喷头变化轨迹
                     MarkService.PrintOriginSpray(sprayPts);
 
-                    RotateTransformService.RotateInversePolyline(plFrame);
+                    plFrame.TransformBy(matrix);
                     //打印喷淋点盲区
-                    CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(RotateTransformService.xDir);
+                    CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
                     calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, new List<Polyline>());
 
                     
@@ -125,7 +126,7 @@ namespace ThMEPWSS
                 return;
             }
 
-            if (!CalWCSLayoutDirection(ref RotateTransformService.xDir))
+            if (!CalWCSLayoutDirection(out Matrix3d matrix))
             {
                 return;
             }
@@ -149,14 +150,14 @@ namespace ThMEPWSS
                     GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
 
                     //转换usc
-                    RotateTransformService.RotatePolyline(plFrame);
-                    RotateTransformService.RotatePolyline(columns);
-                    RotateTransformService.RotatePolyline(beams);
-                    RotateTransformService.RotatePolyline(walls);
+                    plFrame.TransformBy(matrix.Inverse());
+                    columns.ForEach(x => x.TransformBy(matrix.Inverse()));
+                    beams.ForEach(x => x.TransformBy(matrix.Inverse()));
+                    walls.ForEach(x => x.TransformBy(matrix.Inverse()));
 
                     //生成喷淋对象
                     RayLayoutService layoutDemo = new RayLayoutService();
-                    layoutDemo.LayoutSpray(plFrame, columns, beams, RotateTransformService.xDir, true);
+                    layoutDemo.LayoutSpray(plFrame, columns, beams, matrix, true);
                 }
             }
         }
@@ -246,7 +247,7 @@ namespace ThMEPWSS
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 //获取方向线
-                if (!CalWCSLayoutDirection(ref RotateTransformService.xDir))
+                if (!CalWCSLayoutDirection(out Matrix3d matrix))
                 {
                     return;
                 }
@@ -258,7 +259,8 @@ namespace ThMEPWSS
                     var bufferPoly = plFrame.Buffer(1)[0] as Polyline;
                     //清除原有构件
                     plFrame.ClearBlindArea();
-                    if (!CalSprayBlindArea(bufferPoly, acdb))
+
+                    if (!CalSprayBlindArea(bufferPoly, acdb, matrix))
                     {
                         CalSprayLineBlindArea(bufferPoly, acdb);
                     }
@@ -286,7 +288,7 @@ namespace ThMEPWSS
                 return;
             }
 
-            if (!CalWCSLayoutDirection(ref RotateTransformService.xDir))
+            if (!CalWCSLayoutDirection(out Matrix3d matrix))
             {
                 return;
             }
@@ -305,16 +307,16 @@ namespace ThMEPWSS
                     GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
 
                     //转换usc
-                    RotateTransformService.RotatePolyline(plFrame);
-                    RotateTransformService.RotatePolyline(columns);
-                    RotateTransformService.RotatePolyline(beams);
-                    RotateTransformService.RotatePolyline(walls);
+                    plFrame.TransformBy(matrix.Inverse());
+                    columns.ForEach(x => x.TransformBy(matrix.Inverse()));
+                    beams.ForEach(x => x.TransformBy(matrix.Inverse()));
+                    walls.ForEach(x => x.TransformBy(matrix.Inverse()));
 
                     //计算可布置区域
                     var layoutAreas = CreateLayoutAreaService.GetLayoutArea(plFrame, beams, columns, 300);
 
                     //打印可布置区域
-                    MarkService.PrintLayoutArea(layoutAreas);
+                    MarkService.PrintLayoutArea(layoutAreas, matrix);
                 }
             }
         }
@@ -324,7 +326,7 @@ namespace ThMEPWSS
         /// </summary>
         /// <param name="result"></param>
         /// <param name="acdb"></param>
-        private bool CalSprayBlindArea(Polyline plFrame, AcadDatabase acdb)
+        private bool CalSprayBlindArea(Polyline plFrame, AcadDatabase acdb, Matrix3d matrix)
         {
             var filterlist = OpFilter.Bulid(o =>
             o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.SprayLayerName &
@@ -348,7 +350,7 @@ namespace ThMEPWSS
                 return false;
             }
             var sprayPts = sprays.Select(x => x.Position).ToList();
-            CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(RotateTransformService.xDir);
+            CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
             calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, new List<Polyline>());
 
             return true;
@@ -390,8 +392,9 @@ namespace ThMEPWSS
         /// 计算排布方向
         /// </summary>
         /// <returns></returns>
-        private bool CalWCSLayoutDirection(ref Vector3d dir)
+        private bool CalWCSLayoutDirection(out Matrix3d matrix)
         {
+            matrix = Active.Editor.CurrentUserCoordinateSystem;
             PromptPointOptions options = new PromptPointOptions("请选择排布方向起始点");
             var sResult = Active.Editor.GetPoint(options);
 
@@ -405,7 +408,19 @@ namespace ThMEPWSS
                 {
                     return false;
                 }
-                dir = (endPt - transPt).GetNormal();
+
+                transPt = new Point3d(transPt.X, transPt.Y, 0);
+                endPt = new Point3d(endPt.X, endPt.Y, 0);
+                Vector3d xDir = (endPt - transPt).GetNormal();
+                Vector3d yDir = xDir.GetPerpendicularVector().GetNormal();
+                Vector3d zDir = Vector3d.ZAxis;
+               
+                matrix = new Matrix3d(new double[]{
+                    xDir.X, yDir.X, zDir.X, 0,
+                    xDir.Y, yDir.Y, zDir.Y, 0,
+                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    0.0, 0.0, 0.0, 1.0});
+
                 return true;
             }
 

@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.Service
 {
-    public static class RotateTransformService
+    public static class RotateTransformServicesss
     {
         public static Vector3d xDir = Vector3d.XAxis;
 

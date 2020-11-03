@@ -22,10 +22,10 @@ namespace ThMEPWSS.Bussiness
         Vector3d tDir;
         readonly double length = 3400;
 
-        public CalSprayBlindAreaService(Vector3d xDir)
+        public CalSprayBlindAreaService(Matrix3d matrix)
         {
-            vDir = xDir;
-            tDir = xDir.CrossProduct(Vector3d.ZAxis);
+            vDir = matrix.CoordinateSystem3d.Xaxis;
+            tDir = matrix.CoordinateSystem3d.Yaxis;
         }
 
         public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline, List<Polyline> holes)

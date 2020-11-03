@@ -80,7 +80,19 @@ namespace ThCADCore.NTS
                 }
                 else if (obj is Hatch hatch)
                 {
-                    return hatch.GeometricExtents.ToNTSPolygon();
+                    var maxHatch = hatch.Boundaries().OrderByDescending(x => x.Area).First();
+                    if (maxHatch is Polyline hatchPolyline)
+                    {
+                        return hatchPolyline.ToNTSPolygon();
+                    }
+                    else if (maxHatch is Circle hatchCircle)
+                    {
+                        return hatchCircle.ToNTSPolygon(10);
+                    }
+                    else
+                    {
+                        throw new ArgumentException();
+                    }
                 }
                 else if (obj is Solid solid)
                 {

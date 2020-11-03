@@ -25,11 +25,11 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double moveLength = 200;
         protected readonly double spacing = 100;
         
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, Vector3d xDir, bool CreateLine = true)
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, Matrix3d matrix, bool CreateLine = true)
         {
             //获取柱轴网
             GridService gridService = new GridService();
-            var allGrids = gridService.CreateGrid(polyline, colums, xDir, 4000);
+            var allGrids = gridService.CreateGrid(polyline, colums, matrix, 4000);
 
             //计算布置网格线
             CalLayoutGrid(polyline, allGrids, out List<List<Line>> tLines, out List<List<Line>> vLines, out Vector3d tDir, out Vector3d vDir);
@@ -47,14 +47,14 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 
             //躲次梁
             AvoidBeamByPointService avoidService = new AvoidBeamByPointService();
-            avoidService.AvoidBeam(polyline, sprays, colums, beams, sideLength, maxLength);
+            avoidService.AvoidBeam(polyline, sprays, colums, beams, sideLength, maxLength, matrix);
 
             var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays)
                 .SelectMany(x => polyline.Trim(x).Cast<Polyline>()
                 .Select(y => new Line(y.StartPoint, y.EndPoint))
                 .ToList()).ToList();
-            RotateTransformService.RotateInverseLines(sprayLines);
-            sprays.ForEach(x => { x.Position = RotateTransformService.RotateInversePoint(x.Position); x.OriginPt = RotateTransformService.RotateInversePoint(x.OriginPt); });
+            sprayLines.ForEach(x => x.TransformBy(matrix));
+            sprays.ForEach(x => { x.Position = x.Position.TransformBy(matrix); x.OriginPt = x.OriginPt.TransformBy(matrix); });
             if (CreateLine)
             {
                 //打印布置网格线

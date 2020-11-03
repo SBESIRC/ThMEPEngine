@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.Operation
         /// <param name="points"></param>
         /// <param name="xLength"></param>
         /// <param name="yLength"></param>
-        public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums, Vector3d xDir, double spacingValue)
+        public List<KeyValuePair<Vector3d, List<Polyline>>> CreateGrid(Polyline polyline, List<Polyline> colums, Matrix3d transMatrix, double spacingValue)
         {
             minSpace = spacingValue;
 
@@ -31,11 +31,6 @@ namespace ThMEPEngineCore.Operation
             var firGrids = MoveClosedGrid(CreateGridLine(matrix, points, polyline));
             var secGrids = MoveClosedGrid(CreateGridLine(RotateMatrix(matrix), points, polyline));
 #if DEBUG
-            var rotateAngle = xDir.GetAngleTo(Vector3d.XAxis);
-            if (xDir.Y < 0)
-            {
-                rotateAngle = -rotateAngle;
-            }
             string GridLineLayer = "AD-Gird";     //轴网线图层
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -43,14 +38,14 @@ namespace ThMEPEngineCore.Operation
                 foreach (var fGird in firGrids.Value)
                 {
                     var rotateGrid = fGird.Clone() as Polyline;
-                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
+                    rotateGrid.TransformBy(transMatrix);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);
                 }
                 foreach (var sGird in secGrids.Value)
                 {
                     var rotateGrid = sGird.Clone() as Polyline;
-                    rotateGrid.Rotate(Point3d.Origin, rotateAngle);
+                    rotateGrid.TransformBy(transMatrix);
                     rotateGrid.Layer = GridLineLayer;
                     acdb.ModelSpace.Add(rotateGrid);
                 }
