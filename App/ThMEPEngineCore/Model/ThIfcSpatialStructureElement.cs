@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcSpatialStructureElement : ThIfcSpatialElement
     {
+        public List<string> Tags { get; set; } = new List<string>();
+
+        public Curve Boundary { get; set; }
     }
 }

@@ -62,8 +62,10 @@
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
+    <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
+    <Compile Include="Engine\ThClosetoolRecognitionEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
@@ -71,6 +73,7 @@
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
+    <Compile Include="Engine\ThSpaceRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
     <Compile Include="Features\ThBeamFeatureCollection.cs" />
     <Compile Include="Features\ThColumnFeature.cs" />
@@ -100,6 +103,8 @@
     <Compile Include="Model\ThIfcBuilding.cs" />
     <Compile Include="Model\ThIfcBuildingElement.cs" />
     <Compile Include="Model\ThIfcBuildingStorey.cs" />
+    <Compile Include="Model\ThIfcFloorDrain.cs" />
+    <Compile Include="Model\ThIfcClosestool.cs" />
     <Compile Include="Model\ThIfcColumn.cs" />
     <Compile Include="Model\ThIfcColumnStandardCase.cs" />
     <Compile Include="Model\ThIfcCommunicationsAppliance.cs" />
@@ -135,6 +140,8 @@
     <Compile Include="Service\ThBeamMerger.cs" />
     <Compile Include="Engine\ThSplitBeamEngine.cs" />
     <Compile Include="Service\ThBeamLinkSnapService.cs" />
+    <Compile Include="Service\ThFloorDrainDbExtension.cs" />
+    <Compile Include="Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThFilterPortLinkBeams.cs" />
     <Compile Include="Extension\ThIfcBeamExtension.cs" />
@@ -149,9 +156,15 @@
     <Compile Include="Service\ThCurveBeamSplitter.cs" />
     <Compile Include="Service\ThBeamSplitter.cs" />
     <Compile Include="Service\ThLinealBeamSplitter.cs" />
+    <Compile Include="Service\ThSpaceBoundaryLayerManager.cs" />
+    <Compile Include="Service\ThSpaceNameLayerManager.cs" />
+    <Compile Include="Service\ThSpaceBoundaryRecognition.cs" />
+    <Compile Include="Service\ThSpaceNameRecognition.cs" />
     <Compile Include="Service\ThStructureBeamAnnotationDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamUtils.cs" />
+    <Compile Include="Service\ThClosetoolDbExtension.cs" />
     <Compile Include="Service\ThStructureColumnDbExtension.cs" />
+    <Compile Include="Service\ThClosetoolLayerManager.cs" />
     <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />

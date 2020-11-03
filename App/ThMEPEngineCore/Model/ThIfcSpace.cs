@@ -8,5 +8,10 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcSpace : ThIfcSpatialStructureElement
     {
+        public List<ThIfcSpace> SubSpaces { get; set; }
+        public ThIfcSpace()
+        {
+            SubSpaces = new List<ThIfcSpace>();
+        }
     }
 }

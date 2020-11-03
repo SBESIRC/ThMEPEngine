@@ -108,6 +108,45 @@ namespace ThMEPEngineCore
                 });
             }
         }
+        [CommandMethod("TIANHUACAD", "ThExtractIfcCloseTool", CommandFlags.Modal)]
+        public void ThExtractIfcCloseTool()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var closetoolEngine = new ThClosetoolRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                closetoolEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                closetoolEngine.Elements.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                });
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractIfcFloorDrain", CommandFlags.Modal)]
+        public void ThExtractIfcFloorDrain()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var floorDrainEngine = new ThFloorDrainRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                floorDrainEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                floorDrainEngine.Elements.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                });
+            }
+        }
         [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
         public void ThExtractBeamConnect()
         {
@@ -259,6 +298,30 @@ namespace ThMEPEngineCore
             {
                 laneLineEngine.Recognize(Active.Database);
                 laneLineEngine.Lanes.ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThSpaceTest", CommandFlags.Modal)]
+        public void ThSpaceTest()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (ThSpaceRecognitionEngine spaceLineEngine = new ThSpaceRecognitionEngine())
+            {
+                //Test ThCADCoreNTSRelate
+                //var ent1Res = Active.Editor.GetEntity("\n select first polyline");
+                //Polyline first = acadDatabase.Element<Polyline>(ent1Res.ObjectId);
+                //var ent2Res = Active.Editor.GetEntity("\n select second polyline");
+                //Polyline second = acadDatabase.Element<Polyline>(ent2Res.ObjectId);
+                //using (var ov = new ThCADCoreNTSFixedPrecision())
+                //{
+                //    ThCADCoreNTSRelate relate = new ThCADCoreNTSRelate(first, second);
+                //}                
+                var framRes = Active.Editor.GetEntity("\n select extract area:<Polyline>");
+                if(framRes.Status==PromptStatus.OK)
+                {
+                    Polyline freame = acadDatabase.Element<Polyline>(framRes.ObjectId);
+                    spaceLineEngine.Recognize(Active.Database, freame.Vertices());
+                    spaceLineEngine.Print(Active.Database);
+                }
             }
         }
         [CommandMethod("TIANHUACAD", "ThTestSegment", CommandFlags.Modal)]
