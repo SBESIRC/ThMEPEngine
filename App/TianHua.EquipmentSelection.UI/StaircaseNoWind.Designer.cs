@@ -306,6 +306,8 @@
             "单扇",
             "双扇"});
             this.repositoryItemComboBox1.Name = "repositoryItemComboBox1";
+            this.repositoryItemComboBox1.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.repositoryItemComboBox1.SelectedValueChanged += new System.EventHandler(this.DoorTypeChanged);
             // 
             // gridColumn2
             // 
@@ -445,6 +447,8 @@
             "单扇",
             "双扇"});
             this.repositoryItemComboBox2.Name = "repositoryItemComboBox2";
+            this.repositoryItemComboBox2.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.repositoryItemComboBox2.SelectedValueChanged += new System.EventHandler(this.DoorTypeChanged);
             // 
             // gridColumn7
             // 
@@ -584,6 +588,8 @@
             "单扇",
             "双扇"});
             this.repositoryItemComboBox3.Name = "repositoryItemComboBox3";
+            this.repositoryItemComboBox3.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.repositoryItemComboBox3.SelectedValueChanged += new System.EventHandler(this.DoorTypeChanged);
             // 
             // gridColumn12
             // 
