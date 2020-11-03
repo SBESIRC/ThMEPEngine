@@ -342,6 +342,7 @@
             // 
             // RidAisle
             // 
+            this.RidAisle.Enabled = false;
             this.RidAisle.Location = new System.Drawing.Point(2, 29);
             this.RidAisle.Name = "RidAisle";
             this.RidAisle.Padding = new System.Windows.Forms.Padding(10, 0, 0, 0);
@@ -420,6 +421,7 @@
             // 
             // RidTemperature
             // 
+            this.RidTemperature.Enabled = false;
             this.RidTemperature.Location = new System.Drawing.Point(102, 2);
             this.RidTemperature.Name = "RidTemperature";
             this.RidTemperature.Padding = new System.Windows.Forms.Padding(23, 0, 0, 0);
@@ -482,6 +484,7 @@
             // ComBoxSlope
             // 
             this.ComBoxSlope.EditValue = "θ≤15°";
+            this.ComBoxSlope.Enabled = false;
             this.ComBoxSlope.Location = new System.Drawing.Point(90, 428);
             this.ComBoxSlope.Name = "ComBoxSlope";
             this.ComBoxSlope.Properties.AllowFocused = false;
@@ -498,6 +501,7 @@
             // 
             // ComBoxHeight
             // 
+            this.ComBoxHeight.Enabled = false;
             this.ComBoxHeight.Location = new System.Drawing.Point(90, 398);
             this.ComBoxHeight.Name = "ComBoxHeight";
             this.ComBoxHeight.Properties.AllowFocused = false;
@@ -510,6 +514,7 @@
             // 
             // ComBoxArea
             // 
+            this.ComBoxArea.Enabled = false;
             this.ComBoxArea.Location = new System.Drawing.Point(90, 368);
             this.ComBoxArea.Name = "ComBoxArea";
             this.ComBoxArea.Properties.AllowFocused = false;
@@ -561,6 +566,7 @@
             // TxtBeam
             // 
             this.TxtBeam.EditValue = "600";
+            this.TxtBeam.Enabled = false;
             this.TxtBeam.Location = new System.Drawing.Point(75, 306);
             this.TxtBeam.Name = "TxtBeam";
             this.TxtBeam.Size = new System.Drawing.Size(94, 20);

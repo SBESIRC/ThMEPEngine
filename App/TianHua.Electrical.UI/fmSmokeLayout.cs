@@ -5,6 +5,7 @@ using ThMEPElectrical.Model;
 using TianHua.Publics.BaseCode;
 using System.Collections.Generic;
 using DevExpress.XtraEditors;
+using System.ComponentModel;
 
 namespace TianHua.Electrical.UI
 {
@@ -34,6 +35,69 @@ namespace TianHua.Electrical.UI
             m_Presenter = new PresenterSmokeLayout(this);
         }
 
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
+        }
+
+
+        public void InitForm(SmokeLayoutDataModel _SmokeLayoutDataModel)
+        {
+            m_SmokeLayout = _SmokeLayoutDataModel;
+
+            if (m_SmokeLayout == null) { m_SmokeLayout = new SmokeLayoutDataModel(); }
+
+            if (m_SmokeLayout.LayoutType == "烟感")
+            {
+                RidSmoke.Checked = true;
+            }
+            else
+            {
+                RidTemperature.Checked = true;
+            }
+
+            if (m_SmokeLayout.AreaLayout == "车库、走除道外房间")
+            {
+                RidGarage.Checked = true;
+            }
+            else
+            {
+                RidAisle.Checked = true;
+            }
+
+            if (m_SmokeLayout.LayoutLogic == "无吊顶避梁")
+            {
+                RidNoCeiling.Checked = true;
+            }
+            if (m_SmokeLayout.LayoutLogic == "有吊顶避梁")
+            {
+                RidCeiling.Checked = true;
+            }
+            if (m_SmokeLayout.LayoutLogic == "无梁楼盖")
+            {
+                RidNoBeam.Checked = true;
+            }
+
+
+            TxtBeam.Text = FuncStr.NullToStr(m_SmokeLayout.BeamDepth);
+
+            TxtRoofThickness.Text = FuncStr.NullToStr(m_SmokeLayout.RoofThickness);
+
+            ComBoxArea.Text = FuncStr.NullToStr(m_SmokeLayout.RoomArea);
+
+            ComBoxHeight.Text = FuncStr.NullToStr(m_SmokeLayout.RoomHeight);
+
+            if (FuncStr.NullToStr(m_SmokeLayout.SlopeRoof) != string.Empty)
+                ComBoxSlope.Text = FuncStr.NullToStr(m_SmokeLayout.SlopeRoof);
+
+
+            RessetPresenter();
+            RidSmoke_CheckedChanged(null, null);
+        }
+
+
+
         public fmSmokeLayout()
         {
             InitializeComponent();
@@ -42,8 +106,8 @@ namespace TianHua.Electrical.UI
 
         private void fmSmokeLayout_Load(object sender, EventArgs e)
         {
-            RessetPresenter();
-            RidSmoke_CheckedChanged(null, null);
+            //RessetPresenter();
+            //RidSmoke_CheckedChanged(null, null);
         }
 
         private void PicSmoke_Click(object sender, EventArgs e)
@@ -94,68 +158,68 @@ namespace TianHua.Electrical.UI
 
         private void RidGarage_CheckedChanged(object sender, EventArgs e)
         {
-            if (RidGarage.Checked)
-            {
-                BtnLayout.Enabled = true;
-                RidNoCeiling.Enabled = true;
-                RidCeiling.Enabled = true;
-                RidNoBeam.Enabled = true;
-                TxtBeam.Enabled = true;
-                TxtRoofThickness.Enabled = true;
-                ComBoxArea.Enabled = true;
-                ComBoxHeight.Enabled = true;
-                ComBoxSlope.Enabled = true;
-            }
+            //if (RidGarage.Checked)
+            //{
+            //    BtnLayout.Enabled = true;
+            //    RidNoCeiling.Enabled = true;
+            //    RidCeiling.Enabled = true;
+            //    RidNoBeam.Enabled = true;
+            //    TxtBeam.Enabled = true;
+            //    TxtRoofThickness.Enabled = true;
+            //    ComBoxArea.Enabled = true;
+            //    ComBoxHeight.Enabled = true;
+            //    ComBoxSlope.Enabled = true;
+            //}
         }
 
         private void RidAisle_CheckedChanged(object sender, EventArgs e)
         {
-            if (RidAisle.Checked)
-            {
-                BtnLayout.Enabled = false;
-                RidNoCeiling.Enabled = false;
-                RidCeiling.Enabled = false;
-                RidNoBeam.Enabled = false;
-                TxtBeam.Enabled = false;
-                TxtRoofThickness.Enabled = false;
-                ComBoxArea.Enabled = false;
-                ComBoxHeight.Enabled = false;
-                ComBoxSlope.Enabled = false;
-            }
+            //if (RidAisle.Checked)
+            //{
+            //    BtnLayout.Enabled = false;
+            //    RidNoCeiling.Enabled = false;
+            //    RidCeiling.Enabled = false;
+            //    RidNoBeam.Enabled = false;
+            //    TxtBeam.Enabled = false;
+            //    TxtRoofThickness.Enabled = false;
+            //    ComBoxArea.Enabled = false;
+            //    ComBoxHeight.Enabled = false;
+            //    ComBoxSlope.Enabled = false;
+            //}
         }
 
         private void RidNoCeiling_CheckedChanged(object sender, EventArgs e)
         {
-            if (RidNoCeiling.Checked)
-            {
-                BtnLayout.Enabled = true;
-                RidNoCeiling.Enabled = true;
-                RidCeiling.Enabled = true;
-                RidNoBeam.Enabled = true;
-                TxtBeam.Enabled = true;
-                TxtRoofThickness.Enabled = true;
-                ComBoxArea.Enabled = true;
-                ComBoxHeight.Enabled = true;
-                ComBoxSlope.Enabled = true;
-            }
+            //if (RidNoCeiling.Checked)
+            //{
+            //    BtnLayout.Enabled = true;
+            //    RidNoCeiling.Enabled = true;
+            //    RidCeiling.Enabled = true;
+            //    RidNoBeam.Enabled = true;
+            //    TxtBeam.Enabled = true;
+            //    TxtRoofThickness.Enabled = true;
+            //    ComBoxArea.Enabled = true;
+            //    ComBoxHeight.Enabled = true;
+            //    ComBoxSlope.Enabled = true;
+            //}
         }
 
         private void RidCeiling_CheckedChanged(object sender, EventArgs e)
         {
-            if (RidCeiling.Checked)
-            {
-                TxtBeam.Enabled = false;
-                TxtRoofThickness.Enabled = false;
-            }
+            //if (RidCeiling.Checked)
+            //{
+            //    TxtBeam.Enabled = false;
+            //    TxtRoofThickness.Enabled = false;
+            //}
         }
 
         private void RidNoBeam_CheckedChanged(object sender, EventArgs e)
         {
-            if (RidNoBeam.Checked)
-            {
-                TxtBeam.Enabled = false;
-                TxtRoofThickness.Enabled = false;
-            }
+            //if (RidNoBeam.Checked)
+            //{
+            //    TxtBeam.Enabled = false;
+            //    TxtRoofThickness.Enabled = false;
+            //}
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
@@ -183,6 +247,8 @@ namespace TianHua.Electrical.UI
 
             m_SmokeLayout.RoomHeight = FuncStr.NullToStr(ComBoxHeight.Text);
 
+
+
             m_SmokeLayout.SlopeRoof = FuncStr.NullToStr(ComBoxSlope.Text);
 
 
@@ -192,7 +258,7 @@ namespace TianHua.Electrical.UI
                 RoofThickness = m_SmokeLayout.RoofThickness,
             };
             // 发送命令
-            switch(m_SmokeLayout.LayoutLogic)
+            switch (m_SmokeLayout.LayoutLogic)
             {
                 case "无吊顶避梁":
                     CommandHandlerBase.ExecuteFromCommandLine(false, "THFDL");
@@ -214,8 +280,8 @@ namespace TianHua.Electrical.UI
             var parameters = new string[]
             {
                 checkbox.Checked ? "_ON" : "_OFF",
-                "E-FD-PR", 
-                "\n", 
+                "E-FD-PR",
+                "\n",
                 "\n"
             };
             CommandHandlerBase.ExecuteFromCommandLine(false, "-LAYER", parameters);

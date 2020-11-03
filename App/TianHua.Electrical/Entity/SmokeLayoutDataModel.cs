@@ -32,7 +32,7 @@ namespace TianHua.Electrical
         /// <summary>
         /// 顶板厚度
         /// </summary>
-        public int RoofThickness { get; set; }
+        public double RoofThickness { get; set; }
 
         /// <summary>
         /// 房间面积
