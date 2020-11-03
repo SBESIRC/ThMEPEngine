@@ -2,8 +2,8 @@
 using DevExpress.XtraEditors;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Nodes;
-using Microsoft.Office.Interop.Excel;
 using System;
+using OfficeOpenXml;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -366,100 +366,85 @@ namespace TianHua.FanSelection.UI
             List<string> _ListSceneScreening = GetSceneScreening();
 
             string _ImportExcelPath = Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanPara.xlsx");
-
-            Microsoft.Office.Interop.Excel.Application _ExclApp = new Microsoft.Office.Interop.Excel.Application();
-            _ExclApp.DisplayAlerts = false;
-            _ExclApp.Visible = false;
-            _ExclApp.ScreenUpdating = false;
-            Microsoft.Office.Interop.Excel.Workbook _WorkBook = _ExclApp.Workbooks.Open(_ImportExcelPath, System.Type.Missing, System.Type.Missing, System.Type.Missing,
-              System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing,
-            System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing);
-
-            Microsoft.Office.Interop.Excel.Worksheet _Sheet = _WorkBook.Worksheets[1];
-
-            var _List = GetListExportFanPara();
-
-            if (_List == null || _List.Count == 0) { return; }
-
-            if (_ListSceneScreening != null && _ListSceneScreening.Count > 0)
+            using (var excelpackage = new ExcelPackage(new FileInfo(_ImportExcelPath)))
             {
-                _List = _List.FindAll(p => _ListSceneScreening.Contains(p.Scenario));
-            }
+                //Microsoft.Office.Interop.Excel.Application _ExclApp = new Microsoft.Office.Interop.Excel.Application();
+                //_ExclApp.DisplayAlerts = false;
+                //_ExclApp.Visible = false;
+                //_ExclApp.ScreenUpdating = false;
+                //Microsoft.Office.Interop.Excel.Workbook _WorkBook = _ExclApp.Workbooks.Open(_ImportExcelPath, System.Type.Missing, System.Type.Missing, System.Type.Missing,
+                //  System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing,
+                //System.Type.Missing, System.Type.Missing, System.Type.Missing, System.Type.Missing);
 
-            if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();
+                var _Sheet = excelpackage.Workbook.Worksheets[0];
 
-            var i = 4;
+                var _List = GetListExportFanPara();
 
-            _List.ForEach(p =>
-            {
-                _Sheet.Cells[i, 1] = p.No;
-                _Sheet.Cells[i, 2] = p.Coverage;
-                _Sheet.Cells[i, 3] = p.FanForm;
-                _Sheet.Cells[i, 4] = p.CalcAirVolume;
-                _Sheet.Cells[i, 5] = p.FanDelivery;
-                _Sheet.Cells[i, 6] = p.Pa;
-                _Sheet.Cells[i, 7] = FuncStr.NullToInt(p.StaticPa);
-                _Sheet.Cells[i, 8] = p.FanEnergyLevel;
-                _Sheet.Cells[i, 9] = p.FanEfficiency;
-                _Sheet.Cells[i, 10] = p.FanRpm;
-                _Sheet.Cells[i, 11] = p.DriveMode;
+                if (_List == null || _List.Count == 0) { return; }
 
-                _Sheet.Cells[i, 12] = p.ElectricalEnergyLevel;
-                _Sheet.Cells[i, 13] = p.MotorPower;
-                _Sheet.Cells[i, 14] = p.PowerSource;
-                _Sheet.Cells[i, 15] = p.ElectricalRpm;
-                _Sheet.Cells[i, 16] = p.IsDoubleSpeed;
-                _Sheet.Cells[i, 17] = p.IsFrequency;
-                _Sheet.Cells[i, 18] = p.WS;
-                _Sheet.Cells[i, 19] = p.IsFirefighting;
+                if (_ListSceneScreening != null && _ListSceneScreening.Count > 0)
+                {
+                    _List = _List.FindAll(p => _ListSceneScreening.Contains(p.Scenario));
+                }
+
+                if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();
+
+                var i = 4;
+
+                _List.ForEach(p =>
+                {
+                    _Sheet.Cells[i, 1].Value = p.No;
+                    _Sheet.Cells[i, 2].Value = p.Coverage;
+                    _Sheet.Cells[i, 3].Value = p.FanForm;
+                    _Sheet.Cells[i, 4].Value = p.CalcAirVolume;
+                    _Sheet.Cells[i, 5].Value = p.FanDelivery;
+                    _Sheet.Cells[i, 6].Value = p.Pa;
+                    _Sheet.Cells[i, 7].Value = FuncStr.NullToInt(p.StaticPa);
+                    _Sheet.Cells[i, 8].Value = p.FanEnergyLevel;
+                    _Sheet.Cells[i, 9].Value = p.FanEfficiency;
+                    _Sheet.Cells[i, 10].Value = p.FanRpm;
+                    _Sheet.Cells[i, 11].Value = p.DriveMode;
+
+                    _Sheet.Cells[i, 12].Value = p.ElectricalEnergyLevel;
+                    _Sheet.Cells[i, 13].Value = p.MotorPower;
+                    _Sheet.Cells[i, 14].Value = p.PowerSource;
+                    _Sheet.Cells[i, 15].Value = p.ElectricalRpm;
+                    _Sheet.Cells[i, 16].Value = p.IsDoubleSpeed;
+                    _Sheet.Cells[i, 17].Value = p.IsFrequency;
+                    _Sheet.Cells[i, 18].Value = p.WS;
+                    _Sheet.Cells[i, 19].Value = p.IsFirefighting;
 
 
-                _Sheet.Cells[i, 20] = p.dB;
-                _Sheet.Cells[i, 21] = p.Weight;
-                _Sheet.Cells[i, 22] = p.Length;
-                _Sheet.Cells[i, 23] = p.Width;
-                _Sheet.Cells[i, 24] = p.Height;
+                    _Sheet.Cells[i, 20].Value = p.dB;
+                    _Sheet.Cells[i, 21].Value = p.Weight;
+                    _Sheet.Cells[i, 22].Value = p.Length;
+                    _Sheet.Cells[i, 23].Value = p.Width;
+                    _Sheet.Cells[i, 24].Value = p.Height;
 
 
 
-                _Sheet.Cells[i, 25] = p.VibrationMode;
-                _Sheet.Cells[i, 26] = p.Amount;
-                _Sheet.Cells[i, 27] = p.Remark;
+                    _Sheet.Cells[i, 25].Value = p.VibrationMode;
+                    _Sheet.Cells[i, 26].Value = p.Amount;
+                    _Sheet.Cells[i, 27].Value = p.Remark;
 
-                i++;
-            });
+                    i++;
+                });
 
-            SaveFileDialog _SaveFileDialog = new SaveFileDialog();
-            _SaveFileDialog.Filter = "Xlsx Files(*.xlsx)|*.xlsx";
-            _SaveFileDialog.RestoreDirectory = true;
-            _SaveFileDialog.FileName = "风机参数表 - " + DateTime.Now.ToString("yyyy.MM.dd HH.mm");
-            _SaveFileDialog.InitialDirectory = Active.DocumentDirectory;
-            var _DialogResult = _SaveFileDialog.ShowDialog();
+                SaveFileDialog _SaveFileDialog = new SaveFileDialog();
+                _SaveFileDialog.Filter = "Xlsx Files(*.xlsx)|*.xlsx";
+                _SaveFileDialog.RestoreDirectory = true;
+                _SaveFileDialog.FileName = "风机参数表 - " + DateTime.Now.ToString("yyyy.MM.dd HH.mm");
+                _SaveFileDialog.InitialDirectory = Active.DocumentDirectory;
+                var _DialogResult = _SaveFileDialog.ShowDialog();
 
-            if (_DialogResult == DialogResult.OK)
-            {
-                TreeList.PostEditor();
-                var _FilePath = _SaveFileDialog.FileName.ToString();
-
-                _WorkBook.SaveAs(_FilePath, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, XlSaveAsAccessMode.xlNoChange,
-                   Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-                ClosePro(_ExclApp, _WorkBook);
+                if (_DialogResult == DialogResult.OK)
+                {
+                    TreeList.PostEditor();
+                    var _FilePath = _SaveFileDialog.FileName.ToString();
+                    excelpackage.SaveAs(new FileInfo(_FilePath));
+                }
             }
         }
-
-        public void ClosePro(Microsoft.Office.Interop.Excel.Application _ExclApp, Microsoft.Office.Interop.Excel.Workbook _WorkBook)
-        {
-            if (_WorkBook != null)
-                _WorkBook.Close(true, Type.Missing, Type.Missing);
-            _ExclApp.Quit();
-            System.GC.GetGeneration(_ExclApp);
-            IntPtr _IntPtr = new IntPtr(_ExclApp.Hwnd);
-            int _K = 0;
-            GetWindowThreadProcessId(_IntPtr, out _K);
-            System.Diagnostics.Process _Process = System.Diagnostics.Process.GetProcessById(_K);
-            _Process.Kill();
-        }
-
 
         private List<ExportFanParaModel> GetListExportFanPara()
         {
@@ -582,94 +567,91 @@ namespace TianHua.FanSelection.UI
         private void BarBtnExportFanCalc_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             List<string> _ListSceneScreening = GetSceneScreening();
-            ExcelFile excelfile = new ExcelFile();
-            Workbook targetWorkbookb = excelfile.OpenWorkBook(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanCalc.xlsx"));
-            var sourceWorkbookb = excelfile.OpenWorkBook(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeProofScenario.xlsx"));
-
-            Worksheet _Sheet = targetWorkbookb.Worksheets[1];
-            var targetsheet = targetWorkbookb.GetSheetFromSheetName("防烟计算");
-
-            var _List = m_ListMainFan;
-
-            if (_ListSceneScreening != null && _ListSceneScreening.Count > 0)
+            using (var targetExcelPackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanCalc.xlsx"))))
+            using (var SmokeProofSourcePackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeProofScenario.xlsx"))))
+            using (var ExhaustSourcePackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeProofScenario.xlsx"))))
             {
-                _List = _List.FindAll(p => _ListSceneScreening.Contains(p.Scenario));
-            }
+                var _Sheet = targetExcelPackage.Workbook.Worksheets[0];
+                var targetsheet = targetExcelPackage.Workbook.Worksheets["防烟计算"];
 
-            if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();
+                var _List = m_ListMainFan;
 
-            var i = 4;
-            ExcelRangeCopyOperator copyOperatorForVolumeModel = new ExcelRangeCopyOperator();
-            ExcelRangeCopyOperator copyOperatorForExhaustModel = new ExcelRangeCopyOperator();
-            _List.ForEach(p =>
-            {
-                if (p.FanModelName == string.Empty || p.FanModelName == "无此风机") { return; }
-                var _FanPrefixDict = PubVar.g_ListFanPrefixDict.Find(s => s.FanUse == p.Scenario);
-                if (_FanPrefixDict == null) return;
-                if (p.PID != "0") { return; }
-                _Sheet.Cells[i, 1] = p.FanNum;
-                _Sheet.Cells[i, 2] = p.Name;
-                _Sheet.Cells[i, 3] = p.Scenario;
-                _Sheet.Cells[i, 13] = p.AirCalcValue;
-                _Sheet.Cells[i, 14] = p.AirVolume;
-                _Sheet.Cells[i, 15] = p.DuctLength;
-
-                _Sheet.Cells[i, 16] = p.Friction;
-                _Sheet.Cells[i, 17] = p.LocRes;
-
-                _Sheet.Cells[i, 18] = p.DuctResistance;
-
-                _Sheet.Cells[i, 19] = p.Damper;
-                _Sheet.Cells[i, 20] = p.EndReservedAirPressure;
-                _Sheet.Cells[i, 21] = p.DynPress;
-
-
-                _Sheet.Cells[i, 22] = p.CalcResistance;
-                _Sheet.Cells[i, 23] = p.WindResis;
-
-                _Sheet.Cells[i, 24] = p.FanModelPower;
-
-                if (!p.IsNull())
+                if (_ListSceneScreening != null && _ListSceneScreening.Count > 0)
                 {
-                    ExcelExportEngine.Instance.Model = p;
-                    if (p.FanVolumeModel != null)
-                    {
-                        ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForVolumeModel;
-                        ExcelExportEngine.Instance.Sourcebook = excelfile.OpenWorkBook(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeProofScenario.xlsx"));
-                        ExcelExportEngine.Instance.Targetsheet = targetWorkbookb.GetSheetFromSheetName("防烟计算");
-                        ExcelExportEngine.Instance.Run();
-                    }
-                    else if (p.ExhaustModel != null)
-                    {
-                        ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForExhaustModel;
-                        ExcelExportEngine.Instance.Sourcebook = excelfile.OpenWorkBook(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeDischargeScenario.xlsx"));
-                        ExcelExportEngine.Instance.Targetsheet = targetWorkbookb.GetSheetFromSheetName("排烟计算");
-                        ExcelExportEngine.Instance.RunExhaustExport();
-                    }
+                    _List = _List.FindAll(p => _ListSceneScreening.Contains(p.Scenario));
                 }
 
-                i++;
-            });
+                if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();
 
-            SaveFileDialog _SaveFileDialog = new SaveFileDialog();
-            _SaveFileDialog.Filter = "Xlsx Files(*.xlsx)|*.xlsx";
-            _SaveFileDialog.RestoreDirectory = true;
-            _SaveFileDialog.InitialDirectory = Active.DocumentDirectory;
-            _SaveFileDialog.FileName = "风机计算书 - " + DateTime.Now.ToString("yyyy.MM.dd HH.mm");
-            var DialogResult = _SaveFileDialog.ShowDialog();
+                var i = 4;
+                ExcelRangeCopyOperator copyOperatorForVolumeModel = new ExcelRangeCopyOperator();
+                ExcelRangeCopyOperator copyOperatorForExhaustModel = new ExcelRangeCopyOperator();
+                _List.ForEach(p =>
+                {
+                    if (p.FanModelName == string.Empty || p.FanModelName == "无此风机") { return; }
+                    var _FanPrefixDict = PubVar.g_ListFanPrefixDict.Find(s => s.FanUse == p.Scenario);
+                    if (_FanPrefixDict == null) return;
+                    if (p.PID != "0") { return; }
+                    _Sheet.Cells[i, 1].Value = p.FanNum;
+                    _Sheet.Cells[i, 2].Value = p.Name;
+                    _Sheet.Cells[i, 3].Value = p.Scenario;
+                    _Sheet.Cells[i, 13].Value = p.AirCalcValue;
+                    _Sheet.Cells[i, 14].Value = p.AirVolume;
+                    _Sheet.Cells[i, 15].Value = p.DuctLength;
 
-            if (DialogResult == DialogResult.OK)
-            {
-                TreeList.PostEditor();
-                var _FilePath = _SaveFileDialog.FileName.ToString();
+                    _Sheet.Cells[i, 16].Value = p.Friction;
+                    _Sheet.Cells[i, 17].Value = p.LocRes;
 
-                targetWorkbookb.SaveAs(_FilePath, Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing, XlSaveAsAccessMode.xlNoChange,
-                   Type.Missing, Type.Missing, Type.Missing, Type.Missing, Type.Missing);
-                ClosePro(excelfile.ExcelApp, targetWorkbookb);
+                    _Sheet.Cells[i, 18].Value = p.DuctResistance;
+
+                    _Sheet.Cells[i, 19].Value = p.Damper;
+                    _Sheet.Cells[i, 20].Value = p.EndReservedAirPressure;
+                    _Sheet.Cells[i, 21].Value = p.DynPress;
+
+
+                    _Sheet.Cells[i, 22].Value = p.CalcResistance;
+                    _Sheet.Cells[i, 23].Value = p.WindResis;
+
+                    _Sheet.Cells[i, 24].Value = p.FanModelPower;
+
+                    if (!p.IsNull())
+                    {
+                        ExcelExportEngine.Instance.Model = p;
+                        if (p.FanVolumeModel != null)
+                        {
+                            ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForVolumeModel;
+                            ExcelExportEngine.Instance.Sourcebook = SmokeProofSourcePackage.Workbook;
+                            ExcelExportEngine.Instance.Targetsheet = targetExcelPackage.Workbook.Worksheets["防烟计算"];
+                            ExcelExportEngine.Instance.Run();
+                        }
+                        else if (p.ExhaustModel != null)
+                        {
+                            ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForExhaustModel;
+                            ExcelExportEngine.Instance.Sourcebook = ExhaustSourcePackage.Workbook;
+                            ExcelExportEngine.Instance.Targetsheet = targetExcelPackage.Workbook.Worksheets["排烟计算"];
+                            ExcelExportEngine.Instance.RunExhaustExport();
+                        }
+                    }
+
+                    i++;
+                });
+
+                SaveFileDialog _SaveFileDialog = new SaveFileDialog();
+                _SaveFileDialog.Filter = "Xlsx Files(*.xlsx)|*.xlsx";
+                _SaveFileDialog.RestoreDirectory = true;
+                _SaveFileDialog.InitialDirectory = Active.DocumentDirectory;
+                _SaveFileDialog.FileName = "风机计算书 - " + DateTime.Now.ToString("yyyy.MM.dd HH.mm");
+                var DialogResult = _SaveFileDialog.ShowDialog();
+
+                if (DialogResult == DialogResult.OK)
+                {
+                    TreeList.PostEditor();
+                    var _FilePath = _SaveFileDialog.FileName.ToString();
+
+                    targetExcelPackage.SaveAs(new FileInfo(_FilePath));
+                }
             }
         }
-
-
 
         public void DataSourceChanged(List<FanDataModel> _List)
         {
@@ -681,12 +663,6 @@ namespace TianHua.FanSelection.UI
 
             InitListFan();
         }
-
-        //private void TreeList_MouseDoubleClick(object sender, MouseEventArgs e)
-        //{
-
-
-        //}
 
         private void TreeList_MouseDown(object sender, MouseEventArgs e)
         {

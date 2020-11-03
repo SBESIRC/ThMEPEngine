@@ -1,10 +1,6 @@
-﻿using Microsoft.Office.Interop.Excel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using TianHua.FanSelection.Model;
+using OfficeOpenXml;
 
 namespace TianHua.FanSelection.ExcelExport
 {
@@ -31,7 +27,7 @@ namespace TianHua.FanSelection.ExcelExport
                 foreach (var floor in fm.FrontRoomDoors2)
                 {
                     floor.Value.RemoveAll(d => d.Count_Door_Q * d.Height_Door_Q * d.Width_Door_Q == 0);
-                 }
+                }
                 return new FireFrontExportWorker();
             }
             else if (model is FontroomNaturalModel fn)
@@ -88,11 +84,11 @@ namespace TianHua.FanSelection.ExcelExport
         {
             switch (load)
             {
-                case "LoadHeightLow" :
+                case "LoadHeightLow":
                     return "h<=24m";
-                case "LoadHeightMiddle" :
+                case "LoadHeightMiddle":
                     return "24m<h<=50m";
-                case "LoadHeightHigh" :
+                case "LoadHeightHigh":
                     return "50m<h<100m";
                 default:
                     break;
@@ -126,7 +122,7 @@ namespace TianHua.FanSelection.ExcelExport
             return string.Empty;
         }
 
-        public abstract void ExportToExcel(IFanModel fanmodel, Worksheet setsheet, Worksheet targetsheet, FanDataModel fandatamodel, ExcelRangeCopyOperator excelfile);
+        public abstract void ExportToExcel(IFanModel fanmodel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, FanDataModel fandatamodel, ExcelRangeCopyOperator excelfile);
 
         private void CleanZeroItem(Dictionary<string, List<ThEvacuationDoor>> floors)
         {

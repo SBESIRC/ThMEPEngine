@@ -1,57 +1,54 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Office.Interop.Excel;
+using OfficeOpenXml;
 using TianHua.FanSelection.Model;
 
 namespace TianHua.FanSelection.ExcelExport
 {
     public class StaircaseAirExportWorker : BaseExportWorker
     {
-        public override void ExportToExcel(IFanModel fanmodel, Worksheet setsheet, Worksheet targetsheet, FanDataModel fandatamodel, ExcelRangeCopyOperator copyoperator)
+        public override void ExportToExcel(IFanModel fanmodel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, FanDataModel fandatamodel, ExcelRangeCopyOperator copyoperator)
         {
             StaircaseAirModel StaircaseAir = fanmodel as StaircaseAirModel;
-            setsheet.SetCellValue("D2", fandatamodel.FanNum);
-            setsheet.SetCellValue("D3", fandatamodel.Name);
-            setsheet.SetCellValue("D4", Math.Max(StaircaseAir.QueryValue, (StaircaseAir.DoorOpeningVolume + StaircaseAir.LeakVolume)).ToString());
-            setsheet.SetCellValue("D5", (StaircaseAir.DoorOpeningVolume + StaircaseAir.LeakVolume).ToString());
-            setsheet.SetCellValue("D6", StaircaseAir.DoorOpeningVolume.ToString());
-            setsheet.SetCellValue("D7", StaircaseAir.LeakVolume.ToString());
-            setsheet.SetCellValue("D9", StaircaseAir.OverAk.ToString());
-            setsheet.SetCellValue("D10", "1");
-            setsheet.SetCellValue("D11", StaircaseAir.StairN1.ToString());
-            setsheet.SetCellValue("D12", StaircaseAir.LeakArea.ToString());
-            setsheet.SetCellValue("D13", "12");
-            setsheet.SetCellValue("D14", StaircaseAir.N2.ToString());
-            setsheet.SetCellValue("D15", StaircaseAir.QueryValue.ToString());
-            setsheet.SetCellValue("D16", StaircaseAir.Count_Floor.ToString());
-            setsheet.SetCellValue("D17", GetLoadRange(StaircaseAir.Load.ToString()));
-            setsheet.SetCellValue("D18", GetStairLocation(StaircaseAir.Stair.ToString()));
-            setsheet.SetCellValue("D19", GetStairSpaceState(StaircaseAir.Type_Area.ToString()));
+            setsheet.Cells["D2"].Value = fandatamodel.FanNum;
+            setsheet.Cells["D3"].Value = fandatamodel.Name;
+            setsheet.Cells["D4"].Value = Math.Max(StaircaseAir.QueryValue, (StaircaseAir.DoorOpeningVolume + StaircaseAir.LeakVolume)).ToString();
+            setsheet.Cells["D5"].Value = (StaircaseAir.DoorOpeningVolume + StaircaseAir.LeakVolume).ToString();
+            setsheet.Cells["D6"].Value = StaircaseAir.DoorOpeningVolume.ToString();
+            setsheet.Cells["D7"].Value = StaircaseAir.LeakVolume.ToString();
+            setsheet.Cells["D9"].Value = StaircaseAir.OverAk.ToString();
+            setsheet.Cells["D10"].Value = "1";
+            setsheet.Cells["D11"].Value = StaircaseAir.StairN1.ToString();
+            setsheet.Cells["D12"].Value = StaircaseAir.LeakArea.ToString();
+            setsheet.Cells["D13"].Value = "12";
+            setsheet.Cells["D14"].Value = StaircaseAir.N2.ToString();
+            setsheet.Cells["D15"].Value = StaircaseAir.QueryValue.ToString();
+            setsheet.Cells["D16"].Value = StaircaseAir.Count_Floor.ToString();
+            setsheet.Cells["D17"].Value = GetLoadRange(StaircaseAir.Load.ToString());
+            setsheet.Cells["D18"].Value = GetStairLocation(StaircaseAir.Stair.ToString());
+            setsheet.Cells["D19"].Value = GetStairSpaceState(StaircaseAir.Type_Area.ToString());
             int rowNo = 20;
             int rangerows = 5;
             for (int i = 1; i <= StaircaseAir.FrontRoomDoors2.Sum(f => f.Value.Count); i++)
             {
-                setsheet.CopyRangeToNext("A20", "D24", rangerows * i);
+                setsheet.CopyRangeToNext(20, 1, 24, 4, rangerows * i);
             }
             foreach (var floor in StaircaseAir.FrontRoomDoors2)
             {
                 for (int i = 0; i < floor.Value.Count; i++)
                 {
-                    setsheet.SetCellValue("A" + rowNo, floor.Key);
-                    setsheet.SetCellValue("B" + rowNo, "前室疏散门" + (i + 1));
-                    setsheet.SetCellValue("D" + rowNo, floor.Value[i].Height_Door_Q.ToString());
-                    setsheet.SetCellValue("D" + (rowNo + 1), floor.Value[i].Width_Door_Q.ToString());
-                    setsheet.SetCellValue("D" + (rowNo + 2), floor.Value[i].Count_Door_Q.ToString());
-                    setsheet.SetCellValue("D" + (rowNo + 3), floor.Value[i].Crack_Door_Q.ToString());
-                    setsheet.SetCellValue("D" + (rowNo + 4), floor.Value[i].Type.ToString());
+                    setsheet.Cells["A" + rowNo].Value = floor.Key;
+                    setsheet.Cells["B" + rowNo].Value = "前室疏散门" + (i + 1);
+                    setsheet.Cells["D" + rowNo].Value = floor.Value[i].Height_Door_Q.ToString();
+                    setsheet.Cells["D" + (rowNo + 1)].Value = floor.Value[i].Width_Door_Q.ToString();
+                    setsheet.Cells["D" + (rowNo + 2)].Value = floor.Value[i].Count_Door_Q.ToString();
+                    setsheet.Cells["D" + (rowNo + 3)].Value = floor.Value[i].Crack_Door_Q.ToString();
+                    setsheet.Cells["D" + (rowNo + 4)].Value = floor.Value[i].Type.ToString();
                     rowNo += rangerows;
                 }
             }
 
-            copyoperator.CopyRangeToOtherSheet(setsheet, "A1:D" + (rowNo - 1).ToString(), targetsheet);
+            copyoperator.CopyRangeToOtherSheet(setsheet, 1, 1, rowNo - 1, 4, targetsheet);
         }
     }
 }

@@ -1,10 +1,5 @@
-﻿using Microsoft.Office.Interop.Excel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TianHua.FanSelection.Model;
+﻿using TianHua.FanSelection.Model;
+using OfficeOpenXml;
 
 namespace TianHua.FanSelection.ExcelExport
 {
@@ -21,8 +16,8 @@ namespace TianHua.FanSelection.ExcelExport
         public static ExcelExportEngine Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-        public Workbook Sourcebook { get; set; }
-        public Worksheet Targetsheet { get; set; }
+        public ExcelWorkbook Sourcebook { get; set; }
+        public ExcelWorksheet Targetsheet { get; set; }
         public FanDataModel Model { get; set; }
         public ExcelRangeCopyOperator RangeCopyOperator { get; set; }
 
@@ -75,7 +70,7 @@ namespace TianHua.FanSelection.ExcelExport
                             return "1.3 净高小于6m-窗口型";
                         }
                     }
-                    
+
                 case "空间-净高大于6m":
                     if (model.PlumeSelection == "轴对称型")
                     {

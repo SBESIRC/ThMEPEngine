@@ -1,17 +1,10 @@
-﻿using Microsoft.Office.Interop.Excel;
-using System;
+﻿using OfficeOpenXml;
 
 namespace TianHua.FanSelection.ExcelExport
 {
     public static class ExcelExtension
     {
-        public static void SetCellValue(this Worksheet sheet, string cellname, string value)
-        {
-            Range cell = sheet.Range[cellname];
-            cell.Value2 = value;
-        }
-
-        public static Worksheet GetSheetFromSheetName(this Workbook workbook, string sheetname)
+        public static ExcelWorksheet GetSheetFromSheetName(this ExcelWorkbook workbook, string sheetname)
         {
             try
             {
@@ -24,11 +17,21 @@ namespace TianHua.FanSelection.ExcelExport
 
         }
 
-        public static void CopyRangeToNext(this Worksheet sheet, string rangestartcell, string rangeendcell, int rowoffset)
+        //public static void SetCellValue(this Worksheet sheet, string cellname, string value)
+        //{
+        //    Range cell = sheet.Range[cellname];
+        //    cell.Value2 = value;
+        //}
+
+        public static void CopyRangeToNext(this ExcelWorksheet excelsheet, int fromrow, int fromcolumn, int torow, int tocolumn, int rowoffset)
         {
-            Range copyedrange = sheet.Range[rangestartcell, rangeendcell];
-            var newrange = copyedrange.Offset[rowoffset, 0];
-            copyedrange.Copy(newrange);
+            var copyedrange = excelsheet.Cells[fromrow, fromcolumn, torow, tocolumn];
+            var torange = excelsheet.Cells[fromrow + rowoffset, fromcolumn, torow + rowoffset, tocolumn];
+            copyedrange.Copy(torange);
+
+            //Range copyedrange = sheet.Range[rangestartcell, rangeendcell];
+            //var newrange = copyedrange.Offset[rowoffset, 0];
+            //copyedrange.Copy(newrange);
         }
     }
 }

@@ -15,9 +15,6 @@
   </PropertyGroup>
   <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
-    <Reference Include="Microsoft.Office.Interop.Excel, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -56,7 +53,6 @@
     <Compile Include="ExcelExport\BaseExportWorker.cs" />
     <Compile Include="ExcelExport\ExcelExportEngine.cs" />
     <Compile Include="ExcelExport\ExcelExtension.cs" />
-    <Compile Include="ExcelExport\ExcelFile.cs" />
     <Compile Include="ExcelExport\ExcelRangeCopyOperator.cs" />
     <Compile Include="ExcelExport\ExhaustAxisymmetricExportWorker.cs" />
     <Compile Include="ExcelExport\ExhaustBalconyExportWorker.cs" />
@@ -143,6 +139,7 @@
     <None Include="Resources\向下加一行.png" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="EPPlus" Version="5.4.0" />
     <PackageReference Include="Catel.Core" Version="5.12.10" />
     <PackageReference Include="NetTopologySuite" Version="2.1.0" />
   </ItemGroup>

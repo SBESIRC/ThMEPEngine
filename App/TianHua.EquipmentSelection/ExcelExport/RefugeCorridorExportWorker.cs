@@ -1,24 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Office.Interop.Excel;
+﻿using OfficeOpenXml;
 using TianHua.FanSelection.Model;
 
 namespace TianHua.FanSelection.ExcelExport
 {
     public class RefugeCorridorExportWorker : BaseExportWorker
     {
-        public override void ExportToExcel(IFanModel fanmodel, Worksheet setsheet, Worksheet targetsheet, FanDataModel fandatamodel, ExcelRangeCopyOperator copyoperator)
+        public override void ExportToExcel(IFanModel fanmodel, ExcelWorksheet setsheet, ExcelWorksheet targetsheet, FanDataModel fandatamodel, ExcelRangeCopyOperator copyoperator)
         {
             RefugeRoomAndCorridorModel refugeCorridorModel = fanmodel as RefugeRoomAndCorridorModel;
-            setsheet.SetCellValue("D2", fandatamodel.FanNum);
-            setsheet.SetCellValue("D3", fandatamodel.Name);
-            setsheet.SetCellValue("D4", refugeCorridorModel.WindVolume.ToString());
-            setsheet.SetCellValue("D5", refugeCorridorModel.Area_Net.ToString());
-            setsheet.SetCellValue("D6", refugeCorridorModel.AirVol_Spec.ToString());
-            copyoperator.CopyRangeToOtherSheet(setsheet, "A1:D6", targetsheet);
+            setsheet.Cells["D2"].Value = fandatamodel.FanNum;
+            setsheet.Cells["D3"].Value = fandatamodel.Name;
+            setsheet.Cells["D4"].Value = refugeCorridorModel.WindVolume.ToString();
+            setsheet.Cells["D5"].Value = refugeCorridorModel.Area_Net.ToString();
+            setsheet.Cells["D6"].Value = refugeCorridorModel.AirVol_Spec.ToString();
+            copyoperator.CopyRangeToOtherSheet(setsheet, 1, 1, 6, 4, targetsheet);
         }
     }
 }
