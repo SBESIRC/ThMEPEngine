@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.PostProcess.MainSecondBeamAdjustor;
 
@@ -79,6 +80,11 @@ namespace ThMEPElectrical.PostProcess
             if (beamSpanInfo.ValidRegions.Count == 0)
                 return new List<Point3d>();
 
+            //DrawUtils.DrawProfile(beamSpanInfo.ValidRegions.Polylines2Curves(), "validRegions");
+            //var circles = GeometryTrans.Points2Circles(beamSpanInfo.PlacePoints, 100, Vector3d.ZAxis);
+            //var circleCurves = GeometryTrans.Circles2Curves(circles);
+
+            //DrawUtils.DrawProfile(circleCurves, "circleCurves");
             var mainBeamPointAdjustor = new MainSecondBeamPointAdjustor(beamSpanInfo, placeAdjustorType);
             mainBeamPointAdjustor.Distribute();
             return mainBeamPointAdjustor.PostPoints;

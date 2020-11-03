@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using GeometryExtensions;
 using ThMEPElectrical.Geometry;
+using ThMEPElectrical.Assistant;
 
 namespace ThMEPElectrical.Business
 {
@@ -32,7 +33,9 @@ namespace ThMEPElectrical.Business
 
             var ucs2wcs = Active.Editor.UCS2WCS();
             //框线范围
-            var points = GeomUtils.CalculateRectangleFromPoints(firstPt.TransformBy(ucs2wcs), secondPt.TransformBy(ucs2wcs));
+            var points = GeomUtils.CalculateRectangleFromPoints(firstPt, secondPt);
+            points = points.PointsTransform(ucs2wcs);
+            //var points = GeomUtils.CalculateRectangleFromPoints(firstPt.TransformBy(ucs2wcs), secondPt.TransformBy(ucs2wcs));
             return points;
         }
     }

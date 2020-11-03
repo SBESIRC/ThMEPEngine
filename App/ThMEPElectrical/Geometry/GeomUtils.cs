@@ -10,6 +10,7 @@ using ThMEPElectrical.Assistant;
 using ThMEPElectrical.Model;
 using ThCADCore.NTS;
 using ThMEPElectrical.PostProcess;
+using ThCADExtension;
 
 namespace ThMEPElectrical.Geometry
 {
@@ -315,6 +316,106 @@ namespace ThMEPElectrical.Geometry
             });
             return polys.Last();
         }
+
+        public static List<Polyline> BufferPolys(List<Polyline> srcPolys, double shrinkDis)
+        {
+            var resPolys = new List<Polyline>();
+            foreach (var singlePoly in srcPolys)
+            {
+                foreach (Polyline offsetPoly in singlePoly.Buffer(shrinkDis))
+                {
+                    resPolys.Add(offsetPoly);
+                }
+            }
+
+            return resPolys;
+        }
+
+        public static List<Polyline> CalculateCanBufferPolys(List<Polyline> srcPolys, double shrinkDis)
+        {
+            var resPolys = new List<Polyline>();
+            foreach (var singlePoly in srcPolys)
+            {
+                if (IsCanBuffer(singlePoly, shrinkDis))
+                    resPolys.Add(singlePoly);
+            }
+
+            return resPolys;
+        }
+
+        public static bool IsCanBuffer(Polyline poly, double shrinkDis)
+        {
+            if (poly.Buffer(shrinkDis).Count > 0)
+                return true;
+
+            return false;
+        }
+
+        public static Curve ExtendCurve(Curve srcCurve, double entityExtendDis)
+        {
+            if (srcCurve is Polyline poly)
+            {
+                var ptS = poly.StartPoint;
+                var ptE = poly.EndPoint;
+                if (ptS.DistanceTo(ptE) < ThMEPCommon.PolyClosedDistance)
+                {
+                    var clonePoly = poly.Clone() as Polyline;
+                    clonePoly.Closed = true;
+                    return clonePoly;
+                }
+                else
+                {
+                    var pts = poly.Vertices();
+                    var resPts = new Point3dCollection();
+                    var vecFir = poly.GetFirstDerivative(ptS).GetNormal();
+                    var extendPtS = ptS - vecFir * entityExtendDis;
+
+                    var vecEnd = poly.GetFirstDerivative(ptE).GetNormal();
+                    var extendPtE = ptE + vecEnd * entityExtendDis;
+                    resPts.Add(extendPtS);
+                    foreach (Point3d srcPt in pts)
+                        resPts.Add(srcPt);
+                    resPts.Add(extendPtE);
+                    return resPts.ToPolyline();
+                }
+            }
+            else if (srcCurve is Line line)
+            {
+                var ptS = line.StartPoint;
+                var ptE = line.EndPoint;
+                var vec = (ptE - ptS).GetNormal();
+                return new Line(ptS - vec * entityExtendDis, ptE + vec * entityExtendDis);
+            }
+
+            return srcCurve.Clone() as Curve;
+        }
+
+        public static double CutRadRange(double rad)
+        {
+            if (IsAlmostNearZero(rad - 1))
+                return 1;
+            else if (IsAlmostNearZero(rad + 1))
+                return -1;
+            return rad;
+        }
+
+        public static double CalAngle(Vector3d from, Vector3d to)
+        {
+            double val = from.X * to.X + from.Y * to.Y;
+            double tmp = Math.Sqrt(Math.Pow(from.X, 2) + Math.Pow(from.Y, 2)) * Math.Sqrt(Math.Pow(to.X, 2) + Math.Pow(to.Y, 2));
+            double angleRad = Math.Acos(CutRadRange(val / tmp));
+            if (IsAlmostNearZero((angleRad - Math.PI)))
+                return angleRad;
+            if (CrossProduct(from, to) < 0)
+                return -angleRad;
+            return angleRad;
+        }
+
+        public static double CrossProduct(Vector3d from, Vector3d to)
+        {
+            return (from.X * to.Y - from.Y * to.X);
+        }
+
         /// <summary>
         /// 计算轮廓的矩形布置信息
         /// </summary>
@@ -332,7 +433,7 @@ namespace ThMEPElectrical.Geometry
 
             var xMax = xLst.Max();
             var yMax = yLst.Max();
-            
+
             var leftBottmPt = new Point3d(xMin, yMin, 0);
             var rightBottomPt = new Point3d(xMax, yMin, 0);
             var leftTopPt = new Point3d(xMin, yMax, 0);
@@ -407,7 +508,9 @@ namespace ThMEPElectrical.Geometry
 
             foreach (var region in regions)
             {
-                ptLst.Add(region.GetCentroid().Point3D());
+                var pt = region.GetWCSCCentroid().Point3D();
+                if (GeomUtils.PtInLoop(postPoly, pt.Point2D()))
+                    ptLst.Add(pt);
             }
 
             if (ptLst.Count < 1)
@@ -423,6 +526,16 @@ namespace ThMEPElectrical.Geometry
             var polys = new List<Polyline>();
             foreach (Polyline offsetPoly in postPoly.Buffer(ThMEPCommon.ShrinkDistance))
                 polys.Add(offsetPoly);
+
+            //var drawPts = new List<Point3d>();
+            //ptLst.ForEach(e => drawPts.Add(new Point3d(e.X, e.Y, 0)));
+            //var circles = GeometryTrans.Points2Circles(drawPts, 100, Vector3d.ZAxis);
+            //var circleCurves = GeometryTrans.Circles2Curves(circles);
+
+            //DrawUtils.DrawProfile(circleCurves, "drawPts");
+            //DrawUtils.DrawProfile(new List<Curve>() { postPoly }, "postPoly");
+
+            //DrawUtils.DrawProfile(polys.Polylines2Curves(), "singlePlace");
             if (polys.Count > 0)
             {
                 var mainRegion = new MainSecondBeamRegion(polys, ptLst);

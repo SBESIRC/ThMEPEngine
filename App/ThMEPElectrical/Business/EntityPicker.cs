@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPElectrical.Geometry;
+using ThMEPElectrical.Assistant;
 
 namespace ThMEPElectrical.Business
 {
@@ -20,7 +21,7 @@ namespace ThMEPElectrical.Business
     public class EntityPicker
     {
         // 选择的图元
-        public static List<Polyline> MakeUserPickEntities()
+        public static List<Polyline> MakeUserPickPolys()
         {
             var polylines = new List<Polyline>();
             PromptSelectionOptions options = new PromptSelectionOptions()
@@ -55,6 +56,38 @@ namespace ThMEPElectrical.Business
             }
 
             return polylines;
+        }
+
+        public static List<Curve> MakeUserPickCurves()
+        {
+            var curves = new List<Curve>();
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择墙轮廓",
+                RejectObjectsOnLockedLayers = true,
+            };
+
+            var result = Active.Editor.GetSelection(options);
+            if (result.Status != PromptStatus.OK)
+            {
+                return curves;
+            }
+
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (ObjectId curveId in result.Value.GetObjectIds())
+                {
+                    var entity = db.CurrentSpace.Element(curveId);
+                    if (entity is Curve curve)
+                    {
+                        curves.Add(GeomUtils.ExtendCurve(curve, ThMEPCommon.EntityExtendDistance));
+                    }
+                }
+            }
+
+            DrawUtils.DrawProfile(curves, "curves");
+            return curves;
         }
     }
 }

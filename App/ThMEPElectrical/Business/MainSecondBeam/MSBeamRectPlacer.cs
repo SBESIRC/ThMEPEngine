@@ -9,6 +9,7 @@ using ThMEPElectrical.PostProcess;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPElectrical.Assistant;
 
 namespace ThMEPElectrical.Business.MainSecondBeam
 {
@@ -39,6 +40,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
 
             // 计算有效的可布置区域
             var mainBeamSpanRegion = CalculateBeamSpanRegion(m_inputProfileData, m_singlePlacePts);
+            //DrawUtils.DrawProfile(mainBeamSpanRegion.ValidRegions.Polylines2Curves(), "validRegions");
             if (mainBeamSpanRegion.ValidRegions.Count == 0)
             {
                 m_singlePlacePts.Clear();
@@ -72,6 +74,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
         {
             var mainBeam = inputProfileData.MainBeamOuterProfile;
             var secondBeams = inputProfileData.SecondBeamProfiles;
+            //DrawUtils.DrawProfile(secondBeams.Polylines2Curves(), "secondBeams");
             var dbLst = new DBObjectCollection();
             secondBeams.ForEach(e => dbLst.Add(e));
 

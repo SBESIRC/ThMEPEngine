@@ -232,18 +232,18 @@ namespace ThMEPElectrical
         }
 
         // 梁吊顶
-        [CommandMethod("TIANHUACAD", "THBeamCeil", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFDCP", CommandFlags.Modal)]
         public void THNoBeamMultiPlace()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
-                packageManager.DoGridBeamPlacePoints();
+                packageManager.DoGridBeamPlacePointsWithUcs();
             }
         }
 
         // 楼层
-        [CommandMethod("TIANHUACAD", "THNoBeamStorey", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFDFS", CommandFlags.Modal)]
         public void THNoBeamStorey()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -253,13 +253,23 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFDL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THFDLBack", CommandFlags.Modal)]
         public void THMSABBMultiPlace()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
                 packageManager.DoMainSecondBeamPlacePoints();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THFDL", CommandFlags.Modal)]
+        public void THMSABBMultiPlaceUcs()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                packageManager.DoMainSecondBeamPlacePointsWithUcs();
             }
         }
     }

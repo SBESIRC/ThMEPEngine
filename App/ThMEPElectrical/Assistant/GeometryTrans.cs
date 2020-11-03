@@ -75,6 +75,14 @@ namespace ThMEPElectrical.Assistant
             return ptLst;
         }
 
+        public static List<Curve> PlaceInputDatas2Curves(List<PlaceInputProfileData> inputProfileDatas)
+        {
+            var curves = new List<Curve>();
+            inputProfileDatas.ForEach(e => curves.Add(e.MainBeamOuterProfile));
+            return curves;
+        }
+
+
         public static Polyline PolylineWithNoSamePoints(this Polyline poly)
         {
             return poly.RemoveNearSamePoints().Points2PointCollection().ToPolyline();
@@ -177,6 +185,32 @@ namespace ThMEPElectrical.Assistant
             poly.Closed = true;
             poly.CreatePolyline(ptCollection);
             return poly;
+        }
+
+        public static Point3dCollection PointsTransform(this Point3dCollection pts, Matrix3d matrix)
+        {
+            var resPts = new Point3dCollection();
+            for (int i = 0; i < pts.Count; i++)
+            {
+                resPts.Add(pts[i].TransformBy(matrix));
+            }
+
+            return resPts;
+        }
+
+        public static List<Curve> MatrixSystemCurves(Matrix3d matrix, double length)
+        {
+            var coordinateSystem = matrix.CoordinateSystem3d;
+            var origin = coordinateSystem.Origin;
+            var x = coordinateSystem.Xaxis;
+            var y = coordinateSystem.Yaxis;
+            var xEnd = origin + x * length;
+            var yEnd = origin + y * length;
+            var lineX = new Line(origin, xEnd);
+            var lineY = new Line(origin, yEnd);
+
+            var curves = new List<Curve>() { lineX, lineY };
+            return curves;
         }
 
         public static Polyline GenerateSmallInValidPoly()

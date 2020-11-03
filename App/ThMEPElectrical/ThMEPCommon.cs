@@ -21,6 +21,7 @@ namespace ThMEPElectrical
         public const string SENSORDWGNAME = "烟感温感图块.dwg";
         public const string SMOKE_SENSOR_BLOCK_NAME = "E-BFAS110";
         public const string TEMPERATURE_SENSOR_BLOCK_NAME = "E-BFAS120";
+        public const string UCS_LAYER_NAME = "AI-UCS";
 
 
         // 常量
@@ -31,7 +32,11 @@ namespace ThMEPElectrical
         public static readonly double ShrinkDistance = -500; // 内缩距离
         public static readonly double ShrinkSmallDistance = -3; // 误差内缩距离
         public static readonly double GridPolyExtendLength = 500; // 轴网两端延伸距离
-        public static readonly double ExtendBeamLength = 20; // 梁的延伸长度
+
+        public static readonly double ExtendBeamLength = 25; // 梁的延伸长度
+        public static readonly double WallProfileShrinkDistance = -1000; // 用户选择墙线内缩距离
+        public static readonly double PolyClosedDistance = 100; // 多段线视觉认为是闭合多段线的误差距离
+        public static readonly double EntityExtendDistance = 1000; // 选择图元延长的距离
     }
 }
 

@@ -44,6 +44,9 @@
     <Compile Include="Business\MainSecondBeam\MSBeamNoRegularPlacer.cs" />
     <Compile Include="Business\MainSecondBeam\MSBeamRectPlacer.cs" />
     <Compile Include="Business\PreWindowSelector.cs" />
+    <Compile Include="Business\Procedure\UcsInfoCalculator.cs" />
+    <Compile Include="Business\Procedure\UserCoordinateWorker.cs" />
+    <Compile Include="Business\Procedure\WallDataPicker.cs" />
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="Core\PackageManager.cs" />
@@ -76,6 +79,8 @@
     <Compile Include="Model\PlacePointProArea.cs" />
     <Compile Include="Model\PlaceRect.cs" />
     <Compile Include="Model\PointPosType.cs" />
+    <Compile Include="Model\PolygonInfo.cs" />
+    <Compile Include="Model\UcsInfo.cs" />
     <Compile Include="PostProcess\Adjustor\NonRegularPlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />

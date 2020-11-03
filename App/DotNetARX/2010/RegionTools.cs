@@ -64,6 +64,18 @@ namespace DotNetARX
                        momInertia, out prodInertia, prinMoments, prinAxes, radiiGyration, out extentsLow, out extentsHigh);
             return centroid;
         }
+
+        public static Point2d GetWCSCCentroid(this Region region)
+        {
+            Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+            CoordinateSystem3d coord = ed.CurrentUserCoordinateSystem.CoordinateSystem3d;
+            Point3d origin = Point3d.Origin;
+            Vector3d xAxis = Vector3d.XAxis;
+            Vector3d yAxis = Vector3d.YAxis;
+            getAreaProp(region.UnmanagedObject, ref origin, ref xAxis, ref yAxis, out perimeter, out area, out centroid,
+                       momInertia, out prodInertia, prinMoments, prinAxes, radiiGyration, out extentsLow, out extentsHigh);
+            return centroid;
+        }
         /// <summary>
         /// 获取面域的惯性矩
         /// </summary>

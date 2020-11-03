@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -28,6 +29,23 @@ namespace ThMEPElectrical.Model
         {
             MainBeamOuterProfile = poly;
             SecondBeamProfiles = srcPlaceProfiles;
+        }
+    }
+
+    /// <summary>
+    /// 一个ucs相关布置数据
+    /// </summary>
+    public class UcsPlaceInputProfileData
+    {
+        public List<PlaceInputProfileData> PlaceInputProfileDatas;
+        public Matrix3d UcsMatrix;
+        public double rotateAngle;
+
+        public UcsPlaceInputProfileData(List<PlaceInputProfileData> profileDatas, Matrix3d matrix, double angle)
+        {
+            PlaceInputProfileDatas = profileDatas;
+            UcsMatrix = matrix;
+            rotateAngle = angle;
         }
     }
 }

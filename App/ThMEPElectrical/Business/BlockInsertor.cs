@@ -27,10 +27,12 @@ namespace ThMEPElectrical.Business
             private set;
         }
 
-        public BlockInsertor(List<Point3d> insertPts, SensorType sensorType)
+        private double m_angle;
+        public BlockInsertor(List<Point3d> insertPts, SensorType sensorType, double angle = 0)
         {
             InsertPts = insertPts;
             Sensor = sensorType;
+            m_angle = angle;
         }
 
         /// <summary>
@@ -38,9 +40,10 @@ namespace ThMEPElectrical.Business
         /// </summary>
         /// <param name="insertPts"></param>
         /// <param name="sensorType"></param>
-        public static void MakeBlockInsert(List<Point3d> insertPts, SensorType sensorType)
+        public static void MakeBlockInsert(List<Point3d> insertPts, SensorType sensorType, double angle = 0)
         {
-            var blockInsertor = new BlockInsertor(insertPts, sensorType);
+            var blockInsertor = new BlockInsertor(insertPts, sensorType, angle);
+
             blockInsertor.Do();
         }
 
@@ -52,12 +55,12 @@ namespace ThMEPElectrical.Business
                 if (Sensor == SensorType.SMOKESENSOR)
                 {
                     db.Database.ImportModel(ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME);
-                    db.Database.InsertModel(InsertPts, ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale);
+                    db.Database.InsertModel(InsertPts, ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale, m_angle);
                 }
                 else
                 {
                     db.Database.ImportModel(ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME);
-                    db.Database.InsertModel(InsertPts, ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale);
+                    db.Database.InsertModel(InsertPts, ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale, m_angle);
                 }
             }
         }

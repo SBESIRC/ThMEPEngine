@@ -15,13 +15,13 @@ namespace ThMEPElectrical.Block
             return Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.SENSORDWGNAME);
         }
 
-        public static void InsertModel(this Database database, List<Point3d> insertPts, string name, Scale3d scale)
+        public static void InsertModel(this Database database, List<Point3d> insertPts, string name, Scale3d scale, double angle = 0)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 foreach (var pt in insertPts)
                 {
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(ThMEPCommon.SENSORLAYERNMAE,name,pt,scale,0.0);
+                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(ThMEPCommon.SENSORLAYERNMAE,name,pt,scale, angle);
                 }
             }
         }

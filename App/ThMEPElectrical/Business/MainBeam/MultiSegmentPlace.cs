@@ -363,7 +363,7 @@ namespace ThMEPElectrical.Business.MainBeam
             var placeRectInfos = new List<PlaceRect>();
             var splitPoly = GenerateSplitPolyline(bottomLine, moveDir, moveLength); // 生成分割矩形
             var resSplitPolys = GenerateIntersectRegions(splitPoly, srcShape);
-            DrawUtils.DrawProfile(resSplitPolys.Polylines2Curves(), "intersectPoly");
+            //DrawUtils.DrawProfile(resSplitPolys.Polylines2Curves(), "intersectPoly");
 
             foreach (var singleResPoly in resSplitPolys)
             {
@@ -438,7 +438,7 @@ namespace ThMEPElectrical.Business.MainBeam
                 if (intersectPoly == null)
                     continue;
 
-                DrawUtils.DrawProfile(new List<Curve>() { intersectPoly }, "intersectPoly");
+                //DrawUtils.DrawProfile(new List<Curve>() { intersectPoly }, "intersectPoly");
                 var placeRect = GeomUtils.CalculateProfileRectInfo(intersectPoly);
                 placeRect.srcPolyline = intersectPoly;
                 oneRowPlaceRectInfos.Add(placeRect);
