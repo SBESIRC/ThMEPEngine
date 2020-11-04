@@ -27,7 +27,7 @@ namespace ThMEPElectrical.Business
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
-                MessageForAdding = "选择墙轮廓",
+                MessageForAdding = "选择要布置的房间框线",
                 RejectObjectsOnLockedLayers = true,
             };
 
@@ -64,7 +64,7 @@ namespace ThMEPElectrical.Business
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
-                MessageForAdding = "选择墙轮廓",
+                MessageForAdding = "选择要布置的房间框线",
                 RejectObjectsOnLockedLayers = true,
             };
 

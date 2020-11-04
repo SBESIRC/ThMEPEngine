@@ -284,7 +284,7 @@ namespace ThCADExtension
         {
             while(true)
             {
-                PromptPointResult prPntRes1 = AcadApp.DocumentManager.MdiActiveDocument.Editor.GetPoint("\n请指定框选的第一点");
+                PromptPointResult prPntRes1 = AcadApp.DocumentManager.MdiActiveDocument.Editor.GetPoint("\n请输入结构信息识别范围的第一个角点");
                 if (prPntRes1.Status != PromptStatus.OK)
                     throw new System.Exception("The 1st corner picking failed!");
                 m1stPoint = prPntRes1.Value;
@@ -293,7 +293,7 @@ namespace ThCADExtension
 
                 using (var ov = new PointMonitorEventHandlerOverride(Editor_PointMonitor))
                 {
-                    PromptPointOptions options = new PromptPointOptions("\n请指定框选的第二点")
+                    PromptPointOptions options = new PromptPointOptions("\n请输入结构信息识别范围的第二个角点")
                     {
                         AllowNone = false,
                     };
