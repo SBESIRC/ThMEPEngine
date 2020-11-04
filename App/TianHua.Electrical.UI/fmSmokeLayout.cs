@@ -265,6 +265,7 @@ namespace TianHua.Electrical.UI
 #endif
 
             // 发送命令
+            SetFocusToDwgView();
             switch (m_SmokeLayout.LayoutLogic)
             {
                 case "无吊顶避梁":
@@ -287,16 +288,29 @@ namespace TianHua.Electrical.UI
             var parameters = new string[]
             {
                 checkbox.Checked ? "_ON" : "_OFF",
-                "E-FD-PR",
+                ThMEPCommon.PROTECTAREA_LAYER_NAME,
                 "\n",
                 "\n"
             };
+            SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "-LAYER", parameters);
         }
 
         private void BtnLayout_Click(object sender, EventArgs e)
         {
+            // 发送命令
+            SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THUCSCOMPASS");
+        }
+
+        private void SetFocusToDwgView()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
     }
 }
