@@ -2240,8 +2240,8 @@ namespace TianHua.FanSelection.UI
 
 
             // 发送CAD命令
-            var parameters = new Object[] { FuncJson.Serialize(_FanDataModel) };
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJBLOCK", parameters);
+            ThFanSelectionService.Instance.Model = _FanDataModel;
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THFJBLOCK");
         }
 
         private void TreeList_CustomDrawNodeCell(object sender, CustomDrawNodeCellEventArgs e)

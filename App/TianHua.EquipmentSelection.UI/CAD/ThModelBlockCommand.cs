@@ -32,12 +32,11 @@ namespace TianHua.FanSelection.UI.CAD
 #endif
 
                 // 获取风机参数
-                var result = Active.Editor.GetString("\n输入风机参数");
-                if (result.Status != PromptStatus.OK)
+                var _FanDataModel = ThFanSelectionService.Instance.Model;
+                if (_FanDataModel == null)
                 {
                     return;
                 }
-                var _FanDataModel = FuncJson.Deserialize<FanDataModel>(result.StringResult);
 
                 if (!dbManager.Contains(_FanDataModel.ID))
                 {
@@ -97,6 +96,9 @@ namespace TianHua.FanSelection.UI.CAD
                         ThFanSelectionEngine.ZoomToModels(_FanDataModel);
                     }
                 }
+
+                // 清除风机参数
+                ThFanSelectionService.Instance.Model = null;
             }
         }
     }
