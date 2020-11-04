@@ -10,6 +10,9 @@ using StraightSkeletonNet;
 using Vector2d = StraightSkeletonNet.Primitives.Vector2d;
 using System.Linq;
 using ThCADExtension;
+using NetTopologySuite.Operation.Union;
+using NetTopologySuite.Operation.Overlay.Snap;
+using NetTopologySuite.Operation.Overlay;
 
 namespace ThCADCore.Test
 {
@@ -122,11 +125,11 @@ namespace ThCADCore.Test
                 }
 
                 var objs = new DBObjectCollection();
-                foreach(var obj in result.Value.GetObjectIds())
+                foreach (var obj in result.Value.GetObjectIds())
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
-                foreach(var obj in objs.Boundaries())
+                foreach (var obj in objs.Boundaries())
                 {
                     acadDatabase.ModelSpace.Add(obj as Entity);
                 }
@@ -263,6 +266,168 @@ namespace ThCADCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThUnaryUnionOp", CommandFlags.Modal)]
+        public void ThUnion()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                var geometry = objs.ToNTSNodedLineStrings();
+
+                foreach (Entity obj in geometry.ToDbCollection())
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThCascadedPolygonUnion", CommandFlags.Modal)]
+        public void ThCascadedPolygonUnion()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                var geometrys = objs.ToNTSLineStrings();
+
+                var cascadedPolygon = CascadedPolygonUnion.Union(geometrys);
+                foreach (Entity obj in cascadedPolygon.ToDbCollection())
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThOverlayUnion", CommandFlags.Modal)]
+        public void ThOverlayUnion()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                var geometrys = objs.ToNTSLineStrings();
+
+                var overlapUnion = OverlapUnion.Union(geometrys.First(), geometrys.Last());
+                foreach (Entity obj in overlapUnion.ToDbCollection())
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThSnapIfNeededOverlayOp", CommandFlags.Modal)]
+        public void ThOverlay()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                var geometrys = objs.ToNTSLineStrings();
+
+                var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Union);
+                foreach (Entity obj in snapGeometry.ToDbCollection())
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThSnapIntersection", CommandFlags.Modal)]
+        public void ThSnapIfNeededIntersection()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                var geometrys = objs.ToNTSLineStrings();
+                // 求交点
+                var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Intersection);
+                foreach (Entity obj in snapGeometry.ToDbCollection())
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThSnapDifference", CommandFlags.Modal)]
+        public void ThThDifference()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                var geometrys = objs.ToNTSLineStrings();
+
+                var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Difference);
+                foreach (Entity obj in snapGeometry.ToDbCollection())
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+
         [CommandMethod("TIANHUACAD", "ThVoronoiDiagram", CommandFlags.Modal)]
         public void ThVoronoiDiagram()
         {
@@ -275,7 +440,7 @@ namespace ThCADCore.Test
                 }
 
                 var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity diagram in pline.VoronoiTriangulation(pline.Length/50.0))
+                foreach (Entity diagram in pline.VoronoiTriangulation(pline.Length / 50.0))
                 {
                     diagram.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(diagram);
@@ -302,7 +467,7 @@ namespace ThCADCore.Test
 
                 var pline = acadDatabase.Element<Polyline>(result.ObjectId);
                 var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(pline, result2.Value);
-                foreach(Entity centerline in centerlines)
+                foreach (Entity centerline in centerlines)
                 {
                     centerline.ColorIndex = 2;
                     acadDatabase.ModelSpace.Add(centerline);
@@ -552,7 +717,7 @@ namespace ThCADCore.Test
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 var host = acadDatabase.Element<Curve>(result2.ObjectId);
                 var nearestNeighbours = spatialIndex.NearestNeighbours(host, result3.Value);
-                foreach(Entity neighbour in nearestNeighbours)
+                foreach (Entity neighbour in nearestNeighbours)
                 {
                     neighbour.UpgradeOpen();
                     neighbour.ColorIndex = 1;
@@ -646,7 +811,7 @@ namespace ThCADCore.Test
                         polyline_Arc.ColorIndex = 1;
                         acadDatabase.ModelSpace.Add(polyline_Arc);
                     }
-                    else if(item is Arc arc)
+                    else if (item is Arc arc)
                     {
                         var arc_Chord = arc.TessellateArcWithChord(100);
                         arc_Chord.ColorIndex = 2;

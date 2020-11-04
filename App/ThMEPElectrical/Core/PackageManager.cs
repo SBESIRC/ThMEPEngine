@@ -123,7 +123,7 @@ namespace ThMEPElectrical.Core
             var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
 
             // 前置数据读取器
-            var infoReader = new InfoReader(preWindow, 250);
+            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.Do();
 
             // 建立映射关系对
