@@ -1,0 +1,264 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{D39D70C9-AF27-4CF0-8F61-23D37FFEB321}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>ThCuiRes_light</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v141</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;_USRDLL;THCUIRES_LIGHT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <NoEntryPoint>true</NoEntryPoint>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;THCUIRES_LIGHT_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="ThCuiRes_light.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Images\AppIcon.ico" />
+    <Image Include="Images\BLOCKSPLIT_light.ico" />
+    <Image Include="Images\DGNPURGE_light_small.ico" />
+    <Image Include="Images\DGNPURGE_light_small.ico" />
+    <Image Include="Images\T20V4.0_light_small.ico" />
+    <Image Include="Images\T20V4.0_light_large.ico" />
+    <Image Include="Images\T20V5.0_light_small.ico" />
+    <Image Include="Images\T20V5.0_light_large.ico" />
+    <Image Include="Images\THABC_light_small.ico" />
+    <Image Include="Images\THABC_light_large.ico" />
+    <Image Include="Images\THBAC_light_small.ico" />
+    <Image Include="Images\THBAC_light_large.ico" />
+    <Image Include="Images\THBBE_light_small.ico" />
+    <Image Include="Images\THBBE_light_large.ico" />
+    <Image Include="Images\THBBR_light_large.ico" />
+    <Image Include="Images\THBBR_light_small.ico" />
+    <Image Include="Images\THBBS_light_small.ico" />
+    <Image Include="Images\THBBS_light_large.ico" />
+    <Image Include="Images\THBEE_light_small.ico" />
+    <Image Include="Images\THBEE_light_large.ico" />
+    <Image Include="Images\THBLI_light_small.ico" />
+    <Image Include="Images\THBLI_light_large.ico" />
+    <Image Include="Images\THBLS_light_small.ico" />
+    <Image Include="Images\THBLS_light_large.ico" />
+    <Image Include="Images\THBPD_light_small.ico" />
+    <Image Include="Images\THBPD_light_large.ico" />
+    <Image Include="Images\THBPP_light_small.ico" />
+    <Image Include="Images\THBPP_light_large.ico" />
+    <Image Include="Images\THBPT_light_small.ico" />
+    <Image Include="Images\THBPT_light_large.ico" />
+    <Image Include="Images\THBPS_light_small.ico" />
+    <Image Include="Images\THBPS_light_large.ico" />
+    <Image Include="Images\THCNU_light_small.ico" />
+    <Image Include="Images\THCNU_light_large.ico" />
+    <Image Include="Images\THELC_light_small.ico" />
+    <Image Include="Images\THELC_light_large.ico" />
+    <Image Include="Images\THFET_light_small.ico" />
+    <Image Include="Images\THFET_light_large.ico" />
+    <Image Include="Images\THHLP_light_small.ico" />
+    <Image Include="Images\THHLP_light_large.ico" />
+    <Image Include="Images\THLOGIN_light_small.ico" />
+    <Image Include="Images\THLOGIN_light_large.ico" />
+    <Image Include="Images\THLOGOUT_light_small.ico" />
+    <Image Include="Images\THLOGOUT_light_large.ico" />
+    <Image Include="Images\THLPE_light_small.ico" />
+    <Image Include="Images\THLPE_light_large.ico" />
+    <Image Include="Images\THLPM_light_small.ico" />
+    <Image Include="Images\THLPM_light_large.ico" />
+    <Image Include="Images\THLPP_light_small.ico" />
+    <Image Include="Images\THLPP_light_large.ico" />
+    <Image Include="Images\THLTR_light_small.ico" />
+    <Image Include="Images\THLTR_light_large.ico" />
+    <Image Include="Images\THMIR_light_small.ico" />
+    <Image Include="Images\THMIR_light_large.ico" />
+    <Image Include="Images\THMLC_light_small.ico" />
+    <Image Include="Images\THMLC_light_large.ico" />
+    <Image Include="Images\THMLK_light_small.ico" />
+    <Image Include="Images\THMLK_light_large.ico" />
+    <Image Include="Images\THMOF_light_small.ico" />
+    <Image Include="Images\THMOF_light_large.ico" />
+    <Image Include="Images\THMON_light_small.ico" />
+    <Image Include="Images\THMON_light_large.ico" />
+    <Image Include="Images\THMSC_light_small.ico" />
+    <Image Include="Images\THMSC_light_large.ico" />
+    <Image Include="Images\THMUK_light_small.ico" />
+    <Image Include="Images\THMUK_light_large.ico" />
+    <Image Include="Images\THPLC_light_small.ico" />
+    <Image Include="Images\THPLC_light_large.ico" />
+    <Image Include="Images\THSLC_light_small.ico" />
+    <Image Include="Images\THSLC_light_large.ico" />
+    <Image Include="Images\THSPS_light_small.ico" />
+    <Image Include="Images\THSPS_light_large.ico" />
+    <Image Include="Images\THSVM_light_small.ico" />
+    <Image Include="Images\THSVM_light_large.ico" />
+    <Image Include="Images\THTET_light_small.ico" />
+    <Image Include="Images\THTET_light_large.ico" />
+    <Image Include="Images\THUKA_light_small.ico" />
+    <Image Include="Images\THUKA_light_large.ico" />
+    <Image Include="Images\THUPT_light_small.ico" />
+    <Image Include="Images\THUPT_light_large.ico" />
+    <Image Include="Images\THFBK_light_small.ico" />
+    <Image Include="Images\THFBK_light_large.ico" />
+    <Image Include="Images\THZ0_light_small.ico" />
+    <Image Include="Images\THZ0_light_large.ico" />
+    <Image Include="Images\TZLOOK_light.ico" />
+    <Image Include="Images\THCP_light_small.ico" />
+    <Image Include="Images\THCP_light_large.ico" />
+    <Image Include="Images\THMA_light_small.ico" />
+    <Image Include="Images\THMA_light_large.ico" />
+    <Image Include="Images\THCRC_light_small.ico" />
+    <Image Include="Images\THCRC_light_large.ico" />
+    <Image Include="Images\THTF_light_small.ico" />
+    <Image Include="Images\THTF_light_large.ico" />
+    <Image Include="Images\THSG_light_small.ico" />
+    <Image Include="Images\THSG_light_large.ico" />
+    <Image Include="Images\THXF_light_small.ico" />
+    <Image Include="Images\THXF_light_large.ico" />
+    <Image Include="Images\THNT_light_small.ico" />
+    <Image Include="Images\THNT_light_large.ico" />
+    <Image Include="Images\THAUL_light_small.ico" />
+    <Image Include="Images\THAUL_light_large.ico" />
+    <Image Include="Images\THAPL_light_small.ico" />
+    <Image Include="Images\THAPL_light_large.ico" />
+    <Image Include="Images\THALC_light_small.ico" />
+    <Image Include="Images\THALC_light_large.ico" />
+    <Image Include="Images\THPGE_light_small.ico" />
+    <Image Include="Images\THPGE_light_large.ico" />
+    <Image Include="Images\THPUD_light_small.ico" />
+    <Image Include="Images\THPUD_light_large.ico" />
+    <Image Include="Images\THPCF_light_small.ico" />
+    <Image Include="Images\THPCF_light_large.ico" />
+    <Image Include="Images\THPOP_light_small.ico" />
+    <Image Include="Images\THPOP_light_large.ico" />
+    <Image Include="Images\THPBR_light_small.ico" />
+    <Image Include="Images\THPBR_light_large.ico" />
+    <Image Include="Images\THWRD_light_small.ico" />
+    <Image Include="Images\THWRD_light_large.ico" />
+    <Image Include="Images\THWRI_light_small.ico" />
+    <Image Include="Images\THWRI_light_large.ico" />
+    <Image Include="Images\THWRR_light_small.ico" />
+    <Image Include="Images\THWRR_light_large.ico" />
+    <Image Include="Images\THPT_light_small.ico" />
+    <Image Include="Images\THPT_light_large.ico" />
+    <Image Include="Images\THFJ_light_small.ico" />
+    <Image Include="Images\THFJ_light_large.ico" />
+    <Image Include="Images\THALIGN_bottom_light_small.ico" />
+    <Image Include="Images\THALIGN_bottom_light_large.ico" />
+    <Image Include="Images\THALIGN_horizontal_light_small.ico" />
+    <Image Include="Images\THALIGN_horizontal_light_large.ico" />
+    <Image Include="Images\THALIGN_left_light_small.ico" />
+    <Image Include="Images\THALIGN_left_light_large.ico" />
+    <Image Include="Images\THALIGN_right_light_small.ico" />
+    <Image Include="Images\THALIGN_right_light_large.ico" />
+    <Image Include="Images\THALIGN_top_light_small.ico" />
+    <Image Include="Images\THALIGN_top_light_large.ico" />
+    <Image Include="Images\THALIGN_vertical_light_small.ico" />
+    <Image Include="Images\THALIGN_vertical_light_large.ico" />
+    <Image Include="Images\THALIGN_xdistribute_light_small.ico" />
+    <Image Include="Images\THALIGN_xdistribute_light_large.ico" />
+    <Image Include="Images\THALIGN_ydistribute_light_small.ico" />
+    <Image Include="Images\THALIGN_ydistribute_light_large.ico" />
+    <Image Include="Images\THQS_Annotation_light_small.ico" />
+    <Image Include="Images\THQS_Annotation_light_large.ico" />
+    <Image Include="Images\THQS_Block_light_small.ico" />
+    <Image Include="Images\THQS_Block_light_large.ico" />
+    <Image Include="Images\THQS_Color_light_small.ico" />
+    <Image Include="Images\THQS_Color_light_large.ico" />
+    <Image Include="Images\THQS_Hatch_light_small.ico" />
+    <Image Include="Images\THQS_Hatch_light_large.ico" />
+    <Image Include="Images\THQS_LastAppend_light_small.ico" />
+    <Image Include="Images\THQS_LastAppend_light_large.ico" />
+    <Image Include="Images\THQS_LastSelect_light_small.ico" />
+    <Image Include="Images\THQS_LastSelect_light_large.ico" />
+    <Image Include="Images\THQS_Layer_light_small.ico" />
+    <Image Include="Images\THQS_Layer_light_large.ico" />
+    <Image Include="Images\THQS_Linetype_light_small.ico" />
+    <Image Include="Images\THQS_Linetype_light_large.ico" />
+    <Image Include="Images\THQS_Text_light_small.ico" />
+    <Image Include="Images\THQS_Text_light_large.ico" />
+    <Image Include="Images\Architecture_light_small.ico" />
+    <Image Include="Images\Architecture_light_large.ico" />
+    <Image Include="Images\Electrical_light_small.ico" />
+    <Image Include="Images\Electrical_light_large.ico" />
+    <Image Include="Images\Havc_light_small.ico" />
+    <Image Include="Images\Havc_light_large.ico" />
+    <Image Include="Images\Project_Plan_light_small.ico" />
+    <Image Include="Images\Project_Plan_light_large.ico" />
+    <Image Include="Images\Structure_light_small.ico" />
+    <Image Include="Images\Structure_light_large.ico" />
+    <Image Include="Images\Water_Sewerage_light_small.ico" />
+    <Image Include="Images\Water_Sewerage_light_large.ico" />
+    <Image Include="Images\THALIAS_light_small.ico" />
+    <Image Include="Images\THALIAS_light_large.ico" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
