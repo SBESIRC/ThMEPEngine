@@ -30,14 +30,7 @@ namespace TianHua.FanSelection.UI
             }
 
             this.TxtCalcValue.Text = ExhaustModelCalculator.GetTxtCalcValue(Model.ExhaustModel);
-            if (Model.ExhaustModel.IsNull())
-            {
-                TxtEstimatedValue.Text = Model.AirCalcValue.NullToStr();
-            }
-            else
-            {
-                TxtEstimatedValue.Text = FuncStr.NullToStr(Model.ExhaustModel.EstimateAirVolum.NullToDouble());
-            }
+            TxtEstimatedValue.Text = FuncStr.NullToStr(Model.ExhaustModel.EstimateAirVolum.NullToDouble());
             TxtFactor.Text = FuncStr.NullToStr(Model.AirCalcFactor);
             TxtAirVolume.Text = FuncStr.NullToStr(Model.AirVolume);
         }
@@ -114,6 +107,7 @@ namespace TianHua.FanSelection.UI
         private void UpdateAirVolume()
         {
             int maxcalvalue = FuncStr.NullToInt(Math.Round(Math.Max(this.TxtCalcValue.Text.NullToDouble(), this.TxtEstimatedValue.Text.NullToDouble()) * this.TxtFactor.Text.NullToDouble()));
+            //Model.AirCalcValue = maxcalvalue;
             Model.AirVolume = maxcalvalue==0 ? 0 : ExhaustModelCalculator.RoundUpToFifty(maxcalvalue);
             this.TxtAirVolume.Text = Model.AirVolume.NullToStr();
         }
