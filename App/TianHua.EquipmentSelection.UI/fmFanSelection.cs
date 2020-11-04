@@ -2432,8 +2432,8 @@ namespace TianHua.FanSelection.UI
 
                 _ListTemp.ForEach(p =>
                 {
-                    var _Parameters = new Object[] { FuncJson.Serialize(p) };
-                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFJINPLACEEDITBLOCK", _Parameters);
+                    ThFanSelectionService.Instance.Model = p;
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THFJINPLACEEDITBLOCK");
                 });
 
 

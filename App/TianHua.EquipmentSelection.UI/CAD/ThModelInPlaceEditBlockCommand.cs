@@ -18,7 +18,6 @@ namespace TianHua.FanSelection.UI.CAD
         {
             using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
             {
 
                 // set focus to AutoCAD
@@ -30,15 +29,17 @@ namespace TianHua.FanSelection.UI.CAD
 #endif
 
                 // 获取风机参数
-                var result = Active.Editor.GetString("\n输入风机参数");
-                if (result.Status != PromptStatus.OK)
+                var _FanDataModel = ThFanSelectionService.Instance.Model;
+                if (_FanDataModel == null)
                 {
                     return;
                 }
-                var _FanDataModel = FuncJson.Deserialize<FanDataModel>(result.StringResult);
 
                 // 在位编辑风机
                 ThFanSelectionEngine.EditModelsInplace(_FanDataModel);
+
+                // 清除风机参数
+                ThFanSelectionService.Instance.Model = null;
             }
         }
     }
