@@ -10,27 +10,28 @@ namespace TianHua.AutoCAD.ThCui
         {
             //设置用于下拉菜单别名的字符串集合
             StringCollection sc = new StringCollection();
-            sc.Add("THPop");
+            sc.Add("THMEPPopMenu");
             //添加名为“我的菜单”的下拉菜单，如果已经存在，则返回null
-            PopMenu theMenu = cs.MenuGroup.AddPopMenu("机电工具集", sc, "ID_THMenu");
+            PopMenu theMenu = cs.MenuGroup.AddPopMenu("机电工具集", sc, "ID_THMEPTOOLSET");
             if (theMenu != null)//如果“我的菜单”还没有被添加，则添加菜单项
             {
                 {
-                    var havcMenu = theMenu.AddSubMenu(-1, "暖通", "ID_THPROFILE _H");
+                    var havcMenu = theMenu.AddSubMenu(-1, "暖通", "ID_THMEPTOOLSET_HAVC");
                     havcMenu.AddMenuItem(-1, "风机选型", "ID_THFJ");
                 }
                 {
-                    var elecMenu = theMenu.AddSubMenu(-1, "电气", "ID_THPROFILE _E");
+                    var elecMenu = theMenu.AddSubMenu(-1, "电气", "ID_THMEPTOOLSET_ELECTRICAL");
                     elecMenu.AddMenuItem(-1, "烟感温感布置", "ID_THYWG");
                 }
                 {
-                    var wssMenu = theMenu.AddSubMenu(-1, "给排水", "ID_THPROFILE _W");
+                    var wssMenu = theMenu.AddSubMenu(-1, "给排水", "ID_THMEPTOOLSET_WSS");
                     wssMenu.AddMenuItem(-1, "喷头布置", "ID_THPLPT");
                     wssMenu.AddMenuItem(-1, "盲区检测", "ID_THPLMQ");
                     wssMenu.AddMenuItem(-1, "可布置区域", "ID_THPLKQ");
                 }
             }
         }
+
         //public static void CreateThMenu(CustomizationSection cs)
         //{
         //    //设置用于下拉菜单别名的字符串集合

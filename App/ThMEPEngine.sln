@@ -27,7 +27,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TianHua.Electrical", "TianH
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TianHua.Electrical.UI", "TianHua.Electrical.UI\TianHua.Electrical.UI.csproj", "{537E996D-C4A0-4C7D-8277-ADF5EA7F9D76}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThCui", "ThCui\ThCui.csproj", "{A7A6ED9C-27F3-4F7E-AA5E-D9637CB12A46}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThMEPCui", "ThCui\ThMEPCui.csproj", "{A7A6ED9C-27F3-4F7E-AA5E-D9637CB12A46}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -254,7 +254,7 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {4DC31E7F-3F21-4F0B-B4C8-C20B040E84EF}
 		        SolutionGuid = {BACE1130-D315-4658-B063-566B4F1EBA5B}
+		SolutionGuid = {4DC31E7F-3F21-4F0B-B4C8-C20B040E84EF}
 	EndGlobalSection
 EndGlobal
