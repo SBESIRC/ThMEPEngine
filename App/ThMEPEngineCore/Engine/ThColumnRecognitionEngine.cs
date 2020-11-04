@@ -43,7 +43,18 @@ namespace ThMEPEngineCore.Engine
                     curves = columnDbExtension.ColumnCurves;
                 }
                 curves.ToCollection().UnionPolygons().Cast<Curve>()
-                    .ForEach(o => Elements.Add(ThIfcColumn.CreateColumnEntity(o)));
+                    .ForEach(o =>
+                    {
+                        if (o is Polyline polyline && polyline.Area > 0.0)
+                        {
+                            var bufferObjs = polyline.Buffer(ThMEPEngineCoreCommon.ColumnBufferDistance);
+                            if (bufferObjs.Count == 1)
+                            {
+                                var outline = bufferObjs[0] as Polyline;
+                                Elements.Add(ThIfcColumn.CreateColumnEntity(outline));
+                            }
+                        }
+                    });
             }
         }
         private List<Curve> PrecessColumn(List<Curve> curves)

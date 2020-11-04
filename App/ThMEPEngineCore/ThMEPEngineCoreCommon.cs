@@ -96,5 +96,9 @@ namespace ThMEPEngineCore
         /// 剪力墙偏移距离（解决NTS精度）
         /// </summary>
         public const double ShearWallBufferDistance=2.5;
+        /// <summary>
+        /// 柱子偏移距离（解决NTS精度）
+        /// </summary>
+        public const double ColumnBufferDistance = 2.5;
     }
 }
