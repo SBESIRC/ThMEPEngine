@@ -45,7 +45,7 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
                     sprayDic.Add(line, resSprays);
                 }
             }
-
+            
             return sprayDic;
         }
 
@@ -98,7 +98,7 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
         public Polyline expandLine(Line line, double distance)
         {
             Vector3d lineDir = line.Delta.GetNormal();
-            Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir).TransformBy(Active.Editor.CurrentUserCoordinateSystem.Inverse());
+            Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir).TransformBy(Active.Editor.CurrentUserCoordinateSystem);
             Point3d p1 = line.StartPoint + moveDir * distance;
             Point3d p2 = line.EndPoint + moveDir * distance;
             Point3d p3 = line.EndPoint - moveDir * distance;
