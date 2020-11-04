@@ -39,9 +39,21 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 var polys = packageManager.DoMainBeamProfiles();
                 DrawUtils.DrawProfile(polys.Polylines2Curves(), "MainBeamProfiles");
+            }
+        }
+
+        private PlaceParameter Parameter
+        {
+            get
+            {
+                if (ThMEPElectricalService.Instance.Parameter == null)
+                {
+                    ThMEPElectricalService.Instance.Parameter = new PlaceParameter();
+                }
+                return ThMEPElectricalService.Instance.Parameter;
             }
         }
 
@@ -186,7 +198,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoMainBeamPlace();
             }
         }
@@ -196,7 +208,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoMultiWallMainBeamPlace();
             }
         }
@@ -206,7 +218,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoMainBeamRect();
             }
         }
@@ -216,7 +228,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoMainBeamABBRect();
             }
         }
@@ -227,7 +239,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoGridTestProfiles();
             }
         }
@@ -238,7 +250,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoGridBeamPlacePointsWithUcs();
             }
         }
@@ -249,7 +261,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoNoBeamPlacePoints();
             }
         }
@@ -259,7 +271,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoMainSecondBeamPlacePoints();
             }
         }
@@ -269,7 +281,7 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var packageManager = new PackageManager(ThMEPElectricalService.Instance.Parameter);
+                var packageManager = new PackageManager(Parameter);
                 packageManager.DoMainSecondBeamPlacePointsWithUcs();
             }
         }

@@ -1,5 +1,6 @@
-﻿using Autodesk.AutoCAD.Runtime;
-using ThMEPElectrical;
+﻿using ThMEPElectrical;
+using ThMEPElectrical.Model;
+using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Electrical.UI
@@ -25,14 +26,44 @@ namespace TianHua.Electrical.UI
             if (SmokeLayoutUI == null)
             {
                 SmokeLayoutUI = new fmSmokeLayout();
-                SmokeLayoutDataModel _SmokeLayoutDataModel = new SmokeLayoutDataModel();
-                if (ThMEPElectricalService.Instance.Parameter == null) { ThMEPElectricalService.Instance.Parameter = new ThMEPElectrical.Model.PlaceParameter(); }
-                _SmokeLayoutDataModel.LayoutType = ThMEPElectricalService.Instance.Parameter.sensorType == ThMEPElectrical.Model.SensorType.SMOKESENSOR ? "烟感" : "温感";
-                _SmokeLayoutDataModel.RoofThickness = ThMEPElectricalService.Instance.Parameter.RoofThickness;
-                _SmokeLayoutDataModel.AreaLayout = "车库、走除道外房间";
+                SmokeLayoutDataModel _SmokeLayoutDataModel = new SmokeLayoutDataModel()
+                {
+                    LayoutType = LayoutType,
+                    AreaLayout = AreaLayout,
+                    RoofThickness = Parameter.RoofThickness,
+                };
                 SmokeLayoutUI.InitForm(_SmokeLayoutDataModel);
             }
             AcadApp.ShowModelessDialog(SmokeLayoutUI);
+        }
+
+        private string LayoutType
+        {
+            get
+            {
+                return Parameter.sensorType == SensorType.SMOKESENSOR ? 
+                    ElectricalUICommon.SMOKE_INDUCTION : ElectricalUICommon.TEMPERATURE_INDUCTION;
+            }
+        }
+
+        private string AreaLayout
+        {
+            get
+            {
+                return ElectricalUICommon.AREA_COMMON;
+            }
+        }
+
+        private PlaceParameter Parameter
+        {
+            get
+            {
+                if (ThMEPElectricalService.Instance.Parameter == null)
+                {
+                    ThMEPElectricalService.Instance.Parameter = new PlaceParameter();
+                }
+                return ThMEPElectricalService.Instance.Parameter;
+            }
         }
     }
 }
