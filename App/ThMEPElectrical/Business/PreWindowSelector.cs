@@ -1,10 +1,9 @@
 ﻿using AcHelper;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
+using ThCADExtension;
 using GeometryExtensions;
 using ThMEPElectrical.Geometry;
 using ThMEPElectrical.Assistant;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPElectrical.Business
 {
@@ -16,27 +15,21 @@ namespace ThMEPElectrical.Business
         /// <returns></returns>
         public static Point3dCollection GetSelectRectPoints()
         {
-            Document doc = Application.DocumentManager.MdiActiveDocument;
-            Editor ed = doc.Editor;
-            PromptPointOptions ppo = new PromptPointOptions("\n请输入结构信息识别范围的第一个角点：");
-            ppo.AllowNone = false;
-            PromptPointResult ppr = ed.GetPoint(ppo);
-            if (ppr.Status != PromptStatus.OK)
-                return null;
+            using (PointCollector pc = new PointCollector(PointCollector.Shape.Window))
+            {
+                try
+                {
+                    pc.Collect();
+                }
+                catch
+                {
+                    return new Point3dCollection();
+                }
 
-            Point3d firstPt = ppr.Value;
-            PromptCornerOptions pco = new PromptCornerOptions("\n请输入结构信息识别范围的第二个角点:", firstPt);
-            ppr = ed.GetCorner(pco);
-            if (ppr.Status != PromptStatus.OK)
-                return null;
-            Point3d secondPt = ppr.Value;
-
-            var ucs2wcs = Active.Editor.UCS2WCS();
-            //框线范围
-            var points = GeomUtils.CalculateRectangleFromPoints(firstPt, secondPt);
-            points = points.PointsTransform(ucs2wcs);
-            //var points = GeomUtils.CalculateRectangleFromPoints(firstPt.TransformBy(ucs2wcs), secondPt.TransformBy(ucs2wcs));
-            return points;
+                Point3dCollection winCorners = pc.CollectedPoints;
+                var points = GeomUtils.CalculateRectangleFromPoints(winCorners[0], winCorners[1]);
+                return points.PointsTransform(Active.Editor.UCS2WCS());
+            }
         }
     }
 }

@@ -74,7 +74,7 @@ namespace ThMEPElectrical.Core
         {
             var inputProfileDatas = new List<PlaceInputProfileData>();
             var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow == null)
+            if (preWindow.Count == 0)
                 return inputProfileDatas;
 
             // 用户选择
@@ -112,7 +112,7 @@ namespace ThMEPElectrical.Core
         {
             var ucsInputProfileDatas = new List<UcsPlaceInputProfileData>();
             var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow == null)
+            if (preWindow.Count == 0)
                 return ucsInputProfileDatas;
 
             // 用户选择Curves
@@ -153,7 +153,7 @@ namespace ThMEPElectrical.Core
         {
             var ucsInputProfileDatas = new List<UcsPlaceInputProfileData>();
             var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow == null)
+            if (preWindow.Count == 0)
                 return ucsInputProfileDatas;
             // 用户选择
             var wallCurves = EntityPicker.MakeUserPickCurves();
@@ -352,7 +352,7 @@ namespace ThMEPElectrical.Core
             var inputProfileDatas = new List<PlaceInputProfileData>();
             // 用户选择
             var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow == null)
+            if (preWindow.Count == 0)
                 return inputProfileDatas;
 
             var wallPolylines = EntityPicker.MakeUserPickPolys();
@@ -395,7 +395,7 @@ namespace ThMEPElectrical.Core
         {
             // 用户选择
             var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow == null)
+            if (preWindow.Count == 0)
                 return;
             var wallPolylines = EntityPicker.MakeUserPickPolys();
             if (wallPolylines.Count == 0)
@@ -477,7 +477,7 @@ namespace ThMEPElectrical.Core
         {
             var inputProfileDatas = new List<PlaceInputProfileData>();
             var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow == null)
+            if (preWindow.Count == 0)
                 return inputProfileDatas;
             // 用户选择
             var wallPolylines = EntityPicker.MakeUserPickPolys();
