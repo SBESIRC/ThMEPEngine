@@ -86,7 +86,6 @@ namespace ThMEPElectrical.Business
                 }
             }
 
-            DrawUtils.DrawProfile(curves, "curves");
             return curves;
         }
     }

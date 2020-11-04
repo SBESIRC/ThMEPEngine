@@ -23,6 +23,7 @@ namespace ThMEPElectrical
         public const string TEMPERATURE_SENSOR_BLOCK_NAME = "E-BFAS120";
         public const string UCS_COMPASS_BLOCK_NAME = "AI-UCS";
         public const string UCS_COMPASS_LAYER_NAME = "AI-UCS";
+        public const string PROTECTAREA_LAYER_NAME = "E-FD-PR";
 
         // 常量
         public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);

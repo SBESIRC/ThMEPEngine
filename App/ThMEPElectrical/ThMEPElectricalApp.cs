@@ -262,7 +262,7 @@ namespace ThMEPElectrical
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var packageManager = new PackageManager(Parameter);
-                packageManager.DoNoBeamPlacePoints();
+                packageManager.DoNoBeamPlacePointsWithUcs();
             }
         }
 

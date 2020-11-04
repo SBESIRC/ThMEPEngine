@@ -6,6 +6,7 @@ using TianHua.Publics.BaseCode;
 using System.Collections.Generic;
 using DevExpress.XtraEditors;
 using System.ComponentModel;
+using AcHelper;
 
 namespace TianHua.Electrical.UI
 {
@@ -247,16 +248,22 @@ namespace TianHua.Electrical.UI
 
             m_SmokeLayout.RoomHeight = FuncStr.NullToStr(ComBoxHeight.Text);
 
-
-
             m_SmokeLayout.SlopeRoof = FuncStr.NullToStr(ComBoxSlope.Text);
-
 
             // 设置参数
             ThMEPElectricalService.Instance.Parameter = new PlaceParameter()
             {
                 RoofThickness = m_SmokeLayout.RoofThickness,
             };
+
+            // set focus to AutoCAD
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
+
             // 发送命令
             switch (m_SmokeLayout.LayoutLogic)
             {
