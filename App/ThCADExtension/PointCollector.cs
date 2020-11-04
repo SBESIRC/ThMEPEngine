@@ -1,6 +1,7 @@
 ﻿using System;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.GraphicsInterface;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -43,9 +44,10 @@ namespace ThCADExtension
         private Point3d m1stPoint;
         private double mDist;
 
+        public List<string> Prompts { get; set; }
         public Point3dCollection CollectedPoints { get; private set; }
 
-        public PointCollector(Shape shape)
+        public PointCollector(Shape shape, List<String> prompts)
         {
             mShape = shape;
             switch (mShape)
@@ -64,6 +66,7 @@ namespace ThCADExtension
                     break;
             }
 
+            Prompts = prompts;
             CollectedPoints = new Point3dCollection();
         }
 
@@ -282,9 +285,11 @@ namespace ThCADExtension
 
         private void CollectWindowPoints()
         {
-            while(true)
+            while (true)
             {
-                PromptPointResult prPntRes1 = AcadApp.DocumentManager.MdiActiveDocument.Editor.GetPoint("\n请输入结构信息识别范围的第一个角点");
+                var prompt1 = (Prompts.Count == 2) ?
+                    string.Format("\n{0}", Prompts[0]) : string.Format("\n{0}", "请指定框选的第一个角点");
+                PromptPointResult prPntRes1 = AcadApp.DocumentManager.MdiActiveDocument.Editor.GetPoint(prompt1);
                 if (prPntRes1.Status != PromptStatus.OK)
                     throw new System.Exception("The 1st corner picking failed!");
                 m1stPoint = prPntRes1.Value;
@@ -293,7 +298,9 @@ namespace ThCADExtension
 
                 using (var ov = new PointMonitorEventHandlerOverride(Editor_PointMonitor))
                 {
-                    PromptPointOptions options = new PromptPointOptions("\n请输入结构信息识别范围的第二个角点")
+                    var prompt2 = (Prompts.Count == 2) ?
+                        string.Format("\n{0}", Prompts[1]) : string.Format("\n{0}", "请指定框选的第二个角点");
+                    PromptPointOptions options = new PromptPointOptions(prompt2)
                     {
                         AllowNone = false,
                     };
