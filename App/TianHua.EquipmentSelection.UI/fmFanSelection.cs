@@ -2448,11 +2448,13 @@ namespace TianHua.FanSelection.UI
         {
             if (message == null || FuncStr.NullToStr(message.Data.Model) == string.Empty) { return; }
 
-            var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(message.Data.Model));
+            m_ListFan.RemoveAll(p => p.ID == FuncStr.NullToStr(message.Data.Model));
 
-            if (_Fan == null) { return; }
+            m_ListFan.RemoveAll(p => p.PID == FuncStr.NullToStr(message.Data.Model));
 
-            _Fan.IsErased = message.Data.Erased;
+            //if (_Fan == null) { return; }
+
+            //_Fan.IsErased = message.Data.Erased;
 
             TreeList.RefreshDataSource();
 
