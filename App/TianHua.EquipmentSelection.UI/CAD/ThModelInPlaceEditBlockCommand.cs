@@ -38,7 +38,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var _FanDataModel = FuncJson.Deserialize<FanDataModel>(result.StringResult);
 
                 // 在位编辑风机
-                ThFanSelectionEngine.ReplaceModelsInplace(_FanDataModel);
+                ThFanSelectionEngine.EditModelsInplace(_FanDataModel);
             }
         }
     }

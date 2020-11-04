@@ -132,6 +132,29 @@ namespace TianHua.FanSelection.UI.CAD
             }
         }
 
+        public static void EditModelsInplace(FanDataModel dataModel)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取原模型对象
+                var models = acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
+                    .ToList();
+
+                // 更新新模型
+                foreach (var model in models)
+                {
+                    // 写入修改后的属性
+                    model.ObjectId.ModifyModelAttributes(dataModel.Attributes());
+                    model.ObjectId.SetModelNumber(dataModel.InstallFloor, model.ObjectId.GetModelNumber());
+
+                    // 更新规格和型号
+                    UpdateModelName(model.ObjectId, dataModel);
+                }
+            }
+        }
+
         public static void RemoveModels(FanDataModel dataModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

@@ -43,6 +43,11 @@ namespace TianHua.FanSelection.UI.CAD
 
         public void DbEvent_ObjectErased_Handler(object sender, ObjectErasedEventArgs e)
         {
+            if (e.DBObject.IsUndoing)
+            {
+                return;
+            }
+
             var model = e.DBObject.GetModelIdentifier();
             if (!string.IsNullOrEmpty(model))
             {
