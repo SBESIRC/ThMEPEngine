@@ -52,8 +52,8 @@ namespace TianHua.FanSelection.UI
             if (!Model.ExhaustModel.IsNull())
             {
                 this.TxtCalcValue.Text = ExhaustModelCalculator.GetTxtCalcValue(Model.ExhaustModel);
-                Model.AirCalcValue = this.TxtCalcValue.Text.NullToInt();
                 Model.ExhaustModel.EstimateAirVolum = TxtEstimatedValue.Text;
+                Model.AirCalcValue = Math.Max(this.TxtCalcValue.Text.NullToInt(), TxtEstimatedValue.Text.NullToInt());
             }
         }
 
@@ -85,6 +85,7 @@ namespace TianHua.FanSelection.UI
             if (Model.ExhaustModel != null)
             {
                 Model.ExhaustModel.EstimateAirVolum = this.TxtEstimatedValue.Text;
+                Model.AirCalcValue = Math.Max(this.TxtCalcValue.Text.NullToInt(), TxtEstimatedValue.Text.NullToInt());
             }
             else
             {
