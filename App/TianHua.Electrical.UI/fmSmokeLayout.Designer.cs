@@ -192,6 +192,7 @@
             this.BtnCancel.StyleController = this.layoutControl1;
             this.BtnCancel.TabIndex = 32;
             this.BtnCancel.Text = "取消";
+            this.BtnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
             // 
             // BtnOK
             // 

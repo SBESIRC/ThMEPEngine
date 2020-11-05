@@ -312,5 +312,10 @@ namespace TianHua.Electrical.UI
             Active.Document.Window.Focus();
 #endif
         }
+
+        private void BtnCancel_Click(object sender, EventArgs e)
+        {
+            Hide();
+        }
     }
 }
