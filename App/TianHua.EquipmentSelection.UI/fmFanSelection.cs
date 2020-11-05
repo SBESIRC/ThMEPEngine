@@ -1813,10 +1813,7 @@ namespace TianHua.FanSelection.UI
                 return;
             }
 
-            string _ImportExcelPath = Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanPara.xlsx");
-
-
-            using (var excelpackage = new ExcelPackage(new FileInfo(_ImportExcelPath)))
+            using (var excelpackage = ThFanSelectionUIUtils.CreateModelExportExcelPackage())
             {
                 var _Sheet = excelpackage.Workbook.Worksheets[0];
 
@@ -2028,9 +2025,9 @@ namespace TianHua.FanSelection.UI
                 return;
             }
 
-            using (var FanVolumeSourcepackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeProofScenario.xlsx"))))
-            using (var ExhaustSourcepackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeDischargeScenario.xlsx"))))
-            using (var Targetpackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanCalc.xlsx"))))
+            using (var Targetpackage = ThFanSelectionUIUtils.CreateModelCalculateExcelPackage())
+            using (var FanVolumeSourcepackage = ThFanSelectionUIUtils.CreateSmokeProofExcelPackage())
+            using (var ExhaustSourcepackage = ThFanSelectionUIUtils.CreateSmokeDischargeExcelPackage())
             {
                 var _Sheet = Targetpackage.Workbook.Worksheets[0];
                 var _List = m_ListFan;

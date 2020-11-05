@@ -366,9 +366,7 @@ namespace TianHua.FanSelection.UI
         private void BarBtnExportFanPara_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             List<string> _ListSceneScreening = GetSceneScreening();
-
-            string _ImportExcelPath = Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanPara.xlsx");
-            using (var excelpackage = new ExcelPackage(new FileInfo(_ImportExcelPath)))
+            using (var excelpackage = ThFanSelectionUIUtils.CreateModelExportExcelPackage())
             {
                 //Microsoft.Office.Interop.Excel.Application _ExclApp = new Microsoft.Office.Interop.Excel.Application();
                 //_ExclApp.DisplayAlerts = false;
@@ -569,9 +567,9 @@ namespace TianHua.FanSelection.UI
         private void BarBtnExportFanCalc_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             List<string> _ListSceneScreening = GetSceneScreening();
-            using (var targetExcelPackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanCalc.xlsx"))))
-            using (var SmokeProofSourcePackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeProofScenario.xlsx"))))
-            using (var ExhaustSourcePackage = new ExcelPackage(new FileInfo(Path.Combine(ThCADCommon.SupportPath(), "DesignData", "SmokeProofScenario.xlsx"))))
+            using (var targetExcelPackage = ThFanSelectionUIUtils.CreateModelCalculateExcelPackage())
+            using (var SmokeProofSourcePackage = ThFanSelectionUIUtils.CreateSmokeProofExcelPackage())
+            using (var ExhaustSourcePackage = ThFanSelectionUIUtils.CreateSmokeDischargeExcelPackage())
             {
                 var _Sheet = targetExcelPackage.Workbook.Worksheets[0];
                 var targetsheet = targetExcelPackage.Workbook.Worksheets["防烟计算"];
