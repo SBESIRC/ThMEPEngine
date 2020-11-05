@@ -73,6 +73,14 @@ namespace TianHua.FanSelection.UI
             }
         }
 
+        public Action<ThModelSaveMessage> OnModelSaveHandler
+        {
+            get
+            {
+                return OnModelSaved;
+            }
+        }
+
         /// <summary>
         /// 风机箱选型
         /// </summary>
@@ -2473,6 +2481,11 @@ namespace TianHua.FanSelection.UI
             TreeList.RefreshDataSource();
 
             this.TreeList.ExpandAll();
+        }
+
+        private void OnModelSaved(ThModelSaveMessage message)
+        {
+            // TODO: 保持图纸同时保持风机模型数据
         }
     }
 }
