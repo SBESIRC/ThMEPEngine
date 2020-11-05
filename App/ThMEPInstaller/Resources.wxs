@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?include Variable.wxi ?>
+  <Fragment>
+    <DirectoryRef Id="DIR_Autoloader_Contents_Resources_2012">
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_2012" Guid="{CD7CBFC1-AFB8-4A30-9205-A91F899FE837}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_2012" Name="ThMEP.dll" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP_light.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Cuix_2012" Guid="{5B98F472-CE36-4D47-B724-56C247CF75CD}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Cuix_2012" Name="ThMEP.cuix" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.cuix" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_Resources_2014">
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_2014" Guid="{51E614EA-8E34-4D8A-83A1-FA1235509B9C}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_2014" Name="ThMEP.dll" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP_light.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Cuix_2014" Guid="{E52C5805-F3A9-4617-9D64-3D3EBC7A681A}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Cuix_2014" Name="ThMEP.cuix" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.cuix" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_Resources_2016">
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_Dark_2016" Guid="{2ABA38E4-57C0-46C9-AC6C-3E207C29935D}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_Dark_2016" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_Light_2016" Guid="{57961A8C-376A-4B66-BFC0-19F6CC42DDB5}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_Light_2016" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP_light.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Cuix_2016" Guid="{507F4238-B954-40E9-8B6A-BB4BBA3306D2}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Cuix_2016" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.cuix" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_Resources_2018">
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_Dark_2018" Guid="{94A428E7-C547-4F41-A0BE-5DEF7A6526FD}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_Dark_2018" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_Light_2018" Guid="{883E1F62-A649-4DB5-B30B-C41E616E49EC}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_Light_2018" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP_light.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Cuix_2018" Guid="{3503777E-BACC-43A8-8EB1-3CCA4908C264}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Cuix_2018" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.cuix" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponentsResources">
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_2012" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_2014" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_Dark_2016" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_Light_2016" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_Dark_2018" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_Light_2018" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Cuix_2012" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Cuix_2014" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Cuix_2016" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Cuix_2018" />
+    </ComponentGroup>
+  </Fragment>
+</Wix>
