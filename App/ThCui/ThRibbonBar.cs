@@ -34,17 +34,13 @@ namespace TianHua.AutoCAD.ThCui
             var row = panel.AddNewRibbonRow();
 
             // 风机选型
-            {
-                var subPanel = row.AddNewPanel();
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("风机选型",
-                    "天华风机选型",
-                    "THFJ",
-                    "",
-                    "IDI_THCAD_THFJ_SMALL",
-                    "IDI_THCAD_THFJ_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            row.AddNewButton("风机选型",
+                "天华风机选型",
+                "THFJ",
+                "",
+                "IDI_THCAD_THFJ_SMALL",
+                "IDI_THCAD_THFJ_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
         private static void CreateElectricPanel(RibbonTabSource tab)
         {
@@ -52,51 +48,42 @@ namespace TianHua.AutoCAD.ThCui
             var row = panel.AddNewRibbonRow();
 
             // 烟感温感布置
-            {
-                var subPanel = row.AddNewPanel();
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("烟感温感布置",
-                    "天华烟感温感布置",
-                    "THYWG",
-                    "",
-                    "IDI_THCAD_THYWG_SMALL",
-                    "IDI_THCAD_THYWG_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            row.AddNewButton("烟感温感布置",
+                "天华烟感温感布置",
+                "THYWG",
+                "",
+                "IDI_THCAD_THYWG_SMALL",
+                "IDI_THCAD_THYWG_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
         {
             var panel = tab.AddNewPanel("Water", "给排水");
             var row = panel.AddNewRibbonRow();
 
-            // 给排水
-            {
-                var subPanel = row.AddNewPanel();
-                var subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("喷头布置",
-                    "天华喷头布置",
-                    "THPLPT",
-                    "",
-                    "IDI_THCAD_THPLPT_SMALL",
-                    "IDI_THCAD_THPLPT_LARGE",
-                    RibbonButtonStyle.LargeWithText);
+            row.AddNewButton("喷头布置",
+                "天华喷头布置",
+                "THPLPT",
+                "",
+                "IDI_THCAD_THPLPT_SMALL",
+                "IDI_THCAD_THPLPT_LARGE",
+                RibbonButtonStyle.LargeWithText);
 
-                subRow.AddNewButton("盲区检测",
-                    "天华盲区检测",
-                    "THPLMQ",
-                    "",
-                    "IDI_THCAD_THPLMQ_SMALL",
-                    "IDI_THCAD_THPLMQ_LARGE",
-                    RibbonButtonStyle.LargeWithText);
+            row.AddNewButton("盲区检测",
+                "天华盲区检测",
+                "THPLMQ",
+                "",
+                "IDI_THCAD_THPLMQ_SMALL",
+                "IDI_THCAD_THPLMQ_LARGE",
+                RibbonButtonStyle.LargeWithText);
 
-                subRow.AddNewButton("可布置区域",
-                    "天华可布置区域",
-                    "THPLKQ",
-                    "",
-                    "IDI_THCAD_THPLKQ_SMALL",
-                    "IDI_THCAD_THPLKQ_LARGE",
-                    RibbonButtonStyle.LargeWithText);
-            }
+            row.AddNewButton("可布置区域",
+                "天华可布置区域",
+                "THPLKQ",
+                "",
+                "IDI_THCAD_THPLKQ_SMALL",
+                "IDI_THCAD_THPLKQ_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
         private static void CreateHelpPanel(RibbonTabSource tab)
         {

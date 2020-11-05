@@ -11,17 +11,17 @@ namespace ThCADExtension
         public static Tolerance Global_Tolerance = new Tolerance(1e-4, 1e-4);
 
         // CUIX 
-        public static readonly string CuixFile = "ThCAD.cuix";
-        public static readonly string CuixResDll = "ThCAD.dll";
-        public static readonly string CuixMenuGroup = "ThCAD";
+        public static readonly string CuixFile = "ThMEP.cuix";
+        public static readonly string CuixResDll = "ThMEP.dll";
+        public static readonly string CuixMenuGroup = "ThMEP";
 
         // Ribbon
-        public static readonly string RibbonTabName = "ThRibbonBar";
-        public static readonly string RibbonTabTitle = "天华效率工具";
+        public static readonly string RibbonTabName = "ThMEPRibbonBar";
+        public static readonly string RibbonTabTitle = "天华机电工具集";
         public static readonly string OnlineHelpUrl = @"http://info.thape.com.cn/AI/thcad/help.html";
 
         // RegAppName
-        public static readonly string RegAppName = "THCAD";
+        public static readonly string RegAppName = "THMEP";
 
         // DxfName
         public static readonly string DxfName_Text      = "TEXT";
