@@ -10,8 +10,8 @@ Task Debug.Build {
 }
 
 Task Requires.MSBuild {
-    # Visual Studio 2017 Community
-    $script:msbuildExe = resolve-path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
+    # Visual Studio 2019 Enterprise
+    $script:msbuildExe = resolve-path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\Current\Bin\MSBuild.exe"
 
     if ($msbuildExe -eq $null)
     {
@@ -36,6 +36,12 @@ Task Compile.Assembly.R18.FanSelection -Depends Requires.MSBuild {
     }
 }
 
+Task Compile.Resource.R18 -Depends Requires.MSBuild {
+    exec {
+            & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\$buildType\Dark\",IntermediateOutputPath="..\build\obj\$buildType\Dark\" ".\ThCuiRes\ThCuiRes.vcxproj" /t:rebuild
+            & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\$buildType\Light\",IntermediateOutputPath="..\build\obj\$buildType\Light\" ".\ThCuiRes\ThCuiRes_light.vcxproj" /t:rebuild
+    }
+}
 
 # $buildType build for AutoCAD R19
 Task Compile.Assembly.R19.Common -Depends Requires.MSBuild {
@@ -49,6 +55,13 @@ Task Compile.Assembly.R19.FanSelection -Depends Requires.MSBuild {
     exec {
         & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\" ".\ThMEPEquipmentSelection.sln" /p:Configuration="${buildType}-NET40" /t:restore
         & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\" ".\ThMEPEquipmentSelection.sln" /p:Configuration="${buildType}-NET40" /t:rebuild
+    }
+}
+
+Task Compile.Resource.R19 -Depends Requires.MSBuild {
+    exec {
+        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\Dark\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\Dark\" ".\ThCuiRes\ThCuiRes.vcxproj" /t:rebuild
+        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET40\Light\",IntermediateOutputPath="..\build\obj\${buildType}-NET40\Light\" ".\ThCuiRes\ThCuiRes_light.vcxproj" /t:rebuild
     }
 }
 
@@ -67,6 +80,13 @@ Task Compile.Assembly.R20.FanSelection -Depends Requires.MSBuild {
     }
 }
 
+Task Compile.Resource.R20 -Depends Requires.MSBuild {
+    exec {
+        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET45\Dark\",IntermediateOutputPath="..\build\obj\${buildType}-NET45\Dark\" ".\ThCuiRes\ThCuiRes.vcxproj" /t:rebuild
+        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET45\Light\",IntermediateOutputPath="..\build\obj\${buildType}-NET45\Light\" ".\ThCuiRes\ThCuiRes_light.vcxproj" /t:rebuild
+    }
+}
+
 # $buildType build for AutoCAD R22
 Task Compile.Assembly.R22.Common -Depends Requires.MSBuild {
     exec {
@@ -79,6 +99,13 @@ Task Compile.Assembly.R22.FanSelection -Depends Requires.MSBuild {
     exec {
         & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET46\",IntermediateOutputPath="..\build\obj\${buildType}-NET46\" ".\ThMEPEquipmentSelection.sln" /p:Configuration="${buildType}-NET46" /t:restore
         & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET46\",IntermediateOutputPath="..\build\obj\${buildType}-NET46\" ".\ThMEPEquipmentSelection.sln" /p:Configuration="${buildType}-NET46" /t:rebuild
+    }
+}
+
+Task Compile.Resource.R22 -Depends Requires.MSBuild {
+    exec {
+        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET46\Dark\",IntermediateOutputPath="..\build\obj\${buildType}-NET46\Dark\" ".\ThCuiRes\ThCuiRes.vcxproj" /t:rebuild
+        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\${buildType}-NET46\Light\",IntermediateOutputPath="..\build\obj\${buildType}-NET46\Light\" ".\ThCuiRes\ThCuiRes_light.vcxproj" /t:rebuild
     }
 }
 
@@ -95,6 +122,11 @@ Task Compile.Engine -Depends Requires.BuildType, Compile.Assembly.R18.Common, Co
 
 }
 
+Task Compile.Resource -Depends Compile.Resource.R18, Compile.Resource.R19, Compile.Resource.R20, Compile.Resource.R22
+{
+
+}
+
 Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R18.FanSelection, Compile.Assembly.R19.FanSelection, Compile.Assembly.R20.FanSelection, Compile.Assembly.R22.FanSelection
 {
     
@@ -102,7 +134,7 @@ Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R18.FanS
 
 # temporarily disable code sign
 # $buildType build for ThCADPluginInstaller
-Task Compile.Installer -Depends Compile.Engine, Compile.FanSelection {
+Task Compile.Installer -Depends Compile.Engine, Compile.Resource, Compile.FanSelection {
     if ($buildType -eq $null) {
         throw "No build type specified"
     }
