@@ -201,7 +201,7 @@
             this.BtnOK.Size = new System.Drawing.Size(63, 22);
             this.BtnOK.StyleController = this.layoutControl1;
             this.BtnOK.TabIndex = 31;
-            this.BtnOK.Text = "确定";
+            this.BtnOK.Text = "布置";
             this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
             // 
             // sidePanel3
@@ -545,6 +545,7 @@
             // 
             // CheckProtect
             // 
+            this.CheckProtect.EditValue = true;
             this.CheckProtect.Location = new System.Drawing.Point(10, 460);
             this.CheckProtect.Name = "CheckProtect";
             this.CheckProtect.Properties.AllowFocused = false;
@@ -910,8 +911,10 @@
             // 
             // fmSmokeLayout
             // 
+            this.AcceptButton = this.BtnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.BtnCancel;
             this.ClientSize = new System.Drawing.Size(216, 515);
             this.Controls.Add(this.layoutControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;

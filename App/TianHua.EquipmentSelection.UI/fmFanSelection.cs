@@ -825,7 +825,9 @@ namespace TianHua.FanSelection.UI
                             {
                                 _Fan.FanSelectionStateInfo.fanSelectionState = FanSelectionState.HighUnsafe;
                             }
+            
                         }
+                        m_fmFanModel.InitForm(_Fan, m_ListFan);
                     }
                     else
                     {
@@ -946,6 +948,7 @@ namespace TianHua.FanSelection.UI
                             }
 
                         }
+                        m_fmFanModel.InitForm(_Fan, m_ListFan);
                     }
 
                     var parentpick = new ThFanSelectionModelPicker(m_ListFanParametersDouble, parent, new List<double>() { parent.GetAirVolume(), parent.WindResis, 0 });
@@ -983,6 +986,7 @@ namespace TianHua.FanSelection.UI
                                 }
 
                             }
+                            m_fmFanModel.InitForm(_Fan, m_ListFan);
                         }
 
                         var parentpick = new ThFanSelectionModelPicker(m_ListFanParametersDouble, parent, new List<double>() { parent.GetAirVolume(), parent.WindResis, 0 });
@@ -1016,6 +1020,7 @@ namespace TianHua.FanSelection.UI
                                 SetAxialFanDataModel(_Fan, _FanParameters, picker);
                             }
                         }
+                        m_fmFanModel.InitForm(_Fan, m_ListFan);
                     }
 
                     var parentpick = PickThFanSelectionAxialModel(parent);
@@ -1193,7 +1198,18 @@ namespace TianHua.FanSelection.UI
 
             _FilterString += @" AND IsErased = false ";
 
-            TreeList.ActiveFilterString = _FilterString;
+            try
+            {
+                TreeList.ActiveFilterString = _FilterString;
+            }
+            catch  
+            {
+
+       
+            }
+
+
+       
 
             if (m_ListFan == null) { m_ListFan = new List<FanDataModel>(); }
 
@@ -1798,6 +1814,7 @@ namespace TianHua.FanSelection.UI
             }
 
             string _ImportExcelPath = Path.Combine(ThCADCommon.SupportPath(), "DesignData", "FanPara.xlsx");
+
 
             using (var excelpackage = new ExcelPackage(new FileInfo(_ImportExcelPath)))
             {
