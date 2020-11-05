@@ -74,7 +74,6 @@
     <Compile Include="Messaging\ThModelCopyMessage.cs" />
     <Compile Include="Messaging\ThModelDeleteMessage.cs" />
     <Compile Include="Messaging\ThModelMessageArgs.cs" />
-    <Compile Include="Messaging\ThModelSyncMessage.cs" />
     <Compile Include="ThFanSelectionCommon.cs" />
     <Compile Include="Function\ThFanSelectionModelPick.cs" />
     <Compile Include="Function\ThFanSelectionModelPicker.cs" />
