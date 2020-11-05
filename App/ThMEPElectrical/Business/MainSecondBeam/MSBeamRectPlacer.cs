@@ -55,7 +55,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
             {
                 m_singlePlacePts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.MEDIUMPLACE);
             }
-            else if (m_singlePlacePts.Count == 4)
+            else if (m_singlePlacePts.Count == 4 && rowCount == ROWCOUNT.MULTILINE)
             {
                 m_singlePlacePts = MainSecondBeamPointAdjustor.MakeMainBeamPointAdjustor(mainBeamSpanRegion, MSPlaceAdjustorType.LARGEPLACE);
             }

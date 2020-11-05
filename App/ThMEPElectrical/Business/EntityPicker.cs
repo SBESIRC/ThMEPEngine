@@ -47,11 +47,18 @@ namespace ThMEPElectrical.Business
             {
                 foreach (ObjectId polyId in result.Value.GetObjectIds())
                 {
-                    var curPoly = db.CurrentSpace.Element(polyId).Clone() as Polyline;
-                    curPoly.Closed = true;
-                    var bufferPoly = GeomUtils.BufferPoly(curPoly);
-                    if (bufferPoly != null)
-                        polylines.Add(bufferPoly);
+                    var curPoly = db.CurrentSpace.Element(polyId) as Polyline;
+                    var ptS = curPoly.StartPoint;
+                    var ptE = curPoly.EndPoint;
+
+                    if (ptS.DistanceTo(ptE) < ThMEPCommon.PolyClosedDistance)
+                    {
+                        var clonePoly = curPoly.Clone() as Polyline;
+                        clonePoly.Closed = true;
+                        var bufferPoly = GeomUtils.BufferPoly(clonePoly);
+                        if (bufferPoly != null && bufferPoly.Area > 1000)
+                            polylines.Add(bufferPoly);
+                    }
                 }
             }
 

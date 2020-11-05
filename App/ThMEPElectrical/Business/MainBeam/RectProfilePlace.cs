@@ -13,6 +13,13 @@ using ThCADCore.NTS;
 
 namespace ThMEPElectrical.Business.MainBeam
 {
+    public enum ROWCOUNT
+    {
+        MULTILINE = 0,
+        ONELINE = 1,
+        ONECOL = ONELINE
+    }
+
     /// <summary>
     /// 单个布置 矩形
     /// </summary>
@@ -20,6 +27,8 @@ namespace ThMEPElectrical.Business.MainBeam
     {
         protected LayoutProfileData m_layoutProfile = null; // 轮廓
         protected PlaceParameter m_parameter = null; // 界面用户输入参数
+
+        protected ROWCOUNT rowCount = ROWCOUNT.ONELINE;
 
         protected List<Point3d> m_singlePlacePts = new List<Point3d>(); // 插入点
 
@@ -142,6 +151,7 @@ namespace ThMEPElectrical.Business.MainBeam
             else
             {
                 MultiRowPlace(placeRectInfo, verticalCount, verticalGap);
+                rowCount = ROWCOUNT.MULTILINE;
             }
 
             m_singlePlacePts = CalculateRegionPoints(placeRectInfo.srcPolyline, m_singlePlacePts);

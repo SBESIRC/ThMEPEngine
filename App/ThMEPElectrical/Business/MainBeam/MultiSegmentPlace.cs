@@ -147,21 +147,26 @@ namespace ThMEPElectrical.Business.MainBeam
             var leftBottomPtCircle = new Circle(leftBottomPt, Vector3d.ZAxis, vertexProtectRadius);
             var tempLeftFirstPt = LeftEdgeIntersectHorizontal(leftBottomPtCircle, midLine);
 
+            var tempLst = new List<Point3d>();
             if (!tempLeftFirstPt.HasValue)
-                return null;
+                return tempLst;
 
             var leftFirstPt = tempLeftFirstPt.Value;
             var leftFirstPtNode = CalculateValidPoint(leftFirstPt, placeRectInfo);
+            if (leftFirstPtNode == null)
+                return tempLst;
 
             // 右下顶点
             var rightBottomCircle = new Circle(rightBottomPt, Vector3d.ZAxis, vertexProtectRadius);
             var tempRightLastPt = RightEdgeIntersectHorizontal(rightBottomCircle, midLine);
 
             if (!tempRightLastPt.HasValue)
-                return null;
+                return tempLst;
 
             var rightLastPt = tempRightLastPt.Value;
             var rightLastPtNode = CalculateValidPoint(rightLastPt, placeRectInfo);
+            if (rightLastPtNode == null)
+                return tempLst;
 
             // 计算水平间隔长度
             var horizontalLength = (leftFirstPtNode.InsertPt - rightLastPtNode.InsertPt).Length;
@@ -269,7 +274,9 @@ namespace ThMEPElectrical.Business.MainBeam
                 var midPt = IntersectMidPtVertical(srcPoly, line);
 
                 if (!midPt.HasValue)
-                    return null;
+                {
+                    return new PlacePoint(pt, false);
+                }
 
                 return new PlacePoint(midPt.Value, true);
             }

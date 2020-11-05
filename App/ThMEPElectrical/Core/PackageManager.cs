@@ -116,11 +116,11 @@ namespace ThMEPElectrical.Core
                 return ucsInputProfileDatas;
 
             // 用户选择Curves
-            var wallCurves = EntityPicker.MakeUserPickCurves();
+            var wallCurves = EntityPicker.MakeUserPickPolys();
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
@@ -156,11 +156,11 @@ namespace ThMEPElectrical.Core
             if (preWindow.Count == 0)
                 return ucsInputProfileDatas;
             // 用户选择
-            var wallCurves = EntityPicker.MakeUserPickCurves();
+            var wallCurves = EntityPicker.MakeUserPickPolys();
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.Do();
@@ -213,11 +213,11 @@ namespace ThMEPElectrical.Core
             if (preWindow.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallCurves = EntityPicker.MakeUserPickCurves();
+            var wallCurves = EntityPicker.MakeUserPickPolys();
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.PickColumns(); // 提取柱子

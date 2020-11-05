@@ -18,6 +18,8 @@ namespace ThMEPElectrical.Business.Procedure
         private string m_ucsLayerName;
         private List<Curve> m_srcWallCurves;
 
+        private List<Polyline> m_srcWallPolys; // poly 墙线
+
 
         public static List<PolygonInfo> MakeUserCoordinateWorker(List<Curve> srcWallCurves, string ucsLayerName)
         {
@@ -26,10 +28,29 @@ namespace ThMEPElectrical.Business.Procedure
             return ucsCoorWorker.WallProfileInfos;
         }
 
+        public static List<PolygonInfo> MakeUserCoordinateWorkerFromSelectPolys(List<Polyline> wallPolys, string ucsLayerName)
+        {
+            var ucsCoorWorker = new UserCoordinateWorker(wallPolys, ucsLayerName);
+            ucsCoorWorker.DoWallPolys();
+            return ucsCoorWorker.WallProfileInfos;
+        }
+
+        public UserCoordinateWorker(List<Polyline> srcWallPolys, string ucsLayerName)
+        {
+            m_srcWallPolys = srcWallPolys;
+            m_ucsLayerName = ucsLayerName;
+        }
+
         public UserCoordinateWorker(List<Curve> srcWallCurves, string ucsLayerName)
         {
             m_srcWallCurves = srcWallCurves;
             m_ucsLayerName = ucsLayerName;
+        }
+
+        public void DoWallPolys()
+        {
+            var ucsInfos = UcsInfoCalculator.MakeUcsInfos(m_ucsLayerName);
+            CalculatePolygonInfo(ucsInfos, m_srcWallPolys);
         }
 
         public void Do()
