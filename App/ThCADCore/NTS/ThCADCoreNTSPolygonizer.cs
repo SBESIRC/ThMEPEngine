@@ -41,7 +41,7 @@ namespace ThCADCore.NTS
             return objs.ToCollection();
         }
 
-        public static DBObjectCollection Boundaries(this DBObjectCollection lines)
+        public static DBObjectCollection Outline(this DBObjectCollection lines)
         {
             var polygons = new List<Polygon>();
             var boundaries = new DBObjectCollection();
@@ -74,87 +74,10 @@ namespace ThCADCore.NTS
             }
             foreach (var item in polygons)
             {
+                // 暂时不考虑有“洞”的情况
                 boundaries.Add(item.Shell.ToDbPolyline());
             }
             return boundaries;
-        }
-
-        public static List<Polygon> OutlineGeometries(this DBObjectCollection lines)
-        {
-            var geometries = new List<Polygon>();
-            var geometry = CascadedPolygonUnion.Union(lines.Polygonize());
-            if (geometry == null)
-            {
-                return geometries;
-            }
-            if (geometry is Polygon polygon)
-            {
-                geometries.Add(polygon);
-            }
-            else if (geometry is MultiPolygon mPolygon)
-            {
-                foreach (Polygon subPolygon in mPolygon.Geometries)
-                {
-                    geometries.Add(subPolygon);
-                }
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return geometries;
-        }
-
-        public static DBObjectCollection Outline(this DBObjectCollection lines)
-        {
-            var objs = new DBObjectCollection();
-            if (lines.Count > 0)
-            {
-                foreach (var geometry in lines.OutlineGeometries())
-                {
-                    objs.Add(geometry.Shell.ToDbPolyline());
-                }
-            }
-            return objs;
-        }
-
-        public static DBObjectCollection FindLoops(this DBObjectCollection lines)
-        {
-            var polygons = new List<Polygon>();
-            var polygonizer = new Polygonizer();
-            var loops = new DBObjectCollection();
-            polygonizer.Add(lines.ToNTSNodedLineStrings());
-            var geometries = polygonizer.GetPolygons().ToList();
-            foreach (var geometry in geometries)
-            {
-                if (geometry is MultiPolygon mPolygon)
-                {
-                    foreach (var item in mPolygon.Geometries)
-                    {
-                        if (item is Polygon polygon)
-                        {
-                            polygons.Add(polygon);
-                        }
-                        else
-                        {
-                            throw new NotSupportedException();
-                        }
-                    }
-                }
-                else if (geometry is Polygon polygon)
-                {
-                    polygons.Add(polygon);
-                }
-                else
-                {
-                    continue;
-                }
-            }
-            foreach (var item in polygons)
-            {
-                loops.Add(item.Shell.ToDbPolyline());
-            }
-            return loops;
         }
     }
 }

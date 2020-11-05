@@ -112,30 +112,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThCBoundary", CommandFlags.Modal)]
-        public void ThCompositeBoundary()
-        {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-                foreach (var obj in objs.Boundaries())
-                {
-                    acadDatabase.ModelSpace.Add(obj as Entity);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThOutline", CommandFlags.Modal)]
         public void ThOutline()
         {
