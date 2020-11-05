@@ -2255,6 +2255,7 @@ namespace TianHua.FanSelection.UI
                 return;
             }
 
+            m_fmFanModel.InitForm(_FanDataModel, m_ListFan);
 
             // 发送CAD命令
             ThFanSelectionService.Instance.Model = _FanDataModel;
