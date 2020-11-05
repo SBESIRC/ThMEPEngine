@@ -78,8 +78,9 @@ namespace ThMEPWSS
                     plFrame.ClearLayouArea();
 
                     //获取构建信息
-                    GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
-
+                    var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
+                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
+                    
                     //转换usc
                     plFrame.TransformBy(matrix.Inverse());
                     columns.ForEach(x => x.TransformBy(matrix.Inverse()));
@@ -100,8 +101,6 @@ namespace ThMEPWSS
                     //打印喷淋点盲区
                     CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
                     calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, new List<Polyline>());
-
-                    
                 }
             }
         }
@@ -147,7 +146,8 @@ namespace ThMEPWSS
                     plFrame.ClearLayouArea();
 
                     //获取构建信息
-                    GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
+                    var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
+                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
 
                     //转换usc
                     plFrame.TransformBy(matrix.Inverse());
@@ -304,7 +304,8 @@ namespace ThMEPWSS
                     plFrame.ClearLayouArea();
 
                     //获取构建信息
-                    GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
+                    var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
+                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
 
                     //转换usc
                     plFrame.TransformBy(matrix.Inverse());
@@ -435,20 +436,34 @@ namespace ThMEPWSS
         /// <param name="columns"></param>
         /// <param name="beams"></param>
         /// <param name="walls"></param>
-        private void GetStructureInfo(AcadDatabase acdb, Polyline polyline, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls)
+        private void GetStructureInfo(AcadDatabase acdb, Polyline polyline, Polyline pFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls)
         {
             var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
             
             //获取柱
             columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            var objs = new DBObjectCollection();
+            columns.ForEach(x => objs.Add(x));
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
+            objs.Clear();
 
             //获取梁
             var thBeams = allStructure.BeamEngine.Elements.Cast<ThIfcLineBeam>().ToList();
             thBeams.ForEach(x => x.ExtendBoth(20, 20));
             beams = thBeams.Select(o => o.Outline).Cast<Polyline>().ToList();
-            
+            objs = new DBObjectCollection();
+            beams.ForEach(x => objs.Add(x));
+            thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            beams = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
+            objs.Clear();
+
             //获取剪力墙
             walls = allStructure.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            objs = new DBObjectCollection();
+            walls.ForEach(x => objs.Add(x));
+            thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
         }
         #endregion
 
