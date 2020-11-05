@@ -18,12 +18,14 @@ namespace TianHua.FanSelection.UI
         private static bool _runCustomCommand = false;
         private static ObjectId _selectedEntId = ObjectId.Null;
         private static CustomCommandMappers _customCommands = null;
+        private static ThFanSelectionDbSyncEngine dbSyncEngine = null;
         private static ThFanSelectionDbEventHandler dbEventHandler = null;
 
         public void Initialize()
         {
             CreateDbEventHandler();
             SubscribeToOverrules();
+            AddOnIdleEventHandler();
             AddDoubleClickHandler();
             SubscribeToDocumentEvents();
         }
@@ -32,6 +34,7 @@ namespace TianHua.FanSelection.UI
         {
             DeleteDbEventHandler();
             UnsubscribeToOverrules();
+            RemoveOnIdleEventHandler();
             RemoveDoubleClickHandler();
             UnSubscribeToDocumentEvents();
         }
@@ -145,6 +148,16 @@ namespace TianHua.FanSelection.UI
             AcadApp.BeginDoubleClick -= Application_BeginDoubleClick;
         }
 
+        private static void AddOnIdleEventHandler()
+        {
+            AcadApp.Idle += Application_OnIdle;
+        }
+
+        private static void RemoveOnIdleEventHandler()
+        {
+            AcadApp.Idle -= Application_OnIdle;
+        }
+
         private static void CreateDbEventHandler()
         {
             dbEventHandler = new ThFanSelectionDbEventHandler();
@@ -246,6 +259,15 @@ namespace TianHua.FanSelection.UI
                 // 取消订阅DB事件
                 UnSubscribeToDbEvents(e.Document.Database);
             }
+        }
+
+        private static void Application_OnIdle(object sender, EventArgs e)
+        {
+            if (dbSyncEngine == null)
+            {
+                dbSyncEngine = new ThFanSelectionDbSyncEngine();
+            }
+            dbSyncEngine.Sync();
         }
 
         private static void Application_BeginDoubleClick(object sender, BeginDoubleClickEventArgs e)
