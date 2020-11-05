@@ -182,6 +182,7 @@ namespace TianHua.FanSelection.UI
 
         private static void SubscribeToDbEvents(Database db)
         {
+            db.SaveComplete += dbEventHandler.DbEvent_SaveComplete_handler;
             db.ObjectErased += dbEventHandler.DbEvent_ObjectErased_Handler;
             db.DeepCloneEnded += dbEventHandler.DbEvent_DeepCloneEnded_Handler;
             db.BeginDeepCloneTranslation += dbEventHandler.DbEvent_BeginDeepCloneTranslation_Handler;
@@ -189,6 +190,7 @@ namespace TianHua.FanSelection.UI
 
         private static void UnSubscribeToDbEvents(Database db)
         {
+            db.SaveComplete += dbEventHandler.DbEvent_SaveComplete_handler;
             db.ObjectErased -= dbEventHandler.DbEvent_ObjectErased_Handler;
             db.DeepCloneEnded -= dbEventHandler.DbEvent_DeepCloneEnded_Handler;
             db.BeginDeepCloneTranslation -= dbEventHandler.DbEvent_BeginDeepCloneTranslation_Handler;

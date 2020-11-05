@@ -1,4 +1,5 @@
 ﻿using System;
+using AcHelper;
 using Linq2Acad;
 using System.Collections.Generic;
 using TianHua.FanSelection.Messaging;
@@ -57,6 +58,20 @@ namespace TianHua.FanSelection.UI.CAD
                     Erased = e.Erased,
                 });
             }
+        }
+
+        public void DbEvent_SaveComplete_handler(object sender, DatabaseIOEventArgs e)
+        {
+            // 只考虑本图纸保存的情况
+            if (Active.DocumentFullPath != e.FileName)
+            {
+                return;
+            }
+
+            ThModelSaveMessage.SendWith(new ThModelSaveMessageArgs()
+            {
+                FileName = e.FileName,
+            });
         }
     }
 }
