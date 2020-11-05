@@ -81,7 +81,6 @@ namespace TianHua.FanSelection.UI.CAD
                     }
 
                     // 参数变化
-                    // 暂时没有处理的一个场景：编号变化
                     var blockReference = new ThFSBlockReference(model);
                     var attributes = new Dictionary<string, string>(blockReference.Attributes);
                     if (_FanDataModel.IsAttributeModified(attributes))

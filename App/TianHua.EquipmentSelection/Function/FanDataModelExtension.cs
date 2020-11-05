@@ -105,10 +105,10 @@ namespace TianHua.FanSelection.Function
             }
 
             // 设备编号（“楼层-编号”）
-            // 暂时只比较楼层是否变化
             if (attributes.ContainsKey(ThFanSelectionCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER))
             {
-                if (!attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER].StartsWith(model.InstallFloor))
+                if (attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER]
+                    != ThFanSelectionUtils.StoreyNumber(model.InstallFloor, model.VentNum))
                 {
                     return true;
                 }
@@ -199,13 +199,14 @@ namespace TianHua.FanSelection.Function
             }
 
             // 备注
-            if (attributes.ContainsKey(ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_REMARK))
-            {
-                if (attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_REMARK] != model.Remark)
-                {
-                    return true;
-                }
-            }
+            // 业务需求，暂时忽略备注
+            //if (attributes.ContainsKey(ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_REMARK))
+            //{
+            //    if (attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_REMARK] != model.Remark)
+            //    {
+            //        return true;
+            //    }
+            //}
 
             // 安装方式
             if (attributes.ContainsKey(ThFanSelectionCommon.BLOCK_ATTRIBUTE_MOUNT_TYPE))

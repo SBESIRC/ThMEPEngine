@@ -75,17 +75,17 @@ namespace TianHua.FanSelection
                 else
                     _FanNum += "- ";
 
-                if (ListVentQuan != null && ListVentQuan.Count > 0)
-                {
-                    _FanNum += "-";
-                    ListVentQuan.ForEach(p =>
-                    {
-                        _FanNum += p + ",";
-                    });
-                    _FanNum = _FanNum.TrimEnd(',');
-                }
-                else
-                    _FanNum += "- ";
+                //if (ListVentQuan != null && ListVentQuan.Count > 0)
+                //{
+                //    _FanNum += "-";
+                //    ListVentQuan.ForEach(p =>
+                //    {
+                //        _FanNum += p + ",";
+                //    });
+                //    _FanNum = _FanNum.TrimEnd(',');
+                //}
+                //else
+                //    _FanNum += "- ";
 
                 return _FanNum;
             }

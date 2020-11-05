@@ -2,11 +2,14 @@
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
+using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.FanSelection.Function;
+using Autodesk.AutoCAD.DatabaseServices;
+using System;
+using TianHua.Publics.BaseCode;
 
 namespace TianHua.FanSelection.UI.CAD
 {
@@ -30,18 +33,13 @@ namespace TianHua.FanSelection.UI.CAD
                 Active.Database.ImportModel(blockName, layerName);
                 var objId = Active.Database.InsertModel(blockName, layerName, dataModel.Attributes());
                 var blockRef = acadDatabase.Element<BlockReference>(objId);
-                var position = pr.Value - objId.GetModelBasePoint();
-                for (int i = 0; i < dataModel.VentQuan; i++)
-                {
-                    double deltaX = blockRef.GeometricExtents.Width() * 2 * i;
-                    Vector3d delta = new Vector3d(deltaX, 0.0, 0.0);
-                    Matrix3d displacement = Matrix3d.Displacement(position + delta);
-                    var model = acadDatabase.ModelSpace.Add(blockRef.GetTransformedCopy(displacement));
-                    model.SetModelIdentifier(dataModel.ID, dataModel.ListVentQuan[i], dataModel.VentStyle);
-                    model.SetModelNumber(dataModel.InstallFloor, dataModel.ListVentQuan[i]);
-                    model.SetModelTextHeight();
-                    UpdateModelName(model, dataModel);
-                }
+                var position = pr.Value.TransformBy(Active.Editor.UCS2WCS()) - objId.GetModelBasePoint();
+                Matrix3d displacement = Matrix3d.Displacement(position);
+                var model = acadDatabase.ModelSpace.Add(blockRef.GetTransformedCopy(displacement));
+                model.SetModelIdentifier(dataModel.ID, FuncStr.NullToInt(dataModel.VentNum), dataModel.VentStyle);
+                model.SetModelNumber(dataModel.InstallFloor, FuncStr.NullToInt(dataModel.VentNum));
+                model.SetModelTextHeight();
+                UpdateModelName(model, dataModel);
 
                 // 删除初始图块
                 blockRef.UpgradeOpen();
@@ -177,15 +175,15 @@ namespace TianHua.FanSelection.UI.CAD
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => o.ObjectId.IsModel(dataModel.ID));
-                foreach (var model in models.Select((value, i) => new { i, value }))
+                foreach(var model in models)
                 {
                     // 更新编号
-                    int number = dataModel.ListVentQuan[model.i];
-                    model.value.ObjectId.UpdateModelNumber(number);
+                    int number = FuncStr.NullToInt(dataModel.VentNum);
+                    model.ObjectId.UpdateModelNumber(number);
 
                     // 更新属性值
-                    model.value.ObjectId.ModifyModelAttributes(dataModel.Attributes());
-                    model.value.ObjectId.SetModelNumber(dataModel.InstallFloor, number);
+                    model.ObjectId.ModifyModelAttributes(dataModel.Attributes());
+                    model.ObjectId.SetModelNumber(dataModel.InstallFloor, number);
                 }
             }
         }
