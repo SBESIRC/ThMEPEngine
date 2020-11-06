@@ -1823,6 +1823,8 @@ namespace TianHua.FanSelection.UI
 
         private void BarBtnExportFanPara_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+
+
             fmSceneScreening _fmSceneScreening = new fmSceneScreening();
 
             _fmSceneScreening.Init(m_ListSceneScreening);
@@ -2503,7 +2505,7 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelSaved(ThModelSaveMessage message)
         {
-            // TODO: 保持图纸同时保持风机模型数据
+ 
             if (m_ListFan == null || m_ListFan.Count == 0 || FuncStr.NullToStr(message.Data.FileName) == string.Empty) { return; }
             TreeList.PostEditor();
 
@@ -2519,7 +2521,7 @@ namespace TianHua.FanSelection.UI
                 m_FanDesign.LastOperationDate = DateTime.Now;
                 m_FanDesign.Name = _Filename.Replace(".dwg", "");
                 m_FanDesign.Status = "0";
-                m_FanDesign.Path = FuncStr.NullToStr(message.Data.FileName).Replace(".dwg", ".json");
+                m_FanDesign.Path = ThFanSelectionUIUtils.DefaultModelExportPath() + "\\" + FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
 
                 if (m_ListFanDesign == null) m_ListFanDesign = new List<FanDesignDataModel>();
                 m_ListFanDesign.Add(m_FanDesign);
