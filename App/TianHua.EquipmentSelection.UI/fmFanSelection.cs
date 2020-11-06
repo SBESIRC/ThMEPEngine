@@ -239,6 +239,23 @@ namespace TianHua.FanSelection.UI
             {
                 var _JsonmFanDesign = ReadTxt(ThFanSelectionUIUtils.DefaultModelExportCatalogPath());
                 m_ListFanDesign = FuncJson.Deserialize<List<FanDesignDataModel>>(_JsonmFanDesign);
+                if (m_ListFanDesign != null && m_ListFanDesign.Count > 0)
+                {
+                    m_FanDesign = m_ListFanDesign.First();
+
+                    if (m_FanDesign != null)
+                    {
+                        var _JsonListFan = ReadTxt(m_FanDesign.Path);
+                        m_ListFan = FuncJson.Deserialize<List<FanDataModel>>(_JsonListFan);
+
+                        if (m_ListFan != null && m_ListFan.Count > 0)
+                            m_ListFan = m_ListFan.OrderBy(p => p.SortID).ToList();
+                        TreeList.DataSource = m_ListFan;
+                        this.TreeList.ExpandAll();
+                        this.Text = "风机选型 - " + m_FanDesign.Name;
+                    }
+
+                }
             }
         }
 
@@ -833,7 +850,7 @@ namespace TianHua.FanSelection.UI
                             {
                                 _Fan.FanSelectionStateInfo.fanSelectionState = FanSelectionState.HighUnsafe;
                             }
-            
+
                         }
                         m_fmFanModel.InitForm(_Fan, m_ListFan);
                     }
@@ -1210,14 +1227,14 @@ namespace TianHua.FanSelection.UI
             {
                 TreeList.ActiveFilterString = _FilterString;
             }
-            catch  
+            catch
             {
 
-       
+
             }
 
 
-       
+
 
             if (m_ListFan == null) { m_ListFan = new List<FanDataModel>(); }
 
@@ -2487,6 +2504,51 @@ namespace TianHua.FanSelection.UI
         private void OnModelSaved(ThModelSaveMessage message)
         {
             // TODO: 保持图纸同时保持风机模型数据
+            if (m_ListFan == null || m_ListFan.Count == 0 || FuncStr.NullToStr(message.Data.FileName) == string.Empty) { return; }
+            TreeList.PostEditor();
+
+            var _Path = ThFanSelectionUIUtils.DefaultModelExportCatalogPath();
+
+            if (m_FanDesign == null || FuncStr.NullToStr(m_FanDesign.Name) == string.Empty)
+            {
+                string _Filename = System.IO.Path.GetFileName(FuncStr.NullToStr(message.Data.FileName));
+
+                m_FanDesign = new FanDesignDataModel();
+                m_FanDesign.ID = Guid.NewGuid().ToString();
+                m_FanDesign.CreateDate = DateTime.Now;
+                m_FanDesign.LastOperationDate = DateTime.Now;
+                m_FanDesign.Name = _Filename.Replace(".dwg", "");
+                m_FanDesign.Status = "0";
+                m_FanDesign.Path = FuncStr.NullToStr(message.Data.FileName).Replace(".dwg", ".json");
+
+                if (m_ListFanDesign == null) m_ListFanDesign = new List<FanDesignDataModel>();
+                m_ListFanDesign.Add(m_FanDesign);
+
+                if (!Directory.Exists(ThFanSelectionUIUtils.DefaultModelExportPath()))
+                {
+                    Directory.CreateDirectory(ThFanSelectionUIUtils.DefaultModelExportPath());
+                }
+
+                var _JsonFanDesign = FuncJson.Serialize(m_ListFanDesign);
+                JsonExporter.Instance.SaveToFile(_Path, Encoding.UTF8, _JsonFanDesign);
+
+                var _Json = FuncJson.Serialize(m_ListFan);
+                JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _Json);
+
+
+                this.Text = "风机选型 - " + m_FanDesign.Name;
+
+            }
+            else
+            {
+                if (m_FanDesign.Path == string.Empty) { return; }
+                m_FanDesign.LastOperationDate = DateTime.Now;
+                var _JsonFanDesign = FuncJson.Serialize(m_ListFanDesign);
+                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportCatalogPath(), Encoding.UTF8, _JsonFanDesign);
+
+                var _JsonFan = FuncJson.Serialize(m_ListFan);
+                JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
+            }
         }
     }
 }
