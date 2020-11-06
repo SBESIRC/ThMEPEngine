@@ -220,7 +220,7 @@ namespace ThMEPElectrical.Core
             var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
-            infoReader.PickColumns(); // 提取柱子
+            infoReader.PickColumnAndShearWall(); // 提取和剪力墙
             var gridPolys = new List<Polyline>();
             // 建立映射关系对
             foreach (var pairInfo in wallPairInfos)
@@ -228,6 +228,8 @@ namespace ThMEPElectrical.Core
                 var wallPtCollection = pairInfo.ExternalProfile.Vertices();
                 var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
                 var columnTrans = TransformPolylines(validColumns, pairInfo.UserSys);
+
+                var validShearWalls = GetValidProfiles(infoReader.RecognizeShearWalls, wallPtCollection);
                 //轴网线
                 var gridCalculator = new GridService();
                 //DrawUtils.DrawProfile(columnTrans.Polylines2Curves(), "columnTrans");
@@ -242,6 +244,7 @@ namespace ThMEPElectrical.Core
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 // 外墙，内洞，轴网
+                validColumns.AddRange(validShearWalls);
                 var profileDatas = NoBeamStoreyDetectionCalculator.MakeNoBeamStoreyDetectionCalculator(gridPolys, validColumns, pairInfo.ExternalProfile);
                 ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(profileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }
@@ -454,7 +457,7 @@ namespace ThMEPElectrical.Core
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
-            infoReader.PickColumns(); // 提取柱子
+            infoReader.PickColumnAndShearWall(); // 提取和剪力墙
             var gridPolys = new List<Polyline>();
 
             // 外墙轮廓数据
@@ -496,7 +499,7 @@ namespace ThMEPElectrical.Core
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
-            infoReader.PickColumns(); // 提取柱子
+            infoReader.PickColumnAndShearWall(); // 提取柱子和剪力墙
             var gridPolys = new List<Polyline>();
 
             // 外墙轮廓数据

@@ -21,6 +21,13 @@ namespace ThMEPElectrical.CAD
     {
         private double m_roofThickness;
         private Point3dCollection m_preWindow; // 预处理窗口
+
+        public List<Polyline> RecognizeShearWalls
+        {
+            get;
+            set;
+        } = new List<Polyline>(); // 剪力墙
+         
         public List<Polyline> RecognizeMainBeamColumnWalls
         {
             get;
@@ -53,9 +60,27 @@ namespace ThMEPElectrical.CAD
             ComponentPicker(m_preWindow);
         }
 
-        public void PickColumns()
+        public void PickColumnAndShearWall()
         {
             ColumnPicker(m_preWindow);
+            PickShearWalls(m_preWindow);
+        }
+
+        private void PickShearWalls(Point3dCollection ptCollection)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                // 启动剪力墙识别引擎
+                var shearWallEngine = new ThShearWallRecognitionEngine();
+                shearWallEngine.Recognize(acadDatabase.Database, ptCollection);
+
+                // 剪力墙
+                shearWallEngine.Elements.ForEach(shearWallElement =>
+                {
+                    if (shearWallElement.Outline is Polyline shearWallPoly)
+                        RecognizeShearWalls.Add(shearWallPoly);
+                });
+            }
         }
 
         /// <summary>
