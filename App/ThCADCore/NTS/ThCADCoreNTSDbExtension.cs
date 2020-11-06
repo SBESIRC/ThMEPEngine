@@ -11,9 +11,6 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSDbExtension
     {
-        private const double TESSELLATE_ARC_LENGTH = 1000;
-
-
         public static Polyline ToDbPolyline(this LineString lineString)
         {
             var pline = new Polyline();
@@ -162,7 +159,8 @@ namespace ThCADCore.NTS
         public static LineString ToNTSLineString(this Polyline poly)
         {
             var points = new List<Coordinate>();
-            var polyLine = poly.HasBulges ? poly.TessellatePolylineWithArc(TESSELLATE_ARC_LENGTH) : poly;
+            var arcLength = ThCADCoreNTSService.Instance.ArcTessellationLength;
+            var polyLine = poly.HasBulges ? poly.TessellatePolylineWithArc(arcLength) : poly;
             for (int i = 0; i < polyLine.NumberOfVertices; i++)
             {
                 points.Add(polyLine.GetPoint3dAt(i).ToNTSCoordinate());

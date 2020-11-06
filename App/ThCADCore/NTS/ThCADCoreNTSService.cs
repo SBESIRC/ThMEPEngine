@@ -18,6 +18,7 @@ namespace ThCADCore.NTS
         //-------------SINGLETON-----------------
         public bool PrecisionReduce { get; set; }
 
+        public double ArcTessellationLength { get; set; } = 1000.0;
 
         private GeometryFactory geometryFactory;
         private GeometryFactory defaultGeometryFactory;
