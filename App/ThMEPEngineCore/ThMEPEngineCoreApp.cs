@@ -28,6 +28,7 @@ namespace ThMEPEngineCore
         public void Initialize()
         {
             //
+            ThMPolygonTool.Initialize();
         }
 
         public void Terminate()
@@ -103,8 +104,15 @@ namespace ThMEPEngineCore
                 shearWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
                 shearWallEngine.Elements.ForEach(o =>
                 {
-                    var curve = o.Outline as Curve;
-                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                    if (o.Outline is Curve curve)
+                    {
+                        acadDatabase.ModelSpace.Add(curve.WashClone());
+                    }
+                    else if (o.Outline is MPolygon mPolygon)
+                    {
+                        mPolygon.SetDatabaseDefaults(Active.Database);
+                        acadDatabase.ModelSpace.Add(mPolygon);
+                    }
                 });
             }
         }
@@ -300,104 +308,6 @@ namespace ThMEPEngineCore
                 laneLineEngine.Lanes.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
-        [CommandMethod("TIANHUACAD", "ThSpaceTest", CommandFlags.Modal)]
-        public void ThSpaceTest()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThSpaceRecognitionEngine spaceLineEngine = new ThSpaceRecognitionEngine())
-            {
-                //Test ThCADCoreNTSRelate
-                //var ent1Res = Active.Editor.GetEntity("\n select first polyline");
-                //Polyline first = acadDatabase.Element<Polyline>(ent1Res.ObjectId);
-                //var ent2Res = Active.Editor.GetEntity("\n select second polyline");
-                //Polyline second = acadDatabase.Element<Polyline>(ent2Res.ObjectId);
-                //using (var ov = new ThCADCoreNTSFixedPrecision())
-                //{
-                //    ThCADCoreNTSRelate relate = new ThCADCoreNTSRelate(first, second);
-                //}                
-                var framRes = Active.Editor.GetEntity("\n select extract area:<Polyline>");
-                if(framRes.Status==PromptStatus.OK)
-                {
-                    Polyline freame = acadDatabase.Element<Polyline>(framRes.ObjectId);
-                    spaceLineEngine.Recognize(Active.Database, freame.Vertices());
-                    spaceLineEngine.Print(Active.Database);
-                }
-            }
-        }
-        [CommandMethod("TIANHUACAD", "ThTestSegment", CommandFlags.Modal)]
-        public void ThTestSegment()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var entRes = Active.Editor.GetEntity("\n select a polyline");
-                Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
-                DBObjectCollection objs = new DBObjectCollection();
-                objs.Add(acadDatabase.Element<Polyline>(entRes.ObjectId));
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                var otherRes = Active.Editor.GetEntity("\nselect a polyline");
-                Polyline otherPolyline = acadDatabase.Element<Polyline>(otherRes.ObjectId);
-                Point3dCollection pts = new Point3dCollection();
-                for (int i = 0; i < otherPolyline.NumberOfVertices; i++)
-                {
-                    pts.Add(otherPolyline.GetPoint3dAt(0));
-                }
-                var selObjs = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pts);
-                bool res = polyline.Intersects(otherPolyline);
-                ThSegmentService thSegmentService = new ThSegmentService(polyline);
-                thSegmentService.SegmentAll(new CalBeamStruService());
-                thSegmentService.Segments.ForEach(o => acadDatabase.ModelSpace.Add(o.Outline));
-            }
-        }
-        [CommandMethod("TIANHUACAD", "ThTestDifference", CommandFlags.Modal)]
-        public void ThTestDifference()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var beamRes = Active.Editor.GetEntity("\n select a beam outline");
-                if(beamRes.Status!=PromptStatus.OK)
-                {
-                    return;
-                }
-                Polyline beamOutline = acadDatabase.Element<Polyline>(beamRes.ObjectId);
-                var segmentRes = Active.Editor.GetSelection();
-                if (segmentRes.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                DBObjectCollection segments = new DBObjectCollection();
-                segmentRes.Value.GetObjectIds().ForEach(o => segments.Add(acadDatabase.Element<Polyline>(o)));
-                var diffObjs=ThCADCoreNTSPolygonExtension.Difference(beamOutline, segments);
-                diffObjs.Cast<Entity>().ForEach(o => acadDatabase.ModelSpace.Add(o));
-            }
-        }
-        [CommandMethod("TIANHUACAD", "ThTestPointIn", CommandFlags.Modal)]
-        public void ThTestPointIn()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var entRes = Active.Editor.GetEntity("\n select a polyline");
-                Polyline polyline = acadDatabase.Element<Polyline>(entRes.ObjectId);
-                var ptRes = Active.Editor.GetPoint("\n select a point");
-                int isIn = polyline.PointInPolylineEx(ptRes.Value, 1.0);
-                if (isIn == 0)
-                {
-                    Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline上");
-                }
-                else if (isIn == 1)
-                {
-                    Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline内");
-                }
-                else if (isIn == -1)
-                {
-                    Active.Editor.WriteLine("CheckPointInPolyline: 点在polyline外");
-                }
-                Ray ray = new Ray();
-                ray.BasePoint = Point3d.Origin;
-                ray.SecondPoint = new Point3d(1000, 0, 0);
-                ray.UnitDir = Vector3d.XAxis;
-                acadDatabase.ModelSpace.Add(ray);
-            }
-        }
         /// <summary>
         /// 提取指定区域内的梁信息
         /// </summary>
@@ -473,35 +383,6 @@ namespace ThMEPEngineCore
                     {
                         acadDatabase.ModelSpace.Add(beam.BeamBoundary);
                     }
-                }
-            }
-        }
-
-
-        [CommandMethod("TIANHUACAD", "ThLaneLineRecognization", CommandFlags.Modal)]
-        public void ThLaneLineRecognization()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var objs = new DBObjectCollection();
-                result.Value.GetObjectIds().ForEach(o => objs.Add(acadDatabase.Element<Curve>(o)));
-                var lines = ThLaneLineSimplifier.Simplify(objs, 1500.0);
-                //for (int i = 0; i < polylines.Count; i++)
-                //{
-                //    polylines[i].Item1.ColorIndex = i + 1;
-                //    acadDatabase.ModelSpace.Add(polylines[i].Item1);
-                //    polylines[i].Item2.ColorIndex = i + 1;
-                //    acadDatabase.ModelSpace.Add(polylines[i].Item2);
-                //}
-                foreach (var poly in lines)
-                {
-                    (poly as Curve).ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(poly as Curve);
                 }
             }
         }

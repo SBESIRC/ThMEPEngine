@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Engine
             using (var shearWallDbExtension = new ThStructureShearWallDbExtension(database))
             {
                 shearWallDbExtension.BuildElementCurves();
-                List<Curve> curves = new List<Curve>();
+                List<Entity> ents = new List<Entity>();
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
@@ -24,14 +24,14 @@ namespace ThMEPEngineCore.Engine
                     ThCADCoreNTSSpatialIndex shearwallCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                     foreach (var filterObj in shearwallCurveSpatialIndex.SelectCrossingPolygon(polygon))
                     {
-                        curves.Add(filterObj as Curve);
+                        ents.Add(filterObj as Entity);
                     }
                 }
                 else
                 {
-                    curves = shearWallDbExtension.ShearWallCurves;
+                    ents = shearWallDbExtension.ShearWallCurves;
                 }
-                curves.ForEach(o =>
+                ents.ForEach(o =>
                 {
                     if (o is Polyline polyline && polyline.Area > 0.0)
                     {
@@ -41,6 +41,11 @@ namespace ThMEPEngineCore.Engine
                             var outline = bufferObjs[0] as Polyline;
                             Elements.Add(ThIfcWall.CreateWallEntity(outline));
                         }
+                    }
+                    else if(o is MPolygon mPolygon)
+                    {
+                        // 暂时忽略带洞的剪力墙
+                        //Elements.Add(ThIfcWall.CreateWallEntity(mPolygon));
                     }
                 });
             }

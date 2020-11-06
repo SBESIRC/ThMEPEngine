@@ -39,6 +39,7 @@
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSLineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSMatch.cs" />
+    <Compile Include="NTS\ThCADCoreNTSMPolygonExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSOperation.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolygonizer.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolylineExtension.cs" />
@@ -74,11 +75,21 @@
         <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
         <PackageReference Include="AutoCAD-2012.Net.Interop.x64" Version="1.0.0" />
       </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2014'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
         <PackageReference Include="AutoCAD-2014.Net.Interop.x64" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2016'))">
@@ -86,12 +97,22 @@
         <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
         <PackageReference Include="AutoCAD-2016.Net.Interop.x86" Version="1.0.0" />
       </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2018'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
         <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
         <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
   </Choose>

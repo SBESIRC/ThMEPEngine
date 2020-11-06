@@ -206,41 +206,59 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
-  </ItemGroup>
+  </ItemGroup>  
   <Choose>
-    <When Condition="$(DefineConstants.Contains('ACAD2012'))">
-      <ItemGroup>
-        <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2012.Net.Interop.x64" Version="1.0.0" />
-      </ItemGroup>
-    </When>
-    <When Condition="$(DefineConstants.Contains('ACAD2014'))">
-      <ItemGroup>
-        <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2014.Net.Interop.x64" Version="1.0.0" />
-      </ItemGroup>
-    </When>
-    <When Condition="$(DefineConstants.Contains('ACAD2016'))">
-      <ItemGroup>
-        <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2016.Net.Interop.x86" Version="1.0.0" />
-      </ItemGroup>
-    </When>
-    <When Condition="$(DefineConstants.Contains('ACAD2018'))">
-      <ItemGroup>
-        <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
-        <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
-        <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
-      </ItemGroup>
-      <ItemGroup>
-        <Reference Include="Autodesk.AutoCAD.Interop.dll">
-          <HintPath>..\..\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.dll</HintPath>
-        </Reference>
-        <Reference Include="Autodesk.AutoCAD.Interop.Common.dll">
-          <HintPath>..\..\\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.Common.dll</HintPath>
-        </Reference>
-      </ItemGroup>
-    </When>
-  </Choose>
+        <When Condition="$(DefineConstants.Contains('ACAD2012'))">
+            <ItemGroup>
+                <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
+                <PackageReference Include="AutoCAD-2012.Net.Interop.x64" Version="1.0.0" />
+            </ItemGroup>
+            <ItemGroup>
+                <Reference Include="AcMPolygonMGD">
+                    <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+                </Reference>
+            </ItemGroup>
+        </When>
+        <When Condition="$(DefineConstants.Contains('ACAD2014'))">
+            <ItemGroup>
+                <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
+                <PackageReference Include="AutoCAD-2014.Net.Interop.x64" Version="1.0.0" />
+            </ItemGroup>
+            <ItemGroup>
+                <Reference Include="AcMPolygonMGD">
+                    <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+                </Reference>
+            </ItemGroup>
+        </When>
+        <When Condition="$(DefineConstants.Contains('ACAD2016'))">
+            <ItemGroup>
+                <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
+                <PackageReference Include="AutoCAD-2016.Net.Interop.x86" Version="1.0.0" />
+            </ItemGroup>
+            <ItemGroup>
+                <Reference Include="AcMPolygonMGD">
+                    <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+                </Reference>
+            </ItemGroup>
+        </When>
+        <When Condition="$(DefineConstants.Contains('ACAD2018'))">
+            <ItemGroup>
+                <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
+                <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
+                <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+            </ItemGroup>
+            <ItemGroup>
+                <Reference Include="AcMPolygonMGD">
+                    <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+                </Reference>
+                <Reference Include="Autodesk.AutoCAD.Interop.dll">
+                    <HintPath>..\..\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.dll</HintPath>
+                </Reference>
+                <Reference Include="Autodesk.AutoCAD.Interop.Common.dll">
+                    <HintPath>..\..\\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.Common.dll</HintPath>
+                </Reference>
+            </ItemGroup>
+        </When>
+    </Choose>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

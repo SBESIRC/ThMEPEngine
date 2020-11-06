@@ -6,6 +6,7 @@ using NetTopologySuite.Utilities;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
 
 namespace ThCADCore.NTS
 {
@@ -54,6 +55,18 @@ namespace ThCADCore.NTS
                 plines.Add(hole.ToDbPolyline());
             }
             return plines;
+        }
+
+        public static Entity ToDbEntity(this Polygon polygon)
+        {
+            if (polygon.Holes.Count() > 0)
+            {
+                return polygon.ToMPolygon();
+            }
+            else
+            {
+                return polygon.Shell.ToDbPolyline();
+            }
         }
 
         public static List<Polyline> ToDbPolylines(this MultiLineString geometries)
@@ -222,6 +235,78 @@ namespace ThCADCore.NTS
             if (geometry is LinearRing ring)
             {
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(ring);
+            }
+            else
+            {
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+            }
+        }
+
+        public static Polygon ToNTSPolygon(this MPolygon mPolygon)
+        {
+            int num = mPolygon.NumMPolygonLoops;
+            Polyline shell = null;
+            List<Polyline> holes = new List<Polyline>();
+            for (int i = 0; i < num; i++)
+            {
+                LoopDirection ld = mPolygon.GetLoopDirection(i);
+                MPolygonLoop mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
+                Polyline polyline = new Polyline()
+                {
+                    Closed = true
+                };
+                for (int j = 0; j < mPolygonLoop.Count; j++)
+                {
+                    var bulgeItem = mPolygonLoop[j];
+                    polyline.AddVertexAt(j, bulgeItem.Vertex, bulgeItem.Bulge, 0, 0);
+                }
+                if(ld== LoopDirection.Exterior)
+                {
+                    shell = polyline;
+                }
+                else
+                {
+                    holes.Add(polyline);
+                }
+            }
+            if(shell ==null && holes.Count==1)
+            {
+                return holes[0].ToNTSPolygon();
+            }
+            else if(shell != null && holes.Count == 0)
+            {
+                return shell.ToNTSPolygon();
+            }
+            else if(shell != null && holes.Count > 0)
+            {
+                LinearRing shellLinearRing = new LinearRing(
+                shell.ToNTSLineString().CoordinateSequence,
+                ThCADCoreNTSService.Instance.GeometryFactory);
+                List<LinearRing> holeRings = new List<LinearRing>();
+                holes.ForEach(o =>
+                {
+                    LinearRing holeLinearRing = new LinearRing(
+                    o.ToNTSLineString().CoordinateSequence,
+                    ThCADCoreNTSService.Instance.GeometryFactory);
+                    holeRings.Add(holeLinearRing);
+                });
+                return new Polygon(shellLinearRing, holeRings.ToArray(),
+                    ThCADCoreNTSService.Instance.GeometryFactory);
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static Polygon ToNTSPolygon(this Circle circle)
+        {
+            var length = ThCADCoreNTSService.Instance.ArcTessellationLength;
+            var circum = 2 * Math.PI * circle.Radius;
+            int num = (int)Math.Ceiling(circum / length);
+            if (num >= 3)
+            {
+                return circle.ToNTSPolygon(num);
             }
             else
             {

@@ -2,6 +2,7 @@
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries.Prepared;
 using Autodesk.AutoCAD.Geometry;
+using ThCADExtension;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -27,6 +28,12 @@ namespace ThMEPEngineCore.Algorithm
         public bool Contains(Curve curve)
         {
             return PreparedPolygon.Contains(curve.ToNTSGeometry());
+        }
+
+        public bool Contains(MPolygon mPolygon)
+        {
+            var polygon = mPolygon.ToNTSPolygon();
+            return PreparedPolygon.Contains(polygon);
         }
 
         private IPreparedGeometry preparedPolygon;

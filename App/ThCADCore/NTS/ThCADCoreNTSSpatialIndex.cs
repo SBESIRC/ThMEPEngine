@@ -102,6 +102,10 @@ namespace ThCADCore.NTS
                 {
                     return blockReference.GeometricExtents.ToNTSPolygon();
                 }
+                else if (obj is MPolygon mPolygon)
+                {
+                    return mPolygon.ToNTSPolygon();
+                }
                 else
                 {
                     throw new NotSupportedException();
