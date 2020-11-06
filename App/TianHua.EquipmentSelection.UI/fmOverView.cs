@@ -454,6 +454,7 @@ namespace TianHua.FanSelection.UI
                if (p.FanModelName == string.Empty || p.FanModelName == "无此风机") { return; }
                var _FanPrefixDict = PubVar.g_ListFanPrefixDict.Find(s => s.FanUse == p.Scenario);
                if (_FanPrefixDict == null) return;
+               if (p.IsErased) return;
                ExportFanParaModel _ExportFanPara = new ExportFanParaModel();
                _ExportFanPara.ID = p.ID;
                _ExportFanPara.Scenario = p.Scenario;
@@ -578,7 +579,7 @@ namespace TianHua.FanSelection.UI
 
                 if (_ListSceneScreening != null && _ListSceneScreening.Count > 0)
                 {
-                    _List = _List.FindAll(p => _ListSceneScreening.Contains(p.Scenario));
+                    _List = _List.FindAll(p => _ListSceneScreening.Contains(p.Scenario) && !p.IsErased);
                 }
 
                 if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();

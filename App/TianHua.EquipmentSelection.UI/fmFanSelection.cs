@@ -1850,7 +1850,7 @@ namespace TianHua.FanSelection.UI
 
                 if (m_ListSceneScreening != null && m_ListSceneScreening.Count > 0)
                 {
-                    _List = _List.FindAll(p => m_ListSceneScreening.Contains(p.Scenario));
+                    _List = _List.FindAll(p => m_ListSceneScreening.Contains(p.Scenario) );
                 }
 
                 if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();
@@ -1921,6 +1921,7 @@ namespace TianHua.FanSelection.UI
                if (p.FanModelName == string.Empty || p.FanModelName == "无此风机") { return; }
                var _FanPrefixDict = PubVar.g_ListFanPrefixDict.Find(s => s.FanUse == p.Scenario);
                if (_FanPrefixDict == null) return;
+               if (p.IsErased) return;
                ExportFanParaModel _ExportFanPara = new ExportFanParaModel();
                _ExportFanPara.ID = p.ID;
                _ExportFanPara.Scenario = p.Scenario;
@@ -2061,7 +2062,7 @@ namespace TianHua.FanSelection.UI
 
                 if (m_ListSceneScreening != null && m_ListSceneScreening.Count > 0)
                 {
-                    _List = _List.FindAll(p => m_ListSceneScreening.Contains(p.Scenario));
+                    _List = _List.FindAll(p => m_ListSceneScreening.Contains(p.Scenario) && !p.IsErased);
                 }
 
                 if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();
@@ -2490,13 +2491,15 @@ namespace TianHua.FanSelection.UI
         {
             if (message == null || FuncStr.NullToStr(message.Data.Model) == string.Empty) { return; }
 
-            m_ListFan.RemoveAll(p => p.ID == FuncStr.NullToStr(message.Data.Model));
+            var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(message.Data.Model));
 
-            m_ListFan.RemoveAll(p => p.PID == FuncStr.NullToStr(message.Data.Model));
+            //m_ListFan.RemoveAll(p => p.ID == FuncStr.NullToStr(message.Data.Model));
 
-            //if (_Fan == null) { return; }
+            //m_ListFan.RemoveAll(p => p.PID == FuncStr.NullToStr(message.Data.Model));
 
-            //_Fan.IsErased = message.Data.Erased;
+            if (_Fan == null) { return; }
+
+            _Fan.IsErased = message.Data.Erased;
 
             TreeList.RefreshDataSource();
 
