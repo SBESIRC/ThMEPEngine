@@ -151,7 +151,7 @@ namespace ThMEPElectrical.Business
 
             foreach (var singleBeamProfile in secondBeamInfos)
             {
-                if (singleBeamProfile.Height > 600)
+                if (singleBeamProfile.Height >= ThMEPCommon.SecondBeamDivideHeight)
                 {
                     return true;
                 }
@@ -184,7 +184,7 @@ namespace ThMEPElectrical.Business
         {
             foreach (var singleBeamProfile in srcBeamProfiles)
             {
-                if (singleBeamProfile.Height > 600)
+                if (singleBeamProfile.Height >= ThMEPCommon.SecondBeamDivideHeight)
                 {
                     srcBeamProfiles.Remove(singleBeamProfile);
                     return singleBeamProfile;
