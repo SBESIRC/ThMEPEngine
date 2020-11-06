@@ -35,5 +35,33 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
         }
+
+        public static Coordinate Intersection(this Line line1, Line line2, Intersect intersectType)
+        {
+            if(line1.IsCollinear(line2))
+            {
+                throw new NotSupportedException();
+            }
+            var linesegment1 = new LineSegment(line1.StartPoint.ToNTSCoordinate(), line1.EndPoint.ToNTSCoordinate());
+            var linesegment2 = new LineSegment(line2.StartPoint.ToNTSCoordinate(), line2.EndPoint.ToNTSCoordinate());
+            switch (intersectType)
+            {
+                case Intersect.ExtendBoth:
+                    var intersectPt = linesegment1.LineIntersection(linesegment2);
+                    if(intersectPt == null)
+                    {
+                        throw new NotSupportedException();
+                    }
+                    return intersectPt;
+                case Intersect.OnBothOperands:
+                    var geometry = line1.ToNTSLineString().Intersection(line2.ToNTSLineString());
+                    if (geometry is Point point)
+                    {
+                        return point.Coordinate;
+                    }
+                    break;
+            }
+            return null;
+        }
     }
 }

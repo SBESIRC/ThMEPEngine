@@ -145,6 +145,7 @@
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThFilterPortLinkBeams.cs" />
     <Compile Include="Extension\ThIfcBeamExtension.cs" />
+    <Compile Include="Service\ThLaneLineSimplifier.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
     <Compile Include="Service\ThLineBeamOutliner.cs" />

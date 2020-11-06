@@ -476,5 +476,34 @@ namespace ThMEPEngineCore
                 }
             }
         }
+
+
+        [CommandMethod("TIANHUACAD", "ThLaneLineRecognization", CommandFlags.Modal)]
+        public void ThLaneLineRecognization()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs = new DBObjectCollection();
+                result.Value.GetObjectIds().ForEach(o => objs.Add(acadDatabase.Element<Curve>(o)));
+                var lines = ThLaneLineSimplifier.Simplify(objs, 1500.0);
+                //for (int i = 0; i < polylines.Count; i++)
+                //{
+                //    polylines[i].Item1.ColorIndex = i + 1;
+                //    acadDatabase.ModelSpace.Add(polylines[i].Item1);
+                //    polylines[i].Item2.ColorIndex = i + 1;
+                //    acadDatabase.ModelSpace.Add(polylines[i].Item2);
+                //}
+                foreach (var poly in lines)
+                {
+                    (poly as Curve).ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(poly as Curve);
+                }
+            }
+        }
     }
 }
