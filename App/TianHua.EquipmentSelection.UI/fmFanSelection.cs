@@ -1478,6 +1478,14 @@ namespace TianHua.FanSelection.UI
                     if (_Fan.PID == "0")
                     {
                         TreeList.DeleteSelectedNodes();
+
+                        using (Active.Document.LockDocument())
+                        using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                        using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
+                        {
+                            dbManager.EraseModels(_Fan.ID);
+                            Active.Editor.Regen();
+                        }
                     }
                     else
                     {
@@ -1488,17 +1496,19 @@ namespace TianHua.FanSelection.UI
                             m_ListFan.Remove(_MainFan);
                             TreeList.RefreshDataSource();
                             this.TreeList.ExpandAll();
+
+                            using (Active.Document.LockDocument())
+                            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                            using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
+                            {
+                                dbManager.EraseModels(_MainFan.ID);
+                                Active.Editor.Regen();
+                            }
                             //SetFanModel();
                         }
                     }
 
-                    using (Active.Document.LockDocument())
-                    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                    using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
-                    {
-                        dbManager.EraseModels(_Fan.ID);
-                        Active.Editor.Regen();
-                    }
+     
                     m_fmOverView.DataSourceChanged(m_ListFan);
                 }
             }
@@ -2467,6 +2477,7 @@ namespace TianHua.FanSelection.UI
 
                     _SonFanData.ID = Guid.NewGuid().ToString();
                     _SonFanData.PID = _Guid;
+                    _SonFanData.IsErased = false;
                     _ListTemp.Add(_SonFanData);
                 }
                 var _Inidex = m_ListFan.IndexOf(_Fan);
@@ -2500,6 +2511,12 @@ namespace TianHua.FanSelection.UI
             if (_Fan == null) { return; }
 
             _Fan.IsErased = message.Data.Erased;
+
+            var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(message.Data.Model));
+
+            if (_FanSon != null) { _FanSon.IsErased = message.Data.Erased; }
+
+       
 
             TreeList.RefreshDataSource();
 
