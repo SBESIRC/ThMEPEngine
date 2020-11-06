@@ -244,12 +244,11 @@ namespace ThCADCore.NTS
 
         public static Polygon ToNTSPolygon(this MPolygon mPolygon)
         {
-            int num = mPolygon.NumMPolygonLoops;
             Polyline shell = null;
             List<Polyline> holes = new List<Polyline>();
-            for (int i = 0; i < num; i++)
+            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
             {
-                LoopDirection ld = mPolygon.GetLoopDirection(i);
+                LoopDirection direction = mPolygon.GetLoopDirection(i);
                 MPolygonLoop mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
                 Polyline polyline = new Polyline()
                 {
@@ -257,19 +256,23 @@ namespace ThCADCore.NTS
                 };
                 for (int j = 0; j < mPolygonLoop.Count; j++)
                 {
-                    var bulgeItem = mPolygonLoop[j];
-                    polyline.AddVertexAt(j, bulgeItem.Vertex, bulgeItem.Bulge, 0, 0);
+                    var bulgeVertex = mPolygonLoop[j];
+                    polyline.AddVertexAt(j, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
                 }
-                if(ld== LoopDirection.Exterior)
+                if(LoopDirection.Exterior == direction)
                 {
                     shell = polyline;
                 }
-                else
+                else if (LoopDirection.Interior == direction)
                 {
                     holes.Add(polyline);
                 }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }
-            if(shell ==null && holes.Count==1)
+            if(shell == null && holes.Count == 1)
             {
                 return holes[0].ToNTSPolygon();
             }
@@ -279,23 +282,17 @@ namespace ThCADCore.NTS
             }
             else if(shell != null && holes.Count > 0)
             {
-                LinearRing shellLinearRing = new LinearRing(
-                shell.ToNTSLineString().CoordinateSequence,
-                ThCADCoreNTSService.Instance.GeometryFactory);
                 List<LinearRing> holeRings = new List<LinearRing>();
-                holes.ForEach(o =>
+                holes.ForEach(o => 
                 {
-                    LinearRing holeLinearRing = new LinearRing(
-                    o.ToNTSLineString().CoordinateSequence,
-                    ThCADCoreNTSService.Instance.GeometryFactory);
-                    holeRings.Add(holeLinearRing);
+                    holeRings.Add(o.ToNTSLineString() as LinearRing);
                 });
-                return new Polygon(shellLinearRing, holeRings.ToArray(),
-                    ThCADCoreNTSService.Instance.GeometryFactory);
+                LinearRing shellLinearRing = shell.ToNTSLineString() as LinearRing;
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(shellLinearRing, holeRings.ToArray());
             }
             else
             {
-                return null;
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
             }
         }
 
