@@ -334,7 +334,7 @@ namespace ThMEPElectrical.Core
             var ptCollection = PolySec.Vertices();
             foreach (Point3d pt in ptCollection)
             {
-                if (GeomUtils.PtInLoop(polyFir, pt.ToPoint2D()))
+                if (GeomUtils.PtInLoop(polyFir, pt))
                     return true;
             }
 

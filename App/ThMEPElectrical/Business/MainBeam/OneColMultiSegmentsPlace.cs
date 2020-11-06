@@ -140,7 +140,7 @@ namespace ThMEPElectrical.Business.MainBeam
         {
             var srcPoly = placeRectInfo.srcPolyline;
 
-            if (GeomUtils.PtInLoop(srcPoly, pt.ToPoint2D()))
+            if (GeomUtils.PtInLoop(srcPoly, pt))
             {
                 return new PlacePoint(pt, false);
             }

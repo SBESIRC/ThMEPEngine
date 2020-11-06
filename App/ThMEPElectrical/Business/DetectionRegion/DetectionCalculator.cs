@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -71,7 +72,7 @@ namespace ThMEPElectrical.Business
             var ptLst = secPoly.Polyline2Point2d();
             foreach (var pt in ptLst)
             {
-                if (GeomUtils.PtInLoop(firPoly, pt))
+                if (GeomUtils.PtInLoop(firPoly, pt.ToPoint3d()))
                     return true;
             }
 

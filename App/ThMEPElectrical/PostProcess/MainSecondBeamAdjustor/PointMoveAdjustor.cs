@@ -118,7 +118,7 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
         {
             foreach (var singlePoly in srcPolys)
             {
-                if (GeomUtils.PtInLoop(singlePoly, srcPt.Point2D()))
+                if (GeomUtils.PtInLoop(singlePoly, srcPt))
                     return true;
             }
 

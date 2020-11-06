@@ -79,7 +79,7 @@ namespace ThMEPElectrical.Business.Procedure
             bool IsChanged = false;
             foreach (var ucsInfo in ucsInfos)
             {
-                if (GeomUtils.PtInLoop(polygonInfo.ExternalProfile, ucsInfo.ucsInsertPoint.Point2D()))
+                if (GeomUtils.PtInLoop(polygonInfo.ExternalProfile, ucsInfo.ucsInsertPoint))
                 {
                     polygonInfo.UserSys = ucsInfo.ucsMatrix;
                     polygonInfo.BlockXAxis = ucsInfo.BlockXAxis;
@@ -104,7 +104,7 @@ namespace ThMEPElectrical.Business.Procedure
             var secPts = polySec.Vertices();
             foreach (Point3d pt in secPts)
             {
-                if (!GeomUtils.PtInLoop(polyFir, pt.Point2D()))
+                if (!GeomUtils.PtInLoop(polyFir, pt))
                     return false;
             }
 
