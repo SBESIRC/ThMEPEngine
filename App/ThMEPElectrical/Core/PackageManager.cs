@@ -178,11 +178,11 @@ namespace ThMEPElectrical.Core
                 infoReader.RecognizeSecondBeams.ForEach(e => innerHoles.Add(e.Profile));
 
                 var validHoles = GetValidProfiles(innerHoles, wallPtCollection);
-                var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
+                //var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
                 //DrawUtils.DrawProfile(GeometryTrans.MatrixSystemCurves(pairInfo.OriginMatrix, 100), "drawMatrix");
                 //轴网线
                 var gridCalculator = new GridService();
-                var columnTrans = TransformPolylines(validColumns, pairInfo.UserSys);
+                var columnTrans = TransformPolylines(infoReader.Columns, pairInfo.UserSys);
                 //DrawUtils.DrawProfile(columnTrans.Polylines2Curves(), "columnTrans");
                 //DrawUtils.DrawProfile(new List<Curve>() { pairInfo.ExternalProfile }, "ExternalProfile");
 
@@ -226,7 +226,7 @@ namespace ThMEPElectrical.Core
             foreach (var pairInfo in wallPairInfos)
             {
                 var wallPtCollection = pairInfo.ExternalProfile.Vertices();
-                var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
+                var validColumns = infoReader.Columns;
                 var columnTrans = TransformPolylines(validColumns, pairInfo.UserSys);
 
                 var validShearWalls = GetValidProfiles(infoReader.RecognizeShearWalls, wallPtCollection);
