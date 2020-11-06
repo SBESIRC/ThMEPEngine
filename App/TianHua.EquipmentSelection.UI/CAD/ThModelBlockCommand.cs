@@ -87,6 +87,7 @@ namespace TianHua.FanSelection.UI.CAD
                     {
                         bModified = true;
                         ThFanSelectionEngine.ModifyModels(_FanDataModel);
+                        ThFanSelectionEngine.ZoomToModels(_FanDataModel);
                     }
 
                     // 风机图块没有变化
