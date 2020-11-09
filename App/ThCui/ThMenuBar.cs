@@ -12,7 +12,7 @@ namespace TianHua.AutoCAD.ThCui
             StringCollection sc = new StringCollection();
             sc.Add("THMEPPopMenu");
             //添加名为“我的菜单”的下拉菜单，如果已经存在，则返回null
-            PopMenu theMenu = cs.MenuGroup.AddPopMenu("机电工具集", sc, "ID_THMEPTOOLSET");
+            PopMenu theMenu = cs.MenuGroup.AddPopMenu("天华机电工具集", sc, "ID_THMEPTOOLSET");
             if (theMenu != null)//如果“我的菜单”还没有被添加，则添加菜单项
             {
                 {
