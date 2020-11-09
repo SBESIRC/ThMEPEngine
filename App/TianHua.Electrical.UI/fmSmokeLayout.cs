@@ -58,7 +58,7 @@ namespace TianHua.Electrical.UI
                 RidTemperature.Checked = true;
             }
 
-            if (m_SmokeLayout.AreaLayout == "车库、走除道外房间")
+            if (m_SmokeLayout.AreaLayout == "车库、除走道外房间")
             {
                 RidGarage.Checked = true;
             }

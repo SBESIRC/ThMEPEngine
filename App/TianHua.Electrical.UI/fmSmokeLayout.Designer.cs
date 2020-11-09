@@ -337,7 +337,7 @@
             this.RidGarage.Size = new System.Drawing.Size(198, 25);
             this.RidGarage.TabIndex = 8;
             this.RidGarage.TabStop = true;
-            this.RidGarage.Text = "车库、走除道外房间";
+            this.RidGarage.Text = "车库、除走道外房间";
             this.RidGarage.UseVisualStyleBackColor = true;
             this.RidGarage.CheckedChanged += new System.EventHandler(this.RidGarage_CheckedChanged);
             // 
