@@ -425,14 +425,18 @@ namespace ThMEPElectrical.Geometry
                 return ptLst;
 
             postPoly = postPoly.RemoveNearSamePoints().Points2PointCollection().ToPolyline();
-            var regions = RegionTools.CreateRegion(new Curve[] { postPoly });
 
+#if ACAD_ABOVE_2012
+            var regions = RegionTools.CreateRegion(new Curve[] { postPoly });
             foreach (var region in regions)
             {
                 var pt = region.GetWCSCCentroid().Point3D();
                 if (GeomUtils.PtInLoop(postPoly, pt))
                     ptLst.Add(pt);
             }
+#else
+            ptLst.Add(postPoly.GetCentroidPoint());
+#endif
 
             if (ptLst.Count < 1)
             {

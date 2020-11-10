@@ -1,12 +1,13 @@
-﻿using NetTopologySuite.Simplify;
+﻿using NFox.Cad;
+using System.Linq;
+using NetTopologySuite.Simplify;
+using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
-using System.Linq;
-using NFox.Cad;
 
 namespace ThCADCore.NTS
 {
@@ -70,6 +71,11 @@ namespace ThCADCore.NTS
         public static bool IsRectangle(this AcPolygon polygon)
         {
             return polygon.ToNTSPolygon().IsRectangle;
+        }
+
+        public static Point3d GetCentroidPoint(this AcPolygon polygon)
+        {
+            return Centroid.GetCentroid(polygon.ToNTSPolygon()).ToAcGePoint3d();
         }
 
         /// <summary>
