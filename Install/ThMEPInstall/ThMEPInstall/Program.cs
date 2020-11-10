@@ -22,23 +22,23 @@ namespace ThMEPInstall
 
         static void ImportRegFile(string regfile)
         {
-            Process proc = new Process();
-            try
+            using (var process = new Process())
             {
-                proc.StartInfo.FileName = "reg.exe";
-                proc.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                proc.StartInfo.CreateNoWindow = true;
-                proc.StartInfo.UseShellExecute = false;
-
-                string command = "import " + regfile;
-                proc.StartInfo.Arguments = command;
-                proc.Start();
-
-                proc.WaitForExit();
-            }
-            catch (System.Exception)
-            {
-                proc.Dispose();
+                try
+                {
+                    process.StartInfo.FileName = "reg.exe";
+                    process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                    process.StartInfo.CreateNoWindow = true;
+                    process.StartInfo.UseShellExecute = false;
+                    string command = "import " + regfile;
+                    process.StartInfo.Arguments = command;
+                    process.Start();
+                    process.WaitForExit();
+                }
+                catch (System.Exception)
+                {
+                    //
+                }
             }
         }
     }
