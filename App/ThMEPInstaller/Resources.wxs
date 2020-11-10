@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?include Variable.wxi ?>
+  <Fragment>
+    <DirectoryRef Id="DIR_Autoloader_Contents_Resources">
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_Dark" Guid="{94A428E7-C547-4F41-A0BE-5DEF7A6526FD}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_Dark" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Dll_Light" Guid="{883E1F62-A649-4DB5-B30B-C41E616E49EC}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Dll_Light" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP_light.dll" KeyPath="yes" />
+      </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Resources_Cuix" Guid="{3503777E-BACC-43A8-8EB1-3CCA4908C264}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Resources_Cuix" Source="$(var.AutoloaderContentsPath)\Resources\ThMEP.cuix" KeyPath="yes" />
+      </Component>
+    </DirectoryRef>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponentsResources">
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Cuix" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_Dark" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Resources_Dll_Light" />
+    </ComponentGroup>
+  </Fragment>
+</Wix>

@@ -1,152 +1,83 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
-using GeoAPI.Geometries;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Polygonize;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSPolygonizer
     {
-        public static ICollection<IGeometry> Polygonize(this DBObjectCollection lines)
+        public static ICollection<Geometry> Polygonize(this DBObjectCollection curves)
+        {
+            // 空间索引会过滤几何意义上“完全重叠”的图形
+            // 对于几何意义上"完全重叠"的图形，Polygonizer会失败
+            // 这里正好借用空间索引的特性，来解决Polygonizer会失败的问题
+            using (var si = new ThCADCoreNTSSpatialIndex(curves))
+            {
+                var polygonizer = new Polygonizer();
+                polygonizer.Add(UnaryUnionOp.Union(si.Geometries.Keys));
+                return polygonizer.GetPolygons();
+            }
+        }
+
+        public static ICollection<Geometry> Polygonize(this Geometry geometry)
         {
             var polygonizer = new Polygonizer();
-            polygonizer.Add(lines.ToNTSNodedLineStrings());
+            polygonizer.Add(UnaryUnionOp.Union(geometry));
             return polygonizer.GetPolygons();
         }
 
         public static DBObjectCollection Polygons(this DBObjectCollection lines)
         {
-            var objs = new DBObjectCollection();
-            var polygonizer = new Polygonizer();
-            polygonizer.Add(lines.ToNTSNodedLineStrings());
-            foreach (IPolygon polygon in polygonizer.GetPolygons())
+            var objs = new List<DBObject>();
+            foreach (Polygon polygon in lines.Polygonize())
             {
-                objs.Add(polygon.Shell.ToDbPolyline());
+                objs.AddRange(polygon.ToDbPolylines());
             }
-            return objs;
+            return objs.ToCollection();
         }
 
-        public static DBObjectCollection Boundaries(this DBObjectCollection lines)
+        public static DBObjectCollection Outline(this DBObjectCollection lines)
         {
-            using (var ov = new ThCADCoreNTSPrecisionReducer())
-            {
-                var polygons = new List<IPolygon>();
-                var polygonizer = new Polygonizer();
-                var boundaries = new DBObjectCollection();
-                polygonizer.Add(lines.ToNTSNodedLineStrings());
-                var geometry = CascadedPolygonUnion.Union(polygonizer.GetPolygons());
-                if (geometry == null)
-                {
-                    return boundaries;
-                }
-                if (geometry is IMultiPolygon mPolygon)
-                {
-                    foreach (var item in mPolygon.Geometries)
-                    {
-                        if (item is IPolygon polygon)
-                        {
-                            polygons.Add(polygon);
-                        }
-                        else
-                        {
-                            throw new NotSupportedException();
-                        }
-                    }
-                }
-                else if (geometry is IPolygon polygon)
-                {
-                    polygons.Add(polygon);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-                foreach (var item in polygons)
-                {
-                    boundaries.Add(item.Shell.ToDbPolyline());
-                }
-                return boundaries;
-            }
-        }
-
-        public static List<IPolygon> OutlineGeometries(this DBObjectCollection lines)
-        {
-            var polygonizer = new Polygonizer();
-            var geometries = new List<IPolygon>();
-            polygonizer.Add(lines.ToNTSNodedLineStrings());
-            var geometry = CascadedPolygonUnion.Union(polygonizer.GetPolygons());
+            var polygons = new List<Polygon>();
+            var boundaries = new DBObjectCollection();
+            var geometry = CascadedPolygonUnion.Union(lines.Polygonize());
             if (geometry == null)
             {
-                return geometries;
+                return boundaries;
             }
-            if (geometry is IPolygon polygon)
+            if (geometry is MultiPolygon mPolygon)
             {
-                geometries.Add(polygon);
-            }
-            else if (geometry is IMultiPolygon mPolygon)
-            {
-                foreach (IPolygon subPolygon in mPolygon.Geometries)
+                foreach (var item in mPolygon.Geometries)
                 {
-                    geometries.Add(subPolygon);
+                    if (item is Polygon polygon)
+                    {
+                        polygons.Add(polygon);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException();
+                    }
                 }
+            }
+            else if (geometry is Polygon polygon)
+            {
+                polygons.Add(polygon);
             }
             else
             {
                 throw new NotSupportedException();
             }
-            return geometries;
-        }
-
-        public static DBObjectCollection Outline(this DBObjectCollection lines)
-        {
-            var objs = new DBObjectCollection();
-            foreach (var geometry in lines.OutlineGeometries())
-            {
-                objs.Add(geometry.Shell.ToDbPolyline());
-            }
-            return objs;
-        }
-
-        public static DBObjectCollection FindLoops(this DBObjectCollection lines)
-        {
-            var polygons = new List<IPolygon>();
-            var polygonizer = new Polygonizer();
-            var loops = new DBObjectCollection();
-            polygonizer.Add(lines.ToNTSNodedLineStrings());
-            var geometries = polygonizer.GetPolygons().ToList();
-            foreach (var geometry in geometries)
-            {
-                if (geometry is IMultiPolygon mPolygon)
-                {
-                    foreach (var item in mPolygon.Geometries)
-                    {
-                        if (item is IPolygon polygon)
-                        {
-                            polygons.Add(polygon);
-                        }
-                        else
-                        {
-                            throw new NotSupportedException();
-                        }
-                    }
-                }
-                else if (geometry is IPolygon polygon)
-                {
-                    polygons.Add(polygon);
-                }
-                else
-                {
-                    continue;
-                }
-            }
             foreach (var item in polygons)
             {
-                loops.Add(item.Shell.ToDbPolyline());
+                // 暂时不考虑有“洞”的情况
+                boundaries.Add(item.Shell.ToDbPolyline());
             }
-            return loops;
+            return boundaries;
         }
     }
 }

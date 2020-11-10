@@ -141,5 +141,74 @@ namespace DotNetARX
             }
             return ltrs;//返回所有的层表记录的ObjectId
         }
+
+        /// <summary>
+        /// 将图层解锁
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="layerName"></param>
+        public static void UnLockLayer(this Database db, string layerName)
+        {
+            //打开层表
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            //如果不存在名为layerName的图层，则返回
+            if (!lt.Has(layerName)) return;
+            ObjectId layerId = lt[layerName];//获取名为layerName的层表记录的Id
+            //以写的方式打开名为layerName的层表记录
+            LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+            if (ltr != null)
+            {
+                if (ltr.IsLocked)
+                {
+                    ltr.IsLocked = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 将图层解冻
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="layerName"></param>
+        public static void UnFrozenLayer(this Database db, string layerName)
+        {
+            //打开层表
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            //如果不存在名为layerName的图层，则返回
+            if (!lt.Has(layerName)) return;
+            ObjectId layerId = lt[layerName];//获取名为layerName的层表记录的Id
+            //以写的方式打开名为layerName的层表记录
+            LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+            if (ltr != null)
+            {
+                if (ltr.IsFrozen)
+                {
+                    ltr.IsFrozen = false;
+                }
+            }
+        }
+
+        /// <summary>
+        /// 将图层打开
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="layerName"></param>
+        public static void UnOffLayer(this Database db, string layerName)
+        {
+            //打开层表
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            //如果不存在名为layerName的图层，则返回
+            if (!lt.Has(layerName)) return;
+            ObjectId layerId = lt[layerName];//获取名为layerName的层表记录的Id
+            //以写的方式打开名为layerName的层表记录
+            LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+            if (ltr != null)
+            {
+                if (ltr.IsOff)
+                {
+                    ltr.IsOff = false;
+                }
+            }
+        }
     }
 }

@@ -1,5 +1,6 @@
-﻿using GeoAPI.Geometries;
-using NetTopologySuite;
+﻿using NetTopologySuite;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Geometries.Prepared;
 
 namespace ThCADCore.NTS
 {
@@ -15,14 +16,13 @@ namespace ThCADCore.NTS
         internal ThCADCoreNTSService() { }
         public static ThCADCoreNTSService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
-
-        public double Scale { get; set; }
         public bool PrecisionReduce { get; set; }
 
+        public double ArcTessellationLength { get; set; } = 1000.0;
 
-        private IGeometryFactory geometryFactory;
-        private IGeometryFactory defaultGeometryFactory;
-        public IGeometryFactory GeometryFactory
+        private GeometryFactory geometryFactory;
+        private GeometryFactory defaultGeometryFactory;
+        public GeometryFactory GeometryFactory
         {
             get
             {
@@ -46,8 +46,21 @@ namespace ThCADCore.NTS
             }
         }
 
-        private IPrecisionModel precisionModel;
-        public IPrecisionModel PrecisionModel
+        private PreparedGeometryFactory preparedGeometryFactory;
+        public PreparedGeometryFactory PreparedGeometryFactory
+        {
+            get
+            {
+                if (preparedGeometryFactory == null)
+                {
+                    preparedGeometryFactory = new PreparedGeometryFactory();
+                }
+                return preparedGeometryFactory;
+            }
+        }
+
+        private PrecisionModel precisionModel;
+        public PrecisionModel PrecisionModel
         {
             get
             {
@@ -55,14 +68,7 @@ namespace ThCADCore.NTS
                 {
                     if (precisionModel == null)
                     {
-                        if (Scale == 0.0)
-                        {
-                            precisionModel = NtsGeometryServices.Instance.CreatePrecisionModel(PrecisionModels.FloatingSingle);
-                        }
-                        else
-                        {
-                            precisionModel = NtsGeometryServices.Instance.CreatePrecisionModel(Scale);
-                        }
+                        precisionModel = NtsGeometryServices.Instance.CreatePrecisionModel(PrecisionModels.Fixed);
                     }
                     return precisionModel;
                 }

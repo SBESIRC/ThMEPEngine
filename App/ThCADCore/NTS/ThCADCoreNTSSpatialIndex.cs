@@ -1,18 +1,27 @@
 ﻿using System;
-using GeoAPI.Geometries;
-using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
+using DotNetARX;
+using Linq2Acad;
+using System.Linq;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.Strtree;
+using NetTopologySuite.Geometries.Prepared;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
     public class ThCADCoreNTSSpatialIndex : IDisposable
     {
-        private STRtree<IGeometry> Engine { get; set; }
+        private STRtree<Geometry> Engine { get; set; }
+        public Dictionary<Geometry, DBObject> Geometries { get; set; }
         public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
         {
-            Engine = new STRtree<IGeometry>();
-            Initialize(objs);
+            Geometries = new Dictionary<Geometry, DBObject>();
+            Update(objs, new DBObjectCollection());
         }
 
         public void Dispose()
@@ -20,17 +29,82 @@ namespace ThCADCore.NTS
             //
         }
 
-        private void Initialize(DBObjectCollection objs)
+        private DBObjectCollection CrossingFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
         {
-            foreach(Curve obj in objs)
+            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
+        }
+
+        private DBObjectCollection FenceFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
+        {
+            return objs.Cast<Entity>().Where(o => Intersects(preparedGeometry, o)).ToCollection();
+        }
+
+        private DBObjectCollection WindowFilter(DBObjectCollection objs, IPreparedGeometry preparedGeometry)
+        {
+            return objs.Cast<Entity>().Where(o => Contains(preparedGeometry, o)).ToCollection();
+        }
+
+        private bool Contains(IPreparedGeometry preparedGeometry, Entity entity)
+        {
+            return preparedGeometry.Contains(ToNTSGeometry(entity));
+        }
+
+        private bool Intersects(IPreparedGeometry preparedGeometry, Entity entity)
+        {
+            return preparedGeometry.Intersects(ToNTSGeometry(entity));
+        }
+
+        private Geometry ToNTSGeometry(DBObject obj)
+        {
+            using (var ov = new ThCADCoreNTSFixedPrecision())
             {
                 if (obj is Line line)
                 {
-                    AddGeometry(line.ToNTSLineString());
+                    return line.ToNTSLineString();
                 }
                 else if (obj is Polyline polyline)
                 {
-                    AddGeometry(polyline.ToNTSLineString());
+                    return polyline.ToNTSLineString();
+                }
+                else if (obj is Arc arc)
+                {
+                    return arc.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is Circle circle)
+                {
+                    return circle.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is DBText text)
+                {
+                    return text.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is Hatch hatch)
+                {
+                    var maxHatch = hatch.Boundaries().OrderByDescending(x => x.Area).First();
+                    if (maxHatch is Polyline hatchPolyline)
+                    {
+                        return hatchPolyline.ToNTSPolygon();
+                    }
+                    else if (maxHatch is Circle hatchCircle)
+                    {
+                        return hatchCircle.ToNTSPolygon(10);
+                    }
+                    else
+                    {
+                        throw new ArgumentException();
+                    }
+                }
+                else if (obj is Solid solid)
+                {
+                    return solid.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is BlockReference blockReference)
+                {
+                    return blockReference.GeometricExtents.ToNTSPolygon();
+                }
+                else if (obj is MPolygon mPolygon)
+                {
+                    return mPolygon.ToNTSPolygon();
                 }
                 else
                 {
@@ -39,97 +113,164 @@ namespace ThCADCore.NTS
             }
         }
 
-        private void AddGeometry(IGeometry geometry)
+        private Polygon ToNTSPolygon(DBObject obj)
         {
-            Engine.Insert(geometry.EnvelopeInternal, geometry);
+            using (var ov = new ThCADCoreNTSFixedPrecision())
+            {
+                if (obj is Polyline poly)
+                {
+                    return poly.ToNTSPolygon();
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
         }
 
-        private void RemoveGeometry(IGeometry geometry)
+        /// <summary>
+        /// 更新索引
+        /// </summary>
+        /// <param name="adds"></param>
+        /// <param name="removals"></param>
+        public void Update(DBObjectCollection adds, DBObjectCollection removals)
         {
-            Engine.Remove(geometry.EnvelopeInternal, geometry);
+            // 添加新的对象
+            adds.Cast<DBObject>().ForEachDbObject(o =>
+            {
+                var geometry = ToNTSGeometry(o);
+                if (!Geometries.Keys.Contains(geometry))
+                {
+                    Geometries.Add(geometry, o);
+                }
+            });
+            // 移除删除对象
+            Geometries.RemoveAll((k, v) => removals.Contains(v));
+
+            // 创建新的索引
+            Engine = new STRtree<Geometry>();
+            Geometries.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
         }
 
+        /// <summary>
+        /// Crossing selection
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public DBObjectCollection SelectCrossingPolygon(Polyline polyline)
+        {
+            var geometry = ToNTSPolygon(polyline);
+            return CrossingFilter(
+                Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
+        }
+
+        public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
+        {
+            var pline = new Polyline()
+            {
+                Closed = true,
+            };
+            pline.CreatePolyline(polygon);
+            return SelectCrossingPolygon(pline);
+        }
+
+        /// <summary>
+        /// Crossing selection
+        /// </summary>
+        /// <param name="pt1"></param>
+        /// <param name="pt2"></param>
+        /// <returns></returns>
         public DBObjectCollection SelectCrossingWindow(Point3d pt1, Point3d pt2)
         {
             var extents = new Extents3d(pt1, pt2);
-            return Query(extents.ToEnvelope());
+            return SelectCrossingPolygon(extents.ToRectangle());
         }
 
-        public DBObjectCollection SelectFence(Curve curve)
+        /// <summary>
+        /// Window selection
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public DBObjectCollection SelectWindowPolygon(Polyline polyline)
         {
-            return Query(curve.GeometricExtents.ToEnvelope());
+            var geometry = ToNTSPolygon(polyline);
+            return WindowFilter(Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
+        }
+
+        /// <summary>
+        /// Fence Selection
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public DBObjectCollection SelectFence(Polyline polyline)
+        {
+            var geometry = ToNTSGeometry(polyline);
+            return FenceFilter(Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
+        }
+
+        public DBObjectCollection SelectAll()
+        {
+            var objs = new DBObjectCollection();
+            foreach (var item in Geometries.Values)
+            {
+                objs.Add(item);
+            }
+            return objs;
+        }
+
+        public void AddTag(DBObject obj, object tag)
+        {
+            if (Geometries.ContainsValue(obj))
+            {
+                Geometries.Where(o => o.Value == obj).First().Key.UserData = tag;
+            }
+        }
+
+        public object Tag(DBObject obj)
+        {
+            if (!Geometries.ContainsValue(obj))
+            {
+                return null;
+            }
+            return Geometries.Where(o => o.Value == obj).First().Key.UserData;
         }
 
         private DBObjectCollection Query(Envelope envelope)
         {
             var objs = new DBObjectCollection();
-            foreach(var geometry in Engine.Query(envelope))
+            foreach (var geometry in Engine.Query(envelope))
             {
-                if (geometry is ILineString lineString)
+                if (Geometries.ContainsKey(geometry))
                 {
-                    objs.Add(lineString.ToDbPolyline());
-                }
-                else if (geometry is ILinearRing linearRing)
-                {
-                    objs.Add(linearRing.ToDbPolyline());
-                }
-                else if (geometry is IPolygon polygon)
-                {
-                    objs.Add(polygon.Shell.ToDbPolyline());
-                }
-                else
-                {
-                    throw new NotSupportedException();
+                    objs.Add(Geometries[geometry]);
                 }
             }
             return objs;
         }
 
         /// <summary>
-        /// 最近的邻居
+        /// 最近的几个邻居
         /// </summary>
         /// <param name="curve"></param>
         /// <returns></returns>
-        public Curve NearestNeighbour(Curve curve)
+        public DBObjectCollection NearestNeighbours(Curve curve, int num)
         {
-            IGeometry geometry = null;
-            if (curve is Line line)
-            {
-                geometry = line.ToNTSLineString();
-            }
-            else if (curve is Polyline polyline)
-            {
-                geometry = polyline.ToNTSLineString();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-
-            var objs = new DBObjectCollection();
+            var geometry = ToNTSGeometry(curve);
             var neighbours = Engine.NearestNeighbour(
-                geometry.EnvelopeInternal, 
-                geometry, 
-                new GeometryItemDistance(), 
-                2);
-            foreach(var neighbour in neighbours)
+                geometry.EnvelopeInternal,
+                geometry,
+                new GeometryItemDistance(),
+                num)
+                .Where(o => !o.EqualsExact(geometry));
+            var objs = new DBObjectCollection();
+            foreach (var neighbour in neighbours)
             {
-                // 从邻居中过滤掉自己
-                if (neighbour.EqualsExact(geometry))
-                {
-                    continue;
-                }
-
-                if (neighbour is ILineString lineString)
-                {
-                    objs.Add(lineString.ToDbPolyline());
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
+                objs.Add(Geometries[neighbour]);
             }
-            return objs[0] as Curve;
+            return objs;
         }
     }
 }

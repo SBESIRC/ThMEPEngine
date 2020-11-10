@@ -1,6 +1,6 @@
-﻿using GeoAPI.Geometries;
+﻿using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 
 namespace ThCADCore.NTS
 {
@@ -25,7 +25,7 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static Point3d ToAcGePoint3d(this IPoint point)
+        public static Point3d ToAcGePoint3d(this Point point)
         {
             return point.Coordinate.ToAcGePoint3d();
         }
@@ -38,7 +38,7 @@ namespace ThCADCore.NTS
                 );
         }
 
-        public static Point2d ToAcGePoint2d(this IPoint point)
+        public static Point2d ToAcGePoint2d(this Point point)
         {
             return point.Coordinate.ToAcGePoint2d();
         }
@@ -47,8 +47,7 @@ namespace ThCADCore.NTS
         {
             return new Coordinate(
                     ThCADCoreNTSService.Instance.PrecisionModel.MakePrecise(point.X),
-                    ThCADCoreNTSService.Instance.PrecisionModel.MakePrecise(point.Y),
-                    ThCADCoreNTSService.Instance.PrecisionModel.MakePrecise(point.Z)
+                    ThCADCoreNTSService.Instance.PrecisionModel.MakePrecise(point.Y)
                     );
 
         }
@@ -69,6 +68,16 @@ namespace ThCADCore.NTS
                 coordinates.Add(pt.ToNTSCoordinate());
             }
             return coordinates.ToArray();
+        }
+
+        public static Point3dCollection ToAcGePoint3ds(this Coordinate[] coordinates)
+        {
+            var points = new Point3dCollection();
+            foreach(var coordinate in coordinates)
+            {
+                points.Add(coordinate.ToAcGePoint3d());
+            }
+            return points;
         }
 
         public static bool IsReflex(Coordinate p1, Coordinate p2, Coordinate p3)

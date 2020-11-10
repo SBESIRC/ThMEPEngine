@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+  <?include Variable.wxi ?>
+  <Fragment>
+    <?if $(var.Configuration) = Debug ?>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+      <?define OutputPath_R18_Debug="bin\Debug" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R18_Publics_BaseCode_Debug" Guid="{D26B2AA8-72A6-4F59-8EDF-D64E55BF899E}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R18_Publics_BaseCode_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+      <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" Guid="{068DAC6D-A7E8-423D-93A0-C5F7DF8052F8}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+      <?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" Guid="{08623593-86CB-49DC-BCBB-85E82513B616}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+      <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" Guid="{0DF4AD2D-8AE1-4085-9039-505E914DCCE9}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <?elseif $(var.Configuration) = Release ?>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+      <?define OutputPath_R18_Release="bin\Release" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R18_Publics_BaseCode_Release" Guid="{764BA8CE-6B91-471D-BDC4-DE04FD7EC3B7}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R18_Publics_BaseCode_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+      <?define OutputPath_R19_Release="bin\Release-NET40" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" Guid="{C09DA21E-1817-46F1-9AAA-5D6A81CBB6B1}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+      <?define OutputPath_R20_Release="bin\Release-NET45" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" Guid="{09718367-D0D7-4343-950D-D6C95B2AC2EF}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+      <?define OutputPath_R22_Release="bin\Release-NET46" ?>
+      <Component Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" Guid="{86665659-595C-42D3-83B0-85460E273E5B}" Win64="yes">
+        <File Id="FILE_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\TianHua.Publics.BaseCode.dll" />
+      </Component>
+    </DirectoryRef>
+    <?endif?>
+  </Fragment>
+  <Fragment>
+    <ComponentGroup Id="ProductComponentsAppInternal">
+      <?if $(var.Configuration) = Debug ?>
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_Publics_BaseCode_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Debug" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Debug" />
+      <?elseif $(var.Configuration) = Release ?>
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_Publics_BaseCode_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Publics_BaseCode_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Publics_BaseCode_Release" />
+      <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Publics_BaseCode_Release" />
+      <?endif?>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

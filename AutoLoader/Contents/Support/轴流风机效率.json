@@ -1,0 +1,56 @@
+[
+    {
+        "No_Min": 2.5,
+        "No_Max": 5,
+        "FanEfficiencyLevel": "3级",
+        "FanEfficiency": 67
+    },
+    {
+        "No_Min": 2.5,
+        "No_Max": 5,
+        "FanEfficiencyLevel": "2级",
+        "FanEfficiency": 72
+    },
+    {
+        "No_Min": 2.5,
+        "No_Max": 5,
+        "FanEfficiencyLevel": "1级",
+        "FanEfficiency": 75
+    },
+    {
+        "No_Min": 5,
+        "No_Max": 10,
+        "FanEfficiencyLevel": "3级",
+        "FanEfficiency": 70
+    },
+    {
+        "No_Min": 5,
+        "No_Max": 10,
+        "FanEfficiencyLevel": "2级",
+        "FanEfficiency": 75
+    },
+    {
+        "No_Min": 5,
+        "No_Max": 10,
+        "FanEfficiencyLevel": "1级",
+        "FanEfficiency": 78
+    },
+    {
+        "No_Min": 10,
+        "No_Max": "",
+        "FanEfficiencyLevel": "3级",
+        "FanEfficiency": 73
+    },
+    {
+        "No_Min": 10,
+        "No_Max": "",
+        "FanEfficiencyLevel": "2级",
+        "FanEfficiency": 79
+    },
+    {
+        "No_Min": 10,
+        "No_Max": "",
+        "FanEfficiencyLevel": "1级",
+        "FanEfficiency": 83
+    }
+]

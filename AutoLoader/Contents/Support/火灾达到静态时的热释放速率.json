@@ -1,0 +1,62 @@
+[
+    {
+        "BuildType": "办公室、学校、客厅、走道",
+        "HasSprinkler": false,
+        "ReleaseSpeed": "6"
+    },
+    {
+        "BuildType": "办公室、学校、客厅、走道",
+        "HasSprinkler": true,
+        "ReleaseSpeed": "1.5"
+    },
+    {
+        "BuildType": "商店,展览厅",
+        "HasSprinkler": false,
+        "ReleaseSpeed": "10"
+    },
+    {
+        "BuildType": "商店,展览厅",
+        "HasSprinkler": true,
+        "ReleaseSpeed": "3"
+    },
+    {
+        "BuildType": "其他公共场所",
+        "HasSprinkler": false,
+        "ReleaseSpeed": "8"
+    },
+    {
+        "BuildType": "其他公共场所",
+        "HasSprinkler": true,
+        "ReleaseSpeed": "2.5"
+    },
+    {
+        "BuildType": "汽车库",
+        "HasSprinkler": false,
+        "ReleaseSpeed": "3"
+    },
+    {
+        "BuildType": "汽车库",
+        "HasSprinkler": true,
+        "ReleaseSpeed": "1.5"
+    },
+    {
+        "BuildType": "厂房",
+        "HasSprinkler": false,
+        "ReleaseSpeed": "8"
+    },
+    {
+        "BuildType": "厂房",
+        "HasSprinkler": true,
+        "ReleaseSpeed": "2.5"
+    },
+    {
+        "BuildType": "仓库",
+        "HasSprinkler": false,
+        "ReleaseSpeed": "20"
+    },
+    {
+        "BuildType": "仓库",
+        "HasSprinkler": true,
+        "ReleaseSpeed": "4"
+    }
+]
