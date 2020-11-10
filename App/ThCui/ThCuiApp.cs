@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using ThCADExtension;
+using System.Diagnostics;
 using Autodesk.AutoCAD.Runtime;
 
 namespace TianHua.AutoCAD.ThCui
@@ -87,6 +88,12 @@ namespace TianHua.AutoCAD.ThCui
             ////AcadApp.DocumentManager.DocumentLockModeChanged -= DocCollEvent_DocumentLockModeChanged_Handler;
             ////反注册SystemVariableChanged 事件
             //AcadApp.SystemVariableChanged -= SystemVariableChangedHandler;
+        }
+
+        [CommandMethod("TIANHUACAD", "THHLP", CommandFlags.Modal)]
+        public void ThHelp()
+        {
+            Process.Start(ThCADCommon.OnlineHelpUrl);
         }
 
 #if DEBUG

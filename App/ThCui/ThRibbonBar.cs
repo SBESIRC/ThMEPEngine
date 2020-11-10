@@ -13,7 +13,7 @@ namespace TianHua.AutoCAD.ThCui
                 CreateHVACPanel(tab);
                 CreateElectricPanel(tab);
                 CreateWSSPanel(tab);
-                //CreateHelpPanel(tab);
+                CreateHelpPanel(tab);
                 //CreateSettingsPanel(tab);
                 //CreateCheckToolPanel(tab);
                 //CreatStatisticPanel(tab);
@@ -87,10 +87,17 @@ namespace TianHua.AutoCAD.ThCui
         }
         private static void CreateHelpPanel(RibbonTabSource tab)
         {
-            // 登录界面
             var panel = tab.AddNewPanel("Help", "帮助");
             var row = panel.AddNewRibbonRow();
 
+            // 帮助文档
+            row.AddNewButton("使用帮助",
+                "天华使用帮助",
+                ThCuiCommon.CMD_THHLP_GLOBAL_NAME,
+                "天华MEP工具集使用帮助",
+                "IDI_THCAD_THHLP_SMALL",
+                "IDI_THCAD_THHLP_LARGE",
+                RibbonButtonStyle.LargeWithText);
             //// 登录
             //{
             //    var subPanel = row.AddNewPanel();
@@ -119,91 +126,91 @@ namespace TianHua.AutoCAD.ThCui
             //        RibbonButtonStyle.LargeWithText);
             //}
 
-            {
-                var subPanel = row.AddNewPanel();
+            //{
+            //    var subPanel = row.AddNewPanel();
 
-                // 专业切换
-                var subRow = subPanel.AddNewRibbonRow();
-                var splitButton = subRow.AddNewSplitButton(
-                    "专业切换",
-                    RibbonSplitButtonBehavior.SplitFollow,
-                    RibbonSplitButtonListStyle.IconText,
-                    RibbonButtonStyle.SmallWithText);
+            //    // 专业切换
+            //    var subRow = subPanel.AddNewRibbonRow();
+            //    var splitButton = subRow.AddNewSplitButton(
+            //        "专业切换",
+            //        RibbonSplitButtonBehavior.SplitFollow,
+            //        RibbonSplitButtonListStyle.IconText,
+            //        RibbonButtonStyle.SmallWithText);
 
-                // 方案专业
-                splitButton.AddNewButton("方案",
-                    "天华方案",
-                    "THPROFILE _P",
-                    "切换到天华方案",
-                    "IDI_THCAD_PROJECT_PLAN_SMALL",
-                    "IDI_THCAD_PROJECT_PLAN_LARGE",
-                    RibbonButtonStyle.SmallWithText);
+            //    // 方案专业
+            //    splitButton.AddNewButton("方案",
+            //        "天华方案",
+            //        "THPROFILE _P",
+            //        "切换到天华方案",
+            //        "IDI_THCAD_PROJECT_PLAN_SMALL",
+            //        "IDI_THCAD_PROJECT_PLAN_LARGE",
+            //        RibbonButtonStyle.SmallWithText);
 
-                // 建筑专业
-                splitButton.AddNewButton("建筑专业",
-                    "天华建筑",
-                    "THPROFILE _A",
-                    "切换到天华建筑",
-                    "IDI_THCAD_ARCHITECTURE_SMALL",
-                    "IDI_THCAD_ARCHITECTURE_LARGE",
-                    RibbonButtonStyle.SmallWithText);
+            //    // 建筑专业
+            //    splitButton.AddNewButton("建筑专业",
+            //        "天华建筑",
+            //        "THPROFILE _A",
+            //        "切换到天华建筑",
+            //        "IDI_THCAD_ARCHITECTURE_SMALL",
+            //        "IDI_THCAD_ARCHITECTURE_LARGE",
+            //        RibbonButtonStyle.SmallWithText);
 
-                // 结构专业
-                splitButton.AddNewButton("结构专业",
-                    "天华结构",
-                    "THPROFILE _S",
-                    "切换到天华结构",
-                    "IDI_THCAD_STRUCTURE_SMALL",
-                    "IDI_THCAD_STRUCTURE_LARGE",
-                    RibbonButtonStyle.SmallWithText);
+            //    // 结构专业
+            //    splitButton.AddNewButton("结构专业",
+            //        "天华结构",
+            //        "THPROFILE _S",
+            //        "切换到天华结构",
+            //        "IDI_THCAD_STRUCTURE_SMALL",
+            //        "IDI_THCAD_STRUCTURE_LARGE",
+            //        RibbonButtonStyle.SmallWithText);
 
-                // 暖通专业
-                splitButton.AddNewButton("暖通专业",
-                    "天华暖通",
-                    "THPROFILE _H",
-                    "切换到天华暖通",
-                    "IDI_THCAD_HAVC_SMALL",
-                    "IDI_THCAD_HAVC_LARGE",
-                    RibbonButtonStyle.SmallWithText);
+            //    // 暖通专业
+            //    splitButton.AddNewButton("暖通专业",
+            //        "天华暖通",
+            //        "THPROFILE _H",
+            //        "切换到天华暖通",
+            //        "IDI_THCAD_HAVC_SMALL",
+            //        "IDI_THCAD_HAVC_LARGE",
+            //        RibbonButtonStyle.SmallWithText);
 
-                // 电气专业
-                splitButton.AddNewButton("电气专业",
-                    "天华电气",
-                    "THPROFILE _E",
-                    "切换到天华电气",
-                    "IDI_THCAD_ELECTRICAL_SMALL",
-                    "IDI_THCAD_ELECTRICAL_LARGE",
-                    RibbonButtonStyle.LargeWithText);
+            //    // 电气专业
+            //    splitButton.AddNewButton("电气专业",
+            //        "天华电气",
+            //        "THPROFILE _E",
+            //        "切换到天华电气",
+            //        "IDI_THCAD_ELECTRICAL_SMALL",
+            //        "IDI_THCAD_ELECTRICAL_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
 
-                // 给排水专业
-                splitButton.AddNewButton("给排水专业",
-                    "天华给排水",
-                    "THPROFILE _W",
-                    "切换到天华给排水",
-                    "IDI_THCAD_WATER_SMALL",
-                    "IDI_THCAD_WATER_LARGE",
-                    RibbonButtonStyle.LargeWithText);
+            //    // 给排水专业
+            //    splitButton.AddNewButton("给排水专业",
+            //        "天华给排水",
+            //        "THPROFILE _W",
+            //        "切换到天华给排水",
+            //        "IDI_THCAD_WATER_SMALL",
+            //        "IDI_THCAD_WATER_LARGE",
+            //        RibbonButtonStyle.LargeWithText);
 
-                // 帮助文档
-                subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("帮助文档",
-                    "天华帮助",
-                    ThCuiCommon.CMD_THHLP_GLOBAL_NAME,
-                    "获取帮助文档",
-                    "IDI_THCAD_THHLP_SMALL",
-                    "IDI_THCAD_THHLP_LARGE",
-                    RibbonButtonStyle.SmallWithText);
+            //    // 帮助文档
+            //    subRow = subPanel.AddNewRibbonRow();
+            //    subRow.AddNewButton("帮助文档",
+            //        "天华帮助",
+            //        ThCuiCommon.CMD_THHLP_GLOBAL_NAME,
+            //        "获取帮助文档",
+            //        "IDI_THCAD_THHLP_SMALL",
+            //        "IDI_THCAD_THHLP_LARGE",
+            //        RibbonButtonStyle.SmallWithText);
 
-                // 反馈意见
-                subRow = subPanel.AddNewRibbonRow();
-                subRow.AddNewButton("反馈意见",
-                    "天华反馈",
-                    "THFBK",
-                    "反馈意见",
-                    "IDI_THCAD_THFBK_SMALL",
-                    "IDI_THCAD_THFBK_LARGE",
-                    RibbonButtonStyle.SmallWithText);
-            }
+            //    // 反馈意见
+            //    subRow = subPanel.AddNewRibbonRow();
+            //    subRow.AddNewButton("反馈意见",
+            //        "天华反馈",
+            //        "THFBK",
+            //        "反馈意见",
+            //        "IDI_THCAD_THFBK_SMALL",
+            //        "IDI_THCAD_THFBK_LARGE",
+            //        RibbonButtonStyle.SmallWithText);
+            //}
         }
 
         private static void CreateSettingsPanel(RibbonTabSource tab)
