@@ -427,6 +427,10 @@ namespace ThMEPElectrical.Geometry
             postPoly = postPoly.RemoveNearSamePoints().Points2PointCollection().ToPolyline();
 
 #if ACAD_ABOVE_2012
+            // 基于CAD API，存在多种方式根据Region获取质心的方式
+            //  1. Region.AreaProperties() （AutoCAD >= 2013)
+            //  2. Solid3d.Extrude(Region) -> Solid3d .MassProperties()
+            // https://www.keanw.com/2015/08/getting-the-centroid-of-an-autocad-region-using-net.html
             var regions = RegionTools.CreateRegion(new Curve[] { postPoly });
             foreach (var region in regions)
             {
@@ -435,7 +439,14 @@ namespace ThMEPElectrical.Geometry
                     ptLst.Add(pt);
             }
 #else
-            ptLst.Add(postPoly.GetCentroidPoint());
+            // 在AutoCAD 2012下, Region.CreateFromCurves()很不稳定，容易抛异常
+            // 更糟糕的事，由于无法事先预判是否可以形成Region，使用这个API就存在很大风险
+            // 所以这里抛弃用Region取质心的方式，而采用纯几何计算的方式来获取质心
+            var centriod = postPoly.GetCentroidPoint();
+            if (GeomUtils.PtInLoop(postPoly, centriod))
+            {
+                ptLst.Add(centriod);
+            }
 #endif
 
             if (ptLst.Count < 1)
