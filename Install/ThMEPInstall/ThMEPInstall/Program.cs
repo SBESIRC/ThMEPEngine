@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Diagnostics;
 
@@ -16,8 +17,7 @@ namespace ThMEPInstall
 
         static string ExecutablePath()
         {
-            var fi = new FileInfo(Assembly.GetExecutingAssembly().Location);
-            return fi.Directory.FullName;
+            return AppDomain.CurrentDomain.BaseDirectory;
         }
 
         static void ImportRegFile(string regfile)
