@@ -274,7 +274,7 @@ namespace ThMEPElectrical.Core
                 drawCurves.AddRange(pairValue.Value);
             }
 
-            DrawUtils.DrawProfile(drawCurves, "gridInfos");
+            //DrawUtils.DrawProfile(drawCurves, "gridInfos");
         }
 
         private List<Polyline> TransformPolylines(List<Polyline> srcPolys, Matrix3d transMatrix)
@@ -509,13 +509,13 @@ namespace ThMEPElectrical.Core
                 var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
                 var gridCalculator = new GridService();
 
-                DrawUtils.DrawProfile(validColumns.Polylines2Curves(), "validColumns");
+                //DrawUtils.DrawProfile(validColumns.Polylines2Curves(), "validColumns");
                 //轴网线
                 var gridInfo = gridCalculator.CreateGrid(poly, validColumns, new Matrix3d(), ThMEPCommon.spacingValue);
                 gridInfo = BothExtendPolys(gridInfo);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
-                DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
+                //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
             }
         }
 
@@ -842,7 +842,7 @@ namespace ThMEPElectrical.Core
                 rectPolylines.Add(MinRectangle.Calculate(poly));
             }
 
-            DrawUtils.DrawProfile(rectPolylines.Polylines2Curves(), "rectPolyline");
+            //DrawUtils.DrawProfile(rectPolylines.Polylines2Curves(), "rectPolyline");
         }
 
         public void DoMainBeamABBRect()
@@ -857,7 +857,7 @@ namespace ThMEPElectrical.Core
                 rectPolylines.Add(ABBRectangle.MakeABBPolyline(poly));
             }
 
-            DrawUtils.DrawProfile(rectPolylines.Polylines2Curves(), "rectPolyline");
+            //DrawUtils.DrawProfile(rectPolylines.Polylines2Curves(), "rectPolyline");
         }
     }
 }

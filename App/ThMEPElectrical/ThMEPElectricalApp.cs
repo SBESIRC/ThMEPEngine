@@ -41,7 +41,7 @@ namespace ThMEPElectrical
             {
                 var packageManager = new PackageManager(Parameter);
                 var polys = packageManager.DoMainBeamProfiles();
-                DrawUtils.DrawProfile(polys.Polylines2Curves(), "MainBeamProfiles");
+                //DrawUtils.DrawProfile(polys.Polylines2Curves(), "MainBeamProfiles");
             }
         }
 
@@ -188,7 +188,7 @@ namespace ThMEPElectrical
                     curves.Add(circle);
                 }
 
-                DrawUtils.DrawProfile(curves, "curves");
+                //DrawUtils.DrawProfile(curves, "curves");
             }
         }
 
