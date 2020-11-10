@@ -22,27 +22,30 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
         /// <param name="sprays"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public Dictionary<Line, List<SprayLayoutData>> GetBoundarySpray(Polyline polyline, List<SprayLayoutData> sprays, double length)
+        public Dictionary<Line, List<SprayLayoutData>> GetBoundarySpray(Polyline plFrame, List<Polyline> polylines, List<SprayLayoutData> sprays, double length)
         {
-            List<Line> lines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
-            }
-            
             Dictionary<Line, List<SprayLayoutData>> sprayDic = new Dictionary<Line, List<SprayLayoutData>>();
-            foreach (var line in lines)
+            foreach (var polyline in polylines)
             {
-                if (line.Length <= 300)
+                List<Line> lines = new List<Line>();
+                for (int i = 0; i < polyline.NumberOfVertices; i++)
                 {
-                    continue;
+                    lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
                 }
 
-                var linePoly = expandLine(line, length);
-                var resSprays = GetSprays(polyline, line, linePoly, sprays);
-                if (resSprays.Count > 0)
+                foreach (var line in lines)
                 {
-                    sprayDic.Add(line, resSprays);
+                    if (line.Length <= 300)
+                    {
+                        continue;
+                    }
+
+                    var linePoly = expandLine(line, length);
+                    var resSprays = GetSprays(plFrame, line, linePoly, sprays);
+                    if (resSprays.Count > 0)
+                    {
+                        sprayDic.Add(line, resSprays);
+                    }
                 }
             }
             

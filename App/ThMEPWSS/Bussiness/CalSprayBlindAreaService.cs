@@ -31,7 +31,7 @@ namespace ThMEPWSS.Bussiness
         public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline, List<Polyline> holes)
         {
             var sprayData = SprayDataOperateService.CalSprayPoint(sprays, vDir, tDir, length);
-            var blindArea = GetBlindArea(sprayData, polyline, holes);
+            var blindArea = GetRealBlindArea(sprayData, polyline, holes);
 
             //打印盲区
             InsertBlindArea(blindArea);
@@ -41,7 +41,7 @@ namespace ThMEPWSS.Bussiness
         {
             var sprayPts = sprays.Select(x => x.Position).ToList();
             var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, length);
-            var blindArea = GetBlindArea(sprayData, polyline, holes);
+            var blindArea = GetRealBlindArea(sprayData, polyline, holes);
 
             //打印盲区
             InsertBlindArea(blindArea);

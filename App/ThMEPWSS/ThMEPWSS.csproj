@@ -62,6 +62,7 @@
     <Compile Include="Service\MarkService.cs" />
     <Compile Include="Service\RotateTransformService.cs" />
     <Compile Include="Service\SprayDataOperateService.cs" />
+    <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
     <Compile Include="ThMEPWSSApp.cs" />
     <Compile Include="ThWSSCommon.cs" />

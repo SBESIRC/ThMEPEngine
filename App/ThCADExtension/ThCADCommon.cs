@@ -111,13 +111,13 @@ namespace ThCADExtension
         // Contents 路径
         private static string ContentsPath()
         {
-            return Path.Combine(RootPath(),"Contents");
+            return Path.Combine(RootPath(), "AutoLoader", "Contents");
         }
 
         private static string RootPath()
         {
             var fi = new FileInfo(Assembly.GetCallingAssembly().Location);
-            return fi.Directory.Parent.Parent.Parent.FullName;
+            return fi.Directory.Parent.Parent.Parent.Parent.FullName;
         }
     }
 }

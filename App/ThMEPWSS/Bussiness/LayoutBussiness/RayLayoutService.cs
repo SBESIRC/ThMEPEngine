@@ -25,7 +25,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
         protected readonly double moveLength = 200;
         protected readonly double spacing = 100;
         
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, Matrix3d matrix, bool CreateLine = true)
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, List<Polyline> walls, List<Polyline> holes, Matrix3d matrix, bool CreateLine = true)
         {
             //获取柱轴网
             GridService gridService = new GridService();
@@ -39,15 +39,26 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 
             //边界保护（调整线）
             CheckProtectService checkProtectService = new CheckProtectService();
-            checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
+            //checkProtectService.CheckBoundarySprays(polyline, new List<Polyline>() { polyline }, sprays, sideLength, maxLength);
 
             //边界保护（调整点）
             CheckProtectByPointsService checkProtectByPointsService = new CheckProtectByPointsService();
-            checkProtectByPointsService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
+            checkProtectByPointsService.CheckBoundarySprays(polyline, new List<Polyline>() { polyline }, sprays, sideLength, maxLength);
+
+            //清除洞口喷淋
+            holes.AddRange(walls);
+            CalHolesService calHolesService = new CalHolesService();
+            calHolesService.ClearHoleSpray(holes, sprays);
+            
+            //洞口边界保护（调整线）
+            //checkProtectService.CheckBoundarySprays(polyline, holes, sprays, sideLength, maxLength);
+
+            //洞口边界保护（调整点）
+            checkProtectByPointsService.CheckBoundarySprays(polyline, holes, sprays, sideLength, maxLength);
 
             //躲次梁
             AvoidBeamByPointService avoidService = new AvoidBeamByPointService();
-            avoidService.AvoidBeam(polyline, sprays, colums, beams, sideLength, maxLength, matrix);
+            avoidService.AvoidBeam(polyline, sprays, colums, beams, holes, sideLength, maxLength, matrix);
 
             var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays)
                 .SelectMany(x => polyline.Trim(x).Cast<Polyline>()

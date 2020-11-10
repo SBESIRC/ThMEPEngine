@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Model;
 
@@ -85,6 +86,17 @@ namespace ThMEPWSS.Service
             double compareValue = distance * compareX;
 
             return compareValue >= minSpacing && compareValue <= maxSpacing;
+        }
+
+        /// <summary>
+        /// 判断移动之后的点是否落在了洞内
+        /// </summary>
+        /// <param name="newPosition"></param>
+        /// <param name="holes"></param>
+        /// <returns></returns>
+        public bool CheckSprayWithHoles(Point3d newPosition, List<Polyline> holes)
+        {
+            return !(holes.Where(x => x.Contains(newPosition)).Count() > 0);
         }
     }
 }
