@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Reflection;
 using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADExtension
@@ -110,9 +111,13 @@ namespace ThCADExtension
         // Contents 路径
         private static string ContentsPath()
         {
-            return Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                @"Autodesk\ApplicationPlugins\ThMEPPlugin.bundle\Contents");
+            return Path.Combine(RootPath(),"Contents");
+        }
+
+        private static string RootPath()
+        {
+            var fi = new FileInfo(Assembly.GetCallingAssembly().Location);
+            return fi.Directory.Parent.Parent.Parent.FullName;
         }
     }
 }

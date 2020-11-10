@@ -12,21 +12,29 @@ ProductCode="{CC5E48FB-AB03-450F-A1A1-894B8AC1E72B}"
 UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
+	<!--Assembly App, CUI, 2012 version-->
     <Components>
-        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" SupportPathChs="./Contents/Resources/2012" />
-        <ComponentEntry AppName="ThMEPCuix2012"                 ModuleName="./Contents/Resources/2012/ThMEP.cuix" />
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
+        <ComponentEntry ModuleName="./Contents/Win64/2012/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        </ComponentEntry>
     </Components>
+    <!--Assembly App, CUI, 2014 version-->
     <Components>
-        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" SupportPathChs="./Contents/Resources/2014" />
-        <ComponentEntry AppName="ThMEPCuix2014"                 ModuleName="./Contents/Resources/2014/ThMEP.cuix" />
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        </ComponentEntry>
     </Components>
+    <!--Assembly App, CUI, 2016 version-->
     <Components>
-        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" SupportPathChs="./Contents/Resources/2016" />
-        <ComponentEntry AppName="ThMEPCuix2016"                 ModuleName="./Contents/Resources/2016/ThMEP.cuix" />
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        </ComponentEntry>
     </Components>
+    <!--Assembly App, CUI, 2018 version-->
     <Components>
-        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" SupportPathChs="./Contents/Resources/2016" />
-        <ComponentEntry AppName="ThMEPCuix2018"                 ModuleName="./Contents/Resources/2018/ThMEP.cuix" />
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        </ComponentEntry>
     </Components>
     <!--Assembly App, ThMEPEngineCore, 2012 version-->
     <Components>
