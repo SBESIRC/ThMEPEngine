@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.IO;
+using System.Reflection;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 
 namespace ThMEPInstall
 {
@@ -10,10 +8,16 @@ namespace ThMEPInstall
     {
         static void Main(string[] args)
         {
-            ImportRegFile("ThMEPPlugin.2012.reg");
-            ImportRegFile("ThMEPPlugin.2014.reg");
-            ImportRegFile("ThMEPPlugin.2016.reg");
-            ImportRegFile("ThMEPPlugin.2018.reg");
+            ImportRegFile(Path.Combine(ExecutablePath(), "ThMEPPlugin.2012.reg"));
+            ImportRegFile(Path.Combine(ExecutablePath(), "ThMEPPlugin.2014.reg"));
+            ImportRegFile(Path.Combine(ExecutablePath(), "ThMEPPlugin.2016.reg"));
+            ImportRegFile(Path.Combine(ExecutablePath(), "ThMEPPlugin.2018.reg"));
+        }
+
+        static string ExecutablePath()
+        {
+            var fi = new FileInfo(Assembly.GetExecutingAssembly().Location);
+            return fi.Directory.FullName;
         }
 
         static void ImportRegFile(string regfile)
