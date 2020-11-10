@@ -431,12 +431,16 @@ namespace ThMEPElectrical.Geometry
             //  1. Region.AreaProperties() （AutoCAD >= 2013)
             //  2. Solid3d.Extrude(Region) -> Solid3d .MassProperties()
             // https://www.keanw.com/2015/08/getting-the-centroid-of-an-autocad-region-using-net.html
-            var regions = RegionTools.CreateRegion(new Curve[] { postPoly });
-            foreach (var region in regions)
+            // https://adndevblog.typepad.com/autocad/2019/03/detecting-geometric-center-for-lwpolyline-3dpoly-and-2dpoly.html
+            foreach (var region in RegionTools.CreateRegion(new Curve[] { postPoly }))
             {
-                var pt = region.GetWCSCCentroid().Point3D();
-                if (GeomUtils.PtInLoop(postPoly, pt))
-                    ptLst.Add(pt);
+                Point3d o = Point3d.Origin;
+                Vector3d x = Vector3d.XAxis;
+                Vector3d y = Vector3d.YAxis;
+                var properties = region.AreaProperties(ref o, ref x, ref y);
+                var centroid = properties.Centroid.ToPoint3d();
+                if (GeomUtils.PtInLoop(postPoly, centroid))
+                    ptLst.Add(centroid);
             }
 #else
             // 在AutoCAD 2012下, Region.CreateFromCurves()很不稳定，容易抛异常
