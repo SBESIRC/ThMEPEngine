@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DotNetARX;
 using ThMEPElectrical.Model;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPElectrical.Assistant
 {
@@ -19,7 +20,7 @@ namespace ThMEPElectrical.Assistant
             if (curves == null || curves.Count == 0)
                 return objectIds;
 
-            using (var db = AcadDatabase.Active())
+                using (var db = AcadDatabase.Active())
             {
                 if (color == null)
                     CreateLayer(LayerName, Color.FromRgb(255, 0, 0));
@@ -35,6 +36,16 @@ namespace ThMEPElectrical.Assistant
             }
 
             return objectIds;
+        }
+
+        public static List<ObjectId> DrawProfileDebug(List<Curve> curves, string LayerName, Color color = null)
+        {
+            // 调试按钮关闭且图层不是保护半径有效图层
+            var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
+            if (!debugSwitch && !ThMEPCommon.PROTECTAREA_LAYER_NAME.Equals(LayerName))
+                return new List<ObjectId>();
+
+            return DrawProfile(curves, LayerName, color);
         }
 
         /// <summary>
@@ -72,6 +83,10 @@ namespace ThMEPElectrical.Assistant
         /// <param name="inputProfileDatas"></param>
         public static void DrawGroup(List<PlaceInputProfileData> inputProfileDatas)
         {
+            var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
+            if (!debugSwitch)
+                return;
+
             foreach (var singleProfileData in inputProfileDatas)
             {
                 DrawSingleInputProfileData(singleProfileData);
@@ -87,8 +102,8 @@ namespace ThMEPElectrical.Assistant
             var mainBeam = inputProfileData.MainBeamOuterProfile;
             var secondBeams = inputProfileData.SecondBeamProfiles;
 
-            var mainIds = DrawProfile(new List<Curve>() { mainBeam }, "mainBeam", Color.FromRgb(255, 0, 0));
-            var secondBeamIds = DrawProfile(secondBeams.Polylines2Curves(), "secondBeams", Color.FromRgb(0, 255, 0));
+            var mainIds = DrawProfileDebug(new List<Curve>() { mainBeam }, "mainBeam", Color.FromRgb(255, 0, 0));
+            var secondBeamIds = DrawProfileDebug(secondBeams.Polylines2Curves(), "secondBeams", Color.FromRgb(0, 255, 0));
 
             var totalIds = new ObjectIdList();
             totalIds.AddRange(mainIds);

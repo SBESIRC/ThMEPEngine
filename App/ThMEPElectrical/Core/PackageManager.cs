@@ -132,8 +132,8 @@ namespace ThMEPElectrical.Core
                 var wallPtCollection = pairInfo.ExternalProfile.Vertices();
                 var innerHoles = GetValidProfiles(infoReader.RecognizeMainBeamColumnWalls, wallPtCollection);
                 var secondBeams = GetValidProfileInfos(infoReader.RecognizeSecondBeams, wallPtCollection);
-                //var drawCurves = SecondBeamProfile2Polyline(secondBeams).Polylines2Curves();
-                //DrawUtils.DrawProfile(drawCurves, "drawCurves");
+                var drawCurves = SecondBeamProfile2Polyline(secondBeams).Polylines2Curves();
+                DrawUtils.DrawProfileDebug(drawCurves, "drawCurves");
                 // 外墙，内洞，次梁
                 var profileDatas = BeamDetectionCalculator.MakeDetectionData(pairInfo.ExternalProfile, innerHoles, secondBeams);
 
@@ -395,7 +395,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, Parameter.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
             }
 
             return ptLst;
@@ -433,7 +433,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
             }
             return ptLst;
         }
@@ -650,7 +650,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
             }
 
             return ptLst;
@@ -691,7 +691,7 @@ namespace ThMEPElectrical.Core
                     BlockInsertor.MakeBlockInsert(ptLst, Parameter.sensorType, ucsProfileData.rotateAngle);
                     var circles = GeometryTrans.Points2Circles(ptLst, Parameter.ProtectRadius, Vector3d.ZAxis);
                     var curves = GeometryTrans.Circles2Curves(circles);
-                    DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                    DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
                 }
             }
         }
@@ -786,7 +786,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
             }
 
             return ptLst;
@@ -824,7 +824,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
             }
 
             return ptLst;
