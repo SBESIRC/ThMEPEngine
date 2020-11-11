@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical.Block
+namespace ThMEPElectrical.CAD
 {
     public static class BlockInsertDBExtension
     {

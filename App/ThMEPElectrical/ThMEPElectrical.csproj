@@ -41,7 +41,7 @@
     <Compile Include="BlockConvert\ThBConvertRuleEngineWeakCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
-    <Compile Include="Block\BlockInsertDBExtension.cs" />
+    <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculator.cs" />
     <Compile Include="Business\DetectionRegion\DetectionCalculator.cs" />
@@ -138,9 +138,7 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="View\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
