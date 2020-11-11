@@ -1,6 +1,7 @@
 ﻿using System;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThCADCore.NTS
 {
@@ -38,6 +39,14 @@ namespace ThCADCore.NTS
             else if (curve is Polyline2d poly2d)
             {
                 return poly2d.ToNTSLineString();
+            }
+            else if(curve is Circle circle)
+            {
+                return circle.Tessellate(ThCADCoreNTSService.Instance.ArcTessellationLength).ToNTSLineString();
+            }
+            else if(curve is Arc arc)
+            {
+                return arc.TessellateArcWithArc(ThCADCoreNTSService.Instance.ArcTessellationLength).ToNTSLineString();
             }
             else
             {
