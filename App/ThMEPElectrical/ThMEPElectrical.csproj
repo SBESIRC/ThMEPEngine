@@ -110,6 +110,8 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="ThBlockConvertCmds.cs" />
+    <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
