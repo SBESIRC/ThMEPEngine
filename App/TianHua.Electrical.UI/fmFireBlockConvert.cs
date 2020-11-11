@@ -11,7 +11,7 @@ using TianHua.Publics.BaseCode;
 
 namespace TianHua.Electrical.UI
 {
-    public partial class fmFireBlockConver : DevExpress.XtraEditors.XtraForm, IFireBlockConver
+    public partial class fmFireBlockConvert : DevExpress.XtraEditors.XtraForm, IFireBlockConver
     {
         public List<ViewFireBlockConver> m_ListFireBlockConver { get; set; }
 
@@ -27,7 +27,7 @@ namespace TianHua.Electrical.UI
             m_Presenter = new PresenterFireBlockConver(this);
         }
 
-        public fmFireBlockConver()
+        public fmFireBlockConvert()
         {
             InitializeComponent();
         }

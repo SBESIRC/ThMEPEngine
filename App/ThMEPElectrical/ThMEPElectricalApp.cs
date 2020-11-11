@@ -1,23 +1,25 @@
-﻿using Autodesk.AutoCAD.Runtime;
-using Linq2Acad;
-using ThMEPElectrical.CAD;
-using ThMEPElectrical.Core;
-using ThMEPElectrical.Assistant;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using NFox.Cad;
+﻿using NFox.Cad;
 using AcHelper;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using ThMEPElectrical.Model;
-using ThMEPEngineCore.Engine;
-using ThMEPElectrical.Broadcast;
-using System.Linq;
-using ThCADExtension;
-using ThCADCore.NTS;
 using DotNetARX;
+using Linq2Acad;
+using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
+using ThMEPElectrical.CAD;
+using ThMEPElectrical.Core;
+using ThMEPElectrical.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPElectrical.Command;
+using ThMEPElectrical.Broadcast;
+using ThMEPElectrical.Assistant;
+using ThMEPElectrical.BlockConvert;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical
 {
@@ -313,6 +315,24 @@ namespace ThMEPElectrical
                     }
                     jig.TransformEntities();
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPBE", CommandFlags.Modal)]
+        public void ThStrongCurrentBlockConvert()
+        {
+            using (var cmd = new ThBConvertCommand(ConvertMode.STRONGCURRENT))
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THLBE", CommandFlags.Modal)]
+        public void ThWeakCurrentBlockConvert()
+        {
+            using (var cmd = new ThBConvertCommand(ConvertMode.WEAKCURRENT))
+            {
+                cmd.Execute();
             }
         }
     }

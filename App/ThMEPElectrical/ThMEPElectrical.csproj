@@ -26,6 +26,21 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\GeometryTrans.cs" />
+    <Compile Include="BlockConvert\ThBConvertBlockReference.cs" />
+    <Compile Include="BlockConvert\ThBConvertCommon.cs" />
+    <Compile Include="BlockConvert\ThBConvertDbExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngineStrongCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngineWeakCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertManager.cs" />
+    <Compile Include="BlockConvert\ThBConvertRule.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleEngineStrongCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleEngineWeakCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="Block\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculator.cs" />
@@ -50,6 +65,7 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />

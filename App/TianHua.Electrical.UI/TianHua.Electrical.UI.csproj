@@ -61,11 +61,11 @@
   <ItemGroup>
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
-    <Compile Include="fmFireBlockConver.cs">
+    <Compile Include="fmFireBlockConvert.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="fmFireBlockConver.Designer.cs">
-      <DependentUpon>fmFireBlockConver.cs</DependentUpon>
+    <Compile Include="fmFireBlockConvert.Designer.cs">
+      <DependentUpon>fmFireBlockConvert.cs</DependentUpon>
     </Compile>
     <Compile Include="fmSmokeLayout.cs">
       <SubType>Form</SubType>
@@ -74,8 +74,8 @@
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="fmFireBlockConver.resx">
-      <DependentUpon>fmFireBlockConver.cs</DependentUpon>
+    <EmbeddedResource Include="fmFireBlockConvert.resx">
+      <DependentUpon>fmFireBlockConvert.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmSmokeLayout.resx">
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>

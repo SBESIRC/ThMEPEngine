@@ -1,6 +1,6 @@
 ﻿namespace TianHua.Electrical.UI
 {
-    partial class fmFireBlockConver
+    partial class fmFireBlockConvert
     {
         /// <summary>
         /// Required designer variable.
