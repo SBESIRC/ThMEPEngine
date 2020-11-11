@@ -29,10 +29,6 @@ namespace TianHua.AutoCAD.ThCui
                     wssMenu.AddMenuItem(-1, "盲区检测", "ID_THPLMQ");
                     wssMenu.AddMenuItem(-1, "可布置区域", "ID_THPLKQ");
                 }
-                {
-                    var helpMenu = theMenu.AddSubMenu(-1, "帮助", "ID_THMEPTOOLSET_HELP");
-                    helpMenu.AddMenuItem(-1, "使用帮助", "ID_THHLP");
-                }
             }
         }
 
