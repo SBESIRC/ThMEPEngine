@@ -7,7 +7,7 @@
     <ProjectGuid>{A7A6ED9C-27F3-4F7E-AA5E-D9637CB12A46}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>TianHua.AutoCAD.ThCui</RootNamespace>
-    <AssemblyName>ThCui</AssemblyName>
+    <AssemblyName>ThMEPCui</AssemblyName>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>

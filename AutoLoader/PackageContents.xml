@@ -15,7 +15,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
 	<!--Assembly App, CUI, 2012 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
-        <ComponentEntry ModuleName="./Contents/Win64/2012/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
 			<Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
@@ -24,7 +24,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <!--Assembly App, CUI, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2014/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
 			<Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
@@ -33,7 +33,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <!--Assembly App, CUI, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2016/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
 			<Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
@@ -42,7 +42,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <!--Assembly App, CUI, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/ThCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThCui" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
 			<Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
