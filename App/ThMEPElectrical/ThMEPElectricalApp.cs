@@ -13,9 +13,6 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
-[assembly: CommandClass(typeof(ThMEPElectrical.ThMEPElectricalApp))]
-[assembly: ExtensionApplication(typeof(ThMEPElectrical.ThMEPElectricalApp))]
-
 namespace ThMEPElectrical
 {
     public class ThMEPElectricalApp : IExtensionApplication

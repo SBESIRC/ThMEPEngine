@@ -2,8 +2,6 @@
 using ThMEPElectrical.Command;
 using ThMEPElectrical.BlockConvert;
 
-[assembly: CommandClass(typeof(ThMEPElectrical.ThBlockConvertCmds))]
-
 namespace ThMEPElectrical
 {
     public class ThBlockConvertCmds

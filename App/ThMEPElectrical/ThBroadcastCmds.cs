@@ -13,8 +13,6 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
-[assembly: CommandClass(typeof(ThMEPElectrical.ThBroadcastCmds))]
-
 namespace ThMEPElectrical
 {
     public class ThBroadcastCmds
