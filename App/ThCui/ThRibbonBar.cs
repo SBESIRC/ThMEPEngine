@@ -13,7 +13,7 @@ namespace TianHua.AutoCAD.ThCui
                 CreateHVACPanel(tab);
                 CreateElectricPanel(tab);
                 CreateWSSPanel(tab);
-                CreateHelpPanel(tab);
+                //CreateHelpPanel(tab);
                 //CreateSettingsPanel(tab);
                 //CreateCheckToolPanel(tab);
                 //CreatStatisticPanel(tab);
