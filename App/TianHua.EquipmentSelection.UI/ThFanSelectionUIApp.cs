@@ -19,21 +19,25 @@ namespace TianHua.FanSelection.UI
         private static ObjectId _selectedEntId = ObjectId.Null;
         private static CustomCommandMappers _customCommands = null;
         private static ThFanSelectionDbEventHandler dbEventHandler = null;
+        private static ThFanSelectionDocumentEventHandler documentEventHandler = null;
 
         public void Initialize()
         {
-            CreateDbEventHandler();
             SubscribeToOverrules();
             AddDoubleClickHandler();
-            SubscribeToDocumentEvents();
+            SubscribeToDocumentManagerEvents();
+            if (Active.Document != null)
+            {
+                SubscribeToDbEvents(Active.Database);
+                SubscribeToDocumentEvents(Active.Document);
+            }
         }
 
         public void Terminate()
         {
-            DeleteDbEventHandler();
             UnsubscribeToOverrules();
             RemoveDoubleClickHandler();
-            UnSubscribeToDocumentEvents();
+            UnSubscribeToDocumentManagerEvents();
         }
 
         [CommandMethod("TIANHUACAD", "THFJDW", CommandFlags.Modal)]
@@ -121,6 +125,15 @@ namespace TianHua.FanSelection.UI
             SubscribeToDbEvents(Active.Database);
         }
 
+        [CommandMethod("TIANHUACAD", "THFJUIUPDATE", CommandFlags.NoUndoMarker)]
+        public void ThEquipmentUiUpdate()
+        {
+            using (var cmd = new ThModelUiUpdateCommand())
+            {
+                cmd.Execute();
+            }
+        }
+
         private ObjectId GetSelectedEntity()
         {
             PromptSelectionResult res = Active.Editor.GetSelection();
@@ -145,22 +158,7 @@ namespace TianHua.FanSelection.UI
             AcadApp.BeginDoubleClick -= Application_BeginDoubleClick;
         }
 
-        private static void CreateDbEventHandler()
-        {
-            dbEventHandler = new ThFanSelectionDbEventHandler();
-            if (Active.Database != null)
-            {
-                // 订阅DB事件
-                SubscribeToDbEvents(Active.Database);
-            }
-        }
-
-        private static void DeleteDbEventHandler()
-        {
-            dbEventHandler = null;
-        }
-
-        private static void SubscribeToDocumentEvents()
+        private static void SubscribeToDocumentManagerEvents()
         {
             AcadApp.DocumentManager.DocumentCreated += DocumentManager_DocumentCreated;
             AcadApp.DocumentManager.DocumentActivated += DocumentManager_DocumentActivated;
@@ -170,7 +168,7 @@ namespace TianHua.FanSelection.UI
             AcadApp.DocumentManager.DocumentToBeDestroyed += DocumentManager_DocumentToBeDestroyed;
         }
 
-        private static void UnSubscribeToDocumentEvents()
+        private static void UnSubscribeToDocumentManagerEvents()
         {
             AcadApp.DocumentManager.DocumentCreated -= DocumentManager_DocumentCreated;
             AcadApp.DocumentManager.DocumentActivated -= DocumentManager_DocumentActivated;
@@ -182,18 +180,22 @@ namespace TianHua.FanSelection.UI
 
         private static void SubscribeToDbEvents(Database db)
         {
-            db.SaveComplete += dbEventHandler.DbEvent_SaveComplete_handler;
-            db.ObjectErased += dbEventHandler.DbEvent_ObjectErased_Handler;
-            db.DeepCloneEnded += dbEventHandler.DbEvent_DeepCloneEnded_Handler;
-            db.BeginDeepCloneTranslation += dbEventHandler.DbEvent_BeginDeepCloneTranslation_Handler;
+            dbEventHandler = new ThFanSelectionDbEventHandler(db);
         }
 
         private static void UnSubscribeToDbEvents(Database db)
         {
-            db.SaveComplete += dbEventHandler.DbEvent_SaveComplete_handler;
-            db.ObjectErased -= dbEventHandler.DbEvent_ObjectErased_Handler;
-            db.DeepCloneEnded -= dbEventHandler.DbEvent_DeepCloneEnded_Handler;
-            db.BeginDeepCloneTranslation -= dbEventHandler.DbEvent_BeginDeepCloneTranslation_Handler;
+            dbEventHandler.Dispose();
+        }
+
+        private static void SubscribeToDocumentEvents(Document document)
+        {
+            documentEventHandler = new ThFanSelectionDocumentEventHandler(document);
+        }
+
+        private static void UnSubscribeToDocumentEvents(Document document)
+        {
+            documentEventHandler.Dispose();
         }
 
         private static void SubscribeToOverrules()
@@ -236,6 +238,9 @@ namespace TianHua.FanSelection.UI
             {
                 // 订阅DB事件
                 SubscribeToDbEvents(e.Document.Database);
+
+                // 订阅Document事件
+                SubscribeToDocumentEvents(e.Document);
             }
         }
 
@@ -247,6 +252,9 @@ namespace TianHua.FanSelection.UI
 
                 // 取消订阅DB事件
                 UnSubscribeToDbEvents(e.Document.Database);
+
+                // 取消订阅Docuemnt事件
+                UnSubscribeToDocumentEvents(e.Document);
             }
         }
 

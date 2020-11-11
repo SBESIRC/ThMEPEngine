@@ -7,9 +7,26 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.FanSelection.UI.CAD
 {
-    public class ThFanSelectionDbEventHandler
+    public class ThFanSelectionDbEventHandler : IDisposable
     {
+        private Database Database { get; set; }
+
         private IdMapping Mapping { get; set; }
+
+        public ThFanSelectionDbEventHandler(Database database)
+        {
+            Database = database;
+            Database.ObjectErased += DbEvent_ObjectErased_Handler;
+            Database.DeepCloneEnded += DbEvent_DeepCloneEnded_Handler;
+            Database.BeginDeepCloneTranslation += DbEvent_BeginDeepCloneTranslation_Handler;
+        }
+
+        public void Dispose()
+        {
+            Database.ObjectErased -= DbEvent_ObjectErased_Handler;
+            Database.DeepCloneEnded -= DbEvent_DeepCloneEnded_Handler;
+            Database.BeginDeepCloneTranslation -= DbEvent_BeginDeepCloneTranslation_Handler;
+        }
 
         public void DbEvent_BeginDeepCloneTranslation_Handler(object sender, IdMappingEventArgs e)
         {
@@ -50,7 +67,7 @@ namespace TianHua.FanSelection.UI.CAD
             }
 
             var model = e.DBObject.GetModelIdentifier();
-            if (!string.IsNullOrEmpty(model))
+            if (!string.IsNullOrEmpty(model) && !e.DBObject.IsUndoing)
             {
                 ThModelDeleteMessage.SendWith(new ThModelDeleteMessageArgs()
                 {
@@ -58,20 +75,6 @@ namespace TianHua.FanSelection.UI.CAD
                     Erased = e.Erased,
                 });
             }
-        }
-
-        public void DbEvent_SaveComplete_handler(object sender, DatabaseIOEventArgs e)
-        {
-            // 只考虑本图纸保存的情况
-            if (Active.DocumentFullPath != e.FileName)
-            {
-                return;
-            }
-
-            ThModelSaveMessage.SendWith(new ThModelSaveMessageArgs()
-            {
-                FileName = e.FileName,
-            });
         }
     }
 }

@@ -81,6 +81,14 @@ namespace TianHua.FanSelection.UI
             }
         }
 
+        public Action<ThModelUndoMessage> OnModelUndoHandler
+        {
+            get
+            {
+                return OnModelUndo;
+            }
+        }
+
         /// <summary>
         /// 风机箱选型
         /// </summary>
@@ -2571,6 +2579,49 @@ namespace TianHua.FanSelection.UI
                 var _JsonFan = FuncJson.Serialize(m_ListFan);
                 JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
             }
+        }
+
+
+        private void OnModelUndo(ThModelUndoMessage message)
+        {
+            if (message.Data == null) { return; }
+
+            if(message.Data.UnappendedModels != null && message.Data.UnappendedModels.Count > 0)
+            {
+
+                for (int i = 0; i < message.Data.UnappendedModels.Count; i++)
+                {
+                    var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(message.Data.UnappendedModels[i]));
+
+                    if (_Fan == null) { continue; }
+
+                    _Fan.IsErased = true;
+
+                    var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(message.Data.UnappendedModels[i]));
+
+                    if (_FanSon != null) { _FanSon.IsErased = true; }
+                }
+            }
+
+            if (message.Data.ReappendedModels != null && message.Data.ReappendedModels.Count > 0)
+            {
+                for (int i = 0; i < message.Data.ReappendedModels.Count; i++)
+                {
+                    var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(message.Data.ReappendedModels[i]));
+
+                    if (_Fan == null) { continue; }
+
+                    _Fan.IsErased = false;
+
+                    var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(message.Data.ReappendedModels[i]));
+
+                    if (_FanSon != null) { _FanSon.IsErased = false; }
+                }
+            }
+
+            TreeList.RefreshDataSource();
+
+            this.TreeList.ExpandAll();
         }
     }
 }
