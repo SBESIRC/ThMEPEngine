@@ -352,7 +352,6 @@ namespace ThCADCore.Test
                 }
                 foreach (Polygon obj in objs.Polygonize())
                 {
-
                     // 洞
                     //obj.SymmetricDifference(frameObj.ToNTSPolygon());
                     //var ntsObj = obj.Difference(new DBObjectCollection() { frameObj }.UnionGeometries());
@@ -362,7 +361,6 @@ namespace ThCADCore.Test
                         entity.ColorIndex = 2;
                         acadDatabase.ModelSpace.Add(entity);
                     }
-                    int i = 0;
                 }
             }
         }
