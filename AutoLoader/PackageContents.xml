@@ -53,6 +53,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
         <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
@@ -65,6 +66,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
@@ -77,6 +79,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
@@ -89,6 +92,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
