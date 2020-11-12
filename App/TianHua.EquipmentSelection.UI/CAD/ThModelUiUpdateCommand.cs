@@ -41,11 +41,12 @@ namespace TianHua.FanSelection.UI.CAD
                 {
                     return;
                 }
-                ThModelUndoMessage.SendWith(new ThModelUndoMessageArgs()
-                {
-                    UnappendedModels = args.UnappendedModels,
-                    ReappendedModels = args.ReappendedModels,
-                });
+                ThModelUndoMessage.SendWith(args);
+            }
+            else if (ThFanSelectionService.Instance.Message is ThModelDeleteMessage eraseMessage &&
+                ThFanSelectionService.Instance.MessageArgs is ThModelDeleteMessageArgs eraseArgs)
+            {
+                ThModelDeleteMessage.SendWith(eraseArgs);
             }
         }
     }

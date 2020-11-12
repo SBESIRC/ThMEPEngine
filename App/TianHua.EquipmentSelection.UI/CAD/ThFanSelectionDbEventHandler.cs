@@ -16,14 +16,12 @@ namespace TianHua.FanSelection.UI.CAD
         public ThFanSelectionDbEventHandler(Database database)
         {
             Database = database;
-            Database.ObjectErased += DbEvent_ObjectErased_Handler;
             Database.DeepCloneEnded += DbEvent_DeepCloneEnded_Handler;
             Database.BeginDeepCloneTranslation += DbEvent_BeginDeepCloneTranslation_Handler;
         }
 
         public void Dispose()
         {
-            Database.ObjectErased -= DbEvent_ObjectErased_Handler;
             Database.DeepCloneEnded -= DbEvent_DeepCloneEnded_Handler;
             Database.BeginDeepCloneTranslation -= DbEvent_BeginDeepCloneTranslation_Handler;
         }
@@ -56,24 +54,6 @@ namespace TianHua.FanSelection.UI.CAD
                         ModelMapping = mapping,
                     });
                 }
-            }
-        }
-
-        public void DbEvent_ObjectErased_Handler(object sender, ObjectErasedEventArgs e)
-        {
-            if (e.DBObject.IsUndoing)
-            {
-                return;
-            }
-
-            var model = e.DBObject.GetModelIdentifier();
-            if (!string.IsNullOrEmpty(model) && !e.DBObject.IsUndoing)
-            {
-                ThModelDeleteMessage.SendWith(new ThModelDeleteMessageArgs()
-                {
-                    Model = model,
-                    Erased = e.Erased,
-                });
             }
         }
     }

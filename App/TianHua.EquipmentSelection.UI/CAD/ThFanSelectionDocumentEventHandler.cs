@@ -13,6 +13,8 @@ namespace TianHua.FanSelection.UI.CAD
 
         private ThFanSelectionDbUndoHandler DbUndoHandler { get; set; }
 
+        private ThFanSelectionDbEraseHandler DbEraseHandler { get; set; }
+
         private Database Database
         {
             get
@@ -41,7 +43,10 @@ namespace TianHua.FanSelection.UI.CAD
                 e.GlobalCommandName == "REDO" ||
                 e.GlobalCommandName == "MREDO")
             {
+                // UNDO/REDO ERASE命令会触发Database.ObjectErased事件
+                // 所以这里同时挂接UNDO/REDO + ERASE事件
                 DbUndoHandler = new ThFanSelectionDbUndoHandler(Database);
+                DbEraseHandler = new ThFanSelectionDbEraseHandler(Database);
             }
             else if (e.GlobalCommandName == "QSAVE")
             {
@@ -54,6 +59,10 @@ namespace TianHua.FanSelection.UI.CAD
                 // 暂时只支持QSAVE
                 DbSaveHandler = new ThFanSelectionDbSaveHandler(Database);
             }
+            else if (e.GlobalCommandName == "ERASE")
+            {
+                DbEraseHandler = new ThFanSelectionDbEraseHandler(Database);
+            }
         }
 
         public void CommandEndedHandler(object sender, CommandEventArgs e)
@@ -63,15 +72,25 @@ namespace TianHua.FanSelection.UI.CAD
                 e.GlobalCommandName == "REDO" ||
                 e.GlobalCommandName == "MREDO")
             {
+                // UNDO/REDO ERASE命令会触发Database.ObjectErased事件
+                // 所以这里同时触发UNDO/REDO + ERASE事件
                 SendUndoMessage();
+                SendEraseMessage();
                 DbUndoHandler.Dispose();
+                DbEraseHandler.Dispose();
             }
             else if (e.GlobalCommandName == "QSAVE")
             {
                 SendSaveMessage();
                 DbSaveHandler.Dispose();
             }
+            else if (e.GlobalCommandName == "ERASE")
+            {
+                SendEraseMessage();
+                DbEraseHandler.Dispose();
+            }
         }
+
 
         public void SendSaveMessage()
         {
@@ -96,6 +115,24 @@ namespace TianHua.FanSelection.UI.CAD
                 {
                     UnappendedModels = DbUndoHandler.UnappendedModels,
                     ReappendedModels = DbUndoHandler.ReappendedModels,
+                }
+            };
+        }
+
+        public void SendEraseMessage()
+        {
+            if (string.IsNullOrEmpty(DbEraseHandler.Model))
+            {
+                return;
+            }
+
+            _ = new ThFanSelectionAppIdleHandler()
+            {
+                Message = new ThModelDeleteMessage(),
+                MessageArgs = new ThModelDeleteMessageArgs()
+                {
+                    Model = DbEraseHandler.Model,
+                    Erased = DbEraseHandler.Erased,
                 }
             };
         }
