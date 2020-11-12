@@ -47,6 +47,7 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 
             //清除洞口喷淋
             holes.AddRange(walls);
+            holes.AddRange(colums);
             CalHolesService calHolesService = new CalHolesService();
             calHolesService.ClearHoleSpray(holes, sprays);
             

@@ -21,6 +21,14 @@ namespace ThMEPWSS.Model
         public Line nextTLine { get; set; }      //前一条排布横线
         public Line prevVLine { get; set; }      //后一条排布竖线
         public Line prevTLine { get; set; }      //后一条排布横线
+        //圆形保护区域
+        public Circle ArcRadii {
+            get
+            {
+                double length = Radii.StartPoint.DistanceTo(Position);
+                return new Circle(Position, Vector3d.ZAxis, length);
+            }
+        }
         public static SprayLayoutData Create(Point3d pos, Curve radii)
         {
             return new SprayLayoutData()

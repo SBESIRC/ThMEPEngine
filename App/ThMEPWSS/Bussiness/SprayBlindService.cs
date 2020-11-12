@@ -71,9 +71,10 @@ namespace ThMEPWSS.Bussiness
             //计算喷淋实际保护区域
             ShadowService shadowService = new ShadowService();
             List<Polyline> protectAreas = new List<Polyline>();
+            ThCADCoreNTSService.Instance.ArcTessellationLength = 500;
             foreach (var spray in sprays)
             {
-                var sprayRadii = spray.Radii as Polyline;
+                var sprayRadii = spray.ArcRadii.ToNTSPolygon().ToDbPolylines()[0];
                 var intersectPolys = holes.Where(x => sprayRadii.Intersects(x)).ToList();
 
                 var area = sprayRadii.Intersection(new DBObjectCollection() { polyline })
@@ -92,6 +93,7 @@ namespace ThMEPWSS.Bussiness
                     protectAreas.AddRange(shadowService.CreateShadow(spray.Position, area, obstacle).SelectMany(x => x.Buffer(1).Cast<Polyline>()));
                 }
             }
+            ThCADCoreNTSService.Instance.ArcTessellationLength = 1000;
             var sprayArea = SprayLayoutDataUtils.Radii(protectAreas).Cast<Polyline>().ToList();
             CalHolesService calHolesService = new CalHolesService();
             var holeDic = calHolesService.CalHoles(sprayArea);

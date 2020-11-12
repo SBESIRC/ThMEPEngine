@@ -293,6 +293,12 @@ namespace ThMEPWSS
                     //清除原有构件
                     plFrame.ClearBlindArea();
 
+                    //获取构建信息
+                    var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
+                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
+                    holes.AddRange(columns);
+                    holes.AddRange(walls);
+
                     if (!CalSprayBlindArea(bufferPoly, holes, acdb, matrix))
                     {
                         CalSprayLineBlindArea(bufferPoly, holes, acdb);
@@ -365,6 +371,39 @@ namespace ThMEPWSS
                     MarkService.PrintLayoutArea(layoutAreas, matrix);
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPLCD", CommandFlags.Modal)]
+        public void ThCreateLayoutPtByLine()
+        {
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = "选择区域",
+                RejectObjectsOnLockedLayers = true,
+            };
+            var dxfNames = new string[]
+            {
+                RXClass.GetClass(typeof(Line)).DxfName,
+            };
+            var filter = ThSelectionFilterTool.Build(dxfNames);
+            var result = Active.Editor.GetSelection(options, filter);
+            if (result.Status != PromptStatus.OK)
+            {
+                return;
+            }
+
+            List<Line> lines = new List<Line>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (ObjectId frame in result.Value.GetObjectIds())
+                {
+                    var plBack = acdb.Element<Line>(frame);
+                    lines.Add(plBack);
+                }
+            }
+            LayoutSprayByLineService layoutSprayByLineService = new LayoutSprayByLineService();
+            layoutSprayByLineService.LayoutSprayByLine(lines, 3000);
         }
 
         /// <summary>
