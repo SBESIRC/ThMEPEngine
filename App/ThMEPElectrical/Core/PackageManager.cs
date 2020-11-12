@@ -20,6 +20,7 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Operation;
 using ThMEPElectrical.Business.Procedure;
+using ThMEPElectrical.Business.Operation;
 
 namespace ThMEPElectrical.Core
 {
@@ -132,14 +133,15 @@ namespace ThMEPElectrical.Core
                 var wallPtCollection = pairInfo.ExternalProfile.Vertices();
                 var innerHoles = GetValidProfiles(infoReader.RecognizeMainBeamColumnWalls, wallPtCollection);
                 var secondBeams = GetValidProfileInfos(infoReader.RecognizeSecondBeams, wallPtCollection);
-                var drawCurves = SecondBeamProfile2Polyline(secondBeams).Polylines2Curves();
-                DrawUtils.DrawProfileDebug(drawCurves, "drawCurves");
+                //var drawCurves = SecondBeamProfile2Polyline(secondBeams).Polylines2Curves();
+                //DrawUtils.DrawProfileDebug(drawCurves, "drawCurves");
                 // 外墙，内洞，次梁
                 var profileDatas = BeamDetectionCalculator.MakeDetectionData(pairInfo.ExternalProfile, innerHoles, secondBeams);
 
-
+                var validProfileDatas = ValidInputPairInfoCalculator.MakeValidInputPairInfoCalculator(profileDatas, pairInfo);
+                DrawUtils.DrawGroup(validProfileDatas);
                 // 主次梁 坐标系信息
-                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(profileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
+                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(validProfileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }
 
             return ucsInputProfileDatas;
@@ -196,7 +198,9 @@ namespace ThMEPElectrical.Core
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 // 外墙，内洞，轴网
                 var profileDatas = GridDetectionCalculator.MakeGridDetectionCalculator(pairInfo.ExternalProfile, gridPolys, validHoles);
-                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(profileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
+                var validProfileDatas = ValidInputPairInfoCalculator.MakeValidInputPairInfoCalculator(profileDatas, pairInfo);
+                DrawUtils.DrawGroup(validProfileDatas);
+                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(validProfileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }
 
             return ucsInputProfileDatas;
@@ -246,7 +250,9 @@ namespace ThMEPElectrical.Core
                 // 外墙，内洞，轴网
                 validColumns.AddRange(validShearWalls);
                 var profileDatas = NoBeamStoreyDetectionCalculator.MakeNoBeamStoreyDetectionCalculator(gridPolys, validColumns, pairInfo.ExternalProfile);
-                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(profileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
+                var validProfileDatas = ValidInputPairInfoCalculator.MakeValidInputPairInfoCalculator(profileDatas, pairInfo);
+                DrawUtils.DrawGroup(validProfileDatas);
+                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(validProfileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }
 
             return ucsInputProfileDatas;

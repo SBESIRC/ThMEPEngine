@@ -13,6 +13,7 @@ using ThCADExtension;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Overlay.Snap;
 using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Geometries;
 
 namespace ThCADCore.Test
 {
@@ -311,6 +312,8 @@ namespace ThCADCore.Test
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
+
+
                 var geometrys = objs.ToNTSLineStrings();
 
                 var overlapUnion = OverlapUnion.Union(geometrys.First(), geometrys.Last());
@@ -318,6 +321,48 @@ namespace ThCADCore.Test
                 {
                     obj.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThPolygonIntersect", CommandFlags.Modal)]
+        public void ThPolygonIntersect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var singleResult = Active.Editor.GetEntity("请选择对象");
+                if (singleResult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var frame = singleResult.ObjectId;
+                var frameObj = acadDatabase.Element<Polyline>(frame);
+                
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                foreach (Polygon obj in objs.Polygonize())
+                {
+
+                    // 洞
+                    //obj.SymmetricDifference(frameObj.ToNTSPolygon());
+                    //var ntsObj = obj.Difference(new DBObjectCollection() { frameObj }.UnionGeometries());
+                    var ntsObj =  obj.Union(frameObj.ToNTSPolygon());
+                    foreach (Entity entity in ntsObj.ToDbCollection())
+                    {
+                        entity.ColorIndex = 2;
+                        acadDatabase.ModelSpace.Add(entity);
+                    }
+                    int i = 0;
                 }
             }
         }
@@ -387,14 +432,27 @@ namespace ThCADCore.Test
                     return;
                 }
 
-                var objs = new DBObjectCollection();
+                //var objs = new DBObjectCollection();
+                //foreach (var obj in result.Value.GetObjectIds())
+                //{
+                //    objs.Add(acadDatabase.Element<Entity>(obj));
+                //}
+                //var geometrys = objs.ToNTSLineStrings();
+
+                //var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Difference);
+                //foreach (Entity obj in snapGeometry.ToDbCollection())
+                //{
+                //    obj.ColorIndex = 1;
+                //    acadDatabase.ModelSpace.Add(obj);
+                //}
+
+                var polys = new List<Polyline>();
                 foreach (var obj in result.Value.GetObjectIds())
                 {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
+                    polys.Add(acadDatabase.Element<Polyline>(obj));
                 }
-                var geometrys = objs.ToNTSLineStrings();
 
-                var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Difference);
+                var snapGeometry = SnapIfNeededOverlayOp.Overlay(polys.First().ToNTSPolygon(), polys.Last().ToNTSPolygon(), SpatialFunction.Union);
                 foreach (Entity obj in snapGeometry.ToDbCollection())
                 {
                     obj.ColorIndex = 1;
