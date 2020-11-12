@@ -20,6 +20,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using NFox.Cad;
 
 namespace ThMEPEngineCore
 {
@@ -298,14 +299,15 @@ namespace ThMEPEngineCore
             dbText.Height = 200;
             return dbText;
         }
-        [CommandMethod("TIANHUACAD", "ThExtractLaneLine", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THCDX", CommandFlags.Modal)]
         public void ThExtractLaneLine()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
                 laneLineEngine.Recognize(Active.Database);
-                laneLineEngine.Lanes.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                ThLaneLineSimplifier.Simplify(laneLineEngine.Lanes.ToCollection(), 1500)
+                    .ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
         /// <summary>
