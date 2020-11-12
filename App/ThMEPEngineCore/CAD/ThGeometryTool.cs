@@ -164,12 +164,20 @@ namespace ThMEPEngineCore.CAD
             Plane plane = new Plane(lineSp, vec);
             Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
             Point3d newPt=outerPt.TransformBy(wcsToUcs);
-            if(newPt.X<=0.0001 && newPt.Y <= 0.0001)
+            if(Math.Abs(newPt.X)<=0.0001 && Math.Abs(newPt.Y) <= 0.0001)
             {
                 if(newPt.Z>=0 && newPt.Z<= lineSp.DistanceTo(lineEp))
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+        public static bool IsPointInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt,double tolerance=0.0)
+        {
+            if(IsPointOnLine(lineSp, lineEp, outerPt))
+            {
+                return outerPt.DistanceTo(lineSp) > tolerance && outerPt.DistanceTo(lineEp) > tolerance;
             }
             return false;
         }
