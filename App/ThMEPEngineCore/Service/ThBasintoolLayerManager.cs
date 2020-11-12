@@ -32,7 +32,7 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            return (patterns[0] == "5") && (patterns[1] == "KITCHEN") && (patterns[2] == "A");
+            return (patterns[0] == "4") && (patterns[1] == "KITCHEN") && (patterns[2] == "A");
         }
     }
 }
