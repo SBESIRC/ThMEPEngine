@@ -119,10 +119,12 @@ namespace ThMEPElectrical.Business.Procedure
                 tempPolygonInfos.Add(new PolygonInfo(poly));
             }
 
+            // 被包含则不是有效的轮廓区域
             for (int i = 0; i < tempPolygonInfos.Count; i++)
             {
                 if (tempPolygonInfos[i].IsUsed)
                     continue;
+
                 var curPoly = tempPolygonInfos[i].ExternalProfile;
                 for (int j = 0; j < tempPolygonInfos.Count; j++)
                 {

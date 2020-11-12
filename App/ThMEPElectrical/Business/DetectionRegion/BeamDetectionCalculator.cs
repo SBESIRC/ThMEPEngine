@@ -54,7 +54,6 @@ namespace ThMEPElectrical.Business
 
             // 数据转换
             RegionBeamSpanProfileData = DetectRegion2ProfileData(divideDetectRegion);
-            DrawUtils.DrawGroup(RegionBeamSpanProfileData);
         }
 
         /// <summary>

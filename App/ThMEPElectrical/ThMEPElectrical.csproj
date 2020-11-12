@@ -50,6 +50,7 @@
     <Compile Include="Business\LayoutCalculator.cs" />
     <Compile Include="Business\EntityPicker.cs" />
     <Compile Include="Business\MainBeam\OneColMultiSegmentsPlaceEx.cs" />
+    <Compile Include="Business\Operation\ValidInputPairInfoCalculator.cs" />
     <Compile Include="Business\PlacePointCalculator.cs" />
     <Compile Include="Business\MainBeam\MultiSegmentPlace.cs" />
     <Compile Include="Business\MainBeam\OneColMultiSegmentsPlace.cs" />
