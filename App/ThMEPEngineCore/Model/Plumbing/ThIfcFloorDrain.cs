@@ -10,7 +10,7 @@ namespace ThMEPEngineCore.Model.Plumbing
 {
     public class ThIfcFloorDrain : ThIfcSanitaryTerminal
     {
-        public static ThIfcFloorDrain CreateFloorDrainEntity(Entity entity)
+        public static ThIfcFloorDrain Create(Entity entity)
         {
             return new ThIfcFloorDrain()
             {

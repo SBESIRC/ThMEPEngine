@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcFloorDrain.CreateFloorDrainEntity(o));
+                    Elements.Add(ThIfcFloorDrain.Create(o));
                 });
             }
         }

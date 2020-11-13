@@ -5,7 +5,7 @@ namespace ThMEPEngineCore.Model.Plumbing
 {
     public class ThIfcClosestool: ThIfcSanitaryTerminal
     {
-        public static ThIfcClosestool CreateClosestoolEntity(Entity entity)
+        public static ThIfcClosestool Create(Entity entity)
         {
             return new ThIfcClosestool()
             {

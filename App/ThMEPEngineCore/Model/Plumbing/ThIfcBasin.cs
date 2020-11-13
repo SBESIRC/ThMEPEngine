@@ -8,7 +8,7 @@ namespace ThMEPEngineCore.Model.Plumbing
     /// </summary>
     public class ThIfcBasin : ThIfcSanitaryTerminal
     {
-        public static ThIfcBasin CreateBasintoolEntity(Entity entity)
+        public static ThIfcBasin Create(Entity entity)
         {
             return new ThIfcBasin()
             {

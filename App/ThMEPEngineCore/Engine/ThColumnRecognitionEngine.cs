@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Engine
                             if (bufferObjs.Count == 1)
                             {
                                 var outline = bufferObjs[0] as Polyline;
-                                Elements.Add(ThIfcColumn.CreateColumnEntity(outline));
+                                Elements.Add(ThIfcColumn.Create(outline));
                             }
                         }
                     });

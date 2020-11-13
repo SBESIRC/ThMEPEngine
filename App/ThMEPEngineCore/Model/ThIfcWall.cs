@@ -9,7 +9,7 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcWall : ThIfcBuildingElement
     {
-        public static ThIfcWall CreateWallEntity(Entity curve)
+        public static ThIfcWall Create(Entity curve)
         {
             return new ThIfcWall()
             {

@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcClosestool.CreateClosestoolEntity(o));
+                    Elements.Add(ThIfcClosestool.Create(o));
                 });
             }
         }

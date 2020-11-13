@@ -9,7 +9,7 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcColumn : ThIfcBuildingElement
     {
-        public static ThIfcColumn CreateColumnEntity(Curve curve)
+        public static ThIfcColumn Create(Curve curve)
         {
             return new ThIfcColumn()
             {

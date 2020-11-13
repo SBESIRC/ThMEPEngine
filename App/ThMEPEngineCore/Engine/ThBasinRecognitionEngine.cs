@@ -39,7 +39,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcBasin.CreateBasintoolEntity(o));
+                    Elements.Add(ThIfcBasin.Create(o));
                 });
             }
         }
