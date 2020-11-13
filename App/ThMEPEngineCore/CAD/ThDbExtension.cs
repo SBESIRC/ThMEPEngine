@@ -108,5 +108,19 @@ namespace ThMEPEngineCore.CAD
 
             return true;
         }
+
+        public static bool IsVisible(this Entity entity,AcadDatabase acadDb)
+        {
+            if (entity.LayerId != ObjectId.Null && entity.LayerId.IsValid)
+            {
+                var layerTableRecord = acadDb.Element<LayerTableRecord>(entity.LayerId);
+                return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
+            }
+            return entity.IsVisible();
+        }
+        public static bool IsVisible(this Entity entity)
+        {
+            return entity.Visible;
+        }
     }
 }

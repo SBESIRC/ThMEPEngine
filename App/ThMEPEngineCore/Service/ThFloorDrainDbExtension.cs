@@ -50,7 +50,8 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 List<Entity> ents = new List<Entity>();
-                if (IsBuildElementBlockReference(blockReference))
+                if (IsBuildElementBlockReference(blockReference) &&
+                    blockReference.IsVisible(acadDatabase))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (IsBuildElementBlock(blockTableRecord))
@@ -64,7 +65,8 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (blockObj.IsBuildElementBlockReference() &&
+                                    blockObj.IsVisible(acadDatabase))
                                 {
                                     if (CheckLayerValid(blockObj) && ThFloorDrainLayerManager.IsFloorDrainBlockName(blockObj.Name))
                                     {

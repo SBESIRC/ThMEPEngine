@@ -22,7 +22,6 @@ namespace ThMEPEngineCore.Engine
             {
                 basintoolDbExtension.BuildElementCurves();
                 List<Entity> ents = new List<Entity>();
-
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();

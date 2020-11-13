@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +26,7 @@ namespace ThMEPEngineCore.Service
         protected bool CheckCurveValid(Curve curve)
         {
             return (curve is Line) || (curve is Arc) || (curve is Polyline);
-        }
+        }        
         protected bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
             // 暂时不支持动态块，外部参照，覆盖
