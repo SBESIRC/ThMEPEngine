@@ -123,7 +123,9 @@
     <Compile Include="Model\ThIfcDoorStandardCase.cs" />
     <Compile Include="Model\ThIfcElement.cs" />
     <Compile Include="Model\ThIfcFlowTerminal.cs" />
+    <Compile Include="Model\ThIfcLane.cs" />
     <Compile Include="Model\ThIfcLineBeam.cs" />
+    <Compile Include="Model\ThIfcParkingStall.cs" />
     <Compile Include="Model\ThIfcProduct.cs" />
     <Compile Include="Model\Relationship\ThIfcRelationship.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnects.cs" />
