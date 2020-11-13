@@ -1,14 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
-    public class ThIfcClosestool:ThIfcBuildingElement
+    public class ThIfcClosestool: ThIfcPlumbingFixtures
     {
         public static ThIfcClosestool CreateClosestoolEntity(Entity entity)
         {
