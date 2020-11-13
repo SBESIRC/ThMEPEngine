@@ -1,9 +1,9 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.Model
+namespace ThMEPEngineCore.Model.Plumbing
 {
-    public class ThIfcClosestool: ThIfcPlumbingFixtures
+    public class ThIfcClosestool: ThIfcSanitaryTerminal
     {
         public static ThIfcClosestool CreateClosestoolEntity(Entity entity)
         {

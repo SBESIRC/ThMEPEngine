@@ -5,10 +5,11 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThClosetoolRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThClosetoolRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {

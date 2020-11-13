@@ -9,10 +9,11 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThBasintoolRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThBasinRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -38,7 +39,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThlfcBasintool.CreateBasintoolEntity(o));
+                    Elements.Add(ThIfcBasin.CreateBasintoolEntity(o));
                 });
             }
         }

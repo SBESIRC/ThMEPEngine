@@ -5,10 +5,11 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThFloorDrainRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThFloorDrainRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -33,7 +34,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcClosestool.CreateClosestoolEntity(o));
+                    Elements.Add(ThIfcFloorDrain.CreateFloorDrainEntity(o));
                 });
             }
         }

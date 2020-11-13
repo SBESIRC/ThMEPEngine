@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPEngineCore.Model
+namespace ThMEPEngineCore.Model.Plumbing
 {
-    public class ThIfcFloorDrain:ThIfcBuildingElement
+    public class ThIfcFloorDrain : ThIfcSanitaryTerminal
     {
         public static ThIfcFloorDrain CreateFloorDrainEntity(Entity entity)
         {
