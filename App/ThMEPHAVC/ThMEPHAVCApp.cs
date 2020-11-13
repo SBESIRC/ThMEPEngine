@@ -1,4 +1,9 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using AcHelper;
+using Linq2Acad;
+using ThMEPHAVC.Duct;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPHAVC
 {
@@ -6,12 +11,37 @@ namespace ThMEPHAVC
     {
         public void Initialize()
         {
-            throw new System.NotImplementedException();
         }
 
         public void Terminate()
         {
-            throw new System.NotImplementedException();
+        }
+
+        [CommandMethod("TIANHUACAD", "THDuctGraph", CommandFlags.Modal)]
+        public void THDuctGraph()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var lines = new DBObjectCollection();
+                var entsresult = Active.Editor.GetSelection();
+                if (entsresult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                foreach (var item in entsresult.Value.GetObjectIds())
+                {
+                    lines.Add(acadDatabase.Element<Entity>(item));
+                }
+
+                var pointresult = Active.Editor.GetPoint("\n选则线路起点");
+                if (pointresult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                ThDuctGraphEngine ductGraphEngine = new ThDuctGraphEngine();
+                ductGraphEngine.BuildGraph(lines, pointresult.Value);
+            }
         }
     }
 }
