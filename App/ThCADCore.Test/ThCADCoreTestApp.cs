@@ -285,12 +285,29 @@ namespace ThCADCore.Test
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
-                var geometrys = objs.ToNTSLineStrings();
 
-                var cascadedPolygon = CascadedPolygonUnion.Union(geometrys);
+                var polygons = new List<Geometry>();
+                objs.Cast<DBObject>().ForEachDbObject(p =>
+                {
+                    if (p is Polyline poly)
+                    {
+                        polygons.Add(poly.ToNTSPolygon());
+                    }
+
+                });
+
+                //var geometrys = objs.ToNTSNodedLineStrings();
+                //foreach (Entity entity in geometrys.ToDbCollection())
+                //{
+                //    entity.ColorIndex = 2;
+                //    acadDatabase.ModelSpace.Add(entity);
+                //}
+
+                int i = 0;
+                var cascadedPolygon = CascadedPolygonUnion.Union(polygons);
                 foreach (Entity obj in cascadedPolygon.ToDbCollection())
                 {
-                    obj.ColorIndex = 1;
+                    obj.ColorIndex = 2;
                     acadDatabase.ModelSpace.Add(obj);
                 }
             }

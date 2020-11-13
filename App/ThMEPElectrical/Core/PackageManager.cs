@@ -193,7 +193,8 @@ namespace ThMEPElectrical.Core
                 gridInfo = BothExtendPolys(gridInfo);
 
                 gridInfo = TransfromGridInfos(gridInfo, pairInfo.UserSys.Inverse());
-                //DrawGridInfos(gridInfo);
+                //var obbExternal = new DBObjectCollection() { pairInfo.ExternalProfile }.GetMinimumRectangle(100);
+                //DrawGridInfos(gridInfo, obbExternal);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 // 外墙，内洞，轴网
@@ -272,7 +273,7 @@ namespace ThMEPElectrical.Core
             return resGridInfos;
         }
 
-        private void DrawGridInfos(List<KeyValuePair<Vector3d, List<Polyline>>> gridInfos)
+        private void DrawGridInfos(List<KeyValuePair<Vector3d, List<Polyline>>> gridInfos, Polyline externalProfile)
         {
             var drawCurves = new List<Curve>();
             foreach (var pairValue in gridInfos)
@@ -280,7 +281,22 @@ namespace ThMEPElectrical.Core
                 drawCurves.AddRange(pairValue.Value);
             }
 
-            //DrawUtils.DrawProfile(drawCurves, "gridInfos");
+            var resExtendPolys = new List<Polyline>();
+            foreach (Polyline offsetPoly in externalProfile.Buffer(ThMEPCommon.GridPolyExtendLength * 4))
+            {
+                resExtendPolys.Add(offsetPoly);
+            }
+
+            if (resExtendPolys.Count == 0)
+                return;
+
+            var validExternalProfile = resExtendPolys.First();
+
+            var vadlidCurves = drawCurves.Where(p =>
+            {
+                return GeomUtils.PtInLoop(validExternalProfile, p.StartPoint);
+            }).ToList();
+            DrawUtils.DrawProfileDebug(vadlidCurves, "gridInfos");
         }
 
         private List<Polyline> TransformPolylines(List<Polyline> srcPolys, Matrix3d transMatrix)
@@ -522,6 +538,38 @@ namespace ThMEPElectrical.Core
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
+            }
+        }
+
+        /// <summary>
+        /// 轴网测试
+        /// </summary>
+        public void DoGridTestProfilesWithUcs()
+        {
+            var preWindow = PreWindowSelector.GetSelectRectPoints();
+            if (preWindow.Count == 0)
+                return;
+            // 用户选择
+            var wallCurves = EntityPicker.MakeUserPickPolys();
+            if (wallCurves.Count == 0)
+                return;
+
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            // 前置数据读取器
+            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
+            infoReader.Do();
+
+            // 建立映射关系对
+            foreach (var pairInfo in wallPairInfos)
+            {
+                //轴网线
+                var gridCalculator = new GridService();
+                var columnTrans = TransformPolylines(infoReader.Columns, pairInfo.UserSys);
+                var gridInfo = gridCalculator.CreateGrid(pairInfo.ExternalProfile.GetTransformedCopy(pairInfo.UserSys) as Polyline, columnTrans, pairInfo.UserSys.Inverse(), ThMEPCommon.spacingValue);
+                gridInfo = BothExtendPolys(gridInfo);
+                gridInfo = TransfromGridInfos(gridInfo, pairInfo.UserSys.Inverse());
+                var obbExternal = new DBObjectCollection() { pairInfo.ExternalProfile }.GetMinimumRectangle();
+                DrawGridInfos(gridInfo, obbExternal);
             }
         }
 

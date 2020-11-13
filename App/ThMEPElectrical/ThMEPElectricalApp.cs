@@ -131,7 +131,7 @@ namespace ThMEPElectrical
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var packageManager = new PackageManager(Parameter);
-                packageManager.DoGridTestProfiles();
+                packageManager.DoGridTestProfilesWithUcs();
             }
         }
 
