@@ -105,7 +105,8 @@ namespace TianHua.FanSelection
         {
             List<string> _List = new List<string>();
             _List.Add("吊装");
-            _List.Add("落地");
+            _List.Add("落地条形");
+            _List.Add("落地方形");
             return _List;
         }
 

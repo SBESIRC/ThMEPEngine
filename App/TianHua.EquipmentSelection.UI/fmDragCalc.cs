@@ -125,9 +125,9 @@ namespace TianHua.FanSelection.UI
 
             if (e.Column.FieldName == "SelectionFactor")
             {
-                if (_Fan.SelectionFactor < 1.1)
+                if (_Fan.SelectionFactor < 1)
                 {
-                    _Fan.SelectionFactor = 1.1;
+                    _Fan.SelectionFactor = 1;
                 }
             }
 

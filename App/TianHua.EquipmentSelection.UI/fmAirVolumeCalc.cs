@@ -75,9 +75,9 @@ namespace TianHua.FanSelection.UI
                 }
                 else
                 {
-                    if (_Fan.AirCalcFactor < 1.1)
+                    if (_Fan.AirCalcFactor < 1)
                     {
-                        _Fan.AirCalcFactor = 1.1;
+                        _Fan.AirCalcFactor = 1;
                     }
                 }
 
