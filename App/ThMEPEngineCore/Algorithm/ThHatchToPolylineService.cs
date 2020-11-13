@@ -17,13 +17,21 @@ namespace ThMEPEngineCore.Algorithm
 {
     public class ThHatchToPolylineService
     {
-        private double PointOffsetDistance = 2.0;
+        ///目前主要用于支撑对剪力墙带一个洞的裁剪
+        ///暂时将线延伸设为5mm,之前设1,2mm有没成功的情况
+        ///打断点偏移的距离要大于线延伸的距离
+        private double PointOffsetDistance = 6.0; 
+        private const double LineExtendDistance = 5.0; 
         private List<Polyline> BuildPolylines { get; set; }
         private Hatch CurrentHatch { get; set; }
         private ThHatchToPolylineService(Hatch hatch)
         {
             BuildPolylines = new List<Polyline>();
             CurrentHatch = hatch;
+            if(PointOffsetDistance<= LineExtendDistance)
+            {
+                PointOffsetDistance=LineExtendDistance + 1.0;
+            }
         }
         public static List<Polyline> ToGapPolyline(Hatch hatch)
         {
@@ -109,11 +117,6 @@ namespace ThMEPEngineCore.Algorithm
         }
         private Polyline BuildOutermostPolyline(Polyline outerPolyline, Polyline innerPolyline)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                acadDatabase.ModelSpace.Add(outerPolyline);
-                acadDatabase.ModelSpace.Add(innerPolyline);
-            }
             List<Line> lines = new List<Line>();
             List<Tuple<int, Point3d, Point3d>> splitSegments = new List<Tuple<int, Point3d, Point3d>>();
             for (int i = 0; i < innerPolyline.NumberOfVertices; i++)
@@ -133,8 +136,8 @@ namespace ThMEPEngineCore.Algorithm
                 {
                     continue;
                 }
-                Point3d firstProjectPt = outerPolyline.GetClosestPointTo(pts[0], extendVec.Value, false);
-                Point3d secondProjectPt = outerPolyline.GetClosestPointTo(pts[1], extendVec.Value, false);
+                Point3d firstProjectPt = outerPolyline.GetClosestPointTo(pts[0], false);
+                Point3d secondProjectPt = outerPolyline.GetClosestPointTo(pts[1], false);
                 for (int j = 0; j < outerPolyline.NumberOfVertices; j++)
                 {
                     var secondLineSegment = outerPolyline.GetLineSegmentAt(j);
@@ -162,12 +165,16 @@ namespace ThMEPEngineCore.Algorithm
                 lines.AddRange(GetLines(innerPolyline, splitSegments[0]));
                 lines.AddRange(GetLines(outerPolyline, splitSegments[1]));
             }
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            List<Line> extendLines = new List<Line>();
+            lines.ForEach(o =>
             {
-                lines.ForEach(o => acadDatabase.ModelSpace.Add(o));
-            }
+                Point3d sp = o.StartPoint - o.LineDirection().MultiplyBy(LineExtendDistance);
+                Point3d ep = o.EndPoint + o.LineDirection().MultiplyBy(LineExtendDistance);
+                extendLines.Add(new Line(sp, ep));
+            });
+            lines.ForEach(o =>o.Dispose());
             DBObjectCollection dbObjs = new DBObjectCollection();
-            lines.ForEach(o => dbObjs.Add(o));
+            extendLines.ForEach(o => dbObjs.Add(o));
             var unionObjs = dbObjs.Polygonize();
             List<Polyline> polygonPolyines = new List<Polyline>();
             unionObjs.ForEach(o =>
@@ -235,8 +242,8 @@ namespace ThMEPEngineCore.Algorithm
         {
             List<Point3d> offsetPts = new List<Point3d>();
             Point3d midPt = ThGeometryTool.GetMidPt(lineSegment.StartPoint, lineSegment.EndPoint);
-            Point3d firstPt = midPt + midPt.GetVectorTo(lineSegment.StartPoint).GetNormal().MultiplyBy(1.0);
-            Point3d secondPt = midPt + midPt.GetVectorTo(lineSegment.EndPoint).GetNormal().MultiplyBy(1.0);
+            Point3d firstPt = midPt + midPt.GetVectorTo(lineSegment.StartPoint).GetNormal().MultiplyBy(offsetDis);
+            Point3d secondPt = midPt + midPt.GetVectorTo(lineSegment.EndPoint).GetNormal().MultiplyBy(offsetDis);
             if(IsIn(lineSegment, firstPt))
             {
                 offsetPts.Add(firstPt);
