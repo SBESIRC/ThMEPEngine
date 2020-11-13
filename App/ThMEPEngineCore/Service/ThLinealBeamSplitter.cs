@@ -24,7 +24,7 @@ namespace ThMEPEngineCore.Service
         public void Dispose()
         {
         }
-        public override void Split(List<Polyline> outlines)
+        public override void Split(List<Entity> outlines)
         {
             List<ThIfcLineBeam> beamContainer = new List<ThIfcLineBeam>() { LineBeam };
             outlines.ForEach(m =>

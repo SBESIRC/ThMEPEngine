@@ -33,12 +33,12 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
         }
 
-        public static List<Geometry> ToNTSPolygons(this DBObjectCollection objs)
+        public static List<Polygon> ToNTSPolygons(this DBObjectCollection objs)
         {
-            var polygons = new List<Geometry>();
-            foreach (Polyline polyline in objs)
+            var polygons = new List<Polygon>();
+            foreach (Entity entity in objs)
             {
-                polygons.Add(polyline.ToNTSPolygon());
+                polygons.Add(entity.ToNTSPolygon());
             }
             return polygons;
         }

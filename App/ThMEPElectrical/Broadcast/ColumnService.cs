@@ -1,14 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using NetTopologySuite.Geometries;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.Model;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Broadcast
 {
@@ -119,7 +115,7 @@ namespace ThMEPElectrical.Broadcast
         {
             var closetPt = line.GetClosestPointTo(column.columnCenterPt, true);
             Line intersectLine = new Line(column.columnCenterPt, closetPt);
-            
+
             Polyline columnPoly = column.columnPoly;
             List<Point3d> columnPts = new List<Point3d>();
             for (int i = 0; i < columnPoly.NumberOfVertices; i++)
@@ -158,7 +154,7 @@ namespace ThMEPElectrical.Broadcast
             ThCADCoreNTSSpatialIndex thPatialIndex = new ThCADCoreNTSSpatialIndex(dBObject);
             var closet = thPatialIndex.NearestNeighbours(line, 1);
 
-            
+
             if (closet.Count > 0)
             {
                 Polyline closetColumn = closet.Cast<Polyline>().First();
@@ -204,10 +200,10 @@ namespace ThMEPElectrical.Broadcast
                     upColumn.Add(col);
                 }
             }
-            
+
             return new List<List<Polyline>>() { upColumn, downColumn };
         }
-        
+
         /// <summary>
         /// 让线指向x或者y轴正方向
         /// </summary>

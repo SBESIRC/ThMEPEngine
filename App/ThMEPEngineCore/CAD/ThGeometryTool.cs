@@ -4,6 +4,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
+using GeometryExtensions;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -197,6 +199,33 @@ namespace ThMEPEngineCore.CAD
             Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, Vector3d.ZAxis, dBText.Position);
             obb.TransformBy(counterClockwiseMat);
             return obb;
+        }
+        public static Point3dCollection EntityVertices(this Entity entity)
+        {
+            // 暂不支持弧
+            Point3dCollection pts = new Point3dCollection();
+            if (entity is Polyline polyline)
+            {
+                return polyline.Vertices();
+            }
+            else if(entity is Line line)
+            {
+                pts.Add(line.StartPoint);
+                pts.Add(line.EndPoint);
+            }
+            else if (entity is Arc arc)
+            {
+                return arc.ToPolyline().Vertices();
+            }
+            else if(entity is MPolygon mPolygon)
+            {
+                pts = mPolygon.Vertices();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return pts;
         }
     }
 }

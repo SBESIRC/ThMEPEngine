@@ -74,11 +74,9 @@ namespace ThMEPEngineCore.Service
                             {
                                 if (IsBuildElement(hatch) && CheckLayerValid(hatch))
                                 {
-                                    hatch.ToDbEntities().ForEach(o =>
-                                    {
-                                        o.TransformBy(matrix);
-                                        ents.Add(o);
-                                    });
+                                    var newHatch = hatch.GetTransformedCopy(matrix) as Hatch;
+                                    List<Polyline> gapOutlines = ThHatchToPolylineService.ToGapPolyline(newHatch);
+                                    gapOutlines.ForEach(o => ents.Add(o));
                                 }
                             }
                             else if (dbObj is Solid solid)

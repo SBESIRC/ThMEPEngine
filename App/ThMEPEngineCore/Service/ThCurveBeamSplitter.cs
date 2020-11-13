@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.Service
         {            
         }
 
-        public override void Split(List<Polyline> outlines)
+        public override void Split(List<Entity> outlines)
         {
             throw new NotImplementedException();
         }

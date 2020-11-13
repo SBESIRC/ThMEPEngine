@@ -44,8 +44,7 @@ namespace ThMEPEngineCore.Engine
                     }
                     else if(o is MPolygon mPolygon)
                     {
-                        // 暂时忽略带洞的剪力墙
-                        //Elements.Add(ThIfcWall.CreateWallEntity(mPolygon));
+                        Elements.Add(ThIfcWall.CreateWallEntity(mPolygon));
                     }
                 });
             }

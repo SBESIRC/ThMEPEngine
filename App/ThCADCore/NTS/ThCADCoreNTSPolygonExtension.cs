@@ -46,12 +46,10 @@ namespace ThCADCore.NTS
         {
             return polygon.ToNTSPolygon().Contains(curve.ToNTSGeometry());
         }
-
-        public static bool Intersects(this AcPolygon polygon, Curve curve)
+        public static bool Intersects(this AcPolygon polygon, Entity entity)
         {
-            return polygon.ToNTSPolygon().Intersects(curve.ToNTSGeometry());
+            return polygon.ToNTSPolygon().Intersects(entity.ToNTSGeometry());
         }
-
         public static DBObjectCollection SplitBy(this AcPolygon polygon, Curve curve)
         {
             var geometries = new Geometry[]

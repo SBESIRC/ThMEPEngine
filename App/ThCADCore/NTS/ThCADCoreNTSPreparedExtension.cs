@@ -25,5 +25,9 @@ namespace ThCADCore.NTS
         {
             return PreparedPolygon.Intersects(curve.ToNTSLineString());
         }
+        public bool Intersects(MPolygon mPolygon)
+        {
+            return PreparedPolygon.Intersects(mPolygon.ToNTSPolygon());
+        }
     }
 }

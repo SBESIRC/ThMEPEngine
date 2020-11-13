@@ -17,6 +17,10 @@ namespace ThCADCore.NTS
             {
                 return curve.ToNTSLineString();
             }
+            else if(obj is MPolygon mPolygon)
+            {
+                return mPolygon.ToNTSPolygon();
+            }
             else if (obj is Region region)
             {
                 return region.ToNTSPolygon();
@@ -47,6 +51,26 @@ namespace ThCADCore.NTS
             else if(curve is Arc arc)
             {
                 return arc.TessellateArcWithArc(ThCADCoreNTSService.Instance.ArcTessellationLength).ToNTSLineString();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static Polygon ToNTSPolygon(this Entity entity)
+        {
+            if (entity is Polyline polyline)
+            {
+                return polyline.ToNTSPolygon();
+            }
+            else if (entity is Circle circle)
+            {
+                return circle.ToNTSPolygon();
+            }
+            else if (entity is MPolygon mPolygon)
+            {
+                return mPolygon.ToNTSPolygon();
             }
             else
             {

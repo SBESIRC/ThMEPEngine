@@ -189,7 +189,21 @@ namespace ThMEPEngineCore.Service
                 if (linkObjs.Count > 0)
                 {
                     // 确保梁的延伸和剪力墙是“重叠(Overlap)”的
-                    var overlapObjs = linkObjs.Cast<Polyline>().Where(o => preparedEnvelope.Intersects(o));
+                    var overlapObjs = linkObjs.Cast<Entity>().Where(o =>
+                    {
+                        if(o is Curve curve)
+                        {
+                            return preparedEnvelope.Intersects(curve);
+                        }
+                        else if(o is MPolygon mPolygon)
+                        {
+                            return preparedEnvelope.Intersects(mPolygon);
+                        }
+                        else
+                        {
+                            return false;
+                        }
+                    });
                     foreach (DBObject dbObj in overlapObjs)
                     {
                         links.Add(ShearWallEngine.FilterByOutline(dbObj));
