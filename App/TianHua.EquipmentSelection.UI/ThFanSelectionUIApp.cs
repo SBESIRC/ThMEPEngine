@@ -3,11 +3,11 @@ using AcHelper;
 using Linq2Acad;
 using System.IO;
 using ThCADExtension;
-using Autodesk.AutoCAD.ApplicationServices;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using TianHua.FanSelection.UI.CAD;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.FanSelection.UI
@@ -18,7 +18,6 @@ namespace TianHua.FanSelection.UI
         private static bool _runCustomCommand = false;
         private static ObjectId _selectedEntId = ObjectId.Null;
         private static CustomCommandMappers _customCommands = null;
-        private static ThFanSelectionDbEventHandler dbEventHandler = null;
         private static ThFanSelectionDocumentEventHandler documentEventHandler = null;
 
         public void Initialize()
@@ -28,7 +27,6 @@ namespace TianHua.FanSelection.UI
             SubscribeToDocumentManagerEvents();
             if (Active.Document != null)
             {
-                SubscribeToDbEvents(Active.Database);
                 SubscribeToDocumentEvents(Active.Document);
             }
         }
@@ -106,23 +104,19 @@ namespace TianHua.FanSelection.UI
         [CommandMethod("TIANHUACAD", "THFJBLOCK", CommandFlags.NoHistory)]
         public void ThEquipmentBlock()
         {
-            UnSubscribeToDbEvents(Active.Database);
             using (var cmd = new ThModelBlockCommand())
             {
                 cmd.Execute();
             }
-            SubscribeToDbEvents(Active.Database);
         }
 
         [CommandMethod("TIANHUACAD", "THFJINPLACEEDITBLOCK", CommandFlags.NoHistory)]
         public void ThEquipmentInPlaceEditBlock()
         {
-            UnSubscribeToDbEvents(Active.Database);
             using (var cmd = new ThModelInPlaceEditBlockCommand())
             {
                 cmd.Execute();
             }
-            SubscribeToDbEvents(Active.Database);
         }
 
         [CommandMethod("TIANHUACAD", "THFJUIUPDATE", CommandFlags.NoUndoMarker)]
@@ -178,16 +172,6 @@ namespace TianHua.FanSelection.UI
             AcadApp.DocumentManager.DocumentToBeDestroyed -= DocumentManager_DocumentToBeDestroyed;
         }
 
-        private static void SubscribeToDbEvents(Database db)
-        {
-            dbEventHandler = new ThFanSelectionDbEventHandler(db);
-        }
-
-        private static void UnSubscribeToDbEvents(Database db)
-        {
-            dbEventHandler.Dispose();
-        }
-
         private static void SubscribeToDocumentEvents(Document document)
         {
             documentEventHandler = new ThFanSelectionDocumentEventHandler(document);
@@ -236,9 +220,6 @@ namespace TianHua.FanSelection.UI
         {
             if (e.Document != null)
             {
-                // 订阅DB事件
-                SubscribeToDbEvents(e.Document.Database);
-
                 // 订阅Document事件
                 SubscribeToDocumentEvents(e.Document);
             }
@@ -249,9 +230,6 @@ namespace TianHua.FanSelection.UI
             if (e.Document != null)
             {
                 e.Document.CloseModelSelectionDialog();
-
-                // 取消订阅DB事件
-                UnSubscribeToDbEvents(e.Document.Database);
 
                 // 取消订阅Docuemnt事件
                 UnSubscribeToDocumentEvents(e.Document);

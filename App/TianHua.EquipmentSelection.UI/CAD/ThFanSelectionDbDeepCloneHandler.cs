@@ -1,21 +1,19 @@
 ﻿using System;
-using AcHelper;
-using Linq2Acad;
 using System.Collections.Generic;
-using TianHua.FanSelection.Messaging;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.FanSelection.UI.CAD
 {
-    public class ThFanSelectionDbEventHandler : IDisposable
+    public class ThFanSelectionDbDeepCloneHandler : IDisposable
     {
         private Database Database { get; set; }
-
         private IdMapping Mapping { get; set; }
+        public Dictionary<string, string> ModelMapping { get; set; }
 
-        public ThFanSelectionDbEventHandler(Database database)
+        public ThFanSelectionDbDeepCloneHandler(Database database)
         {
             Database = database;
+            ModelMapping = new Dictionary<string, string>();
             Database.DeepCloneEnded += DbEvent_DeepCloneEnded_Handler;
             Database.BeginDeepCloneTranslation += DbEvent_BeginDeepCloneTranslation_Handler;
         }
@@ -33,26 +31,20 @@ namespace TianHua.FanSelection.UI.CAD
 
         public void DbEvent_DeepCloneEnded_Handler(object sender, EventArgs e)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var tx = Database.TransactionManager.StartOpenCloseTransaction())
             {
-                var mapping = new Dictionary<string, string>();
                 foreach (IdPair pair in Mapping)
                 {
-                    var sourceModel = pair.Key.GetModelIdentifier();
-                    var targetModel = pair.Value.GetModelIdentifier();
+                    var sourceModel = pair.Key.GetDBObject(tx).GetModelIdentifier();
+                    var targetModel = pair.Value.GetDBObject(tx).GetModelIdentifier();
                     if (!string.IsNullOrEmpty(sourceModel) &&
                         !string.IsNullOrEmpty(targetModel) &&
                         (sourceModel != targetModel))
                     {
-                        mapping[sourceModel] = targetModel;
+                        // 考虑到一个对象可以被复制多次，
+                        // 这里将新复制对象作为键值，而将被复制对象作为值
+                        ModelMapping[targetModel] = sourceModel;
                     }
-                }
-                if (mapping.Count > 0)
-                {
-                    ThModelCopyMessage.SendWith(new ThModelCopyMessageArgs()
-                    {
-                        ModelMapping = mapping,
-                    });
                 }
             }
         }

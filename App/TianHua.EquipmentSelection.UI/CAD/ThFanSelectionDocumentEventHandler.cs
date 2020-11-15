@@ -15,6 +15,8 @@ namespace TianHua.FanSelection.UI.CAD
 
         private ThFanSelectionDbEraseHandler DbEraseHandler { get; set; }
 
+        private ThFanSelectionDbDeepCloneHandler DbDeepCloneHandler { get; set; }
+
         private Database Database
         {
             get
@@ -63,6 +65,18 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 DbEraseHandler = new ThFanSelectionDbEraseHandler(Database);
             }
+            else if (e.GlobalCommandName == "COPY")
+            {
+                DbDeepCloneHandler = new ThFanSelectionDbDeepCloneHandler(Database);
+            }
+            else if (e.GlobalCommandName == "CUTCLIP")
+            {
+                DbEraseHandler = new ThFanSelectionDbEraseHandler(Database);
+            }
+            else if (e.GlobalCommandName == "PASTECLIP")
+            {
+                DbDeepCloneHandler = new ThFanSelectionDbDeepCloneHandler(Database);
+            }
         }
 
         public void CommandEndedHandler(object sender, CommandEventArgs e)
@@ -89,8 +103,22 @@ namespace TianHua.FanSelection.UI.CAD
                 SendEraseMessage();
                 DbEraseHandler.Dispose();
             }
+            else if (e.GlobalCommandName == "COPY")
+            {
+                SendCopyMessage();
+                DbDeepCloneHandler.Dispose();
+            }
+            else if (e.GlobalCommandName == "CUTCLIP")
+            {
+                SendEraseMessage();
+                DbEraseHandler.Dispose();
+            }
+            else if (e.GlobalCommandName == "PASTECLIP")
+            {
+                SendCopyMessage();
+                DbDeepCloneHandler.Dispose();
+            }
         }
-
 
         public void SendSaveMessage()
         {
@@ -121,7 +149,7 @@ namespace TianHua.FanSelection.UI.CAD
 
         public void SendEraseMessage()
         {
-            if (string.IsNullOrEmpty(DbEraseHandler.Model))
+            if (DbEraseHandler.Models.Count == 0)
             {
                 return;
             }
@@ -131,8 +159,24 @@ namespace TianHua.FanSelection.UI.CAD
                 Message = new ThModelDeleteMessage(),
                 MessageArgs = new ThModelDeleteMessageArgs()
                 {
-                    Model = DbEraseHandler.Model,
-                    Erased = DbEraseHandler.Erased,
+                    Models = DbEraseHandler.Models,
+                }
+            };
+        }
+
+        public void SendCopyMessage()
+        {
+            if (DbDeepCloneHandler.ModelMapping.Count == 0)
+            {
+                return;
+            }
+
+            _ = new ThFanSelectionAppIdleHandler()
+            {
+                Message = new ThModelCopyMessage(),
+                MessageArgs = new ThModelCopyMessageArgs()
+                {
+                    ModelMapping = DbDeepCloneHandler.ModelMapping,
                 }
             };
         }

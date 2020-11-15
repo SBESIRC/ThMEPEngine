@@ -6,7 +6,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using OfficeOpenXml;
 using System.Runtime.InteropServices;
 using AcHelper;
 using Linq2Acad;
@@ -1516,7 +1515,7 @@ namespace TianHua.FanSelection.UI
                         }
                     }
 
-     
+
                     m_fmOverView.DataSourceChanged(m_ListFan);
                 }
             }
@@ -1868,7 +1867,7 @@ namespace TianHua.FanSelection.UI
 
                 if (m_ListSceneScreening != null && m_ListSceneScreening.Count > 0)
                 {
-                    _List = _List.FindAll(p => m_ListSceneScreening.Contains(p.Scenario) );
+                    _List = _List.FindAll(p => m_ListSceneScreening.Contains(p.Scenario));
                 }
 
                 if (_List != null && _List.Count > 0) _List = _List.OrderBy(p => p.SortScenario).OrderBy(p => p.SortID).ToList();
@@ -2463,10 +2462,10 @@ namespace TianHua.FanSelection.UI
             {
                 var _Value = message.Data.ModelMapping[_Key];
 
-                var _Fan = m_ListFan.Find(p => p.ID == _Key);
+                var _Fan = m_ListFan.Find(p => p.ID == _Value);
                 if (_Fan == null) { return; }
                 List<FanDataModel> _ListTemp = new List<FanDataModel>();
-                string _Guid = _Value;
+                string _Guid = _Key;
                 var _Json = FuncJson.Serialize(_Fan);
                 var _FanDataModel = FuncJson.Deserialize<FanDataModel>(_Json);
 
@@ -2508,23 +2507,24 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelDeleted(ThModelDeleteMessage message)
         {
-            if (message == null || FuncStr.NullToStr(message.Data.Model) == string.Empty) { return; }
+            if (message == null || message.Data.Models.Count == 0) { return; }
 
-            var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(message.Data.Model));
+            foreach(var item in message.Data.Models)
+            {
+                var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(item.Key));
 
-            //m_ListFan.RemoveAll(p => p.ID == FuncStr.NullToStr(message.Data.Model));
+                //m_ListFan.RemoveAll(p => p.ID == FuncStr.NullToStr(message.Data.Model));
 
-            //m_ListFan.RemoveAll(p => p.PID == FuncStr.NullToStr(message.Data.Model));
+                //m_ListFan.RemoveAll(p => p.PID == FuncStr.NullToStr(message.Data.Model));
 
-            if (_Fan == null) { return; }
+                if (_Fan == null) { return; }
 
-            _Fan.IsErased = message.Data.Erased;
+                _Fan.IsErased = item.Value;
 
-            var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(message.Data.Model));
+                var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(item.Key));
 
-            if (_FanSon != null) { _FanSon.IsErased = message.Data.Erased; }
-
-       
+                if (_FanSon != null) { _FanSon.IsErased = item.Value; }
+            }
 
             TreeList.RefreshDataSource();
 
@@ -2533,7 +2533,7 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelSaved(ThModelSaveMessage message)
         {
- 
+
             if (m_ListFan == null || m_ListFan.Count == 0 || FuncStr.NullToStr(message.Data.FileName) == string.Empty) { return; }
             TreeList.PostEditor();
 
@@ -2586,7 +2586,7 @@ namespace TianHua.FanSelection.UI
         {
             if (message.Data == null) { return; }
 
-            if(message.Data.UnappendedModels != null && message.Data.UnappendedModels.Count > 0)
+            if (message.Data.UnappendedModels != null && message.Data.UnappendedModels.Count > 0)
             {
 
                 for (int i = 0; i < message.Data.UnappendedModels.Count; i++)
@@ -2623,6 +2623,6 @@ namespace TianHua.FanSelection.UI
 
             this.TreeList.ExpandAll();
         }
- 
+
     }
 }

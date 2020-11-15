@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using TianHua.FanSelection.Messaging;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.FanSelection.UI.CAD
@@ -7,13 +8,12 @@ namespace TianHua.FanSelection.UI.CAD
     public class ThFanSelectionDbEraseHandler : IDisposable
     {
         private Database Database { get; set; }
-
-        public bool Erased { get; set; }
-        public string Model { get; set; }
+        public Dictionary<string, bool> Models { get; set; }
 
         public ThFanSelectionDbEraseHandler(Database database)
         {
             Database = database;
+            Models = new Dictionary<string, bool>();
             Database.ObjectErased += DbEvent_ObjectErased_Handler;
         }
 
@@ -27,8 +27,7 @@ namespace TianHua.FanSelection.UI.CAD
             var model = e.DBObject.GetModelIdentifier();
             if (!string.IsNullOrEmpty(model))
             {
-                Model = model;
-                Erased = e.Erased;
+                Models[model] = e.Erased;
             }
         }
     }

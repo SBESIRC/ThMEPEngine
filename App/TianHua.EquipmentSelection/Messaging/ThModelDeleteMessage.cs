@@ -1,11 +1,11 @@
 ﻿using Catel.Messaging;
+using System.Collections.Generic;
 
 namespace TianHua.FanSelection.Messaging
 {
     public class ThModelDeleteMessageArgs : ThModelMessageArgs
     {
-        public bool Erased { get; set; }
-        public string Model { get; set; }
+        public Dictionary<string, bool> Models { get; set; }
     }
 
     public class ThModelDeleteMessage : MessageBase<ThModelDeleteMessage, ThModelDeleteMessageArgs>

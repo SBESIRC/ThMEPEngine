@@ -48,6 +48,11 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 ThModelDeleteMessage.SendWith(eraseArgs);
             }
+            else if (ThFanSelectionService.Instance.Message is ThModelCopyMessage copyMessage &&
+                ThFanSelectionService.Instance.MessageArgs is ThModelCopyMessageArgs copyArgs)
+            {
+                ThModelCopyMessage.SendWith(copyArgs);
+            }
         }
     }
 }
