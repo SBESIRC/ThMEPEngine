@@ -10,6 +10,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Pipe.Model;
+using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Engine
 {

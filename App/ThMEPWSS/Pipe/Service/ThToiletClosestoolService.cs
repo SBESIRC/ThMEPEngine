@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Service
 {
