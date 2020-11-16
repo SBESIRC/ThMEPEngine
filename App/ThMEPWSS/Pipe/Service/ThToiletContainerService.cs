@@ -62,15 +62,13 @@ namespace ThMEPWSS.Pipe.Service
             ThToiletContainer thToiletContainer = new ThToiletContainer();
             thToiletContainer.Toilet = toiletSpace;
             var toiletDrainwellService = ThToiletDrainwellService.Find(Spaces, toiletSpace, SpaceSpatialIndex);
-            thToiletContainer.DrainageWell = toiletDrainwellService.Drainwell;
+            thToiletContainer.DrainageWells = toiletDrainwellService.Drainwells;
 
             var toiletClosestoolService = ThToiletClosestoolService.Find(Closestools, toiletSpace, ClosestoolSpatialIndex);
-            thToiletContainer.Closestool =
-                toiletClosestoolService.ClosestoolCollection.Count == 1 ?
-                toiletClosestoolService.ClosestoolCollection[0] : null;
+            thToiletContainer.Closestools = toiletClosestoolService.Closestools;
 
             var toiletFloordrainService = ThToiletFloorDrainService.Find(FloorDrains, toiletSpace, FloorDrainSpatialIndex);
-            thToiletContainer.FloorDrains = toiletFloordrainService.FloorDrainCollection;
+            thToiletContainer.FloorDrains = toiletFloordrainService.FloorDrains;
 
             return thToiletContainer;
         }

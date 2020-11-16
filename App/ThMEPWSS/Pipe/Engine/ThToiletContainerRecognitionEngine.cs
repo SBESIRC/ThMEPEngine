@@ -1,45 +1,39 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using Linq2Acad;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model;
-using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Service;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThToiletContainerRecognitionEngine : IDisposable
+    public class ThToiletContainerRecognitionEngine : ThContainerRecognitionEngine
     {
-        public List<ThToiletContainer> ToiletContainer { get; set; }
-        public void Recognize(Database database,Point3dCollection pts)
+        public List<ThToiletContainer> ToiletContainers { get; set; }
+        public ThToiletContainerRecognitionEngine()
         {
-            ToiletContainer = new List<ThToiletContainer>();
+            ToiletContainers = new List<ThToiletContainer>();
+        }
+        public override void Recognize(Database database, Point3dCollection pts)
+        {
+            ToiletContainers = new List<ThToiletContainer>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var spaces = GetSpaces(database, pts);
                 var closestools = GetClosestools(database, pts);
                 var floorDrains = GetFloorDrains(database, pts);
                 var toiletContainerService = ThToiletContainerService.Build(spaces, closestools, floorDrains);
-                ToiletContainer = toiletContainerService.ToiletContainers;
-            }
-        }
-        private List<ThIfcSpace> GetSpaces(Database database, Point3dCollection pts)
-        {            
-            using (ThSpaceRecognitionEngine spaceEngine = new ThSpaceRecognitionEngine())
-            {
-                spaceEngine.Recognize(database, pts);
-                return spaceEngine.Spaces;
+                ToiletContainers = toiletContainerService.ToiletContainers;
             }
         }
         private List<ThIfcClosestool> GetClosestools(Database database, Point3dCollection pts)
         {
-            using (ThClosetoolRecognitionEngine closetoolEngine = new ThClosetoolRecognitionEngine())
+            using (ThClosestoolRecognitionEngine closetoolEngine = new ThClosestoolRecognitionEngine())
             {
                 closetoolEngine.Recognize(database, pts);
                 return closetoolEngine.Elements.Cast<ThIfcClosestool>().ToList();
@@ -52,10 +46,6 @@ namespace ThMEPWSS.Pipe.Engine
                 floorDrainEngine.Recognize(database, pts);
                 return floorDrainEngine.Elements.Cast<ThIfcFloorDrain>().ToList();
             }
-        }
-
-        public void Dispose()
-        {           
         }
     }
 }

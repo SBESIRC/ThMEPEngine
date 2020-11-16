@@ -121,7 +121,7 @@ namespace ThMEPEngineCore
         public void ThExtractIfcCloseTool()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var closetoolEngine = new ThClosetoolRecognitionEngine())
+            using (var closetoolEngine = new ThClosestoolRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)

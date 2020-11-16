@@ -12,48 +12,43 @@ using ThMEPEngineCore.Model.Plumbing;
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThToiletClosestoolService
-    {        
-        private List<ThIfcClosestool> Closestools { get; set; }
-        private ThIfcSpace ToiletSpace { get; set; }
-        private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
-        public bool IsFinded
-        {
-            get
-            {
-                return ClosestoolCollection.Count>0;
-            }
-        }
+    {
         /// <summary>
         /// 找到的坐便器
-        /// 目前只支持查找一个
         /// </summary>
-        public List<ThIfcClosestool> ClosestoolCollection 
-        { 
-            get;
-            set; 
-        } 
+        public List<ThIfcClosestool> Closestools { get; set; }
+        private List<ThIfcClosestool> ClosestoolList { get; set; }
+        private ThIfcSpace ToiletSpace { get; set; }
+        private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
         private ThToiletClosestoolService(
-            List<ThIfcClosestool> closestools, 
+            List<ThIfcClosestool> closestoolList, 
             ThIfcSpace toiletSpace, 
             ThCADCoreNTSSpatialIndex closestoolSpatialIndex)
-        {            
-            Closestools = closestools;
+        {
+            ClosestoolList = closestoolList;
+            Closestools = new List<ThIfcClosestool>();
             ToiletSpace = toiletSpace;
             ClosestoolSpatialIndex = closestoolSpatialIndex;
-            ClosestoolCollection = new List<ThIfcClosestool>();
             if (ClosestoolSpatialIndex == null)
             {
                 DBObjectCollection dbObjs = new DBObjectCollection();
-                Closestools.ForEach(o => dbObjs.Add(o.Outline));
+                ClosestoolList.ForEach(o => dbObjs.Add(o.Outline));
                 ClosestoolSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
         }
+        /// <summary>
+        /// 创建查找卫生间内查找坐便器的实例
+        /// </summary>
+        /// <param name="closestools">查找范围内的所有坐便器</param>
+        /// <param name="toiletSpace">卫生间空间</param>
+        /// <param name="closestoolSpatialIndex">卫生间索引空间</param>
+        /// <returns></returns>
         public static ThToiletClosestoolService Find(
-            List<ThIfcClosestool> closestools, 
+            List<ThIfcClosestool> closestoolList, 
             ThIfcSpace toiletSpace, 
             ThCADCoreNTSSpatialIndex closestoolSpatialIndex = null)
         {
-            var instance = new ThToiletClosestoolService(closestools, toiletSpace, closestoolSpatialIndex);
+            var instance = new ThToiletClosestoolService(closestoolList, toiletSpace, closestoolSpatialIndex);
             instance.Find();
             return instance;
         }
@@ -61,9 +56,9 @@ namespace ThMEPWSS.Pipe.Service
         {
             var tolitBoundary = ToiletSpace.Boundary as Polyline;
             var crossObjs = ClosestoolSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
-            var crossClosestools = Closestools.Where(o => crossObjs.Contains(o.Outline));
+            var crossClosestools = ClosestoolList.Where(o => crossObjs.Contains(o.Outline));
             var includedClosestools = crossClosestools.Where(o => tolitBoundary.Contains(o.Outline as Curve));
-            includedClosestools.ForEach(o => ClosestoolCollection.Add(o));
+            includedClosestools.ForEach(o => Closestools.Add(o));
         }        
     }
 }

@@ -67,11 +67,11 @@
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
+    <Compile Include="Engine\ThClosestoolRecognitionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
-    <Compile Include="Engine\ThClosetoolRecognitionEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
@@ -152,6 +152,8 @@
     <Compile Include="Service\ThBeamMerger.cs" />
     <Compile Include="Engine\ThSplitBeamEngine.cs" />
     <Compile Include="Service\ThBeamLinkSnapService.cs" />
+    <Compile Include="Service\ThClosestoolDbExtension.cs" />
+    <Compile Include="Service\ThClosestoolLayerManager.cs" />
     <Compile Include="Service\ThFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
@@ -175,9 +177,7 @@
     <Compile Include="Service\ThSpaceNameRecognition.cs" />
     <Compile Include="Service\ThStructureBeamAnnotationDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamUtils.cs" />
-    <Compile Include="Service\ThClosetoolDbExtension.cs" />
     <Compile Include="Service\ThStructureColumnDbExtension.cs" />
-    <Compile Include="Service\ThClosetoolLayerManager.cs" />
     <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />

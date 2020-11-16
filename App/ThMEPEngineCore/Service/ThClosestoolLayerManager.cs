@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThClosetoolLayerManager
+    public class ThClosestoolLayerManager
     {
         public static List<string> XrefLayers(Database database)
         {
@@ -19,12 +19,13 @@ namespace ThMEPEngineCore.Service
         }
         private static bool IsClosetoolLayerName(string name)
         {
-            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
-            if (patterns.Count() < 3)
-            {
-                return false;
-            }
-            return (patterns[0] == "TOLT") && (patterns[1] == "EQPM") && (patterns[2] == "AE");
+            return true;
+            //string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
+            //if (patterns.Count() < 3)
+            //{
+            //    return false;
+            //}
+            //return (patterns[0] == "TOLT") && (patterns[1] == "EQPM") && (patterns[2] == "AE");
         }
         public static bool IsClosetoolBlockName(string name)
         {

@@ -1,10 +1,6 @@
 ﻿using System;
 using Linq2Acad;
-using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
@@ -13,12 +9,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThClosetoolDbExtension : ThDbExtension, IDisposable
+    public class ThClosestoolDbExtension : ThDbExtension, IDisposable
     {
         public List<Entity> CloseTools { get; set; }
-        public ThClosetoolDbExtension(Database db) : base(db)
+        public ThClosestoolDbExtension(Database db) : base(db)
         {
-            LayerFilter = ThClosetoolLayerManager.XrefLayers(db);
+            LayerFilter = ThClosestoolLayerManager.XrefLayers(db);
             CloseTools = new List<Entity>();
         }
         public void Dispose()
@@ -66,7 +62,7 @@ namespace ThMEPEngineCore.Service
                                 }
                                 if (blockObj.IsBuildElementBlockReference())
                                 {
-                                    if (CheckLayerValid(blockObj) && ThClosetoolLayerManager.IsClosetoolBlockName(blockObj.Name))
+                                    if (CheckLayerValid(blockObj) && ThClosestoolLayerManager.IsClosetoolBlockName(blockObj.Name))
                                     {
                                         var minPt = blockObj.GeometricExtents.MinPoint;
                                         var maxPt = blockObj.GeometricExtents.MaxPoint;
@@ -80,7 +76,7 @@ namespace ThMEPEngineCore.Service
                                         polyline.AddVertexAt(3, new Point2d(minPt.X, maxPt.Y), 0.0, 0.0, 0.0);
                                         polyline.TransformBy(matrix);
                                         ents.Add(polyline);
-                                    }                                    
+                                    }
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
                                 }

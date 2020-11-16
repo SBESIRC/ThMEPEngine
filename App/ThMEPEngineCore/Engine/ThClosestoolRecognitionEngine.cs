@@ -9,12 +9,12 @@ using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThClosetoolRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThClosestoolRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var closetoolDbExtension = new ThClosetoolDbExtension(database))
+            using (var closetoolDbExtension = new ThClosestoolDbExtension(database))
             {
                 closetoolDbExtension.BuildElementCurves();
                 List<Entity> ents = new List<Entity>();

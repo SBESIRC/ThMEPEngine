@@ -12,6 +12,10 @@ namespace ThMEPEngineCore.Engine
     public abstract class ThDistributionElementRecognitionEngine : IDisposable
     {
         public List<ThIfcDistributionFlowElement> Elements { get; set; }
+        protected ThDistributionElementRecognitionEngine()
+        {
+            Elements = new List<ThIfcDistributionFlowElement>();
+        }
 
         public void Dispose()
         {

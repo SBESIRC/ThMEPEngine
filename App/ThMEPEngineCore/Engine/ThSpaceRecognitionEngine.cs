@@ -25,6 +25,7 @@ namespace ThMEPEngineCore.Engine
         private Dictionary<DBText, List<Curve>> TextContainer { get; set; }
         private Dictionary<Curve, List<Curve>> AreaContainer { get; set; }
         private Dictionary<Curve, ThIfcSpace> SpaceIndex { get; set; } //用几何对象快速查找ThIfcSpace对象
+        private ThCADCoreNTSSpatialIndex SpaceSpatialIndex;
         public ThSpaceRecognitionEngine()
         {
             Spaces = new List<ThIfcSpace>();
@@ -41,13 +42,20 @@ namespace ThMEPEngineCore.Engine
                 //Load Data
                 SpaceNames = RecognizeSpaceNameText(database, polygon);
                 SpaceBoundaries = RecognizeSpaceBoundary(database, polygon);
+                //BuildSpaceSpatialIndex();
                 //Build Container
-                this.TextContainer = BuildTextContainers();
-                this.AreaContainer = BuildAreaContainers();
+                BuildTextContainers();
+                BuildAreaContainers();
                 CreateSpaceBoundaries();
                 SpaceMatchText();
                 BuildNestedSpace();
             }
+        }
+        private void BuildSpaceSpatialIndex()
+        {
+            DBObjectCollection dbObjs = new DBObjectCollection();
+            SpaceBoundaries.ForEach(o => dbObjs.Add(o));
+            SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
         }
         public void Print(Database database)
         {
@@ -78,64 +86,35 @@ namespace ThMEPEngineCore.Engine
             dbText.Height = height;
             return dbText;
         }
-        /// <summary>
-        /// 制造假数据(后期择时删除)
-        /// </summary>
-        /// <param name="acadDatabase"></param>
-        private void FakeData(AcadDatabase acadDatabase)
+        private void BuildTextContainers()
         {
-            TypedValue[] textTvs = new TypedValue[]
-            {
-                new TypedValue((int)DxfCode.Start,"Text")
-            };
-            TypedValue[] polylineTvs = new TypedValue[]
-            {
-                new TypedValue((int)DxfCode.Start,"LWPOLYLINE")
-            };
-            SelectionFilter textSf = new SelectionFilter(textTvs);
-            SelectionFilter polylineSf = new SelectionFilter(polylineTvs);
-            var textRes = Active.Editor.GetSelection(textSf);            
-            if(textRes.Status==PromptStatus.OK)
-            {
-                textRes.Value.GetObjectIds().ForEach(o => SpaceNames.Add(acadDatabase.Element<DBText>(o)));
-            }
-            var polylineRes = Active.Editor.GetSelection(polylineSf);
-            if (polylineRes.Status == PromptStatus.OK)
-            {
-                polylineRes.Value.GetObjectIds().ForEach(o => SpaceBoundaries.Add(acadDatabase.Element<Polyline>(o)));
-            }
-        }
-        private Dictionary<DBText,List<Curve>> BuildTextContainers()
-        {
-            Dictionary<DBText, List<Curve>> results = new Dictionary<DBText, List<Curve>>();
+            this.TextContainer = new Dictionary<DBText, List<Curve>>();
             SpaceNames.ForEach(m =>
             {
                 Polyline textBoundary = ThGeometryTool.TextOBB(m);
                 Point3d textCenterPt = ThGeometryTool.GetMidPt(
-                    textBoundary.GetPoint3dAt(0), textBoundary.GetPoint3dAt(2));
+                    textBoundary.GetPoint3dAt(0), textBoundary.GetPoint3dAt(2));                
                 var containers = SelectTextIntersectPolygon(SpaceBoundaries, textBoundary);
                 containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
-                results.Add(m, containers);
-            });
-            return results;
+                this.TextContainer.Add(m, containers);
+            });            
         }
-        private Dictionary<Curve, List<Curve>> BuildAreaContainers()
+        private void BuildAreaContainers()
         {
-            Dictionary<Curve, List<Curve>> results = new Dictionary<Curve, List<Curve>>();
+            this.AreaContainer = new Dictionary<Curve, List<Curve>>();
             SpaceBoundaries.ForEach(m =>
             {
                 if(m is Polyline polyline)
                 {
                     var containers = SelectPolylineContainers(SpaceBoundaries, polyline);
                     containers.Remove(m);
-                    results.Add(m, containers.OrderBy(o => o.Area).ToList());
+                    this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
                 }
                 else
                 {
-                    results.Add(m, new List<Curve>());
+                    this.AreaContainer.Add(m, new List<Curve>());
                 }
             });
-            return results;
         }        
         private List<DBText> RecognizeSpaceNameText(Database database,Point3dCollection polygon)
         {
@@ -285,15 +264,20 @@ namespace ThMEPEngineCore.Engine
         /// <returns></returns>
         private List<Curve> SelectPolylineContainers(List<Curve> curves, Polyline son)
         {
+            var bufferObjs = son.Buffer(-5.0);
             return curves.Where(o =>
             {
                 if (o is Polyline parent)
                 {
-                    using (var ov = new ThCADCoreNTSFixedPrecision())
+                    return bufferObjs.Cast<Curve>().Where(m =>
                     {
-                        ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(parent, son);
-                        return relation.IsCovers;
-                    }
+                        if (m is Polyline polyline)
+                        {
+                            ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(parent, polyline);
+                            return relation.IsCovers;
+                        }
+                        return false;
+                    }).Any();
                 }
                 return false;
             }).ToList();

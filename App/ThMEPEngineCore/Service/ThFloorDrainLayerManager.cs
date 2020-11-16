@@ -19,12 +19,13 @@ namespace ThMEPEngineCore.Service
         }
         private static bool IsFloorDrainLayerName(string name)
         {
-            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
-            if (patterns.Count() < 2)
-            {
-                return false;
-            }
-            return (patterns[0] == "PIPE") && (patterns[1] == "AE");
+            return true;
+            //string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
+            //if (patterns.Count() < 2)
+            //{
+            //    return false;
+            //}
+            //return (patterns[0] == "PIPE") && (patterns[1] == "AE");
         }
         public static bool IsFloorDrainBlockName(string name)
         {
