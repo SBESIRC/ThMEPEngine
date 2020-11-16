@@ -32,7 +32,7 @@ namespace TianHua.FanSelection.UI.CAD
                     var model = acadDatabase.Element<BlockReference>(o);
                     model.Explode(objs);
                     objs.Cast<Entity>()
-                    .Where(e => ThFanSelectionDbUtils.IsModelFoundationLayer(e))
+                    .Where(e => e.IsModelFoundationLayer())
                     .ForEach(f =>
                     {
                         foundation.Add(acadDatabase.ModelSpace.Add(f));

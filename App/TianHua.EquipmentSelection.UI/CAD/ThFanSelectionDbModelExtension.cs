@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Linq2Acad;
 using DotNetARX;
 using System.Linq;
@@ -12,7 +11,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.FanSelection.UI.CAD
 {
-    public static class ThFanSelectionDbExtension
+    public static class ThFanSelectionDbModelExtension
     {
         public static ObjectId InsertModel(this Database database, string name, string layer, Dictionary<string, string> attNameValues)
         {

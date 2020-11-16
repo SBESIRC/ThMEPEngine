@@ -28,7 +28,7 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 Geometries = new ObjectIdCollection();
                 acadDatabase.ModelSpace
-                    .Where(o => ThFanSelectionDbUtils.IsModelFoundation(o))
+                    .Where(o => o.IsModelFoundation())
                     .ForEach(o => Geometries.Add(o.ObjectId));
             }
         }

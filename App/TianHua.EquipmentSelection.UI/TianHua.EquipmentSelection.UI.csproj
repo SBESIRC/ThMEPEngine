@@ -95,7 +95,7 @@
     <Compile Include="CAD\ThFanSelectionDbEraseHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbModelFoundationManager.cs" />
     <Compile Include="CAD\ThFanSelectionDbSaveHandler.cs" />
-    <Compile Include="CAD\ThFanSelectionDbUtils.cs" />
+    <Compile Include="CAD\ThFanSelectionDbModelFoundationExtension.cs" />
     <Compile Include="CAD\ThFanSelectionDocumentEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbUndoHandler.cs" />
     <Compile Include="CAD\ThFanSelectionModelFoundationService.cs" />
@@ -301,7 +301,7 @@
     <Compile Include="ThAirVolumeUserControl.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="CAD\ThFanSelectionDbExtension.cs" />
+    <Compile Include="CAD\ThFanSelectionDbModelExtension.cs" />
     <Compile Include="CAD\ThFanSelectionDbModelManager.cs" />
     <Compile Include="CAD\ThFanSelectionDocumentExtension.cs" />
     <Compile Include="CAD\ThFanSelectionDynBlockExtension.cs" />
