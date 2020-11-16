@@ -1461,7 +1461,7 @@ namespace TianHua.FanSelection.UI
                         TreeList.DeleteSelectedNodes();
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
+                        using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
                             Active.Editor.Regen();
@@ -1488,7 +1488,7 @@ namespace TianHua.FanSelection.UI
 
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
+                        using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
                             Active.Editor.Regen();
@@ -1506,7 +1506,7 @@ namespace TianHua.FanSelection.UI
 
                             using (Active.Document.LockDocument())
                             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                            using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
+                            using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
                             {
                                 dbManager.EraseModels(_MainFan.ID);
                                 Active.Editor.Regen();

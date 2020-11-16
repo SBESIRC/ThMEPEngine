@@ -8,17 +8,17 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace TianHua.FanSelection.UI.CAD
 {
-    public class ThFanSelectionDbManager : IDisposable
+    public class ThFanSelectionDbModelManager : IDisposable
     {
         private Database HostDb { get; set; }
-        private ObjectIdCollection Geometries { get; set; }
+        public ObjectIdCollection Geometries { get; set; }
         public Dictionary<string, List<int>> Models { get; private set; }
 
         /// <summary>
         /// 构造函数
         /// </summary>
         /// <param name="database"></param>
-        public ThFanSelectionDbManager(Database database)
+        public ThFanSelectionDbModelManager(Database database)
         {
             HostDb = database;
             LoadFromDb(database);

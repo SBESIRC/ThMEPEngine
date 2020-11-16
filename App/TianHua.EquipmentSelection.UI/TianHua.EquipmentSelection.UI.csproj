@@ -93,9 +93,12 @@
     <Compile Include="CAD\ThFanSelectionAppIdleHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbDeepCloneHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbEraseHandler.cs" />
+    <Compile Include="CAD\ThFanSelectionDbModelFoundationManager.cs" />
     <Compile Include="CAD\ThFanSelectionDbSaveHandler.cs" />
+    <Compile Include="CAD\ThFanSelectionDbUtils.cs" />
     <Compile Include="CAD\ThFanSelectionDocumentEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbUndoHandler.cs" />
+    <Compile Include="CAD\ThFanSelectionModelFoundationService.cs" />
     <Compile Include="CAD\ThModelBlockCommand.cs" />
     <Compile Include="CAD\ThModelInPlaceEditBlockCommand.cs" />
     <Compile Include="CAD\ThModelUiUpdateCommand.cs" />
@@ -162,6 +165,7 @@
     <Compile Include="CAD\CustomCommandMappers.cs" />
     <Compile Include="IO\DataManager.cs" />
     <Compile Include="CAD\DrawModelsInCAD.cs" />
+    <Compile Include="ThFanSelectionModelFoundationCmds.cs" />
     <Compile Include="ThFanSelectionUIService.cs" />
     <Compile Include="ThFanSelectionUIApp.cs" />
     <Compile Include="IO\ExcelLoader.cs" />
@@ -298,7 +302,7 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="CAD\ThFanSelectionDbExtension.cs" />
-    <Compile Include="CAD\ThFanSelectionDbManager.cs" />
+    <Compile Include="CAD\ThFanSelectionDbModelManager.cs" />
     <Compile Include="CAD\ThFanSelectionDocumentExtension.cs" />
     <Compile Include="CAD\ThFanSelectionDynBlockExtension.cs" />
     <Compile Include="CAD\ThFanSelectionEditorExtension.cs" />

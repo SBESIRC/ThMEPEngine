@@ -20,7 +20,7 @@ namespace TianHua.FanSelection.UI.CAD
         {
             using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
+            using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
             {
 
                 // set focus to AutoCAD

@@ -27,8 +27,10 @@ namespace TianHua.FanSelection
         public const string HTFC_Efficiency = "离心风机效率.json";
         public const string AXIAL_Efficiency = "轴流风机效率.json";
         public const string RegAppName_FanSelection = "THCAD_FAN_SELECTION";
+        public const string RegAppName_Model_Foundation = "THCAD_FAN_FOUNDATION";
 
         // 图层
+        public const string FOUNDATION_LAYER = "H-BASE";
         public const string BLOCK_LAYER_FIRE = "H-FIRE-FBOX";
         public const string BLOCK_LAYER_DUAL = "H-DUAL-FBOX";
         public const string BLOCK_LAYER_EQUP = "H-EQUP-FBOX";
