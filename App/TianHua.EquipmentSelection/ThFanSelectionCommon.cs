@@ -8,7 +8,8 @@ namespace TianHua.FanSelection
 
         public const string AXIAL_TYPE_NAME = "轴流";
         public const string AXIAL_BLOCK_NAME = "轴流风机";
-        public const string AXIAL_MODEL_NAME_SUFFIX = "无基础";
+        public const string AXIAL_MODEL_NAME_SUFFIX_HOIST = "无基础";
+        public const string AXIAL_MODEL_NAME_SUFFIX_SQUARE = "方形基础";
         public const string HTFC_TYPE_NAME = "离心";
         public const string HTFC_BACKWARD_NAME = "后倾";
         public const string HTFC_BLOCK_NAME = "离心风机";
@@ -47,7 +48,8 @@ namespace TianHua.FanSelection
 
         // 风机块属性值
         public const string BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST = "吊装";
-        public const string BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR = "落地";
+        public const string BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP = "落地条形";
+        public const string BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE = "落地方形";
         public const string BLOCK_ATTRIBUTE_VALUE_FIXED_FREQUENCY = "定频";
         public const string BLOCK_ATTRIBUTE_VALUE_VARIABLE_FREQUENCY = "变频";
         public const string BLOCK_ATTRIBUTE_VALUE_DUAL_FREQUENCY = "双频";
