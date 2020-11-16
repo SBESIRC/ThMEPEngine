@@ -32,11 +32,11 @@
     <Compile Include="Entity\BlockDataModel.cs" />
     <Compile Include="Entity\SmokeLayoutDataModel.cs" />
     <Compile Include="Presenters\Presenter.cs" />
-    <Compile Include="Presenters\PresenterFireBlockConver.cs" />
+    <Compile Include="Presenters\PresenterFireBlockConvert.cs" />
     <Compile Include="Presenters\PresenterSmokeLayout.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ViewModels\ViewFireBlockConver.cs" />
-    <Compile Include="View\IFireBlockConver.cs" />
+    <Compile Include="ViewModels\ViewFireBlockConvert.cs" />
+    <Compile Include="View\IFireBlockConvert.cs" />
     <Compile Include="View\ISmokeLayout.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -8,7 +8,7 @@ using TianHua.Publics.BaseCode;
 
 namespace TianHua.Electrical
 {
-    public class ViewFireBlockConver
+    public class ViewFireBlockConvert
     {
         public BlockDataModel UpstreamBlockInfo { get; set; }//上游专业块信息
 

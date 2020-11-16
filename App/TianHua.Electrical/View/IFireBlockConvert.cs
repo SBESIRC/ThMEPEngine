@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace TianHua.Electrical
 {
-    public interface IFireBlockConver
+    public interface IFireBlockConvert
     {
-        List<ViewFireBlockConver> m_ListFireBlockConver { get; set; }
+        List<ViewFireBlockConvert> m_ListFireBlockConver { get; set; }
     }
 }

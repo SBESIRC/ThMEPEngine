@@ -11,9 +11,9 @@ using TianHua.Publics.BaseCode;
 
 namespace TianHua.Electrical.UI
 {
-    public partial class fmFireBlockConvert : DevExpress.XtraEditors.XtraForm, IFireBlockConver
+    public partial class fmFireBlockConvert : DevExpress.XtraEditors.XtraForm, IFireBlockConvert
     {
-        public List<ViewFireBlockConver> m_ListFireBlockConver { get; set; }
+        public List<ViewFireBlockConvert> m_ListFireBlockConver { get; set; }
 
         public PresenterFireBlockConver m_Presenter;
 
@@ -44,10 +44,10 @@ namespace TianHua.Electrical.UI
             Gdc.DataSource = m_ListFireBlockConver;
         }
 
-        private List<ViewFireBlockConver> InitViewRelation()
+        private List<ViewFireBlockConvert> InitViewRelation()
         {
-            List<ViewFireBlockConver> _List = new List<ViewFireBlockConver>();
-            _List.Add(new ViewFireBlockConver()
+            List<ViewFireBlockConvert> _List = new List<ViewFireBlockConvert>();
+            _List.Add(new ViewFireBlockConvert()
             {
                 IsSelect = false,
                 Visibility = "70防火阀FD",
@@ -55,21 +55,21 @@ namespace TianHua.Electrical.UI
                 UpstreamBlockInfo = new BlockDataModel() { RealName = "70°C防火风口—2018", Name = "2018", Icon = Properties.Resources._1 },
                 DownstreamBlockInfo = new BlockDataModel() { RealName = "70°防火风口", Name = "防火风口", Icon = Properties.Resources._1_1 }
             });
-            _List.Add(new ViewFireBlockConver()
+            _List.Add(new ViewFireBlockConvert()
             {
                 IsSelect = false,
                 Visibility = "770防火阀FD",
                 UpstreamBlockInfo = new BlockDataModel() { RealName = "板式排烟口—2018", Name = "板式排烟口-2018", Icon = Properties.Resources._2 },
                 DownstreamBlockInfo = new BlockDataModel() { RealName = "板式排烟口", Name = "板式排烟口", Icon = Properties.Resources._2_1 }
             });
-            _List.Add(new ViewFireBlockConver()
+            _List.Add(new ViewFireBlockConvert()
             {
                 IsSelect = false,
                 Visibility = "111",
                 UpstreamBlockInfo = new BlockDataModel() { RealName = "板式排烟口—2018", Name = "板式排烟口-2018", Icon = Properties.Resources._3 },
                 DownstreamBlockInfo = new BlockDataModel() { RealName = "板式排烟口", Name = "板式排烟口", Icon = Properties.Resources._3_1 }
             });
-            _List.Add(new ViewFireBlockConver()
+            _List.Add(new ViewFireBlockConvert()
             {
                 IsSelect = false,
                 Visibility = "222",
@@ -83,16 +83,13 @@ namespace TianHua.Electrical.UI
         {
             int[] _Rownumber = this.Gdv.GetSelectedRows();
 
-            List<ViewFireBlockConver> _List = new List<ViewFireBlockConver>();
+            List<ViewFireBlockConvert> _List = new List<ViewFireBlockConvert>();
 
             for (int i = 0; i < _Rownumber.Count(); i++)
             {
-                ViewFireBlockConver _ViewFireBlockConver = this.Gdv.GetRow(_Rownumber[i]) as ViewFireBlockConver;
+                ViewFireBlockConvert _ViewFireBlockConver = this.Gdv.GetRow(_Rownumber[i]) as ViewFireBlockConvert;
                 _List.Add(_ViewFireBlockConver);
             }
-
-      
         }
- 
     }
 }
