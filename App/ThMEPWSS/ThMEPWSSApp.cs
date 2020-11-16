@@ -610,18 +610,16 @@ namespace ThMEPWSS
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var kitchenEngine = new ThKitchenContainerRecognitionEngine())
             {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
+                PromptIntegerOptions parameter_floor = new PromptIntegerOptions("请输入楼层");
+                PromptIntegerResult floor = Active.Editor.GetInteger(parameter_floor);
+                if (floor.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                PromptIntegerOptions parameter_floor = new PromptIntegerOptions("请输入楼层");
-                PromptIntegerResult floor = Active.Editor.GetInteger(parameter_floor);
+
                 var zone = new ThWPipeZone();
                 var parameters = new ThWKitchenPipeParameters(1, floor.Value);
-                //var frame = acadDatabase.Element<Polyline>(result.ObjectId);//避免框选
-                var s = new Point3dCollection();
-                kitchenEngine.Recognize(acadDatabase.Database, s);
+                kitchenEngine.Recognize(acadDatabase.Database, new Point3dCollection());
                 var validKitchenContainers = kitchenEngine.KitchenContainers.Where(o => IsValidKitchenContainer(o));
                 foreach (var kitchen in validKitchenContainers)
                 {
@@ -650,7 +648,7 @@ namespace ThMEPWSS
                         acadDatabase.ModelSpace.Add(new Circle() { Radius = floor.Value/2, Center = pt });
                         DBText taggingtext = new DBText()
                         {
-                            Height = 50,
+                            Height = 20,
                             Position = pt,
                             TextString = engine.Parameters.Identifier,
                         };
@@ -659,6 +657,7 @@ namespace ThMEPWSS
                 }
             }
         }
+
         //卫生间立管
         [CommandMethod("TIANHUACAD", "THTOILETPIPE", CommandFlags.Modal)]
         public void ThToiletPipe()
