@@ -198,7 +198,7 @@ namespace ThCADCore.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetEntity("请选择对象");
+                var result = Active.Editor.GetSelection();
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
@@ -210,8 +210,13 @@ namespace ThCADCore.Test
                     return;
                 }
 
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity obj in pline.Buffer(-result2.Value))
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Polyline>(obj));
+                }
+
+                foreach (Entity obj in objs.Buffer(result2.Value))
                 {
                     obj.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(obj);
@@ -296,14 +301,6 @@ namespace ThCADCore.Test
 
                 });
 
-                //var geometrys = objs.ToNTSNodedLineStrings();
-                //foreach (Entity entity in geometrys.ToDbCollection())
-                //{
-                //    entity.ColorIndex = 2;
-                //    acadDatabase.ModelSpace.Add(entity);
-                //}
-
-                int i = 0;
                 var cascadedPolygon = CascadedPolygonUnion.Union(polygons);
                 foreach (Entity obj in cascadedPolygon.ToDbCollection())
                 {
