@@ -4,6 +4,7 @@ using QuickGraph;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using QuickGraph.Algorithms;
 
 namespace ThMEPHAVC.Duct
 {
@@ -84,6 +85,12 @@ namespace ThMEPHAVC.Duct
 
             //更新探测点到起始线的终点后，再执行循环探测
             DoBuildGraph(searchpoint, results[0] as Line);
+
+            foreach (var item in Graph.Vertices)
+            {
+                var outedge = Graph.OutEdges(item);
+            }
+            
         }
     }
 }

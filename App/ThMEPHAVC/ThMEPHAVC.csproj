@@ -24,6 +24,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Duct\ThDuctGraphAnalysisEngine.cs" />
     <Compile Include="Duct\ThDuctGraphEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
