@@ -2507,11 +2507,11 @@ namespace TianHua.FanSelection.UI
 
         private void OnModelDeleted(ThModelDeleteMessage message)
         {
-            if (message == null || message.Data.Models.Count == 0) { return; }
+            if (message.Data == null) { return; }
 
-            foreach(var item in message.Data.Models)
+            foreach (var item in message.Data.ErasedModels)
             {
-                var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(item.Key));
+                var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(item));
 
                 //m_ListFan.RemoveAll(p => p.ID == FuncStr.NullToStr(message.Data.Model));
 
@@ -2519,11 +2519,28 @@ namespace TianHua.FanSelection.UI
 
                 if (_Fan == null) { return; }
 
-                _Fan.IsErased = item.Value;
+                _Fan.IsErased = true;
 
-                var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(item.Key));
+                var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(item));
 
-                if (_FanSon != null) { _FanSon.IsErased = item.Value; }
+                if (_FanSon != null) { _FanSon.IsErased = true; }
+            }
+
+            foreach (var item in message.Data.UnerasedModels)
+            {
+                var _Fan = m_ListFan.Find(p => p.ID == FuncStr.NullToStr(item));
+
+                //m_ListFan.RemoveAll(p => p.ID == FuncStr.NullToStr(message.Data.Model));
+
+                //m_ListFan.RemoveAll(p => p.PID == FuncStr.NullToStr(message.Data.Model));
+
+                if (_Fan == null) { return; }
+
+                _Fan.IsErased = false;
+
+                var _FanSon = m_ListFan.Find(p => p.PID == FuncStr.NullToStr(item));
+
+                if (_FanSon != null) { _FanSon.IsErased = false; }
             }
 
             TreeList.RefreshDataSource();

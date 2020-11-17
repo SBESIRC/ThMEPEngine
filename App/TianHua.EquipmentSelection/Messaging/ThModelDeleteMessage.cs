@@ -5,7 +5,10 @@ namespace TianHua.FanSelection.Messaging
 {
     public class ThModelDeleteMessageArgs : ThModelMessageArgs
     {
-        public Dictionary<string, bool> Models { get; set; }
+        public List<string> ErasedModels { get; set; }
+
+        public List<string> UnerasedModels { get; set; }
+
     }
 
     public class ThModelDeleteMessage : MessageBase<ThModelDeleteMessage, ThModelDeleteMessageArgs>

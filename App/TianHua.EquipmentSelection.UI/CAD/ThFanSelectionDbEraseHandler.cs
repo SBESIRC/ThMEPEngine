@@ -8,12 +8,16 @@ namespace TianHua.FanSelection.UI.CAD
     public class ThFanSelectionDbEraseHandler : IDisposable
     {
         private Database Database { get; set; }
-        public Dictionary<string, bool> Models { get; set; }
+
+        public List<string> ErasedModels { get; set; }
+
+        public List<string> UnerasedModels { get; set; }
 
         public ThFanSelectionDbEraseHandler(Database database)
         {
             Database = database;
-            Models = new Dictionary<string, bool>();
+            ErasedModels = new List<string>();
+            UnerasedModels = new List<string>();
             Database.ObjectErased += DbEvent_ObjectErased_Handler;
         }
 
@@ -27,7 +31,14 @@ namespace TianHua.FanSelection.UI.CAD
             var model = e.DBObject.GetModelIdentifier();
             if (!string.IsNullOrEmpty(model))
             {
-                Models[model] = e.Erased;
+                if (e.Erased)
+                {
+                    ErasedModels.Add(model);
+                }
+                else
+                {
+                    UnerasedModels.Add(model);
+                }
             }
         }
     }

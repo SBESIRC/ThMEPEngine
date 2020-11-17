@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using TianHua.FanSelection.Messaging;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -149,7 +150,8 @@ namespace TianHua.FanSelection.UI.CAD
 
         public void SendEraseMessage()
         {
-            if (DbEraseHandler.Models.Count == 0)
+            if (DbEraseHandler.ErasedModels.Count == 0 &&
+                DbEraseHandler.UnerasedModels.Count == 0)
             {
                 return;
             }
@@ -159,7 +161,8 @@ namespace TianHua.FanSelection.UI.CAD
                 Message = new ThModelDeleteMessage(),
                 MessageArgs = new ThModelDeleteMessageArgs()
                 {
-                    Models = DbEraseHandler.Models,
+                    ErasedModels = DbEraseHandler.ErasedModels,
+                    UnerasedModels = DbEraseHandler.UnerasedModels,
                 }
             };
         }

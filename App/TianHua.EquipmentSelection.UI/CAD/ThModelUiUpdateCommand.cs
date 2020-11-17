@@ -23,7 +23,7 @@ namespace TianHua.FanSelection.UI.CAD
             using (var tx = Active.Database.TransactionManager.StartOpenCloseTransaction())
             {
                 return Active.Database.ModelSpace(tx).GetEntities<BlockReference>(tx)
-                    .Where(o => o.GetXDataForApplication(ThFanSelectionCommon.RegAppName_FanSelection) != null)
+                    .Where(o => o.IsModel())
                     .Select(o => o.GetModelIdentifier()).ToList();
             }
         }
@@ -46,6 +46,14 @@ namespace TianHua.FanSelection.UI.CAD
             else if (ThFanSelectionService.Instance.Message is ThModelDeleteMessage eraseMessage &&
                 ThFanSelectionService.Instance.MessageArgs is ThModelDeleteMessageArgs eraseArgs)
             {
+                var models = Models();
+                eraseArgs.ErasedModels.RemoveAll(o => models.Contains(o));
+                eraseArgs.UnerasedModels.RemoveAll(o => !models.Contains(o));
+                if (eraseArgs.ErasedModels.Count == 0 &&
+                    eraseArgs.UnerasedModels.Count == 0)
+                {
+                    return;
+                }
                 ThModelDeleteMessage.SendWith(eraseArgs);
             }
             else if (ThFanSelectionService.Instance.Message is ThModelCopyMessage copyMessage &&
