@@ -44,7 +44,7 @@ namespace ThMEPEngineCore.Engine
                     }
                     else if(o is MPolygon mPolygon)
                     {
-                        Elements.Add(ThIfcWall.Create(mPolygon));
+                        // Elements.Add(ThIfcWall.Create(mPolygon));
                     }
                 });
             }
