@@ -43,7 +43,8 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 List<DBText> dbTexts = new List<DBText>();
-                if (IsBuildElementBlockReference(blockReference))
+                if (IsBuildElementBlockReference(blockReference) &&
+                    blockReference.IsVisible(acadDatabase))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (IsBuildElementBlock(blockTableRecord))
@@ -57,7 +58,8 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (blockObj.IsBuildElementBlockReference() &&
+                                    blockObj.IsVisible(acadDatabase))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     dbTexts.AddRange(BuildElementTexts(blockObj, mcs2wcs));
@@ -65,7 +67,8 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is DBText dBText)
                             {
-                                if (CheckLayerValid(dBText))
+                                if (CheckLayerValid(dBText) &&
+                                    dBText.IsVisible(acadDatabase))
                                 {
                                     var newText=dBText.GetTransformedCopy(matrix) as DBText;
                                     dbTexts.Add(newText);

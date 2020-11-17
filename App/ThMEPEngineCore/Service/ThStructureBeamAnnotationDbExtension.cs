@@ -59,7 +59,8 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                if (IsBuildElementBlock(blockTableRecord))
+                if (IsBuildElementBlock(blockTableRecord) &&
+                    blockReference.IsVisible(acadDatabase))
                 {
                     foreach (var objId in blockTableRecord)
                     {
@@ -70,7 +71,8 @@ namespace ThMEPEngineCore.Service
                             {
                                 continue;
                             }
-                            if (blockObj.IsBuildElementBlockReference())
+                            if (blockObj.IsBuildElementBlockReference() &&
+                                blockObj.IsVisible(acadDatabase))
                             {
                                 var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                 annotations.AddRange(BuildElementTexts(blockObj, mcs2wcs));
@@ -80,7 +82,8 @@ namespace ThMEPEngineCore.Service
                         {
                             if (CheckLayerValid(dbtext) &&
                                 IsBuildElement(dbtext) &&
-                                IsAnnotation(dbtext))
+                                IsAnnotation(dbtext) &&
+                                dbtext.IsVisible(acadDatabase))
                             {
                                 annotations.Add(new ThIfcBeamAnnotation(dbtext, matrix));
                             }

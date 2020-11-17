@@ -49,7 +49,8 @@ namespace ThMEPEngineCore.Service
                 if (IsBuildElementBlockReference(blockReference))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                    if (IsBuildElementBlock(blockTableRecord))
+                    if (IsBuildElementBlock(blockTableRecord) &&
+                        blockReference.IsVisible(acadDatabase))
                     {
                         foreach (var objId in blockTableRecord)
                         {
@@ -60,9 +61,11 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (blockObj.IsBuildElementBlockReference() &&
+                                    blockObj.IsVisible(acadDatabase))
                                 {
-                                    if (CheckLayerValid(blockObj) && ThClosestoolLayerManager.IsClosetoolBlockName(blockObj.Name))
+                                    if (CheckLayerValid(blockObj) && 
+                                        ThClosestoolLayerManager.IsClosetoolBlockName(blockObj.Name))
                                     {
                                         var minPt = blockObj.GeometricExtents.MinPoint;
                                         var maxPt = blockObj.GeometricExtents.MaxPoint;

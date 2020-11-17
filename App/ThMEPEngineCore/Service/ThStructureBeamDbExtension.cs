@@ -51,7 +51,8 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 List<Curve> curves = new List<Curve>();
-                if (IsBuildElementBlockReference(blockReference))
+                if (IsBuildElementBlockReference(blockReference) &&
+                    blockReference.IsVisible(acadDatabase))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (IsBuildElementBlock(blockTableRecord))
@@ -65,7 +66,8 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (blockObj.IsBuildElementBlockReference() &&
+                                    blockObj.IsVisible(acadDatabase))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
@@ -73,14 +75,16 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Curve curve)
                             {
-                                if (CheckLayerValid(curve) && CheckCurveValid(curve))
+                                if (CheckLayerValid(curve) && CheckCurveValid(curve) &&
+                                    curve.IsVisible(acadDatabase))
                                 {
                                     curves.Add(curve.GetTransformedCopy(matrix) as Curve);
                                 }
                             }
                             else if(dbObj is Mline mline)
                             {
-                                if (CheckLayerValid(mline))
+                                if (CheckLayerValid(mline) &&
+                                    mline.IsVisible(acadDatabase))
                                 {
                                     var mlineCopy = mline.GetTransformedCopy(matrix) as Mline;
                                     DBObjectCollection mlineCurves = new DBObjectCollection();

@@ -22,7 +22,10 @@ namespace ThCADExtension
             MPolygon mPolygon = new MPolygon();
             if (external is Polyline polyline)
             {
-                mPolygon.AppendLoopFromBoundary(polyline, false, 0.0);
+                if(polyline.Area>0.0)
+                {
+                    mPolygon.AppendLoopFromBoundary(polyline, false, 0.0);
+                }
             }
             else if(external is Polyline2d polyline2d)
             {

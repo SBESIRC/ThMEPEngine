@@ -50,7 +50,8 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 List<Entity> ents = new List<Entity>();
-                if (IsBuildElementBlockReference(blockReference))
+                if (IsBuildElementBlockReference(blockReference) &&
+                    blockReference.IsVisible(acadDatabase))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (IsBuildElementBlock(blockTableRecord))
@@ -64,7 +65,8 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (blockObj.IsBuildElementBlockReference() &&
+                                    blockObj.IsVisible(acadDatabase))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
@@ -72,16 +74,25 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Hatch hatch)
                             {
-                                if (IsBuildElement(hatch) && CheckLayerValid(hatch))
+                                if (IsBuildElement(hatch) && CheckLayerValid(hatch) &&
+                                    hatch.IsVisible(acadDatabase))
                                 {
-                                    var newHatch = hatch.GetTransformedCopy(matrix) as Hatch;
-                                    List<Polyline> gapOutlines = ThHatchToPolylineService.ToGapPolyline(newHatch);
-                                    gapOutlines.ForEach(o => ents.Add(o));
+                                    var mpolygons = hatch.ToMPolygons();
+                                    foreach(var item in mpolygons)
+                                    {
+                                        if(item is MPolygon mPolygon)
+                                        {
+                                            var newMPolygon = mPolygon.GetTransformedCopy(matrix) as MPolygon;
+                                            List<Polyline> gapOutlines = ThMPolygonToGapPolylineService.ToGapPolyline(newMPolygon);
+                                            gapOutlines.ForEach(o => ents.Add(o));
+                                        }
+                                    }
                                 }
                             }
                             else if (dbObj is Solid solid)
                             {
-                                if (IsBuildElement(solid) && CheckLayerValid(solid))
+                                if (IsBuildElement(solid) && CheckLayerValid(solid) &&
+                                    solid.IsVisible(acadDatabase))
                                 {
                                     var poly = solid.ToPolyline();
                                     poly.TransformBy(matrix);

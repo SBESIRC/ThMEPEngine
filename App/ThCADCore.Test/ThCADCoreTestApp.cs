@@ -140,6 +140,7 @@ namespace ThCADCore.Test
         public void ThMerge()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var fixedPrecision=new ThCADCoreNTSFixedPrecision())
             {
                 var result = Active.Editor.GetSelection();
                 if (result.Status != PromptStatus.OK)

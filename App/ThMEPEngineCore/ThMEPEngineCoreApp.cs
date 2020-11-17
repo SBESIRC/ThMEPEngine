@@ -21,6 +21,7 @@ using Newtonsoft.Json;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore
 {
@@ -386,6 +387,36 @@ namespace ThMEPEngineCore
                         acadDatabase.ModelSpace.Add(beam.BeamBoundary);
                     }
                 }
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THHatchPrint", CommandFlags.Modal)]
+        public void THHatchPrint()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())           
+            {
+                var hatchRes = Active.Editor.GetEntity("\nselect a hatch");
+                Hatch hatch = acadDatabase.Element<Hatch>(hatchRes.ObjectId);
+                hatch.Boundaries().ForEach(o=> acadDatabase.ModelSpace.Add(o));
+            }            
+        }
+        [CommandMethod("TIANHUACAD", "THLineMergeTest", CommandFlags.Modal)]
+        public void THLineMergeTest()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var lineRes = Active.Editor.GetSelection();
+                if(lineRes.Status!=PromptStatus.OK)
+                {
+                    return;
+                }
+                List<Line> lines = new List<Line>();
+                lineRes.Value.GetObjectIds().ForEach(o=> lines.Add(acadDatabase.Element<Line>(o)));
+                var newLines=ThLineMerger.Merge(lines);
+                newLines.ForEach(o =>
+                {
+                    o.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(o);
+                });
             }
         }
     }

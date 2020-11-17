@@ -21,11 +21,11 @@ namespace ThCADCore.NTS
         private static MultiPolygon ToNTSMultiPolygon(this Hatch hatch)
         {
             var geometry = hatch.ToNTSGeometry();
-            if (geometry is GeometryCollection collection)
+            if (geometry.IsEmpty)
             {
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon();
             }
-            else if (geometry is Polygon polygon)
+            if (geometry is Polygon polygon)
             {
                 var polygons = new Polygon[] { polygon };
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons);
@@ -39,10 +39,10 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
         }
-
         public static DBObjectCollection ToMPolygons(this Hatch hatch)
         {
             var objs = new DBObjectCollection();
+
             hatch.ToNTSMultiPolygon().Geometries
                 .Cast<Polygon>()
                 .ForEach(o => objs.Add(o.ToMPolygon()));

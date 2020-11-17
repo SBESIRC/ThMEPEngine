@@ -15,108 +15,99 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public class ThHatchToPolylineService
+    public class ThMPolygonToGapPolylineService
     {
         ///目前主要用于支撑对剪力墙带一个洞的裁剪
         ///暂时将线延伸设为5mm,之前设1,2mm有没成功的情况
         ///打断点偏移的距离要大于线延伸的距离
-        private double PointOffsetDistance = 6.0; 
-        private const double LineExtendDistance = 5.0; 
-        private List<Polyline> BuildPolylines { get; set; }
-        private Hatch CurrentHatch { get; set; }
-        private ThHatchToPolylineService(Hatch hatch)
+        private double PointOffsetDistance = 10.0; 
+        private const double LineExtendDistance = 5.0;        
+        private MPolygon CurrentMPolygon { get; set; }
+        private ThMPolygonToGapPolylineService(MPolygon mPolygon)
         {
-            BuildPolylines = new List<Polyline>();
-            CurrentHatch = hatch;
+            CurrentMPolygon = mPolygon;
             if(PointOffsetDistance<= LineExtendDistance)
             {
-                PointOffsetDistance=LineExtendDistance + 1.0;
+                PointOffsetDistance=LineExtendDistance + 5.0;
             }
         }
-        public static List<Polyline> ToGapPolyline(Hatch hatch)
+        public static List<Polyline> ToGapPolyline(MPolygon mPolygon)
         {
-            var intstance = new ThHatchToPolylineService(hatch);
-            intstance.ToGapPolyline();
-            return intstance.BuildPolylines;
-        }
-        private void ToGapPolyline()
-        {
-            var polygons = ToPolygons();
-            polygons.ForEach(o =>
+            List<Polyline> gapPolylines = new List<Polyline>();
+            var intstance = new ThMPolygonToGapPolylineService(mPolygon);
+            var gapPolyline = intstance.ToGapPolyline();
+            if(gapPolyline != null && gapPolyline.Area>0.0)
             {
-                BuildPolylines.Add(ToGapPolyline(o));
-            });
+                gapPolylines.Add(gapPolyline);
+            }
+            return gapPolylines;
         }
-        private Polyline ToGapPolyline(Polygon polygon)
+        private Polyline ToGapPolyline()
         {
-            Polyline shell= polygon.Shell.ToDbPolyline();
-            var holes = polygon.Holes;
-            if (holes.Length == 0)
+            var shell= GetMPolygonShell(CurrentMPolygon);
+            var holes = GetMPolygonHoles(CurrentMPolygon);
+            if (holes.Count == 0)
             {
                 return shell;
             }
-            else if(holes.Length == 1)
+            else if(shell.Area==0.0 && holes.Count==1)
+            {
+                return holes[0];
+            }
+            else if(shell.Area > 0.0 && holes.Count == 1)
             {
                 Polyline shellOutline = shell.ToNTSLineString().ToDbPolyline();
-                return BuildOutermostPolyline(shellOutline, holes[0].ToDbPolyline());
+                return BuildOutermostPolyline(shellOutline, holes[0].ToNTSLineString().ToDbPolyline());
             }
             else
             {
                 throw new NotSupportedException();
             }
         }
-        private List<Polygon> ToPolygons()
+        private Polyline GetMPolygonShell(MPolygon mPolygon)
         {
-            var results = new List<Polygon>();
-            var polygons = new List<Polygon>();
-            CurrentHatch.Boundaries().ForEach(o =>
+            Polyline shell = new Polyline();
+            for (int i=0;i< mPolygon.NumMPolygonLoops;i++)
             {
-                if (o is Polyline polyline)
+                var loopDirection = mPolygon.GetLoopDirection(i);
+                if(loopDirection== LoopDirection.Exterior)
                 {
-                    polygons.Add(polyline.ToNTSLineString().ToDbPolyline().ToNTSPolygon());
+                    var mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
+                    shell= ToPolyline(mPolygonLoop);
+                    break;
                 }
-                else if (o is Circle circle)
-                {
-                    var circlePolygon = circle.ToNTSPolygon();
-                    if (circlePolygon != null)
-                    {
-                        polygons.Add(circlePolygon);
-                    }
-                }
-            });
-            MultiPolygon multiPolygon = ThCADCoreNTSService.Instance.
-                GeometryFactory.CreateMultiPolygon(polygons.ToArray());
-            ThCADCoreNTSBuildArea buildArea = new ThCADCoreNTSBuildArea();
-            var result = buildArea.Build(multiPolygon);
-            foreach (var ploygon in FilterPolygons(result))
-            {
-                results.Add(ploygon);
             }
-            return results;
+            return shell;
         }
-        private static List<Polygon> FilterPolygons(Geometry geometry)
+        private List<Polyline> GetMPolygonHoles(MPolygon mPolygon)
         {
-            var objs = new List<Polygon>();
-            if (geometry.IsEmpty)
+            List<Polyline> holes = new List<Polyline>();
+            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
             {
-                return objs;
+                var loopDirection = mPolygon.GetLoopDirection(i);
+                if (loopDirection == LoopDirection.Interior)
+                {
+                    var mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
+                    holes.Add(ToPolyline(mPolygonLoop));
+                }
             }
-            if (geometry is Polygon polygon)
+            return holes;
+        }
+        private Polyline ToPolyline(MPolygonLoop mPolygonLoop)
+        {
+            Polyline polyline = new Polyline()
             {
-                objs.Add(polygon);
-            }
-            else if (geometry is MultiPolygon polygons)
+                Closed = true
+            };
+            for (int i = 0; i < mPolygonLoop.Count; i++)
             {
-                polygons.Geometries.ForEach(g => objs.AddRange(FilterPolygons(g)));
+                var bulgeVertex = mPolygonLoop[i];
+                polyline.AddVertexAt(i, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
             }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
+            return polyline;
         }
         private Polyline BuildOutermostPolyline(Polyline outerPolyline, Polyline innerPolyline)
-        {
+        {            
             List<Line> lines = new List<Line>();
             List<Tuple<int, Point3d, Point3d>> splitSegments = new List<Tuple<int, Point3d, Point3d>>();
             for (int i = 0; i < innerPolyline.NumberOfVertices; i++)
@@ -173,8 +164,9 @@ namespace ThMEPEngineCore.Algorithm
                 extendLines.Add(new Line(sp, ep));
             });
             lines.ForEach(o =>o.Dispose());
+            var mergelines = ThLineMerger.Merge(extendLines);
             DBObjectCollection dbObjs = new DBObjectCollection();
-            extendLines.ForEach(o => dbObjs.Add(o));
+            mergelines.ForEach(o => dbObjs.Add(o));
             var unionObjs = dbObjs.Polygonize();
             List<Polyline> polygonPolyines = new List<Polyline>();
             unionObjs.ForEach(o =>
@@ -184,7 +176,7 @@ namespace ThMEPEngineCore.Algorithm
                     polygonPolyines.Add(polygon.Shell.ToDbPolyline());
                 }
             });
-            return polygonPolyines.OrderByDescending(o => o.Area).First();
+            return polygonPolyines.Count > 0 ? polygonPolyines.OrderByDescending(o => o.Area).First() : null; 
         }
         private Vector3d? LineExtendVector(Polyline self,Point3d pt,Vector3d ptOnLineVec)
         {

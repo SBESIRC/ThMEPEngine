@@ -33,26 +33,38 @@ namespace ThMEPEngineCore.CAD
             return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
         }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
-            Point3d secondSp, Point3d secondEp)
+            Point3d secondSp, Point3d secondEp,double tolerance= 1.0)
         {
             Vector3d firstVec = firstSp.GetVectorTo(firstEp);
             Vector3d secondVec = secondSp.GetVectorTo(secondEp);
             if (firstVec.IsParallelToEx(secondVec))
             {
-                Vector3d otherVec;
-                if (firstSp.DistanceTo(secondEp) > 0.0)
+                Plane plane = new Plane(firstSp, firstVec);
+                Matrix3d worldToPlane = Matrix3d.WorldToPlane(plane);
+                Point3d newSecondSp = secondSp.TransformBy(worldToPlane);
+                Point3d newSecondEp = secondEp.TransformBy(worldToPlane);
+                plane.Dispose();
+                if (
+                    Math.Abs(newSecondSp.X)<= tolerance && 
+                    Math.Abs(newSecondSp.Y) <= tolerance &&
+                    Math.Abs(newSecondEp.X) <= tolerance &&
+                    Math.Abs(newSecondEp.Y) <= tolerance
+                    )
                 {
-                    otherVec = firstSp.GetVectorTo(secondEp);
+                    return true;
                 }
-                else
-                {
-                    otherVec = firstSp.GetVectorTo(secondSp);
-                }
-                double angle = firstVec.GetAngleTo(otherVec);
-                angle = angle / Math.PI * 180.0;
-                angle %= 180.0;
-                return (Math.Abs(angle) <= ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) 
-                    || Math.Abs(angle - 180.0) <= ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE;
+            }
+            return false;
+        }
+        public static bool IsOverlapEx(Point3d firstSp, Point3d firstEp,
+            Point3d secondSp, Point3d secondEp)
+        {
+            if(IsCollinearEx(firstSp, firstEp, secondSp, secondEp))
+            {
+                List<Point3d> pts = new List<Point3d> { firstSp, firstEp, secondSp, secondEp };
+                var maxPts=MaxDistancePoints(pts);
+                return (firstSp.DistanceTo(firstEp) + secondSp.DistanceTo(secondEp)) >
+                    maxPts.Item1.DistanceTo(maxPts.Item2);
             }
             return false;
         }
@@ -226,6 +238,23 @@ namespace ThMEPEngineCore.CAD
                 throw new NotSupportedException();
             }
             return pts;
+        }
+        public static Tuple<Point3d,Point3d> MaxDistancePoints(List<Point3d> points)
+        {
+            Point3d firstPt = Point3d.Origin;
+            Point3d secondPt = Point3d.Origin;
+            for (int i=0;i<points.Count-1;i++)
+            {
+                for (int j = i+1; j < points.Count; j++)
+                {
+                    if(points[i].DistanceTo(points[j])> firstPt.DistanceTo(secondPt))
+                    {
+                        firstPt = points[i];
+                        secondPt = points[j];
+                    }
+                }
+            }
+            return Tuple.Create(firstPt, secondPt);
         }
     }
 }

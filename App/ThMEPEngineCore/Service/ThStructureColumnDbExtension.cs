@@ -55,7 +55,8 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 List<Curve> curves = new List<Curve>();
-                if (IsBuildElementBlockReference(blockReference))
+                if (IsBuildElementBlockReference(blockReference) &&
+                    blockReference.IsVisible(acadDatabase))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (IsBuildElementBlock(blockTableRecord))
@@ -69,7 +70,8 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (blockObj.IsBuildElementBlockReference() &&
+                                    blockObj.IsVisible(acadDatabase))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
@@ -77,7 +79,9 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Hatch hatch)
                             {
-                                if (IsBuildElement(hatch) && CheckLayerValid(hatch))
+                                if (IsBuildElement(hatch) && 
+                                    CheckLayerValid(hatch) &&
+                                    hatch.IsVisible(acadDatabase))
                                 {
                                     // 暂时不支持有“洞”的填充
                                     hatch.Boundaries().ForEachDbObject(o =>
@@ -113,7 +117,9 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Solid solid)
                             {
-                                if (IsBuildElement(solid) && CheckLayerValid(solid))
+                                if (IsBuildElement(solid) &&
+                                    CheckLayerValid(solid) &&
+                                    solid.IsVisible(acadDatabase))
                                 {
                                     var poly = solid.ToPolyline();
                                     poly.TransformBy(matrix);
