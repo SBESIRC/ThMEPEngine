@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {
-    public class ThToiletContainer
+    public class ThWToiletRoom : ThWRoom
     {
         /// <summary>
         /// 卫生间空间
@@ -26,7 +22,7 @@ namespace ThMEPWSS.Pipe.Model
         /// 地漏
         /// </summary>
         public List<ThIfcFloorDrain> FloorDrains { get; set; }
-        public ThToiletContainer()
+        public ThWToiletRoom()
         {
             Toilet = null;
             Closestools = new List<ThIfcClosestool>();

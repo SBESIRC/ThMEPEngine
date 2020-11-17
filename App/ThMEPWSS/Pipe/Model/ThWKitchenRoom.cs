@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {
-    public class ThKitchenContainer
+    public class ThWKitchenRoom : ThWRoom
     {
         /// <summary>
         /// 厨房空间
@@ -23,11 +19,11 @@ namespace ThMEPWSS.Pipe.Model
         /// </summary>
         public List<ThIfcSpace> DrainageWells { get; set; }
 
-        public ThKitchenContainer()
+        public ThWKitchenRoom()
         {
             Kitchen = null;
             BasinTools = new List<ThIfcBasin>();
-            Pypes= new List<ThIfcSpace>();
+            Pypes = new List<ThIfcSpace>();
             DrainageWells = new List<ThIfcSpace>();
         }
     }

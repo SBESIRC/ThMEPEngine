@@ -13,27 +13,26 @@ using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThKitchenContainerService : IDisposable
+    public class ThKitchenRoomService : IDisposable
     {
-        public List<ThKitchenContainer> KitchenContainers { get; set; }
+        public List<ThWKitchenRoom> KitchenContainers { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThIfcBasin> Basintools { get; set; }
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
 
-        private ThKitchenContainerService(
-            
+        private ThKitchenRoomService(            
             List<ThIfcSpace> spaces,
             List<ThIfcBasin> basintools)
         {
             Spaces = spaces;
             Basintools = basintools;
-            KitchenContainers = new List<ThKitchenContainer>();
+            KitchenContainers = new List<ThWKitchenRoom>();
             BuildSpatialIndex();
         }
-        public static ThKitchenContainerService Build(List<ThIfcSpace> spaces, List<ThIfcBasin> basintools)
+        public static ThKitchenRoomService Build(List<ThIfcSpace> spaces, List<ThIfcBasin> basintools)
         {
-            using (var kitchenContainerService = new ThKitchenContainerService(spaces, basintools))
+            using (var kitchenContainerService = new ThKitchenRoomService(spaces, basintools))
             {
                 kitchenContainerService.Build();
                 return kitchenContainerService;
@@ -51,9 +50,9 @@ namespace ThMEPWSS.Pipe.Service
                 KitchenContainers.Add(CreateKitchenContainer(o));
             });
         }
-        private ThKitchenContainer CreateKitchenContainer(ThIfcSpace kitchenSpace)
+        private ThWKitchenRoom CreateKitchenContainer(ThIfcSpace kitchenSpace)
         {
-            ThKitchenContainer thKitchenContainer = new ThKitchenContainer();
+            ThWKitchenRoom thKitchenContainer = new ThWKitchenRoom();
             thKitchenContainer.Kitchen = kitchenSpace;
             var kitchenDrainwellService = ThKitchenDrainwellService.Find(Spaces, kitchenSpace, SpaceSpatialIndex);
             thKitchenContainer.DrainageWells = kitchenDrainwellService.Drainwells;

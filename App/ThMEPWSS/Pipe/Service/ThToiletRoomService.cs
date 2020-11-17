@@ -13,9 +13,9 @@ using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThToiletContainerService : IDisposable
+    public class ThToiletRoomService : IDisposable
     {
-        public List<ThToiletContainer> ToiletContainers { get; set; }
+        public List<ThWToiletRoom> ToiletContainers { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThIfcClosestool> Closestools { get; set; }
         private List<ThIfcFloorDrain> FloorDrains { get; set; }
@@ -24,7 +24,7 @@ namespace ThMEPWSS.Pipe.Service
         private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
 
-        private ThToiletContainerService(
+        private ThToiletRoomService(
             List<ThIfcSpace> spaces,
             List<ThIfcClosestool> closestools,
             List<ThIfcFloorDrain> floorDrains)
@@ -32,14 +32,14 @@ namespace ThMEPWSS.Pipe.Service
             Spaces = spaces;
             Closestools = closestools;
             FloorDrains = floorDrains;
-            ToiletContainers = new List<ThToiletContainer>();
+            ToiletContainers = new List<ThWToiletRoom>();
             BuildSpatialIndex();
         }
-        public static ThToiletContainerService Build(List<ThIfcSpace> spaces,
+        public static ThToiletRoomService Build(List<ThIfcSpace> spaces,
             List<ThIfcClosestool> closestools,
             List<ThIfcFloorDrain> floorDrains)
         {
-            using (var toiletContainerService = new ThToiletContainerService(spaces, closestools, floorDrains))
+            using (var toiletContainerService = new ThToiletRoomService(spaces, closestools, floorDrains))
             {
                 toiletContainerService.Build();
                 return toiletContainerService;
@@ -57,9 +57,9 @@ namespace ThMEPWSS.Pipe.Service
                 ToiletContainers.Add(CreateToiletContainer(o));
             });
         }
-        private ThToiletContainer CreateToiletContainer(ThIfcSpace toiletSpace)
+        private ThWToiletRoom CreateToiletContainer(ThIfcSpace toiletSpace)
         {
-            ThToiletContainer thToiletContainer = new ThToiletContainer();
+            ThWToiletRoom thToiletContainer = new ThWToiletRoom();
             thToiletContainer.Toilet = toiletSpace;
             var toiletDrainwellService = ThToiletDrainwellService.Find(Spaces, toiletSpace, SpaceSpatialIndex);
             thToiletContainer.DrainageWells = toiletDrainwellService.Drainwells;

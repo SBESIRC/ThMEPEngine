@@ -23,8 +23,6 @@ using ThMEPEngineCore.Extension;
 using System;
 using ThMEPWSS.Pipe.Engine;
 using DotNetARX;
-using ThMEPWSS.Pipe.Model;
-using ThMEPWSS.Pipe.Service;
 
 
 namespace ThMEPWSS
@@ -33,12 +31,10 @@ namespace ThMEPWSS
     {
         public void Initialize()
         {
-            //throw new System.NotImplementedException();
         }
 
         public void Terminate()
         {
-            //throw new System.NotImplementedException();
         }
 
         #region 喷淋布置
@@ -81,7 +77,7 @@ namespace ThMEPWSS
                 var holeDic = calHolesService.CalHoles(polylines);
                 foreach (var holeInfo in holeDic)
                 {
-                    var plFrame = holeInfo.Key;    
+                    var plFrame = holeInfo.Key;
                     var holes = holeInfo.Value;
 
                     //清除原有构件
@@ -98,11 +94,11 @@ namespace ThMEPWSS
 
                     //转换usc
                     plFrame.TransformBy(matrix.Inverse());
-                    holes.ForEach(x => x.TransformBy(matrix.Inverse())); 
+                    holes.ForEach(x => x.TransformBy(matrix.Inverse()));
                     columns.ForEach(x => x.TransformBy(matrix.Inverse()));
                     beams.ForEach(x => x.TransformBy(matrix.Inverse()));
                     walls.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    
+
                     //生成喷头
                     RayLayoutService layoutDemo = new RayLayoutService();
                     var sprayPts = layoutDemo.LayoutSpray(plFrame, columns, beams, walls, holes, matrix, false);
@@ -603,221 +599,6 @@ namespace ThMEPWSS
                 }
             }
         }
-        //厨房立管
-        [CommandMethod("TIANHUACAD", "THKITCHENPIPE", CommandFlags.Modal)]
-        public void ThKitchenpipe()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var kitchenEngine = new ThKitchenContainerRecognitionEngine())
-            {
-                PromptIntegerOptions parameter_floor = new PromptIntegerOptions("请输入楼层");
-                PromptIntegerResult floor = Active.Editor.GetInteger(parameter_floor);
-                if (floor.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var zone = new ThWPipeZone();
-                var parameters = new ThWKitchenPipeParameters(1, floor.Value);
-                kitchenEngine.Recognize(acadDatabase.Database, new Point3dCollection());
-                var validKitchenContainers = kitchenEngine.KitchenContainers.Where(o => IsValidKitchenContainer(o));
-                foreach (var kitchen in validKitchenContainers)
-                {
-                    Polyline Boundry = kitchen.Kitchen.Boundary as Polyline;                  
-                    Polyline Outline = kitchen.DrainageWells[0].Boundary as Polyline;
-                    BlockReference Basinline = kitchen.BasinTools[0].Outline as BlockReference;
-                    Polyline Pype = new Polyline();
-                    if (kitchen.Pypes.Count>0)
-                    {
-                       Pype = kitchen.Pypes[0].Boundary as Polyline;
-                    }
-                    else
-                    {
-                       Pype = new Polyline();
-                    }
-                    var engine = new ThWKitchenPipeEngine()
-                    {
-                        Zone = zone,
-                        Parameters = parameters,
-                    };
-
-                    engine.Run(Boundry, Outline, Basinline, Pype);
-                    foreach (Point3d pt in engine.Pipes)
-                    {
-                        acadDatabase.ModelSpace.Add(new DBPoint(pt));
-                        acadDatabase.ModelSpace.Add(new Circle() { Radius = floor.Value/2, Center = pt });
-                        DBText taggingtext = new DBText()
-                        {
-                            Height = 20,
-                            Position = pt,
-                            TextString = engine.Parameters.Identifier,
-                        };
-                        acadDatabase.ModelSpace.Add(taggingtext);
-                    }
-                }
-            }
-        }
-
-        //卫生间立管
-        [CommandMethod("TIANHUACAD", "THTOILETPIPE", CommandFlags.Modal)]
-        public void ThToiletPipe()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var toiletEngine = new ThToiletContainerRecognitionEngine())
-            {
-                var separation_key = new PromptKeywordOptions("\n污废分流");
-                separation_key.Keywords.Add("是", "Y", "是(Y)");
-                separation_key.Keywords.Add("否", "N", "否(N)");
-                separation_key.Keywords.Default = "否";
-                var result = Active.Editor.GetKeywords(separation_key);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                bool isSeparation = result.StringResult == "是";
-
-                var caisson_key = new PromptKeywordOptions("\n沉箱");
-                caisson_key.Keywords.Add("有", "Y", "有(Y)");
-                caisson_key.Keywords.Add("没有", "N", "没有(N)");
-                caisson_key.Keywords.Default = "没有";
-                result = Active.Editor.GetKeywords(caisson_key);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                bool isCaisson = result.StringResult == "有";
-
-                var parameter_floor = new PromptIntegerOptions("请输入楼层");
-                var floorResult = Active.Editor.GetInteger(parameter_floor);
-                if (floorResult.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                toiletEngine.Recognize(acadDatabase.Database, new Point3dCollection());
-                var validToiletContainers = toiletEngine.ToiletContainers.Where(o => IsValidToiletContainer(o));
-                foreach (var toilet in validToiletContainers)
-                {
-                    Polyline boundry = toilet.Toilet.Boundary as Polyline;
-                    Polyline well = toilet.DrainageWells[0].Boundary as Polyline;
-                    Polyline closestool = toilet.Closestools[0].Outline as Polyline;
-                    var zone = new ThWPipeZone();
-                    var parameters = new ThWToiletPipeParameters(isSeparation, isCaisson, floorResult.Value);
-                    var engine = new ThWToiletPipeEngine()
-                    {
-                        Zone = zone,
-                        Parameters = parameters,
-                    };
-                    engine.Run(boundry, well, closestool);
-                    for (int i = 0; i < parameters.Number; i++)
-                    {
-                        acadDatabase.ModelSpace.Add(new DBPoint(engine.Pipes[i]));
-                        acadDatabase.ModelSpace.Add(new Circle() { Radius = parameters.Diameter[i] / 2, Center = engine.Pipes[i] });
-                        DBText taggingtext = new DBText()
-                        {
-                            Height = 20,
-                            Position = engine.Pipes[i],
-                            TextString = engine.Parameters.Identifier[i],
-                        };
-                        acadDatabase.ModelSpace.Add(taggingtext);
-                    }
-                }
-            }
-        }
-        private bool IsValidToiletContainer(ThToiletContainer toiletContainer)
-        {
-            return
-                toiletContainer.Toilet != null &&
-                toiletContainer.DrainageWells.Count==1 &&
-                toiletContainer.Closestools.Count == 1 &&
-                toiletContainer.FloorDrains.Count > 0; 
-        }
-        private bool IsValidKitchenContainer(ThKitchenContainer kitchenContainer)
-        {
-            return
-                kitchenContainer.Kitchen != null &&
-                kitchenContainer.DrainageWells.Count == 1;         
-        }
-
-
-        [CommandMethod("TIANHUACAD", "THPIPECOMPOSITE", CommandFlags.Modal)]
-        public void Thpipecomposite()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("\n选择厨房框线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var result2 = Active.Editor.GetEntity("\n选择厨房管井/框线外管井");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var result3 = Active.Editor.GetEntity("\n选择厨房台盆");
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var result4 = Active.Editor.GetEntity("\n选择厨房排烟管");
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var result5 = Active.Editor.GetEntity("\n选择卫生间框线");
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var result6 = Active.Editor.GetEntity("\n选择卫生间管井");
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var result7 = Active.Editor.GetEntity("\n选择卫生间坐便器");
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                Polyline boundary = acadDatabase.Element<Polyline>(result.ObjectId);
-                Polyline outline = acadDatabase.Element<Polyline>(result2.ObjectId);
-                Polyline pype = acadDatabase.Element<Polyline>(result4.ObjectId);
-                Polyline boundary1 = acadDatabase.Element<Polyline>(result5.ObjectId);
-                Polyline outline1 = acadDatabase.Element<Polyline>(result6.ObjectId);
-                Polyline urinal = acadDatabase.Element<Polyline>(result7.ObjectId);
-                BlockReference basinline = acadDatabase.Element<BlockReference>(result3.ObjectId);
-
-                var zone = new ThWPipeZone();
-                var toiletEngine = new ThWToiletPipeEngine()
-                {
-                    Zone = zone,
-                    Parameters = new ThWToiletPipeParameters(true, true, 150),
-                };
-                var kitchenEngine = new ThWKitchenPipeEngine()
-                {
-                    Zone = zone,
-                    Parameters = new ThWKitchenPipeParameters(1, 100),
-                };
-                var compositeEngine = new ThWCompositePipeEngine(kitchenEngine, toiletEngine);
-                compositeEngine.Run(boundary, outline, basinline, pype, boundary1, outline1, urinal);
-                foreach (Point3d pt in compositeEngine.KitchenPipes)
-                {
-                    acadDatabase.ModelSpace.Add(new DBPoint(pt));
-                    acadDatabase.ModelSpace.Add(new Circle() { Radius = 50, Center = pt });
-                }
-                for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
-                {
-                    var toilet = compositeEngine.ToiletPipes[i];
-                    var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
-                    acadDatabase.ModelSpace.Add(new DBPoint(toilet));
-                    acadDatabase.ModelSpace.Add(new Circle() { Radius = radius, Center = toilet });
-
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THFLOORDRAIN", CommandFlags.Modal)]
         public void Thfloordrain()
         {
@@ -1304,7 +1085,7 @@ namespace ThMEPWSS
         public void THToiletRecognize()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThToiletContainerRecognitionEngine tcre = new ThToiletContainerRecognitionEngine())
+            using (ThWToiletRoomRecognitionEngine engine = new ThWToiletRoomRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -1313,19 +1094,18 @@ namespace ThMEPWSS
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 Point3dCollection f = new Point3dCollection();
-                tcre.Recognize(Active.Database, f);
-
-                tcre.ToiletContainers.ForEach(o =>
+                engine.Recognize(Active.Database, f);
+                engine.Rooms.ForEach(o =>
                 {
                     ObjectIdCollection objIds = new ObjectIdCollection();
                     DBObjectCollection dbObjs = new DBObjectCollection();
                     dbObjs.Add(o.Toilet.Boundary);
-                    o.Closestools.ForEach(m=> dbObjs.Add(m.Outline));
+                    o.Closestools.ForEach(m => dbObjs.Add(m.Outline));
                     o.DrainageWells.ForEach(m => dbObjs.Add(m.Boundary));
                     o.FloorDrains.ForEach(m => dbObjs.Add(m.Outline));
                     dbObjs.Cast<Entity>().ForEach(m => objIds.Add(acadDatabase.ModelSpace.Add(m)));
                     if (o.Toilet != null && o.Closestools.Count == 1 &&
-                    o.DrainageWells.Count ==1 && o.FloorDrains.Count > 0)
+                    o.DrainageWells.Count == 1 && o.FloorDrains.Count > 0)
                     {
                         dbObjs.Cast<Entity>().ForEach(m => m.ColorIndex = 3);
                     }
@@ -1341,20 +1121,20 @@ namespace ThMEPWSS
         public void THKitchenRecognize()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThKitchenContainerRecognitionEngine tcre = new ThKitchenContainerRecognitionEngine())
-            {        
+            using (ThWKitchenRoomRecognitionEngine engine = new ThWKitchenRoomRecognitionEngine())
+            {
                 Point3dCollection f = new Point3dCollection();
-                tcre.Recognize(Active.Database, f);
-                tcre.KitchenContainers.ForEach(o =>
+                engine.Recognize(Active.Database, f);
+                engine.Rooms.ForEach(o =>
                 {
                     ObjectIdCollection objIds = new ObjectIdCollection();
                     DBObjectCollection dbObjs = new DBObjectCollection();
                     dbObjs.Add(o.Kitchen.Boundary);
-                    
+
                     o.DrainageWells.ForEach(m => dbObjs.Add(m.Boundary));
-                   
+
                     dbObjs.Cast<Entity>().ForEach(m => objIds.Add(acadDatabase.ModelSpace.Add(m)));
-                    if (o.Kitchen != null && o.DrainageWells.Count == 1 )
+                    if (o.Kitchen != null && o.DrainageWells.Count == 1)
                     {
                         dbObjs.Cast<Entity>().ForEach(m => m.ColorIndex = 3);
                     }
