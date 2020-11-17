@@ -135,6 +135,7 @@ namespace TianHua.FanSelection.UI.CAD
 
         private void CleanDbHandlers()
         {
+            DbSaveHandler?.Dispose();
             DbUndoHandler?.Dispose();
             DbEraseHandler?.Dispose();
             DbDeepCloneHandler?.Dispose();
