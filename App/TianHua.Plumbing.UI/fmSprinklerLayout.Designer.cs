@@ -29,6 +29,10 @@
         private void InitializeComponent()
         {
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.BtnAlongTheLine = new DevExpress.XtraEditors.SimpleButton();
+            this.BtnArea = new DevExpress.XtraEditors.SimpleButton();
+            this.BtnCheck = new DevExpress.XtraEditors.SimpleButton();
+            this.BtnLayout = new DevExpress.XtraEditors.SimpleButton();
             this.pictureEdit1 = new DevExpress.XtraEditors.PictureEdit();
             this.label1 = new System.Windows.Forms.Label();
             this.TxtSpacing = new DevExpress.XtraEditors.TextEdit();
@@ -49,13 +53,9 @@
             this.layoutControlItem9 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem10 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem11 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.BtnLayout = new DevExpress.XtraEditors.SimpleButton();
             this.layoutControlItem4 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.BtnCheck = new DevExpress.XtraEditors.SimpleButton();
             this.layoutControlItem5 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.BtnArea = new DevExpress.XtraEditors.SimpleButton();
             this.layoutControlItem6 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.BtnAlongTheLine = new DevExpress.XtraEditors.SimpleButton();
             this.layoutControlItem13 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
@@ -108,6 +108,49 @@
             this.layoutControl1.Size = new System.Drawing.Size(178, 414);
             this.layoutControl1.TabIndex = 0;
             this.layoutControl1.Text = "layoutControl1";
+            // 
+            // BtnAlongTheLine
+            // 
+            this.BtnAlongTheLine.Location = new System.Drawing.Point(10, 382);
+            this.BtnAlongTheLine.Name = "BtnAlongTheLine";
+            this.BtnAlongTheLine.Size = new System.Drawing.Size(158, 22);
+            this.BtnAlongTheLine.StyleController = this.layoutControl1;
+            this.BtnAlongTheLine.TabIndex = 19;
+            this.BtnAlongTheLine.Text = "布置沿线喷头";
+            this.BtnAlongTheLine.Click += new System.EventHandler(this.BtnAlongTheLine_Click);
+            // 
+            // BtnArea
+            // 
+            this.BtnArea.AllowFocus = false;
+            this.BtnArea.Location = new System.Drawing.Point(94, 350);
+            this.BtnArea.Name = "BtnArea";
+            this.BtnArea.Size = new System.Drawing.Size(74, 22);
+            this.BtnArea.StyleController = this.layoutControl1;
+            this.BtnArea.TabIndex = 18;
+            this.BtnArea.Text = "可布区域";
+            this.BtnArea.Click += new System.EventHandler(this.BtnArea_Click);
+            // 
+            // BtnCheck
+            // 
+            this.BtnCheck.AllowFocus = false;
+            this.BtnCheck.Location = new System.Drawing.Point(10, 350);
+            this.BtnCheck.Name = "BtnCheck";
+            this.BtnCheck.Size = new System.Drawing.Size(74, 22);
+            this.BtnCheck.StyleController = this.layoutControl1;
+            this.BtnCheck.TabIndex = 17;
+            this.BtnCheck.Text = "盲区检测";
+            this.BtnCheck.Click += new System.EventHandler(this.BtnCheck_Click);
+            // 
+            // BtnLayout
+            // 
+            this.BtnLayout.AllowFocus = false;
+            this.BtnLayout.Location = new System.Drawing.Point(10, 318);
+            this.BtnLayout.Name = "BtnLayout";
+            this.BtnLayout.Size = new System.Drawing.Size(158, 22);
+            this.BtnLayout.StyleController = this.layoutControl1;
+            this.BtnLayout.TabIndex = 16;
+            this.BtnLayout.Text = "布置喷头";
+            this.BtnLayout.Click += new System.EventHandler(this.BtnLayout_Click);
             // 
             // pictureEdit1
             // 
@@ -171,7 +214,7 @@
             this.RidApplications.Properties.Items.AddRange(new DevExpress.XtraEditors.Controls.RadioGroupItem[] {
             new DevExpress.XtraEditors.Controls.RadioGroupItem("除走道外", "除走道外"),
             new DevExpress.XtraEditors.Controls.RadioGroupItem("走道&坡道", "走道&&坡道")});
-            this.RidApplications.Size = new System.Drawing.Size(158, 25);
+            this.RidApplications.Size = new System.Drawing.Size(158, 24);
             this.RidApplications.StyleController = this.layoutControl1;
             this.RidApplications.TabIndex = 11;
             this.RidApplications.SelectedIndexChanged += new System.EventHandler(this.RidApplications_SelectedIndexChanged);
@@ -190,7 +233,7 @@
             // RidSprinklerType
             // 
             this.RidSprinklerType.EditValue = "上喷";
-            this.RidSprinklerType.Location = new System.Drawing.Point(10, 178);
+            this.RidSprinklerType.Location = new System.Drawing.Point(10, 177);
             this.RidSprinklerType.Name = "RidSprinklerType";
             this.RidSprinklerType.Properties.AllowFocused = false;
             this.RidSprinklerType.Properties.Appearance.BackColor = System.Drawing.Color.Transparent;
@@ -200,14 +243,14 @@
             this.RidSprinklerType.Properties.Items.AddRange(new DevExpress.XtraEditors.Controls.RadioGroupItem[] {
             new DevExpress.XtraEditors.Controls.RadioGroupItem("上喷", "上喷"),
             new DevExpress.XtraEditors.Controls.RadioGroupItem("下喷", "下喷")});
-            this.RidSprinklerType.Size = new System.Drawing.Size(158, 23);
+            this.RidSprinklerType.Size = new System.Drawing.Size(158, 24);
             this.RidSprinklerType.StyleController = this.layoutControl1;
             this.RidSprinklerType.TabIndex = 6;
             // 
             // RidSprinklerScope
             // 
             this.RidSprinklerScope.EditValue = "标准覆盖";
-            this.RidSprinklerScope.Location = new System.Drawing.Point(10, 128);
+            this.RidSprinklerScope.Location = new System.Drawing.Point(10, 126);
             this.RidSprinklerScope.Name = "RidSprinklerScope";
             this.RidSprinklerScope.Properties.AllowFocused = false;
             this.RidSprinklerScope.Properties.Appearance.BackColor = System.Drawing.Color.Transparent;
@@ -216,14 +259,14 @@
             this.RidSprinklerScope.Properties.Items.AddRange(new DevExpress.XtraEditors.Controls.RadioGroupItem[] {
             new DevExpress.XtraEditors.Controls.RadioGroupItem("标准覆盖", "标准覆盖"),
             new DevExpress.XtraEditors.Controls.RadioGroupItem("扩大覆盖", "扩大覆盖")});
-            this.RidSprinklerScope.Size = new System.Drawing.Size(158, 23);
+            this.RidSprinklerScope.Size = new System.Drawing.Size(158, 24);
             this.RidSprinklerScope.StyleController = this.layoutControl1;
             this.RidSprinklerScope.TabIndex = 5;
             // 
             // ComBoxHazardLevel
             // 
             this.ComBoxHazardLevel.EditValue = "中危险等级II级";
-            this.ComBoxHazardLevel.Location = new System.Drawing.Point(10, 81);
+            this.ComBoxHazardLevel.Location = new System.Drawing.Point(10, 79);
             this.ComBoxHazardLevel.Name = "ComBoxHazardLevel";
             this.ComBoxHazardLevel.Properties.AllowFocused = false;
             this.ComBoxHazardLevel.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
@@ -272,7 +315,7 @@
             // layoutControlItem1
             // 
             this.layoutControlItem1.Control = this.ComBoxHazardLevel;
-            this.layoutControlItem1.Location = new System.Drawing.Point(0, 54);
+            this.layoutControlItem1.Location = new System.Drawing.Point(0, 52);
             this.layoutControlItem1.Name = "layoutControlItem1";
             this.layoutControlItem1.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
             this.layoutControlItem1.Size = new System.Drawing.Size(168, 47);
@@ -283,10 +326,10 @@
             // layoutControlItem2
             // 
             this.layoutControlItem2.Control = this.RidSprinklerScope;
-            this.layoutControlItem2.Location = new System.Drawing.Point(0, 101);
+            this.layoutControlItem2.Location = new System.Drawing.Point(0, 99);
             this.layoutControlItem2.Name = "layoutControlItem2";
             this.layoutControlItem2.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
-            this.layoutControlItem2.Size = new System.Drawing.Size(168, 50);
+            this.layoutControlItem2.Size = new System.Drawing.Size(168, 51);
             this.layoutControlItem2.Text = "喷头范围：";
             this.layoutControlItem2.TextLocation = DevExpress.Utils.Locations.Top;
             this.layoutControlItem2.TextSize = new System.Drawing.Size(60, 14);
@@ -294,10 +337,10 @@
             // layoutControlItem3
             // 
             this.layoutControlItem3.Control = this.RidSprinklerType;
-            this.layoutControlItem3.Location = new System.Drawing.Point(0, 151);
+            this.layoutControlItem3.Location = new System.Drawing.Point(0, 150);
             this.layoutControlItem3.Name = "layoutControlItem3";
             this.layoutControlItem3.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
-            this.layoutControlItem3.Size = new System.Drawing.Size(168, 50);
+            this.layoutControlItem3.Size = new System.Drawing.Size(168, 51);
             this.layoutControlItem3.Text = "喷头类型：";
             this.layoutControlItem3.TextLocation = DevExpress.Utils.Locations.Top;
             this.layoutControlItem3.TextSize = new System.Drawing.Size(60, 14);
@@ -318,7 +361,7 @@
             this.layoutControlItem8.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem8.Name = "layoutControlItem8";
             this.layoutControlItem8.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
-            this.layoutControlItem8.Size = new System.Drawing.Size(168, 52);
+            this.layoutControlItem8.Size = new System.Drawing.Size(168, 51);
             this.layoutControlItem8.Text = "应用场所：";
             this.layoutControlItem8.TextLocation = DevExpress.Utils.Locations.Top;
             this.layoutControlItem8.TextSize = new System.Drawing.Size(60, 14);
@@ -326,10 +369,10 @@
             // simpleSeparator1
             // 
             this.simpleSeparator1.AllowHotTrack = false;
-            this.simpleSeparator1.Location = new System.Drawing.Point(0, 52);
+            this.simpleSeparator1.Location = new System.Drawing.Point(0, 51);
             this.simpleSeparator1.Name = "simpleSeparator1";
             this.simpleSeparator1.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
-            this.simpleSeparator1.Size = new System.Drawing.Size(168, 2);
+            this.simpleSeparator1.Size = new System.Drawing.Size(168, 1);
             // 
             // layoutControlItem9
             // 
@@ -363,17 +406,6 @@
             this.layoutControlItem11.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem11.TextVisible = false;
             // 
-            // BtnLayout
-            // 
-            this.BtnLayout.AllowFocus = false;
-            this.BtnLayout.Location = new System.Drawing.Point(10, 318);
-            this.BtnLayout.Name = "BtnLayout";
-            this.BtnLayout.Size = new System.Drawing.Size(158, 22);
-            this.BtnLayout.StyleController = this.layoutControl1;
-            this.BtnLayout.TabIndex = 16;
-            this.BtnLayout.Text = "布置喷头";
-            this.BtnLayout.Click += new System.EventHandler(this.BtnLayout_Click);
-            // 
             // layoutControlItem4
             // 
             this.layoutControlItem4.Control = this.BtnLayout;
@@ -383,17 +415,6 @@
             this.layoutControlItem4.Size = new System.Drawing.Size(168, 32);
             this.layoutControlItem4.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem4.TextVisible = false;
-            // 
-            // BtnCheck
-            // 
-            this.BtnCheck.AllowFocus = false;
-            this.BtnCheck.Location = new System.Drawing.Point(10, 350);
-            this.BtnCheck.Name = "BtnCheck";
-            this.BtnCheck.Size = new System.Drawing.Size(74, 22);
-            this.BtnCheck.StyleController = this.layoutControl1;
-            this.BtnCheck.TabIndex = 17;
-            this.BtnCheck.Text = "盲区检测";
-            this.BtnCheck.Click += new System.EventHandler(this.BtnCheck_Click);
             // 
             // layoutControlItem5
             // 
@@ -405,17 +426,6 @@
             this.layoutControlItem5.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem5.TextVisible = false;
             // 
-            // BtnArea
-            // 
-            this.BtnArea.AllowFocus = false;
-            this.BtnArea.Location = new System.Drawing.Point(94, 350);
-            this.BtnArea.Name = "BtnArea";
-            this.BtnArea.Size = new System.Drawing.Size(74, 22);
-            this.BtnArea.StyleController = this.layoutControl1;
-            this.BtnArea.TabIndex = 18;
-            this.BtnArea.Text = "可布区域";
-            this.BtnArea.Click += new System.EventHandler(this.BtnArea_Click);
-            // 
             // layoutControlItem6
             // 
             this.layoutControlItem6.Control = this.BtnArea;
@@ -425,16 +435,6 @@
             this.layoutControlItem6.Size = new System.Drawing.Size(84, 32);
             this.layoutControlItem6.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem6.TextVisible = false;
-            // 
-            // BtnAlongTheLine
-            // 
-            this.BtnAlongTheLine.Location = new System.Drawing.Point(10, 382);
-            this.BtnAlongTheLine.Name = "BtnAlongTheLine";
-            this.BtnAlongTheLine.Size = new System.Drawing.Size(158, 22);
-            this.BtnAlongTheLine.StyleController = this.layoutControl1;
-            this.BtnAlongTheLine.TabIndex = 19;
-            this.BtnAlongTheLine.Text = "布置沿线喷头";
-            this.BtnAlongTheLine.Click += new System.EventHandler(this.BtnAlongTheLine_Click);
             // 
             // layoutControlItem13
             // 
@@ -453,6 +453,8 @@
             this.ClientSize = new System.Drawing.Size(178, 414);
             this.Controls.Add(this.layoutControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
+            this.LookAndFeel.SkinName = "The Bezier";
+            this.LookAndFeel.UseDefaultLookAndFeel = false;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
             this.Name = "fmSprinklerLayout";
