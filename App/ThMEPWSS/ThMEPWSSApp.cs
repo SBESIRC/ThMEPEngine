@@ -384,7 +384,7 @@ namespace ThMEPWSS
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
-                MessageForAdding = "选择区域",
+                MessageForAdding = "选择布置线",
                 RejectObjectsOnLockedLayers = true,
             };
             var dxfNames = new string[]
@@ -395,7 +395,7 @@ namespace ThMEPWSS
             var result = Active.Editor.GetSelection(options, filter);
             if (result.Status != PromptStatus.OK)
             {
-                return;
+                return; 
             }
 
             List<Line> lines = new List<Line>();

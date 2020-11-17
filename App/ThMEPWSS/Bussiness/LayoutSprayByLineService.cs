@@ -26,6 +26,15 @@ namespace ThMEPWSS.Bussiness
             }
         }
 
+        /// <summary>
+        /// 计算布置点
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="usefulLines"></param>
+        /// <param name="sPt"></param>
+        /// <param name="useLength"></param>
+        /// <param name="distance"></param>
+        /// <returns></returns>
         private List<Point3d> CalSprayPoint(Line line, Dictionary<Line, bool> usefulLines, Point3d sPt, double useLength, double distance)
         {
             usefulLines[line] = false;

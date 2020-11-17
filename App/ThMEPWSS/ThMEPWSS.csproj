@@ -52,6 +52,7 @@
     <Compile Include="Pipe\ThWToiletFloordrainEngine.cs" />
     <Compile Include="Model\SprayDataService.cs" />
     <Compile Include="Model\SprayLayoutData.cs" />
+    <Compile Include="Model\ThWSSParameter.cs" />
     <Compile Include="Pipe\Engine\ThToiletContainerRecognitionEngine.cs" />
     <Compile Include="Pipe\Model\ThToiletContainer.cs" />
     <Compile Include="Pipe\Service\ThToiletFloorDrainService.cs" />
@@ -76,6 +77,7 @@
     <Compile Include="Service\MarkService.cs" />
     <Compile Include="Service\RotateTransformService.cs" />
     <Compile Include="Service\SprayDataOperateService.cs" />
+    <Compile Include="Service\ThWSSUIService.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
     <Compile Include="ThMEPWSSApp.cs" />

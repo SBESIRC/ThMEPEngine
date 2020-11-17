@@ -17,16 +17,26 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 {
     public class RayLayoutService
     {
-        protected readonly double sideLength = 3400;
-        protected readonly double sideMinLength = 0;
-        protected readonly double maxLength = 1800;
-        protected readonly double minLength = 100;
-        protected readonly double raduisLength = 1800;
-        protected readonly double moveLength = 200;
-        protected readonly double spacing = 100;
+        protected double sideLength = 3400;
+        //protected double sideMinLength = 0;
+        protected double maxLength = 1800;  //任何情况下喷头间距不小于1800
+        //protected double minLength = 100;
+        protected double radiusLength = 1800;
+        //protected readonly double moveLength = 200;
+        protected readonly double spacing = 100;  //布置线间距为100的倍数
         
         public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, List<Polyline> walls, List<Polyline> holes, Matrix3d matrix, bool CreateLine = true)
         {
+            #region 预设参数
+            sideLength = ThWSSUIService.Instance.Parameter.protectRange;
+            radiusLength = sideLength / 2;
+
+            if (!ThWSSUIService.Instance.Parameter.ConsiderBeam)  //不考虑梁
+            {
+                beams = new List<Polyline>();
+            }
+            #endregion
+
             //获取柱轴网
             GridService gridService = new GridService();
             var allGrids = gridService.CreateGrid(polyline, colums, matrix, 4000);
@@ -316,15 +326,15 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 //间距是50的倍数
                 moveLength = Math.Ceiling(moveLength / 50) * 50;
                 remainder = (length - moveLength * num) / 2;
-                if (remainder > raduisLength)
+                if (remainder > radiusLength)
                 {
                     while (true)
                     {
-                        moveLength = (length - raduisLength * 2) / num;
+                        moveLength = (length - radiusLength * 2) / num;
                         //间距是50的倍数
                         moveLength = Math.Floor(moveLength / 50) * 50;
                         remainder = (length - moveLength * num) / 2;
-                        if (remainder > raduisLength || moveLength > sideLength)
+                        if (remainder > radiusLength || moveLength > sideLength)
                         {
                             num += 1;
                         }

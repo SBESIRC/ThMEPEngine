@@ -20,7 +20,6 @@ namespace ThMEPWSS.Bussiness
     {
         Vector3d vDir;
         Vector3d tDir;
-        readonly double length = 3400;
 
         public CalSprayBlindAreaService(Matrix3d matrix)
         {
@@ -30,7 +29,7 @@ namespace ThMEPWSS.Bussiness
 
         public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline, List<Polyline> holes)
         {
-            var sprayData = SprayDataOperateService.CalSprayPoint(sprays, vDir, tDir, length);
+            var sprayData = SprayDataOperateService.CalSprayPoint(sprays, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
             var blindArea = GetRealBlindArea(sprayData, polyline, holes);
 
             //打印盲区
@@ -40,7 +39,7 @@ namespace ThMEPWSS.Bussiness
         public void CalSprayBlindArea(List<SprayLayoutData> sprays, Polyline polyline, List<Polyline> holes)
         {
             var sprayPts = sprays.Select(x => x.Position).ToList();
-            var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, length);
+            var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
             var blindArea = GetRealBlindArea(sprayData, polyline, holes);
 
             //打印盲区
