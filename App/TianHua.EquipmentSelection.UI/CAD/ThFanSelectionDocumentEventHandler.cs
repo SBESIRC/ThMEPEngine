@@ -116,12 +116,12 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 SendCopyMessage();
             }
-            CleanDbHandlers();
+            ResetDbHandlers();
         }
 
         public void CommandFailedHandler(object sender, CommandEventArgs e)
         {
-            CleanDbHandlers();
+            ResetDbHandlers();
         }
 
         public void CommandCancelledHandler(object sender, CommandEventArgs e)
@@ -130,15 +130,31 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 SendCopyMessage();
             }
-            CleanDbHandlers();
+            ResetDbHandlers();
         }
 
-        private void CleanDbHandlers()
+        private void ResetDbHandlers()
         {
-            DbSaveHandler?.Dispose();
-            DbUndoHandler?.Dispose();
-            DbEraseHandler?.Dispose();
-            DbDeepCloneHandler?.Dispose();
+            if (DbSaveHandler != null)
+            {
+                DbSaveHandler.Dispose();
+                DbSaveHandler = null;
+            }
+            if (DbUndoHandler != null)
+            {
+                DbUndoHandler.Dispose();
+                DbUndoHandler = null;
+            }
+            if (DbEraseHandler != null)
+            {
+                DbEraseHandler.Dispose();
+                DbEraseHandler = null;
+            }
+            if (DbDeepCloneHandler != null)
+            {
+                DbDeepCloneHandler.Dispose();
+                DbDeepCloneHandler = null;
+            }
         }
 
         public void SendSaveMessage()
