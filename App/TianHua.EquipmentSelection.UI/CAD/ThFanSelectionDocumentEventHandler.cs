@@ -30,12 +30,16 @@ namespace TianHua.FanSelection.UI.CAD
         {
             Document = document;
             Document.CommandEnded += CommandEndedHandler;
+            Document.CommandFailed += CommandFailedHandler;
+            Document.CommandCancelled += CommandCancelledHandler;
             Document.CommandWillStart += CommandWillStartHandler;
         }
 
         public void Dispose()
         {
             Document.CommandEnded -= CommandEndedHandler;
+            Document.CommandFailed -= CommandFailedHandler;
+            Document.CommandCancelled -= CommandCancelledHandler;
             Document.CommandWillStart -= CommandWillStartHandler;
         }
 
@@ -91,34 +95,49 @@ namespace TianHua.FanSelection.UI.CAD
                 // 所以这里同时触发UNDO/REDO + ERASE事件
                 SendUndoMessage();
                 SendEraseMessage();
-                DbUndoHandler.Dispose();
-                DbEraseHandler.Dispose();
             }
             else if (e.GlobalCommandName == "QSAVE")
             {
                 SendSaveMessage();
-                DbSaveHandler.Dispose();
             }
             else if (e.GlobalCommandName == "ERASE")
             {
                 SendEraseMessage();
-                DbEraseHandler.Dispose();
             }
             else if (e.GlobalCommandName == "COPY")
             {
                 SendCopyMessage();
-                DbDeepCloneHandler.Dispose();
             }
             else if (e.GlobalCommandName == "CUTCLIP")
             {
                 SendEraseMessage();
-                DbEraseHandler.Dispose();
             }
             else if (e.GlobalCommandName == "PASTECLIP")
             {
                 SendCopyMessage();
-                DbDeepCloneHandler.Dispose();
             }
+            CleanDbHandlers();
+        }
+
+        public void CommandFailedHandler(object sender, CommandEventArgs e)
+        {
+            CleanDbHandlers();
+        }
+
+        public void CommandCancelledHandler(object sender, CommandEventArgs e)
+        {
+            if (e.GlobalCommandName == "COPY")
+            {
+                SendCopyMessage();
+            }
+            CleanDbHandlers();
+        }
+
+        private void CleanDbHandlers()
+        {
+            DbUndoHandler?.Dispose();
+            DbEraseHandler?.Dispose();
+            DbDeepCloneHandler?.Dispose();
         }
 
         public void SendSaveMessage()
