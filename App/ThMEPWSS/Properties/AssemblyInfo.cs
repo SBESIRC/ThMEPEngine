@@ -37,4 +37,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion("1.0.0.0")]
 
 [assembly: CommandClass(typeof(ThMEPWSS.ThPipeCmds))]
+[assembly: CommandClass(typeof(ThMEPWSS.ThSprayCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThMEPWSSApp))]

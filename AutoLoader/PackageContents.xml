@@ -136,47 +136,39 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPWSS, 2012 version-->
+    <!--Assembly App, Plumbing.UI, 2012 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
-        <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLPT" Global="THPLPT" />
-                <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLKQ" Global="THPLKQ" />
+                <Command Local="THPL" Global="THPL" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPWSS, 2014 version-->
+    <!--Assembly App, Plumbing.UI, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLPT" Global="THPLPT" />
-                <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLKQ" Global="THPLKQ" />
+                <Command Local="THPL" Global="THPL" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPWSS, 2016 version-->
+    <!--Assembly App, Plumbing.UI, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLPT" Global="THPLPT" />
-                <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLKQ" Global="THPLKQ" />
+                <Command Local="THPL" Global="THPL" />
             </Commands>
         </ComponentEntry>
     </Components>
-    <!--Assembly App, ThMEPWSS, 2018 version-->
+    <!--Assembly App, Plumbing.UI, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THPLPT" Global="THPLPT" />
-                <Command Local="THPLMQ" Global="THPLMQ" />
-                <Command Local="THPLKQ" Global="THPLKQ" />
+                <Command Local="THPL" Global="THPL" />
             </Commands>
         </ComponentEntry>
     </Components>

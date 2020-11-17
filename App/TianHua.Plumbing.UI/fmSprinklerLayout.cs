@@ -1,54 +1,20 @@
-﻿using AcHelper;
-using AcHelper.Commands;
-using DevExpress.XtraEditors;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using System;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using ThMEPWSS.Model;
+using AcHelper;
+using AcHelper.Commands;
 using ThMEPWSS.Service;
+using DevExpress.XtraEditors;
 using TianHua.Publics.BaseCode;
 
 namespace TianHua.Plumbing.UI
 {
     public partial class fmSprinklerLayout : DevExpress.XtraEditors.XtraForm
     {
-        //TODO:
-        //ComBoxHazardLevel.EditValue  危险等级
-        //RidSprinklerScope.EditValue  喷头范围
-        //RidSprinklerType.EditValue   喷头类型
-        //CheckGirder.Check            考虑梁
-        //ComBoxDeadZone.EditValue     盲区表达
-        //TxtSpacing.Text              喷头间距
         public fmSprinklerLayout()
         {
             InitializeComponent();
         }
-
-        //private static fmSprinklerLayout sprinklerLayout = new fmSprinklerLayout();
-        ///// <summary>
-        ///// 打开窗体
-        ///// </summary>
-        ///// <param name="sender"></param>
-        ///// <param name="e"></param>
-        //public static fmSprinklerLayout GetForm()
-        //{
-        //    if (sprinklerLayout.IsDisposed)
-        //    {
-        //        sprinklerLayout = new fmSprinklerLayout();
-        //        return sprinklerLayout;
-        //    }
-        //    else
-        //    {
-        //        return sprinklerLayout;
-        //    }
-        //}
 
         private void RidApplications_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -114,6 +80,7 @@ namespace TianHua.Plumbing.UI
             //获取更改信息
             CreateChangedInfo();
 
+            //发送命令
             CommandHandlerBase.ExecuteFromCommandLine(false, "THPLPT");
         }
 
@@ -133,24 +100,20 @@ namespace TianHua.Plumbing.UI
             //获取更改信息
             CreateChangedInfo();
 
+            //发送命令
             CommandHandlerBase.ExecuteFromCommandLine(false, "THPLMQ");
         }
 
         private void BtnArea_Click(object sender, EventArgs e)
         {
-            //fmWaiting.WaitingExcute(() => { Test(); }, "正在处理，请稍后...."); 
             //聚焦到CAD
             SetFocusToDwgView();
 
             //获取更改信息
             CreateChangedInfo();
 
+            //发送命令
             CommandHandlerBase.ExecuteFromCommandLine(false, "THPLKQ");
-        }
-
-        public void Test()
-        {
-            Thread.Sleep(5000);
         }
 
         private void BtnAlongTheLine_Click(object sender, EventArgs e)
@@ -164,6 +127,7 @@ namespace TianHua.Plumbing.UI
             //喷头间距
             ThWSSUIService.Instance.Parameter.distance = Convert.ToDouble(TxtSpacing.Text);
 
+            //发送命令
             CommandHandlerBase.ExecuteFromCommandLine(false, "THPLCD");
         }
 

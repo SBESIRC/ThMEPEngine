@@ -107,7 +107,6 @@ namespace ThMEPWSS.Pipe
             var center = well.GetCenter();
             var vertices1 = urinal.Vertices();
             int b = 0;
-            double dst = double.MaxValue;
             for (int i = 0; i < vertices1.Count-1; i++)
             {
                 if (well.GetDistToPoint((vertices1[i]+0.5* vertices1[i].GetVectorTo(vertices1[i+1])))<60)

@@ -83,6 +83,7 @@
     <Compile Include="Service\SprayDataOperateService.cs" />
     <Compile Include="Service\ThWSSUIService.cs" />
     <Compile Include="ThPipeCmds.cs" />
+    <Compile Include="ThSprayCmds.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
     <Compile Include="ThMEPWSSApp.cs" />

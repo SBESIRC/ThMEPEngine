@@ -76,7 +76,6 @@
       <SubType>Component</SubType>
     </Compile>
     <Compile Include="PlumbingUIApp.cs" />
-    <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="fmSprinklerLayout.resx">
       <DependentUpon>fmSprinklerLayout.cs</DependentUpon>
