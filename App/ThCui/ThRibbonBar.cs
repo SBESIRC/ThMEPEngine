@@ -61,28 +61,12 @@ namespace TianHua.AutoCAD.ThCui
             var panel = tab.AddNewPanel("Water", "给排水");
             var row = panel.AddNewRibbonRow();
 
-            row.AddNewButton("喷头布置",
-                "天华喷头布置",
-                "THPLPT",
+            row.AddNewButton("喷头工具",
+                "天华喷头工具",
+                "THPL",
                 "",
                 "IDI_THCAD_THPLPT_SMALL",
                 "IDI_THCAD_THPLPT_LARGE",
-                RibbonButtonStyle.LargeWithText);
-
-            row.AddNewButton("盲区检测",
-                "天华盲区检测",
-                "THPLMQ",
-                "",
-                "IDI_THCAD_THPLMQ_SMALL",
-                "IDI_THCAD_THPLMQ_LARGE",
-                RibbonButtonStyle.LargeWithText);
-
-            row.AddNewButton("可布置区域",
-                "天华可布置区域",
-                "THPLKQ",
-                "",
-                "IDI_THCAD_THPLKQ_SMALL",
-                "IDI_THCAD_THPLKQ_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
         private static void CreateHelpPanel(RibbonTabSource tab)
