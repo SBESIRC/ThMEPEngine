@@ -397,7 +397,7 @@ namespace ThMEPEngineCore
                 var hatchRes = Active.Editor.GetEntity("\nselect a hatch");
                 Hatch hatch = acadDatabase.Element<Hatch>(hatchRes.ObjectId);
                 hatch.Boundaries().ForEach(o=> acadDatabase.ModelSpace.Add(o));
-            }            
+            }
         }
         [CommandMethod("TIANHUACAD", "THLineMergeTest", CommandFlags.Modal)]
         public void THLineMergeTest()
@@ -418,6 +418,27 @@ namespace ThMEPEngineCore
                     acadDatabase.ModelSpace.Add(o);
                 });
             }
+        }
+        [CommandMethod("TIANHUACAD", "THTestIsCollinear", CommandFlags.Modal)]
+        public void THTestIsCollinear()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var line1Res = Active.Editor.GetEntity("\nselect first line");
+                var line2Res = Active.Editor.GetEntity("\nselect second line");
+                Line line1 = acadDatabase.Element<Line>(line1Res.ObjectId);
+                Line line2 = acadDatabase.Element<Line>(line2Res.ObjectId);
+                if (ThGeometryTool.IsCollinearEx(
+                    line1.StartPoint, line1.EndPoint, line2.StartPoint, line2.EndPoint))
+                {
+                    Active.Editor.WriteMessage("共线");
+                }
+                else
+                {
+                    Active.Editor.WriteMessage("不共线");
+                }
+            }
+            
         }
     }
 }
