@@ -95,5 +95,48 @@ namespace ThMEPWSS.Service
         {
             return !(holes.Where(x => x.Contains(newPosition)).Count() > 0);
         }
+
+        /// <summary>
+        /// 判断喷淋图块的大小是否满足要求
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
+        public bool CheckSprayBlockSize(BlockReference block, double maxLength)
+        {
+            var extents = block.Bounds;
+            if (extents == null)
+            {
+                return false;
+            }
+
+            var length = extents.Value.MinPoint.DistanceTo(extents.Value.MaxPoint) / 2;
+            return length <= maxLength;
+        }
+
+        /// <summary>
+        /// 判断图层状态
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="layerName"></param>
+        /// <returns></returns>
+        public bool CheckLayerStatus(Database db, string layerName)
+        {
+            //打开层表
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            //如果不存在名为layerName的图层，则返回
+            if (!lt.Has(layerName)) return false;
+            ObjectId layerId = lt[layerName];//获取名为layerName的层表记录的Id
+            //以写的方式打开名为layerName的层表记录
+            LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+            if (ltr != null)
+            {
+                if (!ltr.IsLocked && !ltr.IsFrozen && !ltr.IsOff)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

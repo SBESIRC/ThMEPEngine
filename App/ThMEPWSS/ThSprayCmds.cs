@@ -388,7 +388,6 @@ namespace ThMEPWSS
             columns.ForEach(x => objs.Add(x));
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
-            objs.Clear();
 
             //获取梁
             var thBeams = allStructure.BeamEngine.Elements.Cast<ThIfcLineBeam>().ToList();
@@ -398,7 +397,6 @@ namespace ThMEPWSS
             beams.ForEach(x => objs.Add(x));
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             beams = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
-            objs.Clear();
 
             //获取剪力墙
             walls = allStructure.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
@@ -431,6 +429,15 @@ namespace ThMEPWSS
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
             var sprays = thCADCoreNTSSpatialIndex.SelectWindowPolygon(plFrame).Cast<BlockReference>().ToList();
 
+            CheckService checkService = new CheckService();
+            //只需要显示出来的喷淋
+            if(checkService.CheckLayerStatus(acdb.Database, ThWSSCommon.SprayLayerName))
+            {
+                return false;
+            }
+
+            //筛选出正确的喷淋图块
+            sprays = sprays.Where(x => checkService.CheckSprayBlockSize(x, 300)).ToList();
             if (sprays.Count <= 0)
             {
                 Active.Editor.WriteMessage("\n 喷淋暂未生成");

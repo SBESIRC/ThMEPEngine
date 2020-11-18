@@ -61,7 +61,6 @@ namespace TianHua.Plumbing.UI
         private void fmSprinklerLayout_Load(object sender, EventArgs e)
         {
             RidApplications_SelectedIndexChanged(null, null);
- 
         }
 
         private void BtnLayout_Click(object sender, EventArgs e)
