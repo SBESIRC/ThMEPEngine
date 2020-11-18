@@ -3,25 +3,23 @@ using System.IO;
 using System.Linq;
 using System.Collections.Generic;
 using AcHelper;
+using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.BeamInfo;
-using ThMEPEngineCore.Model.Segment;
-using ThMEPEngineCore.BeamInfo.Business;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Newtonsoft.Json;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
-using NFox.Cad;
-using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore
 {
@@ -299,17 +297,6 @@ namespace ThMEPEngineCore
             dbText.Layer = "0";
             dbText.Height = 200;
             return dbText;
-        }
-        [CommandMethod("TIANHUACAD", "THCDX", CommandFlags.Modal)]
-        public void ThExtractLaneLine()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
-            {
-                laneLineEngine.Recognize(Active.Database);
-                ThLaneLineSimplifier.Simplify(laneLineEngine.Lanes.ToCollection(), 1500)
-                    .ForEach(o => acadDatabase.ModelSpace.Add(o));
-            }
         }
         /// <summary>
         /// 提取指定区域内的梁信息

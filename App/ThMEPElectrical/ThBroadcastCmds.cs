@@ -9,6 +9,7 @@ using ThMEPElectrical.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPElectrical.Broadcast;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -70,10 +71,10 @@ namespace ThMEPElectrical
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 // 获取车道线
-                var laneLineEngine = new ThLaneLineRecognitionEngine();
-                laneLineEngine.Recognize(acdb.Database);
+                var laneLineEngine = new ThLaneRecognitionEngine();
+                laneLineEngine.Recognize(acdb.Database, new Point3dCollection());
                 // 暂时假设车道线绘制符合要求
-                var lanes = laneLineEngine.Lanes.Cast<Line>().ToList();
+                var lanes = laneLineEngine.Spaces.Select(o => o.Boundary).Cast<Line>().ToList();
                 if (lanes.Count == 0)
                 {
                     return;
