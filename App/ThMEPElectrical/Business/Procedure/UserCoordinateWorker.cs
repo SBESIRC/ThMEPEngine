@@ -56,7 +56,10 @@ namespace ThMEPElectrical.Business.Procedure
         public void Do()
         {
             var ucsInfos = UcsInfoCalculator.MakeUcsInfos(m_ucsLayerName);
-            var wallPolys = WallDataPicker.MakeWallPickProfiles(m_srcWallCurves);
+            var wallPolys = SplitWallWorker.MakeSplitWallProfiles(m_srcWallCurves);
+            //DrawUtils.DrawProfile(wallPolys.Polylines2Curves(), "wallPolys");
+            //WallProfileInfos = new List<PolygonInfo>();
+            //return;
             CalculatePolygonInfo(ucsInfos, wallPolys);
         }
 

@@ -272,6 +272,34 @@ namespace ThMEPElectrical.Geometry
             return false;
         }
 
+        public static DBObjectCollection Curves2DBCollection(List<Curve> curves)
+        {
+            var objs = new DBObjectCollection();
+            foreach (var curve in curves)
+            {
+                objs.Add(curve);
+            }
+
+            return objs;
+        }
+
+        public static List<Curve> EraseSameObjects(List<Curve> srcCurves)
+        {
+            var objs = Curves2DBCollection(srcCurves);
+            var resCurves = new List<Curve>();
+            using (var si = new ThCADCoreNTSSpatialIndex(objs))
+            {
+                var entitys = si.Geometries.Values;
+                foreach (DBObject entity in entitys)
+                {
+                    if (entity is Curve curve)
+                        resCurves.Add(curve);
+                }
+            }
+
+            return resCurves;
+        }
+
         public static Curve ExtendCurve(Curve srcCurve, double entityExtendDis)
         {
             if (srcCurve is Polyline poly)
@@ -297,18 +325,20 @@ namespace ThMEPElectrical.Geometry
                     foreach (Point3d srcPt in pts)
                         resPts.Add(srcPt);
                     resPts.Add(extendPtE);
-                    return resPts.ToPolyline();
+                    var extendPoly = new Polyline();
+                    extendPoly.CreatePolyline(resPts);
+                    return extendPoly;
                 }
             }
-            else if (srcCurve is Line line)
+            else
             {
+                // 直线
+                var line = srcCurve as Line;
                 var ptS = line.StartPoint;
                 var ptE = line.EndPoint;
                 var vec = (ptE - ptS).GetNormal();
                 return new Line(ptS - vec * entityExtendDis, ptE + vec * entityExtendDis);
             }
-
-            return srcCurve.Clone() as Curve;
         }
 
         public static double CutRadRange(double rad)

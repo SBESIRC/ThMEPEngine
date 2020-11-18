@@ -86,13 +86,15 @@ namespace ThMEPElectrical.Business
                 foreach (ObjectId curveId in result.Value.GetObjectIds())
                 {
                     var entity = db.CurrentSpace.Element(curveId);
-                    if (entity is Curve curve)
+                    if (entity is Polyline || entity is Line)
                     {
+                        var curve = entity as Curve;
                         curves.Add(GeomUtils.ExtendCurve(curve, ThMEPCommon.EntityExtendDistance));
                     }
                 }
             }
 
+            curves = GeomUtils.EraseSameObjects(curves);
             return curves;
         }
     }
