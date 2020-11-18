@@ -60,6 +60,7 @@
     <Compile Include="BeamInfo\Utils\ThStructureUtils.cs" />
     <Compile Include="CAD\ThDrawTool.cs" />
     <Compile Include="CAD\ThGeometryTool.cs" />
+    <Compile Include="Algorithm\ThMEPLineExtension.cs" />
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
