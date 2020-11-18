@@ -19,6 +19,7 @@ using ThWSS;
 using ThWSS.Bussiness;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Extension;
+using System;
 
 namespace ThMEPWSS
 {
@@ -260,8 +261,23 @@ namespace ThMEPWSS
                     lines.Add(plBack);
                 }
             }
+
+            //预处理线
+            DBObjectCollection objs = new DBObjectCollection();
+            lines.ForEach(x => objs.Add(x));
+            var handleLines = ThMEPLineExtension.LineSimplifier(objs, 20.0, 2.0, Math.PI / 180.0);
+            objs = new DBObjectCollection();
+            handleLines.ForEach(x => objs.Add(x));
+            handleLines = objs.ToNTSNodedLineStrings().ToDbObjects()
+                .SelectMany(x => {
+                    DBObjectCollection entitySet = new DBObjectCollection();
+                    (x as Polyline).Explode(entitySet);
+                    return entitySet.Cast<Line>().ToList();
+                })
+                .ToList();
+
             LayoutSprayByLineService layoutSprayByLineService = new LayoutSprayByLineService();
-            layoutSprayByLineService.LayoutSprayByLine(lines, 3000);
+            layoutSprayByLineService.LayoutSprayByLine(handleLines, 3000);
         }
 
         [CommandMethod("TIANHUACAD", "THPLZX", CommandFlags.Modal)]
