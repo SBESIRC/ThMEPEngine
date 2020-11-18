@@ -47,8 +47,7 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 List<Curve> curves = new List<Curve>();
-                if (IsBuildElementBlockReference(blockReference) &&
-                    blockReference.IsVisible(acadDatabase))
+                if (IsBuildElementBlockReference(blockReference))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (IsBuildElementBlock(blockTableRecord))
@@ -62,8 +61,7 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference() &&
-                                    blockObj.IsVisible(acadDatabase))
+                                if (IsBuildElementBlockReference(blockObj))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
@@ -71,7 +69,7 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Curve curve)
                             {
-                                if (CheckLayerValid(curve) && curve.IsVisible(acadDatabase))
+                                if (CheckLayerValid(curve))
                                 {
                                     curves.Add(curve.GetTransformedCopy(matrix) as Curve);
                                 }

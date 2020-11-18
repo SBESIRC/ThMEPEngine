@@ -1,11 +1,8 @@
 ﻿using System;
-using Linq2Acad;
-using System.Text;
 using System.Linq;
-using System.Threading.Tasks;
+using Linq2Acad;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
 
 namespace ThMEPEngineCore.Service
 {
@@ -16,10 +13,15 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
                     .Where(o => IsBasintoolLayerName(o.Name))
                     .Select(o => o.Name)
                     .ToList();
             }
+        }
+        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
         private static bool IsBasintoolLayerName(string name)
         {

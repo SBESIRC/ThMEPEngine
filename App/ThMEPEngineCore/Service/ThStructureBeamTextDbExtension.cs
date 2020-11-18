@@ -49,42 +49,41 @@ namespace ThMEPEngineCore.Service
         }
         private IEnumerable<DBText> BuildElementTexts(BlockReference blockReference, Matrix3d matrix)
         {
-            List<DBText> texts = new List<DBText>();
-            if (blockReference.BlockTableRecord == ObjectId.Null)
-            {
-                return texts;
-            }
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                if (IsBuildElementBlock(blockTableRecord))
+                List<DBText> texts = new List<DBText>();
+                if (IsBuildElementBlockReference(blockReference))
                 {
-                    foreach (var objId in blockTableRecord)
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    if (IsBuildElementBlock(blockTableRecord))
                     {
-                        var dbObj = acadDatabase.Element<Entity>(objId);
-                        if (dbObj is BlockReference blockObj)
+                        foreach (var objId in blockTableRecord)
                         {
-                            if (blockObj.BlockTableRecord.IsNull)
+                            var dbObj = acadDatabase.Element<Entity>(objId);
+                            if (dbObj is BlockReference blockObj)
                             {
-                                continue;
+                                if (blockObj.BlockTableRecord.IsNull)
+                                {
+                                    continue;
+                                }
+                                if (IsBuildElementBlockReference(blockObj))
+                                {
+                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                    texts.AddRange(BuildElementTexts(blockObj, mcs2wcs));
+                                }
                             }
-                            if (blockObj.IsBuildElementBlockReference())
+                            else if (dbObj is DBText dbtext)
                             {
-                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                texts.AddRange(BuildElementTexts(blockObj, mcs2wcs));
-                            }
-                        }
-                        else if (dbObj is DBText dbtext)
-                        {
-                            if (CheckLayerValid(dbtext))
-                            {
-                                texts.Add(dbtext.GetTransformedCopy(matrix) as DBText);
+                                if (CheckLayerValid(dbtext))
+                                {
+                                    texts.Add(dbtext.GetTransformedCopy(matrix) as DBText);
+                                }
                             }
                         }
                     }
                 }
+                return texts;
             }
-            return texts;
         }
     }
 }

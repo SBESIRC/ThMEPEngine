@@ -58,7 +58,6 @@
     <Compile Include="BeamInfo\Utils\ThOverkillDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureUtils.cs" />
-    <Compile Include="CAD\ThDbExtension.cs" />
     <Compile Include="CAD\ThDrawTool.cs" />
     <Compile Include="CAD\ThGeometryTool.cs" />
     <Compile Include="CAD\ThPropertySet.cs" />

@@ -12,6 +12,7 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
                     .Where(o => IsColumnCurveLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
@@ -23,10 +24,16 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
                     .Where(o => IsColumnHatchLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
             }
+        }
+
+        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
 
         private static bool IsColumnCurveLayer(string name)

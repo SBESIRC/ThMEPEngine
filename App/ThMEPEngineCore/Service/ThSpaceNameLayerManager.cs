@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using Linq2Acad;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,12 +13,13 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
                     .Where(o => IsSpaceNameLayer(o.Name))
                     .Select(o => o.Name)
                     .ToList();
             }
         }
-        public  static bool IsSpaceNameLayer(string name)
+        private static bool IsSpaceNameLayer(string name)
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
             // 图层名未包含S_BEAM
@@ -33,6 +33,10 @@ namespace ThMEPEngineCore.Service
                 return false;
             }
             return (patterns[0] == "ROOM") && (patterns[1] == "NAME") && (patterns[2] == "AD");
+        }
+        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
     }
 }

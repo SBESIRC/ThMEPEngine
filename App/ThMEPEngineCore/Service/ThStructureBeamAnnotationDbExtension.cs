@@ -51,53 +51,49 @@ namespace ThMEPEngineCore.Service
 
         private IEnumerable<ThIfcBeamAnnotation> BuildElementTexts(BlockReference blockReference, Matrix3d matrix)
         {
-            List<ThIfcBeamAnnotation> annotations = new List<ThIfcBeamAnnotation>();
-            if (blockReference.BlockTableRecord == ObjectId.Null)
-            {
-                return annotations;
-            }
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                if (IsBuildElementBlock(blockTableRecord) &&
-                    blockReference.IsVisible(acadDatabase))
+                List<ThIfcBeamAnnotation> annotations = new List<ThIfcBeamAnnotation>();
+                if (IsBuildElementBlockReference(blockReference))
                 {
-                    foreach (var objId in blockTableRecord)
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    if (IsBuildElementBlock(blockTableRecord))
                     {
-                        var dbObj = acadDatabase.Element<Entity>(objId);
-                        if (dbObj is BlockReference blockObj)
+                        foreach (var objId in blockTableRecord)
                         {
-                            if (blockObj.BlockTableRecord.IsNull)
+                            var dbObj = acadDatabase.Element<Entity>(objId);
+                            if (dbObj is BlockReference blockObj)
                             {
-                                continue;
+                                if (blockObj.BlockTableRecord.IsNull)
+                                {
+                                    continue;
+                                }
+                                if (IsBuildElementBlockReference(blockObj))
+                                {
+                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                    annotations.AddRange(BuildElementTexts(blockObj, mcs2wcs));
+                                }
                             }
-                            if (blockObj.IsBuildElementBlockReference() &&
-                                blockObj.IsVisible(acadDatabase))
+                            else if (dbObj is DBText dbtext)
                             {
-                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                annotations.AddRange(BuildElementTexts(blockObj, mcs2wcs));
+                                if (CheckLayerValid(dbtext) &&
+                                    IsBuildElement(dbtext) &&
+                                    IsAnnotation(dbtext))
+                                {
+                                    annotations.Add(new ThIfcBeamAnnotation(dbtext, matrix));
+                                }
                             }
                         }
-                        else if (dbObj is DBText dbtext)
+                        var xclip = blockReference.XClipInfo();
+                        if (xclip.IsValid)
                         {
-                            if (CheckLayerValid(dbtext) &&
-                                IsBuildElement(dbtext) &&
-                                IsAnnotation(dbtext) &&
-                                dbtext.IsVisible(acadDatabase))
-                            {
-                                annotations.Add(new ThIfcBeamAnnotation(dbtext, matrix));
-                            }
+                            xclip.TransformBy(matrix);
+                            return annotations.Where(o => xclip.Contains(o.Position.TransformBy(o.Matrix)));
                         }
-                    }
-                    var xclip = blockReference.XClipInfo();
-                    if (xclip.IsValid)
-                    {
-                        xclip.TransformBy(matrix);
-                        return annotations.Where(o => xclip.Contains(o.Position.TransformBy(o.Matrix)));
                     }
                 }
+                return annotations;
             }
-            return annotations;
         }
 
         protected override bool IsBuildElement(Entity entity)

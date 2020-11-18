@@ -45,41 +45,41 @@ namespace ThMEPEngineCore.Service
         }
         private IEnumerable<Curve> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)
         {
-            List<Curve> curves = new List<Curve>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                if (IsBuildElementBlock(blockTableRecord) &&
-                    blockReference.IsVisible(acadDatabase))
+                List<Curve> curves = new List<Curve>();
+                if (IsBuildElementBlockReference(blockReference))
                 {
-                    foreach (var objId in blockTableRecord)
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    if (IsBuildElementBlock(blockTableRecord))
                     {
-                        var dbObj = acadDatabase.Element<Entity>(objId);
-                        if (dbObj is BlockReference blockObj)
+                        foreach (var objId in blockTableRecord)
                         {
-                            if (blockObj.BlockTableRecord.IsNull)
+                            var dbObj = acadDatabase.Element<Entity>(objId);
+                            if (dbObj is BlockReference blockObj)
                             {
-                                continue;
+                                if (blockObj.BlockTableRecord.IsNull)
+                                {
+                                    continue;
+                                }
+                                if (IsBuildElementBlockReference(blockObj))
+                                {
+                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                    curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
+                                }
                             }
-                            if (blockObj.IsBuildElementBlockReference() &&
-                                blockObj.IsVisible(acadDatabase))
+                            else if (dbObj is Curve curve)
                             {
-                                var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
-                            }
-                        }
-                        else if(dbObj is Curve curve)
-                        {
-                            if(CheckLayerValid(curve) &&
-                                curve.IsVisible(acadDatabase))
-                            {
-                                curves.Add(curve.GetTransformedCopy(matrix) as Curve);
+                                if (CheckLayerValid(curve))
+                                {
+                                    curves.Add(curve.GetTransformedCopy(matrix) as Curve);
+                                }
                             }
                         }
                     }
                 }
+                return curves;
             }
-            return curves;
         }
         public override void BuildElementTexts()
         {

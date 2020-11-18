@@ -49,8 +49,7 @@ namespace ThMEPEngineCore.Service
                 if (IsBuildElementBlockReference(blockReference))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                    if (IsBuildElementBlock(blockTableRecord) &&
-                        blockReference.IsVisible(acadDatabase))
+                    if (IsBuildElementBlock(blockTableRecord))
                     {
                         foreach (var objId in blockTableRecord)
                         {
@@ -61,8 +60,7 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference() &&
-                                    blockObj.IsVisible(acadDatabase))
+                                if (IsBuildElementBlockReference(blockObj))
                                 {
                                     if (CheckLayerValid(blockObj) && 
                                         ThClosestoolLayerManager.IsClosetoolBlockName(blockObj.Name))
