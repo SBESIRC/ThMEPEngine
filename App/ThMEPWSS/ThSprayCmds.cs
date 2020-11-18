@@ -244,6 +244,7 @@ namespace ThMEPWSS
             var dxfNames = new string[]
             {
                 RXClass.GetClass(typeof(Line)).DxfName,
+                RXClass.GetClass(typeof(Polyline)).DxfName
             };
             var filter = ThSelectionFilterTool.Build(dxfNames);
             var result = Active.Editor.GetSelection(options, filter);
@@ -252,7 +253,7 @@ namespace ThMEPWSS
                 return;
             }
 
-            List<Line> lines = new List<Line>();
+            List<Curve> lines = new List<Curve>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 foreach (ObjectId frame in result.Value.GetObjectIds())
