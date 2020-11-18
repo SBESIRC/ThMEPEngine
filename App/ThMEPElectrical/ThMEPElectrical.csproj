@@ -115,6 +115,7 @@
     <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
+    <Compile Include="ThLaneLineSimplifier.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

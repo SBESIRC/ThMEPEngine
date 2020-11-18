@@ -115,26 +115,5 @@ namespace ThMEPEngineCore.Test
                 }
             }
         }
-
-        [CommandMethod("TIANHUACAD", "ThLineProcessing", CommandFlags.Modal)]
-        public void ThLineProcessing()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var objs = new DBObjectCollection();
-                result.Value.GetObjectIds().ForEach(o => objs.Add(acadDatabase.Element<Curve>(o)));
-                var lines = ThMEPLineExtension.LineSimplifier(objs, 20.0, 2.0, Math.PI / 180.0);
-                lines.ForEach(o =>
-                {
-                    o.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(o);
-                });
-            }
-        }
     }
 }

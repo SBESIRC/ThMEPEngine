@@ -10,7 +10,6 @@ namespace ThMEPEngineCore.Algorithm
 {
     public static class ThMEPLineExtension
     {
-        // 针对通风管道的lines处理
         public static List<Line> LineSimplifier(DBObjectCollection curves, double DistGap2Extend, double DistGap2Merge, double AngleTolerance)
         {
             // 将多段线炸开，保留所有Line(长度大于10.0mm)
