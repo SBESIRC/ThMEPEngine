@@ -194,30 +194,6 @@ namespace ThCADCore.NTS
             return GeometryCombiner.Combine(geometries);
         }
 
-        public static DBObjectCollection Merge(this DBObjectCollection lines)
-        {
-            var merger = new LineMerger();
-            merger.Add(lines.ToNTSNodedLineStrings());
-            var results = new DBObjectCollection();
-            foreach (var geometry in merger.GetMergedLineStrings())
-            {
-                if (geometry is LineString lineString)
-                {
-                    // 合并后的图元需要刷成合并前的图元的属性
-                    // 假设合并的图元都有相同的属性
-                    // 这里用集合中的第一个图元“刷”到合并后的图元
-                    var result = lineString.ToDbPolyline();
-                    result.SetPropertiesFrom(lines[0] as Entity);
-                    results.Add(result);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return results;
-        }
-
         public static DBObjectCollection ToDbCollection(this Geometry geometry)
         {
             return geometry.ToDbObjects().ToCollection<DBObject>();
