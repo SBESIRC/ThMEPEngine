@@ -33,28 +33,20 @@ namespace ThMEPEngineCore.CAD
             return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
         }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
-            Point3d secondSp, Point3d secondEp,double tolerance= 1.0)
+            Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
         {
-            Vector3d firstVec = firstSp.GetVectorTo(firstEp);
-            Vector3d secondVec = secondSp.GetVectorTo(secondEp);
-            if (firstVec.IsParallelToEx(secondVec))
-            {
-                Plane plane = new Plane(firstSp, firstVec);
-                Matrix3d worldToPlane = Matrix3d.WorldToPlane(plane);
-                Point3d newSecondSp = secondSp.TransformBy(worldToPlane);
-                Point3d newSecondEp = secondEp.TransformBy(worldToPlane);
-                plane.Dispose();
-                if (
-                    Math.Abs(newSecondSp.X)<= tolerance && 
-                    Math.Abs(newSecondSp.Y) <= tolerance &&
-                    Math.Abs(newSecondEp.X) <= tolerance &&
-                    Math.Abs(newSecondEp.Y) <= tolerance
-                    )
-                {
-                    return true;
-                }
-            }
-            return false;
+            return
+                IsCollinearEx(firstSp, firstEp, secondSp, tolerance) &&
+                IsCollinearEx(firstSp, firstEp, secondEp, tolerance);
+        }
+        public static bool IsCollinearEx(Point3d firstPt, Point3d secondPt,
+            Point3d thirdPt, double tolerance = 1.0)
+        {
+            Vector3d firstVec = firstPt.GetVectorTo(secondPt);
+            Vector3d secondVec = firstPt.GetVectorTo(thirdPt);
+            double angle = firstVec.GetAngleTo(secondVec);
+            double value = firstVec.Length * secondVec.Length * Math.Sin(angle);
+            return Math.Abs(value) <= (firstVec.Length * tolerance);
         }
         public static bool IsOverlapEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
