@@ -42,10 +42,6 @@ namespace ThMEPEngineCore.Engine
                             Elements.Add(ThIfcWall.Create(outline));
                         }
                     }
-                    else if(o is MPolygon mPolygon)
-                    {
-                        // Elements.Add(ThIfcWall.Create(mPolygon));
-                    }
                 });
             }
         }
