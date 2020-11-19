@@ -174,7 +174,7 @@ namespace TianHua.Plumbing.UI
             {
                 ThWSSUIService.Instance.Parameter.hazardLevel = ThMEPWSS.Model.HazardLevel.ThirdLevel;
             }
-            else if (ComBoxHazardLevel.Text == "严重危险级")
+            else if (ComBoxHazardLevel.Text == "严重危险级、仓库危险级")
             {
                 ThWSSUIService.Instance.Parameter.hazardLevel = ThMEPWSS.Model.HazardLevel.SeriousLevel;
             }

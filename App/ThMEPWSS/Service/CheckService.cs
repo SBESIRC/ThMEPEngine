@@ -131,7 +131,7 @@ namespace ThMEPWSS.Service
             LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
             if (ltr != null)
             {
-                if (!ltr.IsLocked && !ltr.IsFrozen && !ltr.IsOff)
+                if (ltr.IsLocked && ltr.IsFrozen && ltr.IsOff)
                 {
                     return true;
                 }

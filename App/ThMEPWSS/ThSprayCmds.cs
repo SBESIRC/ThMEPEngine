@@ -258,7 +258,7 @@ namespace ThMEPWSS
             {
                 foreach (ObjectId frame in result.Value.GetObjectIds())
                 {
-                    var plBack = acdb.Element<Line>(frame);
+                    var plBack = acdb.Element<Curve>(frame);
                     lines.Add(plBack);
                 }
             }
