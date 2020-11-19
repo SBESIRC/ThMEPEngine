@@ -44,9 +44,7 @@ namespace ThMEPEngineCore.CAD
         {
             Vector3d firstVec = firstPt.GetVectorTo(secondPt);
             Vector3d secondVec = firstPt.GetVectorTo(thirdPt);
-            double angle = firstVec.GetAngleTo(secondVec);
-            double value = firstVec.Length * secondVec.Length * Math.Sin(angle);
-            return Math.Abs(value) <= (firstVec.Length * tolerance);
+            return firstVec.CrossProduct(secondVec).Length <= firstVec.Length * tolerance;
         }
         public static bool IsOverlapEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
