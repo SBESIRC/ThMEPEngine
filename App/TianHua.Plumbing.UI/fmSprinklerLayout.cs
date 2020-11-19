@@ -6,6 +6,7 @@ using AcHelper.Commands;
 using ThMEPWSS.Service;
 using DevExpress.XtraEditors;
 using TianHua.Publics.BaseCode;
+using System.ComponentModel;
 
 namespace TianHua.Plumbing.UI
 {
@@ -15,6 +16,13 @@ namespace TianHua.Plumbing.UI
         {
             InitializeComponent();
         }
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
+        }
+
 
         private void RidApplications_SelectedIndexChanged(object sender, EventArgs e)
         {
