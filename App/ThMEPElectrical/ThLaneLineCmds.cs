@@ -12,7 +12,7 @@ namespace ThMEPElectrical
 {
     public class ThLaneLineCmds
     {
-        [CommandMethod("TIANHUACAD", "THCDX", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THTCD", CommandFlags.Modal)]
         public void ThLaneLine()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

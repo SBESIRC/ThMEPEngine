@@ -1,22 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ApplicationPackage 
-SchemaVersion="1.0"
-AppVersion="1.0.0"
-Name="TIANHUA MEP Toolset"
-NameChs="天华 MEP 工具集"
-Description="TIANHUA MEP Toolset for AutoCAD"
-DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量"
-Author="TIANHUA AI Research Center" 
-AuthorChs="天华AI研究中心"
-ProductCode="{CC5E48FB-AB03-450F-A1A1-894B8AC1E72B}" 
-UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
+<ApplicationPackage SchemaVersion="1.0" AppVersion="1.0.0" Name="TIANHUA MEP Toolset" NameChs="天华 MEP 工具集" Description="TIANHUA MEP Toolset for AutoCAD" DescriptionChs="天华 MEP 工具集为机电设计师提供自动化工具，提高设计效率和设计质量" Author="TIANHUA AI Research Center" AuthorChs="天华AI研究中心" ProductCode="{CC5E48FB-AB03-450F-A1A1-894B8AC1E72B}" UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}">
     <RuntimeRequirements OS="Win64" Platform="AutoCAD" SupportPathChs="./Contents/Support" />
     <CompanyDetails Name="Tianhua Architectural Design Co., Ltd" Phone="+86 21 64281588" Url="http://www.thape.com/" Email="airdcenter@thape.com.cn" />
-	<!--Assembly App, CUI, 2012 version-->
+    <!--Assembly App, CUI, 2012 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
         <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
-			<Commands GroupName="TIANHUACAD">
+            <Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
         </ComponentEntry>
@@ -25,7 +15,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
-			<Commands GroupName="TIANHUACAD">
+            <Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
         </ComponentEntry>
@@ -34,7 +24,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
-			<Commands GroupName="TIANHUACAD">
+            <Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
         </ComponentEntry>
@@ -43,7 +33,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPCui.dll" LoadOnAutoCADStartup="true" LoadOnCommandInvocation="false" AppDescription="Assembly app for CUI" AppName="ThMEPCui" AppType=".NET">
-			<Commands GroupName="TIANHUACAD">
+            <Commands GroupName="TIANHUACAD">
                 <Command Local="THHLP" Global="THHLP" />
             </Commands>
         </ComponentEntry>
@@ -53,7 +43,6 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
         <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
@@ -66,7 +55,6 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
@@ -79,7 +67,6 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
@@ -92,7 +79,6 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
-                <Command Local="THCDX" Global="THCDX" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
@@ -100,10 +86,46 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
             </Commands>
         </ComponentEntry>
     </Components>
+    <!--Assembly App, ThMEPElectrical, 2012 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
+        <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THTCD" Global="THTCD" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPElectrical, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THTCD" Global="THTCD" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPElectrical, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THTCD" Global="THTCD" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPElectrical, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPElectrical.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ThMEPElectrical" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THTCD" Global="THTCD" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
     <!--Assembly App, Electrical.UI, 2012 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
-        <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ElectricalUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
             </Commands>
@@ -112,7 +134,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <!--Assembly App, Electrical.UI, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ElectricalUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
             </Commands>
@@ -121,7 +143,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <!--Assembly App, Electrical.UI, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ElectricalUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
             </Commands>
@@ -130,7 +152,7 @@ UpgradeCode="{4E78C925-EFFF-4EB9-A986-5C0F35058CFC}" >
     <!--Assembly App, Electrical.UI, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical" AppName="ElectricalUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
             </Commands>
