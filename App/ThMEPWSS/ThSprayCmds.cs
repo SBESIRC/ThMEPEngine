@@ -278,7 +278,10 @@ namespace ThMEPWSS
                 .ToList();
 
             LayoutSprayByLineService layoutSprayByLineService = new LayoutSprayByLineService();
-            layoutSprayByLineService.LayoutSprayByLine(handleLines, 3000);
+            var layoutPts = layoutSprayByLineService.LayoutSprayByLine(handleLines, 3000);
+
+            //放置喷头
+            InsertSprayService.InsertSprayBlock(layoutPts, SprayType.SPRAYDOWN);
         }
 
         [CommandMethod("TIANHUACAD", "THPLZX", CommandFlags.Modal)]

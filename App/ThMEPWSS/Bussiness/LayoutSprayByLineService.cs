@@ -11,19 +11,13 @@ namespace ThMEPWSS.Bussiness
 {
     public class LayoutSprayByLineService
     {
-        public void LayoutSprayByLine(List<Line> lines, double distance)
+        public List<Point3d> LayoutSprayByLine(List<Line> lines, double distance)
         {
             Dictionary<Line, bool> usefulLines = lines.ToDictionary(x => x, y => true);
             var line = usefulLines.First().Key;
             var layoutPt = CalSprayPoint(line, usefulLines, line.StartPoint, 0, distance);
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var pt in layoutPt)
-                {
-                    var ss = new Circle(pt, Vector3d.ZAxis, 400);
-                    db.ModelSpace.Add(ss);
-                }
-            }
+
+            return layoutPt;
         }
 
         /// <summary>

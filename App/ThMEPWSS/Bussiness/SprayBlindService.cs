@@ -86,13 +86,12 @@ namespace ThMEPWSS.Bussiness
                 var area = sprayRadii.Intersection(new DBObjectCollection() { polyline })
                     .Cast<Polyline>()
                     .Where(y => y.Contains(spray.Position))
-                    .First()
+                    .FirstOrDefault()
                     .Difference(intersectPolys.ToCollection())
                     .Cast<Polyline>()
                     .Where(y => y.Contains(spray.Position))
                     .SelectMany(z => z.Buffer(1).Cast<Polyline>())
                     .FirstOrDefault();
-
                 if (area != null)
                 {
                     var obstacle = holes.Where(x => area.Contains(x)).ToList();
