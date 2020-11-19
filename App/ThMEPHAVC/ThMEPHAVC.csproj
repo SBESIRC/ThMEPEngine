@@ -24,9 +24,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Duct\ThDraught.cs" />
+    <Compile Include="Duct\ThDraughtDesignEngine.cs" />
+    <Compile Include="Duct\ThDuctDesignEngine.cs" />
     <Compile Include="Duct\ThDuctGraphAnalysisEngine.cs" />
     <Compile Include="Duct\ThDuctGraphEngine.cs" />
     <Compile Include="Duct\ThDuctLineSimplifier.cs" />
+    <Compile Include="Duct\ThGraphExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />
