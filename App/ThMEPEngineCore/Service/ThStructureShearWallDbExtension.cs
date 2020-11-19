@@ -75,15 +75,12 @@ namespace ThMEPEngineCore.Service
                                 if (IsBuildElement(hatch) && 
                                     CheckLayerValid(hatch))
                                 {
-                                    var mpolygons = hatch.ToMPolygons();
-                                    foreach(var item in mpolygons)
+                                    var newHatch= hatch.GetTransformedCopy(matrix) as Hatch;
+                                    var polygons = newHatch.ToPolygons();
+                                    foreach(var polygon in polygons)
                                     {
-                                        if(item is MPolygon mPolygon)
-                                        {
-                                            var newMPolygon = mPolygon.GetTransformedCopy(matrix) as MPolygon;
-                                            List<Polyline> gapOutlines = ThMPolygonToGapPolylineService.ToGapPolyline(newMPolygon);
-                                            gapOutlines.ForEach(o => ents.Add(o));
-                                        }
+                                        List<Polyline> gapOutlines = ThPolygonToGapPolylineService.ToGapPolyline(polygon);
+                                        gapOutlines.ForEach(o => ents.Add(o));
                                     }
                                 }
                             }

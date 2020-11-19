@@ -15,26 +15,30 @@ using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Algorithm
 {
-    public class ThMPolygonToGapPolylineService
+    public class ThPolygonToGapPolylineService
     {
         ///目前主要用于支撑对剪力墙带一个洞的裁剪
         ///暂时将线延伸设为5mm,之前设1,2mm有没成功的情况
         ///打断点偏移的距离要大于线延伸的距离
         private double PointOffsetDistance = 10.0; 
         private const double LineExtendDistance = 5.0;        
-        private MPolygon CurrentMPolygon { get; set; }
-        private ThMPolygonToGapPolylineService(MPolygon mPolygon)
+        private Polygon CurrentPolygon { get; set; }
+        private ThPolygonToGapPolylineService(Polygon polygon)
         {
-            CurrentMPolygon = mPolygon;
+            CurrentPolygon = polygon;
             if(PointOffsetDistance<= LineExtendDistance)
             {
                 PointOffsetDistance=LineExtendDistance + 5.0;
             }
         }
-        public static List<Polyline> ToGapPolyline(MPolygon mPolygon)
+        public static List<Polyline> ToGapPolyline(Polygon polygon)
         {
             List<Polyline> gapPolylines = new List<Polyline>();
-            var intstance = new ThMPolygonToGapPolylineService(mPolygon);
+            if(polygon==null || polygon.Shell==null)
+            {
+                return gapPolylines;
+            }
+            var intstance = new ThPolygonToGapPolylineService(polygon);
             var gapPolyline = intstance.ToGapPolyline();
             if(gapPolyline != null && gapPolyline.Area>0.0)
             {
@@ -44,8 +48,9 @@ namespace ThMEPEngineCore.Algorithm
         }
         private Polyline ToGapPolyline()
         {
-            var shell= GetMPolygonShell(CurrentMPolygon);
-            var holes = GetMPolygonHoles(CurrentMPolygon);
+            var shell= CurrentPolygon.Shell.ToDbPolyline();
+            var holes = new List<Polyline>();
+            CurrentPolygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
             if (holes.Count == 0)
             {
                 return shell;
@@ -64,48 +69,7 @@ namespace ThMEPEngineCore.Algorithm
                 throw new NotSupportedException();
             }
         }
-        private Polyline GetMPolygonShell(MPolygon mPolygon)
-        {
-            Polyline shell = new Polyline();
-            for (int i=0;i< mPolygon.NumMPolygonLoops;i++)
-            {
-                var loopDirection = mPolygon.GetLoopDirection(i);
-                if(loopDirection== LoopDirection.Exterior)
-                {
-                    var mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
-                    shell= ToPolyline(mPolygonLoop);
-                    break;
-                }
-            }
-            return shell;
-        }
-        private List<Polyline> GetMPolygonHoles(MPolygon mPolygon)
-        {
-            List<Polyline> holes = new List<Polyline>();
-            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
-            {
-                var loopDirection = mPolygon.GetLoopDirection(i);
-                if (loopDirection == LoopDirection.Interior)
-                {
-                    var mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
-                    holes.Add(ToPolyline(mPolygonLoop));
-                }
-            }
-            return holes;
-        }
-        private Polyline ToPolyline(MPolygonLoop mPolygonLoop)
-        {
-            Polyline polyline = new Polyline()
-            {
-                Closed = true
-            };
-            for (int i = 0; i < mPolygonLoop.Count; i++)
-            {
-                var bulgeVertex = mPolygonLoop[i];
-                polyline.AddVertexAt(i, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
-            }
-            return polyline;
-        }
+
         private Polyline BuildOutermostPolyline(Polyline outerPolyline, Polyline innerPolyline)
         {            
             List<Line> lines = new List<Line>();

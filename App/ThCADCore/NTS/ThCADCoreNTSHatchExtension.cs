@@ -39,13 +39,12 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
         }
-        public static DBObjectCollection ToMPolygons(this Hatch hatch)
+        public static List<Polygon> ToPolygons(this Hatch hatch)
         {
-            var objs = new DBObjectCollection();
-
+            var objs = new List<Polygon>();
             hatch.ToNTSMultiPolygon().Geometries
                 .Cast<Polygon>()
-                .ForEach(o => objs.Add(o.ToMPolygon()));
+                .ForEach(o => objs.Add(o));
             return objs;
         }
     }

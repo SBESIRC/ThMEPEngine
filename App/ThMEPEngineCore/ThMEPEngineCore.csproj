@@ -10,8 +10,10 @@
     <RootNamespace>ThMEPEngineCore</RootNamespace>
     <AssemblyName>ThMEPEngineCore</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-NET45|AnyCPU'">
     <OutputPath>..\ThMEPWSS\bin\Debug-NET45\</OutputPath>
@@ -28,7 +30,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Algorithm\ThMPolygonToGapPolylineService.cs" />
+    <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
     <Compile Include="Algorithm\ThMEPFrameService.cs" />
     <Compile Include="Algorithm\ThMEPNTSExtension.cs" />
