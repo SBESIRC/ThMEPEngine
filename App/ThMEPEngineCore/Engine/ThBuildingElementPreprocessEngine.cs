@@ -36,7 +36,10 @@ namespace ThMEPEngineCore.Engine
         {
             return Math.Abs(beam.Width - other.Width) <= ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE.EqualPoint;
         }
-
+        protected bool SameHeight(ThIfcLineBeam beam, ThIfcLineBeam other)
+        {
+            return Math.Abs(beam.Height - other.Height) <= ThMEPEngineCoreCommon.GEOMETRY_TOLERANCE.EqualPoint;
+        }
         protected List<ThIfcLineBeam> MergeBeams(List<ThIfcLineBeam> beams)
         {
             var results = new List<ThIfcLineBeam>();

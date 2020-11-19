@@ -55,7 +55,7 @@ namespace ThMEPEngineCore.Engine
                 startBeams = FilterCollinearBeams(thIfcLineBeam, thIfcLineBeam.StartPoint);
                 startBeams = startBeams
                     .Where(o => IsOutsideOfBeam(thIfcLineBeam, o))
-                    .Where(o => Math.Abs(o.Width - thIfcLineBeam.Width) <= 1.0)
+                    .Where(o => SameWidth(o, thIfcLineBeam) && SameHeight(o, thIfcLineBeam))
                     .OrderBy(o => thIfcLineBeam.StartPoint.DistanceTo(o.EndPoint)).ToList();
             }
             var endComponents = GetPortLinkObjs(thIfcLineBeam, thIfcLineBeam.EndPoint);
@@ -65,7 +65,7 @@ namespace ThMEPEngineCore.Engine
                 endBeams = FilterCollinearBeams(thIfcLineBeam, thIfcLineBeam.EndPoint);
                 endBeams = endBeams
                     .Where(o => IsOutsideOfBeam(thIfcLineBeam, o))
-                    .Where(o => Math.Abs(o.Width - thIfcLineBeam.Width) <= 1.0)
+                    .Where(o => SameWidth(o, thIfcLineBeam) && SameHeight(o, thIfcLineBeam))
                     .OrderBy(o => thIfcLineBeam.EndPoint.DistanceTo(o.StartPoint)).ToList();
             }
             if (startBeams.Count > 0 || endBeams.Count > 0)
@@ -77,7 +77,6 @@ namespace ThMEPEngineCore.Engine
                 AddBeams.Add(newBeam);
             }
         }
-
         private ThIfcLineBeam Join(ThIfcLineBeam current, ThIfcLineBeam startLink, ThIfcLineBeam endLink)
         {
             double startExtendDis = startLink != null ? current.StartPoint.DistanceTo(startLink.EndPoint) : 0.0;
