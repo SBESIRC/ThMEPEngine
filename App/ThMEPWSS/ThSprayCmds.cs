@@ -1,11 +1,12 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
+using NFox.Cad;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
-using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
@@ -13,18 +14,27 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.Bussiness;
+using ThMEPEngineCore.Progress;
 using ThMEPWSS.Bussiness.LayoutBussiness;
 using ThMEPWSS.Service;
 using ThWSS;
 using ThWSS.Bussiness;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Extension;
-using System;
+using Catel.IoC;
 
 namespace ThMEPWSS
 {
     public class ThSprayCmds
     {
+        private IProgressHandler ProgressHandler
+        {
+            get
+            {
+                return ServiceLocator.Default.ResolveType<IProgressHandler>();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THPLPT", CommandFlags.Modal)]
         public void ThAutomaticLayoutSpray()
         {
@@ -62,6 +72,7 @@ namespace ThMEPWSS
 
                 CalHolesService calHolesService = new CalHolesService();
                 var holeDic = calHolesService.CalHoles(polylines);
+                var meter = new ThMEPProgressMeter(ProgressHandler);
                 foreach (var holeInfo in holeDic)
                 {
                     var plFrame = holeInfo.Key;
@@ -101,7 +112,9 @@ namespace ThMEPWSS
                     //打印喷淋点盲区
                     CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
                     calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
+                    meter.CurrentPercent = 100;
                 }
+                meter.Reset();
             }
         }
 

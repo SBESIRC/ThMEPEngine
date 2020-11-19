@@ -189,5 +189,8 @@
       </ItemGroup>
     </When>
   </Choose>
+  <ItemGroup>
+    <PackageReference Include="Catel.Core" Version="5.12.10" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
