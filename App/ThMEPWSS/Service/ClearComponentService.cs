@@ -40,6 +40,36 @@ namespace ThMEPWSS.Service
         }
 
         /// <summary>
+        /// 删除走道线喷淋图块
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static void ClearSprayByLine(this List<Line> lines)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
+                var objs = new DBObjectCollection();
+                var sprays = acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => o.Layer == ThWSSCommon.SprayLayerName);
+                sprays.ForEach(x => objs.Add(x));
+
+                var crossingSprays = lines.Select(x => x.ToPolyline()).SelectMany(x =>
+                {
+                    ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    return thCADCoreNTSSpatialIndex.SelectFence(x).Cast<BlockReference>().ToList();
+                }).Distinct();
+                foreach (BlockReference spray in crossingSprays)
+                {
+                    spray.UpgradeOpen();
+                    spray.Erase();
+                }
+            }
+        }
+
+        /// <summary>
         /// 删除喷淋布置线
         /// </summary>
         /// <param name="polyline"></param>

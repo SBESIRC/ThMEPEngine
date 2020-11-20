@@ -201,6 +201,7 @@
             this.ComBoxDeadZone.Size = new System.Drawing.Size(158, 20);
             this.ComBoxDeadZone.StyleController = this.layoutControl1;
             this.ComBoxDeadZone.TabIndex = 12;
+            this.ComBoxDeadZone.SelectedIndexChanged += new System.EventHandler(this.ComBoxDeadZone_SelectedIndexChanged);
             // 
             // RidApplications
             // 
@@ -229,6 +230,7 @@
             this.CheckGirder.TabIndex = 10;
             this.CheckGirder.Text = "考虑梁";
             this.CheckGirder.UseVisualStyleBackColor = true;
+            this.CheckGirder.CheckedChanged += new System.EventHandler(this.CheckGirder_CheckedChanged);
             // 
             // RidSprinklerType
             // 
@@ -246,6 +248,7 @@
             this.RidSprinklerType.Size = new System.Drawing.Size(158, 24);
             this.RidSprinklerType.StyleController = this.layoutControl1;
             this.RidSprinklerType.TabIndex = 6;
+            this.RidSprinklerType.SelectedIndexChanged += new System.EventHandler(this.RidSprinklerType_SelectedIndexChanged);
             // 
             // RidSprinklerScope
             // 
@@ -262,6 +265,7 @@
             this.RidSprinklerScope.Size = new System.Drawing.Size(158, 24);
             this.RidSprinklerScope.StyleController = this.layoutControl1;
             this.RidSprinklerScope.TabIndex = 5;
+            this.RidSprinklerScope.SelectedIndexChanged += new System.EventHandler(this.RidSprinklerScope_SelectedIndexChanged);
             // 
             // ComBoxHazardLevel
             // 
@@ -280,6 +284,7 @@
             this.ComBoxHazardLevel.Size = new System.Drawing.Size(158, 20);
             this.ComBoxHazardLevel.StyleController = this.layoutControl1;
             this.ComBoxHazardLevel.TabIndex = 4;
+            this.ComBoxHazardLevel.SelectedIndexChanged += new System.EventHandler(this.ComBoxHazardLevel_SelectedIndexChanged);
             // 
             // layoutControlItem12
             // 

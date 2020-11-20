@@ -223,6 +223,12 @@ namespace ThMEPWSS
                     walls.ForEach(x => x.TransformBy(matrix.Inverse()));
                     holes.AddRange(walls);
 
+                    //不考虑梁
+                    if (!ThWSSUIService.Instance.Parameter.ConsiderBeam)
+                    {
+                        beams = new List<Polyline>();
+                    }
+
                     //计算可布置区域
                     var layoutAreas = CreateLayoutAreaService.GetLayoutArea(plFrame, beams, columns, holes, 300);
 
@@ -277,6 +283,10 @@ namespace ThMEPWSS
                 })
                 .ToList();
 
+            //清除原有喷淋
+            handleLines.ClearSprayByLine();
+
+            //计算喷淋布置点
             LayoutSprayByLineService layoutSprayByLineService = new LayoutSprayByLineService();
             var layoutPts = layoutSprayByLineService.LayoutSprayByLine(handleLines, 3000);
 
@@ -433,9 +443,14 @@ namespace ThMEPWSS
         /// <param name="acdb"></param>
         private bool CalSprayBlindArea(Polyline plFrame, List<Polyline> holes, AcadDatabase acdb, Matrix3d matrix)
         {
+            var dxfNames = new string[]
+            {
+                ThWSSCommon.TZ_SprayName,
+                RXClass.GetClass(typeof(BlockReference)).DxfName,
+            };
             var filterlist = OpFilter.Bulid(o =>
             o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.SprayLayerName &
-            o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(BlockReference)).DxfName);
+            o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
 
             var dBObjectCollection = new DBObjectCollection();
             var allSprays = Active.Editor.SelectAll(filterlist);

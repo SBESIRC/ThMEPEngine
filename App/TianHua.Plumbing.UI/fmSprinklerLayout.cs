@@ -84,9 +84,6 @@ namespace TianHua.Plumbing.UI
             //聚焦到CAD
             SetFocusToDwgView();
 
-            //获取更改信息
-            CreateChangedInfo();
-
             //发送命令
             CommandHandlerBase.ExecuteFromCommandLine(false, "THPLPT");
         }
@@ -104,9 +101,6 @@ namespace TianHua.Plumbing.UI
             //聚焦到CAD
             SetFocusToDwgView();
 
-            //获取更改信息
-            CreateChangedInfo();
-
             //发送命令
             CommandHandlerBase.ExecuteFromCommandLine(false, "THPLMQ");
         }
@@ -116,9 +110,6 @@ namespace TianHua.Plumbing.UI
             //聚焦到CAD
             SetFocusToDwgView();
 
-            //获取更改信息
-            CreateChangedInfo();
-
             //发送命令
             CommandHandlerBase.ExecuteFromCommandLine(false, "THPLKQ");
         }
@@ -127,9 +118,6 @@ namespace TianHua.Plumbing.UI
         {
             //聚焦到CAD
             SetFocusToDwgView();
-
-            //获取更改信息
-            CreateChangedInfo();
 
             //喷头间距
             ThWSSUIService.Instance.Parameter.distance = Convert.ToDouble(TxtSpacing.Text);
@@ -148,11 +136,24 @@ namespace TianHua.Plumbing.UI
 
         private void CreateChangedInfo()
         {
-            ComBoxHazardLevel_SelectedIndexChanged();       //危险等级
-            RidSprinklerScope_SelectedIndexChanged();       //喷头覆盖范围
-            RidSprinklerType_SelectedIndexChanged();        //上喷下喷
-            CheckGirder_CheckedChanged();                   //是否考虑梁
-            ComBoxDeadZone_SelectedIndexChanged();          //盲区表达方式
+            ComBoxHazardLevel_SelectedIndexChanged(null, null);       //危险等级
+            RidSprinklerScope_SelectedIndexChanged(null, null);       //喷头覆盖范围
+            RidSprinklerType_SelectedIndexChanged(null, null);        //上喷下喷
+            CheckGirder_CheckedChanged(null, null);                   //是否考虑梁
+            ComBoxDeadZone_SelectedIndexChanged(null, null);          //盲区表达方式
+        }
+
+        /// <summary>
+        /// 聚焦到CAD
+        /// </summary>
+         private void SetFocusToDwgView()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
         }
 
         /// <summary>
@@ -160,7 +161,7 @@ namespace TianHua.Plumbing.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ComBoxHazardLevel_SelectedIndexChanged()
+        private void ComBoxHazardLevel_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ComBoxHazardLevel.Text == "轻危险级")
             {
@@ -179,13 +180,13 @@ namespace TianHua.Plumbing.UI
                 ThWSSUIService.Instance.Parameter.hazardLevel = ThMEPWSS.Model.HazardLevel.SeriousLevel;
             }
         }
-        
+
         /// <summary>
         /// 喷头覆盖范围
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void RidSprinklerScope_SelectedIndexChanged()
+        private void RidSprinklerScope_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (this.RidSprinklerScope.SelectedIndex == 0)
             {
@@ -202,7 +203,7 @@ namespace TianHua.Plumbing.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void RidSprinklerType_SelectedIndexChanged()
+        private void RidSprinklerType_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (RidSprinklerType.SelectedIndex == 0)
             {
@@ -219,7 +220,7 @@ namespace TianHua.Plumbing.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void CheckGirder_CheckedChanged()
+        private void CheckGirder_CheckedChanged(object sender, EventArgs e)
         {
             if (CheckGirder.Checked)
             {
@@ -236,7 +237,7 @@ namespace TianHua.Plumbing.UI
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ComBoxDeadZone_SelectedIndexChanged()
+        private void ComBoxDeadZone_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (ComBoxDeadZone.Text == "矩形")
             {
@@ -254,19 +255,6 @@ namespace TianHua.Plumbing.UI
             {
                 ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.BigCircle;
             }
-        }
-
-        /// <summary>
-        /// 聚焦到CAD
-        /// </summary>
-         private void SetFocusToDwgView()
-        {
-            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
-#if ACAD2012
-            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
-#else
-            Active.Document.Window.Focus();
-#endif
         }
     }
 }
