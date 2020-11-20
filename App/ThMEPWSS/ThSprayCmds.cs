@@ -445,7 +445,8 @@ namespace ThMEPWSS
         {
             var dxfNames = new string[]
             {
-                ThWSSCommon.TZ_SprayName,
+                ThWSSCommon.TZ_SprayName_16,
+                ThWSSCommon.TZ_SprayName_12,
                 RXClass.GetClass(typeof(BlockReference)).DxfName,
             };
             var filterlist = OpFilter.Bulid(o =>

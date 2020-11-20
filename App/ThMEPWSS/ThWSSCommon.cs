@@ -15,6 +15,7 @@ namespace ThWSS
         public static readonly string Layout_Area_LayerName = "AI-Sprinkler-可布置区域";            //可布置区域图层
         public static readonly string PipeLine_LayerName = "AI-Sprinkler-Blind";                    //管道图层
         public static readonly string ParkingLineLayer = "AD-SIGN";                                 //车位线图层
-        public static readonly string TZ_SprayName = "TCH_EQUIPMENT";                               //天正喷头自定义实体名
+        public static readonly string TZ_SprayName_16 = "TCH_EQUIPMENT";                            //天正喷头自定义实体名_16
+        public static readonly string TZ_SprayName_12 = "TCH EQUIPMENT";                            //天正喷头自定义实体名_12
     }
 }
