@@ -266,7 +266,7 @@ namespace ThMEPWSS
             //预处理线
             DBObjectCollection objs = new DBObjectCollection();
             lines.ForEach(x => objs.Add(x));
-            var handleLines = ThMEPLineExtension.LineSimplifier(objs, 20.0, 2.0, Math.PI / 180.0);
+            var handleLines = ThMEPLineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI / 180.0);
             objs = new DBObjectCollection();
             handleLines.ForEach(x => objs.Add(x));
             handleLines = objs.ToNTSNodedLineStrings().ToDbObjects()
