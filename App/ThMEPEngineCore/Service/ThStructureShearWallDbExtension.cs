@@ -79,6 +79,9 @@ namespace ThMEPEngineCore.Service
                                     var polygons = newHatch.ToPolygons();
                                     foreach(var polygon in polygons)
                                     {
+                                        // 把“甜甜圈”式的带洞的Polygon（有且只有洞）转成不带洞的Polygon
+                                        // 在区域划分时，剪力墙是“不可以用”区域，剪力墙的外部和内部都是“可用区域”
+                                        // 通过这种处理，将剪力墙的外部和内部区域联通起来，从而获取正确的可用区域
                                         List<Polyline> gapOutlines = ThPolygonToGapPolylineService.ToGapPolyline(polygon);
                                         gapOutlines.ForEach(o => ents.Add(o));
                                     }
