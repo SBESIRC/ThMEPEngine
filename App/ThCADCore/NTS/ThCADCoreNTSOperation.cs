@@ -25,7 +25,7 @@ namespace ThCADCore.NTS
             var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
             {
                 JoinStyle = NTSJoinStyle.Mitre,
-                EndCapStyle = EndCapStyle.Square,
+                EndCapStyle = EndCapStyle.Flat,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
