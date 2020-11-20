@@ -115,5 +115,29 @@ namespace ThMEPEngineCore.Test
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THLineSimplifer", CommandFlags.Modal)]
+        public void THLineSimplifer()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+                var lines = ThMEPLineExtension.LineSimplifier(objs, 5.0, 20.0, 2.0, Math.PI / 180.0);
+                foreach (var obj in lines)
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
     }
 }

@@ -10,10 +10,23 @@ namespace ThMEPEngineCore.Algorithm
 {
     public static class ThMEPLineExtension
     {
-        public static List<Line> LineSimplifier(DBObjectCollection curves, double DistGap2Extend, double DistGap2Merge, double AngleTolerance)
+        public static List<Line> LineSimplifier(DBObjectCollection dBObjectCollection, double ArcChord, double DistGap2Extend, double DistGap2Merge, double AngleTolerance)
         {
             // 将多段线炸开，保留所有Line(长度大于10.0mm)
-            var lines = ExplodeCurves(curves);
+            var curves = ExplodeCurves(dBObjectCollection);
+            var lines = new List<Line>();
+            var arcs = new List<Arc>();
+            curves.ForEach(o => 
+            {
+                if(o is Line l)
+                {
+                    lines.Add(l);
+                } 
+                else
+                {
+                    arcs.Add(o as Arc);
+                }
+            });
 
             // z归零
             var lines_zTo0 = ProjectToXY(lines);
@@ -29,19 +42,34 @@ namespace ThMEPEngineCore.Algorithm
             // cross - 交叉（未延伸）
             // cross-extend - 延伸后交叉
             var crossedLines = LineCross(mergedLines, DistGap2Extend, AngleTolerance);
-            return crossedLines;
+
+            var results = new List<Line>();
+            results.AddRange(crossedLines);
+            // arc打成多段线
+            arcs.ForEach(o => 
+            {
+                
+                var polyline = o.TessellateArcWithChord(ArcChord);
+                var entitySet = new DBObjectCollection();
+                polyline.Explode(entitySet);
+                foreach(var obj in entitySet)
+                {
+                    results.Add(obj as Line);
+                }
+            });
+            return results;
         }
 
-        // 将输入的DBObjectCollection的线炸开，只提取出所有line
-        public static List<Line> ExplodeCurves(DBObjectCollection curves)
+        // 将输入的DBObjectCollection的线炸开，只提取出所有line和arc
+        public static List<Curve> ExplodeCurves(DBObjectCollection curves)
         {
-            var objs = new List<Line>();
+            var objs = new List<Curve>();
             foreach (Curve curve in curves)
             {
+                const double lengthThreshold = 10.0;
                 if (curve is Line line)
                 {
                     // 剔除过短线段
-                    const double lengthThreshold = 10.0;
                     if (line.Length > lengthThreshold)
                     {
                         objs.Add(line.WashClone() as Line);
@@ -55,7 +83,10 @@ namespace ThMEPEngineCore.Algorithm
                 }
                 else if (curve is Arc arc)
                 {
-                    throw new NotSupportedException();
+                    if (arc.Length > lengthThreshold)
+                    {
+                        objs.Add(arc);
+                    }
                 }
                 else
                 {
@@ -302,7 +333,6 @@ namespace ThMEPEngineCore.Algorithm
                     lists_update.Add(t);
                 }
             });
-            //return lists_update.OrderBy(x => x.Item1).ThenByDescending(y => y.Item2).ToList();
             return lists_update;
         }
 
