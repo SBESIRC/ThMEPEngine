@@ -83,15 +83,19 @@ namespace ThMEPWSS.Bussiness
                 
                 var intersectPolys = holes.Where(x => sprayRadii.Intersects(x)).ToList();
 
+                //计算真实的保护区域
                 var area = sprayRadii.Intersection(new DBObjectCollection() { polyline })
                     .Cast<Polyline>()
                     .Where(y => y.Contains(spray.Position))
-                    .FirstOrDefault()
-                    .Difference(intersectPolys.ToCollection())
+                    .FirstOrDefault();
+                if (area != null)
+                {
+                    area = area.Difference(intersectPolys.ToCollection())
                     .Cast<Polyline>()
                     .Where(y => y.Contains(spray.Position))
                     .SelectMany(z => z.Buffer(1).Cast<Polyline>())
                     .FirstOrDefault();
+                }
                 if (area != null)
                 {
                     var obstacle = holes.Where(x => area.Contains(x)).ToList();

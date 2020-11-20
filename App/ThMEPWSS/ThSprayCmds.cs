@@ -288,7 +288,7 @@ namespace ThMEPWSS
 
             //计算喷淋布置点
             LayoutSprayByLineService layoutSprayByLineService = new LayoutSprayByLineService();
-            var layoutPts = layoutSprayByLineService.LayoutSprayByLine(handleLines, 3000);
+            var layoutPts = layoutSprayByLineService.LayoutSprayByLine(handleLines, ThWSSUIService.Instance.Parameter.distance);
 
             //放置喷头
             InsertSprayService.InsertSprayBlock(layoutPts, SprayType.SPRAYDOWN);
@@ -458,11 +458,11 @@ namespace ThMEPWSS
             {
                 foreach (ObjectId obj in allSprays.Value.GetObjectIds())
                 {
-                    dBObjectCollection.Add(acdb.Element<BlockReference>(obj));
+                    dBObjectCollection.Add(acdb.Element<Entity>(obj));
                 }
             }
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
-            var sprays = thCADCoreNTSSpatialIndex.SelectWindowPolygon(plFrame).Cast<BlockReference>().ToList();
+            var sprays = thCADCoreNTSSpatialIndex.SelectWindowPolygon(plFrame).Cast<Entity>().ToList();
 
             CheckService checkService = new CheckService();
             //只需要显示出来的喷淋
@@ -478,7 +478,11 @@ namespace ThMEPWSS
                 Active.Editor.WriteMessage("\n 喷淋暂未生成");
                 return false;
             }
-            var sprayPts = sprays.Select(x => x.Position).ToList();
+            var sprayPts = sprays.Select(x =>
+            {
+                var pts = x.GeometricExtents;
+                return new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
+            }).ToList();
             CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
             calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
 

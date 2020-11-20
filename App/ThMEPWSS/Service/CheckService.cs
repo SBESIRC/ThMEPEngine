@@ -102,7 +102,7 @@ namespace ThMEPWSS.Service
         /// <param name="block"></param>
         /// <param name="maxLength"></param>
         /// <returns></returns>
-        public bool CheckSprayBlockSize(BlockReference block, double maxLength)
+        public bool CheckSprayBlockSize(Entity block, double maxLength)
         {
             var extents = block.Bounds;
             if (extents == null)
