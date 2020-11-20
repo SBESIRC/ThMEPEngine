@@ -35,7 +35,7 @@ namespace ThMEPWSS.Model
 
     public enum BlindAreaType
     {
-        Rectangle = 1000,          //矩形
+        Rectangle = 0,          //矩形
         SmallCircle = 1000,        //圆形-低
         MedianCircle = 500,       //圆形-中
         BigCircle = 200,          //圆形-高
