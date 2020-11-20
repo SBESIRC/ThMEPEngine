@@ -47,5 +47,20 @@ namespace ThCADCore.NTS
                 .ForEach(o => objs.Add(o));
             return objs;
         }
+        public static List<MPolygon> ToMPolygons(this Hatch hatch)
+        {
+            // 在AutoCAD 2012下，新创建的MPolygon还不能立即使用。
+            // 需要把创建的MPolygon添加到Database后才可以正常使用。
+            // 代码例子：
+            //  acadDatabase.ModelSpace.Add(mPolygon);
+            //  mPolygon.TransformBy(matrix);
+            //  .....
+            //  mPolygon.Erase();
+            var objs = new List<MPolygon>();
+            hatch.ToNTSMultiPolygon().Geometries
+                .Cast<Polygon>()
+                .ForEach(o => objs.Add(o.ToMPolygon()));
+            return objs;
+        }
     }
 }
