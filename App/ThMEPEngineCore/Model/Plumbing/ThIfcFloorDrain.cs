@@ -10,6 +10,7 @@ namespace ThMEPEngineCore.Model.Plumbing
 {
     public class ThIfcFloorDrain : ThIfcSanitaryTerminal
     {
+        public UseKind Use { get; set; }
         public static ThIfcFloorDrain Create(Entity entity)
         {
             return new ThIfcFloorDrain()
@@ -18,5 +19,11 @@ namespace ThMEPEngineCore.Model.Plumbing
                 Uuid = Guid.NewGuid().ToString()
             };
         }
+    }
+    public enum UseKind
+    {
+        None,
+        Toilet,
+        Balcony
     }
 }

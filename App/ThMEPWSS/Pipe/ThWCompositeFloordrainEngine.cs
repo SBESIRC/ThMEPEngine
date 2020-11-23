@@ -2,6 +2,11 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using Linq2Acad;
+using ThMEPWSS.Pipe.Model;
+
+using Dreambuild.AutoCAD;
+
 
 namespace ThMEPWSS.Pipe
 {
@@ -85,11 +90,31 @@ namespace ThMEPWSS.Pipe
             ThWToiletFloordrainEngine = thWToiletFloordrainEngine;
             ThWDeviceFloordrainEngine = thWDeviceFloordrainEngine;
         }
-        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, Polyline rainpipe, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe, List<BlockReference> tfloordrain, Polyline tboundary, BlockReference devicefloordrain)
+        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, Polyline rainpipe, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe, List<BlockReference> tfloordrain, Polyline tboundary, List<BlockReference> devicefloordrain)
         {
-            ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe);
-            ThWToiletFloordrainEngine.Run(tfloordrain, tboundary);
+            if (Farfromwashmachine(washingmachine, device, device_other))
+            {
+                ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe);
+            }
+            else
+            {
+                ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device_other, device, condensepipe);
+            }
+            //ThWToiletFloordrainEngine.Run(tfloordrain, tboundary);
             ThWDeviceFloordrainEngine.Run(rainpipe, device, condensepipe, devicefloordrain);
+            ThWDeviceFloordrainEngine.Run(rainpipe, device_other, condensepipe, devicefloordrain);
+        }
+        private bool Farfromwashmachine(BlockReference washingmachine, Polyline device, Polyline device_other)
+        { 
+            if(washingmachine.Position.DistanceTo(device.GetCenter())> washingmachine.Position.DistanceTo(device_other.GetCenter()))
+            {
+                return true;
+            }
+        else
+            {
+                return false;
+            }
+
         }
     }
 }

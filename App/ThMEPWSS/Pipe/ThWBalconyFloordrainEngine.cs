@@ -6,6 +6,7 @@ using Dreambuild.AutoCAD;
 using NFox.Cad;
 using DotNetARX;
 using ThCADExtension;
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Pipe
 {
@@ -30,11 +31,11 @@ namespace ThMEPWSS.Pipe
             Rainpipe_to_Floordrain = new Point3dCollection();
             new_circle = new Circle();
         }
-        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, Polyline rainpipe, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other,Polyline condensepipe)
+        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, Polyline rainpipe, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe)
         {
-            List<BlockReference> floordrain =Isinside(bfloordrain, bboundary);
+            List<BlockReference> floordrain = Isinside(bfloordrain, bboundary);
             int num = Washingfloordrain(floordrain, washingmachine);
-            for (int i=0;i< floordrain.Count;i++)
+            for (int i = 0; i < floordrain.Count; i++)
             {
                 if (i != num)
                 {
@@ -45,26 +46,45 @@ namespace ThMEPWSS.Pipe
                     Floordrain_washing.Add(floordrain[i]);
                 }
             }
-            if (Isdownspout_in(bboundary, downspout))
-            {      
-                Downspout_to_Floordrain.Add((downspout.GetCenter() - 50 * ((Floordrain_washing[0].Position).GetVectorTo(downspout.GetCenter()).GetNormal())));
-                Downspout_to_Floordrain.Add((Floordrain_washing[0].Position + 50 * ((Floordrain_washing[0].Position).GetVectorTo(downspout.GetCenter()).GetNormal())));
-            }
-            else
-            { 
-                if (downspout.GetCenter().DistanceTo((Floordrain_washing[0].Position))<=800)
+            if (downspout == null)
+            {
+                var center = new_downspout(bboundary, condensepipe, Floordrain_washing, device_other);
+                new_circle = new Circle() { Radius = 50, Center = center };
+                if (GeomUtils.PtInLoop(bboundary, center))
                 {
-                    Downspout_to_Floordrain = Line_vertices(bboundary, downspout.GetCenter(), Floordrain_washing, washingmachine);
-              
+                    Downspout_to_Floordrain.Add(center);
+                    Downspout_to_Floordrain.Add(Floordrain_washing[0].Position);
                 }
                 else
-                {   var center= new_downspout(bboundary, condensepipe, Floordrain_washing,device);
-                    new_circle = new Circle() {Radius=50,Center=center };
-                    
+                {
                     Downspout_to_Floordrain = Line_vertices(bboundary, center, Floordrain_washing, washingmachine);
                 }
-
             }
+            else
+            {
+                if (Isdownspout_in(bboundary, downspout))
+                {
+                    Downspout_to_Floordrain.Add((downspout.GetCenter() - 50 * ((Floordrain_washing[0].Position).GetVectorTo(downspout.GetCenter()).GetNormal())));
+                    Downspout_to_Floordrain.Add((Floordrain_washing[0].Position + 50 * ((Floordrain_washing[0].Position).GetVectorTo(downspout.GetCenter()).GetNormal())));
+                }
+                else
+                {
+                    if (downspout.GetCenter().DistanceTo((Floordrain_washing[0].Position)) <= 800)
+                    {
+                        Downspout_to_Floordrain = Line_vertices(bboundary, downspout.GetCenter(), Floordrain_washing, washingmachine);
+
+                    }
+                    else
+                    {
+                        var center = new_downspout(bboundary, condensepipe, Floordrain_washing, device_other);
+                        new_circle = new Circle() { Radius = 50, Center = center };
+
+                        Downspout_to_Floordrain = Line_vertices(bboundary, center, Floordrain_washing, washingmachine);
+                    }
+
+                }
+            }
+        
             if (Israinpipe_in(bboundary, rainpipe))
             {
                 Rainpipe_to_Floordrain.Add((rainpipe.GetCenter() - 50 * ((Floordrain[0].Position).GetVectorTo(rainpipe.GetCenter()).GetNormal())));
@@ -72,9 +92,9 @@ namespace ThMEPWSS.Pipe
             }
             else
             {
-                if (rainpipe.GetCenter().DistanceTo((Floordrain[0].Position)) <= 800)
+                if (rainpipe.GetCenter().DistanceTo((Floordrain[0].Position)) <= 2000/*800*/)
                 {
-                    Rainpipe_to_Floordrain = Line_vertices_rainpipe(bboundary, rainpipe.GetCenter(), Floordrain);
+                    Rainpipe_to_Floordrain = Line_vertices_rainpipe(bboundary, rainpipe.GetCenter(), Floordrain,device);
 
                 }
                 else
@@ -175,20 +195,23 @@ namespace ThMEPWSS.Pipe
                     dst = boundarypoint.DistanceTo(washingmachine.Position);
                     num = i;
                 }
-
+                  //洗衣机所在边
             }
             Line linespecific= new Line(bboundary.Vertices()[num], bboundary.Vertices()[num + 1]);
-            var perpendicular_point = linespecific.ToCurve3d().GetClosestPointTo(center_spout).Point;
+            var perpendicular_point = linespecific.ToCurve3d().GetClosestPointTo(center_spout).Point;//排水井在洗衣机所在边垂点
             var dmin = perpendicular_point.DistanceTo(center_spout);
-            Line line = new Line(center_spout, perpendicular_point);         
-            var perpendicular_point1= linespecific.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;
-            Line line1 = new Line(Floordrain_washing[0].Position, perpendicular_point1);
+            Line line = new Line(center_spout, perpendicular_point); //排水管构造横边  
+            var perpendicular_point1= linespecific.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;//洗衣机所在边洗衣机地漏垂点
+            Line line1 = new Line(Floordrain_washing[0].Position, perpendicular_point1);//构造横边  
             line.Rotation(center_spout, Math.PI * 45 / 180);
             line1.IntersectWith(line, Intersect.ExtendBoth, pts, (IntPtr)0, (IntPtr)0);
-            var perpendicular_point2 = linespecific.ToCurve3d().GetClosestPointTo(pts[0]).Point;
+            var perpendicular_point2 = linespecific.ToCurve3d().GetClosestPointTo(pts[0]).Point;//交点垂足
             if (perpendicular_point2.DistanceTo(pts[0])<dmin)
-            { if(perpendicular_point2.DistanceTo(pts[0])>=200)
-                {   if (pts[0].DistanceTo(center_spout) >= (perpendicular_point.DistanceTo(perpendicular_point1)) * Math.Sqrt(2))
+            { 
+                if(perpendicular_point2.DistanceTo(pts[0])>=200)
+
+                {   
+                    if (pts[0].DistanceTo(center_spout) >= 50 )
                     {
                         vertices.Add(center_spout + 50 * center_spout.GetVectorTo(pts[0]).GetNormal());
                         vertices.Add(pts[0]);
@@ -196,15 +219,15 @@ namespace ThMEPWSS.Pipe
                     }
                 else
                     {
-                        var temp = center_spout + 50 * center_spout.GetVectorTo(pts[0]).GetNormal();
-                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(temp).Point;
+                        //var temp = center_spout + 50 * center_spout.GetVectorTo(pts[0]).GetNormal();
+                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(pts[0]).Point;
                         var tts = new Point3dCollection();
-                        Line templine =new Line(temp,temp1);
-                        Circle circletemp = new Circle() { Center = Floordrain_washing[0].Position, Radius = 50 };
+                        Line templine =new Line(pts[0], temp1);
+                        Circle circletemp = new Circle() { Center = center_spout, Radius = 50 };//取与排水井为中心圆的交点
                         circletemp.IntersectWith(templine, Intersect.ExtendArgument, tts, (IntPtr)0, (IntPtr)0);
 
-                        vertices.Add(temp);
-                        if(tts[0].DistanceTo(temp)> tts[1].DistanceTo(temp))
+                        //vertices.Add(temp);
+                        if(tts[0].DistanceTo(pts[0]) > tts[1].DistanceTo(pts[0]))
                         {
                             vertices.Add(tts[1]);
                         }
@@ -212,19 +235,20 @@ namespace ThMEPWSS.Pipe
                         {
                             vertices.Add(tts[0]);
                         }
+                        vertices.Add(Floordrain_washing[0].Position + 50 * Floordrain_washing[0].Position.GetVectorTo(perpendicular_point1).GetNormal());
 
                     }
 
                 }
-            else
-                {   if (perpendicular_point2.DistanceTo(pts[0])<=150)
+                else
+                {   if (perpendicular_point2.DistanceTo(pts[0])<=150)//第一点已在排水井圆心外
                     {
                         vertices.Add(center_spout + 50 * (perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal()));
                         vertices.Add(center_spout + (200 - perpendicular_point2.DistanceTo(pts[0])) * (perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal()));
                         vertices.Add(pts[0] + (200 - perpendicular_point2.DistanceTo(pts[0])) * perpendicular_point2.GetVectorTo(pts[0]).GetNormal());
                         vertices.Add(Floordrain_washing[0].Position + 50 * perpendicular_point2.GetVectorTo(pts[0]).GetNormal());
                     }
-                    else
+                    else//第一点在排水井圆心内
                     {
                         var temp = center_spout + (200 - perpendicular_point2.DistanceTo(pts[0])) * (perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal());
                         var temp1 = pts[0] + (200 - perpendicular_point2.DistanceTo(pts[0])) * perpendicular_point2.GetVectorTo(pts[0]).GetNormal();
@@ -252,23 +276,21 @@ namespace ThMEPWSS.Pipe
                 line1.IntersectWith(line, Intersect.ExtendBoth, pts1, (IntPtr)0, (IntPtr)0);
                 var perpendicular_point3 = linespecific.ToCurve3d().GetClosestPointTo(pts1[0]).Point;
                 if (perpendicular_point3.DistanceTo(pts1[0]) >= 200)
-                {   if (pts1[0].DistanceTo(center_spout) >= (perpendicular_point.DistanceTo(perpendicular_point1)) * Math.Sqrt(2))
+                {   
+                    if (pts1[0].DistanceTo(center_spout) >= 50)
                     {
                         vertices.Add(center_spout + 50 * center_spout.GetVectorTo(pts1[0]).GetNormal());
                         vertices.Add(pts1[0]);
                         vertices.Add(Floordrain_washing[0].Position + 50 * Floordrain_washing[0].Position.GetVectorTo(perpendicular_point1).GetNormal());
                     }
                      else
-                    {
-                        var temp = center_spout + 50 * center_spout.GetVectorTo(pts1[0]).GetNormal();
-                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(temp).Point;
+                    {                 
+                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(pts1[0]).Point;
                         var tts = new Point3dCollection();
-                        Line templine = new Line(temp, temp1);
-                        Circle circletemp = new Circle() { Center = Floordrain_washing[0].Position, Radius = 50 };
-                        circletemp.IntersectWith(templine, Intersect.ExtendArgument, tts, (IntPtr)0, (IntPtr)0);
-
-                        vertices.Add(temp);
-                        if (tts[0].DistanceTo(temp) > tts[1].DistanceTo(temp))
+                        Line templine = new Line(pts1[0], temp1);
+                        Circle circletemp = new Circle() { Center = center_spout, Radius = 50 };
+                        circletemp.IntersectWith(templine, Intersect.ExtendArgument, tts, (IntPtr)0, (IntPtr)0);                        
+                        if (tts[0].DistanceTo(pts1[0]) > tts[1].DistanceTo(pts1[0]))
                         {
                             vertices.Add(tts[1]);
                         }
@@ -276,6 +298,7 @@ namespace ThMEPWSS.Pipe
                         {
                             vertices.Add(tts[0]);
                         }
+                        vertices.Add(Floordrain_washing[0].Position + 50 * Floordrain_washing[0].Position.GetVectorTo(perpendicular_point1).GetNormal());
                     }
 
                 }
@@ -311,67 +334,81 @@ namespace ThMEPWSS.Pipe
             }
             return vertices;
         }
-        private static Point3d new_downspout(Polyline bboundary, Polyline rainpipe, List<BlockReference> Floordrain_washing, Polyline device)
+        private static Point3d new_downspout(Polyline bboundary, Polyline rainpipe, List<BlockReference> Floordrain_washing, Polyline device)//新的排水管井
         {   
             Point3d center = Point3d.Origin;
             var vertices = device.Vertices();
             double dmax = double.MaxValue;
-            int a = 0;
-           
+            int a = 0;         
+           //device距离最近点
             for (int i=0;i< vertices.Count;i++)
-            {
-               
+            {              
                 if(dmax>(Floordrain_washing[0].Position.DistanceTo(vertices[i])))
                 {
                     dmax = (Floordrain_washing[0].Position.DistanceTo(vertices[i]));
                     a = i;
                 }
             }
-
-            var perpendicular_point = device.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;
-          
-
-            if (a > 0)
+            var vertices_boundary = bboundary.Vertices();
+            int b = 0;
+            for (int i = 0; i < vertices_boundary.Count; i++)
             {
-                double dst = 0.0;
-                if (vertices[a].GetVectorTo(vertices[a - 1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
+                if (dmax > (Floordrain_washing[0].Position.DistanceTo(vertices_boundary[i])))
                 {
-                    Line line = new Line(vertices[a], vertices[a - 1]);
-                    dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
-                    center = vertices[a] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a+1]).GetNormal());
+                    dmax = (Floordrain_washing[0].Position.DistanceTo(vertices_boundary[i]));
+                    b = i;
                 }
-                else
-                {
-                    Line line = new Line(vertices[a], vertices[a+1]);
-                    dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
-                    center = vertices[a] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a-1]).GetNormal());
-                }
+            }
+            var perpendicular_point = device.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;
+            if (rainpipe.GetCenter().DistanceTo(Floordrain_washing[0].Position) > 700)
+            { 
+               var perpendicular_basepoint= bboundary.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;
+                center = Floordrain_washing[0].Position +(perpendicular_basepoint.GetVectorTo(vertices_boundary[b]).GetNormal())* (perpendicular_basepoint.DistanceTo(vertices_boundary[b]) - 100);
             }
             else
             {
-                double dst = 0.0;
-                if (vertices[0].GetVectorTo(vertices[1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
+                if (a > 0)
                 {
-                    Line line = new Line(vertices[0], vertices[1]);
-                    var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
-                    dst = point.DistanceTo(rainpipe.GetCenter());
-                    center = vertices[0] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[vertices.Count - 2]).GetNormal());
+                    double dst = 0.0;
+                    if (vertices[a].GetVectorTo(vertices[a - 1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
+                    {
+                        Line line = new Line(vertices[a], vertices[a - 1]);
+                        dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
+                        center = vertices[a] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a + 1]).GetNormal());
+                    }
+                    else
+                    {
+                        Line line = new Line(vertices[a], vertices[a + 1]);
+                        dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
+                        center = vertices[a] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a - 1]).GetNormal());
+                    }
                 }
                 else
                 {
-                    Line line = new Line(vertices[0], vertices[vertices.Count-2]);
-                    var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
-                    var s = rainpipe.GetCenter();
-                    dst = point.DistanceTo(s);
-                    center = vertices[0] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[1]).GetNormal());
-                }
+                    double dst = 0.0;
+                    if (vertices[0].GetVectorTo(vertices[1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
+                    {
+                        Line line = new Line(vertices[0], vertices[1]);
+                        var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
+                        dst = point.DistanceTo(rainpipe.GetCenter());
+                        center = vertices[0] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[vertices.Count - 2]).GetNormal());
+                    }
+                    else
+                    {
+                        Line line = new Line(vertices[0], vertices[vertices.Count - 2]);
+                        var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
+                        var s = rainpipe.GetCenter();
+                        dst = point.DistanceTo(s);
+                        center = vertices[0] + 100 * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[1]).GetNormal());
+                    }
 
+                }
             }
 
            
             return center;
         }
-        private static Point3dCollection Line_vertices_rainpipe(Polyline bboundary, Point3d center_rainpipe, List<BlockReference> Floordrain)
+        private static Point3dCollection Line_vertices_rainpipe(Polyline bboundary, Point3d center_rainpipe, List<BlockReference> Floordrain,Polyline device)
         {
 
             var vertices = new Point3dCollection();
@@ -393,35 +430,35 @@ namespace ThMEPWSS.Pipe
                 }
             }
             Line linespecific = new Line(bboundary.Vertices()[num], bboundary.Vertices()[num + 1]);
-            var perpendicular_point = linespecific.ToCurve3d().GetClosestPointTo(center_rainpipe).Point;
+            var perpendicular_point = linespecific.ToCurve3d().GetClosestPointTo(center_rainpipe).Point;//雨水管基点
             var dmin = perpendicular_point.DistanceTo(center_rainpipe);
             Line line = new Line(center_rainpipe, perpendicular_point);
-            var perpendicular_point1 = linespecific.ToCurve3d().GetClosestPointTo(Floordrain[0].Position).Point;
+            var perpendicular_point1 = linespecific.ToCurve3d().GetClosestPointTo(Floordrain[0].Position).Point;//地漏基点
             Line line1 = new Line(Floordrain[0].Position, perpendicular_point1);
-            line.Rotation(center_rainpipe, Math.PI * 45 / 180);
+            line.Rotation(center_rainpipe, Math.PI/ 4);
             line1.IntersectWith(line, Intersect.ExtendBoth, pts, (IntPtr)0, (IntPtr)0);
-            var perpendicular_point2 = linespecific.ToCurve3d().GetClosestPointTo(pts[0]).Point;
+            var perpendicular_point2 = linespecific.ToCurve3d().GetClosestPointTo(pts[0]).Point;//交点基点
+        
             if (perpendicular_point2.DistanceTo(pts[0]) < dmin)
             {
                 if (perpendicular_point2.DistanceTo(pts[0]) >= 200)
-                {
-                    if (pts[0].DistanceTo(center_rainpipe) >= (perpendicular_point.DistanceTo(perpendicular_point1)) * Math.Sqrt(2))
+                {                              
+                    if (pts[0].DistanceTo(center_rainpipe) >= 50)
                     {
-                        vertices.Add(center_rainpipe + 50 * center_rainpipe.GetVectorTo(pts[0]).GetNormal());
-                        vertices.Add(pts[0]);
-                        vertices.Add(Floordrain[0].Position + 50 * Floordrain[0].Position.GetVectorTo(perpendicular_point1).GetNormal());
+
+                        vertices.Add(center_rainpipe + 50 * (center_rainpipe.GetVectorTo(perpendicular_point).GetNormal()));
+                        vertices.Add(perpendicular_point);
+                        vertices.Add(Floordrain[0].Position + (perpendicular_point1.GetVectorTo(perpendicular_point).GetNormal()) * (perpendicular_point.DistanceTo(perpendicular_point1) - perpendicular_point1.DistanceTo(Floordrain[0].Position)));
+                        vertices.Add(Floordrain[0].Position + 50 * perpendicular_point1.GetVectorTo(perpendicular_point).GetNormal());             
                     }
                     else
                     {
-                        var temp = center_rainpipe + 50 * center_rainpipe.GetVectorTo(pts[0]).GetNormal();
-                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(temp).Point;
+                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(pts[0]).Point;
                         var tts = new Point3dCollection();
-                        Line templine = new Line(temp, temp1);
-                        Circle circletemp = new Circle() { Center = Floordrain[0].Position, Radius = 50 };
+                        Line templine = new Line(pts[0], temp1);
+                        Circle circletemp = new Circle() { Center = pts[0], Radius = 50 };
                         circletemp.IntersectWith(templine, Intersect.ExtendArgument, tts, (IntPtr)0, (IntPtr)0);
-
-                        vertices.Add(temp);
-                        if (tts[0].DistanceTo(temp) > tts[1].DistanceTo(temp))
+                        if (tts[0].DistanceTo(pts[0]) > tts[1].DistanceTo(pts[0]))
                         {
                             vertices.Add(tts[1]);
                         }
@@ -429,12 +466,12 @@ namespace ThMEPWSS.Pipe
                         {
                             vertices.Add(tts[0]);
                         }
-
-                    }
-
+                        vertices.Add(Floordrain[0].Position + 50 * Floordrain[0].Position.GetVectorTo(perpendicular_point1).GetNormal());
+                    }                                  
                 }
                 else
-                {   if (perpendicular_point2.DistanceTo(pts[0]) <= 150)
+                { 
+                    if (perpendicular_point2.DistanceTo(pts[0]) <= 150)
                     {
                         vertices.Add(center_rainpipe + 50 * (perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal()));
                         vertices.Add(center_rainpipe + (200 - perpendicular_point2.DistanceTo(pts[0])) * (perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal()));
@@ -467,26 +504,27 @@ namespace ThMEPWSS.Pipe
                 var pts1 = new Point3dCollection();
                 line.Rotation(center_rainpipe, -Math.PI / 2);
                 line1.IntersectWith(line, Intersect.ExtendBoth, pts1, (IntPtr)0, (IntPtr)0);
-                var perpendicular_point3 = linespecific.ToCurve3d().GetClosestPointTo(pts1[0]).Point;
-                if (perpendicular_point3.DistanceTo(pts1[0]) >= 200)
+                var perpendicular_point3 = linespecific.ToCurve3d().GetClosestPointTo(pts1[0]).Point;                         
+               if (perpendicular_point3.DistanceTo(pts1[0]) >= 200)
                 {
-                    if (pts1[0].DistanceTo(center_rainpipe) >= (perpendicular_point.DistanceTo(perpendicular_point1)) * Math.Sqrt(2))
+                    if (pts1[0].DistanceTo(center_rainpipe) >=50)
                     {
-                        vertices.Add(center_rainpipe + 50 * center_rainpipe.GetVectorTo(pts1[0]).GetNormal());
-                        vertices.Add(pts1[0]);
-                        vertices.Add(Floordrain[0].Position + 50 * Floordrain[0].Position.GetVectorTo(perpendicular_point1).GetNormal());
+                        vertices.Add(center_rainpipe + 50 * (center_rainpipe.GetVectorTo(perpendicular_point).GetNormal()));
+                        vertices.Add(perpendicular_point);
+                        vertices.Add(Floordrain[0].Position + (perpendicular_point1.GetVectorTo(perpendicular_point).GetNormal()) * (perpendicular_point.DistanceTo(perpendicular_point1) - perpendicular_point1.DistanceTo(Floordrain[0].Position)));
+                        vertices.Add(Floordrain[0].Position + 50 * perpendicular_point1.GetVectorTo(perpendicular_point).GetNormal()); ;                  
                     }
                     else
                     {
-                        var temp = center_rainpipe + 50 * center_rainpipe.GetVectorTo(pts1[0]).GetNormal();
-                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(temp).Point;
+                      
+                        var temp1 = linespecific.ToCurve3d().GetClosestPointTo(pts1[0]).Point;
                         var tts = new Point3dCollection();
-                        Line templine = new Line(temp, temp1);
-                        Circle circletemp = new Circle() { Center = Floordrain[0].Position, Radius = 50 };
+                        Line templine = new Line(pts1[0], temp1);
+                        Circle circletemp = new Circle() { Center = center_rainpipe, Radius = 50 };
                         circletemp.IntersectWith(templine, Intersect.ExtendArgument, tts, (IntPtr)0, (IntPtr)0);
 
-                        vertices.Add(temp);
-                        if (tts[0].DistanceTo(temp) > tts[1].DistanceTo(temp))
+                   
+                        if (tts[0].DistanceTo(pts1[0]) > tts[1].DistanceTo(pts1[0]))
                         {
                             vertices.Add(tts[1]);
                         }
@@ -494,6 +532,7 @@ namespace ThMEPWSS.Pipe
                         {
                             vertices.Add(tts[0]);
                         }
+                        vertices.Add(Floordrain[0].Position + 50 * Floordrain[0].Position.GetVectorTo(perpendicular_point1).GetNormal());
                     }
 
                 }
@@ -501,10 +540,10 @@ namespace ThMEPWSS.Pipe
                 {
                     if (perpendicular_point3.DistanceTo(pts1[0]) <= 150)
                     {
-                        vertices.Add(center_rainpipe + 50 * (perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal()));
-                        vertices.Add(center_rainpipe + (200 - perpendicular_point3.DistanceTo(pts1[0])) * (perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal()));
-                        vertices.Add(pts1[0] + (200 - perpendicular_point3.DistanceTo(pts1[0])) * perpendicular_point3.GetVectorTo(pts1[0]).GetNormal());
-                        vertices.Add(Floordrain[0].Position + 50 * perpendicular_point3.GetVectorTo(pts1[0]).GetNormal());
+                        vertices.Add(center_rainpipe + 50 * (center_rainpipe.GetVectorTo(perpendicular_point).GetNormal()));
+                        vertices.Add(perpendicular_point);
+                        vertices.Add(Floordrain[0].Position + (perpendicular_point1.GetVectorTo(perpendicular_point1).GetNormal()) * (perpendicular_point.DistanceTo(perpendicular_point1) - perpendicular_point1.DistanceTo(Floordrain[0].Position)));
+                        vertices.Add(Floordrain[0].Position + 50 * perpendicular_point1.GetVectorTo(perpendicular_point).GetNormal());
                     }
                     else
                     {

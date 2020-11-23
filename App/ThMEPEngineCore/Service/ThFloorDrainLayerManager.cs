@@ -32,7 +32,7 @@ namespace ThMEPEngineCore.Service
             //}
             //return (patterns[0] == "PIPE") && (patterns[1] == "AE");
         }
-        public static bool IsFloorDrainBlockName(string name)
+        public static bool IsToiletFloorDrainBlockName(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)
@@ -40,6 +40,15 @@ namespace ThMEPEngineCore.Service
                 return false;
             }
             return (patterns[0] == "4") && (patterns[1] == "DRAIN") && (patterns[2] == "W");
+        }
+        public static bool IsBalconyFloorDrainBlockName(string name)
+        {
+            string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
+            if (patterns.Count() < 3)
+            {
+                return false;
+            }
+            return (patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2] == "W");
         }
     }
 }

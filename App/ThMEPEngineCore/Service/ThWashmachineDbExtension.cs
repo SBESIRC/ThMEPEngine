@@ -1,11 +1,9 @@
 ﻿using System;
 using Linq2Acad;
-using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
+using System.Text;
 using ThMEPEngineCore.CAD;
+using System.Threading.Tasks;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -13,18 +11,17 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThFloorDrainDbExtension : ThDbExtension, IDisposable
+   public class ThWashMachineDbExtension : ThDbExtension, IDisposable
     {
-        public List<Entity> FloorDrains { get; set; }
-        public ThFloorDrainDbExtension(Database db) : base(db)
-        {
-            LayerFilter = ThFloorDrainLayerManager.XrefLayers(db);
-            FloorDrains = new List<Entity>();
-        }
         public void Dispose()
         {
         }
-
+        public List<Entity> Washmachine { get; set; }
+        public ThWashMachineDbExtension(Database db) : base(db)
+        {
+            LayerFilter = ThWashMachineLayerManager.XrefLayers(db);
+            Washmachine = new List<Entity>();
+        }
         public override void BuildElementCurves()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
@@ -39,12 +36,11 @@ namespace ThMEPEngineCore.Service
                         }
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
                         var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        FloorDrains.AddRange(BuildElementCurves(blkRef, mcs2wcs));
+                        Washmachine.AddRange(BuildElementCurves(blkRef, mcs2wcs));
                     }
                 }
             }
         }
-
         private IEnumerable<Entity> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
@@ -66,11 +62,10 @@ namespace ThMEPEngineCore.Service
                                 }
                                 if (IsBuildElementBlockReference(blockObj))
                                 {
-                                    if (CheckLayerValid(blockObj) && ThFloorDrainLayerManager.IsToiletFloorDrainBlockName(blockObj.Name))
+                                    if (CheckLayerValid(blockObj) && ThWashMachineLayerManager.IsWashmachineBlockName(blockObj.Name))
                                     {
-                                        var newBr = blockObj.GetTransformedCopy(matrix) as BlockReference;
-                                        ents.Add(newBr);
-                                    }                                    
+                                        ents.Add(blockObj.GetTransformedCopy(matrix));
+                                    }
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
                                 }
@@ -87,7 +82,6 @@ namespace ThMEPEngineCore.Service
                 return ents;
             }
         }
-
         public override void BuildElementTexts()
         {
             throw new NotImplementedException();

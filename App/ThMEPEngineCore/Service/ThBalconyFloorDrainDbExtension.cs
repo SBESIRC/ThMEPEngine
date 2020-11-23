@@ -13,10 +13,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThFloorDrainDbExtension : ThDbExtension, IDisposable
+    public class ThBalconyFloorDrainDbExtension : ThDbExtension, IDisposable
     {
         public List<Entity> FloorDrains { get; set; }
-        public ThFloorDrainDbExtension(Database db) : base(db)
+        public ThBalconyFloorDrainDbExtension(Database db) : base(db)
         {
             LayerFilter = ThFloorDrainLayerManager.XrefLayers(db);
             FloorDrains = new List<Entity>();
@@ -66,7 +66,7 @@ namespace ThMEPEngineCore.Service
                                 }
                                 if (IsBuildElementBlockReference(blockObj))
                                 {
-                                    if (CheckLayerValid(blockObj) && ThFloorDrainLayerManager.IsToiletFloorDrainBlockName(blockObj.Name))
+                                    if (CheckLayerValid(blockObj) && ThFloorDrainLayerManager.IsBalconyFloorDrainBlockName(blockObj.Name))
                                     {
                                         var newBr = blockObj.GetTransformedCopy(matrix) as BlockReference;
                                         ents.Add(newBr);

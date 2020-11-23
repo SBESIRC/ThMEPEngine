@@ -1,30 +1,26 @@
 ﻿using System;
 using Linq2Acad;
-using NFox.Cad;
 using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
+
 namespace ThMEPEngineCore.Service
 {
-    public class ThFloorDrainDbExtension : ThDbExtension, IDisposable
+    public class ThRainPipeDbExtension : ThDbExtension, IDisposable
     {
-        public List<Entity> FloorDrains { get; set; }
-        public ThFloorDrainDbExtension(Database db) : base(db)
+        public List<Entity> RainPipes { get; set; }
+        public ThRainPipeDbExtension(Database db) : base(db)
         {
-            LayerFilter = ThFloorDrainLayerManager.XrefLayers(db);
-            FloorDrains = new List<Entity>();
+            LayerFilter = ThRainPipeLayerManager.XrefLayers(db);
+            RainPipes = new List<Entity>();
         }
         public void Dispose()
         {
         }
-
         public override void BuildElementCurves()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
@@ -39,12 +35,11 @@ namespace ThMEPEngineCore.Service
                         }
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
                         var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        FloorDrains.AddRange(BuildElementCurves(blkRef, mcs2wcs));
+                        RainPipes.AddRange(BuildElementCurves(blkRef, mcs2wcs));
                     }
                 }
             }
         }
-
         private IEnumerable<Entity> BuildElementCurves(BlockReference blockReference, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
@@ -66,11 +61,22 @@ namespace ThMEPEngineCore.Service
                                 }
                                 if (IsBuildElementBlockReference(blockObj))
                                 {
-                                    if (CheckLayerValid(blockObj) && ThFloorDrainLayerManager.IsToiletFloorDrainBlockName(blockObj.Name))
+                                    if (CheckLayerValid(blockObj) &&
+                                        ThRainPipeLayerManager.IsRainPipeBlockName(blockObj.Name))
                                     {
-                                        var newBr = blockObj.GetTransformedCopy(matrix) as BlockReference;
-                                        ents.Add(newBr);
-                                    }                                    
+                                        var minPt = blockObj.GeometricExtents.MinPoint;
+                                        var maxPt = blockObj.GeometricExtents.MaxPoint;
+                                        Polyline polyline = new Polyline()
+                                        {
+                                            Closed = true
+                                        };
+                                        polyline.AddVertexAt(0, new Point2d(minPt.X, minPt.Y), 0.0, 0.0, 0.0);
+                                        polyline.AddVertexAt(1, new Point2d(maxPt.X, minPt.Y), 0.0, 0.0, 0.0);
+                                        polyline.AddVertexAt(2, new Point2d(maxPt.X, maxPt.Y), 0.0, 0.0, 0.0);
+                                        polyline.AddVertexAt(3, new Point2d(minPt.X, maxPt.Y), 0.0, 0.0, 0.0);
+                                        polyline.TransformBy(matrix);
+                                        ents.Add(polyline);
+                                    }
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
                                 }
@@ -87,7 +93,6 @@ namespace ThMEPEngineCore.Service
                 return ents;
             }
         }
-
         public override void BuildElementTexts()
         {
             throw new NotImplementedException();

@@ -11,31 +11,27 @@ using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Plumbing;
 
 
-
-
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThToiletFloorDrainService
-    {        
+    public class ThDevicePlatformFloorDrainService
+    {
         private List<ThIfcFloorDrain> FloorDrainList { get; set; }
-        private ThIfcSpace ToiletSpace { get; set; }
+        private ThIfcSpace DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         /// <summary>
-        /// 找到的坐便器
-        /// 目前只支持查找一个
-        /// </summary>
         public List<ThIfcFloorDrain> FloorDrains
-        { 
+        {
             get;
-            set; 
-        } 
-        private ThToiletFloorDrainService(
-            List<ThIfcFloorDrain> floordrainList, 
-            ThIfcSpace toiletSpace, 
-            ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
+
+            set;
+        }
+        private ThDevicePlatformFloorDrainService(
+          List<ThIfcFloorDrain> floordrainList,
+          ThIfcSpace devicePlatformSpace,
+          ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
             FloorDrainList = floordrainList;
-            ToiletSpace = toiletSpace;
+            DevicePlatformSpace = devicePlatformSpace;
             FloorDrainSpatialIndex = floordrainSpatialIndex;
             FloorDrains = new List<ThIfcFloorDrain>();
             if (FloorDrainSpatialIndex == null)
@@ -45,27 +41,26 @@ namespace ThMEPWSS.Pipe.Service
                 FloorDrainSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
         }
-        public static ThToiletFloorDrainService Find(
-            List<ThIfcFloorDrain> floordrains, 
-            ThIfcSpace toiletSpace, 
-            ThCADCoreNTSSpatialIndex floordrainSpatialIndex = null)
+        public static ThDevicePlatformFloorDrainService Find(
+         List<ThIfcFloorDrain> floordrains,
+         ThIfcSpace devicePlatformSpace,
+         ThCADCoreNTSSpatialIndex floordrainSpatialIndex = null)
         {
-            var instance = new ThToiletFloorDrainService(floordrains, toiletSpace, floordrainSpatialIndex);
+            var instance = new ThDevicePlatformFloorDrainService(floordrains, devicePlatformSpace, floordrainSpatialIndex);
             instance.Find();
             return instance;
         }
         private void Find()
         {
-            var tolitBoundary = ToiletSpace.Boundary as Polyline;
-            var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
+            var devicePlatformBoundary = DevicePlatformSpace.Boundary as Polyline;
+            var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(devicePlatformBoundary);
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
-
             var includedFloordrains = crossFloordrains.Where(o =>
             {
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
-                return tolitBoundary.Contains(bufferObjs[0] as Curve);
-            });
+                return devicePlatformBoundary.Contains(bufferObjs[0] as Curve);
+            });         
             includedFloordrains.ForEach(o => FloorDrains.Add(o));
         }
         private bool Contains(Polyline polyline, Polygon polygon)

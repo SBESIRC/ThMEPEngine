@@ -1,7 +1,10 @@
 ﻿using System;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.Assistant;
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Pipe
 {
@@ -20,16 +23,26 @@ namespace ThMEPWSS.Pipe
             Rainpipe_tofloordrain = new Point3dCollection();
         }
 
-        public void Run(Polyline rainpipe, Polyline device, Polyline condensepipe, BlockReference devicefloordrain)
+        public void Run(Polyline rainpipe, Polyline device, Polyline condensepipe, List<BlockReference> devicefloordrain)
         {
-            Devicefloordrain.Add(Isinsidedevice(device, devicefloordrain));
-            if (Condensepipe_floordrain(device, condensepipe, devicefloordrain).Count > 0)
+            int num;
+            if(GeomUtils.PtInLoop(device, devicefloordrain[0].Position))
             {
-                Condensepipe_tofloordrain = Condensepipe_floordrain(device, condensepipe, devicefloordrain);
+                num = 0;
             }
-            else if (Rainpipe_floordrain(device, rainpipe, devicefloordrain).Count > 0)
+            else
             {
-                Rainpipe_tofloordrain = Rainpipe_floordrain(device, rainpipe, devicefloordrain);
+                num = 1;
+            }
+            
+            Devicefloordrain.Add(Isinsidedevice(device, devicefloordrain[num]));
+            if (Condensepipe_floordrain(device, condensepipe, devicefloordrain[num]).Count > 0)
+            {
+                Condensepipe_tofloordrain = Condensepipe_floordrain(device, condensepipe, devicefloordrain[num]);
+            }
+            else if (Rainpipe_floordrain(device, rainpipe, devicefloordrain[num]).Count > 0)
+            {
+                Rainpipe_tofloordrain = Rainpipe_floordrain(device, rainpipe, devicefloordrain[num]);
             }
             else
             {
@@ -37,12 +50,10 @@ namespace ThMEPWSS.Pipe
             }
 
         }
+    
         private Point3d Isinsidedevice(Polyline device, BlockReference devicefloordrain)
-        {
-            var pts = new Point3dCollection();
-            Line line = new Line(device.GetCenter(), devicefloordrain.Position);
-            device.IntersectWith(line, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-            if (pts[0].GetVectorTo(devicefloordrain.Position).IsCodirectionalTo(devicefloordrain.Position.GetVectorTo(pts[1])))
+        {     
+            if (GeomUtils.PtInLoop(device, devicefloordrain.Position))
             {
                 return devicefloordrain.Position;
             }

@@ -24,6 +24,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />
     <Compile Include="Bussiness\BoundaryProtectBussiness\BoundaryProtestService.cs" />
@@ -37,14 +38,28 @@
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
+    <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeRoomRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWDevicePlatformRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWKitchenRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWToiletRoomRecognitionEngine.cs" />
+    <Compile Include="Pipe\Geom\GeomUtils.cs" />
+    <Compile Include="Pipe\Model\ThWBalconyRoom.cs" />
+    <Compile Include="Pipe\Model\ThWCompositeBalconyRoom.cs" />
     <Compile Include="Pipe\Model\ThWCompositeRoom.cs" />
+    <Compile Include="Pipe\Model\ThWDevicePlatformRoom.cs" />
     <Compile Include="Pipe\Model\ThWKitchenRoom.cs" />
     <Compile Include="Pipe\Model\ThWRoom.cs" />
     <Compile Include="Pipe\Model\ThWToiletRoom.cs" />
+    <Compile Include="Pipe\Service\ThBalconyFloorDrainService.cs" />
+    <Compile Include="Pipe\Service\ThBalconyRainPipeService.cs" />
+    <Compile Include="Pipe\Service\ThBalconyRoomService.cs" />
+    <Compile Include="Pipe\Service\ThBalconyWashMachineService.cs" />
+    <Compile Include="Pipe\Service\ThDevicePlatformCondensePipeService.cs" />
+    <Compile Include="Pipe\Service\ThDevicePlatformFloorDrainService.cs" />
+    <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
+    <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThFindSpaceRangedSpaces.cs" />
     <Compile Include="Pipe\Service\ThKitchenBasintoolService.cs" />
