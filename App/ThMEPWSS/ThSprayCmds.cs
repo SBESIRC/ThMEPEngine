@@ -476,7 +476,7 @@ namespace ThMEPWSS
             sprays = sprays.Where(x => checkService.CheckSprayBlockSize(x, 300)).ToList();
             if (sprays.Count <= 0)
             {
-                Active.Editor.WriteMessage("\n 喷淋暂未生成");
+                Active.Editor.WriteMessage("\n 区域未检测到喷头");
                 return false;
             }
             var sprayPts = sprays.Select(x =>
@@ -518,7 +518,7 @@ namespace ThMEPWSS
             }
             else
             {
-                Active.Editor.WriteMessage("\n 喷淋布置线暂未生成");
+                Active.Editor.WriteMessage("\n 区域未检测到喷头");
             }
         }
     }
