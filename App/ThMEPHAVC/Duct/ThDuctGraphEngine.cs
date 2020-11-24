@@ -5,27 +5,51 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using QuickGraph.Algorithms;
+using QuickGraph.Serialization;
 using System.Collections.Generic;
 using AcHelper;
+using System;
+using System.Runtime.Serialization;
 
 namespace ThMEPHAVC.Duct
 {
     public class ThDuctVertex
     {
-        public Point3d Position { get; set; }
+        public double XPosition { get; set; }
+        public double YPosition { get; set; }
+        //public Point3d Position { get; set; }
+
+        public double DistanceTo(ThDuctVertex targetvertex) 
+        {
+            return Math.Pow(Math.Pow(this.XPosition - targetvertex.XPosition, 2) + Math.Pow(this.YPosition - targetvertex.YPosition, 2),0.5);
+        }
+
+        public bool Equals(Point3d point)
+        {
+            return this.XPosition == point.X && this.YPosition == point.Y;
+        }
+
+        public bool IsSameVertexTo(ThDuctVertex samevertex)
+        {
+            return Math.Abs(this.XPosition - samevertex.XPosition) < 0.1 && Math.Abs(this.YPosition - samevertex.YPosition) < 0.1;
+        }
+
+        public Point3d VertexToPoint3D()
+        {
+            return new Point3d(XPosition, YPosition, 0);
+        }
     }
 
-    public class ThDuctEdge<TVertex> : Edge<TVertex> where TVertex: ThDuctVertex
+    public class ThDuctEdge<TVertex> : Edge<TVertex> where TVertex : ThDuctVertex
     {
         public List<ThDraught> DraughtInfomation { get; set; }
         public double AirVolume { get; set; }
         public double TotalVolumeInEdgeChain { get; set; }
-        public int MyProperty { get; set; }
         public double EdgeLength { get; set; }
         public int DraughtCount { get; set; }
         public ThDuctEdge(TVertex source, TVertex target) : base(source, target)
         {
-            EdgeLength = source.Position.DistanceTo(target.Position);
+            EdgeLength = source.DistanceTo(target);
         }
     }
 
@@ -48,19 +72,21 @@ namespace ThMEPHAVC.Duct
             var source = new ThDuctVertex();
             var target = new ThDuctVertex()
             {
-                Position = targetpoint
+                XPosition = targetpoint.X,
+                YPosition = targetpoint.Y,
             };
             if (ifFirstSearch)
             {
                 source = new ThDuctVertex()
                 {
-                    Position = sourcepoint
+                    XPosition = sourcepoint.X,
+                    YPosition = sourcepoint.Y,
                 };
                 Graph.AddVertex(source);
             }
             else
             {
-                source = Graph.Vertices.Where(v => v.Position.Equals(sourcepoint)).First();
+                source = Graph.Vertices.Where(v => v.Equals(sourcepoint)).First();
             }
             Graph.AddVertex(target);
             Graph.AddEdge(new ThDuctEdge<ThDuctVertex>(source, target));
@@ -104,13 +130,7 @@ namespace ThMEPHAVC.Duct
             GraphStartVertex = AddVerticesGen(results[0] as Line, true, ref searchpoint);
 
             //更新探测点到起始线的终点后，再执行循环探测
-            DoBuildGraph(searchpoint, results[0] as Line);
-
-            foreach (var item in Graph.Vertices)
-            {
-                var outedge = Graph.OutEdges(item);
-            }
-            
+            DoBuildGraph(searchpoint, results[0] as Line);            
         }
     }
 }

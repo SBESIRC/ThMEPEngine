@@ -1,10 +1,17 @@
 ﻿using AcHelper;
 using Linq2Acad;
 using ThMEPHAVC.Duct;
+using System.Xml;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using TianHua.Publics.BaseCode;
+using System.Collections.Generic;
+using System.Linq;
+using QuickGraph.Serialization;
+using QuickGraph;
+using ThMEPHAVC.Duct.PipeFitting;
 
 namespace ThMEPHAVC
 {
@@ -16,6 +23,40 @@ namespace ThMEPHAVC
 
         public void Terminate()
         {
+        }
+
+        [CommandMethod("TIANHUACAD", "THDuctDraw", CommandFlags.Modal)]
+        public void THDuctDraw()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                ThDuctParameters DuctParameters = new ThDuctParameters();
+
+                var startpointresult = Active.Editor.GetPoint("\n选择管道起点");
+                if (startpointresult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                DuctParameters.DuctStartPositionX = startpointresult.Value.X;
+                DuctParameters.DuctStartPositionY = startpointresult.Value.Y;
+
+                var endpointresult = Active.Editor.GetPoint("\n选择管道终点");
+                if (endpointresult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                DuctParameters.DuctEndPositionX = endpointresult.Value.X;
+                DuctParameters.DuctEndPositionY = endpointresult.Value.Y;
+
+                DuctParameters.DuctSectionWidth = 1500;
+
+                ThDuct duct = ThPipeGeometryFactoryService.Instance.CreateThDuct(DuctParameters);
+                foreach (Line obj in duct.Geometries)
+                {
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+
+            }
         }
 
         [CommandMethod("TIANHUACAD", "THDuctGraph", CommandFlags.Modal)]
@@ -59,29 +100,42 @@ namespace ThMEPHAVC
                 ThDraughtDesignEngine DraughtDesignEngine = new ThDraughtDesignEngine(graphAnalysisEngine.EndLevelEdges, DesignParameters);
                 ThDuctDesignEngine DuctDesignEngine = new ThDuctDesignEngine(ductGraphEngine.Graph, ductGraphEngine.GraphStartVertex);
 
+                var jsongraph = new AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>>();
+                using (var xmlwriter = XmlWriter.Create(@"D:\管道设计\需求文档\Graplxml.xml"))
+                {
+                    var graphjson = GraphSerializeService.Instance.GetJsonStringFromGraph(ductGraphEngine.Graph);
+                    jsongraph = GraphSerializeService.Instance.GetGraphFromJsonString(graphjson);
+                    //var edgejson = FuncJson.Serialize(Graphedgedateset);
+                    //var deedges = FuncJson.Deserialize<IEnumerable<ThDuctEdge<ThDuctVertex>>>(edgejson);
+                    //var trangraph2 = Graphedgedateset.ToAdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>>(false);
+                    ductGraphEngine.Graph.SerializeToGraphML<ThDuctVertex, ThDuctEdge<ThDuctVertex>, AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>>>(xmlwriter);
+                    //GraphMLExtensions.SerializeToGraphML<ThDuctVertex, ThDuctEdge<ThDuctVertex>, AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>>>(ductGraphEngine.Graph, xmlwriter);
+                    //ductGraphEngine.Graph.SerializeToXml<ThDuctVertex, ThDuctEdge<ThDuctVertex>, AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>>>();
+                }
+
                 //测试 将最后一级管路画出来
                 foreach (var edges in DraughtDesignEngine.DraughtEndEdges)
                 {
                     foreach (var edge in edges)
                     {
-                        acadDatabase.ModelSpace.Add(new Line(edge.Source.Position, edge.Target.Position) { ColorIndex = 1 });
+                        acadDatabase.ModelSpace.Add(new Line(edge.Source.VertexToPoint3D(), edge.Target.VertexToPoint3D()) { ColorIndex = 1 });
                         if (edge.DraughtInfomation == null)
                         {
                             continue;
                         }
                         foreach (var draft in edge.DraughtInfomation)
                         {
-                            acadDatabase.ModelSpace.Add(new DBPoint(draft.Parameters.CenterPosition));
+                            acadDatabase.ModelSpace.Add(new DBPoint(new Point3d(draft.Parameters.XPosition, draft.Parameters.YPosition, 0)));
                         }
                     }
                 }
 
-                foreach (var edge in ductGraphEngine.Graph.Edges)
+                foreach (var edge in jsongraph.Edges)
                 {
                     DBText volumeinfo = new DBText()
                     {
                         TextString = edge.AirVolume.ToString(),
-                        Position = edge.Target.Position,
+                        Position = edge.Target.VertexToPoint3D(),
                         Height = 1500
                     };
                     acadDatabase.ModelSpace.Add(volumeinfo);

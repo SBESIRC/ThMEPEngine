@@ -53,7 +53,9 @@ namespace ThMEPHAVC.Duct
                         ThDraughtParameters draughtparameters = new ThDraughtParameters()
                         {
                             DraughtVolume = singledraughtvolume,
-                            CenterPosition = dividepoint,
+                            XPosition = dividepoint.X,
+                            YPosition = dividepoint.Y,
+                            //CenterPosition = dividepoint,
                             DraughtLength = RoundUpToTen(draughtlength),
                             DraughtWidth = RoundDownToTen(draughtwidth),
                             DraughtType = DesignDraughtParameters.DraughtType

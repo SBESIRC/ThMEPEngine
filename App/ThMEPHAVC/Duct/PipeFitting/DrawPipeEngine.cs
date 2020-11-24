@@ -30,27 +30,27 @@ namespace ThMEPHAVC.Duct.PipeFitting
 
         public void DrawPipeFittingsInCAD(Point3d position)
         {
-            var reducingworker = new PipeFittingDrawWorker();
+            var pipefittingWorker = new PipeFittingDrawWorker();
             Matrix3d mt = Active.Editor.CurrentUserCoordinateSystem;
             foreach (var reducing in Reducings)
             {
                 mt = mt * Matrix3d.Displacement(position - reducing.Parameters.StartCenterPoint) * Matrix3d.Rotation(reducing.Parameters.RotateAngle * Math.PI / 180, Vector3d.ZAxis, reducing.Parameters.StartCenterPoint);
-                reducingworker.DrawPipeFitting(reducing, mt);
+                pipefittingWorker.DrawPipeFitting(reducing, mt);
             }
             foreach (var elbow in Elbows)
             {
                 mt = mt * Matrix3d.Displacement(position - elbow.Parameters.CornerPoint) * Matrix3d.Rotation(elbow.Parameters.RotateAngle * Math.PI / 180, Vector3d.ZAxis, elbow.Parameters.CornerPoint);
-                reducingworker.DrawPipeFitting(elbow, mt);
+                pipefittingWorker.DrawPipeFitting(elbow, mt);
             }
             foreach (var tee in Tees)
             {
                 mt = mt * Matrix3d.Displacement(position - tee.Parameters.CenterPoint) * Matrix3d.Rotation(tee.Parameters.RotateAngle * Math.PI / 180, Vector3d.ZAxis, tee.Parameters.CenterPoint);
-                reducingworker.DrawPipeFitting(tee, mt);
+                pipefittingWorker.DrawPipeFitting(tee, mt);
             }
             foreach (var fourway in FourWays)
             {
                 mt = mt * Matrix3d.Displacement(position - fourway.Parameters.FourWayCenter) * Matrix3d.Rotation(fourway.Parameters.RotateAngle * Math.PI / 180, Vector3d.ZAxis, fourway.Parameters.FourWayCenter);
-                reducingworker.DrawPipeFitting(fourway, mt);
+                pipefittingWorker.DrawPipeFitting(fourway, mt);
             }
 
         }

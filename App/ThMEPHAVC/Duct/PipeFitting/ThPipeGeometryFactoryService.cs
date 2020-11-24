@@ -52,6 +52,13 @@ namespace ThMEPHAVC.Duct.PipeFitting
             };
         }
 
+        public ThDuct CreateThDuct(ThDuctParameters parameters)
+        {
+            return new ThDuct(parameters)
+            {
+                Geometries = CreateThDuctGeometries(parameters)
+            };
+        }
 
         private DBObjectCollection CreateReducingGeometries(ThReducingParameters parameters)
         {
@@ -508,6 +515,48 @@ namespace ThMEPHAVC.Duct.PipeFitting
                 mainSmallToSideSmallArc,
             };
 
+        }
+
+        public DBObjectCollection CreateThDuctGeometries(ThDuctParameters parameters)
+        {
+            //绘制辅助中心线
+            Line auxiliaryCenterLine = new Line()
+            {
+                StartPoint = new Point3d(parameters.DuctStartPositionX, parameters.DuctStartPositionY, 0),
+                EndPoint = new Point3d(parameters.DuctEndPositionX, parameters.DuctEndPositionY, 0),
+                Layer = "Auot_DUCT-加压送风管",
+                ColorIndex = 1
+            };
+
+            //偏移出管轮廓线
+            var ductUpperLineCollection = auxiliaryCenterLine.GetOffsetCurves(0.5* parameters.DuctSectionWidth);
+            var ductBelowLineCollection = auxiliaryCenterLine.GetOffsetCurves(-0.5* parameters.DuctSectionWidth);
+            Line ductUpperLine = (Line)ductUpperLineCollection[0];
+            Line ductBelowLine = (Line)ductBelowLineCollection[0];
+
+            //绘制管道端线
+            Line ductUpperEndLine = new Line()
+            {
+                StartPoint = ductUpperLine.StartPoint,
+                EndPoint = ductBelowLine.StartPoint,
+                Layer = "Auot_DUCT-加压送风管",
+                ColorIndex = 1
+            };
+            Line ductBelowEndLine = new Line()
+            {
+                StartPoint = ductUpperLine.EndPoint,
+                EndPoint = ductBelowLine.EndPoint,
+                Layer = "Auot_DUCT-加压送风管",
+                ColorIndex = 1
+            };
+
+            return new DBObjectCollection()
+            {
+                ductUpperLine,
+                ductBelowLine,
+                ductUpperEndLine,
+                ductBelowEndLine
+            };
         }
 
     }

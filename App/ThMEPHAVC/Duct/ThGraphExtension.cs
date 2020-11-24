@@ -14,7 +14,7 @@ namespace ThMEPHAVC.Duct
     {
         public static double GetTwoVertexDistance(this ThDuctVertex vertexa, ThDuctVertex vertexb)
         {
-            return vertexa.Position.DistanceTo(vertexb.Position);
+            return vertexa.DistanceTo(vertexb);
         }
         public static double GetEdgeLength(this ThDuctEdge<ThDuctVertex> edge)
         {
@@ -23,10 +23,10 @@ namespace ThMEPHAVC.Duct
 
         public static List<Point3d> GetEdgeDividePoint(this ThDuctEdge<ThDuctVertex> edge, int dividecount)
         {
-            double dx = Math.Abs(edge.Target.Position.X - edge.Source.Position.X);
-            double dy = Math.Abs(edge.Target.Position.Y - edge.Source.Position.Y);
-            Point3d maxinx = edge.Source.Position.X > edge.Target.Position.X ? edge.Source.Position : edge.Target.Position;
-            Point3d maxiny = edge.Source.Position.Y > edge.Target.Position.Y ? edge.Source.Position : edge.Target.Position;
+            double dx = Math.Abs(edge.Target.XPosition - edge.Source.XPosition);
+            double dy = Math.Abs(edge.Target.YPosition - edge.Source.YPosition);
+            Point3d maxinx = edge.Source.XPosition > edge.Target.XPosition ? edge.Source.VertexToPoint3D() : edge.Target.VertexToPoint3D();
+            Point3d maxiny = edge.Source.YPosition > edge.Target.YPosition ? edge.Source.VertexToPoint3D() : edge.Target.VertexToPoint3D();
 
             List <Point3d> dividepoints = new List<Point3d>();
             for (int i = 1; i <= dividecount; i++)
