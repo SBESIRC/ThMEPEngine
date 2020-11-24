@@ -66,6 +66,7 @@
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
+    <Compile Include="Engine\ThArchitectureWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBasinRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
@@ -156,6 +157,8 @@
     <Compile Include="Model\ThIfcSpace.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
+    <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
+    <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThBalconyFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThBasintoolDbExtension.cs" />
     <Compile Include="Service\ThBasintoolLayerManager.cs" />
