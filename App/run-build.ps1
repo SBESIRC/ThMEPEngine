@@ -134,7 +134,7 @@ Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R18.FanS
 
 # temporarily disable code sign
 # $buildType build for ThCADPluginInstaller
-Task Compile.Installer -Depends Compile.Engine, Compile.Resource, Compile.FanSelection {
+Task Compile.Installer -Depends Compile.Engine, Compile.Resource {
     if ($buildType -eq $null) {
         throw "No build type specified"
     }
