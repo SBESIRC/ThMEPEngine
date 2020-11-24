@@ -5,6 +5,8 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -37,15 +39,14 @@ namespace ThMEPEngineCore.Engine
                 {
                     if (o is Polyline polyline && polyline.Area > 0.0)
                     {
-                        var newPolyline = polyline.ToNTSLineString().ToDbPolyline();
-                        var handleObjs = HandleAbnormalEdge(newPolyline);
-                        handleObjs.ForEach(k =>
+                        var handleObjs = HandleAbnormalEdge(polyline);
+                        handleObjs.ForEach(m =>
                         {
-                            var bufferObjs = k.Buffer(ThMEPEngineCoreCommon.ShearWallBufferDistance);
-                            if (bufferObjs.Count == 1)
+                            var bufferObjs = m.Buffer(ThMEPEngineCoreCommon.ShearWallBufferDistance);
+                            if (bufferObjs.Count > 0)
                             {
-                                var outline = bufferObjs[0] as Polyline;
-                                Elements.Add(ThIfcWall.Create(outline));
+                                var first = bufferObjs.Cast<Polyline>().OrderByDescending(n => n.Area).First();
+                                Elements.Add(ThIfcWall.Create(first));
                             }
                         });
                     }
