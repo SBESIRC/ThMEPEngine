@@ -99,9 +99,17 @@
     <Compile Include="IO\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
     <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableCarrierFitting.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableCarrierSegment.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableFitting.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableSegment.cs" />
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
     <Compile Include="Model\Electrical\ThIfcLamp.cs" />
     <Compile Include="Model\Havc\ThIfcAirTerminal.cs" />
+    <Compile Include="Model\Havc\ThIfcDuctFitting.cs" />
+    <Compile Include="Model\Havc\ThIfcDuctSegment.cs" />
+    <Compile Include="Model\ThIfcFlowFitting.cs" />
+    <Compile Include="Model\ThIfcFlowSegment.cs" />
     <Compile Include="Model\Plumbing\ThIfcCondensePipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcRainPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSanitaryTerminal.cs" />
