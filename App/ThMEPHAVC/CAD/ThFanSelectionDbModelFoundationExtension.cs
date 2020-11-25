@@ -1,6 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using TianHua.FanSelection;
 
-namespace TianHua.FanSelection.UI.CAD
+namespace ThMEPHAVC.CAD
 {
     public static class ThFanSelectionDbModelFoundationExtension
     {

@@ -5,8 +5,9 @@ using System.Linq;
 using Catel.Collections;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using TianHua.FanSelection;
 
-namespace TianHua.FanSelection.UI.CAD
+namespace ThMEPHAVC.CAD
 {
     public class ThFanSelectionDbModelManager : IDisposable
     {

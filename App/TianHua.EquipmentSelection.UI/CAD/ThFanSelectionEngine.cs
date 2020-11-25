@@ -10,6 +10,7 @@ using TianHua.FanSelection.Function;
 using Autodesk.AutoCAD.DatabaseServices;
 using System;
 using TianHua.Publics.BaseCode;
+using ThMEPHAVC.CAD;
 
 namespace TianHua.FanSelection.UI.CAD
 {

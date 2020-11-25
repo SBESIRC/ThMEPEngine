@@ -1,10 +1,10 @@
 ﻿using System;
 using Linq2Acad;
 using System.Linq;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace TianHua.FanSelection.UI.CAD
+namespace ThMEPHAVC.CAD
 {
     public class ThFanSelectionDbModelFoundationManager : IDisposable
     {

@@ -1,10 +1,11 @@
 ﻿using Linq2Acad;
 using DotNetARX;
 using System.Linq;
-using Catel.Collections;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using TianHua.FanSelection;
 
-namespace TianHua.FanSelection.UI.CAD
+namespace ThMEPHAVC.CAD
 {
     public class ThFanSelectionModelFoundationService
     {

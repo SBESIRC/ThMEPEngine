@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace TianHua.FanSelection.UI.CAD
+namespace ThMEPHAVC.CAD
 {
     public static class ThFanSelectionEditorExtension
     {

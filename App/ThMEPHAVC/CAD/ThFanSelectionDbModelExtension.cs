@@ -8,8 +8,9 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using TianHua.FanSelection.Function;
 using Autodesk.AutoCAD.DatabaseServices;
+using TianHua.FanSelection;
 
-namespace TianHua.FanSelection.UI.CAD
+namespace ThMEPHAVC.CAD
 {
     public static class ThFanSelectionDbModelExtension
     {

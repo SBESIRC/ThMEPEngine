@@ -28,6 +28,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD\ThFanSelectionDbModelExtension.cs" />
+    <Compile Include="CAD\ThFanSelectionDbModelFoundationExtension.cs" />
+    <Compile Include="CAD\ThFanSelectionDbModelFoundationManager.cs" />
+    <Compile Include="CAD\ThFanSelectionDbModelManager.cs" />
+    <Compile Include="CAD\ThFanSelectionDynBlockExtension.cs" />
+    <Compile Include="CAD\ThFanSelectionEditorExtension.cs" />
+    <Compile Include="CAD\ThFanSelectionGeExtension.cs" />
+    <Compile Include="CAD\ThFanSelectionModelFoundationService.cs" />
+    <Compile Include="CAD\ThFSBlockReference.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
     <Compile Include="Duct\GraphSerializeService.cs" />
@@ -62,6 +71,10 @@
     <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
+      <Project>{6fadc5fa-f54f-4742-bacd-9f1f855e8210}</Project>
+      <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
   <Choose>
