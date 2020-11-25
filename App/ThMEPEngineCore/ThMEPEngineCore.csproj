@@ -105,9 +105,13 @@
     <Compile Include="Model\Electrical\ThIfcCableSegment.cs" />
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
     <Compile Include="Model\Electrical\ThIfcLamp.cs" />
+    <Compile Include="Model\Havc\ThIfcDuctCross.cs" />
+    <Compile Include="Model\Havc\ThIfcDuctElbow.cs" />
     <Compile Include="Model\Havc\ThIfcAirTerminal.cs" />
     <Compile Include="Model\Havc\ThIfcDuctFitting.cs" />
     <Compile Include="Model\Havc\ThIfcDuctSegment.cs" />
+    <Compile Include="Model\Havc\ThIfcDuctTee.cs" />
+    <Compile Include="Model\Havc\ThIfcDuctReducing.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowSegment.cs" />
     <Compile Include="Model\Plumbing\ThIfcCondensePipe.cs" />
@@ -163,6 +167,7 @@
     <Compile Include="Operation\GridService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
+    <Compile Include="Service\Havc\ThHavcDuctFittingDbExtension.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
@@ -190,6 +195,7 @@
     <Compile Include="Service\ThOtherDbExtension.cs" />
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
+    <Compile Include="Service\Havc\ThHavcDuctFittingFactoryService.cs" />
     <Compile Include="Service\ThRainPipeDbExtension.cs" />
     <Compile Include="Service\ThRainPipeLayerManager.cs" />
     <Compile Include="Service\ThSegmentService.cs" />
@@ -291,5 +297,8 @@
       </ItemGroup>
     </When>
   </Choose>
+  <ItemGroup>
+    <PackageReference Include="Xbim.Essentials" Version="5.1.297" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

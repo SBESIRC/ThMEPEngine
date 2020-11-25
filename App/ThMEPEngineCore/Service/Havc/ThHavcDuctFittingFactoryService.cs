@@ -1,66 +1,54 @@
 ﻿using System;
+using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
-using DotNetARX;
-using AcHelper;
+using ThMEPEngineCore.Model.Havc;
 
-namespace ThMEPHAVC.Duct.PipeFitting
+namespace ThMEPEngineCore.Service.Havc
 {
-    public class ThPipeGeometryFactoryService
+    public class ThHavcDuctFittingFactoryService
     {
-        //==============SINGLETON============
-        //fourth version from:
-        //http://csharpindepth.com/Articles/General/Singleton.aspx
-        private static readonly ThPipeGeometryFactoryService instance = new ThPipeGeometryFactoryService();
-        // Explicit static constructor to tell C# compiler
-        // not to mark type as beforefieldinit    
-        static ThPipeGeometryFactoryService() { }
-        internal ThPipeGeometryFactoryService() { }
-        public static ThPipeGeometryFactoryService Instance { get { return instance; } }
-        //-------------SINGLETON-----------------
-
-        public ThReducing CreateReducing(ThReducingParameters parameters)
+        public ThIfcDuctReducing CreateReducing(ThIfcDuctReducingParameters parameters)
         {
-            return new ThReducing(parameters)
+            return new ThIfcDuctReducing(parameters)
             {
-                Geometries = CreateReducingGeometries(parameters)
+                Representation = CreateReducingGeometries(parameters)
             };
         }
 
-        public ThElbow CreateElbow(ThElbowParameters parameters)
+        public ThIfcDuctElbow CreateElbow(ThIfcDuctElbowParameters parameters)
         {
-            return new ThElbow(parameters)
+            return new ThIfcDuctElbow(parameters)
             {
-                Geometries = CreateElbowGeometries(parameters)
+                Representation = CreateElbowGeometries(parameters)
             };
         }
 
-        public ThTee CreateTee(ThTeeParameters parameters)
+        public ThIfcDuctTee CreateTee(ThIfcDuctTeeParameters parameters)
         {
-            return new ThTee(parameters)
+            return new ThIfcDuctTee(parameters)
             {
-                Geometries = CreateTeeGeometries(parameters)
+                Representation = CreateTeeGeometries(parameters)
             };
         }
 
-        public ThFourWay CreateFourWay(ThFourWayParameters parameters)
+        public ThIfcDuctCross CreateCross(ThIfcDuctCrossParameters parameters)
         {
-            return new ThFourWay(parameters)
+            return new ThIfcDuctCross(parameters)
             {
-                Geometries = CreateFourWayGeometries(parameters)
+                Representation = CreateCrossGeometries(parameters)
             };
         }
 
-        public ThDuct CreateThDuct(ThDuctParameters parameters)
+        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters)
         {
-            return new ThDuct(parameters)
+            return new ThIfcDuctSegment(parameters)
             {
-                Geometries = CreateThDuctGeometries(parameters)
+                Representation = CreateDuctSegmentGeometries(parameters)
             };
         }
 
-        private DBObjectCollection CreateReducingGeometries(ThReducingParameters parameters)
+        private DBObjectCollection CreateReducingGeometries(ThIfcDuctReducingParameters parameters)
         {
             //创建小端的端线
             Line smallendline = new Line()
@@ -105,7 +93,7 @@ namespace ThMEPHAVC.Duct.PipeFitting
             };
         }
 
-        public DBObjectCollection CreateElbowGeometries(ThElbowParameters parameters)
+        public DBObjectCollection CreateElbowGeometries(ThIfcDuctElbowParameters parameters)
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
             //创建弯头内外侧圆弧
@@ -206,7 +194,7 @@ namespace ThMEPHAVC.Duct.PipeFitting
             };
         }
 
-        public DBObjectCollection CreateTeeGeometries(ThTeeParameters parameters)
+        public DBObjectCollection CreateTeeGeometries(ThIfcDuctTeeParameters parameters)
         {
             //创建支路端线
             Line branchEndLine = new Line()
@@ -339,13 +327,13 @@ namespace ThMEPHAVC.Duct.PipeFitting
             };
         }
 
-        public DBObjectCollection CreateFourWayGeometries(ThFourWayParameters parameters)
+        public DBObjectCollection CreateCrossGeometries(ThIfcDuctCrossParameters parameters)
         {
             //创建大端的端线
             Line mainBigEndLine = new Line()
             {
-                StartPoint = parameters.FourWayCenter + new Vector3d(-0.5* parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
-                EndPoint = parameters.FourWayCenter + new Vector3d(0.5 * parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
+                StartPoint = parameters.Center + new Vector3d(-0.5* parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
+                EndPoint = parameters.Center + new Vector3d(0.5 * parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
                 Layer = "Auot_DUCT-加压送风管端线",
                 ColorIndex = 2
             };
@@ -353,22 +341,22 @@ namespace ThMEPHAVC.Duct.PipeFitting
             //创建主路小端的端线
             Line mainSmallEndLine = new Line()
             {
-                StartPoint = parameters.FourWayCenter + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
-                EndPoint = parameters.FourWayCenter + new Vector3d(0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
+                StartPoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
+                EndPoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
                 Layer = "Auot_DUCT-加压送风管端线",
                 ColorIndex = 2
             };
 
 
             //创建主路大端与侧路大端的圆弧过渡段
-            Point3d bigEndCircleCenter = parameters.FourWayCenter + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth), -parameters.SideBigEndWidth, 0);
+            Point3d bigEndCircleCenter = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth), -parameters.SideBigEndWidth, 0);
             Arc bigInnerArc = new Arc(bigEndCircleCenter, 0.5 * parameters.SideBigEndWidth, 0, 0.5 * Math.PI)
             {
                 Layer = "Auot_DUCT-加压送风管",
                 ColorIndex = 1
             };
             //创建主路大端与侧路小端的圆弧过渡段
-            Point3d smallEndCircleCenter = parameters.FourWayCenter + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth), -parameters.SideSmallEndWidth, 0);
+            Point3d smallEndCircleCenter = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth), -parameters.SideSmallEndWidth, 0);
             Arc smallInnerArc = new Arc(smallEndCircleCenter, 0.5 * parameters.SideSmallEndWidth, 0.5 * Math.PI, Math.PI)
             {
                 Layer = "Auot_DUCT-加压送风管",
@@ -394,8 +382,8 @@ namespace ThMEPHAVC.Duct.PipeFitting
             //创建侧路大端的端线
             Line sideBigEndLine = new Line()
             {
-                StartPoint = parameters.FourWayCenter + new Vector3d(-0.5 * (parameters.BigEndWidth+ parameters.SideBigEndWidth) - 50,-0.5 * parameters.SideBigEndWidth,0),
-                EndPoint = parameters.FourWayCenter + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth) - 50, 0.5 * parameters.SideBigEndWidth, 0),
+                StartPoint = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth+ parameters.SideBigEndWidth) - 50,-0.5 * parameters.SideBigEndWidth,0),
+                EndPoint = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth) - 50, 0.5 * parameters.SideBigEndWidth, 0),
                 Layer = "Auot_DUCT-加压送风管端线",
                 ColorIndex = 2
             };
@@ -420,8 +408,8 @@ namespace ThMEPHAVC.Duct.PipeFitting
             //创建辅助线，确定侧路大端管线与主路小端管线的交点
             Ray sideBigEndAuxiliaryRay = new Ray()
             {
-                BasePoint = parameters.FourWayCenter + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 0, 0),
-                SecondPoint = parameters.FourWayCenter + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 10, 0)
+                BasePoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 0, 0),
+                SecondPoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 10, 0)
             };
             Circle sideBigEndAuxiliaryCircle = new Circle() 
             {
@@ -446,8 +434,8 @@ namespace ThMEPHAVC.Duct.PipeFitting
             //创建侧路小端的端线
             Line sideSmallEndLine = new Line()
             {
-                StartPoint = parameters.FourWayCenter + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, -0.5 * parameters.SideSmallEndWidth, 0),
-                EndPoint = parameters.FourWayCenter + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, 0.5 * parameters.SideSmallEndWidth, 0),
+                StartPoint = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, -0.5 * parameters.SideSmallEndWidth, 0),
+                EndPoint = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, 0.5 * parameters.SideSmallEndWidth, 0),
                 Layer = "Auot_DUCT-加压送风管端线",
                 ColorIndex = 2
             };
@@ -472,8 +460,8 @@ namespace ThMEPHAVC.Duct.PipeFitting
             //创建辅助线，确定侧路小端管线与主路小端管线的交点
             Ray sideSmallEndAuxiliaryRay = new Ray()
             {
-                BasePoint = parameters.FourWayCenter + new Vector3d(0.5 * parameters.mainSmallEndWidth, 0, 0),
-                SecondPoint = parameters.FourWayCenter + new Vector3d(0.5 * parameters.mainSmallEndWidth, 10, 0)
+                BasePoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 0, 0),
+                SecondPoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 10, 0)
             };
             Circle sideSmallEndAuxiliaryCircle = new Circle()
             {
@@ -517,20 +505,20 @@ namespace ThMEPHAVC.Duct.PipeFitting
 
         }
 
-        public DBObjectCollection CreateThDuctGeometries(ThDuctParameters parameters)
+        public DBObjectCollection CreateDuctSegmentGeometries(ThIfcDuctSegmentParameters parameters)
         {
             //绘制辅助中心线
             Line auxiliaryCenterLine = new Line()
             {
-                StartPoint = new Point3d(parameters.DuctStartPositionX, parameters.DuctStartPositionY, 0),
-                EndPoint = new Point3d(parameters.DuctEndPositionX, parameters.DuctEndPositionY, 0),
+                StartPoint = new Point3d(-parameters.Length/2.0, 0, 0),
+                EndPoint = new Point3d(parameters.Length / 2.0, 0, 0),
                 Layer = "Auot_DUCT-加压送风管",
                 ColorIndex = 1
             };
 
             //偏移出管轮廓线
-            var ductUpperLineCollection = auxiliaryCenterLine.GetOffsetCurves(0.5* parameters.DuctSectionWidth);
-            var ductBelowLineCollection = auxiliaryCenterLine.GetOffsetCurves(-0.5* parameters.DuctSectionWidth);
+            var ductUpperLineCollection = auxiliaryCenterLine.GetOffsetCurves(0.5 * parameters.Width);
+            var ductBelowLineCollection = auxiliaryCenterLine.GetOffsetCurves(-0.5 * parameters.Width);
             Line ductUpperLine = (Line)ductUpperLineCollection[0];
             Line ductBelowLine = (Line)ductBelowLineCollection[0];
 
@@ -558,6 +546,5 @@ namespace ThMEPHAVC.Duct.PipeFitting
                 ductBelowEndLine
             };
         }
-
     }
 }

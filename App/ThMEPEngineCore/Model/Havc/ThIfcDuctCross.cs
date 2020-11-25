@@ -1,14 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHAVC.Duct.PipeFitting
+namespace ThMEPEngineCore.Model.Havc
 {
-    public class ThFourWayParameters
+    public class ThIfcDuctCrossParameters
     {
         /// <summary>
         /// 四通大端管道截面宽度
@@ -33,7 +29,7 @@ namespace ThMEPHAVC.Duct.PipeFitting
         /// <summary>
         /// 四通中心点
         /// </summary>
-        public Point3d FourWayCenter { get; set; }
+        public Point3d Center { get; set; }
 
         /// <summary>
         /// 旋转角度
@@ -42,16 +38,19 @@ namespace ThMEPHAVC.Duct.PipeFitting
 
     }
 
-    public class ThFourWay : IPipeFitting
+    public class ThIfcDuctCross : ThIfcDuctFitting
     {
-        public DBObjectCollection Geometries { get; set; }
-        public ThFourWayParameters Parameters { get; set; }
+        public ThIfcDuctCrossParameters Parameters { get; private set; }
 
-        public ThFourWay(ThFourWayParameters parameters)
+        public ThIfcDuctCross(ThIfcDuctCrossParameters parameters)
         {
             Parameters = parameters;
-            Parameters.FourWayCenter = new Point3d(0, 0, 0);
+            Parameters.Center = Point3d.Origin;
         }
 
+        public static ThIfcDuctCross Create(ThIfcDuctCrossParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

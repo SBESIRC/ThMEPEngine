@@ -1,18 +1,10 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using GeometryExtensions;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHAVC.Duct.PipeFitting
+namespace ThMEPEngineCore.Model.Havc
 {
-    public class ThReducingParameters
+    public class ThIfcDuctReducingParameters
     {
         /// <summary>
         /// 异径大端截面宽度
@@ -35,15 +27,19 @@ namespace ThMEPHAVC.Duct.PipeFitting
         public double RotateAngle { get; set; }
     }
 
-    public class ThReducing : IPipeFitting
+    public class ThIfcDuctReducing : ThIfcDuctFitting
     {
-        public DBObjectCollection Geometries { get; set; }
-        public ThReducingParameters Parameters { get; set; }
+        public ThIfcDuctReducingParameters Parameters { get; set; }
 
-        public ThReducing(ThReducingParameters parameters)
+        public ThIfcDuctReducing(ThIfcDuctReducingParameters parameters)
         {
             Parameters = parameters;
-            Parameters.StartCenterPoint = new Point3d(0,0,0);
+            Parameters.StartCenterPoint = Point3d.Origin;
+        }
+
+        public static ThIfcDuctReducing Create(ThIfcDuctReducingParameters parameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }

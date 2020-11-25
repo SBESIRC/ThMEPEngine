@@ -1,18 +1,9 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using GeometryExtensions;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ThMEPHAVC.Duct.PipeFitting
+namespace ThMEPEngineCore.Model.Havc
 {
-    public class ThElbowParameters
+    public class ThIfcDuctElbowParameters
     {
         /// <summary>
         /// 弯头角度(弧度)
@@ -51,15 +42,19 @@ namespace ThMEPHAVC.Duct.PipeFitting
         public double RotateAngle { get; set; }
     }
 
-    public class ThElbow : IPipeFitting
+    public class ThIfcDuctElbow : ThIfcDuctFitting
     {
-        public DBObjectCollection Geometries { get; set; }
-        public ThElbowParameters Parameters { get; set; }
+        public ThIfcDuctElbowParameters Parameters { get; private set; }
 
-        public ThElbow(ThElbowParameters parameters)
+        public ThIfcDuctElbow(ThIfcDuctElbowParameters parameters)
         {
             Parameters = parameters;
-            Parameters.CornerPoint = new Point3d(0,0,0);
+            Parameters.CornerPoint = Point3d.Origin;
+        }
+
+        public static ThIfcDuctElbow Create(ThIfcDuctElbowParameters parameters)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -31,15 +31,6 @@
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
     <Compile Include="Duct\GraphSerializeService.cs" />
-    <Compile Include="Duct\PipeFitting\DrawPipeEngine.cs" />
-    <Compile Include="Duct\PipeFitting\IPipeFitting.cs" />
-    <Compile Include="Duct\PipeFitting\PipeFittingDrawWorker.cs" />
-    <Compile Include="Duct\PipeFitting\ThDuct.cs" />
-    <Compile Include="Duct\PipeFitting\ThElbow.cs" />
-    <Compile Include="Duct\PipeFitting\ThFourWay.cs" />
-    <Compile Include="Duct\PipeFitting\ThPipeGeometryFactoryService.cs" />
-    <Compile Include="Duct\PipeFitting\ThReducing.cs" />
-    <Compile Include="Duct\PipeFitting\ThTee.cs" />
     <Compile Include="Duct\ThDraught.cs" />
     <Compile Include="Duct\ThDraughtDesignEngine.cs" />
     <Compile Include="Duct\ThDuctDesignEngine.cs" />

@@ -1,14 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ThMEPHAVC.Duct.PipeFitting
+namespace ThMEPEngineCore.Model.Havc
 {
-    public class ThTeeParameters
+    public class ThIfcDuctTeeParameters
     {
         /// <summary>
         /// 中心点
@@ -35,16 +30,19 @@ namespace ThMEPHAVC.Duct.PipeFitting
         /// </summary>
         public double RotateAngle { get; set; }
     }
-    public class ThTee : IPipeFitting
+    public class ThIfcDuctTee : ThIfcDuctFitting
     {
-        public DBObjectCollection Geometries { get; set; }
-        public ThTeeParameters Parameters { get; set; }
+        public ThIfcDuctTeeParameters Parameters { get; set; }
 
-        public ThTee(ThTeeParameters parameters)
+        public ThIfcDuctTee(ThIfcDuctTeeParameters parameters)
         {
             Parameters = parameters;
-            Parameters.CenterPoint = new Point3d(0, 0, 0);
+            Parameters.CenterPoint = Point3d.Origin;
         }
 
+        public static ThIfcDuctTee Create(ThIfcDuctTeeParameters parameters)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

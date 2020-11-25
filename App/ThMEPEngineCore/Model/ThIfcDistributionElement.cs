@@ -1,13 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcDistributionElement : ThIfcElement
     {
-        //
+        /// <summary>
+        /// OCS到其他坐标系转换矩阵
+        /// </summary>
+        public Matrix3d Matrix { get; set; }
+        /// <summary>
+        /// OCS坐标系下的几何图元
+        /// </summary>
+        public DBObjectCollection Representation { get; set; }
     }
 }
