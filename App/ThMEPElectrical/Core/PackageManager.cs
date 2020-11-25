@@ -133,13 +133,14 @@ namespace ThMEPElectrical.Core
                 var wallPtCollection = pairInfo.ExternalProfile.Vertices();
                 var innerHoles = GetValidProfiles(infoReader.RecognizeMainBeamColumnWalls, wallPtCollection);
                 var secondBeams = GetValidProfileInfos(infoReader.RecognizeSecondBeams, wallPtCollection);
+                //DrawUtils.DrawProfile(innerHoles.Polylines2Curves(), "innerHoles11");
                 //var drawCurves = SecondBeamProfile2Polyline(secondBeams).Polylines2Curves();
-                //DrawUtils.DrawProfileDebug(drawCurves, "drawCurves");
+                //DrawUtils.DrawProfileDebug(drawCurves, "drawCurves11");
                 // 外墙，内洞，次梁
-                var profileDatas = BeamDetectionCalculator.MakeDetectionData(pairInfo.ExternalProfile, innerHoles, secondBeams);
+                var profileDatas = BeamDetectionCalculatorEx.MakeDetectionDataEx(pairInfo.ExternalProfile, innerHoles, secondBeams);
 
                 var validProfileDatas = ValidInputPairInfoCalculator.MakeValidInputPairInfoCalculator(profileDatas, pairInfo);
-                DrawUtils.DrawGroup(validProfileDatas);
+                //DrawUtils.DrawGroup(validProfileDatas);
                 // 主次梁 坐标系信息
                 ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(validProfileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }

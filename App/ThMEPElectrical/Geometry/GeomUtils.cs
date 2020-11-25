@@ -405,6 +405,21 @@ namespace ThMEPElectrical.Geometry
             return false;
         }
 
+        public static bool IsIntersect(Polyline firstPly, Polyline secPly)
+        {
+            if (GeomUtils.IsIntersectValid(firstPly, secPly))
+            {
+                var ptLst = new Point3dCollection();
+                firstPly.IntersectWith(secPly, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);
+                if (ptLst.Count != 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static bool IsIntersectValid(Polyline firstPly, Polyline secPly)
         {
             // first
@@ -440,6 +455,44 @@ namespace ThMEPElectrical.Geometry
                 return true;
 
             return false;
+        }
+
+        public static DetectionPolygon MPolygon2PolygonInfo(MPolygon polygon)
+        {
+            Polyline shell = null;
+            List<Polyline> holes = new List<Polyline>();
+            for (int i = 0; i < polygon.NumMPolygonLoops; i++)
+            {
+                LoopDirection direction = polygon.GetLoopDirection(i);
+                MPolygonLoop mPolygonLoop = polygon.GetMPolygonLoopAt(i);
+                Polyline polyline = new Polyline()
+                {
+                    Closed = true
+                };
+
+                for (int j = 0; j < mPolygonLoop.Count; j++)
+                {
+                    var bulgeVertex = mPolygonLoop[j];
+                    polyline.AddVertexAt(j, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
+                }
+                if (LoopDirection.Exterior == direction)
+                {
+                    shell = polyline;
+                }
+                else if (LoopDirection.Interior == direction)
+                {
+                    holes.Add(polyline);
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+
+            if (shell == null)
+                throw new NotSupportedException("shell is null");
+
+            return new DetectionPolygon(shell, holes);
         }
 
         /// <summary>

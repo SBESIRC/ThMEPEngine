@@ -18,6 +18,12 @@ namespace ThMEPElectrical.Model
 
         public bool IsUsed = false;
 
+        public bool IsHolePoly = false;
+
+        public int OrderNum = 0;
+
+        public List<SecondBeamProfileInfo> RelatedSecondBeams = new List<SecondBeamProfileInfo>(); // 记录相关联的信息
+
         public SecondBeamProfileInfo(Polyline poly, double height = 500)
         {
             Profile = poly;

@@ -33,6 +33,42 @@ namespace ThMEPElectrical.Business
         }
 
         /// <summary>
+        /// 计算区域和内部数据的关系组, 探测区域带有洞信息
+        /// </summary>
+        /// <param name="profiles"></param>
+        /// <returns></returns>
+        protected virtual List<DetectionRegion> CalculateDetectionPolygonRelations(List<DetectionPolygon> detectionPolygons, List<SecondBeamProfileInfo> secondBeamInfos)
+        {
+            var detectRegions = new List<DetectionRegion>();
+
+            // 探测区域
+            foreach (var polygon in detectionPolygons)
+            {
+                var detectRegion = new DetectionRegion()
+                {
+                    DetectionProfile = polygon.Shell,
+                    DetectionInnerProfiles = polygon.Holes
+                };
+
+                detectRegions.Add(detectRegion);
+
+                // 带有洞的区域的组合关系
+                foreach (var secondBeam in secondBeamInfos)
+                {
+                    var secondBeamProfile = secondBeam.Profile;
+
+                    if (IsIntersectOrContains(polygon.Shell, secondBeamProfile))
+                    {
+                        secondBeam.IsUsed = true;
+                        detectRegion.secondBeams.Add(secondBeam);
+                    }
+                }
+            }
+
+            return detectRegions;
+        }
+
+        /// <summary>
         /// 计算区域和内部数据的关系组
         /// </summary>
         /// <param name="profiles"></param>

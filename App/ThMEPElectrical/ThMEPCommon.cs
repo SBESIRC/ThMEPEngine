@@ -40,6 +40,8 @@ namespace ThMEPElectrical
         public static readonly double EntityExtendDistance = 1000; // 选择图元延长的距离
         public static readonly double SecondBeamDivideHeight = 600; // 梁高差高度差值大于等于600划分
 
+        public static readonly double ValidBeamLength = 2000; // 有效的梁长度
+
         public static readonly double NearestDisTolerance = 2; //最近距离容差值
     }
 }

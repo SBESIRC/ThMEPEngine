@@ -40,6 +40,8 @@
     <Compile Include="BlockConvert\ThBConvertRuleEngineWeakCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
+    <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
+    <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
     <Compile Include="Business\Procedure\SplitWallWorker.cs" />
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
@@ -73,6 +75,7 @@
     <Compile Include="Geometry\CoordinateTransform.cs" />
     <Compile Include="Geometry\GeomUtils.cs" />
     <Compile Include="Geometry\MinRectangle.cs" />
+    <Compile Include="Geometry\MPolygonProfileFinder.cs" />
     <Compile Include="Layout\ILayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />
@@ -87,10 +90,12 @@
     <Compile Include="Broadcast\ParkingLinesService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\ColumnModel.cs" />
+    <Compile Include="Model\DetectionPolygon.cs" />
     <Compile Include="Model\DetectionRegion.cs" />
     <Compile Include="Model\LayoutMap.cs" />
     <Compile Include="Model\LayoutProfileData.cs" />
     <Compile Include="Model\MainSecondBeamRegion.cs" />
+    <Compile Include="Model\SplitBeamPath.cs" />
     <Compile Include="Model\PlaceInputProfileData.cs" />
     <Compile Include="Model\PlaceParameter.cs" />
     <Compile Include="Model\PlacePoint.cs" />

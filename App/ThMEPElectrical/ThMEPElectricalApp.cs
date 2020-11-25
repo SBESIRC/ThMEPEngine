@@ -20,6 +20,7 @@ namespace ThMEPElectrical
         public void Initialize()
         {
             //
+            ThMPolygonTool.Initialize();
         }
 
         public void Terminate()

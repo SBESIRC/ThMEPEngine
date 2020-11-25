@@ -59,6 +59,15 @@ namespace ThCADExtension
                     throw new NotSupportedException();
                 }
             });
+
+            mPolygon.SetLoopDirection(0, LoopDirection.Exterior);
+            if (innerCurves.Count > 0)
+            {
+                for (int i = 1; i <= innerCurves.Count; i++)
+                {
+                    mPolygon.SetLoopDirection(i, LoopDirection.Interior);
+                }
+            }
             return mPolygon;
         }
     }
