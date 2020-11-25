@@ -4,12 +4,13 @@ using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertEngineWeakCurrent : ThBConvertEngine
     {
-        public override ObjectId Insert(string name, Scale3d scale, ThBConvertBlockReference srcBlockReference)
+        public override ObjectId Insert(string name, Scale3d scale, ThBlockReferenceData srcBlockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -23,7 +24,7 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void MatchProperties(ObjectId blkRef, ThBConvertBlockReference srcBlockReference)
+        public override void MatchProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -31,12 +32,12 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void SetDatbaseProperties(ObjectId blkRef, ThBConvertBlockReference srcBlockReference)
+        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             throw new NotImplementedException();
         }
 
-        public override void TransformBy(ObjectId blkRef, ThBConvertBlockReference srcBlockReference)
+        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

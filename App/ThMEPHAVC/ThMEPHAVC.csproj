@@ -36,7 +36,6 @@
     <Compile Include="CAD\ThFanSelectionEditorExtension.cs" />
     <Compile Include="CAD\ThFanSelectionGeExtension.cs" />
     <Compile Include="CAD\ThFanSelectionModelFoundationService.cs" />
-    <Compile Include="CAD\ThFSBlockReference.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
     <Compile Include="Duct\GraphSerializeService.cs" />

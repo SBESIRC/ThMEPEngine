@@ -11,7 +11,7 @@ namespace ThMEPElectrical.BlockConvert
     {
         // Reference:
         //  https://adndevblog.typepad.com/autocad/2012/05/accessing-visible-entities-in-a-dynamic-block.html
-        public static Dictionary<string, ObjectIdCollection> DynablockVisibilityStates(this ThBConvertBlockReference blockReference)
+        public static Dictionary<string, ObjectIdCollection> DynablockVisibilityStates(this ThBlockReferenceData blockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.HostDatabase))
             {
@@ -75,7 +75,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static string CurrentVisibilityStateValue(this ThBConvertBlockReference blockReference)
+        public static string CurrentVisibilityStateValue(this ThBlockReferenceData blockReference)
         {
             var visibilityStates = DynablockVisibilityStates(blockReference);
             var properties = blockReference.CustomProperties
@@ -89,7 +89,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static ObjectIdCollection VisibleEntities(this ThBConvertBlockReference blockReference)
+        public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference)
         {
             var objs = new ObjectIdCollection();
             var visibilityStates = DynablockVisibilityStates(blockReference);
@@ -109,7 +109,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static List<string> VisibleTexts(this ThBConvertBlockReference blockReference)
+        public static List<string> VisibleTexts(this ThBlockReferenceData blockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.HostDatabase))
             {

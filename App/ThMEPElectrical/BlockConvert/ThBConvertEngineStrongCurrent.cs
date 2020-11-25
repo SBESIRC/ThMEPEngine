@@ -4,12 +4,13 @@ using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
     public class ThBConvertEngineStrongCurrent : ThBConvertEngine
     {
-        public override ObjectId Insert(string name, Scale3d scale, ThBConvertBlockReference srcBlockReference)
+        public override ObjectId Insert(string name, Scale3d scale, ThBlockReferenceData srcBlockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -23,19 +24,19 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        public override void MatchProperties(ObjectId blkRef, ThBConvertBlockReference source)
+        public override void MatchProperties(ObjectId blkRef, ThBlockReferenceData source)
         {
-            var target = new ThBConvertBlockReference(blkRef);
+            var target = new ThBlockReferenceData(blkRef);
             FillProperties(target, source);
             blkRef.UpdateAttributesInBlock(new Dictionary<string, string>(target.Attributes));
         }
 
-        public override void SetDatbaseProperties(ObjectId blkRef, ThBConvertBlockReference srcBlockReference)
+        public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             throw new NotImplementedException();
         }
 
-        public override void TransformBy(ObjectId blkRef, ThBConvertBlockReference srcBlockReference)
+        public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -44,7 +45,7 @@ namespace ThMEPElectrical.BlockConvert
             }
         }
 
-        private void FillProperties(ThBConvertBlockReference target, ThBConvertBlockReference source)
+        private void FillProperties(ThBlockReferenceData target, ThBlockReferenceData source)
         {
             // 负载编号：“设备符号"&"-"&"楼层-编号”
             if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_LOAD_NUMBER))

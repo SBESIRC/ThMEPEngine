@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using TianHua.FanSelection.Function;
 using ThMEPHAVC.CAD;
+using ThCADExtension;
 
 namespace TianHua.FanSelection.UI.CAD
 {
@@ -82,7 +83,7 @@ namespace TianHua.FanSelection.UI.CAD
                     }
 
                     // 参数变化
-                    var blockReference = new ThFSBlockReference(model);
+                    var blockReference = new ThBlockReferenceData(model);
                     var attributes = new Dictionary<string, string>(blockReference.Attributes);
                     if (_FanDataModel.IsAttributeModified(attributes))
                     {

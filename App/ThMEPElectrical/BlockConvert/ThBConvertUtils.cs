@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
+using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -25,7 +26,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static string LoadSN(ThBConvertBlockReference blockReference)
+        public static string LoadSN(ThBlockReferenceData blockReference)
         {
             string name = blockReference.StringValue(ThBConvertCommon.PROPERTY_EQUIPMENT_SYMBOL);
             if (string.IsNullOrEmpty(name))
@@ -40,7 +41,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static string LoadPower(ThBConvertBlockReference blockReference)
+        public static string LoadPower(ThBlockReferenceData blockReference)
         {
             // 电量
             // 1.优先从属性"电量"提取（仅数字），属性内值可能为：数字+字母
@@ -76,7 +77,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static string LoadUsage(ThBConvertBlockReference blockReference)
+        public static string LoadUsage(ThBlockReferenceData blockReference)
         {
             // 设备名称
             // 1.优先从属性"设备名称", "风机功能"提取
@@ -122,7 +123,7 @@ namespace ThMEPElectrical.BlockConvert
         /// <param name="blockReference"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static string StringValue(this ThBConvertBlockReference blockReference, string name)
+        public static string StringValue(this ThBlockReferenceData blockReference, string name)
         {
             try
             {
@@ -157,7 +158,7 @@ namespace ThMEPElectrical.BlockConvert
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static bool IsFirePowerSupply(this ThBConvertBlockReference blockReference)
+        public static bool IsFirePowerSupply(this ThBlockReferenceData blockReference)
         {
             return blockReference.StringValue(ThBConvertCommon.PROPERTY_FIRE_POWER_SUPPLY) == "消防电源";
         }

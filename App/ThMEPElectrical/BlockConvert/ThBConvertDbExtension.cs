@@ -5,6 +5,7 @@ using GeometryExtensions;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -40,9 +41,9 @@ namespace ThMEPElectrical.BlockConvert
         /// <param name="database"></param>
         /// <param name="blkRef"></param>
         /// <returns></returns>
-        public static ThBConvertBlockReference GetBlockReference(this Database database, ObjectId blkRef)
+        public static ThBlockReferenceData GetBlockReference(this Database database, ObjectId blkRef)
         {
-            return new ThBConvertBlockReference(blkRef);
+            return new ThBlockReferenceData(blkRef);
         }
 
         /// <summary>
