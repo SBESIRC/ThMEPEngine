@@ -1,9 +1,13 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
+using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.BeamInfo;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.BeamInfo.Utils;
 using System.Collections.Generic;
@@ -24,6 +28,85 @@ namespace ThMEPEngineCore.Test
         public void Terminate()
         {
             //
+        }
+
+        /// <summary>
+        /// 提取指定区域内的梁信息
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THGETBEAMINFO", CommandFlags.Modal)]
+        public void THGETBEAMINFO()
+        {
+            // 选择楼层区域
+            // 暂时只支持矩形区域
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                DBObjectCollection curves = new DBObjectCollection();
+                var selRes = Active.Editor.GetSelection();
+                foreach (ObjectId objId in selRes.Value.GetObjectIds())
+                {
+                    curves.Add(acadDatabase.Element<Curve>(objId));
+                }
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
+                Point3d pt1 = Active.Editor.GetPoint("select left down point: ").Value;
+                Point3d pt2 = Active.Editor.GetPoint("select right up point: ").Value;
+                DBObjectCollection filterCurves = spatialIndex.SelectCrossingWindow(pt1, pt2);
+                ThDistinguishBeamInfo thDisBeamInfo = new ThDistinguishBeamInfo();
+                var beams = thDisBeamInfo.CalBeamStruc(filterCurves);
+                foreach (var beam in beams)
+                {
+                    acadDatabase.ModelSpace.Add(beam.BeamBoundary);
+                }
+            }
+        }
+        /// <summary>
+        /// 提取所选图元的梁信息
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THGETBEAMINFO2", CommandFlags.Modal)]
+        public void THGETBEAMINFO2()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 选择对象
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    RejectObjectsOnLockedLayers = true,
+                };
+
+                // 梁线的图元类型
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Arc)).DxfName,
+                    RXClass.GetClass(typeof(Line)).DxfName,
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                // 梁线的图元图层
+                var layers = ThBeamLayerManager.GeometryLayers(acdb.Database);
+                var filter = ThSelectionFilterTool.Build(dxfNames, layers.ToArray());
+                var entSelected = Active.Editor.GetSelection(options, filter);
+                if (entSelected.Status != PromptStatus.OK)
+                {
+                    return;
+                };
+
+                // 执行操作
+                DBObjectCollection dBObjects = new DBObjectCollection();
+                foreach (ObjectId obj in entSelected.Value.GetObjectIds())
+                {
+                    var entity = acdb.Element<Entity>(obj);
+                    dBObjects.Add(entity.GetTransformedCopy(Matrix3d.Identity));
+                }
+
+                ThDistinguishBeamInfo thDisBeamCommand = new ThDistinguishBeamInfo();
+                var beams = thDisBeamCommand.CalBeamStruc(dBObjects);
+                using (var acadDatabase = AcadDatabase.Active())
+                {
+                    foreach (var beam in beams)
+                    {
+                        acadDatabase.ModelSpace.Add(beam.BeamBoundary);
+                    }
+                }
+            }
         }
 
         [CommandMethod("TIANHUACAD", "THBE", CommandFlags.Modal)]
@@ -138,6 +221,58 @@ namespace ThMEPEngineCore.Test
                     acadDatabase.ModelSpace.Add(obj);
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THHatchPrint", CommandFlags.Modal)]
+        public void THHatchPrint()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var hatchRes = Active.Editor.GetEntity("\nselect a hatch");
+                Hatch hatch = acadDatabase.Element<Hatch>(hatchRes.ObjectId);
+                hatch.Boundaries().ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THLineMergeTest", CommandFlags.Modal)]
+        public void THLineMergeTest()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var lineRes = Active.Editor.GetSelection();
+                if (lineRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                List<Line> lines = new List<Line>();
+                lineRes.Value.GetObjectIds().ForEach(o => lines.Add(acadDatabase.Element<Line>(o)));
+                var newLines = ThLineMerger.Merge(lines);
+                newLines.ForEach(o =>
+                {
+                    o.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(o);
+                });
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THTestIsCollinear", CommandFlags.Modal)]
+        public void THTestIsCollinear()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var line1Res = Active.Editor.GetEntity("\nselect first line");
+                var line2Res = Active.Editor.GetEntity("\nselect second line");
+                Line line1 = acadDatabase.Element<Line>(line1Res.ObjectId);
+                Line line2 = acadDatabase.Element<Line>(line2Res.ObjectId);
+                if (ThGeometryTool.IsCollinearEx(
+                    line1.StartPoint, line1.EndPoint, line2.StartPoint, line2.EndPoint))
+                {
+                    Active.Editor.WriteMessage("共线");
+                }
+                else
+                {
+                    Active.Editor.WriteMessage("不共线");
+                }
+            }
+
         }
     }
 }
