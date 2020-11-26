@@ -39,16 +39,7 @@ namespace ThMEPEngineCore.Engine
                 {
                     if (o is Polyline polyline && polyline.Area > 0.0)
                     {
-                        var handleObjs = HandleAbnormalEdge(polyline);
-                        handleObjs.ForEach(m =>
-                        {
-                            var bufferObjs = m.Buffer(ThMEPEngineCoreCommon.ShearWallBufferDistance);
-                            if (bufferObjs.Count > 0)
-                            {
-                                var first = bufferObjs.Cast<Polyline>().OrderByDescending(n => n.Area).First();
-                                Elements.Add(ThIfcWall.Create(first));
-                            }
-                        });
+                        Elements.Add(ThIfcWall.Create(polyline));
                     }
                 });
             }
