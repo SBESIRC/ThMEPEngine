@@ -28,6 +28,7 @@ namespace ThMEPEngineCore.Algorithm
         }
         private void Merge()
         {
+            Lines = Lines.OrderByDescending(o => o.Length).ToList();
             Lines.ForEach(o => ToGroup(o));
             LineGroups.ForEach(o =>
             {
