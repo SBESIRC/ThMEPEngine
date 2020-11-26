@@ -1,14 +1,12 @@
 ﻿using System;
 using ThCADExtension;
-using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
-using Autodesk.AutoCAD.EditorInput;
 
-namespace ThMEPWSS.Pipe
+namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWKitchenPipeEngine : IDisposable
     {

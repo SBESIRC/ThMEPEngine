@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 
-
-namespace ThMEPWSS.Pipe
+namespace ThMEPWSS.Pipe.Engine
 {
    public  class ThWInnerPipeIndexEngine : IDisposable
     {

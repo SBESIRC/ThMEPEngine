@@ -4,11 +4,10 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
-using DotNetARX;
 using ThCADExtension;
 using ThMEPWSS.Pipe.Geom;
 
-namespace ThMEPWSS.Pipe
+namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWBalconyFloordrainEngine : IDisposable
     {

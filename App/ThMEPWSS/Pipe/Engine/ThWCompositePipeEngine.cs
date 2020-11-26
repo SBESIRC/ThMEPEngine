@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPWSS.Pipe
+namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWCompositePipeEngine : IDisposable
     {

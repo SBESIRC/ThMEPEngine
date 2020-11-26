@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using NFox.Cad;
 
-namespace ThMEPWSS.Pipe
+namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWToiletPipeEngine : IDisposable
     {

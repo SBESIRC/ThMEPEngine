@@ -3,10 +3,9 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Geom;
 
-namespace ThMEPWSS.Pipe
+namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWDeviceFloordrainEngine : IDisposable
     {

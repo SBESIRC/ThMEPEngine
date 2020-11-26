@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Geom;
 using Dreambuild.AutoCAD;
 
-
-namespace ThMEPWSS.Pipe
+namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWCompositeFloordrainEngine : IDisposable
     {
