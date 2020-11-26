@@ -42,7 +42,7 @@ namespace ThCADCore.NTS
             }
             return results;
         }
-        private static List<Polygon> FilterPolygons(Geometry geometry)
+        public static List<Polygon> FilterPolygons(this Geometry geometry)
         {
             var objs = new List<Polygon>();
             if (geometry.IsEmpty)
