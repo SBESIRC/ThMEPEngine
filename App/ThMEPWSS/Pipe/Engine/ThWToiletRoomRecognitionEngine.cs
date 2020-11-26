@@ -28,8 +28,7 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 var closestools = GetClosestools(database, pts);
                 var floorDrains = GetFloorDrains(database, pts);
-                var toiletContainerService = ThToiletRoomService.Build(this.Spaces, closestools, floorDrains);
-                Rooms = toiletContainerService.ToiletContainers;
+                Rooms = ThToiletRoomService.Build(this.Spaces, closestools, floorDrains);
             }
         }
         private List<ThIfcClosestool> GetClosestools(Database database, Point3dCollection pts)

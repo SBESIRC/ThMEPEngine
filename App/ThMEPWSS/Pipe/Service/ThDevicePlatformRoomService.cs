@@ -19,33 +19,37 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThIfcSpace> Spaces { get; set; }   
         private List<ThIfcFloorDrain> FloorDrains { get; set; }
         private List<ThIfcRainPipe> RainPipes { get; set; }
+        private List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
         private List<ThIfcCondensePipe> CondensePipes { get; set; }
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex RainPipeSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex CondensePipeSpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex RoofRainPipeSpatialIndex { get; set; }
 
         public double ClosedDistance { get; set; } = 500.0;
         private ThDevicePlatformRoomService(
          List<ThIfcSpace> spaces,
          List<ThIfcFloorDrain> floorDrains,
          List<ThIfcRainPipe> rainPipes,
-         List<ThIfcCondensePipe> condensePipes
+         List<ThIfcCondensePipe> condensePipes,
+         List<ThIfcRoofRainPipe> roofRainPipes
         )
         {  
              Spaces = spaces;
             FloorDrains = floorDrains;
             RainPipes = rainPipes;
             CondensePipes = condensePipes;
+            RoofRainPipes = roofRainPipes;
             DevicePlatformRoom = new List<ThWDevicePlatformRoom>();
             BuildSpatialIndex();
         }
-        public static ThDevicePlatformRoomService Build(List<ThIfcSpace> spaces, List<ThIfcFloorDrain> floorDrains, List<ThIfcRainPipe> rainPipes, List<ThIfcCondensePipe> condensePipes)
+        public static List<ThWDevicePlatformRoom> Build(List<ThIfcSpace> spaces, List<ThIfcFloorDrain> floorDrains, List<ThIfcRainPipe> rainPipes, List<ThIfcCondensePipe> condensePipes, List<ThIfcRoofRainPipe> roofRainPipes)
         {
-            using (var devicePlatformRoomService = new ThDevicePlatformRoomService(spaces, floorDrains, rainPipes, condensePipes))
+            using (var devicePlatformRoomService = new ThDevicePlatformRoomService(spaces, floorDrains, rainPipes, condensePipes, roofRainPipes))
             {
                 devicePlatformRoomService.Build();
-                return devicePlatformRoomService;
+                return devicePlatformRoomService.DevicePlatformRoom;
             }
         }
         public void Dispose()
@@ -74,6 +78,8 @@ namespace ThMEPWSS.Pipe.Service
                 thDevicePlatformRoom.RainPipes = DevicePlatformRainPipeService.RainPipe;
                 var DevicePlatformCondensePipeService = ThDevicePlatformCondensePipeService.Find(CondensePipes, devicePlatformSpace, CondensePipeSpatialIndex);
                 thDevicePlatformRoom.CondensePipes = DevicePlatformCondensePipeService.CondensePipe;
+                var DevicePlatformRoofRainPipeService = ThDevicePlatformRoofRainPipeService.Find(RoofRainPipes, devicePlatformSpace, RoofRainPipeSpatialIndex);
+                thDevicePlatformRoom.RoofRainPipes = DevicePlatformRoofRainPipeService.RoofRainPipe;
                 thDevicePlatformRoomlist.Add(thDevicePlatformRoom);
             }
             return thDevicePlatformRoomlist;
@@ -119,8 +125,9 @@ namespace ThMEPWSS.Pipe.Service
             DBObjectCollection condensePipeObjs = new DBObjectCollection();
             CondensePipes.ForEach(o => condensePipeObjs.Add(o.Outline));
             CondensePipeSpatialIndex = new ThCADCoreNTSSpatialIndex(condensePipeObjs);
-
+            DBObjectCollection roofRainPipeObjs = new DBObjectCollection();
+            RoofRainPipes.ForEach(o => roofRainPipeObjs.Add(o.Outline));
+            RoofRainPipeSpatialIndex = new ThCADCoreNTSSpatialIndex(roofRainPipeObjs);
         }
-
     }
 }

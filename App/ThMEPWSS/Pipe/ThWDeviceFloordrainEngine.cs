@@ -16,23 +16,24 @@ namespace ThMEPWSS.Pipe
         public Point3dCollection Devicefloordrain { get; set; }
         public Point3dCollection Condensepipe_tofloordrain { get; set; }
         public Point3dCollection Rainpipe_tofloordrain { get; set; }
+        public Point3dCollection RoofRainpipe_tofloordrain { get; set; }
         public ThWDeviceFloordrainEngine()
         {
             Devicefloordrain = new Point3dCollection();
             Condensepipe_tofloordrain = new Point3dCollection();
             Rainpipe_tofloordrain = new Point3dCollection();
+            RoofRainpipe_tofloordrain = new Point3dCollection();
         }
 
-        public void Run(Polyline rainpipe, Polyline device, Polyline condensepipe, List<BlockReference> devicefloordrain)
+        public void Run(Polyline rainpipe, Polyline device, Polyline condensepipe, List<BlockReference> devicefloordrain, Polyline roofrainpipe)
         {
-            int num;
-            if(GeomUtils.PtInLoop(device, devicefloordrain[0].Position))
+            int num=0;
+            for (int i = 0; i < devicefloordrain.Count; i++)
             {
-                num = 0;
-            }
-            else
-            {
-                num = 1;
+                if (GeomUtils.PtInLoop(device, devicefloordrain[i].Position))
+                {
+                    num = i;
+                }          
             }
             
             Devicefloordrain.Add(Isinsidedevice(device, devicefloordrain[num]));
@@ -46,9 +47,15 @@ namespace ThMEPWSS.Pipe
             }
             else
             {
-                throw new ArgumentNullException("Drawing errors");
+                //throw new ArgumentNullException("Drawing errors");
             }
-
+            if (roofrainpipe != null)
+            {
+                if (RoofRainpipe_floordrain(device, roofrainpipe, devicefloordrain[num]).Count > 0)
+                {
+                    RoofRainpipe_tofloordrain = RoofRainpipe_floordrain(device, roofrainpipe, devicefloordrain[num]);
+                }
+            }
         }
     
         private Point3d Isinsidedevice(Polyline device, BlockReference devicefloordrain)
@@ -64,34 +71,54 @@ namespace ThMEPWSS.Pipe
         }
         private Point3dCollection Condensepipe_floordrain(Polyline device, Polyline condensepipe, BlockReference devicefloordrain)
         {
-            var pts = new Point3dCollection();
-            Line line = new Line(device.GetCenter(), condensepipe.GetCenter());
-            device.IntersectWith(line, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-            var condensepipe_floordrain = new Point3dCollection();
-            if (pts[0].GetVectorTo(condensepipe.GetCenter()).IsCodirectionalTo(condensepipe.GetCenter().GetVectorTo(pts[1])))
+            if (condensepipe != null)
             {
-                condensepipe_floordrain.Add(condensepipe.GetCenter() + 50 * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
-                condensepipe_floordrain.Add(devicefloordrain.Position - 50 * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
-            }
+                var pts = new Point3dCollection();
+                Line line = new Line(device.GetCenter(), condensepipe.GetCenter());
+                device.IntersectWith(line, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
+                var condensepipe_floordrain = new Point3dCollection();
+                if (pts[0].GetVectorTo(condensepipe.GetCenter()).IsCodirectionalTo(condensepipe.GetCenter().GetVectorTo(pts[1])))
+                {
+                    condensepipe_floordrain.Add(condensepipe.GetCenter() + 50 * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                    condensepipe_floordrain.Add(devicefloordrain.Position - 50 * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                }
 
-            return condensepipe_floordrain;
-        }
-        private Point3dCollection Rainpipe_floordrain(Polyline device, Polyline rainpipe, BlockReference devicefloordrain)
-        {
-            var pts = new Point3dCollection();
-            Line line = new Line(device.GetCenter(), rainpipe.GetCenter());
-            device.IntersectWith(line, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-            var rainpipe_floordrain = new Point3dCollection();
-            if (pts[0].GetVectorTo(rainpipe.GetCenter()).IsCodirectionalTo(rainpipe.GetCenter().GetVectorTo(pts[1])))
-            {
-                rainpipe_floordrain.Add(rainpipe.GetCenter() + 50 * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
-                rainpipe_floordrain.Add(devicefloordrain.Position - 50 * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                return condensepipe_floordrain;
             }
             else
             {
-                throw new ArgumentNullException("devicefloordraine was Null");
+                return new Point3dCollection();
             }
+
+
+        }
+        private Point3dCollection Rainpipe_floordrain(Polyline device, Polyline rainpipe, BlockReference devicefloordrain)
+        {   
+            var rainpipe_floordrain = new Point3dCollection();
+            if (GeomUtils.PtInLoop(device, rainpipe.GetCenter()))
+            {
+                rainpipe_floordrain.Add(rainpipe.GetCenter() + 50 * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                rainpipe_floordrain.Add(devicefloordrain.Position - 50 * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+
+            }
+            //else
+            //{
+            //    throw new ArgumentNullException("devicefloordraine was Null");
+            //}
             return rainpipe_floordrain;
+        }
+        private Point3dCollection RoofRainpipe_floordrain(Polyline device, Polyline roofrainpipe, BlockReference devicefloordrain)
+        {
+            var pts = new Point3dCollection();
+            Line line = new Line(device.GetCenter(), roofrainpipe.GetCenter());
+            device.IntersectWith(line, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
+            var RoofRainpipe_floordrain = new Point3dCollection();
+            if (pts[0].GetVectorTo(roofrainpipe.GetCenter()).IsCodirectionalTo(roofrainpipe.GetCenter().GetVectorTo(pts[1])))
+            {
+                RoofRainpipe_floordrain.Add(roofrainpipe.GetCenter() + 50 * roofrainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                RoofRainpipe_floordrain.Add(devicefloordrain.Position - 50 * roofrainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+            }
+            return RoofRainpipe_floordrain;
         }
     }
 }

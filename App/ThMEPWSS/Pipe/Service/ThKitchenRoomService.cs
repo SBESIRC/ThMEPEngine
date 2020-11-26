@@ -30,12 +30,12 @@ namespace ThMEPWSS.Pipe.Service
             KitchenContainers = new List<ThWKitchenRoom>();
             BuildSpatialIndex();
         }
-        public static ThKitchenRoomService Build(List<ThIfcSpace> spaces, List<ThIfcBasin> basintools)
+        public static List<ThWKitchenRoom> Build(List<ThIfcSpace> spaces, List<ThIfcBasin> basintools)
         {
             using (var kitchenContainerService = new ThKitchenRoomService(spaces, basintools))
             {
                 kitchenContainerService.Build();
-                return kitchenContainerService;
+                return kitchenContainerService.KitchenContainers;
             }
         }
         public void Dispose()

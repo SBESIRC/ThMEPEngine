@@ -52,6 +52,7 @@
     <Compile Include="Pipe\Model\ThWKitchenRoom.cs" />
     <Compile Include="Pipe\Model\ThWRoom.cs" />
     <Compile Include="Pipe\Model\ThWToiletRoom.cs" />
+    <Compile Include="Pipe\Service\ThBalconyBasintoolService.cs" />
     <Compile Include="Pipe\Service\ThBalconyFloorDrainService.cs" />
     <Compile Include="Pipe\Service\ThBalconyRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThBalconyRoomService.cs" />
@@ -59,6 +60,7 @@
     <Compile Include="Pipe\Service\ThDevicePlatformCondensePipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformFloorDrainService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
+    <Compile Include="Pipe\Service\ThDevicePlatformRoofRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThFindSpaceRangedSpaces.cs" />
@@ -69,7 +71,7 @@
     <Compile Include="Pipe\ThWBalconyFloordrainEngine.cs" />
     <Compile Include="Pipe\ThWCompositeFloordrainEngine.cs" />
     <Compile Include="Pipe\ThWDeviceFloordrainEngine.cs" />
-    <Compile Include="Pipe\ThWInnerpipeindexEngine.cs" />
+    <Compile Include="Pipe\ThWInnerPipeIndexEngine.cs" />
     <Compile Include="Pipe\ThWPipeCommon.cs" />
     <Compile Include="Pipe\ThWToiletFloordrainEngine.cs" />
     <Compile Include="Model\SprayDataService.cs" />

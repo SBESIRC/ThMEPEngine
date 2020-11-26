@@ -78,6 +78,7 @@
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThRainPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThRoofRainPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Model\ThIfcFlowSegment.cs" />
     <Compile Include="Model\Plumbing\ThIfcCondensePipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcRainPipe.cs" />
+    <Compile Include="Model\Plumbing\ThIfcRoofRainPipe.cs" />
     <Compile Include="Model\Plumbing\ThIfcSanitaryTerminal.cs" />
     <Compile Include="Model\Plumbing\ThIfcWashMachine.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsElements.cs" />
@@ -198,6 +200,8 @@
     <Compile Include="Service\Havc\ThHavcDuctFittingFactoryService.cs" />
     <Compile Include="Service\ThRainPipeDbExtension.cs" />
     <Compile Include="Service\ThRainPipeLayerManager.cs" />
+    <Compile Include="Service\ThRoofRainPipeDbExtension.cs" />
+    <Compile Include="Service\ThRoofRainPipeLayerManager.cs" />
     <Compile Include="Service\ThSegmentService.cs" />
     <Compile Include="Service\ThSegmentServiceExtension.cs" />
     <Compile Include="Service\ThCurveBeamSplitter.cs" />

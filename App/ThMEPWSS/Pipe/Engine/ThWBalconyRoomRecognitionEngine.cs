@@ -30,8 +30,8 @@ namespace ThMEPWSS.Pipe.Engine
                 var floorDrains = GetFloorDrains(database, pts);
                 var washmachines= GetWashmachines(database, pts);
                 var rainPipes = GetRainPipes(database, pts);
-                var balconyRoomService = ThBalconyRoomService.Build(this.Spaces, washmachines, floorDrains, rainPipes);
-                Rooms = balconyRoomService.BalconyRooms;
+                var basinTools = GetBasinTools(database, pts);
+                Rooms = ThBalconyRoomService.Build(this.Spaces, washmachines, floorDrains, rainPipes, basinTools);
             }
         }
         private List<ThIfcFloorDrain> GetFloorDrains(Database database, Point3dCollection pts)
@@ -56,6 +56,14 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 rainPipesEngine.Recognize(database, pts);
                 return rainPipesEngine.Elements.Cast<ThIfcRainPipe>().ToList();
+            }
+        }
+        private List<ThIfcBasin> GetBasinTools(Database database, Point3dCollection pts)
+        {
+            using (ThBasinRecognitionEngine basinToolsEngine = new ThBasinRecognitionEngine())
+            {
+                basinToolsEngine.Recognize(database, pts);
+                return basinToolsEngine.Elements.Cast<ThIfcBasin>().ToList();
             }
         }
     }

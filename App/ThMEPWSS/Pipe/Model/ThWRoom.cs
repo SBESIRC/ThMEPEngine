@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Model
 {
-    public abstract class ThWRoom
+    public abstract class ThWRoom : ThIfcSpace
     {
     }
 }

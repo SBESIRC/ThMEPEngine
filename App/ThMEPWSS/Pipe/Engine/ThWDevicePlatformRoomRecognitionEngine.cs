@@ -29,8 +29,8 @@ namespace ThMEPWSS.Pipe.Engine
                 var floorDrains = GetFloorDrains(database, pts);
                 var rainPipes = GetRainPipes(database, pts);
                 var condensePipes = GetCondensePipes(database, pts);
-                var devicePlatformRoomService = ThDevicePlatformRoomService.Build(this.Spaces, floorDrains, rainPipes, condensePipes);
-                Rooms = devicePlatformRoomService.DevicePlatformRoom;
+                var roofRainPipes = GetRoofRainPipes(database, pts);
+                Rooms = ThDevicePlatformRoomService.Build(this.Spaces, floorDrains, rainPipes, condensePipes, roofRainPipes);
             }
         }
         private List<ThIfcFloorDrain> GetFloorDrains(Database database, Point3dCollection pts)
@@ -55,6 +55,14 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 condensePipesEngine.Recognize(database, pts);
                 return condensePipesEngine.Elements.Cast<ThIfcCondensePipe>().ToList();
+            }
+        }
+        private List<ThIfcRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
+        {
+            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
+            {
+                roofRainPipesEngine.Recognize(database, pts);
+                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
             }
         }
     }

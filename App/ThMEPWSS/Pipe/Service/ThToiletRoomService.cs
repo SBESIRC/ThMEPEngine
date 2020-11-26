@@ -35,14 +35,14 @@ namespace ThMEPWSS.Pipe.Service
             ToiletContainers = new List<ThWToiletRoom>();
             BuildSpatialIndex();
         }
-        public static ThToiletRoomService Build(List<ThIfcSpace> spaces,
+        public static List<ThWToiletRoom> Build(List<ThIfcSpace> spaces,
             List<ThIfcClosestool> closestools,
             List<ThIfcFloorDrain> floorDrains)
         {
             using (var toiletContainerService = new ThToiletRoomService(spaces, closestools, floorDrains))
             {
                 toiletContainerService.Build();
-                return toiletContainerService;
+                return toiletContainerService.ToiletContainers;
             }
         }
         public void Dispose()

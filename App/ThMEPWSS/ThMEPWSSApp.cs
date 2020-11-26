@@ -212,7 +212,7 @@ namespace ThMEPWSS
                     return;
                 }
                 Polyline pboundary = acadDatabase.Element<Polyline>(result7.ObjectId);
-                var PipeindexEngine = new ThWInnerpipeindexEngine();
+                var PipeindexEngine = new ThWInnerPipeIndexEngine();
                 PipeindexEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary);
                 for (int i = 0; i < PipeindexEngine.Fpipeindex.Count - 1; i++)
                 {

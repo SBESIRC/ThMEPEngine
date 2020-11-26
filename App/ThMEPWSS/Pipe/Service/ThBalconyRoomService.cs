@@ -19,32 +19,36 @@ namespace ThMEPWSS.Pipe.Service
         public List<ThWBalconyRoom> BalconyRooms { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThIfcFloorDrain> FloorDrains { get; set; }
-
         private List<ThIfcWashMachine> Washmachines { get; set; }
         private List<ThIfcRainPipe> RainPipes { get; set; }
+        private List<ThIfcBasin> Basintools { get; set; }
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex WashmachineSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex RainPipeSpatialIndex { get; set; }
+        private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
         private ThBalconyRoomService(
             List<ThIfcSpace> spaces,
             List<ThIfcWashMachine> washmachines,
             List<ThIfcFloorDrain> floorDrains,
-            List<ThIfcRainPipe> rainPipes)
+            List<ThIfcRainPipe> rainPipes,
+            List<ThIfcBasin> basintools)
         {
+            Basintools = basintools;
             Spaces = spaces;        
             FloorDrains = floorDrains;
             BalconyRooms = new List<ThWBalconyRoom>();
             Washmachines = washmachines;
             RainPipes = rainPipes;
+
             BuildSpatialIndex();
         }
-        public static ThBalconyRoomService Build(List<ThIfcSpace> spaces, List<ThIfcWashMachine> washmachines,List<ThIfcFloorDrain> floorDrains, List<ThIfcRainPipe> rainPipes)
+        public static List<ThWBalconyRoom> Build(List<ThIfcSpace> spaces, List<ThIfcWashMachine> washmachines,List<ThIfcFloorDrain> floorDrains, List<ThIfcRainPipe> rainPipes, List<ThIfcBasin> basintools)
         {
-            using (var balconyRoomService = new ThBalconyRoomService(spaces, washmachines,floorDrains, rainPipes))
+            using (var balconyRoomService = new ThBalconyRoomService(spaces, washmachines,floorDrains, rainPipes, basintools))
             {
                 balconyRoomService.Build();
-                return balconyRoomService;
+                return balconyRoomService.BalconyRooms;
             }
         }
         public void Dispose()
@@ -72,6 +76,8 @@ namespace ThMEPWSS.Pipe.Service
 
             var BalconyRainPipeService = ThBalconyRainPipeService.Find(RainPipes, balconySpace, RainPipeSpatialIndex);
             thBalconyRoom.RainPipes = BalconyRainPipeService.RainPipe;
+            var BalconyBasintoolsService = ThBalconyBasintoolService.Find(Basintools, balconySpace, BasintoolSpatialIndex);
+            thBalconyRoom.BasinTools = BalconyBasintoolsService.Basintools;
 
             return thBalconyRoom;
         }
@@ -97,6 +103,9 @@ namespace ThMEPWSS.Pipe.Service
             DBObjectCollection rainpipeObjs = new DBObjectCollection();
             RainPipes.ForEach(o => rainpipeObjs.Add(o.Outline));
             RainPipeSpatialIndex = new ThCADCoreNTSSpatialIndex(rainpipeObjs);
+            DBObjectCollection basintoolsObjs = new DBObjectCollection();
+            Basintools.ForEach(o => basintoolsObjs.Add(o.Outline));
+            BasintoolSpatialIndex = new ThCADCoreNTSSpatialIndex(basintoolsObjs);
         }
     }
 }

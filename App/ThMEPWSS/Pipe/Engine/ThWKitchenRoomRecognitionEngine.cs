@@ -26,8 +26,7 @@ namespace ThMEPWSS.Pipe.Engine
                     this.Spaces = GetSpaces(database, pts);
                 }
                 var basintools = GetBasintools(database, pts);
-                var kitchenContainerService = ThKitchenRoomService.Build(this.Spaces, basintools);
-                Rooms = kitchenContainerService.KitchenContainers;
+                Rooms = ThKitchenRoomService.Build(this.Spaces, basintools);
             }
         }
         private List<ThIfcBasin> GetBasintools(Database database, Point3dCollection pts)

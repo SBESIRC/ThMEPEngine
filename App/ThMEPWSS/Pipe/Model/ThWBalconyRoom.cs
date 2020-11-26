@@ -20,6 +20,8 @@ namespace ThMEPWSS.Pipe.Model
         public List<ThIfcRainPipe> RainPipes { get; set; }
         //洗衣机
         public List<ThIfcWashMachine> Washmachines { get; set; }
+        //阳台台盆
+        public List<ThIfcBasin> BasinTools { get; set; }
         public ThWBalconyRoom()
         {
             Balcony = null;
@@ -27,6 +29,7 @@ namespace ThMEPWSS.Pipe.Model
             //DrainWells = new List<ThIfcSpace>();
             RainPipes = new List<ThIfcRainPipe>();
             Washmachines = new List<ThIfcWashMachine>();
+            BasinTools = new List<ThIfcBasin>();
         }
 
     }

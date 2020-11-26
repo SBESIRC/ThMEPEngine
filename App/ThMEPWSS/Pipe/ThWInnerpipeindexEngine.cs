@@ -7,7 +7,7 @@ using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Pipe
 {
-   public  class ThWInnerpipeindexEngine : IDisposable
+   public  class ThWInnerPipeIndexEngine : IDisposable
     {
         public void Dispose()
         {
@@ -29,7 +29,7 @@ namespace ThMEPWSS.Pipe
         public Point3dCollection Rainpipeindex { get; set; }
         public Point3dCollection Rainpipeindex_tag { get; set; }
 
-        public ThWInnerpipeindexEngine()
+        public ThWInnerPipeIndexEngine()
         {
             Fpipeindex = new Point3dCollection();
             Fpipeindex_tag = new Point3dCollection();
@@ -66,10 +66,10 @@ namespace ThMEPWSS.Pipe
         private Point3dCollection Fpiperun(List<Polyline> fpipe, Polyline pboundary)
         {
             var pipeindex = new Point3dCollection();
-            var pipelist = Pipelist(fpipe);
-            pipeindex.Add(pipelist[Getvertices(pipelist, pboundary)]);
+            var pipelist = Pipelist(fpipe);//型心几何
+            pipeindex.Add(pipelist[Getvertices(pipelist, pboundary)]);//加入起点
             List<int> num = new List<int>();
-            num.Add(Getvertices(pipelist, pboundary));
+            num.Add(Getvertices(pipelist, pboundary));//加入起点序号
             for (int i=0;i< fpipe.Count-1;i++)
             {   
                 if (i > 0)
@@ -211,7 +211,7 @@ namespace ThMEPWSS.Pipe
             }
             return Rainpipeindex;
         }
-        private Point3dCollection Pipelist(List<Polyline> fpipe)
+        private Point3dCollection Pipelist(List<Polyline> fpipe)//取所有立管的中心
         { var pipelist = new Point3dCollection();
             for(int i=0;i< fpipe.Count;i++)
             {
@@ -220,13 +220,13 @@ namespace ThMEPWSS.Pipe
             return pipelist;
         }
 
-        private static int Getvertices(Point3dCollection pipe, Polyline pboundary)
+        private static int Getvertices(Point3dCollection pipe, Polyline pboundary)//选起点
         {     
             var point = new Point3d(pboundary.GetCenter().X,double.MaxValue,0); 
-            Line line = new Line(pboundary.GetCenter(),point);       
+            Line line = new Line(pboundary.GetCenter(),point); //中心Y轴   
             double dst = 0.0;
             int num = 0;
-            for (int i=0;i< pipe.Count;i++)
+            for (int i=0;i< pipe.Count;i++)//取上半部距Y轴最远
             {
                 if (pipe[i].Y > pboundary.GetCenter().Y)
                 {

@@ -4,7 +4,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using ThMEPWSS.Pipe.Model;
-
+using ThMEPWSS.Pipe.Geom;
 using Dreambuild.AutoCAD;
 
 
@@ -68,11 +68,25 @@ namespace ThMEPWSS.Pipe
                 return ThWBalconyFloordrainEngine.Downspout_to_Floordrain;
             }
         }
+        public Point3dCollection Bbasinline_to_Floordrain
+        {
+            get
+            {
+                return ThWBalconyFloordrainEngine.Bbasinline_to_Floordrain;
+            }
+        }
         public Point3dCollection Rainpipe_to_Floordrain
         {
             get
             {
                 return ThWBalconyFloordrainEngine.Rainpipe_to_Floordrain;
+            }
+        }
+        public Point3dCollection Bbasinline_Center
+        {
+            get
+            {
+                return ThWBalconyFloordrainEngine.Bbasinline_Center;
             }
         }
 
@@ -83,30 +97,83 @@ namespace ThMEPWSS.Pipe
                 return ThWBalconyFloordrainEngine.new_circle;
             }
         }
+        public List<Point3dCollection> Rainpipe_tofloordrains { get; set; }
         //
         public ThWCompositeFloordrainEngine(ThWBalconyFloordrainEngine thWBalconyFloordrainEngine, ThWToiletFloordrainEngine thWToiletFloordrainEngine, ThWDeviceFloordrainEngine thWDeviceFloordrainEngine)
         {
             ThWBalconyFloordrainEngine = thWBalconyFloordrainEngine;
             ThWToiletFloordrainEngine = thWToiletFloordrainEngine;
             ThWDeviceFloordrainEngine = thWDeviceFloordrainEngine;
+            Rainpipe_tofloordrains = new List<Point3dCollection>();
         }
-        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, Polyline rainpipe, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe, List<BlockReference> tfloordrain, Polyline tboundary, List<BlockReference> devicefloordrain)
+        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, List<Polyline> rainpipe, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe, List<BlockReference> tfloordrain, Polyline tboundary, List<BlockReference> devicefloordrain, Polyline roofrainpipe, BlockReference bbasinline)
         {
-            if (Farfromwashmachine(washingmachine, device, device_other))
+            Polyline rainpipe_Device = null;
+            Polyline rainpipe_Device_other = null;
+            if (rainpipe.Count>1)
             {
-                ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe);
+                foreach (var rainpipe_boundary in rainpipe)
+                {
+                    if (GeomUtils.PtInLoop(device, rainpipe_boundary.GetCenter()))
+                    {
+                        rainpipe_Device = rainpipe_boundary;
+                        break;
+                    }
+                }
+                foreach (var rainpipe_boundary in rainpipe)
+                { 
+                    if (GeomUtils.PtInLoop(device_other, rainpipe_boundary.GetCenter()))
+                    {
+                        rainpipe_Device_other = rainpipe_boundary;
+                        break;
+                    }
+                }
+            }
+            else if(rainpipe.Count==1)
+            {
+                rainpipe_Device = rainpipe[0];
+                rainpipe_Device_other= rainpipe[0];
             }
             else
             {
-                ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device_other, device, condensepipe);
+                //throw new ArgumentNullException();
+            }
+            if (Farfromwashmachine(washingmachine, device, device_other))
+            {
+                if(CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe))
+                {             
+                     ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device, downspout, washingmachine, device, device_other, roofrainpipe, bbasinline);
+                }
+                else
+                {
+                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device, downspout, washingmachine, device, device_other, condensepipe, bbasinline);
+                }
+                
+            }
+            else
+            {
+                if (CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe))
+                {
+                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device_other, downspout, washingmachine, device_other, device, roofrainpipe, bbasinline);
+                }
+                else
+                {
+                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device_other, downspout, washingmachine, device_other, device, condensepipe, bbasinline);
+                }
             }
             //ThWToiletFloordrainEngine.Run(tfloordrain, tboundary);
-            ThWDeviceFloordrainEngine.Run(rainpipe, device, condensepipe, devicefloordrain);
-            ThWDeviceFloordrainEngine.Run(rainpipe, device_other, condensepipe, devicefloordrain);
+            ThWDeviceFloordrainEngine.Run(rainpipe_Device, device, condensepipe, devicefloordrain, roofrainpipe);
+            Rainpipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Rainpipe_tofloordrain);
+
+            if (device_other != null)
+            {
+                ThWDeviceFloordrainEngine.Run(rainpipe_Device_other, device_other, condensepipe, devicefloordrain, roofrainpipe);
+                Rainpipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Rainpipe_tofloordrain);
+            }
         }
         private bool Farfromwashmachine(BlockReference washingmachine, Polyline device, Polyline device_other)
         { 
-            if(washingmachine.Position.DistanceTo(device.GetCenter())> washingmachine.Position.DistanceTo(device_other.GetCenter()))
+            if(device_other!=null&&washingmachine.Position.DistanceTo(device.GetCenter())> washingmachine.Position.DistanceTo(device_other.GetCenter()))
             {
                 return true;
             }
@@ -114,7 +181,17 @@ namespace ThMEPWSS.Pipe
             {
                 return false;
             }
-
+        }
+        private bool CondensepipeIsRoofPipe(BlockReference washingmachine, Polyline roofrainpipe, Polyline condensepipe)
+        {          
+            if ((roofrainpipe!=null&& (washingmachine.Position.DistanceTo(roofrainpipe.GetCenter())<800))||( condensepipe==null))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
