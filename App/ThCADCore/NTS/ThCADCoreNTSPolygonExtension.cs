@@ -8,6 +8,9 @@ using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using System.Collections.Generic;
+using System;
+using ThCADExtension;
 
 namespace ThCADCore.NTS
 {
@@ -117,6 +120,16 @@ namespace ThCADCore.NTS
                 .Cast<Entity>()
                 .Where(o => o is Polyline)
                 .ToCollection();
+        }
+        public static List<Polygon> ToPolygons(this List<Polyline> outlines)
+        {
+            var polygons = new List<Polygon>();            
+            outlines.ForEach(o => polygons.Add(o.ToNTSPolygon()));
+            MultiPolygon multiPolygon = ThCADCoreNTSService.Instance.
+                GeometryFactory.CreateMultiPolygon(polygons.ToArray());
+            ThCADCoreNTSBuildArea buildArea = new ThCADCoreNTSBuildArea();
+            var result = buildArea.Build(multiPolygon);
+            return result.FilterPolygons();
         }
     }
 }
