@@ -113,6 +113,8 @@
     <Compile Include="Model\Havc\ThIfcDuctSegment.cs" />
     <Compile Include="Model\Havc\ThIfcDuctTee.cs" />
     <Compile Include="Model\Havc\ThIfcDuctReducing.cs" />
+    <Compile Include="Model\Havc\ThIfcPipeFitting.cs" />
+    <Compile Include="Model\Havc\ThIfcPipeSegment.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowSegment.cs" />
     <Compile Include="Model\Plumbing\ThIfcCondensePipe.cs" />
