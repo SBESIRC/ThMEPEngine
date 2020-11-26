@@ -104,6 +104,7 @@
     <Compile Include="Model\PointPosType.cs" />
     <Compile Include="Model\PolygonInfo.cs" />
     <Compile Include="Model\UcsInfo.cs" />
+    <Compile Include="Model\WallModel.cs" />
     <Compile Include="PostProcess\Adjustor\NonRegularPlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />

@@ -105,6 +105,23 @@ namespace ThMEPElectrical
                     var parkingLinesService = new ParkingLinesService();
                     var parkingLines = parkingLinesService.CreateParkingLines(frame, lanes, out List<List<Line>> otherPLines);
 
+                    //获取构建信息
+                    var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, frame.Vertices());
+
+                    //获取柱
+                    var columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                    var objs = new DBObjectCollection();
+                    columns.ForEach(x => objs.Add(x));
+                    ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(frame).Cast<Polyline>().ToList();
+
+                    //获取剪力墙
+                    var walls = allStructure.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                    objs = new DBObjectCollection();
+                    walls.ForEach(x => objs.Add(x));
+                    thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(frame).Cast<Polyline>().ToList();
+
                     var columnEngine = new ThColumnRecognitionEngine();
                     columnEngine.Recognize(acdb.Database, frame.Vertices());
                     var columPoly = columnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();

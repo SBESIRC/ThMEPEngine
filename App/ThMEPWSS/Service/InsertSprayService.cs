@@ -24,6 +24,7 @@ namespace ThWSS.Bussiness
                 db.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
                 db.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
                 db.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
+                db.Database.UnPrintLayer(ThWSSCommon.SprayLayerName);
                 var filePath = Path.Combine(ThCADCommon.SupportPath(), ThWSSCommon.SprayDwgName);
                 db.Database.ImportBlocksFromDwg(filePath);
                 foreach (var insertPoint in insertPts)

@@ -46,7 +46,7 @@ namespace ThMEPElectrical.Broadcast
                     }
                     else
                     {
-                        if (2 * upLength < downLength && upLength > 2000)
+                        if (2 * upLength < downLength && upLength > 2000)  
                         {
                             length = length + upLength;
                         }
@@ -153,7 +153,6 @@ namespace ThMEPElectrical.Broadcast
 
             ThCADCoreNTSSpatialIndex thPatialIndex = new ThCADCoreNTSSpatialIndex(dBObject);
             var closet = thPatialIndex.NearestNeighbours(line, 1);
-
 
             if (closet.Count > 0)
             {

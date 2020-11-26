@@ -140,6 +140,7 @@ namespace ThMEPWSS.Bussiness
             {
                 var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.BlindArea_LayerName);
                 db.Database.UnFrozenLayer(ThWSSCommon.BlindArea_LayerName);
+                db.Database.UnPrintLayer(ThWSSCommon.BlindArea_LayerName);
 
                 foreach (var area in blindArea.Where(x => x.Area > 1))
                 {
