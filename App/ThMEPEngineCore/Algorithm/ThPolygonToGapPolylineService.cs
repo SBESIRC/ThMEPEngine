@@ -1,17 +1,13 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
-using NetTopologySuite.Geometries;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using AcHelper;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.CAD;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using NetTopologySuite.Geometries;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -20,17 +16,18 @@ namespace ThMEPEngineCore.Algorithm
         ///目前主要用于支撑对剪力墙带一个洞的裁剪
         ///暂时将线延伸设为5mm,之前设1,2mm有没成功的情况
         ///打断点偏移的距离要大于线延伸的距离
-        private double PointOffsetDistance = 10.0; 
-        private const double LineExtendDistance = 5.0;        
+        private double PointOffsetDistance = 25.0; 
+        private const double LineExtendDistance = 10.0;        
         private Polygon CurrentPolygon { get; set; }
         private ThPolygonToGapPolylineService(Polygon polygon)
         {
             CurrentPolygon = polygon;
-            if(PointOffsetDistance<= LineExtendDistance)
+            if(PointOffsetDistance<= LineExtendDistance*2)
             {
-                PointOffsetDistance=LineExtendDistance + 5.0;
+                PointOffsetDistance= LineExtendDistance * 2 + 10.0;
             }
         }
+
         public static List<Polyline> ToGapPolyline(Polygon polygon)
         {
             List<Polyline> gapPolylines = new List<Polyline>();
@@ -38,14 +35,18 @@ namespace ThMEPEngineCore.Algorithm
             {
                 return gapPolylines;
             }
-            var intstance = new ThPolygonToGapPolylineService(polygon);
-            var gapPolyline = intstance.ToGapPolyline();
-            if(gapPolyline != null && gapPolyline.Area>0.0)
+            using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
             {
-                gapPolylines.Add(gapPolyline);
+                var intstance = new ThPolygonToGapPolylineService(polygon);
+                var gapPolyline = intstance.ToGapPolyline();
+                if (gapPolyline != null && gapPolyline.Area > 0.0)
+                {
+                    gapPolylines.Add(gapPolyline);
+                }
             }
             return gapPolylines;
         }
+
         private Polyline ToGapPolyline()
         {
             var shell= CurrentPolygon.Shell.ToDbPolyline();
@@ -59,10 +60,12 @@ namespace ThMEPEngineCore.Algorithm
             {
                 return holes[0];
             }
-            else if(shell.Area > 0.0 && holes.Count == 1)
+            else if(shell.Area > 0.0 && holes.Count >0)
             {
                 Polyline shellOutline = shell.ToNTSLineString().ToDbPolyline();
-                return BuildOutermostPolyline(shellOutline, holes[0].ToNTSLineString().ToDbPolyline());
+                List<Polyline> holeOutlines = new List<Polyline>();
+                holes.ForEach(o => holeOutlines.Add(o.ToNTSLineString().ToDbPolyline()));
+                return BuildOutermostPolyline(shellOutline, holeOutlines);
             }
             else
             {
@@ -70,65 +73,52 @@ namespace ThMEPEngineCore.Algorithm
             }
         }
 
-        private Polyline BuildOutermostPolyline(Polyline outerPolyline, Polyline innerPolyline)
-        {            
+        private Polyline BuildOutermostPolyline(Polyline shell, List<Polyline> holes)
+        {
+            Polyline shellOutline = shell.Clone() as Polyline;
+            while (holes.Count>0)
+            {
+                holes = holes.OrderBy(o=>o.Distance(shellOutline)).ToList();
+                var first = holes.First();
+                holes.Remove(first);
+                shellOutline = BuildOutermostPolyline(shellOutline, first, holes);
+                if(shellOutline.Area==0.0)
+                {
+                    return shellOutline;
+                }
+            }
+            return shellOutline;
+        }
+
+        private Polyline BuildOutermostPolyline(Polyline shell, Polyline hole,List<Polyline> otherHoles)
+        {
+            ThPolygonSplitParameter splitParameter = new ThPolygonSplitParameter
+            {
+                Shell = shell,
+                Hole = hole,
+                OffsetDistance = PointOffsetDistance,
+                OtherHoles = otherHoles
+            };
+            var instance=ThPolygonSplitPointAnalysis.Split(splitParameter);
+            if(!instance.IsFind)
+            {
+                return new Polyline();
+            }
             List<Line> lines = new List<Line>();
-            List<Tuple<int, Point3d, Point3d>> splitSegments = new List<Tuple<int, Point3d, Point3d>>();
-            for (int i = 0; i < innerPolyline.NumberOfVertices; i++)
-            {
-                var firstLineSegment = innerPolyline.GetLineSegmentAt(i);
-                if(firstLineSegment.Length<= PointOffsetDistance*2)
-                {
-                    continue;
-                }
-                var pts = BuildOffsetPoints(firstLineSegment, PointOffsetDistance);
-                if (pts.Count != 2)
-                {
-                    continue;
-                }
-                Vector3d? extendVec = LineExtendVector(innerPolyline, pts[0], pts[0].GetVectorTo(pts[1]));
-                if (extendVec == null)
-                {
-                    continue;
-                }
-                Point3d firstProjectPt = outerPolyline.GetClosestPointTo(pts[0], false);
-                Point3d secondProjectPt = outerPolyline.GetClosestPointTo(pts[1], false);
-                for (int j = 0; j < outerPolyline.NumberOfVertices; j++)
-                {
-                    var secondLineSegment = outerPolyline.GetLineSegmentAt(j);
-                    if (secondLineSegment.Length <= PointOffsetDistance * 2)
-                    {
-                        continue;
-                    }
-                    if (IsIn(secondLineSegment, firstProjectPt) &&
-                        IsIn(secondLineSegment, secondProjectPt))
-                    {
-                        splitSegments.Add(Tuple.Create(i, pts[0], pts[1]));
-                        splitSegments.Add(Tuple.Create(j, firstProjectPt, secondProjectPt));
-                        lines.Add(new Line(pts[0], firstProjectPt));
-                        lines.Add(new Line(pts[1], secondProjectPt));
-                        break;
-                    }
-                }
-                if (splitSegments.Count > 0)
-                {
-                    break;
-                }
-            }
-            if (splitSegments.Count == 2)
-            {
-                lines.AddRange(GetLines(innerPolyline, splitSegments[0]));
-                lines.AddRange(GetLines(outerPolyline, splitSegments[1]));
-            }
+            lines.AddRange(GetLines(shell, instance.ShellSegmentSplitPts));
+            lines.AddRange(GetLines(hole, instance.HoleSegmentSplitPts));
+            lines.Add(new Line(instance.HoleSegmentSplitPts.Item2, instance.ShellSegmentSplitPts.Item2));
+            lines.Add(new Line(instance.HoleSegmentSplitPts.Item3, instance.ShellSegmentSplitPts.Item3));
+            lines=lines.Where(o => o.Length > 1.0).ToList();
+            var mergelines = ThLineMerger.Merge(lines);
             List<Line> extendLines = new List<Line>();
-            lines.ForEach(o =>
+            mergelines.ForEach(o =>
             {
                 Point3d sp = o.StartPoint - o.LineDirection().MultiplyBy(LineExtendDistance);
                 Point3d ep = o.EndPoint + o.LineDirection().MultiplyBy(LineExtendDistance);
                 extendLines.Add(new Line(sp, ep));
             });
-            lines.ForEach(o =>o.Dispose());
-            var mergelines = ThLineMerger.Merge(extendLines);
+            lines.ForEach(o => o.Dispose());            
             DBObjectCollection dbObjs = new DBObjectCollection();
             mergelines.ForEach(o => dbObjs.Add(o));
             var unionObjs = dbObjs.Polygonize();
@@ -140,40 +130,16 @@ namespace ThMEPEngineCore.Algorithm
                     polygonPolyines.Add(polygon.Shell.ToDbPolyline());
                 }
             });
-            return polygonPolyines.Count > 0 ? polygonPolyines.OrderByDescending(o => o.Area).First() : null; 
+            return polygonPolyines.Count > 0 ? polygonPolyines.OrderByDescending(o => o.Area).First() : new Polyline();
         }
-        private Vector3d? LineExtendVector(Polyline self,Point3d pt,Vector3d ptOnLineVec)
-        {
-            var perpendVec = ptOnLineVec.GetPerpendicularVector().GetNormal();
-            Point3d extendPt1 = pt - perpendVec.MultiplyBy(1e6);
-            Point3d extendPt2 = pt + perpendVec.MultiplyBy(1e6);
-            if(IntsertPoints(pt, extendPt1, self).Count==1)
-            {
-                return pt.GetVectorTo(extendPt1).GetNormal();
-            }
-            else if(IntsertPoints(pt, extendPt2, self).Count == 1)
-            {
-                return pt.GetVectorTo(extendPt2).GetNormal();
-            }
-            else
-            {
-                return null;
-            }
-        }
-        private Point3dCollection IntsertPoints(Point3d basePt,Point3d extendPt, Polyline polyline)
-        {
-            Point3dCollection intersectPts = new Point3dCollection();
-            Line extendLine = new Line(basePt, extendPt);
-            extendLine.IntersectWith(polyline, Intersect.OnBothOperands, intersectPts, IntPtr.Zero, IntPtr.Zero);
-            return intersectPts;
-        }
-        private List<Line> GetLines(Polyline polyline , Tuple<int, Point3d, Point3d> segmentItem)
+
+        private List<Line> GetLines(Polyline polyline , Tuple<LineSegment3d, Point3d, Point3d> segmentItem)
         {
             List<Line> lines = new List<Line>();
             for(int i=0;i<polyline.NumberOfVertices;i++)
             {
                 var lineSegment = polyline.GetLineSegmentAt(i);
-                if (i != segmentItem.Item1)
+                if (!segmentItem.Item1.IsEqualTo(lineSegment))
                 {
                     lines.Add(new Line(lineSegment.StartPoint, lineSegment.EndPoint));
                 }
@@ -193,26 +159,6 @@ namespace ThMEPEngineCore.Algorithm
                 }
             }
             return lines.Where(o=>o.Length>0).ToList();
-        }
-        private List<Point3d> BuildOffsetPoints(LineSegment3d lineSegment, double offsetDis)
-        {
-            List<Point3d> offsetPts = new List<Point3d>();
-            Point3d midPt = ThGeometryTool.GetMidPt(lineSegment.StartPoint, lineSegment.EndPoint);
-            Point3d firstPt = midPt + midPt.GetVectorTo(lineSegment.StartPoint).GetNormal().MultiplyBy(offsetDis);
-            Point3d secondPt = midPt + midPt.GetVectorTo(lineSegment.EndPoint).GetNormal().MultiplyBy(offsetDis);
-            if(IsIn(lineSegment, firstPt))
-            {
-                offsetPts.Add(firstPt);
-            }
-            if (IsIn(lineSegment, secondPt))
-            {
-                offsetPts.Add(secondPt);
-            }            
-            return offsetPts;
-        }
-        private bool IsIn(LineSegment3d lineSegment,Point3d pt,double tolerance=1.0)
-        {
-            return ThGeometryTool.IsPointInLine(lineSegment.StartPoint, lineSegment.EndPoint, pt, tolerance);
         }
     }
 }

@@ -274,5 +274,39 @@ namespace ThMEPEngineCore.Test
             }
 
         }
+        [CommandMethod("TIANHUACAD", "THTestSplit", CommandFlags.Modal)]
+        public void THTestSplit()
+        {            
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var shellRes = Active.Editor.GetEntity("\nselect a shell");
+                if (shellRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Active.Editor.WriteMessage("\nSelect holes");
+                var holeRes = Active.Editor.GetSelection();
+                if (holeRes.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline shell = acadDatabase.Element<Polyline>(shellRes.ObjectId);
+                List<Polyline> holes = new List<Polyline>();
+                holeRes.Value.GetObjectIds().ForEach(o => holes.Add(acadDatabase.Element<Polyline>(o)));
+
+                List<Polyline> polylines = new List<Polyline>();
+                polylines.Add(shell);
+                polylines.AddRange(holes);
+                List<Polyline> tessellatePolylines = new List<Polyline>();
+                polylines.ForEach(o => tessellatePolylines.Add(o.TessellatePolylineWithArc(50.0)));
+                var polygons = tessellatePolylines.ToPolygons();
+                polygons.ForEach(o =>
+                {
+                    var outlines = ThPolygonToGapPolylineService.ToGapPolyline(o);
+                    outlines.ForEach(k => k.ColorIndex = 1);
+                    outlines.ForEach(k => acadDatabase.ModelSpace.Add(k));
+                });
+            }
+        }
     }
 }
