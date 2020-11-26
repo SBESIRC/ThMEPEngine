@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ThMEPWSS.Pipe.Engine
+namespace ThMEPWSS.Pipe.Model
 {
     public class ThWToiletPipeParameters
     {

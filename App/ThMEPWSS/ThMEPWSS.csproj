@@ -49,8 +49,11 @@
     <Compile Include="Pipe\Model\ThWCompositeBalconyRoom.cs" />
     <Compile Include="Pipe\Model\ThWCompositeRoom.cs" />
     <Compile Include="Pipe\Model\ThWDevicePlatformRoom.cs" />
+    <Compile Include="Pipe\Model\ThWKitchenPipe.cs" />
     <Compile Include="Pipe\Model\ThWKitchenRoom.cs" />
+    <Compile Include="Pipe\Model\ThWPipe.cs" />
     <Compile Include="Pipe\Model\ThWRoom.cs" />
+    <Compile Include="Pipe\Model\ThWToiletPipe.cs" />
     <Compile Include="Pipe\Model\ThWToiletRoom.cs" />
     <Compile Include="Pipe\Service\ThBalconyBasintoolService.cs" />
     <Compile Include="Pipe\Service\ThBalconyFloorDrainService.cs" />
@@ -83,9 +86,9 @@
     <Compile Include="Pipe\Engine\ThWCompositePipeEngine.cs" />
     <Compile Include="Pipe\ThWGeUtils.cs" />
     <Compile Include="Pipe\Engine\ThWKitchenPipeEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWKitchenPipeParameters.cs" />
+    <Compile Include="Pipe\Model\ThWKitchenPipeParameters.cs" />
     <Compile Include="Pipe\ThWPipeEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWToiletPipeParameters.cs" />
+    <Compile Include="Pipe\Model\ThWToiletPipeParameters.cs" />
     <Compile Include="Pipe\ThWPipeZone.cs" />
     <Compile Include="Pipe\Engine\ThWToiletPipeEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
