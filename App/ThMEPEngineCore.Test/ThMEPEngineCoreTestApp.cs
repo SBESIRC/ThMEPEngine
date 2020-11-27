@@ -272,7 +272,33 @@ namespace ThMEPEngineCore.Test
                     Active.Editor.WriteMessage("不共线");
                 }
             }
+        }
 
+        [CommandMethod("TIANHUACAD", "THCenterLine", CommandFlags.Modal)]
+        public void THCenterLine()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+                foreach(Polyline polyline in objs)
+                {
+                    var lines = ThMEPCenterlineService.CenterLineExtraction(polyline, 800);
+                    foreach (var obj in lines)
+                    {
+                        obj.ColorIndex = 1;
+                        acadDatabase.ModelSpace.Add(obj);
+                    }
+                }
+            }
         }
     }
 }
