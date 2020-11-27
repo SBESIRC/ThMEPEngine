@@ -195,29 +195,6 @@ namespace ThMEPElectrical.Business
             return detectionPolygons;
         }
 
-        private List<DetectionPolygon> SplitRegions(Polyline externalPolyline, DBObjectCollection dbLst)
-        {
-            var detectionPolygons = new List<DetectionPolygon>();
-            var drawCurves = new List<Entity>();
-
-            foreach (Entity item in externalPolyline.DifferenceMP(dbLst))
-            {
-                if (item is Polyline polyline)
-                {
-                    detectionPolygons.Add(new DetectionPolygon(polyline));
-                    drawCurves.Add(polyline);
-                }
-                else if (item is MPolygon mPolygon)
-                {
-                    detectionPolygons.Add(GeomUtils.MPolygon2PolygonInfo(mPolygon));
-                    drawCurves.Add(mPolygon);
-                }
-            }
-
-            //DrawUtils.DrawEntitiesDebug(drawCurves, "entities");
-            return detectionPolygons;
-        }
-
         /// <summary>
         /// 计算主梁等构成的主探测区域
         /// </summary>

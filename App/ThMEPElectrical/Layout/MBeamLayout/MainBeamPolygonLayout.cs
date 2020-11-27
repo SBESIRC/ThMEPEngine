@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPElectrical.Business.MainBeam;
 using ThMEPElectrical.Model;
+using ThMEPElectrical.PostProcess.HoleAdjustor;
 
 namespace ThMEPElectrical.Layout.MBeamLayout
 {
@@ -20,14 +21,10 @@ namespace ThMEPElectrical.Layout.MBeamLayout
             if (m_inputProfileData == null || m_parameter == null)
                 return null;
 
-            var mainBeamProfile = m_inputProfileData.MainBeamOuterProfile;
-            var postPoly = m_postMainBeamPoly;
-
-
             var layoutData = new LayoutProfileData(m_inputProfileData.MainBeamOuterProfile, m_postMainBeamPoly);
             // 单个布置
             m_placePoints = MultiSegmentPlace.MakeABBPolygonProfilePoints(layoutData, m_parameter);
-
+            m_placePoints = IsolatedHoleAdjustor.MakeIsolatedHoleAdjustor(m_placePoints, m_inputProfileData);
             return PlacePoints;
         }
 

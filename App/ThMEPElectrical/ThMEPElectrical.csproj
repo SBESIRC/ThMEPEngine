@@ -95,6 +95,7 @@
     <Compile Include="Model\LayoutMap.cs" />
     <Compile Include="Model\LayoutProfileData.cs" />
     <Compile Include="Model\MainSecondBeamRegion.cs" />
+    <Compile Include="Model\PairData.cs" />
     <Compile Include="Model\SplitBeamPath.cs" />
     <Compile Include="Model\PlaceInputProfileData.cs" />
     <Compile Include="Model\PlaceParameter.cs" />
@@ -109,6 +110,8 @@
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
+    <Compile Include="PostProcess\HoleAdjustor\HoleRegionPointAdjustor.cs" />
+    <Compile Include="PostProcess\HoleAdjustor\IsolatedHoleAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamLargeAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamMediumAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />

@@ -68,6 +68,52 @@ namespace ThMEPElectrical.Business
             return detectRegions;
         }
 
+        protected List<DetectionPolygon> SplitRegions(Polyline externalPolyline, DBObjectCollection dbLst)
+        {
+            var detectionPolygons = new List<DetectionPolygon>();
+            var drawCurves = new List<Entity>();
+
+            foreach (Entity item in externalPolyline.DifferenceMP(dbLst))
+            {
+                if (item is Polyline polyline)
+                {
+                    detectionPolygons.Add(new DetectionPolygon(polyline));
+                    drawCurves.Add(polyline);
+                }
+                else if (item is MPolygon mPolygon)
+                {
+                    detectionPolygons.Add(GeomUtils.MPolygon2PolygonInfo(mPolygon));
+                    drawCurves.Add(mPolygon);
+                }
+            }
+
+            //DrawUtils.DrawEntitiesDebug(drawCurves, "entities");
+            return detectionPolygons;
+        }
+
+        protected void CalculateDetectionRegionWithHoles(List<DetectionRegion> detectionRegions, List<Polyline> polylines)
+        {
+            var dbLst = new DBObjectCollection();
+            polylines.ForEach(p => dbLst.Add(p));
+
+            foreach (var singleDetectRegion in detectionRegions)
+            {
+                var detectionPolygons = SplitRegions(singleDetectRegion.DetectionProfile, dbLst);
+                var holes = GetHoles(detectionPolygons);
+                singleDetectRegion.DetectionInnerProfiles.AddRange(holes);
+            }
+        }
+
+        protected List<Polyline> GetHoles(List<DetectionPolygon> detectionPolygons)
+        {
+            var polys = new List<Polyline>();
+            foreach (var polygon in detectionPolygons)
+            {
+                polys.AddRange(polygon.Holes);
+            }
+            return polys;
+        }
+
         /// <summary>
         /// 计算区域和内部数据的关系组
         /// </summary>
@@ -147,7 +193,7 @@ namespace ThMEPElectrical.Business
         protected List<PlaceInputProfileData> DetectRegion2ProfileData(List<DetectionRegion> srcRegions)
         {
             var inputProfileDatas = new List<PlaceInputProfileData>();
-            srcRegions.ForEach(e => inputProfileDatas.Add(new PlaceInputProfileData(e.DetectionProfile, BeamProfiles2Polylines(e.secondBeams))));
+            srcRegions.ForEach(e => inputProfileDatas.Add(new PlaceInputProfileData(e.DetectionProfile, BeamProfiles2Polylines(e.secondBeams), e.DetectionInnerProfiles)));
             return inputProfileDatas;
         }
 
@@ -215,7 +261,7 @@ namespace ThMEPElectrical.Business
                 {
                     foreach (DBObject singlePolygon in poly.GeometryIntersection(m_wallProfile))
                     {
-                        if (singlePolygon is Polyline validPoly)
+                        if (singlePolygon is Polyline validPoly && validPoly.Closed)
                             polyLst.Add(validPoly);
                     }
                 }

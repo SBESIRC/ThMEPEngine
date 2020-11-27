@@ -19,17 +19,19 @@ namespace ThMEPElectrical.Business
     {
         private List<Polyline> m_gridPolys; // 原始的轴网线
         private List<Polyline> m_holes; // 内部洞相关数据
+        private List<Polyline> m_swallColumnPlys; // 剪力墙柱子数据
 
-        public GridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes)
+        public GridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes, List<Polyline> swallColumnPlys)
             : base(wallPoly)
         {
             m_gridPolys = gridPolys;
             m_holes = holes;
+            m_swallColumnPlys = swallColumnPlys;
         }
 
-        public static List<PlaceInputProfileData> MakeGridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes)
+        public static List<PlaceInputProfileData> MakeGridDetectionCalculator(Polyline wallPoly, List<Polyline> gridPolys, List<Polyline> holes, List<Polyline> swallColumnPlys)
         {
-            var gridDetectionCalculator = new GridDetectionCalculator(wallPoly, gridPolys, holes);
+            var gridDetectionCalculator = new GridDetectionCalculator(wallPoly, gridPolys, holes, swallColumnPlys);
             gridDetectionCalculator.Do();
 
             return gridDetectionCalculator.RegionBeamSpanProfileData;
@@ -48,6 +50,7 @@ namespace ThMEPElectrical.Business
             // 计算关系组
             var detectRegions = CalculateDetectionRelations(gridProfiles, innerRelatedInfos);
 
+            CalculateDetectionRegionWithHoles(detectRegions, m_swallColumnPlys);
             // 数据转换
             RegionBeamSpanProfileData = DetectRegion2ProfileData(detectRegions);
         }
