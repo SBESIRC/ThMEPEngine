@@ -537,7 +537,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME, Color.FromRgb(0, 0, 255));
             }
 
             return ptLst;
@@ -578,7 +578,7 @@ namespace ThMEPElectrical.Core
                     BlockInsertor.MakeBlockInsert(ptLst, Parameter.sensorType, ucsProfileData.rotateAngle);
                     var circles = GeometryTrans.Points2Circles(ptLst, Parameter.ProtectRadius, Vector3d.ZAxis);
                     var curves = GeometryTrans.Circles2Curves(circles);
-                    DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                    DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME, Color.FromRgb(0, 0, 255));
                 }
             }
         }

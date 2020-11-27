@@ -109,6 +109,16 @@ namespace ThMEPElectrical.Assistant
                     layerRecord.Color = color;
                     layerRecord.IsPlottable = false;
                 }
+                else
+                {
+                    if (!layerRecord.Color.Equals(color))
+                    {
+                        layerRecord.UpgradeOpen();
+                        layerRecord.Color = color;
+                        layerRecord.IsPlottable = false;
+                        layerRecord.DowngradeOpen();
+                    }
+                }
             }
         }
 
