@@ -40,7 +40,7 @@ namespace ThMEPElectrical.Business.MainSecondBeam
 
             // 计算有效的可布置区域
             var mainBeamSpanRegion = CalculateBeamSpanRegion(m_inputProfileData, m_singlePlacePts);
-            DrawUtils.DrawProfile(mainBeamSpanRegion.ValidRegions.Polylines2Curves(), "validRegions");
+            //DrawUtils.DrawProfile(mainBeamSpanRegion.ValidRegions.Polylines2Curves(), "validRegions");
             if (mainBeamSpanRegion.ValidRegions.Count == 0)
             {
                 m_singlePlacePts.Clear();
