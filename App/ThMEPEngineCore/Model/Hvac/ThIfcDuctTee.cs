@@ -1,7 +1,7 @@
 ﻿using System;
 using Autodesk.AutoCAD.Geometry;
 
-namespace ThMEPEngineCore.Model.Havc
+namespace ThMEPEngineCore.Model.Hvac
 {
     public class ThIfcDuctTeeParameters
     {

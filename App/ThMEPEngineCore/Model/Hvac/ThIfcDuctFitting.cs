@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPEngineCore.Model.Havc
+namespace ThMEPEngineCore.Model.Hvac
 {
     public class ThIfcDuctFitting : ThIfcFlowFitting
     {

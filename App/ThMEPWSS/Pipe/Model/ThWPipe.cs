@@ -1,4 +1,4 @@
-﻿using ThMEPEngineCore.Model.Havc;
+﻿using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPWSS.Pipe.Model
 {

@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.Model.Havc
+namespace ThMEPEngineCore.Model.Hvac
 {
     public class ThIfcDuctReducingParameters
     {

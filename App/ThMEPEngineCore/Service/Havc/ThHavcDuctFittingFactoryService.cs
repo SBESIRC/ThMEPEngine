@@ -2,7 +2,7 @@
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Havc;
+using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPEngineCore.Service.Havc
 {
