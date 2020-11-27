@@ -21,6 +21,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Operation;
 using ThMEPElectrical.Business.Procedure;
 using ThMEPElectrical.Business.Operation;
+using ThMEPElectrical.Business.BlindAreaReminder;
 
 namespace ThMEPElectrical.Core
 {
@@ -541,6 +542,12 @@ namespace ThMEPElectrical.Core
             }
 
             return ptLst;
+        }
+
+        public void DoBlindAreaReminder()
+        {
+            var polygons = BlindReminderCalculator.MakeBlindAreaReminderCalculator(Parameter.ProtectRadius);
+            HatchCreater.MakeHatchCreater(polygons);
         }
 
         /// <summary>

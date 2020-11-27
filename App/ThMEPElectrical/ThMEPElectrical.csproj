@@ -40,6 +40,8 @@
     <Compile Include="BlockConvert\ThBConvertRuleEngineWeakCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
+    <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
+    <Compile Include="Business\BlindAreaReminder\HatchCreater.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
     <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
     <Compile Include="Business\Procedure\SplitWallWorker.cs" />

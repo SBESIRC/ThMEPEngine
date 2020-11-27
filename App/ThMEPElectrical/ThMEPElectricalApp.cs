@@ -178,6 +178,16 @@ namespace ThMEPElectrical
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THYGMQ", CommandFlags.Modal)]
+        public void THYGMQ()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new PackageManager(Parameter);
+                packageManager.DoBlindAreaReminder();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THUCSCOMPASS", CommandFlags.Modal)]
         public void ThUcsCompass()
         {

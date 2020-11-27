@@ -495,6 +495,12 @@ namespace ThMEPElectrical.Geometry
             return new DetectionPolygon(shell, holes);
         }
 
+        public static PolygonInfo MPolygon2Polygon(MPolygon mPolygon)
+        {
+            var polygon = MPolygon2PolygonInfo(mPolygon);
+            return new PolygonInfo(polygon.Shell, polygon.Holes);
+        }
+
         /// <summary>
         /// 计算几何中心
         /// </summary>

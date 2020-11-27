@@ -88,7 +88,7 @@ namespace ThMEPElectrical.Assistant
         /// </summary>
         /// <param name="allLayers"></param>
         /// <param name="aimLayer"></param>
-        public static void CreateLayer(string aimLayer, Color color)
+        public static ObjectId CreateLayer(string aimLayer, Color color)
         {
             LayerTableRecord layerRecord = null;
             using (var db = AcadDatabase.Active())
@@ -120,6 +120,8 @@ namespace ThMEPElectrical.Assistant
                     }
                 }
             }
+
+            return layerRecord.ObjectId;
         }
 
         /// <summary>
