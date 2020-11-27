@@ -3,7 +3,6 @@ using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
@@ -210,18 +209,9 @@ namespace ThCADCore.Test
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
-                var builder = new ThCADCoreNTSBuildArea();
-                var geometry = builder.Build(objs.ToMultiLineString());
-                if (geometry is Polygon polygon)
+                foreach(var obj in objs.BuildArea())
                 {
-                    acadDatabase.ModelSpace.Add(polygon.ToMPolygon());
-                }
-                else if (geometry is MultiPolygon mPolygons)
-                {
-                    mPolygons.Geometries.Cast<Polygon>().ForEach(o =>
-                    {
-                        acadDatabase.ModelSpace.Add(o.ToMPolygon());
-                    });
+                    acadDatabase.ModelSpace.Add(obj as Entity);
                 }
             }
         }

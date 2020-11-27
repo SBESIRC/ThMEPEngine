@@ -1,4 +1,9 @@
-﻿using NetTopologySuite.Operation.Buffer;
+﻿using System;
+using System.Linq;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
 using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
@@ -28,6 +33,29 @@ namespace ThCADCore.NTS
                 EndCapStyle = EndCapStyle.Flat,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
+        }
+
+        public static DBObjectCollection BuildArea(this DBObjectCollection objs)
+        {
+            var poylgons = new DBObjectCollection();
+            var builder = new ThCADCoreNTSBuildArea();
+            Geometry geometry = builder.Build(objs.Explode().ToMultiLineString());
+            if (geometry is Polygon polygon)
+            {
+                poylgons.Add(polygon.ToMPolygon());
+            }
+            else if (geometry is MultiPolygon mPolygons)
+            {
+                mPolygons.Geometries.Cast<Polygon>().ForEach(o =>
+                {
+                    poylgons.Add(o.ToMPolygon());
+                });
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return poylgons;
         }
     }
 }
