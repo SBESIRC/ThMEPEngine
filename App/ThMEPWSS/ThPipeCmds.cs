@@ -1,4 +1,5 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
 using Linq2Acad;
 using ThMEPWSS.Pipe;
 using Dreambuild.AutoCAD;
@@ -9,7 +10,6 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-
 
 namespace ThMEPWSS
 {
@@ -102,35 +102,26 @@ namespace ThMEPWSS
                     var compositeEngine = new ThWCompositePipeEngine(kitchenEngines, toiletEngines);
                     compositeEngine.Run(boundary, outline, basinline, pype, boundary1, outline1, closestool);
                     var toiletfloorEngines = new ThWToiletFloordrainEngine();                
-                    foreach (Point3d pt in compositeEngine.KitchenPipes)
+                    foreach (var kitchenPipe in compositeEngine.KitchenPipes)
                     {
-                        acadDatabase.ModelSpace.Add(new DBPoint(pt));
-                        acadDatabase.ModelSpace.Add(new Circle() { Radius = 50, Center = pt });
-                        DBText taggingtext = new DBText()
+                        foreach(Entity item in kitchenPipe.Representation)
                         {
-                            Height = 20,
-                            Position = pt,
-                            TextString = kitchenEngines.Parameters.Identifier,
-                        };
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                            acadDatabase.ModelSpace.Add(item.GetTransformedCopy(kitchenPipe.Matrix));
+                        }
                     }
                     if (compositeEngine.ToiletPipes.Count > 0)
                     {
-                        if (compositeEngine.ToiletPipes[0].IsEqualTo(compositeEngine.KitchenPipes[compositeEngine.KitchenPipes.Count - 1]))
+                        if (compositeEngine.ToiletPipes[0].Equals(compositeEngine.KitchenPipes[compositeEngine.KitchenPipes.Count - 1]))
                         {
                             for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
                             {
-                                var toilet = compositeEngine.ToiletPipes[i] + 200 * compositeEngine.ToiletPipes[0].GetVectorTo(compositeEngine.ToiletPipes[1]).GetNormal();
+                                var toilet = compositeEngine.ToiletPipes[i]; /*+ ;*/
                                 var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
-                                acadDatabase.ModelSpace.Add(new DBPoint(toilet));
-                                acadDatabase.ModelSpace.Add(new Circle() { Radius = radius, Center = toilet });
-                                DBText taggingtext = new DBText()
+                                foreach (Entity item in toilet.Representation)
                                 {
-                                    Height = 20,
-                                    Position = toilet,
-                                    TextString = toiletEngines.Parameters.Identifier[i],
-                                };
-                                acadDatabase.ModelSpace.Add(taggingtext);
+                                   var offset = Matrix3d.Displacement(200 * compositeEngine.ToiletPipes[0].Center.GetVectorTo(compositeEngine.ToiletPipes[1].Center).GetNormal());
+                                   acadDatabase.ModelSpace.Add(item.GetTransformedCopy(toilet.Matrix.PostMultiplyBy(offset)));
+                                }
                             }
                         }
                         else
@@ -139,15 +130,10 @@ namespace ThMEPWSS
                             {
                                 var toilet = compositeEngine.ToiletPipes[i];
                                 var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
-                                acadDatabase.ModelSpace.Add(new DBPoint(toilet));
-                                acadDatabase.ModelSpace.Add(new Circle() { Radius = radius, Center = toilet });
-                                DBText taggingtext = new DBText()
+                                foreach (Entity item in toilet.Representation)
                                 {
-                                    Height = 20,
-                                    Position = toilet,
-                                    TextString = toiletEngines.Parameters.Identifier[i],
-                                };
-                                acadDatabase.ModelSpace.Add(taggingtext);
+                                    acadDatabase.ModelSpace.Add(item.GetTransformedCopy(toilet.Matrix));
+                                }
                             }
                         }
                     }
@@ -158,8 +144,23 @@ namespace ThMEPWSS
                         acadDatabase.ModelSpace.Add(ent);
                     }
                 }
+                //判断是否为正确的Balcony
                 foreach (var compositeBalcony in compositeEngines.FloorDrainRooms)
-                {                                   
+                {
+                    BlockReference floordrain = null;
+                    var bfloordrain = new List<BlockReference>();
+                    foreach (var FloorDrain in compositeBalcony.Balcony.FloorDrains)
+                    {
+                        floordrain = FloorDrain.Outline as BlockReference;
+                        bfloordrain.Add(floordrain);
+                    }
+                    if (bfloordrain == null || bfloordrain.Count == 0)
+                    {
+                        return;
+                    }
+                }
+                foreach (var compositeBalcony in compositeEngines.FloorDrainRooms)
+                {
                     Polyline roofrainpipe = null;
                     Polyline tboundary = null;
                     Polyline bboundary = null;
@@ -355,9 +356,8 @@ namespace ThMEPWSS
                             acadDatabase.ModelSpace.Add(ent_line1);
                         }
                     }
-                    //设备平台输出完毕
-                    //}
                 }
+                
             }
         }
         private bool IsValidToiletContainer(ThWToiletRoom toiletContainer)

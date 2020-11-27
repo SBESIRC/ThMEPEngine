@@ -12,27 +12,41 @@ namespace ThMEPWSS.Pipe.Engine
     public class ThWKitchenPipeEngine : IDisposable
     {
         public ThWPipeZone Zone { get; set; }
-        public Point3dCollection Pipes { get; set; }
+        public List<ThWKitchenPipe> Pipes { get; set; }
         public ThWKitchenPipeParameters Parameters { get; set; }
         public ThWKitchenPipeEngine()
         {
-            Pipes = new Point3dCollection();
+            Pipes = new List<ThWKitchenPipe>();
         }
         public void Dispose()
         {
         }
+
+        public ThWKitchenPipe Create(Point3d center)
+        {
+            return new ThWKitchenPipe()
+            {
+                Identifier = Parameters.Identifier,
+                Matrix = Matrix3d.Displacement(center.GetAsVector()),
+                Representation = new DBObjectCollection()
+                {
+                    new Circle(Point3d.Origin, Vector3d.ZAxis, Parameters.Diameter / 2.0),
+                }
+            };
+        }
+
         public void Run(Polyline boundary, Polyline outline, BlockReference basinline, Polyline pype)
         {
             if (OutlineInBoundary(boundary, outline))
             {
                 var pt = FindInsideVertex(boundary, outline);
                 var dir = GetDirection(boundary, outline, pt);
-                Pipes.Add(pt + dir * 100);
+                Pipes.Add(Create(pt + dir * 100));
 
                 //如果管井和台盆不共边，则需要添加一个管子
                 if (Commonline(boundary, outline, basinline))
                 {
-                    Pipes.Add(Addpipe(boundary, basinline, pype, outline));
+                    Pipes.Add(Create(Addpipe(boundary, basinline, pype, outline)));
                 }
             }
             else
@@ -40,14 +54,14 @@ namespace ThMEPWSS.Pipe.Engine
                 if (Parallelline(boundary, outline, basinline))
                 {
                     var pt = FindOutsideVertex(basinline, outline);              
-                    Pipes.Add(pt);
+                    Pipes.Add(Create(pt));
 
                 }
                 else
                 {
                     var pt = FindOutsideVertex(basinline, outline);
-                    Pipes.Add(pt);
-                    Pipes.Add(Addpipe(boundary, basinline, pype, outline));
+                    Pipes.Add(Create(pt));
+                    Pipes.Add(Create(Addpipe(boundary, basinline, pype, outline)));
                 }
             }
 

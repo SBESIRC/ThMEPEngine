@@ -1,6 +1,8 @@
 ﻿using System;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.Pipe.Model;
+using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -9,7 +11,7 @@ namespace ThMEPWSS.Pipe.Engine
         public ThWToiletPipeEngine ToiletPipeEngine { get; set; }
         public ThWKitchenPipeEngine KitchenPipeEngine { get; set; }
 
-        public Point3dCollection KitchenPipes
+        public List<ThWKitchenPipe> KitchenPipes
         {
             get
             {
@@ -17,7 +19,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
         }
 
-        public Point3dCollection ToiletPipes
+        public List<ThWToiletPipe>  ToiletPipes
         {
             get
             {

@@ -5,22 +5,37 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
+using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWToiletPipeEngine : IDisposable
     {
         public ThWPipeZone Zone { get; set; }
-        public Point3dCollection Pipes { get; set; }
+        public List<ThWToiletPipe> Pipes { get; set; }
         public ThWToiletPipeParameters Parameters { get; set; }
         
         public ThWToiletPipeEngine()
         {
-            Pipes = new Point3dCollection();
+            Pipes = new List<ThWToiletPipe>();
         }
         public void Dispose()
         {
         }
+        public ThWToiletPipe Create(Point3d center, int index)
+        {
+            return new ThWToiletPipe()
+            {
+                Center = center,
+                Identifier = Parameters.Identifier[index],
+                Matrix = Matrix3d.Displacement(center.GetAsVector()),
+                Representation = new DBObjectCollection()
+                {
+                    new Circle(Point3d.Origin, Vector3d.ZAxis, Parameters.Diameter[index] / 2.0),
+                },
+            };
+        }
+
         public void Run(Polyline outline, Polyline well, Polyline closestool)
         {
           
@@ -34,7 +49,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var pt = FindInsideVertex(a, well, dir);
                 for (int i = 0; i < Parameters.Number; i++)
                 {
-                    Pipes.Add(pt + i * dir * 200);
+                    Pipes.Add(Create((pt + i * dir * 200),i));
                 }
             }
             else
@@ -255,14 +270,14 @@ namespace ThMEPWSS.Pipe.Engine
                 return true;
             }
         }
-        private Point3dCollection FindOutsideVertex(Polyline outline, Polyline well, Polyline closestool,int d)
+        private List<ThWToiletPipe> FindOutsideVertex(Polyline outline, Polyline well, Polyline closestool,int d)
         {
             var vertices = well.Vertices();
             double dst = double.MaxValue;
             int a = 0;
             Point3d pt = Point3d.Origin;
             Vector3d dir = Vector3d.XAxis;
-            Point3dCollection pipes = new Point3dCollection();
+            var pipes = new List<ThWToiletPipe>();          
             for (int i = 0; i < vertices.Count; i++)
             {
                 if (dst> outline.GetCenter().DistanceTo(vertices[i]))
@@ -300,7 +315,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
             for (int i = 0; i < Parameters.Number; i++)
             {
-                pipes.Add(pt + i * dir * 200);
+                pipes.Add(Create((pt + i * dir * 200),i));
             }
             return pipes;
         }
