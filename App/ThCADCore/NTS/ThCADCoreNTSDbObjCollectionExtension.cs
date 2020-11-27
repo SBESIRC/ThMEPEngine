@@ -1,5 +1,6 @@
 ﻿using System;
 using NFox.Cad;
+using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -180,12 +181,14 @@ namespace ThCADCore.NTS
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
         {
-            var geometries = new List<LineString>();
+            var geometries = new List<Geometry>();
             foreach (Curve curve in curves)
             {
-                geometries.Add(curve.ToNTSLineString());
+                geometries.Add(curve.ToNTSGeometry());
             }
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(geometries.ToArray());
+            // 暂时过滤掉Polygon
+            var lineStrings = geometries.Where(o => o is LineString).Cast<LineString>();
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 
         public static Geometry Combine(this DBObjectCollection curves, double chord = 5.0)

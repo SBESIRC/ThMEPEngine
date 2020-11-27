@@ -17,12 +17,12 @@ namespace ThCADCore.NTS
 
         public static double Distance(this Curve line, Curve curve)
         {
-            return line.ToNTSLineString().Distance(curve.ToNTSLineString());
+            return line.ToNTSGeometry().Distance(curve.ToNTSGeometry());
         }
 
         public static double IndexedDistance(this Curve line, Curve curve)
         {
-            return IndexedFacetDistance.Distance(line.ToNTSLineString(), curve.ToNTSLineString());
+            return IndexedFacetDistance.Distance(line.ToNTSGeometry(), curve.ToNTSGeometry());
         }
     }
 }

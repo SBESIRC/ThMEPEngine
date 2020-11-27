@@ -65,8 +65,8 @@ namespace ThCADCore.NTS
         {
             var geometries = new Geometry[]
             {
+                curve.ToNTSGeometry(),
                 polygon.ToNTSPolygon(),
-                curve.ToNTSLineString()
             };
 
             var objs = new DBObjectCollection();

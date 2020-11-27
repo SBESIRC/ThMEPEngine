@@ -68,39 +68,11 @@ namespace ThCADCore.NTS
                 }
                 else if (obj is Arc arc)
                 {
-                    return arc.GeometricExtents.ToNTSPolygon();
+                    return arc.ToNTSGeometry();
                 }
                 else if (obj is Circle circle)
                 {
-                    return circle.GeometricExtents.ToNTSPolygon();
-                }
-                else if (obj is DBText text)
-                {
-                    return text.GeometricExtents.ToNTSPolygon();
-                }
-                else if (obj is Hatch hatch)
-                {
-                    var maxHatch = hatch.Boundaries().OrderByDescending(x => x.Area).First();
-                    if (maxHatch is Polyline hatchPolyline)
-                    {
-                        return hatchPolyline.ToNTSPolygon();
-                    }
-                    else if (maxHatch is Circle hatchCircle)
-                    {
-                        return hatchCircle.ToNTSPolygon(10);
-                    }
-                    else
-                    {
-                        throw new ArgumentException();
-                    }
-                }
-                else if (obj is Solid solid)
-                {
-                    return solid.GeometricExtents.ToNTSPolygon();
-                }
-                else if (obj is BlockReference blockReference)
-                {
-                    return blockReference.GeometricExtents.ToNTSPolygon();
+                    return circle.ToNTSGeometry();
                 }
                 else if (obj is MPolygon mPolygon)
                 {
@@ -108,7 +80,15 @@ namespace ThCADCore.NTS
                 }
                 else if (obj is Entity entity)
                 {
-                    return entity.GeometricExtents.ToNTSPolygon();
+                    try
+                    {
+                        return entity.GeometricExtents.ToNTSPolygon();
+                    }
+                    catch
+                    {
+                        // 若异常抛出，则返回一个“空”的Polygon
+                        return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+                    }
                 }
                 else
                 {
