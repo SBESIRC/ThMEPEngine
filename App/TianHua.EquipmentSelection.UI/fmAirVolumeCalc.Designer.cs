@@ -49,6 +49,10 @@
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem1 = new DevExpress.XtraLayout.EmptySpaceItem();
+            this.CheckIsManualInput = new DevExpress.XtraEditors.CheckEdit();
+            this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.TxtManualInput = new DevExpress.XtraEditors.TextEdit();
+            this.layoutControlItem4 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Gdc)).BeginInit();
@@ -64,10 +68,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CheckIsManualInput.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtManualInput.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).BeginInit();
             this.SuspendLayout();
             // 
             // layoutControl1
             // 
+            this.layoutControl1.Controls.Add(this.TxtManualInput);
+            this.layoutControl1.Controls.Add(this.CheckIsManualInput);
             this.layoutControl1.Controls.Add(this.BtnOK);
             this.layoutControl1.Controls.Add(this.Gdc);
             this.layoutControl1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -82,9 +92,9 @@
             // BtnOK
             // 
             this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.BtnOK.Location = new System.Drawing.Point(230, 108);
+            this.BtnOK.Location = new System.Drawing.Point(232, 104);
             this.BtnOK.Name = "BtnOK";
-            this.BtnOK.Size = new System.Drawing.Size(115, 22);
+            this.BtnOK.Size = new System.Drawing.Size(113, 22);
             this.BtnOK.StyleController = this.layoutControl1;
             this.BtnOK.TabIndex = 33;
             this.BtnOK.Text = "确定";
@@ -107,7 +117,7 @@
             this.TxtDynPress,
             this.TxtAirCalcValue,
             this.TxtAirCalcFactor});
-            this.Gdc.Size = new System.Drawing.Size(333, 92);
+            this.Gdc.Size = new System.Drawing.Size(333, 88);
             this.Gdc.TabIndex = 32;
             this.Gdc.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.Gdv});
@@ -268,7 +278,9 @@
             this.layoutControlGroup1.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
             this.layoutControlItem1,
             this.layoutControlItem2,
-            this.emptySpaceItem1});
+            this.emptySpaceItem1,
+            this.layoutControlItem3,
+            this.layoutControlItem4});
             this.layoutControlGroup1.Name = "Root";
             this.layoutControlGroup1.Size = new System.Drawing.Size(357, 142);
             this.layoutControlGroup1.TextVisible = false;
@@ -278,26 +290,69 @@
             this.layoutControlItem1.Control = this.Gdc;
             this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem1.Name = "layoutControlItem1";
-            this.layoutControlItem1.Size = new System.Drawing.Size(337, 96);
+            this.layoutControlItem1.Size = new System.Drawing.Size(337, 92);
             this.layoutControlItem1.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem1.TextVisible = false;
             // 
             // layoutControlItem2
             // 
             this.layoutControlItem2.Control = this.BtnOK;
-            this.layoutControlItem2.Location = new System.Drawing.Point(218, 96);
+            this.layoutControlItem2.Location = new System.Drawing.Point(220, 92);
             this.layoutControlItem2.Name = "layoutControlItem2";
-            this.layoutControlItem2.Size = new System.Drawing.Size(119, 26);
+            this.layoutControlItem2.Size = new System.Drawing.Size(117, 30);
             this.layoutControlItem2.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem2.TextVisible = false;
             // 
             // emptySpaceItem1
             // 
             this.emptySpaceItem1.AllowHotTrack = false;
-            this.emptySpaceItem1.Location = new System.Drawing.Point(0, 96);
+            this.emptySpaceItem1.Location = new System.Drawing.Point(164, 92);
             this.emptySpaceItem1.Name = "emptySpaceItem1";
-            this.emptySpaceItem1.Size = new System.Drawing.Size(218, 26);
+            this.emptySpaceItem1.Size = new System.Drawing.Size(56, 30);
             this.emptySpaceItem1.TextSize = new System.Drawing.Size(0, 0);
+            // 
+            // CheckIsManualInput
+            // 
+            this.CheckIsManualInput.Location = new System.Drawing.Point(15, 107);
+            this.CheckIsManualInput.Name = "CheckIsManualInput";
+            this.CheckIsManualInput.Properties.AllowFocused = false;
+            this.CheckIsManualInput.Properties.Caption = "";
+            this.CheckIsManualInput.Size = new System.Drawing.Size(19, 19);
+            this.CheckIsManualInput.StyleController = this.layoutControl1;
+            this.CheckIsManualInput.TabIndex = 34;
+            this.CheckIsManualInput.CheckedChanged += new System.EventHandler(this.CheckIsManualInput_CheckedChanged);
+            // 
+            // layoutControlItem3
+            // 
+            this.layoutControlItem3.Control = this.CheckIsManualInput;
+            this.layoutControlItem3.Location = new System.Drawing.Point(0, 92);
+            this.layoutControlItem3.Name = "layoutControlItem3";
+            this.layoutControlItem3.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 3, 5, 5);
+            this.layoutControlItem3.Size = new System.Drawing.Size(27, 30);
+            this.layoutControlItem3.TextSize = new System.Drawing.Size(0, 0);
+            this.layoutControlItem3.TextVisible = false;
+            // 
+            // TxtManualInput
+            // 
+            this.TxtManualInput.Enabled = false;
+            this.TxtManualInput.Location = new System.Drawing.Point(101, 107);
+            this.TxtManualInput.Name = "TxtManualInput";
+            this.TxtManualInput.Properties.Mask.EditMask = "[0-9]\\d*";
+            this.TxtManualInput.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtManualInput.Size = new System.Drawing.Size(68, 20);
+            this.TxtManualInput.StyleController = this.layoutControl1;
+            this.TxtManualInput.TabIndex = 35;
+            this.TxtManualInput.EditValueChanged += new System.EventHandler(this.TxtManualInput_EditValueChanged);
+            // 
+            // layoutControlItem4
+            // 
+            this.layoutControlItem4.Control = this.TxtManualInput;
+            this.layoutControlItem4.Location = new System.Drawing.Point(27, 92);
+            this.layoutControlItem4.Name = "layoutControlItem4";
+            this.layoutControlItem4.Padding = new DevExpress.XtraLayout.Utils.Padding(1, 5, 5, 5);
+            this.layoutControlItem4.Size = new System.Drawing.Size(137, 30);
+            this.layoutControlItem4.Text = "输入风量：";
+            this.layoutControlItem4.TextSize = new System.Drawing.Size(60, 14);
             // 
             // fmAirVolumeCalc
             // 
@@ -326,6 +381,10 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CheckIsManualInput.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtManualInput.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -353,5 +412,9 @@
         private DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn ColAirVolume;
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit TxtAirCalcValue;
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit TxtAirCalcFactor;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem3;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem4;
+        public DevExpress.XtraEditors.CheckEdit CheckIsManualInput;
+        public DevExpress.XtraEditors.TextEdit TxtManualInput;
     }
 }

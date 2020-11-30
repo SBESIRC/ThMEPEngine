@@ -410,10 +410,21 @@ namespace TianHua.FanSelection.UI
                 {
                     if (_fmAirVolumeCalc.m_ListFan != null && _fmAirVolumeCalc.m_ListFan.Count > 0)
                     {
-                        _Fan.AirVolume = _fmAirVolumeCalc.m_ListFan.First().AirVolume;
-                        _Fan.AirCalcFactor = _fmAirVolumeCalc.m_ListFan.First().AirCalcFactor;
-                        _Fan.AirCalcValue = _fmAirVolumeCalc.m_ListFan.First().AirCalcValue;
-                        _Fan.FanVolumeModel = _fmAirVolumeCalc.m_ListFan.First().FanVolumeModel;
+                        _Fan.IsManualInputAirVolume = _fmAirVolumeCalc.CheckIsManualInput.Checked;
+                        if (_fmAirVolumeCalc.CheckIsManualInput.Checked)
+                        {
+                            _Fan.AirVolume = FuncStr.NullToInt(_fmAirVolumeCalc.TxtManualInput.Text);
+                        }
+                        else
+                        {
+                            _Fan.AirVolume = _fmAirVolumeCalc.m_ListFan.First().AirVolume;
+                            _Fan.AirCalcFactor = _fmAirVolumeCalc.m_ListFan.First().AirCalcFactor;
+                            _Fan.AirCalcValue = _fmAirVolumeCalc.m_ListFan.First().AirCalcValue;
+                            _Fan.FanVolumeModel = _fmAirVolumeCalc.m_ListFan.First().FanVolumeModel;
+
+                        }
+
+
                     }
 
                     SetFanModel();

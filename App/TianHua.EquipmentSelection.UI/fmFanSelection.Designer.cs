@@ -28,9 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(fmFanSelection));
-            this.BarManager = new DevExpress.XtraBars.BarManager(this.components);
+            this.BarManager = new DevExpress.XtraBars.BarManager();
             this.bar2 = new DevExpress.XtraBars.Bar();
             this.barBtnNew = new DevExpress.XtraBars.BarButtonItem();
             this.BarBtnOpen = new DevExpress.XtraBars.BarButtonItem();
@@ -127,7 +126,7 @@
             this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem4 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.layoutControlItem8 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.ToolTip = new DevExpress.Utils.ToolTipController(this.components);
+            this.ToolTip = new DevExpress.Utils.ToolTipController();
             ((System.ComponentModel.ISupportInitialize)(this.BarManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
@@ -474,7 +473,6 @@
             this.TreeList.TabIndex = 11;
             this.TreeList.TreeLineStyle = DevExpress.XtraTreeList.LineStyle.Solid;
             this.TreeList.CustomNodeCellEditForEditing += new DevExpress.XtraTreeList.GetCustomNodeCellEditEventHandler(this.TreeList_CustomNodeCellEditForEditing);
-            //this.TreeList.FocusedNodeChanged += new DevExpress.XtraTreeList.FocusedNodeChangedEventHandler(this.TreeList_FocusedNodeChanged);
             this.TreeList.CustomColumnDisplayText += new DevExpress.XtraTreeList.CustomColumnDisplayTextEventHandler(this.TreeList_CustomColumnDisplayText);
             this.TreeList.ValidatingEditor += new DevExpress.XtraEditors.Controls.BaseContainerValidateEditorEventHandler(this.TreeList_ValidatingEditor);
             this.TreeList.InvalidValueException += new DevExpress.XtraEditors.Controls.InvalidValueExceptionEventHandler(this.TreeList_InvalidValueException);
