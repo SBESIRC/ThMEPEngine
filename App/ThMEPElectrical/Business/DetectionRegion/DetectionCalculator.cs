@@ -246,10 +246,36 @@ namespace ThMEPElectrical.Business
             return false;
         }
 
+        protected List<Polyline> CalculateRegions(List<Polyline> polylines)
+        {
+            var bufferPls = new DBObjectCollection();
+            foreach (var singlePl in polylines)
+            {
+               foreach (var entity in singlePl.BufferPL(ThMEPCommon.PLbufferLength))
+                {
+                    if (entity is Polyline poly && poly.Closed)
+                    {
+                        bufferPls.Add(poly);
+                    }
+                }
+            }
+
+            var resPolys = new List<Polyline>();
+            foreach (Entity entity in m_wallProfile.Difference(bufferPls))
+            {
+                if (entity is Polyline poly && poly.Closed)
+                {
+                    resPolys.Add(poly);
+                }
+            }
+
+            return resPolys;
+        }
+
         /// <summary>
         /// 计算轴网线 + 墙线构成的第一次区域
         /// </summary>
-        protected List<Polyline> CalculateRegions(List<Polyline> srcRegionProfiles)
+        protected List<Polyline> CalculateRegions2(List<Polyline> srcRegionProfiles)
         {
             var objs = srcRegionProfiles.ToCollection();
             var obLst = objs.Polygons();

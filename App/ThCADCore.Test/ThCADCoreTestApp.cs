@@ -571,6 +571,34 @@ namespace ThCADCore.Test
             }
         }
 
+
+        [CommandMethod("TIANHUACAD", "ThPBuffer", CommandFlags.Modal)]
+        public void ThBuffer()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetDistance("\n请输入距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                double distanceTolerance = result2.Value;
+                var obj = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach (Polyline pl in obj.BufferPL(20))
+                {
+                    pl.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(pl);
+                }
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "ThSimplify", CommandFlags.Modal)]
         public void ThSimplify()
         {

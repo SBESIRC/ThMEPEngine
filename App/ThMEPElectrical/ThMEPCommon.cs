@@ -46,6 +46,7 @@ namespace ThMEPElectrical
         public static readonly double NearestDisTolerance = 2; //最近距离容差值
 
         public static readonly double ProtectAreaScatterLength = 200; // 保护半径离散长度
+        public static readonly double PLbufferLength = 1; // pline buffer 宽度
     }
 }
 
