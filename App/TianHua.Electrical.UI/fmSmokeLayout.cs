@@ -317,5 +317,10 @@ namespace TianHua.Electrical.UI
         {
             Hide();
         }
+
+        private void BtnBLIS_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }
