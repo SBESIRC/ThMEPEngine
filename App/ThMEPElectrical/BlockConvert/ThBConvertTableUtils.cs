@@ -1,4 +1,5 @@
 ﻿using Linq2Acad;
+using System.Text.RegularExpressions;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.BlockConvert
@@ -16,7 +17,7 @@ namespace ThMEPElectrical.BlockConvert
                 Contents = cell.Value.ToString(),
             })
             {
-                return mText.Text;
+                return Regex.Replace(mText.Text, @"\t|\n|\r", "");
             }
         }
 

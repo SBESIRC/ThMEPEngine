@@ -19,17 +19,21 @@ namespace TianHua.Electrical.UI.CAD
                 var block = acadDatabase.Blocks.ElementOrDefault(convert.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string);
                 if (block != null)
                 {
-                    return new BlockDataModel()
+                    var model = new BlockDataModel()
                     {
                         ID = block.Name,
                         Name = block.Name,
                         Icon = block.PreviewIcon,
-                        Visibility = convert.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] as string,
                     };
+                    if (convert.Attributes.ContainsKey(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY))
+                    {
+                        model.Visibility = convert.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] as string;
+                    }
+                    return model;
                 }
                 else
                 {
-                    return new BlockDataModel();
+                    return null;
                 }
             }
         }

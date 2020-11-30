@@ -83,7 +83,7 @@ namespace TianHua.Electrical.UI
             using (ThBConvertManager manager = ThBConvertManager.CreateManager(blockDb.Database, ConvertMode.ALL))
             {
                 m_ListStrongBlockConvert.Clear();
-                foreach (var rule in manager.Rules.Where(o => o.Mode == ConvertMode.STRONGCURRENT))
+                foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.STRONGCURRENT) == ConvertMode.STRONGCURRENT))
                 {
                     m_ListStrongBlockConvert.Add(new ViewFireBlockConvert()
                     {
@@ -93,7 +93,7 @@ namespace TianHua.Electrical.UI
                 }
 
                 m_ListWeakBlockConvert.Clear();
-                foreach (var rule in manager.Rules.Where(o => o.Mode == ConvertMode.WEAKCURRENT))
+                foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.WEAKCURRENT) == ConvertMode.WEAKCURRENT))
                 {
                     m_ListWeakBlockConvert.Add(new ViewFireBlockConvert()
                     {

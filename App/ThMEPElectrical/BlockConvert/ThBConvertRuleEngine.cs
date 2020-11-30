@@ -18,19 +18,19 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var rules = new List<ThBConvertRule>();
-                if ((mode & ConvertMode.STRONGCURRENT) != 0)
+                if ((mode & ConvertMode.STRONGCURRENT) == ConvertMode.STRONGCURRENT)
                 {
                     var table = acadDatabase.ModelSpace
                         .OfType<Table>()
                         .First(o => o.Cells[0, 0].Text() == ThBConvertCommon.BLOCK_MAP_RULES_TABLE_TITLE_STRONG);
-                    rules.AddRange(Rules(table, mode));
+                    rules.AddRange(Rules(table, ConvertMode.STRONGCURRENT));
                 }
-                if ((mode & ConvertMode.WEAKCURRENT) != 0)
+                if ((mode & ConvertMode.WEAKCURRENT) == ConvertMode.WEAKCURRENT)
                 {
                     var table = acadDatabase.ModelSpace
                         .OfType<Table>()
                         .First(o => o.Cells[0, 0].Text() == ThBConvertCommon.BLOCK_MAP_RULES_TABLE_TITLE_WEAK);
-                    rules.AddRange(Rules(table, mode));
+                    rules.AddRange(Rules(table, ConvertMode.WEAKCURRENT));
                 }
                 return rules;
             }
