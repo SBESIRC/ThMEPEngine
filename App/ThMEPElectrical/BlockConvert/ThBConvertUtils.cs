@@ -1,6 +1,5 @@
-﻿using System;
+﻿using ThCADExtension;
 using System.Text.RegularExpressions;
-using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -12,11 +11,15 @@ namespace ThMEPElectrical.BlockConvert
         /// <summary>
         /// 弱电设备
         /// </summary>
-        WEAKCURRENT = 0,
+        WEAKCURRENT = 1,
         /// <summary>
         /// 强电设备
         /// </summary>
-        STRONGCURRENT = 1,
+        STRONGCURRENT = 2,
+        /// <summary>
+        /// 全部
+        /// </summary>
+        ALL = (WEAKCURRENT | STRONGCURRENT),
     }
 
     public static class ThBConvertUtils
@@ -118,6 +121,21 @@ namespace ThMEPElectrical.BlockConvert
         }
 
         /// <summary>
+        /// 是否为消防电源
+        /// </summary>
+        /// <param name="blockReference"></param>
+        /// <returns></returns>
+        public static bool IsFirePower(ThBlockReferenceData blockReference)
+        {
+            string name = blockReference.StringValue(ThBConvertCommon.PROPERTY_FIRE_POWER_SUPPLY);
+            if (string.IsNullOrEmpty(name))
+            {
+                return name == "消防电源";
+            }
+            return false;
+        }
+
+        /// <summary>
         /// 获取属性（字符串）
         /// </summary>
         /// <param name="blockReference"></param>
@@ -150,33 +168,6 @@ namespace ThMEPElectrical.BlockConvert
             catch
             {
                 return string.Empty;
-            }
-        }
-
-        /// <summary>
-        /// 是否为消防电源
-        /// </summary>
-        /// <param name="blockReference"></param>
-        /// <returns></returns>
-        public static bool IsFirePowerSupply(this ThBlockReferenceData blockReference)
-        {
-            return blockReference.StringValue(ThBConvertCommon.PROPERTY_FIRE_POWER_SUPPLY) == "消防电源";
-        }
-        
-        /// <summary>
-        /// 块的转换比例
-        /// </summary>
-        /// <param name="block"></param>
-        /// <returns></returns>
-        public static double Scale(this ThBlockConvertBlock block)
-        {
-            try
-            {
-                return Convert.ToDouble(block.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_SCALE]);
-            }
-            catch
-            {
-                return 1.0;
             }
         }
     }

@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 
 namespace TianHua.Electrical
 {
-    public class PresenterFireBlockConver : Presenter<IFireBlockConvert>
+    public class PresenterFireBlockConvert : Presenter<IFireBlockConvert>
     {
-        public PresenterFireBlockConver(IFireBlockConvert View) : base(View)
+        public PresenterFireBlockConvert(IFireBlockConvert View) : base(View)
         {
 
         }
@@ -20,9 +20,8 @@ namespace TianHua.Electrical
 
         public override void OnViewLoaded()
         {
-            View.m_ListStrongBlockConver = InitListStrongBlockConver();
-
-            View.m_ListWeakBlockConver = InitListWeakBlockConver();
+            View.m_ListWeakBlockConvert = InitListWeakBlockConver();
+            View.m_ListStrongBlockConvert = InitListStrongBlockConver();
         }
 
         private List<ViewFireBlockConvert> InitListWeakBlockConver()

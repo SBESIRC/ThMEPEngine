@@ -16,6 +16,8 @@ namespace ThMEPElectrical.BlockConvert
     /// </summary>
     public class ThBConvertRule
     {
+        public ConvertMode Mode { get; set; }
+
         public Tuple<ThBlockConvertBlock, ThBlockConvertBlock> Transformation { get; set; }
     }
 }

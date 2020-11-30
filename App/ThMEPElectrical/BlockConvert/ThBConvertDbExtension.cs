@@ -1,11 +1,10 @@
-﻿using System;
-using Linq2Acad;
+﻿using Linq2Acad;
 using System.Linq;
+using ThCADExtension;
 using GeometryExtensions;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -18,21 +17,8 @@ namespace ThMEPElectrical.BlockConvert
         /// <returns></returns>
         public static List<ThBConvertRule> Rules(this Database database, ConvertMode mode)
         {
-            switch (mode)
-            {
-                case ConvertMode.STRONGCURRENT:
-                    {
-                        var engine = new ThBConvertRuleEngineStrongCurrent();
-                        return engine.Acquire(database);
-                    }
-                case ConvertMode.WEAKCURRENT:
-                    {
-                        var engine = new ThBConvertRuleEngineWeakCurrent();
-                        return engine.Acquire(database);
-                    }
-                default:
-                    throw new NotSupportedException();
-            }
+            var engine = new ThBConvertRuleEngine();
+            return engine.Acquire(database, mode);
         }
 
         /// <summary>
@@ -59,7 +45,7 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var objs = new ObjectIdCollection();
-                var name = (string)block.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK];
+                var name = (string)block.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME];
                 var blkRefs = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
                     .Where(o => o.GetEffectiveName() == name);

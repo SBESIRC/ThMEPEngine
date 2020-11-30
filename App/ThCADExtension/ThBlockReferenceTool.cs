@@ -3,7 +3,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADExtension
 {
-    public static class ThBlockTool
+    public static class ThBlockReferenceTool
     {
         /// <summary>
         /// 获取块引用的变换矩阵

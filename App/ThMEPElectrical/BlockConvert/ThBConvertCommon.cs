@@ -4,12 +4,13 @@
     {
         public static readonly double default_voltage = 380;
         public static readonly double radian_tolerance = 1e-6;
-        public static readonly string LAYER_FAN_DEVICE = "E-FAS-DEVC";
-        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK = "Block";
-        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_SCALE = "Scale";
+        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_NAME = "块名";
+        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_LAYER = "目标图层";
+        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_EXPLODE = "是否炸开";
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";
-        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_FIREPOWER = "FirePowerBlock";
-        public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_NON_FIREPOWER = "NonFirePowerBlock";
+
+        public static readonly string LAYER_BLOCK_WEAKCURRENT = "E-FAS-DEVC";
+        public static readonly string LAYER_BLOCK_STRONGCURRENT = "E-UNIV-DIAG";
 
         public static readonly string PROPERTY_POWER_VOLTAGE = "电压";
         public static readonly string PROPERTY_POWER_QUANTITY = "电量";
@@ -27,8 +28,8 @@
         public static readonly string PROPERTY_FAN_USAGE = "风机功能";
         public static readonly string PROPERTY_EQUIPMENT_NAME = "设备名称";
 
-        public static readonly string BLOCK_MAP_RULES_FILE = "提电气块转换配置表.机电一所.dwg";
-        public static readonly string BLOCK_MAP_RULES_TABLE_TITLE_WEAK = "机电一所弱电设备转换对应表";
-        public static readonly string BLOCK_MAP_RULES_TABLE_TITLE_STRONG = "机电一所强电设备转换对应表";
+        public static readonly string BLOCK_MAP_RULES_FILE = "天华提电气块转换配置表.dwg";
+        public static readonly string BLOCK_MAP_RULES_TABLE_TITLE_WEAK = "天华弱电提资转换对应表";
+        public static readonly string BLOCK_MAP_RULES_TABLE_TITLE_STRONG = "天华强电提资转换对应表";
     }
 }

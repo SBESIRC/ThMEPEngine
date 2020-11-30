@@ -37,7 +37,7 @@
     <Compile Include="ThArcExtension.cs" />
     <Compile Include="ThBlockReferenceData.cs" />
     <Compile Include="ThBlockReferenceExtensions.cs" />
-    <Compile Include="ThBlockTool.cs" />
+    <Compile Include="ThBlockReferenceTool.cs" />
     <Compile Include="ThCADCommon.cs" />
     <Compile Include="ThCircleExtension.cs" />
     <Compile Include="ThCUITools.cs" />

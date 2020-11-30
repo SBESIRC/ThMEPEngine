@@ -1,5 +1,8 @@
 ﻿using ThMEPElectrical;
+using AcHelper.Commands;
+using System.Windows.Forms;
 using ThMEPElectrical.Model;
+using ThMEPElectrical.BlockConvert;
 using Autodesk.AutoCAD.Runtime;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -35,6 +38,29 @@ namespace TianHua.Electrical.UI
                 SmokeLayoutUI.InitForm(_SmokeLayoutDataModel);
             }
             AcadApp.ShowModelessDialog(SmokeLayoutUI);
+        }
+
+        [CommandMethod("TIANHUACAD", "THTZL", CommandFlags.Modal)]
+        public void ThBlockConvert()
+        {
+            using (var dlg = new fmBlockConvert())
+            {
+                var result = AcadApp.ShowModalDialog(dlg);
+                if (result == DialogResult.OK)
+                {
+                    switch (dlg.ActiveConvertMode)
+                    {
+                        case ConvertMode.STRONGCURRENT:
+                            CommandHandlerBase.ExecuteFromCommandLine(false, "THPBE");
+                            break;
+                        case ConvertMode.WEAKCURRENT:
+                            CommandHandlerBase.ExecuteFromCommandLine(false, "THLBE");
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            }
         }
 
         private string LayoutType

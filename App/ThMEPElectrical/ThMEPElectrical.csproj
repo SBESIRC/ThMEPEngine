@@ -36,8 +36,7 @@
     <Compile Include="BlockConvert\ThBConvertManager.cs" />
     <Compile Include="BlockConvert\ThBConvertRule.cs" />
     <Compile Include="BlockConvert\ThBConvertRuleEngine.cs" />
-    <Compile Include="BlockConvert\ThBConvertRuleEngineStrongCurrent.cs" />
-    <Compile Include="BlockConvert\ThBConvertRuleEngineWeakCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />

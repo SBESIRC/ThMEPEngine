@@ -1,10 +1,9 @@
-﻿using System;
-using Linq2Acad;
+﻿using Linq2Acad;
 using DotNetARX;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
 
 namespace ThMEPElectrical.BlockConvert
 {
@@ -33,7 +32,19 @@ namespace ThMEPElectrical.BlockConvert
 
         public override void SetDatbaseProperties(ObjectId blkRef, ThBlockReferenceData srcBlockReference)
         {
-            throw new NotImplementedException();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var block = acadDatabase.Element<Entity>(blkRef);
+
+                // 图层
+                block.LayerId = ThBConvertDbUtils.BlockLayer(ThBConvertCommon.LAYER_BLOCK_STRONGCURRENT, 2);
+
+                // 颜色
+                if (ThBConvertUtils.IsFirePower(srcBlockReference))
+                {
+                    block.ColorIndex = 1;
+                }
+            }
         }
 
         public override void TransformBy(ObjectId blkRef, ThBlockReferenceData srcBlockReference)

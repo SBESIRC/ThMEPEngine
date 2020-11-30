@@ -38,7 +38,7 @@ namespace ThMEPElectrical.BlockConvert
         public ThBlockConvertBlock TransformRule(string block)
         {
             var rule = Rules.First(o =>
-                (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK] == block);
+                (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] == block);
             return rule?.Transformation.Item2;
         }
 
@@ -51,7 +51,7 @@ namespace ThMEPElectrical.BlockConvert
         public ThBlockConvertBlock TransformRule(string block, string visibility)
         {
             var rule = Rules.First(o =>
-                (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK] == block &&
+                (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] == block &&
                 (string)o.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY] == visibility);
             return rule?.Transformation.Item2;
         }

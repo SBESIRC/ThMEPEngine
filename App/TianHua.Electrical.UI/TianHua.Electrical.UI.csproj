@@ -59,6 +59,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD\ElectricalUIDbExtension.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
     <Compile Include="fmBlockConvert.cs">
@@ -109,6 +110,10 @@
     <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
       <Name>DotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
+      <Name>ThCADExtension</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
       <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
@@ -199,5 +204,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

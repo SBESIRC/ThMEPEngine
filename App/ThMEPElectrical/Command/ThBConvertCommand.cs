@@ -4,6 +4,7 @@ using AcHelper;
 using Linq2Acad;
 using System.IO;
 using DotNetARX;
+using System.Linq;
 using ThCADExtension;
 using AcHelper.Commands;
 using GeometryExtensions;
@@ -147,7 +148,22 @@ namespace ThMEPElectrical.Command
                                     ThBlockConvertBlock transformedBlock = null;
                                     if (Mode == ConvertMode.STRONGCURRENT)
                                     {
-                                        transformedBlock = manager.TransformRule(blockReference.EffectiveName);
+                                        if (string.IsNullOrEmpty(visibility))
+                                        {
+                                            // 当配置表中可见性为空时，则按图块名转换
+                                            transformedBlock = manager.TransformRule(blockReference.EffectiveName);
+                                        }
+                                        else if (blockReference.CurrentVisibilityStateValue() == visibility)
+                                        {
+                                            // 当配置表中可见性有字符时，则按块名和可见性的组合一对一转换
+                                            transformedBlock = manager.TransformRule(
+                                                blockReference.EffectiveName,
+                                                blockReference.CurrentVisibilityStateValue());
+                                        }
+                                        else
+                                        {
+                                            throw new NotSupportedException();
+                                        }
                                     }
                                     else if (Mode == ConvertMode.WEAKCURRENT)
                                     {
@@ -174,14 +190,11 @@ namespace ThMEPElectrical.Command
                                     string name = null;
                                     if (Mode == ConvertMode.STRONGCURRENT)
                                     {
-                                        var attribute = blockReference.IsFirePowerSupply() ?
-                                            ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_FIREPOWER : 
-                                            ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NON_FIREPOWER;
-                                        name = (string)transformedBlock.Attributes[attribute];
+                                        name = (string)transformedBlock.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME];
                                     }
                                     else if (Mode == ConvertMode.WEAKCURRENT)
                                     {
-                                        name = (string)transformedBlock.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK];
+                                        name = (string)transformedBlock.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME];
                                     }
                                     else
                                     {
@@ -190,7 +203,7 @@ namespace ThMEPElectrical.Command
                                     var result = currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
 
                                     // 插入新的块引用
-                                    var scale = new Scale3d(transformedBlock.Scale());
+                                    var scale = new Scale3d(100.0, 100.0, 100.0);
                                     var objId = engine.Insert(name, scale, blockReference);
 
                                     // 将新插入的块引用调整到源块引用所在的位置
@@ -198,6 +211,38 @@ namespace ThMEPElectrical.Command
 
                                     // 将源块引用的属性“刷”到新的块引用
                                     engine.MatchProperties(objId, blockReference);
+                                    
+                                    // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
+                                    // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
+                                    var refIds = new ObjectIdCollection();
+                                    if (rule.Explodable())
+                                    {
+                                        var blkref = currentDb.Element<BlockReference>(objId, true);
+
+                                        // 
+                                        void handler(object s, ObjectEventArgs e)
+                                        {
+                                            if (e.DBObject is BlockReference reference)
+                                            {
+                                                refIds.Add(e.DBObject.ObjectId);
+                                            }
+                                        }
+                                        currentDb.Database.ObjectAppended += handler;
+                                        blkref.ExplodeToOwnerSpace();
+                                        currentDb.Database.ObjectAppended -= handler;
+
+                                        blkref.Erase();
+                                    }
+                                    else
+                                    {
+                                        refIds.Add(objId);
+                                    }
+
+                                    // 设置块引用的数据库属性
+                                    refIds.Cast<ObjectId>().ForEach(o =>
+                                    {
+                                        engine.SetDatbaseProperties(objId, blockReference);
+                                    });
                                 }
                                 catch
                                 {
