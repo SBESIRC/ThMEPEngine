@@ -47,7 +47,8 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
             if (polygons.Count == 0)
                 return;
 
-            var protectAreas = CalculateProtectArea();
+            ClearHatch.MakeClearHatch(polygons);
+            var protectAreas = CalculateProtectArea(polygons);
 
             //DrawUtils.DrawProfileDebug(protectAreas.Polylines2Curves(), "protectArea");
             CalculateBlindPolylines(polygons, protectAreas);
@@ -89,7 +90,7 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
             return polygons;
         }
 
-        private List<Polyline> CalculateProtectArea()
+        private List<Polyline> CalculateProtectArea(List<PolygonInfo> polygonInfos)
         {
             var polys = new List<Polyline>();
 
@@ -103,6 +104,9 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
 
                 foreach (var blockRef in blockRefs)
                 {
+                    if (!IsValidBlock(blockRef, polygonInfos))
+                        continue;
+
                     var polyline = new Polyline()
                     {
                         Closed = true
@@ -117,6 +121,17 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
             }
 
             return polys;
+        }
+
+        private bool IsValidBlock(BlockReference block, List<PolygonInfo> polygonInfos)
+        {
+            foreach (var polygonInfo in polygonInfos)
+            {
+                if (GeomUtils.PtInLoop(polygonInfo.ExternalProfile, block.Position))
+                    return true;
+            }
+
+            return false;
         }
 
         private List<PolygonInfo> CalculatePolygonInfos()

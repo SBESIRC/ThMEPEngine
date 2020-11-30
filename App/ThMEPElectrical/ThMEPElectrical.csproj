@@ -40,6 +40,7 @@
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
+    <Compile Include="Business\BlindAreaReminder\ClearHatch.cs" />
     <Compile Include="Business\BlindAreaReminder\HatchCreater.cs" />
     <Compile Include="Business\ClearScene\ClearSmoke.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />

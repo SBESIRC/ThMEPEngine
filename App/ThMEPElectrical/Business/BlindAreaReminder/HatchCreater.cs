@@ -30,18 +30,20 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
+                var removeObjIds = new ObjectIdCollection();
                 foreach (var polygon in m_polygonInfos)
                 {
                     // 填充面积框线
                     Hatch hatch = new Hatch();
                     hatch.LayerId = DrawUtils.CreateLayer(ThMEPCommon.BLINDAREA_HATCH_LAYER_NAME, Color.FromRgb(255, 0, 0));
                     acadDatabase.ModelSpace.Add(hatch);
-                    hatch.Associative = true;
+                    hatch.Associative = false;
 
                     // 外圈轮廓
                     ObjectIdCollection objIdColl = new ObjectIdCollection();
                     var externalId = acadDatabase.ModelSpace.Add(polygon.ExternalProfile);
                     objIdColl.Add(externalId);
+                    removeObjIds.Add(externalId);
                     hatch.AppendLoop(HatchLoopTypes.Outermost, objIdColl);
 
                     // 重新生成Hatch纹理
@@ -53,6 +55,7 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
                         objIdColl.Clear();
                         var innerId = acadDatabase.ModelSpace.Add(item);
                         objIdColl.Add(innerId);
+                        removeObjIds.Add(innerId);
                         hatch.AppendLoop(HatchLoopTypes.Default, objIdColl);
 
                         // 重新生成Hatch纹理
@@ -62,6 +65,12 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
                     // 需要重新设置Pattern属性后Pattern才能被正确的应用
                     //hatch.SetHatchPattern(hatch.PatternType, hatch.PatternName);
                     hatch.EvaluateHatch(true);
+                }
+
+                foreach (ObjectId id in removeObjIds)
+                {
+                    var entity = acadDatabase.ModelSpace.Element(id, true);
+                    entity.Erase();
                 }
             }
         }

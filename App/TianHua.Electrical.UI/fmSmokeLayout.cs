@@ -320,7 +320,7 @@ namespace TianHua.Electrical.UI
 
         private void BtnBLIS_Click(object sender, EventArgs e)
         {
-
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THYGMQ");
         }
     }
 }
