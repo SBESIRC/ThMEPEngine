@@ -19,9 +19,9 @@ namespace TianHua.FanSelection.ExcelExport
             setsheet.Cells["D9"].Value = StaircaseAir.OverAk.ToString();
             setsheet.Cells["D10"].Value = "1";
             setsheet.Cells["D11"].Value = StaircaseAir.StairN1.ToString();
-            setsheet.Cells["D12"].Value = StaircaseAir.LeakArea.ToString();
+            setsheet.Cells["D12"].Value = Math.Round(StaircaseAir.LeakArea,2).ToString();
             setsheet.Cells["D13"].Value = "12";
-            setsheet.Cells["D14"].Value = StaircaseAir.N2.ToString();
+            setsheet.Cells["D14"].Value = Math.Round(StaircaseAir.N2,2).ToString();
             setsheet.Cells["D15"].Value = StaircaseAir.QueryValue.ToString();
             setsheet.Cells["D16"].Value = StaircaseAir.Count_Floor.ToString();
             setsheet.Cells["D17"].Value = GetLoadRange(StaircaseAir.Load.ToString());
