@@ -95,7 +95,6 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
 
             using (var db = AcadDatabase.Active())
             {
-                var testBlocks = db.ModelSpace.OfType<BlockReference>().ToList();
                 var blockRefs = db.ModelSpace.OfType<BlockReference>().Where(p => p.Name.Equals(ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME)).ToList();
                 if (blockRefs.Count == 0)
                 {

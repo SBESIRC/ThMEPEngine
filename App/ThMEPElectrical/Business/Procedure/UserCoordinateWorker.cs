@@ -9,6 +9,7 @@ using ThMEPElectrical.Model;
 using ThMEPElectrical.Assistant;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPElectrical.Business.ClearScene;
 
 namespace ThMEPElectrical.Business.Procedure
 {
@@ -60,6 +61,8 @@ namespace ThMEPElectrical.Business.Procedure
             //DrawUtils.DrawProfile(wallPolys.Polylines2Curves(), "wallPolys");
             //WallProfileInfos = new List<PolygonInfo>();
             //return;
+
+            ClearSmoke.MakeClearSmoke(wallPolys);
             CalculatePolygonInfo(ucsInfos, wallPolys);
         }
 
