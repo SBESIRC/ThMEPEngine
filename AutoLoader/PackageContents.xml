@@ -99,6 +99,7 @@
                 <Command Local="THFDL" Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
+                <Command Local="THYGMQ" Global="THYGMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -112,6 +113,7 @@
                 <Command Local="THFDL" Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
+                <Command Local="THYGMQ" Global="THYGMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -125,6 +127,7 @@
                 <Command Local="THFDL" Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
+                <Command Local="THYGMQ" Global="THYGMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -138,6 +141,7 @@
                 <Command Local="THFDL" Global="THFDL" />
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
+                <Command Local="THYGMQ" Global="THYGMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
