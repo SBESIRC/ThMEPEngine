@@ -19,7 +19,7 @@ namespace ThMEPElectrical.Model
         // 包含次梁构成的轮廓，可能没有次梁轮廓
         public List<Polyline> SecondBeamProfiles { get; private set; }
 
-        public List<Polyline> Holes { get; private set; }
+        public List<Polyline> Holes { get; private set; } = new List<Polyline>();
 
         public PlaceInputProfileData(Polyline poly)
         {
