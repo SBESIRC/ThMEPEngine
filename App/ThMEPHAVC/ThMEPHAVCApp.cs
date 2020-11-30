@@ -1,4 +1,11 @@
-﻿using Autodesk.AutoCAD.Runtime;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using Linq2Acad;
+using System.Collections.Generic;
+using ThMEPHAVC.CAD;
+using System.Linq;
 
 namespace ThMEPHAVC
 {
@@ -11,6 +18,30 @@ namespace ThMEPHAVC
         public void Terminate()
         {
         }
+
+        [CommandMethod("TIANHUACAD", "THselDB", CommandFlags.Modal)]
+        public void THSelDB()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var selectionresult = Active.Editor.GetSelection();
+                if (selectionresult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objids = selectionresult.Value.GetObjectIds();
+                //var fanobj = objids.First(o => o.GetObject(OpenMode.ForRead).IsModel());
+
+                ThFanSelectionDbModelEngine dbmodelengine = new ThFanSelectionDbModelEngine(objids.First());
+                var fanintake = dbmodelengine.IntakeForm;
+                var fanvolume = dbmodelengine.FanVolume;
+                var faninlet = dbmodelengine.FanInlet;
+                var fanoutlet = dbmodelengine.FanOutlet;
+                var inletpoint = dbmodelengine.FanInletBasePoint;
+                var outletpoint = dbmodelengine.FanOutletBasePoint;
+            }
+        }
+
 
         //[CommandMethod("TIANHUACAD", "THDuctDraw", CommandFlags.Modal)]
         //public void THDuctDraw()

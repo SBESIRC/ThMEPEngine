@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Linq2Acad;
 using DotNetARX;
 using System.Linq;
@@ -158,6 +159,12 @@ namespace ThMEPHAVC.CAD
 
             var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataBinaryChunk).First();
             return Encoding.UTF8.GetString(values.Value as byte[]);
+        }
+
+        public static bool IsHTFCModel(this ObjectId obj)
+        {
+            var style = GetModelStyle(obj);
+            return style.Contains(ThFanSelectionCommon.HTFC_TYPE_NAME);
         }
 
         public static int GetModelNumber(this ObjectId obj)

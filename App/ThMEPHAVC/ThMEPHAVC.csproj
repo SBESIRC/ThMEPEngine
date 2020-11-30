@@ -28,6 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD\ThFanSelectionDbModelEngine.cs" />
     <Compile Include="CAD\ThFanSelectionDbModelExtension.cs" />
     <Compile Include="CAD\ThFanSelectionDbModelFoundationExtension.cs" />
     <Compile Include="CAD\ThFanSelectionDbModelFoundationManager.cs" />
