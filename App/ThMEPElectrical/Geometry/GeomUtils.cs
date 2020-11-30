@@ -309,7 +309,9 @@ namespace ThMEPElectrical.Geometry
                 resPts.Add(new Point3d(pts[i].X, pts[i].Y, 0));
             }
 
-            return resPts.ToPolyline();
+            var resPoly = new Polyline();
+            resPoly.CreatePolyline(resPts);
+            return resPoly;
         }
 
         public static Curve ExtendCurve(Curve srcCurve, double entityExtendDis)
