@@ -3,7 +3,6 @@ using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
 using System.IO;
-using DotNetARX;
 using System.Linq;
 using ThCADExtension;
 using AcHelper.Commands;
@@ -59,8 +58,16 @@ namespace ThMEPElectrical.Command
             using (AcadDatabase currentDb = AcadDatabase.Active())
             using (ThBConvertEngine engine = CreateConvertEngine(Mode))
             using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
-            using (ThBConvertManager manager = ThBConvertManager.CreateManager(blockDb.Database, Mode))
             {
+                ThBConvertManager manager = new ThBConvertManager()
+                {
+                    Rules = ThMEPElectricalService.Instance.ConvertParameter.Rules,
+                };
+                if (manager.Rules.Count == 0)
+                {
+                    return;
+                }
+
                 // 在当前图纸中框选一个区域，获取块引用
                 var extents = new Extents3d();
                 var prompts = new List<string>();
@@ -133,7 +140,7 @@ namespace ThMEPElectrical.Command
                     // 从而绕过XrefFileLock.LockFile()的异常
                     using (AcadDatabase xrefDb = AcadDatabase.Open(xref, DwgOpenMode.ReadOnly, false))
                     {
-                        foreach (var rule in manager.Rules)
+                        foreach (var rule in manager.Rules.Where(o => o.Mode == Mode))
                         {
                             var block = rule.Transformation.Item1;
                             var visibility = block.StringValue(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY);
@@ -203,7 +210,7 @@ namespace ThMEPElectrical.Command
                                     var result = currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
 
                                     // 插入新的块引用
-                                    var scale = new Scale3d(100.0, 100.0, 100.0);
+                                    var scale = ThMEPElectricalService.Instance.ConvertParameter.Scale;
                                     var objId = engine.Insert(name, scale, blockReference);
 
                                     // 将新插入的块引用调整到源块引用所在的位置
@@ -211,7 +218,7 @@ namespace ThMEPElectrical.Command
 
                                     // 将源块引用的属性“刷”到新的块引用
                                     engine.MatchProperties(objId, blockReference);
-                                    
+
                                     // 考虑到目标块可能有多个，在制作模板块时将他们再封装在一个块中
                                     // 如果是多个目标块的情况，这里将块炸开，以便获得多个块
                                     var refIds = new ObjectIdCollection();

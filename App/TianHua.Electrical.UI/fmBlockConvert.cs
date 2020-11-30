@@ -1,18 +1,9 @@
-﻿using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using ThCADExtension;
+using System.Collections.Generic;
 using ThMEPElectrical.BlockConvert;
-using TianHua.Publics.BaseCode;
-using TianHua.Electrical.UI.CAD;
 
 namespace TianHua.Electrical.UI
 {
@@ -66,7 +57,6 @@ namespace TianHua.Electrical.UI
         public void InitForm()
         {
             RessetPresenter();
-            InitViewRelation();
             GdcWeakCurrent.DataSource = m_ListWeakBlockConvert;
             GdcStrongCurrent.DataSource = m_ListStrongBlockConvert;
         }
@@ -74,34 +64,6 @@ namespace TianHua.Electrical.UI
         private string BlockDwgPath()
         {
             return Path.Combine(ThCADCommon.SupportPath(), ThBConvertCommon.BLOCK_MAP_RULES_FILE);
-        }
-
-        private void InitViewRelation()
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
-            using (ThBConvertManager manager = ThBConvertManager.CreateManager(blockDb.Database, ConvertMode.ALL))
-            {
-                m_ListStrongBlockConvert.Clear();
-                foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.STRONGCURRENT) == ConvertMode.STRONGCURRENT))
-                {
-                    m_ListStrongBlockConvert.Add(new ViewFireBlockConvert()
-                    {
-                        UpstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item1),
-                        DownstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item2),
-                    });
-                }
-
-                m_ListWeakBlockConvert.Clear();
-                foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.WEAKCURRENT) == ConvertMode.WEAKCURRENT))
-                {
-                    m_ListWeakBlockConvert.Add(new ViewFireBlockConvert()
-                    {
-                        UpstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item1),
-                        DownstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item2),
-                    });
-                }
-            }
         }
 
         private void Tab_SelectedPageChanged(object sender, DevExpress.XtraTab.TabPageChangedEventArgs e)
@@ -132,13 +94,11 @@ namespace TianHua.Electrical.UI
             {
                 _Rownumber = this.GdvWeakCurrent.GetSelectedRows();
             }
- 
-            List<ViewFireBlockConvert> _List = new List<ViewFireBlockConvert>();
 
             for (int i = 0; i < _Rownumber.Count(); i++)
             {
-                ViewFireBlockConvert _ViewFireBlockConver = this.GdvStrongCurrent.GetRow(_Rownumber[i]) as ViewFireBlockConvert;
-                _List.Add(_ViewFireBlockConver);
+                ViewFireBlockConvert _ViewFireBlockConvert = this.GdvStrongCurrent.GetRow(_Rownumber[i]) as ViewFireBlockConvert;
+                _ViewFireBlockConvert.IsSelect = true;
             }
         }
     }
