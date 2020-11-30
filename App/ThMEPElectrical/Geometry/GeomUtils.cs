@@ -300,6 +300,18 @@ namespace ThMEPElectrical.Geometry
             return resCurves;
         }
 
+        public static Polyline OptimizePolyline(Polyline polyline)
+        {
+            var pts = polyline.Vertices();
+            var resPts = new Point3dCollection();
+            for (int i = 0; i < pts.Count; i++)
+            {
+                resPts.Add(new Point3d(pts[i].X, pts[i].Y, 0));
+            }
+
+            return resPts.ToPolyline();
+        }
+
         public static Curve ExtendCurve(Curve srcCurve, double entityExtendDis)
         {
             if (srcCurve is Polyline poly)
@@ -314,12 +326,13 @@ namespace ThMEPElectrical.Geometry
                 }
                 else
                 {
-                    var pts = poly.Vertices();
+                    var resPolyline = OptimizePolyline(poly);
+                    var pts = resPolyline.Vertices();
                     var resPts = new Point3dCollection();
-                    var vecFir = poly.GetFirstDerivative(ptS).GetNormal();
+                    var vecFir = resPolyline.GetFirstDerivative(ptS).GetNormal();
                     var extendPtS = ptS - vecFir * entityExtendDis;
 
-                    var vecEnd = poly.GetFirstDerivative(ptE).GetNormal();
+                    var vecEnd = resPolyline.GetFirstDerivative(ptE).GetNormal();
                     var extendPtE = ptE + vecEnd * entityExtendDis;
                     resPts.Add(extendPtS);
                     foreach (Point3d srcPt in pts)
