@@ -8,6 +8,9 @@ namespace TianHua.Electrical
 {
     public interface IFireBlockConvert
     {
-        List<ViewFireBlockConvert> m_ListFireBlockConver { get; set; }
+        List<ViewFireBlockConvert> m_ListStrongBlockConver { get; set; }
+
+
+        List<ViewFireBlockConvert> m_ListWeakBlockConver { get; set; }
     }
 }

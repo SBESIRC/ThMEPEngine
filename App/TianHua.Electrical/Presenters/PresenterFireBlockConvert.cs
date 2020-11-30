@@ -20,10 +20,17 @@ namespace TianHua.Electrical
 
         public override void OnViewLoaded()
         {
-            View.m_ListFireBlockConver = InitListFireBlockConvert();
+            View.m_ListStrongBlockConver = InitListStrongBlockConver();
+
+            View.m_ListWeakBlockConver = InitListWeakBlockConver();
         }
 
-        private List<ViewFireBlockConvert> InitListFireBlockConvert()
+        private List<ViewFireBlockConvert> InitListWeakBlockConver()
+        {
+            return new List<ViewFireBlockConvert>();
+        }
+
+        private List<ViewFireBlockConvert> InitListStrongBlockConver()
         {
             return new List<ViewFireBlockConvert>();
         }
