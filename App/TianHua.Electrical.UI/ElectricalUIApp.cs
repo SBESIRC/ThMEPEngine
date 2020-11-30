@@ -91,5 +91,17 @@ namespace TianHua.Electrical.UI
                 return ThMEPElectricalService.Instance.Parameter;
             }
         }
+
+        private ThBConvertParameter ConvertParameter
+        {
+            get
+            {
+                if (ThMEPElectricalService.Instance.ConvertParameter == null)
+                {
+                    ThMEPElectricalService.Instance.ConvertParameter = new ThBConvertParameter();
+                }
+                return ThMEPElectricalService.Instance.ConvertParameter;
+            }
+        }
     }
 }
