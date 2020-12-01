@@ -76,7 +76,7 @@ namespace TianHua.Electrical.UI
                 if (result == DialogResult.OK)
                 {
                     // 获取图块转换比例
-                    ThMEPElectricalService.Instance.ConvertParameter.Scale = new Scale3d(100.0);
+                    ConvertParameter.Scale = new Scale3d(100.0);
 
                     // 获取用户指定的转换条目
                     var rules = new List<ThBConvertRule>();
@@ -98,7 +98,7 @@ namespace TianHua.Electrical.UI
                             r.Transformation.Item2.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string == o.DownstreamID;
                         }));
                     });
-                    ThMEPElectricalService.Instance.ConvertParameter.Rules = rules;
+                    ConvertParameter.Rules = rules;
 
                     // 发送命令
                     switch (dlg.ActiveConvertMode)

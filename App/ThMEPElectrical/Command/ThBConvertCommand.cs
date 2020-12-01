@@ -112,16 +112,18 @@ namespace ThMEPElectrical.Command
                 {
                     var blkRef = currentDb.Element<BlockReference>(obj);
                     var blkDef = blkRef.GetEffectiveBlockTableRecord();
-                    if (blkDef.IsFromExternalReference && blkDef.IsFromOverlayReference)
+                    if (blkDef.IsFromExternalReference /* && blkDef.IsFromOverlayReference */)
                     {
                         // 暂时不考虑unresolved的情况
                         using (var xrefDatatbase = blkDef.GetXrefDatabase(false))
                         {
-                            // 暂时只关心特定的外参图纸（暖通提资）
-                            if (Path.GetFileName(xrefDatatbase.Filename).StartsWith("H"))
-                            {
-                                xrefs.Add(xrefDatatbase.Filename);
-                            }
+                            // 暂时不考虑各专业的外参图纸
+                            xrefs.Add(xrefDatatbase.Filename);
+                            //// 暂时只关心特定的外参图纸（暖通提资）
+                            //if (Path.GetFileName(xrefDatatbase.Filename).StartsWith("H"))
+                            //{
+                            //    xrefs.Add(xrefDatatbase.Filename);
+                            //}
                         }
                     }
                 }
