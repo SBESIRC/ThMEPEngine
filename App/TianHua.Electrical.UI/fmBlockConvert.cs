@@ -4,7 +4,7 @@ using System.Linq;
 using ThCADExtension;
 using System.Collections.Generic;
 using ThMEPElectrical.BlockConvert;
-using TianHua.Publics.BaseCode;
+using DevExpress.XtraGrid.Views.Grid;
 
 namespace TianHua.Electrical.UI
 {
@@ -98,26 +98,24 @@ namespace TianHua.Electrical.UI
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
-            int[] _Rownumber = new int[] { };
-
             if (Tab.SelectedTabPage == PageStrongCurrent)
             {
-                _Rownumber = this.GdvStrongCurrent.GetSelectedRows();
+                SyncItemStatus(this.GdvStrongCurrent);
             }
             if (Tab.SelectedTabPage == PageWeakCurrent)
             {
-                _Rownumber = this.GdvWeakCurrent.GetSelectedRows();
+                SyncItemStatus(this.GdvWeakCurrent);
             }
-
-            for (int i = 0; i < _Rownumber.Count(); i++)
-            {
-                ViewFireBlockConvert _ViewFireBlockConvert = this.GdvStrongCurrent.GetRow(_Rownumber[i]) as ViewFireBlockConvert;
-                _ViewFireBlockConvert.IsSelect = true;
-            }
-
-
         }
 
-   
+        private void SyncItemStatus(GridView gridView)
+        {
+            var _Rownumber = gridView.GetSelectedRows();
+            for (int i = 0; i < _Rownumber.Count(); i++)
+            {
+                ViewFireBlockConvert _ViewFireBlockConvert = gridView.GetRow(_Rownumber[i]) as ViewFireBlockConvert;
+                _ViewFireBlockConvert.IsSelect = true;
+            }
+        }
     }
 }
