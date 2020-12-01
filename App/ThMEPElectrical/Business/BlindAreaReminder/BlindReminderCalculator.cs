@@ -48,19 +48,28 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
                 return;
 
             ClearHatch.MakeClearHatch(polygons);
-            var protectAreas = CalculateProtectArea(polygons);
+            var protectAreaCircles = CalculateProtectArea(polygons);
 
             //DrawUtils.DrawProfileDebug(protectAreas.Polylines2Curves(), "protectArea");
-            CalculateBlindPolylines(polygons, protectAreas);
+            CalculateBlindPolylines(polygons, protectAreaCircles);
         }
 
-        private void CalculateBlindPolylines(List<PolygonInfo> polygonInfos, List<Polyline> polylines)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="polygonInfos"> 墙线</param>
+        /// <param name="polylines"> 烟感保护区</param>
+        private void CalculateBlindPolylines(List<PolygonInfo> polygonInfos, List<PolylineCircle> polyCircles)
         {
             foreach (var polygon in polygonInfos)
             {
                 var external = polygon.ExternalProfile;
                 var dbLst = new DBObjectCollection();
-                polylines.ForEach(p => dbLst.Add(p));
+                polyCircles.ForEach(p =>
+                {
+                    if (GeomUtils.PtInLoop(external, p.Point))
+                        dbLst.Add(p.Poly);
+                });
                 polygon.InnerProfiles.ForEach(p => dbLst.Add(p));
 
                 BlindPolygons.AddRange(SplitRegions(external, dbLst));
@@ -86,20 +95,20 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
                 }
             }
 
-            DrawUtils.DrawEntitiesDebug(drawCurves, "entities");
+            //DrawUtils.DrawEntitiesDebug(drawCurves, "entities");
             return polygons;
         }
 
-        private List<Polyline> CalculateProtectArea(List<PolygonInfo> polygonInfos)
+        private List<PolylineCircle> CalculateProtectArea(List<PolygonInfo> polygonInfos)
         {
-            var polys = new List<Polyline>();
+            var polyCircles = new List<PolylineCircle>();
 
             using (var db = AcadDatabase.Active())
             {
                 var blockRefs = db.ModelSpace.OfType<BlockReference>().Where(p => p.Name.Equals(ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME)).ToList();
                 if (blockRefs.Count == 0)
                 {
-                    return polys;
+                    return polyCircles;
                 }
 
                 foreach (var blockRef in blockRefs)
@@ -116,11 +125,12 @@ namespace ThMEPElectrical.Business.BlindAreaReminder
                     polyline.AddVertexAt(0, arc1.StartPoint.ToPoint2D(), 1, 0, 0);
                     polyline.AddVertexAt(1, arc2.StartPoint.ToPoint2D(), 1, 0, 0);
                     polyline.AddVertexAt(2, arc2.EndPoint.ToPoint2D(), 0, 0, 0);
-                    polys.Add(polyline.TessellatePolylineWithChord(ThMEPCommon.ProtectAreaScatterLength));
+                    var tesslatePoly = polyline.TessellatePolylineWithChord(ThMEPCommon.ProtectAreaScatterLength);
+                    polyCircles.Add(new PolylineCircle(tesslatePoly, blockRef.Position));
                 }
             }
 
-            return polys;
+            return polyCircles;
         }
 
         private bool IsValidBlock(BlockReference block, List<PolygonInfo> polygonInfos)

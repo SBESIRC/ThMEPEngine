@@ -100,6 +100,7 @@
     <Compile Include="Model\LayoutProfileData.cs" />
     <Compile Include="Model\MainSecondBeamRegion.cs" />
     <Compile Include="Model\PairData.cs" />
+    <Compile Include="Model\PolylineCircle.cs" />
     <Compile Include="Model\SplitBeamPath.cs" />
     <Compile Include="Model\PlaceInputProfileData.cs" />
     <Compile Include="Model\PlaceParameter.cs" />
