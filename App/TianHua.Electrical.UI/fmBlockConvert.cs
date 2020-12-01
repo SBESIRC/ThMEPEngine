@@ -4,6 +4,7 @@ using System.Linq;
 using ThCADExtension;
 using System.Collections.Generic;
 using ThMEPElectrical.BlockConvert;
+using TianHua.Publics.BaseCode;
 
 namespace TianHua.Electrical.UI
 {
@@ -14,6 +15,8 @@ namespace TianHua.Electrical.UI
         public List<ViewFireBlockConvert> m_ListWeakBlockConvert { get; set; }
 
         public List<ViewFireBlockConvert> m_ListStrongBlockConvert { get; set; }
+
+        public List<ViewGdvEidtData> m_ListLayingRatio { get; set; }
 
         public ConvertMode ActiveConvertMode
         {
@@ -33,6 +36,7 @@ namespace TianHua.Electrical.UI
                 }
             }
         }
+
 
         public void RessetPresenter()
         {
@@ -61,6 +65,14 @@ namespace TianHua.Electrical.UI
             RessetPresenter();
             GdcWeakCurrent.DataSource = m_ListWeakBlockConvert;
             GdcStrongCurrent.DataSource = m_ListStrongBlockConvert;
+
+            FuncControlStyle.SetGridEditStyle(ComBoxProportion);
+            ComBoxProportion.Properties.DisplayMember = "DisplayMember";
+            ComBoxProportion.Properties.ValueMember = "ValueMember";
+            ComBoxProportion.Properties.DataSource = m_ListLayingRatio;
+ 
+            ComBoxProportion.EditValue = 100;
+ 
         }
 
         private string BlockDwgPath()
@@ -102,6 +114,10 @@ namespace TianHua.Electrical.UI
                 ViewFireBlockConvert _ViewFireBlockConvert = this.GdvStrongCurrent.GetRow(_Rownumber[i]) as ViewFireBlockConvert;
                 _ViewFireBlockConvert.IsSelect = true;
             }
+
+
         }
+
+   
     }
 }

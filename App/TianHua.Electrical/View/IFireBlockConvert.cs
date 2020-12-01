@@ -12,5 +12,8 @@ namespace TianHua.Electrical
 
 
         List<ViewFireBlockConvert> m_ListWeakBlockConvert { get; set; }
+
+
+        List<ViewGdvEidtData> m_ListLayingRatio { get; set; }
     }
 }
