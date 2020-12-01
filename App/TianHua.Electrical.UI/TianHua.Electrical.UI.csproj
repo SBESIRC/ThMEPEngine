@@ -74,6 +74,7 @@
     <Compile Include="fmSmokeLayout.Designer.cs">
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>
     </Compile>
+    <Compile Include="FuncControlStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="fmBlockConvert.resx">
       <DependentUpon>fmBlockConvert.cs</DependentUpon>

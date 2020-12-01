@@ -57,6 +57,7 @@ namespace TianHua.Electrical.UI
                 // 获取转换条目
                 foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.STRONGCURRENT) == ConvertMode.STRONGCURRENT))
                 {
+                    if (dlg.m_ListStrongBlockConvert == null || dlg.m_ListStrongBlockConvert.Count == 0) { dlg.m_ListStrongBlockConvert = new List<ViewFireBlockConvert>(); }
                     dlg.m_ListStrongBlockConvert.Add(new ViewFireBlockConvert()
                     {
                         UpstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item1),
@@ -65,6 +66,7 @@ namespace TianHua.Electrical.UI
                 }
                 foreach (var rule in manager.Rules.Where(o => (o.Mode & ConvertMode.WEAKCURRENT) == ConvertMode.WEAKCURRENT))
                 {
+                   if (dlg.m_ListWeakBlockConvert == null || dlg.m_ListWeakBlockConvert.Count == 0) { dlg.m_ListWeakBlockConvert = new List<ViewFireBlockConvert>(); }
                     dlg.m_ListWeakBlockConvert.Add(new ViewFireBlockConvert()
                     {
                         UpstreamBlockInfo = blockDb.Database.CreateBlockDataModel(rule.Transformation.Item1),
@@ -84,7 +86,7 @@ namespace TianHua.Electrical.UI
                     {
                         rules.AddRange(manager.Rules.Where(r =>
                         {
-                            return o.IsSelect &&
+                            return o.IsSelect &&                                
                             r.Transformation.Item1.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string == o.UpstreamID &&
                             r.Transformation.Item2.Attributes[ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_NAME] as string == o.DownstreamID;
                         }));
@@ -125,7 +127,7 @@ namespace TianHua.Electrical.UI
         {
             get
             {
-                return Parameter.sensorType == SensorType.SMOKESENSOR ? 
+                return Parameter.sensorType == SensorType.SMOKESENSOR ?
                     ElectricalUICommon.SMOKE_INDUCTION : ElectricalUICommon.TEMPERATURE_INDUCTION;
             }
         }
