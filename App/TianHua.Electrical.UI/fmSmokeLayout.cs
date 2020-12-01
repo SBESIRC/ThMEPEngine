@@ -256,14 +256,6 @@ namespace TianHua.Electrical.UI
                 RoofThickness = m_SmokeLayout.RoofThickness,
             };
 
-            // set focus to AutoCAD
-            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
-#if ACAD2012
-            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
-#else
-            Active.Document.Window.Focus();
-#endif
-
             // 发送命令
             SetFocusToDwgView();
             switch (m_SmokeLayout.LayoutLogic)
@@ -320,6 +312,8 @@ namespace TianHua.Electrical.UI
 
         private void BtnBLIS_Click(object sender, EventArgs e)
         {
+            // 发送命令
+            SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THYGMQ");
         }
     }
