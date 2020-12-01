@@ -56,14 +56,14 @@
             this.gridColumn7 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.BtnCancel = new DevExpress.XtraEditors.SimpleButton();
             this.BtnOK = new DevExpress.XtraEditors.SimpleButton();
+            this.ComBoxProportion = new DevExpress.XtraEditors.GridLookUpEdit();
+            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.layoutControlGroup1 = new DevExpress.XtraLayout.LayoutControlGroup();
             this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem4 = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem1 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.layoutControlItem6 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.ComBoxProportion = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Tab)).BeginInit();
@@ -78,14 +78,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.GdvWeakCurrent)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CheckWeakEdit)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.PicWeakEdit)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ComBoxProportion.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem6)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ComBoxProportion.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             this.SuspendLayout();
             // 
             // layoutControl1
@@ -123,6 +123,7 @@
             this.PageStrongCurrent.Margin = new System.Windows.Forms.Padding(0);
             this.PageStrongCurrent.Name = "PageStrongCurrent";
             this.PageStrongCurrent.Size = new System.Drawing.Size(865, 485);
+            this.PageStrongCurrent.Tag = "2";
             this.PageStrongCurrent.Text = "强电转化规则";
             // 
             // GdcStrongCurrent
@@ -294,7 +295,8 @@
             // 
             this.PageWeakCurrent.Controls.Add(this.GdcWeakCurrent);
             this.PageWeakCurrent.Name = "PageWeakCurrent";
-            this.PageWeakCurrent.Size = new System.Drawing.Size(865, 485);
+            this.PageWeakCurrent.Size = new System.Drawing.Size(861, 486);
+            this.PageWeakCurrent.Tag = "1";
             this.PageWeakCurrent.Text = "弱电转换规则";
             // 
             // GdcWeakCurrent
@@ -308,7 +310,7 @@
             this.GdcWeakCurrent.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.PicWeakEdit,
             this.CheckWeakEdit});
-            this.GdcWeakCurrent.Size = new System.Drawing.Size(865, 485);
+            this.GdcWeakCurrent.Size = new System.Drawing.Size(861, 486);
             this.GdcWeakCurrent.TabIndex = 25;
             this.GdcWeakCurrent.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.GdvWeakCurrent});
@@ -484,6 +486,27 @@
             this.BtnOK.Text = "确定";
             this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
             // 
+            // ComBoxProportion
+            // 
+            this.ComBoxProportion.Location = new System.Drawing.Point(78, 529);
+            this.ComBoxProportion.Name = "ComBoxProportion";
+            this.ComBoxProportion.Properties.AllowFocused = false;
+            this.ComBoxProportion.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.ComBoxProportion.Properties.NullText = "";
+            this.ComBoxProportion.Properties.PopupSizeable = false;
+            this.ComBoxProportion.Properties.PopupView = this.gridLookUpEdit1View;
+            this.ComBoxProportion.Size = new System.Drawing.Size(139, 20);
+            this.ComBoxProportion.StyleController = this.layoutControl1;
+            this.ComBoxProportion.TabIndex = 4;
+            // 
+            // gridLookUpEdit1View
+            // 
+            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
+            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
+            // 
             // layoutControlGroup1
             // 
             this.layoutControlGroup1.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
@@ -547,27 +570,6 @@
             this.layoutControlItem1.Text = "出图比例：";
             this.layoutControlItem1.TextSize = new System.Drawing.Size(60, 14);
             // 
-            // ComBoxProportion
-            // 
-            this.ComBoxProportion.Location = new System.Drawing.Point(78, 529);
-            this.ComBoxProportion.Name = "ComBoxProportion";
-            this.ComBoxProportion.Properties.AllowFocused = false;
-            this.ComBoxProportion.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.ComBoxProportion.Properties.NullText = "";
-            this.ComBoxProportion.Properties.PopupSizeable = false;
-            this.ComBoxProportion.Properties.PopupView = this.gridLookUpEdit1View;
-            this.ComBoxProportion.Size = new System.Drawing.Size(139, 20);
-            this.ComBoxProportion.StyleController = this.layoutControl1;
-            this.ComBoxProportion.TabIndex = 4;
-            // 
-            // gridLookUpEdit1View
-            // 
-            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
-            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
-            // 
             // fmBlockConvert
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -597,14 +599,14 @@
             ((System.ComponentModel.ISupportInitialize)(this.GdvWeakCurrent)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.CheckWeakEdit)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.PicWeakEdit)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ComBoxProportion.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem6)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ComBoxProportion.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             this.ResumeLayout(false);
 
         }

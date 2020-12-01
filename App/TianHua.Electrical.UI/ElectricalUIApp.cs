@@ -103,7 +103,7 @@ namespace TianHua.Electrical.UI
                     ConvertParameter.Rules = rules;
 
                     // 发送命令
-                    switch (dlg.ActiveConvertMode)
+                    switch (dlg.ConvertMode)
                     {
                         case ConvertMode.STRONGCURRENT:
                             CommandHandlerBase.ExecuteFromCommandLine(false, "THPBE");

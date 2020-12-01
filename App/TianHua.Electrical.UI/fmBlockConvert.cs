@@ -19,22 +19,11 @@ namespace TianHua.Electrical.UI
 
         public List<ViewGdvEidtData> m_ListLayingRatio { get; set; }
 
-        public ConvertMode ActiveConvertMode
+        public ConvertMode ConvertMode
         {
             get
             {
-                if (Tab.SelectedTabPage == PageStrongCurrent)
-                {
-                    return ConvertMode.STRONGCURRENT;
-                }
-                else if (Tab.SelectedTabPage == PageWeakCurrent)
-                {
-                    return ConvertMode.WEAKCURRENT;
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
+                return (ConvertMode)FuncStr.NullToInt(Tab.SelectedTabPage.Tag);
             }
         }
 
@@ -83,15 +72,10 @@ namespace TianHua.Electrical.UI
  
         }
 
-        private string BlockDwgPath()
-        {
-            return Path.Combine(ThCADCommon.SupportPath(), ThBConvertCommon.BLOCK_MAP_RULES_FILE);
-        }
-
         private void Tab_SelectedPageChanged(object sender, DevExpress.XtraTab.TabPageChangedEventArgs e)
         {
 
-            switch(ActiveConvertMode)
+            switch(ConvertMode)
             {
                 case ConvertMode.STRONGCURRENT:
                     BtnOK.Text = "强电转换";
