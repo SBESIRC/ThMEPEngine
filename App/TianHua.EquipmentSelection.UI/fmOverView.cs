@@ -618,14 +618,14 @@ namespace TianHua.FanSelection.UI
                     if (!p.IsNull())
                     {
                         ExcelExportEngine.Instance.Model = p;
-                        if (p.FanVolumeModel != null)
+                        if (p.FanVolumeModel != null && p.IsManualInputAirVolume != true)
                         {
                             ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForVolumeModel;
                             ExcelExportEngine.Instance.Sourcebook = SmokeProofSourcePackage.Workbook;
                             ExcelExportEngine.Instance.Targetsheet = targetExcelPackage.Workbook.Worksheets["防烟计算"];
                             ExcelExportEngine.Instance.Run();
                         }
-                        else if (p.ExhaustModel != null)
+                        else if (p.ExhaustModel != null && p.IsManualInputAirVolume != true)
                         {
                             ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForExhaustModel;
                             ExcelExportEngine.Instance.Sourcebook = ExhaustSourcePackage.Workbook;
