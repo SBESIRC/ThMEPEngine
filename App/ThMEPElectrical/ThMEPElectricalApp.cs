@@ -126,7 +126,7 @@ namespace ThMEPElectrical
         }
 
         // 轴网
-        [CommandMethod("TIANHUACAD", "THZY", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THZW", CommandFlags.Modal)]
         public void THDoGridTestProfiles()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
