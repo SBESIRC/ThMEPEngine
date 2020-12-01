@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using ThCADExtension;
+using TianHua.Publics.BaseCode;
 using System.Collections.Generic;
 using ThMEPElectrical.BlockConvert;
 using DevExpress.XtraGrid.Views.Grid;
@@ -37,6 +38,13 @@ namespace TianHua.Electrical.UI
             }
         }
 
+        public double BlockScale
+        {
+            get
+            {
+                return FuncStr.NullToDouble(ComBoxProportion.EditValue);
+            }
+        }
 
         public void RessetPresenter()
         {

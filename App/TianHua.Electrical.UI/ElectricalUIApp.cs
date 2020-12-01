@@ -78,7 +78,7 @@ namespace TianHua.Electrical.UI
                 if (result == DialogResult.OK)
                 {
                     // 获取图块转换比例
-                    ConvertParameter.Scale = new Scale3d(100.0);
+                    ConvertParameter.Scale = new Scale3d(dlg.BlockScale);
 
                     // 获取用户指定的转换条目
                     var rules = new List<ThBConvertRule>();
