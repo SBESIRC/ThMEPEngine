@@ -40,6 +40,23 @@ namespace ThMEPElectrical.BlockConvert
         }
 
         /// <summary>
+        /// 从天华MEP风机模型中提取电量
+        /// </summary>
+        /// <param name="blockReference"></param>
+        /// <returns></returns>
+        public static string LoadPowerFromTHModel(ThBlockReferenceData blockReference)
+        {
+            // "电量"属性值中“电量：”后的字符 , 例: 5.5kW 或 5.5/2.2kW
+            var value = blockReference.StringValue(ThBConvertCommon.PROPERTY_POWER_QUANTITY);
+            Match match = Regex.Match(value, @"^(电量[:：])(.+)$");
+            if (match.Success)
+            {
+                return match.Groups[2].Value;
+            }
+            return string.Empty;
+        }
+
+        /// <summary>
         /// 电量
         /// </summary>
         /// <param name="blockReference"></param>

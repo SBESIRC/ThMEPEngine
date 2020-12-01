@@ -67,7 +67,7 @@ namespace ThMEPElectrical.BlockConvert
             // 电量：“电量”
             if (target.Attributes.ContainsKey(ThBConvertCommon.PROPERTY_POWER_QUANTITY))
             {
-                target.Attributes[ThBConvertCommon.PROPERTY_POWER_QUANTITY] = ThBConvertUtils.LoadPower(source);
+                target.Attributes[ThBConvertCommon.PROPERTY_POWER_QUANTITY] = ThBConvertUtils.LoadPowerFromTHModel(source);
             }
 
             // 负载用途：“负载用途”
