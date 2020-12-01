@@ -47,6 +47,8 @@ namespace TianHua.Electrical.UI
         public fmBlockConvert()
         {
             InitializeComponent();
+            m_ListWeakBlockConvert = new List<ViewFireBlockConvert>();
+            m_ListStrongBlockConvert = new List<ViewFireBlockConvert>();
         }
 
         private void fmFireBlockConver_Load(object sender, EventArgs e)

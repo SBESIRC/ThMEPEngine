@@ -10,28 +10,14 @@ namespace TianHua.Electrical
     {
         public PresenterFireBlockConvert(IFireBlockConvert View) : base(View)
         {
-
         }
 
         public override void OnViewEvent()
         {
-
         }
 
         public override void OnViewLoaded()
         {
-            View.m_ListWeakBlockConvert = InitListWeakBlockConver();
-            View.m_ListStrongBlockConvert = InitListStrongBlockConver();
-        }
-
-        private List<ViewFireBlockConvert> InitListWeakBlockConver()
-        {
-            return new List<ViewFireBlockConvert>();
-        }
-
-        private List<ViewFireBlockConvert> InitListStrongBlockConver()
-        {
-            return new List<ViewFireBlockConvert>();
         }
     }
 }
