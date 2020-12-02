@@ -41,9 +41,15 @@
     <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDevicePlatformRoomRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWFirstFloorRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWIndependentFloorEngine.cs" />
     <Compile Include="Pipe\Engine\ThWKitchenRoomRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWPairFloorsEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWRoofDeviceFloorRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWRoofFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWToiletRoomRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
     <Compile Include="Pipe\Model\ThWBalconyRoom.cs" />
     <Compile Include="Pipe\Model\ThWCompositeBalconyRoom.cs" />
@@ -52,6 +58,7 @@
     <Compile Include="Pipe\Model\ThWKitchenPipe.cs" />
     <Compile Include="Pipe\Model\ThWKitchenRoom.cs" />
     <Compile Include="Pipe\Model\ThWPipe.cs" />
+    <Compile Include="Pipe\Model\ThWRoofDeviceFloorRoom.cs" />
     <Compile Include="Pipe\Model\ThWRoom.cs" />
     <Compile Include="Pipe\Model\ThWToiletPipe.cs" />
     <Compile Include="Pipe\Model\ThWToiletRoom.cs" />
@@ -70,6 +77,10 @@
     <Compile Include="Pipe\Service\ThKitchenBasintoolService.cs" />
     <Compile Include="Pipe\Service\ThKitchenDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThKitchenRoomService.cs" />
+    <Compile Include="Pipe\Service\ThRoofDeviceFloorGravityWaterBucketService.cs" />
+    <Compile Include="Pipe\Service\ThRoofDeviceFloorRoofRainPipeService.cs" />
+    <Compile Include="Pipe\Service\ThRoofDeviceFloorRoomService.cs" />
+    <Compile Include="Pipe\Service\ThRoofDeviceFloorSideEntryWaterBucketService.cs" />
     <Compile Include="Pipe\Service\ThToiletRoomService.cs" />
     <Compile Include="Pipe\Engine\ThWBalconyFloordrainEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeFloordrainEngine.cs" />

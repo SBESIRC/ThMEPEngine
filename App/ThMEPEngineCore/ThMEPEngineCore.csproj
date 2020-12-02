@@ -77,9 +77,11 @@
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
+    <Compile Include="Engine\ThGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThRainPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThRoofRainPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThSideEntryWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
@@ -116,6 +118,8 @@
     <Compile Include="Model\Hvac\ThIfcDuctReducing.cs" />
     <Compile Include="Model\Hvac\ThIfcPipeFitting.cs" />
     <Compile Include="Model\Hvac\ThIfcPipeSegment.cs" />
+    <Compile Include="Model\Plumbing\ThIfcGravityWaterBucket.cs" />
+    <Compile Include="Model\Plumbing\ThIfcSideEntryWaterBucket.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowSegment.cs" />
     <Compile Include="Model\Plumbing\ThIfcCondensePipe.cs" />
@@ -193,6 +197,8 @@
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThFilterPortLinkBeams.cs" />
     <Compile Include="Extension\ThIfcBeamExtension.cs" />
+    <Compile Include="Service\ThGravityWaterBucketDbExtension.cs" />
+    <Compile Include="Service\ThGravityWaterBucketLayerManager.cs" />
     <Compile Include="Service\ThLaneLineSimplifier.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
@@ -210,6 +216,8 @@
     <Compile Include="Service\ThCurveBeamSplitter.cs" />
     <Compile Include="Service\ThBeamSplitter.cs" />
     <Compile Include="Service\ThLinealBeamSplitter.cs" />
+    <Compile Include="Service\ThSideEntryWaterBucketDbExtension.cs" />
+    <Compile Include="Service\ThSideEntryWaterBucketLayerManager.cs" />
     <Compile Include="Service\ThSpaceBoundaryLayerManager.cs" />
     <Compile Include="Service\ThSpaceNameLayerManager.cs" />
     <Compile Include="Service\ThSpaceBoundaryRecognition.cs" />

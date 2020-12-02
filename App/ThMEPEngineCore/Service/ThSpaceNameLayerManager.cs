@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.Service
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
             // 图层名未包含S_BEAM
-            if (!layerName.Contains("AD-NAME-ROOM"))
+            if (!layerName.Contains("AD-FLOOR-AREA")&& !layerName.Contains("AD-AREA-OUTL"))
             {
                 return false;
             }
@@ -32,7 +32,8 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            return (patterns[0] == "ROOM") && (patterns[1] == "NAME") && (patterns[2] == "AD");
+            return (patterns[0] == "AREA" && patterns[1] == "FLOOR"&& patterns[2] == "AD")||
+               (patterns[0] == "OUTL" && patterns[1] == "AREA" && patterns[2] == "AD");
         }
         private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
         {
