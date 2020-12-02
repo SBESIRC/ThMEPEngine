@@ -1960,7 +1960,15 @@ namespace TianHua.FanSelection.UI
                _ExportFanPara.Coverage = p.Name;
                _ExportFanPara.FanForm = p.VentStyle.Replace("(电机内置)", "").Replace("(电机外置)", "");
                //_ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirVolume);
-               _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue);
+               if (p.IsManualInputAirVolume)
+               {
+                   _ExportFanPara.CalcAirVolume = "-";
+               }
+               else
+               {
+                   _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue);
+               }
+
                _ExportFanPara.FanEnergyLevel = p.VentLev;
                _ExportFanPara.DriveMode = p.VentConnect;
                _ExportFanPara.ElectricalEnergyLevel = p.EleLev;
@@ -2012,7 +2020,24 @@ namespace TianHua.FanSelection.UI
 
                    if (_SonFan != null)
                    {
-                       _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue) + "/" + FuncStr.NullToStr(_SonFan.AirCalcValue);
+                       if (p.IsManualInputAirVolume && _SonFan.IsManualInputAirVolume)
+                       {
+                           _ExportFanPara.CalcAirVolume = "-/-";
+                       }
+                       else if (p.IsManualInputAirVolume)
+                       {
+                           _ExportFanPara.CalcAirVolume = "-/" + FuncStr.NullToStr(_SonFan.AirCalcValue);
+
+                       }
+                       else if (_SonFan.IsManualInputAirVolume)
+                       {
+                           _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue) + "/-";
+                       }
+                       else
+                       {
+                           _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue) + "/" + FuncStr.NullToStr(_SonFan.AirCalcValue);
+                       }
+
 
                        _ExportFanPara.FanDelivery = FuncStr.NullToStr(p.AirVolume) + "/" + FuncStr.NullToStr(_SonFan.AirVolume);
 
@@ -2108,7 +2133,16 @@ namespace TianHua.FanSelection.UI
                     _Sheet.Cells[i, 1].Value = p.FanNum;
                     _Sheet.Cells[i, 2].Value = p.Name;
                     _Sheet.Cells[i, 3].Value = p.Scenario;
-                    _Sheet.Cells[i, 13].Value = p.AirCalcValue;
+
+                    if (p.IsManualInputAirVolume)
+                    {
+                        _Sheet.Cells[i, 13].Value = "-";
+                    }
+                    else
+                    {
+                        _Sheet.Cells[i, 13].Value = p.AirCalcValue;
+                    }
+
                     _Sheet.Cells[i, 14].Value = p.AirVolume;
                     _Sheet.Cells[i, 15].Value = p.DuctLength;
 
@@ -2152,7 +2186,19 @@ namespace TianHua.FanSelection.UI
                             _Sheet.Cells[i, 1].Value = _SonFan.FanNum;
                             _Sheet.Cells[i, 2].Value = "-";
                             _Sheet.Cells[i, 3].Value = "-";
-                            _Sheet.Cells[i, 13].Value = _SonFan.AirCalcValue;
+
+                            if (_SonFan.IsManualInputAirVolume)
+                            {
+                                _Sheet.Cells[i, 13].Value = "-";
+                            }
+                            else
+                            {
+                                _Sheet.Cells[i, 13].Value = _SonFan.AirCalcValue;
+                            }
+
+
+
+               
                             _Sheet.Cells[i, 14].Value = _SonFan.AirVolume;
                             _Sheet.Cells[i, 15].Value = _SonFan.DuctLength;
 
@@ -2168,6 +2214,7 @@ namespace TianHua.FanSelection.UI
                             _Sheet.Cells[i, 22].Value = _SonFan.CalcResistance;
                             _Sheet.Cells[i, 23].Value = _SonFan.WindResis;
                             _Sheet.Cells[i, 24].Value = _SonFan.FanModelPower;
+
                         }
                     }
 
