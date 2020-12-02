@@ -9,7 +9,6 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using ThMEPHAVC.CAD;
 using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI

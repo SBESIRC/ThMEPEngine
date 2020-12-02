@@ -7,8 +7,8 @@
     <ProjectGuid>{B49B0155-F4A7-4928-A539-66882A6EC79A}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>ThMEPHAVC</RootNamespace>
-    <AssemblyName>ThMEPHAVC</AssemblyName>
+    <RootNamespace>ThMEPHVAC</RootNamespace>
+    <AssemblyName>ThMEPHVAC</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -29,8 +29,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\ThFanSelectionDbModelEngine.cs" />
-    <Compile Include="CAD\ThFanSelectionEditorExtension.cs" />
-    <Compile Include="CAD\ThFanSelectionGeExtension.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
     <Compile Include="Duct\GraphSerializeService.cs" />

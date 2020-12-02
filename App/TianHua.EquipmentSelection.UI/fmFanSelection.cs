@@ -20,9 +20,7 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Nodes;
 using TianHua.FanSelection.UI.IO;
-using TianHua.FanSelection.UI.CAD;
 using TianHua.FanSelection.Messaging;
-using ThMEPHAVC.CAD;
 using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI

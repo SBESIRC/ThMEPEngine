@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service.Hvac;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPHVAC.CAD
 {
     public class FanOpening
     {

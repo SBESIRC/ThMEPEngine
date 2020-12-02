@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Newtonsoft.Json;
 using QuickGraph;
 
-namespace ThMEPHAVC.Duct
+namespace ThMEPHVAC.Duct
 {
     class GraphSerializeService
     {

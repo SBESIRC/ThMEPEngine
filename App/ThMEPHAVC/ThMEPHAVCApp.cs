@@ -4,10 +4,10 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
 using System.Collections.Generic;
-using ThMEPHAVC.CAD;
+using ThMEPHVAC.CAD;
 using System.Linq;
 
-namespace ThMEPHAVC
+namespace ThMEPHVAC
 {
     public class ThMEPHAVCApp : IExtensionApplication
     {

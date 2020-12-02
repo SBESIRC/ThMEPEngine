@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPHAVC.Duct.DuctExcelLoder
+namespace ThMEPHVAC.Duct.DuctExcelLoder
 {
     public class DuctVolumeInformation
     {

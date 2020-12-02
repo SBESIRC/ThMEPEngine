@@ -179,6 +179,8 @@
     <Compile Include="Operation\GridService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
+    <Compile Include="Service\Hvac\ThHvacEditorExtension.cs" />
+    <Compile Include="Service\Hvac\ThHvacGeExtension.cs" />
     <Compile Include="Service\Hvac\ThHvacFanDbExtension.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelFoundationService.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelFoundationExtension.cs" />

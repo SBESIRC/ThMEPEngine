@@ -9,7 +9,6 @@ using Autodesk.AutoCAD.EditorInput;
 using TianHua.FanSelection.Function;
 using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.Publics.BaseCode;
-using ThMEPHAVC.CAD;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
 

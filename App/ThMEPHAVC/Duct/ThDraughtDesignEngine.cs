@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPHAVC.Duct
+namespace ThMEPHVAC.Duct
 {
     public class DraughtDesignParameters
     {
