@@ -8,10 +8,10 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using TianHua.FanSelection.Function;
 using Autodesk.AutoCAD.DatabaseServices;
-using System;
 using TianHua.Publics.BaseCode;
 using ThMEPHAVC.CAD;
 using ThCADExtension;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI.CAD
 {
@@ -188,6 +188,14 @@ namespace TianHua.FanSelection.UI.CAD
                     model.ObjectId.SetModelNumber(dataModel.InstallFloor, number);
                 }
             }
+        }
+
+        private static void SetModelNumber(this ObjectId obj, string storey, int number)
+        {
+            obj.UpdateAttributesInBlock(new Dictionary<string, string>()
+            {
+                { ThFanSelectionCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER, ThFanSelectionUtils.StoreyNumber(storey, number.ToString()) }
+            });
         }
 
         public static void ModifyModelNames(FanDataModel dataModel)

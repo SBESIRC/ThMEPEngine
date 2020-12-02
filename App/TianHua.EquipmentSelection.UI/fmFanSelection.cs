@@ -23,6 +23,7 @@ using TianHua.FanSelection.UI.IO;
 using TianHua.FanSelection.UI.CAD;
 using TianHua.FanSelection.Messaging;
 using ThMEPHAVC.CAD;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI
 {
@@ -1473,7 +1474,7 @@ namespace TianHua.FanSelection.UI
                         TreeList.DeleteSelectedNodes();
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
+                        using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
                             Active.Editor.Regen();
@@ -1500,7 +1501,7 @@ namespace TianHua.FanSelection.UI
 
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                        using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
+                        using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                         {
                             dbManager.EraseModels(_Fan.ID);
                             Active.Editor.Regen();
@@ -1518,7 +1519,7 @@ namespace TianHua.FanSelection.UI
 
                             using (Active.Document.LockDocument())
                             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-                            using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
+                            using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
                             {
                                 dbManager.EraseModels(_MainFan.ID);
                                 Active.Editor.Regen();

@@ -3,16 +3,15 @@ using DotNetARX;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
-using TianHua.FanSelection;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPEngineCore.Service.Hvac
 {
-    public class ThFanSelectionModelFoundationService
+    public class ThHvacDbModelFoundationService
     {
         public static void CleanAll(Database database)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
-            using (var manager = new ThFanSelectionDbModelFoundationManager(database))
+            using (var manager = new ThHvacDbModelFoundationManager(database))
             {
                 manager.Geometries.Cast<ObjectId>().ForEach(o =>
                 {
@@ -24,7 +23,7 @@ namespace ThMEPHAVC.CAD
         public static void Generate(Database database)
         {
             using (var acadDatabase = AcadDatabase.Use(database))
-            using (var manager = new ThFanSelectionDbModelManager(database))
+            using (var manager = new ThHvacDbModelManager(database))
             {
                 manager.Geometries.Cast<ObjectId>().ForEach(o =>
                 {
@@ -44,7 +43,7 @@ namespace ThMEPHAVC.CAD
                         {
                             { (int)DxfCode.ExtendedDataAsciiString, model.GetModelIdentifier() },
                         };
-                        f.AddXData(ThFanSelectionCommon.RegAppName_Model_Foundation, valueList);
+                        f.AddXData(ThHvacCommon.RegAppName_Model_Foundation, valueList);
                     });
                 });
             }

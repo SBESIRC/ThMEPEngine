@@ -29,14 +29,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\ThFanSelectionDbModelEngine.cs" />
-    <Compile Include="CAD\ThFanSelectionDbModelExtension.cs" />
-    <Compile Include="CAD\ThFanSelectionDbModelFoundationExtension.cs" />
-    <Compile Include="CAD\ThFanSelectionDbModelFoundationManager.cs" />
-    <Compile Include="CAD\ThFanSelectionDbModelManager.cs" />
-    <Compile Include="CAD\ThFanSelectionDynBlockExtension.cs" />
     <Compile Include="CAD\ThFanSelectionEditorExtension.cs" />
     <Compile Include="CAD\ThFanSelectionGeExtension.cs" />
-    <Compile Include="CAD\ThFanSelectionModelFoundationService.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
     <Compile Include="Duct\GraphSerializeService.cs" />

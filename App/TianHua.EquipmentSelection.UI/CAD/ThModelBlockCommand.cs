@@ -1,13 +1,11 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
-using AcHelper.Commands;
-using TianHua.Publics.BaseCode;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
-using TianHua.FanSelection.Function;
-using ThMEPHAVC.CAD;
 using ThCADExtension;
+using AcHelper.Commands;
+using System.Collections.Generic;
+using TianHua.FanSelection.Function;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI.CAD
 {
@@ -22,7 +20,7 @@ namespace TianHua.FanSelection.UI.CAD
         {
             using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
+            using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
             {
 
                 // set focus to AutoCAD

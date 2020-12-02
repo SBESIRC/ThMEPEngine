@@ -57,5 +57,10 @@ namespace ThMEPEngineCore.Service
         {
             return entity.ObjectId.IsValid;
         }
+        protected bool IsModel(BlockReference blockReference)
+        {
+            //
+            return false;
+        }
     }
 }

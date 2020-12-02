@@ -433,6 +433,10 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPHAVC\ThMEPHAVC.csproj">
       <Project>{b49b0155-f4a7-4928-a539-66882a6ec79a}</Project>
       <Name>ThMEPHAVC</Name>

@@ -1,12 +1,10 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using ThCADExtension;
-using Autodesk.AutoCAD.DatabaseServices;
 using TianHua.FanSelection;
 using TianHua.Publics.BaseCode;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
-using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHAVC.CAD
 {

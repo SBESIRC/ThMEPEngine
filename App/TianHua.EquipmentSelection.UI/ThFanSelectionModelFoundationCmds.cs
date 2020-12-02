@@ -1,7 +1,6 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.Runtime;
-using ThMEPHAVC.CAD;
-using TianHua.FanSelection.UI.CAD;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI
 {
@@ -10,8 +9,8 @@ namespace TianHua.FanSelection.UI
         [CommandMethod("TIANHUACAD", "THEXTRACTMODELFOUNDATION", CommandFlags.Modal)]
         public void ThExtractModelFoundation()
         {
-            ThFanSelectionModelFoundationService.CleanAll(Active.Database);
-            ThFanSelectionModelFoundationService.Generate(Active.Database);
+            ThHvacDbModelFoundationService.CleanAll(Active.Database);
+            ThHvacDbModelFoundationService.Generate(Active.Database);
         }
     }
 }

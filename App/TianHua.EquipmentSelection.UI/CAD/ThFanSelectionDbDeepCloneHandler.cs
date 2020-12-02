@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPHAVC.CAD;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI.CAD
 {
