@@ -18,6 +18,17 @@ namespace ThCADCore.NTS
             return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection();
         }
 
+        /// <summary>
+        /// 支持MPolygon的数据格式
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <param name="curves"></param>
+        /// <returns></returns>
+        public static DBObjectCollection DifferenceMP(this AcPolygon polygon, DBObjectCollection curves)
+        {
+            return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDBCollectionMP();
+        }
+
         public static DBObjectCollection Intersection(this AcPolygon polygon, DBObjectCollection curves)
         {
             return polygon.ToNTSPolygon().Intersection(curves.UnionGeometries()).ToDbCollection();
@@ -46,18 +57,16 @@ namespace ThCADCore.NTS
         {
             return polygon.ToNTSPolygon().Contains(curve.ToNTSGeometry());
         }
-
-        public static bool Intersects(this AcPolygon polygon, Curve curve)
+        public static bool Intersects(this AcPolygon polygon, Entity entity)
         {
-            return polygon.ToNTSPolygon().Intersects(curve.ToNTSGeometry());
+            return polygon.ToNTSPolygon().Intersects(entity.ToNTSGeometry());
         }
-
         public static DBObjectCollection SplitBy(this AcPolygon polygon, Curve curve)
         {
             var geometries = new Geometry[]
             {
+                curve.ToNTSGeometry(),
                 polygon.ToNTSPolygon(),
-                curve.ToNTSLineString()
             };
 
             var objs = new DBObjectCollection();

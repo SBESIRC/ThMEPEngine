@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Service
         {
             SplitBeams = new List<ThIfcBeam>();
         }
-        public abstract void Split(List<Polyline> outlines);
+        public abstract void Split(List<Entity> outlines);
         public abstract void SplitTType(List<ThIfcBeam> beams);
     }
 }

@@ -26,6 +26,7 @@ namespace ThMEPWSS.Service
                 acdb.Database.UnFrozenLayer(ThWSSCommon.Layout_Error_Spray_LayerName);
                 acdb.Database.UnLockLayer(ThWSSCommon.Layout_Error_Spray_LayerName);
                 acdb.Database.UnOffLayer(ThWSSCommon.Layout_Error_Spray_LayerName);
+                acdb.Database.UnPrintLayer(ThWSSCommon.Layout_Error_Spray_LayerName);
                 //打印有问题的但无法移动的喷淋点位
                 foreach (var spray in errorSprays)
                 {
@@ -72,16 +73,17 @@ namespace ThMEPWSS.Service
                 acdb.Database.UnFrozenLayer(ThWSSCommon.Layout_Origin_Spray_LayerName);
                 acdb.Database.UnLockLayer(ThWSSCommon.Layout_Origin_Spray_LayerName);
                 acdb.Database.UnOffLayer(ThWSSCommon.Layout_Origin_Spray_LayerName);
+                acdb.Database.UnPrintLayer(ThWSSCommon.Layout_Origin_Spray_LayerName);
                 //打印有问题的但无法移动的喷淋点位
                 foreach (var spray in moveSprays)
                 {
                     var sprayInnerCircle = new Circle(spray.OriginPt, Vector3d.ZAxis, 100);
-                    sprayInnerCircle.ColorIndex = 2;
+                    sprayInnerCircle.ColorIndex = 5;
                     sprayInnerCircle.LayerId = layerId;
                     acdb.ModelSpace.Add(sprayInnerCircle);
 
                     var sprayOuterCircle = new Circle(spray.OriginPt, Vector3d.ZAxis, 150);
-                    sprayOuterCircle.ColorIndex = 2;
+                    sprayOuterCircle.ColorIndex = 5;
                     sprayOuterCircle.LayerId = layerId;
                     acdb.ModelSpace.Add(sprayOuterCircle);
 
@@ -89,7 +91,7 @@ namespace ThMEPWSS.Service
                     Hatch hatch = new Hatch();
                     hatch.LayerId = layerId;
                     acdb.ModelSpace.Add(hatch);
-                    hatch.ColorIndex = 2;
+                    hatch.ColorIndex = 5;
                     hatch.SetHatchPattern(HatchPatternType.PreDefined, "Solid");
                     hatch.Associative = true;
                     hatch.AppendLoop(HatchLoopTypes.External, new ObjectIdCollection() { sprayOuterCircle.Id });
@@ -100,7 +102,7 @@ namespace ThMEPWSS.Service
                     Polyline connectPl = new Polyline() { Closed = true };
                     connectPl.AddVertexAt(0, spray.OriginPt.ToPoint2D(), 0, 0, 0);
                     connectPl.AddVertexAt(0, spray.Position.ToPoint2D(), 0, 0, 0);
-                    connectPl.ColorIndex = 2;
+                    connectPl.ColorIndex = 5;
                     connectPl.LayerId = layerId;
                     connectPl.ConstantWidth = 50;
                     acdb.ModelSpace.Add(connectPl);
@@ -124,6 +126,7 @@ namespace ThMEPWSS.Service
                 acdb.Database.UnFrozenLayer(ThWSSCommon.Layout_Area_LayerName);
                 acdb.Database.UnLockLayer(ThWSSCommon.Layout_Area_LayerName);
                 acdb.Database.UnOffLayer(ThWSSCommon.Layout_Area_LayerName);
+                acdb.Database.UnPrintLayer(ThWSSCommon.Layout_Area_LayerName);
                 foreach (var area in polylines)
                 {
                     area.TransformBy(matrix);

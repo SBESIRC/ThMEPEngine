@@ -24,6 +24,7 @@ namespace ThMEPElectrical
         public const string UCS_COMPASS_BLOCK_NAME = "AI-UCS";
         public const string UCS_COMPASS_LAYER_NAME = "AI-UCS";
         public const string PROTECTAREA_LAYER_NAME = "E-FD-PR";
+        public const string BLINDAREA_HATCH_LAYER_NAME = "E-FD-DA";
 
         // 常量
         public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);
@@ -35,10 +36,17 @@ namespace ThMEPElectrical
         public static readonly double GridPolyExtendLength = 500; // 轴网两端延伸距离
 
         public static readonly double ExtendBeamLength = 25; // 梁的延伸长度
-        public static readonly double WallProfileShrinkDistance = -1000; // 用户选择墙线内缩距离
+        public static readonly double WallProfileShrinkDistance = -100; // 用户选择墙线内缩距离
         public static readonly double PolyClosedDistance = 100; // 多段线视觉认为是闭合多段线的误差距离
         public static readonly double EntityExtendDistance = 1000; // 选择图元延长的距离
         public static readonly double SecondBeamDivideHeight = 600; // 梁高差高度差值大于等于600划分
+
+        public static readonly double ValidBeamLength = 2000; // 有效的梁长度
+
+        public static readonly double NearestDisTolerance = 2; //最近距离容差值
+
+        public static readonly double ProtectAreaScatterLength = 200; // 保护半径离散长度
+        public static readonly double PLbufferLength = 1; // pline buffer 宽度
     }
 }
 

@@ -14,6 +14,10 @@ namespace ThCADExtension
         public static List<Curve> Boundaries(this Hatch hatch)
         {
             var curves = new List<Curve>();
+            if(hatch==null)
+            {
+                return curves;
+            }
             for (int index = 0; index < hatch.NumberOfLoops; index++)
             {
                 var hatchLoop = hatch.GetLoopAt(index);

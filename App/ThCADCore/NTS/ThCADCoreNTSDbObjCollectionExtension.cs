@@ -1,5 +1,6 @@
 ﻿using System;
 using NFox.Cad;
+using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -33,12 +34,12 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
         }
 
-        public static List<Geometry> ToNTSPolygons(this DBObjectCollection objs)
+        public static List<Polygon> ToNTSPolygons(this DBObjectCollection objs)
         {
-            var polygons = new List<Geometry>();
-            foreach (Polyline polyline in objs)
+            var polygons = new List<Polygon>();
+            foreach (Entity entity in objs)
             {
-                polygons.Add(polyline.ToNTSPolygon());
+                polygons.Add(entity.ToNTSPolygon());
             }
             return polygons;
         }
@@ -180,12 +181,14 @@ namespace ThCADCore.NTS
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
         {
-            var geometries = new List<LineString>();
+            var geometries = new List<Geometry>();
             foreach (Curve curve in curves)
             {
-                geometries.Add(curve.ToNTSLineString());
+                geometries.Add(curve.ToNTSGeometry());
             }
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(geometries.ToArray());
+            // 暂时过滤掉Polygon
+            var lineStrings = geometries.Where(o => o is LineString).Cast<LineString>();
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 
         public static Geometry Combine(this DBObjectCollection curves, double chord = 5.0)
@@ -194,28 +197,14 @@ namespace ThCADCore.NTS
             return GeometryCombiner.Combine(geometries);
         }
 
-        public static DBObjectCollection Merge(this DBObjectCollection lines)
+        /// <summary>
+        /// 支持MPolygon 数据格式的流转
+        /// </summary>
+        /// <param name="geometry"></param>
+        /// <returns></returns>
+        public static DBObjectCollection ToDBCollectionMP(this Geometry geometry)
         {
-            var merger = new LineMerger();
-            merger.Add(lines.ToNTSNodedLineStrings());
-            var results = new DBObjectCollection();
-            foreach (var geometry in merger.GetMergedLineStrings())
-            {
-                if (geometry is LineString lineString)
-                {
-                    // 合并后的图元需要刷成合并前的图元的属性
-                    // 假设合并的图元都有相同的属性
-                    // 这里用集合中的第一个图元“刷”到合并后的图元
-                    var result = lineString.ToDbPolyline();
-                    result.SetPropertiesFrom(lines[0] as Entity);
-                    results.Add(result);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return results;
+            return geometry.ToDbObjectsMP().ToCollection<DBObject>();
         }
 
         public static DBObjectCollection ToDbCollection(this Geometry geometry)

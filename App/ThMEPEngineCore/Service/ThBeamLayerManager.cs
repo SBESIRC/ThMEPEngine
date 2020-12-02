@@ -17,30 +17,32 @@ namespace ThMEPEngineCore.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var layers = new List<string>();
-                acadDatabase.Layers.Where(o =>
-                {
-                    // 图层名未包含S_BEAM
-                    if (!o.Name.ToUpper().Contains("S_BEAM"))
+                acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
+                    .Where(o =>
                     {
-                        return false;
-                    }
+                        // 图层名未包含S_BEAM
+                        if (!o.Name.ToUpper().Contains("S_BEAM"))
+                        {
+                            return false;
+                        }
 
-                    // 若图层名包含S_BEAM，
-                    // 则继续判断是否包含TEXT
-                    if (o.Name.ToUpper().Contains("TEXT"))
-                    {
-                        return false;
-                    }
+                        // 若图层名包含S_BEAM，
+                        // 则继续判断是否包含TEXT
+                        if (o.Name.ToUpper().Contains("TEXT"))
+                        {
+                            return false;
+                        }
 
-                    // 继续判断是否包含REIN
-                    if (o.Name.ToUpper().Contains("REIN"))
-                    {
-                        return false;
-                    }
+                        // 继续判断是否包含REIN
+                        if (o.Name.ToUpper().Contains("REIN"))
+                        {
+                            return false;
+                        }
 
-                    // 返回指定的图层
-                    return true;
-                }).ForEachDbObject(o => layers.Add(o.Name));
+                        // 返回指定的图层
+                        return true;
+                    }).ForEachDbObject(o => layers.Add(o.Name));
                 return layers;
             }
         }
@@ -55,6 +57,7 @@ namespace ThMEPEngineCore.Service
             {
                 var layers = new List<string>();
                 acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
                     .Where(o =>
                     {
                         var layerName = ThStructureUtils.OriginalFromXref(o.Name).ToUpper();
@@ -80,7 +83,10 @@ namespace ThMEPEngineCore.Service
                 return layers;
             }
         }
-
+        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
+        }
         public static List<string> AnnotationLayers(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))

@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using DotNetARX;
 using ThCADExtension;
+using ThMEPWSS.Service;
 
 namespace ThWSS.Bussiness
 {
@@ -16,19 +17,21 @@ namespace ThWSS.Bussiness
         /// <param name="insertPts"></param>
         public static void InsertSprayBlock(List<Point3d> insertPts, SprayType type)
         {
+            var sprayType = ThWSSUIService.Instance.Parameter.layoutType == ThMEPWSS.Model.LayoutType.UpSpray ? ThWSSCommon.SprayUpBlockName : ThWSSCommon.SprayDownBlockName;
             using (var db = AcadDatabase.Active())
             {
                 LayerTools.AddLayer(db.Database, ThWSSCommon.SprayLayerName);
                 db.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
                 db.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
                 db.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
+                db.Database.UnPrintLayer(ThWSSCommon.SprayLayerName);
                 var filePath = Path.Combine(ThCADCommon.SupportPath(), ThWSSCommon.SprayDwgName);
                 db.Database.ImportBlocksFromDwg(filePath);
                 foreach (var insertPoint in insertPts)
                 {
                     var blockId = db.ModelSpace.ObjectId.InsertBlockReference(
                         ThWSSCommon.SprayLayerName,
-                        ThWSSCommon.SprayBlockName,
+                        sprayType,
                         insertPoint,
                         new Scale3d(1, 1, 1),
                         0);

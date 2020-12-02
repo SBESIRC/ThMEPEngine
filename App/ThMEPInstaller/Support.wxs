@@ -15,6 +15,9 @@
 			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Fan" Guid="{D510B440-E5DC-430E-816A-0D28F3AA7550}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Block_Fan" Source="$(var.AutoloaderContentsPath)\Support\暖通.选型.风机.dwg" KeyPath="yes" />
 			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{52925679-6A6D-477F-83DC-7C99E78FC0E1}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\天华提电气块转换配置表.dwg" KeyPath="yes" />
+			</Component>
 			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Guid="{A21AD44A-402A-4739-94C6-9EA6524A9013}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_HTFC_Fan" Source="$(var.AutoloaderContentsPath)\Support\离心风机选型.json" KeyPath="yes" />
 			</Component>
@@ -76,6 +79,7 @@
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />

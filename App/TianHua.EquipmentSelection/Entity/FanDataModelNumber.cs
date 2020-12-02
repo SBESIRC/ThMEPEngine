@@ -98,6 +98,8 @@ namespace TianHua.FanSelection
             {
                 if (Scenario != "消防加压送风") { return AirVolume; }
 
+                if (IsManualInputAirVolume) { return this.AirVolume; }
+
                 var _Value = this.AirCalcValue * this.AirCalcFactor / this.VentQuan;
 
                 var _Rem = FuncStr.NullToInt(_Value) % 50;

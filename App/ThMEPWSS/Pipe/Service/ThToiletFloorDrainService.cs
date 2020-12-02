@@ -7,43 +7,41 @@ using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using NetTopologySuite.Geometries;
+using ThMEPEngineCore.Model.Plumbing;
+
+
+
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThToiletFloorDrainService
     {        
-        private List<ThIfcFloorDrain> FloorDrains { get; set; }
+        private List<ThIfcFloorDrain> FloorDrainList { get; set; }
         private ThIfcSpace ToiletSpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
-        public bool IsFinded
-        {
-            get
-            {
-                return FloorDrainCollection.Count>0;
-            }
-        }
         /// <summary>
         /// 找到的坐便器
         /// 目前只支持查找一个
         /// </summary>
-        public List<ThIfcFloorDrain> FloorDrainCollection
+        public List<ThIfcFloorDrain> FloorDrains
         { 
             get;
             set; 
         } 
         private ThToiletFloorDrainService(
-            List<ThIfcFloorDrain> floordrains, 
+            List<ThIfcFloorDrain> floordrainList, 
             ThIfcSpace toiletSpace, 
             ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
-            FloorDrains = floordrains;
+            FloorDrainList = floordrainList;
             ToiletSpace = toiletSpace;
             FloorDrainSpatialIndex = floordrainSpatialIndex;
-            FloorDrainCollection = new List<ThIfcFloorDrain>();
+            FloorDrains = new List<ThIfcFloorDrain>();
             if (FloorDrainSpatialIndex == null)
             {
                 DBObjectCollection dbObjs = new DBObjectCollection();
-                FloorDrains.ForEach(o => dbObjs.Add(o.Outline));
+                FloorDrainList.ForEach(o => dbObjs.Add(o.Outline));
                 FloorDrainSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
         }
@@ -60,9 +58,21 @@ namespace ThMEPWSS.Pipe.Service
         {
             var tolitBoundary = ToiletSpace.Boundary as Polyline;
             var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
-            var crossFloordrains = FloorDrains.Where(o => crossObjs.Contains(o.Outline));
-            var includedFloordrains = crossFloordrains.Where(o => tolitBoundary.Contains(o.Outline as Curve));
-            includedFloordrains.ForEach(o => FloorDrainCollection.Add(o));
-        }        
+            var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
+
+            var includedFloordrains = crossFloordrains.Where(o =>
+            {
+                var block = o.Outline as BlockReference;
+                var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
+                return tolitBoundary.Contains(bufferObjs[0] as Curve);
+            });
+            includedFloordrains.ForEach(o => FloorDrains.Add(o));
+        }
+        private bool Contains(Polyline polyline, Polygon polygon)
+        {
+            return polyline.ToNTSPolygon().Contains(polygon);
+        }
     }
 }
+
+

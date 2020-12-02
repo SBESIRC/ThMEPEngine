@@ -20,9 +20,9 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
         readonly double moveLength = 100;
         readonly double maxMoveLength = 200;
 
-        public void CheckBoundarySprays(Polyline polyline, List<SprayLayoutData> sprays, double length, double minLength)
+        public void CheckBoundarySprays(Polyline plFrame, List<Polyline> polylines, List<SprayLayoutData> sprays, double length, double minLength)
         {
-            var bSprays = GetBoundarySpray(polyline, sprays, length);
+            var bSprays = GetBoundarySpray(plFrame, polylines, sprays, length);
             AdjustSprayLine(bSprays, sprays, length / 2, minLength);
         }
 

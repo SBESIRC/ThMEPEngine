@@ -16,7 +16,7 @@ namespace ThMEPWSS.Service
         /// <param name="polyline"></param>
         /// <param name="allBeams"></param>
         /// <returns></returns>
-        public static List<Polyline> GetLayoutArea(Polyline polyline, List<Polyline> allBeams, List<Polyline> columnPoly, double spacing = 300)
+        public static List<Polyline> GetLayoutArea(Polyline polyline, List<Polyline> allBeams, List<Polyline> columnPoly, List<Polyline> wallPolys, double spacing = 300)
         {
             DBObjectCollection dBObjects = new DBObjectCollection();
             foreach (var beam in allBeams)
@@ -27,6 +27,11 @@ namespace ThMEPWSS.Service
             foreach (var cPoly in columnPoly)
             {
                 dBObjects.Add(cPoly);
+            }
+
+            foreach (var wPoly in wallPolys)
+            {
+                dBObjects.Add(wPoly);
             }
             var layoutAreas = polyline.Difference(dBObjects).Cast<Polyline>().SelectMany(x => x.Buffer(-spacing).Cast<Polyline>()).Where(x => x.Area > 0).ToList();
             return layoutAreas;

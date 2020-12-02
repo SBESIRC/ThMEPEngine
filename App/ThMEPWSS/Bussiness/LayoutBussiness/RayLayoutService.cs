@@ -17,16 +17,26 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 {
     public class RayLayoutService
     {
-        protected readonly double sideLength = 3400;
-        protected readonly double sideMinLength = 0;
-        protected readonly double maxLength = 1800;
-        protected readonly double minLength = 100;
-        protected readonly double raduisLength = 1800;
-        protected readonly double moveLength = 200;
-        protected readonly double spacing = 100;
+        protected double sideLength = 3400;
+        //protected double sideMinLength = 0;
+        protected double maxLength = 1800;  //任何情况下喷头间距不小于1800
+        //protected double minLength = 100;
+        protected double radiusLength = 1800;
+        //protected readonly double moveLength = 200;
+        protected readonly double spacing = 100;  //布置线间距为100的倍数
         
-        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, Matrix3d matrix, bool CreateLine = true)
+        public List<SprayLayoutData> LayoutSpray(Polyline polyline, List<Polyline> colums, List<Polyline> beams, List<Polyline> walls, List<Polyline> holes, Matrix3d matrix, bool CreateLine = true)
         {
+            #region 预设参数
+            sideLength = ThWSSUIService.Instance.Parameter.protectRange;
+            radiusLength = sideLength / 2;
+
+            if (!ThWSSUIService.Instance.Parameter.ConsiderBeam)  //不考虑梁
+            {
+                beams = new List<Polyline>();
+            }
+            #endregion
+
             //获取柱轴网
             GridService gridService = new GridService();
             var allGrids = gridService.CreateGrid(polyline, colums, matrix, 4000);
@@ -39,15 +49,27 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
 
             //边界保护（调整线）
             CheckProtectService checkProtectService = new CheckProtectService();
-            checkProtectService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
+            //checkProtectService.CheckBoundarySprays(polyline, new List<Polyline>() { polyline }, sprays, sideLength, maxLength);
 
             //边界保护（调整点）
             CheckProtectByPointsService checkProtectByPointsService = new CheckProtectByPointsService();
-            checkProtectByPointsService.CheckBoundarySprays(polyline, sprays, sideLength, maxLength);
+            checkProtectByPointsService.CheckBoundarySprays(polyline, new List<Polyline>() { polyline }, sprays, sideLength, maxLength);
+
+            //清除洞口喷淋
+            holes.AddRange(walls);
+            holes.AddRange(colums);
+            CalHolesService calHolesService = new CalHolesService();
+            calHolesService.ClearHoleSpray(holes, sprays);
+            
+            //洞口边界保护（调整线）
+            //checkProtectService.CheckBoundarySprays(polyline, holes, sprays, sideLength, maxLength);
+
+            //洞口边界保护（调整点）
+            checkProtectByPointsService.CheckBoundarySprays(polyline, holes, sprays, sideLength, maxLength);
 
             //躲次梁
             AvoidBeamByPointService avoidService = new AvoidBeamByPointService();
-            avoidService.AvoidBeam(polyline, sprays, colums, beams, sideLength, maxLength, matrix);
+            avoidService.AvoidBeam(polyline, sprays, colums, beams, holes, sideLength, maxLength, matrix);
 
             var sprayLines = SprayDataOperateService.CalAllSprayLines(sprays)
                 .SelectMany(x => polyline.Trim(x).Cast<Polyline>()
@@ -304,15 +326,15 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 //间距是50的倍数
                 moveLength = Math.Ceiling(moveLength / 50) * 50;
                 remainder = (length - moveLength * num) / 2;
-                if (remainder > raduisLength)
+                if (remainder > radiusLength)
                 {
                     while (true)
                     {
-                        moveLength = (length - raduisLength * 2) / num;
+                        moveLength = (length - radiusLength * 2) / num;
                         //间距是50的倍数
                         moveLength = Math.Floor(moveLength / 50) * 50;
                         remainder = (length - moveLength * num) / 2;
-                        if (remainder > raduisLength || moveLength > sideLength)
+                        if (remainder > radiusLength || moveLength > sideLength)
                         {
                             num += 1;
                         }

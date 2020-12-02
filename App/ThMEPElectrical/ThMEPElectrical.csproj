@@ -26,7 +26,28 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\GeometryTrans.cs" />
-    <Compile Include="Block\BlockInsertDBExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertCommon.cs" />
+    <Compile Include="BlockConvert\ThBConvertDbExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertDbUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertDynBlockUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngineStrongCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertEngineWeakCurrent.cs" />
+    <Compile Include="BlockConvert\ThBConvertManager.cs" />
+    <Compile Include="BlockConvert\ThBConvertRule.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleEngine.cs" />
+    <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
+    <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertUtils.cs" />
+    <Compile Include="BlockConvert\ThBConvertParameter.cs" />
+    <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
+    <Compile Include="Business\BlindAreaReminder\ClearHatch.cs" />
+    <Compile Include="Business\BlindAreaReminder\HatchCreater.cs" />
+    <Compile Include="Business\ClearScene\ClearSmoke.cs" />
+    <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
+    <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
+    <Compile Include="Business\Procedure\SplitWallWorker.cs" />
+    <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculator.cs" />
     <Compile Include="Business\DetectionRegion\DetectionCalculator.cs" />
@@ -35,6 +56,7 @@
     <Compile Include="Business\LayoutCalculator.cs" />
     <Compile Include="Business\EntityPicker.cs" />
     <Compile Include="Business\MainBeam\OneColMultiSegmentsPlaceEx.cs" />
+    <Compile Include="Business\Operation\ValidInputPairInfoCalculator.cs" />
     <Compile Include="Business\PlacePointCalculator.cs" />
     <Compile Include="Business\MainBeam\MultiSegmentPlace.cs" />
     <Compile Include="Business\MainBeam\OneColMultiSegmentsPlace.cs" />
@@ -50,12 +72,14 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
+    <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
     <Compile Include="Geometry\CoordinateTransform.cs" />
     <Compile Include="Geometry\GeomUtils.cs" />
     <Compile Include="Geometry\MinRectangle.cs" />
+    <Compile Include="Geometry\MPolygonProfileFinder.cs" />
     <Compile Include="Layout\ILayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />
@@ -70,10 +94,14 @@
     <Compile Include="Broadcast\ParkingLinesService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\ColumnModel.cs" />
+    <Compile Include="Model\DetectionPolygon.cs" />
     <Compile Include="Model\DetectionRegion.cs" />
     <Compile Include="Model\LayoutMap.cs" />
     <Compile Include="Model\LayoutProfileData.cs" />
     <Compile Include="Model\MainSecondBeamRegion.cs" />
+    <Compile Include="Model\PairData.cs" />
+    <Compile Include="Model\PolylineCircle.cs" />
+    <Compile Include="Model\SplitBeamPath.cs" />
     <Compile Include="Model\PlaceInputProfileData.cs" />
     <Compile Include="Model\PlaceParameter.cs" />
     <Compile Include="Model\PlacePoint.cs" />
@@ -82,10 +110,13 @@
     <Compile Include="Model\PointPosType.cs" />
     <Compile Include="Model\PolygonInfo.cs" />
     <Compile Include="Model\UcsInfo.cs" />
+    <Compile Include="Model\WallModel.cs" />
     <Compile Include="PostProcess\Adjustor\NonRegularPlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\PointAdjustor.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IBeautifyConstraint.cs" />
     <Compile Include="PostProcess\ConstraintInterface\IDistanceConstraint.cs" />
+    <Compile Include="PostProcess\HoleAdjustor\HoleRegionPointAdjustor.cs" />
+    <Compile Include="PostProcess\HoleAdjustor\IsolatedHoleAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamLargeAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamMediumAdjustor.cs" />
     <Compile Include="PostProcess\MainSecondBeamAdjustor\MainSecondBeamSingleAdjustor.cs" />
@@ -94,6 +125,11 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="ThBlockConvertCmds.cs" />
+    <Compile Include="ThBroadcastCmds.cs" />
+    <Compile Include="ThLaneLineCmds.cs" />
+    <Compile Include="ThLaneLineMerger.cs" />
+    <Compile Include="ThLaneLineSimplifier.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -122,26 +158,36 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="View\" />
-  </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2012.Net.Interop.x64" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2014'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2014.Net.Interop.x64" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2016'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2016.Net.Interop.x86" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2018'))">
@@ -151,11 +197,8 @@
         <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
       </ItemGroup>
       <ItemGroup>
-        <Reference Include="Autodesk.AutoCAD.Interop.dll">
-          <HintPath>..\..\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.dll</HintPath>
-        </Reference>
-        <Reference Include="Autodesk.AutoCAD.Interop.Common.dll">
-          <HintPath>..\..\\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.Common.dll</HintPath>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>

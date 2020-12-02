@@ -25,9 +25,7 @@ namespace TianHua.AutoCAD.ThCui
                 }
                 {
                     var wssMenu = theMenu.AddSubMenu(-1, "给排水", "ID_THMEPTOOLSET_WSS");
-                    wssMenu.AddMenuItem(-1, "喷头布置", "ID_THPLPT");
-                    wssMenu.AddMenuItem(-1, "盲区检测", "ID_THPLMQ");
-                    wssMenu.AddMenuItem(-1, "可布置区域", "ID_THPLKQ");
+                    wssMenu.AddMenuItem(-1, "喷头工具", "ID_THPL");
                 }
             }
         }

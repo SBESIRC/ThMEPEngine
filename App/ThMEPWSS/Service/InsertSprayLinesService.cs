@@ -18,6 +18,7 @@ namespace ThMEPWSS.Service
             {
                 LayerTools.AddLayer(db.Database, ThWSSCommon.Layout_Line_LayerName);
                 db.Database.UnFrozenLayer(ThWSSCommon.Layout_Line_LayerName);
+                db.Database.UnPrintLayer(ThWSSCommon.Layout_Line_LayerName);
                 var lineData = sprayLines.Select(x => new Line(x.StartPoint, x.EndPoint)).ToList();
                 foreach (var line in lineData)
                 {

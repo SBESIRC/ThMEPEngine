@@ -59,13 +59,14 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD\ElectricalUIDbExtension.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
-    <Compile Include="fmFireBlockConver.cs">
+    <Compile Include="fmBlockConvert.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="fmFireBlockConver.Designer.cs">
-      <DependentUpon>fmFireBlockConver.cs</DependentUpon>
+    <Compile Include="fmBlockConvert.Designer.cs">
+      <DependentUpon>fmBlockConvert.cs</DependentUpon>
     </Compile>
     <Compile Include="fmSmokeLayout.cs">
       <SubType>Form</SubType>
@@ -73,9 +74,10 @@
     <Compile Include="fmSmokeLayout.Designer.cs">
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>
     </Compile>
+    <Compile Include="FuncControlStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <EmbeddedResource Include="fmFireBlockConver.resx">
-      <DependentUpon>fmFireBlockConver.cs</DependentUpon>
+    <EmbeddedResource Include="fmBlockConvert.resx">
+      <DependentUpon>fmBlockConvert.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="fmSmokeLayout.resx">
       <DependentUpon>fmSmokeLayout.cs</DependentUpon>
@@ -109,6 +111,10 @@
     <ProjectReference Include="..\DotNetARX\2010\DotNetARX.csproj">
       <Project>{5ddfcada-bea4-402c-b3e4-5c7f83c2f09e}</Project>
       <Name>DotNetARX</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThCADExtension\ThCADExtension.csproj">
+      <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
+      <Name>ThCADExtension</Name>
     </ProjectReference>
     <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
       <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
@@ -153,19 +159,31 @@
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2012.Net.Interop.x64" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2014'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2014.Net.Interop.x64" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2016'))">
       <ItemGroup>
         <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-        <PackageReference Include="AutoCAD-2016.Net.Interop.x86" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2018'))">
@@ -173,6 +191,11 @@
         <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
         <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
         <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
   </Choose>
@@ -182,5 +205,6 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -111,13 +111,19 @@ namespace ThCADExtension
         // Contents 路径
         private static string ContentsPath()
         {
-            return Path.Combine(RootPath(),"Contents");
+            return Path.Combine(RootPath(), "Contents");
         }
 
+        // 运行时根目录
         private static string RootPath()
         {
+#if DEBUG
+            return Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                @"Autodesk\ApplicationPlugins\ThMEPPlugin.bundle");
+#else
             var fi = new FileInfo(Assembly.GetCallingAssembly().Location);
             return fi.Directory.Parent.Parent.Parent.FullName;
+#endif
         }
     }
 }

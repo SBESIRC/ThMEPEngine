@@ -11,6 +11,7 @@ using ThMEPElectrical.Assistant;
 using ThCADCore.NTS;
 using ThMEPElectrical.PostProcess;
 using ThMEPElectrical.Business.MainSecondBeam;
+using ThMEPElectrical.PostProcess.HoleAdjustor;
 
 namespace ThMEPElectrical.Layout.MainSecBeamLayout
 {
@@ -40,7 +41,7 @@ namespace ThMEPElectrical.Layout.MainSecBeamLayout
 
             // ABB主次梁矩形布置
             m_placePoints = MSBeamRectPlacer.MakeMSBeamRectPlacer(layoutData, m_parameter, m_inputProfileData);
-
+            m_placePoints = IsolatedHoleAdjustor.MakeIsolatedHoleAdjustor(m_placePoints, m_inputProfileData);
             return m_placePoints;
         }
     }

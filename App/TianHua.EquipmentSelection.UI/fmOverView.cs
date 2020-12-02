@@ -465,6 +465,15 @@ namespace TianHua.FanSelection.UI
                if (p.VentStyle != null)
                    _ExportFanPara.FanForm = p.VentStyle.Replace("(电机内置)", "").Replace("(电机外置)", "");
                //_ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirVolume);
+
+               if (p.IsManualInputAirVolume)
+               {
+                   _ExportFanPara.CalcAirVolume = "-";
+               }
+               else
+               {
+                   _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue);
+               }
                _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue);
                _ExportFanPara.FanEnergyLevel = p.VentLev;
                _ExportFanPara.DriveMode = p.VentConnect;
@@ -510,6 +519,41 @@ namespace TianHua.FanSelection.UI
                    _ExportFanPara.Width = _FanParameters.Weight;
                    _ExportFanPara.Height = _FanParameters.Height;
                }
+
+               if (p.Control == "双速")
+               {
+                   var _SonFan = m_ListFan.Find(s => s.PID == p.ID);
+
+                   if (_SonFan != null)
+                   {
+                       if (p.IsManualInputAirVolume && _SonFan.IsManualInputAirVolume)
+                       {
+                           _ExportFanPara.CalcAirVolume = "-/-";
+                       }
+                       else if (p.IsManualInputAirVolume)
+                       {
+                           _ExportFanPara.CalcAirVolume = "-/" + FuncStr.NullToStr(_SonFan.AirCalcValue);
+
+                       }
+                       else if (_SonFan.IsManualInputAirVolume)
+                       {
+                           _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue) + "/-";
+                       }
+                       else
+                       {
+                           _ExportFanPara.CalcAirVolume = FuncStr.NullToStr(p.AirCalcValue) + "/" + FuncStr.NullToStr(_SonFan.AirCalcValue);
+                       }
+
+
+                       _ExportFanPara.FanDelivery = FuncStr.NullToStr(p.AirVolume) + "/" + FuncStr.NullToStr(_SonFan.AirVolume);
+
+                       _ExportFanPara.Pa = FuncStr.NullToStr(p.WindResis) + "/" + FuncStr.NullToStr(_SonFan.WindResis);
+
+                       _ExportFanPara.StaticPa = FuncStr.NullToInt(FuncStr.NullToStr((p.DuctResistance + p.Damper) * p.SelectionFactor)) + "/" + FuncStr.NullToInt(FuncStr.NullToStr((_SonFan.DuctResistance + _SonFan.Damper) * _SonFan.SelectionFactor));
+
+                   }
+               }
+
 
                _List.Add(_ExportFanPara);
            });
@@ -596,7 +640,15 @@ namespace TianHua.FanSelection.UI
                     _Sheet.Cells[i, 1].Value = p.FanNum;
                     _Sheet.Cells[i, 2].Value = p.Name;
                     _Sheet.Cells[i, 3].Value = p.Scenario;
-                    _Sheet.Cells[i, 13].Value = p.AirCalcValue;
+
+                    if (p.IsManualInputAirVolume)
+                    {
+                        _Sheet.Cells[i, 13].Value = "-";
+                    }
+                    else
+                    {
+                        _Sheet.Cells[i, 13].Value = p.AirCalcValue;
+                    }
                     _Sheet.Cells[i, 14].Value = p.AirVolume;
                     _Sheet.Cells[i, 15].Value = p.DuctLength;
 
@@ -615,17 +667,63 @@ namespace TianHua.FanSelection.UI
 
                     _Sheet.Cells[i, 24].Value = p.FanModelPower;
 
+                    if (p.Control == "双速")
+                    {
+                        var _SonFan = m_ListFan.Find(s => s.PID == p.ID);
+
+                        if (_SonFan != null)
+                        {
+                            i++;
+                            _Sheet.Cells[i, 1].Value = _SonFan.FanNum;
+                            _Sheet.Cells[i, 2].Value = "-";
+                            _Sheet.Cells[i, 3].Value = "-";
+
+
+
+                            if (_SonFan != null)
+                            {
+                                if (_SonFan.IsManualInputAirVolume)
+                                {
+                                    _Sheet.Cells[i, 13].Value = "-";
+                                }
+                                else
+                                {
+                                    _Sheet.Cells[i, 13].Value = _SonFan.AirCalcValue;
+                                }
+
+
+
+                                _Sheet.Cells[i, 13].Value = _SonFan.AirCalcValue;
+                                _Sheet.Cells[i, 14].Value = _SonFan.AirVolume;
+                                _Sheet.Cells[i, 15].Value = _SonFan.DuctLength;
+
+                                _Sheet.Cells[i, 16].Value = _SonFan.Friction;
+                                _Sheet.Cells[i, 17].Value = _SonFan.LocRes;
+
+                                _Sheet.Cells[i, 18].Value = _SonFan.DuctResistance;
+
+                                _Sheet.Cells[i, 19].Value = _SonFan.Damper;
+                                _Sheet.Cells[i, 20].Value = _SonFan.EndReservedAirPressure;
+                                _Sheet.Cells[i, 21].Value = _SonFan.DynPress;
+
+                                _Sheet.Cells[i, 22].Value = _SonFan.CalcResistance;
+                                _Sheet.Cells[i, 23].Value = _SonFan.WindResis;
+                                _Sheet.Cells[i, 24].Value = _SonFan.FanModelPower;
+                            }
+                        }
+                    }
+
                     if (!p.IsNull())
                     {
                         ExcelExportEngine.Instance.Model = p;
-                        if (p.FanVolumeModel != null)
+                        if (p.FanVolumeModel != null && p.IsManualInputAirVolume != true)
                         {
                             ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForVolumeModel;
                             ExcelExportEngine.Instance.Sourcebook = SmokeProofSourcePackage.Workbook;
                             ExcelExportEngine.Instance.Targetsheet = targetExcelPackage.Workbook.Worksheets["防烟计算"];
                             ExcelExportEngine.Instance.Run();
                         }
-                        else if (p.ExhaustModel != null)
+                        else if (p.ExhaustModel != null && p.IsManualInputAirVolume != true)
                         {
                             ExcelExportEngine.Instance.RangeCopyOperator = copyOperatorForExhaustModel;
                             ExcelExportEngine.Instance.Sourcebook = ExhaustSourcePackage.Workbook;

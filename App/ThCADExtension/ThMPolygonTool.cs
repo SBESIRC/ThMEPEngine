@@ -22,7 +22,10 @@ namespace ThCADExtension
             MPolygon mPolygon = new MPolygon();
             if (external is Polyline polyline)
             {
-                mPolygon.AppendLoopFromBoundary(polyline, false, 0.0);
+                if(polyline.Area>0.0)
+                {
+                    mPolygon.AppendLoopFromBoundary(polyline, false, 0.0);
+                }
             }
             else if(external is Polyline2d polyline2d)
             {
@@ -56,6 +59,15 @@ namespace ThCADExtension
                     throw new NotSupportedException();
                 }
             });
+
+            mPolygon.SetLoopDirection(0, LoopDirection.Exterior);
+            if (innerCurves.Count > 0)
+            {
+                for (int i = 1; i <= innerCurves.Count; i++)
+                {
+                    mPolygon.SetLoopDirection(i, LoopDirection.Interior);
+                }
+            }
             return mPolygon;
         }
     }

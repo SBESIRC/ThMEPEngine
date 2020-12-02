@@ -1,25 +1,21 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Collections.Generic;
 using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
+using ThCADExtension;
+using Newtonsoft.Json;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.BeamInfo;
-using ThMEPEngineCore.Model.Segment;
-using ThMEPEngineCore.BeamInfo.Business;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using Newtonsoft.Json;
-using ThCADExtension;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore
 {
@@ -116,11 +112,33 @@ namespace ThMEPEngineCore
                 });
             }
         }
+        [CommandMethod("TIANHUACAD", "THExtractArchWall", CommandFlags.Modal)]
+        public void THExtractArchWall()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                archWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                archWallEngine.Elements.ForEach(o =>
+                {
+                    if (o.Outline is Curve curve)
+                    {
+                        acadDatabase.ModelSpace.Add(curve.WashClone());
+                    }                    
+                });
+            }
+        }
         [CommandMethod("TIANHUACAD", "ThExtractIfcCloseTool", CommandFlags.Modal)]
         public void ThExtractIfcCloseTool()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var closetoolEngine = new ThClosetoolRecognitionEngine())
+            using (var closetoolEngine = new ThClosestoolRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -298,91 +316,34 @@ namespace ThMEPEngineCore
             dbText.Height = 200;
             return dbText;
         }
-        [CommandMethod("TIANHUACAD", "ThExtractLaneLine", CommandFlags.Modal)]
-        public void ThExtractLaneLine()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
-            {
-                laneLineEngine.Recognize(Active.Database);
-                laneLineEngine.Lanes.ForEach(o => acadDatabase.ModelSpace.Add(o));
-            }
-        }
-        /// <summary>
-        /// 提取指定区域内的梁信息
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THGETBEAMINFO", CommandFlags.Modal)]
-        public void THGETBEAMINFO()
-        {
-            // 选择楼层区域
-            // 暂时只支持矩形区域
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                DBObjectCollection curves = new DBObjectCollection();
-                var selRes = Active.Editor.GetSelection();
-                foreach (ObjectId objId in selRes.Value.GetObjectIds())
-                {
-                    curves.Add(acadDatabase.Element<Curve>(objId));
-                }
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
-                Point3d pt1 = Active.Editor.GetPoint("select left down point: ").Value;
-                Point3d pt2 = Active.Editor.GetPoint("select right up point: ").Value;
-                DBObjectCollection filterCurves = spatialIndex.SelectCrossingWindow(pt1, pt2);
-                ThDistinguishBeamInfo thDisBeamInfo = new ThDistinguishBeamInfo();
-                var beams = thDisBeamInfo.CalBeamStruc(filterCurves);
-                foreach (var beam in beams)
-                {
-                    acadDatabase.ModelSpace.Add(beam.BeamBoundary);
-                }
-            }
-        }
-        /// <summary>
-        /// 提取所选图元的梁信息
-        /// </summary>
-        [CommandMethod("TIANHUACAD", "THGETBEAMINFO2", CommandFlags.Modal)]
-        public void THGETBEAMINFO2()
-        {
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                // 选择对象
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    RejectObjectsOnLockedLayers = true,
-                };
 
-                // 梁线的图元类型
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Arc)).DxfName,
-                    RXClass.GetClass(typeof(Line)).DxfName,
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                // 梁线的图元图层
-                var layers = ThBeamLayerManager.GeometryLayers(acdb.Database);
-                var filter = ThSelectionFilterTool.Build(dxfNames, layers.ToArray());
-                var entSelected = Active.Editor.GetSelection(options, filter);
-                if (entSelected.Status != PromptStatus.OK)
+        [CommandMethod("TIANHUACAD", "ThBuffer", CommandFlags.Modal)]
+        public void ThBuffer()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
                 {
                     return;
-                };
-
-                // 执行操作
-                DBObjectCollection dBObjects = new DBObjectCollection();
-                foreach (ObjectId obj in entSelected.Value.GetObjectIds())
-                {
-                    var entity = acdb.Element<Entity>(obj);
-                    dBObjects.Add(entity.GetTransformedCopy(Matrix3d.Identity));
                 }
 
-                ThDistinguishBeamInfo thDisBeamCommand = new ThDistinguishBeamInfo();
-                var beams = thDisBeamCommand.CalBeamStruc(dBObjects);
-                using (var acadDatabase = AcadDatabase.Active())
+                var result2 = Active.Editor.GetDistance("\n输入距离");
+                if (result2.Status != PromptStatus.OK)
                 {
-                    foreach (var beam in beams)
-                    {
-                        acadDatabase.ModelSpace.Add(beam.BeamBoundary);
-                    }
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                foreach (Entity obj in objs.Buffer(result2.Value))
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
                 }
             }
         }

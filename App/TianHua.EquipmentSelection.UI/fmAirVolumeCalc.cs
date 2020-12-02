@@ -51,6 +51,12 @@ namespace TianHua.FanSelection.UI
                 this.TxtAirCalcValue.ReadOnly = false;
                 this.TxtAirCalcValue.ContextImageOptions.SvgImage = null;
             }
+
+            CheckIsManualInput.Checked = m_Fan.IsManualInputAirVolume;
+            if (CheckIsManualInput.Checked)
+            {
+                TxtManualInput.Text = FuncStr.NullToStr(m_Fan.AirVolume);
+            }
         }
 
         private void Gdv_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
@@ -75,9 +81,9 @@ namespace TianHua.FanSelection.UI
                 }
                 else
                 {
-                    if (_Fan.AirCalcFactor < 1.1)
+                    if (_Fan.AirCalcFactor < 1)
                     {
-                        _Fan.AirCalcFactor = 1.1;
+                        _Fan.AirCalcFactor = 1;
                     }
                 }
 
@@ -140,7 +146,10 @@ namespace TianHua.FanSelection.UI
                 var _TensDigit = FindNum(FuncStr.NullToInt(_Value), 2);
                 var _Tmp = FuncStr.NullToInt(_TensDigit.ToString() + _UnitsDigit.ToString());
                 if (_Tmp < 50)
-                    _Fan.AirVolume = FuncStr.NullToInt(FuncStr.NullToStr(_Value).Replace(FuncStr.NullToStr(_Tmp), "50"));
+                {
+                    var _DifferenceValue = 50 - _Tmp;
+                    _Fan.AirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
+                }
                 else
                 {
                     var _DifferenceValue = 100 - _Tmp;
@@ -181,7 +190,7 @@ namespace TianHua.FanSelection.UI
                     case "独立或合用前室（楼梯间自然）":
                         FontroomNaturalModel fontroommodel = _fmFanVolumeCalc.Model as FontroomNaturalModel;
                         m_Fan.FanVolumeModel = _fmFanVolumeCalc.Model as FontroomNaturalModel;
-                        m_Fan.AirCalcValue = Convert.ToInt32(Math.Round(Math.Max(fontroommodel.QueryValue,fontroommodel.TotalVolume)));
+                        m_Fan.AirCalcValue = Convert.ToInt32(Math.Round(Math.Max(fontroommodel.QueryValue, fontroommodel.TotalVolume)));
                         break;
                     case "独立或合用前室（楼梯间送风）":
                         FontroomWindModel fontroomwindmodel = _fmFanVolumeCalc.Model as FontroomWindModel;
@@ -217,6 +226,53 @@ namespace TianHua.FanSelection.UI
                 Gdv.PostEditor();
                 Gdv.RefreshData();
 
+            }
+        }
+
+        private void CheckIsManualInput_CheckedChanged(object sender, EventArgs e)
+        {
+            if (CheckIsManualInput.Checked)
+            {
+                TxtManualInput.Enabled = true;
+                Gdc.Enabled = false;
+
+            }
+            else
+            {
+
+                TxtManualInput.Enabled = false;
+                Gdc.Enabled = true;
+            }
+        }
+
+        private void TxtManualInput_EditValueChanged(object sender, EventArgs e)
+        {
+            var _ManualInput = FuncStr.NullToInt(TxtManualInput.Text);
+
+            if (_ManualInput == 0) { return; }
+
+
+            var _Rem = FuncStr.NullToInt(_ManualInput) % 50;
+            if (_Rem != 0)
+            {
+                var _UnitsDigit = FindNum(FuncStr.NullToInt(_ManualInput), 1);
+                var _TensDigit = FindNum(FuncStr.NullToInt(_ManualInput), 2);
+                var _Tmp = FuncStr.NullToInt(_TensDigit.ToString() + _UnitsDigit.ToString());
+                if (_Tmp < 50)
+                {
+                    var _DifferenceValue = 50 - _Tmp;
+                    TxtManualInput.Text = FuncStr.NullToStr(FuncStr.NullToInt(_ManualInput) + _DifferenceValue);
+
+                }
+                else
+                {
+                    var _DifferenceValue = 100 - _Tmp;
+                    TxtManualInput.Text = FuncStr.NullToStr(FuncStr.NullToInt(_ManualInput) + _DifferenceValue);
+                }
+            }
+            else
+            {
+                TxtManualInput.Text = FuncStr.NullToStr(FuncStr.NullToInt(_ManualInput));
             }
         }
     }

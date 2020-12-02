@@ -174,7 +174,11 @@ namespace TianHua.FanSelection.Function
             }
             if (mount == ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST)
             {
-                return string.Format("{0}（{1}）", modelName, ThFanSelectionCommon.AXIAL_MODEL_NAME_SUFFIX);
+                return string.Format("{0}（{1}）", modelName, ThFanSelectionCommon.AXIAL_MODEL_NAME_SUFFIX_HOIST);
+            }
+            else if (mount == ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE)
+            {
+                return string.Format("{0}{1}", modelName, ThFanSelectionCommon.AXIAL_MODEL_NAME_SUFFIX_SQUARE);
             }
             else
             {
@@ -235,8 +239,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机外置、直进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机外置、直进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机外置、直进直出、无基础)";
                                         default:
@@ -247,8 +253,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机外置、侧进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机外置、侧进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机外置、侧进直出、无基础)";
                                         default:
@@ -259,8 +267,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机外置、上进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机外置、上进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机外置、上进直出、无基础)";
                                         default:
@@ -271,8 +281,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机外置、直进上出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机外置、直进上出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机外置、直进上出、无基础)";
                                         default:
@@ -283,8 +295,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机外置、直进下出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机外置、直进下出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机外置、直进下出、无基础)";
                                         default:
@@ -295,8 +309,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机外置、下进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机外置、下进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机外置、下进直出、无基础)";
                                         default:
@@ -316,8 +332,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机内置、直进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机内置、直进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机内置、直进直出、无基础)";
                                         default:
@@ -328,8 +346,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机内置、侧进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机内置、侧进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机内置、侧进直出、无基础)";
                                         default:
@@ -340,8 +360,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机内置、上进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机内置、上进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机内置、上进直出、无基础)";
                                         default:
@@ -352,8 +374,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机内置、直进上出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机内置、直进上出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机内置、直进上出、无基础)";
                                         default:
@@ -364,8 +388,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机内置、直进下出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机内置、直进下出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机内置、直进下出、无基础)";
                                         default:
@@ -376,8 +402,10 @@ namespace TianHua.FanSelection.Function
                                 {
                                     switch (mount)
                                     {
-                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_FLOOR:
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_STRIP:
                                             return "离心风机(电机内置、下进直出、有基础)";
+                                        case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_SQUARE:
+                                            return "离心风机(电机内置、下进直出、有基础2)";
                                         case ThFanSelectionCommon.BLOCK_ATTRIBUTE_VALUE_MOUNT_HOIST:
                                             return "离心风机(电机内置、下进直出、无基础)";
                                         default:

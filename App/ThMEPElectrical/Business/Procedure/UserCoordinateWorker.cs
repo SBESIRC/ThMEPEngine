@@ -9,6 +9,7 @@ using ThMEPElectrical.Model;
 using ThMEPElectrical.Assistant;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPElectrical.Business.ClearScene;
 
 namespace ThMEPElectrical.Business.Procedure
 {
@@ -56,7 +57,12 @@ namespace ThMEPElectrical.Business.Procedure
         public void Do()
         {
             var ucsInfos = UcsInfoCalculator.MakeUcsInfos(m_ucsLayerName);
-            var wallPolys = WallDataPicker.MakeWallPickProfiles(m_srcWallCurves);
+            var wallPolys = SplitWallWorker.MakeSplitWallProfiles(m_srcWallCurves);
+            //DrawUtils.DrawProfile(wallPolys.Polylines2Curves(), "wallPolys");
+            //WallProfileInfos = new List<PolygonInfo>();
+            //return;
+
+            ClearSmoke.MakeClearSmoke(wallPolys);
             CalculatePolygonInfo(ucsInfos, wallPolys);
         }
 
@@ -119,10 +125,12 @@ namespace ThMEPElectrical.Business.Procedure
                 tempPolygonInfos.Add(new PolygonInfo(poly));
             }
 
+            // 被包含则不是有效的轮廓区域
             for (int i = 0; i < tempPolygonInfos.Count; i++)
             {
                 if (tempPolygonInfos[i].IsUsed)
                     continue;
+
                 var curPoly = tempPolygonInfos[i].ExternalProfile;
                 for (int j = 0; j < tempPolygonInfos.Count; j++)
                 {

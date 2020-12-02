@@ -4,6 +4,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
+using GeometryExtensions;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -31,26 +33,28 @@ namespace ThMEPEngineCore.CAD
             return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
         }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
+            Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
+        {
+            return
+                IsCollinearEx(firstSp, firstEp, secondSp, tolerance) &&
+                IsCollinearEx(firstSp, firstEp, secondEp, tolerance);
+        }
+        public static bool IsCollinearEx(Point3d firstPt, Point3d secondPt,
+            Point3d thirdPt, double tolerance = 1.0)
+        {
+            Vector3d firstVec = firstPt.GetVectorTo(secondPt);
+            Vector3d secondVec = firstPt.GetVectorTo(thirdPt);
+            return firstVec.CrossProduct(secondVec).Length <= firstVec.Length * tolerance;
+        }
+        public static bool IsOverlapEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
         {
-            Vector3d firstVec = firstSp.GetVectorTo(firstEp);
-            Vector3d secondVec = secondSp.GetVectorTo(secondEp);
-            if (firstVec.IsParallelToEx(secondVec))
+            if(IsCollinearEx(firstSp, firstEp, secondSp, secondEp))
             {
-                Vector3d otherVec;
-                if (firstSp.DistanceTo(secondEp) > 0.0)
-                {
-                    otherVec = firstSp.GetVectorTo(secondEp);
-                }
-                else
-                {
-                    otherVec = firstSp.GetVectorTo(secondSp);
-                }
-                double angle = firstVec.GetAngleTo(otherVec);
-                angle = angle / Math.PI * 180.0;
-                angle %= 180.0;
-                return (Math.Abs(angle) <= ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) 
-                    || Math.Abs(angle - 180.0) <= ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE;
+                List<Point3d> pts = new List<Point3d> { firstSp, firstEp, secondSp, secondEp };
+                var maxPts=MaxDistancePoints(pts);
+                return (firstSp.DistanceTo(firstEp) + secondSp.DistanceTo(secondEp)) >
+                    maxPts.Item1.DistanceTo(maxPts.Item2);
             }
             return false;
         }
@@ -164,12 +168,20 @@ namespace ThMEPEngineCore.CAD
             Plane plane = new Plane(lineSp, vec);
             Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
             Point3d newPt=outerPt.TransformBy(wcsToUcs);
-            if(newPt.X<=0.0001 && newPt.Y <= 0.0001)
+            if(Math.Abs(newPt.X)<=0.0001 && Math.Abs(newPt.Y) <= 0.0001)
             {
                 if(newPt.Z>=0 && newPt.Z<= lineSp.DistanceTo(lineEp))
                 {
                     return true;
                 }
+            }
+            return false;
+        }
+        public static bool IsPointInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt,double tolerance=0.0)
+        {
+            if(IsPointOnLine(lineSp, lineEp, outerPt))
+            {
+                return outerPt.DistanceTo(lineSp) > tolerance && outerPt.DistanceTo(lineEp) > tolerance;
             }
             return false;
         }
@@ -189,6 +201,50 @@ namespace ThMEPEngineCore.CAD
             Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, Vector3d.ZAxis, dBText.Position);
             obb.TransformBy(counterClockwiseMat);
             return obb;
+        }
+        public static Point3dCollection EntityVertices(this Entity entity)
+        {
+            // 暂不支持弧
+            Point3dCollection pts = new Point3dCollection();
+            if (entity is Polyline polyline)
+            {
+                return polyline.Vertices();
+            }
+            else if(entity is Line line)
+            {
+                pts.Add(line.StartPoint);
+                pts.Add(line.EndPoint);
+            }
+            else if (entity is Arc arc)
+            {
+                return arc.ToPolyline().Vertices();
+            }
+            else if(entity is MPolygon mPolygon)
+            {
+                pts = mPolygon.Vertices();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return pts;
+        }
+        public static Tuple<Point3d,Point3d> MaxDistancePoints(List<Point3d> points)
+        {
+            Point3d firstPt = Point3d.Origin;
+            Point3d secondPt = Point3d.Origin;
+            for (int i=0;i<points.Count-1;i++)
+            {
+                for (int j = i+1; j < points.Count; j++)
+                {
+                    if(points[i].DistanceTo(points[j])> firstPt.DistanceTo(secondPt))
+                    {
+                        firstPt = points[i];
+                        secondPt = points[j];
+                    }
+                }
+            }
+            return Tuple.Create(firstPt, secondPt);
         }
     }
 }

@@ -195,7 +195,50 @@ namespace ThCADExtension
                 return segmentCollection.ToPolyline();
             }
         }
-
+        public static Polyline Tessellate(this Circle circle, double length)
+        {
+            if (length >= 2*Math.PI*circle.Radius)
+            {
+                return circle.ToTriangle();
+            }
+            else
+            {
+                Plane plane = new Plane(circle.Center, circle.Normal);
+                Matrix3d planeToWorld = Matrix3d.PlaneToWorld(plane);
+                Arc firstArc = new Arc(Point3d.Origin, circle.Radius, 0.0, Math.PI);
+                Arc secondArc = new Arc(Point3d.Origin, circle.Radius, Math.PI, Math.PI*2.0);
+                firstArc.TransformBy(planeToWorld);
+                secondArc.TransformBy(planeToWorld);
+                Polyline firstPolyline = firstArc.TessellateArcWithArc(length);
+                Polyline secondPolyline = secondArc.TessellateArcWithArc(length);
+                var firstSegmentCollection = new PolylineSegmentCollection(firstPolyline);
+                var secondSegmentCollection = new PolylineSegmentCollection(secondPolyline);
+                var segmentCollection = new PolylineSegmentCollection();
+                firstSegmentCollection.ForEach(o => segmentCollection.Add(o));
+                secondSegmentCollection.ForEach(o => segmentCollection.Add(o));
+                return segmentCollection.ToPolyline();
+            }
+        }
+        private static Polyline ToTriangle(this Circle circle)
+        {
+            Plane plane = new Plane(circle.Center, circle.Normal);
+            Matrix3d planeToWorld = Matrix3d.PlaneToWorld(plane);
+            Point3d firstPt = new Point3d(0, circle.Radius, 0);
+            double xLen = circle.Radius * Math.Cos(Math.PI / 6.0);
+            double yLen = circle.Radius * Math.Sin(Math.PI / 6.0);
+            Point3d secondPt = new Point3d(-xLen, -yLen, 0);
+            Point3d thirdPt = new Point3d(xLen, -yLen, 0);
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            polyline.AddVertexAt(0, new Point2d(firstPt.X, firstPt.Y), 0, 0, 0);
+            polyline.AddVertexAt(1, new Point2d(secondPt.X, secondPt.Y), 0, 0, 0);
+            polyline.AddVertexAt(2, new Point2d(thirdPt.X, thirdPt.Y), 0, 0, 0);
+            polyline.TransformBy(planeToWorld);
+            plane.Dispose();
+            return polyline;
+        }
         /// <summary>
         /// 根据角度分割弧段(保证起始点终止点不变)
         /// </summary>

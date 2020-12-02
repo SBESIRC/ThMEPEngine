@@ -9,6 +9,7 @@ using ThMEPElectrical.Business.MainBeam;
 using ThMEPElectrical.Model;
 using ThMEPElectrical.Business.MainSecondBeam;
 using ThCADCore.NTS;
+using ThMEPElectrical.PostProcess.HoleAdjustor;
 
 namespace ThMEPElectrical.Layout.MainSecBeamLayout
 {
@@ -34,7 +35,7 @@ namespace ThMEPElectrical.Layout.MainSecBeamLayout
 
             // 主次梁异形布置
             m_placePoints = MSBeamNoRegularPlacer.MakeMSNoRegularPlacer(layoutData, m_parameter, m_inputProfileData);
-
+            m_placePoints = IsolatedHoleAdjustor.MakeIsolatedHoleAdjustor(m_placePoints, m_inputProfileData);
             return PlacePoints;
         }
     }

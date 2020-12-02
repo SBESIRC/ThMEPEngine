@@ -39,13 +39,8 @@ namespace ThMEPEngineCore.Engine
                         if (bufferObjs.Count == 1)
                         {
                             var outline = bufferObjs[0] as Polyline;
-                            Elements.Add(ThIfcWall.CreateWallEntity(outline));
+                            Elements.Add(ThIfcWall.Create(outline));
                         }
-                    }
-                    else if(o is MPolygon mPolygon)
-                    {
-                        // 暂时忽略带洞的剪力墙
-                        //Elements.Add(ThIfcWall.CreateWallEntity(mPolygon));
                     }
                 });
             }

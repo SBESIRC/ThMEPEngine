@@ -1,16 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Segment;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
@@ -26,13 +22,15 @@ namespace ThMEPEngineCore.Service
             SplitBeams = new List<ThIfcLineBeam>();
             BeamNarrowOutline = ThLineBeamOutliner.Extend(lineBeam, 0, -lineBeam.Width * BeamNarrowRatio);
         }
-        public void Split(Polyline outline)
+        public void Split(Entity outline)
         {
             List<Polyline> results = new List<Polyline>();
-            ThCADCoreNTSRelate thCADCoreNTSRelate = new ThCADCoreNTSRelate(LineBeam.Outline as Polyline, outline);
+            var outlinePolygon = outline.ToNTSPolygon();
+            ThCADCoreNTSRelate thCADCoreNTSRelate = new ThCADCoreNTSRelate(
+                LineBeam.Outline.ToNTSPolygon(), outlinePolygon);
             if (thCADCoreNTSRelate.IsCovers || thCADCoreNTSRelate.IsOverlaps)
             {
-                if(thCADCoreNTSRelate.IsCovers)
+                if (thCADCoreNTSRelate.IsCovers)
                 {
                     HandleCovers(outline);
                 }
@@ -40,40 +38,40 @@ namespace ThMEPEngineCore.Service
                 {
                     HandleOverLaps(outline);
                 }
-                SplitBeams=SplitBeams.Where(o =>
-                {
-                    ThCADCoreNTSRelate cadCoreNTSRelateOne = new ThCADCoreNTSRelate(outline, o.Outline as Polyline);
-                    return !cadCoreNTSRelateOne.IsCovers && !cadCoreNTSRelateOne.IsWithIn;
-                }).ToList();
-                SplitBeams=SplitBeams.Where(o => Math.Abs(o.Width - LineBeam.Width) <= 1.0).ToList();
-                SplitBeams= SplitBeams.Where(o=> Math.Abs(o.Length - LineBeam.Length) > 1.0).ToList();
-            }            
-        }        
+                SplitBeams = SplitBeams.Where(o =>
+                  {
+                      ThCADCoreNTSRelate cadCoreNTSRelateOne = new ThCADCoreNTSRelate(outlinePolygon, o.Outline.ToNTSPolygon());
+                      return !cadCoreNTSRelateOne.IsCovers && !cadCoreNTSRelateOne.IsWithIn;
+                  }).ToList();
+                SplitBeams = SplitBeams.Where(o => Math.Abs(o.Width - LineBeam.Width) <= 1.0).ToList();
+                SplitBeams = SplitBeams.Where(o => Math.Abs(o.Length - LineBeam.Length) > 1.0).ToList();
+            }
+        }
         public void SplitTType(ThIfcBeam splitBeam)
         {
             var extentOutline = ThLineBeamOutliner.ExtendBoth(
                 splitBeam as ThIfcLineBeam, 2.0 * LineBeam.Width, 2.0 * LineBeam.Width);
             var intersectPts = ThGeometryTool.IntersectWithEx(LineBeam.Outline as Polyline, extentOutline);
-            if (intersectPts.Count == 4 && 
+            if (intersectPts.Count == 4 &&
                 IsPerpendicular(splitBeam, intersectPts))
             {
                 var breakPts = ProjectionPoints(intersectPts);
-                var midPt = ThGeometryTool.GetMidPt(breakPts[0], breakPts[breakPts.Count-1]);
+                var midPt = ThGeometryTool.GetMidPt(breakPts[0], breakPts[breakPts.Count - 1]);
                 SplitBeam(new List<Point3d> { midPt });
             }
-        }        
+        }
         private bool IsPerpendicular(ThIfcBeam splitBeam, Point3dCollection intersectPts)
         {
-            if(splitBeam is ThIfcLineBeam thIfcLineBeam)
+            if (splitBeam is ThIfcLineBeam thIfcLineBeam)
             {
                 double rad = LineBeam.Direction.GetAngleTo(thIfcLineBeam.Direction);
                 double angle = rad / Math.PI * 180.0;
                 return Math.Abs(angle - 90.0) <= 10.0 || Math.Abs(angle - 270.0) <= 10.0 ? true : false;
             }
-            else if(splitBeam is ThIfcArcBeam thArcBeam)
+            else if (splitBeam is ThIfcArcBeam thArcBeam)
             {
                 double rad = 0.0;
-                if(thArcBeam.StartPoint.DistanceTo(intersectPts[0])<
+                if (thArcBeam.StartPoint.DistanceTo(intersectPts[0]) <
                     thArcBeam.EndPoint.DistanceTo(intersectPts[0]))
                 {
                     rad = LineBeam.Direction.GetAngleTo(thArcBeam.StartTangent);
@@ -90,14 +88,14 @@ namespace ThMEPEngineCore.Service
                 throw new NotSupportedException();
             }
         }
-        private void HandleCovers(Polyline outline)
+        private void HandleCovers(Entity outline)
         {
-            Point3dCollection pts = outline.Vertices();
-            var breakPts= ProjectionPoints(pts);
+            Point3dCollection pts = outline.EntityVertices();
+            var breakPts = ProjectionPoints(pts);
             SplitBeam(breakPts);
         }
-        
-        private void HandleOverLaps(Polyline outline)
+
+        private void HandleOverLaps(Entity outline)
         {
             var pts = BeamNarrowOutline.IntersectWithEx(outline);
             if (pts.Count == 1)
@@ -112,7 +110,7 @@ namespace ThMEPEngineCore.Service
             {
                 var rectangle = o.GetMinimumRectangle();
                 var tempBeam = ThIfcLineBeam.Create(rectangle);
-                if(!IsSamePositionBeam(tempBeam))
+                if (!IsSamePositionBeam(tempBeam))
                 {
                     SplitBeams.Add(ThIfcLineBeam.Create(LineBeam, tempBeam.StartPoint, tempBeam.EndPoint));
                 }
@@ -120,7 +118,7 @@ namespace ThMEPEngineCore.Service
         }
         private bool IsSamePositionBeam(ThIfcLineBeam thIfcLineBeam)
         {
-            if(LineBeam.StartPoint.DistanceTo(thIfcLineBeam.StartPoint)<=1.0 &&
+            if (LineBeam.StartPoint.DistanceTo(thIfcLineBeam.StartPoint) <= 1.0 &&
                LineBeam.EndPoint.DistanceTo(thIfcLineBeam.EndPoint) <= 1.0)
             {
                 return true;
@@ -134,10 +132,10 @@ namespace ThMEPEngineCore.Service
         }
         private List<Point3d> ProjectionPoints(Point3dCollection points)
         {
-            List<Point3d> projectionPts = new List<Point3d>(); 
+            List<Point3d> projectionPts = new List<Point3d>();
             points.Cast<Point3d>().ForEach(o =>
             {
-                Point3d pt = ProjectionPoint(LineBeam.StartPoint,LineBeam.EndPoint,o);               
+                Point3d pt = ProjectionPoint(LineBeam.StartPoint, LineBeam.EndPoint, o);
                 if (!projectionPts.Where(m => m.DistanceTo(pt) <= 1.0).Any())
                 {
                     projectionPts.Add(pt);
@@ -146,7 +144,7 @@ namespace ThMEPEngineCore.Service
             projectionPts = projectionPts.OrderBy(o => o.DistanceTo(LineBeam.StartPoint)).ToList();
             return projectionPts;
         }
-        private Point3d ProjectionPoint(Point3d startPt,Point3d endPt,Point3d outerPt)
+        private Point3d ProjectionPoint(Point3d startPt, Point3d endPt, Point3d outerPt)
         {
             Plane plane = new Plane(startPt, startPt.GetVectorTo(endPt).GetNormal());
             Matrix3d worldToPlane = Matrix3d.WorldToPlane(plane);
@@ -167,8 +165,8 @@ namespace ThMEPEngineCore.Service
             breakPts = breakPts.Distinct().ToList();
             Point3d startPt = LineBeam.StartPoint;
             breakPts.ForEach(o =>
-            {                
-                SplitBeams.Add(CreateLineBeam(startPt,o));
+            {
+                SplitBeams.Add(CreateLineBeam(startPt, o));
                 startPt = o;
             });
             SplitBeams.Add(CreateLineBeam(startPt, LineBeam.EndPoint));

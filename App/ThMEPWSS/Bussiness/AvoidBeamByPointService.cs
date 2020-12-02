@@ -25,22 +25,22 @@ namespace ThMEPWSS.Bussiness
         double spcing = 300;
         double maxSpacing = 3400;
         double minSpacing = 100;
-        double sprayWidth = 200;
 
-        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, List<Polyline> beamPolys, double maxValue, double minValue, Matrix3d matrix)
+        public void AvoidBeam(Polyline polyline, List<SprayLayoutData> sprays, List<Polyline> columnPolys, List<Polyline> beamPolys, List<Polyline> wallPolys, 
+            double maxValue, double minValue, Matrix3d matrix)
         {
             maxSpacing = maxValue;
             minSpacing = minValue;
 
             //计算可布置区域
-            var layoutAreas = CreateLayoutAreaService.GetLayoutArea(polyline, beamPolys, columnPolys, spcing);
+            var layoutAreas = CreateLayoutAreaService.GetLayoutArea(polyline, beamPolys, columnPolys, wallPolys, spcing);
 
             //计算出不合法的喷淋点位
             var moveSprays = CalIllegalSpary(sprays, layoutAreas);
 
             //计算出边界喷淋
             BoundaryProtestService protestService = new BoundaryProtestService();
-            var bSprays = protestService.GetBoundarySpray(polyline, sprays, maxSpacing);
+            var bSprays = protestService.GetBoundarySpray(polyline, new List<Polyline>() { polyline }, sprays, maxSpacing);
 
             //移动并校核喷淋
             MoveSpray(moveSprays, layoutAreas, sprays, bSprays);

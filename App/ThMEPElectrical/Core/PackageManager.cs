@@ -20,6 +20,8 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Operation;
 using ThMEPElectrical.Business.Procedure;
+using ThMEPElectrical.Business.Operation;
+using ThMEPElectrical.Business.BlindAreaReminder;
 
 namespace ThMEPElectrical.Core
 {
@@ -116,11 +118,11 @@ namespace ThMEPElectrical.Core
                 return ucsInputProfileDatas;
 
             // 用户选择Curves
-            var wallCurves = EntityPicker.MakeUserPickPolys();
+            var wallCurves = EntityPicker.MakeUserPickCurves();
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
 
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
@@ -132,14 +134,16 @@ namespace ThMEPElectrical.Core
                 var wallPtCollection = pairInfo.ExternalProfile.Vertices();
                 var innerHoles = GetValidProfiles(infoReader.RecognizeMainBeamColumnWalls, wallPtCollection);
                 var secondBeams = GetValidProfileInfos(infoReader.RecognizeSecondBeams, wallPtCollection);
+                //DrawUtils.DrawProfile(innerHoles.Polylines2Curves(), "innerHoles11");
                 //var drawCurves = SecondBeamProfile2Polyline(secondBeams).Polylines2Curves();
-                //DrawUtils.DrawProfile(drawCurves, "drawCurves");
+                //DrawUtils.DrawProfileDebug(drawCurves, "drawCurves11");
                 // 外墙，内洞，次梁
-                var profileDatas = BeamDetectionCalculator.MakeDetectionData(pairInfo.ExternalProfile, innerHoles, secondBeams);
+                var profileDatas = BeamDetectionCalculatorEx.MakeDetectionDataEx(pairInfo.ExternalProfile, innerHoles, secondBeams);
 
-
+                var validProfileDatas = ValidInputPairInfoCalculator.MakeValidInputPairInfoCalculator(profileDatas, pairInfo);
+                //DrawUtils.DrawGroup(validProfileDatas);
                 // 主次梁 坐标系信息
-                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(profileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
+                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(validProfileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }
 
             return ucsInputProfileDatas;
@@ -156,11 +160,11 @@ namespace ThMEPElectrical.Core
             if (preWindow.Count == 0)
                 return ucsInputProfileDatas;
             // 用户选择
-            var wallCurves = EntityPicker.MakeUserPickPolys();
+            var wallCurves = EntityPicker.MakeUserPickCurves();
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.Do();
@@ -168,6 +172,8 @@ namespace ThMEPElectrical.Core
             var gridPolys = new List<Polyline>();
 
             var innerHoles = new List<Polyline>();
+
+            var swallColumnHoles = new List<Polyline>();
             // 建立映射关系对
             foreach (var pairInfo in wallPairInfos)
             {
@@ -175,9 +181,12 @@ namespace ThMEPElectrical.Core
                 innerHoles.Clear();
                 // 所有的内部洞数据, 收集主次梁-柱子剪力墙等数据
                 innerHoles.AddRange(infoReader.RecognizeMainBeamColumnWalls);
+                swallColumnHoles.AddRange(infoReader.RecognizeMainBeamColumnWalls);
+
                 infoReader.RecognizeSecondBeams.ForEach(e => innerHoles.Add(e.Profile));
 
                 var validHoles = GetValidProfiles(innerHoles, wallPtCollection);
+                var validSwallColumnHoles = GetValidProfiles(swallColumnHoles, wallPtCollection);
                 //var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
                 //DrawUtils.DrawProfile(GeometryTrans.MatrixSystemCurves(pairInfo.OriginMatrix, 100), "drawMatrix");
                 //轴网线
@@ -191,12 +200,15 @@ namespace ThMEPElectrical.Core
                 gridInfo = BothExtendPolys(gridInfo);
 
                 gridInfo = TransfromGridInfos(gridInfo, pairInfo.UserSys.Inverse());
-                //DrawGridInfos(gridInfo);
+                //var obbExternal = new DBObjectCollection() { pairInfo.ExternalProfile }.GetMinimumRectangle(100);
+                //DrawGridInfos(gridInfo, obbExternal);
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 // 外墙，内洞，轴网
-                var profileDatas = GridDetectionCalculator.MakeGridDetectionCalculator(pairInfo.ExternalProfile, gridPolys, validHoles);
-                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(profileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
+                var profileDatas = GridDetectionCalculator.MakeGridDetectionCalculator(pairInfo.ExternalProfile, gridPolys, validHoles, validSwallColumnHoles);
+                var validProfileDatas = ValidInputPairInfoCalculator.MakeValidInputPairInfoCalculator(profileDatas, pairInfo);
+                DrawUtils.DrawGroup(validProfileDatas);
+                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(validProfileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }
 
             return ucsInputProfileDatas;
@@ -213,11 +225,11 @@ namespace ThMEPElectrical.Core
             if (preWindow.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallCurves = EntityPicker.MakeUserPickPolys();
+            var wallCurves = EntityPicker.MakeUserPickCurves();
             if (wallCurves.Count == 0)
                 return ucsInputProfileDatas;
 
-            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorkerFromSelectPolys(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
             // 前置数据读取器
             var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
             infoReader.PickColumnAndShearWall(); // 提取和剪力墙
@@ -246,7 +258,9 @@ namespace ThMEPElectrical.Core
                 // 外墙，内洞，轴网
                 validColumns.AddRange(validShearWalls);
                 var profileDatas = NoBeamStoreyDetectionCalculator.MakeNoBeamStoreyDetectionCalculator(gridPolys, validColumns, pairInfo.ExternalProfile);
-                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(profileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
+                var validProfileDatas = ValidInputPairInfoCalculator.MakeValidInputPairInfoCalculator(profileDatas, pairInfo);
+                DrawUtils.DrawGroup(validProfileDatas);
+                ucsInputProfileDatas.Add(new UcsPlaceInputProfileData(validProfileDatas, pairInfo.UserSys, pairInfo.rotateAngle));
             }
 
             return ucsInputProfileDatas;
@@ -266,7 +280,7 @@ namespace ThMEPElectrical.Core
             return resGridInfos;
         }
 
-        private void DrawGridInfos(List<KeyValuePair<Vector3d, List<Polyline>>> gridInfos)
+        private void DrawGridInfos(List<KeyValuePair<Vector3d, List<Polyline>>> gridInfos, Polyline externalProfile)
         {
             var drawCurves = new List<Curve>();
             foreach (var pairValue in gridInfos)
@@ -274,7 +288,22 @@ namespace ThMEPElectrical.Core
                 drawCurves.AddRange(pairValue.Value);
             }
 
-            //DrawUtils.DrawProfile(drawCurves, "gridInfos");
+            var resExtendPolys = new List<Polyline>();
+            foreach (Polyline offsetPoly in externalProfile.Buffer(ThMEPCommon.GridPolyExtendLength * 4))
+            {
+                resExtendPolys.Add(offsetPoly);
+            }
+
+            if (resExtendPolys.Count == 0)
+                return;
+
+            var validExternalProfile = resExtendPolys.First();
+
+            var vadlidCurves = drawCurves.Where(p =>
+            {
+                return GeomUtils.PtInLoop(validExternalProfile, p.StartPoint);
+            }).ToList();
+            DrawUtils.DrawProfileDebug(vadlidCurves, "gridInfos");
         }
 
         private List<Polyline> TransformPolylines(List<Polyline> srcPolys, Matrix3d transMatrix)
@@ -366,125 +395,6 @@ namespace ThMEPElectrical.Core
         }
 
         /// <summary>
-        /// 无梁楼盖布置
-        /// </summary>
-        /// <returns></returns>
-        public List<Point3d> DoNoBeamPlacePoints()
-        {
-            var ptLst = new List<Point3d>();
-
-            // 计算轴网和梁结构关系
-            var inputProfileDatas = DoNoBeamStoreyProfiles();
-            if (inputProfileDatas.Count == 0)
-                return ptLst;
-
-            // 转到UCS
-            var wcs2Ucs = Active.Editor.WCS2UCS();
-            var ucs2Wcs = Active.Editor.UCS2WCS();
-
-            // 插入点的计算
-            var transformPlaceInputDatas = TransformProfileDatas(inputProfileDatas, wcs2Ucs);
-
-            var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, Parameter);
-            tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
-
-            // 转到WCS
-            if (ptLst.Count > 0)
-            {
-                BlockInsertor.MakeBlockInsert(tempPts, Parameter.sensorType);
-
-                var circles = GeometryTrans.Points2Circles(ptLst, Parameter.ProtectRadius, Vector3d.ZAxis);
-                var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
-            }
-
-            return ptLst;
-        }
-
-
-        /// <summary>
-        /// 有梁吊顶布置
-        /// </summary>
-        /// <returns></returns>
-        public List<Point3d> DoGridBeamPlacePoints()
-        {
-            var ptLst = new List<Point3d>();
-
-            // 计算轴网和梁结构关系
-            var inputProfileDatas = DoGridBeamProfiles();
-            if (inputProfileDatas.Count == 0)
-                return ptLst;
-
-            // 转到UCS
-            var wcs2Ucs = Active.Editor.WCS2UCS();
-            var ucs2Wcs = Active.Editor.UCS2WCS();
-
-            // 插入点的计算
-            PlaceParameter placePara = new PlaceParameter();
-            var transformPlaceInputDatas = TransformProfileDatas(inputProfileDatas, wcs2Ucs);
-
-            var tempPts = PlacePointCalculator.MakeCalculatePlacePoints(transformPlaceInputDatas, placePara);
-            tempPts.ForEach(pt => ptLst.Add(pt.TransformBy(ucs2Wcs)));
-
-            // 转到WCS
-            if (ptLst.Count > 0)
-            {
-                BlockInsertor.MakeBlockInsert(tempPts, placePara.sensorType);
-
-                var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
-                var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
-            }
-            return ptLst;
-        }
-
-
-        /// <summary>
-        /// 计算无梁楼盖的信息
-        /// </summary>
-        /// <returns></returns>
-        public List<PlaceInputProfileData> DoNoBeamStoreyProfiles()
-        {
-            var inputProfileDatas = new List<PlaceInputProfileData>();
-            // 用户选择
-            var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow.Count == 0)
-                return inputProfileDatas;
-
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
-                return inputProfileDatas;
-
-            // 前置数据读取器
-            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
-            infoReader.PickColumnAndShearWall(); // 提取和剪力墙
-            var gridPolys = new List<Polyline>();
-
-            // 外墙轮廓数据
-            foreach (var poly in wallPolylines)
-            {
-                var wallPtCollection = poly.Vertices();
-
-                var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
-                var gridCalculator = new GridService();
-
-                //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, new Matrix3d(), ThMEPCommon.spacingValue);
-                gridInfo = BothExtendPolys(gridInfo);
-                gridPolys.Clear();
-                gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
-                //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
-                //return inputProfileDatas;
-                // 外墙，内洞，轴网
-                var profileDatas = NoBeamStoreyDetectionCalculator.MakeNoBeamStoreyDetectionCalculator(gridPolys, validColumns, poly);
-                // 轴网 + 相关次梁信息
-                inputProfileDatas.AddRange(profileDatas);
-            }
-
-            return inputProfileDatas;
-        }
-
-        /// <summary>
         /// 轴网测试
         /// </summary>
         public void DoGridTestProfiles()
@@ -516,6 +426,38 @@ namespace ThMEPElectrical.Core
                 gridPolys.Clear();
                 gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
                 //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "gridPolys");
+            }
+        }
+
+        /// <summary>
+        /// 轴网测试
+        /// </summary>
+        public void DoGridTestProfilesWithUcs()
+        {
+            var preWindow = PreWindowSelector.GetSelectRectPoints();
+            if (preWindow.Count == 0)
+                return;
+            // 用户选择
+            var wallCurves = EntityPicker.MakeUserPickCurves();
+            if (wallCurves.Count == 0)
+                return;
+
+            var wallPairInfos = UserCoordinateWorker.MakeUserCoordinateWorker(wallCurves, ThMEPCommon.UCS_COMPASS_LAYER_NAME);
+            // 前置数据读取器
+            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
+            infoReader.Do();
+
+            // 建立映射关系对
+            foreach (var pairInfo in wallPairInfos)
+            {
+                //轴网线
+                var gridCalculator = new GridService();
+                var columnTrans = TransformPolylines(infoReader.Columns, pairInfo.UserSys);
+                var gridInfo = gridCalculator.CreateGrid(pairInfo.ExternalProfile.GetTransformedCopy(pairInfo.UserSys) as Polyline, columnTrans, pairInfo.UserSys.Inverse(), ThMEPCommon.spacingValue);
+                gridInfo = BothExtendPolys(gridInfo);
+                gridInfo = TransfromGridInfos(gridInfo, pairInfo.UserSys.Inverse());
+                var obbExternal = new DBObjectCollection() { pairInfo.ExternalProfile }.GetMinimumRectangle();
+                DrawGridInfos(gridInfo, obbExternal);
             }
         }
 
@@ -566,60 +508,6 @@ namespace ThMEPElectrical.Core
         }
 
         /// <summary>
-        /// 计算梁吊顶的信息
-        /// </summary>
-        /// <returns></returns>
-        public List<PlaceInputProfileData> DoGridBeamProfiles()
-        {
-            var inputProfileDatas = new List<PlaceInputProfileData>();
-            var preWindow = PreWindowSelector.GetSelectRectPoints();
-            if (preWindow.Count == 0)
-                return inputProfileDatas;
-            // 用户选择
-            var wallPolylines = EntityPicker.MakeUserPickPolys();
-            if (wallPolylines.Count == 0)
-                return inputProfileDatas;
-
-            // 前置数据读取器
-            var infoReader = new InfoReader(preWindow, Parameter.RoofThickness);
-            infoReader.Do();
-
-            var gridPolys = new List<Polyline>();
-
-            var innerHoles = new List<Polyline>();
-            // 外墙轮廓数据
-            foreach (var poly in wallPolylines)
-            {
-                var wallPtCollection = poly.Vertices();
-                innerHoles.Clear();
-                // 所有的内部洞数据, 收集主次梁-柱子剪力墙等数据
-                innerHoles.AddRange(infoReader.RecognizeMainBeamColumnWalls);
-                infoReader.RecognizeSecondBeams.ForEach(e => innerHoles.Add(e.Profile));
-
-                var validHoles = GetValidProfiles(innerHoles, wallPtCollection);
-
-                var validColumns = GetValidProfiles(infoReader.Columns, wallPtCollection);
-                var gridCalculator = new GridService();
-
-                //轴网线
-                var gridInfo = gridCalculator.CreateGrid(poly, validColumns, new Matrix3d(), ThMEPCommon.spacingValue);
-                gridInfo = BothExtendPolys(gridInfo);
-                gridPolys.Clear();
-                gridInfo.ForEach(e => gridPolys.AddRange(e.Value));
-                //DrawUtils.DrawProfile(gridPolys.Polylines2Curves(), "tet");
-                //return inputProfileDatas;
-                // 外墙，内洞，轴网
-                var profileDatas = GridDetectionCalculator.MakeGridDetectionCalculator(poly, gridPolys, validHoles);
-                // 轴网 + 相关次梁信息
-                inputProfileDatas.AddRange(profileDatas);
-            }
-
-            return inputProfileDatas;
-        }
-
-
-
-        /// <summary>
         /// 计算主次梁的布置点集
         /// </summary>
         /// <returns></returns>
@@ -650,10 +538,16 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME, Color.FromRgb(0, 0, 255));
             }
 
             return ptLst;
+        }
+
+        public void DoBlindAreaReminder()
+        {
+            var polygons = BlindReminderCalculator.MakeBlindAreaReminderCalculator(Parameter.ProtectRadius);
+            HatchCreater.MakeHatchCreater(polygons);
         }
 
         /// <summary>
@@ -691,7 +585,7 @@ namespace ThMEPElectrical.Core
                     BlockInsertor.MakeBlockInsert(ptLst, Parameter.sensorType, ucsProfileData.rotateAngle);
                     var circles = GeometryTrans.Points2Circles(ptLst, Parameter.ProtectRadius, Vector3d.ZAxis);
                     var curves = GeometryTrans.Circles2Curves(circles);
-                    DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                    DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME, Color.FromRgb(0, 0, 255));
                 }
             }
         }
@@ -744,6 +638,13 @@ namespace ThMEPElectrical.Core
             var mainBeam = profileData.MainBeamOuterProfile;
             var secondBeams = profileData.SecondBeamProfiles;
 
+            var holes = profileData.Holes;
+            var holesTrans = new List<Polyline>();
+            holes.ForEach(hole =>
+            {
+                holesTrans.Add(hole.GetTransformedCopy(matrix) as Polyline);
+            });
+
             var secondBeamsTrans = new List<Polyline>();
             secondBeams.ForEach(e =>
             {
@@ -751,7 +652,7 @@ namespace ThMEPElectrical.Core
             });
 
             var cloneMainBeamTrans = mainBeam.GetTransformedCopy(matrix) as Polyline;
-            return new PlaceInputProfileData(cloneMainBeamTrans, secondBeamsTrans);
+            return new PlaceInputProfileData(cloneMainBeamTrans, secondBeamsTrans, holesTrans);
         }
 
         /// <summary>
@@ -786,7 +687,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
             }
 
             return ptLst;
@@ -824,7 +725,7 @@ namespace ThMEPElectrical.Core
 
                 var circles = GeometryTrans.Points2Circles(ptLst, placePara.ProtectRadius, Vector3d.ZAxis);
                 var curves = GeometryTrans.Circles2Curves(circles);
-                DrawUtils.DrawProfile(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
+                DrawUtils.DrawProfileDebug(curves, ThMEPCommon.PROTECTAREA_LAYER_NAME);
             }
 
             return ptLst;

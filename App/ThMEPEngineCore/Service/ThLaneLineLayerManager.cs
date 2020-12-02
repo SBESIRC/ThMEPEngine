@@ -18,6 +18,7 @@ namespace ThMEPEngineCore.Service
             {
                 var layers = new List<string>();
                 acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
                     .Where(o =>
                     {
                         var layerName = ThStructureUtils.OriginalFromXref(o.Name).ToUpper();
@@ -36,6 +37,10 @@ namespace ThMEPEngineCore.Service
                     }).ForEachDbObject(o => layers.Add(o.Name));
                 return layers;
             }
+        }
+        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
     }
 }

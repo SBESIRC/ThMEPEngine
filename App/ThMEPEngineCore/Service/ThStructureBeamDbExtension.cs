@@ -65,7 +65,7 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (IsBuildElementBlockReference(blockObj))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));

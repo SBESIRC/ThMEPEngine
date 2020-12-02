@@ -28,9 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(fmFanSelection));
-            this.BarManager = new DevExpress.XtraBars.BarManager(this.components);
+            this.BarManager = new DevExpress.XtraBars.BarManager();
             this.bar2 = new DevExpress.XtraBars.Bar();
             this.barBtnNew = new DevExpress.XtraBars.BarButtonItem();
             this.BarBtnOpen = new DevExpress.XtraBars.BarButtonItem();
@@ -127,7 +126,7 @@
             this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem4 = new DevExpress.XtraLayout.EmptySpaceItem();
             this.layoutControlItem8 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.ToolTip = new DevExpress.Utils.ToolTipController(this.components);
+            this.ToolTip = new DevExpress.Utils.ToolTipController();
             ((System.ComponentModel.ISupportInitialize)(this.BarManager)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();

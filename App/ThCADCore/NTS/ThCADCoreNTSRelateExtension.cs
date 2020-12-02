@@ -15,6 +15,11 @@ namespace ThCADCore.NTS
             Matrix = RelateOp.Relate(poly0.ToNTSPolygon(), poly2.ToNTSPolygon());
         }
 
+        public ThCADCoreNTSRelate(Polygon poly0, Polygon poly2)
+        {
+            Matrix = RelateOp.Relate(poly0, poly2);
+        }
+
         public bool IsCovers
         {
             get

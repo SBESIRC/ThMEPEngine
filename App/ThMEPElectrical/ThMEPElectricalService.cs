@@ -1,4 +1,5 @@
 ﻿using ThMEPElectrical.Model;
+using ThMEPElectrical.BlockConvert;
 
 namespace ThMEPElectrical
 {
@@ -15,7 +16,14 @@ namespace ThMEPElectrical
         public static ThMEPElectricalService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-
+        /// <summary>
+        /// 烟感布置参数
+        /// </summary>
         public PlaceParameter Parameter { get; set; }
+
+        /// <summary>
+        /// 提资块转换参数
+        /// </summary>
+        public ThBConvertParameter ConvertParameter { get; set; }
     }
 }

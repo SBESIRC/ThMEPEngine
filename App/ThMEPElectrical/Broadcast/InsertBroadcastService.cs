@@ -61,7 +61,7 @@ namespace ThMEPElectrical.Broadcast
 
         private static string BlockDwgPath()
         {
-            return Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.BroadcastDwgName);
+            return System.IO.Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.BroadcastDwgName);
         }
     }
 }

@@ -64,7 +64,7 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (IsBuildElementBlockReference(blockObj))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
@@ -72,18 +72,25 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Hatch hatch)
                             {
-                                if (IsBuildElement(hatch) && CheckLayerValid(hatch))
+                                if (IsBuildElement(hatch) && 
+                                    CheckLayerValid(hatch))
                                 {
-                                    hatch.ToDbEntities().ForEach(o =>
+                                    var newHatch= hatch.GetTransformedCopy(matrix) as Hatch;
+                                    var polygons = newHatch.ToPolygons();
+                                    foreach(var polygon in polygons)
                                     {
-                                        o.TransformBy(matrix);
-                                        ents.Add(o);
-                                    });
+                                        // 把“甜甜圈”式的带洞的Polygon（有且只有洞）转成不带洞的Polygon
+                                        // 在区域划分时，剪力墙是“不可以用”区域，剪力墙的外部和内部都是“可用区域”
+                                        // 通过这种处理，将剪力墙的外部和内部区域联通起来，从而获取正确的可用区域
+                                        List<Polyline> gapOutlines = ThPolygonToGapPolylineService.ToGapPolyline(polygon);
+                                        gapOutlines.ForEach(o => ents.Add(o));
+                                    }
                                 }
                             }
                             else if (dbObj is Solid solid)
                             {
-                                if (IsBuildElement(solid) && CheckLayerValid(solid))
+                                if (IsBuildElement(solid) && 
+                                    CheckLayerValid(solid))
                                 {
                                     var poly = solid.ToPolyline();
                                     poly.TransformBy(matrix);

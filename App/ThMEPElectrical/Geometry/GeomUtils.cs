@@ -272,6 +272,48 @@ namespace ThMEPElectrical.Geometry
             return false;
         }
 
+        public static DBObjectCollection Curves2DBCollection(List<Curve> curves)
+        {
+            var objs = new DBObjectCollection();
+            foreach (var curve in curves)
+            {
+                objs.Add(curve);
+            }
+
+            return objs;
+        }
+
+        public static List<Curve> EraseSameObjects(List<Curve> srcCurves)
+        {
+            var objs = Curves2DBCollection(srcCurves);
+            var resCurves = new List<Curve>();
+            using (var si = new ThCADCoreNTSSpatialIndex(objs))
+            {
+                var entitys = si.Geometries.Values;
+                foreach (DBObject entity in entitys)
+                {
+                    if (entity is Curve curve)
+                        resCurves.Add(curve);
+                }
+            }
+
+            return resCurves;
+        }
+
+        public static Polyline OptimizePolyline(Polyline polyline)
+        {
+            var pts = polyline.Vertices();
+            var resPts = new Point3dCollection();
+            for (int i = 0; i < pts.Count; i++)
+            {
+                resPts.Add(new Point3d(pts[i].X, pts[i].Y, 0));
+            }
+
+            var resPoly = new Polyline();
+            resPoly.CreatePolyline(resPts);
+            return resPoly;
+        }
+
         public static Curve ExtendCurve(Curve srcCurve, double entityExtendDis)
         {
             if (srcCurve is Polyline poly)
@@ -286,29 +328,32 @@ namespace ThMEPElectrical.Geometry
                 }
                 else
                 {
-                    var pts = poly.Vertices();
+                    var resPolyline = OptimizePolyline(poly);
+                    var pts = resPolyline.Vertices();
                     var resPts = new Point3dCollection();
-                    var vecFir = poly.GetFirstDerivative(ptS).GetNormal();
+                    var vecFir = resPolyline.GetFirstDerivative(ptS).GetNormal();
                     var extendPtS = ptS - vecFir * entityExtendDis;
 
-                    var vecEnd = poly.GetFirstDerivative(ptE).GetNormal();
+                    var vecEnd = resPolyline.GetFirstDerivative(ptE).GetNormal();
                     var extendPtE = ptE + vecEnd * entityExtendDis;
                     resPts.Add(extendPtS);
                     foreach (Point3d srcPt in pts)
                         resPts.Add(srcPt);
                     resPts.Add(extendPtE);
-                    return resPts.ToPolyline();
+                    var extendPoly = new Polyline();
+                    extendPoly.CreatePolyline(resPts);
+                    return extendPoly;
                 }
             }
-            else if (srcCurve is Line line)
+            else
             {
+                // 直线
+                var line = srcCurve as Line;
                 var ptS = line.StartPoint;
                 var ptE = line.EndPoint;
                 var vec = (ptE - ptS).GetNormal();
                 return new Line(ptS - vec * entityExtendDis, ptE + vec * entityExtendDis);
             }
-
-            return srcCurve.Clone() as Curve;
         }
 
         public static double CutRadRange(double rad)
@@ -375,6 +420,21 @@ namespace ThMEPElectrical.Geometry
             return false;
         }
 
+        public static bool IsIntersect(Polyline firstPly, Polyline secPly)
+        {
+            if (GeomUtils.IsIntersectValid(firstPly, secPly))
+            {
+                var ptLst = new Point3dCollection();
+                firstPly.IntersectWith(secPly, Intersect.OnBothOperands, ptLst, (IntPtr)0, (IntPtr)0);
+                if (ptLst.Count != 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public static bool IsIntersectValid(Polyline firstPly, Polyline secPly)
         {
             // first
@@ -412,6 +472,50 @@ namespace ThMEPElectrical.Geometry
             return false;
         }
 
+        public static DetectionPolygon MPolygon2PolygonInfo(MPolygon polygon)
+        {
+            Polyline shell = null;
+            List<Polyline> holes = new List<Polyline>();
+            for (int i = 0; i < polygon.NumMPolygonLoops; i++)
+            {
+                LoopDirection direction = polygon.GetLoopDirection(i);
+                MPolygonLoop mPolygonLoop = polygon.GetMPolygonLoopAt(i);
+                Polyline polyline = new Polyline()
+                {
+                    Closed = true
+                };
+
+                for (int j = 0; j < mPolygonLoop.Count; j++)
+                {
+                    var bulgeVertex = mPolygonLoop[j];
+                    polyline.AddVertexAt(j, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
+                }
+                if (LoopDirection.Exterior == direction)
+                {
+                    shell = polyline;
+                }
+                else if (LoopDirection.Interior == direction)
+                {
+                    holes.Add(polyline);
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+
+            if (shell == null)
+                throw new NotSupportedException("shell is null");
+
+            return new DetectionPolygon(shell, holes);
+        }
+
+        public static PolygonInfo MPolygon2Polygon(MPolygon mPolygon)
+        {
+            var polygon = MPolygon2PolygonInfo(mPolygon);
+            return new PolygonInfo(polygon.Shell, polygon.Holes);
+        }
+
         /// <summary>
         /// 计算几何中心
         /// </summary>
@@ -431,12 +535,16 @@ namespace ThMEPElectrical.Geometry
             //  1. Region.AreaProperties() （AutoCAD >= 2013)
             //  2. Solid3d.Extrude(Region) -> Solid3d .MassProperties()
             // https://www.keanw.com/2015/08/getting-the-centroid-of-an-autocad-region-using-net.html
-            var regions = RegionTools.CreateRegion(new Curve[] { postPoly });
-            foreach (var region in regions)
+            // https://adndevblog.typepad.com/autocad/2019/03/detecting-geometric-center-for-lwpolyline-3dpoly-and-2dpoly.html
+            foreach (var region in RegionTools.CreateRegion(new Curve[] { postPoly }))
             {
-                var pt = region.GetWCSCCentroid().Point3D();
-                if (GeomUtils.PtInLoop(postPoly, pt))
-                    ptLst.Add(pt);
+                Point3d o = Point3d.Origin;
+                Vector3d x = Vector3d.XAxis;
+                Vector3d y = Vector3d.YAxis;
+                var properties = region.AreaProperties(ref o, ref x, ref y);
+                var centroid = properties.Centroid.ToPoint3d();
+                if (GeomUtils.PtInLoop(postPoly, centroid))
+                    ptLst.Add(centroid);
             }
 #else
             // 在AutoCAD 2012下, Region.CreateFromCurves()很不稳定，容易抛异常

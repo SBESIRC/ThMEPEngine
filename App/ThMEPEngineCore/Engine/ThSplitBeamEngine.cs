@@ -109,7 +109,7 @@ namespace ThMEPEngineCore.Engine
             {
                 return new List<ThIfcBeam>();
             }
-            List<Polyline> passBeams = new List<Polyline>();
+            List<Entity> passBeams = new List<Entity>();
             if (beams[0].ComponentType==BeamComponentType.OverhangingPrimaryBeam)
             {
                 beams.ForEach(o => passBeams.Add(ThLineBeamOutliner.ExtendBoth(o, 2 * lineBeam.Width, 2 * lineBeam.Width)));
@@ -149,7 +149,7 @@ namespace ThMEPEngineCore.Engine
             List<ThIfcBeam> addBeams = new List<ThIfcBeam>();
             BeamConnectRecogitionEngine.BeamEngine.Elements.ForEach(o =>
                 {
-                    List<Polyline> passWalls = BeamCrossWallOutlines(o as ThIfcBeam);
+                    List<Entity> passWalls = BeamCrossWallOutlines(o as ThIfcBeam);
                     ThBeamSplitter thSplitBeam = null;
                     if (o is ThIfcLineBeam thIfcLineBeam)
                     {
@@ -205,22 +205,22 @@ namespace ThMEPEngineCore.Engine
                 BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
             }
         }
-        private List<Polyline> BeamCrossWallOutlines(ThIfcBeam thIfcBeam)
+        private List<Entity> BeamCrossWallOutlines(ThIfcBeam thIfcBeam)
         {
-            List<Polyline> passWalls = new List<Polyline>();
+            List<Entity> passWalls = new List<Entity>();
             //搜索与梁相交的墙段
             Polyline outline = ThLineBeamOutliner.Extend(thIfcBeam as ThIfcLineBeam, 0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
             DBObjectCollection wallComponents = BeamConnectRecogitionEngine.SpatialIndexManager.WallSpatialIndex.SelectCrossingPolygon(outline);
             if (wallComponents.Count > 0)
             {
                 var intersectShearWalls = BeamConnectRecogitionEngine.ShearWallEngine.FilterByOutline(wallComponents).ToList();
-                intersectShearWalls.ForEach(m => passWalls.Add(m.Outline as Polyline));
+                intersectShearWalls.ForEach(m => passWalls.Add(m.Outline));
             }
             return passWalls;
         }
-        private List<Polyline> BeamCrossColumnOutlines(ThIfcBeam thIfcBeam)
+        private List<Entity> BeamCrossColumnOutlines(ThIfcBeam thIfcBeam)
         {            
-            List<Polyline> passColumns = new List<Polyline>();
+            List<Entity> passColumns = new List<Entity>();
             Polyline outline = ThLineBeamOutliner.Extend(thIfcBeam as ThIfcLineBeam, 0.0, -ThMEPEngineCoreCommon.BeamBufferDistance);
             DBObjectCollection columnComponents = BeamConnectRecogitionEngine.SpatialIndexManager.ColumnSpatialIndex.SelectCrossingPolygon(outline);
             if (columnComponents.Count > 0)

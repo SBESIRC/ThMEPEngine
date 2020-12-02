@@ -18,17 +18,17 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
         readonly double lineMinSpacing = 400;
         readonly double moveLength = 100;
 
-        public void CheckBoundarySprays(Polyline polyline, List<SprayLayoutData> sprays, double length, double minSpacing)
+        public void CheckBoundarySprays(Polyline plFrame, List<Polyline> polylines, List<SprayLayoutData> sprays, double length, double minSpacing)
         {
             sprayMinSpcing = minSpacing;
             lineMaxSpacing = length / 2;
             sprayMaxSpacing = length;
 
             //获取边界的喷淋
-            var bSprays = GetBoundarySpray(polyline, sprays, sprayMaxSpacing);
+            var bSprays = GetBoundarySpray(plFrame, polylines, sprays, sprayMaxSpacing);
             
             //调整边界喷淋
-            AdjustSprayPosition(bSprays, sprays);
+            AdjustSprayPosition(bSprays, sprays, polylines);
         }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
         /// </summary>
         /// <param name="sprays"></param>
         /// <param name="maxSpacing"></param>
-        public void AdjustSprayPosition(Dictionary<Line, List<SprayLayoutData>> sprays, List<SprayLayoutData> allSprays)
+        public void AdjustSprayPosition(Dictionary<Line, List<SprayLayoutData>> sprays, List<SprayLayoutData> allSprays, List<Polyline> holes)
         {
             foreach (var sprayLst in sprays)
             {
@@ -49,6 +49,13 @@ namespace ThMEPWSS.Bussiness.BoundaryProtectBussiness
                         Point3d newPosition = spray.Position + dir * length;
 
                         CheckService checkService = new CheckService();
+                        //检验是否落在了洞内
+                        //if(!checkService.CheckSprayWithHoles(newPosition, holes))
+                        //{
+                        //    moveRes = false;
+                        //    break;
+                        //}
+
                         var aroundSprays = spray.GetAroundSprays(allSprays);
                         foreach (var aSpray in aroundSprays)
                         {

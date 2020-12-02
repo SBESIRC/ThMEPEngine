@@ -2,6 +2,7 @@
 using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPHAVC.CAD;
 
 namespace TianHua.FanSelection.UI.CAD
 {

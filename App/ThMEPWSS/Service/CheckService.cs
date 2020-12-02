@@ -1,13 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using NetTopologySuite.Noding;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPEngineCore.Model;
+using ThCADCore.NTS;
 using ThMEPWSS.Model;
+using ThMEPEngineCore.Model;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Service
 {
@@ -85,6 +83,60 @@ namespace ThMEPWSS.Service
             double compareValue = distance * compareX;
 
             return compareValue >= minSpacing && compareValue <= maxSpacing;
+        }
+
+        /// <summary>
+        /// 判断移动之后的点是否落在了洞内
+        /// </summary>
+        /// <param name="newPosition"></param>
+        /// <param name="holes"></param>
+        /// <returns></returns>
+        public bool CheckSprayWithHoles(Point3d newPosition, List<Polyline> holes)
+        {
+            return !(holes.Where(x => x.Contains(newPosition)).Count() > 0);
+        }
+
+        /// <summary>
+        /// 判断喷淋图块的大小是否满足要求
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="maxLength"></param>
+        /// <returns></returns>
+        public bool CheckSprayBlockSize(Entity block, double maxLength)
+        {
+            var extents = block.Bounds;
+            if (extents == null)
+            {
+                return false;
+            }
+
+            var length = extents.Value.MinPoint.DistanceTo(extents.Value.MaxPoint) / 2;
+            return length <= maxLength;
+        }
+
+        /// <summary>
+        /// 判断图层状态
+        /// </summary>
+        /// <param name="db"></param>
+        /// <param name="layerName"></param>
+        /// <returns></returns>
+        public bool CheckLayerStatus(Database db, string layerName)
+        {
+            //打开层表
+            LayerTable lt = (LayerTable)db.LayerTableId.GetObject(OpenMode.ForRead);
+            //如果不存在名为layerName的图层，则返回
+            if (!lt.Has(layerName)) return false;
+            ObjectId layerId = lt[layerName];//获取名为layerName的层表记录的Id
+            //以写的方式打开名为layerName的层表记录
+            LayerTableRecord ltr = (LayerTableRecord)layerId.GetObject(OpenMode.ForWrite);
+            if (ltr != null)
+            {
+                if (ltr.IsLocked && ltr.IsFrozen && ltr.IsOff)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

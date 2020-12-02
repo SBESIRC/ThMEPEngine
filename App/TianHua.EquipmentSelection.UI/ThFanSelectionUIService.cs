@@ -14,5 +14,7 @@
         //-------------SINGLETON-----------------
 
         public FanDataModel Model { get; set; }
+        public object Message { get; set; }
+        public object MessageArgs { get; set; }
     }
 }

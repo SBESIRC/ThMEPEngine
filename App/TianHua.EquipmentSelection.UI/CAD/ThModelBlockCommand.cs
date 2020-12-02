@@ -6,6 +6,8 @@ using TianHua.Publics.BaseCode;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using TianHua.FanSelection.Function;
+using ThMEPHAVC.CAD;
+using ThCADExtension;
 
 namespace TianHua.FanSelection.UI.CAD
 {
@@ -20,7 +22,7 @@ namespace TianHua.FanSelection.UI.CAD
         {
             using (Active.Document.LockDocument())
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThFanSelectionDbManager dbManager = new ThFanSelectionDbManager(Active.Database))
+            using (ThFanSelectionDbModelManager dbManager = new ThFanSelectionDbModelManager(Active.Database))
             {
 
                 // set focus to AutoCAD
@@ -81,7 +83,7 @@ namespace TianHua.FanSelection.UI.CAD
                     }
 
                     // 参数变化
-                    var blockReference = new ThFSBlockReference(model);
+                    var blockReference = new ThBlockReferenceData(model);
                     var attributes = new Dictionary<string, string>(blockReference.Attributes);
                     if (_FanDataModel.IsAttributeModified(attributes))
                     {

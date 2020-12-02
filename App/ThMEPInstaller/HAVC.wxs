@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include Variable.wxi ?>
+	<Fragment>
+		<?if $(var.Configuration) = Debug ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+			<?define OutputPath_R18_Debug="bin\Debug" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPHAVC_Debug" Guid="{E9FBEAAF-D66D-459C-9EC4-7E5B8C1BF14E}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPHAVC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHAVC_Debug" Guid="{09E916F0-793F-4818-9458-9A92241D72ED}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPHAVC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHAVC_Debug" Guid="{630831DF-C2C0-469F-B0B0-FF60A5A4EDD9}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPHAVC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPHAVC_Debug" Guid="{C5FF78D8-C9FF-44DB-93C2-8EA2267308E9}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPHAVC_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<?elseif $(var.Configuration) = Release ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+			<?define OutputPath_R18_Release="bin\Release" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPHAVC_Release" Guid="{9E3E5540-1582-4009-B81F-4C0DC4B4C4CE}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPHAVC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHAVC_Release" Guid="{06144C28-5E5A-4BAA-8BDD-453C65108AC6}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPHAVC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHAVC_Release" Guid="{AE02BDBC-5A79-4607-884D-8736A353A648}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPHAVC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Release="bin\Release-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPHAVC_Release" Guid="{748EC55A-B152-4717-92E3-BE2784310494}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPHAVC_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPHAVC.dll" />
+			</Component>
+		</DirectoryRef>
+		<?endif?>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ProductComponentsHAVCWin64">
+			<?if $(var.Configuration) = Debug ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPHAVC_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHAVC_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHAVC_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPHAVC_Debug" />
+			<?elseif $(var.Configuration) = Release ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPHAVC_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPHAVC_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPHAVC_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPHAVC_Release" />
+			<?endif?>
+		</ComponentGroup>
+	</Fragment>
+</Wix>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -28,23 +29,9 @@ namespace ThMEPEngineCore.Service
             // 对于简化处理后的结果，做后处理 post-processing
             // 小区域封闭图形以及部分外伸线需要设计师手动剔除
             var lines_filtered = LineMerge(processedlines, Math.PI / 180.0);
-            //var lines_filtered = LineMerge(LineMerge(processedlines, Math.PI / 180.0), Math.PI / 180.0);
             var postprocessedLines = PostProcessing(lines_filtered, Math.PI / 90.0);
 
-            // 最后返回结果 
-            postprocessedLines.ForEach(o =>
-            {
-                if (curves.Contains(o))
-                {
-                    var index = postprocessedLines.IndexOf(o);
-                    postprocessedLines[index] = o.Clone() as Line;
-                    postprocessedLines[index].Linetype = "ByLayer";
-                }
-                else
-                {
-                    o.Linetype = "ByLayer";
-                }
-            });
+            // 最后返回结果
             return postprocessedLines;
         }
 
@@ -55,11 +42,11 @@ namespace ThMEPEngineCore.Service
             {
                 if (curve is Line line && line.Length > 10.0)
                 {
-                    objs.Add(line);
+                    objs.Add(line.WashClone() as Line);
                 }
                 else if (curve is Arc arc && arc.Length > 10.0)
                 {
-                    objs.Add(arc);
+                    objs.Add(arc.WashClone() as Arc);
                 }
                 else if (curve is Polyline polyline)
                 {
@@ -71,25 +58,25 @@ namespace ThMEPEngineCore.Service
             return objs;
         }
 
-        private static List<Tuple<List<Curve>,int>> EstimateCorrelationship(List<Curve> curves, double threshold)
+        private static List<Tuple<List<Curve>, int>> EstimateCorrelationship(List<Curve> curves, double threshold)
         {
             var correlationship = new List<Tuple<List<Curve>, int>>();
             var arcs = curves.FindAll(o => o is Arc);
             arcs.ForEach(x => {
                 var result = FindConnection(x as Arc, curves, threshold);
-                correlationship.Add(Tuple.Create(result.Item1,result.Item2));
+                correlationship.Add(Tuple.Create(result.Item1, result.Item2));
                 curves = result.Item3;
             });
             return correlationship;
         }
 
-        private static List<Line> SimplifyByCategory(List<Curve> curves, List<Tuple<List<Curve>,int>> lists)
+        private static List<Line> SimplifyByCategory(List<Curve> curves, List<Tuple<List<Curve>, int>> lists)
         {
             var simplifiedLines = new List<Line>();
 
             var lists_index = new List<Tuple<List<int>, int>>();
             //如果是新构造的直线，则在curves中新增直线，并以索引寻找line/arc
-            lists.ForEach(t => 
+            lists.ForEach(t =>
             {
                 var list_int = new List<int>();
                 t.Item1.ForEach(l =>
@@ -103,14 +90,14 @@ namespace ThMEPEngineCore.Service
                 lists_index.Add(Tuple.Create(list_int, t.Item2));
             });
 
-            lists_index.ForEach(tuple => 
+            lists_index.ForEach(tuple =>
             {
-                switch (tuple.Item2) 
+                switch (tuple.Item2)
                 {
                     // 一条弧线两段连接的均为直线
                     case 1:
                     case 2:
-                        if(tuple.Item1.Count != 2)
+                        if (tuple.Item1.Count != 2)
                         {
                             throw new NotSupportedException();
                         }
@@ -122,9 +109,9 @@ namespace ThMEPEngineCore.Service
                         }
                         break;
                     case 3:
-                        for(int i = 0; i < tuple.Item1.Count - 1; i++)
+                        for (int i = 0; i < tuple.Item1.Count - 1; i++)
                         {
-                            for(int j = i + 1; j < tuple.Item1.Count; j++)
+                            for (int j = i + 1; j < tuple.Item1.Count; j++)
                             {
                                 if (!IsLooseCollinear(curves[tuple.Item1[i]] as Line, curves[tuple.Item1[j]] as Line, Math.PI / 90.0))
                                 {
@@ -136,14 +123,14 @@ namespace ThMEPEngineCore.Service
                         }
                         break;
                     default:
-                        tuple.Item1.ForEach(index => 
+                        tuple.Item1.ForEach(index =>
                         {
                             curves[index] = (curves[index] is Arc) ? new Line(curves[index].StartPoint, curves[index].EndPoint) : curves[index];
                         });
                         break;
                 }
             });
-            curves.ForEach(o => { if (o is Line line && line.Length > 10.0) simplifiedLines.Add(line);});
+            curves.ForEach(o => { if (o is Line line && line.Length > 10.0) simplifiedLines.Add(line); });
             return simplifiedLines;
         }
 
@@ -404,7 +391,7 @@ namespace ThMEPEngineCore.Service
         private static List<Line> LineMerge(List<Line> lines, double tolerance)
         {
             var results = new List<Line>();
-            lines.ForEach(o => 
+            lines.ForEach(o =>
             {
                 // 找到与线段o有重合点、重合段的线段
                 var collinear = lines.FindAll(x => (x.Delta.GetAngleTo(o.Delta) < tolerance || x.Delta.GetAngleTo(o.Delta) > (Math.PI - tolerance)) &&
@@ -412,29 +399,29 @@ namespace ThMEPEngineCore.Service
                 Math.Abs(x.EndPoint.DistanceTo(o.StartPoint) + x.EndPoint.DistanceTo(o.EndPoint) - o.Length) < 1.0));
                 collinear.Remove(o);
                 // 重合段的合并处理
-                if(collinear.Count == 0)
+                if (collinear.Count == 0)
                 {
-                    if(!results.Contains(o)) results.Add(o);
+                    if (!results.Contains(o)) results.Add(o);
                 }
                 else
                 {
                     var points = new List<Point3d>();
                     points.Add(o.StartPoint);
                     points.Add(o.EndPoint);
-                    collinear.ForEach(y => 
-                    { 
-                        if(! points.Contains(y.StartPoint)) points.Add(y.StartPoint); 
-                        if(! points.Contains(y.EndPoint)) points.Add(y.EndPoint);
-                        if(lines.IndexOf(o) < lines.IndexOf(y)) lines.Remove(y);
-                        if(results.Contains(y)) results.Remove(y);
+                    collinear.ForEach(y =>
+                    {
+                        if (!points.Contains(y.StartPoint)) points.Add(y.StartPoint);
+                        if (!points.Contains(y.EndPoint)) points.Add(y.EndPoint);
+                        if (lines.IndexOf(o) < lines.IndexOf(y)) lines.Remove(y);
+                        if (results.Contains(y)) results.Remove(y);
                     });
                     var distMax = Tuple.Create(0.0, 0, 0);
                     for (int i = 0; i < points.Count - 1; i++)
                     {
-                        for(int j = i + 1; j < points.Count; j++)
+                        for (int j = i + 1; j < points.Count; j++)
                         {
                             var dist = points[i].DistanceTo(points[j]);
-                            if(dist > distMax.Item1)
+                            if (dist > distMax.Item1)
                             {
                                 distMax = Tuple.Create(dist, i, j);
                             }

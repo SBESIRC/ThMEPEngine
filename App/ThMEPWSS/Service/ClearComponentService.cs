@@ -1,7 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,13 +30,67 @@ namespace ThMEPWSS.Service
                 acadDatabase.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
                 acadDatabase.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
                 acadDatabase.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
+
+                //获取喷淋
+                var dxfNames = new string[]
+                {
+                    ThWSSCommon.TZ_SprayName_16,
+                    ThWSSCommon.TZ_SprayName_12,
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filterlist = OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.SprayLayerName &
+                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+                var sprays = new List<Entity>();
+                var allSprays = Active.Editor.SelectAll(filterlist);
+                if (allSprays.Status == PromptStatus.OK)
+                {
+                    using (AcadDatabase acdb = AcadDatabase.Active())
+                    {
+                        foreach (ObjectId obj in allSprays.Value.GetObjectIds())
+                        {
+                            sprays.Add(acdb.Element<Entity>(obj));
+                        }
+                    }
+                }
+                var objs = new DBObjectCollection();
+                sprays.Where(o => {
+                    var pts = o.GeometricExtents;
+                    var position = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
+                    return polyline.Contains(position);
+                })
+                .ForEachDbObject(o => objs.Add(o));
+                foreach (Entity spray in objs)
+                {
+                    spray.UpgradeOpen();
+                    spray.Erase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除走道线喷淋图块
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static void ClearSprayByLine(this List<Line> lines)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
+                acadDatabase.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
+                acadDatabase.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
                 var objs = new DBObjectCollection();
                 var sprays = acadDatabase.ModelSpace
-                    .OfType<BlockReference>()
+                    .OfType<Entity>()
                     .Where(o => o.Layer == ThWSSCommon.SprayLayerName);
-                sprays.Where(o => polyline.Contains(o.Position))
-                         .ForEachDbObject(o => objs.Add(o));
-                foreach (BlockReference spray in objs)
+                sprays.ForEach(x => objs.Add(x));
+
+                var crossingSprays = lines.Select(x => x.ToPolyline()).SelectMany(x =>
+                {
+                    ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                    return thCADCoreNTSSpatialIndex.SelectFence(x).Cast<Entity>().ToList();
+                }).Distinct();
+                foreach (Entity spray in crossingSprays)
                 {
                     spray.UpgradeOpen();
                     spray.Erase();

@@ -50,38 +50,9 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
         protected override Point3d PostMovePoint(List<Polyline> validPolys, MediumNode mediumNode)
         {
             var pt = mediumNode.Point;
-            var pts = new List<Point3d>(); // 不同方向上的点集s
-            var pointNode = CalculateClosetPoints(validPolys, pt);
-            var closestPt = pointNode.NearestPt;
+            var pts = new List<Point3d>(); // 不同方向上的点集
+            var pointNode = CalculateToleranceClosetPoints(validPolys, pt);
             pts.AddRange(pointNode.NearestPts);
-            var constraintDis = pt.DistanceTo(closestPt) * 2;
-
-            double disGap = 10e6;
-            var lineEndPts = new List<Point3d>();
-            // 水平向左
-            var extendEndPt = pt - Vector3d.XAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-            // 竖直向上
-            extendEndPt = pt + Vector3d.YAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-
-            // 水平向右
-            extendEndPt = pt + Vector3d.XAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-            // 竖直向下
-            extendEndPt = pt - Vector3d.YAxis * disGap;
-            lineEndPts.Add(extendEndPt);
-
-            // 计算不同方向上的距离和点集关系
-            foreach (var endPt in lineEndPts)
-            {
-                var endLine = new Line(pt, endPt);
-                var dirClosestPt = CalculateDirectionClosestPoint(endLine, validPolys, pt);
-                if (dirClosestPt.HasValue && !pts.Contains(dirClosestPt.Value) && pt.DistanceTo(dirClosestPt.Value) < constraintDis)
-                {
-                    pts.Add(dirClosestPt.Value);
-                }
-            }
 
             if (pts.Count == 0)
             {
@@ -93,6 +64,38 @@ namespace ThMEPElectrical.PostProcess.MainSecondBeamAdjustor
 
             return CalculateRandomPoint(pts);
         }
+
+        /// <summary>
+        /// 计算带有容差的最近点距离
+        /// </summary>
+        /// <param name="srcPolys"></param>
+        /// <param name="srcPt"></param>
+        /// <returns></returns>
+        protected PointNode CalculateToleranceClosetPoints(List<Polyline> srcPolys, Point3d srcPt)
+        {
+            var closestPts = new List<Point3d>();
+
+            foreach (var singlePoly in srcPolys)
+            {
+                closestPts.Add(singlePoly.GetClosestPointTo(srcPt, false));
+            }
+
+            closestPts.Sort((pt1, pt2) =>
+            {
+                return pt1.DistanceTo(srcPt).CompareTo(pt2.DistanceTo(srcPt));
+            }
+            );
+
+            var nearestPt = closestPts.First();
+
+            var nearestDis = nearestPt.DistanceTo(srcPt);
+
+            var nearestPts = closestPts.Where(pt => pt.DistanceTo(srcPt) < (nearestDis + ThMEPCommon.NearestDisTolerance)).ToList();
+            if (nearestPts.Count == 0)
+                nearestPts.Add(nearestPt);
+            return new PointNode(nearestPt, nearestPts);
+        }
+
 
         /// <summary>
         /// 随机选择移动点

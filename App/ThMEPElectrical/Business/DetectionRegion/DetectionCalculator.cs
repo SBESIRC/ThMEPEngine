@@ -33,6 +33,88 @@ namespace ThMEPElectrical.Business
         }
 
         /// <summary>
+        /// 计算区域和内部数据的关系组, 探测区域带有洞信息
+        /// </summary>
+        /// <param name="profiles"></param>
+        /// <returns></returns>
+        protected virtual List<DetectionRegion> CalculateDetectionPolygonRelations(List<DetectionPolygon> detectionPolygons, List<SecondBeamProfileInfo> secondBeamInfos)
+        {
+            var detectRegions = new List<DetectionRegion>();
+
+            // 探测区域
+            foreach (var polygon in detectionPolygons)
+            {
+                var detectRegion = new DetectionRegion()
+                {
+                    DetectionProfile = polygon.Shell,
+                    DetectionInnerProfiles = polygon.Holes
+                };
+
+                detectRegions.Add(detectRegion);
+
+                // 带有洞的区域的组合关系
+                foreach (var secondBeam in secondBeamInfos)
+                {
+                    var secondBeamProfile = secondBeam.Profile;
+
+                    if (IsIntersectOrContains(polygon.Shell, secondBeamProfile))
+                    {
+                        secondBeam.IsUsed = true;
+                        detectRegion.secondBeams.Add(secondBeam);
+                    }
+                }
+            }
+
+            return detectRegions;
+        }
+
+        protected List<DetectionPolygon> SplitRegions(Polyline externalPolyline, DBObjectCollection dbLst)
+        {
+            var detectionPolygons = new List<DetectionPolygon>();
+            var drawCurves = new List<Entity>();
+
+            foreach (Entity item in externalPolyline.DifferenceMP(dbLst))
+            {
+                if (item is Polyline polyline)
+                {
+                    detectionPolygons.Add(new DetectionPolygon(polyline));
+                    drawCurves.Add(polyline);
+                }
+                else if (item is MPolygon mPolygon)
+                {
+                    detectionPolygons.Add(GeomUtils.MPolygon2PolygonInfo(mPolygon));
+                    drawCurves.Add(mPolygon);
+                }
+            }
+
+            //DrawUtils.DrawEntitiesDebug(drawCurves, "entities");
+            return detectionPolygons;
+        }
+
+        protected void CalculateDetectionRegionWithHoles(List<DetectionRegion> detectionRegions, List<Polyline> polylines)
+        {
+            var dbLst = new DBObjectCollection();
+            polylines.ForEach(p => dbLst.Add(p));
+
+            foreach (var singleDetectRegion in detectionRegions)
+            {
+                var detectionPolygons = SplitRegions(singleDetectRegion.DetectionProfile, dbLst);
+                var holes = GetHoles(detectionPolygons);
+                singleDetectRegion.DetectionInnerProfiles.AddRange(holes);
+            }
+        }
+
+        protected List<Polyline> GetHoles(List<DetectionPolygon> detectionPolygons)
+        {
+            var polys = new List<Polyline>();
+            foreach (var polygon in detectionPolygons)
+            {
+                polys.AddRange(polygon.Holes);
+            }
+            return polys;
+        }
+
+        /// <summary>
         /// 计算区域和内部数据的关系组
         /// </summary>
         /// <param name="profiles"></param>
@@ -111,7 +193,7 @@ namespace ThMEPElectrical.Business
         protected List<PlaceInputProfileData> DetectRegion2ProfileData(List<DetectionRegion> srcRegions)
         {
             var inputProfileDatas = new List<PlaceInputProfileData>();
-            srcRegions.ForEach(e => inputProfileDatas.Add(new PlaceInputProfileData(e.DetectionProfile, BeamProfiles2Polylines(e.secondBeams))));
+            srcRegions.ForEach(e => inputProfileDatas.Add(new PlaceInputProfileData(e.DetectionProfile, BeamProfiles2Polylines(e.secondBeams), e.DetectionInnerProfiles)));
             return inputProfileDatas;
         }
 
@@ -164,10 +246,36 @@ namespace ThMEPElectrical.Business
             return false;
         }
 
+        protected List<Polyline> CalculateRegions(List<Polyline> polylines)
+        {
+            var bufferPls = new DBObjectCollection();
+            foreach (var singlePl in polylines)
+            {
+               foreach (var entity in singlePl.BufferPL(ThMEPCommon.PLbufferLength))
+                {
+                    if (entity is Polyline poly && poly.Closed)
+                    {
+                        bufferPls.Add(poly);
+                    }
+                }
+            }
+
+            var resPolys = new List<Polyline>();
+            foreach (Entity entity in m_wallProfile.Difference(bufferPls))
+            {
+                if (entity is Polyline poly && poly.Closed)
+                {
+                    resPolys.Add(poly);
+                }
+            }
+
+            return resPolys;
+        }
+
         /// <summary>
         /// 计算轴网线 + 墙线构成的第一次区域
         /// </summary>
-        protected List<Polyline> CalculateRegions(List<Polyline> srcRegionProfiles)
+        protected List<Polyline> CalculateRegions2(List<Polyline> srcRegionProfiles)
         {
             var objs = srcRegionProfiles.ToCollection();
             var obLst = objs.Polygons();
@@ -179,7 +287,7 @@ namespace ThMEPElectrical.Business
                 {
                     foreach (DBObject singlePolygon in poly.GeometryIntersection(m_wallProfile))
                     {
-                        if (singlePolygon is Polyline validPoly)
+                        if (singlePolygon is Polyline validPoly && validPoly.Closed)
                             polyLst.Add(validPoly);
                     }
                 }

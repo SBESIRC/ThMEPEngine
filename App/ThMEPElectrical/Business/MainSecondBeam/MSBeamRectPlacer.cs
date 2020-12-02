@@ -74,9 +74,11 @@ namespace ThMEPElectrical.Business.MainSecondBeam
         {
             var mainBeam = inputProfileData.MainBeamOuterProfile;
             var secondBeams = inputProfileData.SecondBeamProfiles;
+            var holes = inputProfileData.Holes;
             //DrawUtils.DrawProfile(secondBeams.Polylines2Curves(), "secondBeams");
             var dbLst = new DBObjectCollection();
             secondBeams.ForEach(e => dbLst.Add(e));
+            holes.ForEach(hole => dbLst.Add(hole));
 
             // 计算内轮廓和偏移计算
             var resProfiles = new List<Polyline>();

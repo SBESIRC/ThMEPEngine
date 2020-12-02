@@ -10,8 +10,13 @@
     <RootNamespace>ThMEPEngineCore</RootNamespace>
     <AssemblyName>ThMEPEngineCore</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug-NET45|AnyCPU'">
+    <OutputPath>..\ThMEPWSS\bin\Debug-NET45\</OutputPath>
   </PropertyGroup>
   <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
@@ -25,6 +30,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
+    <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
+    <Compile Include="Algorithm\ThLineMerger.cs" />
     <Compile Include="Algorithm\ThMEPFrameService.cs" />
     <Compile Include="Algorithm\ThMEPNTSExtension.cs" />
     <Compile Include="Algorithm\ThMEPPolygonPartitioner.cs" />
@@ -53,27 +61,37 @@
     <Compile Include="BeamInfo\Utils\ThOverkillDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureUtils.cs" />
-    <Compile Include="CAD\ThDbExtension.cs" />
     <Compile Include="CAD\ThDrawTool.cs" />
     <Compile Include="CAD\ThGeometryTool.cs" />
+    <Compile Include="Algorithm\ThMEPLineExtension.cs" />
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
+    <Compile Include="Engine\ThArchitectureWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThBasinRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
+    <Compile Include="Engine\ThClosestoolRecognitionEngine.cs" />
+    <Compile Include="Engine\ThCondensePipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
+    <Compile Include="Engine\ThGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
-    <Compile Include="Engine\ThClosetoolRecognitionEngine.cs" />
+    <Compile Include="Engine\ThRainPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThRoofRainPipeRecognitionEngine.cs" />
+    <Compile Include="Engine\ThSideEntryWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
-    <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
+    <Compile Include="Engine\ThLaneRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpaceRecognitionEngine.cs" />
+    <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
+    <Compile Include="Engine\ThWashMachineRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
     <Compile Include="Features\ThBeamFeatureCollection.cs" />
     <Compile Include="Features\ThColumnFeature.cs" />
@@ -85,9 +103,30 @@
     <Compile Include="IO\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
     <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableCarrierFitting.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableCarrierSegment.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableFitting.cs" />
+    <Compile Include="Model\Electrical\ThIfcCableSegment.cs" />
     <Compile Include="Model\Electrical\ThIfcCommunicationsAppliance.cs" />
     <Compile Include="Model\Electrical\ThIfcLamp.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctCross.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctElbow.cs" />
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctFitting.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctSegment.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctTee.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctReducing.cs" />
+    <Compile Include="Model\Hvac\ThIfcPipeFitting.cs" />
+    <Compile Include="Model\Hvac\ThIfcPipeSegment.cs" />
+    <Compile Include="Model\Plumbing\ThIfcGravityWaterBucket.cs" />
+    <Compile Include="Model\Plumbing\ThIfcSideEntryWaterBucket.cs" />
+    <Compile Include="Model\ThIfcFlowFitting.cs" />
+    <Compile Include="Model\ThIfcFlowSegment.cs" />
+    <Compile Include="Model\Plumbing\ThIfcCondensePipe.cs" />
+    <Compile Include="Model\Plumbing\ThIfcRainPipe.cs" />
+    <Compile Include="Model\Plumbing\ThIfcRoofRainPipe.cs" />
+    <Compile Include="Model\Plumbing\ThIfcSanitaryTerminal.cs" />
+    <Compile Include="Model\Plumbing\ThIfcWashMachine.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsElements.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsPathElements.cs" />
     <Compile Include="Model\Segment\ThArcSegment.cs" />
@@ -103,8 +142,8 @@
     <Compile Include="Model\ThIfcBuilding.cs" />
     <Compile Include="Model\ThIfcBuildingElement.cs" />
     <Compile Include="Model\ThIfcBuildingStorey.cs" />
-    <Compile Include="Model\ThIfcFloorDrain.cs" />
-    <Compile Include="Model\ThIfcClosestool.cs" />
+    <Compile Include="Model\Plumbing\ThIfcFloorDrain.cs" />
+    <Compile Include="Model\Plumbing\ThIfcClosestool.cs" />
     <Compile Include="Model\ThIfcColumn.cs" />
     <Compile Include="Model\ThIfcColumnStandardCase.cs" />
     <Compile Include="Model\ThIfcCommunicationsAppliance.cs" />
@@ -116,7 +155,9 @@
     <Compile Include="Model\ThIfcDoorStandardCase.cs" />
     <Compile Include="Model\ThIfcElement.cs" />
     <Compile Include="Model\ThIfcFlowTerminal.cs" />
+    <Compile Include="Model\ThIfcLane.cs" />
     <Compile Include="Model\ThIfcLineBeam.cs" />
+    <Compile Include="Model\ThIfcParkingStall.cs" />
     <Compile Include="Model\ThIfcProduct.cs" />
     <Compile Include="Model\Relationship\ThIfcRelationship.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnects.cs" />
@@ -131,20 +172,33 @@
     <Compile Include="Model\ThIfcWallStandardCase.cs" />
     <Compile Include="Model\ThIfcWindow.cs" />
     <Compile Include="Model\ThIfcWindowStandardCase.cs" />
+    <Compile Include="Model\Plumbing\ThIfcBasin.cs" />
     <Compile Include="Operation\GridService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Model\ThIfcSpace.cs" />
+    <Compile Include="Service\Havc\ThHavcDuctFittingDbExtension.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
+    <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
+    <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
+    <Compile Include="Service\ThBalconyFloorDrainDbExtension.cs" />
+    <Compile Include="Service\ThBasintoolDbExtension.cs" />
+    <Compile Include="Service\ThBasintoolLayerManager.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
     <Compile Include="Service\ThBeamMerger.cs" />
     <Compile Include="Engine\ThSplitBeamEngine.cs" />
     <Compile Include="Service\ThBeamLinkSnapService.cs" />
+    <Compile Include="Service\ThClosestoolDbExtension.cs" />
+    <Compile Include="Service\ThClosestoolLayerManager.cs" />
+    <Compile Include="Service\ThCondensePipeDbExtension.cs" />
+    <Compile Include="Service\ThCondensePipeLayerManager.cs" />
     <Compile Include="Service\ThFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
     <Compile Include="Service\ThFilterPortLinkBeams.cs" />
     <Compile Include="Extension\ThIfcBeamExtension.cs" />
+    <Compile Include="Service\ThGravityWaterBucketDbExtension.cs" />
+    <Compile Include="Service\ThGravityWaterBucketLayerManager.cs" />
     <Compile Include="Service\ThLaneLineSimplifier.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
@@ -152,20 +206,25 @@
     <Compile Include="Service\ThOtherDbExtension.cs" />
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
+    <Compile Include="Service\Havc\ThHavcDuctFittingFactoryService.cs" />
+    <Compile Include="Service\ThRainPipeDbExtension.cs" />
+    <Compile Include="Service\ThRainPipeLayerManager.cs" />
+    <Compile Include="Service\ThRoofRainPipeDbExtension.cs" />
+    <Compile Include="Service\ThRoofRainPipeLayerManager.cs" />
     <Compile Include="Service\ThSegmentService.cs" />
     <Compile Include="Service\ThSegmentServiceExtension.cs" />
     <Compile Include="Service\ThCurveBeamSplitter.cs" />
     <Compile Include="Service\ThBeamSplitter.cs" />
     <Compile Include="Service\ThLinealBeamSplitter.cs" />
+    <Compile Include="Service\ThSideEntryWaterBucketDbExtension.cs" />
+    <Compile Include="Service\ThSideEntryWaterBucketLayerManager.cs" />
     <Compile Include="Service\ThSpaceBoundaryLayerManager.cs" />
     <Compile Include="Service\ThSpaceNameLayerManager.cs" />
     <Compile Include="Service\ThSpaceBoundaryRecognition.cs" />
     <Compile Include="Service\ThSpaceNameRecognition.cs" />
     <Compile Include="Service\ThStructureBeamAnnotationDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamUtils.cs" />
-    <Compile Include="Service\ThClosetoolDbExtension.cs" />
     <Compile Include="Service\ThStructureColumnDbExtension.cs" />
-    <Compile Include="Service\ThClosetoolLayerManager.cs" />
     <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
@@ -183,6 +242,8 @@
     <Compile Include="Service\ThStructureUtils.cs" />
     <Compile Include="Service\ThHalfPrimaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThVerticalComponentBeamLinkExtension.cs" />
+    <Compile Include="Service\ThWashMachineDbExtension.cs" />
+    <Compile Include="Service\ThWashMachineLayerManager.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
@@ -206,59 +267,53 @@
       <Project>{2abcdb6e-f0c9-44c1-960f-31d494ef9738}</Project>
       <Name>ThCADExtension</Name>
     </ProjectReference>
-  </ItemGroup>  
+  </ItemGroup>
   <Choose>
-        <When Condition="$(DefineConstants.Contains('ACAD2012'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
-                <PackageReference Include="AutoCAD-2012.Net.Interop.x64" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2014'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
-                <PackageReference Include="AutoCAD-2014.Net.Interop.x64" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2016'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
-                <PackageReference Include="AutoCAD-2016.Net.Interop.x86" Version="1.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-        <When Condition="$(DefineConstants.Contains('ACAD2018'))">
-            <ItemGroup>
-                <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
-                <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
-            </ItemGroup>
-            <ItemGroup>
-                <Reference Include="AcMPolygonMGD">
-                    <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
-                </Reference>
-                <Reference Include="Autodesk.AutoCAD.Interop.dll">
-                    <HintPath>..\..\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.dll</HintPath>
-                </Reference>
-                <Reference Include="Autodesk.AutoCAD.Interop.Common.dll">
-                    <HintPath>..\..\\Externals\AutoCAD\2018\Autodesk.AutoCAD.Interop.Common.dll</HintPath>
-                </Reference>
-            </ItemGroup>
-        </When>
-    </Choose>
+    <When Condition="$(DefineConstants.Contains('ACAD2012'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2012.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2012\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2014'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2014.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2014\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2016'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD-2016.Net.Base" Version="1.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+    <When Condition="$(DefineConstants.Contains('ACAD2018'))">
+      <ItemGroup>
+        <PackageReference Include="AutoCAD.NET" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Core" Version="22.0.0" />
+        <PackageReference Include="AutoCAD.NET.Model" Version="22.0.0" />
+      </ItemGroup>
+      <ItemGroup>
+        <Reference Include="AcMPolygonMGD">
+          <HintPath>..\..\Externals\AutoCAD\2018\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+      </ItemGroup>
+    </When>
+  </Choose>
+  <ItemGroup>
+    <PackageReference Include="Xbim.Essentials" Version="5.1.297" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

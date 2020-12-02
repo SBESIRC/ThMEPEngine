@@ -248,6 +248,11 @@ namespace ThMEPElectrical.Assistant
             return circles;
         }
 
+        public static List<Curve> Points2Curves(List<Point3d> srcPts, double radius, Vector3d normal)
+        {
+            var circles = Points2Circles(srcPts, radius, normal);
+            return Circles2Curves(circles);
+        }
 
         public static List<Curve> Circles2Curves(List<Circle> circles)
         {

@@ -69,7 +69,7 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (IsBuildElementBlockReference(blockObj))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     curves.AddRange(BuildElementCurves(blockObj, mcs2wcs));
@@ -77,7 +77,8 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Hatch hatch)
                             {
-                                if (IsBuildElement(hatch) && CheckLayerValid(hatch))
+                                if (IsBuildElement(hatch) && 
+                                    CheckLayerValid(hatch))
                                 {
                                     // 暂时不支持有“洞”的填充
                                     hatch.Boundaries().ForEachDbObject(o =>
@@ -113,7 +114,8 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Solid solid)
                             {
-                                if (IsBuildElement(solid) && CheckLayerValid(solid))
+                                if (IsBuildElement(solid) &&
+                                    CheckLayerValid(solid))
                                 {
                                     var poly = solid.ToPolyline();
                                     poly.TransformBy(matrix);

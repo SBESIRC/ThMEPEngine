@@ -1,18 +1,17 @@
 ﻿using AcHelper;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
-using StraightSkeletonNet;
-using Vector2d = StraightSkeletonNet.Primitives.Vector2d;
-using System.Linq;
-using ThCADExtension;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Overlay.Snap;
 using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Geometries;
 
 namespace ThCADCore.Test
 {
@@ -135,29 +134,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThMerge", CommandFlags.Modal)]
-        public void ThMerge()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-                foreach (var obj in objs.Merge())
-                {
-                    acadDatabase.ModelSpace.Add(obj as Entity);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThDifference", CommandFlags.Modal | CommandFlags.UsePickSet)]
         public void ThDifference()
         {
@@ -192,32 +168,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThBuffer", CommandFlags.Modal)]
-        public void ThBuffer()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var result2 = Active.Editor.GetDistance("请输入距离");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity obj in pline.Buffer(-result2.Value))
-                {
-                    obj.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThPolygonizer", CommandFlags.Modal)]
         public void ThPolygonizer()
         {
@@ -236,6 +186,30 @@ namespace ThCADCore.Test
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
                 foreach (var obj in objs.Polygons())
+                {
+                    acadDatabase.ModelSpace.Add(obj as Entity);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THBUILDAREA", CommandFlags.Modal)]
+        public void ThBuildArea()
+        {
+            using (var ov = new ThCADCoreNTSFixedPrecision())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                foreach(var obj in objs.BuildArea())
                 {
                     acadDatabase.ModelSpace.Add(obj as Entity);
                 }
@@ -284,12 +258,21 @@ namespace ThCADCore.Test
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
-                var geometrys = objs.ToNTSLineStrings();
 
-                var cascadedPolygon = CascadedPolygonUnion.Union(geometrys);
+                var polygons = new List<Geometry>();
+                objs.Cast<DBObject>().ForEachDbObject(p =>
+                {
+                    if (p is Polyline poly)
+                    {
+                        polygons.Add(poly.ToNTSPolygon());
+                    }
+
+                });
+
+                var cascadedPolygon = CascadedPolygonUnion.Union(polygons);
                 foreach (Entity obj in cascadedPolygon.ToDbCollection())
                 {
-                    obj.ColorIndex = 1;
+                    obj.ColorIndex = 2;
                     acadDatabase.ModelSpace.Add(obj);
                 }
             }
@@ -311,6 +294,8 @@ namespace ThCADCore.Test
                 {
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
+
+
                 var geometrys = objs.ToNTSLineStrings();
 
                 var overlapUnion = OverlapUnion.Union(geometrys.First(), geometrys.Last());
@@ -318,6 +303,46 @@ namespace ThCADCore.Test
                 {
                     obj.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThPolygonIntersect", CommandFlags.Modal)]
+        public void ThPolygonIntersect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var singleResult = Active.Editor.GetEntity("请选择对象");
+                if (singleResult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var frame = singleResult.ObjectId;
+                var frameObj = acadDatabase.Element<Polyline>(frame);
+                
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                foreach (Polygon obj in objs.Polygonize())
+                {
+                    // 洞
+                    //obj.SymmetricDifference(frameObj.ToNTSPolygon());
+                    //var ntsObj = obj.Difference(new DBObjectCollection() { frameObj }.UnionGeometries());
+                    var ntsObj =  obj.Union(frameObj.ToNTSPolygon());
+                    foreach (Entity entity in ntsObj.ToDbCollection())
+                    {
+                        entity.ColorIndex = 2;
+                        acadDatabase.ModelSpace.Add(entity);
+                    }
                 }
             }
         }
@@ -387,14 +412,27 @@ namespace ThCADCore.Test
                     return;
                 }
 
-                var objs = new DBObjectCollection();
+                //var objs = new DBObjectCollection();
+                //foreach (var obj in result.Value.GetObjectIds())
+                //{
+                //    objs.Add(acadDatabase.Element<Entity>(obj));
+                //}
+                //var geometrys = objs.ToNTSLineStrings();
+
+                //var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Difference);
+                //foreach (Entity obj in snapGeometry.ToDbCollection())
+                //{
+                //    obj.ColorIndex = 1;
+                //    acadDatabase.ModelSpace.Add(obj);
+                //}
+
+                var polys = new List<Polyline>();
                 foreach (var obj in result.Value.GetObjectIds())
                 {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
+                    polys.Add(acadDatabase.Element<Polyline>(obj));
                 }
-                var geometrys = objs.ToNTSLineStrings();
 
-                var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Difference);
+                var snapGeometry = SnapIfNeededOverlayOp.Overlay(polys.First().ToNTSPolygon(), polys.Last().ToNTSPolygon(), SpatialFunction.Union);
                 foreach (Entity obj in snapGeometry.ToDbCollection())
                 {
                     obj.ColorIndex = 1;
@@ -529,6 +567,34 @@ namespace ThCADCore.Test
                 {
                     diagram.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(diagram);
+                }
+            }
+        }
+
+
+        [CommandMethod("TIANHUACAD", "ThPBuffer", CommandFlags.Modal)]
+        public void ThBuffer()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetDistance("\n请输入距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                double distanceTolerance = result2.Value;
+                var obj = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach (Polyline pl in obj.BufferPL(20))
+                {
+                    pl.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(pl);
                 }
             }
         }
@@ -699,65 +765,6 @@ namespace ThCADCore.Test
                     neighbour.ColorIndex = 1;
                     neighbour.DowngradeOpen();
                 }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "ThSkeleton", CommandFlags.Modal)]
-        public void ThSkeletonStraight()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    if (acadDatabase.Element<Entity>(obj) is Polyline poly)
-                    {
-                        var points = new List<Vector2d>();
-                        for (int i = 0; i < poly.NumberOfVertices; i++)
-                        {
-                            var point2d = poly.GetPoint2dAt(i);
-                            points.Add(new Vector2d(point2d.X, point2d.Y));
-                        }
-
-                        var polygonRes = SkeletonBuilder.Build(points);
-                        if (polygonRes != null)
-                        {
-                            var lines = new List<Line>();
-                            foreach (var edge in polygonRes.Edges)
-                            {
-                                var edgeS = edge.Edge.Begin;
-                                var edgeE = edge.Edge.End;
-                                var innerPoly = new Polyline();
-                                for (int i = 0; i < edge.Polygon.Count; i++)
-                                {
-                                    var polygonPt = edge.Polygon[i];
-                                    var centerPt = new Point3d(polygonPt.X, polygonPt.Y, 0);
-                                    innerPoly.AddVertexAt(i, centerPt.ToPoint2D(), 0, 0, 0);
-                                    var circle = new Circle(centerPt, new Vector3d(0, 0, 1), 0.5);
-                                    acadDatabase.ModelSpace.Add(circle);
-                                }
-
-                                innerPoly.Closed = true;
-                                acadDatabase.ModelSpace.Add(innerPoly);
-                                var ptS = new Point3d(edgeS.X, edgeS.Y, 0);
-                                var ptE = new Point3d(edgeE.X, edgeE.Y, 0);
-                                var line = new Line(ptS, ptE);
-                                lines.Add(line);
-                            }
-                            foreach (var drawLine in lines)
-                            {
-                                acadDatabase.ModelSpace.Add(drawLine);
-                            }
-                        }
-                    }
-                }
-
             }
         }
 

@@ -344,6 +344,9 @@ namespace TianHua.FanSelection
         /// </summary>
         public bool IsErased { get; set; }
 
-
+        /// <summary>
+        /// 是否手动输入风量
+        /// </summary>
+        public bool IsManualInputAirVolume { get; set; }
     }
 }

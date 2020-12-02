@@ -91,11 +91,11 @@ namespace TianHua.FanSelection.Model
         {
             get
             {
+                int ValidFloorCount = FrontRoomDoors2.Count(f => f.Value.Any(d => d.Count_Door_Q * d.Crack_Door_Q * d.Height_Door_Q * d.Width_Door_Q != 0));
                 double n2 = (Count_Floor - StairN1) * FrontRoomDoors2.Sum(
                     f => f.Value.Where(
                         d => d.Count_Door_Q * d.Crack_Door_Q * d.Height_Door_Q * d.Width_Door_Q != 0).Sum(d => d.Count_Door_Q));
-                n2 = Math.Round(n2, 2);
-                return n2 > 0 ? n2 : 0;
+                return n2 > 0 ? n2 / ValidFloorCount : 0;
             }
         }
 
@@ -107,6 +107,7 @@ namespace TianHua.FanSelection.Model
             get
             {
                 double leakarea = 0;
+                int ValidFloorCount = FrontRoomDoors2.Count(f => f.Value.Any(d => d.Count_Door_Q * d.Height_Door_Q * d.Width_Door_Q * d.Crack_Door_Q != 0));
                 foreach (var floor in FrontRoomDoors2)
                 {
                     foreach (var door in floor.Value)
@@ -125,7 +126,7 @@ namespace TianHua.FanSelection.Model
                         }
                     }
                 }
-                return Math.Round(leakarea, 2);
+                return ValidFloorCount == 0 ? leakarea : leakarea / ValidFloorCount;
             }
         }
 

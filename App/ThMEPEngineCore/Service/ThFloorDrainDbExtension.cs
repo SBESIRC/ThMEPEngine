@@ -64,22 +64,12 @@ namespace ThMEPEngineCore.Service
                                 {
                                     continue;
                                 }
-                                if (blockObj.IsBuildElementBlockReference())
+                                if (IsBuildElementBlockReference(blockObj))
                                 {
-                                    if (CheckLayerValid(blockObj) && ThFloorDrainLayerManager.IsFloorDrainBlockName(blockObj.Name))
+                                    if (CheckLayerValid(blockObj) && ThFloorDrainLayerManager.IsToiletFloorDrainBlockName(blockObj.Name))
                                     {
-                                        var minPt = blockObj.GeometricExtents.MinPoint;
-                                        var maxPt = blockObj.GeometricExtents.MaxPoint;
-                                        Polyline polyline = new Polyline()
-                                        {
-                                            Closed = true
-                                        };
-                                        polyline.AddVertexAt(0, new Point2d(minPt.X, minPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.AddVertexAt(1, new Point2d(maxPt.X, minPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.AddVertexAt(2, new Point2d(maxPt.X, maxPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.AddVertexAt(3, new Point2d(minPt.X, maxPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.TransformBy(matrix);
-                                        ents.Add(polyline);
+                                        var newBr = blockObj.GetTransformedCopy(matrix) as BlockReference;
+                                        ents.Add(newBr);
                                     }                                    
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));

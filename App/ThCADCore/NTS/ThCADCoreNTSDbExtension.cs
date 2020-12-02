@@ -57,6 +57,22 @@ namespace ThCADCore.NTS
             return plines;
         }
 
+        public static Entity ToDbMPolygon(this Polygon polygon)
+        {
+            var externalProfile = polygon.Shell.ToDbPolyline();
+            var holes = new List<Curve>();
+            foreach (LinearRing hole in polygon.Holes)
+            {
+                holes.Add(hole.ToDbPolyline());
+            }
+
+            if (holes.Count == 0)
+                return externalProfile;
+
+            //ThMPolygonTool.Initialize();
+            return ThMPolygonTool.CreateMPolygon(externalProfile, holes);
+        }
+
         public static Entity ToDbEntity(this Polygon polygon)
         {
             if (polygon.Holes.Count() > 0)
@@ -159,6 +175,53 @@ namespace ThCADCore.NTS
                 geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
             }
             else if (geometry is Point point) 
+            {
+                objs.Add(point.ToDbPoint());
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return objs;
+        }
+
+        /// <summary>
+        /// MPolygon数据格式流转
+        /// </summary>
+        /// <param name="geometry"></param>
+        /// <returns></returns>
+        public static List<DBObject> ToDbObjectsMP(this Geometry geometry)
+        {
+            var objs = new List<DBObject>();
+            if (geometry.IsEmpty)
+            {
+                return objs;
+            }
+            if (geometry is LineString lineString)
+            {
+                objs.Add(lineString.ToDbPolyline());
+            }
+            else if (geometry is LinearRing linearRing)
+            {
+                objs.Add(linearRing.ToDbPolyline());
+            }
+            else if (geometry is Polygon polygon)
+            {
+                objs.Add(polygon.ToDbMPolygon());
+            }
+            else if (geometry is MultiLineString lineStrings)
+            {
+                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
+            }
+            else if (geometry is MultiPolygon polygons)
+            {
+                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
+            }
+            else if (geometry is GeometryCollection geometries)
+            {
+                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
+            }
+            else if (geometry is Point point)
             {
                 objs.Add(point.ToDbPoint());
             }

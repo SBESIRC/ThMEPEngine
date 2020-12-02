@@ -10,6 +10,8 @@ using TianHua.FanSelection.Function;
 using Autodesk.AutoCAD.DatabaseServices;
 using System;
 using TianHua.Publics.BaseCode;
+using ThMEPHAVC.CAD;
+using ThCADExtension;
 
 namespace TianHua.FanSelection.UI.CAD
 {
@@ -98,7 +100,7 @@ namespace TianHua.FanSelection.UI.CAD
                 foreach (var model in models)
                 {
                     // 提取原属性
-                    var block = new ThFSBlockReference(model.ObjectId);
+                    var block = new ThBlockReferenceData(model.ObjectId);
 
                     // 插入新的图块
                     var objId = Active.Database.InsertModel(blockName, layerName, new Dictionary<string, string>(block.Attributes));
