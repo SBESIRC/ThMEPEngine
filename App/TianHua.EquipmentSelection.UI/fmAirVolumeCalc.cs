@@ -55,7 +55,7 @@ namespace TianHua.FanSelection.UI
             CheckIsManualInput.Checked = m_Fan.IsManualInputAirVolume;
             if (CheckIsManualInput.Checked)
             {
-                TxtManualInput.Text = FuncStr.NullToStr(m_Fan.AirCalcValue);
+                TxtManualInput.Text = FuncStr.NullToStr(m_Fan.AirVolume);
             }
         }
 
