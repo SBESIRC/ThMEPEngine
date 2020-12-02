@@ -46,6 +46,7 @@
     <Compile Include="Business\ClearScene\ClearSmoke.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
     <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
+    <Compile Include="Business\MainBeam\Optimize\NonRegular2PointsOptimizer.cs" />
     <Compile Include="Business\Procedure\SplitWallWorker.cs" />
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
