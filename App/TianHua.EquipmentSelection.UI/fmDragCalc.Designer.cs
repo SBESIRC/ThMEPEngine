@@ -542,7 +542,6 @@
         private DevExpress.XtraGrid.Views.BandedGrid.GridBand gridBand4;
         private DevExpress.XtraGrid.Views.BandedGrid.GridBand gridBand5;
         private DevExpress.XtraGrid.Views.BandedGrid.GridBand gridBand6;
-        private DevExpress.XtraGrid.Views.BandedGrid.GridBand GdvBanEndReservedAirPressure;
         private DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn ColEndReservedAirPressure;
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit TxtEndReservedAirPressure;
         private DevExpress.XtraGrid.Views.BandedGrid.GridBand gridBand7;

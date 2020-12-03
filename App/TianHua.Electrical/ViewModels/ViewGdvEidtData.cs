@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace TianHua.Electrical
 {
@@ -92,6 +88,13 @@ namespace TianHua.Electrical
             return tmp == this;
         }
 
-
+        /// <summary>
+        /// 重写GetHashCode
+        /// </summary>
+        /// <returns></returns>
+        public override int GetHashCode()
+        {
+            return ValueMember.Trim().GetHashCode();
+        }
     }
 }
