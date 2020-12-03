@@ -53,6 +53,7 @@ namespace ThMEPElectrical.Business
             CalculateDetectionRegionWithHoles(detectRegions, m_swallColumnPlys);
             // 数据转换
             RegionBeamSpanProfileData = DetectRegion2ProfileData(detectRegions);
+            DrawUtils.DrawGroup(RegionBeamSpanProfileData);
         }
 
 

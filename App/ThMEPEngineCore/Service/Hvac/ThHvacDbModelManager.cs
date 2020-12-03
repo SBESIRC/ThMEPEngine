@@ -2,14 +2,14 @@
 using Linq2Acad;
 using DotNetARX;
 using System.Linq;
-using Catel.Collections;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.FanSelection;
+using ThMEPEngineCore.Service.Hvac;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPEngineCore.Service.Hvac
 {
-    public class ThFanSelectionDbModelManager : IDisposable
+    public class ThHvacDbModelManager : IDisposable
     {
         private Database HostDb { get; set; }
         public ObjectIdCollection Geometries { get; set; }
@@ -19,7 +19,7 @@ namespace ThMEPHAVC.CAD
         /// 构造函数
         /// </summary>
         /// <param name="database"></param>
-        public ThFanSelectionDbModelManager(Database database)
+        public ThHvacDbModelManager(Database database)
         {
             HostDb = database;
             LoadFromDb(database);
@@ -45,12 +45,12 @@ namespace ThMEPHAVC.CAD
                     .OfType<BlockReference>()
                     .Where(o =>
                     {
-                        if (o.GetEffectiveName().Contains(ThFanSelectionCommon.AXIAL_BLOCK_NAME))
+                        if (o.GetEffectiveName().Contains(ThHvacCommon.AXIAL_BLOCK_NAME))
                         {
                             return true;
                         }
 
-                        if (o.GetEffectiveName().Contains(ThFanSelectionCommon.HTFC_BLOCK_NAME))
+                        if (o.GetEffectiveName().Contains(ThHvacCommon.HTFC_BLOCK_NAME))
                         {
                             return true;
                         }
@@ -88,18 +88,13 @@ namespace ThMEPHAVC.CAD
 
         public void EraseModels(string identifier)
         {
-            using (ObjectIdCollection modelids = GetModels(identifier))
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                foreach (ObjectId item in modelids)
+                GetModels(identifier).Cast<ObjectId>().ForEach(o =>
                 {
-                    if (item.IsErased)
-                    {
-                        continue;
-                    }
-                    item.Erase();
-                }
+                    acadDatabase.Element<Entity>(o, true).Erase();
+                });
             }
-            
         }
 
         /// <summary>
@@ -114,7 +109,7 @@ namespace ThMEPHAVC.CAD
             {
                 foreach (ObjectId obj in objs)
                 {
-                    TypedValueList valueList = obj.GetXData(ThFanSelectionCommon.RegAppName_FanSelection);
+                    TypedValueList valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
                     if (valueList != null)
                     {
                         // 模型ID

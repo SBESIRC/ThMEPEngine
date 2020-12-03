@@ -1,39 +1,21 @@
-﻿
-namespace TianHua.FanSelection
-{
-    public class ThFanSelectionCommon
-    {
-        // 命令
-        public const string CMD_MODEL_EDIT = "THFJEDIT";
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-        public const string AXIAL_TYPE_NAME = "轴流";
-        public const string AXIAL_BLOCK_NAME = "轴流风机";
-        public const string AXIAL_MODEL_NAME_SUFFIX_HOIST = "无基础";
-        public const string AXIAL_MODEL_NAME_SUFFIX_SQUARE = "方形基础";
+namespace ThMEPEngineCore.Service.Hvac
+{
+    public class ThHvacCommon
+    {
         public const string HTFC_TYPE_NAME = "离心";
-        public const string HTFC_BACKWARD_NAME = "后倾";
         public const string HTFC_BLOCK_NAME = "离心风机";
-        public const string MOTOR_POWER = "电机功率.json";
-        public const string MOTOR_POWER_Double = "电机功率-双速.json";
-        public const string HTFC_Selection = "离心风机选型.json";
-        public const string HTFC_Parameters = "离心-前倾-单速.json";
-        public const string HTFC_Parameters_Double = "离心-前倾-双速.json";
-        public const string HTFC_Parameters_Single = "离心-后倾-单速.json";
-        
-        public const string AXIAL_Selection = "轴流风机选型.json";
-        public const string AXIAL_Parameters = "轴流-单速.json";
-        public const string AXIAL_Parameters_Double = "轴流-双速.json";
-        public const string HTFC_Efficiency = "离心风机效率.json";
-        public const string AXIAL_Efficiency = "轴流风机效率.json";
+        public const string AXIAL_BLOCK_NAME = "轴流风机";
         public const string RegAppName_FanSelection = "THCAD_FAN_SELECTION";
         public const string RegAppName_Model_Foundation = "THCAD_FAN_FOUNDATION";
 
         // 图层
         public const string FOUNDATION_LAYER = "H-BASE";
-        public const string BLOCK_LAYER_FIRE = "H-FIRE-FBOX";
-        public const string BLOCK_LAYER_DUAL = "H-DUAL-FBOX";
-        public const string BLOCK_LAYER_EQUP = "H-EQUP-FBOX";
-
 
         // 风机块属性
         public const string BLOCK_ATTRIBUTE_EQUIPMENT_SYMBOL = "设备符号";

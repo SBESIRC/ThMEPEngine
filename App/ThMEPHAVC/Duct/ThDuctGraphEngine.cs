@@ -11,7 +11,7 @@ using AcHelper;
 using System;
 using System.Runtime.Serialization;
 
-namespace ThMEPHAVC.Duct
+namespace ThMEPHVAC.Duct
 {
     public class ThDuctVertex
     {

@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPEngineCore.Service.Hvac
 {
     public static class ThFanSelectionEditorExtension
     {

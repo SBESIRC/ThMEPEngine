@@ -1,11 +1,14 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPElectrical.Broadcast.Service;
 
 namespace ThMEPElectrical.Broadcast
 {
@@ -15,78 +18,134 @@ namespace ThMEPElectrical.Broadcast
         readonly double oneProtect = 21000;
         readonly double tol = 5000;
 
-        public void LayoutBraodCast(List<List<Line>> mainLines, List<List<Line>> otherLines, Polyline roomPoly, List<Polyline> columns, List<Polyline> walls)
+        /// <summary>
+        /// 计算布置信息
+        /// </summary>
+        /// <param name="mainLines"></param>
+        /// <param name="otherLines"></param>
+        /// <param name="roomPoly"></param>
+        /// <param name="columns"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
+        public Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> LayoutBraodcast(List<List<Line>> mainLines, List<Polyline> columns, List<Polyline> walls)
         {
+            Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> layoutInfo = new Dictionary<List<Line>, Dictionary<Point3d, Vector3d>>();
             foreach (var lines in mainLines)
             {
-                var usefulColumns = GetStruct(lines, columns);
-                var usefulWalls = GetStruct(lines, walls);
+                //计算车道线上布置点
+                var lineLayoutPts = GetLayoutLinePoint(lines);
+
+                //获取该车道线上的构建
+                StructureService structureService = new StructureService();
+                var lineColumn = structureService.GetStruct(lines, columns, tol);
+                var lineWall = structureService.GetStruct(lines, walls, tol);
+
+                //将构建分为上下部分
+                var usefulColumns = structureService.SeparateColumnsByLine(lineColumn, lines.First());
+                var usefulWalls = structureService.SeparateColumnsByLine(lineWall, lines.First());
+
+                //计算布置信息
+                var dir = (lines.First().EndPoint - lines.First().StartPoint).GetNormal();
+                StructureLayoutService structureLayoutService = new StructureLayoutService();
+                var lInfo = structureLayoutService.GetLayoutStructPt(lineLayoutPts, usefulColumns[1], usefulWalls[1], dir);
+
+                if (lInfo != null && lInfo.Count > 0)
+                {
+                    layoutInfo.Add(lines, lInfo);
+                }
             }
-            
+
+            return layoutInfo;
         }
 
-        private void GetLayoutLinePoint(List<Line> lines, List<Polyline> columns, List<Polyline> walls)
+        /// <summary>
+        /// 获取车道线上布置点
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="columns"></param>
+        /// <param name="walls"></param>
+        /// <returns></returns>
+        private List<Point3d> GetLayoutLinePoint(List<Line> lines)
         {
-            List<Point3d> allPts = lines.SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).ToList();
-            Point3d sPt = allPts.OrderBy(x => x.X).First();
-            Point3d ePt = allPts.OrderByDescending(x => x.X).First();
+            ParkingLinesService parkingLinesService = new ParkingLinesService();
+            var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
 
             List<Point3d> layoutPts = new List<Point3d>();
-            double lineLength = sPt.DistanceTo(ePt);
+            double lineLength = lines.Sum(x => x.Length);
             if (lineLength < oneProtect)
             {
                 layoutPts.Add(new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0));
             }
             else
             {
-                
+                if (lineLength > protectRange)
+                {
+                    var num = Math.Ceiling(lineLength / protectRange) - 1;
+                    double moveLength = lineLength / num;
+                    layoutPts.AddRange(GetLayoutPoint(handleLines, moveLength, sPt, ePt));
+                }
+                else
+                {
+                    layoutPts.AddRange(new List<Point3d>() { sPt, ePt });
+                }
             }
-        }
 
-        private void GetLayoutStructPt(Point3d pt, List<Polyline> columns, List<Polyline> walls)
-        {
-
+            return layoutPts;
         }
 
         /// <summary>
-        /// 获取停车线周边构建信息
+        /// 计算线上的布置点
         /// </summary>
-        /// <param name="polylines"></param>
-        /// <param name="columns"></param>
+        /// <param name="lines"></param>
+        /// <param name="moveLength"></param>
+        /// <param name="sPt"></param>
+        /// <param name="ePt"></param>
         /// <returns></returns>
-        public List<Polyline> GetStruct(List<Line> lines, List<Polyline> polys)
+        private List<Point3d> GetLayoutPoint(List<Line> lines, double moveLength, Point3d sPt, Point3d ePt)
         {
-            List<Polyline> resPolys = new List<Polyline>();
+            List<Point3d> allPts = new List<Point3d>() { sPt };
+            double excessLength = 0;
             foreach (var line in lines)
             {
-                var linePoly = expandLine(line, tol);
-                resPolys.AddRange(polys.Where(x => linePoly.Intersects(x) || linePoly.Contains(x)).ToList());
+                double lineLength = line.Length;
+                Vector3d dir = (line.EndPoint - line.StartPoint).GetNormal();
+                Vector3d compareDir = (ePt - sPt).GetNormal();
+                if (dir.DotProduct(compareDir) < 0)
+                {
+                    dir = -dir;
+                }
+
+                while (lineLength >= moveLength || (excessLength > 0 && lineLength > excessLength))
+                {
+                    if (excessLength > 0)
+                    {
+                        lineLength = lineLength - excessLength;
+                        Point3d movePt = sPt + dir * excessLength;
+                        sPt = movePt;
+                        allPts.Add(movePt);
+                        excessLength = 0;
+                    }
+                    else
+                    {
+                        lineLength = lineLength - moveLength;
+                        Point3d movePt = sPt + dir * moveLength;
+                        sPt = movePt;
+                        allPts.Add(movePt);
+                    }
+                }
+
+                if (excessLength > 0)
+                {
+                    excessLength = excessLength - lineLength;
+                }
+                else
+                {
+                    excessLength = moveLength - lineLength;
+                }
             }
 
-            return resPolys;
-        }
-
-        /// <summary>
-        /// 扩张line成polyline
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="distance"></param>
-        /// <returns></returns>
-        public Polyline expandLine(Line line, double distance)
-        {
-            Vector3d lineDir = line.Delta.GetNormal();
-            Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
-            Point3d p1 = line.StartPoint - lineDir * tol + moveDir * distance;
-            Point3d p2 = line.EndPoint + lineDir * tol + moveDir * distance;
-            Point3d p3 = line.EndPoint + lineDir * tol - moveDir * distance;
-            Point3d p4 = line.StartPoint - lineDir * tol - moveDir * distance;
-
-            Polyline polyline = new Polyline() { Closed = true };
-            polyline.AddVertexAt(0, p1.ToPoint2D(), 0, 0, 0);
-            polyline.AddVertexAt(0, p2.ToPoint2D(), 0, 0, 0);
-            polyline.AddVertexAt(0, p3.ToPoint2D(), 0, 0, 0);
-            polyline.AddVertexAt(0, p4.ToPoint2D(), 0, 0, 0);
-            return polyline;
+            allPts.Add(ePt);
+            return allPts; 
         }
     }
 }

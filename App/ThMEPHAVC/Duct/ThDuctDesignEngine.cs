@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using QuickGraph;
 
-namespace ThMEPHAVC.Duct
+namespace ThMEPHVAC.Duct
 {
     public class ThDuctDesignEngine
     {

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TianHua.Publics.BaseCode;
 
-namespace ThMEPHAVC.Duct.DuctExcelLoder
+namespace ThMEPHVAC.Duct.DuctExcelLoder
 {
     public class DuctVolumeExcelLoder
     {

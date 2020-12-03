@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHAVC.Duct
+namespace ThMEPHVAC.Duct
 {
     public static class ThGraphExtension
     {

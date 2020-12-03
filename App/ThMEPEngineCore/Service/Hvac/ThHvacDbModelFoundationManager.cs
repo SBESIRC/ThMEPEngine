@@ -4,15 +4,15 @@ using System.Linq;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPEngineCore.Service.Hvac
 {
-    public class ThFanSelectionDbModelFoundationManager : IDisposable
+    public class ThHvacDbModelFoundationManager : IDisposable
     {
         private Database HostDb { get; set; }
 
         public ObjectIdCollection Geometries { get; set; }
 
-        public ThFanSelectionDbModelFoundationManager(Database database)
+        public ThHvacDbModelFoundationManager(Database database)
         {
             HostDb = database;
             LoadFromDb(HostDb);

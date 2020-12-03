@@ -10,6 +10,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.Geometry;
 using ThCADCore.NTS;
 using ThMEPElectrical.PostProcess;
+using ThMEPElectrical.Business.MainBeam.Optimize;
 
 namespace ThMEPElectrical.Business.MainBeam
 {
@@ -136,6 +137,11 @@ namespace ThMEPElectrical.Business.MainBeam
             {
                 return GeomUtils.CalculateCentroidFromPoly(placeRectInfo.srcPolyline);
             }
+
+            // 一行多个布置
+            var oneRowRectPlacePoints = NonRegular2PointsOptimizer.MakeNonRegular2PointsOptimizer(placeRectInfo, m_parameter);
+            if (oneRowRectPlacePoints.Count == 2)
+                return oneRowRectPlacePoints;
 
             // 计算最大水平间隔
             var horizontalMaxGap = m_parameter.ProtectArea / 4.0 / verticalA * 2;

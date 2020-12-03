@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPHVAC
+namespace ThMEPEngineCore.Model.Hvac
 {
-    public static class ThMEPHAVCCommon
+    public class ThIfcFan : ThIfcFlowMovingDevice
     {
     }
 }

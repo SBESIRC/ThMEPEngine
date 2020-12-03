@@ -26,7 +26,7 @@
     <Compile Include="Electrical.wxs" />
     <Compile Include="External.wxs" />
     <Compile Include="FanSelection.wxs" />
-    <Compile Include="HAVC.wxs" />
+    <Compile Include="HVAC.wxs" />
     <Compile Include="Internal.wxs" />
     <Compile Include="Product.wxs" />
     <Compile Include="Resources.wxs" />

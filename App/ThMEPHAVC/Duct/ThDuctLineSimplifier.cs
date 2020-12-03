@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHAVC.Duct
+namespace ThMEPHVAC.Duct
 {
     public class ThDuctLineSimplifier
     {

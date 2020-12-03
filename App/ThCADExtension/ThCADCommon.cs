@@ -72,6 +72,12 @@ namespace ThCADExtension
             return Path.Combine(ContentsPath(), "Support");
         }
 
+        // 暖通风机块
+        public static string HvacModelDwgPath()
+        {
+            return Path.Combine(SupportPath(), "暖通.选型.风机.dwg");
+        }
+
         // ToolPalette 路径
         public static string ToolPalettePath()
         {

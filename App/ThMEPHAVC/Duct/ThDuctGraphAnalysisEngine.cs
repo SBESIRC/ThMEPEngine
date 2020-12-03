@@ -3,7 +3,7 @@ using System.Linq;
 using QuickGraph;
 using System.Collections.Generic;
 
-namespace ThMEPHAVC.Duct
+namespace ThMEPHVAC.Duct
 {
     class ThDuctGraphAnalysisEngine
     {

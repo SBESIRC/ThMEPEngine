@@ -4,9 +4,9 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
 
-namespace ThMEPEngineCore.Service.Havc
+namespace ThMEPEngineCore.Service.Hvac
 {
-    public class ThHavcDuctFittingFactoryService
+    public class ThHvacDuctFittingFactoryService
     {
         public ThIfcDuctReducing CreateReducing(ThIfcDuctReducingParameters parameters)
         {

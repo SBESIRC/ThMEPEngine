@@ -2,9 +2,9 @@
 using ThMEPEngineCore.Model.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.Service.Havc
+namespace ThMEPEngineCore.Service.Hvac
 {
-    public static class ThHavcDuctFittingDbExtension
+    public static class ThHvacDuctFittingDbExtension
     {
         public static void AddDuctFitting(this Database database, ThIfcDuctFitting ductFitting)
         {

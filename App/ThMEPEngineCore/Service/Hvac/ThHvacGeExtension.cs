@@ -1,7 +1,7 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPEngineCore.Service.Hvac
 {
     public static class ThFanSelectionGeExtension
     {

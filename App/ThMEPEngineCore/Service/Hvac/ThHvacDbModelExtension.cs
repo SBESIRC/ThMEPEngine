@@ -1,5 +1,4 @@
 ﻿using System;
-using System.IO;
 using Linq2Acad;
 using DotNetARX;
 using System.Linq;
@@ -7,13 +6,11 @@ using System.Text;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using TianHua.FanSelection.Function;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.FanSelection;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPEngineCore.Service.Hvac
 {
-    public static class ThFanSelectionDbModelExtension
+    public static class ThHvacDbModelExtension
     {
         public static ObjectId InsertModel(this Database database, string name, string layer, Dictionary<string, string> attNameValues)
         {
@@ -32,19 +29,11 @@ namespace ThMEPHAVC.CAD
         public static void ImportModel(this Database database, string name, string layer)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacModelDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
             }
-        }
-
-        public static void SetModelNumber(this ObjectId obj, string storey, int number)
-        {
-            obj.UpdateAttributesInBlock(new Dictionary<string, string>()
-            {
-                { ThFanSelectionCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER, ThFanSelectionUtils.StoreyNumber(storey, number.ToString()) }
-            });
         }
 
         public static void SetModelIdentifier(this ObjectId obj, string identifier, int number, string style)
@@ -55,7 +44,7 @@ namespace ThMEPHAVC.CAD
                 { (int)DxfCode.ExtendedDataInteger32, number },
                 { (int)DxfCode.ExtendedDataBinaryChunk,  Encoding.UTF8.GetBytes(style) },
             };
-            obj.AddXData(ThFanSelectionCommon.RegAppName_FanSelection, valueList);
+            obj.AddXData(ThHvacCommon.RegAppName_FanSelection, valueList);
         }
 
         public static void UpdateModelNumber(this ObjectId obj, int number)
@@ -64,7 +53,7 @@ namespace ThMEPHAVC.CAD
             if (oldValue > 0 && (oldValue != number))
             {
                 obj.ModXData(
-                    ThFanSelectionCommon.RegAppName_FanSelection,
+                    ThHvacCommon.RegAppName_FanSelection,
                     DxfCode.ExtendedDataInteger32,
                     oldValue, number);
             }
@@ -76,7 +65,7 @@ namespace ThMEPHAVC.CAD
             if (!string.IsNullOrEmpty(identifier) && (oldValue != identifier))
             {
                 obj.ModXData(
-                    ThFanSelectionCommon.RegAppName_FanSelection,
+                    ThHvacCommon.RegAppName_FanSelection,
                     DxfCode.ExtendedDataAsciiString,
                     oldValue, identifier);
             }
@@ -84,7 +73,7 @@ namespace ThMEPHAVC.CAD
 
         public static string GetModelIdentifier(this ObjectId obj)
         {
-            var valueList = obj.GetXData(ThFanSelectionCommon.RegAppName_FanSelection);
+            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
             if (valueList == null)
             {
                 return string.Empty;
@@ -101,7 +90,7 @@ namespace ThMEPHAVC.CAD
 
         public static string GetModelIdentifier(this DBObject dBObject)
         {
-            var valueList = dBObject.GetXData(ThFanSelectionCommon.RegAppName_FanSelection);
+            var valueList = dBObject.GetXData(ThHvacCommon.RegAppName_FanSelection);
             if (valueList == null)
             {
                 return string.Empty;
@@ -123,8 +112,8 @@ namespace ThMEPHAVC.CAD
 
         public static void SetModelXDataFrom(this ObjectId obj, ObjectId other)
         {
-            var xdata = other.GetXData(ThFanSelectionCommon.RegAppName_FanSelection);
-            obj.AddXData(ThFanSelectionCommon.RegAppName_FanSelection, xdata);
+            var xdata = other.GetXData(ThHvacCommon.RegAppName_FanSelection);
+            obj.AddXData(ThHvacCommon.RegAppName_FanSelection, xdata);
         }
 
         public static bool IsModel(this DBObject dBObject)
@@ -134,7 +123,7 @@ namespace ThMEPHAVC.CAD
 
         public static bool IsModel(this ObjectId obj, string identifier)
         {
-            var valueList = obj.GetXData(ThFanSelectionCommon.RegAppName_FanSelection);
+            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
             if (valueList == null)
             {
                 return false;
@@ -151,7 +140,7 @@ namespace ThMEPHAVC.CAD
 
         public static string GetModelStyle(this ObjectId obj)
         {
-            var valueList = obj.GetXData(ThFanSelectionCommon.RegAppName_FanSelection);
+            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
             if (valueList == null)
             {
                 return string.Empty;
@@ -164,12 +153,12 @@ namespace ThMEPHAVC.CAD
         public static bool IsHTFCModel(this ObjectId obj)
         {
             var style = GetModelStyle(obj);
-            return style.Contains(ThFanSelectionCommon.HTFC_TYPE_NAME);
+            return style.Contains(ThHvacCommon.HTFC_TYPE_NAME);
         }
 
         public static int GetModelNumber(this ObjectId obj)
         {
-            var valueList = obj.GetXData(ThFanSelectionCommon.RegAppName_FanSelection);
+            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
             if (valueList == null)
             {
                 return 0;
@@ -187,11 +176,6 @@ namespace ThMEPHAVC.CAD
         public static void ModifyModelAttributes(this ObjectId obj, Dictionary<string, string> attributes)
         {
             obj.UpdateAttributesInBlock(attributes);
-        }
-
-        private static string BlockDwgPath()
-        {
-            return Path.Combine(ThCADCommon.SupportPath(), ThFanSelectionCommon.BLOCK_FAN_FILE);
         }
     }
 }

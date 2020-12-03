@@ -5,7 +5,7 @@ using AcHelper.Commands;
 using System.Collections.Generic;
 using TianHua.FanSelection.Messaging;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPHAVC.CAD;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI.CAD
 {
