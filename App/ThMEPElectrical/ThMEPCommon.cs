@@ -18,7 +18,6 @@ namespace ThMEPElectrical
 
         // 烟感温感
         public const string SENSORLAYERNMAE = "E-FAS-DEVC";
-        public const string SENSORDWGNAME = "烟感温感图块.dwg";
         public const string SMOKE_SENSOR_BLOCK_NAME = "E-BFAS110";
         public const string TEMPERATURE_SENSOR_BLOCK_NAME = "E-BFAS120";
         public const string UCS_COMPASS_BLOCK_NAME = "AI-UCS";

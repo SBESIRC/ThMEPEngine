@@ -1,12 +1,8 @@
-﻿using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPElectrical.Model;
+﻿using Linq2Acad;
 using ThMEPElectrical.CAD;
-using Linq2Acad;
+using ThMEPElectrical.Model;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPElectrical.Business
 {
@@ -54,13 +50,23 @@ namespace ThMEPElectrical.Business
             {
                 if (Sensor == SensorType.SMOKESENSOR)
                 {
-                    db.Database.ImportModel(ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME);
-                    db.Database.InsertModel(InsertPts, ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale, m_angle);
+                    db.Database.ImportModel(ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, ThMEPCommon.SENSORLAYERNMAE);
+                    InsertPts.ForEach(o =>
+                    {
+                        db.Database.InsertModel(
+                            ThMEPCommon.SENSORLAYERNMAE, 
+                            ThMEPCommon.SMOKE_SENSOR_BLOCK_NAME, o,  ThMEPCommon.BlockScale, m_angle);
+                    });
                 }
                 else
                 {
-                    db.Database.ImportModel(ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME);
-                    db.Database.InsertModel(InsertPts, ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, ThMEPCommon.BlockScale, m_angle);
+                    db.Database.ImportModel(ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, ThMEPCommon.SENSORLAYERNMAE);
+                    InsertPts.ForEach(o =>
+                    {
+                        db.Database.InsertModel(
+                            ThMEPCommon.SENSORLAYERNMAE, 
+                            ThMEPCommon.TEMPERATURE_SENSOR_BLOCK_NAME, o, ThMEPCommon.BlockScale, m_angle);
+                    });
                 }
             }
         }
