@@ -28,7 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CAD\ThFanSelectionDbModelEngine.cs" />
+    <Compile Include="CAD\ThDbModelFan.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
     <Compile Include="Duct\GraphSerializeService.cs" />
