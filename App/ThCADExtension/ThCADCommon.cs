@@ -84,6 +84,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "烟感温感图块.dwg");
         }
 
+        // 消防喷淋块
+        public static string SprinklerDwgPath()
+        {
+            return Path.Combine(SupportPath(), "给排水.喷淋.dwg");
+        }
+
         // ToolPalette 路径
         public static string ToolPalettePath()
         {

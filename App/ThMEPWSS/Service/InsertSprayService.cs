@@ -1,68 +1,81 @@
 ﻿using System;
+using AcHelper;
 using Linq2Acad;
-using System.IO;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using DotNetARX;
 using ThCADExtension;
-using ThMEPWSS.Service;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThWSS.Bussiness
+namespace ThMEPWSS.Service
 {
-    public static class InsertSprayService
+    public static class InsertSprinklerService
     {
         /// <summary>
         /// 插入喷淋图块
         /// </summary>
         /// <param name="insertPts"></param>
-        public static void InsertSprayBlock(List<Point3d> insertPts, SprayType type)
+        public static void Insert(List<Point3d> positions)
         {
-            var sprayType = ThWSSUIService.Instance.Parameter.layoutType == ThMEPWSS.Model.LayoutType.UpSpray ? ThWSSCommon.SprayUpBlockName : ThWSSCommon.SprayDownBlockName;
-            using (var db = AcadDatabase.Active())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                LayerTools.AddLayer(db.Database, ThWSSCommon.SprayLayerName);
-                db.Database.UnFrozenLayer(ThWSSCommon.SprayLayerName);
-                db.Database.UnLockLayer(ThWSSCommon.SprayLayerName);
-                db.Database.UnOffLayer(ThWSSCommon.SprayLayerName);
-                db.Database.UnPrintLayer(ThWSSCommon.SprayLayerName);
-                var filePath = Path.Combine(ThCADCommon.SupportPath(), ThWSSCommon.SprayDwgName);
-                db.Database.ImportBlocksFromDwg(filePath);
-                foreach (var insertPoint in insertPts)
+                string name = BlockName();
+                acadDatabase.Database.ImportBlock(name, ThWSSCommon.SprayLayerName);
+                positions.ForEach(o =>
                 {
-                    var blockId = db.ModelSpace.ObjectId.InsertBlockReference(
-                        ThWSSCommon.SprayLayerName,
-                        sprayType,
-                        insertPoint,
-                        new Scale3d(1, 1, 1),
-                        0);
-                    //blockId.SetDynBlockValue(ThWSSCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY, SprayVisibilityPropValue(type));
-                }
+                    acadDatabase.Database.InsertBlock(ThWSSCommon.SprayLayerName, name, o, new Scale3d(1), 0);
+                });
             }
         }
 
         /// <summary>
-        /// 喷淋块属性值
+        /// 喷淋图块名
         /// </summary>
-        /// <param name="type"></param>
         /// <returns></returns>
-        public static string SprayVisibilityPropValue(SprayType type)
+        private static string BlockName()
         {
-            switch (type)
+            switch(ThWSSUIService.Instance.Parameter.layoutType)
             {
-                case SprayType.SPRAYUP:
-                    return "上喷";
-                case SprayType.SPRAYDOWN:
-                    return "下喷";
+                case ThMEPWSS.Model.LayoutType.UpSpray:
+                    return ThWSSCommon.SprayUpBlockName;
+                case ThMEPWSS.Model.LayoutType.DownSpray:
+                    return ThWSSCommon.SprayDownBlockName;
                 default:
                     throw new NotSupportedException();
             }
         }
-    }
 
-    // 喷淋放置的一些参数
-    public enum SprayType
-    {
-        SPRAYUP = 0,
-        SPRAYDOWN = 1,
+        /// <summary>
+        /// 插入图块
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="layer"></param>
+        /// <param name="name"></param>
+        /// <param name="position"></param>
+        /// <param name="scale"></param>
+        /// <param name="angle"></param>
+        private static void InsertBlock(this Database database, string layer, string name, Point3d position, Scale3d scale, double angle)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle);
+            }
+        }
+
+        /// <summary>
+        /// 导入图块
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="name"></param>
+        /// <param name="layer"></param>
+        private static void ImportBlock(this Database database, string name, string layer)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.SprinklerDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
+            }
+        }
     }
 }

@@ -10,10 +10,7 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThWSS;
 
 namespace ThMEPWSS.Service
 {

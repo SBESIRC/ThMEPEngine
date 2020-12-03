@@ -1,4 +1,5 @@
-﻿using AcHelper;
+﻿using System;
+using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -10,16 +11,13 @@ using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Extension;
+using ThMEPEngineCore.Algorithm;
+using ThMEPWSS.Service;
 using ThMEPWSS.Bussiness;
 using ThMEPWSS.Bussiness.LayoutBussiness;
-using ThMEPWSS.Service;
-using ThWSS;
-using ThWSS.Bussiness;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Extension;
-using System;
 
 namespace ThMEPWSS
 {
@@ -91,7 +89,7 @@ namespace ThMEPWSS
                     var sprayPts = layoutDemo.LayoutSpray(plFrame, columns, beams, walls, holes, matrix, false);
 
                     //放置喷头
-                    InsertSprayService.InsertSprayBlock(sprayPts.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
+                    InsertSprinklerService.Insert(sprayPts.Select(o => o.Position).ToList());
 
                     //打印喷头变化轨迹
                     MarkService.PrintOriginSpray(sprayPts);
@@ -291,7 +289,7 @@ namespace ThMEPWSS
             var layoutPts = layoutSprayByLineService.LayoutSprayByLine(handleLines, ThWSSUIService.Instance.Parameter.distance);
 
             //放置喷头
-            InsertSprayService.InsertSprayBlock(layoutPts, SprayType.SPRAYDOWN);
+            InsertSprinklerService.Insert(layoutPts);
         }
 
         [CommandMethod("TIANHUACAD", "THPLZX", CommandFlags.Modal)]

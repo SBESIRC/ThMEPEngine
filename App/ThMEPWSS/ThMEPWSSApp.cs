@@ -12,8 +12,6 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
-using ThWSS;
-using ThMEPWSS.Pipe;
 using System;
 using ThMEPWSS.Pipe.Engine;
 using DotNetARX;

@@ -2,13 +2,9 @@
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPWSS.Model;
-using ThWSS;
 
 namespace ThMEPWSS.Service
 {
