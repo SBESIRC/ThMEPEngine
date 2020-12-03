@@ -40,11 +40,6 @@
     <Compile Include="BlockConvert\ThBConvertRuleExtension.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
-    <Compile Include="BlockConvert\ThBConvertParameter.cs" />
-    <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
-    <Compile Include="Business\BlindAreaReminder\ClearHatch.cs" />
-    <Compile Include="Business\BlindAreaReminder\HatchCreater.cs" />
-    <Compile Include="Business\ClearScene\ClearSmoke.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
     <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
     <Compile Include="Business\MainBeam\Optimize\NonRegular2PointsOptimizer.cs" />
@@ -93,7 +88,7 @@
     <Compile Include="Broadcast\ColumnService.cs" />
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
     <Compile Include="Broadcast\LayoutService.cs" />
-    <Compile Include="Broadcast\ParkingLinesService.cs" />
+    <Compile Include="Broadcast\Service\ParkingLinesService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionPolygon.cs" />

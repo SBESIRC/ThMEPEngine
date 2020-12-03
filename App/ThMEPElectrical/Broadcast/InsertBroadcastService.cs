@@ -21,9 +21,26 @@ namespace ThMEPElectrical.Broadcast
                 db.Database.ImportModel();
                 foreach (var col in insertPts)
                 {
-                    db.Database.InsertModel(col.layoutPoint + col.layoutDirection * scaleNum * 1.5, col.layoutDirection, new Dictionary<string, string>(){
+                    db.Database.InsertModel(col.layoutPoint + col.layoutDirection * scaleNum * 1.5, -col.layoutDirection, new Dictionary<string, string>(){
                         { "F","W" },
                     });
+                }
+            }
+        }
+
+        public static void InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                db.Database.ImportModel();
+                foreach (var ptDic in insertPtInfo)
+                {
+                    foreach (var ptInfo in ptDic.Value)
+                    {
+                        db.Database.InsertModel(ptInfo.Key + ptInfo.Value * scaleNum * 1.5, -ptInfo.Value, new Dictionary<string, string>(){
+                            { "F","W" },
+                        });
+                    }
                 }
             }
         }
