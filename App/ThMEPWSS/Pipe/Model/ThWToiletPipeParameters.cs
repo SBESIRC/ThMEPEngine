@@ -50,7 +50,7 @@ namespace ThMEPWSS.Pipe.Model
             {
                 if (floor >= 150)
                 {
-                    Diameter.Add(150.00);
+                    Diameter.Add(100.00);//原要求为150
                 }
                 else
                 {

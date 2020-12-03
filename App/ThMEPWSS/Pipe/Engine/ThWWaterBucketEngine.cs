@@ -30,8 +30,8 @@ namespace ThMEPWSS.Pipe.Engine
                 GravityWaterBucketCenter.Add(waterBucket.Position);
             }
             foreach (var waterBucket in sideWaterBucket)
-            { 
-               Vector3d dis =new Vector3d (160, -114, 0);
+            {
+                Vector3d dis = new Vector3d(160, -114, 0);
                 Vector3d dis1 = new Vector3d(-160, 114, 0);
                 if (OnLeftPart(waterBucket, boundary))
                 {
@@ -39,15 +39,19 @@ namespace ThMEPWSS.Pipe.Engine
                     SideWaterBucketCenter.Add(waterBucket.Position - dis);
                 }
                 else { SideWaterBucketCenter.Add(waterBucket.Position - dis1); }
-                foreach(var rainPipe in roofRainPipe)
+            }
+            
+            foreach (Point3d waterBucket in SideWaterBucketCenter)
+            {
+                foreach (var rainPipe in roofRainPipe)
                 {
-                    if(rainPipe.GetCenter().IsEqualTo(waterBucket.Position))
+                    if (rainPipe.GetCenter().Equals(waterBucket))
                     {
                         continue;
                     }
-                    else { Center_point.Add(waterBucket.Position); }
-                }
-            }
+                    Center_point.Add(waterBucket);
+                }             
+            }                          
             SideWaterBucketTag = Index(SideWaterBucketCenter,boundary);
             GravityWaterBucketTag = Index(GravityWaterBucketCenter,boundary);
         }
