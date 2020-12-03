@@ -156,6 +156,12 @@ namespace ThMEPEngineCore.Service.Hvac
             return style.Contains(ThHvacCommon.HTFC_TYPE_NAME);
         }
 
+        public static bool IsAXIALModel(this ObjectId obj)
+        {
+            var style = GetModelStyle(obj);
+            return style.Contains(ThHvacCommon.AXIAL_TYPE_NAME);
+        }
+
         public static int GetModelNumber(this ObjectId obj)
         {
             var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);

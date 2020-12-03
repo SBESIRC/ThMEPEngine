@@ -64,6 +64,7 @@ namespace TianHua.FanSelection
         public const string BLOCK_DYNAMIC_PROPERTY_ANGLE2 = "角度2";
         public const string BLOCK_DYNAMIC_PROPERTY_ROTATE1 = "翻转状态1";
         public const string BLOCK_DYNAMIC_PROPERTY_ROTATE2 = "翻转状态2";
+        public const string BLOCK_DYNAMIC_PROPERTY_DIAMETER = "风机直径";
         public const string BLOCK_DYNAMIC_PROPERTY_POSITION1_X = "位置1 X";
         public const string BLOCK_DYNAMIC_PROPERTY_POSITION1_Y = "位置1 Y";
         public const string BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X = "设备基点 X";
@@ -71,5 +72,13 @@ namespace TianHua.FanSelection
         public const string BLOCK_DYNAMIC_PROPERTY_SPECIFICATION_MODEL = "规格及型号";
         public const string BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT = "型号字高";
         public const string BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT = "标注字高";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_X = "进风口 X";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_Y = "进风口 Y";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_X = "出风口 X";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_Y = "出风口 Y";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL_B = "进风口竖B";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL_B = "出风口竖B";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL_A = "进风口横A";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL_A = "出风口横A";
     }
 }

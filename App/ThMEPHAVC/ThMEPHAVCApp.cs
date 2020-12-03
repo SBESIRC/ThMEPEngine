@@ -32,7 +32,7 @@ namespace ThMEPHVAC
                 var objids = selectionresult.Value.GetObjectIds();
                 //var fanobj = objids.First(o => o.GetObject(OpenMode.ForRead).IsModel());
 
-                ThFanSelectionDbModelEngine dbmodelengine = new ThFanSelectionDbModelEngine(objids.First());
+                ThDbModelFan dbmodelengine = new ThDbModelFan(objids.First());
                 var fanintake = dbmodelengine.IntakeForm;
                 var fanvolume = dbmodelengine.FanVolume;
                 var faninlet = dbmodelengine.FanInlet;

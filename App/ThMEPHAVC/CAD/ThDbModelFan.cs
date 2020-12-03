@@ -13,9 +13,8 @@ namespace ThMEPHVAC.CAD
         public double Width { get; set; }
         public double Height { get; set; }
         public bool IsCircleOpening { get; set; }
-        //public Point3d OpeningCenter { get; set; }
     }
-    public class ThFanSelectionDbModelEngine
+    public class ThDbModelFan
     {
         public ObjectId Model { get; set; }
         public ThBlockReferenceData Data { get; set; }
@@ -68,13 +67,11 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-
-        public ThFanSelectionDbModelEngine(ObjectId objectId)
+        public ThDbModelFan(ObjectId objectId)
         {
             Model = objectId;
             Data = new ThBlockReferenceData(objectId);
         }
-
         private string GetIntakeForm()
         {
             if (Model.IsHTFCModel())
@@ -96,12 +93,11 @@ namespace ThMEPHVAC.CAD
 
         private FanOpening GetFanInlet()
         {
-            string blockname = Data.EffectiveName;
-            if (blockname.Contains("轴流"))
+            if (Model.IsAXIALModel())
             {
                 var redius = Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
-                    .Where(d => d.PropertyName == "风机直径")
+                    .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
                     .First().Value.NullToDouble();
                 return new FanOpening()
                 {
@@ -112,6 +108,7 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
+                string blockname = Data.EffectiveName;
                 if (blockname.Contains("直进") || blockname.Contains("侧进"))
                 {
                     return new FanOpening()
@@ -120,7 +117,7 @@ namespace ThMEPHVAC.CAD
                         Height = 0,
                         Width = Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == "进风口横A")
+                        .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL_A)
                         .First().Value.NullToDouble()
                     };
                 }
@@ -132,26 +129,24 @@ namespace ThMEPHVAC.CAD
 
                         Height = Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == "进风口竖B")
+                        .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL_B)
                         .First().Value.NullToDouble(),
 
                         Width = Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == "进风口横A")
+                        .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL_A)
                         .First().Value.NullToDouble()
                     };
                 }
             }
         }
-
         private FanOpening GetFanOutlet()
         {
-            string blockname = Data.EffectiveName;
-            if (blockname.Contains("轴流"))
+            if (Model.IsAXIALModel())
             {
                 var redius = Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
-                    .Where(d => d.PropertyName == "风机直径")
+                    .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
                     .First().Value.NullToDouble();
                 return new FanOpening()
                 {
@@ -162,6 +157,7 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
+                string blockname = Data.EffectiveName;
                 if (blockname.Contains("直出"))
                 {
                     return new FanOpening()
@@ -170,7 +166,7 @@ namespace ThMEPHVAC.CAD
                         Height = 0,
                         Width = Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == "出风口横a")
+                        .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL_A)
                         .First().Value.NullToDouble()
                     };
                 }
@@ -182,12 +178,12 @@ namespace ThMEPHVAC.CAD
 
                         Height = Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == "出风口竖B")
+                        .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL_B)
                         .First().Value.NullToDouble(),
 
                         Width = Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == "出风口横A")
+                        .Where(d => d.PropertyName == ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL_A)
                         .First().Value.NullToDouble()
                     };
                 }
@@ -200,12 +196,16 @@ namespace ThMEPHVAC.CAD
             Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.GetAsVector());
             if (blockname.Contains("直进") || blockname.Contains("侧进"))
             {
-                Point3d inletposition = CreatePointFromProperty("进风口 X", "进风口 Y");
+                Point3d inletposition = CreatePointFromProperty(
+                    ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_INLET_X, 
+                    ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_INLET_Y);
                 return inletposition.TransformBy(ocs2Wcs);
             }
             else
             {
-                Point3d inletposition = CreatePointFromProperty("设备基点 X", "设备基点 Y");
+                Point3d inletposition = CreatePointFromProperty(
+                    ThFanSelectionCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
+                    ThFanSelectionCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                 return inletposition.TransformBy(ocs2Wcs);
             }
         }
@@ -214,10 +214,11 @@ namespace ThMEPHVAC.CAD
         {
             string blockname = Data.EffectiveName;
             Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.GetAsVector());
-            Point3d inletposition = CreatePointFromProperty("出风口 X", "出风口 Y");
+            Point3d inletposition = CreatePointFromProperty(
+                ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_X, 
+                ThFanSelectionCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_Y);
             return inletposition.TransformBy(ocs2Wcs);
         }
-
         private Point3d CreatePointFromProperty(string xname,string yname)
         {
             double inletX = Data.CustomProperties

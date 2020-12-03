@@ -9,6 +9,7 @@ namespace ThMEPEngineCore.Service.Hvac
     public class ThHvacCommon
     {
         public const string HTFC_TYPE_NAME = "离心";
+        public const string AXIAL_TYPE_NAME = "轴流";
         public const string HTFC_BLOCK_NAME = "离心风机";
         public const string AXIAL_BLOCK_NAME = "轴流风机";
         public const string RegAppName_FanSelection = "THCAD_FAN_SELECTION";
