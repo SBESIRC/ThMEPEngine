@@ -40,6 +40,10 @@
     <Compile Include="BlockConvert\ThBConvertRuleEngineWeakCurrent.cs" />
     <Compile Include="BlockConvert\ThBConvertTableUtils.cs" />
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
+    <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
+    <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
+    <Compile Include="Broadcast\Service\StructureService.cs" />
+    <Compile Include="Broadcast\StructureLayoutService.cs" />
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
     <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
     <Compile Include="Business\Procedure\SplitWallWorker.cs" />
@@ -87,7 +91,7 @@
     <Compile Include="Broadcast\ColumnService.cs" />
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
     <Compile Include="Broadcast\LayoutService.cs" />
-    <Compile Include="Broadcast\ParkingLinesService.cs" />
+    <Compile Include="Broadcast\Service\ParkingLinesService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionPolygon.cs" />
