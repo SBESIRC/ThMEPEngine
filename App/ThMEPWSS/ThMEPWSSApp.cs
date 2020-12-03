@@ -8,14 +8,11 @@ using Linq2Acad;
 using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
-using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 using System;
 using ThMEPWSS.Pipe.Engine;
 using DotNetARX;
-
 
 namespace ThMEPWSS
 {
@@ -27,54 +24,6 @@ namespace ThMEPWSS
 
         public void Terminate()
         {
-        }
-
-        [CommandMethod("TIANHUACAD", "THLG", CommandFlags.Modal)]
-        public void ThConnectPipe()
-        {
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                AllowDuplicates = false,
-                MessageForAdding = "选择区域",
-                RejectObjectsOnLockedLayers = true,
-            };
-            var dxfNames = new string[]
-            {
-                RXClass.GetClass(typeof(Polyline)).DxfName,
-            };
-            var filter = ThSelectionFilterTool.Build(dxfNames);
-            var result = Active.Editor.GetSelection(options, filter);
-            if (result.Status != PromptStatus.OK)
-            {
-                return;
-            }
-
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                foreach (ObjectId frame in result.Value.GetObjectIds())
-                {
-                    var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
-
-                    var filterlist = OpFilter.Bulid(o =>
-                        o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.PipeLine_LayerName &
-                        o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Line)).DxfName);
-
-                    var dBObjectCollection = new DBObjectCollection();
-                    var allLines = Active.Editor.SelectAll(filterlist);
-                    if (allLines.Status == PromptStatus.OK)
-                    {
-                        foreach (ObjectId obj in allLines.Value.GetObjectIds())
-                        {
-                            dBObjectCollection.Add(acdb.Element<Line>(obj));
-                        }
-
-                        ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
-                        var pipeLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(plFrame).Cast<Line>().ToList();
-
-                    }
-                }
-            }
         }
 
         [CommandMethod("TIANHUACAD", "THPIPEINDEX", CommandFlags.Modal)]
