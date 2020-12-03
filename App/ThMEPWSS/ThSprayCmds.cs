@@ -443,8 +443,8 @@ namespace ThMEPWSS
         {
             var dxfNames = new string[]
             {
-                ThWSSCommon.TZ_SprayName_16,
-                ThWSSCommon.TZ_SprayName_12,
+                ThCADCommon.DxfName_TCH_EQUIPMENT_16,
+                ThCADCommon.DxfName_TCH_EQUIPMENT_12,
                 RXClass.GetClass(typeof(BlockReference)).DxfName,
             };
             var filterlist = OpFilter.Bulid(o =>

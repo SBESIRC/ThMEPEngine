@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 
 namespace ThMEPWSS.Service
 {
@@ -31,8 +32,8 @@ namespace ThMEPWSS.Service
                 //获取喷淋
                 var dxfNames = new string[]
                 {
-                    ThWSSCommon.TZ_SprayName_16,
-                    ThWSSCommon.TZ_SprayName_12,
+                    ThCADCommon.DxfName_TCH_EQUIPMENT_16,
+                    ThCADCommon.DxfName_TCH_EQUIPMENT_12,
                     RXClass.GetClass(typeof(BlockReference)).DxfName,
                 };
                 var filterlist = OpFilter.Bulid(o =>
