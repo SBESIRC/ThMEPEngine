@@ -462,33 +462,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThCenterline", CommandFlags.Modal)]
-        public void ThCenterline()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var result2 = Active.Editor.GetDistance("请输入差值距离");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                var centerlines = ThCADCoreNTSCenterlineBuilder.Centerline(pline, result2.Value);
-                foreach (Entity centerline in centerlines)
-                {
-                    centerline.ColorIndex = 2;
-                    acadDatabase.ModelSpace.Add(centerline);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THDT", CommandFlags.Modal)]
         public void ThDelaunayTriangulation()
         {

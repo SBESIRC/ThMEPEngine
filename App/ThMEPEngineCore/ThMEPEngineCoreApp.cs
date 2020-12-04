@@ -316,36 +316,5 @@ namespace ThMEPEngineCore
             dbText.Height = 200;
             return dbText;
         }
-
-        [CommandMethod("TIANHUACAD", "ThBuffer", CommandFlags.Modal)]
-        public void ThBuffer()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var result2 = Active.Editor.GetDistance("\n输入距离");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
-                }
-
-                foreach (Entity obj in objs.Buffer(result2.Value))
-                {
-                    obj.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
-        }
     }
 }
