@@ -61,6 +61,7 @@
     <Compile Include="BeamInfo\Utils\ThOverkillDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureDbExtension.cs" />
     <Compile Include="BeamInfo\Utils\ThStructureUtils.cs" />
+    <Compile Include="CAD\ThDbObjectRecognitionEngine.cs" />
     <Compile Include="CAD\ThDrawTool.cs" />
     <Compile Include="CAD\ThGeometryTool.cs" />
     <Compile Include="Algorithm\ThMEPLineExtension.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
     <Compile Include="Engine\ThGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
+    <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
     <Compile Include="Engine\ThRainPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThRoofRainPipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThSideEntryWaterBucketRecognitionEngine.cs" />
@@ -220,6 +222,8 @@
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
     <Compile Include="Service\Hvac\ThHvacDuctFittingFactoryService.cs" />
+    <Compile Include="Service\ThParkingStallDbExtension.cs" />
+    <Compile Include="Service\ThParkingStallLayerManager.cs" />
     <Compile Include="Service\ThRainPipeDbExtension.cs" />
     <Compile Include="Service\ThRainPipeLayerManager.cs" />
     <Compile Include="Service\ThRoofRainPipeDbExtension.cs" />

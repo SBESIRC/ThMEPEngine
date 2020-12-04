@@ -11,10 +11,12 @@ namespace ThMEPEngineCore.Service
     public abstract class ThDbExtension
     {
         public Database HostDb { get; set; }
+        public List<Entity> DbObjects { get; set; }
         public List<string> LayerFilter { get; set; }
         protected ThDbExtension(Database db)
         {
             HostDb = db;
+            DbObjects = new List<Entity>();
             LayerFilter = new List<string>();
         }
         public abstract void BuildElementTexts();

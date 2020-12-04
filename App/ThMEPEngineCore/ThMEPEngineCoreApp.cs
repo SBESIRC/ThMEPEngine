@@ -173,6 +173,25 @@ namespace ThMEPEngineCore
                 });
             }
         }
+        [CommandMethod("TIANHUACAD", "ThExtractParkingStall", CommandFlags.Modal)]
+        public void ThExtractParkingStall()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var engine = new ThParkingStallRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
+                engine.Spaces.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o.Boundary);
+                });
+            }
+        }
         [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
         public void ThExtractBeamConnect()
         {

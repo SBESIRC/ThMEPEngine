@@ -38,6 +38,7 @@
     <Compile Include="ThBlockReferenceData.cs" />
     <Compile Include="ThBlockReferenceExtensions.cs" />
     <Compile Include="ThBlockReferenceTool.cs" />
+    <Compile Include="ThBlockTools.cs" />
     <Compile Include="ThCADCommon.cs" />
     <Compile Include="ThCircleExtension.cs" />
     <Compile Include="ThCUITools.cs" />
