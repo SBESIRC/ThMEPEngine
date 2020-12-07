@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical
+namespace ThMEPElectrical.Lane
 {
     public class ThLaneLineSimplifier
     {

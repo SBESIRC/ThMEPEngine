@@ -79,6 +79,7 @@
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
+    <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
@@ -134,8 +135,8 @@
     <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
-    <Compile Include="ThLaneLineMerger.cs" />
-    <Compile Include="ThLaneLineSimplifier.cs" />
+    <Compile Include="Lane\ThLaneLineMerger.cs" />
+    <Compile Include="Lane\ThLaneLineSimplifier.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

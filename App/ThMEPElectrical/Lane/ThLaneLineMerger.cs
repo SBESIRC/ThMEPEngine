@@ -2,7 +2,7 @@
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical
+namespace ThMEPElectrical.Lane
 {
     public class ThLaneLineMerger
     {
