@@ -18,33 +18,48 @@ namespace ThMEPElectrical
         public void ThLaneLine()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThLaneRecognitionEngine laneLineEngine = new ThLaneRecognitionEngine())
             {
-                var result = Active.Editor.GetEntity("\n请选择需要提取车道中心线的范围框线");
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    RejectObjectsOnLockedLayers = true,
+                    MessageForAdding = "请选择需要提取车道中心线的范围框线"
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+
+                };
+                var filterlist = OpFilter.Bulid(o =>
+                    o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames)
+                );
+                var result = Active.Editor.GetSelection(options, filterlist);
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                // 提取车道中心线
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                laneLineEngine.Recognize(Active.Database, frame.Vertices());
-
-                // 车道线处理
-                var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
-                var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
-                if (lines.Count == 0)
-                {
-                    return;
-                }
-
-                // 框线相交处打断
                 acadDatabase.Database.CreateLaneLineLayer();
-                ThCADCoreNTSGeometryClipper.Clip(frame, lines.ToCollection()).Cast<Curve>().ForEach(o =>
+                foreach (var frameId in result.Value.GetObjectIds())
                 {
-                    acadDatabase.ModelSpace.Add(o);
-                    o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
-                });
+                    using (ThLaneRecognitionEngine laneLineEngine = new ThLaneRecognitionEngine())
+                    {
+                        // 提取车道中心线
+                        Polyline frame = acadDatabase.Element<Polyline>(frameId);
+                        laneLineEngine.Recognize(Active.Database, frame.Vertices());
+
+                        // 车道中心线处理
+                        var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
+                        var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
+
+                        // 框线相交处打断
+                        ThCADCoreNTSGeometryClipper.Clip(frame, lines.ToCollection()).Cast<Curve>().ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
+                        });
+                    }
+                }
             }
         }
     }
