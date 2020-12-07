@@ -2,11 +2,11 @@
 using AcHelper;
 using Linq2Acad;
 using System.Linq;
+using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -26,17 +26,21 @@ namespace ThMEPElectrical
                     return;
                 }
 
+                // 提取车道中心线
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 laneLineEngine.Recognize(Active.Database, frame.Vertices());
-                var lines = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
-                var results = ThLaneLineSimplifier.Simplify(lines.ToCollection(), 1500);
-                if (results.Count == 0)
+
+                // 车道线处理
+                var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
+                var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
+                if (lines.Count == 0)
                 {
                     return;
                 }
 
+                // 框线相交处打断
                 acadDatabase.Database.CreateLaneLineLayer();
-                results.ForEach(o =>
+                ThCADCoreNTSGeometryClipper.Clip(frame, lines.ToCollection()).Cast<Curve>().ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o);
                     o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
