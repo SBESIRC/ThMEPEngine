@@ -29,7 +29,18 @@ namespace ThMEPElectrical
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 laneLineEngine.Recognize(Active.Database, frame.Vertices());
                 var lines = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
-                ThLaneLineSimplifier.Simplify(lines.ToCollection(), 1500).ForEach(o => acadDatabase.ModelSpace.Add(o));
+                var results = ThLaneLineSimplifier.Simplify(lines.ToCollection(), 1500);
+                if (results.Count == 0)
+                {
+                    return;
+                }
+
+                acadDatabase.Database.CreateLaneLineLayer();
+                results.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
+                });
             }
         }
     }

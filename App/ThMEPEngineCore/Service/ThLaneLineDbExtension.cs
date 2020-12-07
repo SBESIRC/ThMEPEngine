@@ -70,7 +70,7 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Curve curve)
                             {
-                                if (CheckLayerValid(curve))
+                                if (CheckLayerValid(curve) && CheckCurveValid(curve))
                                 {
                                     curves.Add(curve.GetTransformedCopy(matrix) as Curve);
                                 }

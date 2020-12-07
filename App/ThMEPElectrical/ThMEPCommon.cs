@@ -25,6 +25,10 @@ namespace ThMEPElectrical
         public const string PROTECTAREA_LAYER_NAME = "E-FD-PR";
         public const string BLINDAREA_HATCH_LAYER_NAME = "E-FD-DA";
 
+        // 图层
+        public const short LANELINE_LAYER_COLORINDEX = 6;
+        public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";
+
         // 常量
         public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);
         public static readonly Point3d NullPoint3d = new Point3d(double.NaN, double.NaN, 0);

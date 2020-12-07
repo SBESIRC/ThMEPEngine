@@ -32,5 +32,15 @@ namespace ThMEPElectrical
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
             }
         }
+
+        public static void CreateLaneLineLayer(this Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                database.AddLayer(ThMEPCommon.LANELINE_LAYER_NAME);
+                database.SetLayerColor(ThMEPCommon.LANELINE_LAYER_NAME, ThMEPCommon.LANELINE_LAYER_COLORINDEX);
+                acadDatabase.Layers.Element(ThMEPCommon.LANELINE_LAYER_NAME).IsPlottable = false;
+            }
+        }
     }
 }
