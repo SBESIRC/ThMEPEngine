@@ -12,9 +12,25 @@ namespace ThCADCore.NTS
             {
                 return point.ToNTSPoint();
             }
-            else if (obj is Curve curve)
+            else if (obj is Line line)
             {
-                return curve.ToNTSLineString();
+                return line.ToNTSLineString();
+            }
+            else if (obj is Polyline polyline)
+            {
+                return polyline.ToNTSLineString();
+            }
+            else if (obj is Polyline2d poly2d)
+            {
+                return poly2d.ToNTSLineString();
+            }
+            else if (obj is Circle circle)
+            {
+                return circle.ToNTSPolygon();
+            }
+            else if (obj is Arc arc)
+            {
+                return arc.ToNTSLineString();
             }
             else if(obj is MPolygon mPolygon)
             {
@@ -23,33 +39,6 @@ namespace ThCADCore.NTS
             else if (obj is Region region)
             {
                 return region.ToNTSPolygon();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-        private static Geometry ToNTSLineString(this Curve curve)
-        {
-            if (curve is Line line)
-            {
-                return line.ToNTSLineString();
-            }
-            else if (curve is Polyline polyline)
-            {
-                return polyline.ToNTSLineString();
-            }
-            else if (curve is Polyline2d poly2d)
-            {
-                return poly2d.ToNTSLineString();
-            }
-            else if (curve is Circle circle)
-            {
-                return circle.ToNTSPolygon();
-            }
-            else if (curve is Arc arc)
-            {
-                return arc.ToNTSLineString();
             }
             else
             {
