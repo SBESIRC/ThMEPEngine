@@ -386,14 +386,10 @@ namespace ThCADCore.NTS
             return shapeFactory.CreateCircle();
         }
 
-        public static LineString ToNTSLineString(this Line line)
+        public static LineString ToNTSLineString(this Arc arc)
         {
-            var points = new List<Coordinate>
-            {
-                line.StartPoint.ToNTSCoordinate(),
-                line.EndPoint.ToNTSCoordinate()
-            };
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
+            int segments = (int)Math.Ceiling(arc.Length / ThCADCoreNTSService.Instance.ArcTessellationLength);
+            return arc.ToNTSLineString(segments + 1);
         }
 
         public static LineString ToNTSLineString(this Arc arc, int numPoints)
@@ -405,6 +401,16 @@ namespace ThCADCore.NTS
                 NumPoints = numPoints
             };
             return shapeFactory.CreateArc(arc.StartAngle, arc.TotalAngle);
+        }
+
+        public static LineString ToNTSLineString(this Line line)
+        {
+            var points = new List<Coordinate>
+            {
+                line.StartPoint.ToNTSCoordinate(),
+                line.EndPoint.ToNTSCoordinate()
+            };
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
         }
 
         public static Point ToNTSPoint(this DBPoint point)
