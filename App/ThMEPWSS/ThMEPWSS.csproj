@@ -39,12 +39,11 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDevicePlatformRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWTopFloorRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWIndependentFloorEngine.cs" />
     <Compile Include="Pipe\Engine\ThWKitchenRoomRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWPairFloorsEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofDeviceFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
@@ -76,6 +75,8 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThFindSpaceRangedSpaces.cs" />
+    <Compile Include="Pipe\Service\ThRoofDeviceFloorBaseCircleService.cs" />
+    <Compile Include="Pipe\Service\ThRoofFloorBasicCircleService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorBaseCircleService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeRoomService.cs" />
@@ -107,9 +108,7 @@
     <Compile Include="Pipe\Engine\ThWCompositePipeEngine.cs" />
     <Compile Include="Pipe\ThWGeUtils.cs" />
     <Compile Include="Pipe\Engine\ThWKitchenPipeEngine.cs" />
-    <Compile Include="Pipe\Model\ThWKitchenPipeParameters.cs" />
     <Compile Include="Pipe\ThWPipeEngine.cs" />
-    <Compile Include="Pipe\Model\ThWToiletPipeParameters.cs" />
     <Compile Include="Pipe\ThWPipeZone.cs" />
     <Compile Include="Pipe\Engine\ThWToiletPipeEngine.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

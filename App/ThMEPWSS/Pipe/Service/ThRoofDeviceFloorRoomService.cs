@@ -15,22 +15,25 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
         private List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofDeviceFloorRoom> Rooms { get; private set; }
+        private List<ThIfcSpace> BaseCircles { get; set; }
 
         private ThRoofDeviceFloorRoomService(
             List<ThIfcSpace> spaces,
             List<ThIfcGravityWaterBucket> gravityWaterBuckets,
             List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets,
-            List<ThIfcRoofRainPipe> roofRainPipes)
+            List<ThIfcRoofRainPipe> roofRainPipes,
+            List<ThIfcSpace> baseCircles)
         {
             Spaces = spaces;
             RoofRainPipes = roofRainPipes;
             GravityWaterBuckets = gravityWaterBuckets;
             SideEntryWaterBuckets = sideEntryWaterBuckets;
+            BaseCircles = baseCircles;
             Rooms = new List<ThWRoofDeviceFloorRoom>();
         }
-        public static List<ThWRoofDeviceFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThIfcRoofRainPipe> roofRainPipes)
+        public static List<ThWRoofDeviceFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
-            using (var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes))
+            using (var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles))
             {
                 roofDeviceFloorContainerService.Build();
                 return roofDeviceFloorContainerService.Rooms;
@@ -56,6 +59,7 @@ namespace ThMEPWSS.Pipe.Service
                 RoofRainPipes = ThRoofDeviceFloorRoofRainPipeService.Find(roofDeviceFloorSpace, RoofRainPipes),
                 GravityWaterBuckets = ThRoofDeviceFloorGravityWaterBucketService.Find(roofDeviceFloorSpace, GravityWaterBuckets),
                 SideEntryWaterBuckets = ThRoofDeviceFloorSideEntryWaterBucketService.Find(roofDeviceFloorSpace, SideEntryWaterBuckets),
+                BaseCircles = ThRoofFloorBaseCircleService.Find(roofDeviceFloorSpace, BaseCircles),
             };
         }
         private List<ThIfcSpace> GetRoofDeviceFloorSpaces()

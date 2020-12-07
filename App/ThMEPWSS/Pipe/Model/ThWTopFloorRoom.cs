@@ -3,6 +3,9 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Model
 {
+    /// <summary>
+    /// 顶层
+    /// </summary>
     public class ThWTopFloorRoom : ThWRoom
     {
         /// <summary>

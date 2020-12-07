@@ -6,26 +6,25 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThTopFloorBaseCircleService
+    public class ThRoofDeviceFloorBaseCircleService
     {
         private List<ThIfcSpace> BaseCircles { get; set; }
         private ThIfcSpace Space { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        private ThTopFloorBaseCircleService(
+        private ThRoofDeviceFloorBaseCircleService(
            ThIfcSpace space,
            List<ThIfcSpace> baseCircles)
         {
             BaseCircles = baseCircles;
             Space = space;
             var objs = new DBObjectCollection();
-            //Pipes.ForEach(o => objs.Add(o.Outline));
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
         public static List<ThIfcSpace> Find(
             ThIfcSpace space,
             List<ThIfcSpace> baseCircles)
         {
-            var service = new ThTopFloorBaseCircleService(space, baseCircles);
+            var service = new ThRoofDeviceFloorBaseCircleService(space, baseCircles);
             return service.Find(space);
         }
         private List<ThIfcSpace> Find(ThIfcSpace FirstFloorSpace)
@@ -60,4 +59,3 @@ namespace ThMEPWSS.Pipe.Service
 
     }
 }
-

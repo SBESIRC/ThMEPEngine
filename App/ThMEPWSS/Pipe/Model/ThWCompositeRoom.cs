@@ -5,15 +5,10 @@
         public ThWToiletRoom Toilet { get; set; }
         public ThWKitchenRoom Kitchen { get; set; }
 
-        public ThWCompositeRoom(ThWKitchenRoom kitchenRoom)
+        public ThWCompositeRoom(ThWKitchenRoom kitchen, ThWToiletRoom toilet)
         {
-            Kitchen = kitchenRoom;
-        }
-
-        public ThWCompositeRoom(ThWKitchenRoom kitchenRoom, ThWToiletRoom toilet)
-        {
-            Kitchen = kitchenRoom;
             Toilet = toilet;
+            Kitchen = kitchen;
         }
     }
 }

@@ -30,10 +30,6 @@ namespace ThMEPWSS.Pipe.Engine
                 Rooms = ThTopFloorRoomService.Build(this.Spaces, basepoint, compositeroom, compositebalconyroom);
             }
         }
-        //private List<ThIfcSpace> Getbasepoint(Database database, Point3dCollection pts)
-        //{
-        
-        //}
         private List<ThWCompositeRoom> Getcompositeroom(Database database, Point3dCollection pts)
         {
             using (ThWCompositeRoomRecognitionEngine compositeRoomRecognitionEngine = new ThWCompositeRoomRecognitionEngine())

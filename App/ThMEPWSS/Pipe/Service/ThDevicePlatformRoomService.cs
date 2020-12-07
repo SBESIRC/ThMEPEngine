@@ -71,7 +71,7 @@ namespace ThMEPWSS.Pipe.Service
             foreach (var devicePlatformSpace in devicePlatformSpaces)
             {
                 ThWDevicePlatformRoom thDevicePlatformRoom = new ThWDevicePlatformRoom();
-                thDevicePlatformRoom.DevicePlatform.Add(devicePlatformSpace);
+                thDevicePlatformRoom.DevicePlatforms.Add(devicePlatformSpace);
                 var DevicePlatformFloordrainService = ThDevicePlatformFloorDrainService.Find(FloorDrains, devicePlatformSpace, FloorDrainSpatialIndex);
                 thDevicePlatformRoom.FloorDrains = DevicePlatformFloordrainService.FloorDrains;
                 var DevicePlatformRainPipeService = ThDevicePlatformRainPipeService.Find(RainPipes, devicePlatformSpace, RainPipeSpatialIndex);

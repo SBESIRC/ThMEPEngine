@@ -4,10 +4,13 @@ using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {
+    /// <summary>
+    /// 屋顶
+    /// </summary>
     public class ThWRoofFloorRoom : ThWRoom
     {
         /// <summary>
-        /// 屋顶设备层空间
+        /// 屋顶空间
         /// </summary>
         public ThIfcSpace RoofFloor { get; set; }
         /// <summary>
@@ -18,14 +21,20 @@ namespace ThMEPWSS.Pipe.Model
         /// 侧入式水斗
         /// </summary>
         public List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
-
+        /// <summary>
+        /// 屋顶雨水管
+        /// </summary>
         public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        /// <summary>
+        /// 基点区域
+        /// </summary>
+        public List<ThIfcSpace> BaseCircles { get; set; }
         public ThWRoofFloorRoom()
         {
-            RoofFloor = null;
             GravityWaterBuckets = new List<ThIfcGravityWaterBucket>();
             SideEntryWaterBuckets = new List<ThIfcSideEntryWaterBucket>();
             RoofRainPipes = new List<ThIfcRoofRainPipe>();
+            BaseCircles = new List<ThIfcSpace>();
         }
     }
 }

@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
@@ -110,6 +111,13 @@ namespace ThMEPEngineCore.Engine
                     containers.Remove(m);
                     this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
                 }
+                else if(m is Circle circle)//新加的
+                {
+                    Polyline polyline1 = circle.Tessellate(50);
+                    var containers = SelectPolylineContainers(SpaceBoundaries, polyline1);
+                    containers.Remove(m);
+                    this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
+                }
                 else
                 {
                     this.AreaContainer.Add(m, new List<Curve>());
@@ -152,6 +160,7 @@ namespace ThMEPEngineCore.Engine
             {
                 spaceBoundaryDbExtension.BuildElementCurves();
                 List<Curve> curves = new List<Curve>();
+                
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();

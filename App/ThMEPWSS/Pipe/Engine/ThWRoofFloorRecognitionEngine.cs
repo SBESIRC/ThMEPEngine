@@ -7,7 +7,7 @@ using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Plumbing;
-
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -27,10 +27,11 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     this.Spaces = GetSpaces(database, pts);
                 }
+                var baseCircles= new List<ThIfcSpace>();
                 var gravityWaterBuckets = GetgravityWaterBuckets(database, pts);
                 var sideEntryWaterBuckets = GetsideEntryWaterBuckets(database, pts);
                 var roofRainPipes = GetroofRainPipes(database, pts);
-                Rooms = ThRoofFloorRoomService.Build(this.Spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes);
+                Rooms = ThRoofFloorRoomService.Build(this.Spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);
             }
         }
         private List<ThIfcGravityWaterBucket> GetgravityWaterBuckets(Database database, Point3dCollection pts)
