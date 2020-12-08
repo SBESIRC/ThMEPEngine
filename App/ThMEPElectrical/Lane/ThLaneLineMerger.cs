@@ -1,20 +1,13 @@
-﻿using System;
-using Autodesk.AutoCAD.Geometry;
+﻿using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Lane
 {
     public class ThLaneLineMerger
     {
-        /// <summary>
-        /// 生成主车道
-        /// </summary>
-        /// <param name="lines"></param>
-        /// <param name="startPoint"></param>
-        /// <returns></returns>
-        public static DBObjectCollection LineMerge(DBObjectCollection lines, Point3d startPoint)
+        public static DBObjectCollection LineMerge(DBObjectCollection lines)
         {
-            throw new NotImplementedException();
+            return lines.LineMerge();
         }
     }
 }

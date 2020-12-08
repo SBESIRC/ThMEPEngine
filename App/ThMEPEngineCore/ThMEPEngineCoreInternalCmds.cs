@@ -40,6 +40,31 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THLINEMERGE", CommandFlags.Modal)]
+        public void ThLineMerge()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                foreach (Entity obj in objs.LineMerge())
+                {
+                    obj.ColorIndex = 5;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()
         {
