@@ -572,57 +572,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThSimplify", CommandFlags.Modal)]
-        public void ThSimplify()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("\n请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var result2 = Active.Editor.GetDistance("\n请输入距离");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var options = new PromptKeywordOptions("\n请指定简化方式")
-                {
-                    AllowNone = true
-                };
-                options.Keywords.Add("DP", "DP", "DP(D)");
-                options.Keywords.Add("VW", "VW", "VW(V)");
-                options.Keywords.Add("TP", "TP", "TP(T)");
-                options.Keywords.Default = "DP";
-                var result3 = Active.Editor.GetKeywords(options);
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                Polyline pline = null;
-                double distanceTolerance = result2.Value;
-                var obj = acadDatabase.Element<Polyline>(result.ObjectId);
-                if (result3.StringResult == "DP")
-                {
-                    pline = obj.DPSimplify(distanceTolerance);
-                }
-                else if (result3.StringResult == "VW")
-                {
-                    pline = obj.VWSimplify(distanceTolerance);
-                }
-                else if (result3.StringResult == "TP")
-                {
-                    pline = obj.TPSimplify(distanceTolerance);
-                }
-                pline.ColorIndex = 1;
-                acadDatabase.ModelSpace.Add(pline);
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThOrientation", CommandFlags.Modal)]
         public void ThOrientation()
         {
