@@ -97,7 +97,8 @@ namespace ThMEPElectrical.Broadcast
                 .ToList();
             var objs = new DBObjectCollection();
             parkingLines.ForEach(x => objs.Add(x));
-            var handleLines = objs.ToNTSNodedLineStrings().ToDbObjects()
+            var handleLines = objs.ToNTSNodedLineStrings()
+                .ToDbObjects()
                 .SelectMany(x =>
                 {
                     DBObjectCollection entitySet = new DBObjectCollection();

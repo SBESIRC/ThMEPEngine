@@ -177,17 +177,18 @@ namespace ThMEPElectrical
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acdb.Element<Polyline>(obj);
+                    var plFrame = ThMEPFrameService.Normalize(frame);
 
                     //获取车道线
-                    var lanes = GetLanes(frame, acdb);
+                    var lanes = GetLanes(plFrame, acdb);
 
                     //处理车道线
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
                     var parkingLinesService = new ParkingLinesService();
-                    var parkingLines = parkingLinesService.CreateNodedParkingLines(frame, handleLines, out List<List<Line>> otherPLines);
+                    var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
 
                     //获取构建信息
-                    GetStructureInfo(acdb, frame, out List<Polyline> columns, out List<Polyline> walls);
+                    GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> walls);
 
                     //主车道布置信息
                     LayoutWithParkingLineService layoutService = new LayoutWithParkingLineService();
@@ -214,9 +215,9 @@ namespace ThMEPElectrical
                 .Where(o => o.Layer == ThMEPCommon.NewParkingLineLayer);
             laneLines.ForEach(x => objs.Add(x));
 
-            var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+            //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Polyline>().ToList();
+            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
             return sprayLines.SelectMany(x=>polyline.Trim(x).Cast<Polyline>().ToList()).ToList();
         }
