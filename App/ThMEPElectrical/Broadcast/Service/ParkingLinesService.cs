@@ -90,15 +90,21 @@ namespace ThMEPElectrical.Broadcast
         /// <returns></returns>
         public List<List<Line>> CreateNodedParkingLines(Polyline roomPoly, List<Line> parkingLines, out List<List<Line>> otherPLins)
         {
-            parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList();
+            parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>()
+                .Select(y => {
+                    var dir = (y.EndPoint - y.StartPoint).GetNormal();
+                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1); }))
+                .ToList();
             var objs = new DBObjectCollection();
             parkingLines.ForEach(x => objs.Add(x));
             var handleLines = objs.ToNTSNodedLineStrings().ToDbObjects()
-                .SelectMany(x => {
+                .SelectMany(x =>
+                {
                     DBObjectCollection entitySet = new DBObjectCollection();
                     (x as Polyline).Explode(entitySet);
                     return entitySet.Cast<Line>().ToList();
                 })
+                .Where(x => x.Length > 2)
                 .ToList();
             var pLines = ClassifyParkingLines(handleLines);
             var xPLines = pLines[0];

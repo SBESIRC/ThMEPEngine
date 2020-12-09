@@ -17,6 +17,7 @@ namespace ThMEPElectrical.Broadcast
         readonly double protectRange = 27000;
         readonly double oneProtect = 21000;
         readonly double tol = 5000;
+        readonly double minLength = 5000;
 
         /// <summary>
         /// 计算布置信息
@@ -32,8 +33,8 @@ namespace ThMEPElectrical.Broadcast
             Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> layoutInfo = new Dictionary<List<Line>, Dictionary<Point3d, Vector3d>>();
             foreach (var lines in mainLines)
             {
-                //计算车道线上布置点
-                var lineLayoutPts = GetLayoutLinePoint(lines);
+                ParkingLinesService parkingLinesService = new ParkingLinesService();
+                var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
 
                 //获取该车道线上的构建
                 StructureService structureService = new StructureService();
@@ -44,14 +45,27 @@ namespace ThMEPElectrical.Broadcast
                 var usefulColumns = structureService.SeparateColumnsByLine(lineColumn, lines.First());
                 var usefulWalls = structureService.SeparateColumnsByLine(lineWall, lines.First());
 
+                var pts = new List<Point3d>() { sPt, ePt };
+
                 //计算布置信息
                 var dir = (lines.First().EndPoint - lines.First().StartPoint).GetNormal();
                 StructureLayoutService structureLayoutService = new StructureLayoutService();
-                var lInfo = structureLayoutService.GetLayoutStructPt(lineLayoutPts, usefulColumns[1], usefulWalls[1], dir);
+                var lInfo = structureLayoutService.GetLayoutStructPt(pts, usefulColumns[1], usefulWalls[1], dir);
 
+                //计算出构建上的起点和终点在线上的位置
                 if (lInfo != null && lInfo.Count > 0)
                 {
-                    layoutInfo.Add(lines, lInfo);
+                    pts = GetStructLayoutPtOnLine(lInfo.Select(x => x.Key).ToList(), lines);
+                }
+
+                //计算车道线上布置点
+                var lineLayoutPts = GetLayoutLinePoint(lines, pts, sPt, ePt);
+
+                //计算布置信息
+                var otherInfo = structureLayoutService.GetLayoutStructPt(lineLayoutPts, usefulColumns[1], usefulWalls[1], dir);
+                if (otherInfo != null && otherInfo.Count > 0)
+                {
+                    layoutInfo.Add(lines, otherInfo);
                 }
             }
 
@@ -65,24 +79,33 @@ namespace ThMEPElectrical.Broadcast
         /// <param name="columns"></param>
         /// <param name="walls"></param>
         /// <returns></returns>
-        private List<Point3d> GetLayoutLinePoint(List<Line> lines)
+        private List<Point3d> GetLayoutLinePoint(List<Line> lines, List<Point3d> pts, Point3d lineSPt, Point3d lineEPt)
         {
-            ParkingLinesService parkingLinesService = new ParkingLinesService();
-            var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
-
+            Point3d sPt = pts.OrderBy(x => x.DistanceTo(lineSPt)).First();
+            Point3d ePt = pts.OrderBy(x => x.DistanceTo(lineEPt)).First();
             List<Point3d> layoutPts = new List<Point3d>();
             double lineLength = lines.Sum(x => x.Length);
+            if (lineLength < 5000)    //车道小于五米不需要布置
+            {
+                return layoutPts;
+            }
+
             if (lineLength < oneProtect)
             {
                 layoutPts.Add(new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0));
             }
             else
             {
+                lineLength= lineLength - sPt.DistanceTo(lineSPt) - ePt.DistanceTo(lineEPt);
                 if (lineLength > protectRange)
                 {
-                    var num = Math.Ceiling(lineLength / protectRange) - 1;
+                    var num = Math.Ceiling(lineLength / protectRange);
+                    if (num == 1)
+                    {
+                        num++;
+                    }
                     double moveLength = lineLength / num;
-                    layoutPts.AddRange(GetLayoutPoint(handleLines, moveLength, sPt, ePt));
+                    layoutPts.AddRange(GetLayoutPoint(lines, moveLength, sPt, ePt));
                 }
                 else
                 {
@@ -115,7 +138,7 @@ namespace ThMEPElectrical.Broadcast
                     dir = -dir;
                 }
 
-                while (lineLength >= moveLength || (excessLength > 0 && lineLength > excessLength))
+                while (lineLength > moveLength || (excessLength > 0 && lineLength > excessLength))
                 {
                     if (excessLength > 0)
                     {
@@ -137,15 +160,36 @@ namespace ThMEPElectrical.Broadcast
                 if (excessLength > 0)
                 {
                     excessLength = excessLength - lineLength;
+                    sPt = sPt + dir * lineLength;
                 }
                 else
                 {
                     excessLength = moveLength - lineLength;
+                    sPt = sPt + dir * lineLength;
                 }
             }
 
-            allPts.Add(ePt);
+            //allPts.Add(ePt);
             return allPts; 
+        }
+
+        /// <summary>
+        /// 获取构建上的排布点
+        /// </summary>
+        /// <param name="pts"></param>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        private List<Point3d> GetStructLayoutPtOnLine(List<Point3d> pts, List<Line> lines)
+        {
+            List<Point3d> resPts = new List<Point3d>();
+            foreach (var pt in pts)
+            {
+                var closetPt = pts.OrderBy(x => x.DistanceTo(pt)).First();
+                var lineClosetPt = lines.Select(x => x.GetClosestPointTo(closetPt, true)).OrderBy(x => x.DistanceTo(pt)).First();
+                resPts.Add(lineClosetPt);
+            }
+
+            return resPts;
         }
     }
 }
