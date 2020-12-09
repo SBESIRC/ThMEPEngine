@@ -31,11 +31,10 @@ namespace ThMEPWSS.Pipe.Engine
             }
             foreach (var waterBucket in sideWaterBucket)
             {
-                Vector3d dis = new Vector3d(160, -114, 0);
-                Vector3d dis1 = new Vector3d(-160, 114, 0);
+                Vector3d dis = new Vector3d(ThWPipeCommon.SIDEWATERBUCKET_X_INDENT, -ThWPipeCommon.SIDEWATERBUCKET_Y_INDENT, 0);
+                Vector3d dis1 = new Vector3d(-ThWPipeCommon.SIDEWATERBUCKET_X_INDENT, ThWPipeCommon.SIDEWATERBUCKET_Y_INDENT, 0);
                 if (OnLeftPart(waterBucket, boundary))
                 {
-
                     SideWaterBucketCenter.Add(waterBucket.Position - dis);
                 }
                 else { SideWaterBucketCenter.Add(waterBucket.Position - dis1); }
@@ -72,9 +71,9 @@ namespace ThMEPWSS.Pipe.Engine
             var index = new Point3dCollection();
             foreach (Point3d center in centers)
             {         
-                index.Add(center + Vector3d.YAxis.GetNormal() * 1260 + Vector3d.XAxis.GetNormal() * 540);
-                index.Add(center + Vector3d.YAxis.GetNormal() * 1260 + Vector3d.XAxis.GetNormal() * 800);
-                index.Add(center + Vector3d.YAxis.GetNormal() * 1260 + Vector3d.XAxis.GetNormal() * 760) ;
+                index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * ThWPipeCommon.MAX_TAG_XPOSITION);
+                index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.MAX_TAG_LENGTH));
+                index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.MAX_TAG_LENGTH - ThWPipeCommon.TEXT_INDENT)) ;
             }
             return index;
         }

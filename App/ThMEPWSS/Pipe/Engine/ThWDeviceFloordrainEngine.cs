@@ -78,8 +78,8 @@ namespace ThMEPWSS.Pipe.Engine
                 var condensepipe_floordrain = new Point3dCollection();
                 if (pts[0].GetVectorTo(condensepipe.GetCenter()).IsCodirectionalTo(condensepipe.GetCenter().GetVectorTo(pts[1])))
                 {
-                    condensepipe_floordrain.Add(condensepipe.GetCenter() + 50 * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
-                    condensepipe_floordrain.Add(devicefloordrain.Position - 50 * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                    condensepipe_floordrain.Add(condensepipe.GetCenter() + ThWPipeCommon.COMMONRADIUS * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                    condensepipe_floordrain.Add(devicefloordrain.Position - ThWPipeCommon.COMMONRADIUS * condensepipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
                 }
 
                 return condensepipe_floordrain;
@@ -96,8 +96,8 @@ namespace ThMEPWSS.Pipe.Engine
             var rainpipe_floordrain = new Point3dCollection();
             if (GeomUtils.PtInLoop(device, rainpipe.GetCenter()))
             {
-                rainpipe_floordrain.Add(rainpipe.GetCenter() + 50 * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
-                rainpipe_floordrain.Add(devicefloordrain.Position - 50 * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                rainpipe_floordrain.Add(rainpipe.GetCenter() + ThWPipeCommon.COMMONRADIUS * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                rainpipe_floordrain.Add(devicefloordrain.Position - ThWPipeCommon.COMMONRADIUS * rainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
 
             }
             //else
@@ -114,8 +114,8 @@ namespace ThMEPWSS.Pipe.Engine
             var RoofRainpipe_floordrain = new Point3dCollection();
             if (pts[0].GetVectorTo(roofrainpipe.GetCenter()).IsCodirectionalTo(roofrainpipe.GetCenter().GetVectorTo(pts[1])))
             {
-                RoofRainpipe_floordrain.Add(roofrainpipe.GetCenter() + 50 * roofrainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
-                RoofRainpipe_floordrain.Add(devicefloordrain.Position - 50 * roofrainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                RoofRainpipe_floordrain.Add(roofrainpipe.GetCenter() + ThWPipeCommon.COMMONRADIUS * roofrainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
+                RoofRainpipe_floordrain.Add(devicefloordrain.Position - ThWPipeCommon.COMMONRADIUS * roofrainpipe.GetCenter().GetVectorTo(devicefloordrain.Position).GetNormal());
             }
             return RoofRainpipe_floordrain;
         }
