@@ -207,19 +207,19 @@ namespace ThMEPElectrical
         /// 获取车道线
         /// </summary>
         /// <param name="polyline"></param>
-        public List<Polyline> GetLanes(Polyline polyline, AcadDatabase acdb)
+        public List<Curve> GetLanes(Polyline polyline, AcadDatabase acdb)
         {
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
-                .OfType<Polyline>()
+                .OfType<Curve>()
                 .Where(o => o.Layer == ThMEPCommon.NewParkingLineLayer);
             laneLines.ForEach(x => objs.Add(x));
 
             //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
-            return sprayLines.SelectMany(x=>polyline.Trim(x).Cast<Polyline>().ToList()).ToList();
+            return sprayLines.SelectMany(x=>polyline.Trim(x).Cast<Curve>().ToList()).ToList();
         }
 
         /// <summary>

@@ -97,8 +97,11 @@ namespace ThMEPElectrical.Broadcast
                 .ToList();
             var objs = new DBObjectCollection();
             parkingLines.ForEach(x => objs.Add(x));
-            var handleLines = objs.ToNTSNodedLineStrings()
-                .ToDbObjects()
+            var nodeGeo = objs.ToNTSNodedLineStrings();
+            var handleLines = new List<Line>();
+            if (nodeGeo != null)
+            {
+                handleLines = nodeGeo.ToDbObjects()
                 .SelectMany(x =>
                 {
                     DBObjectCollection entitySet = new DBObjectCollection();
@@ -107,6 +110,8 @@ namespace ThMEPElectrical.Broadcast
                 })
                 .Where(x => x.Length > 2)
                 .ToList();
+            }
+            
             var pLines = ClassifyParkingLines(handleLines);
             var xPLines = pLines[0];
             var yPLines = pLines[1];
