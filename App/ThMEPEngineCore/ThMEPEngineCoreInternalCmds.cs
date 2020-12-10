@@ -92,7 +92,7 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThSimplify", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THSIMPLIFY", CommandFlags.Modal)]
         public void ThSimplify()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
