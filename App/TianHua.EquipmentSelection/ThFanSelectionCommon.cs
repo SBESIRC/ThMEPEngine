@@ -76,9 +76,9 @@ namespace TianHua.FanSelection
         public const string BLOCK_DYNAMIC_PROPERTY_INLET_Y = "进风口 Y";
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_X = "出风口 X";
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_Y = "出风口 Y";
-        public const string BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL_B = "进风口竖B";
-        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL_B = "出风口竖B";
-        public const string BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL_A = "进风口横A";
-        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL_A = "出风口横A";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL = "进风口竖";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL = "出风口竖";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL = "进风口横";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL = "出风口横";
     }
 }
