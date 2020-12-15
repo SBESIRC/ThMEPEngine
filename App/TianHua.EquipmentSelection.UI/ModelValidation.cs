@@ -29,7 +29,22 @@ namespace TianHua.FanSelection.UI
             {
                 Query.ReadOnly = false;
             }
-            bool hasDoubleTypeDoor = Model.FrontRoomDoors2.Values.Any(f => f.Any(d => d.Type.ToString() == "双扇"));
+            bool hasDoubleTypeDoor = false;
+            switch (Model.FireScenario)
+            {
+                case "消防电梯前室":
+                case "独立或合用前室（楼梯间自然）":
+                case "独立或合用前室（楼梯间送风）":
+                    hasDoubleTypeDoor = Model.FrontRoomDoors2.Values.Any(f => f.Where(s => s.Count_Door_Q * s.Width_Door_Q * s.Height_Door_Q !=0).Any(d => d.Type.ToString() == "双扇"));
+                    break;
+                case "楼梯间（前室不送风）":
+                case "楼梯间（前室送风）":
+                    hasDoubleTypeDoor = Model.FrontRoomDoors2.Values.Any(f => f.Where(s => s.Count_Door_Q * s.Height_Door_Q * s.Width_Door_Q * s.Crack_Door_Q != 0).Any(d => d.Type.ToString() == "双扇"));
+                    break;
+                default:
+                    break;
+            }
+            
             List<ThResult> results = new List<ThResult>()
             {
                 new ThResult()
