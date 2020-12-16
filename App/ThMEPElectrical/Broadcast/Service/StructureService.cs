@@ -26,7 +26,6 @@ namespace ThMEPElectrical.Broadcast.Service
                 var linePoly = StructUtils.ExpandLine(x, tol);
                 var polyCollection = new DBObjectCollection() { linePoly };
                 return polys.Where(y => y.Intersection(polyCollection).Count > 0).ToList();
-                //return linePoly.Intersection(polyCollection).Cast<Polyline>().ToList();
             }).ToList();
 
             return resPolys;
@@ -79,60 +78,6 @@ namespace ThMEPElectrical.Broadcast.Service
                 }
             }
 
-            return new List<List<Polyline>>() { upPolyline, downPolyline };
-        }
-
-        /// <summary>
-        /// 沿着线将柱分隔成上下两部分
-        /// </summary>
-        /// <param name="columns"></param>
-        /// <param name="line"></param>
-        /// <returns></returns>
-        public List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines)
-        {
-            Dictionary<Line, List<Polyline>> groupDic = new Dictionary<Line, List<Polyline>>();
-            foreach (var poly in polyline)
-            {
-                var closetLine = lines.OrderBy(x => x.Distance(poly)).First();
-                if (groupDic.ContainsKey(closetLine))
-                {
-                    groupDic[closetLine].Add(poly);
-                }
-                else
-                {
-                    groupDic.Add(closetLine, new List<Polyline>() { poly });
-                }
-            }
-
-            List<Polyline> upPolyline = new List<Polyline>();
-            List<Polyline> downPolyline = new List<Polyline>();
-            foreach (var lineDic in groupDic)
-            {
-                Vector3d xDir = (lineDic.Key.EndPoint - lineDic.Key.StartPoint).GetNormal();
-                Vector3d yDir = Vector3d.ZAxis.CrossProduct(xDir);
-                Vector3d zDir = Vector3d.ZAxis;
-                Matrix3d matrix = new Matrix3d(
-                    new double[] {
-                    xDir.X, yDir.X, zDir.X, lineDic.Key.StartPoint.X,
-                    xDir.Y, yDir.Y, zDir.Y, lineDic.Key.StartPoint.Y,
-                    xDir.Z, yDir.Z, zDir.Z, lineDic.Key.StartPoint.Z,
-                    0.0, 0.0, 0.0, 1.0
-                    });
-
-                foreach (var poly in lineDic.Value)
-                {
-                    var transPt = StructUtils.GetStructCenter(poly).TransformBy(matrix.Inverse());
-                    if (transPt.Y < 0)
-                    {
-                        downPolyline.Add(poly);
-                    }
-                    else
-                    {
-                        upPolyline.Add(poly);
-                    }
-                }
-            }
-            
             return new List<List<Polyline>>() { upPolyline, downPolyline };
         }
     }
