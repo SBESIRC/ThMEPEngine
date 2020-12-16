@@ -5,8 +5,8 @@ namespace TianHua.FanSelection.Messaging
 {
     public class ThModelUndoMessageArgs : ThModelMessageArgs
     {
-        public List<string> UnappendedModels { get; set; }
-        public List<string> ReappendedModels { get; set; }
+        public Dictionary<string, List<int>> UnappendedModels { get; set; }
+        public Dictionary<string, List<int>> ReappendedModels { get; set; }
     }
 
     public class ThModelUndoMessage : MessageBase<ThModelUndoMessage, ThModelUndoMessageArgs>

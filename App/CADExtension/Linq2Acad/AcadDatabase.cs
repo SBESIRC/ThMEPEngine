@@ -234,13 +234,13 @@ namespace Linq2Acad
         /// <exception cref="System.InvalidCastException">Thrown when the object cannot be casted to the target type.</exception>
         /// <exception cref="System.Exception">Thrown when getting the element throws an exception.</exception>
         /// <returns>The object with the given ObjectId.</returns>
-        public T Element<T>(ObjectId id, bool forWrite, bool forceOpenOnLockedLayer = false) where T : DBObject
+        public T Element<T>(ObjectId id, bool forWrite, bool openErased = false, bool forceOpenOnLockedLayer = false) where T : DBObject
         {
             if (!id.IsValid) throw Error.InvalidObject("ObjectId");
 
             try
             {
-                return ElementInternal<T>(id, forWrite, forceOpenOnLockedLayer);
+                return ElementInternal<T>(id, forWrite, openErased, forceOpenOnLockedLayer);
             }
             catch (InvalidCastException e)
             {
@@ -324,9 +324,9 @@ namespace Linq2Acad
         /// <param name="id">The id of the object.</param>
         /// <param name="forWrite">True, if the object should be opened for-write.</param>
         /// <returns>The object with the given ObjectId.</returns>
-        private T ElementInternal<T>(ObjectId id, bool forWrite, bool forceOpenOnLockedLayer = false) where T : DBObject
+        private T ElementInternal<T>(ObjectId id, bool forWrite, bool openErased = false, bool forceOpenOnLockedLayer = false) where T : DBObject
         {
-            return (T)transaction.GetObject(id, forWrite ? OpenMode.ForWrite : OpenMode.ForRead, false, forceOpenOnLockedLayer);
+            return (T)transaction.GetObject(id, forWrite ? OpenMode.ForWrite : OpenMode.ForRead, openErased, forceOpenOnLockedLayer);
         }
 
         /// <summary>

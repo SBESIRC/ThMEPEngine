@@ -348,5 +348,23 @@ namespace TianHua.FanSelection
         /// 是否手动输入风量
         /// </summary>
         public bool IsManualInputAirVolume { get; set; }
+
+
+        /// <summary>
+        /// 系统风量
+        /// </summary>
+        public int SysAirVolume { get; set; }
+
+
+        /// <summary>
+        /// 是否系统均分
+        /// </summary>
+        public bool IsSysAverage 
+        {
+            get
+            {
+                return true;
+            }
+        }
     }
 }

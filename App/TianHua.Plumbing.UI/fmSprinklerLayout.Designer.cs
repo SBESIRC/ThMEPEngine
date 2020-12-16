@@ -143,13 +143,12 @@
             // 
             // BtnLayout
             // 
-            this.BtnLayout.AllowFocus = false;
             this.BtnLayout.Location = new System.Drawing.Point(10, 318);
             this.BtnLayout.Name = "BtnLayout";
             this.BtnLayout.Size = new System.Drawing.Size(158, 22);
             this.BtnLayout.StyleController = this.layoutControl1;
             this.BtnLayout.TabIndex = 16;
-            this.BtnLayout.Text = "布置喷头";
+            this.BtnLayout.Text = "喷头布置";
             this.BtnLayout.Click += new System.EventHandler(this.BtnLayout_Click);
             // 
             // pictureEdit1

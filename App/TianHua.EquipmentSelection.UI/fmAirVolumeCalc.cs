@@ -55,7 +55,7 @@ namespace TianHua.FanSelection.UI
             CheckIsManualInput.Checked = m_Fan.IsManualInputAirVolume;
             if (CheckIsManualInput.Checked)
             {
-                TxtManualInput.Text = FuncStr.NullToStr(m_Fan.AirVolume);
+                TxtManualInput.Text = FuncStr.NullToStr(m_Fan.SysAirVolume);
             }
         }
 
@@ -89,6 +89,11 @@ namespace TianHua.FanSelection.UI
 
             }
 
+            SysAirCalc(_Fan);
+        }
+
+        private void SysAirCalc(FanDataModel _Fan)
+        {
             var _Value = _Fan.AirCalcValue * _Fan.AirCalcFactor;
 
             var _Rem = FuncStr.NullToInt(_Value) % 50;
@@ -104,17 +109,17 @@ namespace TianHua.FanSelection.UI
                 if (_Tmp < 50)
                 {
                     var _DifferenceValue = 50 - _Tmp;
-                    _Fan.AirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
+                    _Fan.SysAirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
                 }
                 else
                 {
                     var _DifferenceValue = 100 - _Tmp;
-                    _Fan.AirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
+                    _Fan.SysAirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
                 }
             }
             else
             {
-                _Fan.AirVolume = FuncStr.NullToInt(_Value);
+                _Fan.SysAirVolume = FuncStr.NullToInt(_Value);
             }
         }
 
@@ -148,17 +153,18 @@ namespace TianHua.FanSelection.UI
                 if (_Tmp < 50)
                 {
                     var _DifferenceValue = 50 - _Tmp;
-                    _Fan.AirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
+                    _Fan.SysAirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
                 }
                 else
                 {
                     var _DifferenceValue = 100 - _Tmp;
-                    _Fan.AirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
+                    _Fan.SysAirVolume = FuncStr.NullToInt(_Value) + _DifferenceValue;
                 }
             }
             else
             {
-                _Fan.AirVolume = FuncStr.NullToInt(_Value);
+                _Fan.SysAirVolume = FuncStr.NullToInt(_Value);
+
             }
         }
 
@@ -242,6 +248,8 @@ namespace TianHua.FanSelection.UI
 
                 TxtManualInput.Enabled = false;
                 Gdc.Enabled = true;
+                SysAirCalc(m_Fan);
+                Gdv.RefreshData();
             }
         }
 

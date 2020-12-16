@@ -34,6 +34,12 @@ namespace TianHua.FanSelection
         public const string BLOCK_LAYER_DUAL = "H-DUAL-FBOX";
         public const string BLOCK_LAYER_EQUP = "H-EQUP-FBOX";
 
+        // 场景
+        public const string SCENARIO_MAKEUP = "消防补风";
+        public const string SCENARIO_EXHAUSTION = "消防排烟";
+        public const string SCENARIO_PROTECTION = "消防加压送风";
+        public const string SCENARIO_DUAL_MAKEUP = "消防补风兼平时送风";
+        public const string SCENARIO_DUAL_EXHAUSTION = "消防排烟兼平时排风";
 
         // 风机块属性
         public const string BLOCK_ATTRIBUTE_EQUIPMENT_SYMBOL = "设备符号";

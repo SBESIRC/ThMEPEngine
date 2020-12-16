@@ -5,9 +5,9 @@ namespace TianHua.FanSelection.Messaging
 {
     public class ThModelDeleteMessageArgs : ThModelMessageArgs
     {
-        public List<string> ErasedModels { get; set; }
+        public Dictionary<string, List<int>> ErasedModels { get; set; }
 
-        public List<string> UnerasedModels { get; set; }
+        public Dictionary<string, List<int>> UnerasedModels { get; set; }
 
     }
 

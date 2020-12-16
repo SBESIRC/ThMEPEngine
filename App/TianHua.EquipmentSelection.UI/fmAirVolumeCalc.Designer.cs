@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.TxtManualInput = new DevExpress.XtraEditors.TextEdit();
+            this.CheckIsManualInput = new DevExpress.XtraEditors.CheckEdit();
             this.BtnOK = new DevExpress.XtraEditors.SimpleButton();
             this.Gdc = new DevExpress.XtraGrid.GridControl();
             this.Gdv = new DevExpress.XtraGrid.Views.BandedGrid.BandedGridView();
@@ -49,12 +51,12 @@
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
             this.emptySpaceItem1 = new DevExpress.XtraLayout.EmptySpaceItem();
-            this.CheckIsManualInput = new DevExpress.XtraEditors.CheckEdit();
             this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.TxtManualInput = new DevExpress.XtraEditors.TextEdit();
             this.layoutControlItem4 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtManualInput.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CheckIsManualInput.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Gdc)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Gdv)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtAirCalcValue)).BeginInit();
@@ -68,9 +70,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.CheckIsManualInput.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtManualInput.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).BeginInit();
             this.SuspendLayout();
             // 
@@ -88,6 +88,29 @@
             this.layoutControl1.Size = new System.Drawing.Size(357, 142);
             this.layoutControl1.TabIndex = 0;
             this.layoutControl1.Text = "layoutControl1";
+            // 
+            // TxtManualInput
+            // 
+            this.TxtManualInput.Enabled = false;
+            this.TxtManualInput.Location = new System.Drawing.Point(101, 107);
+            this.TxtManualInput.Name = "TxtManualInput";
+            this.TxtManualInput.Properties.Mask.EditMask = "[0-9]\\d*";
+            this.TxtManualInput.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtManualInput.Size = new System.Drawing.Size(68, 20);
+            this.TxtManualInput.StyleController = this.layoutControl1;
+            this.TxtManualInput.TabIndex = 35;
+            this.TxtManualInput.EditValueChanged += new System.EventHandler(this.TxtManualInput_EditValueChanged);
+            // 
+            // CheckIsManualInput
+            // 
+            this.CheckIsManualInput.Location = new System.Drawing.Point(15, 107);
+            this.CheckIsManualInput.Name = "CheckIsManualInput";
+            this.CheckIsManualInput.Properties.AllowFocused = false;
+            this.CheckIsManualInput.Properties.Caption = "";
+            this.CheckIsManualInput.Size = new System.Drawing.Size(19, 19);
+            this.CheckIsManualInput.StyleController = this.layoutControl1;
+            this.CheckIsManualInput.TabIndex = 34;
+            this.CheckIsManualInput.CheckedChanged += new System.EventHandler(this.CheckIsManualInput_CheckedChanged);
             // 
             // BtnOK
             // 
@@ -230,8 +253,8 @@
             // 
             this.ColAirVolume.AppearanceCell.Options.UseTextOptions = true;
             this.ColAirVolume.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.ColAirVolume.Caption = "风量";
-            this.ColAirVolume.FieldName = "AirVolume";
+            this.ColAirVolume.Caption = "系统风量";
+            this.ColAirVolume.FieldName = "SysAirVolume";
             this.ColAirVolume.Name = "ColAirVolume";
             this.ColAirVolume.OptionsColumn.AllowEdit = false;
             this.ColAirVolume.Visible = true;
@@ -311,17 +334,6 @@
             this.emptySpaceItem1.Size = new System.Drawing.Size(56, 30);
             this.emptySpaceItem1.TextSize = new System.Drawing.Size(0, 0);
             // 
-            // CheckIsManualInput
-            // 
-            this.CheckIsManualInput.Location = new System.Drawing.Point(15, 107);
-            this.CheckIsManualInput.Name = "CheckIsManualInput";
-            this.CheckIsManualInput.Properties.AllowFocused = false;
-            this.CheckIsManualInput.Properties.Caption = "";
-            this.CheckIsManualInput.Size = new System.Drawing.Size(19, 19);
-            this.CheckIsManualInput.StyleController = this.layoutControl1;
-            this.CheckIsManualInput.TabIndex = 34;
-            this.CheckIsManualInput.CheckedChanged += new System.EventHandler(this.CheckIsManualInput_CheckedChanged);
-            // 
             // layoutControlItem3
             // 
             this.layoutControlItem3.Control = this.CheckIsManualInput;
@@ -331,18 +343,6 @@
             this.layoutControlItem3.Size = new System.Drawing.Size(27, 30);
             this.layoutControlItem3.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem3.TextVisible = false;
-            // 
-            // TxtManualInput
-            // 
-            this.TxtManualInput.Enabled = false;
-            this.TxtManualInput.Location = new System.Drawing.Point(101, 107);
-            this.TxtManualInput.Name = "TxtManualInput";
-            this.TxtManualInput.Properties.Mask.EditMask = "[0-9]\\d*";
-            this.TxtManualInput.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
-            this.TxtManualInput.Size = new System.Drawing.Size(68, 20);
-            this.TxtManualInput.StyleController = this.layoutControl1;
-            this.TxtManualInput.TabIndex = 35;
-            this.TxtManualInput.EditValueChanged += new System.EventHandler(this.TxtManualInput_EditValueChanged);
             // 
             // layoutControlItem4
             // 
@@ -368,6 +368,8 @@
             this.Text = "风量计算器";
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.TxtManualInput.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CheckIsManualInput.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Gdc)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Gdv)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtAirCalcValue)).EndInit();
@@ -381,9 +383,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.CheckIsManualInput.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtManualInput.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).EndInit();
             this.ResumeLayout(false);
 

@@ -24,15 +24,17 @@ namespace TianHua.FanSelection.UI
             {
                 TxtCalcValue.Text = "无";
                 TxtEstimatedValue.Text = FuncStr.NullToStr(Model.AirCalcValue);
-                Model.AirCalcFactor = 1.2;
+                //Model.AirCalcFactor = 1.2;
                 TxtFactor.Text = FuncStr.NullToStr(Model.AirCalcFactor);
                 return;
             }
 
-            this.TxtCalcValue.Text = ExhaustModelCalculator.GetTxtCalcValue(Model.ExhaustModel);
+            TxtCalcValue.Text = ExhaustModelCalculator.GetTxtCalcValue(Model.ExhaustModel);
             TxtEstimatedValue.Text = FuncStr.NullToStr(Model.ExhaustModel.EstimateAirVolum.NullToDouble());
+            int maxairvalue = Math.Max(TxtCalcValue.Text.NullToInt(), TxtEstimatedValue.Text.NullToInt());
+            Model.SysAirVolume = SysAirCalc(Model.AirCalcFactor, maxairvalue);
             TxtFactor.Text = FuncStr.NullToStr(Model.AirCalcFactor);
-            TxtAirVolume.Text = FuncStr.NullToStr(Model.AirVolume);
+            TxtAirVolume.Text = FuncStr.NullToStr(Model.SysAirVolume);
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
@@ -53,7 +55,6 @@ namespace TianHua.FanSelection.UI
             {
                 this.TxtCalcValue.Text = ExhaustModelCalculator.GetTxtCalcValue(Model.ExhaustModel);
                 Model.ExhaustModel.EstimateAirVolum = TxtEstimatedValue.Text;
-                Model.AirCalcValue = Math.Max(this.TxtCalcValue.Text.NullToInt(), TxtEstimatedValue.Text.NullToInt());
             }
         }
 
@@ -82,14 +83,16 @@ namespace TianHua.FanSelection.UI
 
         private void EstimateValueChanged(object sender, EventArgs e)
         {
+            int maxairvalue = Math.Max(TxtCalcValue.Text.NullToInt(), TxtEstimatedValue.Text.NullToInt());
+            Model.SysAirVolume = SysAirCalc(Model.AirCalcFactor, maxairvalue);
             if (Model.ExhaustModel != null)
             {
                 Model.ExhaustModel.EstimateAirVolum = this.TxtEstimatedValue.Text;
-                Model.AirCalcValue = Math.Max(this.TxtCalcValue.Text.NullToInt(), TxtEstimatedValue.Text.NullToInt());
+                Model.AirCalcValue = Math.Max(ExhaustModelCalculator.GetTxtCalcValue(Model.ExhaustModel).NullToInt(), Model.ExhaustModel.EstimateAirVolum.NullToInt());
             }
             else
             {
-                Model.AirCalcValue = this.TxtEstimatedValue.Text.NullToInt();
+                Model.AirCalcValue = FuncStr.NullToInt(TxtEstimatedValue.Text);
             }
             UpdateAirVolume();
         }
@@ -102,15 +105,20 @@ namespace TianHua.FanSelection.UI
 
         private void CalculateValueChanged(object sender, EventArgs e)
         {
+            int maxairvalue = 0;
+            if (!Model.ExhaustModel.IsNull())
+            {
+                maxairvalue = Math.Max(ExhaustModelCalculator.GetTxtCalcValue(Model.ExhaustModel).NullToInt(), Model.ExhaustModel.EstimateAirVolum.NullToInt());
+                Model.AirCalcValue = maxairvalue;
+            }
             UpdateAirVolume();
         }
 
         private void UpdateAirVolume()
         {
-            int maxcalvalue = FuncStr.NullToInt(Math.Round(Math.Max(this.TxtCalcValue.Text.NullToDouble(), this.TxtEstimatedValue.Text.NullToDouble()) * this.TxtFactor.Text.NullToDouble()));
-            //Model.AirCalcValue = maxcalvalue;
-            Model.AirVolume = maxcalvalue==0 ? 0 : ExhaustModelCalculator.RoundUpToFifty(maxcalvalue);
-            this.TxtAirVolume.Text = Model.AirVolume.NullToStr();
+            int maxairvalue = Math.Max(TxtCalcValue.Text.NullToInt(), TxtEstimatedValue.Text.NullToInt());
+            Model.SysAirVolume = SysAirCalc(Model.AirCalcFactor, maxairvalue);
+            this.TxtAirVolume.Text = Model.SysAirVolume.NullToStr();
         }
 
         private void FactorChangedCheck(object sender, KeyEventArgs e)
@@ -125,5 +133,29 @@ namespace TianHua.FanSelection.UI
         {
             this.TxtFactor.Text = ExhaustModelCalculator.SelectionFactorCheck(this.TxtFactor.Text);
         }
+
+        private int SysAirCalc(double calcfactor, double airvalue)
+        {
+            var _Value = airvalue * calcfactor;
+            int sysairvolume = 0;
+            var _Rem = FuncStr.NullToInt(_Value) % 100;
+            if (_Rem == 0)
+            {
+                sysairvolume = FuncStr.NullToInt(_Value);
+            }
+            else
+            {
+                if (_Rem < 50)
+                {
+                    sysairvolume = FuncStr.NullToInt(_Value - _Rem + 50);
+                }
+                else
+                {
+                    sysairvolume = FuncStr.NullToInt(_Value - _Rem + 100);
+                }
+            }
+            return FuncStr.NullToInt(sysairvolume);
+        }
+
     }
 }

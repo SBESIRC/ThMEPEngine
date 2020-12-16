@@ -23,7 +23,6 @@ namespace TianHua.FanSelection.UI
 
         public void Initialize()
         {
-            SubscribeToOverrules();
             AddDoubleClickHandler();
             SubscribeToDocumentManagerEvents();
             if (Active.Document != null)
@@ -34,7 +33,6 @@ namespace TianHua.FanSelection.UI
 
         public void Terminate()
         {
-            UnsubscribeToOverrules();
             RemoveDoubleClickHandler();
             UnSubscribeToDocumentManagerEvents();
         }
@@ -102,25 +100,34 @@ namespace TianHua.FanSelection.UI
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJBLOCK", CommandFlags.NoHistory)]
-        public void ThEquipmentBlock()
+        [CommandMethod("TIANHUACAD", "THFJSYSTEMINSERT", CommandFlags.NoHistory | CommandFlags.NoUndoMarker)]
+        public void ThEquipmentSystemInsert()
         {
-            using (var cmd = new ThModelBlockCommand())
+            using (var cmd = new ThModelSystemInsertCommand())
             {
                 cmd.Execute();
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJINPLACEEDITBLOCK", CommandFlags.NoHistory)]
-        public void ThEquipmentInPlaceEditBlock()
+        [CommandMethod("TIANHUACAD", "THFJSYSTEMCOPY", CommandFlags.NoHistory | CommandFlags.NoUndoMarker)]
+        public void ThEquipmentSystemCopy()
         {
-            using (var cmd = new ThModelInPlaceEditBlockCommand())
+            using (var cmd = new ThModelSystemCopyCommand())
             {
                 cmd.Execute();
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFJUIUPDATE", CommandFlags.NoUndoMarker)]
+        [CommandMethod("TIANHUACAD", "THFJSYSTEMERASE", CommandFlags.NoHistory | CommandFlags.NoUndoMarker)]
+        public void ThEquipmentSystemErase()
+        {
+            using (var cmd = new ThModelSystemEraseCommand())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THFJUIUPDATE", CommandFlags.NoHistory | CommandFlags.NoUndoMarker)]
         public void ThEquipmentUiUpdate()
         {
             using (var cmd = new ThModelUiUpdateCommand())
@@ -181,16 +188,6 @@ namespace TianHua.FanSelection.UI
         private static void UnSubscribeToDocumentEvents(Document document)
         {
             documentEventHandler.Dispose();
-        }
-
-        private static void SubscribeToOverrules()
-        {
-            ThFanModelOverruleManager.Instance.Register();
-        }
-
-        private static void UnsubscribeToOverrules()
-        {
-            ThFanModelOverruleManager.Instance.UnRegister();
         }
 
         private static void DocumentManager_DocumentActivated(object sender, DocumentCollectionEventArgs e)

@@ -97,8 +97,10 @@
     <Compile Include="CAD\ThFanSelectionDocumentEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbUndoHandler.cs" />
     <Compile Include="CAD\ThFanSelectionEngine.cs" />
-    <Compile Include="CAD\ThModelBlockCommand.cs" />
-    <Compile Include="CAD\ThModelInPlaceEditBlockCommand.cs" />
+    <Compile Include="CAD\ThModelSystemInsertCommand.cs" />
+    <Compile Include="CAD\ThModelCommand.cs" />
+    <Compile Include="CAD\ThModelSystemCopyCommand.cs" />
+    <Compile Include="CAD\ThModelSystemEraseCommand.cs" />
     <Compile Include="CAD\ThModelUiUpdateCommand.cs" />
     <Compile Include="CtlAxisymmetric.cs">
       <SubType>UserControl</SubType>

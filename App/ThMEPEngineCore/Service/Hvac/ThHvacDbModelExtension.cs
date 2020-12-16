@@ -1,5 +1,4 @@
-﻿using System;
-using Linq2Acad;
+﻿using Linq2Acad;
 using DotNetARX;
 using System.Linq;
 using System.Text;
@@ -73,19 +72,8 @@ namespace ThMEPEngineCore.Service.Hvac
 
         public static string GetModelIdentifier(this ObjectId obj)
         {
-            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
-            if (valueList == null)
-            {
-                return string.Empty;
-            }
-
-            var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-            if (!values.Any())
-            {
-                return string.Empty;
-            }
-
-            return (string)values.ElementAt(0).Value;
+            var model = obj.GetObject(OpenMode.ForRead, true);
+            return model.GetModelIdentifier();
         }
 
         public static string GetModelIdentifier(this DBObject dBObject)
@@ -123,19 +111,8 @@ namespace ThMEPEngineCore.Service.Hvac
 
         public static bool IsModel(this ObjectId obj, string identifier)
         {
-            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
-            if (valueList == null)
-            {
-                return false;
-            }
-
-            var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-            if (!values.Any())
-            {
-                return false;
-            }
-
-            return (string)values.ElementAt(0).Value == identifier;
+            var model = obj.GetObject(OpenMode.ForRead, true);
+            return model.GetModelIdentifier() == identifier;
         }
 
         public static string GetModelStyle(this ObjectId obj)
@@ -164,7 +141,13 @@ namespace ThMEPEngineCore.Service.Hvac
 
         public static int GetModelNumber(this ObjectId obj)
         {
-            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
+            var model = obj.GetObject(OpenMode.ForRead, true);
+            return model.GetModelNumber();
+        }
+
+        public static int GetModelNumber(this DBObject dBObject)
+        {
+            var valueList = dBObject.GetXData(ThHvacCommon.RegAppName_FanSelection);
             if (valueList == null)
             {
                 return 0;

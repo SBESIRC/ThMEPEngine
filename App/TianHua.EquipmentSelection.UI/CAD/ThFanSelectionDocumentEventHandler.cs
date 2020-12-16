@@ -205,17 +205,18 @@ namespace TianHua.FanSelection.UI.CAD
 
         public void SendCopyMessage()
         {
-            if (DbDeepCloneHandler.ModelMapping.Count == 0)
+            if (DbDeepCloneHandler.ModelSystemMapping.Count == 0)
             {
                 return;
             }
 
+            // 暂时只支持复制整个系统
             _ = new ThFanSelectionAppIdleHandler()
             {
                 Message = new ThModelCopyMessage(),
                 MessageArgs = new ThModelCopyMessageArgs()
                 {
-                    ModelMapping = DbDeepCloneHandler.ModelMapping,
+                    ModelSystemMapping = DbDeepCloneHandler.ModelSystemMapping,
                 }
             };
         }
