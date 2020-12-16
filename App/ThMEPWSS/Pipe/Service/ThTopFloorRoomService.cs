@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -13,23 +14,26 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThIfcSpace> BaseCircles { get; set; }
         private List<ThWCompositeRoom> CompositeRooms { get; set; }
         private List<ThWCompositeBalconyRoom> CompositeBalconyRooms { get; set; }
+        private List<Line> DivisionLines { get; set; }      
         public List<ThWTopFloorRoom> Rooms { get; private set; }
 
         private ThTopFloorRoomService(
             List<ThIfcSpace> spaces,
-            List<ThIfcSpace> baseCircles,
+            List<ThIfcSpace> baseCircles,          
             List<ThWCompositeRoom> compositeRooms,
-            List<ThWCompositeBalconyRoom> compositeBalconyRooms)
+            List<ThWCompositeBalconyRoom> compositeBalconyRooms,
+            List<Line> divisionLines)
         {
             Spaces = spaces;
             BaseCircles = baseCircles;
-            CompositeRooms = compositeRooms;
+            CompositeRooms = compositeRooms;           
             CompositeBalconyRooms = compositeBalconyRooms;
+            DivisionLines = divisionLines;
             Rooms = new List<ThWTopFloorRoom>();
         }
-        public static List<ThWTopFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcSpace> baseCircles, List<ThWCompositeRoom> compositeRooms, List<ThWCompositeBalconyRoom> compositeBalconyRooms)
+        public static List<ThWTopFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcSpace> baseCircles, List<ThWCompositeRoom> compositeRooms, List<ThWCompositeBalconyRoom> compositeBalconyRooms, List<Line> divisionLines)
         {
-            using (var firstFloorContainerService = new ThTopFloorRoomService(spaces, baseCircles, compositeRooms, compositeBalconyRooms))
+            using (var firstFloorContainerService = new ThTopFloorRoomService(spaces, baseCircles, compositeRooms, compositeBalconyRooms, divisionLines))
             {
                 firstFloorContainerService.Build();
                 return firstFloorContainerService.Rooms;
@@ -50,13 +54,15 @@ namespace ThMEPWSS.Pipe.Service
         private ThWTopFloorRoom CreateFirstFloorContainer(ThIfcSpace firstFloorSpace)
         {
             return new ThWTopFloorRoom()
-            {
+            {                
                 FirstFloor = firstFloorSpace,
                 BaseCircles = ThTopFloorBaseCircleService.Find(firstFloorSpace, BaseCircles),
                 CompositeRooms = ThTopFloorCompositeRoomService.Find(firstFloorSpace, CompositeRooms),
                 CompositeBalconyRooms = ThTopFloorCompositeBalconyRoomService.Find(firstFloorSpace, CompositeBalconyRooms),
+                DivisionLines = ThTopFloorDivisionLineService.Find(firstFloorSpace, DivisionLines),
             };
         }
+
         /// <summary>
         /// 选择顶层空间
         /// </summary>
@@ -79,7 +85,14 @@ namespace ThMEPWSS.Pipe.Service
             });
             if(spaces.Count>0)
             {
-                FirSpace.Add(spaces.OrderByDescending(o => o.Item2).First().Item1);
+                FirSpace.Add(spaces.OrderByDescending(o => o.Item2).First().Item1);            
+                foreach(var space in spaces.OrderByDescending(o => o.Item2))
+                {
+                    if(space.Item1!= FirSpace[0])
+                    {
+                        FirSpace.Add(space.Item1);
+                    }
+                }
             }
             return FirSpace;
         }

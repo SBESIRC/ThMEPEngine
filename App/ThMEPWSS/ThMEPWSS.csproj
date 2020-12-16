@@ -40,6 +40,7 @@
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWCompositeIndexEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDevicePlatformRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWTopFloorRecognitionEngine.cs" />
@@ -80,6 +81,7 @@
     <Compile Include="Pipe\Service\ThTopFloorBaseCircleService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeRoomService.cs" />
+    <Compile Include="Pipe\Service\ThTopFloorDivisionLineService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorRoomService.cs" />
     <Compile Include="Pipe\Service\ThKitchenBasintoolService.cs" />
     <Compile Include="Pipe\Service\ThKitchenDrainwellService.cs" />

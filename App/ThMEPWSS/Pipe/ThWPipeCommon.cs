@@ -86,5 +86,8 @@
         /// 厨房到阳台最大距离
         /// </summary>
         public const double MAX_KITCHEN_TO_BALCONY_DISTANCE = 9000;
+
+        // 图层
+        public const string AD_FLOOR_AREA = "AD-FLOOR-AREA";
     }
 }

@@ -27,22 +27,21 @@ namespace ThMEPWSS.Pipe.Service
         public static List<ThWCompositeBalconyRoom> Find(
             ThIfcSpace space,
             List<ThWCompositeBalconyRoom> compositeBalconyRoom)
-        {
-            var service = new ThTopFloorCompositeBalconyRoomService(space, compositeBalconyRoom);
-            return service.Find(space);
+        {          
+            return Findspace(space, compositeBalconyRoom);
         }
-        private List<ThWCompositeBalconyRoom> Find(ThIfcSpace FirstFloorSpace)
+        private static List<ThWCompositeBalconyRoom> Findspace(ThIfcSpace FirstFloorSpace, List<ThWCompositeBalconyRoom> compositeBalconyRoom)
         {
-            var engine = new ThWCompositeRoomRecognitionEngine();
-            foreach (var room in engine.FloorDrainRooms)
+            var balconyroom = new List<ThWCompositeBalconyRoom>();
+            foreach (var room in compositeBalconyRoom)
             {
                 var bboundary = FirstFloorSpace.Boundary as Polyline;
                 if (GeomUtils.PtInLoop(bboundary, room.Balcony.Balcony.Boundary.GetCenter()))
                 {
-                    CompositeBalconyRoom.Add(room);
+                    balconyroom.Add(room);
                 }
             }
-            return CompositeBalconyRoom;
+            return balconyroom;
         }
     
     }

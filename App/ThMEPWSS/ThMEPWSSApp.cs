@@ -159,124 +159,505 @@ namespace ThMEPWSS
                     return;
                 }
                 Polyline pboundary = acadDatabase.Element<Polyline>(result7.ObjectId);
+                Active.Editor.WriteMessage("\n 选择分割线");
+
+                var dxfNames = new string[]
+                {
+                    //RXClass.GetClass(typeof(Arc)).DxfName,
+                    RXClass.GetClass(typeof(Line)).DxfName,
+                    //RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                TypedValue[] tvs7 = new TypedValue[]
+                {
+                    new TypedValue((int)DxfCode.Start, string.Join(",", dxfNames)),
+                };
+                SelectionFilter sf7 = new SelectionFilter(tvs7);
+                var result8 = Active.Editor.GetSelection(sf7);
+                var divideLines = new List<Line>();
+                if (result8.Status == PromptStatus.OK)
+                {
+                    //块的集合
+                    foreach (var objId in result8.Value.GetObjectIds())
+                    {
+                        divideLines.Add(acadDatabase.Element<Line>(objId));
+                    }
+                }
+                Active.Editor.WriteMessage("\n 选择屋顶雨水管");
+                TypedValue[] tvs9 = new TypedValue[]
+                {
+                    new TypedValue((int)DxfCode.Start,"LWPolyLine")
+                };
+                SelectionFilter sf9 = new SelectionFilter(tvs9);
+                var result9 = Active.Editor.GetSelection(sf9);
+                var roofrainpipe = new List<Polyline>();
+                if (result9.Status == PromptStatus.OK)
+                {
+                    //块的集合
+
+                    foreach (var objId in result.Value.GetObjectIds())
+                    {
+                        roofrainpipe.Add(acadDatabase.Element<Polyline>(objId));
+                    }
+                }             
                 var PipeindexEngine = new ThWInnerPipeIndexEngine();
-                PipeindexEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary);
-                for (int i = 0; i < PipeindexEngine.Fpipeindex.Count - 1; i++)
-                {
-                    Line ent_line = new Line(PipeindexEngine.Fpipeindex[i], PipeindexEngine.Fpipeindex_tag[3 * i]);
-                    Line ent_line1 = new Line(PipeindexEngine.Fpipeindex_tag[3 * i], PipeindexEngine.Fpipeindex_tag[3 * i + 1]);
-                    //ent_line.Layer = "W-DRAI-NOTE";
-                    ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                    acadDatabase.ModelSpace.Add(ent_line);
-                    acadDatabase.ModelSpace.Add(ent_line1);
-                    DBText taggingtext = new DBText()
+                var compositeEngine = new ThWCompositeIndexEngine(PipeindexEngine);
+                compositeEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary,divideLines,roofrainpipe);
+                for (int j=0;j < compositeEngine.PipeEngine.Fpipeindex.Count;j++)
+                {   
+                    for (int i = 0; i < compositeEngine.PipeEngine.Fpipeindex[j].Count; i++)
                     {
-                        Height = 200,
-                        Position = PipeindexEngine.Fpipeindex_tag[3 * i + 2],
-                        TextString = $"FL{floor.Value}-{i}",
-                    };
-                    acadDatabase.ModelSpace.Add(taggingtext);
-                }
-                for (int i = 0; i < PipeindexEngine.Tpipeindex.Count - 1; i++)
-                {
-                    Line ent_line = new Line(PipeindexEngine.Tpipeindex[i], PipeindexEngine.Tpipeindex_tag[3 * i]);
-                    Line ent_line1 = new Line(PipeindexEngine.Tpipeindex_tag[3 * i], PipeindexEngine.Tpipeindex_tag[3 * i + 1]);
-                    //ent_line.Layer = "W-DRAI-NOTE";
-                    ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                    acadDatabase.ModelSpace.Add(ent_line);
-                    acadDatabase.ModelSpace.Add(ent_line1);
-                    DBText taggingtext = new DBText()
-                    {
-                        Height = 200,
-                        Position = PipeindexEngine.Tpipeindex_tag[3 * i + 2],
-                        TextString = $"TL{floor.Value}-{i}",
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.Fpipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.Fpipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
 
-                    };
-                    acadDatabase.ModelSpace.Add(taggingtext);
+                                }
+                            }
+                        }
+                        double Yoffset = 250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1=PipeindexEngine.Fpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2=PipeindexEngine.Fpipeindex_tag[j][3 * i+1].TransformBy(Matrix);
+                        var tag3=PipeindexEngine.Fpipeindex_tag[j][3 * i+2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Fpipeindex[j][i], tag1);                        
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"FL{j}-{i + 1}"//原来为{floor.Value}                        
+                        };
+                        DBText taggingtext1 = new DBText()                       
+                        {
+                            Height = 175,
+                            Position = tag3,                           
+                            TextString = $"FL-{i + 1}"//原来为{floor.Value}                        
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }
+                    }
                 }
-                for (int i = 0; i < PipeindexEngine.Wpipeindex.Count - 1; i++)
+                for (int j = 0; j < compositeEngine.PipeEngine.Tpipeindex.Count; j++)
                 {
-                    Line ent_line = new Line(PipeindexEngine.Wpipeindex[i], PipeindexEngine.Wpipeindex_tag[3 * i]);
-                    Line ent_line1 = new Line(PipeindexEngine.Wpipeindex_tag[3 * i], PipeindexEngine.Wpipeindex_tag[3 * i + 1]);
-                    //ent_line.Layer = "W-DRAI-NOTE";
-                    ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                    acadDatabase.ModelSpace.Add(ent_line);
-                    acadDatabase.ModelSpace.Add(ent_line1);
-                    DBText taggingtext = new DBText()
+                    for (int i = 0; i < compositeEngine.PipeEngine.Tpipeindex[j].Count; i++)
                     {
-                        Height = 200,
-                        Position = PipeindexEngine.Wpipeindex_tag[3 * i + 2],
-                        TextString = $"WL{floor.Value}-{i}",
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.Tpipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.Tpipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
 
-                    };
-                    acadDatabase.ModelSpace.Add(taggingtext);
-                }
-                for (int i = 0; i < PipeindexEngine.Ppipeindex.Count - 1; i++)
-                {
-                    Line ent_line = new Line(PipeindexEngine.Ppipeindex[i], PipeindexEngine.Ppipeindex_tag[3 * i]);
-                    Line ent_line1 = new Line(PipeindexEngine.Ppipeindex_tag[3 * i], PipeindexEngine.Ppipeindex_tag[3 * i + 1]);
-                    //ent_line.Layer = "W-DRAI-NOTE";
-                    ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                    acadDatabase.ModelSpace.Add(ent_line);
-                    acadDatabase.ModelSpace.Add(ent_line1);
-                    DBText taggingtext = new DBText()
-                    {
-                        Height = 200,
-                        Position = PipeindexEngine.Ppipeindex_tag[3 * i + 2],
-                        TextString = $"PL{floor.Value}-{i}",
+                                }
+                            }
+                        }
+                        double Yoffset = -250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1=PipeindexEngine.Tpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2=PipeindexEngine.Tpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3=PipeindexEngine.Tpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Tpipeindex[j][i], tag1);
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"TL{j}-{i+1}",
 
-                    };
-                    acadDatabase.ModelSpace.Add(taggingtext);
-                }
-                for (int i = 0; i < PipeindexEngine.Dpipeindex.Count - 1; i++)
-                {
-                    Line ent_line = new Line(PipeindexEngine.Dpipeindex[i], PipeindexEngine.Dpipeindex_tag[3 * i]);
-                    Line ent_line1 = new Line(PipeindexEngine.Dpipeindex_tag[3 * i], PipeindexEngine.Dpipeindex_tag[3 * i + 1]);
-                    //ent_line.Layer = "W-DRAI-NOTE";
-                    ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                    acadDatabase.ModelSpace.Add(ent_line);
-                    acadDatabase.ModelSpace.Add(ent_line1);
-                    DBText taggingtext = new DBText()
-                    {
-                        Height = 200,
-                        Position = PipeindexEngine.Dpipeindex_tag[3 * i + 2],
-                        TextString = $"DL{floor.Value}-{i}",
+                        };
+                        DBText taggingtext1 = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"TL-{i + 1}",
 
-                    };
-                    acadDatabase.ModelSpace.Add(taggingtext);
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }
+                    }
                 }
-                for (int i = 0; i < PipeindexEngine.Npipeindex.Count - 1; i++)
+                for (int j = 0; j < compositeEngine.PipeEngine.Wpipeindex.Count; j++)
                 {
-                    Line ent_line = new Line(PipeindexEngine.Npipeindex[i], PipeindexEngine.Npipeindex_tag[3 * i]);
-                    Line ent_line1 = new Line(PipeindexEngine.Npipeindex_tag[3 * i], PipeindexEngine.Npipeindex_tag[3 * i + 1]);
-                    //ent_line.Layer = "W-DRAI-NOTE";
-                    ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                    acadDatabase.ModelSpace.Add(ent_line);
-                    acadDatabase.ModelSpace.Add(ent_line1);
-                    DBText taggingtext = new DBText()
+                    for (int i = 0; i < compositeEngine.PipeEngine.Wpipeindex[j].Count; i++)
                     {
-                        Height = 200,
-                        Position = PipeindexEngine.Npipeindex_tag[3 * i + 2],
-                        TextString = $"NL{floor.Value}-{i}",
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.Wpipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.Wpipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
 
-                    };
-                    acadDatabase.ModelSpace.Add(taggingtext);
+                                }
+                            }
+                        }
+                        double Yoffset = 250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1 = PipeindexEngine.Wpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.Wpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.Wpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Wpipeindex[j][i], tag1);
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"WL{j}-{i+1}",
+
+                        };
+                        DBText taggingtext1 = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"WL-{i + 1}",
+
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }
+                    }
                 }
-                for (int i = 0; i < PipeindexEngine.Rainpipeindex.Count - 1; i++)
+                for (int j = 0; j < compositeEngine.PipeEngine.Ppipeindex.Count; j++)
                 {
-                    Line ent_line = new Line(PipeindexEngine.Rainpipeindex[i], PipeindexEngine.Rainpipeindex_tag[3 * i]);
-                    Line ent_line1 = new Line(PipeindexEngine.Rainpipeindex_tag[3 * i], PipeindexEngine.Rainpipeindex_tag[3 * i + 1]);
-                    //ent_line.Layer = "W-DRAI-NOTE";
-                    ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                    acadDatabase.ModelSpace.Add(ent_line);
-                    acadDatabase.ModelSpace.Add(ent_line1);
-                    DBText taggingtext = new DBText()
+                    for (int i = 0; i < compositeEngine.PipeEngine.Ppipeindex[j].Count; i++)
                     {
-                        Height = 200,
-                        Position = PipeindexEngine.Rainpipeindex_tag[3 * i + 2],
-                        TextString = $"Y2L{floor.Value}-{i}",
-                    };
-                    acadDatabase.ModelSpace.Add(taggingtext);
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.Ppipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.Ppipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                        double Yoffset = 250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1 = PipeindexEngine.Ppipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.Ppipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.Ppipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Ppipeindex[j][i], tag1);
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"PL{j}-{i+1}",
+
+                        };
+                        DBText taggingtext1 = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"PL-{i + 1}",
+
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }
+                    }
+                }
+                for (int j = 0; j < compositeEngine.PipeEngine.Dpipeindex.Count; j++)
+                {
+                    for (int i = 0; i < compositeEngine.PipeEngine.Dpipeindex[j].Count; i++)
+                    {
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.Dpipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.Dpipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                        double Yoffset = 250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1 = PipeindexEngine.Dpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.Dpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.Dpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Dpipeindex[j][i], tag1);
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"DL{j}-{i+1}",
+
+                        };
+                        DBText taggingtext1 = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"DL-{i + 1}",
+
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }
+                    }
+                }
+                for (int j = 0; j < compositeEngine.PipeEngine.Npipeindex.Count; j++)
+                {
+                    for (int i = 0; i < compositeEngine.PipeEngine.Npipeindex[j].Count; i++)
+                    {
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.Npipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.Npipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                        double Yoffset = 250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1 = PipeindexEngine.Npipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.Npipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.Npipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Npipeindex[j][i], tag1);
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"NL{j}-{i+1}",                         
+                        };
+                        DBText taggingtext1 = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"NL-{i + 1}",
+
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }                               
+                    }
+                }
+                for (int j = 0; j < compositeEngine.PipeEngine.Rainpipeindex.Count; j++)
+                {
+                    for (int i = 0; i < compositeEngine.PipeEngine.Rainpipeindex[j].Count; i++)
+                    {
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.Rainpipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.Rainpipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                        double Yoffset = 250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1 = PipeindexEngine.Rainpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.Rainpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.Rainpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Rainpipeindex[j][i], tag1);
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"Y2L{j}-{i+1}",
+                        };
+                        DBText taggingtext1 = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"Y2L-{i + 1}",
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }
+                    }
+                }
+                for (int j = 0; j < compositeEngine.PipeEngine.RoofRainpipeindex.Count; j++)
+                {
+                    for (int i = 0; i < compositeEngine.PipeEngine.RoofRainpipeindex[j].Count; i++)
+                    {
+                        int num = 0;
+                        if (compositeEngine.FpipeDublicated.Count > 0)
+                        {
+                            foreach (var points in compositeEngine.FpipeDublicated[j])
+                            {
+                                if (points[0].X == PipeindexEngine.RoofRainpipeindex[j][i].X)
+                                {
+                                    for (int k = 0; k < points.Count; k++)
+                                    {
+                                        if (points[k].Y == PipeindexEngine.RoofRainpipeindex[j][i].Y)
+                                        {
+                                            num = k;
+                                        }
+                                    }
+
+                                }
+                            }
+                        }
+                        double Yoffset = 250 * num;
+                        Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
+                        var Matrix = Matrix3d.Displacement(s);
+                        var tag1 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.RoofRainpipeindex[j][i], tag1);
+                        Line ent_line1 = new Line(tag1, tag2);
+                        //ent_line.Layer = "W-DRAI-NOTE";
+                        ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                        acadDatabase.ModelSpace.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line1);
+                        DBText taggingtext = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"Y1L{j}-{i + 1}",
+                        };
+                        DBText taggingtext1 = new DBText()
+                        {
+                            Height = 175,
+                            Position = tag3,
+                            TextString = $"Y1L-{i + 1}",
+                        };
+                        if (j > 0)
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext);
+                        }
+                        else
+                        {
+                            acadDatabase.ModelSpace.Add(taggingtext1);
+                        }
+                    }
                 }
             }
         }

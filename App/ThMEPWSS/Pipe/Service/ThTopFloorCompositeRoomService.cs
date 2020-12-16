@@ -26,22 +26,21 @@ namespace ThMEPWSS.Pipe.Service
         public static List<ThWCompositeRoom> Find(
             ThIfcSpace space,
             List<ThWCompositeRoom> compositeRoom)
-        {
-            var service = new ThTopFloorCompositeRoomService(space, compositeRoom);
-            return service.Find(space);
+        {          
+            return Findspace(space, compositeRoom);
         }
-        private List<ThWCompositeRoom> Find(ThIfcSpace FirstFloorSpace)
+        private static List<ThWCompositeRoom> Findspace(ThIfcSpace FirstFloorSpace, List<ThWCompositeRoom> compositeRoom)
         {
-            var engine = new ThWCompositeRoomRecognitionEngine();
-            foreach (var room in engine.Rooms)
+            var compositeroom_ = new List<ThWCompositeRoom>();
+            foreach (var room in compositeRoom)
             {
                 var bboundary = FirstFloorSpace.Boundary as Polyline;
-                if (GeomUtils.PtInLoop(bboundary, room.Kitchen.Boundary.GetCenter()))
+                if (GeomUtils.PtInLoop(bboundary, room.Kitchen.Kitchen.Boundary.GetCenter()))
                 {
-                    CompositeRoom.Add(room);
+                    compositeroom_.Add(room);
                 }
             }
-            return CompositeRoom;
+            return compositeroom_;
         }
 
     }

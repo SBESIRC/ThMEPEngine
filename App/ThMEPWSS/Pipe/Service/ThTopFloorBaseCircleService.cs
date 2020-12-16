@@ -30,7 +30,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         private List<ThIfcSpace> Find(ThIfcSpace FirstFloorSpace)
         {
-
+            BaseCircles = new List<ThIfcSpace>();
             var noTagSubSpaces = FirstFloorSpace.SubSpaces.Where(o => o.Tags.Count == 0).ToList();
             if (noTagSubSpaces.Count != 0)
             {

@@ -13,11 +13,13 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWRoofFloorRoom> RoofFloors { get; set; }
         public List<ThWTopFloorRoom> TopFloors { get; set; }
 
+        public List<ThWTopFloorRoom> NormalFloors { get; set; }
         public ThWCompositeFloorRecognitionEngine()
         {
             RoofDeviceFloors = new List<ThWRoofDeviceFloorRoom>();
             RoofFloors = new List<ThWRoofFloorRoom>();
             TopFloors = new List<ThWTopFloorRoom>();
+            NormalFloors= new List<ThWTopFloorRoom>();
         }
         public override void Recognize(Database database, Point3dCollection pts)
         {
@@ -38,6 +40,13 @@ namespace ThMEPWSS.Pipe.Engine
                 };
                 FirstEngine.Recognize(database, pts);
                 TopFloors = FirstEngine.Rooms;
+                if (TopFloors.Count > 0)
+                {
+                    for (int i = 1;i< TopFloors.Count; i++)
+                    {
+                        NormalFloors.Add(TopFloors[i]);
+                    }
+                }
             }
         }
     }

@@ -1,10 +1,12 @@
 ﻿using Linq2Acad;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Model;
+
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -27,7 +29,8 @@ namespace ThMEPWSS.Pipe.Engine
                 var basepoint = new List<ThIfcSpace>();
                 var compositeroom = Getcompositeroom(database, pts);
                 var compositebalconyroom = Getcompositebalconyroom(database, pts);
-                Rooms = ThTopFloorRoomService.Build(this.Spaces, basepoint, compositeroom, compositebalconyroom);
+                var divisionLines = GetLines(database);
+                Rooms = ThTopFloorRoomService.Build(this.Spaces, basepoint, compositeroom, compositebalconyroom, divisionLines);
             }
         }
         private List<ThWCompositeRoom> Getcompositeroom(Database database, Point3dCollection pts)
@@ -45,6 +48,14 @@ namespace ThMEPWSS.Pipe.Engine
                 compositeRoomRecognitionEngine.Recognize(database, pts);
                 return compositeRoomRecognitionEngine.FloorDrainRooms;
             }
+        }
+         private List<Line> GetLines(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                var lines = acadDatabase.ModelSpace.OfType<Line>().Where(lineInfo => lineInfo.Layer.Contains(ThWPipeCommon.AD_FLOOR_AREA)).ToList();
+                return lines;
+            }           
         }
     }
 }
