@@ -92,6 +92,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "给排水.喷淋.dwg");
         }
 
+        // 车道线布灯
+        public static string LaneLineLightDwgPath()
+        {
+            return Path.Combine(SupportPath(), "车道线布灯.dwg");
+        }
+
         // ToolPalette 路径
         public static string ToolPalettePath()
         {
