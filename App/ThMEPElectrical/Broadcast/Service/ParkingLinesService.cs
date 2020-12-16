@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPElectrical.Broadcast.Service;
 
 namespace ThMEPElectrical.Broadcast
 {
@@ -167,7 +168,7 @@ namespace ThMEPElectrical.Broadcast
                 Point3d ePt = firLine.EndPoint;
                 while (true)
                 {
-                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.IsEqualTo(sPt, new Tolerance(1, 1)));
+                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.DistanceTo(sPt) < ToleranceService.parkingLineTolerance);
                     if (sMLine != null)
                     {
                         matchLines.Add(sMLine);
@@ -175,7 +176,7 @@ namespace ThMEPElectrical.Broadcast
                         sPt = sMLine.EndPoint;
                     }
 
-                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.IsEqualTo(sPt, new Tolerance(1, 1)));
+                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.DistanceTo(sPt) < ToleranceService.parkingLineTolerance);
                     if (eMLine != null)
                     {
                         matchLines.Add(eMLine);
@@ -191,7 +192,7 @@ namespace ThMEPElectrical.Broadcast
 
                 while (true)
                 {
-                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.IsEqualTo(ePt, new Tolerance(1, 1)));
+                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.DistanceTo(ePt) < ToleranceService.parkingLineTolerance);
                     if (sMLine != null)
                     {
                         matchLines.Add(sMLine);
@@ -199,7 +200,7 @@ namespace ThMEPElectrical.Broadcast
                         ePt = sMLine.EndPoint;
                     }
 
-                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.IsEqualTo(ePt, new Tolerance(1, 1)));
+                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.DistanceTo(ePt) < ToleranceService.parkingLineTolerance);
                     if (eMLine != null)
                     {
                         matchLines.Add(eMLine);
@@ -285,20 +286,22 @@ namespace ThMEPElectrical.Broadcast
 
             List<Point3d> allPts = lines.SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(matrix)).ToList();
             sPt = allPts.OrderBy(x => x.X).First().TransformBy(matrix.Inverse());
-            ePt = allPts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse()); ;
+            ePt = allPts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse()); 
 
             var handleLines = new List<Line>(lines);
             Point3d comparePt = sPt;
             List<Line> resLines = new List<Line>();
             while (handleLines.Count > 0)
             {
-                var matchLine = handleLines.Where(x => x.StartPoint.IsEqualTo(comparePt) || x.EndPoint.IsEqualTo(comparePt)).FirstOrDefault();
+                var matchLine = handleLines.Where(x => x.StartPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance
+                    || x.EndPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance).FirstOrDefault();
+                //var matchLine = handleLines.Where(x => x.StartPoint.IsEqualTo(comparePt) || x.EndPoint.IsEqualTo(comparePt)).FirstOrDefault();
                 if (matchLine == null)
                 {
                     break;
                 }
 
-                comparePt = matchLine.StartPoint.IsEqualTo(comparePt) ? matchLine.EndPoint : matchLine.StartPoint;
+                comparePt = matchLine.StartPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance ? matchLine.EndPoint : matchLine.StartPoint;
                 handleLines.Remove(matchLine);
                 resLines.Add(matchLine);
             }
@@ -319,14 +322,15 @@ namespace ThMEPElectrical.Broadcast
             List<Line> resLines = new List<Line>();
             while (handleLines.Count > 0)
             {
-                var matchLine = handleLines.Where(x => x.StartPoint.IsEqualTo(comparePt, new Tolerance(1, 1)) || x.EndPoint.IsEqualTo(comparePt, new Tolerance(1, 1))).FirstOrDefault();
+                var matchLine = handleLines.Where(x => x.StartPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance
+                    || x.EndPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance).FirstOrDefault();
                 if (matchLine == null)
                 {
                     break;
                 }
 
                 handleLines.Remove(matchLine);
-                if (matchLine.EndPoint.IsEqualTo(comparePt))
+                if (matchLine.EndPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance)
                 {
                     matchLine = new Line(matchLine.EndPoint, matchLine.StartPoint);
                 }

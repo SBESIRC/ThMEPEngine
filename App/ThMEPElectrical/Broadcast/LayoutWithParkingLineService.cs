@@ -16,8 +16,8 @@ namespace ThMEPElectrical.Broadcast
     {
         readonly double protectRange = 27000;
         readonly double oneProtect = 21000;
-        readonly double tol = 5000;
-        readonly double minLength = 5000;
+        readonly double tol = 6000;
+        readonly double exLength = 800;
 
         /// <summary>
         /// 计算布置信息
@@ -28,7 +28,7 @@ namespace ThMEPElectrical.Broadcast
         /// <param name="columns"></param>
         /// <param name="walls"></param>
         /// <returns></returns>
-        public Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> LayoutBraodcast(List<List<Line>> mainLines, List<Polyline> columns, List<Polyline> walls)
+        public Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> LayoutBraodcast(Polyline frame, List<List<Line>> mainLines, List<Polyline> columns, List<Polyline> walls)
         {
             Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> layoutInfo = new Dictionary<List<Line>, Dictionary<Point3d, Vector3d>>();
             foreach (var lines in mainLines)
@@ -42,15 +42,20 @@ namespace ThMEPElectrical.Broadcast
                 var lineWall = structureService.GetStruct(lines, walls, tol);
 
                 //将构建分为上下部分
-                var usefulColumns = structureService.SeparateColumnsByLine(lineColumn, lines.First());
-                var usefulWalls = structureService.SeparateColumnsByLine(lineWall, lines.First());
+                var usefulColumns = structureService.SeparateColumnsByLine(lineColumn, lines, tol * 2);
+                var usefulWalls = structureService.SeparateColumnsByLine(lineWall, lines, tol * 2);
+
+                //过滤掉不应该使用的构建
+                CheckService checkService = new CheckService();
+                var filterCols = checkService.FilterColumns(usefulColumns[1], lines.First(), frame, sPt, ePt);
+                var filterWalls = checkService.FilterWalls(usefulWalls[1], lines, tol, exLength);
 
                 var pts = new List<Point3d>() { sPt, ePt };
 
                 //计算布置信息
                 var dir = (lines.First().EndPoint - lines.First().StartPoint).GetNormal();
                 StructureLayoutService structureLayoutService = new StructureLayoutService();
-                var lInfo = structureLayoutService.GetLayoutStructPt(pts, usefulColumns[1], usefulWalls[1], dir);
+                var lInfo = structureLayoutService.GetLayoutStructPt(pts, filterCols, filterWalls, dir);
 
                 //计算出构建上的起点和终点在线上的位置
                 if (lInfo != null && lInfo.Count > 0)
@@ -92,7 +97,7 @@ namespace ThMEPElectrical.Broadcast
 
             if (lineLength < oneProtect)
             {
-                layoutPts.Add(new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0));
+                layoutPts.Add(new Point3d((lineSPt.X + lineEPt.X) / 2, (lineSPt.Y + lineEPt.Y) / 2, 0));
             }
             else
             {
@@ -138,7 +143,7 @@ namespace ThMEPElectrical.Broadcast
                     dir = -dir;
                 }
 
-                while (lineLength > moveLength || (excessLength > 0 && lineLength > excessLength))
+                while (lineLength > moveLength || (excessLength > 0 && lineLength > excessLength + 10))
                 {
                     if (excessLength > 0)
                     {
@@ -185,7 +190,7 @@ namespace ThMEPElectrical.Broadcast
             foreach (var pt in pts)
             {
                 var closetPt = pts.OrderBy(x => x.DistanceTo(pt)).First();
-                var lineClosetPt = lines.Select(x => x.GetClosestPointTo(closetPt, true)).OrderBy(x => x.DistanceTo(pt)).First();
+                var lineClosetPt = lines.Select(x => x.GetClosestPointTo(closetPt, false)).OrderBy(x => x.DistanceTo(pt)).First();
                 resPts.Add(lineClosetPt);
             }
 

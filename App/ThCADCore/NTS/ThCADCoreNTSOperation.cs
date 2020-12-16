@@ -49,6 +49,18 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
+        public static DBObjectCollection SingleSidedBuffer(this DBObjectCollection objs, double distance,
+            EndCapStyle endCapStyle = EndCapStyle.Flat)
+        {
+            var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
+            {
+                IsSingleSided = true,
+                JoinStyle = NTSJoinStyle.Mitre,
+                EndCapStyle = endCapStyle,
+            });
+            return buffer.GetResultGeometry(distance).ToDbCollection();
+        }
+
         public static DBObjectCollection LineMerge(this DBObjectCollection objs)
         {
             var merger = new LineMerger();

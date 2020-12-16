@@ -20,7 +20,7 @@ namespace ThMEPElectrical
 {
     public class ThBroadcastCmds
     {
-
+        readonly double bufferLength = 100;
         //[CommandMethod("TIANHUACAD", "THPL", CommandFlags.Modal)]
         //public void ThParkingline()
         //{
@@ -146,16 +146,6 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                //// 获取车道线
-                //var laneLineEngine = new ThLaneRecognitionEngine();
-                //laneLineEngine.Recognize(acdb.Database, new Point3dCollection());
-                //// 暂时假设车道线绘制符合要求
-                //var lanes = laneLineEngine.Spaces.Select(o => o.Boundary).Cast<Line>().ToList();
-                //if (lanes.Count == 0)
-                //{
-                //    return;
-                //}
-
                 // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
@@ -188,15 +178,16 @@ namespace ThMEPElectrical
                     var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
 
                     //获取构建信息
-                    GetStructureInfo(acdb, plFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+                    GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
 
                     //主车道布置信息
                     LayoutWithParkingLineService layoutService = new LayoutWithParkingLineService();
-                    var layoutInfo = layoutService.LayoutBraodcast(parkingLines, columns, walls);
+                    var layoutInfo = layoutService.LayoutBraodcast(plFrame, parkingLines, columns, walls);
 
                     //副车道布置信息
                     LayoutWithSecondaryParkingLineService layoutWithSecondaryParkingLineService = new LayoutWithSecondaryParkingLineService();
-                    var resLayoutInfo = layoutWithSecondaryParkingLineService.LayoutBraodcast(layoutInfo, otherPLines, columns, walls);
+                    var resLayoutInfo = layoutWithSecondaryParkingLineService.LayoutBraodcast(layoutInfo, otherPLines, columns, walls, plFrame);
 
                     InsertBroadcastService.InsertSprayBlock(resLayoutInfo);
                 }
@@ -204,7 +195,7 @@ namespace ThMEPElectrical
         }
 
         /// <summary>
-        /// 获取车道线
+        /// 获取车道线hie
         /// </summary>
         /// <param name="polyline"></param>
         public List<Curve> GetLanes(Polyline polyline, AcadDatabase acdb)

@@ -43,7 +43,10 @@
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
     <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
+    <Compile Include="Broadcast\Service\CheckService.cs" />
     <Compile Include="Broadcast\Service\StructureService.cs" />
+    <Compile Include="Broadcast\Service\StructUtils.cs" />
+    <Compile Include="Broadcast\Service\ToleranceService.cs" />
     <Compile Include="Broadcast\StructureLayoutService.cs" />
     <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
     <Compile Include="Business\BlindAreaReminder\ClearHatch.cs" />
