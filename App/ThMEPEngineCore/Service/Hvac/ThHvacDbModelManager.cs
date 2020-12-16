@@ -9,6 +9,7 @@ namespace ThMEPEngineCore.Service.Hvac
 {
     public class ThHvacDbModelManager : IDisposable
     {
+        private bool OpenErased { get; set; }
         private Database HostDb { get; set; }
         public ObjectIdCollection Geometries { get; set; }
         public Dictionary<string, List<int>> Models { get; private set; }
@@ -17,9 +18,10 @@ namespace ThMEPEngineCore.Service.Hvac
         /// 构造函数
         /// </summary>
         /// <param name="database"></param>
-        public ThHvacDbModelManager(Database database)
+        public ThHvacDbModelManager(Database database, bool openErased = false)
         {
             HostDb = database;
+            OpenErased = openErased;
             LoadFromDb(database);
         }
 
@@ -41,7 +43,7 @@ namespace ThMEPEngineCore.Service.Hvac
                 Geometries = new ObjectIdCollection();
                 Models = new Dictionary<string, List<int>>();
                 acadDatabase.Database.ModelSpace()
-                    .GetEntities<BlockReference>(OpenMode.ForRead, true)
+                    .GetEntities<BlockReference>(OpenMode.ForRead, OpenErased)
                     .Where(o => o.IsModel())
                     .ForEachDbObject(o =>
                     {

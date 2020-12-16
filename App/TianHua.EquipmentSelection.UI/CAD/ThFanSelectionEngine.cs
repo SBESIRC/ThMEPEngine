@@ -65,7 +65,7 @@ namespace TianHua.FanSelection.UI.CAD
         public static void RemoveModels(FanDataModel dataModel, bool erasing = true)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
+            using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database, true))
             {
                 dbManager.EraseModels(dataModel.ID, erasing);
             }
@@ -74,7 +74,7 @@ namespace TianHua.FanSelection.UI.CAD
         public static void CloneModels(FanDataModel targetDataModel, FanDataModel srcDataModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
+            using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database, true))
             {
                 // 计算源风机系统和目标风机系统的偏移量
                 var offset = new Vector3d(0,0,0);
