@@ -114,8 +114,15 @@ namespace ThMEPElectrical.Broadcast
             }
             
             var pLines = ClassifyParkingLines(handleLines);
+            //总长度更长的分为主车道
             var xPLines = pLines[0];
             var yPLines = pLines[1];
+            if (xPLines.Sum(x => x.Length) < yPLines.Sum(x => x.Length))
+            {
+                xPLines = pLines[1];
+                yPLines = pLines[0];
+            }
+
             var resLines = HandleLinesByDirection(xPLines);
             otherPLins = HandleLinesByDirection(yPLines);
 
@@ -295,7 +302,6 @@ namespace ThMEPElectrical.Broadcast
             {
                 var matchLine = handleLines.Where(x => x.StartPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance
                     || x.EndPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance).FirstOrDefault();
-                //var matchLine = handleLines.Where(x => x.StartPoint.IsEqualTo(comparePt) || x.EndPoint.IsEqualTo(comparePt)).FirstOrDefault();
                 if (matchLine == null)
                 {
                     break;

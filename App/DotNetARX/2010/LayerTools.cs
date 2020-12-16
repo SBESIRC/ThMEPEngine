@@ -212,7 +212,7 @@ namespace DotNetARX
         }
 
         /// <summary>
-        /// 将图层打开
+        /// 将图层设置为不可打印
         /// </summary>
         /// <param name="db"></param>
         /// <param name="layerName"></param>
