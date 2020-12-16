@@ -296,7 +296,7 @@ namespace TianHua.FanSelection.UI
                 }
 
             }
-            if (e.Column.FieldName == "VentQuan" || e.Column.FieldName == "AirVolume" || e.Column.FieldName == "WindResis")
+            if (e.Column.FieldName == "VentQuan" || e.Column.FieldName == "AirVolume" || e.Column.FieldName == "WindResis" || e.Column.FieldName == "SysAirVolume")
             {
                 var _PID = FuncStr.NullToStr(e.Node.GetValue("PID"));
                 //var _Fan = m_ListFan.Find(p => p.ID == _ID);
@@ -343,7 +343,7 @@ namespace TianHua.FanSelection.UI
         private void TreeList_CustomDrawNodeCell(object sender, DevExpress.XtraTreeList.CustomDrawNodeCellEventArgs e)
         {
             FanDataModel _Fan = TreeList.GetDataRecordByNode(e.Node) as FanDataModel;
-            if (_Fan == null) return;
+            if (_Fan == null|| e.Column == null) return;
             if (e.Column.FieldName == "Scenario")
             {
                 if (_Fan.PID == "0")
