@@ -33,29 +33,25 @@ namespace TianHua.FanSelection.UI.CAD
             }
         }
 
-        public static void InsertModel(FanDataModel dataModel, int number, Point3d pt)
+        public static ObjectId InsertModel(FanDataModel dataModel, int number, Point3d pt)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                // 若检测到图纸中没有对应的风机图块，则在鼠标的点击处插入风机
                 var blockName = dataModel.BlockName();
                 var layerName = dataModel.BlockLayer();
                 Active.Database.ImportModel(blockName, layerName);
                 var objId = Active.Database.InsertModel(blockName, layerName, dataModel.Attributes());
-                var blockRef = acadDatabase.Element<BlockReference>(objId);
+                objId.SetModelIdentifier(dataModel.ID, FuncStr.NullToInt(number), dataModel.VentStyle, dataModel.Scenario);
+                objId.SetModelNumber(dataModel.InstallFloor, FuncStr.NullToInt(number));
+                objId.SetModelTextHeight();
+                UpdateModelName(objId, dataModel);
 
-                // 插入风机图块
-                var position = pt - objId.GetModelBasePoint();
-                Matrix3d displacement = Matrix3d.Displacement(position);
-                var model = acadDatabase.ModelSpace.Add(blockRef.GetTransformedCopy(displacement));
-                model.SetModelIdentifier(dataModel.ID, FuncStr.NullToInt(number), dataModel.VentStyle, dataModel.Scenario);
-                model.SetModelNumber(dataModel.InstallFloor, FuncStr.NullToInt(number));
-                model.SetModelTextHeight();
-                UpdateModelName(model, dataModel);
+                // 设置风机图块位置
+                var blockRef = acadDatabase.Element<BlockReference>(objId, true);
+                blockRef.TransformBy(Matrix3d.Displacement(pt - objId.GetModelBasePoint()));
 
-                // 删除初始图块
-                blockRef.UpgradeOpen();
-                blockRef.Erase();
+                // 返回风机图块
+                return objId;
             }
         }
 
@@ -102,7 +98,18 @@ namespace TianHua.FanSelection.UI.CAD
                     {
                         var model = acadDatabase.Element<BlockReference>(srcObjId);
                         var pt = model.Position + srcObjId.GetModelBasePoint().GetAsVector();
-                        InsertModel(targetDataModel, number, pt + offset);
+                        targetObjId = InsertModel(targetDataModel, number, pt + offset);
+                    }
+                    if (srcObjId.IsValid && targetObjId.IsValid)
+                    {
+                        // 写入原图元属性
+                        var srcModel = acadDatabase.Element<BlockReference>(srcObjId);
+                        var targetModel = acadDatabase.Element<BlockReference>(targetObjId);
+                        targetModel.SetPropertiesFrom(srcModel);
+
+                        // 写入原图元自定义属性（动态属性）
+                        var block = new ThBlockReferenceData(srcObjId);
+                        targetObjId.SetModelCustomPropertiesFrom(block.CustomProperties);
                     }
                 }
             }
@@ -282,7 +289,7 @@ namespace TianHua.FanSelection.UI.CAD
                     .Where(o => o.ObjectId.IsModel(dataModel.ID));
                 if (blockReferences.Any())
                 {
-                    Active.Editor.ZoomToModels(blockReferences.ToArray(), 1.0);
+                    Active.Editor.ZoomToModels(blockReferences.ToArray(), 2.0);
                     Active.Editor.PickFirstModels(blockReferences.Select(o => o.ObjectId).ToArray());
                 }
             }
