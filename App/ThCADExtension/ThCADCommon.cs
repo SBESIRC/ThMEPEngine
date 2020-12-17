@@ -140,6 +140,18 @@ namespace ThCADExtension
             return Path.Combine(RootPath(), "Contents");
         }
 
+        // 风管尺寸规格信息
+        public static string DuctSizeParametersPath()
+        {
+            return Path.Combine(SupportPath(), "风管尺寸参数信息.json");
+        }
+
+        public static string DuctInOutMapping()
+        {
+            return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");
+        }
+
+
         // 运行时根目录
         private static string RootPath()
         {

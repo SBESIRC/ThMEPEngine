@@ -363,7 +363,7 @@ namespace TianHua.FanSelection.UI
             if (_Fan == null) { return; }
             if (_Fan.AirCalcFactor == 0)
             {
-                if (_Fan.ScenarioType == 1)
+                if (_Fan.IsFireModel())
                 {
                     _Fan.AirCalcFactor = 1.2;
                 }
@@ -371,7 +371,6 @@ namespace TianHua.FanSelection.UI
                 {
                     _Fan.AirCalcFactor = 1.1;
                 }
-
             }
 
             //-消防排烟
@@ -1394,14 +1393,6 @@ namespace TianHua.FanSelection.UI
             _FanDataModel.PowerType = "普通";
             _FanDataModel.VibrationMode = "S";
             _FanDataModel.SortID = m_ListFan.Count + 1;
-            if (_FanDataModel.Scenario.Contains("消防"))
-            {
-                _FanDataModel.ScenarioType = 1;
-            }
-            else
-            {
-                _FanDataModel.ScenarioType = 2;
-            }
 
             var _FanPrefixDict = PubVar.g_ListFanPrefixDict.Find(s => s.FanUse == _FanDataModel.Scenario);
             if (_FanPrefixDict != null)

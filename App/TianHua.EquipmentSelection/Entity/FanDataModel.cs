@@ -19,11 +19,6 @@ namespace TianHua.FanSelection
         public string Scenario { get; set; }
 
         /// <summary>
-        /// 场景类型
-        /// </summary>
-        public int ScenarioType { get; set; }
-
-        /// <summary>
         /// 唯一ID
         /// </summary>
         public string ID { get; set; }

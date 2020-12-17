@@ -48,7 +48,7 @@ namespace TianHua.FanSelection.UI.CAD
                 var position = pt - objId.GetModelBasePoint();
                 Matrix3d displacement = Matrix3d.Displacement(position);
                 var model = acadDatabase.ModelSpace.Add(blockRef.GetTransformedCopy(displacement));
-                model.SetModelIdentifier(dataModel.ID, FuncStr.NullToInt(number), dataModel.VentStyle);
+                model.SetModelIdentifier(dataModel.ID, FuncStr.NullToInt(number), dataModel.VentStyle, dataModel.Scenario);
                 model.SetModelNumber(dataModel.InstallFloor, FuncStr.NullToInt(number));
                 model.SetModelTextHeight();
                 UpdateModelName(model, dataModel);

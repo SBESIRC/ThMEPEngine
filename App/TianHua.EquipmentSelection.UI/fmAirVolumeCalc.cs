@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TianHua.Publics.BaseCode;
 using TianHua.FanSelection.Model;
+using TianHua.FanSelection.Function;
 
 namespace TianHua.FanSelection.UI
 {
@@ -72,7 +73,7 @@ namespace TianHua.FanSelection.UI
 
             if (e.Column.FieldName == "AirCalcFactor")
             {
-                if (_Fan.ScenarioType == 1)
+                if (_Fan.IsFireModel())
                 {
                     if (_Fan.AirCalcFactor < 1.2)
                     {
@@ -86,7 +87,6 @@ namespace TianHua.FanSelection.UI
                         _Fan.AirCalcFactor = 1;
                     }
                 }
-
             }
 
             SysAirCalc(_Fan);
@@ -129,7 +129,7 @@ namespace TianHua.FanSelection.UI
             if (_Fan == null)
             { return; }
 
-            if (_Fan.ScenarioType == 1)
+            if (_Fan.IsFireModel())
             {
                 if (_Fan.AirCalcFactor < 1.2)
                 {

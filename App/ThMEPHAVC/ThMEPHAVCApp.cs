@@ -51,6 +51,7 @@ namespace ThMEPHVAC
                 ThFanInletOutletAnalysisEngine thinouteng = new ThFanInletOutletAnalysisEngine(DbFanModel);
                 thinouteng.InletAnalysis();
                 thinouteng.OutletAnalysis();
+                ThDuctSelectionEngine ductselectioneng = new ThDuctSelectionEngine(DbFanModel);
             }
         }
 

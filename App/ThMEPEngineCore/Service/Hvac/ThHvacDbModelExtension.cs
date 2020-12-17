@@ -35,13 +35,14 @@ namespace ThMEPEngineCore.Service.Hvac
             }
         }
 
-        public static void SetModelIdentifier(this ObjectId obj, string identifier, int number, string style)
+        public static void SetModelIdentifier(this ObjectId obj, string identifier, int number, string style, string scenario)
         {
             TypedValueList valueList = new TypedValueList
             {
-                { (int)DxfCode.ExtendedDataAsciiString, identifier },
-                { (int)DxfCode.ExtendedDataInteger32, number },
-                { (int)DxfCode.ExtendedDataBinaryChunk,  Encoding.UTF8.GetBytes(style) },
+                { (int)DxfCode.ExtendedDataAsciiString,     identifier },
+                { (int)DxfCode.ExtendedDataInteger32,       number },
+                { (int)DxfCode.ExtendedDataBinaryChunk,     Encoding.UTF8.GetBytes(style) },
+                { (int)DxfCode.ExtendedDataBinaryChunk,     Encoding.UTF8.GetBytes(scenario) },
             };
             obj.AddXData(ThHvacCommon.RegAppName_FanSelection, valueList);
         }
@@ -123,8 +124,28 @@ namespace ThMEPEngineCore.Service.Hvac
                 return string.Empty;
             }
 
-            var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataBinaryChunk).First();
-            return Encoding.UTF8.GetString(values.Value as byte[]);
+            var typedValue = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataBinaryChunk).FirstOrDefault();
+            if (typedValue == null)
+            {
+                return string.Empty;
+            }
+            return Encoding.UTF8.GetString(typedValue.Value as byte[]);
+        }
+
+        public static string GetModelScenario(this ObjectId obj)
+        {
+            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
+            if (valueList == null)
+            {
+                return string.Empty;
+            }
+
+            var typedValue = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataBinaryChunk).LastOrDefault();
+            if (typedValue == null)
+            {
+                return string.Empty;
+            }
+            return Encoding.UTF8.GetString(typedValue.Value as byte[]);
         }
 
         public static bool IsHTFCModel(this ObjectId obj)

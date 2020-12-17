@@ -71,6 +71,15 @@ namespace ThMEPHVAC.CAD
 
         public DBObjectCollection InAndOutLines { get; set; }
 
+        public string FanScenario
+        {
+            get
+            {
+                return GetFanScenario();
+            }
+        }
+
+
         public ThDbModelFan(ObjectId FanObjectId, DBObjectCollection inandoutlines)
         {
             Model = FanObjectId;
@@ -94,7 +103,8 @@ namespace ThMEPHVAC.CAD
 
         private double GetFanVolume()
         {
-            return Data.Attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_VOLUME].NullToDouble();
+            var fanvolumevaluestring = Data.Attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_VOLUME];
+            return fanvolumevaluestring.Replace(" ", "").Replace("风量：", "").Replace("cmh", "").NullToDouble();
         }
 
         private FanOpening GetFanInlet()
@@ -278,6 +288,11 @@ namespace ThMEPHVAC.CAD
                 .First().Value.NullToDouble();
 
             return new Point3d(inletX, inletY, 0);
+        }
+
+        private string GetFanScenario()
+        {
+            return Model.GetModelScenario();
         }
     }
 }
