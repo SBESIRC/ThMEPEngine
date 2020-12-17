@@ -31,6 +31,10 @@
         /// </summary>
         public const double MAX_BALCONYBASIN_TO_BALCONY = 200;
         /// <summary>
+        /// 阳台区域偏置距离
+        /// </summary>
+        public const double BALCONY_BUFFER_DISTANCE = 500;
+        /// <summary>
         /// 阳台台盆到阳台最小距离
         /// </summary>
         public const double MIN_BALCONYBASIN_TO_BALCONY = 80;
@@ -67,6 +71,14 @@
         /// </summary>
         public const double TOILET_WELLS_INTERVAL = 200;
         /// <summary>
+        /// 卫生间区域偏置距离
+        /// </summary>
+        public const double TOILET_BUFFER_DISTANCE = 500;
+        /// <summary>
+        /// 管井最大面积
+        /// </summary>
+        public const double WELLS_MAX_AREA = 0.15;
+        /// <summary>
         /// 管井到马桶最短距离
         /// </summary>
         public const double MIN_WELL_TO_URINAL_DISTANCE = 60;
@@ -74,6 +86,10 @@
         /// 房间最大间隔
         /// </summary>
         public const double MAX_ROOM_INTERVAL = 200;
+        /// <summary>
+        /// 厨房区域偏置距离
+        /// </summary>
+        public const double KITCHEN_BUFFER_DISTANCE = 500;
         /// <summary>
         /// 卫生间到厨房最大距离
         /// </summary>
@@ -86,8 +102,21 @@
         /// 厨房到阳台最大距离
         /// </summary>
         public const double MAX_KITCHEN_TO_BALCONY_DISTANCE = 9000;
-
-        // 图层
+        /// <summary>
+        /// 设备平台区域最小面积
+        /// </summary>
+        public const double MIN_DEVICEPLATFORM_AREA = 0.4;
+        /// <summary>
+        /// 设备平台区域最大面积
+        /// </summary>
+        public const double MAX_DEVICEPLATFORM_AREA = 1;
+        /// <summary>
+        /// 基点圆区域最大面积
+        /// </summary>
+        public const double MAX_BASECIRCLE_AREA = 140;
+        /// <summary>
+        /// 图层
+        /// </summary>
         public const string AD_FLOOR_AREA = "AD-FLOOR-AREA";
     }
 }

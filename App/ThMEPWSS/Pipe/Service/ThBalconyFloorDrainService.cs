@@ -1,40 +1,27 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Plumbing;
-
-
 
 namespace ThMEPWSS.Pipe.Service
 {
-   public class ThBalconyFloorDrainService
+    public class ThBalconyFloorDrainService
     {
+        public List<ThIfcFloorDrain> FloorDrains { get; private set; }
         private List<ThIfcFloorDrain> FloorDrainList { get; set; }
         private ThIfcSpace BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
-        /// <summary>
- 
-        public List<ThIfcFloorDrain> FloorDrains
-        {
-            get;
-            set;
-        }
         private ThBalconyFloorDrainService(
            List<ThIfcFloorDrain> floordrainList,
            ThIfcSpace balconySpace,
            ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
-            FloorDrainList = floordrainList;
             BalconySpace = balconySpace;
+            FloorDrainList = floordrainList;
             FloorDrainSpatialIndex = floordrainSpatialIndex;
-            FloorDrains = new List<ThIfcFloorDrain>();
             if (FloorDrainSpatialIndex == null)
             {
                 DBObjectCollection dbObjs = new DBObjectCollection();
@@ -56,18 +43,12 @@ namespace ThMEPWSS.Pipe.Service
             var balconyBoundary = BalconySpace.Boundary as Polyline;
             var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(balconyBoundary);
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
-            var includedFloordrains = crossFloordrains.Where(o =>
+            FloorDrains = crossFloordrains.Where(o =>
             {
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
                 return balconyBoundary.Contains(bufferObjs[0] as Curve);
-            });      
-            includedFloordrains.ForEach(o => FloorDrains.Add(o));
-        }
-  
-        private bool Contains(Polyline polyline, Polygon polygon)
-        {
-            return polyline.ToNTSPolygon().Contains(polygon);
+            }).ToList();
         }
     }
 }

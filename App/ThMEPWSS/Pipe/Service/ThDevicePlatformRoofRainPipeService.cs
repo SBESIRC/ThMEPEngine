@@ -13,7 +13,7 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThDevicePlatformRoofRainPipeService
     {
-        public List<ThIfcRoofRainPipe> RoofRainPipe { get; set; }
+        public List<ThIfcRoofRainPipe> RoofRainPipes { get; private set; }
         private List<ThIfcRoofRainPipe> RoofRainPipeList { get; set; }
         private ThIfcSpace DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex RainPipeSpatialIndex { get; set; }
@@ -22,8 +22,7 @@ namespace ThMEPWSS.Pipe.Service
             ThIfcSpace devicePlatformSpace,
             ThCADCoreNTSSpatialIndex rainPipeSpatialIndex)
         {
-            RoofRainPipeList = rainPipeList;
-            RoofRainPipe = new List<ThIfcRoofRainPipe>();
+            RoofRainPipeList = rainPipeList;         
             DevicePlatformSpace = devicePlatformSpace;
             RainPipeSpatialIndex = rainPipeSpatialIndex;
             if (RainPipeSpatialIndex == null)
@@ -32,7 +31,6 @@ namespace ThMEPWSS.Pipe.Service
                 RoofRainPipeList.ForEach(o => dbObjs.Add(o.Outline));
                 RainPipeSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
-
         }
         public static ThDevicePlatformRoofRainPipeService Find(
             List<ThIfcRoofRainPipe> rainPipeList,
@@ -48,8 +46,7 @@ namespace ThMEPWSS.Pipe.Service
             var devicePlatformBoundary = DevicePlatformSpace.Boundary as Polyline;
             var crossObjs = RainPipeSpatialIndex.SelectCrossingPolygon(devicePlatformBoundary);
             var crossRainPipe = RoofRainPipeList.Where(o => crossObjs.Contains(o.Outline));
-            var includedRoofRainPipe = crossRainPipe.Where(o => devicePlatformBoundary.Contains(o.Outline as Curve));
-            includedRoofRainPipe.ForEach(o => RoofRainPipe.Add(o));
+            RoofRainPipes= crossRainPipe.Where(o => devicePlatformBoundary.Contains(o.Outline as Curve)).ToList();         
         }
     }
 }

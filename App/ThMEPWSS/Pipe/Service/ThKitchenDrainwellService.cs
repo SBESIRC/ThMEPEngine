@@ -1,18 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThKitchenDrainwellService: ThDrainwellService
     {
-        private ThIfcSpace KitchenSpace;
-        private const double KitchenBufferDistance = 500.0;
+        private ThIfcSpace KitchenSpace;      
         public ThKitchenDrainwellService():base()
         {
             Pypes = new List<ThIfcSpace>();
@@ -80,7 +76,7 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThIfcSpace> FindNeighbourToiletDrainwells()
         {
             List<ThIfcSpace> drainwellSpaces = new List<ThIfcSpace>();
-            var neibourToilets = FindNeighbouringToiletWithDrainwell(KitchenSpace, KitchenBufferDistance);
+            var neibourToilets = FindNeighbouringToiletWithDrainwell(KitchenSpace, ThWPipeCommon.KITCHEN_BUFFER_DISTANCE);
             if (neibourToilets.Count > 1)
             {
                 //厨房相邻的卫生间有多个，异常，Dead
@@ -109,7 +105,7 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThIfcSpace> FindNeighbourBalconyDrainwells()
         {
             List<ThIfcSpace> drainwellSpaces = new List<ThIfcSpace>();
-            var neibourBalconies = FindNeighbouringBalconyWithDrainwell(KitchenSpace, KitchenBufferDistance);
+            var neibourBalconies = FindNeighbouringBalconyWithDrainwell(KitchenSpace, ThWPipeCommon.KITCHEN_BUFFER_DISTANCE);
             if (neibourBalconies.Count > 1)
             {
                 //厨房相邻的阳台有多个，异常，Dead
@@ -138,11 +134,11 @@ namespace ThMEPWSS.Pipe.Service
         private bool IsValidSpaceArea(ThIfcSpace thIfcSpace)
         {
             double area= GetSpaceArea(thIfcSpace);
-            return area <= 0.15;            
+            return area <= ThWPipeCommon.WELLS_MAX_AREA;            
         }
         private double GetSpaceArea(ThIfcSpace thIfcSpace)
         {
-            return thIfcSpace.Boundary.Area / (1000 * 1000);
+            return thIfcSpace.Boundary.Area / (1000 * 1000);//mm单位
         }
     }
 }

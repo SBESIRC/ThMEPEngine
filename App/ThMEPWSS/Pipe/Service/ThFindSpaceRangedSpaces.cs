@@ -1,10 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Service

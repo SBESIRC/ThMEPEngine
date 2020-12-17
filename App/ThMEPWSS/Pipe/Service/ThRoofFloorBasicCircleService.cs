@@ -29,7 +29,6 @@ namespace ThMEPWSS.Pipe.Service
         }
         private List<ThIfcSpace> Find(ThIfcSpace FirstFloorSpace)
         {
-
             var noTagSubSpaces = FirstFloorSpace.SubSpaces.Where(o => o.Tags.Count == 0).ToList();
             if (noTagSubSpaces.Count != 0)
             {
@@ -50,12 +49,11 @@ namespace ThMEPWSS.Pipe.Service
         private bool IsValidSpaceArea(ThIfcSpace thIfcSpace)
         {
             double area = GetSpaceArea(thIfcSpace);
-            return area >= 140;
+            return area >= ThWPipeCommon.MAX_BASECIRCLE_AREA;
         }
         private double GetSpaceArea(ThIfcSpace thIfcSpace)
         {
             return thIfcSpace.Boundary.Area / (1000 * 1000);
         }
-
     }
 }

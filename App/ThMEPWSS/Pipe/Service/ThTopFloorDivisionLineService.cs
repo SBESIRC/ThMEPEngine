@@ -1,9 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {

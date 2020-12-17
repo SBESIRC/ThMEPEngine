@@ -1,10 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Model;
-using ThMEPWSS.Pipe.Engine;
-using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Pipe.Service

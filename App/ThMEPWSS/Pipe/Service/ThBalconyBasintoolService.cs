@@ -1,23 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThBalconyBasintoolService
     {
-        /// <summary>
-        /// 找到的台盆
-        /// </summary>
-        public List<ThIfcBasin> Basintools { get; set; }
+        public List<ThIfcBasin> Basintools { get; private set; }
         private List<ThIfcBasin> BasintoolList { get; set; }
         private ThIfcSpace BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
@@ -26,9 +19,8 @@ namespace ThMEPWSS.Pipe.Service
             ThIfcSpace balconySpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex)
         {
-            BasintoolList = basintoolList;
-            Basintools = new List<ThIfcBasin>();
             BalconySpace = balconySpace;
+            BasintoolList = basintoolList;
             BasintoolSpatialIndex = basintoolSpatialIndex;
             if (BasintoolSpatialIndex == null)
             {
@@ -58,17 +50,12 @@ namespace ThMEPWSS.Pipe.Service
             var balconyBoundary = BalconySpace.Boundary as Polyline;
             var crossObjs = BasintoolSpatialIndex.SelectCrossingPolygon(balconyBoundary);
             var crossBasintools = BasintoolList.Where(o => crossObjs.Contains(o.Outline));
-            var includedBasintools = crossBasintools.Where(o =>
+            Basintools = crossBasintools.Where(o =>
             {
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
                 return balconyBoundary.Contains(bufferObjs[0] as Curve);
-            });
-            includedBasintools.ForEach(o => Basintools.Add(o));
-        }
-        private bool Contains(Polyline polyline, Polygon polygon)
-        {
-            return polyline.ToNTSPolygon().Contains(polygon);
+            }).ToList();
         }
     }
 }

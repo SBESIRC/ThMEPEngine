@@ -1,17 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Plumbing;
-
-
-
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -60,18 +53,13 @@ namespace ThMEPWSS.Pipe.Service
             var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
 
-            var includedFloordrains = crossFloordrains.Where(o =>
+            FloorDrains = crossFloordrains.Where(o =>
             {
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
                 return tolitBoundary.Contains(bufferObjs[0] as Curve);
-            });
-            includedFloordrains.ForEach(o => FloorDrains.Add(o));
-        }
-        private bool Contains(Polyline polyline, Polygon polygon)
-        {
-            return polyline.ToNTSPolygon().Contains(polygon);
-        }
+            }).ToList();          
+        }     
     }
 }
 

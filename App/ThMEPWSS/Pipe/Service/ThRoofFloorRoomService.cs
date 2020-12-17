@@ -1,14 +1,13 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThRoofFloorRoomService : IDisposable
+    public class ThRoofFloorRoomService 
     {
         private List<ThIfcSpace> BaseCircles { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
@@ -33,15 +32,10 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static List<ThWRoofFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
-            using (var roofFloorContainerService = new ThRoofFloorRoomService(baseCircles,spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes))
-            {
-                roofFloorContainerService.Build();
-                return roofFloorContainerService.Rooms;
-            }
-        }
-        public void Dispose()
-        {
-        }
+            var roofFloorContainerService = new ThRoofFloorRoomService(baseCircles, spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes);
+            roofFloorContainerService.Build();
+            return roofFloorContainerService.Rooms;            
+        }      
         private void Build()
         {
             //找主体空间 空间框线包含“顶层设备空间”

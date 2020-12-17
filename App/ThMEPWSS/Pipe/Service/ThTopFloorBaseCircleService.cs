@@ -18,7 +18,6 @@ namespace ThMEPWSS.Pipe.Service
             BaseCircles = baseCircles;
             Space = space;
             var objs = new DBObjectCollection();
-            //Pipes.ForEach(o => objs.Add(o.Outline));
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
         public static List<ThIfcSpace> Find(
@@ -51,13 +50,12 @@ namespace ThMEPWSS.Pipe.Service
         private bool IsValidSpaceArea(ThIfcSpace thIfcSpace)
         {
             double area = GetSpaceArea(thIfcSpace);
-            return area >= 140;
+            return area >= ThWPipeCommon.MAX_BASECIRCLE_AREA;
         }
         private double GetSpaceArea(ThIfcSpace thIfcSpace)
         {
             return thIfcSpace.Boundary.Area / (1000 * 1000);
         }
-
     }
 }
 

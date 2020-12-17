@@ -1,14 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThTopFloorRoomService : IDisposable
+    public class ThTopFloorRoomService 
     {
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThIfcSpace> BaseCircles { get; set; }
@@ -33,11 +33,9 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static List<ThWTopFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcSpace> baseCircles, List<ThWCompositeRoom> compositeRooms, List<ThWCompositeBalconyRoom> compositeBalconyRooms, List<Line> divisionLines)
         {
-            using (var firstFloorContainerService = new ThTopFloorRoomService(spaces, baseCircles, compositeRooms, compositeBalconyRooms, divisionLines))
-            {
-                firstFloorContainerService.Build();
-                return firstFloorContainerService.Rooms;
-            }
+            var firstFloorContainerService = new ThTopFloorRoomService(spaces, baseCircles, compositeRooms, compositeBalconyRooms, divisionLines);
+            firstFloorContainerService.Build();
+            return firstFloorContainerService.Rooms;            
         }
         public void Dispose()
         {

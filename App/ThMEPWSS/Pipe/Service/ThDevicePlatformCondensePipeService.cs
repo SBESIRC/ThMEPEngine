@@ -1,19 +1,16 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Service
 {
-   public  class ThDevicePlatformCondensePipeService
+    public  class ThDevicePlatformCondensePipeService
     {
-        public List<ThIfcCondensePipe> CondensePipe { get; set; }
+        public List<ThIfcCondensePipe> CondensePipes { get; private set; }
         private List<ThIfcCondensePipe> CondensePipeList { get; set; }
         private ThIfcSpace DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex CondensePipeSpatialIndex { get; set; }
@@ -23,7 +20,6 @@ namespace ThMEPWSS.Pipe.Service
             ThCADCoreNTSSpatialIndex condensePipeSpatialIndex)
         {
             CondensePipeList = condensePipeList;
-            CondensePipe = new List<ThIfcCondensePipe>();
             DevicePlatformSpace = devicePlatformSpace;
             CondensePipeSpatialIndex = condensePipeSpatialIndex;
             if (CondensePipeSpatialIndex == null)
@@ -32,7 +28,6 @@ namespace ThMEPWSS.Pipe.Service
                 CondensePipeList.ForEach(o => dbObjs.Add(o.Outline));
                 CondensePipeSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
-
         }
         public static ThDevicePlatformCondensePipeService Find(
             List<ThIfcCondensePipe> condensePipeList,
@@ -48,8 +43,7 @@ namespace ThMEPWSS.Pipe.Service
             var devicePlatformBoundary = DevicePlatformSpace.Boundary as Polyline;
             var crossObjs = CondensePipeSpatialIndex.SelectCrossingPolygon(devicePlatformBoundary);
             var crossCondensePipe = CondensePipeList.Where(o => crossObjs.Contains(o.Outline));
-            var includedCondensePipe = crossCondensePipe.Where(o => devicePlatformBoundary.Contains(o.Outline as Curve));
-            includedCondensePipe.ForEach(o => CondensePipe.Add(o));
+            CondensePipes = crossCondensePipe.Where(o => devicePlatformBoundary.Contains(o.Outline as Curve)).ToList();
         }
     }
 }

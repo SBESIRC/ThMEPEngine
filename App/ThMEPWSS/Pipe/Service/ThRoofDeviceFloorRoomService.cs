@@ -8,7 +8,7 @@ using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThRoofDeviceFloorRoomService : IDisposable
+    public class ThRoofDeviceFloorRoomService
     {
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
@@ -33,15 +33,10 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static List<ThWRoofDeviceFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
-            using (var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles))
-            {
-                roofDeviceFloorContainerService.Build();
-                return roofDeviceFloorContainerService.Rooms;
-            }
-        }
-        public void Dispose()
-        {
-        }
+            var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);          
+            roofDeviceFloorContainerService.Build();
+            return roofDeviceFloorContainerService.Rooms;          
+        }   
         private void Build()
         {
             //找主体空间 空间框线包含“顶层设备空间”

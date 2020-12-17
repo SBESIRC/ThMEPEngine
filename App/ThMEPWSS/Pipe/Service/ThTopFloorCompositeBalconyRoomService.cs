@@ -1,11 +1,10 @@
 ﻿using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPWSS.Pipe.Model;
-using ThMEPWSS.Pipe.Engine;
-using ThMEPWSS.Pipe.Geom;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -21,7 +20,6 @@ namespace ThMEPWSS.Pipe.Service
             CompositeBalconyRoom = compositeBalconyRoom;
             Space = space;
             var objs = new DBObjectCollection();
-            //Pipes.ForEach(o => objs.Add(o.Outline));
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
         public static List<ThWCompositeBalconyRoom> Find(

@@ -1,11 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 
@@ -16,7 +13,7 @@ namespace ThMEPWSS.Pipe.Service
         /// <summary>
         /// 找到的坐便器
         /// </summary>
-        public List<ThIfcClosestool> Closestools { get; set; }
+        public List<ThIfcClosestool> Closestools { get; private set; }
         private List<ThIfcClosestool> ClosestoolList { get; set; }
         private ThIfcSpace ToiletSpace { get; set; }
         private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
@@ -57,8 +54,7 @@ namespace ThMEPWSS.Pipe.Service
             var tolitBoundary = ToiletSpace.Boundary as Polyline;
             var crossObjs = ClosestoolSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
             var crossClosestools = ClosestoolList.Where(o => crossObjs.Contains(o.Outline));
-            var includedClosestools = crossClosestools.Where(o => tolitBoundary.Contains(o.Outline as Curve));
-            includedClosestools.ForEach(o => Closestools.Add(o));
+            Closestools = crossClosestools.Where(o => tolitBoundary.Contains(o.Outline as Curve)).ToList();            
         }        
     }
 }
