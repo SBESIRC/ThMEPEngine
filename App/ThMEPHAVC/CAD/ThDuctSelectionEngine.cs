@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json.Linq;
 using ThCADExtension;
-using ThMEPEngineCore.Model.Hvac;
-using TianHua.FanSelection;
 using TianHua.Publics.BaseCode;
+using System.Collections.Generic;
+using TianHua.FanSelection.Function;
 
 namespace ThMEPHVAC.CAD
 {
@@ -23,23 +19,12 @@ namespace ThMEPHVAC.CAD
     {
         public List<DuctSizeParameter> DefaultCandidateDucts { get; set; }
         public ThDbModelFan FanModel { get; set; }
-        public double DefaultAirSpeed { get; set; }
         public DuctSizeParameter DefaultRecommendDuct { get; set; }
         public DuctSizeParameter RecommendOuterDuct { get; set; }
         public DuctSizeParameter RecommendInnerDuct { get; set; }
         public ThDuctSelectionEngine(ThDbModelFan fanmodel)
         {
             FanModel = fanmodel;
-            switch (FanModel.FanScenario)
-            {
-                case "消防排烟":
-                case "消防补风":
-                    DefaultAirSpeed = 15;
-                    break;
-                default:
-                    DefaultAirSpeed = 8;
-                    break;
-            }
             DefaultCandidateDucts = GetDefaultCandidateDucts();
             RecommendOuterDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Max(f => f.AspectRatio));
             RecommendInnerDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Min(f => f.AspectRatio));
@@ -47,7 +32,7 @@ namespace ThMEPHVAC.CAD
 
         private List<DuctSizeParameter> GetDefaultCandidateDucts()
         {
-            double calculateDuctArea = FanModel.FanVolume / 3600 / DefaultAirSpeed;
+            double calculateDuctArea = FanModel.FanVolume / 3600.0 / ThFanSelectionUtils.GetDefaultAirSpeed(FanModel.FanScenario);
             var ductParameterString = ReadWord(ThCADCommon.DuctSizeParametersPath());
             var ductParameterObjs = FuncJson.Deserialize<List<DuctSizeParameter>>(ductParameterString);
 

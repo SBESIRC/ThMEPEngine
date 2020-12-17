@@ -73,6 +73,57 @@ namespace TianHua.FanSelection.Function
         }
 
         /// <summary>
+        /// 场景下的默认风速
+        /// </summary>
+        /// <param name="scenario"></param>
+        /// <returns></returns>
+        public static double GetDefaultAirSpeed(string scenario)
+        {
+            switch (scenario)
+            {
+                case "消防排烟":
+                case "消防补风":
+                    return 15.0;
+                default:
+                    return 8.0;
+            }
+        }
+
+        /// <summary>
+        /// 场景下的最小风速
+        /// </summary>
+        /// <param name="scenario"></param>
+        /// <returns></returns>
+        public static double GetMinAirSpeed(string scenario)
+        {
+            switch (scenario)
+            {
+                case "消防排烟":
+                case "消防补风":
+                    return 8.0;
+                default:
+                    return 5.0;
+            }
+        }
+
+        /// <summary>
+        /// 场景下的最大风速
+        /// </summary>
+        /// <param name="scenario"></param>
+        /// <returns></returns>
+        public static double GetMaxAirSpeed(string scenario)
+        {
+            switch (scenario)
+            {
+                case "消防排烟":
+                case "消防补风":
+                    return 20.0;
+                default:
+                    return 10.0;
+            }
+        }
+
+        /// <summary>
         /// 属性“变频”值
         /// </summary>
         /// <param name="control"></param>
