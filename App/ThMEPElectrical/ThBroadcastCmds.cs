@@ -174,7 +174,7 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THFBS2", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THGBMQ", CommandFlags.Modal)]
         public void ThBroadcastBlindArea()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
