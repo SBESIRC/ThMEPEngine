@@ -85,7 +85,6 @@ namespace ThMEPEngineCore.Service.Hvac
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
@@ -94,14 +93,6 @@ namespace ThMEPEngineCore.Service.Hvac
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_X,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_Y,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_X,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_Y,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL,
             })
             {
                 if (dynamicProperties.Contains(property) && properties.Contains(property))
