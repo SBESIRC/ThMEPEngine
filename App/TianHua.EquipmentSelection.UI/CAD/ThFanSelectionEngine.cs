@@ -17,9 +17,6 @@ namespace TianHua.FanSelection.UI.CAD
 {
     public static class ThFanSelectionEngine
     {
-        private static string CurrentModel { get; set; }
-        private static int CurrentModelNumber { get; set; }
-
         public static void InsertModels(FanDataModel dataModel)
         {
             var pr = Active.Editor.GetPoint("\n请输入插入点");
@@ -282,40 +279,11 @@ namespace TianHua.FanSelection.UI.CAD
             {
                 var blockReferences = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
-                    .OrderBy(o => o.GetModelNumber());
-                if (!blockReferences.Any())
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID));
+                if (blockReferences.Any())
                 {
-                    return;
-                }
-                if (CurrentModel == dataModel.ID)
-                {
-                    var models = blockReferences.OrderBy(o => o.GetModelNumber())
-                        .Where(o => o.GetModelNumber() > CurrentModelNumber).ToList();
-                    if (models.Count > 0)
-                    {
-                        // 找到第一个比当前编号大的图块
-                        var model = models.First();
-                        CurrentModelNumber = model.GetModelNumber();
-                        Active.Editor.ZoomToModel(model.ObjectId, 3);
-                        Active.Editor.PickFirstModel(model.ObjectId);
-                    }
-                    else
-                    {
-                        // 未找到一个比当前编号大的图块，回到第一个图块
-                        var model = blockReferences.First();
-                        CurrentModelNumber = model.GetModelNumber();
-                        Active.Editor.ZoomToModel(model.ObjectId, 3);
-                        Active.Editor.PickFirstModel(model.ObjectId);
-                    }
-                }
-                else
-                {
-                    CurrentModel = dataModel.ID;
-                    var model = blockReferences.First();
-                    CurrentModelNumber = model.GetModelNumber();
-                    Active.Editor.ZoomToModel(model.ObjectId, 3);
-                    Active.Editor.PickFirstModel(model.ObjectId);
+                    Active.Editor.ZoomToModels(blockReferences.ToArray(), 1.0);
+                    Active.Editor.PickFirstModels(blockReferences.Select(o => o.ObjectId).ToArray());
                 }
             }
         }
