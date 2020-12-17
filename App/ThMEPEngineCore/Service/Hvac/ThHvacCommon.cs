@@ -54,5 +54,16 @@ namespace ThMEPEngineCore.Service.Hvac
         public const string BLOCK_DYNAMIC_PROPERTY_SPECIFICATION_MODEL = "规格及型号";
         public const string BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT = "型号字高";
         public const string BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT = "标注字高";
+        public const string BLOCK_DYNAMIC_PROPERTY_DIAMETER = "风机直径";
+        public const string BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X = "标注基点 X";
+        public const string BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y = "标注基点 X";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_X = "进风口 X";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_Y = "进风口 Y";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_X = "出风口 X";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_Y = "出风口 Y";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL = "进风口竖";
+        public const string BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL = "进风口横";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL = "出风口竖";
+        public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL = "出风口横";
     }
 }
