@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
@@ -238,10 +237,13 @@ namespace ThMEPHVAC.CAD
                         ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                     return axialinletposition.TransformBy(ocs2Wcs);
                 }
-                Point3d inletposition = CreatePointFromProperty(
-                    ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
-                    ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
-                return inletposition.TransformBy(ocs2Wcs);
+                else
+                {
+                    Point3d inletposition = CreatePointFromProperty(
+                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_X,
+                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_Y);
+                    return inletposition.TransformBy(ocs2Wcs);
+                }
             }
         }
 
@@ -255,12 +257,13 @@ namespace ThMEPHVAC.CAD
                     ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                 return axialinletposition.TransformBy(ocs2Wcs);
             }
-
-            string blockname = Data.EffectiveName;
-            Point3d inletposition = CreatePointFromProperty(
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_X,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_Y);
-            return inletposition.TransformBy(ocs2Wcs);
+            else
+            {
+                Point3d inletposition = CreatePointFromProperty(
+                    ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_X,
+                    ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_Y);
+                return inletposition.TransformBy(ocs2Wcs);
+            }
         }
         private Point3d CreatePointFromProperty(string xname,string yname)
         {
