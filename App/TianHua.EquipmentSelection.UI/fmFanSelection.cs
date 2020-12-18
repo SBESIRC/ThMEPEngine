@@ -2528,25 +2528,25 @@ namespace TianHua.FanSelection.UI
                     _FanDataModel.Name = _FanDataModel.Name;
                     _FanDataModel.InstallFloor = SetFanDataModelByFloor(_FanDataModel);
                     models.Add(_FanDataModel);
-                }
 
-                var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
-                if (_SonFan != null)
-                {
-                    var _SonJson = FuncJson.Serialize(_SonFan);
-                    var _SonFanData = FuncJson.Deserialize<FanDataModel>(_SonJson);
+                    var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+                    if (_SonFan != null)
+                    {
+                        var _SonJson = FuncJson.Serialize(_SonFan);
+                        var _SonFanData = FuncJson.Deserialize<FanDataModel>(_SonJson);
 
-                    _SonFanData.ID = Guid.NewGuid().ToString();
-                    _SonFanData.PID = _Guid;
-                    _SonFanData.IsErased = false;
-                    models.Add(_SonFanData);
-                }
+                        _SonFanData.ID = Guid.NewGuid().ToString();
+                        _SonFanData.PID = _Guid;
+                        _SonFanData.IsErased = false;
+                        models.Add(_SonFanData);
+                    }
 
-                // 更新数据源
-                if (models.Count > 0)
-                {
-                    var _Index = m_ListFan.IndexOf(_Fan);
-                    m_ListFan.InsertRange(_Index + 1, models);
+                    // 更新数据源
+                    if (models.Count > 0)
+                    {
+                        var _Index = m_ListFan.IndexOf(_Fan);
+                        m_ListFan.InsertRange(_Index + 1, models);
+                    }
                 }
             }
 
