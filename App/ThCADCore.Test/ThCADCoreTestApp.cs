@@ -106,8 +106,47 @@ namespace ThCADCore.Test
                     return;
                 }
 
+
+
                 var pline = acadDatabase.Element<Polyline>(result.ObjectId);
                 acadDatabase.ModelSpace.Add(pline.GetOctagonalEnvelope());
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThEarCut", CommandFlags.Modal)]
+        public void ThEarCut()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var options = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "请选择洞",
+                };
+                var result2 = Active.Editor.GetSelection(options);
+
+                var objs = new DBObjectCollection();
+                if (result2.Status == PromptStatus.OK)
+                {
+                    foreach (var obj in result2.Value.GetObjectIds())
+                    {
+                        objs.Add(acadDatabase.Element<Entity>(obj));
+                    }
+                }
+
+                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
+                var builder = new ThCADCoreNTSEarCutTriangulationBuilder();
+                var triangles = builder.EarCut(pline, objs);
+                foreach(Polyline triangle in triangles)
+                {
+                    triangle.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(triangle);
+                }
             }
         }
 
