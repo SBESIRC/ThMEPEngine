@@ -55,12 +55,21 @@ namespace TianHua.FanSelection.UI.CAD
             }
         }
 
-        public static void RemoveModels(FanDataModel dataModel, bool erasing = true)
+        public static void EraseModels(FanDataModel dataModel, bool erasing = true)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database, true))
             {
                 dbManager.EraseModels(dataModel.ID, erasing);
+            }
+        }
+
+        public static void RemoveModels(FanDataModel dataModel)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
+            {
+                dbManager.RemoveModels(dataModel.ID);
             }
         }
 

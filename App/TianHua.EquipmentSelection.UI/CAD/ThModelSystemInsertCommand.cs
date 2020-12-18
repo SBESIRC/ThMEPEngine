@@ -41,7 +41,6 @@ namespace TianHua.FanSelection.UI.CAD
                 else if (dbManager.Models[_FanDataModel.ID].Count != _FanDataModel.VentQuan)
                 {
                     // 场景2：若检测到图纸中有对应的风机图块，但图块数量不同
-                    //  删除原图块，插入新的图块
                     ThFanSelectionEngine.RemoveModels(_FanDataModel);
                     ThFanSelectionEngine.InsertModels(_FanDataModel);
                 }

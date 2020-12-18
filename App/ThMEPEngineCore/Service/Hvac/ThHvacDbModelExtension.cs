@@ -116,6 +116,31 @@ namespace ThMEPEngineCore.Service.Hvac
             return model.GetModelIdentifier() == identifier;
         }
 
+        public static void EraseModel(this ObjectId obj, bool erasing = true)
+        {
+            var model = obj.GetObject(OpenMode.ForWrite, true);
+            model.Erase(erasing);
+        }
+
+        public static void RemoveModel(this ObjectId obj)
+        {
+            var model = obj.GetObject(OpenMode.ForWrite);
+            model.RemoveXData(ThHvacCommon.RegAppName_FanSelection);
+            model.Erase();
+        }
+
+        private static void RemoveXData(this DBObject dBObject, string regAppName)
+        {
+            TypedValueList xdata = dBObject.GetXData(regAppName);
+            if (xdata != null)// 如果有扩展数据
+            {
+                // 新建一个TypedValue列表，并只添加注册应用程序名扩展数据项
+                TypedValueList newValues = new TypedValueList();
+                newValues.Add(DxfCode.ExtendedDataRegAppName, regAppName);
+                dBObject.XData = newValues; //为对象的XData属性重新赋值，从而删除扩展数据 
+            }
+        }
+
         public static string GetModelStyle(this ObjectId obj)
         {
             var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);

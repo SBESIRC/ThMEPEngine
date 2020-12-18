@@ -20,8 +20,8 @@ namespace TianHua.FanSelection.UI.CAD
                 SetFocusToDwgView();
 
                 // 删除风机系统
-                ThFanSelectionService.Instance.ErasedModels.ForEach(o => ThFanSelectionEngine.RemoveModels(o, true));
-                ThFanSelectionService.Instance.UnerasedModels.ForEach(o => ThFanSelectionEngine.RemoveModels(o, false));
+                ThFanSelectionService.Instance.ErasedModels.ForEach(o => ThFanSelectionEngine.EraseModels(o, true));
+                ThFanSelectionService.Instance.UnerasedModels.ForEach(o => ThFanSelectionEngine.EraseModels(o, false));
             }
         }
     }

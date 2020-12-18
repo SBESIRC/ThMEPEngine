@@ -108,7 +108,22 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 GetModels(identifier).Cast<ObjectId>().ForEach(o =>
                 {
-                    acadDatabase.Element<Entity>(o, true, true).Erase(erasing);
+                    o.EraseModel(erasing);
+                });
+            }
+        }
+
+        /// <summary>
+        /// 清除风机图块
+        /// </summary>
+        /// <param name="identifier"></param>
+        public void RemoveModels(string identifier)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
+            {
+                GetModels(identifier).Cast<ObjectId>().ForEach(o =>
+                {
+                    o.RemoveModel();
                 });
             }
         }
