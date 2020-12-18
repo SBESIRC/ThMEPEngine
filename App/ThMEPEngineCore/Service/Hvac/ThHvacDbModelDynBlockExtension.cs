@@ -79,20 +79,22 @@ namespace ThMEPEngineCore.Service.Hvac
 
         public static void SetModelCustomPropertiesFrom(this ObjectId obj, DynamicBlockReferencePropertyCollection properties)
         {
+            // 注意修改设置动态属性的顺序
+            // 不同动态属性之间会互相影响，设置动态属性的顺序影响到最终的结果
             var dynamicProperties = obj.GetDynProperties();
             foreach (var property in new string[] {
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1,
             })
             {
                 if (dynamicProperties.Contains(property) && properties.Contains(property))
