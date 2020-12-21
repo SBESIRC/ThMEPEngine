@@ -65,6 +65,30 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THBUILDAREA", CommandFlags.Modal)]
+        public void ThBuildArea()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                foreach (Entity obj in objs.BuildArea())
+                {
+                    acadDatabase.ModelSpace.Add(obj);
+                    obj.SetDatabaseDefaults();
+                }
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()
         {
