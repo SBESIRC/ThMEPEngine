@@ -195,6 +195,7 @@
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
+    <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
     <Compile Include="Service\ThBalconyFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThBasintoolDbExtension.cs" />
     <Compile Include="Service\ThBasintoolLayerManager.cs" />
