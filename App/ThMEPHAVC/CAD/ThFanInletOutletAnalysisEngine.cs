@@ -41,23 +41,23 @@ namespace ThMEPHAVC.CAD
             OutletStartEdge = tempoutletfirstedge;
 
             //test
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                Line infirst = new Line()
-                {
-                    StartPoint = InletStartEdge.Source.Position,
-                    EndPoint = InletStartEdge.Target.Position,
-                    ColorIndex = 1
-                };
-                Line outfirst = new Line()
-                {
-                    StartPoint = OutletStartEdge.Source.Position,
-                    EndPoint = OutletStartEdge.Target.Position,
-                    ColorIndex = 1
-                };
-                acadDatabase.ModelSpace.Add(infirst);
-                acadDatabase.ModelSpace.Add(outfirst);
-            }
+            //using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            //{
+            //    Line infirst = new Line()
+            //    {
+            //        StartPoint = InletStartEdge.Source.Position,
+            //        EndPoint = InletStartEdge.Target.Position,
+            //        ColorIndex = 1
+            //    };
+            //    Line outfirst = new Line()
+            //    {
+            //        StartPoint = OutletStartEdge.Source.Position,
+            //        EndPoint = OutletStartEdge.Target.Position,
+            //        ColorIndex = 1
+            //    };
+            //    acadDatabase.ModelSpace.Add(infirst);
+            //    acadDatabase.ModelSpace.Add(outfirst);
+            //}
         }
 
         private AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> CreateLineGraph(Point3d basepoint, ref ThDuctEdge<ThDuctVertex> startedge)
@@ -95,6 +95,20 @@ namespace ThMEPHAVC.CAD
                 {
                     InletAnalysisResult = "WrongInlet_Empty";
                     return;
+                }
+                foreach (var edge in InletCenterLineGraph.Edges)
+                {
+                    if (InletCenterLineGraph.OutDegree(edge.Target) == 1)
+                    {
+                        var leftvector = edge.Target.Position.GetVectorTo(InletCenterLineGraph.OutEdges(edge.Target).FirstOrDefault().Target.Position);
+                        var rightvector = edge.Target.Position.GetVectorTo(edge.Source.Position);
+
+                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) < 0)
+                        {
+                            InletAnalysisResult = "WrongInlet_AcuteAngle";
+                            return;
+                        }
+                    }
                 }
                 Vector2d startvector = new Vector2d(InletStartEdge.Target.Position.X - InletStartEdge.Source.Position.X, InletStartEdge.Target.Position.Y - InletStartEdge.Source.Position.Y);
                 var startinletlineangle = startvector.Angle * 180 / Math.PI;
@@ -158,6 +172,22 @@ namespace ThMEPHAVC.CAD
                     OutletAnalysisResult = "WrongOutlet_Empty";
                     return;
                 }
+
+                foreach (var edge in OutletCenterLineGraph.Edges)
+                {
+                    if (OutletCenterLineGraph.OutDegree(edge.Target) == 1)
+                    {
+                        var leftvector = edge.Target.Position.GetVectorTo(OutletCenterLineGraph.OutEdges(edge.Target).FirstOrDefault().Target.Position);
+                        var rightvector = edge.Target.Position.GetVectorTo(edge.Source.Position);
+
+                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) < 0)
+                        {
+                            OutletAnalysisResult = "WrongOutlet_AcuteAngle";
+                            return;
+                        }
+                    }
+                }
+
                 Vector2d startvector = new Vector2d(OutletStartEdge.Target.Position.X - OutletStartEdge.Source.Position.X, OutletStartEdge.Target.Position.Y - OutletStartEdge.Source.Position.Y);
                 var startOutletlineangle = startvector.Angle * 180 / Math.PI;
                 var fanoutletangle = FanModel.FanOutlet.Angle;

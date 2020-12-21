@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
 using ThCADExtension;
 using ThMEPEngineCore.Service.Hvac;
 using TianHua.FanSelection;
@@ -231,6 +233,7 @@ namespace ThMEPHVAC.CAD
         {
             string blockname = Data.EffectiveName;
             Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.GetAsVector());
+            //Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.TransformBy(Active.Editor.GetMatrixFromWcsToUcs()).GetAsVector());
             if (blockname.Contains("直进") || blockname.Contains("侧进"))
             {
                 Point3d inletposition = CreatePointFromProperty(
@@ -250,8 +253,8 @@ namespace ThMEPHVAC.CAD
                 else
                 {
                     Point3d inletposition = CreatePointFromProperty(
-                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_X,
-                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_Y);
+                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL,
+                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL);
                     return inletposition.TransformBy(ocs2Wcs);
                 }
             }
@@ -263,8 +266,8 @@ namespace ThMEPHVAC.CAD
             if (Model.IsAXIALModel())
             {
                 Point3d axialinletposition = CreatePointFromProperty(
-                    ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
-                    ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
+                    ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_X,
+                    ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_Y);
                 return axialinletposition.TransformBy(ocs2Wcs);
             }
             else

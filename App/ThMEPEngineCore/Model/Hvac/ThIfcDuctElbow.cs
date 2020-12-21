@@ -21,6 +21,11 @@ namespace ThMEPEngineCore.Model.Hvac
         public double ReserveLength { get; set; }
 
         /// <summary>
+        /// 单侧折弯长度
+        /// </summary>
+        public double SingleLength { get; set; }
+
+        /// <summary>
         /// 角点
         /// </summary>
         public Point3d CornerPoint { get; set; }
@@ -28,18 +33,12 @@ namespace ThMEPEngineCore.Model.Hvac
         /// <summary>
         /// 中心点
         /// </summary>
-        public Point3d CenterPoint
-        {
-            get
-            {
-                return CornerPoint + new Vector3d(-PipeOpenWidth, -Math.Abs(PipeOpenWidth * Math.Tan(0.5 * (ElbowDegree*Math.PI/180))), 0);
-            }
-        }
+        public Point3d CenterPoint { get; set; }
 
         /// <summary>
-        /// 旋转角度
+        /// 等分角度
         /// </summary>
-        public double RotateAngle { get; set; }
+        public double BisectorAngle { get; set; }
     }
 
     public class ThIfcDuctElbow : ThIfcDuctFitting
@@ -50,6 +49,9 @@ namespace ThMEPEngineCore.Model.Hvac
         {
             Parameters = parameters;
             Parameters.CornerPoint = Point3d.Origin;
+            Parameters.CenterPoint = Parameters.CornerPoint + new Vector3d(-Parameters.PipeOpenWidth, -Math.Abs(Parameters.PipeOpenWidth * Math.Tan(0.5 * (Parameters.ElbowDegree * Math.PI / 180))), 0);
+            var Bisectorvector = new Vector2d(Parameters.CenterPoint.X - Parameters.CornerPoint.X , Parameters.CenterPoint.Y - Parameters.CornerPoint.Y);
+            Parameters.BisectorAngle = Bisectorvector.Angle;
         }
 
         public static ThIfcDuctElbow Create(ThIfcDuctElbowParameters parameters)

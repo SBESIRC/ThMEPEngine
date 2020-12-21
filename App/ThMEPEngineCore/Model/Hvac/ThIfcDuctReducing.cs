@@ -21,6 +21,8 @@ namespace ThMEPEngineCore.Model.Hvac
         /// </summary>
         public Point3d StartCenterPoint { get; set; }
 
+        public double ReducingLength { get; set; }
+
         /// <summary>
         /// 旋转角度
         /// </summary>
@@ -35,6 +37,7 @@ namespace ThMEPEngineCore.Model.Hvac
         {
             Parameters = parameters;
             Parameters.StartCenterPoint = Point3d.Origin;
+            parameters.ReducingLength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(15 * Math.PI / 180);
         }
 
         public static ThIfcDuctReducing Create(ThIfcDuctReducingParameters parameters)

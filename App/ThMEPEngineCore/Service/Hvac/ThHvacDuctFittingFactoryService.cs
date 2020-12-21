@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Linq;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.Service.Hvac
 {
@@ -47,6 +49,59 @@ namespace ThMEPEngineCore.Service.Hvac
                 Representation = CreateDuctSegmentGeometries(parameters)
             };
         }
+
+        public ThIfcDuctSegment CreateVerticalDuctSegment(ThIfcDuctSegmentParameters parameters)
+        {
+            return new ThIfcDuctSegment(parameters)
+            {
+                Representation = CreateverticalDuctGeometries(parameters)
+            };
+        }
+
+        public void DuctSegmentHandle(DBObjectCollection originduct, double sourcecutdistance, double targetcutdistance)
+        {
+            List<string> a = new List<string>();
+            var groupedlines = originduct.Cast<Line>().GroupBy(l => Math.Abs(l.Angle) < 0.01 || Math.Abs(l.Angle - Math.PI) < 0.01).ToList();
+
+            foreach (var linegroup in groupedlines)
+            {
+                //处理水平线
+                if (Math.Abs(linegroup.First().Angle) < 0.01 || Math.Abs(linegroup.First().Angle - Math.PI) < 0.01 )
+                {
+                    foreach (var line in linegroup)
+                    {
+                        if (line.StartPoint.X < line.EndPoint.X)
+                        {
+                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                        }
+                        else
+                        {
+                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                        }
+                    }
+                }
+                //处理竖直线
+                else
+                {
+                    foreach (var line in linegroup)
+                    {
+                        if (line.StartPoint.X < 0)
+                        {
+                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                        }
+                        else
+                        {
+                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                        }
+                    }
+                }
+            }
+        }
+
 
         private DBObjectCollection CreateReducingGeometries(ThIfcDuctReducingParameters parameters)
         {
@@ -93,7 +148,7 @@ namespace ThMEPEngineCore.Service.Hvac
             };
         }
 
-        public DBObjectCollection CreateElbowGeometries(ThIfcDuctElbowParameters parameters)
+        private DBObjectCollection CreateElbowGeometries(ThIfcDuctElbowParameters parameters)
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
             //创建弯头内外侧圆弧
@@ -178,13 +233,15 @@ namespace ThMEPEngineCore.Service.Hvac
                 ColorIndex = 2
             };
 
+            parameters.SingleLength = endextendsealline.GetPointAtDist(0.5* endextendsealline.Length).DistanceTo(parameters.CornerPoint);
+
             return new DBObjectCollection()
             {
                 outerarc,
                 centerarc,
                 innerarc,
-                startplaneline,
-                endplaneline,
+                //startplaneline,
+                //endplaneline,
                 outerendextendline,
                 innerendextendline,
                 outerstartextendline,
@@ -194,7 +251,7 @@ namespace ThMEPEngineCore.Service.Hvac
             };
         }
 
-        public DBObjectCollection CreateTeeGeometries(ThIfcDuctTeeParameters parameters)
+        private DBObjectCollection CreateTeeGeometries(ThIfcDuctTeeParameters parameters)
         {
             //创建支路端线
             Line branchEndLine = new Line()
@@ -327,7 +384,7 @@ namespace ThMEPEngineCore.Service.Hvac
             };
         }
 
-        public DBObjectCollection CreateCrossGeometries(ThIfcDuctCrossParameters parameters)
+        private DBObjectCollection CreateCrossGeometries(ThIfcDuctCrossParameters parameters)
         {
             //创建大端的端线
             Line mainBigEndLine = new Line()
@@ -504,13 +561,51 @@ namespace ThMEPEngineCore.Service.Hvac
             };
 
         }
-
-        public DBObjectCollection CreateDuctSegmentGeometries(ThIfcDuctSegmentParameters parameters)
+        private DBObjectCollection CreateverticalDuctGeometries(ThIfcDuctSegmentParameters parameters)
+        {
+            //绘制管道端线
+            Line UpperLine = new Line()
+            {
+                StartPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
+                EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
+                Layer = "Auot_DUCT-加压送风管",
+                ColorIndex = 1
+            };
+            Line LowerLine = new Line()
+            {
+                StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
+                EndPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
+                Layer = "Auot_DUCT-加压送风管",
+                ColorIndex = 1
+            };
+            Line LeftLine = new Line()
+            {
+                StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
+                EndPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
+                Layer = "Auot_DUCT-加压送风管",
+                ColorIndex = 1
+            };
+            Line RightLine = new Line()
+            {
+                StartPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
+                EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
+                Layer = "Auot_DUCT-加压送风管",
+                ColorIndex = 1
+            };
+            return new DBObjectCollection()
+            {
+                UpperLine,
+                LowerLine,
+                LeftLine,
+                RightLine
+            };
+        }
+        private DBObjectCollection CreateDuctSegmentGeometries(ThIfcDuctSegmentParameters parameters)
         {
             //绘制辅助中心线
             Line auxiliaryCenterLine = new Line()
             {
-                StartPoint = new Point3d(-parameters.Length/2.0, 0, 0),
+                StartPoint = new Point3d(-parameters.Length / 2.0, 0, 0),
                 EndPoint = new Point3d(parameters.Length / 2.0, 0, 0),
                 Layer = "Auot_DUCT-加压送风管",
                 ColorIndex = 1

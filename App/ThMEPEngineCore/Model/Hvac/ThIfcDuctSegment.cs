@@ -12,6 +12,10 @@ namespace ThMEPEngineCore.Model.Hvac
         /// 风管宽度
         /// </summary>
         public double Length { get; set; }
+        /// <summary>
+        /// 风管高度
+        /// </summary>
+        public double Height { get; set; }
     }
 
     public class ThIfcDuctSegment : ThIfcFlowSegment
