@@ -85,7 +85,6 @@ namespace ThMEPEngineCore.Service.Hvac
             foreach (var property in new string[] {
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1,
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X,
@@ -94,7 +93,6 @@ namespace ThMEPEngineCore.Service.Hvac
                 ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X,
                 ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y,
-                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1,
             })
             {
                 if (dynamicProperties.Contains(property) && properties.Contains(property))
