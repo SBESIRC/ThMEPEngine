@@ -1,19 +1,14 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using GeometryExtensions;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThKitchenRoomService : IDisposable
+    public class ThKitchenRoomService 
     {
         public List<ThWKitchenRoom> KitchenContainers { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
@@ -32,15 +27,12 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static List<ThWKitchenRoom> Build(List<ThIfcSpace> spaces, List<ThIfcBasin> basintools)
         {
-            using (var kitchenContainerService = new ThKitchenRoomService(spaces, basintools))
-            {
-                kitchenContainerService.Build();
-                return kitchenContainerService.KitchenContainers;
-            }
+            var kitchenContainerService = new ThKitchenRoomService(spaces, basintools);           
+            kitchenContainerService.Build();
+            return kitchenContainerService.KitchenContainers;
+           
         }
-        public void Dispose()
-        {
-        }
+      
         private void Build()
         {
             //找主体空间 空间框线包含“卫生间”
@@ -69,11 +61,7 @@ namespace ThMEPWSS.Pipe.Service
         {
             DBObjectCollection spaceObjs = new DBObjectCollection();
             Spaces.ForEach(o => spaceObjs.Add(o.Boundary));
-            SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(spaceObjs);
-
-            DBObjectCollection basintoolObjs = new DBObjectCollection();
-            Basintools.ForEach(o => basintoolObjs.Add(o.Outline));
-            BasintoolSpatialIndex = new ThCADCoreNTSSpatialIndex(basintoolObjs);
+            SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(spaceObjs);     
         }
     }
 }

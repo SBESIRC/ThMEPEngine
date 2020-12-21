@@ -1,25 +1,19 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using GeometryExtensions;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThToiletRoomService : IDisposable
+    public class ThToiletRoomService
     {
         public List<ThWToiletRoom> ToiletContainers { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThIfcClosestool> Closestools { get; set; }
         private List<ThIfcFloorDrain> FloorDrains { get; set; }
-
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
@@ -39,15 +33,10 @@ namespace ThMEPWSS.Pipe.Service
             List<ThIfcClosestool> closestools,
             List<ThIfcFloorDrain> floorDrains)
         {
-            using (var toiletContainerService = new ThToiletRoomService(spaces, closestools, floorDrains))
-            {
-                toiletContainerService.Build();
-                return toiletContainerService.ToiletContainers;
-            }
-        }
-        public void Dispose()
-        {
-        }
+            var toiletContainerService = new ThToiletRoomService(spaces, closestools, floorDrains);          
+            toiletContainerService.Build();
+            return toiletContainerService.ToiletContainers;            
+        }      
         private void Build()
         {
             //找主体空间 空间框线包含“卫生间”
@@ -81,14 +70,6 @@ namespace ThMEPWSS.Pipe.Service
             DBObjectCollection spaceObjs = new DBObjectCollection();
             Spaces.ForEach(o => spaceObjs.Add(o.Boundary));
             SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(spaceObjs);
-
-            DBObjectCollection closestoolObjs = new DBObjectCollection();
-            Closestools.ForEach(o => closestoolObjs.Add(o.Outline));
-            ClosestoolSpatialIndex = new ThCADCoreNTSSpatialIndex(closestoolObjs);
-
-            DBObjectCollection floordrainObjs = new DBObjectCollection();
-            FloorDrains.ForEach(o => floordrainObjs.Add(o.Outline));
-            FloorDrainSpatialIndex = new ThCADCoreNTSSpatialIndex(floordrainObjs);
         }
     }
 }

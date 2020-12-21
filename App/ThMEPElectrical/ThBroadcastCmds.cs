@@ -15,57 +15,18 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
 using System;
+using ThMEPElectrical.Broadcast.Service.ClearService;
+using ThMEPElectrical.Broadcast.Service;
+using DotNetARX;
+using ThMEPElectrical.Business;
+using ThMEPElectrical.Business.Procedure;
 
 namespace ThMEPElectrical
 {
     public class ThBroadcastCmds
     {
-
-        //[CommandMethod("TIANHUACAD", "THPL", CommandFlags.Modal)]
-        //public void ThParkingline()
-        //{
-        //    using (AcadDatabase acdb = AcadDatabase.Active())
-        //    {
-        //        // 获取框线
-        //        PromptSelectionOptions options = new PromptSelectionOptions()
-        //        {
-        //            AllowDuplicates = false,
-        //            MessageForAdding = "选择区域",
-        //            RejectObjectsOnLockedLayers = true,
-        //        };
-        //        var dxfNames = new string[]
-        //        {
-        //            RXClass.GetClass(typeof(Polyline)).DxfName,
-        //        };
-        //        var filter = ThSelectionFilterTool.Build(dxfNames);
-        //        var result = Active.Editor.GetSelection(options, filter);
-        //        if (result.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-
-        //        foreach (ObjectId obj in result.Value.GetObjectIds())
-        //        {
-        //            var frame = acdb.Element<Polyline>(obj);
-        //            var objs = new DBObjectCollection();
-        //            var pLines = acdb.ModelSpace
-        //                .OfType<Curve>()
-        //                .Where(o => o.Layer == "AD-SIGN");
-        //            pLines.ForEach(x => objs.Add(x));
-
-        //            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-        //            var lanes = thCADCoreNTSSpatialIndex.SelectWindowPolygon(frame).Cast<Curve>().ToList();
-
-        //            var parkingLinesService = new ParkingLinesService();
-        //            var parkingLines = parkingLinesService.CreateParkingLines(frame, lanes);
-
-        //            foreach (var line in parkingLines)
-        //            {
-        //                acdb.ModelSpace.Add(line.Clone() as Curve);
-        //            }
-        //        }
-        //    }
-        //}
+        readonly double bufferLength = 100;
+        readonly double BlindAreaRadius = 12500;
 
         [CommandMethod("TIANHUACAD", "THFBS", CommandFlags.Modal)]
         public void ThBroadcast()
@@ -146,16 +107,6 @@ namespace ThMEPElectrical
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                //// 获取车道线
-                //var laneLineEngine = new ThLaneRecognitionEngine();
-                //laneLineEngine.Recognize(acdb.Database, new Point3dCollection());
-                //// 暂时假设车道线绘制符合要求
-                //var lanes = laneLineEngine.Spaces.Select(o => o.Boundary).Cast<Line>().ToList();
-                //if (lanes.Count == 0)
-                //{
-                //    return;
-                //}
-
                 // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
@@ -174,51 +125,139 @@ namespace ThMEPElectrical
                     return;
                 }
 
+                //获取外包框
+                List<Curve> frameLst = new List<Curve>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame);
+                    
+                }
+
+                //处理外包框线
+                var plines = HandleFrame(frameLst);
+                foreach (var frame in plines)
+                {
+                    var plFrame = ThMEPFrameService.Normalize(frame);
+                    //删除原有构建
+                    plFrame.ClearBroadCast();
+                    plFrame.ClearBlindArea();
 
                     //获取车道线
-                    var lanes = GetLanes(frame, acdb);
+                    var lanes = GetLanes(plFrame, acdb);
 
                     //处理车道线
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
                     var parkingLinesService = new ParkingLinesService();
-                    var parkingLines = parkingLinesService.CreateNodedParkingLines(frame, handleLines, out List<List<Line>> otherPLines);
+                    var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
 
                     //获取构建信息
-                    GetStructureInfo(acdb, frame, out List<Polyline> columns, out List<Polyline> walls);
+                    var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+                    GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
 
                     //主车道布置信息
                     LayoutWithParkingLineService layoutService = new LayoutWithParkingLineService();
-                    var layoutInfo = layoutService.LayoutBraodcast(parkingLines, columns, walls);
+                    var layoutInfo = layoutService.LayoutBraodcast(plFrame, parkingLines, columns, walls);
 
                     //副车道布置信息
                     LayoutWithSecondaryParkingLineService layoutWithSecondaryParkingLineService = new LayoutWithSecondaryParkingLineService();
-                    var resLayoutInfo = layoutWithSecondaryParkingLineService.LayoutBraodcast(layoutInfo, otherPLines, columns, walls);
+                    var resLayoutInfo = layoutWithSecondaryParkingLineService.LayoutBraodcast(layoutInfo, otherPLines, columns, walls, plFrame);
 
+                    //计算广播盲区
+                    var layoutPts = resLayoutInfo.SelectMany(x => x.Value.Keys).ToList();
+                    PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
+                    blindAreaService.PrintBlindArea(layoutPts, plFrame, BlindAreaRadius);
+
+                    //放置广播
                     InsertBroadcastService.InsertSprayBlock(resLayoutInfo);
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THGBMQ", CommandFlags.Modal)]
+        public void ThBroadcastBlindArea()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                
+                acadDatabase.Database.UnFrozenLayer(ThMEPCommon.BroadcastLayerName);
+                acadDatabase.Database.UnLockLayer(ThMEPCommon.BroadcastLayerName);
+                acadDatabase.Database.UnOffLayer(ThMEPCommon.BroadcastLayerName);
+                List<Curve> frameLst = new List<Curve>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acadDatabase.Element<Polyline>(obj);
+                    var plFrame = ThMEPFrameService.Normalize(frame);
+                    frameLst.Add(plFrame);
+                }
+                var plines = HandleFrame(frameLst);
+                foreach (var pline in plines)
+                {
+                    //删除原有盲区
+                    pline.ClearBlindArea();
+
+                    //获取广播布置点
+                    var pts = GetLayoutBroadcastPoints(acadDatabase, pline);
+
+                    //打印盲区
+                    PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
+                    blindAreaService.PrintBlindArea(pts, pline, BlindAreaRadius);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 处理外包框线
+        /// </summary>
+        /// <param name="frameLst"></param>
+        /// <returns></returns>
+        private List<Polyline> HandleFrame(List<Curve> frameLst)
+        {
+            var polygonInfos = NoUserCoordinateWorker.MakeNoUserCoordinateWorker(frameLst);
+            List<Polyline> resPLines = new List<Polyline>();
+            foreach (var pInfo in polygonInfos)
+            {
+                resPLines.Add(pInfo.ExternalProfile);
+                resPLines.AddRange(pInfo.InnerProfiles);
+            }
+
+            return resPLines;
         }
 
         /// <summary>
         /// 获取车道线
         /// </summary>
         /// <param name="polyline"></param>
-        public List<Polyline> GetLanes(Polyline polyline, AcadDatabase acdb)
+        public List<Curve> GetLanes(Polyline polyline, AcadDatabase acdb)
         {
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
-                .OfType<Polyline>()
+                .OfType<Curve>()
                 .Where(o => o.Layer == ThMEPCommon.NewParkingLineLayer);
             laneLines.ForEach(x => objs.Add(x));
 
-            var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+            //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Polyline>().ToList();
+            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
-            return sprayLines.SelectMany(x=>polyline.Trim(x).Cast<Polyline>().ToList()).ToList();
+            return sprayLines.SelectMany(x=>polyline.Trim(x).Cast<Curve>().ToList()).ToList();
         }
 
         /// <summary>
@@ -246,6 +285,37 @@ namespace ThMEPElectrical
             walls.ForEach(x => objs.Add(x));
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+        }
+
+        /// <summary>
+        /// 获取广播布置点位
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private List<Point3d> GetLayoutBroadcastPoints(AcadDatabase acdb, Polyline polyline)
+        {
+            //获取广播
+            var dxfNames = new string[]
+            {
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+            };
+            var filterlist = OpFilter.Bulid(o =>
+            o.Dxf((int)DxfCode.LayerName) == ThMEPCommon.BroadcastLayerName &
+            o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+            var braodcasts = new List<BlockReference>();
+            var allBraodcasts = Active.Editor.SelectAll(filterlist);
+            if (allBraodcasts.Status == PromptStatus.OK)
+            {
+                foreach (ObjectId obj in allBraodcasts.Value.GetObjectIds())
+                {
+                    braodcasts.Add(acdb.Element<BlockReference>(obj));
+                }
+            }
+            var objs = new DBObjectCollection();
+            braodcasts.Where(o => polyline.Contains(o.Position)).ForEachDbObject(o => objs.Add(o));
+
+            return braodcasts.Select(o => o.Position).ToList();
         }
     }
 }

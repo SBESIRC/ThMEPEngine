@@ -1,5 +1,4 @@
-﻿using System;
-using Linq2Acad;
+﻿using Linq2Acad;
 using DotNetARX;
 using System.Linq;
 using System.Text;
@@ -36,13 +35,14 @@ namespace ThMEPEngineCore.Service.Hvac
             }
         }
 
-        public static void SetModelIdentifier(this ObjectId obj, string identifier, int number, string style)
+        public static void SetModelIdentifier(this ObjectId obj, string identifier, int number, string style, string scenario)
         {
             TypedValueList valueList = new TypedValueList
             {
-                { (int)DxfCode.ExtendedDataAsciiString, identifier },
-                { (int)DxfCode.ExtendedDataInteger32, number },
-                { (int)DxfCode.ExtendedDataBinaryChunk,  Encoding.UTF8.GetBytes(style) },
+                { (int)DxfCode.ExtendedDataAsciiString,     identifier },
+                { (int)DxfCode.ExtendedDataInteger32,       number },
+                { (int)DxfCode.ExtendedDataBinaryChunk,     Encoding.UTF8.GetBytes(style) },
+                { (int)DxfCode.ExtendedDataBinaryChunk,     Encoding.UTF8.GetBytes(scenario) },
             };
             obj.AddXData(ThHvacCommon.RegAppName_FanSelection, valueList);
         }
@@ -73,19 +73,8 @@ namespace ThMEPEngineCore.Service.Hvac
 
         public static string GetModelIdentifier(this ObjectId obj)
         {
-            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
-            if (valueList == null)
-            {
-                return string.Empty;
-            }
-
-            var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-            if (!values.Any())
-            {
-                return string.Empty;
-            }
-
-            return (string)values.ElementAt(0).Value;
+            var model = obj.GetObject(OpenMode.ForRead, true);
+            return model.GetModelIdentifier();
         }
 
         public static string GetModelIdentifier(this DBObject dBObject)
@@ -123,19 +112,33 @@ namespace ThMEPEngineCore.Service.Hvac
 
         public static bool IsModel(this ObjectId obj, string identifier)
         {
-            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
-            if (valueList == null)
-            {
-                return false;
-            }
+            var model = obj.GetObject(OpenMode.ForRead, true);
+            return model.GetModelIdentifier() == identifier;
+        }
 
-            var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-            if (!values.Any())
-            {
-                return false;
-            }
+        public static void EraseModel(this ObjectId obj, bool erasing = true)
+        {
+            var model = obj.GetObject(OpenMode.ForWrite, true);
+            model.Erase(erasing);
+        }
 
-            return (string)values.ElementAt(0).Value == identifier;
+        public static void RemoveModel(this ObjectId obj)
+        {
+            var model = obj.GetObject(OpenMode.ForWrite);
+            model.RemoveXData(ThHvacCommon.RegAppName_FanSelection);
+            model.Erase();
+        }
+
+        private static void RemoveXData(this DBObject dBObject, string regAppName)
+        {
+            TypedValueList xdata = dBObject.GetXData(regAppName);
+            if (xdata != null)// 如果有扩展数据
+            {
+                // 新建一个TypedValue列表，并只添加注册应用程序名扩展数据项
+                TypedValueList newValues = new TypedValueList();
+                newValues.Add(DxfCode.ExtendedDataRegAppName, regAppName);
+                dBObject.XData = newValues; //为对象的XData属性重新赋值，从而删除扩展数据 
+            }
         }
 
         public static string GetModelStyle(this ObjectId obj)
@@ -146,8 +149,28 @@ namespace ThMEPEngineCore.Service.Hvac
                 return string.Empty;
             }
 
-            var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataBinaryChunk).First();
-            return Encoding.UTF8.GetString(values.Value as byte[]);
+            var typedValue = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataBinaryChunk).FirstOrDefault();
+            if (typedValue == null)
+            {
+                return string.Empty;
+            }
+            return Encoding.UTF8.GetString(typedValue.Value as byte[]);
+        }
+
+        public static string GetModelScenario(this ObjectId obj)
+        {
+            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
+            if (valueList == null)
+            {
+                return string.Empty;
+            }
+
+            var typedValue = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataBinaryChunk).LastOrDefault();
+            if (typedValue == null)
+            {
+                return string.Empty;
+            }
+            return Encoding.UTF8.GetString(typedValue.Value as byte[]);
         }
 
         public static bool IsHTFCModel(this ObjectId obj)
@@ -156,9 +179,21 @@ namespace ThMEPEngineCore.Service.Hvac
             return style.Contains(ThHvacCommon.HTFC_TYPE_NAME);
         }
 
+        public static bool IsAXIALModel(this ObjectId obj)
+        {
+            var style = GetModelStyle(obj);
+            return style.Contains(ThHvacCommon.AXIAL_TYPE_NAME);
+        }
+
         public static int GetModelNumber(this ObjectId obj)
         {
-            var valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
+            var model = obj.GetObject(OpenMode.ForRead, true);
+            return model.GetModelNumber();
+        }
+
+        public static int GetModelNumber(this DBObject dBObject)
+        {
+            var valueList = dBObject.GetXData(ThHvacCommon.RegAppName_FanSelection);
             if (valueList == null)
             {
                 return 0;

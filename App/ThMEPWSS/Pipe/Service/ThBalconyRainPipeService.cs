@@ -1,11 +1,8 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 
@@ -13,7 +10,7 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThBalconyRainPipeService
     {
-        public List<ThIfcRainPipe> RainPipe { get; set; }
+        public List<ThIfcRainPipe> RainPipes { get; private set; }
         private List<ThIfcRainPipe> RainPipeList { get; set; }
         private ThIfcSpace BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex RainPipeSpatialIndex { get; set; }
@@ -22,9 +19,8 @@ namespace ThMEPWSS.Pipe.Service
             ThIfcSpace balconySpace,
             ThCADCoreNTSSpatialIndex rainPipeSpatialIndex)
         {
-            RainPipeList = rainPipeList;
-            RainPipe = new List<ThIfcRainPipe>();
             BalconySpace = balconySpace;
+            RainPipeList = rainPipeList;
             RainPipeSpatialIndex = rainPipeSpatialIndex;
             if (RainPipeSpatialIndex == null)
             {
@@ -48,8 +44,7 @@ namespace ThMEPWSS.Pipe.Service
             var balconyBoundary = BalconySpace.Boundary as Polyline;
             var crossObjs = RainPipeSpatialIndex.SelectCrossingPolygon(balconyBoundary);
             var crossRainPipe = RainPipeList.Where(o => crossObjs.Contains(o.Outline));
-            var includedRainPipe = crossRainPipe.Where(o => balconyBoundary.Contains(o.Outline as Curve));
-            includedRainPipe.ForEach(o => RainPipe.Add(o));
+            RainPipes = crossRainPipe.Where(o => balconyBoundary.Contains(o.Outline as Curve)).ToList();
         }
     }
 }

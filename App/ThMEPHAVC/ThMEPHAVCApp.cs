@@ -6,6 +6,8 @@ using Linq2Acad;
 using System.Collections.Generic;
 using ThMEPHVAC.CAD;
 using System.Linq;
+using ThMEPEngineCore.Service.Hvac;
+using ThMEPHAVC.CAD;
 
 namespace ThMEPHVAC
 {
@@ -29,16 +31,27 @@ namespace ThMEPHVAC
                 {
                     return;
                 }
-                var objids = selectionresult.Value.GetObjectIds();
-                //var fanobj = objids.First(o => o.GetObject(OpenMode.ForRead).IsModel());
 
-                ThFanSelectionDbModelEngine dbmodelengine = new ThFanSelectionDbModelEngine(objids.First());
-                var fanintake = dbmodelengine.IntakeForm;
-                var fanvolume = dbmodelengine.FanVolume;
-                var faninlet = dbmodelengine.FanInlet;
-                var fanoutlet = dbmodelengine.FanOutlet;
-                var inletpoint = dbmodelengine.FanInletBasePoint;
-                var outletpoint = dbmodelengine.FanOutletBasePoint;
+                var lineobjects = new DBObjectCollection();
+                ObjectId modelobjectid = ObjectId.Null;
+                foreach (var oid in selectionresult.Value.GetObjectIds().ToList())
+                {
+                    var obj = oid.GetDBObject();
+                    if (obj.IsModel())
+                    {
+                        modelobjectid = oid;
+                    }
+                    else
+                    {
+                        lineobjects.Add(obj);
+                    }
+                }
+                ThDbModelFan DbFanModel = new ThDbModelFan(modelobjectid, lineobjects);
+
+                ThFanInletOutletAnalysisEngine thinouteng = new ThFanInletOutletAnalysisEngine(DbFanModel);
+                thinouteng.InletAnalysis();
+                thinouteng.OutletAnalysis();
+                ThDuctSelectionEngine ductselectioneng = new ThDuctSelectionEngine(DbFanModel);
             }
         }
 

@@ -8,8 +8,8 @@ namespace TianHua.FanSelection.UI.CAD
     public class ThFanSelectionDbUndoHandler : IDisposable
     {
         private Database Database { get; set; }
-        public List<string> UnappendedModels { get; set; } = new List<string>();
-        public List<string> ReappendedModels { get; set; } = new List<string>();
+        public Dictionary<string, List<int>> UnappendedModels { get; set; } = new Dictionary<string, List<int>>();
+        public Dictionary<string, List<int>> ReappendedModels { get; set; } = new Dictionary<string, List<int>>();
 
         public ThFanSelectionDbUndoHandler(Database database)
         {
@@ -27,18 +27,34 @@ namespace TianHua.FanSelection.UI.CAD
 
         private void DbEvent_ObjectReappended_Handler(object sender, ObjectEventArgs e)
         {
+            var number = e.DBObject.GetModelNumber();
             var model = e.DBObject.GetModelIdentifier();
             if (!string.IsNullOrEmpty(model) && e.DBObject.IsUndoing)
             {
-                ReappendedModels.Add(model);
+                if (ReappendedModels.ContainsKey(model))
+                {
+                    ReappendedModels[model].Add(number);
+                }
+                else
+                {
+                    ReappendedModels.Add(model, new List<int>() { number });
+                }
             }
         }
         private void DbEvent_ObjectUnappended_Handler(object sender, ObjectEventArgs e)
         {
+            var number = e.DBObject.GetModelNumber();
             var model = e.DBObject.GetModelIdentifier();
             if (!string.IsNullOrEmpty(model) && e.DBObject.IsUndoing)
             {
-                UnappendedModels.Add(model);
+                if (UnappendedModels.ContainsKey(model))
+                {
+                    UnappendedModels[model].Add(number);
+                }
+                else
+                {
+                    UnappendedModels.Add(model, new List<int>() { number });
+                }
             }
         }
     }

@@ -38,7 +38,7 @@ namespace ThMEPHVAC.Duct
             var edges = GetEdgesListFromJsonString(graphjson);
             var targetvertexs = edges.Select(e => e.Target).ToList();
             var sourcevertexs = edges.Select(e => e.Source).ToList();
-            sourcevertexs.RemoveAll(s => targetvertexs.Any(t => t.XPosition == s.XPosition && t.YPosition == s.YPosition));
+            sourcevertexs.RemoveAll(s => targetvertexs.Any(t => t.Position.X == s.Position.X && t.Position.Y == s.Position.Y));
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> graphrebuild = new AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>>();
             
             RebuildGraph(sourcevertexs.First(), edges,graphrebuild,true);
@@ -47,7 +47,7 @@ namespace ThMEPHVAC.Duct
 
         private void RebuildGraph(ThDuctVertex startvertex, List<ThDuctEdge<ThDuctVertex>> edges, AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> graph, bool iffirstsearch)
         {
-            var searchedges = edges.Where(e=> startvertex.IsSameVertexTo(e.Source)).ToList();
+            var searchedges = edges.Where(e=> startvertex.Equals(e.Source)).ToList();
             if (searchedges.Count == 0)
             {
                 return;
@@ -55,14 +55,14 @@ namespace ThMEPHVAC.Duct
             foreach (var edge in searchedges)
             {
                 var target = edge.Target;
-                var source = new ThDuctVertex();
+                ThDuctVertex source = null;
                 if (iffirstsearch)
                 {
                     source = edge.Source;
                 }
                 else
                 {
-                    source = graph.Vertices.Where(v => v.IsSameVertexTo(edge.Source)).First();
+                    source = graph.Vertices.Where(v => v.Equals(edge.Source)).First();
                 }
 
                 var addedge = new ThDuctEdge<ThDuctVertex>(source, target)
@@ -70,7 +70,6 @@ namespace ThMEPHVAC.Duct
                     DraughtInfomation = edge.DraughtInfomation,
                     AirVolume = edge.AirVolume,
                     TotalVolumeInEdgeChain = edge.TotalVolumeInEdgeChain,
-                    EdgeLength = edge.EdgeLength,
                     DraughtCount = edge.DraughtCount
                 };
                 graph.AddVertex(source);

@@ -1,23 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
-using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Service
 {
-   public class ThKitchenBasintoolService
+    public class ThKitchenBasintoolService
     {
         /// <summary>
         /// 找到的台盆
         /// </summary>
-        public List<ThIfcBasin> Basintools { get; set; }
+        public List<ThIfcBasin> Basintools { get; private set; }
         private List<ThIfcBasin> BasintoolList { get; set; }
         private ThIfcSpace KitchenSpace { get; set; }
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
@@ -65,10 +62,6 @@ namespace ThMEPWSS.Pipe.Service
                 return kitchenBoundary.Contains(bufferObjs[0] as Curve);
             });
             includedBasintools.ForEach(o => Basintools.Add(o));
-        }
-        private bool Contains(Polyline polyline,Polygon polygon)
-        {
-            return polyline.ToNTSPolygon().Contains(polygon);
         }
     }
 }

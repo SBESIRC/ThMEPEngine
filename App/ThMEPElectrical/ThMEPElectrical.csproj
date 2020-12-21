@@ -43,7 +43,12 @@
     <Compile Include="BlockConvert\ThBConvertUtils.cs" />
     <Compile Include="Broadcast\LayoutWithParkingLineService.cs" />
     <Compile Include="Broadcast\LayoutWithSecondaryParkingLineService.cs" />
+    <Compile Include="Broadcast\Service\PrintBlindAreaService.cs" />
+    <Compile Include="Broadcast\Service\CheckService.cs" />
+    <Compile Include="Broadcast\Service\ClearService\ClearComponentService.cs" />
     <Compile Include="Broadcast\Service\StructureService.cs" />
+    <Compile Include="Broadcast\Service\StructUtils.cs" />
+    <Compile Include="Broadcast\Service\ToleranceService.cs" />
     <Compile Include="Broadcast\StructureLayoutService.cs" />
     <Compile Include="Business\BlindAreaReminder\BlindReminderCalculator.cs" />
     <Compile Include="Business\BlindAreaReminder\ClearHatch.cs" />
@@ -52,6 +57,7 @@
     <Compile Include="Business\DetectionRegion\BeamDetectionCalculatorEx.cs" />
     <Compile Include="Business\DetectionRegion\SplitDetectionPolygonCalculator.cs" />
     <Compile Include="Business\MainBeam\Optimize\NonRegular2PointsOptimizer.cs" />
+    <Compile Include="Business\Procedure\NoUserCoordinateWorker.cs" />
     <Compile Include="Business\Procedure\SplitWallWorker.cs" />
     <Compile Include="CAD\BlockInsertDBExtension.cs" />
     <Compile Include="Business\BlockInsertor.cs" />
@@ -79,6 +85,7 @@
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
+    <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
@@ -86,6 +93,7 @@
     <Compile Include="Geometry\GeomUtils.cs" />
     <Compile Include="Geometry\MinRectangle.cs" />
     <Compile Include="Geometry\MPolygonProfileFinder.cs" />
+    <Compile Include="Lane\ThLaneDbExtension.cs" />
     <Compile Include="Layout\ILayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />
@@ -134,8 +142,8 @@
     <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
-    <Compile Include="ThLaneLineMerger.cs" />
-    <Compile Include="ThLaneLineSimplifier.cs" />
+    <Compile Include="Lane\ThLaneLineMerger.cs" />
+    <Compile Include="Lane\ThLaneLineSimplifier.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

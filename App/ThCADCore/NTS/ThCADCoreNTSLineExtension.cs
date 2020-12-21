@@ -36,6 +36,13 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static Line Normalize(this Line line)
+        {
+            var geometry = line.ToNTSLineString();
+            geometry.Normalize();
+            return geometry.ToDbline();
+        }
+
         public static Coordinate Intersection(this Line line1, Line line2, Intersect intersectType)
         {
             if(line1.IsCollinear(line2))

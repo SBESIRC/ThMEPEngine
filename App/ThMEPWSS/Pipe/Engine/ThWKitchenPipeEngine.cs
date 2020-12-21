@@ -41,7 +41,7 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 var pt = FindInsideVertex(boundary, outline);
                 var dir = GetDirection(boundary, outline, pt);
-                Pipes.Add(Create(pt + dir * 100));
+                Pipes.Add(Create(pt + dir * ThWPipeCommon.WELL_TO_WALL_OFFSET));
 
                 //如果管井和台盆不共边，则需要添加一个管子
                 if (Commonline(boundary, outline, basinline))
@@ -148,7 +148,7 @@ namespace ThMEPWSS.Pipe.Engine
                     a = i;
                 }
             }
-
+            //用以下两点构造线来判断是否与pype相交，‘10’与‘70’为自定义偏置参数。
             Point3d evaluate = Point3d.Origin;
             Point3d evaluate1 = Point3d.Origin;
             if (a > 0)
@@ -263,22 +263,22 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 if ((pts.Count > 0) || (pts1.Count > 0))
                 {
-                    return vertices[a + 1] + 100.0 * (-dir + dir1);
+                    return vertices[a + 1] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (-dir + dir1);
                 }
                 else
                 {
-                    return vertices[a] + 100.0 * (dir + dir1);
+                    return vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (dir + dir1);
                 }
             }
             else
             {
                 if (outline.GetCenter().DistanceTo(vertices[a + 1]) < outline.GetCenter().DistanceTo(vertices[a]))
                 {
-                    return vertices[a + 1] + 100.0 * (-dir + dir1);
+                    return vertices[a + 1] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (-dir + dir1);
                 }
                 else
                 {
-                    return vertices[a] + 100.0 * (dir + dir1);
+                    return vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (dir + dir1);
                 }
             }
         }
@@ -296,11 +296,11 @@ namespace ThMEPWSS.Pipe.Engine
             }
             if (a > 0)
             {
-                return vertices[a]+100*( vertices[a].GetVectorTo(vertices[a+1]).GetNormal()+ vertices[a].GetVectorTo(vertices[a-1]).GetNormal());
+                return vertices[a]+ ThWPipeCommon.WELL_TO_WALL_OFFSET * ( vertices[a].GetVectorTo(vertices[a+1]).GetNormal()+ vertices[a].GetVectorTo(vertices[a-1]).GetNormal());
             }
             else
             {
-                return vertices[0] + 100 * (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal());
+                return vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal());
             }
         }      
     }

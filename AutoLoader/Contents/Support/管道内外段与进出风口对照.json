@@ -1,0 +1,15 @@
+[
+{"WorkingScenario":"消防排烟","InnerRoomDuctType":"出风段","OuterRoomDuctType":"进风段"},
+{"WorkingScenario":"消防补风","InnerRoomDuctType":"进风段","OuterRoomDuctType":"出风段"},
+{"WorkingScenario":"消防加压送风","InnerRoomDuctType":"进风段","OuterRoomDuctType":"出风段"},
+{"WorkingScenario":"厨房排油烟","InnerRoomDuctType":"出风段","OuterRoomDuctType":"进风段"},
+{"WorkingScenario":"厨房排油烟补风","InnerRoomDuctType":"进风段","OuterRoomDuctType":"出风段"},
+{"WorkingScenario":"平时送风","InnerRoomDuctType":"进风段","OuterRoomDuctType":"出风段"},
+{"WorkingScenario":"平时排风","InnerRoomDuctType":"出风段","OuterRoomDuctType":"进风段"},
+{"WorkingScenario":"消防排烟兼平时排风","InnerRoomDuctType":"出风段","OuterRoomDuctType":"进风段"},
+{"WorkingScenario":"消防补风兼平时送风","InnerRoomDuctType":"进风段","OuterRoomDuctType":"出风段"},
+{"WorkingScenario":"事故排风","InnerRoomDuctType":"出风段","OuterRoomDuctType":"进风段"},
+{"WorkingScenario":"事故补风","InnerRoomDuctType":"进风段","OuterRoomDuctType":"出风段"},
+{"WorkingScenario":"平时送风兼事故补风","InnerRoomDuctType":"进风段","OuterRoomDuctType":"出风段"},
+{"WorkingScenario":"平时排风兼事故排风","InnerRoomDuctType":"出风段","OuterRoomDuctType":"进风段"}
+]

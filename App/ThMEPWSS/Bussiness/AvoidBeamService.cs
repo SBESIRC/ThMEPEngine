@@ -5,16 +5,13 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using ThCADExtension;
 using ThMEPEngineCore;
-using ThMEPEngineCore.BeamInfo.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
 using ThMEPWSS.Utils;
-using ThWSS.Bussiness;
 
 namespace ThMEPWSS.Bussiness
 {
@@ -51,7 +48,7 @@ namespace ThMEPWSS.Bussiness
             }
 
             MoveSprayLine(matterSprays, sprays);
-            InsertSprayService.InsertSprayBlock(matterSprays.Keys.Select(o => o.Position).ToList(), SprayType.SPRAYDOWN);
+            InsertSprinklerService.Insert(matterSprays.Keys.Select(o => o.Position).ToList());
         }
 
         /// <summary>

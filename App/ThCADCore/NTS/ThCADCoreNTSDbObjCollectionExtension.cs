@@ -1,12 +1,12 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Operation.Linemerge;
 using NetTopologySuite.Geometries.Utilities;
 
 namespace ThCADCore.NTS
@@ -15,88 +15,26 @@ namespace ThCADCore.NTS
     {
         public static MultiPolygon ToNTSMultiPolygon(this DBObjectCollection objs)
         {
-            var polygons = new List<Polygon>();
-            foreach (Entity entity in objs)
-            {
-                if (entity is Polyline polyline)
-                {
-                    polygons.Add(polyline.ToNTSPolygon());
-                }
-                else if (entity is Region region)
-                {
-                    polygons.Add(region.ToNTSPolygon());
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(objs.ToNTSPolygons().ToArray());
         }
 
-        public static List<Polygon> ToNTSPolygons(this DBObjectCollection objs)
+        public static List<Polygon> ToNTSPolygons(this DBObjectCollection curves)
         {
             var polygons = new List<Polygon>();
-            foreach (Entity entity in objs)
-            {
-                polygons.Add(entity.ToNTSPolygon());
-            }
+            curves.Cast<Entity>().ForEach(e => polygons.Add(e.ToNTSPolygon()));
             return polygons;
         }
 
-        public static GeometryCollection ToNTSPolygonCollection(this DBObjectCollection objs)
-        {
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection(objs.ToNTSPolygons().ToArray());
-        }
-
-        public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves, double chord = 5.0)
+        public static List<Geometry> ToNTSLineStrings(this DBObjectCollection curves)
         {
             var geometries = new List<Geometry>();
-            foreach (DBObject curve in curves)
-            {
-                if (curve is Line line)
-                {
-                    geometries.Add(line.ToNTSLineString());
-                }
-                else if (curve is Polyline polyline)
-                {
-                    geometries.Add(polyline.ToNTSLineString());
-                }
-                else if (curve is Arc arc)
-                {
-                    geometries.Add(arc.TessellateWithChord(chord));
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return UnaryUnionOp.Union(geometries);
-        }
-
-        public static List<Geometry> ToNTSLineStrings(this DBObjectCollection curves, double chord = 5.0)
-        {
-            var geometries = new List<Geometry>();
-            foreach (DBObject curve in curves)
-            {
-                if (curve is Line line)
-                {
-                    geometries.Add(line.ToNTSLineString());
-                }
-                else if (curve is Polyline polyline)
-                {
-                    geometries.Add(polyline.ToNTSLineString());
-                }
-                else if (curve is Arc arc)
-                {
-                    geometries.Add(arc.TessellateWithChord(chord));
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
+            curves.Cast<Entity>().ForEach(e => geometries.Add(e.ToNTSGeometry()));
             return geometries;
+        }
+
+        public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
+        {
+            return UnaryUnionOp.Union(curves.ToNTSLineStrings());
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
@@ -109,7 +47,7 @@ namespace ThCADCore.NTS
             // The best situation for using buffer(0) is the trivial case where 
             // there is no overlap between the input geometries. 
             // However, this case is likely rare in practice.
-            return curves.ToNTSPolygonCollection().Buffer(0);
+            return curves.ToNTSMultiPolygon().Buffer(0);
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
@@ -165,9 +103,9 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static Polyline GetMinimumRectangle(this DBObjectCollection curves, double chord = 5.0)
+        public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
         {
-            var geometry = curves.Combine(chord);
+            var geometry = curves.Combine();
             var rectangle = MinimumDiameter.GetMinimumRectangle(geometry);
             if (rectangle is Polygon polygon)
             {
@@ -191,9 +129,9 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
 
-        public static Geometry Combine(this DBObjectCollection curves, double chord = 5.0)
+        public static Geometry Combine(this DBObjectCollection curves)
         {
-            var geometries = curves.ToNTSLineStrings(chord);
+            var geometries = curves.ToNTSLineStrings();
             return GeometryCombiner.Combine(geometries);
         }
 

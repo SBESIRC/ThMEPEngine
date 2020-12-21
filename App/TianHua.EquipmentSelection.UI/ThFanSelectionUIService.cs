@@ -1,4 +1,6 @@
-﻿namespace TianHua.FanSelection.UI
+﻿using System.Collections.Generic;
+
+namespace TianHua.FanSelection.UI
 {
     public class ThFanSelectionService
     {
@@ -14,6 +16,9 @@
         //-------------SINGLETON-----------------
 
         public FanDataModel Model { get; set; }
+        public List<FanDataModel> ErasedModels { get; set; }
+        public List<FanDataModel> UnerasedModels { get; set; }
+        public Dictionary<FanDataModel, FanDataModel> ModelMapping { get; set; }
         public object Message { get; set; }
         public object MessageArgs { get; set; }
     }

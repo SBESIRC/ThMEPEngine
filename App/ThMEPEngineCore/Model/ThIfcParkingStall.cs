@@ -10,6 +10,12 @@ namespace ThMEPEngineCore.Model
 {
     public class ThIfcParkingStall : ThIfcSpace
     {
-        //
+        public static ThIfcParkingStall Create(Curve boundary)
+        {
+            return new ThIfcParkingStall()
+            {
+                Boundary = boundary,
+            };
+        }
     }
 }

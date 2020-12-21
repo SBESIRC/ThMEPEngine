@@ -58,6 +58,11 @@ namespace TianHua.FanSelection.Function
             return model.PID == "0";
         }
 
+        public static bool IsFireModel(this FanDataModel model)
+        {
+            return model.Scenario.Contains("消防");
+        }
+
         public static FanDataModel ParentModel(this List<FanDataModel> models, FanDataModel model)
         {
             if (model.IsHighSpeedModel())
@@ -222,10 +227,6 @@ namespace TianHua.FanSelection.Function
 
         public static int GetAirVolume(this FanDataModel model)
         {
-            if (model.Scenario == "消防加压送风")
-            {
-                return model.SplitAirVolume;
-            }
             return model.AirVolume;
         }
 
@@ -269,6 +270,42 @@ namespace TianHua.FanSelection.Function
                     break;
             }
             return _FanDataModel;
+        }
+
+        public static bool IsHTFCModel(this FanDataModel dataModel)
+        {
+            return ThFanSelectionUtils.IsHTFCModelStyle(dataModel.VentStyle);
+        }
+
+        public static string BlockName(this FanDataModel dataModel)
+        {
+            if (IsHTFCModel(dataModel))
+            {
+                return ThFanSelectionUtils.HTFCBlockName(
+                    dataModel.VentStyle,
+                    dataModel.IntakeForm,
+                    dataModel.MountType);
+            }
+            else
+            {
+                return ThFanSelectionCommon.AXIAL_BLOCK_NAME;
+            }
+        }
+
+        public static string BlockLayer(this FanDataModel dataModel)
+        {
+            switch(dataModel.Scenario)
+            {
+                case ThFanSelectionCommon.SCENARIO_MAKEUP:
+                case ThFanSelectionCommon.SCENARIO_EXHAUSTION:
+                case ThFanSelectionCommon.SCENARIO_PROTECTION:
+                    return ThFanSelectionCommon.BLOCK_LAYER_FIRE;
+                case ThFanSelectionCommon.SCENARIO_DUAL_MAKEUP:
+                case ThFanSelectionCommon.SCENARIO_DUAL_EXHAUSTION:
+                    return ThFanSelectionCommon.BLOCK_LAYER_DUAL;
+                default:
+                    return ThFanSelectionCommon.BLOCK_LAYER_EQUP;
+            }
         }
     }
 }

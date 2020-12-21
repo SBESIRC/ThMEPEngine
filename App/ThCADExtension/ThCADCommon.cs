@@ -52,6 +52,8 @@ namespace ThCADExtension
         public static readonly string DxfName_TCH_DrawingIndex = "TCH_DRAWINGINDEX";
         public static readonly string DxfName_TCH_Elevation = "TCH_ELEVATION";
         public static readonly string DxfName_TCH_Opening = "TCH_OPENING";
+        public static readonly string DxfName_TCH_EQUIPMENT_16 = "TCH_EQUIPMENT";
+        public static readonly string DxfName_TCH_EQUIPMENT_12 = "TCH EQUIPMENT";
 
         // Area Frame
         public static readonly string RegAppName_AreaFrame = "THCAD_AF";
@@ -76,6 +78,24 @@ namespace ThCADExtension
         public static string HvacModelDwgPath()
         {
             return Path.Combine(SupportPath(), "暖通.选型.风机.dwg");
+        }
+
+        // 电气烟感/温感图块
+        public static string ElectricalSensorDwgPath()
+        {
+            return Path.Combine(SupportPath(), "烟感温感图块.dwg");
+        }
+
+        // 消防喷淋块
+        public static string SprinklerDwgPath()
+        {
+            return Path.Combine(SupportPath(), "给排水.喷淋.dwg");
+        }
+
+        // 车道线布灯
+        public static string LaneLineLightDwgPath()
+        {
+            return Path.Combine(SupportPath(), "车道线布灯.dwg");
         }
 
         // ToolPalette 路径
@@ -119,6 +139,18 @@ namespace ThCADExtension
         {
             return Path.Combine(RootPath(), "Contents");
         }
+
+        // 风管尺寸规格信息
+        public static string DuctSizeParametersPath()
+        {
+            return Path.Combine(SupportPath(), "风管尺寸参数信息.json");
+        }
+
+        public static string DuctInOutMapping()
+        {
+            return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");
+        }
+
 
         // 运行时根目录
         private static string RootPath()

@@ -6,7 +6,7 @@ namespace TianHua.FanSelection.Messaging
 {
     public class ThModelCopyMessageArgs : ThModelMessageArgs
     {
-        public Dictionary<string, string> ModelMapping { get; set; }
+        public Dictionary<string, string> ModelSystemMapping { get; set; }
     }
 
     public class ThModelCopyMessage : MessageBase<ThModelCopyMessage, ThModelCopyMessageArgs>

@@ -1,30 +1,21 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using NetTopologySuite.Geometries;
 using ThMEPEngineCore.Model.Plumbing;
-
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThDevicePlatformFloorDrainService
     {
+        public List<ThIfcFloorDrain> FloorDrains { get; private set; }
         private List<ThIfcFloorDrain> FloorDrainList { get; set; }
         private ThIfcSpace DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         /// <summary>
-        public List<ThIfcFloorDrain> FloorDrains
-        {
-            get;
-
-            set;
-        }
+        
         private ThDevicePlatformFloorDrainService(
           List<ThIfcFloorDrain> floordrainList,
           ThIfcSpace devicePlatformSpace,
@@ -32,8 +23,7 @@ namespace ThMEPWSS.Pipe.Service
         {
             FloorDrainList = floordrainList;
             DevicePlatformSpace = devicePlatformSpace;
-            FloorDrainSpatialIndex = floordrainSpatialIndex;
-            FloorDrains = new List<ThIfcFloorDrain>();
+            FloorDrainSpatialIndex = floordrainSpatialIndex;         
             if (FloorDrainSpatialIndex == null)
             {
                 DBObjectCollection dbObjs = new DBObjectCollection();
@@ -55,18 +45,13 @@ namespace ThMEPWSS.Pipe.Service
             var devicePlatformBoundary = DevicePlatformSpace.Boundary as Polyline;
             var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(devicePlatformBoundary);
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
-            var includedFloordrains = crossFloordrains.Where(o =>
+            FloorDrains = crossFloordrains.Where(o =>
             {
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
                 return devicePlatformBoundary.Contains(bufferObjs[0] as Curve);
-            });         
-            includedFloordrains.ForEach(o => FloorDrains.Add(o));
-        }
-        private bool Contains(Polyline polyline, Polygon polygon)
-        {
-            return polyline.ToNTSPolygon().Contains(polygon);
-        }
+            }).ToList();                    
+        }     
     }
 }
 

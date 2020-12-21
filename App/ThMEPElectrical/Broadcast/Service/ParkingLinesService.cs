@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPElectrical.Broadcast.Service;
 
 namespace ThMEPElectrical.Broadcast
 {
@@ -90,19 +91,38 @@ namespace ThMEPElectrical.Broadcast
         /// <returns></returns>
         public List<List<Line>> CreateNodedParkingLines(Polyline roomPoly, List<Line> parkingLines, out List<List<Line>> otherPLins)
         {
-            parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList();
+            parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>()
+                .Select(y => {
+                    var dir = (y.EndPoint - y.StartPoint).GetNormal();
+                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1); }))
+                .ToList();
             var objs = new DBObjectCollection();
             parkingLines.ForEach(x => objs.Add(x));
-            var handleLines = objs.ToNTSNodedLineStrings().ToDbObjects()
-                .SelectMany(x => {
+            var nodeGeo = objs.ToNTSNodedLineStrings();
+            var handleLines = new List<Line>();
+            if (nodeGeo != null)
+            {
+                handleLines = nodeGeo.ToDbObjects()
+                .SelectMany(x =>
+                {
                     DBObjectCollection entitySet = new DBObjectCollection();
                     (x as Polyline).Explode(entitySet);
                     return entitySet.Cast<Line>().ToList();
                 })
+                .Where(x => x.Length > 2)
                 .ToList();
+            }
+            
             var pLines = ClassifyParkingLines(handleLines);
+            //总长度更长的分为主车道
             var xPLines = pLines[0];
             var yPLines = pLines[1];
+            if (xPLines.Sum(x => x.Length) < yPLines.Sum(x => x.Length))
+            {
+                xPLines = pLines[1];
+                yPLines = pLines[0];
+            }
+
             var resLines = HandleLinesByDirection(xPLines);
             otherPLins = HandleLinesByDirection(yPLines);
 
@@ -155,7 +175,7 @@ namespace ThMEPElectrical.Broadcast
                 Point3d ePt = firLine.EndPoint;
                 while (true)
                 {
-                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.IsEqualTo(sPt, new Tolerance(1, 1)));
+                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.DistanceTo(sPt) < ToleranceService.parkingLineTolerance);
                     if (sMLine != null)
                     {
                         matchLines.Add(sMLine);
@@ -163,7 +183,7 @@ namespace ThMEPElectrical.Broadcast
                         sPt = sMLine.EndPoint;
                     }
 
-                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.IsEqualTo(sPt, new Tolerance(1, 1)));
+                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.DistanceTo(sPt) < ToleranceService.parkingLineTolerance);
                     if (eMLine != null)
                     {
                         matchLines.Add(eMLine);
@@ -179,7 +199,7 @@ namespace ThMEPElectrical.Broadcast
 
                 while (true)
                 {
-                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.IsEqualTo(ePt, new Tolerance(1, 1)));
+                    var sMLine = lines.FirstOrDefault(x => x.StartPoint.DistanceTo(ePt) < ToleranceService.parkingLineTolerance);
                     if (sMLine != null)
                     {
                         matchLines.Add(sMLine);
@@ -187,7 +207,7 @@ namespace ThMEPElectrical.Broadcast
                         ePt = sMLine.EndPoint;
                     }
 
-                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.IsEqualTo(ePt, new Tolerance(1, 1)));
+                    var eMLine = lines.FirstOrDefault(x => x.EndPoint.DistanceTo(ePt) < ToleranceService.parkingLineTolerance);
                     if (eMLine != null)
                     {
                         matchLines.Add(eMLine);
@@ -273,20 +293,21 @@ namespace ThMEPElectrical.Broadcast
 
             List<Point3d> allPts = lines.SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(matrix)).ToList();
             sPt = allPts.OrderBy(x => x.X).First().TransformBy(matrix.Inverse());
-            ePt = allPts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse()); ;
+            ePt = allPts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse()); 
 
             var handleLines = new List<Line>(lines);
             Point3d comparePt = sPt;
             List<Line> resLines = new List<Line>();
             while (handleLines.Count > 0)
             {
-                var matchLine = handleLines.Where(x => x.StartPoint.IsEqualTo(comparePt) || x.EndPoint.IsEqualTo(comparePt)).FirstOrDefault();
+                var matchLine = handleLines.Where(x => x.StartPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance
+                    || x.EndPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance).FirstOrDefault();
                 if (matchLine == null)
                 {
                     break;
                 }
 
-                comparePt = matchLine.StartPoint.IsEqualTo(comparePt) ? matchLine.EndPoint : matchLine.StartPoint;
+                comparePt = matchLine.StartPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance ? matchLine.EndPoint : matchLine.StartPoint;
                 handleLines.Remove(matchLine);
                 resLines.Add(matchLine);
             }
@@ -307,14 +328,15 @@ namespace ThMEPElectrical.Broadcast
             List<Line> resLines = new List<Line>();
             while (handleLines.Count > 0)
             {
-                var matchLine = handleLines.Where(x => x.StartPoint.IsEqualTo(comparePt, new Tolerance(1, 1)) || x.EndPoint.IsEqualTo(comparePt, new Tolerance(1, 1))).FirstOrDefault();
+                var matchLine = handleLines.Where(x => x.StartPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance
+                    || x.EndPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance).FirstOrDefault();
                 if (matchLine == null)
                 {
                     break;
                 }
 
                 handleLines.Remove(matchLine);
-                if (matchLine.EndPoint.IsEqualTo(comparePt))
+                if (matchLine.EndPoint.DistanceTo(comparePt) < ToleranceService.parkingLineTolerance)
                 {
                     matchLine = new Line(matchLine.EndPoint, matchLine.StartPoint);
                 }

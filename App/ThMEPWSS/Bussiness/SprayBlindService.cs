@@ -6,14 +6,11 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPWSS.Model;
 using ThMEPWSS.Service;
 using ThMEPWSS.Uitl.ShadowIn2D;
 using ThMEPWSS.Utils;
-using ThWSS;
 
 namespace ThMEPWSS.Bussiness
 {
@@ -138,13 +135,13 @@ namespace ThMEPWSS.Bussiness
         {
             using (var db = AcadDatabase.Active())
             {
-                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.BlindArea_LayerName);
-                db.Database.UnFrozenLayer(ThWSSCommon.BlindArea_LayerName);
-                db.Database.UnPrintLayer(ThWSSCommon.BlindArea_LayerName);
+                var layerId = LayerTools.AddLayer(db.Database, ThWSSCommon.Layout_BlindArea_LayerName);
+                db.Database.UnFrozenLayer(ThWSSCommon.Layout_BlindArea_LayerName);
+                db.Database.UnPrintLayer(ThWSSCommon.Layout_BlindArea_LayerName);
 
                 foreach (var area in blindArea.Where(x => x.Area > 1))
                 {
-                    area.Layer = ThWSSCommon.BlindArea_LayerName;
+                    area.Layer = ThWSSCommon.Layout_BlindArea_LayerName;
                     area.ColorIndex = 10;
                     area.ConstantWidth = 50;
                     db.ModelSpace.Add(area);

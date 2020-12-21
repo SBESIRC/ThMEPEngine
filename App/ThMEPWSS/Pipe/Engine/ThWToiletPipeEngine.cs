@@ -49,12 +49,12 @@ namespace ThMEPWSS.Pipe.Engine
                 var pt = FindInsideVertex(a, well, dir);
                 for (int i = 0; i < Parameters.Number; i++)
                 {
-                    Pipes.Add(Create((pt + i * dir * 200),i));
+                    Pipes.Add(Create((pt + i * dir * ThWPipeCommon.TOILET_WELLS_INTERVAL),i));
                 }
             }
             else
             {
-               Pipes = FindOutsideVertex(outline, well, closestool, d);
+               Pipes = FindOutsideVertex(outline, well);
                
             }
         }
@@ -80,7 +80,6 @@ namespace ThMEPWSS.Pipe.Engine
                     {
                         a = i;
                     }
-
                 }
             }
 
@@ -103,7 +102,8 @@ namespace ThMEPWSS.Pipe.Engine
             return b;
         }
         private int index_c(Polyline boundary, Polyline outline)
-        {//寻找相对于管井的toilet关键边
+        {
+            //寻找相对于管井的toilet关键边
             var center = outline.GetCenter();
             Point3d base_point = boundary.ToCurve3d().GetClosestPointTo(center).Point;
             var vertices1 = boundary.Vertices();
@@ -118,19 +118,19 @@ namespace ThMEPWSS.Pipe.Engine
             return c;
         }
         private int index_d(Polyline boundary, Polyline urinal, Polyline well)
-        {//寻找马桶的关键边
-            var center = well.GetCenter();
+        {
+            //寻找马桶的关键边
             var vertices1 = urinal.Vertices();
             int b = 0;
             for (int i = 0; i < vertices1.Count-1; i++)
             {
-                if (well.GetDistToPoint((vertices1[i]+0.5* vertices1[i].GetVectorTo(vertices1[i+1])))<60)
+                if (well.GetDistToPoint((vertices1[i]+0.5* vertices1[i].GetVectorTo(vertices1[i+1])))< ThWPipeCommon.MIN_WELL_TO_URINAL_DISTANCE)
                 {                 
                     b = i;
                 }
                 else
                 {
-                    if(boundary.GetDistToPoint((vertices1[i] + 0.5 * vertices1[i].GetVectorTo(vertices1[i + 1]))) < 60)
+                    if(boundary.GetDistToPoint((vertices1[i] + 0.5 * vertices1[i].GetVectorTo(vertices1[i + 1]))) < ThWPipeCommon.MIN_WELL_TO_URINAL_DISTANCE)
                     {
                         b = i;
                     }
@@ -147,30 +147,29 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 if (dir.IsCodirectionalTo(vertices[a].GetVectorTo(vertices[a + 1])))
                 {
-                    pt = vertices[a] + (vertices[a].GetVectorTo(vertices[a + 1]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal()) * 100;
+                    pt = vertices[a] + (vertices[a].GetVectorTo(vertices[a + 1]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
                 }
                 else
                 {
-                    pt = vertices[a + 1] + (vertices[a + 1].GetVectorTo(vertices[a]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal()) * 100;
+                    pt = vertices[a + 1] + (vertices[a + 1].GetVectorTo(vertices[a]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
                 }
             }
             else
             {
                 if (dir.IsCodirectionalTo(vertices[0].GetVectorTo(vertices[1])))
                 {
-                    pt = vertices[0] + (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal()) * 100;
+                    pt = vertices[0] + (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
                 }
                 else
                 {
-                    pt = vertices[1] + (vertices[1].GetVectorTo(vertices[0]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal()) * 100;
+                    pt = vertices[1] + (vertices[1].GetVectorTo(vertices[0]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
                 }
             }
             return pt;
             
         }
         private Vector3d Direction(int a, int b,int c ,int d,Polyline boundary,Polyline outline,Polyline urinal,double sum)
-        {
-            var vertices2 = urinal.Vertices();
+        {           
             var vertices1 = boundary.Vertices();
             var vertices = outline.Vertices();
             Point3d base_point = boundary.ToCurve3d().GetClosestPointTo(vertices1[d]+ 0.5*vertices1[d].GetVectorTo(vertices1[d+1])).Point;//马桶关键点在toilet
@@ -270,7 +269,7 @@ namespace ThMEPWSS.Pipe.Engine
                 return true;
             }
         }
-        private List<ThWToiletPipe> FindOutsideVertex(Polyline outline, Polyline well, Polyline closestool,int d)
+        private List<ThWToiletPipe> FindOutsideVertex(Polyline outline, Polyline well)
         {
             var vertices = well.Vertices();
             double dst = double.MaxValue;
@@ -290,12 +289,12 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 if(vertices[a].DistanceTo(vertices[a+1])> vertices[a].DistanceTo(vertices[a-1]))
                 {
-                    pt = vertices[a + 1] + 100 * (vertices[a + 1].GetVectorTo(vertices[a]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal());
+                    pt = vertices[a + 1] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[a + 1].GetVectorTo(vertices[a]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal());
                     dir = vertices[a + 1].GetVectorTo(vertices[a]).GetNormal();
                 }
                 else
                 {
-                    pt = vertices[a-1] + 100 * (vertices[a-1].GetVectorTo(vertices[a]).GetNormal() + vertices[a].GetVectorTo(vertices[a+1]).GetNormal());
+                    pt = vertices[a-1] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[a-1].GetVectorTo(vertices[a]).GetNormal() + vertices[a].GetVectorTo(vertices[a+1]).GetNormal());
                     dir = vertices[a + 1].GetVectorTo(vertices[a]).GetNormal();
                 }
 
@@ -304,18 +303,18 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 if (vertices[0].DistanceTo(vertices[1]) > vertices[1].DistanceTo(vertices[2]))
                 {
-                    pt = vertices[1] + 100 * (vertices[1].GetVectorTo(vertices[0]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal());
+                    pt = vertices[1] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[1].GetVectorTo(vertices[0]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal());
                     dir = vertices[1].GetVectorTo(vertices[0]).GetNormal();
                 }
                 else
                 {
-                    pt = vertices[vertices.Count-1] + 100 * (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[2].GetVectorTo(vertices[1]).GetNormal());
+                    pt = vertices[vertices.Count-1] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[2].GetVectorTo(vertices[1]).GetNormal());
                     dir = vertices[2].GetVectorTo(vertices[1]).GetNormal();
                 }
             }
             for (int i = 0; i < Parameters.Number; i++)
             {
-                pipes.Add(Create((pt + i * dir * 200),i));
+                pipes.Add(Create((pt + i * dir * ThWPipeCommon.TOILET_WELLS_INTERVAL),i));
             }
             return pipes;
         }

@@ -30,5 +30,10 @@ namespace TianHua.FanSelection.UI.CAD
         {
             Overrule.RemoveOverrule(RXClass.GetClass(typeof(BlockReference)), ObjectOverrule);
         }
+
+        public void Reset()
+        {
+            ObjectOverrule.Reset();
+        }
     }
 }

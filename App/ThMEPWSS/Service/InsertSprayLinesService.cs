@@ -1,12 +1,8 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using DotNetARX;
 using Linq2Acad;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThWSS;
 
 namespace ThMEPWSS.Service
 {

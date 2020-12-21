@@ -62,77 +62,43 @@ namespace ThMEPEngineCore.Service.Hvac
             return new Point3d(position_x, position_y, 0);
         }
 
+        public static Point3d GetModelAnnoationBasePoint(this ObjectId obj)
+        {
+            double position_x = 0, position_y = 0;
+            var dynamicProperties = obj.GetDynProperties();
+            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X))
+            {
+                position_x = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X);
+            }
+            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y))
+            {
+                position_y = (double)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y);
+            }
+            return new Point3d(position_x, position_y, 0);
+        }
+
         public static void SetModelCustomPropertiesFrom(this ObjectId obj, DynamicBlockReferencePropertyCollection properties)
         {
+            // 注意修改设置动态属性的顺序
+            // 不同动态属性之间会互相影响，设置动态属性的顺序影响到最终的结果
             var dynamicProperties = obj.GetDynProperties();
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1))
+            foreach (var property in new string[] {
+                ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
+                ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT,
+                ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT,
+                ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_X,
+                ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_ANNOTATION_BASE_POINT_Y,
+            })
             {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_X));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_POSITION1_Y));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE1));
-            }
-
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2) &&
-                properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2));
+                if (dynamicProperties.Contains(property) && properties.Contains(property))
+                {
+                    dynamicProperties.SetValue(property, properties.GetValue(property));
+                }
             }
         }
     }

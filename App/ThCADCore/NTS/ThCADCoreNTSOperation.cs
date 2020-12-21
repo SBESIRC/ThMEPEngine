@@ -2,10 +2,13 @@
 using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
 using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
+using NetTopologySuite.Operation.Linemerge;
+using NFox.Cad;
 
 namespace ThCADCore.NTS
 {
@@ -36,7 +39,7 @@ namespace ThCADCore.NTS
         }
 
         public static DBObjectCollection Buffer(this DBObjectCollection objs, double distance,
-            EndCapStyle endCapStyle = EndCapStyle.Square)
+            EndCapStyle endCapStyle = EndCapStyle.Flat)
         {
             var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
             {
@@ -44,6 +47,30 @@ namespace ThCADCore.NTS
                 EndCapStyle = endCapStyle,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
+        }
+
+        public static DBObjectCollection SingleSidedBuffer(this DBObjectCollection objs, double distance,
+            EndCapStyle endCapStyle = EndCapStyle.Flat)
+        {
+            var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
+            {
+                IsSingleSided = true,
+                JoinStyle = NTSJoinStyle.Mitre,
+                EndCapStyle = endCapStyle,
+            });
+            return buffer.GetResultGeometry(distance).ToDbCollection();
+        }
+
+        public static DBObjectCollection LineMerge(this DBObjectCollection objs)
+        {
+            var merger = new LineMerger();
+            var results = new List<DBObject>();
+            merger.Add(objs.ToNTSNodedLineStrings());
+            merger.GetMergedLineStrings().ForEach(o =>
+            {
+                results.AddRange(o.ToDbObjects());
+            });
+            return results.ToCollection<DBObject>();
         }
 
         public static DBObjectCollection BuildArea(this DBObjectCollection objs)

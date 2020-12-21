@@ -30,6 +30,7 @@
     <Compile Include="NTS\ThCADCoreNTSCenterlineBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSCurveExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSDistance.cs" />
+    <Compile Include="NTS\ThCADCoreNTSEarCutTriangulationBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSEntityExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometryClipper.cs" />

@@ -1,16 +1,15 @@
 ﻿using System;
 using Linq2Acad;
-using DotNetARX;
 using System.Linq;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPEngineCore.Service.Hvac
 {
     public class ThHvacDbModelManager : IDisposable
     {
+        private bool OpenErased { get; set; }
         private Database HostDb { get; set; }
         public ObjectIdCollection Geometries { get; set; }
         public Dictionary<string, List<int>> Models { get; private set; }
@@ -19,9 +18,10 @@ namespace ThMEPEngineCore.Service.Hvac
         /// 构造函数
         /// </summary>
         /// <param name="database"></param>
-        public ThHvacDbModelManager(Database database)
+        public ThHvacDbModelManager(Database database, bool openErased = false)
         {
             HostDb = database;
+            OpenErased = openErased;
             LoadFromDb(database);
         }
 
@@ -41,24 +41,24 @@ namespace ThMEPEngineCore.Service.Hvac
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 Geometries = new ObjectIdCollection();
-                var blkRefs = acadDatabase.ModelSpace
-                    .OfType<BlockReference>()
-                    .Where(o =>
+                Models = new Dictionary<string, List<int>>();
+                acadDatabase.Database.ModelSpace()
+                    .GetEntities<BlockReference>(OpenMode.ForRead, OpenErased)
+                    .Where(o => o.IsModel())
+                    .ForEachDbObject(o =>
                     {
-                        if (o.GetEffectiveName().Contains(ThHvacCommon.AXIAL_BLOCK_NAME))
+                        Geometries.Add(o.ObjectId);
+                        var number = o.GetModelNumber();
+                        var identifier = o.GetModelIdentifier();
+                        if (Models.ContainsKey(identifier))
                         {
-                            return true;
+                            Models[identifier].Add(number);
                         }
-
-                        if (o.GetEffectiveName().Contains(ThHvacCommon.HTFC_BLOCK_NAME))
+                        else
                         {
-                            return true;
+                            Models.Add(identifier, new List<int>() { number });
                         }
-
-                        return false;
                     });
-                blkRefs.ForEachDbObject(o => Geometries.Add(o.ObjectId));
-                Models = ExtractFromDb(database, Geometries);
             }
         }
 
@@ -86,66 +86,46 @@ namespace ThMEPEngineCore.Service.Hvac
             return objs;
         }
 
-        public void EraseModels(string identifier)
+        /// <summary>
+        /// 获取指定编号的风机图块
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="number"></param>
+        /// <returns></returns>
+        public ObjectId GetModel(string identifier, int number)
+        {
+            return GetModels(identifier).Cast<ObjectId>().Where(o => o.GetModelNumber() == number).FirstOrDefault();
+        }
+
+        /// <summary>
+        /// 删除风机图块
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="erasing"></param>
+        public void EraseModels(string identifier, bool erasing = true)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
                 GetModels(identifier).Cast<ObjectId>().ForEach(o =>
                 {
-                    acadDatabase.Element<Entity>(o, true).Erase();
+                    o.EraseModel(erasing);
                 });
             }
         }
 
         /// <summary>
-        /// 提取块引用中的模型信息（模型标识和模型编号）
+        /// 清除风机图块
         /// </summary>
-        /// <param name="objs"></param>
-        /// <returns></returns>
-        private Dictionary<string, List<int>> ExtractFromDb(Database database, ObjectIdCollection objs)
+        /// <param name="identifier"></param>
+        public void RemoveModels(string identifier)
         {
-            var models = new Dictionary<string, List<int>>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                foreach (ObjectId obj in objs)
+                GetModels(identifier).Cast<ObjectId>().ForEach(o =>
                 {
-                    TypedValueList valueList = obj.GetXData(ThHvacCommon.RegAppName_FanSelection);
-                    if (valueList != null)
-                    {
-                        // 模型ID
-                        string identifier = null;
-                        var values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataAsciiString);
-                        if (values.Any())
-                        {
-                            identifier = (string)values.ElementAt(0).Value;
-                        }
-
-                        // 模型编号
-                        int number = 0;
-                        values = valueList.Where(o => o.TypeCode == (int)DxfCode.ExtendedDataInteger32);
-                        if (values.Any())
-                        {
-                            number = (int)values.ElementAt(0).Value;
-                        }
-
-                        if (!string.IsNullOrEmpty(identifier))
-                        {
-                            if (models.ContainsKey(identifier))
-                            {
-                                models[identifier].Add(number);
-                            }
-                            else
-                            {
-                                models.Add(identifier, new List<int>()
-                                {
-                                    number
-                                });
-                            }
-                        }
-                    }
-                }
+                    o.RemoveModel();
+                });
             }
-            return models;
         }
     }
 }

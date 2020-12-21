@@ -98,7 +98,7 @@ namespace ThMEPWSS.Pipe.Engine
         private bool IsBalconyPair(ThWBalconyRoom balconyRoom, ThWDevicePlatformRoom devicePlatformRoom)
         {
             var balconyRoomboundary = balconyRoom.Balcony.Boundary as Polyline;       
-            foreach (var deviceplatform in devicePlatformRoom.DevicePlatform)
+            foreach (var deviceplatform in devicePlatformRoom.DevicePlatforms)
             {
                 var devicePlatformRoomboundary = deviceplatform.Boundary as Polyline;
 

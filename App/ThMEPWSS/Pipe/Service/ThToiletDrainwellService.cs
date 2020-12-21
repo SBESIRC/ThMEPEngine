@@ -1,10 +1,7 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Service
@@ -12,7 +9,6 @@ namespace ThMEPWSS.Pipe.Service
     public class ThToiletDrainwellService : ThDrainwellService
     {       
         private ThIfcSpace ToiletSpace;       
-        private const double ToiletBufferDistance = 500.0;
         private ThToiletDrainwellService() : base()
         {
         }
@@ -44,7 +40,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             else
             {
-                var neibourBalconies = FindNeighbouringBalconyWithDrainwell(ToiletSpace, ToiletBufferDistance);
+                var neibourBalconies = FindNeighbouringBalconyWithDrainwell(ToiletSpace, ThWPipeCommon.TOILET_BUFFER_DISTANCE);
                 if (neibourBalconies.Count==1)
                 {
                     //从相邻的阳台内部空间中

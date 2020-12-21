@@ -44,6 +44,8 @@ namespace TianHua.Plumbing.UI
                 layoutControlItem4.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem5.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem6.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
+
+                BtnLayout.Focus();
             }
             if (FuncStr.NullToStr(RidApplications.EditValue) == "走道&坡道")
             {
@@ -63,12 +65,16 @@ namespace TianHua.Plumbing.UI
                 layoutControlItem4.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem5.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem6.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
+
+                BtnAlongTheLine.Focus();
             }
         }
 
         private void fmSprinklerLayout_Load(object sender, EventArgs e)
         {
             RidApplications_SelectedIndexChanged(null, null);
+
+     
         }
 
         private void BtnLayout_Click(object sender, EventArgs e)

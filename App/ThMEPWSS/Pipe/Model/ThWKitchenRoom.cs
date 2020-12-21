@@ -10,20 +10,22 @@ namespace ThMEPWSS.Pipe.Model
         /// 厨房空间
         /// </summary>
         public ThIfcSpace Kitchen { get; set; }
-        //台盆
+        /// <summary>
+        /// 台盆
+        /// </summary>
         public List<ThIfcBasin> BasinTools { get; set; }
-        //排油烟管
+        /// <summary>
+        /// 排油烟管
+        /// </summary>
         public List<ThIfcSpace> Pypes { get; set; }
         /// <summary>
         /// 排水管井
         /// </summary>
         public List<ThIfcSpace> DrainageWells { get; set; }
-
         public ThWKitchenRoom()
         {
-            Kitchen = null;
-            BasinTools = new List<ThIfcBasin>();
             Pypes = new List<ThIfcSpace>();
+            BasinTools = new List<ThIfcBasin>();
             DrainageWells = new List<ThIfcSpace>();
         }
     }

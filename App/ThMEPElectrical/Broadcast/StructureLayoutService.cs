@@ -27,21 +27,25 @@ namespace ThMEPElectrical.Broadcast
             Dictionary<Point3d, Vector3d> ptDic = new Dictionary<Point3d, Vector3d>();
             foreach (var pt in layoutPts)
             {
-                var column = columns.ToDictionary(x => x, y => y.Distance(pt)).OrderBy(x => x.Value).ToList();
-                var wall = walls.ToDictionary(x => x, y => y.Distance(pt)).OrderBy(x => x.Value).ToList();
+                var column = columns.Distinct().ToDictionary(x => x, y => y.Distance(pt)).OrderBy(x => x.Value).ToList();
+                var wall = walls.Distinct().ToDictionary(x => x, y => y.Distance(pt)).OrderBy(x => x.Value).ToList();
                 if (column.Count <= 0 && wall.Count <= 0)
                 {
                     return null;
                 }
 
                 (Point3d, Vector3d)? layoutInfo = null;
-                if (wall.Count <= 0 || column.First().Value < wall.First().Value)
+                if (wall.Count <= 0 || (column.Count > 0 && column.First().Value < wall.First().Value))
                 {
                     layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
                 }
                 else
                 {
                     layoutInfo = GetWallLayoutPoint(wall.First().Key, pt, dir);
+                    if (layoutInfo == null && column.Count > 0)
+                    {
+                        layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                    }
                 }
 
                 if (layoutInfo.HasValue)

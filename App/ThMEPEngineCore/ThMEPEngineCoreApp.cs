@@ -173,6 +173,25 @@ namespace ThMEPEngineCore
                 });
             }
         }
+        [CommandMethod("TIANHUACAD", "ThExtractParkingStall", CommandFlags.Modal)]
+        public void ThExtractParkingStall()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var engine = new ThParkingStallRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                engine.Recognize(acadDatabase.Database, frame.Vertices());
+                engine.Spaces.ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o.Boundary);
+                });
+            }
+        }
         [CommandMethod("TIANHUACAD", "ThExtractBeamConnect", CommandFlags.Modal)]
         public void ThExtractBeamConnect()
         {
@@ -315,37 +334,6 @@ namespace ThMEPEngineCore
             dbText.Layer = "0";
             dbText.Height = 200;
             return dbText;
-        }
-
-        [CommandMethod("TIANHUACAD", "ThBuffer", CommandFlags.Modal)]
-        public void ThBuffer()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var result2 = Active.Editor.GetDistance("\n输入距离");
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
-                }
-
-                foreach (Entity obj in objs.Buffer(result2.Value))
-                {
-                    obj.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
         }
     }
 }

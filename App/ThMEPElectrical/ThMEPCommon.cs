@@ -9,22 +9,27 @@ namespace ThMEPElectrical
 {
     public static class ThMEPCommon
     {
+        //广播
         public static readonly string ParkingLineLayer = "AD-SIGN";     //车位线图层
         public static readonly string BroadcastLayerName = "E-FAS-DEVC";     //消防应急广播图层
         public static readonly string BroadcastDwgName = "消防应急广播图块.dwg";     //消防应急广播图纸名
         public static readonly string BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY = "可见性";     //图块可见性
         public static readonly string BroadcastBlockName = "E-BFAS410-4";     //消防应急广播图块名
         public static readonly string NewParkingLineLayer = "E-LANE-CENTER";     //车位线图层
+        public static readonly string BlindAreaLayer = "E-MQ-XFGB";     //广播盲区图层
 
         // 烟感温感
         public const string SENSORLAYERNMAE = "E-FAS-DEVC";
-        public const string SENSORDWGNAME = "烟感温感图块.dwg";
         public const string SMOKE_SENSOR_BLOCK_NAME = "E-BFAS110";
         public const string TEMPERATURE_SENSOR_BLOCK_NAME = "E-BFAS120";
         public const string UCS_COMPASS_BLOCK_NAME = "AI-UCS";
         public const string UCS_COMPASS_LAYER_NAME = "AI-UCS";
         public const string PROTECTAREA_LAYER_NAME = "E-FD-PR";
         public const string BLINDAREA_HATCH_LAYER_NAME = "E-FD-DA";
+
+        // 图层
+        public const short LANELINE_LAYER_COLORINDEX = 6;
+        public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";
 
         // 常量
         public static readonly Scale3d BlockScale = new Scale3d(100, 100, 100);

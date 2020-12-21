@@ -16,7 +16,7 @@ namespace TianHua.FanSelection.UI.CAD
             //
         }
 
-        private List<string> Models()
+        private List<int> ModelNumbers(string identifier)
         {
             // 这里不能使用AcadDatabase，因为它会破坏Undo
             // 这里采用StartOpenCloseTransaction()避免REDO被破坏
@@ -24,8 +24,8 @@ namespace TianHua.FanSelection.UI.CAD
             using (var tx = Active.Database.TransactionManager.StartOpenCloseTransaction())
             {
                 return Active.Database.ModelSpace(tx).GetEntities<BlockReference>(tx)
-                    .Where(o => o.IsModel())
-                    .Select(o => o.GetModelIdentifier()).ToList();
+                    .Where(o => o.GetModelIdentifier() == identifier)
+                    .Select(o => o.GetModelNumber()).ToList();
             }
         }
 
@@ -34,28 +34,64 @@ namespace TianHua.FanSelection.UI.CAD
             if (ThFanSelectionService.Instance.Message is ThModelUndoMessage message &&
                 ThFanSelectionService.Instance.MessageArgs is ThModelUndoMessageArgs args)
             {
-                var models = Models();
-                args.UnappendedModels.RemoveAll(o => models.Contains(o));
-                args.ReappendedModels.RemoveAll(o => !models.Contains(o));
-                if (args.UnappendedModels.Count == 0 &&
-                    args.ReappendedModels.Count == 0)
+                var filters = new List<string>();
+                foreach (var item in args.UnappendedModels)
                 {
-                    return;
+                    // 确保图纸中已经没有已经删除的图块
+                    if (item.Value.Intersect(ModelNumbers(item.Key)).Any())
+                    {
+                        filters.Add(item.Key);
+                    }
                 }
-                ThModelUndoMessage.SendWith(args);
+                filters.ForEach(o => args.UnappendedModels.Remove(o));
+
+                filters.Clear();
+                foreach (var item in args.ReappendedModels)
+                {
+                    // 确保图纸中包含所有未被删除的图块
+                    if (item.Value.Except(ModelNumbers(item.Key)).Any())
+                    {
+                        filters.Add(item.Key);
+                    }
+                }
+                filters.ForEach(o => args.ReappendedModels.Remove(o));
+
+                // 广播消息
+                if (args.UnappendedModels.Count != 0 || args.ReappendedModels.Count != 0)
+                {
+                    ThModelUndoMessage.SendWith(args);
+                }
             }
             else if (ThFanSelectionService.Instance.Message is ThModelDeleteMessage eraseMessage &&
                 ThFanSelectionService.Instance.MessageArgs is ThModelDeleteMessageArgs eraseArgs)
             {
-                var models = Models();
-                eraseArgs.ErasedModels.RemoveAll(o => models.Contains(o));
-                eraseArgs.UnerasedModels.RemoveAll(o => !models.Contains(o));
-                if (eraseArgs.ErasedModels.Count == 0 &&
-                    eraseArgs.UnerasedModels.Count == 0)
+                var filters = new List<string>();
+                foreach(var item in eraseArgs.ErasedModels)
                 {
-                    return;
+                    // 确保图纸中已经没有已经删除的图块
+                    if (item.Value.Intersect(ModelNumbers(item.Key)).Any())
+                    {
+                        filters.Add(item.Key);
+                    }
                 }
-                ThModelDeleteMessage.SendWith(eraseArgs);
+                filters.ForEach(o => eraseArgs.ErasedModels.Remove(o));
+
+                filters.Clear();
+                foreach(var item in eraseArgs.UnerasedModels)
+                {
+                    // 确保图纸中包含所有未被删除的图块
+                    if (item.Value.Except(ModelNumbers(item.Key)).Any())
+                    {
+                        filters.Add(item.Key);
+                    }
+                }
+                filters.ForEach(o => eraseArgs.UnerasedModels.Remove(o));
+
+                // 广播消息
+                if (eraseArgs.ErasedModels.Count != 0 || eraseArgs.UnerasedModels.Count != 0)
+                {
+                    ThModelDeleteMessage.SendWith(eraseArgs);
+                }
             }
             else if (ThFanSelectionService.Instance.Message is ThModelCopyMessage copyMessage &&
                 ThFanSelectionService.Instance.MessageArgs is ThModelCopyMessageArgs copyArgs)

@@ -94,7 +94,7 @@ namespace TianHua.FanSelection.UI
 
             LabModelNum.Text = _FanDataModel.FanModelNum;
             LabCCFC.Text = _FanDataModel.FanModelCCCF;
-            LabAir.Text = FuncStr.NullToStr(_FanDataModel.SplitAirVolume);
+            LabAir.Text = FuncStr.NullToStr(_FanDataModel.AirVolume);
             LabPa.Text = FuncStr.NullToStr(_FanDataModel.WindResis);
             LabMotorPower.Text = _FanDataModel.FanModelMotorPower;
             LabNoise.Text = _FanDataModel.FanModelNoise;
@@ -243,7 +243,7 @@ namespace TianHua.FanSelection.UI
 
             if (m_Fan == null || m_ListFan == null || m_ListFan.Count == 0)
             {
-                LabAir.Text = FuncStr.NullToStr(m_Fan.SplitAirVolume);
+                LabAir.Text = FuncStr.NullToStr(m_Fan.AirVolume);
                 LabPa.Text = FuncStr.NullToStr(m_Fan.WindResis);
                 return;
             }
@@ -270,12 +270,12 @@ namespace TianHua.FanSelection.UI
 
             if (_FanSon == null || m_Fan == null)
             {
-                LabAir.Text = FuncStr.NullToStr(m_Fan.SplitAirVolume);
+                LabAir.Text = FuncStr.NullToStr(m_Fan.AirVolume);
                 LabPa.Text = FuncStr.NullToStr(m_Fan.WindResis);
                 return;
             }
 
-            LabAir.Text = m_Fan.SplitAirVolume + "/" + _FanSon.AirVolume;
+            LabAir.Text = m_Fan.AirVolume + "/" + _FanSon.AirVolume;
 
 
 
@@ -351,7 +351,7 @@ namespace TianHua.FanSelection.UI
             if (_FanDataModel.VentStyle == "轴流")
             {
                 double _SafetyFactor = 0;
-                double _Flow = Math.Round(FuncStr.NullToDouble(_FanDataModel.SplitAirVolume) / 3600, 5);
+                double _Flow = Math.Round(FuncStr.NullToDouble(_FanDataModel.AirVolume) / 3600, 5);
                 var _SpecificSpeed = 5.54 * FuncStr.NullToDouble(_FanDataModel.FanModelFanSpeed) * Math.Pow(_Flow, 0.5) / Math.Pow(_FanDataModel.WindResis, 0.75);
                 var _NoSplit = _FanDataModel.FanModelName.Split('-');
                 double _No = 0;
@@ -362,7 +362,7 @@ namespace TianHua.FanSelection.UI
                 var _AxialFanEfficiency = m_ListAxialFanEfficiency.Find(p => FuncStr.NullToInt(p.No_Min) <= _No && FuncStr.NullToInt(p.No_Max) >= _No
                    && _FanDataModel.VentLev == p.FanEfficiencyLevel);
                 if (_AxialFanEfficiency == null) { return; }
-                var _ShaftPower = _FanDataModel.SplitAirVolume * _FanDataModel.WindResis / _AxialFanEfficiency.FanEfficiency * 100 / 0.855 / 1000 / 3600;
+                var _ShaftPower = _FanDataModel.AirVolume * _FanDataModel.WindResis / _AxialFanEfficiency.FanEfficiency * 100 / 0.855 / 1000 / 3600;
 
                 if (_ShaftPower <= 0.5)
                 {
@@ -413,14 +413,14 @@ namespace TianHua.FanSelection.UI
             else
             {
                 double _SafetyFactor = 0;
-                double _Flow = Math.Round(FuncStr.NullToDouble(_FanDataModel.SplitAirVolume) / 3600, 5);
+                double _Flow = Math.Round(FuncStr.NullToDouble(_FanDataModel.AirVolume) / 3600, 5);
                 var _SpecificSpeed = 5.54 * FuncStr.NullToDouble(_FanDataModel.FanModelFanSpeed) * Math.Pow(_Flow, 0.5) / Math.Pow(_FanDataModel.WindResis, 0.75);
 
                 var _FanEfficiency = m_ListFanEfficiency.Find(p => FuncStr.NullToInt(p.No_Min) <= FuncStr.NullToInt(_FanDataModel.FanModelNum) && FuncStr.NullToInt(p.No_Max) >= FuncStr.NullToInt(_FanDataModel.FanModelNum)
                      && FuncStr.NullToInt(p.Rpm_Min) <= FuncStr.NullToInt(_SpecificSpeed)
                       && FuncStr.NullToInt(p.Rpm_Max) >= FuncStr.NullToInt(_SpecificSpeed) && _FanDataModel.VentLev == p.FanEfficiencyLevel);
                 if (_FanEfficiency == null) { return; }
-                var _ShaftPower = _FanDataModel.SplitAirVolume * _FanDataModel.WindResis / _FanEfficiency.FanInternalEfficiency * 100 / 0.855 / 1000 / 3600;
+                var _ShaftPower = _FanDataModel.AirVolume * _FanDataModel.WindResis / _FanEfficiency.FanInternalEfficiency * 100 / 0.855 / 1000 / 3600;
                 if (_ShaftPower <= 0.5)
                 {
                     _SafetyFactor = 1.5;

@@ -34,6 +34,12 @@ namespace TianHua.FanSelection
         public const string BLOCK_LAYER_DUAL = "H-DUAL-FBOX";
         public const string BLOCK_LAYER_EQUP = "H-EQUP-FBOX";
 
+        // 场景
+        public const string SCENARIO_MAKEUP = "消防补风";
+        public const string SCENARIO_EXHAUSTION = "消防排烟";
+        public const string SCENARIO_PROTECTION = "消防加压送风";
+        public const string SCENARIO_DUAL_MAKEUP = "消防补风兼平时送风";
+        public const string SCENARIO_DUAL_EXHAUSTION = "消防排烟兼平时排风";
 
         // 风机块属性
         public const string BLOCK_ATTRIBUTE_EQUIPMENT_SYMBOL = "设备符号";
@@ -58,18 +64,5 @@ namespace TianHua.FanSelection
         public const string BLOCK_ATTRIBUTE_VALUE_DOUBLE_SPEED = "双速";
         public const string BLOCK_ATTRIBUTE_VALUE_FIRE_POWER = "消防电源";
         public const string BLOCK_ATTRIBUTE_VALUE_NON_FIRE_POWER = "非消防电源";
-
-        // 风机块动态属性
-        public const string BLOCK_DYNAMIC_PROPERTY_ANGLE1 = "角度1";
-        public const string BLOCK_DYNAMIC_PROPERTY_ANGLE2 = "角度2";
-        public const string BLOCK_DYNAMIC_PROPERTY_ROTATE1 = "翻转状态1";
-        public const string BLOCK_DYNAMIC_PROPERTY_ROTATE2 = "翻转状态2";
-        public const string BLOCK_DYNAMIC_PROPERTY_POSITION1_X = "位置1 X";
-        public const string BLOCK_DYNAMIC_PROPERTY_POSITION1_Y = "位置1 Y";
-        public const string BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X = "设备基点 X";
-        public const string BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y = "设备基点 Y";
-        public const string BLOCK_DYNAMIC_PROPERTY_SPECIFICATION_MODEL = "规格及型号";
-        public const string BLOCK_DYNAMIC_PROPERTY_MODEL_TEXT_HEIGHT = "型号字高";
-        public const string BLOCK_DYNAMIC_PROPERTY_ANNOTATION_TEXT_HEIGHT = "标注字高";
     }
 }
