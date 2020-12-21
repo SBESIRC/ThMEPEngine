@@ -1466,7 +1466,8 @@ namespace TianHua.FanSelection.UI
                 {
                     if (XtraMessageBox.Show(" 已插入图纸的风机图块也将被删除，是否继续？ ", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        TreeList.DeleteSelectedNodes();
+                        _Fan.IsErased = true;
+                        //TreeList.DeleteSelectedNodes();
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
                         using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
@@ -1480,7 +1481,8 @@ namespace TianHua.FanSelection.UI
                 {
                     if (XtraMessageBox.Show(" 是否确认删除低速工况？ ", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        TreeList.DeleteSelectedNodes();
+                        _Fan.IsErased = true;
+                        //TreeList.DeleteSelectedNodes();
                         SetFanModel();
                     }
                 }
@@ -1492,7 +1494,14 @@ namespace TianHua.FanSelection.UI
                 {
                     if (_Fan.PID == "0")
                     {
-                        TreeList.DeleteSelectedNodes();
+                        _Fan.IsErased = true;
+                        //TreeList.DeleteSelectedNodes();
+
+                        var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+                        if (_SonFan != null)
+                        {
+                            _SonFan.IsErased = true;
+                        }
 
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -1504,11 +1513,13 @@ namespace TianHua.FanSelection.UI
                     }
                     else
                     {
-                        TreeList.DeleteSelectedNodes();
+                        _Fan.IsErased = true;
+                        //TreeList.DeleteSelectedNodes();
                         var _MainFan = m_ListFan.Find(p => p.ID == _Fan.PID);
                         if (_MainFan != null)
                         {
-                            m_ListFan.Remove(_MainFan);
+                            _MainFan.IsErased = true;
+                            //m_ListFan.Remove(_MainFan);
                             TreeList.RefreshDataSource();
                             this.TreeList.ExpandAll();
 
@@ -1523,7 +1534,8 @@ namespace TianHua.FanSelection.UI
                         }
                     }
 
-
+                    TreeList.Refresh();
+                    ComBoxScene_SelectedValueChanged(null, null);
                     m_fmOverView.DataSourceChanged(m_ListFan);
                 }
             }
