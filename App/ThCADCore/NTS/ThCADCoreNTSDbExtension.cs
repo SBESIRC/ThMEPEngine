@@ -1,4 +1,6 @@
 ﻿using System;
+using DotNetARX;
+using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Algorithm;
@@ -6,7 +8,6 @@ using NetTopologySuite.Utilities;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
 
 namespace ThCADCore.NTS
 {
@@ -14,12 +15,11 @@ namespace ThCADCore.NTS
     {
         public static Polyline ToDbPolyline(this LineString lineString)
         {
-            var pline = new Polyline();
-            for (int i = 0; i < lineString.Coordinates.Length; i++)
+            var pline = new Polyline()
             {
-                pline.AddVertexAt(i, lineString.Coordinates[i].ToAcGePoint2d(), 0, 0, 0);
-            }
-            pline.Closed = lineString.StartPoint.EqualsExact(lineString.EndPoint);
+                Closed = lineString.IsClosed,
+            };
+            pline.CreatePolyline(lineString.Coordinates.ToAcGePoint3ds());
             return pline;
         }
 
@@ -31,19 +31,6 @@ namespace ThCADCore.NTS
                 EndPoint = lineString.EndPoint.ToAcGePoint3d()
             };
             return line;
-        }
-
-        public static Polyline ToDbPolyline(this LinearRing linearRing)
-        {
-            var pline = new Polyline()
-            {
-                Closed = true
-            };
-            for (int i = 0; i < linearRing.Coordinates.Length; i++)
-            {
-                pline.AddVertexAt(i, linearRing.Coordinates[i].ToAcGePoint2d(), 0, 0, 0);
-            }
-            return pline;
         }
 
         public static List<Polyline> ToDbPolylines(this Polygon polygon)
