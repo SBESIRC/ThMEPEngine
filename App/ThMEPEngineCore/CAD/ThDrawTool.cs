@@ -1,6 +1,10 @@
 ﻿using System;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Collections.Generic;
+using ThCADExtension;
+using System.Linq;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -54,6 +58,74 @@ namespace ThMEPEngineCore.CAD
                 polyline.Closed = true;
             }
             return polyline;
+        }
+        public static Polyline ToOutline(Point3d startPt,Point3d endPt, double width)
+        {
+            Vector3d vec = startPt.GetVectorTo(endPt).GetNormal();
+            Vector3d perpendVec = vec.GetPerpendicularVector();
+            startPt = startPt - vec.MultiplyBy(1.0);
+            endPt = endPt + vec.MultiplyBy(1.0);
+            Point3d pt1 = startPt + perpendVec.MultiplyBy(width + 1.0);
+            Point3d pt2 = endPt + perpendVec.MultiplyBy(width + 1.0);
+            Point3d pt3 = endPt - perpendVec.MultiplyBy(width + 1.0);
+            Point3d pt4 = startPt - perpendVec.MultiplyBy(width + 1.0);
+            Polyline outline = new Polyline
+            {
+                Closed = true
+            };
+            outline.AddVertexAt(0, new Point2d(pt1.X, pt1.Y), 0, 0, 0);
+            outline.AddVertexAt(1, new Point2d(pt2.X, pt2.Y), 0, 0, 0);
+            outline.AddVertexAt(2, new Point2d(pt3.X, pt3.Y), 0, 0, 0);
+            outline.AddVertexAt(3, new Point2d(pt4.X, pt4.Y), 0, 0, 0);
+            return outline;
+        }
+        public static Polyline CreateSquare(Point3d pt, double edgeLength)
+        {
+            Polyline polyline = new Polyline
+            {
+                Closed = true
+            };
+            polyline.AddVertexAt(0, new Point2d(pt.X + edgeLength / 2.0, pt.Y + edgeLength / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(1, new Point2d(pt.X - edgeLength / 2.0, pt.Y + edgeLength / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(2, new Point2d(pt.X - edgeLength / 2.0, pt.Y - edgeLength / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(3, new Point2d(pt.X + edgeLength / 2.0, pt.Y - edgeLength / 2.0), 0, 0, 0);
+            return polyline;
+        }
+        public static List<Line> GetLines(this DBObjectCollection objs,double length=10.0)
+        {
+            var lines = new List<Line>();
+            objs.Cast<Curve>().ForEach(o =>
+            {
+                if (o is Line line)
+                {
+                    lines.Add(line);
+                }
+                else if (o is Polyline polyline)
+                {
+                    var subObjs = new DBObjectCollection();
+                    polyline.Explode(subObjs);
+                    lines.AddRange(GetLines(subObjs, length));
+                }
+                else if(o is Arc arc)
+                {
+                    var arcPolyline= arc.TessellateArcWithArc(length);
+                    var subObjs = new DBObjectCollection();
+                    arcPolyline.Explode(subObjs);
+                    lines.AddRange(GetLines(subObjs, length));
+                }
+                else if(o is Circle circle)
+                {
+                    var circlePolyline = circle.Tessellate(length);
+                    var subObjs = new DBObjectCollection();
+                    circlePolyline.Explode(subObjs);
+                    lines.AddRange(GetLines(subObjs, length));
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            });
+            return lines;
         }
     }
 }

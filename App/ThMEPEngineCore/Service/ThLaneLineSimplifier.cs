@@ -388,7 +388,7 @@ namespace ThMEPEngineCore.Service
             return false;
         }
 
-        private static List<Line> LineMerge(List<Line> lines, double tolerance)
+        public static List<Line> LineMerge(List<Line> lines, double tolerance)
         {
             var results = new List<Line>();
             lines.ForEach(o =>

@@ -101,7 +101,7 @@ namespace ThCADExtension
         // 车道线布灯
         public static string LaneLineLightDwgPath()
         {
-            return Path.Combine(SupportPath(), "车道线布灯.dwg");
+            return Path.Combine(SupportPath(), "车道灯图块.dwg");
         }
 
         // ToolPalette 路径

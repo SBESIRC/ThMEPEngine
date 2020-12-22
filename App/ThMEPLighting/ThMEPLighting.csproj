@@ -24,6 +24,54 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Garage\Engine\ThArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThBuildNumberEngine.cs" />
+    <Compile Include="Garage\Engine\ThBuildRacewayEngine.cs" />
+    <Compile Include="Garage\Engine\ThDoubleRowArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThDoubleRowNumberEngine.cs" />
+    <Compile Include="Garage\Engine\ThInnerOuterCirclesEngine.cs" />
+    <Compile Include="Garage\Engine\ThOuterCircleDistributionEngine.cs" />
+    <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
+    <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
+    <Compile Include="Garage\Model\ThEntityParameter.cs" />
+    <Compile Include="Garage\Model\ThFindSideLinesParameter.cs" />
+    <Compile Include="Garage\Model\ThLightArrangeParameter.cs" />
+    <Compile Include="Garage\Model\ThLightEdge.cs" />
+    <Compile Include="Garage\Model\ThLightNode.cs" />
+    <Compile Include="Garage\Model\ThRacewayGroupParameter.cs" />
+    <Compile Include="Garage\Model\ThRegionBorder.cs" />
+    <Compile Include="Garage\Model\ThWireOffsetData.cs" />
+    <Compile Include="Garage\Service\ThAlignLineHeadService.cs" />
+    <Compile Include="Garage\Service\ThBuildCableTrayService.cs" />
+    <Compile Include="Garage\Service\ThBuildDoubleRowPosService.cs" />
+    <Compile Include="Garage\Service\ThBuildFirstEdgesService.cs" />
+    <Compile Include="Garage\Service\ThBuildSingleRowPosService.cs" />
+    <Compile Include="Garage\Service\ThDistributeLightService.cs" />
+    <Compile Include="Garage\Service\ThDoubleRowDistributeExService.cs" />
+    <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
+    <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
+    <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
+    <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindSideLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindStartIndexService.cs" />
+    <Compile Include="Garage\Service\ThJoinLinesService.cs" />
+    <Compile Include="Garage\Service\ThLightGraphService.cs" />
+    <Compile Include="Garage\Service\ThPrintService.cs" />
+    <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
+    <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
+    <Compile Include="Garage\Service\ThLinkElbowService.cs" />
+    <Compile Include="Garage\Service\ThNumberService.cs" />
+    <Compile Include="Garage\Service\ThOffsetLineService.cs" />
+    <Compile Include="Garage\Service\ThQueryLineService.cs" />
+    <Compile Include="Garage\Service\ThRacewayGroupService.cs" />
+    <Compile Include="Garage\Service\ThRemoveShortCenterLineService.cs" />
+    <Compile Include="Garage\Service\ThSingleRowNumberService.cs" />
+    <Compile Include="Garage\Service\ThSplitLightEdgeService.cs" />
+    <Compile Include="Garage\Service\ThSplitLineService.cs" />
+    <Compile Include="Garage\Service\ThWireOffsetDataService.cs" />
+    <Compile Include="Garage\ThGarageLightCommon.cs" />
+    <Compile Include="Garage\ThGarageLightUtils.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
     <Compile Include="ParkingStall\Business\UserInteraction\EntityPicker.cs" />
@@ -45,6 +93,7 @@
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingPolyTrans.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupGenerator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThMEPGarageLightingCmds.cs" />
     <Compile Include="ThMEPLightingApp.cs" />
   </ItemGroup>
   <ItemGroup>

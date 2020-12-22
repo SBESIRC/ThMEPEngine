@@ -52,7 +52,7 @@ namespace ThMEPEngineCore.CAD
             if(IsCollinearEx(firstSp, firstEp, secondSp, secondEp))
             {
                 List<Point3d> pts = new List<Point3d> { firstSp, firstEp, secondSp, secondEp };
-                var maxPts=MaxDistancePoints(pts);
+                var maxPts= GetCollinearMaxPts(pts);
                 return (firstSp.DistanceTo(firstEp) + secondSp.DistanceTo(secondEp)) >
                     maxPts.Item1.DistanceTo(maxPts.Item2);
             }
@@ -162,13 +162,13 @@ namespace ThMEPEngineCore.CAD
             plane.Dispose();
             return pts;
         }
-        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt)
+        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt,double tolerance=0.0001)
         {
             Vector3d vec = lineSp.GetVectorTo(lineEp);
             Plane plane = new Plane(lineSp, vec);
             Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
             Point3d newPt=outerPt.TransformBy(wcsToUcs);
-            if(Math.Abs(newPt.X)<=0.0001 && Math.Abs(newPt.Y) <= 0.0001)
+            if(Math.Abs(newPt.X)<= tolerance && Math.Abs(newPt.Y) <= tolerance)
             {
                 if(newPt.Z>=0 && newPt.Z<= lineSp.DistanceTo(lineEp))
                 {
@@ -179,11 +179,10 @@ namespace ThMEPEngineCore.CAD
         }
         public static bool IsPointInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt,double tolerance=0.0)
         {
-            if(IsPointOnLine(lineSp, lineEp, outerPt))
-            {
-                return outerPt.DistanceTo(lineSp) > tolerance && outerPt.DistanceTo(lineEp) > tolerance;
-            }
-            return false;
+            Vector3d vec = lineSp.GetVectorTo(lineEp).GetNormal();
+            Point3d sp = lineSp + vec.MultiplyBy(tolerance);
+            Point3d ep = lineEp - vec.MultiplyBy(tolerance);
+            return IsPointOnLine(sp, ep, outerPt);
         }
         public static bool IsProjectionPtInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt)
         {
@@ -228,23 +227,92 @@ namespace ThMEPEngineCore.CAD
                 throw new NotSupportedException();
             }
             return pts;
-        }
-        public static Tuple<Point3d,Point3d> MaxDistancePoints(List<Point3d> points)
+        }        
+        public static bool IsPerpendicular(Vector3d firstVec,Vector3d secondVec,double tolerance=1.0)
         {
-            Point3d firstPt = Point3d.Origin;
-            Point3d secondPt = Point3d.Origin;
-            for (int i=0;i<points.Count-1;i++)
+            double rad = firstVec.GetAngleTo(secondVec);
+            double ang = rad / Math.PI * 180.0;
+            return Math.Abs(ang-90.0)<= tolerance;
+        }
+        public static double ProjectionDis(this Vector3d a,Vector3d b)
+        {
+            double rad = a.GetAngleTo(b);
+            return b.Length * Math.Cos(rad);
+        }
+        public static Point3dCollection IntersectPts(
+            Line first,Line second,Intersect intersectType)
+        {
+            var pts = new Point3dCollection();
+            first.IntersectWith(second, intersectType, pts, IntPtr.Zero, IntPtr.Zero);
+            return pts;
+        }
+        public static Tuple<Point3d,Point3d> GetCollinearMaxPts(this List<Point3d> pts)
+        {
+            if (pts.Count == 0)
             {
-                for (int j = i+1; j < points.Count; j++)
+                return Tuple.Create(Point3d.Origin, Point3d.Origin);
+            }
+            else if (pts.Count == 1)
+            {
+                return Tuple.Create(pts[0], pts[0]);
+            }
+            else
+            {
+                Point3d first = pts[0];
+                Point3d second = pts[pts.Count - 1];
+                for (int i = 0; i < pts.Count - 1; i++)
                 {
-                    if(points[i].DistanceTo(points[j])> firstPt.DistanceTo(secondPt))
+                    for (int j = i + 1; j < pts.Count; j++)
                     {
-                        firstPt = points[i];
-                        secondPt = points[j];
+                        if (pts[i].DistanceTo(pts[j]) > first.DistanceTo(second))
+                        {
+                            first = pts[i];
+                            second = pts[j];
+                        }
                     }
                 }
+                return Tuple.Create(first, second);
             }
-            return Tuple.Create(firstPt, secondPt);
+        }
+        public static bool IsOverlap(Point3d firstSp, Point3d firstEp, 
+            Point3d secondSp, Point3d secondEp,bool includedJoin=true)
+        {
+            //第二根线在第一根线上的投影是否重叠
+            Vector3d vec = firstSp.GetVectorTo(firstEp).GetNormal();
+            Plane plane = new Plane(firstSp, vec);
+            Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
+            Point3d newSecondSp = secondSp.TransformBy(wcsToUcs);
+            Point3d newSecondEp = secondEp.TransformBy(wcsToUcs);
+            double minZ = Math.Min(newSecondSp.Z, newSecondEp.Z);
+            double maxZ = Math.Max(newSecondSp.Z, newSecondEp.Z);
+            if(includedJoin)
+            {
+                if (maxZ < 0)
+                {
+                    return false;
+                }
+                if (minZ > firstSp.DistanceTo(firstEp))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (maxZ <= 0)
+                {
+                    return false;
+                }
+                if (minZ >= firstSp.DistanceTo(firstEp))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public static bool IsOverlap(this Line first ,Line second, bool includedJoin = true)
+        {
+            return IsOverlap(first.StartPoint, first.EndPoint, 
+                second.StartPoint, second.EndPoint, includedJoin);
         }
     }
 }

@@ -143,7 +143,6 @@
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
     <Compile Include="Lane\ThLaneLineMerger.cs" />
-    <Compile Include="Lane\ThLaneLineSimplifier.cs" />
     <Compile Include="ThMEPCommon.cs" />
     <Compile Include="ThMEPElectricalApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
