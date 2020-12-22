@@ -104,9 +104,7 @@ namespace ThMEPLighting.Garage.Engine
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
                 var objIds = new ObjectIdList();
                 lightEdges.Where(o=>o.IsDX).ForEach(m =>
-                {
-                    m.Edge.SetDatabaseDefaults(acadDatabase.Database);
-                    objIds.Add(acadDatabase.ModelSpace.Add(m.Edge));
+                {                    
                     var normalLine = m.Edge.Normalize();
                     m.LightNodes.ForEach(n =>
                     {
