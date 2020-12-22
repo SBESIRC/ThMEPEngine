@@ -106,6 +106,7 @@ namespace ThMEPLighting.Garage.Service
         /// <param name="start"></param>
         private void Find(List<ThLightEdge> links, Point3d start)
         {
+            //当Degree为零，或碰到已遍历的边结束
             Point3d findPt = GetNextLinkPt(links[links.Count - 1], start);
             var portEdges = SearchEdges(findPt, ThGarageLightCommon.RepeatedPointDistance);
             portEdges = portEdges
@@ -147,7 +148,7 @@ namespace ThMEPLighting.Garage.Service
             var unCollinearEdges = linkEdges.Where(o => !ThGeometryTool.IsCollinearEx(
                   currentEdge.Edge.StartPoint, currentEdge.Edge.EndPoint,
                   o.Edge.StartPoint, o.Edge.EndPoint)).ToList();
-            if (unCollinearEdges.Count == 1)
+            if (unCollinearEdges.Count > 0)
             {
                 return unCollinearEdges[0];
             }
@@ -170,35 +171,31 @@ namespace ThMEPLighting.Garage.Service
             Polyline outline = ThDrawTool.ToOutline(startPt,endPt,2.0);
             var objs = SpatialIndex.SelectCrossingPolygon(outline);
             objs.Remove(mainEdge.Edge);
+            //找到与portPt连接的点
             var linkEdges = Edges
                 .Where(o => objs.Contains(o.Edge))
                 .Where(o => o.Edge.IsLink(portPt));
+            //与mainEdge共线的边
             var collinearEdges = linkEdges
                 .Where(o => ThGeometryTool.IsCollinearEx(
                     mainEdge.Edge.StartPoint, mainEdge.Edge.EndPoint,
                     o.Edge.StartPoint, o.Edge.EndPoint));
+            //与mainEdge不共线的边
             var unCollinearEdges = linkEdges
                 .Where(o => !ThGeometryTool.IsCollinearEx(
                     mainEdge.Edge.StartPoint, mainEdge.Edge.EndPoint,
-                    o.Edge.StartPoint, o.Edge.EndPoint))
-                .Where(o=>o.IsTraversed==false);
-            bool ynBuildBranch = false;
-            if (collinearEdges.Count()>0)
+                    o.Edge.StartPoint, o.Edge.EndPoint));
+            if((collinearEdges.Count()+ unCollinearEdges.Count())<=1)
             {
-                //如果末端有共线，则其它不共线为分支
-                ynBuildBranch = true;
+                //如果端点只连接了一条边，则返回
+                return;
             }
-            else 
+            else
             {
-                //如果末端无共线，则不共线数量大于1为分支
-                if (unCollinearEdges.Count() > 1)
-                {
-                    ynBuildBranch = true;
-                }
-            }
-            if(ynBuildBranch)
-            {
-                unCollinearEdges.ForEach(o =>
+                var edges = new List<ThLightEdge>();
+                edges.AddRange(collinearEdges.Where(o=>o.IsTraversed==false));
+                edges.AddRange(unCollinearEdges.Where(o => o.IsTraversed == false));
+                edges.ForEach(o =>
                 {
                     var pts = BuildBranchPt(mainEdge, o);
                     if (pts.Count > 0)

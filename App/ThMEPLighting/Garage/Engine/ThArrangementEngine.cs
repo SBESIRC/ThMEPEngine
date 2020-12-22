@@ -6,11 +6,11 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Model;
-using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -138,7 +138,7 @@ namespace ThMEPLighting.Garage.Engine
                             n.Position, new Scale3d(ArrangeParameter.PaperRatio), normalLine.Angle);
                             TypedValueList blkValueList = new TypedValueList
                             {
-                                { (int)DxfCode.ExtendedDataAsciiString, "****"},
+                                { (int)DxfCode.ExtendedDataAsciiString, ArrangeParameter.IsSingleRow?"1":"0"},
                             };
                         XDataTools.AddXData(blkId, ThGarageLightCommon.ThGarageLightAppName, blkValueList);
                     });
