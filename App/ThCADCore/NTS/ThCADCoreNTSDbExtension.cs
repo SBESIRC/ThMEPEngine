@@ -44,27 +44,19 @@ namespace ThCADCore.NTS
             return plines;
         }
 
-        public static Entity ToDbMPolygon(this Polygon polygon)
+        public static MPolygon ToDbMPolygon(this Polygon polygon)
         {
-            var externalProfile = polygon.Shell.ToDbPolyline();
-            var holes = new List<Curve>();
-            foreach (LinearRing hole in polygon.Holes)
-            {
-                holes.Add(hole.ToDbPolyline());
-            }
-
-            if (holes.Count == 0)
-                return externalProfile;
-
-            //ThMPolygonTool.Initialize();
-            return ThMPolygonTool.CreateMPolygon(externalProfile, holes);
+            List<Curve> holes = new List<Curve>();
+            var shell = polygon.Shell.ToDbPolyline();
+            polygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
+            return ThMPolygonTool.CreateMPolygon(shell, holes);
         }
 
         public static Entity ToDbEntity(this Polygon polygon)
         {
-            if (polygon.Holes.Count() > 0)
+            if (polygon.NumInteriorRings > 0)
             {
-                return polygon.ToMPolygon();
+                return polygon.ToDbMPolygon();
             }
             else
             {

@@ -59,7 +59,7 @@ namespace ThCADCore.NTS
             var objs = new List<MPolygon>();
             hatch.ToNTSMultiPolygon().Geometries
                 .Cast<Polygon>()
-                .ForEach(o => objs.Add(o.ToMPolygon()));
+                .ForEach(o => objs.Add(o.ToDbMPolygon()));
             return objs;
         }
     }
