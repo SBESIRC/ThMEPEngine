@@ -80,13 +80,13 @@ namespace ThCADCore.NTS
             Geometry geometry = builder.Build(objs.Explode().ToMultiLineString());
             if (geometry is Polygon polygon)
             {
-                poylgons.Add(polygon.ToMPolygon());
+                poylgons.Add(polygon.ToDbMPolygon());
             }
             else if (geometry is MultiPolygon mPolygons)
             {
                 mPolygons.Geometries.Cast<Polygon>().ForEach(o =>
                 {
-                    poylgons.Add(o.ToMPolygon());
+                    poylgons.Add(o.ToDbMPolygon());
                 });
             }
             else

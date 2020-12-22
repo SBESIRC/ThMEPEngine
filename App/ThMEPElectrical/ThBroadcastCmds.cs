@@ -20,6 +20,7 @@ using ThMEPElectrical.Broadcast.Service;
 using DotNetARX;
 using ThMEPElectrical.Business;
 using ThMEPElectrical.Business.Procedure;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical
 {
@@ -130,15 +131,15 @@ namespace ThMEPElectrical
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acdb.Element<Polyline>(obj);
-                    frameLst.Add(frame);
+                    var plFrame = ThMEPFrameService.Normalize(frame);
+                    frameLst.Add(plFrame);
                     
                 }
 
                 //处理外包框线
                 var plines = HandleFrame(frameLst);
-                foreach (var frame in plines)
+                foreach (var plFrame in plines)
                 {
-                    var plFrame = ThMEPFrameService.Normalize(frame);
                     //删除原有构建
                     plFrame.ClearBroadCast();
                     plFrame.ClearBlindArea();
@@ -270,8 +271,8 @@ namespace ThMEPElectrical
         /// <param name="walls"></param>
         private void GetStructureInfo(AcadDatabase acdb, Polyline polyline, out List<Polyline> columns, out List<Polyline> walls)
         {
+            //结构构建
             var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
-
             //获取柱
             columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             var objs = new DBObjectCollection();
@@ -285,6 +286,18 @@ namespace ThMEPElectrical
             walls.ForEach(x => objs.Add(x));
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+
+            //建筑构建
+            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+            {
+                //建筑墙
+                archWallEngine.Recognize(acdb.Database, polyline.Vertices());
+                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Cast<Polyline>().ToList();
+                objs = new DBObjectCollection();
+                arcWall.ForEach(x => objs.Add(x));
+                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList());
+            }
         }
 
         /// <summary>
