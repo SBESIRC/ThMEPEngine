@@ -12,6 +12,7 @@ using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Engine;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage.Service;
 
 namespace ThMEPLighting
 {
@@ -144,8 +145,11 @@ namespace ThMEPLighting
                 };
                 var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();
+                //创建块的索引，偏于后期查询
+                arrangeParameter.LightBlockQueryService= ThQueryLightBlockService.Create(
+                        regionBorders.Select(o => o.RegionBorder).ToList());
                 //以上是准备输入参数
-                ThArrangementEngine arrangeEngine = null;
+                ThArrangementEngine arrangeEngine = null;                
                 if (arrangeParameter.IsSingleRow)
                 {
                     arrangeEngine = new ThSingleRowArrangementEngine(arrangeParameter, racewayParameter);

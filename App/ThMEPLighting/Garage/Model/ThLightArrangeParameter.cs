@@ -1,4 +1,6 @@
-﻿namespace ThMEPLighting.Garage.Model
+﻿using ThMEPLighting.Garage.Service;
+
+namespace ThMEPLighting.Garage.Model
 {
     public class ThLightArrangeParameter
     {
@@ -35,5 +37,7 @@
         /// 图纸比例
         /// </summary>
         public int PaperRatio { get; set; }
+
+        public ThQueryLightBlockService LightBlockQueryService { get; set; }
     }
 }
