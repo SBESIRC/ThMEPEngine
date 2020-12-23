@@ -130,7 +130,11 @@ namespace ThMEPEngineCore
                     if (o.Outline is Curve curve)
                     {
                         acadDatabase.ModelSpace.Add(curve.WashClone());
-                    }                    
+                    }
+                    else if (o.Outline is MPolygon mPolygon)
+                    {
+                        acadDatabase.ModelSpace.Add(mPolygon);
+                    }
                 });
             }
         }

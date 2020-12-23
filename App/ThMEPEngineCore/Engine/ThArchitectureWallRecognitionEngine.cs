@@ -1,9 +1,11 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -13,11 +15,10 @@ namespace ThMEPEngineCore.Engine
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (ThCADCoreNTSFixedPrecision fixedPrecision = new ThCADCoreNTSFixedPrecision())
             using (var archWallDbExtension = new ThArchitectureWallDbExtension(database))
             {
                 archWallDbExtension.BuildElementCurves();
-                List<Curve> curves = new List<Curve>();
+                var curves = new DBObjectCollection();
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
@@ -30,15 +31,12 @@ namespace ThMEPEngineCore.Engine
                 }
                 else
                 {
-                    curves = archWallDbExtension.WallCurves;
+                    curves = archWallDbExtension.WallCurves.ToCollection();
                 }
-                curves.ForEach(o =>
-                {
-                    foreach (Polyline item in ThArchitectureWallSimplifier.Simplify(o as Polyline))
-                    {
-                        Elements.Add(ThIfcWall.Create(item));
-                    }
-                });
+                var results = ThArchitectureWallSimplifier.Normalize(curves);
+                results = ThArchitectureWallSimplifier.Simplify(results);
+                results = ThArchitectureWallSimplifier.BuildArea(results);
+                results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
             }
         }
     }
