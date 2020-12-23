@@ -32,21 +32,24 @@ namespace ThMEPLighting.Garage.Engine
                 var innerOuterCircles = new List<ThWireOffsetData>();
                 using (var innerOuterEngine = new ThInnerOuterCirclesEngine())
                 {
-                    //识别内外圈
-                    innerOuterEngine.Reconize(DxLines, FdxLines, ArrangeParameter.RacywaySpace / 2.0);
+                    //需求变化2020.12.23,非灯线不参与编号传递
+                    innerOuterEngine.Reconize(DxLines,new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);
                     innerOuterCircles = innerOuterEngine.WireOffsetDatas;
-                }               
+                }
+
+                //延伸非灯线
+                FdxLines = ThExtendFdxLinesService.Extend(FdxLines, innerOuterCircles);
 
                 //创建线槽
                 var ports = BuildCableTray(innerOuterCircles); //线槽端口
 
-                //电灯编号                
+                //电灯编号        
+                //需求变化2020.12.23,非灯线不参与编号传递
                 var centerLightEdges = new List<ThLightEdge>();
-                innerOuterCircles.ForEach(o =>
-                {
-                    centerLightEdges.Add(new ThLightEdge(o.Center) { IsDX=o.IsDX});
-                });
-
+                innerOuterCircles
+                    .Where(o => o.IsDX).ToList()
+                    .ForEach(o => centerLightEdges.Add(new ThLightEdge(o.Center) { IsDX = o.IsDX }));
+                    
                 //获取端点在DxLines的Port
                 var centerPorts = GetDxCenterLinePorts(ports,  //灯线端口
                     centerLightEdges.Where(o=>o.IsDX).Select(o => o.Edge).ToList());                         
@@ -74,6 +77,7 @@ namespace ThMEPLighting.Garage.Engine
                     cableCenterLines.Add(o.First);
                     cableCenterLines.Add(o.Second);
                 });
+                FdxLines.ForEach(o => cableCenterLines.Add(o)); 
                 using (var buildRacywayEngine = new ThBuildRacewayEngine(
                     cableCenterLines, ArrangeParameter.Width))
                 {

@@ -43,7 +43,7 @@ namespace ThMEPLighting.Garage.Engine
                 //电灯编号
                 var lightEdges = new List<ThLightEdge>();
                 DxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o)));
-                FdxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o) { IsDX = false }));                
+                //FdxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o) { IsDX = false }));                
                 using (var buildNumberEngine = new ThSingleRowNumberEngine(
                      ports, lightEdges, ArrangeParameter))
                 {
