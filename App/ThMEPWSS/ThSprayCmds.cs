@@ -432,6 +432,18 @@ namespace ThMEPWSS
             walls.ForEach(x => objs.Add(x));
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
+
+            //建筑构建
+            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+            {
+                //建筑墙
+                archWallEngine.Recognize(acdb.Database, polyline.Vertices());
+                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Cast<Polyline>().ToList();
+                objs = new DBObjectCollection();
+                arcWall.ForEach(x => objs.Add(x));
+                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList());
+            }
         }
 
         /// <summary>
