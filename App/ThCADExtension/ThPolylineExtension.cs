@@ -1,5 +1,6 @@
 ﻿using System;
 using DotNetARX;
+using System.Linq;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -37,6 +38,17 @@ namespace ThCADExtension
             }
 
             return vertices;
+        }
+
+        public static double[] Coordinates(this Polyline pLine)
+        {
+            var vertices = (Point3dList)pLine.Vertices();
+            return vertices.Select(o => o.ToArray()).SelectMany(o => o).ToArray();
+        }
+
+        public static double[] Coordinates(this Polyline[] pLines)
+        {
+            return pLines.Select(o => o.Coordinates()).SelectMany(o => o).ToArray();
         }
 
         public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
