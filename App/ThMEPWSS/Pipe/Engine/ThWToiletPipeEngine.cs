@@ -5,6 +5,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Geom;
 using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Engine
@@ -37,16 +38,11 @@ namespace ThMEPWSS.Pipe.Engine
         }
 
         public void Run(Polyline outline, Polyline well, Polyline closestool)
-        {
-          
-                int a = index_a(outline, well);
-                int d = index_d(outline, closestool, well);
-                int b = index_b(outline, closestool,d);
-                int c = index_c(outline, well);
-            if (Wellisinboundary(outline, well))
+        {                          
+            if (GeomUtils.PtInLoop(outline, well.GetCenter()))
             {
-                Vector3d dir = Direction(a, b, c,d, outline, well, closestool, outline.Length / 2.0);
-                var pt = FindInsideVertex(a, well, dir);
+                Vector3d dir = Direction(outline, well);
+                var pt = FindInsideVertex(index_a(outline, well), well);
                 for (int i = 0; i < Parameters.Number; i++)
                 {
                     Pipes.Add(Create((pt + i * dir * ThWPipeCommon.TOILET_WELLS_INTERVAL),i));
@@ -61,114 +57,27 @@ namespace ThMEPWSS.Pipe.Engine
         private int index_a(Polyline boundary, Polyline outline)
         {       //寻找管井关键边  
             var vertices = outline.Vertices();
-            Point3d midpoint = Point3d.Origin;
-            double dst = double.MaxValue;
+            double dst = 0;
             int a = 0;
-            for (int i = 0; i < vertices.Count - 1; i++)
-            {
-                midpoint = vertices[i] + vertices[i].GetVectorTo(vertices[i+1]) * 0.5;
-                Point3d reference_p = boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;              
-                
-                if ( dst- midpoint.DistanceTo(reference_p)>1)
+            for (int i = 0; i < vertices.Count; i++)
+            {                        
+                if ( dst< vertices[i].DistanceTo(boundary.GetCenter()))
                 {
-                    dst = midpoint.DistanceTo(reference_p);
+                    dst = vertices[i].DistanceTo(boundary.GetCenter());
                     a = i;
-                } 
-                else
-                {             
-                    if ((vertices[i].DistanceTo(vertices[i+1])- vertices[a].DistanceTo(vertices[a+1]))>1)
-                    {
-                        a = i;
-                    }
-                }
+                }            
             }
-
             return a;
+        }  
+    
+        private Point3d FindInsideVertex(int a,Polyline outline)
+        {                
+            var vertices = outline.Vertices();
+            int b = Getminnum(a, outline);
+            int c = Getmaxnum(a, outline);        
+            return vertices[a]+100*(vertices[a].GetVectorTo(vertices[b]).GetNormal()+ vertices[a].GetVectorTo(vertices[c]).GetNormal());            
         }
-   
-        private int index_b(Polyline boundary, Polyline urinal,int d)
-        {//寻找相对于马桶的toilet关键边
-            var vertices = urinal.Vertices();
-            Point3d base_point = boundary.ToCurve3d().GetClosestPointTo(vertices[d]+ (vertices[d].GetVectorTo(vertices[d+1]))*0.5).Point;
-            var vertices1 = boundary.Vertices();
-            int b = 0;
-            for (int i = 0; i < vertices1.Count - 1; i++)
-            {
-                if (vertices1[i].GetVectorTo(base_point).IsCodirectionalTo(base_point.GetVectorTo(vertices1[i + 1])))
-                {
-                    b = i;
-                }               
-            }
-            return b;
-        }
-        private int index_c(Polyline boundary, Polyline outline)
-        {
-            //寻找相对于管井的toilet关键边
-            var center = outline.GetCenter();
-            Point3d base_point = boundary.ToCurve3d().GetClosestPointTo(center).Point;
-            var vertices1 = boundary.Vertices();
-            int c = 0;
-            for (int i = 0; i < vertices1.Count - 1; i++)
-            {
-                if (vertices1[i].GetVectorTo(base_point).IsCodirectionalTo(base_point.GetVectorTo(vertices1[i + 1])) )
-                {
-                    c = i;
-                }
-            }
-            return c;
-        }
-        private int index_d(Polyline boundary, Polyline urinal, Polyline well)
-        {
-            //寻找马桶的关键边
-            var vertices1 = urinal.Vertices();
-            int b = 0;
-            for (int i = 0; i < vertices1.Count-1; i++)
-            {
-                if (well.GetDistToPoint((vertices1[i]+0.5* vertices1[i].GetVectorTo(vertices1[i+1])))< ThWPipeCommon.MIN_WELL_TO_URINAL_DISTANCE)
-                {                 
-                    b = i;
-                }
-                else
-                {
-                    if(boundary.GetDistToPoint((vertices1[i] + 0.5 * vertices1[i].GetVectorTo(vertices1[i + 1]))) < ThWPipeCommon.MIN_WELL_TO_URINAL_DISTANCE)
-                    {
-                        b = i;
-                    }
-                }
-            }        
-            return b;
-        }
-        private Point3d FindInsideVertex(int a,Polyline outline,Vector3d dir )
-        { 
-            Point3d pt =Point3d.Origin;             
-            var vertices = outline.Vertices();       
-
-            if (a > 0)
-            {
-                if (dir.IsCodirectionalTo(vertices[a].GetVectorTo(vertices[a + 1])))
-                {
-                    pt = vertices[a] + (vertices[a].GetVectorTo(vertices[a + 1]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
-                }
-                else
-                {
-                    pt = vertices[a + 1] + (vertices[a + 1].GetVectorTo(vertices[a]).GetNormal() + vertices[a].GetVectorTo(vertices[a - 1]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
-                }
-            }
-            else
-            {
-                if (dir.IsCodirectionalTo(vertices[0].GetVectorTo(vertices[1])))
-                {
-                    pt = vertices[0] + (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
-                }
-                else
-                {
-                    pt = vertices[1] + (vertices[1].GetVectorTo(vertices[0]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal()) * ThWPipeCommon.WELL_TO_WALL_OFFSET;
-                }
-            }
-            return pt;
-            
-        }
-        private Vector3d Direction(int a, int b,int c ,int d,Polyline boundary,Polyline outline,Polyline urinal,double sum)
+        private Vector3d Direction_1(int a, int b,int c ,int d,Polyline boundary,Polyline outline,Polyline urinal,double sum)
         {           
             var vertices1 = boundary.Vertices();
             var vertices = outline.Vertices();
@@ -253,21 +162,54 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
         }
-        private bool Wellisinboundary(Polyline boundary, Polyline outline)
-        {
-            var center_o = outline.GetCenter();
-            var center_b = boundary.GetCenter();
-            Line line = new Line(center_o, center_b);
-            var pts = new Point3dCollection();
-            boundary.IntersectWith(line, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-            if (center_o.GetVectorTo(pts[0]).IsCodirectionalTo(center_o.GetVectorTo(pts[1])))
+        private Vector3d Direction(Polyline boundary, Polyline outline)
+        {   
+            var vertices = outline.Vertices();
+            int a = index_a(boundary, outline);
+            int b = Getminnum(a, outline);
+            int c= Getmaxnum(a, outline);
+            if(vertices[a].DistanceTo(vertices[b])> vertices[a].DistanceTo(vertices[c]))
             {
-                return false;
+                return vertices[a].GetVectorTo(vertices[b]).GetNormal();
             }
             else
             {
-                return true;
+                return vertices[a].GetVectorTo(vertices[c]).GetNormal();
             }
+        }
+        private int Getminnum(int a, Polyline outline)
+        {
+            var vertices = outline.Vertices();
+            int b = 0;
+            if(a>0)
+            {
+                b = a - 1;
+            }
+            else
+            {//有的Polyline起始点与终点重合
+                if (vertices[0].Equals(vertices[outline.Vertices().Count - 1]))
+                {
+                    b = outline.Vertices().Count - 2;
+                }
+                else
+                {
+                    b = outline.Vertices().Count - 1;
+                }
+            }
+            return b;
+        }
+        private int Getmaxnum(int a, Polyline outline)
+        {
+            int c = 0;
+            if (a < outline.Vertices().Count - 1)
+            {
+                c = a +1;
+            }
+            else
+            {
+                c = 0;
+            }
+            return c;
         }
         private List<ThWToiletPipe> FindOutsideVertex(Polyline outline, Polyline well)
         {

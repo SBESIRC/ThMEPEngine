@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
@@ -54,7 +55,13 @@ namespace ThMEPWSS.Pipe.Service
             var tolitBoundary = ToiletSpace.Boundary as Polyline;
             var crossObjs = ClosestoolSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
             var crossClosestools = ClosestoolList.Where(o => crossObjs.Contains(o.Outline));
-            Closestools = crossClosestools.Where(o => tolitBoundary.Contains(o.Outline as Curve)).ToList();            
+            Closestools = crossClosestools.Where(o =>
+            {
+                var block = o.Outline as Polyline;
+                var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-20.0).ToDbCollection();
+                return tolitBoundary.Contains(bufferObjs[0] as Curve);
+            }).ToList();
+            
         }        
     }
 }

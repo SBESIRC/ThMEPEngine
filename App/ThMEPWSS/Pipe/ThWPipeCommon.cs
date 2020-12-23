@@ -99,6 +99,10 @@
         /// </summary>
         public const double MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = 4500;
         /// <summary>
+        /// 阳台雨水管到阳台其他地漏最大距离
+        /// </summary>
+        public const double MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE = 4900;
+        /// <summary>
         /// 厨房到阳台最大距离
         /// </summary>
         public const double MAX_KITCHEN_TO_BALCONY_DISTANCE = 9000;

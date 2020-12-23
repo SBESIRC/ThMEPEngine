@@ -27,36 +27,47 @@ namespace ThMEPWSS.Pipe.Engine
         {
             foreach (var waterBucket in gravityWaterBucket)
             {
-                GravityWaterBucketCenter.Add(waterBucket.Position);
+                if (!(boundary.GetCenter().Y - waterBucket.Position.Y > 14000))//排除技术要求
+                {
+                    GravityWaterBucketCenter.Add(waterBucket.Position);
+                }
             }
             foreach (var waterBucket in sideWaterBucket)
             {
                 Vector3d dis = new Vector3d(ThWPipeCommon.SIDEWATERBUCKET_X_INDENT, -ThWPipeCommon.SIDEWATERBUCKET_Y_INDENT, 0);
-                Vector3d dis1 = new Vector3d(-ThWPipeCommon.SIDEWATERBUCKET_X_INDENT, ThWPipeCommon.SIDEWATERBUCKET_Y_INDENT, 0);
-                if (OnLeftPart(waterBucket, boundary))
+                Vector3d dis1 = new Vector3d(-ThWPipeCommon.SIDEWATERBUCKET_X_INDENT, -ThWPipeCommon.SIDEWATERBUCKET_Y_INDENT, 0);
+                if (!(boundary.GetCenter().Y - waterBucket.Position.Y > 14000))//排除技术要求
                 {
-                    SideWaterBucketCenter.Add(waterBucket.Position - dis);
+                    if (Onleft(waterBucket))
+                    {
+                        SideWaterBucketCenter.Add(waterBucket.Position - dis1);
+                    }
+                    else { SideWaterBucketCenter.Add(waterBucket.Position - dis); }
                 }
-                else { SideWaterBucketCenter.Add(waterBucket.Position - dis1); }
             }
             
             foreach (Point3d waterBucket in SideWaterBucketCenter)
             {
+                int s = 0;
                 foreach (var rainPipe in roofRainPipe)
                 {
-                    if (rainPipe.GetCenter().Equals(waterBucket))
+                    if (rainPipe.GetCenter().X-(waterBucket).X<1)
                     {
-                        continue;
-                    }
+                        s = 1;
+                        break;
+                    }                 
+                }
+                if (s == 0)
+                {
                     Center_point.Add(waterBucket);
-                }             
+                }
             }                          
             SideWaterBucketTag = Index(SideWaterBucketCenter,boundary);
             GravityWaterBucketTag = Index(GravityWaterBucketCenter,boundary);
         }
-        private bool OnLeftPart(BlockReference waterBucket, Polyline boundary)
+        private bool Onleft(BlockReference waterBucket)
         {
-            var center = boundary.GetCenter();
+            Point3d center = waterBucket.Bounds.Value.MaxPoint+(waterBucket.Bounds.Value.MaxPoint.GetVectorTo(waterBucket.Bounds.Value.MinPoint))/2;        
             if (waterBucket.Position.X< center.X)
             {
                 return true;

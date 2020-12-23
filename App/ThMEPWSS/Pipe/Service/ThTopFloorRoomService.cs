@@ -69,15 +69,20 @@ namespace ThMEPWSS.Pipe.Service
         {
             var FirSpace = new List<ThIfcSpace>();
             string pattern = @"\d+$";
+            string pattern1= @"^\d";
             var spaces = new List<Tuple<ThIfcSpace, double>>();
             Spaces.ForEach(m =>
             {
                 m.Tags.ForEach(n =>
-                {
+                {                  
                     var match = Regex.Match(n, pattern);
-                    if(!string.IsNullOrEmpty(match.Value))
+                    var match_start= Regex.Match(n, pattern1);                 
+                    if (!string.IsNullOrEmpty(match.Value)&& (!string.IsNullOrEmpty(match_start.Value)||n.StartsWith("B")))
                     {
-                        spaces.Add(Tuple.Create(m, double.Parse(match.Value)));                        
+                        if (!n.Contains(":"))
+                        {
+                            spaces.Add(Tuple.Create(m, double.Parse(match.Value)));
+                        }
                     }
                 });
             });

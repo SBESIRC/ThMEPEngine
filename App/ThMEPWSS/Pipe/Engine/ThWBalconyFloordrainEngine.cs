@@ -33,8 +33,9 @@ namespace ThMEPWSS.Pipe.Engine
             new_circle = new Circle();
             Bbasinline_Center = new Point3dCollection();
         }
-        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, Polyline rainpipe, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe, BlockReference bbasinline)
+        public void Run(List<BlockReference> bfloordrain, Polyline bboundary, List<Polyline> rainpipes, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe, BlockReference bbasinline)
         {
+            Polyline rainpipe = GetRainPipe(bboundary, washingmachine, rainpipes);       
             List<BlockReference> floordrain = Isinside(bfloordrain, bboundary);
             int num = Washingfloordrain(floordrain, washingmachine);//确认地漏序号
             for (int i = 0; i < floordrain.Count; i++)
@@ -145,6 +146,28 @@ namespace ThMEPWSS.Pipe.Engine
                     }
                 }
             }       
+        }
+        private static Polyline GetRainPipe(Polyline bboundary, BlockReference washingmachine, List<Polyline> rainpipes)
+        {   
+            if (rainpipes.Count > 0)
+            {
+                foreach (var pipe in rainpipes)
+                {
+                    if (GeomUtils.PtInLoop(bboundary, pipe.GetCenter())&&
+                        pipe.GetCenter().Y< washingmachine.Position.Y)
+                    {
+                        return pipe;
+                    }
+                }
+                foreach (var pipe in rainpipes)
+                {
+                    if (pipe.GetCenter().DistanceTo(washingmachine.Position) >ThWPipeCommon.MAX_RAINPIPE_TO_BALCONYFLOORDRAIN)//洗衣机地漏与洗衣机接近，此处借用参数
+                    {
+                        return pipe;
+                    }
+                }
+            }
+            return null;
         }
         private static List<BlockReference> Isinside(List<BlockReference> bfloordrain, Polyline bboundary)
         {

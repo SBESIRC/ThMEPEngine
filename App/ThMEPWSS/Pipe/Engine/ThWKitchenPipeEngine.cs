@@ -26,6 +26,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             return new ThWKitchenPipe()
             {
+                Center = center,
                 Identifier = Parameters.Identifier,
                 Matrix = Matrix3d.Displacement(center.GetAsVector()),
                 Representation = new DBObjectCollection()
@@ -84,22 +85,18 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private Point3d FindInsideVertex(Polyline boundary, Polyline outline)
         {
-            var vertices = outline.Vertices();
-
-            Point3d center = outline.GetCenter();
+            var vertices = outline.Vertices();        
             Point3d Ray_bou = Point3d.Origin;
             var pts = new Point3dCollection();
             List<int> num = new List<int>();
             List<double> dst = new List<double>();
-            for (int i = 0; i < vertices.Count - 1; i++)
+            for (int i = 0; i < vertices.Count - 1; i++)//判断管井中点距外廓距离
             {
-                Point3d midpoint = GetMidPoint(vertices[i], vertices[i + 1]);
+                Point3d midpoint = vertices[i]+0.5*vertices[i].GetVectorTo(vertices[i + 1]);
 
                 Ray_bou = boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;
 
                 dst.Add(midpoint.DistanceTo(Ray_bou));
-
-
             }
 
             for (int i = 0; i < 2; i++)
@@ -117,11 +114,7 @@ namespace ThMEPWSS.Pipe.Engine
             Line line3 = new Line(vertices[num[1]], vertices[num[1] + 1]);
             line2.IntersectWith(line3, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
             return pts[0];
-        }
-        private Point3d GetMidPoint(Point3d pt1, Point3d pt2)
-        {
-            return pt1 + pt1.GetVectorTo(pt2) * 0.5;
-        }
+        }    
         private Vector3d GetDirection(Polyline boundary, Polyline outline, Point3d pt)
         {
             var vertices = outline.Vertices();
@@ -183,13 +176,13 @@ namespace ThMEPWSS.Pipe.Engine
                     dst = boundarybaseline.GetDistToPoint(basinline.Position);
                     a = i;
                 }
-            }
-            //boundarybaseline = new Line(vertices[a], vertices[a + 1]);
-            var vertices_1 = outline.Vertices();
-            Line outlinebaseline = new Line();
+            }       
+            var vertices_1 = outline.Vertices();          
             if (vertices_1[0].DistanceTo(vertices_1[1]) < vertices_1[2].DistanceTo(vertices_1[1]))
             {
-                if (vertices[a].GetVectorTo(vertices[a + 1]).IsParallelTo(vertices_1[2].GetVectorTo(vertices_1[1])))
+                if (vertices[a].GetVectorTo(vertices[a + 1]).IsParallelTo(vertices_1[2].GetVectorTo(vertices_1[1]))
+                    &&((vertices[a].X- outline.GetCenter().X)*(vertices[a+1].X - outline.GetCenter().X)<0||
+                    (vertices[a].Y - outline.GetCenter().Y) * (vertices[a + 1].Y - outline.GetCenter().Y) < 0))
                 {
                     return true;
                 }
@@ -294,13 +287,17 @@ namespace ThMEPWSS.Pipe.Engine
                     a = i;
                 }
             }
-            if (a > 0)
+            if (a > 0&&a< vertices.Count-1)
             {
                 return vertices[a]+ ThWPipeCommon.WELL_TO_WALL_OFFSET * ( vertices[a].GetVectorTo(vertices[a+1]).GetNormal()+ vertices[a].GetVectorTo(vertices[a-1]).GetNormal());
             }
-            else
+            else if(a==0)
             {
                 return vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal());
+            }
+            else
+            {
+                return vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[a].GetVectorTo(vertices[a-1]).GetNormal() + vertices[a-1].GetVectorTo(vertices[a - 2]).GetNormal());
             }
         }      
     }

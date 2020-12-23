@@ -107,8 +107,9 @@ namespace ThMEPWSS.Pipe.Engine
         {
             Polyline rainpipe_Device = null;
             Polyline rainpipe_Device_other = null;
-            if (rainpipe.Count>1)
-            {
+            Polyline rainpipe_ = null;
+            if (rainpipe.Count>0)
+            {//给雨水管分类
                 foreach (var rainpipe_boundary in rainpipe)
                 {
                     if (GeomUtils.PtInLoop(device, rainpipe_boundary.GetCenter()))
@@ -125,12 +126,15 @@ namespace ThMEPWSS.Pipe.Engine
                         break;
                     }
                 }
-            }
-            else if(rainpipe.Count==1)
-            {
-                rainpipe_Device = rainpipe[0];
-                rainpipe_Device_other= rainpipe[0];
-            }
+                foreach (var rainpipe_boundary in rainpipe)
+                {
+                    if (GeomUtils.PtInLoop(bboundary, rainpipe_boundary.GetCenter()))
+                    {
+                        rainpipe_ = rainpipe_boundary;
+                        break;
+                    }
+                }
+            }     
             else
             {
                 //throw new ArgumentNullException();
@@ -139,11 +143,11 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 if(CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe))
                 {             
-                     ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device, downspout, washingmachine, device, device_other, roofrainpipe, bbasinline);
+                     ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, roofrainpipe, bbasinline);
                 }
                 else
                 {
-                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device, downspout, washingmachine, device, device_other, condensepipe, bbasinline);
+                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe, bbasinline);
                 }
                 
             }
@@ -151,14 +155,13 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 if (CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe))
                 {
-                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device_other, downspout, washingmachine, device_other, device, roofrainpipe, bbasinline);
+                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device_other, device, roofrainpipe, bbasinline);
                 }
                 else
                 {
-                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe_Device_other, downspout, washingmachine, device_other, device, condensepipe, bbasinline);
+                    ThWBalconyFloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device_other, device, condensepipe, bbasinline);
                 }
-            }
-            //ThWToiletFloordrainEngine.Run(tfloordrain, tboundary);
+            }         
             ThWDeviceFloordrainEngine.Run(rainpipe_Device, device, condensepipe, devicefloordrain, roofrainpipe);
             Rainpipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Rainpipe_tofloordrain);
 

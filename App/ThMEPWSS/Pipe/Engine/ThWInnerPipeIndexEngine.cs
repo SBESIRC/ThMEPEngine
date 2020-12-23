@@ -95,9 +95,10 @@ namespace ThMEPWSS.Pipe.Engine
       
         private Point3dCollection Pipelist(List<Polyline> fpipe)//取所有立管的中心
         { var pipelist = new Point3dCollection();
-            for(int i=0;i< fpipe.Count;i++)
-            {
-                pipelist.Add(fpipe[i].GetCenter());
+            for (int i=0;i< fpipe.Count;i++)
+            {         
+                 pipelist.Add(fpipe[i].GetCenter()); 
+           
             }
             return pipelist;
         }
@@ -130,10 +131,14 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     foreach (Point3d pipe in pipes)
                     {
-                        if (pipe.X < divideLines[i].StartPoint.X)
+                        if (pipe.X < divideLines[0].StartPoint.X)
                         {
                             center.Add(pipe);
 
+                        }
+                        else if(pipe.X > divideLines[0].StartPoint.X&&divideLines.Count==1)//只有一根分割线的特殊情况
+                        {
+                            lastCenter.Add(pipe);
                         }
                     }
                     pipegroup.Add(center);
@@ -180,14 +185,14 @@ namespace ThMEPWSS.Pipe.Engine
                 xvalue += pipe.X;
                 yvalue += pipe.Y;
             }
-            return new Point3d(xvalue, yvalue, 0);
+            return new Point3d(xvalue/ pipes.Count, yvalue / pipes.Count, 0);
         }
         private static Point3dCollection GetPositvevertices(Point3dCollection pipe, Point3d pboundary)//选起点
         {
                 var Pipe = new Point3dCollection();
-                for (int i = 0; i < pipe.Count; i++)//取上半部距Y轴最远
+                for (int i = 0; i < pipe.Count; i++)//取上半部距Y轴
                 {
-                    if (pipe[i].Y >=pboundary.Y)
+                    if (pipe[i].Y >=pboundary.Y-1)
                     {
                     Pipe.Add(pipe[i]);
                     }
@@ -197,9 +202,9 @@ namespace ThMEPWSS.Pipe.Engine
         private static Point3dCollection GetNegativevertices(Point3dCollection pipe, Point3d pboundary)//选起点
         {
             var Pipe = new Point3dCollection();
-            for (int i = 0; i < pipe.Count; i++)//取上半部距Y轴最远
+            for (int i = 0; i < pipe.Count; i++)//取下半部距Y轴
             {
-                if (pipe[i].Y < pboundary.Y)
+                if (pipe[i].Y < pboundary.Y-1)
                 {
                     Pipe.Add(pipe[i]);
                 }
@@ -208,11 +213,12 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private static Point3dCollection Index(Point3dCollection pipe)//由小到大
         {
-            var temp = Point3d.Origin;
-            for(int i=0;i< pipe.Count;i++)
+            
+            for(int i=0;i< pipe.Count-1;i++)
             { 
-                for(int j=i;j< pipe.Count;j++)
+                for(int j=i+1;j< pipe.Count;j++)
                 {
+                    var temp = Point3d.Origin;
                     if (pipe[i].X >pipe[j].X)
                     {
                         temp = pipe[i];

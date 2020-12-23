@@ -62,6 +62,22 @@ namespace ThMEPWSS.Pipe.Engine
                     }
                 }
             }
+            foreach (var toilet in toiletRooms)
+            {
+                int s = 0;
+                foreach (var kitchen in kitchenRooms)
+                {
+                    if (IsPair(kitchen, toilet))
+                    {
+                        s = 1;
+                        break;
+                    }
+                }
+                if(s==0)
+                {                 
+                    Rooms.Add(new ThWCompositeRoom(new ThWKitchenRoom(), toilet));
+                }
+            }
         }
 
         private bool IsPair(ThWKitchenRoom kitchen, ThWToiletRoom toilet)
