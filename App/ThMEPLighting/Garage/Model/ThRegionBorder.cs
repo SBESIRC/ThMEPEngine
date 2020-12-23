@@ -17,5 +17,14 @@ namespace ThMEPLighting.Garage.Model
         /// 非布灯线槽中心线
         /// </summary>
         public List<Line> FdxCenterLines { get; set; }
+
+        public List<ThLightNode> GetLightNodes()
+        {
+            var results = new List<ThLightNode>();
+            return results;
+        }
+        public void EraseNumbers()
+        {
+        }
     }
 }

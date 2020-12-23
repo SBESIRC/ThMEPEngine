@@ -77,8 +77,7 @@ namespace ThMEPLighting
                 SelectionFilter sf = new SelectionFilter(tvs);
                 var result = Active.Editor.GetSelection(pso, sf);
                 if (result.Status == PromptStatus.OK)
-                {
-                    var regionBorders = new List<ThRegionBorder>();
+                {                    
                     result.Value.GetObjectIds().ForEach(o =>
                     {
                         var border = acdb.Element<Polyline>(o);
@@ -95,7 +94,7 @@ namespace ThMEPLighting
                             DxCenterLines = dxLines,
                             FdxCenterLines = fdxLines
                         };
-                        regionBorders.Add(regionBorder);
+                        results.Add(regionBorder);
                     });
                 }
             }

@@ -70,8 +70,8 @@ namespace ThMEPLighting.Garage.Engine
             //创建1号、2号线
             nomalLines.ForEach(o =>
             {
-                bool isDx = splitDxLines.IsContains(o);                
-                var offsetLines = ThOffsetLineService.Offset(o, offsetDistance);
+                bool isDx = splitDxLines.IsContains(o);
+                var offsetLines = ThOffsetLineService.Offset(o, isDx ? offsetDistance : 0.0);
                 var offsetData = new ThWireOffsetData
                 {
                     Center = o,

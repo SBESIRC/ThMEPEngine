@@ -58,6 +58,7 @@
     <Compile Include="Garage\Service\ThJoinLinesService.cs" />
     <Compile Include="Garage\Service\ThLightGraphService.cs" />
     <Compile Include="Garage\Service\ThPrintService.cs" />
+    <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
     <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
     <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
     <Compile Include="Garage\Service\ThLinkElbowService.cs" />

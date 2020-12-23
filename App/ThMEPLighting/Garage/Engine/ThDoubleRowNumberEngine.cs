@@ -55,6 +55,7 @@ namespace ThMEPLighting.Garage.Engine
                     posDistributeEngine.Distribute();
                     firstLightEdges = posDistributeEngine.FirstLightEdges;
                 }
+                firstLightEdges = firstLightEdges.Where(o => o.Edge.Length >= 1.0).ToList();
                 //对firstLightEdges中的IsTraverse设为False
                 firstLightEdges.ForEach(o => o.IsTraversed = false);
                 //获取1号线的起点
