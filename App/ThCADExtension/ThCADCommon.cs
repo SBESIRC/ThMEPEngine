@@ -104,6 +104,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "车道灯图块.dwg");
         }
 
+        // 车位布灯块
+        public static string ParkStallLightDwgPath()
+        {
+            return Path.Combine(SupportPath(), "车位灯图块.dwg");
+        }
+
         // ToolPalette 路径
         public static string ToolPalettePath()
         {

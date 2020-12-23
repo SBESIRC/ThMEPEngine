@@ -74,14 +74,18 @@
     <Compile Include="Garage\ThGarageLightUtils.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
+    <Compile Include="ParkingStall\Business\Block\BlockInsertDBExtension.cs" />
+    <Compile Include="ParkingStall\Business\Block\BlockInsertor.cs" />
     <Compile Include="ParkingStall\Business\UserInteraction\EntityPicker.cs" />
     <Compile Include="ParkingStall\Business\UserInteraction\WallPolygonInfoCalculator.cs" />
     <Compile Include="ParkingStall\CAD\InfoReader.cs" />
     <Compile Include="ParkingStall\Core\CommandManager.cs" />
     <Compile Include="ParkingStall\Geometry\GeomUtils.cs" />
+    <Compile Include="ParkingStall\Model\LightPlaceInfo.cs" />
     <Compile Include="ParkingStall\Model\LineSegment.cs" />
     <Compile Include="ParkingStall\Model\NearParks.cs" />
     <Compile Include="ParkingStall\Model\NearParksPolylineNode.cs" />
+    <Compile Include="ParkingStall\Model\ParkGroupInfo.cs" />
     <Compile Include="ParkingStall\Model\ParkingGroup.cs" />
     <Compile Include="ParkingStall\Model\PolygonInfo.cs" />
     <Compile Include="ParkingStall\ParkingStallCommon.cs" />
@@ -92,6 +96,10 @@
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingNearGroup.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingPolyTrans.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupGenerator.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\ParkingGroupPlaceLightGenerator.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GenerateParkGroupProfile.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GroupLightViewer.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\ParkLightAngleCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPGarageLightingCmds.cs" />
     <Compile Include="ThMEPLightingApp.cs" />
@@ -99,7 +107,6 @@
   <ItemGroup>
     <Folder Include="ParkingStall\Worker\LightAdjustor\" />
     <Folder Include="ParkingStall\Worker\PipeConnector\" />
-    <Folder Include="ParkingStall\Worker\PlaceLight\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>
   <ItemGroup>

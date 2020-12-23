@@ -35,5 +35,15 @@ namespace ThMEPLighting
                 packageManager.GenerateParkGroup();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THGroupLight", CommandFlags.Modal)]
+        public void THGroupLight()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.GenerateGroupLight();
+            }
+        }
     }
 }
