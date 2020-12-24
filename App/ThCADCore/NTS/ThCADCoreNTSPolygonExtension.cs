@@ -94,7 +94,10 @@ namespace ThCADCore.NTS
         /// <returns></returns>
         public static DBObjectCollection MakeValid(this AcPolygon polygon)
         {
-            // http://lin-ear-th-inking.blogspot.com/2020/12/fixing-buffer-for-fixing-polygons.html
+            // zero-width buffer trick:
+            //  http://lin-ear-th-inking.blogspot.com/2020/12/fixing-buffer-for-fixing-polygons.html
+            // self-union trick:
+            //  http://lin-ear-th-inking.blogspot.com/2020/06/jts-overlayng-tolerant-topology.html
             return polygon.ToNTSPolygon().Buffer(0).ToDbCollection();
         }
 

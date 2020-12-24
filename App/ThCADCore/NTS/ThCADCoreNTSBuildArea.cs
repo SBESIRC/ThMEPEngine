@@ -54,12 +54,9 @@ namespace ThCADCore.NTS
 
     public class ThCADCoreNTSBuildArea
     {
-        //
         public Geometry Build(Geometry geometry)
         {
-            var polygonizer = new Polygonizer();
-            polygonizer.Add(geometry);
-            var polys = polygonizer.GetPolygons();
+            var polys = geometry.Polygonize();
 
             if (polys.Count == 0)
             {
