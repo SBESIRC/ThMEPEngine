@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -34,9 +35,10 @@ namespace ThMEPLighting.Garage.Service
                 var tvs = new TypedValue[]
                 {
                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(BlockReference)).DxfName),
-                    new TypedValue((int)DxfCode.RegAppFlags,RXClass.GetClass(typeof(BlockReference)).DxfName),
+                    new TypedValue((int)DxfCode.ExtendedDataRegAppName,ThGarageLightCommon.ThGarageLightAppName),
                 };
-                var psr = Active.Editor.SelectAll();
+                var sf = new SelectionFilter(tvs);
+                var psr = Active.Editor.SelectAll(sf);
                 if (psr.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
                 {
                     var blocks = new DBObjectCollection();

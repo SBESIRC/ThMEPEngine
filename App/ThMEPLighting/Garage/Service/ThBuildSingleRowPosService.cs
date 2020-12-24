@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using System.Linq;
 using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -91,24 +92,31 @@ namespace ThMEPLighting.Garage.Service
         private void BuildByCalculation(ThLineSplitParameter SplitParameter)
         {
             var installPoints = ThDistributeLightService.Distribute(SplitParameter);
-            foreach(var pt in installPoints)
+            DistributePoints(SplitParameter.LineSp, installPoints);
+        }
+        private void BuildByExtractFromCad(ThLineSplitParameter SplitParameter)
+        {
+            var line = new Line(SplitParameter.LineSp, SplitParameter.LineEp);
+            var installPoints = ArrangeParameter.LightBlockQueryService.Query(line);
+            installPoints = installPoints.OrderBy(o => SplitParameter.LineSp.DistanceTo(o)).ToList();
+            DistributePoints(SplitParameter.LineSp, installPoints);
+        }
+        private void DistributePoints(Point3d startPt, List<Point3d> installPoints)
+        {
+            foreach (var pt in installPoints)
             {
-                double disance = SplitParameter.LineSp.DistanceTo(pt);
+                double disance = startPt.DistanceTo(pt);
                 double length = 0.0;
-                foreach(var lightEdge in Edges)
+                foreach (var lightEdge in Edges)
                 {
                     length += lightEdge.Edge.Length;
-                    if(disance<= length)
+                    if (disance <= length)
                     {
                         lightEdge.LightNodes.Add(new ThLightNode { Position = pt });
                         break;
                     }
                 }
             }
-        }
-        private void BuildByExtractFromCad(ThLineSplitParameter SplitParameter)
-        {
-            throw new NotSupportedException();
-        }
+        }        
     }
 }
