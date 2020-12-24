@@ -40,15 +40,15 @@ namespace ThCADExtension
             return vertices;
         }
 
-        public static double[] Coordinates(this Polyline pLine)
+        public static double[] Coordinates2D(this Polyline pLine)
         {
             var vertices = (Point3dList)pLine.Vertices();
-            return vertices.Select(o => o.ToArray()).SelectMany(o => o).ToArray();
+            return vertices.Select(o => o.ToPoint2d().ToArray()).SelectMany(o => o).ToArray();
         }
 
-        public static double[] Coordinates(this Polyline[] pLines)
+        public static double[] Coordinates2D(this Polyline[] pLines)
         {
-            return pLines.Select(o => o.Coordinates()).SelectMany(o => o).ToArray();
+            return pLines.Select(o => o.Coordinates2D()).SelectMany(o => o).ToArray();
         }
 
         public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
@@ -59,6 +59,22 @@ namespace ThCADExtension
                 pt2,
                 pt3,
                 pt4
+            };
+            var pline = new Polyline()
+            {
+                Closed = true,
+            };
+            pline.CreatePolyline(points);
+            return pline;
+        }
+
+        public static Polyline CreateTriangle(Point2d pt1, Point2d pt2, Point2d pt3)
+        {
+            var points = new Point2dCollection()
+            {
+                pt1,
+                pt2,
+                pt3,
             };
             var pline = new Polyline()
             {

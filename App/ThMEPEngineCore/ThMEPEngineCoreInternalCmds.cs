@@ -1,9 +1,12 @@
 ﻿using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
+using System.Linq;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore
 {
@@ -88,6 +91,42 @@ namespace ThMEPEngineCore
                 }
             }
         }
+
+#if ACAD2016
+        [CommandMethod("TIANHUACAD", "THTRIANGULATE", CommandFlags.Modal)]
+        public void ThTriangulate()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var shell = acadDatabase.Element<Polyline>(result.ObjectId);
+
+                var holes = new List<Polyline>();
+                var options = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "请选择洞",
+                };
+                var result2 = Active.Editor.GetSelection(options);
+                if (result2.Status == PromptStatus.OK)
+                {
+                    foreach (var obj in result2.Value.GetObjectIds())
+                    {
+                        holes.Add(acadDatabase.Element<Polyline>(obj));
+                    }
+                }
+                var triangles = ThMEPTriangulationService.EarCut(shell, holes.ToArray());
+                foreach (Polyline triangle in triangles)
+                {
+                    triangle.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(triangle);
+                }
+            }
+        }
+#endif
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()

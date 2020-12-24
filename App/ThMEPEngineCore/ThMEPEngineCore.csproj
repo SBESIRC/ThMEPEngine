@@ -31,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
+    <Compile Include="Algorithm\ThMEPTriangulationService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
     <Compile Include="Algorithm\ThMEPFrameService.cs" />
@@ -314,6 +315,9 @@
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary">
+          <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>

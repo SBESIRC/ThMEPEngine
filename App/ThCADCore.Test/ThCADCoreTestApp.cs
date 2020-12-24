@@ -3,15 +3,16 @@ using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
-using NetTopologySuite.Operation.Union;
-using NetTopologySuite.Operation.Overlay.Snap;
-using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Union;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.Overlay.Snap;
 
 namespace ThCADCore.Test
 {
@@ -113,41 +114,18 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThEarCut", CommandFlags.Modal)]
-        public void ThEarCut()
+        private List<Point2d> Vertices(Polyline poly)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
+            var points = new List<Point2d>();
+            poly.Vertices().Cast<Point3d>().ForEach(o => points.Add(o.ToPoint2D()));
+            return points;
+        }
 
-                var options = new PromptSelectionOptions()
-                {
-                    MessageForAdding = "请选择洞",
-                };
-                var result2 = Active.Editor.GetSelection(options);
-
-                var objs = new DBObjectCollection();
-                if (result2.Status == PromptStatus.OK)
-                {
-                    foreach (var obj in result2.Value.GetObjectIds())
-                    {
-                        objs.Add(acadDatabase.Element<Entity>(obj));
-                    }
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                var builder = new ThCADCoreNTSEarCutTriangulationBuilder();
-                var triangles = builder.EarCut(pline, objs);
-                foreach(Polyline triangle in triangles)
-                {
-                    triangle.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(triangle);
-                }
-            }
+        private List<List<Point2d>> Vertices(DBObjectCollection holes)
+        {
+            var points = new List<List<Point2d>>();
+            holes.Cast<Polyline>().ForEach(o => points.Add(Vertices(o)));
+            return points;
         }
 
         [CommandMethod("TIANHUACAD", "ThOutline", CommandFlags.Modal)]
