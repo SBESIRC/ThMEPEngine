@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using ThCADExtension;
@@ -12,7 +11,6 @@ using ThMEPEngineCore.Model.Hvac;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.Duct;
 using TianHua.Publics.BaseCode;
-using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using ThMEPEngineCore.Model;
 
