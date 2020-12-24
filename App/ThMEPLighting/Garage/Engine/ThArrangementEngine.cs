@@ -96,7 +96,7 @@ namespace ThMEPLighting.Garage.Engine
                 }
             }
         }
-        protected void Print(List<ThLightEdge> lightEdges)
+        protected ObjectIdList Print(List<ThLightEdge> lightEdges)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
@@ -126,6 +126,7 @@ namespace ThMEPLighting.Garage.Engine
                             code.Layer = RacewayParameter.NumberTextParameter.Layer;
                             code.SetDatabaseDefaults(acadDatabase.Database);
                             var codeId = acadDatabase.ModelSpace.Add(code);
+                            objIds.Add(codeId);
                             TypedValueList codeValueList = new TypedValueList
                             {
                                 { (int)DxfCode.ExtendedDataAsciiString, n.Number},
@@ -140,14 +141,11 @@ namespace ThMEPLighting.Garage.Engine
                             {
                                 { (int)DxfCode.ExtendedDataAsciiString, ArrangeParameter.IsSingleRow?"1":"0"},
                             };
+                        objIds.Add(blkId);
                         XDataTools.AddXData(blkId, ThGarageLightCommon.ThGarageLightAppName, blkValueList);
                     });
                 });
-                if (objIds.Count > 0)
-                {
-                    var groupName = Guid.NewGuid().ToString();
-                    GroupTools.CreateGroup(acadDatabase.Database, groupName, objIds);
-                }
+                return objIds;
             }
         }
     }

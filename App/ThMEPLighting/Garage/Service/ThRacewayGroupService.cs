@@ -4,20 +4,24 @@ using DotNetARX;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Model;
+using System.Collections.Generic;
 
 namespace ThMEPLighting.Garage.Service
 {
     public class ThRacewayGroupService
     {        
+        private ObjectIdList ObjIds { get; set; }
         private ThRacewayGroupParameter GroupParameter { get; set; }
         private ThRacewayGroupService(ThRacewayGroupParameter groupParameter)
         {
+            ObjIds = new ObjectIdList();
             GroupParameter = groupParameter;
         }
-        public static void Create(ThRacewayGroupParameter groupParameter)
+        public static ObjectIdList Create(ThRacewayGroupParameter groupParameter)
         {
             var instance = new ThRacewayGroupService(groupParameter);
             instance.Create();
+            return instance.ObjIds;
         }
         private void Create()
         {
@@ -28,10 +32,18 @@ namespace ThMEPLighting.Garage.Service
                 GroupParameter.Sides.ForEach(o => o.Layer = GroupParameter.RacewayParameter.SideLineParameter.Layer);
                 GroupParameter.Ports.ForEach(o => o.Layer = GroupParameter.RacewayParameter.PortLineParameter.Layer);
                 var lines = GroupParameter.GetAll();
-                var objids = new ObjectIdList();
-                lines.ForEach(o => objids.Add(acadDatabase.ModelSpace.Add(o)));
+                lines.ForEach(o =>
+                {
+                    var lineId = acadDatabase.ModelSpace.Add(o);
+                    ObjIds.Add(lineId);
+                    TypedValueList lineValueList = new TypedValueList
+                    {
+                        { (int)DxfCode.ExtendedDataAsciiString, "CableTray"},
+                    };
+                    XDataTools.AddXData(lineId, ThGarageLightCommon.ThGarageLightAppName, lineValueList);
+                });
                 var groupName = Guid.NewGuid().ToString();
-                GroupTools.CreateGroup(acadDatabase.Database, groupName, objids);
+                GroupTools.CreateGroup(acadDatabase.Database, groupName, ObjIds);
             }
         }
         private void CreateLayer(Database db)

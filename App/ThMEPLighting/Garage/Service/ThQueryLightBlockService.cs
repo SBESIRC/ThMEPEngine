@@ -50,36 +50,27 @@ namespace ThMEPLighting.Garage.Service
                 }
             }
         }
-        /// <summary>
-        /// 获取防火分区内的某根线上的
-        /// </summary>
-        /// <param name="region"></param>
-        /// <param name="edge"></param>
-        /// <param name="width"></param>
-        /// <returns></returns>
-        public List<Point3d> Query(Polyline region,Line edge,double width=1.0)
-        {
-            var results = new List<Point3d>();
-            if(SecondarySpatialIndex.ContainsKey(region))
-            {
-                var outline = ThDrawTool.ToOutline(edge.StartPoint, edge.EndPoint, width);
-                var blocks = SecondarySpatialIndex[region]
-                    .SelectCrossingPolygon(outline)
-                    .Cast<BlockReference>().ToList();
-                results = Filter(blocks, edge, width);
-            }
-            return results;
-        }
+
         public List<Point3d> Query(Line edge, double width = 1.0)
         {
             var results = new List<Point3d>();
+            var spatialIndex = PrimarySpatialIndex;
+            foreach (var item in SecondarySpatialIndex)
+            {
+                if(item.Key.Contains(edge))
+                {
+                    spatialIndex = item.Value;                    
+                    break;
+                }
+            }
             var outline = ThDrawTool.ToOutline(edge.StartPoint, edge.EndPoint, width);
-            var blocks = PrimarySpatialIndex
+            var blocks = spatialIndex
                 .SelectCrossingPolygon(outline)
                 .Cast<BlockReference>().ToList();
             results = Filter(blocks, edge, width);
             return results;
         }
+
         private List<Point3d> Filter(List<BlockReference> blocks,Line edge,double tolerance=1.0)
         {
             var results = new List<Point3d>();
@@ -96,6 +87,5 @@ namespace ThMEPLighting.Garage.Service
                 });
             return results;
         }
-
     }
 }

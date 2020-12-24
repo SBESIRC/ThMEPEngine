@@ -52,6 +52,7 @@
     <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
     <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
+    <Compile Include="Garage\Service\ThEliminateService.cs" />
     <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />
     <Compile Include="Garage\Service\ThFindSideLinesService.cs" />
     <Compile Include="Garage\Service\ThFindStartIndexService.cs" />

@@ -57,24 +57,9 @@ namespace ThMEPLighting.Garage.Engine
                 CenterWithPorts = instane.PortLinesDic;
             }
         }
-        private void Print(DBObjectCollection dbObjs)
+        public ObjectIdList CreateGroup(ThRacewayParameter layerParameter)
         {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                var objIds = new ObjectIdList();
-                dbObjs.Cast<Curve>().ForEach(o =>
-                {
-                    var cloneObj = o.Clone() as Curve;
-                    cloneObj.ColorIndex = 5;
-                    cloneObj.SetDatabaseDefaults(acadDb.Database);
-                    objIds.Add(acadDb.ModelSpace.Add(cloneObj));
-                });
-                var groupName = Guid.NewGuid().ToString();
-                GroupTools.CreateGroup(acadDb.Database, groupName, objIds);
-            }
-        }
-        public void CreateGroup(ThRacewayParameter layerParameter)
-        {
+            var results = new ObjectIdList();
             CenterWithSides.ForEach(o =>
             {
                 var ports = new List<Line>();
@@ -89,8 +74,9 @@ namespace ThMEPLighting.Garage.Engine
                     Sides = o.Value,
                     Ports = ports,
                 };
-                ThRacewayGroupService.Create(groupParameter);
+                results.AddRange(ThRacewayGroupService.Create(groupParameter));
             });
+            return results;
         }
         public List<Point3d> GetPorts()
         {

@@ -51,6 +51,16 @@ namespace ThMEPLighting.Garage.Model
         public Line Center { get; set; }
         public List<Line> Sides { get; set; }
         public List<Line> Ports { get; set; }
+        /// <summary>
+        /// 用于收集创建的对象Id
+        /// </summary>
+        public ObjectIdCollection CollectIds { get; set; }
+        public ThRacewayGroupParameter()
+        {
+            Sides = new List<Line>();
+            Ports= new List<Line>();
+            CollectIds = new ObjectIdCollection();
+        }
 
         public List<Line> GetAll()
         {

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
+using DotNetARX;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -18,10 +19,15 @@ namespace ThMEPLighting.Garage.Engine
         }
         public override void Arrange(List<ThRegionBorder> regionBorders)
         {
-            regionBorders.ForEach(o => Arrange(o));
+            regionBorders.ForEach(o =>
+            {
+                var collectIds = Arrange(o);
+                ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds);
+            });
         }
-        private void Arrange(ThRegionBorder regionBorder)
+        private ObjectIdList Arrange(ThRegionBorder regionBorder)
         {
+            var collectIds = new ObjectIdList();
             //对传入的线进行清洗    
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -41,7 +47,7 @@ namespace ThMEPLighting.Garage.Engine
                 FdxLines = ThExtendFdxLinesService.Extend(FdxLines, innerOuterCircles);
 
                 //创建线槽
-                var ports = BuildCableTray(innerOuterCircles); //线槽端口
+                var ports = BuildCableTray(innerOuterCircles,ref collectIds); //线槽端口
 
                 //电灯编号        
                 //需求变化2020.12.23,非灯线不参与编号传递
@@ -61,12 +67,13 @@ namespace ThMEPLighting.Garage.Engine
                     centerPorts, centerLightEdges, ArrangeParameter, wireOffsetDataService))
                 {
                     buildNumberEngine.Build();
-                    Print(buildNumberEngine.FirstLightEdges);
-                    Print(buildNumberEngine.SecondLightEdges);
+                    collectIds.AddRange(Print(buildNumberEngine.FirstLightEdges));
+                    collectIds.AddRange(Print(buildNumberEngine.SecondLightEdges));
                 }
             }
+            return collectIds;
         }
-        private List<Point3d> BuildCableTray(List<ThWireOffsetData> innerOuterCircles)
+        private List<Point3d> BuildCableTray(List<ThWireOffsetData> innerOuterCircles,ref ObjectIdList collectIds)
         {
             //桥架中心线
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -85,7 +92,8 @@ namespace ThMEPLighting.Garage.Engine
                     buildRacywayEngine.Build();
 
                     //成组
-                    buildRacywayEngine.CreateGroup(RacewayParameter);
+                    var cableTrayIds = buildRacywayEngine.CreateGroup(RacewayParameter);
+                    collectIds.AddRange(cableTrayIds);
 
                     //获取参数
                     return buildRacywayEngine.GetPorts();
