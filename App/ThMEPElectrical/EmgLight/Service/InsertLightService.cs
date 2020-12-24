@@ -1,0 +1,156 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using DotNetARX;
+using Linq2Acad;
+using ThMEPElectrical.Model;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
+
+
+namespace ThMEPElectrical.EmgLight
+{
+   public static  class InsertLightService
+    {
+        private static double scaleNum = 100;
+        public static void InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                db.Database.ImportModel();
+                foreach (var ptDic in insertPtInfo)
+                {
+                    foreach (var ptInfo in ptDic.Value)
+                    {
+                        db.Database.InsertModel(ptInfo.Key + ptInfo.Value * scaleNum * 1.5, -ptInfo.Value, new Dictionary<string, string>(){
+                            { "F","W" },
+                        });
+                    }
+                }
+            }
+        }
+
+        public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, Dictionary<string, string> attNameValues)
+        {
+            double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir);
+            //控制旋转角度
+            if (layoutDir.DotProduct(-Vector3d.XAxis) < 0)
+            {
+                rotateAngle = -rotateAngle;
+            }
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                    ThMEPCommon.BroadcastLayerName,
+                    ThMEPCommon.BroadcastBlockName,
+                    pt,
+                    new Scale3d(scaleNum),
+                    rotateAngle,
+                    attNameValues);
+            }
+        }
+
+        public static void ImportModel(this Database database)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThMEPCommon.BroadcastBlockName), false);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPCommon.BroadcastLayerName), false);
+            }
+        }
+
+        private static string BlockDwgPath()
+        {
+            return System.IO.Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.BroadcastDwgName);
+        }
+
+        //for debug
+        public static void ShowGeometry(List<Polyline> Polylines, int ci, LineWeight lw = LineWeight.LineWeight025)
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (Polyline pl in Polylines)
+                {
+                    var showPl = pl.Clone() as Polyline;
+                    showPl.ColorIndex = ci;
+                    showPl.LineWeight = lw;
+                    acdb.ModelSpace.Add(showPl);
+                }
+            }
+        }
+
+        public static void ShowGeometry(Polyline Polyline, int ci, LineWeight lw = LineWeight.LineWeight025)
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+
+                var showPl = Polyline.Clone() as Polyline;
+                showPl.ColorIndex = ci;
+                showPl.LineWeight = lw;
+                acdb.ModelSpace.Add(showPl);
+
+            }
+        }
+        public static void ShowGeometry(Line line, int ci, LineWeight lw = LineWeight.LineWeight025)
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+
+                var showPl = line.Clone() as Line;
+                showPl.ColorIndex = ci;
+                showPl.LineWeight = lw;
+                acdb.ModelSpace.Add(showPl);
+
+            }
+        }
+
+        public static void ShowGeometry(List<Line> lines, int ci, LineWeight lw = LineWeight.LineWeight025)
+        {
+
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (Line line in lines)
+                {
+
+                    var showPl = line.Clone() as Line;
+                    showPl.ColorIndex = ci;
+                    showPl.LineWeight = lw;
+                    acdb.ModelSpace.Add(showPl);
+                }
+            }
+        }
+
+        //public static void ShowGeometry(List<Entity> lines, int ci, LineWeight lw = LineWeight.LineWeight025)
+        //{
+
+        //    using (AcadDatabase acdb = AcadDatabase.Active())
+        //    {
+        //        foreach (Entity line in lines)
+        //        {
+
+        //            var showPl = line.Clone() as Entity;
+        //            showPl.ColorIndex = ci;
+        //            showPl.LineWeight = lw;
+        //            acdb.ModelSpace.Add(showPl);
+        //        }
+        //    }
+        //}
+        //public static void ShowGeometry(Entity line, int ci, LineWeight lw = LineWeight.LineWeight025)
+        //{
+        //    using (AcadDatabase acdb = AcadDatabase.Active())
+        //    {
+
+        //        var showPl = line.Clone() as Entity;
+        //        showPl.ColorIndex = ci;
+        //        showPl.LineWeight = lw;
+        //        acdb.ModelSpace.Add(showPl);
+
+        //    }
+        //}
+    }
+}
