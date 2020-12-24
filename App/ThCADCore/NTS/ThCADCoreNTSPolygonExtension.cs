@@ -88,6 +88,17 @@ namespace ThCADCore.NTS
         }
 
         /// <summary>
+        /// 处理无效的多边形
+        /// </summary>
+        /// <param name="polygon"></param>
+        /// <returns></returns>
+        public static DBObjectCollection MakeValid(this AcPolygon polygon)
+        {
+            // http://lin-ear-th-inking.blogspot.com/2020/12/fixing-buffer-for-fixing-polygons.html
+            return polygon.ToNTSPolygon().Buffer(0).ToDbCollection();
+        }
+
+        /// <summary>
         /// 预处理封闭多段线
         /// </summary>
         /// <param name="polyline"></param>
