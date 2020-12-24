@@ -192,6 +192,7 @@
     <Compile Include="Service\Hvac\ThHvacCommon.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelExtension.cs" />
     <Compile Include="Service\Hvac\ThHvacDuctFittingDbExtension.cs" />
+    <Compile Include="Service\Hvac\ThHvacValveDbExtension.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallDbExtension.cs" />

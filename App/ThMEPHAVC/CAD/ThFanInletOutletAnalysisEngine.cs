@@ -12,14 +12,13 @@ using ThMEPHVAC.Duct;
 
 namespace ThMEPHAVC.CAD
 {
-    //public class FanAnalysisModel
-    //{
-    //    public Point3d FanInletBasePoint { get; set; }
-    //    public Point3d FanOutletBasePoint { get; set; }
-    //    public double RotateAngle { get; set; }
-    //    public string InAndOutForm { get; set; }
-    //    public DBObjectCollection InAndOutLines { get; set; }
-    //}
+    public enum AnalysisResultType
+    {
+        OK = 0,
+        Wrong_AcuteAngle = 1,
+        Wrong_Empty = 2,
+        Wrong_NotVertical = 3
+    }
     public class ThFanInletOutletAnalysisEngine
     {
         //public FanAnalysisModel FanModel { get; set; }
@@ -28,13 +27,15 @@ namespace ThMEPHAVC.CAD
         public ThDuctEdge<ThDuctVertex> InletStartEdge { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         public ThDuctEdge<ThDuctVertex> OutletStartEdge { get; set; }
-        public string InletAnalysisResult { get; set; }
-        public string OutletAnalysisResult { get; set; }
+        public AnalysisResultType InletAnalysisResult { get; set; }
+        public AnalysisResultType OutletAnalysisResult { get; set; }
+        public List<Point3d> AcuteAnglePosition { get; set; }
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
         {
             FanModel = fanmodel;
             ThDuctEdge<ThDuctVertex> tempinletfirstedge = null;
             ThDuctEdge<ThDuctVertex> tempoutletfirstedge = null;
+            AcuteAnglePosition = new List<Point3d>();
             InletCenterLineGraph = CreateLineGraph(fanmodel.FanInletBasePoint, ref tempinletfirstedge);
             InletStartEdge = tempinletfirstedge;
             OutletCenterLineGraph = CreateLineGraph(fanmodel.FanOutletBasePoint, ref tempoutletfirstedge);
@@ -78,13 +79,13 @@ namespace ThMEPHAVC.CAD
             {
                 if (FanModel.IntakeForm.Contains("上进") || FanModel.IntakeForm.Contains("下进"))
                 {
-                    InletAnalysisResult = "InletOK_WithoutCenterLine";
+                    InletAnalysisResult = AnalysisResultType.Wrong_Empty;
                     return;
                 }
                 //非上进或下进，且进口处没有连线
                 else
                 {
-                    InletAnalysisResult = "WrongInlet_WithoutCenterLine";
+                    InletAnalysisResult = AnalysisResultType.Wrong_Empty;
                     return;
                 }
             }
@@ -93,7 +94,7 @@ namespace ThMEPHAVC.CAD
             {
                 if (InletStartEdge.IsNull())
                 {
-                    InletAnalysisResult = "WrongInlet_Empty";
+                    InletAnalysisResult = AnalysisResultType.Wrong_Empty;
                     return;
                 }
                 foreach (var edge in InletCenterLineGraph.Edges)
@@ -103,9 +104,10 @@ namespace ThMEPHAVC.CAD
                         var leftvector = edge.Target.Position.GetVectorTo(InletCenterLineGraph.OutEdges(edge.Target).FirstOrDefault().Target.Position);
                         var rightvector = edge.Target.Position.GetVectorTo(edge.Source.Position);
 
-                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) < 0)
+                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) > 0)
                         {
-                            InletAnalysisResult = "WrongInlet_AcuteAngle";
+                            InletAnalysisResult = AnalysisResultType.Wrong_AcuteAngle;
+                            AcuteAnglePosition.Add(edge.Target.Position);
                             return;
                         }
                     }
@@ -121,12 +123,12 @@ namespace ThMEPHAVC.CAD
                         ApproximateEqualTo(Math.Abs(startinletlineangle - faninletangle), 180, 1) ||
                         ApproximateEqualTo(Math.Abs(startinletlineangle - faninletangle), 270, 1))
                     {
-                        InletAnalysisResult = "InletOK";
+                        InletAnalysisResult = AnalysisResultType.OK;
                         return;
                     }
                     else
                     {
-                        InletAnalysisResult = "WrongInlet_NotVertical";
+                        InletAnalysisResult = AnalysisResultType.Wrong_NotVertical;
                         return;
                     }
                 }
@@ -135,12 +137,12 @@ namespace ThMEPHAVC.CAD
                 {
                     if (ApproximateEqualTo(startinletlineangle, faninletangle, 1))
                     {
-                        InletAnalysisResult = "InletOK";
+                        InletAnalysisResult = AnalysisResultType.OK;
                         return;
                     }
                     else
                     {
-                        InletAnalysisResult = "WrongInlet_NotVertical";
+                        InletAnalysisResult = AnalysisResultType.Wrong_NotVertical;
                         return;
                     }
                 }
@@ -154,13 +156,13 @@ namespace ThMEPHAVC.CAD
             {
                 if (FanModel.IntakeForm.Contains("上出") || FanModel.IntakeForm.Contains("下出"))
                 {
-                    OutletAnalysisResult = "OutletOK_WithoutCenterLine";
+                    OutletAnalysisResult = AnalysisResultType.Wrong_Empty;
                     return;
                 }
                 //直出，且出口处没有连线
                 else
                 {
-                    OutletAnalysisResult = "WrongOutlet_WithoutCenterLine";
+                    OutletAnalysisResult = AnalysisResultType.Wrong_Empty;
                     return;
                 }
             }
@@ -169,7 +171,7 @@ namespace ThMEPHAVC.CAD
             {
                 if (OutletStartEdge.IsNull())
                 {
-                    OutletAnalysisResult = "WrongOutlet_Empty";
+                    OutletAnalysisResult = AnalysisResultType.Wrong_Empty;
                     return;
                 }
 
@@ -180,9 +182,10 @@ namespace ThMEPHAVC.CAD
                         var leftvector = edge.Target.Position.GetVectorTo(OutletCenterLineGraph.OutEdges(edge.Target).FirstOrDefault().Target.Position);
                         var rightvector = edge.Target.Position.GetVectorTo(edge.Source.Position);
 
-                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) < 0)
+                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) > 0)
                         {
-                            OutletAnalysisResult = "WrongOutlet_AcuteAngle";
+                            OutletAnalysisResult = AnalysisResultType.Wrong_AcuteAngle;
+                            AcuteAnglePosition.Add(edge.Target.Position);
                             return;
                         }
                     }
@@ -199,12 +202,12 @@ namespace ThMEPHAVC.CAD
                         ApproximateEqualTo(startOutletlineangle, fanoutletangle + 180, 1) ||
                         ApproximateEqualTo(startOutletlineangle, fanoutletangle + 270, 1))
                     {
-                        OutletAnalysisResult = "OutletOK";
+                        OutletAnalysisResult = AnalysisResultType.OK;
                         return;
                     }
                     else
                     {
-                        OutletAnalysisResult = "WrongOutlet_NotVertical";
+                        OutletAnalysisResult = AnalysisResultType.Wrong_NotVertical;
                         return;
                     }
                 }
@@ -213,12 +216,12 @@ namespace ThMEPHAVC.CAD
                 {
                     if (ApproximateEqualTo(startOutletlineangle, fanoutletangle, 1))
                     {
-                        OutletAnalysisResult = "OutletOK";
+                        OutletAnalysisResult = AnalysisResultType.OK;
                         return;
                     }
                     else
                     {
-                        OutletAnalysisResult = "WrongOutlet_NotVertical";
+                        OutletAnalysisResult = AnalysisResultType.Wrong_NotVertical;
                         return;
                     }
                 }

@@ -8,6 +8,7 @@ using ThMEPHVAC.CAD;
 using System.Linq;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHAVC.CAD;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPHVAC
 {
@@ -26,15 +27,19 @@ namespace ThMEPHVAC
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var selectionresult = Active.Editor.GetSelection();
-                if (selectionresult.Status != PromptStatus.OK)
+                var fanopt = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "请选择风机和中心线"
+                };
+                var fanselectionresult = Active.Editor.GetSelection(fanopt);
+                if (fanselectionresult.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
                 var lineobjects = new DBObjectCollection();
                 ObjectId modelobjectid = ObjectId.Null;
-                foreach (var oid in selectionresult.Value.GetObjectIds().ToList())
+                foreach (var oid in fanselectionresult.Value.GetObjectIds().ToList())
                 {
                     var obj = oid.GetDBObject();
                     if (obj.IsModel())
@@ -53,6 +58,29 @@ namespace ThMEPHVAC
                 thinouteng.OutletAnalysis();
                 ThDuctSelectionEngine ductselectioneng = new ThDuctSelectionEngine(DbFanModel);
                 ThInletOutletDuctDrawEngine inoutductdrawengine = new ThInletOutletDuctDrawEngine(DbFanModel, "600x1500", "400x800", thinouteng.InletCenterLineGraph, thinouteng.OutletCenterLineGraph);
+
+                var wallopt = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "请选择内侧墙线"
+                };
+                var wallselectionresult = Active.Editor.GetSelection(wallopt);
+                if (wallselectionresult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var wallobjects = new DBObjectCollection();
+                foreach (var oid in wallselectionresult.Value.GetObjectIds().ToList())
+                {
+                    var obj = oid.GetDBObject();
+                    wallobjects.Add(obj);
+                }
+                ThHolesAndValvesEngine holesAndValvesEngine = new ThHolesAndValvesEngine(DbFanModel, wallobjects, "600x1500", "400x800", thinouteng.InletCenterLineGraph, thinouteng.OutletCenterLineGraph);
+
+                Active.Editor.WriteMessage(thinouteng.InletAnalysisResult + "," + thinouteng.OutletAnalysisResult);
+                foreach (var point in thinouteng.AcuteAnglePosition)
+                {
+                    acadDatabase.ModelSpace.Add(new Circle(point,Vector3d.ZAxis,600));
+                }
             }
         }
 

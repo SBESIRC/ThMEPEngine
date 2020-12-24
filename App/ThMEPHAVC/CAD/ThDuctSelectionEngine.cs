@@ -29,7 +29,6 @@ namespace ThMEPHVAC.CAD
             RecommendOuterDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Max(f => f.AspectRatio));
             RecommendInnerDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Min(f => f.AspectRatio));
         }
-
         private List<DuctSizeParameter> GetDefaultCandidateDucts()
         {
             double calculateDuctArea = FanModel.FanVolume / 3600.0 / ThFanSelectionUtils.GetDefaultAirSpeed(FanModel.FanScenario);
@@ -49,7 +48,6 @@ namespace ThMEPHVAC.CAD
             }
             return satisfiedDucts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
         }
-
         public string ReadWord(string _Path)
         {
             try
@@ -66,5 +64,11 @@ namespace ThMEPHVAC.CAD
             }
         }
 
+        public List<string> GetDefaultDuctsSizeString()
+        {
+            List<string> DuctsSizeString = new List<string>();
+            DefaultCandidateDucts.ForEach(d=> DuctsSizeString.Add($"{d.DuctWidth}x{d.DuctHeight}"));
+            return DuctsSizeString;
+        }
     }
 }
