@@ -168,6 +168,27 @@ namespace ThMEPLighting.Garage
         public static bool IsContains(this List<Line> lines, Line line,double tolerance=1.0)
         {
             return lines.Where(o => line.IsCoincide(o, tolerance)).Any();
+        }    
+        public static bool HasCommon(this Line first,Line second)
+        {
+            if(first.Length==0.0 || second.Length==0.0)
+            {
+                return false;
+            }
+            if (ThGeometryTool.IsParallelToEx(
+                first.StartPoint.GetVectorTo(first.EndPoint),
+                second.StartPoint.GetVectorTo(second.EndPoint)))
+            {
+                var newSp = ThGeometryTool.GetProjectPtOnLine(first.StartPoint, second.StartPoint, second.EndPoint);
+                var newEp = ThGeometryTool.GetProjectPtOnLine(first.EndPoint, second.StartPoint, second.EndPoint);
+                var pts = new List<Point3d>() { newSp, newEp, second.StartPoint, second.EndPoint };
+                var maxItem = pts.GetCollinearMaxPts();
+                return (maxItem.Item1.DistanceTo(maxItem.Item2) - 1.0) <= (first.Length + second.Length);
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

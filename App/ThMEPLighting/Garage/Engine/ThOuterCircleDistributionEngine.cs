@@ -60,7 +60,8 @@ namespace ThMEPLighting.Garage.Engine
                 //centerLightGraph.Print();
 
                 // 根据中心线子路径，获取1号线对应的边
-                var firstEdgeDatas=ThBuildFirstEdgesService.Build(centerLightGraph.Links, WireOffsetDataService);
+                var firstEdgeDatas=ThBuildFirstEdgesService.Build(centerLightGraph.Links, 
+                    WireOffsetDataService,ArrangeParameter.RacywaySpace/2.0);
 
                 //firstEdgeDatas.Print();
 

@@ -34,10 +34,6 @@ namespace ThMEPLighting.Garage.Service
         }
         private void Number(ThLinkPath singleLinkPath)
         {
-            if(singleLinkPath.Start.DistanceTo(new Point3d(-2784.224, -1169456.4225, 0)) <= 5.0)
-            {
-                string debug = "";
-            }
             var findStartIndex = ThFindStartIndexService.Find(LightGraph, singleLinkPath, ArrangeParameter.LoopNumber, false);
             if (!findStartIndex.IsFind)
             {

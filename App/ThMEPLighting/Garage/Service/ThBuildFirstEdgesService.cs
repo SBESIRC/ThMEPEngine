@@ -15,21 +15,25 @@ namespace ThMEPLighting.Garage.Service
         public ThWireOffsetDataService WireOffsetDataService { get; set; }
 
         private List<ThFirstEdgeData> FirstEdgeDatas { get; set; }
+        private double OffsetDis { get; set; }
 
         private ThBuildFirstEdgesService(
+            double offsetDis,
             List<ThLinkPath> centerLinkPaths, 
             ThWireOffsetDataService wireOffsetDataService)
         {
+            OffsetDis = offsetDis;
             CenterLinkPaths = centerLinkPaths;
             WireOffsetDataService = wireOffsetDataService;
             FirstEdgeDatas = new List<ThFirstEdgeData>();
         }
         public static List<ThFirstEdgeData> Build(
             List<ThLinkPath> centerLinkPaths,
-            ThWireOffsetDataService wireOffsetDataService)
+            ThWireOffsetDataService wireOffsetDataService,
+            double offsetDis)
         {
             var instance = new ThBuildFirstEdgesService(
-                centerLinkPaths, wireOffsetDataService);
+                offsetDis, centerLinkPaths, wireOffsetDataService);
             instance.Build();
             return instance.FirstEdgeDatas;
         }
@@ -54,12 +58,18 @@ namespace ThMEPLighting.Garage.Service
                 return;
             }
             var firstLightEdges = new List<ThLightEdge>();
+            var firstSplitLines = new List<Line>();
             centerLinkPath.Path.ForEach(o =>
             {
                 var first = WireOffsetDataService.FindFirstByCenter(o.Edge);
-                var firstSplitLines = WireOffsetDataService.FindFirstSplitLines(first);
-                firstSplitLines.ForEach(f => firstLightEdges.Add(new ThLightEdge(f) { IsDX = o.IsDX }));
+                firstSplitLines.AddRange(WireOffsetDataService.FindFirstSplitLines(first));
             });
+            var links=ThFindLinkService.Find(firstSplitLines, WireOffsetDataService.FirstQueryInstance);
+            links = ThFilterLinkService.Filter(links, centerLinkPath.Path.Select(o => o.Edge).ToList(), OffsetDis);
+            firstSplitLines.AddRange(links);
+            //后期若支持非灯线，则要把查找到的连接线，IsDX进行值查询
+            //查找找到的连接线对应Center,再找到Center的Edge特性
+            firstSplitLines.ForEach(o => firstLightEdges.Add(new ThLightEdge(o) { IsDX = true }));
             var firstEdgeData = new ThFirstEdgeData
             {
                 CenterLinkPath= centerLinkPath,
