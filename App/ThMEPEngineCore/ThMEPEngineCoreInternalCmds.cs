@@ -126,6 +126,26 @@ namespace ThMEPEngineCore
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THPOLYDECOMPOSE", CommandFlags.Modal)]
+        public void ThPolyDecompose()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var poly = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach (Entity e in ThMEPPolyDecomposer.Decompose(poly))
+                {
+                    e.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(e);
+                }
+            }
+        }
+
 #endif
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]

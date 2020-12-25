@@ -31,6 +31,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
+    <Compile Include="Algorithm\ThMEPPolyDecomposer.cs" />
     <Compile Include="Algorithm\ThMEPTriangulationService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
