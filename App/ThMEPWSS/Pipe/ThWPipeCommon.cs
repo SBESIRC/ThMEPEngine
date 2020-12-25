@@ -49,11 +49,15 @@
         /// <summary>
         /// 标注线长度
         /// </summary>
-        public const double MAX_TAG_LENGTH = 260;
+        public const double MAX_TAG_LENGTH = 1660;
         /// <summary>
         /// 标注文字缩进
         /// </summary>
         public const double TEXT_INDENT = 40;
+        /// <summary>
+        /// 标注文字高度
+        /// </summary>
+        public const double TEXT_HEIGHT = 200;
         /// <summary>
         /// 侧入式雨水斗X方向缩进
         /// </summary>
@@ -94,6 +98,14 @@
         /// 卫生间到厨房最大距离
         /// </summary>
         public const double MAX_TOILET_TO_KITCHEN_DISTANCE = 3500;
+        /// <summary>
+        /// 厨房到雨水管最大距离
+        /// </summary>
+        public const double MAX_KITCHEN_TO_RAINPIPE_DISTANCE = 5500;
+        /// <summary>
+        /// 卫生间到冷凝管最大距离
+        /// </summary>
+        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 2300;
         /// <summary>
         /// 阳台到设备平台最大距离
         /// </summary>

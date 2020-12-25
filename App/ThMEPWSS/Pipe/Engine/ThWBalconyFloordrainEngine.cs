@@ -61,7 +61,7 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 var center = new_downspout(bboundary, condensepipe, Floordrain_washing, device_other);
                 new_circle = new Circle() { Radius = 50, Center = center };
-                if (GeomUtils.PtInLoop(bboundary, center))
+                if (GeomUtils.PtInLoop(bboundary, center))//判断新生管井是否在阳台
                 {
                     Downspout_to_Floordrain.Add(center);
                     foreach (var b_floordrain in Floordrain)
@@ -75,8 +75,14 @@ namespace ThMEPWSS.Pipe.Engine
                     Downspout_to_Floordrain.Add(Floordrain_washing[0].Position);
                     if (bbasinline != null && bbasinline.Position.DistanceTo(washingmachine.Position) < ThWPipeCommon.MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
                     {
-                       
-                        Bbasinline_to_Floordrain = Getvertices(bboundary, washingmachine, Bbasinline_Center[0], Floordrain_washing);            
+                        if (Bbasinline_Center[0].Y > center.Y)
+                        {
+                            Bbasinline_to_Floordrain.Add(Downspout_to_Floordrain[1]);
+                        }
+                        foreach(Point3d point in Getvertices(bboundary, washingmachine, Bbasinline_Center[0], Floordrain_washing, center))
+                        {
+                            Bbasinline_to_Floordrain.Add(point);
+                        }                                          
                     }
                 }
                 else
@@ -614,15 +620,23 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return vertices;
         }
-        private static Point3dCollection Getvertices(Polyline bboundary, BlockReference washingmachine, Point3d bbasinline, List<BlockReference> Floordrain_washing)
+        private static Point3dCollection Getvertices(Polyline bboundary, BlockReference washingmachine, Point3d bbasinline, List<BlockReference> Floordrain_washing,Point3d center)
         {
             var vertices = new Point3dCollection();           
             int num = CriticalLineNumber(bboundary, washingmachine);          
             var linespecific = new Line(bboundary.Vertices()[num], bboundary.Vertices()[num + 1]);
             var perpendicular_point = linespecific.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;//洗衣机地漏在洗衣机所在边垂点
-            var perpendicular_point1 = linespecific.ToCurve3d().GetClosestPointTo(bbasinline).Point;      
-            vertices.Add(Floordrain_washing[0].Position+(perpendicular_point1.DistanceTo(perpendicular_point) + bbasinline.DistanceTo(perpendicular_point1) - Floordrain_washing[0].Position.DistanceTo(perpendicular_point)) * perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal());
-            vertices.Add(bbasinline + (bbasinline).GetVectorTo(vertices[0]).GetNormal() * ThWPipeCommon.COMMONRADIUS);
+            var perpendicular_point1 = linespecific.ToCurve3d().GetClosestPointTo(bbasinline).Point;
+            if (bbasinline.Y < center.Y)//向上偏
+            {
+                vertices.Add(Floordrain_washing[0].Position + (perpendicular_point1.DistanceTo(perpendicular_point) + bbasinline.DistanceTo(perpendicular_point1) - Floordrain_washing[0].Position.DistanceTo(perpendicular_point)) * perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal());
+                vertices.Add(bbasinline + (bbasinline).GetVectorTo(vertices[0]).GetNormal() * ThWPipeCommon.COMMONRADIUS);              
+            }
+            else//向下偏
+            {
+                vertices.Add(Floordrain_washing[0].Position + (perpendicular_point1.DistanceTo(perpendicular_point) - bbasinline.DistanceTo(perpendicular_point1) + Floordrain_washing[0].Position.DistanceTo(perpendicular_point)) * perpendicular_point.GetVectorTo(perpendicular_point1).GetNormal());
+                vertices.Add(bbasinline + (bbasinline).GetVectorTo(vertices[0]).GetNormal() * ThWPipeCommon.COMMONRADIUS);
+            }
             return vertices;
         }    
         private static Point3dCollection Line_Addvertices(Polyline bboundary, Point3d center_spout, List<BlockReference> Floordrain_washing, BlockReference washingmachine, Polyline device, Point3d b_floordrain)

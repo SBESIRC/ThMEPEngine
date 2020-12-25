@@ -52,15 +52,13 @@ namespace ThMEPWSS.Pipe.Engine
             }
             else
             {
-                if (Parallelline(boundary, outline, basinline))
-                {
-                    var pt = FindOutsideVertex(basinline, outline);              
+                var pt = FindOutsideVertex(basinline, outline);
+                if (GetOutsidePipe(pt, basinline))
+                {                              
                     Pipes.Add(Create(pt));
-
                 }
                 else
-                {
-                    var pt = FindOutsideVertex(basinline, outline);
+                {                 
                     Pipes.Add(Create(pt));
                     Pipes.Add(Create(Addpipe(boundary, basinline, pype, outline)));
                 }
@@ -161,47 +159,18 @@ namespace ThMEPWSS.Pipe.Engine
             Line line2 = new Line(evaluate, evaluate1);
             outline.IntersectWith(line2, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
             return pts.Count == 0;
-        }
-        private static bool Parallelline(Polyline boundary, Polyline outline, BlockReference basinline)
+        }    
+        private static bool GetOutsidePipe(Point3d pt, BlockReference basinline)
         {
-            var vertices = boundary.Vertices();
-            Line boundarybaseline = new Line();
-            double dst = double.MaxValue;
-            int a = 0;
-            for (int i = 0; i < vertices.Count - 1; i++)
+            if((pt.X<= basinline.Position.X+500)&& (pt.X >= basinline.Position.X-500))
             {
-                boundarybaseline = new Line(vertices[i], vertices[i + 1]);
-                if (dst > boundarybaseline.GetDistToPoint(basinline.Position))
-                {
-                    dst = boundarybaseline.GetDistToPoint(basinline.Position);
-                    a = i;
-                }
-            }       
-            var vertices_1 = outline.Vertices();          
-            if (vertices_1[0].DistanceTo(vertices_1[1]) < vertices_1[2].DistanceTo(vertices_1[1]))
-            {
-                if (vertices[a].GetVectorTo(vertices[a + 1]).IsParallelTo(vertices_1[2].GetVectorTo(vertices_1[1]))
-                    &&((vertices[a].X- outline.GetCenter().X)*(vertices[a+1].X - outline.GetCenter().X)<0||
-                    (vertices[a].Y - outline.GetCenter().Y) * (vertices[a + 1].Y - outline.GetCenter().Y) < 0))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
-            else
+            else if ((pt.Y <= basinline.Position.Y + 500) && (pt.Y >= basinline.Position.Y - 500))
             {
-                if (vertices[a].GetVectorTo(vertices[a + 1]).IsParallelTo(vertices_1[0].GetVectorTo(vertices_1[1])))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
+            return false;
         }
         private Point3d Addpipe(Polyline boundary, BlockReference basinline, Polyline pype, Polyline outline)
         {

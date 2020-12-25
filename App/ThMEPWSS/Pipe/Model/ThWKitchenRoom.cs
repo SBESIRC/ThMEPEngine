@@ -22,11 +22,21 @@ namespace ThMEPWSS.Pipe.Model
         /// 排水管井
         /// </summary>
         public List<ThIfcSpace> DrainageWells { get; set; }
+        /// <summary>
+        /// 相邻雨水管
+        /// </summary>
+        public List<ThIfcRainPipe> RainPipes { get; set; }
+        /// <summary>
+        /// 相邻屋顶雨水管
+        /// </summary>
+        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
         public ThWKitchenRoom()
         {
             Pypes = new List<ThIfcSpace>();
             BasinTools = new List<ThIfcBasin>();
             DrainageWells = new List<ThIfcSpace>();
+            RainPipes = new List<ThIfcRainPipe>();
+            RoofRainPipes = new List<ThIfcRoofRainPipe>();
         }
     }
 }

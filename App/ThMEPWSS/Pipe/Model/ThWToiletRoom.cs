@@ -22,12 +22,19 @@ namespace ThMEPWSS.Pipe.Model
         /// 地漏
         /// </summary>
         public List<ThIfcFloorDrain> FloorDrains { get; set; }
+        /// <summary>
+        /// 冷凝管
+        /// </summary>
+        public List<ThIfcCondensePipe> CondensePipes { get; set; }
+        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
         public ThWToiletRoom()
         {
             Toilet = null;
             Closestools = new List<ThIfcClosestool>();
             DrainageWells = new List<ThIfcSpace>();
             FloorDrains = new List<ThIfcFloorDrain>();
+            CondensePipes= new List<ThIfcCondensePipe>();
+            RoofRainPipes = new List<ThIfcRoofRainPipe>();
         }
     }
 }

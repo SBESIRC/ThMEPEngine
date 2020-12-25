@@ -84,7 +84,8 @@ namespace ThMEPWSS.Pipe.Engine
             {         
                 index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * ThWPipeCommon.MAX_TAG_XPOSITION);
                 index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.MAX_TAG_LENGTH));
-                index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.MAX_TAG_LENGTH - ThWPipeCommon.TEXT_INDENT)) ;
+                index.Add(center + Vector3d.YAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_YPOSITION - ThWPipeCommon.TEXT_INDENT- ThWPipeCommon.TEXT_HEIGHT) + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.TEXT_INDENT)) ;
+                index.Add(center + Vector3d.YAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_YPOSITION + ThWPipeCommon.TEXT_INDENT) + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.TEXT_INDENT));
             }
             return index;
         }

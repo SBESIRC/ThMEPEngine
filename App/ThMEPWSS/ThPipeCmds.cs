@@ -13,7 +13,7 @@ using System.Linq;
 using System;
 using ThCADCore.NTS;
 using ThCADExtension;
-
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS
 {
@@ -82,7 +82,7 @@ namespace ThMEPWSS
                     {                    
                         boundary1 = composite.Toilet.Toilet.Boundary as Polyline;
                         outline1 = composite.Toilet.DrainageWells[0].Boundary as Polyline;
-                        closestool = composite.Toilet.Closestools[0].Outline as Polyline;                    
+                        closestool = composite.Toilet.Closestools[0].Outline as Polyline;                        
                     }
                     if(IsValidToiletContainerForFloorDrain(composite.Toilet))
                     {
@@ -384,6 +384,36 @@ namespace ThMEPWSS
         {
             return balconyContainer.FloorDrains.Count > 0;
         }
+        private static List<Polyline> GetNewPipes(List<Polyline> rain_pipe)
+        {
+            var rain_pipes = new List<Polyline>();
+            if (rain_pipe.Count > 0)
+            {
+                rain_pipes.Add(rain_pipe[0]);
+                for (int i = 1; i < rain_pipe.Count; i++)
+                {
+                    for (int j = i - 1; j >= 0; j--)
+                    {
+                        if (rain_pipe[j].GetCenter() == rain_pipe[i].GetCenter())
+                        {
+                            break;
+                        }
+                        else
+                        {
+                            if (j > 0)
+                            {
+                                continue;
+                            }
+                            else
+                            {
+                                rain_pipes.Add(rain_pipe[i]);
+                            }
+                        }
+                    }
+                }
+            }
+            return rain_pipes;
+        }
         [CommandMethod("TIANHUACAD", "THPIPETAG", CommandFlags.Modal)]
         public void Thpipetag()
         {
@@ -614,35 +644,57 @@ namespace ThMEPWSS
                         engine.Run(gravityWaterBucket, sideWaterBucket, roofRainPipe, d_boundary);
                         for (int i = 0; i < engine.GravityWaterBucketCenter.Count; i++)
                         {
-                            Line ent_line = new Line(engine.GravityWaterBucketCenter[i], engine.GravityWaterBucketTag[3*i]);
-                            Line ent_line1 = new Line(engine.GravityWaterBucketTag[3*i], engine.GravityWaterBucketTag[3*i + 1]);
+                            Line ent_line = new Line(engine.GravityWaterBucketCenter[i], engine.GravityWaterBucketTag[4*i]);
+                            Line ent_line1 = new Line(engine.GravityWaterBucketTag[4*i], engine.GravityWaterBucketTag[4*i + 1]);
                             //ent_line.Layer = "W-DRAI-NOTE";
-                            ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            ent_line.Color= Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+                            ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
                             acadDatabase.ModelSpace.Add(ent_line);
                             acadDatabase.ModelSpace.Add(ent_line1);
                             DBText taggingtext = new DBText()
                             {
                                 Height = 200,
-                                Position = engine.GravityWaterBucketTag[3*i + 2],
+                                Position = engine.GravityWaterBucketTag[4*i + 2],
                                 TextString = "DN100",
+                                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
                             };
                             acadDatabase.ModelSpace.Add(taggingtext);
+                            DBText taggingtext1 = new DBText()
+                            {
+                                Height = 200,
+                                Position = engine.GravityWaterBucketTag[4 * i + 3],
+                                TextString = "重力型雨水斗",
+                                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
+                            };
+                            acadDatabase.ModelSpace.Add(taggingtext1);
                         }
                         for (int i = 0; i < engine.SideWaterBucketCenter.Count; i++)
                         {
-                            Line ent_line = new Line(engine.SideWaterBucketCenter[i], engine.SideWaterBucketTag[3*i]);
-                            Line ent_line1 = new Line(engine.SideWaterBucketTag[3*i], engine.SideWaterBucketTag[3*i + 1]);
+                            Line ent_line = new Line(engine.SideWaterBucketCenter[i], engine.SideWaterBucketTag[4*i]);
+                            Line ent_line1 = new Line(engine.SideWaterBucketTag[4*i], engine.SideWaterBucketTag[4*i + 1]);
                             //ent_line.Layer = "W-DRAI-NOTE";
-                            ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+                            ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
                             acadDatabase.ModelSpace.Add(ent_line);
                             acadDatabase.ModelSpace.Add(ent_line1);
                             DBText taggingtext = new DBText()
                             {
                                 Height = 200,
-                                Position = engine.SideWaterBucketTag[3*i + 2],
+                                Position = engine.SideWaterBucketTag[4*i + 2],
                                 TextString = "DN75",
+                                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
                             };
                             acadDatabase.ModelSpace.Add(taggingtext);
+                            DBText taggingtext1 = new DBText()
+                            {
+                                Height = 200,
+                                Position = engine.SideWaterBucketTag[4 * i + 3],
+                                TextString = "侧入式雨水斗",
+                                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
+                            };
+                            acadDatabase.ModelSpace.Add(taggingtext1);
                         }
                         for (int i = 0; i < engine.Center_point.Count; i++)
                         {
@@ -692,35 +744,57 @@ namespace ThMEPWSS
                         engine.Run(gravityWaterBucket1, sideWaterBucket1, roofRainPipe1, r_boundary);
                         for (int i = 0; i < engine.GravityWaterBucketCenter.Count; i++)
                         {
-                            Line ent_line = new Line(engine.GravityWaterBucketCenter[i], engine.GravityWaterBucketTag[3*i]);
-                            Line ent_line1 = new Line(engine.GravityWaterBucketTag[3*i], engine.GravityWaterBucketTag[3*i + 1]);
+                            Line ent_line = new Line(engine.GravityWaterBucketCenter[i], engine.GravityWaterBucketTag[4*i]);
+                            Line ent_line1 = new Line(engine.GravityWaterBucketTag[4*i], engine.GravityWaterBucketTag[4*i + 1]);
                             //ent_line.Layer = "W-DRAI-NOTE";
-                            ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+                            ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
                             acadDatabase.ModelSpace.Add(ent_line);
                             acadDatabase.ModelSpace.Add(ent_line1);
                             DBText taggingtext = new DBText()
                             {
                                 Height = 200,
-                                Position = engine.GravityWaterBucketTag[3*i + 2],
+                                Position = engine.GravityWaterBucketTag[4*i + 2],
                                 TextString = "DN100",
-                            };
+                                Color= Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
+                        };
                             acadDatabase.ModelSpace.Add(taggingtext);
+                            DBText taggingtext1 = new DBText()
+                            {
+                                Height = 200,
+                                Position = engine.GravityWaterBucketTag[4 * i + 3],
+                                TextString = "重力型雨水斗",
+                                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
+                            };
+                            acadDatabase.ModelSpace.Add(taggingtext1);
                         }
                         for (int i = 0; i < engine.SideWaterBucketCenter.Count; i++)
                         {
-                            Line ent_line = new Line(engine.SideWaterBucketCenter[i], engine.SideWaterBucketTag[3*i]);
-                            Line ent_line1 = new Line(engine.SideWaterBucketTag[3*i], engine.SideWaterBucketTag[3*i + 1]);
+                            Line ent_line = new Line(engine.SideWaterBucketCenter[i], engine.SideWaterBucketTag[4*i]);
+                            Line ent_line1 = new Line(engine.SideWaterBucketTag[4*i], engine.SideWaterBucketTag[4*i + 1]);
                             //ent_line.Layer = "W-DRAI-NOTE";
-                            ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                            ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+                            ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
                             acadDatabase.ModelSpace.Add(ent_line);
                             acadDatabase.ModelSpace.Add(ent_line1);
                             DBText taggingtext = new DBText()
                             {
                                 Height = 200,
-                                Position = engine.SideWaterBucketTag[3*i + 2],
+                                Position = engine.SideWaterBucketTag[4*i + 2],
                                 TextString = "DN75",
+                                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
                             };
                             acadDatabase.ModelSpace.Add(taggingtext);
+                            DBText taggingtext1 = new DBText()
+                            {
+                                Height = 200,
+                                Position = engine.SideWaterBucketTag[4 * i + 3],
+                                TextString = "侧入式雨水斗",
+                                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
+                            };
+                            acadDatabase.ModelSpace.Add(taggingtext1);
                         }
                         for (int i = 0; i < engine.Center_point.Count; i++)
                         {
@@ -762,6 +836,7 @@ namespace ThMEPWSS
                 baseCenter2.Add(basecircle2);
                 List<Entity> copypipes = new List<Entity>();//要复制的特征
                 List<Entity> copyroofpipes = new List<Entity>();//要复制的屋顶雨水管
+                List<Entity> copyrooftags = new List<Entity>();
                 List<Entity> normalCopys = new List<Entity>();//要复制到其他标准层的立管
                 //标注变量
                 var fpipe = new List<Polyline>();
@@ -804,6 +879,17 @@ namespace ThMEPWSS
                                 {
                                     pype = new Polyline();
                                 }
+                                if (composite.Kitchen.RainPipes.Count > 0)
+                                {
+                                    rain_pipe.Add(composite.Kitchen.RainPipes[0].Outline as Polyline);
+                                }
+                                if (composite.Kitchen.RoofRainPipes.Count > 0)
+                                {
+                                    Polyline s = composite.Kitchen.RoofRainPipes[0].Outline as Polyline;
+                                    roofrain_pipe.Add(s);
+                                    copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
+                                    copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
+                                }
                             }
                         }
                         if (IsValidToiletContainer(composite.Toilet))
@@ -811,6 +897,17 @@ namespace ThMEPWSS
                             boundary1 = composite.Toilet.Toilet.Boundary as Polyline;
                             outline1 = composite.Toilet.DrainageWells[0].Boundary as Polyline;
                             closestool = composite.Toilet.Closestools[0].Outline as Polyline;
+                            if (composite.Toilet.CondensePipes.Count > 0)
+                            {
+                                npipe.Add(composite.Toilet.CondensePipes[0].Outline as Polyline);
+                            }
+                            if (composite.Toilet.RoofRainPipes.Count > 0)
+                            {
+                                Polyline s = composite.Toilet.RoofRainPipes[0].Outline as Polyline;
+                                roofrain_pipe.Add(s);
+                                copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
+                                copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
+                            }                          
                         }
                         if (IsValidToiletContainerForFloorDrain(composite.Toilet))
                         {
@@ -1102,8 +1199,7 @@ namespace ThMEPWSS
                                     npipe.Add(condensepipe);
                                     break;
                                 }
-                            }
-                            
+                            }                           
                             foreach (var devicePlatform in compositeBalcony.DevicePlatforms)
                             {
                                 if (devicePlatform.RoofRainPipes.Count > 0)
@@ -1111,7 +1207,7 @@ namespace ThMEPWSS
                                     roofrainpipe = devicePlatform.RoofRainPipes[0].Outline as Polyline;
                                     roofrain_pipe.Add(roofrainpipe);
                                     copyroofpipes.Add(new Circle() { Center=roofrainpipe.GetCenter(), Radius=38.5 });
-                                    copypipes.Add(new Circle() { Center = roofrainpipe.GetCenter(), Radius = 55.0 });
+                                    copyroofpipes.Add(new Circle() { Center = roofrainpipe.GetCenter(), Radius = 55.0 });
                                     break;
                                 }
                             }
@@ -1251,41 +1347,9 @@ namespace ThMEPWSS
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
 
                 //开始标注 
-                var rain_pipes = new List<Polyline>();//雨水管去重复
-                if (rain_pipe.Count>0)
-                {
-                    rain_pipes.Add(rain_pipe[0]);
-                    for (int i= 1; i< rain_pipe.Count; i++)
-                    {
-                        for (int j = i - 1; j >=0; j--)
-                        {
-                            if (rain_pipe[j].GetCenter() == rain_pipe[i].GetCenter())
-                            {
-                                break;
-                            }
-                            else
-                            {
-                                if(j>0)
-                                {
-                                    continue;
-                                }
-                                else
-                                {
-                                    rain_pipes.Add(rain_pipe[i]);
-                                }
-                            }
-                            
-                          
-                        }
-                    }
-                }
-                foreach(var rainp in rain_pipes)
-                {
-                    copypipes.Add(new Circle() { Center = rainp.GetCenter(), Radius = 37.5 });
-                    copypipes.Add(new Line(new Point3d(rainp.GetCenter().X - 37.5, rainp.GetCenter().Y, 0), new Point3d(rainp.GetCenter().X+37.5, rainp.GetCenter().Y, 0)));
-                    copypipes.Add(new Line(new Point3d(rainp.GetCenter().X, rainp.GetCenter().Y-37.5, 0), new Point3d(rainp.GetCenter().X, rainp.GetCenter().Y+37.5, 0)));
-                }
-                composite_Engine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rain_pipes, pboundary, divideLines, roofrain_pipe);
+                var rain_pipes = GetNewPipes(rain_pipe);//雨水管去重复
+                var npipes = GetNewPipes(npipe);
+                composite_Engine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipes, rain_pipes, pboundary, divideLines, roofrain_pipe);
                 for (int j = 0; j < composite_Engine.PipeEngine.Fpipeindex.Count; j++)
                 {
                     for (int i = 0; i < composite_Engine.PipeEngine.Fpipeindex[j].Count; i++)
@@ -1699,11 +1763,9 @@ namespace ThMEPWSS
                         Line ent_line1 = new Line(tag1, tag2);
                         //ent_line.Layer = "W-DRAI-NOTE";
                         ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                        acadDatabase.ModelSpace.Add(ent_line);
-                        copypipes.Add(ent_line);
+                        acadDatabase.ModelSpace.Add(ent_line);                  
                         normalCopys.Add(ent_line);
-                        acadDatabase.ModelSpace.Add(ent_line1);
-                        copypipes.Add(ent_line1);
+                        acadDatabase.ModelSpace.Add(ent_line1);                     
                         normalCopys.Add(ent_line1);
                         DBText taggingtext = new DBText()
                         {
@@ -1719,14 +1781,12 @@ namespace ThMEPWSS
                         };
                         if (j > 0)
                         {
-                            acadDatabase.ModelSpace.Add(taggingtext);
-                            copypipes.Add(taggingtext);
+                            acadDatabase.ModelSpace.Add(taggingtext);                       
                             normalCopys.Add(taggingtext);
                         }
                         else
                         {
-                            acadDatabase.ModelSpace.Add(taggingtext1);
-                            copypipes.Add(taggingtext1);
+                            acadDatabase.ModelSpace.Add(taggingtext1);                         
                             normalCopys.Add(taggingtext1);
                         }
                     }
@@ -1764,10 +1824,10 @@ namespace ThMEPWSS
                         //ent_line.Layer = "W-DRAI-NOTE";
                         ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
                         acadDatabase.ModelSpace.Add(ent_line);
-                        copypipes.Add(ent_line);
+                        copyrooftags.Add(ent_line);
                         normalCopys.Add(ent_line);
                         acadDatabase.ModelSpace.Add(ent_line1);
-                        copypipes.Add(ent_line1);
+                        copyrooftags.Add(ent_line1);
                         normalCopys.Add(ent_line1);
                         DBText taggingtext = new DBText()
                         {
@@ -1784,13 +1844,13 @@ namespace ThMEPWSS
                         if (j > 0)
                         {
                             acadDatabase.ModelSpace.Add(taggingtext);
-                            copypipes.Add(taggingtext);
+                            copyrooftags.Add(taggingtext);
                             normalCopys.Add(taggingtext);
                         }
                         else
                         {
                             acadDatabase.ModelSpace.Add(taggingtext1);
-                            copypipes.Add(taggingtext1);
+                            copyrooftags.Add(taggingtext1);
                             normalCopys.Add(taggingtext1);
                         }
                     }
@@ -1807,61 +1867,196 @@ namespace ThMEPWSS
                             if (baseCenter0.Count > 0)
                             {
                                 var offset1 = Matrix3d.Displacement(baseCenter2[0].GetVectorTo(baseCenter0[0]));
-                                acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层
+                                Line s1 = ent as Line;
+                                Polyline s2= ent as Polyline;
+                                Circle s3 = ent as Circle;
+                                DBText s4= ent as DBText;
+                                foreach(var bound in FloorEngines.RoofDeviceFloors[0].SubSpaces)
+                                {
+                                    Polyline boundary = bound.Boundary as Polyline;
+                                    if((s1!=null&& GeomUtils.PtInLoop(boundary, s1.StartPoint))|| (s2 != null && GeomUtils.PtInLoop(boundary, s2.StartPoint))
+                                        || (s3 != null && GeomUtils.PtInLoop(boundary, s3.Center))|| (s4 != null && GeomUtils.PtInLoop(boundary, s4.Position)))
+                                    {
+                                        acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层
+                                    }
+                                }
                             }
                         }
                     }
-                    foreach (Circle ent in copyroofpipes)
-                    {   
+                    //标注顶层雨水管
+                    foreach (Circle ent in copyroofpipes)              
+                    {                     
                         Polyline bucket = ent.Tessellate(50);
+                        Point3d center = Point3d.Origin;
+                        Point3d center1 = Point3d.Origin;
                         if (baseCenter2.Count > 0)
                         {
-                            var offset = Matrix3d.Displacement(baseCenter2[0].GetVectorTo(baseCenter1[0]));
-                            acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset));//管井复制到屋顶层
-                            Point3d center = bucket.GetCenter() + baseCenter2[0].GetVectorTo(baseCenter1[0]);
+                            int num = 0;                           
+                            var offset = Matrix3d.Displacement(baseCenter2[0].GetVectorTo(baseCenter1[0]));                           
+                            center = bucket.GetCenter() + baseCenter2[0].GetVectorTo(baseCenter1[0]);
+                            int s = 0;
                             foreach(var gravitybucket in gravityWaterBucket1)
                             {
-                                if (gravitybucket.Position == center)
+                                if (gravitybucket.Position.DistanceTo(center)<2)
                                 {
+                                    s = 1;
                                     break;
                                 }
                             }
+                            if(s==0)
+                            {   
+                                   acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset));//管井复制到屋顶层                                                         
+                            }                     
+                            Circle alert = new Circle() { Center = center, Radius = 100 };
+                            Polyline alertresult = alert.Tessellate(100);
                             foreach (var bucket_1 in sideWaterBucket1)
                             {
-                                if (!Checkbucket(center, bucket_1, r_boundary))
+                                if (Checkbucket(center, bucket_1, r_boundary))
                                 {
-                                    
-                                        Circle alert = new Circle() { Center = center, Radius = 100 };
-                                        Polyline alertresult = alert.Tessellate(100);                                     
-                                        acadDatabase.ModelSpace.Add(alertresult);//生成错误提示
-                                                             
+                                        s += 1;                                      
+                                        break;                                                                                              
                                 }
                             }
-                            if (baseCenter0.Count > 0)
+                            if (s == 0)
                             {
+                                acadDatabase.ModelSpace.Add(alertresult);//生成错误提示    
+                            }
+                            if (baseCenter0.Count > 0)
+                            {                             
                                 var offset1 = Matrix3d.Displacement(baseCenter2[0].GetVectorTo(baseCenter0[0]));
-                                acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层
-                                Point3d center1 = bucket.GetCenter() + baseCenter2[0].GetVectorTo(baseCenter0[0]);
-                                foreach (var gravitybucket in gravityWaterBucket)
+                                foreach (var bound in FloorEngines.RoofDeviceFloors[0].SubSpaces)
                                 {
-                                    if (gravitybucket.Position == center)
+                                    Polyline boundary = bound.Boundary as Polyline;
+                                    if (GeomUtils.PtInLoop(boundary, ent.Center+ baseCenter2[0].GetVectorTo(baseCenter0[0])))
                                     {
+                                        num = 1;
                                         break;
                                     }
                                 }
-                                foreach (var bucket_1 in sideWaterBucket)
+                                if (num == 1)
                                 {
-                                    if (!Checkbucket(center1, bucket_1, d_boundary))
+                                    center1 = bucket.GetCenter() + baseCenter2[0].GetVectorTo(baseCenter0[0]);
+                                    int s1 = 0;
+                                    foreach (var gravitybucket in gravityWaterBucket)
                                     {
-                                        Circle alert1 = new Circle() { Center = center1, Radius = 100 };
-                                        Polyline alertresult1 = alert1.Tessellate(100);
+                                        if (gravitybucket.Position.DistanceTo(center1) < 2)
+                                        {
+                                            s1 = 1;
+                                            break;
+                                        }
+                                    }
+                                    if (s1 == 0)
+                                    {
+                                        acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层                                                                  
+                                    }
+                                    Circle alert1 = new Circle() { Center = center1, Radius = 100 };
+                                    Polyline alertresult1 = alert1.Tessellate(100);
+                                    foreach (var bucket_1 in sideWaterBucket)
+                                    {
+                                        if (Checkbucket(center1, bucket_1, d_boundary))
+                                        {
+                                            s1 += 1;
+                                            break;
+                                        }
+                                    }
+                                    if (s1 == 0)
+                                    {
                                         acadDatabase.ModelSpace.Add(alertresult1);//生成错误提示
                                     }
                                 }
                             }
                         }
-                    }    
-                    if(FloorEngines.NormalFloors.Count>0)//复制所有管井到标准层
+                    }
+                    //标注顶层雨水管标注
+                    for (int i = 0; i < copyrooftags.Count; i += 3)
+                    {
+                        Line bucket = copyrooftags[i] as Line;
+                        Point3d center = Point3d.Origin;
+                        Point3d center1 = Point3d.Origin;
+                        int num = 0;
+                        if (baseCenter2.Count > 0)
+                        {
+                            var offset = Matrix3d.Displacement(baseCenter2[0].GetVectorTo(baseCenter1[0]));
+                            center = bucket.StartPoint + baseCenter2[0].GetVectorTo(baseCenter1[0]);
+                            int s = 0;
+                            foreach (var gravitybucket in gravityWaterBucket1)
+                            {
+                                if (gravitybucket.Position.DistanceTo(center) < 2)
+                                {
+                                    s = 1;
+                                    break;
+                                }
+                            }
+                            if (s == 0)
+                            {
+                                acadDatabase.ModelSpace.Add(copyrooftags[i].GetTransformedCopy(offset));//管井复制到屋顶层  
+                                acadDatabase.ModelSpace.Add(copyrooftags[i + 1].GetTransformedCopy(offset));
+                                acadDatabase.ModelSpace.Add(copyrooftags[i + 2].GetTransformedCopy(offset));
+                            }
+                            Circle alert = new Circle() { Center = center, Radius = 100 };
+                            Polyline alertresult = alert.Tessellate(100);
+                            foreach (var bucket_1 in sideWaterBucket1)
+                            {
+                                if (Checkbucket(center, bucket_1, r_boundary))
+                                {
+                                    s += 1;
+                                    break;
+                                }
+                            }
+                            if (s == 0)
+                            {
+                                acadDatabase.ModelSpace.Add(alertresult);//生成错误提示    
+                            }
+                            if (baseCenter0.Count > 0)
+                            {
+                                var offset1 = Matrix3d.Displacement(baseCenter2[0].GetVectorTo(baseCenter0[0]));
+                                foreach (var bound in FloorEngines.RoofDeviceFloors[0].SubSpaces)
+                                {
+                                    Polyline boundary = bound.Boundary as Polyline;
+                                    if (GeomUtils.PtInLoop(boundary, bucket.StartPoint + baseCenter2[0].GetVectorTo(baseCenter0[0])))
+                                    {
+                                        num = 1;
+                                        break;
+                                    }
+                                }
+                                if (num == 1)
+                                {
+                                    center1 = bucket.StartPoint + baseCenter2[0].GetVectorTo(baseCenter0[0]);
+                                    int s1 = 0;
+                                    foreach (var gravitybucket in gravityWaterBucket)
+                                    {
+                                        if (gravitybucket.Position.DistanceTo(center1) < 2)
+                                        {
+                                            s1 = 1;
+                                            break;
+                                        }
+                                    }
+                                    if (s1 == 0)
+                                    {
+                                        acadDatabase.ModelSpace.Add(copyrooftags[i].GetTransformedCopy(offset1));//管井复制到屋顶设备层 
+                                        acadDatabase.ModelSpace.Add(copyrooftags[i + 1].GetTransformedCopy(offset1));
+                                        acadDatabase.ModelSpace.Add(copyrooftags[i + 2].GetTransformedCopy(offset1));
+                                    }
+                                    Circle alert1 = new Circle() { Center = center1, Radius = 100 };
+                                    Polyline alertresult1 = alert1.Tessellate(100);
+                                    foreach (var bucket_1 in sideWaterBucket)
+                                    {
+                                        if (Checkbucket(center1, bucket_1, d_boundary))
+                                        {
+                                            s1 += 1;
+                                            break;
+                                        }
+                                    }
+                                    if (s1 == 0)
+                                    {
+                                        acadDatabase.ModelSpace.Add(alertresult1);//生成错误提示
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (FloorEngines.NormalFloors.Count>0)//复制所有管井到标准层
                     {
                         for (int i=0; i< FloorEngines.NormalFloors.Count;i++)
                         {
