@@ -35,18 +35,18 @@ namespace ThMEPElectrical.EmgLight.Service
             //    return polys.Where(y =>
             //    {
             //        var polyCollection = new DBObjectCollection() { y };
-            //       return linePoly.Intersection(polyCollection).Count > 0;
+            //        return linePoly.Intersection(polyCollection).Count > 0;
             //    }).ToList();
             //}).ToList();
 
             var resPolys = lines.SelectMany(x =>
             {
                 var linePoly = StructUtils.ExpandLine(x, tol);
-                InsertLightService.ShowGeometry(linePoly, 44);
+               
                 return polys.Where(y =>
                 {
                     var polyCollection = new DBObjectCollection() { y };
-                    return linePoly.Contains(y);
+                    return linePoly.Contains(y) || linePoly.Intersects(y);
                 }).ToList();
             }).ToList();
 
@@ -64,9 +64,7 @@ namespace ThMEPElectrical.EmgLight.Service
         {
             
          var   linePolys= StructUtils.createRecBuffer(lines, length);
-            //debug
-            //  InsertLightService.ShowGeometry(linePolys, 44, LineWeight.LineWeight035);
-
+            
             List<Polyline> upPolyline = new List<Polyline>();
             List<Polyline> downPolyline = new List<Polyline>();
             foreach (var poly in polyline)

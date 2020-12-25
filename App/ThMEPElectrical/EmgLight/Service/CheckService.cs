@@ -109,9 +109,9 @@ namespace ThMEPElectrical.EmgLight.Service
         //    return resPolys;
         //}
 
-        public List<Polyline> FilterColumns(List<Polyline> structures, Line line, Polyline frame)
+        public List<Polyline> FilterColumns(List<Polyline> columns, Line line, Polyline frame)
         {
-            if (structures.Count <= 0)
+            if (columns.Count <= 0)
             {
                 return null;
             }
@@ -122,11 +122,11 @@ namespace ThMEPElectrical.EmgLight.Service
             var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
 
             StructureLayoutServiceLight layoutServiceLight = new StructureLayoutServiceLight();
-            foreach (Polyline structure in structures)
+            foreach (Polyline structure in columns)
             {
                 //平行于车道线的边
                 //var newPoly = column.Buffer(200)[0] as Polyline;
-                var layoutInfo = layoutServiceLight.GetStructureParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
+                var layoutInfo = layoutServiceLight.GetColumnParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
 
                 
                 //选与防火框不相交且在防火框内
@@ -143,19 +143,20 @@ namespace ThMEPElectrical.EmgLight.Service
                     layoutColumns.AddRange(layoutInfo);
 
                 }
+
             }
             return layoutColumns;
         }
 
         /// <summary>
-        /// 墙是否与防火框有相交
+        /// 
         /// </summary>
         /// <param name="walls"></param>
         /// <param name="lines"></param>
         /// <param name="expandLength"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public List<Polyline> FilterWalls(List<Polyline> walls, List<Line> line, Polyline frame, double tol)
+        public List<Polyline> FilterWalls(List<Polyline> walls,Line line, Polyline frame)
         {
             //List<Polyline> layoutWalls = new List<Polyline>();
             //layoutWalls = FilterColumns(walls, line, frame);
@@ -169,9 +170,41 @@ namespace ThMEPElectrical.EmgLight.Service
 
             //return resPolys;
 
-            List<Polyline> layoutWalls = new List<Polyline>();
-             layoutWalls = FilterColumns(walls, line.First(), frame);
-            return layoutWalls;
+            if (walls.Count <= 0)
+            {
+                return null;
+            }
+
+            List<Polyline> layoutColumns = new List<Polyline>();
+            line = line.Normalize();
+
+            var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
+
+            StructureLayoutServiceLight layoutServiceLight = new StructureLayoutServiceLight();
+            foreach (Polyline structure in walls)
+            {
+                //平行于车道线的边
+                //var newPoly = column.Buffer(200)[0] as Polyline;
+                var layoutInfo = layoutServiceLight.GetWallParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
+
+
+                //选与防火框不相交且在防火框内
+                if (layoutInfo != null)
+                {
+
+                    layoutInfo = layoutInfo.Where(x =>
+                    {
+                        Point3dCollection pts = new Point3dCollection();
+                        x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                        return pts.Count <= 0 && frame.Contains(x.StartPoint);
+                    }).ToList();
+
+                    layoutColumns.AddRange(layoutInfo);
+
+                }
+
+            }
+            return layoutColumns;
         }
 
 

@@ -11,6 +11,8 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
 
 
+
+
 namespace ThMEPElectrical.EmgLight
 {
    public static  class InsertLightService
@@ -122,6 +124,21 @@ namespace ThMEPElectrical.EmgLight
                     showPl.LineWeight = lw;
                     acdb.ModelSpace.Add(showPl);
                 }
+            }
+        }
+
+        public static void ShowGeometry(Point3d pt, int ci, LineWeight lw = LineWeight.LineWeight025)
+        {
+
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+
+
+                var pointC = new Circle(pt,new Vector3d(0,0,1), 200);
+                pointC.ColorIndex = ci;
+                pointC.LineWeight = lw;
+              acdb.ModelSpace.Add(pointC);
+                
             }
         }
 

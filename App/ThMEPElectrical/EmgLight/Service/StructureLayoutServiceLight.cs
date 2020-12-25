@@ -1,16 +1,13 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using NFox.Cad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
-using NFox.Cad;
 
 namespace ThMEPElectrical.EmgLight.Service
 {
-   public class StructureLayoutServiceLight
+    public class StructureLayoutServiceLight
     {
         readonly double lightTol = 100;
 
@@ -137,47 +134,47 @@ namespace ThMEPElectrical.EmgLight.Service
         //    return (layoutPt, layoutDir);
         //}
 
+        ///// <summary>
+        ///// 找到构建边
+        ///// </summary>
+        ///// <param name="polyline"></param>
+        ///// <param name="pt"></param>
+        ///// <param name="dir"></param>
+        ///// <returns></returns>
+        //private Line GetLayoutStructLine(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        //{
+        //    var closetPt = polyline.GetClosestPointTo(pt, false);
+        //    layoutPt = closetPt;
+        //    List<Line> lines = new List<Line>();
+        //    for (int i = 0; i < polyline.NumberOfVertices; i++)
+        //    {
+        //        lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
+        //    }
+
+        //    Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
+        //    var layoutLine = lines.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
+        //        .Where(x =>
+        //        {
+        //            var xDir = (x.EndPoint - x.StartPoint).GetNormal();
+        //            return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
+        //        }).FirstOrDefault();
+
+        //    return layoutLine;
+        //}
+
         /// <summary>
-        /// 找到构建边
+        /// 找到墙与车道线平行的边
         /// </summary>
         /// <param name="polyline"></param>
         /// <param name="pt"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        private Line GetLayoutStructLine(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        public List<Polyline> GetWallParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
         {
+           
             var closetPt = polyline.GetClosestPointTo(pt, false);
             layoutPt = closetPt;
-            List<Line> lines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
-            }
-
-            Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
-            var layoutLine = lines.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
-                .Where(x =>
-                {
-                    var xDir = (x.EndPoint - x.StartPoint).GetNormal();
-                    return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
-                }).FirstOrDefault();
-
-            return layoutLine;
-        }
-
-        /// <summary>
-        /// 找到构建与车道线平行的边
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="pt"></param>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        public List<Polyline> GetStructureParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
-        {
-            //debug, add part to select the most close the parallel part for each structure
-            var closetPt = polyline.GetClosestPointTo(pt, false);
-            layoutPt = closetPt;
-            List<Polyline> lines = new List<Polyline>();
+            List<Polyline> structureSegment = new List<Polyline>();
 
 
             for (int i = 0; i < polyline.NumberOfVertices; i++)
@@ -185,7 +182,7 @@ namespace ThMEPElectrical.EmgLight.Service
               Polyline plTemp =  new Polyline();
                 plTemp.AddVertexAt(0, polyline.GetPoint2dAt(i), 0, 0, 0);
                 plTemp.AddVertexAt(0, polyline.GetPoint2dAt((i + 1) % polyline.NumberOfVertices), 0, 0, 0);
-                 lines.Add(plTemp);
+                 structureSegment.Add(plTemp);
             }
 
             dir = dir.GetNormal();
@@ -198,16 +195,51 @@ namespace ThMEPElectrical.EmgLight.Service
             //        return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
             //    }).FirstOrDefault();
 
-            //debug
-            var layoutLine = lines.Where(x =>
+            
+            var structureLayoutSegment = structureSegment.Where(x =>
                {
                    var xDir = (x.EndPoint - x.StartPoint).GetNormal();
-                   bool bParallel = Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
-                   bool bAngle = Math.Abs(dir.DotProduct(xDir)) / (dir.Length * xDir.Length) > Math.Cos(30 * 180 / Math.PI);
-                   return bParallel && bAngle;
+                   //bool bParallel = Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
+                   bool bAngle = Math.Abs(dir.DotProduct(xDir)) / (dir.Length * xDir.Length) > Math.Abs(Math.Cos(30 * Math.PI/180));
+                   return bAngle;
                }).ToList();
            
-            return layoutLine;
+            return structureLayoutSegment;
+        }
+
+
+        /// <summary>
+        /// 找到柱与车道线平行,最近的边
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="pt"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        {
+            var closetPt = polyline.GetClosestPointTo(pt, false);
+            layoutPt = closetPt;
+
+            List<Polyline> structureSegment = new List<Polyline>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                Polyline plTemp = new Polyline();
+                plTemp.AddVertexAt(0, polyline.GetPoint2dAt(i), 0, 0, 0);
+                plTemp.AddVertexAt(0, polyline.GetPoint2dAt((i + 1) % polyline.NumberOfVertices), 0, 0, 0);
+                structureSegment.Add(plTemp);
+            }
+
+            Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
+            var structureLayoutSegment = structureSegment.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
+                .Where(x =>
+                {
+                    var xDir = (x.EndPoint - x.StartPoint).GetNormal();
+                    // return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
+                    bool bAngle = Math.Abs(dir.DotProduct(xDir)) / (dir.Length * xDir.Length) > Math.Abs(Math.Cos(30 * Math.PI/ 180));
+                    return bAngle;
+                }).ToList();
+
+            return structureLayoutSegment;
         }
     }
 }
