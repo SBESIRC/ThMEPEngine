@@ -29,13 +29,15 @@ namespace ThMEPHAVC.CAD
         public ThDuctEdge<ThDuctVertex> OutletStartEdge { get; set; }
         public AnalysisResultType InletAnalysisResult { get; set; }
         public AnalysisResultType OutletAnalysisResult { get; set; }
-        public List<Point3d> AcuteAnglePosition { get; set; }
+        public List<Point3d> InletAcuteAnglePositions { get; set; }
+        public List<Point3d> OutletAcuteAnglePositions { get; set; }
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
         {
             FanModel = fanmodel;
             ThDuctEdge<ThDuctVertex> tempinletfirstedge = null;
             ThDuctEdge<ThDuctVertex> tempoutletfirstedge = null;
-            AcuteAnglePosition = new List<Point3d>();
+            InletAcuteAnglePositions = new List<Point3d>();
+            OutletAcuteAnglePositions = new List<Point3d>();
             InletCenterLineGraph = CreateLineGraph(fanmodel.FanInletBasePoint, ref tempinletfirstedge);
             InletStartEdge = tempinletfirstedge;
             OutletCenterLineGraph = CreateLineGraph(fanmodel.FanOutletBasePoint, ref tempoutletfirstedge);
@@ -101,16 +103,23 @@ namespace ThMEPHAVC.CAD
                 {
                     if (InletCenterLineGraph.OutDegree(edge.Target) == 1)
                     {
-                        var leftvector = edge.Target.Position.GetVectorTo(InletCenterLineGraph.OutEdges(edge.Target).FirstOrDefault().Target.Position);
-                        var rightvector = edge.Target.Position.GetVectorTo(edge.Source.Position);
+                        var cornerpoint = edge.Target.Position;
+                        var inletpoint = edge.Source.Position;
+                        var outletpoint = InletCenterLineGraph.OutEdges(edge.Target).First().Target.Position;
 
-                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) > 0)
+                        var left2d = new Vector2d(inletpoint.X - cornerpoint.X, inletpoint.Y - cornerpoint.Y);
+                        var right2d = new Vector2d(outletpoint.X - cornerpoint.X, outletpoint.Y - cornerpoint.Y);
+
+                        if ((0.5 * Math.PI) - left2d.GetAngleTo(right2d) > 0.01)
                         {
-                            InletAnalysisResult = AnalysisResultType.Wrong_AcuteAngle;
-                            AcuteAnglePosition.Add(edge.Target.Position);
-                            return;
+                            InletAcuteAnglePositions.Add(edge.Target.Position);
                         }
                     }
+                }
+                if (InletAcuteAnglePositions.Count != 0)
+                {
+                    InletAnalysisResult = AnalysisResultType.Wrong_AcuteAngle;
+                    return;
                 }
                 Vector2d startvector = new Vector2d(InletStartEdge.Target.Position.X - InletStartEdge.Source.Position.X, InletStartEdge.Target.Position.Y - InletStartEdge.Source.Position.Y);
                 var startinletlineangle = startvector.Angle * 180 / Math.PI;
@@ -179,16 +188,23 @@ namespace ThMEPHAVC.CAD
                 {
                     if (OutletCenterLineGraph.OutDegree(edge.Target) == 1)
                     {
-                        var leftvector = edge.Target.Position.GetVectorTo(OutletCenterLineGraph.OutEdges(edge.Target).FirstOrDefault().Target.Position);
-                        var rightvector = edge.Target.Position.GetVectorTo(edge.Source.Position);
+                        var cornerpoint = edge.Target.Position;
+                        var inletpoint = edge.Source.Position;
+                        var outletpoint = OutletCenterLineGraph.OutEdges(edge.Target).First().Target.Position;
 
-                        if (leftvector.DotProduct(rightvector) / (leftvector.Length * rightvector.Length) > 0)
+                        var left2d = new Vector2d(inletpoint.X - cornerpoint.X, inletpoint.Y - cornerpoint.Y);
+                        var right2d = new Vector2d(outletpoint.X - cornerpoint.X, outletpoint.Y - cornerpoint.Y);
+
+                        if ((0.5 * Math.PI) - left2d.GetAngleTo(right2d) > 0.01)
                         {
-                            OutletAnalysisResult = AnalysisResultType.Wrong_AcuteAngle;
-                            AcuteAnglePosition.Add(edge.Target.Position);
-                            return;
+                            OutletAcuteAnglePositions.Add(edge.Target.Position);
                         }
                     }
+                }
+                if (OutletAcuteAnglePositions.Count != 0)
+                {
+                    OutletAnalysisResult = AnalysisResultType.Wrong_AcuteAngle;
+                    return;
                 }
 
                 Vector2d startvector = new Vector2d(OutletStartEdge.Target.Position.X - OutletStartEdge.Source.Position.X, OutletStartEdge.Target.Position.Y - OutletStartEdge.Source.Position.Y);

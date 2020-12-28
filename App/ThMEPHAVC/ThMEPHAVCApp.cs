@@ -77,7 +77,8 @@ namespace ThMEPHVAC
                 ThHolesAndValvesEngine holesAndValvesEngine = new ThHolesAndValvesEngine(DbFanModel, wallobjects, "600x1500", "400x800", thinouteng.InletCenterLineGraph, thinouteng.OutletCenterLineGraph);
 
                 Active.Editor.WriteMessage(thinouteng.InletAnalysisResult + "," + thinouteng.OutletAnalysisResult);
-                foreach (var point in thinouteng.AcuteAnglePosition)
+                var acuteAnglePositions = thinouteng.InletAcuteAnglePositions.Union(thinouteng.OutletAcuteAnglePositions);
+                foreach (var point in acuteAnglePositions)
                 {
                     acadDatabase.ModelSpace.Add(new Circle(point,Vector3d.ZAxis,600));
                 }

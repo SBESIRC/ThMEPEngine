@@ -103,8 +103,7 @@ namespace ThMEPHVAC.Duct
 
             //首先单独处理起始段,探测点为用户指定的起点，第一轮探测
             var poly = new Polyline();
-            Matrix3d mt = Active.Editor.CurrentUserCoordinateSystem;
-            poly.CreatePolygon(searchpoint.TransformBy(mt).ToPoint2D(), 4, 10);
+            poly.CreatePolygon(searchpoint.ToPoint2D(), 4, 10);
             var results = SpatialIndex.SelectCrossingPolygon(poly);
             if (results.Count == 0 || results.Count > 1)
             {
