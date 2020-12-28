@@ -16,12 +16,14 @@ namespace ThMEPLighting.Garage.Model
         public bool IsTraversed { get; set; } 
         public Vector3d Direction { get; set; }
         public bool IsDX { get; set; }
+        public EdgePattern Pattern { get; set; }
         public ThLightEdge()
         {
             Id = "";
             LightNodes = new List<ThLightNode>();
             MultiBranch = new List<Tuple<Point3d, ThLightEdge>>();
             IsDX = true;
+            Pattern = EdgePattern.Unknown;
         }
         public ThLightEdge(Line line):this()
         {
@@ -106,5 +108,12 @@ namespace ThMEPLighting.Garage.Model
             }
             return Tuple.Create(startPt, endPt);
         }
+    }
+    public enum EdgePattern
+    {
+        Unknown,
+        First,
+        Second,
+        Center
     }
 }

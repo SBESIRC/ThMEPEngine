@@ -140,6 +140,7 @@ namespace ThMEPLighting.Garage.Engine
                             TypedValueList blkValueList = new TypedValueList
                             {
                                 { (int)DxfCode.ExtendedDataAsciiString, ArrangeParameter.IsSingleRow?"1":"0"},
+                                { (int)DxfCode.ExtendedDataAsciiString, m.Pattern}
                             };
                         objIds.Add(blkId);
                         XDataTools.AddXData(blkId, ThGarageLightCommon.ThGarageLightAppName, blkValueList);

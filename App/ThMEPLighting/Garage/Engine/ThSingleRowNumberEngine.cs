@@ -53,6 +53,8 @@ namespace ThMEPLighting.Garage.Engine
                     break;
                 }
             } while (lightEdges.Count > 0 && ports.Count > 0);
+            //指定为中心线
+            DxLightEdges.ForEach(o => o.Pattern = EdgePattern.Center);
         }
     }
 }

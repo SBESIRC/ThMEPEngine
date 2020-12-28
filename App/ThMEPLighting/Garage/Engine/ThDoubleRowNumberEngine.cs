@@ -76,6 +76,10 @@ namespace ThMEPLighting.Garage.Engine
 
             //对2号线灯编号
             BuildSecondLightEdges();
+
+            //指定边类型
+            FirstLightEdges.ForEach(o => o.Pattern = EdgePattern.First);
+            SecondLightEdges.ForEach(o => o.Pattern = EdgePattern.Second);
         }
         private void BuildSecondLightEdges()
         {
