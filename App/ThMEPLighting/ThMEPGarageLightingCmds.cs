@@ -14,11 +14,80 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Service;
 using DotNetARX;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPLighting
 {
     public class ThMEPGarageLightingCmds
     {
+        [CommandMethod("TIANHUACAD", "THDXC", CommandFlags.Modal)]
+        public void ThDxc()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var polyline = PolylineJig();
+                if (polyline.Area == 0.0)
+                {
+                    return;
+                }
+                short colorIndex = 6;
+                ThLayerTool.CreateLayer(ThGarageLightCommon.DxCenterLineLayerName,
+                    Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
+                polyline.Layer = ThGarageLightCommon.DxCenterLineLayerName;
+                acdb.ModelSpace.Add(polyline);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THFDXC", CommandFlags.Modal)]
+        public void ThFdxc()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var polyline = PolylineJig();
+                if (polyline.Area == 0.0)
+                {
+                    return;
+                }
+                short colorIndex = 1;
+                ThLayerTool.CreateLayer(ThGarageLightCommon.FdxCenterLineLayerName,
+                    Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
+                polyline.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
+                acdb.ModelSpace.Add(polyline);
+            }
+        }
+        private Polyline PolylineJig()
+        {
+            Polyline polyline = new Polyline();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                try
+                {
+                    var jigger = new ThDrawPolylineJigger();
+                    PromptResult jigRes;
+                    do
+                    {
+                        jigRes = Active.Editor.Drag(jigger);
+                        if (jigRes.Status == PromptStatus.OK)
+                            jigger.AllVertexes.Add(jigger.LastVertex);
+                    } while (jigRes.Status == PromptStatus.OK);
+                    if (jigRes.Status == PromptStatus.Cancel)
+                    {
+                        return polyline;
+                    }
+                    var wcsVertexes = jigger.WcsVertexes;
+                    for (int i = 0; i < wcsVertexes.Count; i++)
+                    {
+                        Point3d pt3d = wcsVertexes[i];
+                        Point2d pt2d = new Point2d(pt3d.X, pt3d.Y);
+                        polyline.AddVertexAt(i, pt2d, 0, 0, 0);
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Active.Editor.WriteMessage(ex.ToString());
+                }
+            }
+            return polyline;
+        }
         [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
         public void ThCdzm()
         {
@@ -229,6 +298,11 @@ namespace ThMEPLighting
                 }
             }
             return results;
-        }        
+        }
+        [CommandMethod("TIANHUACAD", "THCDHL", CommandFlags.Modal)]
+        public void THCDHL()
+        {
+
+        }
     }
 }
