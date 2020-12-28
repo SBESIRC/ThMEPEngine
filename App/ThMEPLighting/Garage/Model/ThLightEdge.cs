@@ -108,6 +108,27 @@ namespace ThMEPLighting.Garage.Model
             }
             return Tuple.Create(startPt, endPt);
         }
+        public static EdgePattern Trans(string patternName)
+        {
+            patternName = patternName.ToUpper();
+            var pattern = EdgePattern.Unknown;
+            switch (patternName)
+            {
+                case "FIRST":
+                    pattern = EdgePattern.First;
+                    break;
+                case "SECOND":
+                    pattern = EdgePattern.Second;
+                    break;
+                case "CENTER":
+                    pattern = EdgePattern.Center;
+                    break;
+                default:
+                    pattern = EdgePattern.Unknown;
+                    break;
+            }
+            return pattern;
+        }
     }
     public enum EdgePattern
     {

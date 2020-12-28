@@ -139,7 +139,7 @@ namespace ThMEPLighting.Garage.Engine
                             n.Position, new Scale3d(ArrangeParameter.PaperRatio), normalLine.Angle);
                             TypedValueList blkValueList = new TypedValueList
                             {
-                                { (int)DxfCode.ExtendedDataAsciiString, ArrangeParameter.IsSingleRow?"1":"0"},
+                                { (int)DxfCode.ExtendedDataAsciiString, n.Number},
                                 { (int)DxfCode.ExtendedDataAsciiString, m.Pattern}
                             };
                         objIds.Add(blkId);

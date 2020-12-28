@@ -93,6 +93,24 @@ namespace ThMEPLighting.Garage
                 return ents;
             }
         }
+        public static List<Entity> GetEntities(this Polyline regionBorder,TypedValueList tvs)
+        {
+            List<Entity> ents = new List<Entity>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var pts = regionBorder.Vertices();
+                SelectionFilter sf = new SelectionFilter(tvs.ToArray());
+                var psr = Active.Editor.SelectAll(sf);
+                if (psr.Status == PromptStatus.OK)
+                {
+                    var dbObjs = new DBObjectCollection();
+                    psr.Value.GetObjectIds().ForEach(o => dbObjs.Add(acdb.Element<Entity>(o)));
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                    spatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ForEach(o => ents.Add(o));
+                }
+                return ents;
+            }
+        }
         public static ThCADCoreNTSSpatialIndex BuildSpatialIndex(List<Line> lines)
         {
             DBObjectCollection objs = new DBObjectCollection();

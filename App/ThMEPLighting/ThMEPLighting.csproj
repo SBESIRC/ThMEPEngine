@@ -34,13 +34,16 @@
     <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
+    <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
     <Compile Include="Garage\Model\ThEntityParameter.cs" />
     <Compile Include="Garage\Model\ThFindSideLinesParameter.cs" />
     <Compile Include="Garage\Model\ThLightArrangeParameter.cs" />
     <Compile Include="Garage\Model\ThLightEdge.cs" />
     <Compile Include="Garage\Model\ThLightNode.cs" />
+    <Compile Include="Garage\Model\ThLightSumInfo.cs" />
     <Compile Include="Garage\Model\ThRacewayGroupParameter.cs" />
     <Compile Include="Garage\Model\ThRegionBorder.cs" />
+    <Compile Include="Garage\Model\ThRegionLightEdge.cs" />
     <Compile Include="Garage\Model\ThWireOffsetData.cs" />
     <Compile Include="Garage\Service\ThAlignLineHeadService.cs" />
     <Compile Include="Garage\Service\ThBuildCableTrayService.cs" />

@@ -168,18 +168,67 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THCDTJ", CommandFlags.Modal)]
         public void THCDTJ()
         {
-            
-        }
-        private TypedValueList GetCableTrayCenter()
-        {
-            var peo = new PromptEntityOptions("\n请点击任意一段线槽中心线：");
-            peo.AddAllowedClass(typeof(Line), true);
-            var per = Active.Editor.GetEntity(peo);
-            if(per.Status==PromptStatus.OK)
+            var regionLightEdges = GetFireRegionLights();
+            using (var sumEngine=new ThSumNumberEngine())
+            using (var acadDatabase =AcadDatabase.Active())
             {
-                per.ObjectId.GetXData(ThGarageLightCommon.ThGarageLightAppName);
+                sumEngine.Sum(regionLightEdges);
+                sumEngine.SumInfos.ForEach(o =>
+                {
+                    Active.Editor.WriteLine("Id:" + o.Key.ObjectId);
+                    o.Value.ForEach(v => Active.Editor.WriteLine("回路：" + v.Nubmer + "，" + "灯具数量：" + v.Count));
+                });
             }
-            return new TypedValueList();
         }
+        private List<ThRegionLightEdge> GetFireRegionLights()
+        {
+            var results = new List<ThRegionLightEdge>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var pso = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "\n请选择布灯的区域框线",
+                };
+                TypedValue[] tvs = new TypedValue[]
+                {
+                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Polyline)).DxfName)
+                };
+                SelectionFilter sf = new SelectionFilter(tvs);
+                var result = Active.Editor.GetSelection(pso, sf);
+                if (result.Status == PromptStatus.OK)
+                {
+                    var racewayParameter = new ThRacewayParameter();
+                    result.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var border = acdb.Element<Polyline>(o);
+                        var newBorder = ThMEPFrameService.Normalize(border);
+                        var lineTvs = new TypedValueList
+                            {
+                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
+                                { (int)DxfCode.Start, RXClass.GetClass(typeof(Line)).DxfName},
+                                { (int)DxfCode.LayerName, racewayParameter.CenterLineParameter.Layer}
+                            };
+                        var centerLines  = newBorder.GetEntities(lineTvs).Cast<Line>().ToList();
+
+                        var blkTvs = new TypedValueList
+                            {
+                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
+                                { (int)DxfCode.Start, RXClass.GetClass(typeof(BlockReference)).DxfName},
+                                { (int)DxfCode.LayerName, racewayParameter.LaneLineBlockParameter.Layer}
+                            };
+                        var lightBlks = newBorder.GetEntities(blkTvs).Cast<BlockReference>().ToList();
+
+                        var regionLightEdge = new ThRegionLightEdge
+                        {
+                            RegionBorder = newBorder,
+                            Lights = lightBlks,
+                            Edges = centerLines
+                        };
+                        results.Add(regionLightEdge);
+                    });
+                }
+            }
+            return results;
+        }        
     }
 }
