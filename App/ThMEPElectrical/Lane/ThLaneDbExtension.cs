@@ -12,7 +12,7 @@ namespace ThMEPElectrical.Lane
     {
         public static DBObjectCollection LaneLines(this Database database, Polyline frame)
         {
-            using (ThLaneRecognitionEngine laneLineEngine = new ThLaneRecognitionEngine())
+            using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
                 // 提取车道中心线
                 laneLineEngine.Recognize(database, frame.Vertices());

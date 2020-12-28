@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThLaneRecognitionEngine : ThSpatialElementRecognitionEngine
+    public class ThLaneLineRecognitionEngine : ThSpatialElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {

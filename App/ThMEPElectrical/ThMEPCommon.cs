@@ -13,7 +13,6 @@ namespace ThMEPElectrical
         public static readonly string ParkingLineLayer = "AD-SIGN";     //车位线图层
         public static readonly string BroadcastLayerName = "E-FAS-DEVC";     //消防应急广播图层
         public static readonly string BroadcastBlockName = "E-BFAS410-4";     //消防应急广播图块名
-        public static readonly string NewParkingLineLayer = "E-LANE-CENTER";     //车位线图层
         public static readonly string BlindAreaLayer = "E-MQ-XFGB";     //广播盲区图层
 
         // 烟感温感

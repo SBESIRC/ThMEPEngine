@@ -90,7 +90,7 @@
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
-    <Compile Include="Engine\ThLaneRecognitionEngine.cs" />
+    <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />

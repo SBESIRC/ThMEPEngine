@@ -18,7 +18,6 @@ using System;
 using ThMEPElectrical.Broadcast.Service.ClearService;
 using ThMEPElectrical.Broadcast.Service;
 using DotNetARX;
-using ThMEPElectrical.Business;
 using ThMEPElectrical.Business.Procedure;
 using ThMEPEngineCore.Service;
 
@@ -35,7 +34,7 @@ namespace ThMEPElectrical
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 // 获取车道线
-                var laneLineEngine = new ThLaneRecognitionEngine();
+                var laneLineEngine = new ThLaneLineRecognitionEngine();
                 laneLineEngine.Recognize(acdb.Database, new Point3dCollection());
                 // 暂时假设车道线绘制符合要求
                 var lanes = laneLineEngine.Spaces.Select(o => o.Boundary).Cast<Line>().ToList();
@@ -251,7 +250,7 @@ namespace ThMEPElectrical
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == ThMEPCommon.NewParkingLineLayer);
+                .Where(o => o.Layer == ThMEPCommon.LANELINE_LAYER_NAME);
             laneLines.ForEach(x => objs.Add(x));
 
             //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
