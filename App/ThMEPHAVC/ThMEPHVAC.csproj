@@ -44,6 +44,7 @@
     <Compile Include="Duct\ThDuctGraphEngine.cs" />
     <Compile Include="Duct\ThDuctLineSimplifier.cs" />
     <Compile Include="Duct\ThGraphExtension.cs" />
+    <Compile Include="Entity\DuctSpecModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />
