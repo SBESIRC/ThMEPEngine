@@ -105,7 +105,6 @@
     <Compile Include="Broadcast\ColumnService.cs" />
     <Compile Include="Broadcast\InsertBroadcastService.cs" />
     <Compile Include="Broadcast\LayoutService.cs" />
-    <Compile Include="Broadcast\Service\ParkingLinesService.cs" />
     <Compile Include="Model\BeamProfile.cs" />
     <Compile Include="Model\ColumnModel.cs" />
     <Compile Include="Model\DetectionPolygon.cs" />
