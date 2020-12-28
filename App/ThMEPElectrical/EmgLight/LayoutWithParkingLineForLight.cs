@@ -7,7 +7,7 @@ using NFox.Cad;
 using ThMEPElectrical.EmgLight.Service;
 using Linq2Acad;
 using ThCADCore.NTS;
-
+using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical.EmgLight
 {
@@ -51,7 +51,7 @@ namespace ThMEPElectrical.EmgLight
             {
                 List<Polyline> LayoutTemp = new List<Polyline>();
                 var lines = l.Select(x => x.Normalize()).ToList();
-                ThMEPElectrical.Broadcast.ParkingLinesService parkingLinesService = new ThMEPElectrical.Broadcast.ParkingLinesService();
+                ParkingLinesService parkingLinesService = new ParkingLinesService();
                 var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
 
                 //找到构建上可布置面,用第一条车道线的头尾判定,可能有bug
@@ -94,7 +94,9 @@ namespace ThMEPElectrical.EmgLight
                     }
                     else
                     {
-                        // LayoutBothNonUniformSide();
+
+
+                        LayoutBothNonUniformSide(usefulColumns, usefulWalls, lines, ref LayoutTemp);
                     }
                     Layout.AddRange(LayoutTemp);
                     InsertLightService.ShowGeometry(Layout, 10, LineWeight.LineWeight050);
@@ -405,7 +407,7 @@ namespace ThMEPElectrical.EmgLight
                 prjPt = l.GetClosestPointTo(pt1, true);
 
 
-                if (timeToCheck ==0 && l.ToCurve3d().IsOn(prjPt) == true)
+                if (timeToCheck == 0 && l.ToCurve3d().IsOn(prjPt) == true)
                 {
                     InsertLightService.ShowGeometry(prjPt, 221);
                     distToEnd = prjPt.DistanceTo(l.EndPoint);
@@ -413,7 +415,7 @@ namespace ThMEPElectrical.EmgLight
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, l.EndPoint.ToPoint2D(), 0, 0, 0);
                     timeToCheck += 1;
                 }
-                else if (timeToCheck>0)
+                else if (timeToCheck > 0)
                 {
                     distToEnd += l.Length;
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, l.StartPoint.ToPoint2D(), 0, 0, 0);
@@ -421,7 +423,7 @@ namespace ThMEPElectrical.EmgLight
                 }
 
             }
-            InsertLightService.ShowGeometry(PolylineToEnd, 221,LineWeight.LineWeight040);
+            InsertLightService.ShowGeometry(PolylineToEnd, 221, LineWeight.LineWeight040);
 
             return distToEnd;
 
@@ -444,9 +446,9 @@ namespace ThMEPElectrical.EmgLight
             {
                 //debug : GetClosestPointTo: not project point, if the point out of line, it will use the end-point
                 prjPt = l.GetClosestPointTo(pt1, true);
-                
 
-                if ( l.ToCurve3d().IsOn (prjPt)==true)
+
+                if (l.ToCurve3d().IsOn(prjPt) == true)
                 {
                     distProject = prjPt.DistanceTo(pt1);
 
@@ -468,7 +470,7 @@ namespace ThMEPElectrical.EmgLight
             Point3d prjPt2;
 
             Polyline lineTemp = new Polyline();
-            int timeToCheckPt1 =0;
+            int timeToCheckPt1 = 0;
             int timeToCheckPt2 = 0;
 
             foreach (Line l in lines)
@@ -483,10 +485,10 @@ namespace ThMEPElectrical.EmgLight
                     distProject = prjPt1.DistanceTo(prjPt2);
                     lineTemp.AddVertexAt(lineTemp.NumberOfVertices, prjPt1.ToPoint2D(), 0, 0, 0);
                     lineTemp.AddVertexAt(lineTemp.NumberOfVertices, prjPt2.ToPoint2D(), 0, 0, 0);
-             
+
                     break;
                 }
-                else if (timeToCheckPt1 ==0 && l.ToCurve3d().IsOn(prjPt1) == true && l.ToCurve3d().IsOn(prjPt2) == false)
+                else if (timeToCheckPt1 == 0 && l.ToCurve3d().IsOn(prjPt1) == true && l.ToCurve3d().IsOn(prjPt2) == false)
                 {
                     //debug: not tested
                     distPart1 = prjPt1.DistanceTo(l.EndPoint);
@@ -494,7 +496,7 @@ namespace ThMEPElectrical.EmgLight
                     lineTemp.AddVertexAt(lineTemp.NumberOfVertices, prjPt1.ToPoint2D(), 0, 0, 0);
                     lineTemp.AddVertexAt(lineTemp.NumberOfVertices, l.EndPoint.ToPoint2D(), 0, 0, 0);
                     timeToCheckPt1 += 1;
-                    
+
                 }
                 else if (timeToCheckPt2 == 0 && l.ToCurve3d().IsOn(prjPt1) == false && l.ToCurve3d().IsOn(prjPt2) == true)
                 {
@@ -506,15 +508,15 @@ namespace ThMEPElectrical.EmgLight
                     timeToCheckPt2 += 1;
                     break;
                 }
-                else if (timeToCheckPt1 >0 && timeToCheckPt2 >0 )
+                else if (timeToCheckPt1 > 0 && timeToCheckPt2 > 0)
                 {
                     //debug: not tested
-                    
-                    
-                        distProject += l.Length;
-                        lineTemp.AddVertexAt(lineTemp.NumberOfVertices, l.StartPoint.ToPoint2D(), 0, 0, 0);
-                        lineTemp.AddVertexAt(lineTemp.NumberOfVertices, l.EndPoint.ToPoint2D(), 0, 0, 0);
-                    
+
+
+                    distProject += l.Length;
+                    lineTemp.AddVertexAt(lineTemp.NumberOfVertices, l.StartPoint.ToPoint2D(), 0, 0, 0);
+                    lineTemp.AddVertexAt(lineTemp.NumberOfVertices, l.EndPoint.ToPoint2D(), 0, 0, 0);
+
                     timeToCheckPt1 += 1;
                     timeToCheckPt2 += 1;
 
@@ -534,6 +536,51 @@ namespace ThMEPElectrical.EmgLight
 
             }
             return first;
+        }
+
+        private void LayoutBothNonUniformSide(List<List<Polyline>> Columns, List<List<Polyline>> Walls, List<Line> Lines, ref List<Polyline> LayoutTemp)
+        {
+            Polyline FirstLayout = checkIfHasFirstLight(LayoutTemp, Lines);
+            if (FirstLayout != null)
+            {
+                ////车线起始点已有布灯,第一个点顺延
+
+            }
+            ////从一边开始
+            List<List<Polyline>> usefulSturct = new List<List<Polyline>>();
+            usefulSturct[0].AddRange(Columns[0]);
+            usefulSturct[0].AddRange(Walls[0]);
+            usefulSturct[1].AddRange(Columns[1]);
+            usefulSturct[1].AddRange(Walls[1]);
+
+            usefulSturct[0] = OrderingColumns(usefulSturct[0], Lines);
+            usefulSturct[1] = OrderingColumns(usefulSturct[1], Lines);
+
+            bool bEnd = false;
+            Point3d ptOnLine;
+            Point3d ptNextOnLine;
+            int currSide = 0;
+            int currOppSide = 0;
+            double distLeft = distToLine(Lines, StructUtils.GetStructCenter(usefulSturct[0][0]), out ptOnLine);
+            double distRight = distToLine(Lines, StructUtils.GetStructCenter(usefulSturct[1][0]), out ptOnLine);
+            currSide = distLeft <= distRight ? 0 : 1;
+            currOppSide = currSide == 0 ? 1 : 0;
+            LayoutTemp.Add(usefulSturct[currSide][0]);
+
+            while (bEnd == false)
+            {
+                if (distToLineEnd(Lines,ptOnLine,out var PolylineToEnd) >=TolLightRengeMax )
+                {
+                 
+                }
+
+            }
+
+            Polyline a = new Polyline();
+            a.GetCentroidPoint();
+
+
+            LayoutTemp = LayoutTemp.Distinct().ToList();
         }
 
         private List<Polyline> everyOtherColumns(List<Polyline> Columns)

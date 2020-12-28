@@ -22,7 +22,7 @@ namespace ThMEPElectrical.EmgLight
         {
             using (var db = AcadDatabase.Active())
             {
-                db.Database.ImportModel();
+              //  db.Database.ImportModel();
                 foreach (var ptDic in insertPtInfo)
                 {
                     foreach (var ptInfo in ptDic.Value)
@@ -56,20 +56,20 @@ namespace ThMEPElectrical.EmgLight
             }
         }
 
-        public static void ImportModel(this Database database)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThMEPCommon.BroadcastBlockName), false);
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPCommon.BroadcastLayerName), false);
-            }
-        }
+        //public static void ImportModel(this Database database)
+        //{
+        //    using (AcadDatabase currentDb = AcadDatabase.Use(database))
+        //    using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
+        //    {
+        //        currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThMEPCommon.BroadcastBlockName), false);
+        //        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPCommon.BroadcastLayerName), false);
+        //    }
+        //}
 
-        private static string BlockDwgPath()
-        {
-            return System.IO.Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.BroadcastDwgName);
-        }
+        //private static string BlockDwgPath()
+        //{
+        //    return System.IO.Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.BroadcastDwgName);
+        //}
 
         //for debug
         public static void ShowGeometry(List<Polyline> Polylines, int ci, LineWeight lw = LineWeight.LineWeight025)
