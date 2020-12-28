@@ -143,7 +143,7 @@ namespace ThMEPElectrical
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == ThMEPCommon.NewParkingLineLayer);
+                .Where(o => o.Layer == ThMEPCommon.LANELINE_LAYER_NAME);
             laneLines.ForEach(x => objs.Add(x));
 
             //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
