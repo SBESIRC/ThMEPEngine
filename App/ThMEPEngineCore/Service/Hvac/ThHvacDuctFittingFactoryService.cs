@@ -10,6 +10,7 @@ namespace ThMEPEngineCore.Service.Hvac
 {
     public class ThHvacDuctFittingFactoryService
     {
+        public string LayerName { get; set; }
         public ThIfcDuctReducing CreateReducing(ThIfcDuctReducingParameters parameters)
         {
             return new ThIfcDuctReducing(parameters)
@@ -110,7 +111,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.StartCenterPoint + new Vector3d(0, -0.5 * parameters.SmallEndWidth, 0),
                 EndPoint = parameters.StartCenterPoint + new Vector3d(0, 0.5 * parameters.SmallEndWidth, 0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -119,14 +120,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = smallendline.StartPoint,
                 EndPoint = smallendline.StartPoint + new Vector3d(0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(15 * Math.PI / 180), -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line rightsideline = new Line()
             {
                 StartPoint = smallendline.EndPoint,
                 EndPoint = smallendline.EndPoint + new Vector3d(0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(15 * Math.PI / 180), 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -135,7 +136,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = leftsideline.EndPoint,
                 EndPoint = rightsideline.EndPoint,
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -154,12 +155,12 @@ namespace ThMEPEngineCore.Service.Hvac
             //创建弯头内外侧圆弧
             Arc outerarc = new Arc(parameters.CenterPoint, 1.5 * parameters.PipeOpenWidth, 0, elbowengle)
             {
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Arc innerarc = new Arc(parameters.CenterPoint, 0.5 * parameters.PipeOpenWidth, 0, elbowengle)
             {
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             //创建弯头两端的50mm延申段
@@ -167,35 +168,35 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = outerarc.EndPoint,
                 EndPoint = outerarc.EndPoint + new Vector3d(-50 * Math.Sin(elbowengle), 50 * Math.Cos(elbowengle), 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line innerendextendline = new Line()
             {
                 StartPoint = innerarc.EndPoint,
                 EndPoint = innerarc.EndPoint + new Vector3d(-50 * Math.Sin(elbowengle), 50 * Math.Cos(elbowengle), 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line outerstartextendline = new Line()
             {
                 StartPoint = outerarc.StartPoint,
                 EndPoint = outerarc.StartPoint + new Vector3d(0, -50, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line innerstartextendline = new Line()
             {
                 StartPoint = innerarc.StartPoint,
                 EndPoint = innerarc.StartPoint + new Vector3d(0, -50, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
             //创建弯头中心线圆弧
             Arc centerarc = new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle)
             {
-                Layer = "Auot_DUCT-加压送风中心线",
+                Layer = LayerName,
                 ColorIndex = 5
             };
 
@@ -204,7 +205,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = innerarc.StartPoint,
                 EndPoint = outerarc.StartPoint,
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -212,7 +213,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = innerarc.EndPoint,
                 EndPoint = outerarc.EndPoint,
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -221,7 +222,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = outerstartextendline.EndPoint,
                 EndPoint = innerstartextendline.EndPoint,
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -229,7 +230,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = outerendextendline.EndPoint,
                 EndPoint = innerendextendline.EndPoint,
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -258,7 +259,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter)+50, 0.5*parameters.BranchDiameter, 0),
                 EndPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter) +50, -0.5*parameters.BranchDiameter, 0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -267,7 +268,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.CenterPoint + new Vector3d(0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
                 EndPoint = parameters.CenterPoint + new Vector3d(-0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -276,7 +277,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.CenterPoint + new Vector3d(0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
                 EndPoint = parameters.CenterPoint + new Vector3d(-0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -285,14 +286,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = branchEndLine.StartPoint,
                 EndPoint = branchEndLine.StartPoint + new Vector3d(-50,0,0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line branchBelowStraightLine = new Line()
             {
                 StartPoint = branchEndLine.EndPoint,
                 EndPoint = branchEndLine.EndPoint + new Vector3d(-50, 0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -300,7 +301,7 @@ namespace ThMEPEngineCore.Service.Hvac
             Point3d circleCenter = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter+parameters.BranchDiameter), -parameters.BranchDiameter, 0);
             Arc branchInnerArc = new Arc(circleCenter, 0.5 * parameters.BranchDiameter, 0.5 * Math.PI, Math.PI)
             {
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -331,7 +332,7 @@ namespace ThMEPEngineCore.Service.Hvac
                     }
                 }
                 branchOuterArc.CreateArcSCE(branchUpStraightLine.EndPoint, circleCenter, Intersectpointinarc);
-                branchOuterArc.Layer = "Auot_DUCT-加压送风管";
+                branchOuterArc.Layer = LayerName;
                 branchOuterArc.ColorIndex = 1;
             }
 
@@ -340,14 +341,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = mainBigEndLine.EndPoint,
                 EndPoint = mainBigEndLine.EndPoint + new Vector3d(0,50,0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line outerObliqueLine = new Line()
             {
                 StartPoint = outerStraightLine.EndPoint,
                 EndPoint = mainSmallEndLine.EndPoint,
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -356,14 +357,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = mainSmallEndLine.StartPoint,
                 EndPoint = branchOuterArc.EndPoint,
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line innerBelowLine = new Line()
             {
                 StartPoint = mainBigEndLine.StartPoint,
                 EndPoint = branchInnerArc.EndPoint,
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -391,7 +392,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.Center + new Vector3d(-0.5* parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
                 EndPoint = parameters.Center + new Vector3d(0.5 * parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -400,7 +401,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
                 EndPoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -409,14 +410,14 @@ namespace ThMEPEngineCore.Service.Hvac
             Point3d bigEndCircleCenter = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth), -parameters.SideBigEndWidth, 0);
             Arc bigInnerArc = new Arc(bigEndCircleCenter, 0.5 * parameters.SideBigEndWidth, 0, 0.5 * Math.PI)
             {
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             //创建主路大端与侧路小端的圆弧过渡段
             Point3d smallEndCircleCenter = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth), -parameters.SideSmallEndWidth, 0);
             Arc smallInnerArc = new Arc(smallEndCircleCenter, 0.5 * parameters.SideSmallEndWidth, 0.5 * Math.PI, Math.PI)
             {
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -425,14 +426,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = mainBigEndLine.StartPoint,
                 EndPoint = bigInnerArc.StartPoint,
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line sideBigEndPipeLine = new Line()
             {
                 StartPoint = mainBigEndLine.EndPoint,
                 EndPoint = smallInnerArc.EndPoint,
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -441,7 +442,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth+ parameters.SideBigEndWidth) - 50,-0.5 * parameters.SideBigEndWidth,0),
                 EndPoint = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth) - 50, 0.5 * parameters.SideBigEndWidth, 0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -450,14 +451,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = sideBigEndLine.StartPoint,
                 EndPoint = sideBigEndLine.StartPoint + new Vector3d(50,0,0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line sideBigEndInnerPipeLine = new Line()
             {
                 StartPoint = sideBigEndLine.EndPoint,
                 EndPoint = sideBigEndLine.EndPoint + new Vector3d(50, 0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -482,7 +483,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 Point3d intersectpoint = bigEndIntersects[0];
                 bigOutterArc.CreateArcSCE(intersectpoint, bigEndCircleCenter, sideBigEndOuterPipeLine.EndPoint);
-                bigOutterArc.Layer = "Auot_DUCT-加压送风管";
+                bigOutterArc.Layer = LayerName;
                 bigOutterArc.ColorIndex = 1;
                 mainSmallToSideBigArc.StartPoint = mainSmallEndLine.StartPoint;
                 mainSmallToSideBigArc.EndPoint = bigOutterArc.StartPoint;
@@ -493,7 +494,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, -0.5 * parameters.SideSmallEndWidth, 0),
                 EndPoint = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, 0.5 * parameters.SideSmallEndWidth, 0),
-                Layer = "Auot_DUCT-加压送风管端线",
+                Layer = LayerName,
                 ColorIndex = 2
             };
 
@@ -502,14 +503,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = sideSmallEndLine.StartPoint,
                 EndPoint = sideSmallEndLine.StartPoint + new Vector3d(-50, 0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line sideSmallEndOuterPipeLine = new Line()
             {
                 StartPoint = sideSmallEndLine.EndPoint,
                 EndPoint = sideSmallEndLine.EndPoint + new Vector3d(-50, 0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -534,7 +535,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 Point3d intersectpoint = smallEndIntersects[0];
                 smallOutterArc.CreateArcSCE(sideSmallEndOuterPipeLine.EndPoint, smallEndCircleCenter, intersectpoint);
-                smallOutterArc.Layer = "Auot_DUCT-加压送风管";
+                smallOutterArc.Layer = LayerName;
                 smallOutterArc.ColorIndex = 1;
                 mainSmallToSideSmallArc.StartPoint = mainSmallEndLine.EndPoint;
                 mainSmallToSideSmallArc.EndPoint = smallOutterArc.EndPoint;
@@ -568,28 +569,28 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line LowerLine = new Line()
             {
                 StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line LeftLine = new Line()
             {
                 StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line RightLine = new Line()
             {
                 StartPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             return new DBObjectCollection()
@@ -607,7 +608,7 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = new Point3d(-parameters.Length / 2.0, 0, 0),
                 EndPoint = new Point3d(parameters.Length / 2.0, 0, 0),
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 
@@ -622,14 +623,14 @@ namespace ThMEPEngineCore.Service.Hvac
             {
                 StartPoint = ductUpperLine.StartPoint,
                 EndPoint = ductBelowLine.StartPoint,
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
             Line ductBelowEndLine = new Line()
             {
                 StartPoint = ductUpperLine.EndPoint,
                 EndPoint = ductBelowLine.EndPoint,
-                Layer = "Auot_DUCT-加压送风管",
+                Layer = LayerName,
                 ColorIndex = 1
             };
 

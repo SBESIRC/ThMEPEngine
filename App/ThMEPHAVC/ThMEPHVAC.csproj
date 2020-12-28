@@ -43,6 +43,7 @@
     <Compile Include="Duct\ThDuctGraphAnalysisEngine.cs" />
     <Compile Include="Duct\ThDuctGraphEngine.cs" />
     <Compile Include="Duct\ThDuctLineSimplifier.cs" />
+    <Compile Include="Duct\ThDuctUtils.cs" />
     <Compile Include="Duct\ThGraphExtension.cs" />
     <Compile Include="Entity\DuctSpecModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

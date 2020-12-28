@@ -38,6 +38,7 @@ namespace ThMEPHVAC.CAD
         public double InletDuctHeight { get; set; }
         public double OutletDuctHeight { get; set; }
         public string FanInOutType { get; set; }
+        public string ModelLayer { get; set; }
         public List<ThIfcDistributionElement> InletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> OutletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> DuctReducings { get; set; }
@@ -53,6 +54,7 @@ namespace ThMEPHVAC.CAD
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph
         )
         {
+            ModelLayer = fanmodel.Data.BlockLayer;
             InletOpening = new FanOpeningInfo()
             {
                 Width = fanmodel.FanInlet.Width,
@@ -109,7 +111,10 @@ namespace ThMEPHVAC.CAD
 
         public void SetInletDucts()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
+            {
+                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
+            };
 
             //对于进口为上进的，首先需要画出管口俯视图
             if (FanInOutType.Contains("上进"))
@@ -178,7 +183,10 @@ namespace ThMEPHVAC.CAD
 
         public void SetOutletDucts()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
+            {
+                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
+            };
 
             //对于出口为上出或下出的，首先需要画出管口俯视图
             if (FanInOutType.Contains("上出") || FanInOutType.Contains("下出"))
@@ -248,7 +256,10 @@ namespace ThMEPHVAC.CAD
 
         public void SetInletElbows()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
+            {
+                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
+            };
 
             foreach (var edge in InletCenterLineGraph.Edges)
             {
@@ -280,7 +291,10 @@ namespace ThMEPHVAC.CAD
 
         public void SetOutletElbows()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
+            {
+                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
+            };
 
             foreach (var edge in OutletCenterLineGraph.Edges)
             {

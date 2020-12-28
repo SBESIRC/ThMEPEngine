@@ -162,23 +162,6 @@ namespace ThMEPHVAC.CAD
 
         private ThValve CreateFireValve(string fanlayer)
         {
-            string layer;
-            switch (fanlayer)
-            {
-                case "H-DUAL-FBOX":
-                    layer = "H-DAPP-DDAMP";
-                    break;
-                case "H-FIRE-FBOX":
-                    layer = "H-DAPP-FDAMP";
-                    break;
-                case "H-EQUP-FBOX":
-                    layer = "H-DAPP-EDAMP";
-                    break;
-                default:
-                    layer = "0";
-                    break;
-            }
-
             string visibility;
             switch (Parameters.FanScenario)
             {
@@ -197,7 +180,7 @@ namespace ThMEPHVAC.CAD
             {
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.FILEVALVE_BLOCK_NAME,
-                ValveBlockLayer = layer,
+                ValveBlockLayer = ThDuctUtils.FireValveLayerName(fanlayer),
                 ValveVisibility = visibility,
                 Width = Parameters.DuctWidth,
                 Length = 320,
