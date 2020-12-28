@@ -28,8 +28,8 @@ namespace TianHua.Hvac.UI
             
         }
 
-        [CommandMethod("TIANHUACAD", "THselDB", CommandFlags.Modal)]
-        public void THSelDB()
+        [CommandMethod("TIANHUACAD", "THFJF", CommandFlags.Modal)]
+        public void Thfjf()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

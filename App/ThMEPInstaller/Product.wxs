@@ -15,7 +15,7 @@
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />
             <ComponentGroupRef Id="ProductComponentsWSSWin64" />
-            <!--<ComponentGroupRef Id="ProductComponentsHVACWin64" />-->
+            <ComponentGroupRef Id="ProductComponentsHVACWin64" />
             <ComponentGroupRef Id="ProductComponentsDevExpress" />
             <ComponentGroupRef Id="ProductComponentsElectricalWin64" />
             <ComponentGroupRef Id="ProductComponentsFanSelectionWin64" />
