@@ -88,6 +88,12 @@
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
+    <Compile Include="EmgLight\LayoutWithParkingLineForLight.cs" />
+    <Compile Include="EmgLight\Service\CheckService.cs" />
+    <Compile Include="EmgLight\Service\InsertLightService.cs" />
+    <Compile Include="EmgLight\Service\StructureLayoutServiceLight.cs" />
+    <Compile Include="EmgLight\Service\StructureServiceLight.cs" />
+    <Compile Include="EmgLight\Service\StructUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />
     <Compile Include="Geometry\CoordinateTransform.cs" />
     <Compile Include="Geometry\GeomUtils.cs" />
@@ -140,6 +146,7 @@
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
     <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
+    <Compile Include="ThEmgLightCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />
     <Compile Include="Lane\ThLaneLineMerger.cs" />
     <Compile Include="ThMEPCommon.cs" />
