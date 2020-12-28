@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.TxtOuterTube1 = new DevExpress.XtraEditors.TextEdit();
             this.BtnOK = new DevExpress.XtraEditors.SimpleButton();
             this.LabAirSpeedInner = new System.Windows.Forms.Label();
             this.TxtInnerTube2 = new DevExpress.XtraEditors.TextEdit();
@@ -69,10 +70,10 @@
             this.layoutControlItem18 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem19 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem20 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.TxtOuterTube1 = new DevExpress.XtraEditors.TextEdit();
             this.layoutControlItem21 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube2.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube2.Properties)).BeginInit();
@@ -101,7 +102,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem18)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem19)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem20)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem21)).BeginInit();
             this.SuspendLayout();
             // 
@@ -136,8 +136,20 @@
             this.layoutControl1.TabIndex = 0;
             this.layoutControl1.Text = "layoutControl1";
             // 
+            // TxtOuterTube1
+            // 
+            this.TxtOuterTube1.Location = new System.Drawing.Point(10, 353);
+            this.TxtOuterTube1.Name = "TxtOuterTube1";
+            this.TxtOuterTube1.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
+            this.TxtOuterTube1.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtOuterTube1.Properties.EditValueChanged += new System.EventHandler(this.TxtOuterTube1_Properties_EditValueChanged);
+            this.TxtOuterTube1.Size = new System.Drawing.Size(54, 20);
+            this.TxtOuterTube1.StyleController = this.layoutControl1;
+            this.TxtOuterTube1.TabIndex = 24;
+            // 
             // BtnOK
             // 
+            this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.BtnOK.Location = new System.Drawing.Point(10, 535);
             this.BtnOK.Name = "BtnOK";
             this.BtnOK.Size = new System.Drawing.Size(149, 22);
@@ -161,6 +173,7 @@
             this.TxtInnerTube2.Name = "TxtInnerTube2";
             this.TxtInnerTube2.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
             this.TxtInnerTube2.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtInnerTube2.Properties.EditValueChanged += new System.EventHandler(this.TxtInnerTube2_Properties_EditValueChanged);
             this.TxtInnerTube2.Size = new System.Drawing.Size(55, 20);
             this.TxtInnerTube2.StyleController = this.layoutControl1;
             this.TxtInnerTube2.TabIndex = 21;
@@ -180,6 +193,7 @@
             this.TxtInnerTube1.Name = "TxtInnerTube1";
             this.TxtInnerTube1.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
             this.TxtInnerTube1.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtInnerTube1.Properties.EditValueChanged += new System.EventHandler(this.TxtInnerTube1_Properties_EditValueChanged);
             this.TxtInnerTube1.Size = new System.Drawing.Size(54, 20);
             this.TxtInnerTube1.StyleController = this.layoutControl1;
             this.TxtInnerTube1.TabIndex = 19;
@@ -208,6 +222,7 @@
             this.TxtOuterTube2.Name = "TxtOuterTube2";
             this.TxtOuterTube2.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
             this.TxtOuterTube2.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.TxtOuterTube2.Properties.EditValueChanged += new System.EventHandler(this.TxtOuterTube2_Properties_EditValueChanged);
             this.TxtOuterTube2.Size = new System.Drawing.Size(55, 20);
             this.TxtOuterTube2.StyleController = this.layoutControl1;
             this.TxtOuterTube2.TabIndex = 16;
@@ -242,6 +257,7 @@
             this.ListBoxInnerTube.Size = new System.Drawing.Size(149, 68);
             this.ListBoxInnerTube.StyleController = this.layoutControl1;
             this.ListBoxInnerTube.TabIndex = 12;
+            this.ListBoxInnerTube.SelectedValueChanged += new System.EventHandler(this.ListBoxInnerTube_SelectedValueChanged);
             // 
             // label4
             // 
@@ -292,6 +308,7 @@
             this.ListBoxOuterTube.Size = new System.Drawing.Size(149, 72);
             this.ListBoxOuterTube.StyleController = this.layoutControl1;
             this.ListBoxOuterTube.TabIndex = 7;
+            this.ListBoxOuterTube.SelectedValueChanged += new System.EventHandler(this.ListBoxOuterTube_SelectedValueChanged);
             // 
             // Rad
             // 
@@ -305,6 +322,7 @@
             this.Rad.Properties.Items.AddRange(new DevExpress.XtraEditors.Controls.RadioGroupItem[] {
             new DevExpress.XtraEditors.Controls.RadioGroupItem("推荐", "推荐"),
             new DevExpress.XtraEditors.Controls.RadioGroupItem("自定", "自定")});
+            this.Rad.Properties.SelectedIndexChanged += new System.EventHandler(this.Rad_Properties_SelectedIndexChanged);
             this.Rad.Size = new System.Drawing.Size(149, 23);
             this.Rad.StyleController = this.layoutControl1;
             this.Rad.TabIndex = 6;
@@ -617,16 +635,6 @@
             this.layoutControlItem20.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem20.TextVisible = false;
             // 
-            // TxtOuterTube1
-            // 
-            this.TxtOuterTube1.Location = new System.Drawing.Point(10, 353);
-            this.TxtOuterTube1.Name = "TxtOuterTube1";
-            this.TxtOuterTube1.Properties.Mask.EditMask = "[1-9][0-9]{0,3}";
-            this.TxtOuterTube1.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
-            this.TxtOuterTube1.Size = new System.Drawing.Size(54, 20);
-            this.TxtOuterTube1.StyleController = this.layoutControl1;
-            this.TxtOuterTube1.TabIndex = 24;
-            // 
             // layoutControlItem21
             // 
             this.layoutControlItem21.Control = this.TxtOuterTube1;
@@ -654,6 +662,7 @@
             this.Load += new System.EventHandler(this.fmDuctSpec_Load);
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube2.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtInnerTube1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube2.Properties)).EndInit();
@@ -682,7 +691,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem18)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem19)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem20)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.TxtOuterTube1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem21)).EndInit();
             this.ResumeLayout(false);
 

@@ -256,15 +256,15 @@ namespace ThMEPHVAC.CAD
         public List<ValveGroup> OutletValveGroups { get; set; }
         public ThHolesAndValvesEngine(ThDbModelFan fanmodel,
             DBObjectCollection wallobjects,
-            string inletductinfo,
-            string outletductinfo,
+            double inletductwidth,
+            double outletductwidth,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
         {
-            double inletDuctWidth = inletductinfo.Split('x').First().NullToDouble();
-            double outletDuctWidth = outletductinfo.Split('x').First().NullToDouble();
+            //double inletDuctWidth = inletductinfo.Split('x').First().NullToDouble();
+            //double outletDuctWidth = outletductinfo.Split('x').First().NullToDouble();
 
-            InletValveGroups = GetValveGroup(fanmodel, wallobjects, inletDuctWidth, ValveGroupPosionType.Inlet, inletcenterlinegraph);
+            InletValveGroups = GetValveGroup(fanmodel, wallobjects, inletductwidth, ValveGroupPosionType.Inlet, inletcenterlinegraph);
             foreach (var valvegroup in InletValveGroups)
             {
                 foreach (var valve in valvegroup.ValvesInGroup)
@@ -272,7 +272,7 @@ namespace ThMEPHVAC.CAD
                     ThValvesAndHolesInsertEngine.InsertWallHole(valve, valve.LengthPropertyName, valve.WidthPropertyName);
                 }
             }
-            OutletValveGroups = GetValveGroup(fanmodel, wallobjects, outletDuctWidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
+            OutletValveGroups = GetValveGroup(fanmodel, wallobjects, outletductwidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
             foreach (var valvegroup in OutletValveGroups)
             {
                 foreach (var valve in valvegroup.ValvesInGroup)

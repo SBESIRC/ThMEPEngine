@@ -47,8 +47,8 @@ namespace ThMEPHVAC.CAD
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         public ThDuctEdge<ThDuctVertex> FirstOutletEdge { get; set; }
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel, 
-            string inletductinfo, 
-            string outletductinfo,
+            string innerductinfo, 
+            string outerductinfo,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph
         )
@@ -70,7 +70,7 @@ namespace ThMEPHVAC.CAD
             InletCenterLineGraph = inletcenterlinegraph;
             OutletCenterLineGraph = outletcenterlinegraph;
             FanInOutType = fanmodel.IntakeForm;
-            SetInletOutletSize(fanmodel.FanScenario, fanmodel.IntakeForm, inletductinfo, outletductinfo);
+            SetInletOutletSize(fanmodel.FanScenario, fanmodel.IntakeForm, innerductinfo, outerductinfo);
 
             InletDuctSegments = new List<ThIfcDistributionElement>();
             OutletDuctSegments = new List<ThIfcDistributionElement>();

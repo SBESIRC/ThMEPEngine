@@ -14,6 +14,8 @@ namespace TianHua.Hvac.UI
 {
     public partial class fmDuctSpec : DevExpress.XtraEditors.XtraForm
     {
+        public string SelectedInnerDuctSize { get; set; }
+        public string SelectedOuterDuctSize { get; set; }
         public fmDuctSpec()
         {
             InitializeComponent();
@@ -22,22 +24,11 @@ namespace TianHua.Hvac.UI
 
         private void fmDuctSpec_Load(object sender, EventArgs e)
         {
-            InitForm(null);
             Rad_SelectedIndexChanged(null, null);
         }
 
         public void InitForm(DuctSpecModel _DuctSpecModel)
         {
-            _DuctSpecModel = new DuctSpecModel()
-            {
-                AirSpeed = 22,
-                AirVolume = 888,
-                ListOuterTube  = new List<string> { "123", "234", "345" },
-                ListInnerTube = new List<string> { "aaa", "bbb", "ccc" },
-                OuterTube = "123",
-                InnerTube = "ccc"
-            };
-
             TxtAirVolume.Text = FuncStr.NullToStr(_DuctSpecModel.AirVolume);
 
             TxtAirSpeed.Text = FuncStr.NullToStr(_DuctSpecModel.AirSpeed);
@@ -104,5 +95,61 @@ namespace TianHua.Hvac.UI
 
  
         }
+
+        private void ListBoxOuterTube_SelectedValueChanged(object sender, EventArgs e)
+        {
+            SetIndexOutDuctSizeByDefault();
+        }
+
+        private void ListBoxInnerTube_SelectedValueChanged(object sender, EventArgs e)
+        {
+            SetIndexOutDuctSizeByDefault();
+        }
+
+        private void TxtOuterTube1_Properties_EditValueChanged(object sender, EventArgs e)
+        {
+            SetIndexOutDuctSizeFromUser();
+        }
+
+        private void TxtOuterTube2_Properties_EditValueChanged(object sender, EventArgs e)
+        {
+            SetIndexOutDuctSizeFromUser();
+        }
+
+        private void TxtInnerTube1_Properties_EditValueChanged(object sender, EventArgs e)
+        {
+            SetIndexOutDuctSizeFromUser();
+        }
+
+        private void TxtInnerTube2_Properties_EditValueChanged(object sender, EventArgs e)
+        {
+            SetIndexOutDuctSizeFromUser();
+        }
+
+        private void Rad_Properties_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if(Rad.EditValue.ToString() == "推荐")
+            {
+                SetIndexOutDuctSizeByDefault();
+            }
+            else
+            {
+                SetIndexOutDuctSizeFromUser();
+            }
+        }
+
+        private void SetIndexOutDuctSizeFromUser()
+        {
+            SelectedOuterDuctSize = TxtOuterTube1.Text.NullToStr() + "x" + TxtOuterTube2.Text.NullToStr();
+            SelectedInnerDuctSize = TxtInnerTube1.Text.NullToStr() + "x" + TxtInnerTube2.Text.NullToStr();
+        }
+
+        private void SetIndexOutDuctSizeByDefault()
+        {
+            SelectedOuterDuctSize = FuncStr.NullToStr(ListBoxOuterTube.SelectedValue);
+            SelectedInnerDuctSize = FuncStr.NullToStr(ListBoxInnerTube.SelectedValue);
+        }
+
+
     }
 }

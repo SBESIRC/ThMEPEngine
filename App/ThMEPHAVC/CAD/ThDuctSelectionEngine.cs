@@ -21,13 +21,17 @@ namespace ThMEPHVAC.CAD
         public ThDbModelFan FanModel { get; set; }
         public DuctSizeParameter DefaultRecommendDuct { get; set; }
         public DuctSizeParameter RecommendOuterDuct { get; set; }
+        public string RecommendOuterDuctSize { get; set; }
         public DuctSizeParameter RecommendInnerDuct { get; set; }
+        public string RecommendInnerDuctSize { get; set; }
         public ThDuctSelectionEngine(ThDbModelFan fanmodel)
         {
             FanModel = fanmodel;
             DefaultCandidateDucts = GetDefaultCandidateDucts();
             RecommendOuterDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Max(f => f.AspectRatio));
+            RecommendOuterDuctSize = RecommendOuterDuct.DuctWidth + "x" + RecommendOuterDuct.DuctHeight;
             RecommendInnerDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Min(f => f.AspectRatio));
+            RecommendInnerDuctSize = RecommendInnerDuct.DuctWidth + "x" + RecommendOuterDuct.DuctHeight;
         }
         private List<DuctSizeParameter> GetDefaultCandidateDucts()
         {

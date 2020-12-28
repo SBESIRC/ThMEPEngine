@@ -121,9 +121,17 @@
       <Project>{11dad9ac-da76-4b36-8315-9af9ba638d41}</Project>
       <Name>CADExtension</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPEngineCore\ThMEPEngineCore.csproj">
+      <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
+      <Name>ThMEPEngineCore</Name>
+    </ProjectReference>
     <ProjectReference Include="..\ThMEPHAVC\ThMEPHVAC.csproj">
       <Project>{b49b0155-f4a7-4928-a539-66882a6ec79a}</Project>
       <Name>ThMEPHVAC</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
+      <Project>{6FADC5FA-F54F-4742-BACD-9F1F855E8210}</Project>
+      <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
