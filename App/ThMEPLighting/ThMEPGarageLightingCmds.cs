@@ -13,6 +13,7 @@ using ThMEPLighting.Garage.Engine;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Service;
+using DotNetARX;
 
 namespace ThMEPLighting
 {
@@ -22,20 +23,7 @@ namespace ThMEPLighting
         public void ThCdzm()
         {
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
-            {
-                var options = new PromptKeywordOptions("\n请指定布置方式")
-                {
-                    AllowNone = true
-                };
-                options.Keywords.Add("S", "S", "单排(S)");
-                options.Keywords.Add("D", "D", "双排(D)");
-                options.Keywords.Default = "S";
-                var result3 = Active.Editor.GetKeywords(options);
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                bool isSingleRow = result3.StringResult == "S" ? true : false;
+            {                
                 //输入参数
                 var arrangeParameter = new ThLightArrangeParameter
                 {
@@ -43,7 +31,7 @@ namespace ThMEPLighting
                     Interval = 2700,
                     Margin = 800,
                     RacywaySpace = 2700,
-                    IsSingleRow = isSingleRow,
+                    IsSingleRow = GetArrangeWay(),
                     LoopNumber = 4,
                     PaperRatio = 100
                 };
@@ -101,6 +89,22 @@ namespace ThMEPLighting
             }
             return results;
         }
+        private bool GetArrangeWay() 
+        {
+            var options = new PromptKeywordOptions("\n请指定布置方式")
+            {
+                AllowNone = true
+            };
+            options.Keywords.Add("S", "S", "单排(S)");
+            options.Keywords.Add("D", "D", "双排(D)");
+            options.Keywords.Default = "S";
+            var result3 = Active.Editor.GetKeywords(options);
+            if (result3.Status != PromptStatus.OK)
+            {
+                return true;
+            }
+            return result3.StringResult == "S" ? true : false;
+        }
         private List<Line> GetRegionLines(Polyline region,List<string> layers,List<Type> types)
         {
             var results = new List<Line>();
@@ -126,8 +130,8 @@ namespace ThMEPLighting
             }
             return results;
         }
-        [CommandMethod("TIANHUACAD", "THCDHL", CommandFlags.Modal)]
-        public void THCDHL()
+        [CommandMethod("TIANHUACAD", "THCDBH", CommandFlags.Modal)]
+        public void THCDBH()
         {
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
             {                
@@ -138,7 +142,7 @@ namespace ThMEPLighting
                     Interval = 2700,
                     Margin = 800,
                     RacywaySpace = 2700,
-                    IsSingleRow = true,
+                    IsSingleRow = GetArrangeWay(),
                     LoopNumber = 4,
                     PaperRatio = 100,
                     AutoGenerate=false,
@@ -160,6 +164,22 @@ namespace ThMEPLighting
                 }
                 arrangeEngine.Arrange(regionBorders);
             }
+        }
+        [CommandMethod("TIANHUACAD", "THCDTJ", CommandFlags.Modal)]
+        public void THCDTJ()
+        {
+            
+        }
+        private TypedValueList GetCableTrayCenter()
+        {
+            var peo = new PromptEntityOptions("\n请点击任意一段线槽中心线：");
+            peo.AddAllowedClass(typeof(Line), true);
+            var per = Active.Editor.GetEntity(peo);
+            if(per.Status==PromptStatus.OK)
+            {
+                per.ObjectId.GetXData(ThGarageLightCommon.ThGarageLightAppName);
+            }
+            return new TypedValueList();
         }
     }
 }

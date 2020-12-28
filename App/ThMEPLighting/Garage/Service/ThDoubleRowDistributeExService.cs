@@ -59,9 +59,10 @@ namespace ThMEPLighting.Garage.Service
             //找出哪些分支已经布灯
             var branchEdges = DistributedEdges
                 .Where(o => branchLines.Contains(o.Edge))
-                .Where(o=>o.LightNodes.Count>0)
+                .Where(o => o.LightNodes.Count > 0 || IsNeibourEdgeDistributed(o))
                 .Where(o=>o.IsDX)
                 .ToList();
+
             //找出已布灯边对应的原始（未分割前）的1号线的边
             var branchOriginFirstLines = new List<Line>();
             branchEdges.ForEach(o =>
@@ -83,6 +84,21 @@ namespace ThMEPLighting.Garage.Service
             //获取可以布点的区域
             SplitPoints = ObtainArrangedSegments(splitPoints);
         }
+        /// <summary>
+        /// 如果分支上有短线未布灯，但是其相邻边布灯，也视为布灯
+        /// </summary>
+        /// <param name="lightEdge"></param>
+        /// <returns></returns>
+        private bool IsNeibourEdgeDistributed(ThLightEdge lightEdge)
+        {
+            return DistributedEdges
+                    .Where(o => o.Edge.IsLink(lightEdge.Edge.StartPoint) ||
+                    o.Edge.IsLink(lightEdge.Edge.EndPoint))
+                    .Where(o => ThGeometryTool.IsCollinearEx(
+                        lightEdge.Edge.StartPoint, lightEdge.Edge.EndPoint,
+                        o.Edge.StartPoint, o.Edge.EndPoint))
+                    .Where(o => o.LightNodes.Count > 0).Any();
+        }
         private List<Tuple<Point3d, Point3d>> ObtainArrangedSegments(List<Tuple<Point3d, Point3d>> occupiedSections)
         {
             //occupiedSections 已经在”GetOccupiedSection“排序
@@ -97,33 +113,40 @@ namespace ThMEPLighting.Garage.Service
                 Point3d basePt = StartPt;
                 foreach(var segment in occupiedSections)
                 {
-                    bool isClosedItem1 = basePt.DistanceTo(segment.Item1) < basePt.DistanceTo(segment.Item2);
                     if (ThGeometryTool.IsPointOnLine(segment.Item1, segment.Item2, basePt))
                     {
-                        basePt = isClosedItem1 ? segment.Item2 : segment.Item1;
+                        basePt = GetSplitPt(segment,true);
                         continue;
                     }
                     else
                     {
-                        if(isClosedItem1)
-                        {
-                            results.Add(Tuple.Create(basePt, segment.Item1));
-                            basePt = segment.Item2;
-                        }
-                        else
-                        {
-                            results.Add(Tuple.Create(basePt, segment.Item2));
-                            basePt = segment.Item1;
-                        }
+                        var prePt = GetSplitPt(segment, false);
+                        results.Add(Tuple.Create(basePt, prePt));
+                        basePt = GetSplitPt(segment, true);
                     }
                 }
-                if(ThGeometryTool.IsPointOnLine(StartPt, EndPt, basePt))
+                if(ThGeometryTool.IsPointOnLine(StartPt, EndPt, basePt) &&
+                    basePt.DistanceTo(EndPt)>ThGarageLightCommon.RepeatedPointDistance)
                 {
                     results.Add(Tuple.Create(basePt, EndPt));
                 }
             }
-            return results;
+            return results.Where(o=>o.Item1.DistanceTo(o.Item2)>0.0).ToList();
         }
+        private Point3d GetSplitPt(Tuple<Point3d, Point3d> segment,bool isNext)
+        {
+            var segSp = segment.Item1;
+            var segEp = segment.Item2;
+            var segVec = segment.Item1.GetVectorTo(segment.Item2);
+            var lineVec = StartPt.GetVectorTo(EndPt);
+            if (!segVec.IsCodirectionalTo(lineVec))
+            {
+                segSp = segment.Item2;
+                segEp = segment.Item1;
+            }
+            return isNext?segEp: segSp;
+        }
+        
         private List<Tuple<Point3d,Point3d>> Merge(List<Tuple<Point3d, Point3d>> originSplitPts)
         {
             var mergeSplitPts = new List<Tuple<Point3d, Point3d>>();
@@ -169,8 +192,16 @@ namespace ThMEPLighting.Garage.Service
                 }
             });
             return splitPoints
-                .OrderBy(o=>ThGeometryTool.GetMidPt(o.Item1,o.Item2).DistanceTo(StartPt))
+                .OrderBy(o=> ProjectionDis(ThGeometryTool.GetMidPt(o.Item1,o.Item2)))
                 .ToList();
+        }
+        private double ProjectionDis(Point3d pt)
+        {
+            var vec = StartPt.GetVectorTo(EndPt);
+            var plane = new Plane(StartPt, vec.GetNormal());
+            var mt = Matrix3d.WorldToPlane(plane);
+            var newPt=pt.TransformBy(mt);
+            return newPt.Z;
         }
         private bool CheckBranchIsValid(Line main,Line branchFirst,Line branchSecond)
         {
@@ -178,7 +209,7 @@ namespace ThMEPLighting.Garage.Service
             var secondInters = ThGeometryTool.IntersectPts(main, branchSecond, Intersect.ExtendBoth);
             if(firstInters.Count > 0 && secondInters.Count > 0)
             {
-                bool isPtOn = ThGeometryTool.IsPointOnLine(StartPt, EndPt, firstInters[0],1.0) &&
+                bool isPtOn = ThGeometryTool.IsPointOnLine(StartPt, EndPt, firstInters[0],1.0) ||
                  ThGeometryTool.IsPointOnLine(StartPt, EndPt, secondInters[0], 1.0);
                 bool isProperDis = Math.Abs(firstInters[0].DistanceTo(secondInters[0])
                     - ArrangeParameter.RacywaySpace) <= 1.0;
