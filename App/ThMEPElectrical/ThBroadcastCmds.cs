@@ -292,7 +292,7 @@ namespace ThMEPElectrical
             {
                 //建筑墙
                 archWallEngine.Recognize(acdb.Database, polyline.Vertices());
-                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Cast<Polyline>().ToList();
+                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is Polyline).Cast<Polyline>().ToList();
                 objs = new DBObjectCollection();
                 arcWall.ForEach(x => objs.Add(x));
                 thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
