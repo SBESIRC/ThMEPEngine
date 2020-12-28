@@ -101,6 +101,8 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -116,6 +118,8 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -131,6 +135,8 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -146,6 +152,8 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
