@@ -8,7 +8,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Model;
 
-namespace ThMEPLighting.Garage.Service
+namespace ThMEPLighting.Common
 {
     public class ThLightGraphService
     {
@@ -22,7 +22,7 @@ namespace ThMEPLighting.Garage.Service
             Edges = edges;
             Start = start;
             Links = new List<ThLinkPath>();
-            SpatialIndex = ThGarageLightUtils.BuildSpatialIndex(edges.Select(o => o.Edge).ToList());
+            //SpatialIndex = ThGarageLightUtils.BuildSpatialIndex(edges.Select(o => o.Edge).ToList());
         }
         public static ThLightGraphService Build(List<ThLightEdge> edges, Point3d start)
         {

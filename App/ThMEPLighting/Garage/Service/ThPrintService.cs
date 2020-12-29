@@ -5,6 +5,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using ThMEPEngineCore.CAD;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Service
 {

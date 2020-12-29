@@ -15,7 +15,7 @@ using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.Garage
+namespace ThMEPLighting.Common
 {
     public static class ThGarageLightUtils
     {

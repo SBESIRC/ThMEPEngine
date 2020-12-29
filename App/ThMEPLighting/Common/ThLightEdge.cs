@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPLighting.Garage.Model
+namespace ThMEPLighting.Common
 {
     public class ThLightEdge
     {

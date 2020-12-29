@@ -1,4 +1,4 @@
-﻿namespace ThMEPLighting.Garage
+﻿namespace ThMEPLighting.Common
 {
     public class ThGarageLightCommon
     {

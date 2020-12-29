@@ -38,8 +38,8 @@
     <Compile Include="Garage\Model\ThEntityParameter.cs" />
     <Compile Include="Garage\Model\ThFindSideLinesParameter.cs" />
     <Compile Include="Garage\Model\ThLightArrangeParameter.cs" />
-    <Compile Include="Garage\Model\ThLightEdge.cs" />
-    <Compile Include="Garage\Model\ThLightNode.cs" />
+    <Compile Include="Common\ThLightEdge.cs" />
+    <Compile Include="Common\ThLightNode.cs" />
     <Compile Include="Garage\Model\ThLightSumInfo.cs" />
     <Compile Include="Garage\Model\ThRacewayGroupParameter.cs" />
     <Compile Include="Garage\Model\ThRegionBorder.cs" />
@@ -62,7 +62,7 @@
     <Compile Include="Garage\Service\ThFindSideLinesService.cs" />
     <Compile Include="Garage\Service\ThFindStartIndexService.cs" />
     <Compile Include="Garage\Service\ThJoinLinesService.cs" />
-    <Compile Include="Garage\Service\ThLightGraphService.cs" />
+    <Compile Include="Common\ThLightGraphService.cs" />
     <Compile Include="Garage\Service\ThPrintService.cs" />
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
     <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
@@ -77,8 +77,8 @@
     <Compile Include="Garage\Service\ThSplitLightEdgeService.cs" />
     <Compile Include="Garage\Service\ThSplitLineService.cs" />
     <Compile Include="Garage\Service\ThWireOffsetDataService.cs" />
-    <Compile Include="Garage\ThGarageLightCommon.cs" />
-    <Compile Include="Garage\ThGarageLightUtils.cs" />
+    <Compile Include="Common\ThGarageLightCommon.cs" />
+    <Compile Include="Common\ThGarageLightUtils.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
     <Compile Include="ParkingStall\Business\Block\BlockInsertDBExtension.cs" />

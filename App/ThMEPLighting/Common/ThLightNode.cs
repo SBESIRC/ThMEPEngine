@@ -1,7 +1,7 @@
 ﻿using Autodesk.AutoCAD.Geometry;
 using System.Text.RegularExpressions;
 
-namespace ThMEPLighting.Garage.Model
+namespace ThMEPLighting.Common
 {
     public class ThLightNode
     {

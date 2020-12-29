@@ -13,6 +13,7 @@ using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
 using DotNetARX;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Service
 {

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Engine
 {

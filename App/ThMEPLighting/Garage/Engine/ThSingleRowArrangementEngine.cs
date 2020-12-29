@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
 using DotNetARX;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Engine
 {

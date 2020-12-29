@@ -8,6 +8,7 @@ using ThMEPLighting.Garage.Worker;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Engine
 {

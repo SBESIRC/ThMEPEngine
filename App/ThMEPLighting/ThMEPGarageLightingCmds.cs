@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Garage.Service;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting
 {

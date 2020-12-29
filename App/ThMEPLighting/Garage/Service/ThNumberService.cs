@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service

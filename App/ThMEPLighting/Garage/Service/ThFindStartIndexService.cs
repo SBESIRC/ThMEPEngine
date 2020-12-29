@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ThMEPLighting.Garage.Model;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Garage.Worker;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Service
 {
