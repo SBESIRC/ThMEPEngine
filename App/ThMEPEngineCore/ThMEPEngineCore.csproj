@@ -192,8 +192,6 @@
     <Compile Include="Service\Hvac\ThHvacDbModelManager.cs" />
     <Compile Include="Service\Hvac\ThHvacCommon.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelExtension.cs" />
-    <Compile Include="Service\Hvac\ThHvacDuctFittingDbExtension.cs" />
-    <Compile Include="Service\Hvac\ThHvacValveDbExtension.cs" />
     <Compile Include="Service\ThLaneLineService.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
@@ -225,7 +223,6 @@
     <Compile Include="Service\ThOtherDbExtension.cs" />
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
-    <Compile Include="Service\Hvac\ThHvacDuctFittingFactoryService.cs" />
     <Compile Include="Service\ThParkingStallDbExtension.cs" />
     <Compile Include="Service\ThParkingStallLayerManager.cs" />
     <Compile Include="Service\ThRainPipeDbExtension.cs" />

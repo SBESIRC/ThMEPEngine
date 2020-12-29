@@ -2,11 +2,11 @@
 using System.Linq;
 using DotNetARX;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
-using System.Collections.Generic;
 
-namespace ThMEPEngineCore.Service.Hvac
+namespace ThMEPHVAC.CAD
 {
     public class ThHvacDuctFittingFactoryService
     {

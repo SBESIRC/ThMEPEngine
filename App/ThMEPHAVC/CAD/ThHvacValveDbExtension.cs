@@ -1,14 +1,13 @@
-﻿using Linq2Acad;
-using DotNetARX;
+﻿using System;
 using System.Linq;
-using System.Text;
+using Linq2Acad;
+using DotNetARX;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System;
+using ThMEPEngineCore.Service.Hvac;
 
-namespace ThMEPEngineCore.Service.Hvac
+namespace ThMEPHVAC.CAD
 {
     public static class ThHvacValveDbExtension
     {

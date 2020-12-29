@@ -42,25 +42,6 @@ namespace ThMEPHAVC.CAD
             InletStartEdge = tempinletfirstedge;
             OutletCenterLineGraph = CreateLineGraph(fanmodel.FanOutletBasePoint, ref tempoutletfirstedge);
             OutletStartEdge = tempoutletfirstedge;
-
-            //test
-            //using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            //{
-            //    Line infirst = new Line()
-            //    {
-            //        StartPoint = InletStartEdge.Source.Position,
-            //        EndPoint = InletStartEdge.Target.Position,
-            //        ColorIndex = 1
-            //    };
-            //    Line outfirst = new Line()
-            //    {
-            //        StartPoint = OutletStartEdge.Source.Position,
-            //        EndPoint = OutletStartEdge.Target.Position,
-            //        ColorIndex = 1
-            //    };
-            //    acadDatabase.ModelSpace.Add(infirst);
-            //    acadDatabase.ModelSpace.Add(outfirst);
-            //}
         }
 
         private AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> CreateLineGraph(Point3d basepoint, ref ThDuctEdge<ThDuctVertex> startedge)

@@ -6,13 +6,12 @@ using System.Linq;
 using System.Text;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using ThCADExtension;
 using ThMEPEngineCore.Model.Hvac;
-using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.Duct;
 using TianHua.Publics.BaseCode;
 using Linq2Acad;
 using ThMEPEngineCore.Model;
+using ThMEPHVAC.IO;
 
 namespace ThMEPHVAC.CAD
 {
@@ -22,12 +21,6 @@ namespace ThMEPHVAC.CAD
         public double Height { get; set; }
         public double NormalAngle { get; set; }
         public Point3d OpingBasePoint { get; set; }
-    }
-    public class InOutDuctPositionInfo
-    {
-        public string WorkingScenario { get; set; }
-        public string InnerRoomDuctType { get; set; }
-        public string OuterRoomDuctType { get; set; }
     }
     public class ThInletOutletDuctDrawEngine
     {
@@ -90,10 +83,8 @@ namespace ThMEPHVAC.CAD
 
         public void SetInletOutletSize(string scenario, string inouttype, string innerromeductinfo, string outerromeductinfo)
         {
-            var inOutDuctPositionInfo = ReadWord(ThCADCommon.DuctInOutMapping());
-            var ductPositionObjs = FuncJson.Deserialize<List<InOutDuctPositionInfo>>(inOutDuctPositionInfo);
-
-            var innerRomDuctPosition = ductPositionObjs.First(d=>d.WorkingScenario == scenario).InnerRoomDuctType;
+            var jsonReader = new ThDuctInOutMappingJsonReader();
+            var innerRomDuctPosition = jsonReader.Mappings.First(d=>d.WorkingScenario == scenario).InnerRoomDuctType;
             if (innerRomDuctPosition == "进风段")
             {
                 InletDuctWidth = innerromeductinfo.Split('x').First().NullToDouble();
@@ -319,12 +310,11 @@ namespace ThMEPHVAC.CAD
             {
                 foreach (var Segment in DuctSegments)
                 {
-                    foreach (DBObject dbobj in Segment.Representation)
+                    foreach (Curve dbobj in Segment.Representation)
                     {
-                        var dbent = dbobj as Entity;
-                        dbent.Layer = layer;
-                        dbent.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(dbent);
+                        dbobj.Layer = layer;
+                        dbobj.TransformBy(Segment.Matrix);
+                        acadDatabase.ModelSpace.Add(dbobj);
                     }
                 }
             }

@@ -1,20 +1,10 @@
-﻿using System.IO;
-using System.Linq;
-using System.Text;
-using ThCADExtension;
-using TianHua.Publics.BaseCode;
+﻿using System.Linq;
 using System.Collections.Generic;
 using TianHua.FanSelection.Function;
+using ThMEPHVAC.IO;
 
 namespace ThMEPHVAC.CAD
 {
-    public class DuctSizeParameter
-    {
-        public double DuctWidth { get; set; }
-        public double DuctHeight { get; set; }
-        public double SectionArea { get; set; }
-        public double AspectRatio { get; set; }
-    }
     public class ThDuctSelectionEngine
     {
         public List<DuctSizeParameter> DefaultCandidateDucts { get; set; }
@@ -36,10 +26,8 @@ namespace ThMEPHVAC.CAD
         private List<DuctSizeParameter> GetDefaultCandidateDucts()
         {
             double calculateDuctArea = FanModel.FanVolume / 3600.0 / ThFanSelectionUtils.GetDefaultAirSpeed(FanModel.FanScenario);
-            var ductParameterString = ReadWord(ThCADCommon.DuctSizeParametersPath());
-            var ductParameterObjs = FuncJson.Deserialize<List<DuctSizeParameter>>(ductParameterString);
-
-            var biggerDucts = ductParameterObjs.Where(d => d.SectionArea > calculateDuctArea).OrderBy(d => d.SectionArea);
+            var jsonReader = new ThDuctParameterJsonReader();
+            var biggerDucts = jsonReader.Parameters.Where(d => d.SectionArea > calculateDuctArea).OrderBy(d => d.SectionArea);
             var satisfiedDucts = biggerDucts.Where(d=> d.SectionArea - calculateDuctArea < 0.15 * calculateDuctArea).ToList();
 
             if (satisfiedDucts.Count == 0)
@@ -52,22 +40,6 @@ namespace ThMEPHVAC.CAD
             }
             return satisfiedDucts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
         }
-        public string ReadWord(string _Path)
-        {
-            try
-            {
-                using (StreamReader _StreamReader = new StreamReader(_Path, Encoding.Default))
-                {
-                    return _StreamReader.ReadToEnd();
-                }
-            }
-            catch
-            {
-                return string.Empty;
-
-            }
-        }
-
         public List<string> GetDefaultDuctsSizeString()
         {
             List<string> DuctsSizeString = new List<string>();

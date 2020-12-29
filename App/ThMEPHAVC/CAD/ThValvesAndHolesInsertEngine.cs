@@ -8,6 +8,7 @@ using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.Entity;
 
 namespace ThMEPHVAC.CAD
 {
