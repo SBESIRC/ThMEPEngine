@@ -53,6 +53,7 @@
     <Compile Include="NTS\ThCADCoreNTSService.cs" />
     <Compile Include="NTS\ThCADCoreNTSSimplify.cs" />
     <Compile Include="NTS\ThCADCoreNTSSpatialIndex.cs" />
+    <Compile Include="NTS\ThCADCoreNTSTriangleExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSTriangulate.cs" />
     <Compile Include="NTS\ThCADCoreNTSPolygonExtension.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
