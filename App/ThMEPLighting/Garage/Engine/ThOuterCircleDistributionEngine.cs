@@ -36,7 +36,10 @@ namespace ThMEPLighting.Garage.Engine
             CenterLineEdges = centerLineEdges;
             ArrangeParameter = arrangeParameter;
             WireOffsetDataService = wireOffsetDataService;
-            Start = centerPorts.First();
+            if(centerPorts.Count>0)
+            {
+                Start = centerPorts.First();
+            }               
             FirstLightEdges = new List<ThLightEdge>();
         }
         public ThOuterCircleDistributionEngine(
@@ -47,7 +50,10 @@ namespace ThMEPLighting.Garage.Engine
             Point3d start)
             : this(centerPorts, centerLineEdges, arrangeParameter, wireOffsetDataService)
         {
-            Start = CenterPorts.OrderBy(o=>o.DistanceTo(start)).First();
+            if(CenterPorts.Count>0)
+            {
+                Start = CenterPorts.OrderBy(o => o.DistanceTo(start)).First();
+            }
         }
         public void Dispose()
         {           

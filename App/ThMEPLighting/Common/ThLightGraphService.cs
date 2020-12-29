@@ -95,7 +95,7 @@ namespace ThMEPLighting.Common
         {
             var edges = Edges.Where(o => 
             o.Edge.IsLink(Start,ThGarageLightCommon.RepeatedPointDistance)).ToList();
-            return edges.Count == 1 ? edges.First() : null;
+            return edges.Count > 0 ? edges.First() : null;
         }
         /// <summary>
         /// 查找相连的线

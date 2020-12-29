@@ -25,7 +25,15 @@ namespace ThMEPLighting.Garage.Engine
             if (Ports.Count>0)
             {
                 Start=Ports.First();
-            }            
+            } 
+            else
+            {
+                var dxLightEdges = LineEdges.Where(o => o.IsDX);
+                if (dxLightEdges.Count() > 0)
+                {
+                    Start = dxLightEdges.First().Edge.StartPoint;
+                }
+            }
             ArrangeParameter = arrangeParameter;            
         }
         protected ThBuildNumberEngine(

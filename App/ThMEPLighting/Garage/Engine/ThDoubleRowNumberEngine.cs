@@ -45,9 +45,13 @@ namespace ThMEPLighting.Garage.Engine
             LineEdges.ForEach(o => centerLightEdges.Add(o));
             var centerPorts = new List<Point3d>();
             Ports.ForEach(o => centerPorts.Add(o));
-            Point3d centerStart = Start;
+            Point3d centerStart = Start;         
             do
             {
+                if (centerLightEdges.Where(o => o.IsDX).Count() == 0)
+                {
+                    break;
+                }
                 //外圈布灯,用于创建布灯点或从Cad图纸上获取等安装位置
                 var firstLightEdges = new List<ThLightEdge>();                
                 using (var posDistributeEngine = new ThOuterCircleDistributionEngine(
@@ -73,7 +77,15 @@ namespace ThMEPLighting.Garage.Engine
                 {
                     centerStart = centerPorts.First();
                 }
-            } while (centerLightEdges.Count>0 && centerPorts.Count>0);
+                else if (centerLightEdges.Where(o => o.IsDX).Count() > 0)
+                {
+                    centerStart = centerLightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
+                }
+                else
+                {
+                    break;
+                }
+            } while (centerLightEdges.Count>0);
 
             //对2号线灯编号
             BuildSecondLightEdges();
