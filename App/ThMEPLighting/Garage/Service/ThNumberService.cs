@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using ThMEPLighting.Common;
+﻿using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service
@@ -10,8 +8,7 @@ namespace ThMEPLighting.Garage.Service
         protected ThLightGraphService LightGraph { get; set; }
         protected ThLightArrangeParameter ArrangeParameter { get; set; }
         protected ThNumberService()
-        {
-           
+        {           
         }
         protected ThNumberService(
             ThLightGraphService lightGraph,

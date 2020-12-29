@@ -1,12 +1,10 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
 using DotNetARX;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPLighting.Common;
+using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Engine
 {

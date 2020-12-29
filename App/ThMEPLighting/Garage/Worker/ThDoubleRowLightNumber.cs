@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using ThMEPLighting.Common;
-using ThMEPLighting.Garage.Model;
+﻿using ThMEPLighting.Common;
+using System.Collections.Generic;
 
 namespace ThMEPLighting.Garage.Worker
 {

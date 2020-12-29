@@ -10,8 +10,6 @@ using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPLighting.Garage.Model;
-using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
