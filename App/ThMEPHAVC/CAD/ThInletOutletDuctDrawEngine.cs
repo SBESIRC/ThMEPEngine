@@ -38,7 +38,6 @@ namespace ThMEPHVAC.CAD
         public double InletDuctHeight { get; set; }
         public double OutletDuctHeight { get; set; }
         public string FanInOutType { get; set; }
-        public string ModelLayer { get; set; }
         public List<ThIfcDistributionElement> InletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> OutletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> DuctReducings { get; set; }
@@ -54,7 +53,6 @@ namespace ThMEPHVAC.CAD
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph
         )
         {
-            ModelLayer = fanmodel.Data.BlockLayer;
             InletOpening = new FanOpeningInfo()
             {
                 Width = fanmodel.FanInlet.Width,
@@ -82,11 +80,14 @@ namespace ThMEPHVAC.CAD
             SetOutletElbows();
             SetInletDucts();
             SetOutletDucts();
-            DrawDuctInDWG(InletDuctSegments);
-            DrawDuctInDWG(OutletDuctSegments);
-            DrawDuctInDWG(DuctReducings);
-            DrawDuctInDWG(DuctElbows);
+            string modelLayer = fanmodel.Data.BlockLayer;
+            string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
+            DrawDuctInDWG(InletDuctSegments, ductLayer);
+            DrawDuctInDWG(OutletDuctSegments, ductLayer);
+            DrawDuctInDWG(DuctReducings, ductLayer);
+            DrawDuctInDWG(DuctElbows, ductLayer);
         }
+
         public void SetInletOutletSize(string scenario, string inouttype, string innerromeductinfo, string outerromeductinfo)
         {
             var inOutDuctPositionInfo = ReadWord(ThCADCommon.DuctInOutMapping());
@@ -111,10 +112,7 @@ namespace ThMEPHVAC.CAD
 
         public void SetInletDucts()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
-            {
-                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
-            };
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
             //对于进口为上进的，首先需要画出管口俯视图
             if (FanInOutType.Contains("上进"))
@@ -183,10 +181,7 @@ namespace ThMEPHVAC.CAD
 
         public void SetOutletDucts()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
-            {
-                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
-            };
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
             //对于出口为上出或下出的，首先需要画出管口俯视图
             if (FanInOutType.Contains("上出") || FanInOutType.Contains("下出"))
@@ -256,10 +251,7 @@ namespace ThMEPHVAC.CAD
 
         public void SetInletElbows()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
-            {
-                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
-            };
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
             foreach (var edge in InletCenterLineGraph.Edges)
             {
@@ -291,10 +283,7 @@ namespace ThMEPHVAC.CAD
 
         public void SetOutletElbows()
         {
-            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService()
-            {
-                LayerName = ThDuctUtils.DuctLayerName(ModelLayer),
-            };
+            var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
             foreach (var edge in OutletCenterLineGraph.Edges)
             {
@@ -324,7 +313,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments)
+        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string layer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -333,6 +322,7 @@ namespace ThMEPHVAC.CAD
                     foreach (DBObject dbobj in Segment.Representation)
                     {
                         var dbent = dbobj as Entity;
+                        dbent.Layer = layer;
                         dbent.TransformBy(Segment.Matrix);
                         acadDatabase.ModelSpace.Add(dbent);
                     }

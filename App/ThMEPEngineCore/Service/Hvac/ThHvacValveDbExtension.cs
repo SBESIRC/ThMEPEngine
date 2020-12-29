@@ -31,7 +31,7 @@ namespace ThMEPEngineCore.Service.Hvac
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
-                //currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
             }
         }
 
