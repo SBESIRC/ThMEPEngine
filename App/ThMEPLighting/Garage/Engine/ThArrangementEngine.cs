@@ -11,6 +11,7 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
+using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Engine
@@ -87,6 +88,8 @@ namespace ThMEPLighting.Garage.Engine
                     splitLineEngine.Split();                   
                     splitLineEngine.Results.ForEach(o=> DxLines.AddRange(o.Value));                    
                 }
+                //过滤无需布灯的短线
+                DxLines = ThRemoveShortCenterLineService.Remove(DxLines, ArrangeParameter.MinimumEdgeLength);
             }
         }
         protected ObjectIdList Print(List<ThLightEdge> lightEdges)

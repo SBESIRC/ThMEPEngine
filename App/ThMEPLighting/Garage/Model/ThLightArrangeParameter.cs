@@ -39,5 +39,9 @@ namespace ThMEPLighting.Garage.Model
         public int PaperRatio { get; set; }
 
         public ThQueryLightBlockService LightBlockQueryService { get; set; }
+        /// <summary>
+        /// 最小边的长度
+        /// </summary>
+        public double MinimumEdgeLength { get; set; }
     }
 }

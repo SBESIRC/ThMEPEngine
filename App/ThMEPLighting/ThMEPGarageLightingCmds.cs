@@ -110,7 +110,8 @@ namespace ThMEPLighting
                     RacywaySpace = 2700,
                     IsSingleRow = GetArrangeWay(),
                     LoopNumber = 4,
-                    PaperRatio = 100
+                    PaperRatio = 100,
+                    MinimumEdgeLength=2000
                 };
                 var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();

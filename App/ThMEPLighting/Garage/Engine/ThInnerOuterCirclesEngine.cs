@@ -56,17 +56,11 @@ namespace ThMEPLighting.Garage.Engine
                     }
                 }             
             }
-
-            //对于较短直线(小于偏移值 eg. offsetDistance=2700/2.0）
-            //此直线在T型或十字处,且一端未连接任何物体
-            var removeLines = new List<Line>();
-            removeLines.AddRange(splitDxLines);
-            removeLines.AddRange(splitFdxLines);
-            var validLines = ThRemoveShortCenterLineService.Remove(removeLines, offsetDistance);
-
+           
             //单位化
             var nomalLines = new List<Line>();
-            validLines.ForEach(o => nomalLines.Add(o.Normalize()));
+            splitDxLines.ForEach(o => nomalLines.Add(o.Normalize()));
+            splitFdxLines.ForEach(o => nomalLines.Add(o.Normalize()));
 
             //创建1号、2号线
             nomalLines.ForEach(o =>
