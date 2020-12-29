@@ -9,7 +9,7 @@ namespace ThMEPHVAC.IO
         {
             try
             {
-                using (StreamReader _StreamReader = new StreamReader(_Path, Encoding.Default))
+                using (StreamReader _StreamReader = new StreamReader(_Path, Encoding.UTF8))
                 {
                     return _StreamReader.ReadToEnd();
                 }

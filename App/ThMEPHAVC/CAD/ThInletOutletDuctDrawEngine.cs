@@ -319,22 +319,5 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-
-        public string ReadWord(string _Path)
-        {
-            try
-            {
-                using (StreamReader _StreamReader = new StreamReader(_Path, Encoding.UTF8))
-                {
-                    return _StreamReader.ReadToEnd();
-                }
-            }
-            catch
-            {
-                return string.Empty;
-
-            }
-        }
-
     }
 }
