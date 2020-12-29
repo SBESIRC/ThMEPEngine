@@ -1,11 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical.EmgLight.Service
+namespace ThMEPLighting.EmgLight.Service
 {
     public class StructureLayoutServiceLight
     {

@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical.EmgLight.Service
+namespace ThMEPLighting.EmgLight.Service
 {
     class StructUtils
     {
@@ -29,9 +26,9 @@ namespace ThMEPElectrical.EmgLight.Service
 
             //不需要前后延伸
             Point3d p1 = line.StartPoint + moveDir * distance;
-            Point3d p2 = line.EndPoint  + moveDir * distance;
-            Point3d p3 = line.EndPoint  - moveDir * distance;
-            Point3d p4 = line.StartPoint  - moveDir * distance;
+            Point3d p2 = line.EndPoint + moveDir * distance;
+            Point3d p3 = line.EndPoint - moveDir * distance;
+            Point3d p4 = line.StartPoint - moveDir * distance;
 
 
             Polyline polyline = new Polyline() { Closed = true };
@@ -40,10 +37,10 @@ namespace ThMEPElectrical.EmgLight.Service
             polyline.AddVertexAt(0, p3.ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(0, p4.ToPoint2D(), 0, 0, 0);
 
-                return polyline;
+            return polyline;
         }
 
-         /// <summary>
+        /// <summary>
         /// 大概计算一下构建中点
         /// </summary>
         /// <param name="colums"></param>

@@ -1,24 +1,22 @@
-﻿using NFox.Cad;
-using AcHelper;
+﻿using AcHelper;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Runtime;
+using Dreambuild.AutoCAD;
 using Linq2Acad;
+using NFox.Cad;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
-using ThMEPElectrical.Model;
-using ThMEPEngineCore.Engine;
-using ThMEPElectrical.EmgLight;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
-using System;
-using ThMEPElectrical.Business.Procedure;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using ThMEPLighting.EmgLight;
+using ThMEPLighting.EmgLight.Service;
 
-namespace ThMEPElectrical
+namespace ThMEPLighting
 {
     public class ThEmgLightCmds
     {
@@ -60,9 +58,10 @@ namespace ThMEPElectrical
                 }
 
                 //处理外包框线
-                var plines = HandleFrame(frameLst);
+                //
+              //  var plines = HandleFrame(frameLst);
 
-                foreach (var plFrame in plines)
+                foreach (Polyline plFrame in frameLst)
                 {
 
                     ////删除原有构建
@@ -121,18 +120,18 @@ namespace ThMEPElectrical
         /// </summary>
         /// <param name="frameLst"></param>
         /// <returns></returns>
-        private List<Polyline> HandleFrame(List<Curve> frameLst)
-        {
-            var polygonInfos = NoUserCoordinateWorker.MakeNoUserCoordinateWorker(frameLst);
-            List<Polyline> resPLines = new List<Polyline>();
-            foreach (var pInfo in polygonInfos)
-            {
-                resPLines.Add(pInfo.ExternalProfile);
-                resPLines.AddRange(pInfo.InnerProfiles);
-            }
+        //private List<Polyline> HandleFrame(List<Curve> frameLst)
+        //{
+        //    var polygonInfos = NoUserCoordinateWorker.MakeNoUserCoordinateWorker(frameLst);
+        //    List<Polyline> resPLines = new List<Polyline>();
+        //    foreach (var pInfo in polygonInfos)
+        //    {
+        //        resPLines.Add(pInfo.ExternalProfile);
+        //        resPLines.AddRange(pInfo.InnerProfiles);
+        //    }
 
-            return resPLines;
-        }
+        //    return resPLines;
+        //}
 
         /// <summary>
         /// 获取车道线
@@ -143,7 +142,7 @@ namespace ThMEPElectrical
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
-                .Where(o => o.Layer == ThMEPCommon.LANELINE_LAYER_NAME);
+                .Where(o => o.Layer == ThMEPLightingCommon.LANELINE_LAYER_NAME);
             laneLines.ForEach(x => objs.Add(x));
 
             //var bufferPoly = polyline.Buffer(1)[0] as Polyline;

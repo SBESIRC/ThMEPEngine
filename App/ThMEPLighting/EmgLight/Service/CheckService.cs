@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
 using Linq2Acad;
+using ThCADCore.NTS;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-
-namespace ThMEPElectrical.EmgLight.Service
+namespace ThMEPLighting.EmgLight.Service
 {
     public class CheckService
     {
@@ -128,7 +124,7 @@ namespace ThMEPElectrical.EmgLight.Service
                 //var newPoly = column.Buffer(200)[0] as Polyline;
                 var layoutInfo = layoutServiceLight.GetColumnParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
 
-                
+
                 //选与防火框不相交且在防火框内
                 if (layoutInfo != null)
                 {
@@ -156,7 +152,7 @@ namespace ThMEPElectrical.EmgLight.Service
         /// <param name="expandLength"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public List<Polyline> FilterWalls(List<Polyline> walls,Line line, Polyline frame)
+        public List<Polyline> FilterWalls(List<Polyline> walls, Line line, Polyline frame)
         {
             //List<Polyline> layoutWalls = new List<Polyline>();
             //layoutWalls = FilterColumns(walls, line, frame);

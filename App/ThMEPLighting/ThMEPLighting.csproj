@@ -24,6 +24,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmgLight\LayoutWithParkingLineForLight.cs" />
+    <Compile Include="EmgLight\Service\CheckService.cs" />
+    <Compile Include="EmgLight\Service\InsertLightService.cs" />
+    <Compile Include="EmgLight\Service\StructureLayoutServiceLight.cs" />
+    <Compile Include="EmgLight\Service\StructureServiceLight.cs" />
+    <Compile Include="EmgLight\Service\StructUtils.cs" />
     <Compile Include="Garage\Engine\ThArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildRacewayEngine.cs" />
@@ -108,8 +114,10 @@
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GroupLightViewer.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\ParkLightAngleCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThEmgLightCmds.cs" />
     <Compile Include="ThMEPGarageLightingCmds.cs" />
     <Compile Include="ThMEPLightingApp.cs" />
+    <Compile Include="ThMEPLightingCommon.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="ParkingStall\Worker\LightAdjustor\" />

@@ -1,28 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotNetARX;
+﻿using DotNetARX;
 using Linq2Acad;
-using ThMEPElectrical.Model;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
 
-
-
-
-namespace ThMEPElectrical.EmgLight
+namespace ThMEPLighting.EmgLight.Service
 {
-   public static  class InsertLightService
+    public static class InsertLightService
     {
         private static double scaleNum = 100;
         public static void InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo)
         {
             using (var db = AcadDatabase.Active())
             {
-              //  db.Database.ImportModel();
+                //  db.Database.ImportModel();
                 foreach (var ptDic in insertPtInfo)
                 {
                     foreach (var ptInfo in ptDic.Value)
@@ -47,8 +38,8 @@ namespace ThMEPElectrical.EmgLight
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                    ThMEPCommon.BroadcastLayerName,
-                    ThMEPCommon.BroadcastBlockName,
+                    ThMEPLightingCommon.BroadcastLayerName,
+                    ThMEPLightingCommon.BroadcastBlockName,
                     pt,
                     new Scale3d(scaleNum),
                     rotateAngle,
@@ -134,11 +125,11 @@ namespace ThMEPElectrical.EmgLight
             {
 
 
-                var pointC = new Circle(pt,new Vector3d(0,0,1), 200);
+                var pointC = new Circle(pt, new Vector3d(0, 0, 1), 200);
                 pointC.ColorIndex = ci;
                 pointC.LineWeight = lw;
-              acdb.ModelSpace.Add(pointC);
-                
+                acdb.ModelSpace.Add(pointC);
+
             }
         }
 

@@ -1,15 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using NFox.Cad;
-using ThMEPElectrical.EmgLight.Service;
 using Linq2Acad;
 using ThCADCore.NTS;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
+using ThMEPLighting.EmgLight.Service;
 
-namespace ThMEPElectrical.EmgLight
+namespace ThMEPLighting.EmgLight
 {
     class LayoutWithParkingLineForLight
     {
@@ -30,7 +30,7 @@ namespace ThMEPElectrical.EmgLight
         double TolUniformSideLenth = 0.6;
         int TolAvgColumnDist = 7900;
         int TolLightRangeMin = 4000;
-        int TolLightRengeMax = 8500;
+        int TolLightRengeMax = 7000;
 
 
         /// <summary>
@@ -79,28 +79,29 @@ namespace ThMEPElectrical.EmgLight
                 InsertLightService.ShowGeometry(usefulWalls[0], 142, LineWeight.LineWeight035);
                 InsertLightService.ShowGeometry(usefulWalls[1], 11, LineWeight.LineWeight035);
 
+
+                ////找出平均的一边. -1:no side 0:left 1:right.
+                List<List<double>> columnDistList;
+                int uniformSide = FindUniformDistributionSide(ref usefulColumns, lines, out columnDistList);
+
                 if (debug == true)
                 {
-                    ////找出平均的一边. -1:no side 0:left 1:right.
-                    List<List<double>> columnDistList;
-                    int uniformSide = FindUniformDistributionSide(ref usefulColumns, lines, out columnDistList);
-
-                    if (uniformSide == 0 || uniformSide == 1)
-                    {
-
-                        LayoutUniformSide(usefulColumns[uniformSide], lines, columnDistList[uniformSide], ref LayoutTemp);
-                        LayoutOppositeSide(usefulColumns, usefulWalls, uniformSide, lines, columnDistList, ref LayoutTemp);
-
-                    }
-                    else
-                    {
-
-
-                        LayoutBothNonUniformSide(usefulColumns, usefulWalls, lines, ref LayoutTemp);
-                    }
-                    Layout.AddRange(LayoutTemp);
-                    InsertLightService.ShowGeometry(Layout, 10, LineWeight.LineWeight050);
+                    uniformSide = -1;
                 }
+
+                if (uniformSide == 0 || uniformSide == 1)
+                {
+
+                    LayoutUniformSide(usefulColumns[uniformSide], lines, columnDistList[uniformSide], ref LayoutTemp);
+                    LayoutOppositeSide(usefulColumns, usefulWalls, uniformSide, lines, columnDistList, ref LayoutTemp);
+
+                }
+                else
+                {
+                    LayoutBothNonUniformSide(usefulColumns, usefulWalls, lines, ref LayoutTemp);
+                }
+                Layout.AddRange(LayoutTemp);
+                InsertLightService.ShowGeometry(Layout, 10, LineWeight.LineWeight050);
 
 
             }
@@ -409,7 +410,7 @@ namespace ThMEPElectrical.EmgLight
 
                 if (timeToCheck == 0 && l.ToCurve3d().IsOn(prjPt) == true)
                 {
-                    InsertLightService.ShowGeometry(prjPt, 221);
+                    //  InsertLightService.ShowGeometry(prjPt, 221);
                     distToEnd = prjPt.DistanceTo(l.EndPoint);
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, l.EndPoint.ToPoint2D(), 0, 0, 0);
@@ -423,7 +424,7 @@ namespace ThMEPElectrical.EmgLight
                 }
 
             }
-            InsertLightService.ShowGeometry(PolylineToEnd, 221, LineWeight.LineWeight040);
+            //InsertLightService.ShowGeometry(PolylineToEnd, 221, LineWeight.LineWeight040);
 
             return distToEnd;
 
@@ -548,8 +549,10 @@ namespace ThMEPElectrical.EmgLight
             }
             ////从一边开始
             List<List<Polyline>> usefulSturct = new List<List<Polyline>>();
+            usefulSturct.Add(new List<Polyline>());
             usefulSturct[0].AddRange(Columns[0]);
             usefulSturct[0].AddRange(Walls[0]);
+            usefulSturct.Add(new List<Polyline>());
             usefulSturct[1].AddRange(Columns[1]);
             usefulSturct[1].AddRange(Walls[1]);
 
@@ -558,37 +561,149 @@ namespace ThMEPElectrical.EmgLight
 
             bool bEnd = false;
             Point3d ptOnLine;
-            Point3d ptNextOnLine;
+            Point3d ExtendLineStart;
             int currSide = 0;
-            int currOppSide = 0;
-            double distLeft = distToLine(Lines, StructUtils.GetStructCenter(usefulSturct[0][0]), out ptOnLine);
-            double distRight = distToLine(Lines, StructUtils.GetStructCenter(usefulSturct[1][0]), out ptOnLine);
-            currSide = distLeft <= distRight ? 0 : 1;
-            currOppSide = currSide == 0 ? 1 : 0;
-            LayoutTemp.Add(usefulSturct[currSide][0]);
 
+
+            //第一个点
+            double distLeft = distToLine(Lines, StructUtils.GetStructCenter(usefulSturct[0][0]), out var ptOnLineLeft);
+            double distRight = distToLine(Lines, StructUtils.GetStructCenter(usefulSturct[1][0]), out var ptOnLineRight);
+
+            if (distLeft <= distRight)
+            {
+                currSide = 0;
+                ptOnLine = ptOnLineLeft;
+            }
+            else
+            {
+                currSide = 1;
+                ptOnLine = ptOnLineRight;
+            }
+
+            LayoutTemp.Add(usefulSturct[currSide][0]);
+            currSide = currSide == 0 ? 1 : 0;
+
+
+            var moveDir = (Lines[0].EndPoint - Lines[0].StartPoint).GetNormal();
+            bool bBothSide = false;
             while (bEnd == false)
             {
-                if (distToLineEnd(Lines,ptOnLine,out var PolylineToEnd) >=TolLightRengeMax )
+                //判断到车段线末尾距离是否还需要加灯
+                if (distToLineEnd(Lines, ptOnLine, out var PolylineToEnd) >= TolLightRengeMax)
                 {
-                 
+
+                    //建立当前点距离tolLightRengeMax前后TolLightRangeMin框
+                    ExtendLineStart = PolylineToEnd.GetPointAtDist(TolLightRengeMax - TolLightRangeMin);
+
+                    var ExtendLineEnd = ExtendLineStart + moveDir * ((TolLightRengeMax - TolLightRangeMin) * 2);
+                    var ExtendLine = new Line(ExtendLineStart, ExtendLineEnd);
+                    var ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane);
+
+                    Polyline tempStruct;
+                    //找框内对面是否有位置布灯
+                    var bAdded = FindPolyInExtendPoly(ExtendPoly, usefulSturct[currSide], PolylineToEnd, TolLightRengeMax, out tempStruct);
+                    if (bAdded == true)
+                    {
+                        //框内对面有位置布灯
+                        LayoutTemp.Add(tempStruct);
+                        currSide = currSide == 0 ? 1 : 0;
+
+                        if (bBothSide == true)
+                        {
+                            FindPolyInExtendPoly(ExtendPoly, usefulSturct[currSide], PolylineToEnd, TolLightRengeMax, out tempStruct);
+                            if (bAdded == true)
+                            {
+                                //框内对面有位置布灯
+                                LayoutTemp.Add(tempStruct);
+                                currSide = currSide == 0 ? 1 : 0;
+
+                            }
+
+                        }
+                        distToLine(Lines, StructUtils.GetStructCenter(tempStruct), out ptOnLine);
+                    }
+                    else
+                    {
+                        //框内对面没有位置布灯, 在自己边框内找
+                        currSide = currSide == 0 ? 1 : 0;
+                        bAdded = FindPolyInExtendPoly(ExtendPoly, usefulSturct[currSide], PolylineToEnd, TolLightRengeMax, out tempStruct);
+
+                        if (bAdded == true)
+                        {
+                            //框内自己边有位置布灯
+                            LayoutTemp.Add(tempStruct);
+                            currSide = currSide == 0 ? 1 : 0;
+                            distToLine(Lines, StructUtils.GetStructCenter(tempStruct), out ptOnLine);
+                        }
+                        else
+                        {
+                            //框内自己边没有, 找起点对面TolLightRengeMin内的布灯位置
+                            ExtendLineStart = ptOnLine;
+                            ExtendLineEnd = ExtendLineStart + moveDir * TolLightRangeMin;
+                            ExtendLine = new Line(ExtendLineStart, ExtendLineEnd);
+                            ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane);
+                            currSide = currSide == 0 ? 1 : 0;
+                            //找框内对面是否有位置布灯
+                            bAdded = FindPolyInExtendPoly(ExtendPoly, usefulSturct[currSide], PolylineToEnd, TolLightRangeMin, out tempStruct);
+
+                            if (bAdded == true)
+                            {
+                                //框内对面有位置布灯
+                                LayoutTemp.Add(tempStruct);
+                                currSide = currSide == 0 ? 1 : 0;
+                                distToLine(Lines, StructUtils.GetStructCenter(tempStruct), out ptOnLine);
+                                ptOnLine = PolylineToEnd.GetPointAtDist(TolLightRengeMax);
+                            }
+                            else
+                            {
+                                //啥都没有
+                                ptOnLine = PolylineToEnd.GetPointAtDist(TolLightRengeMax);
+
+                            }
+
+                            bBothSide = true;
+
+                        }
+
+                    }
+
+                }
+                else
+                {
+                    bEnd = true;
                 }
 
             }
 
-            Polyline a = new Polyline();
-            a.GetCentroidPoint();
-
-
             LayoutTemp = LayoutTemp.Distinct().ToList();
         }
-
-        private List<Polyline> everyOtherColumns(List<Polyline> Columns)
+        private bool FindPolyInExtendPoly(Polyline ExtendPoly, List<Polyline> usefulSturct, Polyline PolylineToEnd, double Tol, out Polyline tempStruct)
         {
-            var everyOtherColumns = Columns.Where(x => (Columns.IndexOf(x) % 2) == 0).ToList();
+            bool bReturn = false;
+            var inExtendStruct = usefulSturct.Where(x =>
+               {
+                   return ExtendPoly.Contains(x) || ExtendPoly.Intersects(x);
+               }).ToList();
 
-            return everyOtherColumns;
+            tempStruct = null;
+            if (inExtendStruct.Count > 0)
+            {
+                //框内对面有位置布灯
+                var ExtendLineStart = PolylineToEnd.GetPointAtDist(Tol);
+                findCloseStruct(inExtendStruct, ExtendLineStart, out double minDist, out tempStruct);
+
+                bReturn = true;
+
+            }
+            else
+            {
+                bReturn = false;
+            }
+
+            return bReturn;
         }
+
+
 
 
 

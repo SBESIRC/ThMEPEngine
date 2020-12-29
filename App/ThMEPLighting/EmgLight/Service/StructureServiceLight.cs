@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
-using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
-using Autodesk.AutoCAD.Geometry;
+using ThCADCore.NTS;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical.EmgLight.Service
+namespace ThMEPLighting.EmgLight.Service
 {
     class StructureServiceLight
     {
@@ -42,7 +39,7 @@ namespace ThMEPElectrical.EmgLight.Service
             var resPolys = lines.SelectMany(x =>
             {
                 var linePoly = StructUtils.ExpandLine(x, tol);
-               
+
                 return polys.Where(y =>
                 {
                     var polyCollection = new DBObjectCollection() { y };
@@ -62,9 +59,9 @@ namespace ThMEPElectrical.EmgLight.Service
         /// <returns></returns>
         public List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines, double length)
         {
-            
-         var   linePolys= StructUtils.createRecBuffer(lines, length);
-            
+
+            var linePolys = StructUtils.createRecBuffer(lines, length);
+
             List<Polyline> upPolyline = new List<Polyline>();
             List<Polyline> downPolyline = new List<Polyline>();
             foreach (var poly in polyline)
@@ -83,7 +80,7 @@ namespace ThMEPElectrical.EmgLight.Service
             return new List<List<Polyline>>() { upPolyline, downPolyline };
         }
 
-       
+
 
     }
 }
