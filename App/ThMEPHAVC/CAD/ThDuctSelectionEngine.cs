@@ -31,7 +31,7 @@ namespace ThMEPHVAC.CAD
             RecommendOuterDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Max(f => f.AspectRatio));
             RecommendOuterDuctSize = RecommendOuterDuct.DuctWidth + "x" + RecommendOuterDuct.DuctHeight;
             RecommendInnerDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Min(f => f.AspectRatio));
-            RecommendInnerDuctSize = RecommendInnerDuct.DuctWidth + "x" + RecommendOuterDuct.DuctHeight;
+            RecommendInnerDuctSize = RecommendInnerDuct.DuctWidth + "x" + RecommendInnerDuct.DuctHeight;
         }
         private List<DuctSizeParameter> GetDefaultCandidateDucts()
         {

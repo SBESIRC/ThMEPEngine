@@ -119,6 +119,10 @@ namespace ThMEPHVAC.CAD
                         valves.AddRange(new List<ThValve> { checkvalve, hole, firevalve });
                         break;
                     default:
+                        firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
+                        hole.ValveOffsetFromCenter = -hole.Length;
+                        checkvalve.ValveOffsetFromCenter = 0;
+                        valves.AddRange(new List<ThValve> { checkvalve, hole, firevalve });
                         break;
                 }
 
