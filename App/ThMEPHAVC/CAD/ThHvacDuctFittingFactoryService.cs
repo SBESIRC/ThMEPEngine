@@ -110,7 +110,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.StartCenterPoint + new Vector3d(0, -0.5 * parameters.SmallEndWidth, 0),
                 EndPoint = parameters.StartCenterPoint + new Vector3d(0, 0.5 * parameters.SmallEndWidth, 0),
-                ColorIndex = 2
             };
 
             //创建两侧侧壁轮廓线
@@ -118,13 +117,11 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = smallendline.StartPoint,
                 EndPoint = smallendline.StartPoint + new Vector3d(0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(15 * Math.PI / 180), -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0),
-                ColorIndex = 1
             };
             Line rightsideline = new Line()
             {
                 StartPoint = smallendline.EndPoint,
                 EndPoint = smallendline.EndPoint + new Vector3d(0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(15 * Math.PI / 180), 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0),
-                ColorIndex = 1
             };
 
             //创建大端的端线
@@ -132,7 +129,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = leftsideline.EndPoint,
                 EndPoint = rightsideline.EndPoint,
-                ColorIndex = 2
             };
 
             return new DBObjectCollection()
@@ -148,59 +144,44 @@ namespace ThMEPHVAC.CAD
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
             //创建弯头内外侧圆弧
-            Arc outerarc = new Arc(parameters.CenterPoint, 1.5 * parameters.PipeOpenWidth, 0, elbowengle)
-            {
-                ColorIndex = 1
-            };
-            Arc innerarc = new Arc(parameters.CenterPoint, 0.5 * parameters.PipeOpenWidth, 0, elbowengle)
-            {
-                ColorIndex = 1
-            };
+            Arc outerarc = new Arc(parameters.CenterPoint, 1.5 * parameters.PipeOpenWidth, 0, elbowengle);
+            Arc innerarc = new Arc(parameters.CenterPoint, 0.5 * parameters.PipeOpenWidth, 0, elbowengle);
             //创建弯头两端的50mm延申段
             Line outerendextendline = new Line()
             {
                 StartPoint = outerarc.EndPoint,
                 EndPoint = outerarc.EndPoint + new Vector3d(-50 * Math.Sin(elbowengle), 50 * Math.Cos(elbowengle), 0),
-                ColorIndex = 1
             };
             Line innerendextendline = new Line()
             {
                 StartPoint = innerarc.EndPoint,
                 EndPoint = innerarc.EndPoint + new Vector3d(-50 * Math.Sin(elbowengle), 50 * Math.Cos(elbowengle), 0),
-                ColorIndex = 1
             };
             Line outerstartextendline = new Line()
             {
                 StartPoint = outerarc.StartPoint,
                 EndPoint = outerarc.StartPoint + new Vector3d(0, -50, 0),
-                ColorIndex = 1
             };
             Line innerstartextendline = new Line()
             {
                 StartPoint = innerarc.StartPoint,
                 EndPoint = innerarc.StartPoint + new Vector3d(0, -50, 0),
-                ColorIndex = 1
             };
 
             //创建弯头中心线圆弧
-            Arc centerarc = new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle)
-            {
-                ColorIndex = 5
-            };
+            Arc centerarc = new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle);
 
             //创建弯头端线
             Line startplaneline = new Line()
             {
                 StartPoint = innerarc.StartPoint,
                 EndPoint = outerarc.StartPoint,
-                ColorIndex = 2
             };
 
             Line endplaneline = new Line()
             {
                 StartPoint = innerarc.EndPoint,
                 EndPoint = outerarc.EndPoint,
-                ColorIndex = 2
             };
 
             //创建两端50mm延申段的端线
@@ -208,14 +189,12 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = outerstartextendline.EndPoint,
                 EndPoint = innerstartextendline.EndPoint,
-                ColorIndex = 2
             };
 
             Line endextendsealline = new Line()
             {
                 StartPoint = outerendextendline.EndPoint,
                 EndPoint = innerendextendline.EndPoint,
-                ColorIndex = 2
             };
 
             parameters.SingleLength = endextendsealline.GetPointAtDist(0.5* endextendsealline.Length).DistanceTo(parameters.CornerPoint);
@@ -243,7 +222,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter)+50, 0.5*parameters.BranchDiameter, 0),
                 EndPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter) +50, -0.5*parameters.BranchDiameter, 0),
-                ColorIndex = 2
             };
 
             //创建主路小端端线
@@ -251,7 +229,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.CenterPoint + new Vector3d(0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
                 EndPoint = parameters.CenterPoint + new Vector3d(-0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
-                ColorIndex = 2
             };
 
             //创建主路大端端线
@@ -259,7 +236,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.CenterPoint + new Vector3d(0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
                 EndPoint = parameters.CenterPoint + new Vector3d(-0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
-                ColorIndex = 2
             };
 
             //创建支路50mm直管段
@@ -267,21 +243,16 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = branchEndLine.StartPoint,
                 EndPoint = branchEndLine.StartPoint + new Vector3d(-50,0,0),
-                ColorIndex = 1
             };
             Line branchBelowStraightLine = new Line()
             {
                 StartPoint = branchEndLine.EndPoint,
                 EndPoint = branchEndLine.EndPoint + new Vector3d(-50, 0, 0),
-                ColorIndex = 1
             };
 
             //创建支路下侧圆弧过渡段
             Point3d circleCenter = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter+parameters.BranchDiameter), -parameters.BranchDiameter, 0);
-            Arc branchInnerArc = new Arc(circleCenter, 0.5 * parameters.BranchDiameter, 0.5 * Math.PI, Math.PI)
-            {
-                ColorIndex = 1
-            };
+            Arc branchInnerArc = new Arc(circleCenter, 0.5 * parameters.BranchDiameter, 0.5 * Math.PI, Math.PI);
 
             //创建支路上侧圆弧过渡段
             //首先创建主路上端小管道的内侧线作为辅助线以便于后续计算圆弧交点
@@ -310,7 +281,6 @@ namespace ThMEPHVAC.CAD
                     }
                 }
                 branchOuterArc.CreateArcSCE(branchUpStraightLine.EndPoint, circleCenter, Intersectpointinarc);
-                branchOuterArc.ColorIndex = 1;
             }
 
             //创建主路外侧管线
@@ -318,13 +288,11 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = mainBigEndLine.EndPoint,
                 EndPoint = mainBigEndLine.EndPoint + new Vector3d(0,50,0),
-                ColorIndex = 1
             };
             Line outerObliqueLine = new Line()
             {
                 StartPoint = outerStraightLine.EndPoint,
                 EndPoint = mainSmallEndLine.EndPoint,
-                ColorIndex = 1
             };
 
             //创建主路内侧管线
@@ -332,13 +300,11 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = mainSmallEndLine.StartPoint,
                 EndPoint = branchOuterArc.EndPoint,
-                ColorIndex = 1
             };
             Line innerBelowLine = new Line()
             {
                 StartPoint = mainBigEndLine.StartPoint,
                 EndPoint = branchInnerArc.EndPoint,
-                ColorIndex = 1
             };
 
 
@@ -365,7 +331,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.Center + new Vector3d(-0.5* parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
                 EndPoint = parameters.Center + new Vector3d(0.5 * parameters.BigEndWidth, -50 - parameters.SideBigEndWidth, 0),
-                ColorIndex = 2
             };
 
             //创建主路小端的端线
@@ -373,35 +338,26 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
                 EndPoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
-                ColorIndex = 2
             };
 
 
             //创建主路大端与侧路大端的圆弧过渡段
             Point3d bigEndCircleCenter = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth), -parameters.SideBigEndWidth, 0);
-            Arc bigInnerArc = new Arc(bigEndCircleCenter, 0.5 * parameters.SideBigEndWidth, 0, 0.5 * Math.PI)
-            {
-                ColorIndex = 1
-            };
+            Arc bigInnerArc = new Arc(bigEndCircleCenter, 0.5 * parameters.SideBigEndWidth, 0, 0.5 * Math.PI);
             //创建主路大端与侧路小端的圆弧过渡段
             Point3d smallEndCircleCenter = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth), -parameters.SideSmallEndWidth, 0);
-            Arc smallInnerArc = new Arc(smallEndCircleCenter, 0.5 * parameters.SideSmallEndWidth, 0.5 * Math.PI, Math.PI)
-            {
-                ColorIndex = 1
-            };
+            Arc smallInnerArc = new Arc(smallEndCircleCenter, 0.5 * parameters.SideSmallEndWidth, 0.5 * Math.PI, Math.PI);
 
             //创建主路大端圆弧过渡与大端端线端点连接线
             Line mainBigEndPipeLine = new Line()
             {
                 StartPoint = mainBigEndLine.StartPoint,
                 EndPoint = bigInnerArc.StartPoint,
-                ColorIndex = 1
             };
             Line sideBigEndPipeLine = new Line()
             {
                 StartPoint = mainBigEndLine.EndPoint,
                 EndPoint = smallInnerArc.EndPoint,
-                ColorIndex = 1
             };
 
             //创建侧路大端的端线
@@ -409,7 +365,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth+ parameters.SideBigEndWidth) - 50,-0.5 * parameters.SideBigEndWidth,0),
                 EndPoint = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth) - 50, 0.5 * parameters.SideBigEndWidth, 0),
-                ColorIndex = 2
             };
 
             //创建侧路大端50mm直管段
@@ -417,13 +372,11 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = sideBigEndLine.StartPoint,
                 EndPoint = sideBigEndLine.StartPoint + new Vector3d(50,0,0),
-                ColorIndex = 1
             };
             Line sideBigEndInnerPipeLine = new Line()
             {
                 StartPoint = sideBigEndLine.EndPoint,
                 EndPoint = sideBigEndLine.EndPoint + new Vector3d(50, 0, 0),
-                ColorIndex = 1
             };
 
             //创建侧路大端的外侧圆弧过渡段
@@ -447,7 +400,6 @@ namespace ThMEPHVAC.CAD
             {
                 Point3d intersectpoint = bigEndIntersects[0];
                 bigOutterArc.CreateArcSCE(intersectpoint, bigEndCircleCenter, sideBigEndOuterPipeLine.EndPoint);
-                bigOutterArc.ColorIndex = 1;
                 mainSmallToSideBigArc.StartPoint = mainSmallEndLine.StartPoint;
                 mainSmallToSideBigArc.EndPoint = bigOutterArc.StartPoint;
             }
@@ -457,7 +409,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, -0.5 * parameters.SideSmallEndWidth, 0),
                 EndPoint = parameters.Center + new Vector3d(0.5 * (parameters.BigEndWidth + parameters.SideSmallEndWidth) + 50, 0.5 * parameters.SideSmallEndWidth, 0),
-                ColorIndex = 2
             };
 
             //创建侧路小端50mm直管段
@@ -465,13 +416,11 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = sideSmallEndLine.StartPoint,
                 EndPoint = sideSmallEndLine.StartPoint + new Vector3d(-50, 0, 0),
-                ColorIndex = 1
             };
             Line sideSmallEndOuterPipeLine = new Line()
             {
                 StartPoint = sideSmallEndLine.EndPoint,
                 EndPoint = sideSmallEndLine.EndPoint + new Vector3d(-50, 0, 0),
-                ColorIndex = 1
             };
 
             //创建侧路小端的外侧圆弧过渡段
@@ -495,7 +444,6 @@ namespace ThMEPHVAC.CAD
             {
                 Point3d intersectpoint = smallEndIntersects[0];
                 smallOutterArc.CreateArcSCE(sideSmallEndOuterPipeLine.EndPoint, smallEndCircleCenter, intersectpoint);
-                smallOutterArc.ColorIndex = 1;
                 mainSmallToSideSmallArc.StartPoint = mainSmallEndLine.EndPoint;
                 mainSmallToSideSmallArc.EndPoint = smallOutterArc.EndPoint;
             }
@@ -528,25 +476,21 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
-                ColorIndex = 1
             };
             Line LowerLine = new Line()
             {
                 StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
-                ColorIndex = 1
             };
             Line LeftLine = new Line()
             {
                 StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
-                ColorIndex = 1
             };
             Line RightLine = new Line()
             {
                 StartPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
                 EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
-                ColorIndex = 1
             };
             return new DBObjectCollection()
             {
@@ -563,7 +507,6 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = new Point3d(-parameters.Length / 2.0, 0, 0),
                 EndPoint = new Point3d(parameters.Length / 2.0, 0, 0),
-                ColorIndex = 1
             };
 
             //偏移出管轮廓线
@@ -577,13 +520,11 @@ namespace ThMEPHVAC.CAD
             {
                 StartPoint = ductUpperLine.StartPoint,
                 EndPoint = ductBelowLine.StartPoint,
-                ColorIndex = 1
             };
             Line ductBelowEndLine = new Line()
             {
                 StartPoint = ductUpperLine.EndPoint,
                 EndPoint = ductBelowLine.EndPoint,
-                ColorIndex = 1
             };
 
             return new DBObjectCollection()
