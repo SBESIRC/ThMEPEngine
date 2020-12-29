@@ -6,12 +6,12 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPLighting.Common;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -80,20 +80,12 @@ namespace ThMEPLighting.Garage.Engine
                     fdxWashLines, ThGarageLightCommon.RepeatedPointDistance);
                 var dxMergeLines =ThLaneLineSimplifier.LineMerge(
                     dxTrimLines, ThGarageLightCommon.RepeatedPointDistance);
-
+                FdxLines.AddRange(fdxMergeLines);
                 //分割
-                var splitLines = new List<Line>();
-                splitLines.AddRange(fdxMergeLines);
-                splitLines.AddRange(dxMergeLines);
-
-                var dxSplitLines = new List<Line>();
-                var fdxSplitLines= new List<Line>();
-                using (var splitLineEngine = new ThSplitLineEngine(splitLines))
+                using (var splitLineEngine = new ThSplitLineEngine(dxMergeLines))
                 {
-                    splitLineEngine.Split();
-                    var res=splitLineEngine.Results.Where(o => dxMergeLines.Contains(o.Key));
-                    splitLineEngine.Results.Where(o=>dxMergeLines.IsContains(o.Key)).ForEach(o=> DxLines.AddRange(o.Value));
-                    splitLineEngine.Results.Where(o => fdxMergeLines.IsContains(o.Key)).ForEach(o => FdxLines.AddRange(o.Value));
+                    splitLineEngine.Split();                   
+                    splitLineEngine.Results.ForEach(o=> DxLines.AddRange(o.Value));                    
                 }
             }
         }
