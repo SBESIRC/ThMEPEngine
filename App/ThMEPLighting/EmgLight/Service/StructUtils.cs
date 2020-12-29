@@ -69,7 +69,8 @@ namespace ThMEPLighting.EmgLight.Service
         /// <returns></returns>
         public static List<Polyline> createRecBuffer(List<Line> lines, double length)
         {
-            var newLines = lines.Select(x => x.Normalize()).ToList();
+            //var newLines = lines.Select(x => x.Normalize()).ToList();
+            var newLines = lines;
             List<Polyline> linePolys = new List<Polyline>();
 
             foreach (var line in newLines)

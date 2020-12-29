@@ -103,6 +103,8 @@ namespace ThMEPLighting
                     //主车道布置信息
                     LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
                     var layoutInfo = layoutService.LayoutLight(plFrame, parkingLines, columns, walls);
+                     layoutInfo = layoutService.LayoutLight(plFrame, otherPLines, columns, walls);
+
                     //InsertLightService.InsertSprayBlock(layoutInfo);
 
                     ////副车道布置信息

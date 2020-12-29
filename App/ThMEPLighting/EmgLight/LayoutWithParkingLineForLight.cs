@@ -50,7 +50,8 @@ namespace ThMEPLighting.EmgLight
             foreach (var l in mainLines)
             {
                 List<Polyline> LayoutTemp = new List<Polyline>();
-                var lines = l.Select(x => x.Normalize()).ToList();
+                //var lines = l.Select(x => x.Normalize()).ToList();
+                var lines = l;
                 ParkingLinesService parkingLinesService = new ParkingLinesService();
                 var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
 
@@ -84,10 +85,10 @@ namespace ThMEPLighting.EmgLight
                 List<List<double>> columnDistList;
                 int uniformSide = FindUniformDistributionSide(ref usefulColumns, lines, out columnDistList);
 
-                if (debug == true)
-                {
-                    uniformSide = -1;
-                }
+                //if (debug == true)
+                //{
+                //    uniformSide = -1;
+                //}
 
                 if (uniformSide == 0 || uniformSide == 1)
                 {
@@ -225,8 +226,10 @@ namespace ThMEPLighting.EmgLight
                     0.0, 0.0, 0.0, 1.0
                 });
 
-            var orderColumns = Columns.OrderBy(x => StructUtils.GetStructCenter(x).TransformBy(matrix).X).ToList();
+           // var orderColumns = Columns.OrderBy(x => StructUtils.GetStructCenter(x).TransformBy(matrix).X).ToList();
 
+           //debug , why it needs inverse??? how to build the matrix?????
+            var orderColumns = Columns.OrderBy(x => StructUtils.GetStructCenter(x).TransformBy(matrix.Inverse()).X).ToList();
             return orderColumns;
         }
 
@@ -404,13 +407,13 @@ namespace ThMEPLighting.EmgLight
 
             foreach (Line l in lines)
             {
-                //debug : GetClosestPointTo: not project point, if the point out of line, it will use the end-point
+                //debug : if the wall's center point is project out of the lines
                 prjPt = l.GetClosestPointTo(pt1, true);
-
+             
 
                 if (timeToCheck == 0 && l.ToCurve3d().IsOn(prjPt) == true)
                 {
-                    //  InsertLightService.ShowGeometry(prjPt, 221);
+                   
                     distToEnd = prjPt.DistanceTo(l.EndPoint);
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, l.EndPoint.ToPoint2D(), 0, 0, 0);
@@ -424,8 +427,7 @@ namespace ThMEPLighting.EmgLight
                 }
 
             }
-            //InsertLightService.ShowGeometry(PolylineToEnd, 221, LineWeight.LineWeight040);
-
+           
             return distToEnd;
 
         }
@@ -445,7 +447,7 @@ namespace ThMEPLighting.EmgLight
 
             foreach (Line l in lines)
             {
-                //debug : GetClosestPointTo: not project point, if the point out of line, it will use the end-point
+                //debug : if the point can project to multiple lines, it will stop at the first time
                 prjPt = l.GetClosestPointTo(pt1, true);
 
 
@@ -476,7 +478,7 @@ namespace ThMEPLighting.EmgLight
 
             foreach (Line l in lines)
             {
-                //debug : GetClosestPointTo: not project point, if the point out of line, it will use the end-point
+               
                 prjPt1 = l.GetClosestPointTo(pt1, true);
                 prjPt2 = l.GetClosestPointTo(pt2, true);
 
@@ -589,6 +591,8 @@ namespace ThMEPLighting.EmgLight
             while (bEnd == false)
             {
                 //判断到车段线末尾距离是否还需要加灯
+                InsertLightService.ShowGeometry(ptOnLine, 221);
+
                 if (distToLineEnd(Lines, ptOnLine, out var PolylineToEnd) >= TolLightRengeMax)
                 {
 
@@ -602,6 +606,7 @@ namespace ThMEPLighting.EmgLight
                     Polyline tempStruct;
                     //找框内对面是否有位置布灯
                     var bAdded = FindPolyInExtendPoly(ExtendPoly, usefulSturct[currSide], PolylineToEnd, TolLightRengeMax, out tempStruct);
+           
                     if (bAdded == true)
                     {
                         //框内对面有位置布灯
@@ -624,6 +629,7 @@ namespace ThMEPLighting.EmgLight
                     }
                     else
                     {
+                        //debug, not tested yet
                         //框内对面没有位置布灯, 在自己边框内找
                         currSide = currSide == 0 ? 1 : 0;
                         bAdded = FindPolyInExtendPoly(ExtendPoly, usefulSturct[currSide], PolylineToEnd, TolLightRengeMax, out tempStruct);
@@ -637,6 +643,7 @@ namespace ThMEPLighting.EmgLight
                         }
                         else
                         {
+                            //debug, not tested yet
                             //框内自己边没有, 找起点对面TolLightRengeMin内的布灯位置
                             ExtendLineStart = ptOnLine;
                             ExtendLineEnd = ExtendLineStart + moveDir * TolLightRangeMin;
@@ -648,6 +655,7 @@ namespace ThMEPLighting.EmgLight
 
                             if (bAdded == true)
                             {
+                                //debug, not tested yet
                                 //框内对面有位置布灯
                                 LayoutTemp.Add(tempStruct);
                                 currSide = currSide == 0 ? 1 : 0;
@@ -656,6 +664,7 @@ namespace ThMEPLighting.EmgLight
                             }
                             else
                             {
+                                //debug, not tested yet
                                 //啥都没有
                                 ptOnLine = PolylineToEnd.GetPointAtDist(TolLightRengeMax);
 
@@ -672,7 +681,7 @@ namespace ThMEPLighting.EmgLight
                 {
                     bEnd = true;
                 }
-
+            
             }
 
             LayoutTemp = LayoutTemp.Distinct().ToList();
@@ -702,10 +711,6 @@ namespace ThMEPLighting.EmgLight
 
             return bReturn;
         }
-
-
-
-
 
     }
 }

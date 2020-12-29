@@ -113,7 +113,7 @@ namespace ThMEPLighting.EmgLight.Service
             }
 
             List<Polyline> layoutColumns = new List<Polyline>();
-            line = line.Normalize();
+            //line = line.Normalize();
 
             var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
 
@@ -172,7 +172,7 @@ namespace ThMEPLighting.EmgLight.Service
             }
 
             List<Polyline> layoutColumns = new List<Polyline>();
-            line = line.Normalize();
+            //line = line.Normalize();
 
             var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
 
