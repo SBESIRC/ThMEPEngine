@@ -26,7 +26,7 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var polyline = PolylineJig();
-                if (polyline.Area == 0.0)
+                if (polyline == null)
                 {
                     return;
                 }
@@ -43,7 +43,7 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 var polyline = PolylineJig();
-                if (polyline.Area == 0.0)
+                if (polyline == null)
                 {
                     return;
                 }
@@ -55,8 +55,7 @@ namespace ThMEPLighting
             }
         }
         private Polyline PolylineJig()
-        {
-            Polyline polyline = new Polyline();
+        {            
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 try
@@ -71,22 +70,31 @@ namespace ThMEPLighting
                     } while (jigRes.Status == PromptStatus.OK);
                     if (jigRes.Status == PromptStatus.Cancel)
                     {
-                        return polyline;
+                        return null;
                     }
                     var wcsVertexes = jigger.WcsVertexes;
-                    for (int i = 0; i < wcsVertexes.Count; i++)
+                    if (wcsVertexes.Count > 1)
                     {
-                        Point3d pt3d = wcsVertexes[i];
-                        Point2d pt2d = new Point2d(pt3d.X, pt3d.Y);
-                        polyline.AddVertexAt(i, pt2d, 0, 0, 0);
+                        Polyline polyline = new Polyline();
+                        for (int i = 0; i < wcsVertexes.Count; i++)
+                        {
+                            Point3d pt3d = wcsVertexes[i];
+                            Point2d pt2d = new Point2d(pt3d.X, pt3d.Y);
+                            polyline.AddVertexAt(i, pt2d, 0, 0, 0);
+                        }
+                        return polyline;
                     }
+                    else
+                    {
+                        return null;
+                    }                    
                 }
                 catch (System.Exception ex)
                 {
                     Active.Editor.WriteMessage(ex.ToString());
                 }
             }
-            return polyline;
+            return null;
         }
         [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
         public void ThCdzm()
