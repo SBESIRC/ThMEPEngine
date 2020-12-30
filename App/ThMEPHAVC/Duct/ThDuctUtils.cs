@@ -29,11 +29,71 @@ namespace ThMEPHVAC.Duct
             switch (modelLayer)
             {
                 case "H-DUAL-FBOX":
-                    return ThHvacCommon.FIRE_VALVE_LAYER_DUAL;
+                    return ThHvacCommon.H_DAPP_DDAMP;
                 case "H-FIRE-FBOX":
-                    return ThHvacCommon.FIRE_VALVE_LAYER_FIRE;
+                    return ThHvacCommon.H_DAPP_FDAMP;
                 case "H-EQUP-FBOX":
-                    return ThHvacCommon.FIRE_VALVE_LAYER_EQUP;
+                    return ThHvacCommon.H_DAPP_EDAMP;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        public static string AirValveLayerName(string modelLayer)
+        {
+            switch (modelLayer)
+            {
+                case "H-DUAL-FBOX":
+                    return ThHvacCommon.H_DAPP_DDAMP;
+                case "H-FIRE-FBOX":
+                    return ThHvacCommon.H_DAPP_FDAMP;
+                case "H-EQUP-FBOX":
+                    return ThHvacCommon.H_DAPP_EDAMP;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        public static string SilencerLayerName(string modelLayer)
+        {
+            switch (modelLayer)
+            {
+                case "H-DUAL-FBOX":
+                    return ThHvacCommon.H_DAPP_DDAMP;
+                case "H-FIRE-FBOX":
+                    return ThHvacCommon.H_DAPP_FDAMP;
+                case "H-EQUP-FBOX":
+                    return ThHvacCommon.H_DAPP_EDAMP;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        public static string HoseLayerName(string modelLayer)
+        {
+            switch (modelLayer)
+            {
+                case "H-DUAL-FBOX":
+                    return ThHvacCommon.H_DAPP_DDAMP;
+                case "H-FIRE-FBOX":
+                    return ThHvacCommon.H_DAPP_FDAMP;
+                case "H-EQUP-FBOX":
+                    return ThHvacCommon.H_DAPP_EDAMP;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        public static string FlangeLayerName(string modelLayer)
+        {
+            switch (modelLayer)
+            {
+                case "H-DUAL-FBOX":
+                    return ThHvacCommon.H_DAPP_DAPP;
+                case "H-FIRE-FBOX":
+                    return ThHvacCommon.H_DAPP_FAPP;
+                case "H-EQUP-FBOX":
+                    return ThHvacCommon.H_DAPP_AAPP;
                 default:
                     throw new NotSupportedException();
             }

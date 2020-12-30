@@ -44,7 +44,7 @@ namespace ThMEPHVAC.Entity
             //进风段
             if (Parameters.ValveGroupPosion == ValveGroupPosionType.Inlet)
             {
-                var silencer = CreateSilencer();
+                var silencer = CreateSilencer(fanlayer);
                 var hole = CreateHole();
                 var firevalve = CreateFireValve(fanlayer);
                 silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
@@ -69,8 +69,8 @@ namespace ThMEPHVAC.Entity
             //出风段
             else
             {
-                var silencer = CreateSilencer();
-                var checkvalve = CreateCheckValve();
+                var silencer = CreateSilencer(fanlayer);
+                var checkvalve = CreateCheckValve(fanlayer);
                 var hole = CreateHole();
                 var firevalve = CreateFireValve(fanlayer);
 
@@ -119,7 +119,7 @@ namespace ThMEPHVAC.Entity
             return valves;
         }
 
-        private ThValve CreateSilencer()
+        private ThValve CreateSilencer(string fanlayer)
         {
             return new ThValve()
             {
@@ -128,7 +128,7 @@ namespace ThMEPHVAC.Entity
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.SILENCER_BLOCK_NAME,
-                ValveBlockLayer = ThHvacCommon.SILENCER_LAYER,
+                ValveBlockLayer = ThDuctUtils.SilencerLayerName(fanlayer),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
@@ -168,7 +168,7 @@ namespace ThMEPHVAC.Entity
             };
         }
 
-        private ThValve CreateCheckValve()
+        private ThValve CreateCheckValve(string fanlayer)
         {
             return new ThValve()
             {
@@ -177,7 +177,7 @@ namespace ThMEPHVAC.Entity
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
-                ValveBlockLayer = ThHvacCommon.AIRVALVE_LAYER,
+                ValveBlockLayer = ThDuctUtils.AirValveLayerName(fanlayer),
                 ValveVisibility = ThDuctUtils.CheckValveModelName(),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
@@ -185,7 +185,7 @@ namespace ThMEPHVAC.Entity
             };
         }
 
-        private ThValve CreateElectricValve()
+        private ThValve CreateElectricValve(string fanlayer)
         {
             return new ThValve()
             {
@@ -194,7 +194,7 @@ namespace ThMEPHVAC.Entity
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
-                ValveBlockLayer = ThHvacCommon.AIRVALVE_LAYER,
+                ValveBlockLayer = ThDuctUtils.AirValveLayerName(fanlayer),
                 ValveVisibility = ThDuctUtils.ElectricValveModelName(),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
