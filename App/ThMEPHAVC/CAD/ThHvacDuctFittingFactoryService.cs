@@ -113,16 +113,26 @@ namespace ThMEPHVAC.CAD
             };
 
             //创建两侧侧壁轮廓线
-            Line leftsideline = new Line()
+            double reducinglength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(20 * Math.PI / 180);
+            Line leftsideline = new Line();
+            Line rightsideline = new Line();
+            leftsideline.StartPoint = smallendline.StartPoint;
+            rightsideline.StartPoint = smallendline.EndPoint;
+            if (reducinglength < 100)
             {
-                StartPoint = smallendline.StartPoint,
-                EndPoint = smallendline.StartPoint + new Vector3d(0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(15 * Math.PI / 180), -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0),
-            };
-            Line rightsideline = new Line()
+                leftsideline.EndPoint = smallendline.StartPoint + new Vector3d(100, -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
+                rightsideline.EndPoint = smallendline.EndPoint + new Vector3d(100, 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
+            }
+            else if (reducinglength > 1000)
             {
-                StartPoint = smallendline.EndPoint,
-                EndPoint = smallendline.EndPoint + new Vector3d(0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(15 * Math.PI / 180), 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0),
-            };
+                leftsideline.EndPoint = smallendline.StartPoint + new Vector3d(1000, -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
+                rightsideline.EndPoint = smallendline.EndPoint + new Vector3d(1000, 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
+            }
+            else
+            {
+                leftsideline.EndPoint = smallendline.StartPoint + new Vector3d(reducinglength, -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
+                rightsideline.EndPoint = smallendline.EndPoint + new Vector3d(reducinglength, 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
+            }
 
             //创建大端的端线
             Line bigendline = new Line()
