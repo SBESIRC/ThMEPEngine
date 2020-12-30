@@ -110,7 +110,7 @@ namespace ThMEPHVAC.Duct
             {
                 case "消防排烟":
                 case "消防排烟兼平时排风":
-                    return "280度排烟阀（带输出信号）FDHS";
+                    return "280度排烟阀（带输出信号）FDSH";
                 case "厨房排油烟":
                     return "150度防火阀";
                 default:
