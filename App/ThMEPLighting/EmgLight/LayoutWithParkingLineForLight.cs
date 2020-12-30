@@ -52,10 +52,10 @@ namespace ThMEPLighting.EmgLight
                 List<Polyline> LayoutTemp = new List<Polyline>();
                 //var lines = l.Select(x => x.Normalize()).ToList();
                 var lines = l;
-                ParkingLinesService parkingLinesService = new ParkingLinesService();
-                var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
+                //ParkingLinesService parkingLinesService = new ParkingLinesService();
+                //var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
 
-                //找到构建上可布置面,用第一条车道线的头尾判定,可能有bug
+                //找到构建上可布置面,用第一条车道线的头尾判定
                 CheckService checkService = new CheckService();
                 var filterColmuns = checkService.FilterColumns(columns, lines.First(), frame);
                 var filterWalls = checkService.FilterWalls(walls, lines.First(), frame);
@@ -238,7 +238,7 @@ namespace ThMEPLighting.EmgLight
         /// <param name="Layout"></param>
         private void LayoutUniformSide(List<Polyline> Columns, List<Line> Lines, List<double> distList, out List<Polyline> uniformSideLayout, ref List<Polyline> LayoutTemp)
         {
-            Polyline FirstLayout = checkIfHasFirstLight(LayoutTemp, Lines);
+            Polyline FirstLayout = getLayoutedStructrue(LayoutTemp, Lines);
             if (FirstLayout != null)
             {
                 ////车线起始点已有布灯,第一个点顺延
@@ -334,7 +334,7 @@ namespace ThMEPLighting.EmgLight
             {
                 //均匀边每个分布
                 distToLine(lines, StructUtils.GetStructCenter(uniformSideLayout[0]), out CloestPt);
-                findCloseStruct(usefulSturct, CloestPt, out minDist, out closestStruct);
+                findClosestStruct(usefulSturct, CloestPt, out minDist, out closestStruct);
                 outputTemp.Add(closestStruct);
             }
 
@@ -346,9 +346,9 @@ namespace ThMEPLighting.EmgLight
                     //均匀边隔柱分布
                     //distAlongLine(lines, StructUtils.GetStructCenter(uniformSideLayout[i - 1]), StructUtils.GetStructCenter(uniformSideLayout[i]), out midPt);
                     findMidPointOnLine(lines, StructUtils.GetStructCenter(uniformSideLayout[i - 1]), StructUtils.GetStructCenter(uniformSideLayout[i]), out midPt);
-                    //InsertLightService.ShowGeometry(midPt, 221);
+             
                     //遍历所有对面柱墙,可能会很慢.可在中点做buffer优化
-                    findCloseStruct(usefulSturct, midPt, out minDist, out closestStruct);
+                    findClosestStruct(usefulSturct, midPt, out minDist, out closestStruct);
                     outputTemp.Add(closestStruct);
 
 
@@ -357,7 +357,7 @@ namespace ThMEPLighting.EmgLight
                 {
                     //均匀边每个分布
                     distToLine(lines, StructUtils.GetStructCenter(uniformSideLayout[i]), out CloestPt);
-                    findCloseStruct(usefulSturct, CloestPt, out minDist, out closestStruct);
+                    findClosestStruct(usefulSturct, CloestPt, out minDist, out closestStruct);
                     outputTemp.Add(closestStruct);
 
                 }
@@ -370,7 +370,7 @@ namespace ThMEPLighting.EmgLight
             if (distToLinesEnd > TolLightRengeMax)
             {
                 var LastPrjPtOnLine = LastPartLines.GetPointAtDist(TolLightRengeMax);
-                findCloseStruct(usefulSturct, LastPrjPtOnLine, out minDist, out closestStruct);
+                findClosestStruct(usefulSturct, LastPrjPtOnLine, out minDist, out closestStruct);
                 outputTemp.Add(closestStruct);
             }
 
@@ -379,7 +379,7 @@ namespace ThMEPLighting.EmgLight
             LayoutTemp.AddRange(outputTemp.Distinct().ToList());
 
         }
-        private void findCloseStruct(List<Polyline> structure, Point3d Pt, out double minDist, out Polyline closestStruct)
+        private void findClosestStruct(List<Polyline> structure, Point3d Pt, out double minDist, out Polyline closestStruct)
         {
             minDist = 10000;
             closestStruct = structure[0];
@@ -411,7 +411,6 @@ namespace ThMEPLighting.EmgLight
             {
                 //debug : if the wall's center point is project out of the lines
                 prjPt = l.GetClosestPointTo(pt1, true);
-
 
                 if (timeToCheck == 0 && l.ToCurve3d().IsOn(prjPt) == true)
                 {
@@ -558,7 +557,7 @@ namespace ThMEPLighting.EmgLight
 
         }
 
-        private Polyline checkIfHasFirstLight(List<Polyline> Layout, List<Line> Lines)
+        private Polyline getLayoutedStructrue(List<Polyline> Layout, List<Line> Lines)
         {
             Polyline first = null;
             if (Layout.Count > 0)
@@ -570,7 +569,7 @@ namespace ThMEPLighting.EmgLight
 
         private void LayoutBothNonUniformSide(List<List<Polyline>> Columns, List<List<Polyline>> Walls, List<Line> Lines, ref List<Polyline> LayoutTemp)
         {
-            Polyline FirstLayout = checkIfHasFirstLight(LayoutTemp, Lines);
+            Polyline FirstLayout = getLayoutedStructrue(LayoutTemp, Lines);
             if (FirstLayout != null)
             {
                 ////车线起始点已有布灯,第一个点顺延
@@ -728,7 +727,7 @@ namespace ThMEPLighting.EmgLight
             {
                 //框内对面有位置布灯
                 var ExtendLineStart = PolylineToEnd.GetPointAtDist(Tol);
-                findCloseStruct(inExtendStruct, ExtendLineStart, out double minDist, out tempStruct);
+                findClosestStruct(inExtendStruct, ExtendLineStart, out double minDist, out tempStruct);
 
                 bReturn = true;
 
