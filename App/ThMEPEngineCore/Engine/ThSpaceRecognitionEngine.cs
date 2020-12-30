@@ -42,6 +42,7 @@ namespace ThMEPEngineCore.Engine
             {
                 //Load Data
                 SpaceNames = RecognizeSpaceNameText(database, polygon);
+                var count=SpaceNames.Where(o => o.TextString.Contains("RFS")).Count();
                 SpaceBoundaries = RecognizeSpaceBoundary(database, polygon);
                 //BuildSpaceSpatialIndex();
                 //Build Container
@@ -98,7 +99,7 @@ namespace ThMEPEngineCore.Engine
                 var containers = SelectTextIntersectPolygon(SpaceBoundaries, textBoundary);
                 containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
                 this.TextContainer.Add(m, containers);
-            });            
+            });
         }
         private void BuildAreaContainers()
         {

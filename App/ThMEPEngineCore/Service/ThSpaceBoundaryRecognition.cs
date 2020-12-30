@@ -76,10 +76,10 @@ namespace ThMEPEngineCore.Service
                             }
                         }
                         var xclip = blockReference.XClipInfo();
-                        if (xclip.IsValid)
+                        if (xclip!=null && xclip.IsValid)
                         {
                             xclip.TransformBy(matrix);
-                            return curves.Where(o => xclip.Contains(o));
+                            return curves.Where(o => xclip.Contains(o) || xclip.Intersects(o));
                         }
                     }
                 }

@@ -2,9 +2,10 @@
 using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
-
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -94,20 +95,48 @@ namespace ThMEPWSS.Pipe.Engine
         /// <param name="toiletRooms"></param>
         private void GenerateBalconyPairInfo(List<ThWBalconyRoom> balconyRooms, List<ThWDevicePlatformRoom> devicePlatformRooms)
         {
-         
-            foreach (var balconyRoom in balconyRooms)
-            {
-                var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
-                foreach (var devicePlatformRoom in devicePlatformRooms)
+            var balconyroom1 = new List<ThWBalconyRoom>();
+            for (int i=0;i<balconyRooms.Count;i++)
+            {   
+                if (balconyRooms[i].FloorDrains.Count > 1 && balconyRooms[i].Washmachines.Count>0)
                 {
+                    var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
+                    foreach (var devicePlatformRoom in devicePlatformRooms)
+                    {
 
-                        if (IsBalconyPair(balconyRoom, devicePlatformRoom))
+                        if (IsBalconyPair(balconyRooms[i], devicePlatformRoom))
                         {
-                        devicePlatformIncludingRoom.Add(devicePlatformRoom);
+                            devicePlatformIncludingRoom.Add(devicePlatformRoom);
                         }
+                    }
+                    FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                } 
+                else
+                {
+                    balconyroom1.Add(balconyRooms[i]);
                 }
-                FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRoom, devicePlatformIncludingRoom));
+            }
+            for (int i = 0; i < balconyroom1.Count; i++)
+            {
+                for (int j = i + 1; j < balconyroom1.Count; j++)
+                {
+                    var s = balconyRooms[i].Balcony.Boundary as Polyline;
+                    var s1 = balconyRooms[j].Balcony.Boundary as Polyline;
+                    if (s.GetCenter().DistanceTo(s1.GetCenter()) < 4000)
+                    {
+                        var newBalcony = CreateNewBalcony(balconyRooms[i], balconyRooms[j]);
+                        var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
+                        foreach (var devicePlatformRoom in devicePlatformRooms)
+                        {
 
+                            if (IsBalconyPair(newBalcony, devicePlatformRoom))
+                            {
+                                devicePlatformIncludingRoom.Add(devicePlatformRoom);
+                            }
+                        }
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(newBalcony, devicePlatformIncludingRoom));
+                    }
+                }
             }
         }
 
@@ -125,6 +154,43 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }        
             return true;
+        }
+        private static ThWBalconyRoom CreateNewBalcony(ThWBalconyRoom balcony1, ThWBalconyRoom balcony2)
+        {
+            var balcony = new ThWBalconyRoom();
+             foreach (var floordrain in balcony1.FloorDrains)
+            {
+                balcony.FloorDrains.Add(floordrain);
+            }
+            foreach (var floordrain in balcony2.FloorDrains)
+            {
+                balcony.FloorDrains.Add(floordrain);
+            }
+            balcony.RainPipes = balcony1.RainPipes.Count>0? balcony1.RainPipes:balcony2.RainPipes;
+            balcony.Washmachines = balcony1.Washmachines.Count > 0 ? balcony1.Washmachines : balcony2.Washmachines;
+            balcony.BasinTools = balcony1.BasinTools.Count > 0 ? balcony1.BasinTools : balcony2.BasinTools;
+            balcony.Balcony = new ThMEPEngineCore.Model.ThIfcSpace();
+            balcony.Balcony.Boundary = CreateNewBoundary(balcony1, balcony2);
+            return balcony;
+        }
+        private static Polyline CreateNewBoundary(ThWBalconyRoom balcony1, ThWBalconyRoom balcony2)
+        {
+            var boundary1 = balcony1.Balcony.Boundary as Polyline;
+            var boundary2 = balcony2.Balcony.Boundary as Polyline;
+            var vertice1 = boundary1.Vertices();
+            var vertice2 = boundary2.Vertices();
+            var vertices= new List<Point3d>();
+            for (int i = 0; i < vertice1.Count; i++)
+            {
+                vertices.Add(vertice1[i]);
+            }
+
+            for (int i = 0; i < vertice2.Count; i++)
+            {
+                vertices.Add(vertice2[i]);
+            }
+
+            return GeomUtils.CalculateProfile(vertices);        
         }
     }
 }

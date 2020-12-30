@@ -35,6 +35,10 @@ namespace ThMEPEngineCore.Algorithm
             var polygon = mPolygon.ToNTSPolygon();
             return PreparedPolygon.Contains(polygon);
         }
+        public bool Intersects(Curve curve)
+        {
+            return PreparedPolygon.Intersects(curve.ToNTSGeometry());
+        }
 
         private IPreparedGeometry preparedPolygon;
         private IPreparedGeometry PreparedPolygon

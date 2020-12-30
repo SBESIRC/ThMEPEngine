@@ -34,16 +34,38 @@ namespace ThMEPWSS.Pipe.Engine
             }
             foreach (var waterBucket in sideWaterBucket)
             {
-                Vector3d dis = new Vector3d(ThWPipeCommon.SIDEWATERBUCKET_X_INDENT, -ThWPipeCommon.SIDEWATERBUCKET_Y_INDENT, 0);
-                Vector3d dis1 = new Vector3d(-ThWPipeCommon.SIDEWATERBUCKET_X_INDENT, -ThWPipeCommon.SIDEWATERBUCKET_Y_INDENT, 0);
+                var minPt = waterBucket.GeometricExtents.MinPoint;
+                var maxPt = waterBucket.GeometricExtents.MaxPoint;
+                double SIDEWATERBUCKET_X_INDENT = 0;
+                double SIDEWATERBUCKET_Y_INDENT = 0;
+                
                 if (!(boundary.GetCenter().Y - waterBucket.Position.Y > 14000))//排除技术要求
                 {
-                    if (Onleft(waterBucket))
+                    if (maxPt.X - minPt.X < maxPt.Y - minPt.Y)//纵向放置
                     {
-                        SideWaterBucketCenter.Add(waterBucket.Position - dis1);
+                        SIDEWATERBUCKET_X_INDENT = (maxPt.X - minPt.X)/2;
+                        SIDEWATERBUCKET_Y_INDENT= (maxPt.X - minPt.X)/8*3- SIDEWATERBUCKET_X_INDENT/320*6;
+                        Vector3d dis = new Vector3d(SIDEWATERBUCKET_X_INDENT, -SIDEWATERBUCKET_Y_INDENT, 0);
+                        Vector3d dis1 = new Vector3d(-SIDEWATERBUCKET_X_INDENT, -SIDEWATERBUCKET_Y_INDENT, 0);
+                        if (Onleft(waterBucket))
+                        {
+                            SideWaterBucketCenter.Add(waterBucket.Position - dis1);
+                        }
+                        else { SideWaterBucketCenter.Add(waterBucket.Position - dis); }
                     }
-                    else { SideWaterBucketCenter.Add(waterBucket.Position - dis); }
-                }
+                    else
+                    {
+                        SIDEWATERBUCKET_Y_INDENT = (maxPt.Y - minPt.Y) / 2;
+                        SIDEWATERBUCKET_X_INDENT = (maxPt.Y - minPt.Y) / 8 * 3 - SIDEWATERBUCKET_X_INDENT / 320 * 6;
+                        Vector3d dis = new Vector3d(SIDEWATERBUCKET_X_INDENT, -SIDEWATERBUCKET_Y_INDENT, 0);
+                        Vector3d dis1 = new Vector3d(-SIDEWATERBUCKET_X_INDENT, -SIDEWATERBUCKET_Y_INDENT, 0);
+                        if (Onleft(waterBucket))
+                        {
+                            SideWaterBucketCenter.Add(waterBucket.Position -dis1);
+                        }
+                        else { SideWaterBucketCenter.Add(waterBucket.Position - dis); }
+                    }
+                }            
             }
             
             foreach (Point3d waterBucket in SideWaterBucketCenter)
@@ -51,13 +73,13 @@ namespace ThMEPWSS.Pipe.Engine
                 int s = 0;
                 foreach (var rainPipe in roofRainPipe)
                 {
-                    if (rainPipe.GetCenter().X-(waterBucket).X<1)
+                    if (rainPipe.GetCenter().X-(waterBucket).X<5)
                     {
                         s = 1;
                         break;
                     }                 
                 }
-                if (s == 0)
+                if (roofRainPipe.Count>0&&s == 0)//此处用于单层计算时生效
                 {
                     Center_point.Add(waterBucket);
                 }

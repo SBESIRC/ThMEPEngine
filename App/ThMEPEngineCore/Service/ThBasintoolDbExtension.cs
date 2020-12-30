@@ -76,11 +76,32 @@ namespace ThMEPEngineCore.Service
                         if (xclip.IsValid)
                         {
                             xclip.TransformBy(matrix);
-                            return ents.Where(o => xclip.Contains(o as Polyline));
+                            return ents.Where(o => IsContain(xclip, o));
                         }
                     }
                 }
                 return ents;
+            }
+        }
+        private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
+        {
+            if (ent is Curve curve)
+            {
+                return xclip.Contains(curve);
+            }
+            else if (ent is BlockReference br)
+            {
+                var minPt = br.GeometricExtents.MinPoint;
+                var maxPt = br.GeometricExtents.MaxPoint;
+                var second = new Point3d(maxPt.X, minPt.Y, minPt.Z);
+                var fourth = new Point3d(minPt.X, maxPt.Y, minPt.Z);
+                var pts = new Point3dCollection { minPt, second, maxPt, fourth };
+                var outline = pts.CreatePolyline();
+                return xclip.Contains(outline);
+            }
+            else
+            {
+                return false;
             }
         }
         public override void BuildElementTexts()

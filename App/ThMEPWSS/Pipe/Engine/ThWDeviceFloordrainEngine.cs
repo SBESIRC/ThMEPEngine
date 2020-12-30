@@ -57,11 +57,11 @@ namespace ThMEPWSS.Pipe.Engine
             }
         }
     
-        private Point3d Isinsidedevice(Polyline device, BlockReference devicefloordrain)
+        private Point3d Isinsidedevice(Polyline device, BlockReference device_floordrain)
         {     
-            if (GeomUtils.PtInLoop(device, devicefloordrain.Position))
+            if (GeomUtils.PtInLoop(device, device_floordrain.Position))
             {
-                return devicefloordrain.Position;
+                return device_floordrain.Position;
             }
             else
             {
@@ -92,7 +92,10 @@ namespace ThMEPWSS.Pipe.Engine
 
         }
         private Point3dCollection Rainpipe_floordrain(Polyline device, Polyline rainpipe, BlockReference devicefloordrain)
-        {   
+        {   if(rainpipe==null)
+            {
+                return new Point3dCollection();
+            }
             var rainpipe_floordrain = new Point3dCollection();
             if (GeomUtils.PtInLoop(device, rainpipe.GetCenter()))
             {

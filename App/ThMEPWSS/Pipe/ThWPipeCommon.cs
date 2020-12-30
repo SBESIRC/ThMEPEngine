@@ -9,7 +9,7 @@
         /// <summary>
         /// 洗衣机地漏到雨水管最大距离（阳台区域）
         /// </summary>
-        public const double MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = 700;
+        public const double MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = 1700;
         /// <summary>
         /// 雨水管到地漏最大距离（阳台区域）
         /// </summary>
@@ -109,7 +109,7 @@
         /// <summary>
         /// 阳台到设备平台最大距离
         /// </summary>
-        public const double MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = 4500;
+        public const double MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = 6000;
         /// <summary>
         /// 阳台雨水管到阳台其他地漏最大距离
         /// </summary>
@@ -125,7 +125,7 @@
         /// <summary>
         /// 设备平台区域最大面积
         /// </summary>
-        public const double MAX_DEVICEPLATFORM_AREA = 1;
+        public const double MAX_DEVICEPLATFORM_AREA = 1.1;
         /// <summary>
         /// 基点圆区域最大面积
         /// </summary>

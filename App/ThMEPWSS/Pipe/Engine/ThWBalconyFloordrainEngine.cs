@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
+using ThMEPWSS.Assistant;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -36,8 +37,12 @@ namespace ThMEPWSS.Pipe.Engine
         public void Run(List<BlockReference> bfloordrain, Polyline bboundary, List<Polyline> rainpipes, Polyline downspout, BlockReference washingmachine, Polyline device, Polyline device_other, Polyline condensepipe, BlockReference bbasinline)
         {
             Polyline rainpipe = GetRainPipe(bboundary, washingmachine, rainpipes);       
-            List<BlockReference> floordrain = Isinside(bfloordrain, bboundary);
-            int num = Washingfloordrain(floordrain, washingmachine);//确认地漏序号
+            List<BlockReference> floordrain = Isinside(bfloordrain, bboundary);          
+            int num = 0;
+            if (washingmachine != null)
+            {
+                num = Washingfloordrain(floordrain, washingmachine);//确认地漏序号
+            }
             for (int i = 0; i < floordrain.Count; i++)
             {
                 if (i != num)
@@ -97,7 +102,14 @@ namespace ThMEPWSS.Pipe.Engine
                     }
                     if (Downspout_to_Floordrain.Count==0)
                     {
-                        Downspout_to_Floordrain = Line_vertices(bboundary, center, Floordrain_washing, washingmachine, device_other);
+                        if (center.DistanceTo(Floordrain_washing[0].Position) > 500)
+                        {
+                            Downspout_to_Floordrain= Line_vertices1(bboundary, center, Floordrain_washing, washingmachine, device_other);
+                        }
+                        else
+                        {
+                            Downspout_to_Floordrain = Line_vertices(bboundary, center, Floordrain_washing, washingmachine, device_other);
+                        }
                     }
                     if (bbasinline != null && bbasinline.Position.DistanceTo(washingmachine.Position) < ThWPipeCommon.MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
                     {
@@ -179,7 +191,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             List<BlockReference> floordrain = new List<BlockReference>();
             for (int i = 0; i < bfloordrain.Count; i++)
-            {
+            {             
                 if (GeomUtils.PtInLoop(bboundary, bfloordrain[i].Position))
                 {
                     floordrain.Add(bfloordrain[i]);
@@ -347,12 +359,21 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return vertices;
         }
+        private static Point3dCollection Line_vertices1(Polyline bboundary, Point3d center_spout, List<BlockReference> Floordrain_washing, BlockReference washingmachine, Polyline device)
+        {
+            var points = new Point3dCollection();            
+            Point3d point = new Point3d(center_spout.X, Floordrain_washing[0].Position.Y, 0);
+            points.Add(center_spout + ThWPipeCommon.COMMONRADIUS * center_spout.GetVectorTo(point).GetNormal());
+            points.Add(point -ThWPipeCommon.WELL_TO_WALL_OFFSET * center_spout.GetVectorTo(point).GetNormal());
+            points.Add(point - ThWPipeCommon.WELL_TO_WALL_OFFSET * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
+            points.Add(Floordrain_washing[0].Position + ThWPipeCommon.COMMONRADIUS * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
+            return points;
+        }
         private static Point3d new_downspout(Polyline bboundary, Polyline rainpipe, List<BlockReference> Floordrain_washing, Polyline device)//新的排水管井
         {
             Point3d center = Point3d.Origin;
             var vertices = device.Vertices();
-            double dmax = double.MaxValue;          
-            int a = CriticalNodeNumber(Floordrain_washing, device);//device距离洗衣机最近点           
+            double dmax = double.MaxValue;
             int b = CriticalNodeNumber(Floordrain_washing, bboundary);//balcony距离最近点
             int c = 0;
             var vertices_boundary = bboundary.Vertices();
@@ -425,41 +446,50 @@ namespace ThMEPWSS.Pipe.Engine
             }
             else
             {
+                int a = CriticalNodeNumber(Floordrain_washing, device);//device距离洗衣机最近点           
                 //设备平台范围内生成新管井
-                if (a > 0)
+                if (vertices[a].DistanceTo(rainpipe.GetCenter()) < 700)
                 {
-                    double dst = 0.0;
-                    if (vertices[a].GetVectorTo(vertices[a - 1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
+                    if (a > 0)
                     {
-                        Line line = new Line(vertices[a], vertices[a - 1]);
-                        dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
-                        center = vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a + 1]).GetNormal());
+                        double dst = 0.0;
+                        if (vertices[a].GetVectorTo(vertices[a - 1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
+                        {
+                            Line line = new Line(vertices[a], vertices[a - 1]);
+                            dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
+                            center = vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a + 1]).GetNormal());
+                        }
+                        else
+                        {
+                            Line line = new Line(vertices[a], vertices[a + 1]);
+                            dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
+                            center = vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a - 1]).GetNormal());
+                        }
                     }
                     else
                     {
-                        Line line = new Line(vertices[a], vertices[a + 1]);
-                        dst = line.ToCurve3d().GetDistanceTo(rainpipe.GetCenter());
-                        center = vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[a].GetVectorTo(vertices[a - 1]).GetNormal());
+                        double dst = 0.0;
+                        if (vertices[0].GetVectorTo(vertices[1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
+                        {
+                            Line line = new Line(vertices[0], vertices[1]);
+                            var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
+                            dst = point.DistanceTo(rainpipe.GetCenter());
+                            center = vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[vertices.Count - 2]).GetNormal());
+                        }
+                        else
+                        {
+                            Line line = new Line(vertices[0], vertices[vertices.Count - 2]);
+                            var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
+                            var s = rainpipe.GetCenter();
+                            dst = point.DistanceTo(s);
+                            center = vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[1]).GetNormal());
+                        }
                     }
                 }
                 else
                 {
-                    double dst = 0.0;
-                    if (vertices[0].GetVectorTo(vertices[1]).IsParallelTo((Floordrain_washing[0].Position).GetVectorTo(perpendicular_point)))
-                    {
-                        Line line = new Line(vertices[0], vertices[1]);
-                        var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
-                        dst = point.DistanceTo(rainpipe.GetCenter());
-                        center = vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[vertices.Count - 2]).GetNormal());
-                    }
-                    else
-                    {
-                        Line line = new Line(vertices[0], vertices[vertices.Count - 2]);
-                        var point = line.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
-                        var s = rainpipe.GetCenter();
-                        dst = point.DistanceTo(s);
-                        center = vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (Floordrain_washing[0].Position.GetVectorTo(perpendicular_point).GetNormal()) + dst * (vertices[0].GetVectorTo(vertices[1]).GetNormal());
-                    }
+                    var point = bboundary.ToCurve3d().GetClosestPointTo(rainpipe.GetCenter()).Point;
+                    center = rainpipe.GetCenter() + ThWPipeCommon.TOILET_WELLS_INTERVAL * rainpipe.GetCenter().GetVectorTo(point).GetNormal();//此处借用管井间隔参数
                 }
             }
 
