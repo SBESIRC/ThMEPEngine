@@ -721,5 +721,37 @@ namespace ThCADCore.Test
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "ThGeometrySmoother", CommandFlags.Modal)]
+        public void ThGeometrySmoother()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var alpha = Active.Editor.GetDouble("\n请输入参数");
+                if (alpha.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+                var smoother = new ThCADCoreNTSGeometrySmoother();
+                foreach (Polyline polyline in objs)
+                {
+                    var obj = smoother.Smooth(polyline.ToNTSLineString(), alpha.Value).ToDbPolyline();
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
     }
 }
