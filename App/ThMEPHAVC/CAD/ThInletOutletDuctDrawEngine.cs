@@ -308,13 +308,20 @@ namespace ThMEPHVAC.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                foreach (var Segment in DuctSegments)
+                var layerObj = acadDatabase.Layers.ElementOrDefault(layer, true);
+                if (layerObj != null)
                 {
-                    foreach (Curve dbobj in Segment.Representation)
+                    layerObj.IsOff = false;
+                    layerObj.IsFrozen = false;
+                    layerObj.IsLocked = false;
+                    foreach (var Segment in DuctSegments)
                     {
-                        dbobj.Layer = layer;
-                        dbobj.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(dbobj);
+                        foreach (Curve dbobj in Segment.Representation)
+                        {
+                            dbobj.LayerId = layerObj.ObjectId;
+                            dbobj.TransformBy(Segment.Matrix);
+                            acadDatabase.ModelSpace.Add(dbobj);
+                        }
                     }
                 }
             }
