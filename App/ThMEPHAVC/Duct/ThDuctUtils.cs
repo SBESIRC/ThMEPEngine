@@ -18,7 +18,7 @@ namespace ThMEPHVAC.Duct
                 case "H-FIRE-FBOX":
                     return ThHvacCommon.DUCT_LAYER_FIRE;
                 case "H-EQUP-FBOX":
-                    return ThHvacCommon.DUCT_LAYER_EQUP;
+                    return ThHvacCommon.DUCT_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
             }
@@ -94,6 +94,21 @@ namespace ThMEPHVAC.Duct
                     return ThHvacCommon.H_DAPP_FAPP;
                 case "H-EQUP-FBOX":
                     return ThHvacCommon.H_DAPP_AAPP;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
+        public static string CenterlineLayerName(string ductLayer)
+        {
+            switch (ductLayer)
+            {
+                case ThHvacCommon.DUCT_LAYER_DUAL:
+                    return ThHvacCommon.DUCT_MID_LAYER_DUAL;
+                case ThHvacCommon.DUCT_LAYER_FIRE:
+                    return ThHvacCommon.DUCT_MID_LAYER_FIRE;
+                case ThHvacCommon.DUCT_LAYER_VENT:
+                    return ThHvacCommon.DUCT_MID_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
             }

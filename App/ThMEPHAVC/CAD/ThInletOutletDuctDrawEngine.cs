@@ -1,17 +1,16 @@
 ﻿using System;
+using Linq2Acad;
+using DotNetARX;
 using QuickGraph;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Text;
-using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
+using ThMEPHVAC.IO;
 using ThMEPHVAC.Duct;
 using TianHua.Publics.BaseCode;
-using Linq2Acad;
-using ThMEPEngineCore.Model;
-using ThMEPHVAC.IO;
 
 namespace ThMEPHVAC.CAD
 {
@@ -316,14 +315,34 @@ namespace ThMEPHVAC.CAD
                     layerObj.IsLocked = false;
                     foreach (var Segment in DuctSegments)
                     {
+                        // 绘制风管
                         foreach (Curve dbobj in Segment.Representation)
                         {
                             dbobj.LayerId = layerObj.ObjectId;
                             dbobj.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(dbobj);
                         }
+
+                        // 绘制风管中心线
+                        var centerline = CreateDuctCenterlineLayer(layer);
+                        foreach (Curve dbobj in Segment.Centerline)
+                        {
+                            dbobj.LayerId = centerline;
+                            dbobj.TransformBy(Segment.Matrix);
+                            acadDatabase.ModelSpace.Add(dbobj);
+                        }
                     }
                 }
+            }
+        }
+
+        private ObjectId CreateDuctCenterlineLayer(string ductLayer)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var obj = acadDatabase.Database.AddLayer(ductLayer);
+                acadDatabase.Database.SetLayerColor(ductLayer, 252);
+                return obj;
             }
         }
     }

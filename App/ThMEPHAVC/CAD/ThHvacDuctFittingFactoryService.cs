@@ -22,6 +22,7 @@ namespace ThMEPHVAC.CAD
         {
             return new ThIfcDuctElbow(parameters)
             {
+                Centerline = CreateElbowCenterline(parameters),
                 Representation = CreateElbowGeometries(parameters)
             };
         }
@@ -102,7 +103,6 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-
         private DBObjectCollection CreateReducingGeometries(ThIfcDuctReducingParameters parameters)
         {
             //创建小端的端线
@@ -143,10 +143,19 @@ namespace ThMEPHVAC.CAD
 
             return new DBObjectCollection()
             {
-                    smallendline,
-                    leftsideline,
-                    rightsideline,
-                    bigendline
+                smallendline,
+                leftsideline,
+                rightsideline,
+                bigendline
+            };
+        }
+
+        private DBObjectCollection CreateElbowCenterline(ThIfcDuctElbowParameters parameters)
+        {
+            var elbowengle = parameters.ElbowDegree * Math.PI / 180;
+            return new DBObjectCollection()
+            {
+                new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle),
             };
         }
 
@@ -177,9 +186,6 @@ namespace ThMEPHVAC.CAD
                 StartPoint = innerarc.StartPoint,
                 EndPoint = innerarc.StartPoint + new Vector3d(0, -50, 0),
             };
-
-            //创建弯头中心线圆弧
-            Arc centerarc = new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle);
 
             //创建弯头端线
             Line startplaneline = new Line()
@@ -212,7 +218,6 @@ namespace ThMEPHVAC.CAD
             return new DBObjectCollection()
             {
                 outerarc,
-                centerarc,
                 innerarc,
                 //startplaneline,
                 //endplaneline,
@@ -317,7 +322,6 @@ namespace ThMEPHVAC.CAD
                 EndPoint = branchInnerArc.EndPoint,
             };
 
-
             return new DBObjectCollection()
             {
                 branchEndLine,
@@ -349,7 +353,6 @@ namespace ThMEPHVAC.CAD
                 StartPoint = parameters.Center + new Vector3d(-0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
                 EndPoint = parameters.Center + new Vector3d(0.5 * parameters.mainSmallEndWidth, 100 + 0.5 * parameters.SideBigEndWidth, 0),
             };
-
 
             //创建主路大端与侧路大端的圆弧过渡段
             Point3d bigEndCircleCenter = parameters.Center + new Vector3d(-0.5 * (parameters.BigEndWidth + parameters.SideBigEndWidth), -parameters.SideBigEndWidth, 0);

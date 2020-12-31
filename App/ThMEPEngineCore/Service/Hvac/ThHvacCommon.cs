@@ -25,15 +25,19 @@ namespace ThMEPEngineCore.Service.Hvac
         // 图层
         public const string FOUNDATION_LAYER = "H-BASE";
         public const string WALLHOLE_LAYER = "H-HOLE";
-        public const string DUCT_LAYER_DUAL = "H-DUCT-DUAL";
-        public const string DUCT_LAYER_FIRE = "H-DUCT-FIRE";
-        public const string DUCT_LAYER_EQUP = "H-DUCT-VENT";
         public const string H_DAPP_DDAMP = "H-DAPP-DDAMP";
         public const string H_DAPP_FDAMP = "H-DAPP-FDAMP";
         public const string H_DAPP_EDAMP = "H-DAPP-EDAMP";
         public const string H_DAPP_DAPP = "H-DAPP-DAPP";
         public const string H_DAPP_FAPP = "H-DAPP-FAPP";
         public const string H_DAPP_AAPP = "H-DAPP-AAPP";
+
+        public const string DUCT_LAYER_DUAL = "H-DUCT-DUAL";
+        public const string DUCT_LAYER_FIRE = "H-DUCT-FIRE";
+        public const string DUCT_LAYER_VENT = "H-DUCT-VENT";
+        public const string DUCT_MID_LAYER_DUAL = "H-DUCT-DUAL-MID";
+        public const string DUCT_MID_LAYER_FIRE = "H-DUCT-FIRE-MID";
+        public const string DUCT_MID_LAYER_VENT = "H-DUCT-VENT-MID";
 
         // 风机块属性
         public const string BLOCK_ATTRIBUTE_EQUIPMENT_SYMBOL = "设备符号";
