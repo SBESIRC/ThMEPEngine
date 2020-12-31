@@ -46,7 +46,7 @@ namespace ThMEPLighting.EmgLight
         {
             Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> layoutInfo = new Dictionary<List<Line>, Dictionary<Point3d, Vector3d>>();
             List<Polyline> Layout = new List<Polyline>();
-            bool debug = true;
+
             foreach (var l in mainLines)
             {
                 List<Polyline> LayoutTemp = new List<Polyline>();
@@ -61,14 +61,14 @@ namespace ThMEPLighting.EmgLight
                 var filterWalls = checkService.FilterWalls(walls, lines.First(), frame);
 
                 ////获取该车道线上的构建
-                StructureServiceLight structureService = new StructureServiceLight();
-                var lineColumn = structureService.GetStruct(lines, filterColmuns, TolLane);
-                var lineWall = structureService.GetStruct(lines, filterWalls, TolLane);
+                //StructureServiceLight structureService = new StructureServiceLight();
+                var lineColumn = StructureServiceLight.GetStruct(lines, filterColmuns, TolLane);
+                var lineWall = StructureServiceLight.GetStruct(lines, filterWalls, TolLane);
 
 
                 ////将构建分为上下部分
-                var usefulColumns = structureService.SeparateColumnsByLine(lineColumn, lines, TolLane);
-                var usefulWalls = structureService.SeparateColumnsByLine(lineWall, lines, TolLane);
+                var usefulColumns = StructureServiceLight.SeparateColumnsByLine(lineColumn, lines, TolLane);
+                var usefulWalls = StructureServiceLight.SeparateColumnsByLine(lineWall, lines, TolLane);
 
                 ////for debug
                 //InsertLightService.ShowGeometry(usefulColumns[0], 142, LineWeight.LineWeight035);
@@ -81,17 +81,10 @@ namespace ThMEPLighting.EmgLight
                 List<List<double>> columnDistList;
                 int uniformSide = FindUniformDistributionSide(ref usefulColumns, lines, out columnDistList);
 
-                //if (debug == true)
-                //{
-                //    uniformSide = -1;
-                //}
-
                 if (uniformSide == 0 || uniformSide == 1)
                 {
-
-                    LayoutUniformSide(usefulColumns[uniformSide], lines, columnDistList[uniformSide], out var uniformSideLayout, ref LayoutTemp);
+                    LayoutUniformSide(usefulColumns,uniformSide, lines, columnDistList, out var uniformSideLayout, ref LayoutTemp);
                     LayoutOppositeSide(usefulColumns, usefulWalls, uniformSide, lines, columnDistList, uniformSideLayout, ref LayoutTemp);
-
                 }
                 else
                 {
@@ -143,12 +136,12 @@ namespace ThMEPLighting.EmgLight
             }
 
             //柱数量 > ((车道/平均柱距) * 0.5)
-            if ((bLeft == true) && (3 < usefulColumns[0].Count() && distList[0].Count() < (lineLength / TolAvgColumnDist) * 0.5))
+            if ((bLeft == true) && (4 < usefulColumns[0].Count() && distList[0].Count() < (lineLength / TolAvgColumnDist) * 0.5))
             {
                 bLeft = false;
             }
 
-            if ((bRight == true) && (3 < usefulColumns[1].Count() && distList[1].Count() < (lineLength / TolAvgColumnDist) * 0.5))
+            if ((bRight == true) && (4 < usefulColumns[1].Count() && distList[1].Count() < (lineLength / TolAvgColumnDist) * 0.5))
             {
                 bRight = false;
             }
@@ -236,55 +229,46 @@ namespace ThMEPLighting.EmgLight
         /// <param name="Lines"></param>
         /// <param name="distList"></param>
         /// <param name="Layout"></param>
-        private void LayoutUniformSide(List<Polyline> Columns, List<Line> Lines, List<double> distList, out List<Polyline> uniformSideLayout, ref List<Polyline> LayoutTemp)
+        private void LayoutUniformSide(List<List<Polyline>> Columns, int uniformSide, List<Line> Lines, List<List<double>> distList, out List<Polyline> uniformSideLayout, ref List<Polyline> LayoutTemp)
         {
-            Polyline FirstLayout = getLayoutedStructrue(LayoutTemp, Lines);
-            if (FirstLayout != null)
-            {
-                ////车线起始点已有布灯,第一个点顺延
-
-            }
-
-            ////车线起始点没有布灯,从均匀侧布灯
             int LastHasNoLightColumn = 0;
             List<Polyline> outputTemp = new List<Polyline>();
-            outputTemp.Add(Columns[0]);
             double sum = 0;
 
-            for (int i = 0; i < Columns.Count; i++)
+            int initial = LayoutFirstPlace(LayoutTemp, Columns, uniformSide, Lines, ref outputTemp, ref LastHasNoLightColumn, ref sum);
+
+            for (int i = initial; i < Columns.Count; i++)
             {
                 if (i < Columns.Count - 1)
                 {
-
-
-                    sum += distList[i];
+                    sum += distList[uniformSide][i];
                     if (sum > TolLightRengeMax)
                     {
                         if (LastHasNoLightColumn != 0)
                         {
-                            outputTemp.Add(Columns[i]);
+                            outputTemp.Add(Columns[uniformSide][i]);
                             LastHasNoLightColumn = 0;
                         }
                         else
                         {
                             LastHasNoLightColumn = i;
                         }
-                        sum = distList[i];
+                        sum = distList[uniformSide][i];
                     }
 
-                    if (distList[i] > TolLightRengeMax)
+                    if (distList[uniformSide][i] > TolLightRengeMax)
                     {
 
                         if (LastHasNoLightColumn != 0)
                         {
-                            outputTemp.Add(Columns[i]);
-                            outputTemp.Add(Columns[i + 1]);
+                            outputTemp.Add(Columns[uniformSide][i]);
+                            outputTemp.Add(Columns[uniformSide][i + 1]);
                             LastHasNoLightColumn = 0;
                             sum = 0;
                         }
                         else
                         {
-                            outputTemp.Add(Columns[i + 1]);
+                            outputTemp.Add(Columns[uniformSide][i + 1]);
                             LastHasNoLightColumn = 0;
                             sum = 0;
                         }
@@ -297,7 +281,7 @@ namespace ThMEPLighting.EmgLight
                     //最后一个点特殊处理
                     if (LastHasNoLightColumn != 0)
                     {
-                        outputTemp.Add(Columns[i]);
+                        outputTemp.Add(Columns[uniformSide][i]);
 
                     }
 
@@ -346,7 +330,7 @@ namespace ThMEPLighting.EmgLight
                     //均匀边隔柱分布
                     //distAlongLine(lines, StructUtils.GetStructCenter(uniformSideLayout[i - 1]), StructUtils.GetStructCenter(uniformSideLayout[i]), out midPt);
                     findMidPointOnLine(lines, StructUtils.GetStructCenter(uniformSideLayout[i - 1]), StructUtils.GetStructCenter(uniformSideLayout[i]), out midPt);
-             
+
                     //遍历所有对面柱墙,可能会很慢.可在中点做buffer优化
                     findClosestStruct(usefulSturct, midPt, out minDist, out closestStruct);
                     outputTemp.Add(closestStruct);
@@ -379,6 +363,7 @@ namespace ThMEPLighting.EmgLight
             LayoutTemp.AddRange(outputTemp.Distinct().ToList());
 
         }
+
         private void findClosestStruct(List<Polyline> structure, Point3d Pt, out double minDist, out Polyline closestStruct)
         {
             minDist = 10000;
@@ -543,7 +528,7 @@ namespace ThMEPLighting.EmgLight
 
         private void findMidPointOnLine(List<Line> lines, Point3d pt1, Point3d pt2, out Point3d prjMidPt)
         {
-           
+
             Point3d midPoint;
 
 
@@ -557,24 +542,106 @@ namespace ThMEPLighting.EmgLight
 
         }
 
-        private Polyline getLayoutedStructrue(List<Polyline> Layout, List<Line> Lines)
+        private int LayoutFirstPlace(List<Polyline> Layout, List<List<Polyline>> Columns, int uniformSide, List<Line> Lines, ref List<Polyline> outputTemp, ref int LastHasNoLightColumn, ref double sum)
         {
-            Polyline first = null;
+            //   A|   |B    |E
+            //------s[--------lines----------]e
+            //   C|   |D
+            //
+            //
+            //not tested yet
+            int nReturn = 0;
+            int outherSide = uniformSide == 0 ? 1 : 0;
+            bool added = false;
             if (Layout.Count > 0)
             {
+                // //车道线往前做框buffer
+                var moveDir = (Lines[0].EndPoint - Lines[0].StartPoint).GetNormal();
+                var ExtendLineStart = Lines[0].StartPoint - moveDir * TolLightRangeMin;
+                var ExtendLineEnd = Lines[0].StartPoint + moveDir * TolLightRangeMin;
+                var ExtendLine = new Line(ExtendLineStart, ExtendLineEnd);
+                var ExtendLineList = new List<Line>();
+                ExtendLineList.Add(ExtendLine);
+
+                var FilteredLayout = StructureServiceLight.GetStruct(ExtendLineList, Layout, TolLane);
+
+                var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
+
+                importLayout[0] = OrderingColumns(importLayout[0], ExtendLineList);
+                importLayout[1] = OrderingColumns(importLayout[1], ExtendLineList);
+
+
+                //有bug, 前一柱的左边布线也会算,需要建立column的数据结构解决, 暂时不考虑
+                var outherSidePoint = importLayout[outherSide].Where(x => x.StartPoint == Columns[outherSide][0].StartPoint ||
+                                                                    x.StartPoint == Columns[outherSide][0].EndPoint ||
+                                                                    x.EndPoint == Columns[outherSide][0].StartPoint ||
+                                                                    x.EndPoint == Columns[outherSide][0].EndPoint).ToList();
+
+                var uniformSidePoint = importLayout[uniformSide].Where(x => x.StartPoint == Columns[uniformSide][0].StartPoint ||
+                                                                    x.StartPoint == Columns[uniformSide][0].EndPoint ||
+                                                                    x.EndPoint == Columns[uniformSide][0].StartPoint ||
+                                                                    x.EndPoint == Columns[uniformSide][0].EndPoint).ToList();
+                if (outherSidePoint.Count > 0)
+                {
+                    //情况D:
+                    outputTemp.Add(importLayout[uniformSide][1]);
+                    LastHasNoLightColumn = 0;
+                    sum = 0;
+                    nReturn = 1;
+                    added = true;
+
+                }
+                if (importLayout[uniformSide].Count > 0)
+                {
+                    //情况A:
+                    outputTemp.Add(importLayout[uniformSide][0]);
+                    LastHasNoLightColumn = 1;
+                    sum = importLayout[uniformSide][0].Distance(Columns[uniformSide][0]);
+                    nReturn = 0;
+                    added = true;
+                }
+                if (uniformSidePoint.Count > 0)
+                {
+                    //情况B:
+                    outputTemp.Add(importLayout[uniformSide][0]);
+                    LastHasNoLightColumn = 0;
+                    sum = 0;
+                    nReturn = 0;
+                    added = true;
+
+                }
+
+                if (added == false)
+                {
+                    //情况C:
+                    outputTemp.Add(Columns[uniformSide][0]);
+                    LastHasNoLightColumn = 0;
+                    sum = 0;
+                    nReturn = 0;
+                }
 
             }
-            return first;
+            else
+            {
+                outputTemp.Add(Columns[uniformSide][0]);
+                LastHasNoLightColumn = 0;
+                sum = 0;
+                nReturn = 0;
+
+            }
+
+
+            return nReturn;
         }
 
         private void LayoutBothNonUniformSide(List<List<Polyline>> Columns, List<List<Polyline>> Walls, List<Line> Lines, ref List<Polyline> LayoutTemp)
         {
-            Polyline FirstLayout = getLayoutedStructrue(LayoutTemp, Lines);
-            if (FirstLayout != null)
-            {
-                ////车线起始点已有布灯,第一个点顺延
+            //   Polyline FirstLayout = getLayoutedStructrue(LayoutTemp, Lines);
+            //if (FirstLayout != null)
+            //{
+            //    ////车线起始点已有布灯,第一个点顺延
 
-            }
+            //}
             ////从一边开始
             List<List<Polyline>> usefulSturct = new List<List<Polyline>>();
             usefulSturct.Add(new List<Polyline>());
@@ -619,7 +686,6 @@ namespace ThMEPLighting.EmgLight
             {
                 //判断到车段线末尾距离是否还需要加灯
                 //InsertLightService.ShowGeometry(ptOnLine, 221);
-
                 if (distToLineEnd(Lines, ptOnLine, out var PolylineToEnd) >= TolLightRengeMax)
                 {
 
@@ -628,7 +694,7 @@ namespace ThMEPLighting.EmgLight
 
                     var ExtendLineEnd = ExtendLineStart + moveDir * ((TolLightRengeMax - TolLightRangeMin) * 2);
                     var ExtendLine = new Line(ExtendLineStart, ExtendLineEnd);
-                    var ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane);
+                    var ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane, 0, TolLane, 0);
 
                     Polyline tempStruct;
                     //找框内对面是否有位置布灯
@@ -675,7 +741,7 @@ namespace ThMEPLighting.EmgLight
                             ExtendLineStart = ptOnLine;
                             ExtendLineEnd = ExtendLineStart + moveDir * TolLightRangeMin;
                             ExtendLine = new Line(ExtendLineStart, ExtendLineEnd);
-                            ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane);
+                            ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane, 0, TolLane, 0);
                             currSide = currSide == 0 ? 1 : 0;
                             //找框内对面是否有位置布灯
                             bAdded = FindPolyInExtendPoly(ExtendPoly, usefulSturct[currSide], PolylineToEnd, TolLightRangeMin, out tempStruct);

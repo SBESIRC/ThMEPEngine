@@ -1,13 +1,13 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Runtime;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+using NFox.Cad;
+using AcHelper;
+using Linq2Acad;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
@@ -15,7 +15,6 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
-using ThMEPLighting.Common;
 
 namespace ThMEPLighting
 {
@@ -62,7 +61,6 @@ namespace ThMEPLighting
                 //
                 //  var plines = HandleFrame(frameLst);
 
-                bool debug = false;
                 foreach (Polyline plFrame in frameLst)
                 {
 
@@ -83,120 +81,11 @@ namespace ThMEPLighting
                     var parkingLinesService = new ParkingLinesService();
                     var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
 
-                    //车道线顺序
-                    List<ThLightEdge> edges = new List<ThLightEdge>();
+                    //将车道线排序,点按排序方向排列,合并连续线段
+                    List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
 
-                    //  parkingLines.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
-                    // otherPLines.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
-
-
-
-                    // handleLines.ForEach(x => edges.Add(new ThLightEdge(x)));
-
-
-                    foreach (List<Line> ls in parkingLines)
-                    {
-                        foreach (Line l in ls)
-                        {
-                            edges.Add(new ThLightEdge(l));
-                        }
-                    }
-
-                    foreach (List<Line> ls in otherPLines)
-                    {
-                        foreach (Line l in ls)
-                        {
-                            edges.Add(new ThLightEdge(l));
-                        }
-                    }
-
-                    //foreach (Line l in handleLines)
-                    //{
-                    //    edges.Add(new ThLightEdge(l));
-                    //}
-
-
-
-
-                    //ThLightGraphService testLight = ThLightGraphService.Build(edges, edges[2].Edge.StartPoint);
-                    //InsertLightService.ShowGeometry(edges[2].Edge.StartPoint, "Start", 20);
-
-                    ThLightGraphService testLight = ThLightGraphService.Build(edges, edges[3].Edge.EndPoint);
-                    
-                    InsertLightService.ShowGeometry(edges[3].Edge.EndPoint, "Start", 20);
-
-                    //按顺序排布车道线点并合并同一条线的车道线
-                    List<List<Line>> TempOrderedEdge = new List<List<Line>>();
-
-                    for (int i = 0; i < testLight.Links.Count; i++)
-                    {
-
-                        List<Line> tempLine = new List<Line>();
-                        TempOrderedEdge.Add(tempLine);
-
-                        for (int j = 0; j < testLight.Links[i].Path.Count; j++)
-                        {
-                            if (j==0)
-                            {
-                                if (testLight.Links[i].Path[j].Edge.StartPoint != testLight.Links[i].Start)
-                                {
-                                     testLight.Links[i].Path[j].Edge.ReverseCurve();
-                                 
-                                   
-                                }
-                                tempLine.Add(testLight.Links[i].Path[j].Edge);
-
-                            }
-                            else
-                            {
-                                if (testLight.Links[i].Path[j].Edge.StartPoint != testLight.Links[i].Path[j-1].Edge.EndPoint)
-                                {
-                                    testLight.Links[i].Path[j].Edge.ReverseCurve();
-                                }
-                                var nowEdge = (testLight.Links[i].Path[j].Edge.EndPoint - testLight.Links[i].Path[j].Edge.StartPoint).GetNormal();
-                                var PreEdge = (testLight.Links[i].Path[j-1].Edge.EndPoint - testLight.Links[i].Path[j-1].Edge.StartPoint).GetNormal();
-                               bool bAngle = Math.Abs(nowEdge.DotProduct(PreEdge)) / (nowEdge.Length * PreEdge.Length) < Math.Abs(Math.Cos(45 * Math.PI / 180));
-                                if (bAngle)
-                                {
-                                    
-                                    tempLine = new List<Line>();
-                                    TempOrderedEdge.Add(tempLine);
-                                }
-                                
-                                tempLine.Add(testLight.Links[i].Path[j].Edge);
-                            }
-                            
-                        }
-                        
-
-                    }
-
-                    
-                    
-                    //for (int i = 0; i < testLight.Links.Count; i++)
-                    //{
-                    //    for (int j = 0; j < testLight.Links[i].Path.Count; j++)
-                    //    {
-                    //        InsertLightService.ShowGeometry(testLight.Links[i].Path[j].Edge.StartPoint, string.Format("ordered{0}-{1}-start", i, j), 20);
-                    //        InsertLightService.ShowGeometry(testLight.Links[i].Path[j].Edge.EndPoint, string.Format("ordered{0}-{1}-end", i, j), 20);
-                    //    }
-                    //}
-
-
-
-                    //for (int i = 0; i < TempOrderedEdge.Count; i++)
-                    //{
-                    //    for (int j = 0; j < TempOrderedEdge[i].Count; j++)
-                    //    {
-                    //        InsertLightService.ShowGeometry(TempOrderedEdge[i][j].StartPoint, string.Format("new Line {0}-{1}-start", i, j), 161);
-                    //        InsertLightService.ShowGeometry(TempOrderedEdge[i][j].EndPoint, string.Format("new Line {0}-{1}-end", i, j), 161);
-                    //    }
-                    //}
-
-
-
-
-                    if (debug == false)
+                   bool debug = false;
+                    if ( debug == false)
                     {
                         ////debug
                         //foreach (List<Line> parkinglineString in parkingLines)
@@ -211,7 +100,6 @@ namespace ThMEPLighting
 
                         //}
 
-
                         //获取构建信息
                         var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
                         GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
@@ -219,10 +107,12 @@ namespace ThMEPLighting
 
                         //主车道布置信息
                         LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
-                        var layoutInfo = layoutService.LayoutLight(plFrame, TempOrderedEdge, columns, walls);
+                        var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
                         //layoutInfo = layoutService.LayoutLight(plFrame, otherPLines, columns, walls);
 
                         //InsertLightService.InsertSprayBlock(layoutInfo);
+
+
 
                         ////副车道布置信息
                         // LayoutWithParkingLineForLight layoutSecondaryService = new LayoutWithParkingLineForLight();
