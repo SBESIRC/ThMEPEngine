@@ -55,7 +55,7 @@ namespace ThMEPHVAC.CAD
         {
             return new ThIfcDuctSegment(parameters)
             {
-                Representation = CreateverticalDuctGeometries(parameters)
+                Representation = CreateVerticalDuctGeometries(parameters)
             };
         }
 
@@ -482,7 +482,7 @@ namespace ThMEPHVAC.CAD
             };
 
         }
-        private DBObjectCollection CreateverticalDuctGeometries(ThIfcDuctSegmentParameters parameters)
+        private DBObjectCollection CreateVerticalDuctGeometries(ThIfcDuctSegmentParameters parameters)
         {
             //绘制管道端线
             Line UpperLine = new Line()
