@@ -118,6 +118,7 @@
     <Compile Include="Model\Hvac\ThIfcDuctElbow.cs" />
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctFitting.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctHose.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctSegment.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctTee.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctReducing.cs" />

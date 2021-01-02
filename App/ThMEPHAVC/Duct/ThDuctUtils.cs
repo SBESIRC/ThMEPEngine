@@ -147,5 +147,19 @@ namespace ThMEPHVAC.Duct
         {
             return ThHvacCommon.WALLHOLE_LAYER;
         }
+
+        public static double GetHoseLength(string scenario)
+        {
+            switch (scenario)
+            {
+                case "消防排烟":
+                case "消防补风":
+                case "消防加压送风":
+                    return 0;
+                default:
+                    return 200;
+            }
+
+        }
     }
 }

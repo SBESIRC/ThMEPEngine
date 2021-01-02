@@ -17,6 +17,7 @@ namespace ThMEPEngineCore.Service.Hvac
         public const string AIRVALVE_BLOCK_NAME = "风阀";
         public const string SILENCER_BLOCK_NAME = "阻抗复合式消声器";
         public const string FILEVALVE_BLOCK_NAME = "防火阀";
+        public const string HOSE_BLOCK_NAME = "风机软接";
 
         // XDATA
         public const string RegAppName_FanSelection = "THCAD_FAN_SELECTION";

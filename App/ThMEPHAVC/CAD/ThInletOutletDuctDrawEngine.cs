@@ -34,6 +34,7 @@ namespace ThMEPHVAC.CAD
         public List<ThIfcDistributionElement> OutletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> DuctReducings { get; set; }
         public List<ThIfcDistributionElement> DuctElbows { get; set; }
+        public List<ThIfcDistributionElement> DuctHoses { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> InletCenterLineGraph { get; set; }
         public ThDuctEdge<ThDuctVertex> FirstInletEdge { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
@@ -68,16 +69,19 @@ namespace ThMEPHVAC.CAD
             OutletDuctSegments = new List<ThIfcDistributionElement>();
             DuctReducings = new List<ThIfcDistributionElement>();
             DuctElbows = new List<ThIfcDistributionElement>();
+            DuctHoses = new List<ThIfcDistributionElement>();
             SetInletElbows();
             SetOutletElbows();
-            SetInletDucts();
-            SetOutletDucts();
+            SetInOutHoses(fanmodel.FanScenario);
+            SetInletDucts(fanmodel.FanScenario);
+            SetOutletDucts(fanmodel.FanScenario);
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             DrawDuctInDWG(InletDuctSegments, ductLayer);
             DrawDuctInDWG(OutletDuctSegments, ductLayer);
             DrawDuctInDWG(DuctReducings, ductLayer);
             DrawDuctInDWG(DuctElbows, ductLayer);
+            DrawHoseInDWG(DuctHoses, modelLayer);
         }
 
         public void SetInletOutletSize(string scenario, string inouttype, string innerromeductinfo, string outerromeductinfo)
@@ -100,7 +104,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public void SetInletDucts()
+        private void SetInletDucts(string scenario)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -134,20 +138,30 @@ namespace ThMEPHVAC.CAD
                 if (InletOpening.Width < InletDuctWidth)
                 {
                     double rotationangle = InletOpening.NormalAngle * Math.PI / 180;
-                    reducing.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                    //reducing.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                    reducing.Matrix = Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()));
                 }
                 //若风机进口宽度比管道宽度大，即风机进口对应变径的大端
                 else
                 {
                     double rotationangle = InletOpening.NormalAngle * Math.PI / 180 - Math.PI;
-                    reducing.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
+                    //reducing.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
+                    reducing.Matrix = Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)));
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()));
+                }
+                if (DuctHoses.Count() != 0)
+                {
+                    double hoselength = DuctHoses.Cast<ThIfcDuctHose>().First().Parameters.Length;
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(new Point3d(hoselength * Math.Cos(InletOpening.NormalAngle * Math.PI / 180), hoselength * Math.Sin(InletOpening.NormalAngle * Math.PI / 180), 0).GetAsVector()));
                 }
                 DuctReducings.Add(reducing);
 
                 var firstvertex = InletCenterLineGraph.Vertices.Where(v => v.IsStartVertexOfGraph).FirstOrDefault();
                 if (!firstvertex.IsNull())
                 {
-                    InletCenterLineGraph.OutEdges(firstvertex).FirstOrDefault().SourceShrink = reducing.Parameters.ReducingLength;
+                    InletCenterLineGraph.OutEdges(firstvertex).FirstOrDefault().SourceShrink = reducing.Parameters.ReducingLength + ThDuctUtils.GetHoseLength(scenario);
                 }
             }
 
@@ -169,7 +183,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public void SetOutletDucts()
+        private void SetOutletDucts(string scenario)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -203,20 +217,30 @@ namespace ThMEPHVAC.CAD
                 if (OutletOpening.Width < OutletDuctWidth)
                 {
                     double rotationangle = OutletOpening.NormalAngle * Math.PI / 180;
-                    reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                    //reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                    reducing.Matrix = Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()));
                 }
                 //若风机出口宽度比管道宽度大，即风机出口对应变径的大端
                 else
                 {
                     double rotationangle = OutletOpening.NormalAngle * Math.PI / 180 - Math.PI;
-                    reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
+                    //reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
+                    reducing.Matrix = Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)));
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()));
+                }
+                if (DuctHoses.Count() != 0)
+                {
+                    double hoselength = DuctHoses.Cast<ThIfcDuctHose>().First().Parameters.Length;
+                    reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(new Point3d(hoselength * Math.Cos(OutletOpening.NormalAngle * Math.PI / 180), hoselength * Math.Sin(OutletOpening.NormalAngle * Math.PI / 180), 0).GetAsVector()));
                 }
                 DuctReducings.Add(reducing);
 
                 var firstvertex = OutletCenterLineGraph.Vertices.Where(v => v.IsStartVertexOfGraph).FirstOrDefault();
                 if (!firstvertex.IsNull())
                 {
-                    OutletCenterLineGraph.OutEdges(firstvertex).FirstOrDefault().SourceShrink = reducing.Parameters.ReducingLength;
+                    OutletCenterLineGraph.OutEdges(firstvertex).FirstOrDefault().SourceShrink = reducing.Parameters.ReducingLength + ThDuctUtils.GetHoseLength(scenario);
                 }
 
             }
@@ -239,7 +263,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public void SetInletElbows()
+        private void SetInletElbows()
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -271,7 +295,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public void SetOutletElbows()
+        private void SetOutletElbows()
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -301,6 +325,44 @@ namespace ThMEPHVAC.CAD
                     edge.TargetShrink = elbow.Parameters.SingleLength;
                 }
             }
+        }
+
+        private void SetInOutHoses(string scenario)
+        {
+            if (scenario == "消防补风" || scenario == "消防排烟" || scenario == "消防加压送风")
+            {
+                return;
+            }
+            else
+            {
+                if (FanInOutType.Contains("上进") || FanInOutType.Contains("下进") || FanInOutType.Contains("下出"))
+                {
+                    return;
+                }
+                else
+                {
+                    ThIfcDuctHose inlethose = CreateHose(InletOpening.Width, InletOpening.NormalAngle, scenario);
+                    inlethose.Matrix = Matrix3d.Displacement(inlethose.Parameters.InsertPoint.GetVectorTo(InletOpening.OpingBasePoint)) * Matrix3d.Rotation(inlethose.Parameters.RotateAngle, Vector3d.ZAxis, inlethose.Parameters.InsertPoint);
+                    ThIfcDuctHose outlethose = CreateHose(OutletOpening.Width, OutletOpening.NormalAngle, scenario);
+                    outlethose.Matrix = Matrix3d.Displacement(outlethose.Parameters.InsertPoint.GetVectorTo(OutletOpening.OpingBasePoint)) * Matrix3d.Rotation(outlethose.Parameters.RotateAngle, Vector3d.ZAxis, outlethose.Parameters.InsertPoint);
+                    DuctHoses.AddRange(new List<ThIfcDistributionElement> { inlethose, outlethose });
+                }
+
+            }
+        }
+
+        private ThIfcDuctHose CreateHose(double width, double openingnormalangle,string scenario)
+        {
+            double openingnormalradian = openingnormalangle * Math.PI / 180;
+            ThIfcDuctHoseParameters hoseparameters = new ThIfcDuctHoseParameters()
+            {
+                Width = width,
+                Length = ThDuctUtils.GetHoseLength(scenario),
+                RotateAngle = openingnormalradian < 0.5 * Math.PI ? 0.5 * Math.PI + openingnormalradian : openingnormalradian + 0.5 * Math.PI,
+            };
+            var hose = new ThIfcDuctHose(hoseparameters);
+            hose.SetHoseInsertPoint();
+            return hose;
         }
 
         private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string layer)
@@ -333,6 +395,14 @@ namespace ThMEPHVAC.CAD
                         }
                     }
                 }
+            }
+        }
+
+        private void DrawHoseInDWG(List<ThIfcDistributionElement> hoses, string modellayer)
+        {
+            foreach (ThIfcDuctHose hose in hoses)
+            {
+                ThValvesAndHolesInsertEngine.InsertHose(hose, modellayer);
             }
         }
 
