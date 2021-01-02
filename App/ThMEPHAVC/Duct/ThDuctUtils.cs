@@ -24,6 +24,23 @@ namespace ThMEPHVAC.Duct
             }
         }
 
+        public static string DuctCenterLineLayerName(string scenario)
+        {
+            if (scenario.Contains("消防"))
+            {
+                return ThHvacCommon.FIRE_CENTERLINE_LAYER;
+            }
+            else if (scenario.Contains("兼用"))
+            {
+                return ThHvacCommon.DUAL_CENTERLINE_LAYER;
+            }
+            else
+            {
+                return ThHvacCommon.VENT_CENTERLINE_LAYER;
+            }
+        }
+
+
         public static string FireValveLayerName(string modelLayer)
         {
             switch (modelLayer)

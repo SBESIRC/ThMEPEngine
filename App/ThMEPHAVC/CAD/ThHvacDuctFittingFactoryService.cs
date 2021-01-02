@@ -14,6 +14,7 @@ namespace ThMEPHVAC.CAD
         {
             return new ThIfcDuctReducing(parameters)
             {
+                Centerline = CreateReducingCenterLine(parameters),
                 Representation = CreateReducingGeometries(parameters)
             };
         }
@@ -47,6 +48,7 @@ namespace ThMEPHVAC.CAD
         {
             return new ThIfcDuctSegment(parameters)
             {
+                Centerline = CreateDuctSegmentCenterLine(parameters),
                 Representation = CreateDuctSegmentGeometries(parameters)
             };
         }
@@ -59,7 +61,7 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public void DuctSegmentHandle(DBObjectCollection originduct, double sourcecutdistance, double targetcutdistance)
+        public void DuctSegmentHandle(DBObjectCollection originduct,DBObjectCollection ductcenterlines, double sourcecutdistance, double targetcutdistance)
         {
             List<string> a = new List<string>();
             var groupedlines = originduct.Cast<Line>().GroupBy(l => Math.Abs(l.Angle) < 0.01 || Math.Abs(l.Angle - Math.PI) < 0.01).ToList();
@@ -101,6 +103,38 @@ namespace ThMEPHVAC.CAD
                     }
                 }
             }
+
+            foreach (Line centerline in ductcenterlines)
+            {
+                if (centerline.StartPoint.X < centerline.EndPoint.X)
+                {
+                    centerline.StartPoint = centerline.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                    centerline.EndPoint = centerline.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                }
+                else
+                {
+                    centerline.EndPoint = centerline.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                    centerline.StartPoint = centerline.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                }
+
+            }
+        }
+
+        private double GetReducingLength(ThIfcDuctReducingParameters parameters)
+        {
+            double reducinglength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(20 * Math.PI / 180);
+            return reducinglength < 100 ? 100 : reducinglength > 1000 ? 1000 : reducinglength;
+        }
+        private DBObjectCollection CreateReducingCenterLine(ThIfcDuctReducingParameters parameters)
+        {
+            return new DBObjectCollection()
+            {
+                new Line()
+                {
+                    StartPoint = parameters.StartCenterPoint,
+                    EndPoint = parameters.StartCenterPoint + new Vector3d(GetReducingLength(parameters),0,0)
+                }
+            };
         }
 
         private DBObjectCollection CreateReducingGeometries(ThIfcDuctReducingParameters parameters)
@@ -117,22 +151,9 @@ namespace ThMEPHVAC.CAD
             Line leftsideline = new Line();
             Line rightsideline = new Line();
             leftsideline.StartPoint = smallendline.StartPoint;
+            leftsideline.EndPoint = smallendline.StartPoint + new Vector3d(GetReducingLength(parameters), -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
             rightsideline.StartPoint = smallendline.EndPoint;
-            if (reducinglength < 100)
-            {
-                leftsideline.EndPoint = smallendline.StartPoint + new Vector3d(100, -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
-                rightsideline.EndPoint = smallendline.EndPoint + new Vector3d(100, 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
-            }
-            else if (reducinglength > 1000)
-            {
-                leftsideline.EndPoint = smallendline.StartPoint + new Vector3d(1000, -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
-                rightsideline.EndPoint = smallendline.EndPoint + new Vector3d(1000, 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
-            }
-            else
-            {
-                leftsideline.EndPoint = smallendline.StartPoint + new Vector3d(reducinglength, -0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
-                rightsideline.EndPoint = smallendline.EndPoint + new Vector3d(reducinglength, 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
-            }
+            rightsideline.EndPoint = smallendline.EndPoint + new Vector3d(GetReducingLength(parameters), 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth), 0);
 
             //创建大端的端线
             Line bigendline = new Line()
@@ -153,9 +174,20 @@ namespace ThMEPHVAC.CAD
         private DBObjectCollection CreateElbowCenterline(ThIfcDuctElbowParameters parameters)
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
+            var centerarc = new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle);
             return new DBObjectCollection()
             {
-                new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle),
+                centerarc,
+                new Line()
+                {
+                    StartPoint = centerarc.StartPoint,
+                    EndPoint = centerarc.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(0,-50,0))),
+                },
+                new Line()
+                {
+                    StartPoint = centerarc.EndPoint,
+                    EndPoint = centerarc.EndPoint.TransformBy(Matrix3d.Rotation(centerarc.EndAngle + 0.5 * Math.PI,Vector3d.ZAxis,centerarc.EndPoint).PostMultiplyBy(Matrix3d.Displacement(new Vector3d(50,0,0)))),
+                }
             };
         }
 
@@ -513,6 +545,15 @@ namespace ThMEPHVAC.CAD
                 RightLine
             };
         }
+
+        private DBObjectCollection CreateDuctSegmentCenterLine(ThIfcDuctSegmentParameters parameters)
+        {
+            return new DBObjectCollection()
+            {
+                new Line(new Point3d(-parameters.Length / 2.0,0,0),new Point3d(parameters.Length / 2.0,0,0)),
+            };
+        }
+
         private DBObjectCollection CreateDuctSegmentGeometries(ThIfcDuctSegmentParameters parameters)
         {
             //绘制辅助中心线

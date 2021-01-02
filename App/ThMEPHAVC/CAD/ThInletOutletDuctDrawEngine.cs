@@ -77,10 +77,11 @@ namespace ThMEPHVAC.CAD
             SetOutletDucts(fanmodel.FanScenario);
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
-            DrawDuctInDWG(InletDuctSegments, ductLayer);
-            DrawDuctInDWG(OutletDuctSegments, ductLayer);
-            DrawDuctInDWG(DuctReducings, ductLayer);
-            DrawDuctInDWG(DuctElbows, ductLayer);
+            string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(fanmodel.FanScenario);
+            DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer);
+            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer);
+            DrawDuctInDWG(DuctReducings, ductLayer, centerLinerLayer);
+            DrawDuctInDWG(DuctElbows, ductLayer, centerLinerLayer);
             DrawHoseInDWG(DuctHoses, modelLayer);
         }
 
@@ -174,7 +175,7 @@ namespace ThMEPHVAC.CAD
                     Length = ductgraphedge.EdgeLength
                 };
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters);
-                ductFittingFactoryService.DuctSegmentHandle(ductSegment.Representation, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
+                ductFittingFactoryService.DuctSegmentHandle(ductSegment.Representation, ductSegment.Centerline, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
@@ -254,7 +255,7 @@ namespace ThMEPHVAC.CAD
                     Length = ductgraphedge.EdgeLength
                 };
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters);
-                ductFittingFactoryService.DuctSegmentHandle(ductSegment.Representation, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
+                ductFittingFactoryService.DuctSegmentHandle(ductSegment.Representation,ductSegment.Centerline, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
@@ -365,11 +366,11 @@ namespace ThMEPHVAC.CAD
             return hose;
         }
 
-        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string layer)
+        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string ductlayer, string centerlinelayer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var layerObj = acadDatabase.Layers.ElementOrDefault(layer, true);
+                var layerObj = acadDatabase.Layers.ElementOrDefault(ductlayer, true);
                 if (layerObj != null)
                 {
                     layerObj.IsOff = false;
@@ -386,7 +387,7 @@ namespace ThMEPHVAC.CAD
                         }
 
                         // 绘制风管中心线
-                        var centerline = CreateDuctCenterlineLayer(layer);
+                        var centerline = CreateDuctCenterlineLayer(centerlinelayer);
                         foreach (Curve dbobj in Segment.Centerline)
                         {
                             dbobj.LayerId = centerline;
@@ -406,12 +407,13 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private ObjectId CreateDuctCenterlineLayer(string ductLayer)
+        private ObjectId CreateDuctCenterlineLayer(string centerlinelayer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var obj = acadDatabase.Database.AddLayer(ductLayer);
-                acadDatabase.Database.SetLayerColor(ductLayer, 252);
+                var obj = acadDatabase.Database.AddLayer(centerlinelayer);
+                acadDatabase.Database.SetLayerColor(centerlinelayer, 252);
+                acadDatabase.Database.UnPrintLayer(centerlinelayer);
                 return obj;
             }
         }
