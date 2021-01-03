@@ -8,14 +8,25 @@ using ThMEPEngineCore.Model.Hvac;
 
 namespace ThMEPHVAC.CAD
 {
+    public enum ReducingToFanJoinType
+    {
+        //小端与风机相连
+        small = 1,
+        //大端与风机相连
+        big = 2,
+        //小端与风机相连且圆转方
+        small_circle = 3,
+        //大端与风机相连且圆转方
+        big_circle = 4
+    }
     public class ThHvacDuctFittingFactoryService
     {
-        public ThIfcDuctReducing CreateReducing(ThIfcDuctReducingParameters parameters)
+        public ThIfcDuctReducing CreateReducing(ThIfcDuctReducingParameters parameters, ReducingToFanJoinType jointype)
         {
             return new ThIfcDuctReducing(parameters)
             {
                 Centerline = CreateReducingCenterLine(parameters),
-                Representation = CreateReducingGeometries(parameters)
+                Representation = CreateReducingGeometries(parameters, jointype)
             };
         }
 
@@ -137,7 +148,7 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        private DBObjectCollection CreateReducingGeometries(ThIfcDuctReducingParameters parameters)
+        private DBObjectCollection CreateReducingGeometries(ThIfcDuctReducingParameters parameters, ReducingToFanJoinType jointype)
         {
             //创建小端的端线
             Line smallendline = new Line()
@@ -145,6 +156,20 @@ namespace ThMEPHVAC.CAD
                 StartPoint = parameters.StartCenterPoint + new Vector3d(0, -0.5 * parameters.SmallEndWidth, 0),
                 EndPoint = parameters.StartCenterPoint + new Vector3d(0, 0.5 * parameters.SmallEndWidth, 0),
             };
+
+            //创建小端的法兰线
+            Line smallendleftflange = new Line()
+            {
+                StartPoint = smallendline.StartPoint,
+                EndPoint = smallendline.StartPoint + new Vector3d(0,-45,0),
+            };
+            Line smallendrightflange = new Line()
+            {
+                StartPoint = smallendline.EndPoint,
+                EndPoint = smallendline.EndPoint + new Vector3d(0, 45, 0),
+            };
+
+
 
             //创建两侧侧壁轮廓线
             double reducinglength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(20 * Math.PI / 180);
@@ -161,14 +186,51 @@ namespace ThMEPHVAC.CAD
                 StartPoint = leftsideline.EndPoint,
                 EndPoint = rightsideline.EndPoint,
             };
-
-            return new DBObjectCollection()
+            //创建大端的法兰线
+            Line bigendleftflange = new Line()
             {
-                smallendline,
-                leftsideline,
-                rightsideline,
-                bigendline
+                StartPoint = bigendline.StartPoint,
+                EndPoint = bigendline.StartPoint + new Vector3d(0, -45, 0),
             };
+            Line bigendrightflange = new Line()
+            {
+                StartPoint = bigendline.EndPoint,
+                EndPoint = bigendline.EndPoint + new Vector3d(0, 45, 0),
+            };
+
+
+            var reducinglines = new DBObjectCollection() { leftsideline, rightsideline };
+            switch (jointype)
+            {
+                case ReducingToFanJoinType.small:
+                    reducinglines.Add(bigendline);
+                    reducinglines.Add(bigendleftflange);
+                    reducinglines.Add(bigendrightflange);
+                    break;
+                case ReducingToFanJoinType.big:
+                    reducinglines.Add(smallendline);
+                    reducinglines.Add(smallendleftflange);
+                    reducinglines.Add(smallendrightflange);
+                    break;
+                case ReducingToFanJoinType.small_circle:
+                    reducinglines.Add(bigendline);
+                    reducinglines.Add(bigendleftflange);
+                    reducinglines.Add(bigendrightflange);
+                    reducinglines.Add(new Line(parameters.StartCenterPoint, leftsideline.EndPoint));
+                    reducinglines.Add(new Line(parameters.StartCenterPoint, rightsideline.EndPoint));
+                    break;
+                case ReducingToFanJoinType.big_circle:
+                    reducinglines.Add(smallendline);
+                    reducinglines.Add(smallendleftflange);
+                    reducinglines.Add(smallendrightflange);
+                    reducinglines.Add(new Line(parameters.StartCenterPoint + new Vector3d(GetReducingLength(parameters),0,0), smallendline.StartPoint));
+                    reducinglines.Add(new Line(parameters.StartCenterPoint + new Vector3d(GetReducingLength(parameters),0,0), smallendline.EndPoint));
+                    break;
+                default:
+                    break;
+            }
+
+            return reducinglines;
         }
 
         private DBObjectCollection CreateElbowCenterline(ThIfcDuctElbowParameters parameters)

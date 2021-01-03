@@ -11,6 +11,7 @@ using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.IO;
 using ThMEPHVAC.Duct;
 using TianHua.Publics.BaseCode;
+using ThMEPEngineCore.Service.Hvac;
 
 namespace ThMEPHVAC.CAD
 {
@@ -73,8 +74,9 @@ namespace ThMEPHVAC.CAD
             SetInletElbows();
             SetOutletElbows();
             SetInOutHoses(fanmodel.FanScenario);
-            SetInletDucts(fanmodel.FanScenario);
-            SetOutletDucts(fanmodel.FanScenario);
+            bool isAxial = fanmodel.Model.IsAXIALModel();
+            SetInletDucts(fanmodel.FanScenario, isAxial);
+            SetOutletDucts(fanmodel.FanScenario, isAxial);
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(fanmodel.FanScenario);
@@ -105,7 +107,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetInletDucts(string scenario)
+        private void SetInletDucts(string scenario,bool isaxial)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -134,10 +136,19 @@ namespace ThMEPHVAC.CAD
                     BigEndWidth = reducingBigEndWidth,
                     SmallEndWidth = reducingSmallEndWidth
                 };
-                var reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters);
+                //var reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters);
+                ThIfcDuctReducing reducing = new ThIfcDuctReducing(new ThIfcDuctReducingParameters());
                 //若风机进口宽度比管道宽度小，即风机进口对应变径的小端
                 if (InletOpening.Width < InletDuctWidth)
                 {
+                    if (isaxial)
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.small_circle);
+                    }
+                    else
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.small);
+                    }
                     double rotationangle = InletOpening.NormalAngle * Math.PI / 180;
                     //reducing.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                     reducing.Matrix = Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
@@ -146,6 +157,15 @@ namespace ThMEPHVAC.CAD
                 //若风机进口宽度比管道宽度大，即风机进口对应变径的大端
                 else
                 {
+                    if (isaxial)
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.big_circle);
+                    }
+                    else
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.big);
+                    }
+
                     double rotationangle = InletOpening.NormalAngle * Math.PI / 180 - Math.PI;
                     //reducing.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
                     reducing.Matrix = Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
@@ -184,7 +204,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetOutletDucts(string scenario)
+        private void SetOutletDucts(string scenario,bool isaxial)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -213,10 +233,20 @@ namespace ThMEPHVAC.CAD
                     BigEndWidth = reducingBigEndWidth,
                     SmallEndWidth = reducingSmallEndWidth
                 };
-                var reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters);
+                //var reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters);
+                ThIfcDuctReducing reducing = new ThIfcDuctReducing(new ThIfcDuctReducingParameters());
                 //若风机出口宽度比管道宽度小，即风机出口对应变径的小端
                 if (OutletOpening.Width < OutletDuctWidth)
                 {
+                    if (isaxial)
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.small_circle);
+                    }
+                    else
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.small);
+                    }
+
                     double rotationangle = OutletOpening.NormalAngle * Math.PI / 180;
                     //reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                     reducing.Matrix = Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
@@ -225,6 +255,15 @@ namespace ThMEPHVAC.CAD
                 //若风机出口宽度比管道宽度大，即风机出口对应变径的大端
                 else
                 {
+                    if (isaxial)
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.big_circle);
+                    }
+                    else
+                    {
+                        reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters, ReducingToFanJoinType.big);
+                    }
+
                     double rotationangle = OutletOpening.NormalAngle * Math.PI / 180 - Math.PI;
                     //reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
                     reducing.Matrix = Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
