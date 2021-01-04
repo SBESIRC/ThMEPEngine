@@ -13,6 +13,7 @@ namespace ThMEPEngineCore.Model
         /// OCS坐标系的中心线几何图元
         /// </summary>
         public DBObjectCollection Centerline { get; set; } = new DBObjectCollection();
+        public DBObjectCollection FlangeLine { get; set; } = new DBObjectCollection();
         /// <summary>
         /// OCS坐标系下的几何图元
         /// </summary>

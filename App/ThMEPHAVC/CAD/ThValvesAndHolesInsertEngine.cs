@@ -24,8 +24,8 @@ namespace ThMEPHVAC.CAD
                 var layerName = HoleModel.ValveBlockLayer;
                 Active.Database.ImportValve(blockName, layerName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
-                objId.SetValveWidth(HoleModel.Width, HoleModel.LengthPropertyName);
-                objId.SetValveHeight(HoleModel.Length, HoleModel.WidthPropertyName);
+                objId.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
+                objId.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
                 objId.SetValveModel(HoleModel.ValveVisibility);
 
                 // 设置开洞位置

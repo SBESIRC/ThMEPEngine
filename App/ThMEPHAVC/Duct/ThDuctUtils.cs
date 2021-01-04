@@ -40,6 +40,21 @@ namespace ThMEPHVAC.Duct
             }
         }
 
+        public static string DuctFlangeLineLayerName(string modelLayer)
+        {
+            switch (modelLayer)
+            {
+                case "H-DUAL-FBOX":
+                    return ThHvacCommon.DUAL_FLANGE_LAYER;
+                case "H-FIRE-FBOX":
+                    return ThHvacCommon.FIRE_FLANGE_LAYER;
+                case "H-EQUP-FBOX":
+                    return ThHvacCommon.VENT_FLANGE_LAYER;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
 
         public static string FireValveLayerName(string modelLayer)
         {

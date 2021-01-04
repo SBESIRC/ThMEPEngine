@@ -80,10 +80,11 @@ namespace ThMEPHVAC.CAD
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(fanmodel.FanScenario);
-            DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer);
-            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer);
-            DrawDuctInDWG(DuctReducings, ductLayer, centerLinerLayer);
-            DrawDuctInDWG(DuctElbows, ductLayer, centerLinerLayer);
+            string flangeLinerLayer = ThDuctUtils.DuctFlangeLineLayerName(modelLayer);
+            DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawDuctInDWG(DuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawDuctInDWG(DuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
             DrawHoseInDWG(DuctHoses, modelLayer);
         }
 
@@ -405,16 +406,21 @@ namespace ThMEPHVAC.CAD
             return hose;
         }
 
-        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string ductlayer, string centerlinelayer)
+        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string ductlayer, string centerlinelayer, string flangelayer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var layerObj = acadDatabase.Layers.ElementOrDefault(ductlayer, true);
+                var flangelayerObj = acadDatabase.Layers.ElementOrDefault(flangelayer, true);
                 if (layerObj != null)
                 {
                     layerObj.IsOff = false;
                     layerObj.IsFrozen = false;
                     layerObj.IsLocked = false;
+                    flangelayerObj.IsOff = false;
+                    flangelayerObj.IsFrozen = false;
+                    flangelayerObj.IsLocked = false;
+
                     foreach (var Segment in DuctSegments)
                     {
                         // 绘制风管
@@ -430,6 +436,14 @@ namespace ThMEPHVAC.CAD
                         foreach (Curve dbobj in Segment.Centerline)
                         {
                             dbobj.LayerId = centerline;
+                            dbobj.TransformBy(Segment.Matrix);
+                            acadDatabase.ModelSpace.Add(dbobj);
+                        }
+
+                        // 绘制法兰线
+                        foreach (Curve dbobj in Segment.FlangeLine)
+                        {
+                            dbobj.LayerId = flangelayerObj.ObjectId;
                             dbobj.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(dbobj);
                         }

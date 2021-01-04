@@ -26,6 +26,7 @@ namespace ThMEPHVAC.CAD
             return new ThIfcDuctReducing(parameters)
             {
                 Centerline = CreateReducingCenterLine(parameters),
+                FlangeLine = CreateReducingFlangeLines(parameters, jointype),
                 Representation = CreateReducingGeometries(parameters, jointype)
             };
         }
@@ -35,6 +36,7 @@ namespace ThMEPHVAC.CAD
             return new ThIfcDuctElbow(parameters)
             {
                 Centerline = CreateElbowCenterline(parameters),
+                FlangeLine = CreateElbowFlangeline(parameters),
                 Representation = CreateElbowGeometries(parameters)
             };
         }
@@ -147,7 +149,34 @@ namespace ThMEPHVAC.CAD
                 }
             };
         }
+        private DBObjectCollection CreateReducingFlangeLines(ThIfcDuctReducingParameters parameters, ReducingToFanJoinType jointype)
+        {
 
+            Line smallendflange = new Line()
+            {
+                StartPoint = parameters.StartCenterPoint + new Vector3d(0, 0.5 * parameters.SmallEndWidth, 0) + new Vector3d(0, 45, 0),
+                EndPoint = parameters.StartCenterPoint + new Vector3d(0, -0.5 * parameters.SmallEndWidth, 0) + new Vector3d(0, -45, 0),
+            };
+            Line bigendflange = new Line()
+            {
+                StartPoint = parameters.StartCenterPoint + new Vector3d(parameters.ReducingLength, 0.5 * parameters.BigEndWidth, 0) + new Vector3d(0, 45, 0),
+                EndPoint = parameters.StartCenterPoint + new Vector3d(parameters.ReducingLength, -0.5 * parameters.BigEndWidth, 0) + new Vector3d(0, -45, 0),
+            };
+            var flangelines = new DBObjectCollection();
+            switch (jointype)
+            {
+                case ReducingToFanJoinType.small:
+                case ReducingToFanJoinType.small_circle:
+                    flangelines.Add(bigendflange);
+                    break;
+                case ReducingToFanJoinType.big:
+                case ReducingToFanJoinType.big_circle:
+                    flangelines.Add(smallendflange);
+                    break;
+            }
+
+            return flangelines;
+        }
         private DBObjectCollection CreateReducingGeometries(ThIfcDuctReducingParameters parameters, ReducingToFanJoinType jointype)
         {
             //创建小端的端线
@@ -160,13 +189,8 @@ namespace ThMEPHVAC.CAD
             //创建小端的法兰线
             Line smallendleftflange = new Line()
             {
-                StartPoint = smallendline.StartPoint,
+                StartPoint = smallendline.EndPoint + new Vector3d(0, 45, 0),
                 EndPoint = smallendline.StartPoint + new Vector3d(0,-45,0),
-            };
-            Line smallendrightflange = new Line()
-            {
-                StartPoint = smallendline.EndPoint,
-                EndPoint = smallendline.EndPoint + new Vector3d(0, 45, 0),
             };
 
 
@@ -189,40 +213,19 @@ namespace ThMEPHVAC.CAD
             //创建大端的法兰线
             Line bigendleftflange = new Line()
             {
-                StartPoint = bigendline.StartPoint,
+                StartPoint = bigendline.EndPoint + new Vector3d(0, 45, 0),
                 EndPoint = bigendline.StartPoint + new Vector3d(0, -45, 0),
-            };
-            Line bigendrightflange = new Line()
-            {
-                StartPoint = bigendline.EndPoint,
-                EndPoint = bigendline.EndPoint + new Vector3d(0, 45, 0),
             };
 
 
             var reducinglines = new DBObjectCollection() { leftsideline, rightsideline };
             switch (jointype)
             {
-                case ReducingToFanJoinType.small:
-                    reducinglines.Add(bigendline);
-                    reducinglines.Add(bigendleftflange);
-                    reducinglines.Add(bigendrightflange);
-                    break;
-                case ReducingToFanJoinType.big:
-                    reducinglines.Add(smallendline);
-                    reducinglines.Add(smallendleftflange);
-                    reducinglines.Add(smallendrightflange);
-                    break;
                 case ReducingToFanJoinType.small_circle:
-                    reducinglines.Add(bigendline);
-                    reducinglines.Add(bigendleftflange);
-                    reducinglines.Add(bigendrightflange);
                     reducinglines.Add(new Line(parameters.StartCenterPoint, leftsideline.EndPoint));
                     reducinglines.Add(new Line(parameters.StartCenterPoint, rightsideline.EndPoint));
                     break;
                 case ReducingToFanJoinType.big_circle:
-                    reducinglines.Add(smallendline);
-                    reducinglines.Add(smallendleftflange);
-                    reducinglines.Add(smallendrightflange);
                     reducinglines.Add(new Line(parameters.StartCenterPoint + new Vector3d(GetReducingLength(parameters),0,0), smallendline.StartPoint));
                     reducinglines.Add(new Line(parameters.StartCenterPoint + new Vector3d(GetReducingLength(parameters),0,0), smallendline.EndPoint));
                     break;
@@ -232,7 +235,6 @@ namespace ThMEPHVAC.CAD
 
             return reducinglines;
         }
-
         private DBObjectCollection CreateElbowCenterline(ThIfcDuctElbowParameters parameters)
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
@@ -252,7 +254,68 @@ namespace ThMEPHVAC.CAD
                 }
             };
         }
+        private DBObjectCollection CreateElbowFlangeline(ThIfcDuctElbowParameters parameters)
+        {
+            var elbowengle = parameters.ElbowDegree * Math.PI / 180;
+            //创建弯头内外侧圆弧
+            Arc outerarc = new Arc(parameters.CenterPoint, 1.5 * parameters.PipeOpenWidth, 0, elbowengle);
+            Arc innerarc = new Arc(parameters.CenterPoint, 0.5 * parameters.PipeOpenWidth, 0, elbowengle);
+            //创建弯头两端的50mm延申段
+            Line outerendextendline = new Line()
+            {
+                StartPoint = outerarc.EndPoint,
+                EndPoint = outerarc.EndPoint + new Vector3d(-50 * Math.Sin(elbowengle), 50 * Math.Cos(elbowengle), 0),
+            };
+            Line innerendextendline = new Line()
+            {
+                StartPoint = innerarc.EndPoint,
+                EndPoint = innerarc.EndPoint + new Vector3d(-50 * Math.Sin(elbowengle), 50 * Math.Cos(elbowengle), 0),
+            };
+            Line outerstartextendline = new Line()
+            {
+                StartPoint = outerarc.StartPoint,
+                EndPoint = outerarc.StartPoint + new Vector3d(0, -50, 0),
+            };
+            Line innerstartextendline = new Line()
+            {
+                StartPoint = innerarc.StartPoint,
+                EndPoint = innerarc.StartPoint + new Vector3d(0, -50, 0),
+            };
 
+            //创建两端50mm延申段的端线
+            Line startextendsealline = new Line()
+            {
+                StartPoint = outerstartextendline.EndPoint,
+                EndPoint = innerstartextendline.EndPoint,
+            };
+            Line endextendsealline = new Line()
+            {
+                StartPoint = outerendextendline.EndPoint,
+                EndPoint = innerendextendline.EndPoint,
+            };
+
+            Vector3d startsealvector = startextendsealline.StartPoint - startextendsealline.EndPoint;
+            Vector3d starttranvector = startsealvector / startsealvector.Length * 45;
+            Line startflangeline = new Line()
+            {
+                StartPoint = startextendsealline.StartPoint.TransformBy(Matrix3d.Displacement(starttranvector)),
+                EndPoint = startextendsealline.EndPoint.TransformBy(Matrix3d.Displacement(starttranvector.Negate())),
+            };
+
+            Vector3d endsealvector = endextendsealline.StartPoint - endextendsealline.EndPoint;
+            Vector3d endtranvector = endsealvector / endsealvector.Length * 45;
+            Line endflangeline = new Line()
+            {
+                StartPoint = endextendsealline.StartPoint.TransformBy(Matrix3d.Displacement(endtranvector)),
+                EndPoint = endextendsealline.EndPoint.TransformBy(Matrix3d.Displacement(endtranvector.Negate())),
+            };
+
+            return new DBObjectCollection()
+            {
+                startflangeline,
+                endflangeline
+            };
+        }
         private DBObjectCollection CreateElbowGeometries(ThIfcDuctElbowParameters parameters)
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
@@ -281,18 +344,18 @@ namespace ThMEPHVAC.CAD
                 EndPoint = innerarc.StartPoint + new Vector3d(0, -50, 0),
             };
 
-            //创建弯头端线
-            Line startplaneline = new Line()
-            {
-                StartPoint = innerarc.StartPoint,
-                EndPoint = outerarc.StartPoint,
-            };
+            ////创建弯头端线
+            //Line startplaneline = new Line()
+            //{
+            //    StartPoint = innerarc.StartPoint,
+            //    EndPoint = outerarc.StartPoint,
+            //};
 
-            Line endplaneline = new Line()
-            {
-                StartPoint = innerarc.EndPoint,
-                EndPoint = outerarc.EndPoint,
-            };
+            //Line endplaneline = new Line()
+            //{
+            //    StartPoint = innerarc.EndPoint,
+            //    EndPoint = outerarc.EndPoint,
+            //};
 
             //创建两端50mm延申段的端线
             Line startextendsealline = new Line()
@@ -300,11 +363,26 @@ namespace ThMEPHVAC.CAD
                 StartPoint = outerstartextendline.EndPoint,
                 EndPoint = innerstartextendline.EndPoint,
             };
-
             Line endextendsealline = new Line()
             {
                 StartPoint = outerendextendline.EndPoint,
                 EndPoint = innerendextendline.EndPoint,
+            };
+
+            Vector3d startsealvector = startextendsealline.StartPoint - startextendsealline.EndPoint;
+            Vector3d starttranvector = startsealvector / startsealvector.Length * 45;
+            Line startflangeline = new Line()
+            {
+                StartPoint = startextendsealline.StartPoint.TransformBy(Matrix3d.Displacement(starttranvector)),
+                EndPoint = startextendsealline.EndPoint.TransformBy(Matrix3d.Displacement(starttranvector.Negate())),
+            };
+
+            Vector3d endsealvector = endextendsealline.StartPoint - endextendsealline.EndPoint;
+            Vector3d endtranvector = endsealvector / endsealvector.Length * 45;
+            Line endflangeline = new Line()
+            {
+                StartPoint = endextendsealline.StartPoint.TransformBy(Matrix3d.Displacement(endtranvector)),
+                EndPoint = endextendsealline.EndPoint.TransformBy(Matrix3d.Displacement(endtranvector.Negate())),
             };
 
             parameters.SingleLength = endextendsealline.GetPointAtDist(0.5* endextendsealline.Length).DistanceTo(parameters.CornerPoint);
@@ -319,8 +397,8 @@ namespace ThMEPHVAC.CAD
                 innerendextendline,
                 outerstartextendline,
                 innerstartextendline,
-                startextendsealline,
-                endextendsealline
+                startflangeline,
+                endflangeline
             };
         }
 

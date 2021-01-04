@@ -38,6 +38,11 @@ namespace ThMEPEngineCore.Service.Hvac
         public const string DUAL_CENTERLINE_LAYER = "H-DUCT-DUAL-MID";
         public const string VENT_CENTERLINE_LAYER = "H-DUCT-VENT-MID";
 
+        // 管道法兰线图层
+        public const string FIRE_FLANGE_LAYER = "H-DAPP-FAPP";
+        public const string DUAL_FLANGE_LAYER = "H-DAPP-DAPP";
+        public const string VENT_FLANGE_LAYER = "H-DAPP-AAPP";
+
         public const string DUCT_LAYER_DUAL = "H-DUCT-DUAL";
         public const string DUCT_LAYER_FIRE = "H-DUCT-FIRE";
         public const string DUCT_LAYER_VENT = "H-DUCT-VENT";
