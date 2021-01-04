@@ -2735,8 +2735,8 @@ namespace TianHua.FanSelection.UI
                 m_FanDesign.LastOperationDate = DateTime.Now;
                 m_FanDesign.Name = _Filename.Replace(".dwg", "");
                 m_FanDesign.Status = "0";
-                m_FanDesign.Path = ThFanSelectionUIUtils.DefaultModelExportPath() + "\\" + FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
-
+                // m_FanDesign.Path = ThFanSelectionUIUtils.DefaultModelExportPath() + "\\" + FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
+                m_FanDesign.Path = FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
                 if (m_ListFanDesign == null) m_ListFanDesign = new List<FanDesignDataModel>();
                 m_ListFanDesign.Add(m_FanDesign);
 
