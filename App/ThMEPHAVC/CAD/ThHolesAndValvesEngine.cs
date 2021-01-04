@@ -26,7 +26,8 @@ namespace ThMEPHVAC.CAD
             {
                 foreach (var valve in valvegroup.ValvesInGroup)
                 {
-                    ThValvesAndHolesInsertEngine.InsertValveAndHole(valve, valve.LengthPropertyName, valve.WidthPropertyName);
+                    ThValvesAndHolesInsertEngine.InsertValveAndHole(valve);
+                    ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(valve);
                 }
             }
             OutletValveGroups = GetValveGroup(fanmodel, wallobjects, outletductwidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
@@ -34,7 +35,9 @@ namespace ThMEPHVAC.CAD
             {
                 foreach (var valve in valvegroup.ValvesInGroup)
                 {
-                    ThValvesAndHolesInsertEngine.InsertValveAndHole(valve, valve.LengthPropertyName, valve.WidthPropertyName);
+
+                    ThValvesAndHolesInsertEngine.InsertValveAndHole(valve);
+                    ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(valve);
                 }
             }
 

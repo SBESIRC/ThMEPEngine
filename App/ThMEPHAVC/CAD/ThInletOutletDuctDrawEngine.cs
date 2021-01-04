@@ -443,6 +443,7 @@ namespace ThMEPHVAC.CAD
             foreach (ThIfcDuctHose hose in hoses)
             {
                 ThValvesAndHolesInsertEngine.InsertHose(hose, modellayer);
+                ThValvesAndHolesInsertEngine.EnableHoseLayer(hose, modellayer);
             }
         }
 

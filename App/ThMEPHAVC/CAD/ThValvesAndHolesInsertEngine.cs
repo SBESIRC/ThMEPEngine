@@ -16,7 +16,7 @@ namespace ThMEPHVAC.CAD
 {
     public class ThValvesAndHolesInsertEngine
     {
-        public static ObjectId InsertValveAndHole(ThValve HoleModel,string heightpropertyname, string widthpropertyname)
+        public static ObjectId InsertValveAndHole(ThValve HoleModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -24,8 +24,8 @@ namespace ThMEPHVAC.CAD
                 var layerName = HoleModel.ValveBlockLayer;
                 Active.Database.ImportValve(blockName, layerName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
-                objId.SetValveWidth(HoleModel.Width, widthpropertyname);
-                objId.SetValveHeight(HoleModel.Length, heightpropertyname);
+                objId.SetValveWidth(HoleModel.Width, HoleModel.LengthPropertyName);
+                objId.SetValveHeight(HoleModel.Length, HoleModel.WidthPropertyName);
                 objId.SetValveModel(HoleModel.ValveVisibility);
 
                 // 设置开洞位置
@@ -56,6 +56,39 @@ namespace ThMEPHVAC.CAD
                 //返回软接图块
                 return objId;
             }
+        }
+
+        public static void EnableValveAndHoleLayer(ThValve holeModel)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var layerName = holeModel.ValveBlockLayer;
+                var layerObj = acadDatabase.Layers.ElementOrDefault(layerName, true);
+                if (layerObj != null)
+                {
+                    EnableLayer(layerObj);
+                }
+            }
+        }
+
+        public static void EnableHoseLayer(ThIfcDuctHose hose, string modellayer)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var layerName = ThDuctUtils.HoseLayerName(modellayer);
+                var layerObj = acadDatabase.Layers.ElementOrDefault(layerName, true);
+                if (layerObj != null)
+                {
+                    EnableLayer(layerObj);
+                }
+            }
+        }
+
+        private static void EnableLayer(LayerTableRecord ltr)
+        {
+            ltr.IsOff = false;
+            ltr.IsFrozen = false;
+            ltr.IsLocked = false;
         }
     }
 }
