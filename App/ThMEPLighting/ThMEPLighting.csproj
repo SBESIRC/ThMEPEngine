@@ -50,6 +50,7 @@
     <Compile Include="Garage\Model\ThRacewayGroupParameter.cs" />
     <Compile Include="Garage\Model\ThRegionBorder.cs" />
     <Compile Include="Garage\Model\ThRegionLightEdge.cs" />
+    <Compile Include="Garage\Model\ThShortenParameter.cs" />
     <Compile Include="Garage\Model\ThWireOffsetData.cs" />
     <Compile Include="Garage\Service\ThAlignLineHeadService.cs" />
     <Compile Include="Garage\Service\ThBuildCableTrayService.cs" />
@@ -71,6 +72,7 @@
     <Compile Include="Common\ThLightGraphService.cs" />
     <Compile Include="Garage\Service\ThPrintService.cs" />
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
+    <Compile Include="Garage\Service\ThShortenLineService.cs" />
     <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
     <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
     <Compile Include="Garage\Service\ThLinkElbowService.cs" />

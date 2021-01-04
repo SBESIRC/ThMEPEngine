@@ -33,14 +33,12 @@ namespace ThMEPLighting.Garage.Engine
             RacewayParameter = racewayParameter;
         }
         public abstract void Arrange(List<ThRegionBorder> regionBorders);
-        protected List<Line> Trim(List<Line> lines,Polyline regionBorder,double bufferDis)
+        protected List<Line> Trim(List<Line> lines,Polyline regionBorder)
         {
             List<Line> results = new List<Line>();
-            var bufferObjs = regionBorder.Buffer(bufferDis);
-            var bufferBorder=bufferObjs.Cast<Polyline>().OrderByDescending(o => o.Area).First();
             lines.ForEach(o =>
             {
-                var objs = bufferBorder.Trim(o);
+                var objs = regionBorder.Trim(o);
                 objs.Cast<Curve>().ForEach(m =>
                 {
                     if (m is Line line)
@@ -74,12 +72,19 @@ namespace ThMEPLighting.Garage.Engine
                 var fdxWashLines = WashClone(regionBorder.FdxCenterLines);
 
                 //用房间轮廓线对车道中心线进行打断，线的端点距离边界500
-                var dxTrimLines = Trim(dxWashLines, regionBorder.RegionBorder,
-                    ThGarageLightCommon.RegionBorderBufferDistance);                
+                var dxTrimLines = Trim(dxWashLines, regionBorder.RegionBorder);
 
+                var shortenPara = new ThShortenParameter
+                {
+                    Border = regionBorder.RegionBorder,
+                    DxLines = dxTrimLines,
+                    FdxLines= fdxWashLines,
+                    Distance= ThGarageLightCommon.RegionBorderBufferDistance
+                };
+                var shortDxLines = ThShortenLineService.Shorten(shortenPara);
                 //共线，重叠处理，分割处理
                 var fdxMergeLines = ThLineMerger.Merge(fdxWashLines);
-                var dxMergeLines = ThLineMerger.Merge(dxTrimLines);
+                var dxMergeLines = ThLineMerger.Merge(shortDxLines);
                 
                 FdxLines.AddRange(fdxMergeLines);
                 //分割
