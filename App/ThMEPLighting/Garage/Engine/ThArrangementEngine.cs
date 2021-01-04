@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -77,10 +78,9 @@ namespace ThMEPLighting.Garage.Engine
                     ThGarageLightCommon.RegionBorderBufferDistance);                
 
                 //共线，重叠处理，分割处理
-                var fdxMergeLines = ThLaneLineSimplifier.LineMerge(
-                    fdxWashLines, ThGarageLightCommon.RepeatedPointDistance);
-                var dxMergeLines =ThLaneLineSimplifier.LineMerge(
-                    dxTrimLines, ThGarageLightCommon.RepeatedPointDistance);
+                var fdxMergeLines = ThLineMerger.Merge(fdxWashLines);
+                var dxMergeLines = ThLineMerger.Merge(dxTrimLines);
+                
                 FdxLines.AddRange(fdxMergeLines);
                 //分割
                 using (var splitLineEngine = new ThSplitLineEngine(dxMergeLines))
@@ -88,8 +88,8 @@ namespace ThMEPLighting.Garage.Engine
                     splitLineEngine.Split();                   
                     splitLineEngine.Results.ForEach(o=> DxLines.AddRange(o.Value));                    
                 }
-                //过滤无需布灯的短线
-                DxLines = ThRemoveShortCenterLineService.Remove(DxLines, ArrangeParameter.MinimumEdgeLength);
+                //取消过滤无需布灯的短线(20210104)
+                //DxLines = ThRemoveShortCenterLineService.Remove(DxLines, ArrangeParameter.MinimumEdgeLength);
             }
         }
         protected ObjectIdList Print(List<ThLightEdge> lightEdges)
