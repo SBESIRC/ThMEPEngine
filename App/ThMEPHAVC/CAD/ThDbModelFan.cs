@@ -111,16 +111,16 @@ namespace ThMEPHVAC.CAD
 
         private FanOpening GetFanInlet()
         {
-            double angle2Property = Data.CustomProperties
+            double angle2Property = Convert.ToDouble(Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
-                    .First().Value.NullToDouble() * 180 / Math.PI;
+                    .First().Value) * 180 / Math.PI;
             if (Model.IsAXIALModel())
             {
-                var redius = Data.CustomProperties
+                var redius = Convert.ToDouble(Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
-                    .First().Value.NullToDouble();
+                    .First().Value);
                 return new FanOpening()
                 {
                     IsCircleOpening = true,
@@ -138,10 +138,10 @@ namespace ThMEPHVAC.CAD
                     {
                         IsCircleOpening = false,
                         Height = 0,
-                        Width = Data.CustomProperties
+                        Width = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)
-                        .First().Value.NullToDouble()
+                        .First().Value),
                     };
                     if (blockname.Contains("直进"))
                     {
@@ -159,31 +159,31 @@ namespace ThMEPHVAC.CAD
                     {
                         IsCircleOpening = false,
                         Angle = angle2Property,
-                        Height = Data.CustomProperties
+                        Height = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL)
-                        .First().Value.NullToDouble(),
+                        .First().Value),
 
-                        Width = Data.CustomProperties
+                        Width = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)
-                        .First().Value.NullToDouble()
+                        .First().Value),
                     };
                 }
             }
         }
         private FanOpening GetFanOutlet()
         {
-            double angle2Property = Data.CustomProperties
+            double angle2Property = Convert.ToDouble(Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
-                    .First().Value.NullToDouble() * 180 / Math.PI;
+                    .First().Value) * 180 / Math.PI;
             if (Model.IsAXIALModel())
             {
-                var redius = Data.CustomProperties
+                var redius = Convert.ToDouble(Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_DIAMETER)
-                    .First().Value.NullToDouble();
+                    .First().Value);
                 return new FanOpening()
                 {
                     IsCircleOpening = true,
@@ -201,12 +201,11 @@ namespace ThMEPHVAC.CAD
                     {
                         IsCircleOpening = false,
                         Height = 0,
-                        //Angle = angle2Property <= 180 ? angle2Property + 180 : angle2Property - 180,
                         Angle = angle2Property,
-                        Width = Data.CustomProperties
+                        Width = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)
-                        .First().Value.NullToDouble()
+                        .First().Value),
                     };
                 }
                 else
@@ -215,15 +214,15 @@ namespace ThMEPHVAC.CAD
                     {
                         IsCircleOpening = false,
                         Angle = angle2Property,
-                        Height = Data.CustomProperties
+                        Height = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL)
-                        .First().Value.NullToDouble(),
+                        .First().Value),
 
-                        Width = Data.CustomProperties
+                        Width = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)
-                        .First().Value.NullToDouble()
+                        .First().Value),
                     };
                 }
             }
@@ -233,7 +232,6 @@ namespace ThMEPHVAC.CAD
         {
             string blockname = Data.EffectiveName;
             Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.GetAsVector());
-            //Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.TransformBy(Active.Editor.GetMatrixFromWcsToUcs()).GetAsVector());
             if (blockname.Contains("直进") || blockname.Contains("侧进"))
             {
                 Point3d inletposition = CreatePointFromProperty(
@@ -280,15 +278,15 @@ namespace ThMEPHVAC.CAD
         }
         private Point3d CreatePointFromProperty(string xname,string yname)
         {
-            double inletX = Data.CustomProperties
+            double inletX = Convert.ToDouble(Data.CustomProperties
                 .Cast<DynamicBlockReferenceProperty>()
                 .Where(d => d.PropertyName == xname)
-                .First().Value.NullToDouble();
+                .First().Value);
 
-            double inletY = Data.CustomProperties
+            double inletY = Convert.ToDouble(Data.CustomProperties
                 .Cast<DynamicBlockReferenceProperty>()
                 .Where(d => d.PropertyName == yname)
-                .First().Value.NullToDouble();
+                .First().Value);
 
             return new Point3d(inletX, inletY, 0);
         }
