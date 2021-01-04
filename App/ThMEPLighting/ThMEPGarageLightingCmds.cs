@@ -155,13 +155,16 @@ namespace ThMEPLighting
                         var fdxLines = GetRegionLines(newBorder,
                         new List<string> { ThGarageLightCommon.FdxCenterLineLayerName },
                         new List<Type> { typeof(Line), typeof(Polyline) });
-                        var regionBorder = new ThRegionBorder
+                        if(dxLines.Count>0)
                         {
-                            RegionBorder = newBorder,
-                            DxCenterLines = dxLines,
-                            FdxCenterLines = fdxLines
-                        };
-                        results.Add(regionBorder);
+                            var regionBorder = new ThRegionBorder
+                            {
+                                RegionBorder = newBorder,
+                                DxCenterLines = dxLines,
+                                FdxCenterLines = fdxLines
+                            };
+                            results.Add(regionBorder);
+                        }
                     });
                 }
             }
