@@ -1,6 +1,7 @@
 ﻿using System;
 using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
@@ -80,11 +81,18 @@ namespace ThMEPLighting.Garage.Engine
         public List<Point3d> GetPorts()
         {
             var ports = new List<Point3d>();
-            CenterWithPorts.ForEach(m =>
+            using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
+            {
+                CenterWithPorts.ForEach(m =>
                 {
-                    m.Value.ForEach(n => 
-                    ports.Add(ThGeometryTool.GetMidPt(n.StartPoint,n.EndPoint)));
+                    var normalize = m.Key.Normalize();
+                    var pts = new List<Point3d>();
+                    m.Value.ForEach(n =>
+                    pts.Add(ThGeometryTool.GetMidPt(n.StartPoint, n.EndPoint)));
+                    pts=pts.OrderBy(p => normalize.StartPoint.DistanceTo(p)).ToList();
+                    ports.AddRange(pts);
                 });
+            }                
             return ports;
         }
     }
