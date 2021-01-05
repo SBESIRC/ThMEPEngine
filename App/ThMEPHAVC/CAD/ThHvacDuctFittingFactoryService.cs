@@ -369,22 +369,6 @@ namespace ThMEPHVAC.CAD
                 EndPoint = innerendextendline.EndPoint,
             };
 
-            Vector3d startsealvector = startextendsealline.StartPoint - startextendsealline.EndPoint;
-            Vector3d starttranvector = startsealvector / startsealvector.Length * 45;
-            Line startflangeline = new Line()
-            {
-                StartPoint = startextendsealline.StartPoint.TransformBy(Matrix3d.Displacement(starttranvector)),
-                EndPoint = startextendsealline.EndPoint.TransformBy(Matrix3d.Displacement(starttranvector.Negate())),
-            };
-
-            Vector3d endsealvector = endextendsealline.StartPoint - endextendsealline.EndPoint;
-            Vector3d endtranvector = endsealvector / endsealvector.Length * 45;
-            Line endflangeline = new Line()
-            {
-                StartPoint = endextendsealline.StartPoint.TransformBy(Matrix3d.Displacement(endtranvector)),
-                EndPoint = endextendsealline.EndPoint.TransformBy(Matrix3d.Displacement(endtranvector.Negate())),
-            };
-
             parameters.SingleLength = endextendsealline.GetPointAtDist(0.5* endextendsealline.Length).DistanceTo(parameters.CornerPoint);
 
             return new DBObjectCollection()
@@ -397,8 +381,6 @@ namespace ThMEPHVAC.CAD
                 innerendextendline,
                 outerstartextendline,
                 innerstartextendline,
-                startflangeline,
-                endflangeline
             };
         }
 
