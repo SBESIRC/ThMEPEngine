@@ -251,8 +251,8 @@ namespace ThMEPHVAC.CAD
                 else
                 {
                     Point3d inletposition = CreatePointFromProperty(
-                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL,
-                        ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL);
+                        ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
+                        ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_Y);
                     return inletposition.TransformBy(ocs2Wcs);
                 }
             }

@@ -33,9 +33,12 @@ namespace ThMEPHVAC.CAD
         public string FanInOutType { get; set; }
         public List<ThIfcDistributionElement> InletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> OutletDuctSegments { get; set; }
-        public List<ThIfcDistributionElement> DuctReducings { get; set; }
-        public List<ThIfcDistributionElement> DuctElbows { get; set; }
-        public List<ThIfcDistributionElement> DuctHoses { get; set; }
+        public List<ThIfcDistributionElement> InletDuctReducings { get; set; }
+        public List<ThIfcDistributionElement> OutletDuctReducings { get; set; }
+        public List<ThIfcDistributionElement> InletDuctElbows { get; set; }
+        public List<ThIfcDistributionElement> OutletDuctElbows { get; set; }
+        public List<ThIfcDistributionElement> InletDuctHoses { get; set; }
+        public List<ThIfcDistributionElement> OutletDuctHoses { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> InletCenterLineGraph { get; set; }
         public ThDuctEdge<ThDuctVertex> FirstInletEdge { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
@@ -68,27 +71,47 @@ namespace ThMEPHVAC.CAD
 
             InletDuctSegments = new List<ThIfcDistributionElement>();
             OutletDuctSegments = new List<ThIfcDistributionElement>();
-            DuctReducings = new List<ThIfcDistributionElement>();
-            DuctElbows = new List<ThIfcDistributionElement>();
-            DuctHoses = new List<ThIfcDistributionElement>();
+            InletDuctReducings = new List<ThIfcDistributionElement>();
+            OutletDuctReducings = new List<ThIfcDistributionElement>();
+            InletDuctElbows = new List<ThIfcDistributionElement>();
+            OutletDuctElbows = new List<ThIfcDistributionElement>();
+            InletDuctHoses = new List<ThIfcDistributionElement>();
+            OutletDuctHoses = new List<ThIfcDistributionElement>();
+
             SetInletElbows();
             SetOutletElbows();
             SetInOutHoses(fanmodel.FanScenario);
             bool isAxial = fanmodel.Model.IsAXIALModel();
             SetInletDucts(fanmodel.FanScenario, isAxial);
             SetOutletDucts(fanmodel.FanScenario, isAxial);
+        }
+
+        public void RunInletDrawEngine(ThDbModelFan fanmodel)
+        {
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(fanmodel.FanScenario);
             string flangeLinerLayer = ThDuctUtils.DuctFlangeLineLayerName(modelLayer);
             DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer, flangeLinerLayer);
-            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, flangeLinerLayer);
-            DrawDuctInDWG(DuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
-            DrawDuctInDWG(DuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
-            DrawHoseInDWG(DuctHoses, modelLayer);
+            DrawDuctInDWG(InletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawDuctInDWG(InletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawHoseInDWG(InletDuctHoses, modelLayer);
         }
 
-        public void SetInletOutletSize(string scenario, string inouttype, string innerromeductinfo, string outerromeductinfo)
+        public void RunOutletDrawEngine(ThDbModelFan fanmodel)
+        {
+            string modelLayer = fanmodel.Data.BlockLayer;
+            string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
+            string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(fanmodel.FanScenario);
+            string flangeLinerLayer = ThDuctUtils.DuctFlangeLineLayerName(modelLayer);
+            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawDuctInDWG(OutletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawDuctInDWG(OutletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
+            DrawHoseInDWG(OutletDuctHoses, modelLayer);
+        }
+
+
+        private void SetInletOutletSize(string scenario, string inouttype, string innerromeductinfo, string outerromeductinfo)
         {
             var jsonReader = new ThDuctInOutMappingJsonReader();
             var innerRomDuctPosition = jsonReader.Mappings.First(d=>d.WorkingScenario == scenario).InnerRoomDuctType;
@@ -113,7 +136,7 @@ namespace ThMEPHVAC.CAD
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
             //对于进口为上进的，首先需要画出管口俯视图
-            if (FanInOutType.Contains("上进"))
+            if (FanInOutType.Contains("上进") || FanInOutType.Contains("下进"))
             {
                 var DuctParameters = new ThIfcDuctSegmentParameters()
                 {
@@ -128,6 +151,11 @@ namespace ThMEPHVAC.CAD
 
             else if(InletOpening.Width != InletDuctWidth)
             {
+                if (InletCenterLineGraph.Edges.Count() == 0)
+                {
+                    return;
+                }
+
                 //仅对于非上进的风机画变径，对于上进的，不画变径
                 double reducingBigEndWidth = Math.Max(InletOpening.Width, InletDuctWidth);
                 double reducingSmallEndWidth = Math.Min(InletOpening.Width, InletDuctWidth);
@@ -173,12 +201,12 @@ namespace ThMEPHVAC.CAD
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()));
                 }
-                if (DuctHoses.Count() != 0)
+                if (InletDuctHoses.Count() != 0)
                 {
-                    double hoselength = DuctHoses.Cast<ThIfcDuctHose>().First().Parameters.Length;
+                    double hoselength = InletDuctHoses.Cast<ThIfcDuctHose>().First().Parameters.Length;
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(new Point3d(hoselength * Math.Cos(InletOpening.NormalAngle * Math.PI / 180), hoselength * Math.Sin(InletOpening.NormalAngle * Math.PI / 180), 0).GetAsVector()));
                 }
-                DuctReducings.Add(reducing);
+                InletDuctReducings.Add(reducing);
 
                 var firstvertex = InletCenterLineGraph.Vertices.Where(v => v.IsStartVertexOfGraph).FirstOrDefault();
                 if (!firstvertex.IsNull())
@@ -225,6 +253,11 @@ namespace ThMEPHVAC.CAD
 
             else if (OutletOpening.Width != OutletDuctWidth)
             {
+                if (OutletCenterLineGraph.Edges.Count() == 0)
+                {
+                    return;
+                }
+
                 //仅对于非上进的风机画变径，对于上进的，不画变径
                 double reducingBigEndWidth = Math.Max(OutletOpening.Width, OutletDuctWidth);
                 double reducingSmallEndWidth = Math.Min(OutletOpening.Width, OutletDuctWidth);
@@ -271,12 +304,12 @@ namespace ThMEPHVAC.CAD
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()));
                 }
-                if (DuctHoses.Count() != 0)
+                if (OutletDuctHoses.Count() != 0)
                 {
-                    double hoselength = DuctHoses.Cast<ThIfcDuctHose>().First().Parameters.Length;
+                    double hoselength = OutletDuctHoses.Cast<ThIfcDuctHose>().First().Parameters.Length;
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(new Point3d(hoselength * Math.Cos(OutletOpening.NormalAngle * Math.PI / 180), hoselength * Math.Sin(OutletOpening.NormalAngle * Math.PI / 180), 0).GetAsVector()));
                 }
-                DuctReducings.Add(reducing);
+                OutletDuctReducings.Add(reducing);
 
                 var firstvertex = OutletCenterLineGraph.Vertices.Where(v => v.IsStartVertexOfGraph).FirstOrDefault();
                 if (!firstvertex.IsNull())
@@ -328,7 +361,7 @@ namespace ThMEPHVAC.CAD
                     };
                     var elbow = ductFittingFactoryService.CreateElbow(elbowParameters);
                     elbow.Matrix = Matrix3d.Displacement(edge.Target.Position.GetAsVector()) * Matrix3d.Rotation(bisectoroftwoedge.Angle - elbow.Parameters.BisectorAngle, Vector3d.ZAxis, elbow.Parameters.CornerPoint);
-                    DuctElbows.Add(elbow);
+                    InletDuctElbows.Add(elbow);
 
                     outedge.SourceShrink = elbow.Parameters.SingleLength;
                     edge.TargetShrink = elbow.Parameters.SingleLength;
@@ -360,7 +393,7 @@ namespace ThMEPHVAC.CAD
                     };
                     var elbow = ductFittingFactoryService.CreateElbow(elbowParameters);
                     elbow.Matrix = Matrix3d.Displacement(edge.Target.Position.GetAsVector()) * Matrix3d.Rotation(bisectoroftwoedge.Angle - elbow.Parameters.BisectorAngle, Vector3d.ZAxis, elbow.Parameters.CornerPoint);
-                    DuctElbows.Add(elbow);
+                    OutletDuctElbows.Add(elbow);
 
                     outedge.SourceShrink = elbow.Parameters.SingleLength;
                     edge.TargetShrink = elbow.Parameters.SingleLength;
@@ -376,19 +409,18 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
-                if (FanInOutType.Contains("上进") || FanInOutType.Contains("下进") || FanInOutType.Contains("下出"))
-                {
-                    return;
-                }
-                else
+                if (!FanInOutType.Contains("上进") && !FanInOutType.Contains("下进"))
                 {
                     ThIfcDuctHose inlethose = CreateHose(InletOpening.Width, InletOpening.NormalAngle, scenario);
                     inlethose.Matrix = Matrix3d.Displacement(inlethose.Parameters.InsertPoint.GetVectorTo(InletOpening.OpingBasePoint)) * Matrix3d.Rotation(inlethose.Parameters.RotateAngle, Vector3d.ZAxis, inlethose.Parameters.InsertPoint);
+                    InletDuctHoses.Add(inlethose);
+                }
+                if (!FanInOutType.Contains("下出") && !FanInOutType.Contains("上出"))
+                {
                     ThIfcDuctHose outlethose = CreateHose(OutletOpening.Width, OutletOpening.NormalAngle, scenario);
                     outlethose.Matrix = Matrix3d.Displacement(outlethose.Parameters.InsertPoint.GetVectorTo(OutletOpening.OpingBasePoint)) * Matrix3d.Rotation(outlethose.Parameters.RotateAngle, Vector3d.ZAxis, outlethose.Parameters.InsertPoint);
-                    DuctHoses.AddRange(new List<ThIfcDistributionElement> { inlethose, outlethose });
+                    OutletDuctHoses.Add(outlethose);
                 }
-
             }
         }
 

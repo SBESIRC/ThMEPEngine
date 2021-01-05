@@ -62,7 +62,7 @@ namespace ThMEPHAVC.CAD
             {
                 if (FanModel.IntakeForm.Contains("上进") || FanModel.IntakeForm.Contains("下进"))
                 {
-                    InletAnalysisResult = AnalysisResultType.Wrong_Empty;
+                    InletAnalysisResult = AnalysisResultType.OK;
                     return;
                 }
                 //非上进或下进，且进口处没有连线
@@ -146,7 +146,7 @@ namespace ThMEPHAVC.CAD
             {
                 if (FanModel.IntakeForm.Contains("上出") || FanModel.IntakeForm.Contains("下出"))
                 {
-                    OutletAnalysisResult = AnalysisResultType.Wrong_Empty;
+                    OutletAnalysisResult = AnalysisResultType.OK;
                     return;
                 }
                 //直出，且出口处没有连线

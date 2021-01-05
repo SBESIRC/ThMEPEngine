@@ -22,6 +22,11 @@ namespace ThMEPHVAC.CAD
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
         {
             InletValveGroups = GetValveGroup(fanmodel, wallobjects, inletductwidth, ValveGroupPosionType.Inlet, inletcenterlinegraph);
+            OutletValveGroups = GetValveGroup(fanmodel, wallobjects, outletductwidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
+        }
+
+        public void RunInletValvesInsertEngine()
+        {
             foreach (var valvegroup in InletValveGroups)
             {
                 foreach (var valve in valvegroup.ValvesInGroup)
@@ -30,7 +35,10 @@ namespace ThMEPHVAC.CAD
                     ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(valve);
                 }
             }
-            OutletValveGroups = GetValveGroup(fanmodel, wallobjects, outletductwidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
+        }
+
+        public void RunOutletValvesInsertEngine()
+        {
             foreach (var valvegroup in OutletValveGroups)
             {
                 foreach (var valve in valvegroup.ValvesInGroup)
@@ -40,8 +48,8 @@ namespace ThMEPHVAC.CAD
                     ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(valve);
                 }
             }
-
         }
+
 
         private List<ThValveGroup> GetValveGroup(ThDbModelFan fanmodel,
             DBObjectCollection wallobjects,

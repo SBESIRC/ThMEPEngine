@@ -659,23 +659,23 @@ namespace ThMEPHVAC.CAD
             //绘制管道端线
             Line UpperLine = new Line()
             {
-                StartPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
-                EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
+                StartPoint = new Point3d(-parameters.Height / 2.0, parameters.Width / 2.0, 0),
+                EndPoint = new Point3d(parameters.Height / 2.0, parameters.Width / 2.0, 0),
             };
             Line LowerLine = new Line()
             {
-                StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
-                EndPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
+                StartPoint = new Point3d(-parameters.Height / 2.0, -parameters.Width / 2.0, 0),
+                EndPoint = new Point3d(parameters.Height / 2.0, -parameters.Width / 2.0, 0),
             };
             Line LeftLine = new Line()
             {
-                StartPoint = new Point3d(-parameters.Width / 2.0, -parameters.Height / 2.0, 0),
-                EndPoint = new Point3d(-parameters.Width / 2.0, parameters.Height / 2.0, 0),
+                StartPoint = new Point3d(-parameters.Height / 2.0, -parameters.Width / 2.0, 0),
+                EndPoint = new Point3d(-parameters.Height / 2.0, parameters.Width / 2.0, 0),
             };
             Line RightLine = new Line()
             {
-                StartPoint = new Point3d(parameters.Width / 2.0, -parameters.Height / 2.0, 0),
-                EndPoint = new Point3d(parameters.Width / 2.0, parameters.Height / 2.0, 0),
+                StartPoint = new Point3d(parameters.Height / 2.0, -parameters.Width / 2.0, 0),
+                EndPoint = new Point3d(parameters.Height / 2.0, parameters.Width / 2.0, 0),
             };
             return new DBObjectCollection()
             {

@@ -103,16 +103,27 @@ namespace TianHua.Hvac.UI
                     wallobjects.Add(obj);
                 }
                 ThHolesAndValvesEngine holesAndValvesEngine = new ThHolesAndValvesEngine(DbFanModel, wallobjects, inoutductdrawengine.InletDuctWidth, inoutductdrawengine.OutletDuctWidth, inAndOutAnalysisEngine.InletCenterLineGraph, inAndOutAnalysisEngine.OutletCenterLineGraph);
+                
+                if (inAndOutAnalysisEngine.InletAnalysisResult == AnalysisResultType.OK)
+                {
+                    inoutductdrawengine.RunInletDrawEngine(DbFanModel);
+                    holesAndValvesEngine.RunInletValvesInsertEngine();
+                }
+                if (inAndOutAnalysisEngine.OutletAnalysisResult == AnalysisResultType.OK)
+                {
+                    inoutductdrawengine.RunOutletDrawEngine(DbFanModel);
+                    holesAndValvesEngine.RunOutletValvesInsertEngine();
+                }
 
                 Active.Editor.WriteMessage(inAndOutAnalysisEngine.InletAnalysisResult + "," + inAndOutAnalysisEngine.OutletAnalysisResult);
-                if (inAndOutAnalysisEngine.InletAnalysisResult != AnalysisResultType.OK || inAndOutAnalysisEngine.OutletAnalysisResult != AnalysisResultType.OK)
-                {
-                    var acuteAnglePositions = inAndOutAnalysisEngine.InletAcuteAnglePositions.Union(inAndOutAnalysisEngine.OutletAcuteAnglePositions);
-                    foreach (var point in acuteAnglePositions)
-                    {
-                        acadDatabase.ModelSpace.Add(new Circle(point, Vector3d.ZAxis, 600));
-                    }
-                }
+                //if (inAndOutAnalysisEngine.InletAnalysisResult != AnalysisResultType.OK || inAndOutAnalysisEngine.OutletAnalysisResult != AnalysisResultType.OK)
+                //{
+                //    var acuteAnglePositions = inAndOutAnalysisEngine.InletAcuteAnglePositions.Union(inAndOutAnalysisEngine.OutletAcuteAnglePositions);
+                //    foreach (var point in acuteAnglePositions)
+                //    {
+                //        acadDatabase.ModelSpace.Add(new Circle(point, Vector3d.ZAxis, 600));
+                //    }
+                //}
 
             }
         }
