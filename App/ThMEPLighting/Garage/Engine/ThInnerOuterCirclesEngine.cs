@@ -59,9 +59,11 @@ namespace ThMEPLighting.Garage.Engine
            
             //单位化
             var nomalLines = new List<Line>();
-            splitDxLines.ForEach(o => nomalLines.Add(o.Normalize()));
-            splitFdxLines.ForEach(o => nomalLines.Add(o.Normalize()));
-
+            using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
+            {
+                splitDxLines.ForEach(o => nomalLines.Add(o.Normalize()));
+                splitFdxLines.ForEach(o => nomalLines.Add(o.Normalize()));
+            }
             //创建1号、2号线
             nomalLines.ForEach(o =>
             {

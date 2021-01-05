@@ -43,5 +43,17 @@ namespace ThMEPLighting.Garage.Model
         /// 最小边的长度
         /// </summary>
         public double MinimumEdgeLength { get; set; }
+        /// <summary>
+        /// 灯编号文字高度
+        /// </summary>
+        public double LightNumberTextHeight { get; set; } = 350;
+        /// <summary>
+        /// 灯编号文字宽度因子
+        /// </summary>
+        public double LightNumberTextWidthFactor { get; set; } = 0.65;
+        /// <summary>
+        /// 灯编号文字基点距离灯线高度
+        /// </summary>
+        public double LightNumberTextOffsetHeight { get; set; } = 450;
     }
 }

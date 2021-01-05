@@ -104,10 +104,14 @@ namespace ThMEPLighting.Garage.Engine
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
                 var objIds = new ObjectIdList();
-                lightEdges.Where(o=>o.IsDX).ForEach(m =>
-                {                    
-                    var normalLine = m.Edge.Normalize();
-                    m.LightNodes.ForEach(n =>
+                lightEdges.Where(o => o.IsDX).ForEach(m =>
+                  {
+                      var normalLine = m.Edge.Clone() as Line;
+                      using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
+                      {
+                          normalLine = m.Edge.Normalize();
+                      }
+                      m.LightNodes.ForEach(n =>
                     {
                         if (!string.IsNullOrEmpty(n.Number))
                         {
@@ -116,10 +120,15 @@ namespace ThMEPLighting.Garage.Engine
                             var alignPt = n.Position + normalLine.StartPoint.GetVectorTo(normalLine.EndPoint)
                             .GetPerpendicularVector()
                             .GetNormal()
-                            .MultiplyBy(ThGarageLightCommon.NumberTextAlighHeight);
-                            code.Height = 500.0;
+                            .MultiplyBy(ArrangeParameter.LightNumberTextOffsetHeight + ArrangeParameter.LightNumberTextHeight / 2.0);
+                            code.Height = ArrangeParameter.LightNumberTextHeight;
+                            code.WidthFactor = ArrangeParameter.LightNumberTextWidthFactor;
                             code.Position = alignPt;
-                            code.Rotation = normalLine.Angle;
+                            //文字旋转角度
+                            double angle = normalLine.Angle / Math.PI * 180.0;
+                            angle = ThGarageLightUtils.LightNumberAngle(angle);
+                            angle = angle / 180.0 * Math.PI;
+                            code.Rotation = angle;
                             code.HorizontalMode = TextHorizontalMode.TextCenter;
                             code.VerticalMode = TextVerticalMode.TextVerticalMid;
                             code.AlignmentPoint = code.Position;
@@ -129,24 +138,24 @@ namespace ThMEPLighting.Garage.Engine
                             var codeId = acadDatabase.ModelSpace.Add(code);
                             objIds.Add(codeId);
                             TypedValueList codeValueList = new TypedValueList
-                            {
+                                  {
                                 { (int)DxfCode.ExtendedDataAsciiString, n.Number},
-                            };
+                                  };
                             XDataTools.AddXData(codeId, ThGarageLightCommon.ThGarageLightAppName, codeValueList);
                         }
                         var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                             RacewayParameter.LaneLineBlockParameter.Layer,
                             ThGarageLightCommon.LaneLineLightBlockName,
                             n.Position, new Scale3d(ArrangeParameter.PaperRatio), normalLine.Angle);
-                            TypedValueList blkValueList = new TypedValueList
-                            {
+                        TypedValueList blkValueList = new TypedValueList
+                                  {
                                 { (int)DxfCode.ExtendedDataAsciiString, n.Number},
                                 { (int)DxfCode.ExtendedDataAsciiString, m.Pattern}
-                            };
+                                  };
                         objIds.Add(blkId);
                         XDataTools.AddXData(blkId, ThGarageLightCommon.ThGarageLightAppName, blkValueList);
                     });
-                });
+                  });
                 return objIds;
             }
         }

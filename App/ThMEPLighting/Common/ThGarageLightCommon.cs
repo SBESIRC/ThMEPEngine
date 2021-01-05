@@ -10,7 +10,6 @@
         public static readonly double BranchPortToMainDistance = 2.0; //分支端点距离主分支的距离容差
         public static readonly double LineCoincideTolerance = 1e-4; //线重合容差
         public static readonly string LaneLineLightBlockName = "E-BL001-1";
-        public static readonly double NumberTextAlighHeight = 400.0;
         public static readonly string ThGarageLightAppName = "ThGarageLight";
     }
 }

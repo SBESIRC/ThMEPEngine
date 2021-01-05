@@ -206,5 +206,38 @@ namespace ThMEPLighting.Common
                 return false;
             }
         }
+        /// <summary>
+        /// 获取灯编号的文字角度
+        /// </summary>
+        /// <param name="lightEdgeAngle">灯线角度</param>
+        /// <returns></returns>
+        public static double LightNumberAngle(double lightEdgeAngle)
+        {
+            if(lightEdgeAngle==0.0 || lightEdgeAngle == 180.0)
+            {
+                return 0.0;
+            }
+            if(lightEdgeAngle == 90.0 || lightEdgeAngle == 270.0)
+            {
+                return 90;
+            }
+            if(lightEdgeAngle>0.0 && lightEdgeAngle < 90.0)
+            {
+                return lightEdgeAngle;
+            }
+            if (lightEdgeAngle > 90.0 && lightEdgeAngle < 180.0)
+            {
+                return lightEdgeAngle + 180.0;
+            }
+            if (lightEdgeAngle > 180.0 && lightEdgeAngle < 270.0)
+            {
+                return lightEdgeAngle - 180.0;
+            }
+            if (lightEdgeAngle > 270.0 && lightEdgeAngle < 360.0)
+            {
+                return lightEdgeAngle;
+            }
+            return 0.0;
+        }
     }
 }
