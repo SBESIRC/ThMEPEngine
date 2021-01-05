@@ -18,6 +18,16 @@ namespace ThMEPHVAC
         /// </summary>
         public double AirSpeed { get; set; }
 
+        /// <summary>
+        /// 最大风速
+        /// </summary>
+        public double MaxAirSpeed { get; set; }
+
+        /// <summary>
+        /// 最小风速
+        /// </summary>
+        public double MinAirSpeed { get; set; }
+
 
         /// <summary>
         /// 机房外管段
@@ -35,6 +45,16 @@ namespace ThMEPHVAC
 
 
         public string InnerTube { get; set; }
+
+       /// <summary>
+       /// 机房内管段分析结果
+       /// </summary>
+        public string InnerAnalysisType { get; set; }
+
+        /// <summary>
+        /// 机房外管段分析结果
+        /// </summary>
+        public string OuterAnalysisType { get; set; }
 
     }
 }

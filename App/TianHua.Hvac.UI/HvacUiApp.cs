@@ -11,6 +11,7 @@ using ThMEPEngineCore.Service.Hvac;
 using ThMEPHAVC.CAD;
 using ThMEPHVAC;
 using ThMEPHVAC.CAD;
+using ThMEPHVAC.IO;
 using TianHua.FanSelection.Function;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -68,14 +69,22 @@ namespace TianHua.Hvac.UI
                 }
                 ThDuctSelectionEngine ductselectionengine = new ThDuctSelectionEngine(DbFanModel);
 
+                //进出口段与机房内外段的对应关系
+                var jsonReader = new ThDuctInOutMappingJsonReader();
+                var innerRomDuctPosition = jsonReader.Mappings.First(d => d.WorkingScenario == DbFanModel.FanScenario).InnerRoomDuctType;
+
                 var ductModel = new DuctSpecModel()
                 {
                     AirSpeed = ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario),
+                    MaxAirSpeed = ThFanSelectionUtils.GetMaxAirSpeed(DbFanModel.FanScenario),
+                    MinAirSpeed = ThFanSelectionUtils.GetMinAirSpeed(DbFanModel.FanScenario),
                     AirVolume = DbFanModel.FanVolume,
                     ListOuterTube = ductselectionengine.GetDefaultDuctsSizeString(),
                     ListInnerTube = ductselectionengine.GetDefaultDuctsSizeString(),
                     OuterTube = ductselectionengine.RecommendOuterDuctSize,
-                    InnerTube = ductselectionengine.RecommendInnerDuctSize
+                    InnerTube = ductselectionengine.RecommendInnerDuctSize,
+                    InnerAnalysisType = innerRomDuctPosition == "进风段"? inAndOutAnalysisEngine.InletAnalysisResult.ToString() : inAndOutAnalysisEngine.OutletAnalysisResult.ToString(),
+                    OuterAnalysisType = innerRomDuctPosition == "进风段" ? inAndOutAnalysisEngine.OutletAnalysisResult.ToString() : inAndOutAnalysisEngine.InletAnalysisResult.ToString(),
                 };
 
                 fmDuctSpec fmDuct = new fmDuctSpec();
