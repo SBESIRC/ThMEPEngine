@@ -13,6 +13,7 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.Overlay.Snap;
+using NetTopologySuite.Densify;
 
 namespace ThCADCore.Test
 {
@@ -85,7 +86,7 @@ namespace ThCADCore.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetEntity("请选择对象");
+                var result = Active.Editor.GetEntity("\n请选择对象");
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
@@ -93,6 +94,35 @@ namespace ThCADCore.Test
 
                 var pline = acadDatabase.Element<Polyline>(result.ObjectId);
                 acadDatabase.ModelSpace.Add(pline.ConvexHull());
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THConcaveHull", CommandFlags.Modal)]
+        public void THConcaveHull()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetDouble("\n请输入参数");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var threshold = result2.Value;
+                var frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var geometry = Densifier.Densify(frame.ToNTSLineString(), threshold * 0.95);
+                var concavehull = new ThCADCoreNTSConcaveHull(geometry, threshold);
+                concavehull.getConcaveHull().ToDbObjects().Cast<Entity>().ForEach(o =>
+                {
+                    o.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(o);
+                });
             }
         }
 
