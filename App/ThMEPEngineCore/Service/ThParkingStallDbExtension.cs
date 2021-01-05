@@ -71,9 +71,7 @@ namespace ThMEPEngineCore.Service
                                         // 获取车位块的OBB
                                         // 用OBB创建一个矩形多段线来“代替”车位块
                                         var btr = acadDatabase.Blocks.Element(blockObj.BlockTableRecord);
-                                        var extents = btr.GeometricExtents();
-                                        extents.TransformBy(mcs2wcs);
-                                        ents.Add(extents.ToRectangle());
+                                        ents.Add(btr.GeometricExtents().ToRectangle().GetTransformedCopy(mcs2wcs));
                                     }
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
                                 }
