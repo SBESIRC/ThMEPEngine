@@ -5,6 +5,8 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
+using Dreambuild.AutoCAD;
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -49,16 +51,28 @@ namespace ThMEPWSS.Pipe.Service
         }
         private void Find()
         {
+            var drains = new List<ThIfcFloorDrain>();
             var tolitBoundary = ToiletSpace.Boundary as Polyline;
             var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
 
-            FloorDrains = crossFloordrains.Where(o =>
+            drains = crossFloordrains.Where(o =>
             {
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
                 return tolitBoundary.Contains(bufferObjs[0] as Curve);
-            }).ToList();          
+            }).ToList(); 
+            foreach(var drain in drains)
+            {
+                FloorDrains.Add(drain);
+            }
+            foreach (var drain in FloorDrainList)
+            {
+                if (!GeomUtils.PtInLoop(tolitBoundary, drain.Outline.GetCenter()) && drain.Outline.GetCenter().DistanceTo(tolitBoundary.GetCenter()) < ThWPipeCommon.MAX_TOILET_TO_FLOORDRAIN_DISTANCE)
+                {
+                    FloorDrains.Add(drain);
+                }
+            }
         }     
     }
 }

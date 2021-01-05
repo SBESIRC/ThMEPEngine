@@ -48,26 +48,50 @@ namespace ThMEPWSS.Pipe.Engine
             RoofRainpipeindex = new List<Point3dCollection>();
             RoofRainpipeindex_tag = new List<Point3dCollection>();
         }
-        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary,List<Line> divideLines, List<Polyline> roofrainpipe)
-        {      
-            Fpipeindex = Fpiperun(fpipe,  pboundary, divideLines);
-            Fpipeindex_tag = Taggingpoint(Fpipeindex, pboundary);
-            Tpipeindex = Fpiperun(tpipe, pboundary, divideLines);
-            Tpipeindex_tag = Taggingpoint(Tpipeindex, pboundary);
-            Wpipeindex = Fpiperun(wpipe, pboundary, divideLines);
-            Wpipeindex_tag = Taggingpoint(Wpipeindex, pboundary);
-            Ppipeindex = Fpiperun(ppipe, pboundary, divideLines);
-            Ppipeindex_tag = Taggingpoint(Ppipeindex, pboundary);
-            Dpipeindex = Fpiperun(dpipe, pboundary, divideLines);
-            Dpipeindex_tag = Taggingpoint(Dpipeindex, pboundary);
-            Npipeindex = Fpiperun(npipe, pboundary, divideLines);
-            Npipeindex_tag = Taggingpoint(Npipeindex, pboundary);
-            Rainpipeindex = Fpiperun(rainpipe, pboundary, divideLines);
-            Rainpipeindex_tag = Taggingpoint(Rainpipeindex, pboundary);
-            RoofRainpipeindex = Fpiperun(roofrainpipe, pboundary, divideLines);
-            RoofRainpipeindex_tag = Taggingpoint(RoofRainpipeindex, pboundary);
+        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary,List<Line> divideLines, List<Polyline> roofrainpipe,Point3d toiletPoint,Point3d balconyPoint)
+        {
+            if (fpipe.Count > 0)
+            {
+                Fpipeindex = Fpiperun(fpipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                Fpipeindex_tag = Taggingpoint(Fpipeindex, pboundary);
+            }
+            if (tpipe.Count > 0)
+            {
+                Tpipeindex = Fpiperun(tpipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                Tpipeindex_tag = Taggingpoint(Tpipeindex, pboundary);
+            }
+            if (wpipe.Count > 0)
+            {
+                Wpipeindex = Fpiperun(wpipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                Wpipeindex_tag = Taggingpoint(Wpipeindex, pboundary);
+            }
+            if (ppipe.Count > 0)
+            {
+                Ppipeindex = Fpiperun(ppipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                Ppipeindex_tag = Taggingpoint(Ppipeindex, pboundary);
+            }
+            if (dpipe.Count > 0)
+            {
+                Dpipeindex = Fpiperun(dpipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                Dpipeindex_tag = Taggingpoint(Dpipeindex, pboundary);
+            }
+            if (npipe.Count > 0)
+            {
+                Npipeindex = Fpiperun(npipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                Npipeindex_tag = Taggingpoint(Npipeindex, pboundary);
+            }
+            if (rainpipe.Count > 0)
+            {
+                Rainpipeindex = Fpiperun(rainpipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                Rainpipeindex_tag = Taggingpoint(Rainpipeindex, pboundary);
+            }
+            if (roofrainpipe.Count > 0)
+            {
+                RoofRainpipeindex = Fpiperun(roofrainpipe, pboundary, divideLines, toiletPoint, balconyPoint);
+                RoofRainpipeindex_tag = Taggingpoint(RoofRainpipeindex, pboundary);
+            }
         }
-        private List<Point3dCollection> Fpiperun(List<Polyline> fpipe, Polyline pboundary,List<Line> divideLines)
+        private List<Point3dCollection> Fpiperun(List<Polyline> fpipe, Polyline pboundary, List<Line> divideLines, Point3d toiletPoint,Point3d balconyPoint)
         {   
             if (fpipe.Count>0)
             {
@@ -81,7 +105,7 @@ namespace ThMEPWSS.Pipe.Engine
                     //对各组节点重新排序
                     var pipeindex = new Point3dCollection();
                     List<int> num = new List<int>();
-                    var center = Getcenter(pipeList[i]);
+                    var center = Getcenter(pipeList[i], pboundary, toiletPoint, balconyPoint);
                     pipeindex= RightIndex(GetPositvevertices(pipeList[i], center), GetNegativevertices(pipeList[i], center), i);                                                                                                           
                     index.Add(pipeindex);
                 }
@@ -175,17 +199,24 @@ namespace ThMEPWSS.Pipe.Engine
             pipegroup.Add(lastCenter);
             return pipegroup;
         }
-        private static Point3d Getcenter(Point3dCollection pipes)
+        private static Point3d Getcenter(Point3dCollection pipes,Polyline pboundary,Point3d topoint,Point3d balpoint)
         {
-       
-            double xvalue = 0.0;
-            double yvalue = 0.0;
-            foreach (Point3d pipe in pipes)
+            for (int i=1;i< pipes.Count;i++)
             {
-                xvalue += pipe.X;
-                yvalue += pipe.Y;
+                if ((pipes[0].Y - pboundary.GetCenter().Y) * (pipes[i].Y - pboundary.GetCenter().Y) < 0)
+                {
+                    return pboundary.GetCenter();
+                }
             }
-            return new Point3d(xvalue/ pipes.Count, yvalue / pipes.Count, 0);
+            if(Math.Abs(pipes[0].Y- balpoint.Y)< ThWPipeCommon.MAX_TAG_YPOSITION)//此处可借用，一般会小于500
+            {
+                return balpoint;
+            }
+            else
+            {
+                return topoint;
+            }
+       
         }
         private static Point3dCollection GetPositvevertices(Point3dCollection pipe, Point3d pboundary)//选起点
         {
@@ -224,7 +255,16 @@ namespace ThMEPWSS.Pipe.Engine
                         temp = pipe[i];
                         pipe[i] = pipe[j];
                         pipe[j] = temp;
-                    }                  
+                    }
+                    else if(pipe[i].X== pipe[j].X)//横坐标相同，按纵坐标从大到小排列
+                    {
+                        if(pipe[i].Y<pipe[j].Y)
+                        {
+                            temp = pipe[i];
+                            pipe[i] = pipe[j];
+                            pipe[j] = temp;
+                        }
+                    }
                 }
             }
             return pipe;

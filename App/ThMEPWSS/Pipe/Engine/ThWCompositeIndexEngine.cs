@@ -21,9 +21,9 @@ namespace ThMEPWSS.Pipe.Engine
             FpipeDublicated = new List<List<Point3dCollection>>();
         }
 
-        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary, List<Line> divideLines, List<Polyline> roofrainpipe)
+        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary, List<Line> divideLines, List<Polyline> roofrainpipe,Point3d toiletPoint,Point3d balconyPoint)
         {
-            PipeEngine.Run(fpipe,tpipe, wpipe, ppipe,dpipe, npipe,rainpipe,pboundary,divideLines, roofrainpipe);
+            PipeEngine.Run(fpipe,tpipe, wpipe, ppipe,dpipe, npipe,rainpipe,pboundary,divideLines, roofrainpipe, toiletPoint, balconyPoint);
             FpipeDublicated = GetDublicated(PipeEngine.Fpipeindex, PipeEngine.Tpipeindex, PipeEngine.Wpipeindex, PipeEngine.Ppipeindex, PipeEngine.Dpipeindex, PipeEngine.Npipeindex, PipeEngine.Rainpipeindex, PipeEngine.RoofRainpipeindex) ;
            
         }

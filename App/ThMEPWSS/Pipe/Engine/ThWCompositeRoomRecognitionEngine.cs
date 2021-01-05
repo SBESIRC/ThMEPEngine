@@ -54,13 +54,20 @@ namespace ThMEPWSS.Pipe.Engine
         {
             foreach (var kitchen in kitchenRooms)
             {
-                foreach (var toilet in toiletRooms)
+                if (toiletRooms.Count > 0)
                 {
-                    if (IsPair(kitchen, toilet))
+                    foreach (var toilet in toiletRooms)
                     {
-                        Rooms.Add(new ThWCompositeRoom(kitchen, toilet));
-                        break;
+                        if (IsPair(kitchen, toilet))
+                        {
+                            Rooms.Add(new ThWCompositeRoom(kitchen, toilet));
+                            break;
+                        }
                     }
+                }
+                else
+                {
+                    Rooms.Add(new ThWCompositeRoom(kitchen, new ThWToiletRoom()));
                 }
             }
             foreach (var toilet in toiletRooms)

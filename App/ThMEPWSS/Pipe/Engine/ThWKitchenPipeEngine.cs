@@ -83,35 +83,27 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private Point3d FindInsideVertex(Polyline boundary, Polyline outline)
         {
-            var vertices = outline.Vertices();        
-            Point3d Ray_bou = Point3d.Origin;
-            var pts = new Point3dCollection();
-            List<int> num = new List<int>();
-            List<double> dst = new List<double>();
-            for (int i = 0; i < vertices.Count - 1; i++)//判断管井中点距外廓距离
+            var vertices = outline.Vertices();
+            var vertices1 = boundary.Vertices();          
+            double dst = double.MaxValue;
+            int num = 0;
+            for (int i = 0; i < vertices.Count; i++)//判断管井中点距外廓距离
             {
-                Point3d midpoint = vertices[i]+0.5*vertices[i].GetVectorTo(vertices[i + 1]);
-
-                Ray_bou = boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;
-
-                dst.Add(midpoint.DistanceTo(Ray_bou));
-            }
-
-            for (int i = 0; i < 2; i++)
-            {
-                if (dst[i] < dst[i + 2])
+                double dst1 = double.MaxValue;
+                for (int j=0;j< vertices1.Count;j++)
                 {
-                    num.Add(i);
+                   if(dst1> vertices[i].DistanceTo(vertices1[j]))
+                    {
+                        dst1 = vertices[i].DistanceTo(vertices1[j]);
+                    }                   
                 }
-                else
+                if(dst>dst1)
                 {
-                    num.Add(i + 2);
+                    dst = dst1;
+                    num = i;
                 }
             }
-            Line line2 = new Line(vertices[num[0]], vertices[num[0] + 1]);
-            Line line3 = new Line(vertices[num[1]], vertices[num[1] + 1]);
-            line2.IntersectWith(line3, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-            return pts[0];
+            return vertices[num];
         }    
         private Vector3d GetDirection(Polyline boundary, Polyline outline, Point3d pt)
         {

@@ -107,6 +107,10 @@
         /// </summary>
         public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 2300;
         /// <summary>
+        /// 卫生间到地漏最大距离
+        /// </summary>
+        public const double MAX_TOILET_TO_FLOORDRAIN_DISTANCE = 2200;
+        /// <summary>
         /// 阳台到设备平台最大距离
         /// </summary>
         public const double MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = 6000;

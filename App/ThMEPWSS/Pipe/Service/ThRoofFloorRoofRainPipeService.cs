@@ -31,7 +31,8 @@ namespace ThMEPWSS.Pipe.Service
         }
         private List<ThIfcRoofRainPipe> Find()
         {
-            var roofFloorBoundary = Space.Boundary as Polyline;
+            var roofFloorBoundary = Space.Boundary.Clone() as Polyline;
+            roofFloorBoundary.Closed=true;
             var crossObjs = SpatialIndex.SelectCrossingPolygon(roofFloorBoundary);
             return Pipes.Where(o => crossObjs.Contains(o.Outline)).ToList();
         }
