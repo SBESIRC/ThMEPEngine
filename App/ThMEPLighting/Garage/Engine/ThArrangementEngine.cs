@@ -103,6 +103,7 @@ namespace ThMEPLighting.Garage.Engine
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(ArrangeParameter.LightNumberTextStyle), false);
                 var objIds = new ObjectIdList();
                 lightEdges.Where(o => o.IsDX).ForEach(m =>
                   {
@@ -134,6 +135,7 @@ namespace ThMEPLighting.Garage.Engine
                             code.AlignmentPoint = code.Position;
                             code.ColorIndex = RacewayParameter.NumberTextParameter.ColorIndex;
                             code.Layer = RacewayParameter.NumberTextParameter.Layer;
+                            code.TextStyleId = acadDatabase.TextStyles.Element(ArrangeParameter.LightNumberTextStyle).Id;
                             code.SetDatabaseDefaults(acadDatabase.Database);
                             var codeId = acadDatabase.ModelSpace.Add(code);
                             objIds.Add(codeId);

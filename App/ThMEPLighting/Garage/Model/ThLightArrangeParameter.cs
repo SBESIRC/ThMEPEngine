@@ -55,5 +55,9 @@ namespace ThMEPLighting.Garage.Model
         /// 灯编号文字基点距离灯线高度
         /// </summary>
         public double LightNumberTextOffsetHeight { get; set; } = 450;
+        /// <summary>
+        /// 灯编号文字样式
+        /// </summary>
+        public string LightNumberTextStyle { get; set; } = "TH-STYLE3";
     }
 }
