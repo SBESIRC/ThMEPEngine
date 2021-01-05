@@ -464,10 +464,12 @@ namespace ThMEPHVAC.CAD
                         }
 
                         // 绘制风管中心线
-                        var centerline = CreateDuctCenterlineLayer(centerlinelayer);
+                        var linetypeId = CreateDuctCenterlinetype();
+                        var layerId = CreateDuctCenterlineLayer(centerlinelayer);
                         foreach (Curve dbobj in Segment.Centerline)
                         {
-                            dbobj.LayerId = centerline;
+                            dbobj.LayerId = layerId;
+                            dbobj.LinetypeId = linetypeId;
                             dbobj.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(dbobj);
                         }
@@ -501,6 +503,15 @@ namespace ThMEPHVAC.CAD
                 acadDatabase.Database.SetLayerColor(centerlinelayer, 252);
                 acadDatabase.Database.UnPrintLayer(centerlinelayer);
                 return obj;
+            }
+        }
+
+        private ObjectId CreateDuctCenterlinetype()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.ImportLinetype(ThHvacCommon.CENTERLINE_LINETYPE, true);
+                return acadDatabase.Linetypes.ElementOrDefault(ThHvacCommon.CENTERLINE_LINETYPE).ObjectId;
             }
         }
     }

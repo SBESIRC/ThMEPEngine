@@ -18,6 +18,9 @@
 			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" Guid="{C4927586-6F2F-443A-954E-5E7BF1947D78}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Block_Pipe" Source="$(var.AutoloaderContentsPath)\Support\暖通.设备.管道.dwg" KeyPath="yes" />
 			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Hvac_Template" Guid="{C8238A21-4E9D-4606-B044-C35ED216B97A}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Hvac_Template" Source="$(var.AutoloaderContentsPath)\Support\暖通.作业.模板.dwg" KeyPath="yes" />
+			</Component>
 			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{52925679-6A6D-477F-83DC-7C99E78FC0E1}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\天华提电气块转换配置表.dwg" KeyPath="yes" />
 			</Component>
@@ -90,6 +93,7 @@
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Hvac_Template" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />

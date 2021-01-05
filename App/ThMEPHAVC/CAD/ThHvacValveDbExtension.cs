@@ -30,7 +30,15 @@ namespace ThMEPHVAC.CAD
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
-                //currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
+            }
+        }
+
+        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
             }
         }
 

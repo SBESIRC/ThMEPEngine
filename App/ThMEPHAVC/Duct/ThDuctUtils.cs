@@ -131,21 +131,6 @@ namespace ThMEPHVAC.Duct
             }
         }
 
-        public static string CenterlineLayerName(string ductLayer)
-        {
-            switch (ductLayer)
-            {
-                case ThHvacCommon.DUCT_LAYER_DUAL:
-                    return ThHvacCommon.DUCT_MID_LAYER_DUAL;
-                case ThHvacCommon.DUCT_LAYER_FIRE:
-                    return ThHvacCommon.DUCT_MID_LAYER_FIRE;
-                case ThHvacCommon.DUCT_LAYER_VENT:
-                    return ThHvacCommon.DUCT_MID_LAYER_VENT;
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-
         public static string FireValveBlockName()
         {
             return ThHvacCommon.FILEVALVE_BLOCK_NAME;
