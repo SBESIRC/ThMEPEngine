@@ -14,9 +14,9 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSOperation
     {
-        public static DBObjectCollection Trim(this Polyline polyline, Curve curve)
+        public static DBObjectCollection Trim(this Polyline polyline, Curve curve, bool inverted = false)
         {
-            return ThCADCoreNTSGeometryClipper.Clip(polyline, curve);
+            return ThCADCoreNTSGeometryClipper.Clip(polyline, curve, inverted);
         }
 
         public static DBObjectCollection Buffer(this Polyline polyline, double distance)

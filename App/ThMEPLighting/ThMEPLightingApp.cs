@@ -45,5 +45,35 @@ namespace ThMEPLighting
                 packageManager.GenerateGroupLight();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THSrcLane", CommandFlags.Modal)]
+        public void THSrcLane()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.GenerateSrcLaneInfo();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtendLane", CommandFlags.Modal)]
+        public void THExtendLane()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.ExtendLaneInfo();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THLaneGroup", CommandFlags.Modal)]
+        public void THLaneGroup()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.GenerateLaneGroup();
+            }
+        }
     }
 }

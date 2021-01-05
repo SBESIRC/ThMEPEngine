@@ -7,10 +7,11 @@ using System.Threading.Tasks;
 
 namespace ThMEPLighting.ParkingStall.Model
 {
+
     public class ParkGroupInfo
     {
-        public Polyline BigPolyline;
-        public Polyline SmallPolyline;
+        public Polyline BigPolyline; // 合并后的大轮廓
+        public Polyline SmallPolyline; // 原始小组的其中一个轮廓
 
         public ParkGroupInfo(Polyline bigPoly, Polyline smallPoly)
         {

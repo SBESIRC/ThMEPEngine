@@ -83,7 +83,12 @@ namespace ThMEPLighting.ParkingStall.Geometry
             return false;
         }
 
-        public static List<Curve> Polyline2Curves(Polyline polyline, bool copyLayer = true)
+        public static double Rad2Angle(double rad)
+        {
+            return (rad / Math.PI) * 180;
+        }
+
+        public static List<Curve> Polyline2Curves(Polyline polyline, bool copyLayer = false)
         {
             if (polyline == null)
                 return null;

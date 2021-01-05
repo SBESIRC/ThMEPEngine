@@ -64,6 +64,7 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
                 smallPolyPolylineNodes.Add(SetPolyInfo(singlePoly, lines));
             }
 
+            // 小轮廓
             foreach (var polyNode in smallPolyPolylineNodes)
             {
                 var lineSegments = polyNode.LineSegments;
@@ -81,7 +82,7 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
                 }
             }
 
-
+            // 大轮廓
             var polyNodes = new List<PolylineNode>();
             foreach (var singlePoly in polylines)
             {
@@ -104,6 +105,30 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
                 var position = PolylineCenter(firstSegment.SegmentLine, secondSegment.SegmentLine);
 
                 LightPlaceInfos[i].Position = position;
+            }
+
+            // 组的边界轮廓
+            for (int i = 0; i < parkGroupInfos.Count; i++)
+            {
+                var bigPoly = parkGroupInfos[i].BigPolyline;
+                var lines = new List<Line>();
+                for (int j = 0; j < bigPoly.NumberOfVertices; j++)
+                {
+                    var line2d = bigPoly.GetLineSegment2dAt(j);
+                    lines.Add(Line2dToLine(line2d));
+                }
+
+                var polylineNode = SetPolyInfo(bigPoly, lines);
+                var firstSegment = polylineNode.LineSegments[0];
+                var secondSegment = polylineNode.LineSegments[1];
+                if (firstSegment.SegmentLineLengthType == LineLengthType.LONG_TYPE)
+                {
+                    LightPlaceInfos[i].BigGroupInfo = new BigGroupInformation(bigPoly, firstSegment.SegmentLine, secondSegment.SegmentLine);
+                }
+                else if (firstSegment.SegmentLineLengthType == LineLengthType.SHORT_TYPE)
+                {
+                    LightPlaceInfos[i].BigGroupInfo = new BigGroupInformation(bigPoly, secondSegment.SegmentLine, firstSegment.SegmentLine);
+                }
             }
         }
 

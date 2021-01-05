@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThMEPLighting.ParkingStall.Model;
 
 namespace ThMEPLighting.ParkingStall.Worker.ParkingGroup
@@ -73,7 +74,19 @@ namespace ThMEPLighting.ParkingStall.Worker.ParkingGroup
         {
             foreach (var nearPark in nearParks)
             {
-                ParkingRelatedGroups.Add(new ParkingRelatedGroup(nearPark.Polylines));
+                var srcPolys = nearPark.Polylines;
+
+                var shrinkPolys = new List<Polyline>();
+                foreach (var srcPoly in srcPolys)
+                {
+                    foreach (var entity in srcPoly.Buffer(-ParkingStallCommon.ParkingPolyEnlargeLength))
+                    {
+                        if (entity is Polyline poly && poly.Closed)
+                            shrinkPolys.Add(poly);
+                    }
+                }
+
+                ParkingRelatedGroups.Add(new ParkingRelatedGroup(shrinkPolys));
             }
         }
 

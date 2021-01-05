@@ -39,7 +39,7 @@ namespace ThMEPLighting.ParkingStall.Model
     }
 
     /// <summary>
-    /// 一个车位信息
+    /// 一个相连车位信息
     /// </summary>
     public class PolylineNode
     {
