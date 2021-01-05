@@ -29,10 +29,17 @@ namespace ThMEPHVAC.CAD
         {
             foreach (var valvegroup in InletValveGroups)
             {
-                foreach (var valve in valvegroup.ValvesInGroup)
+                foreach (var model in valvegroup.ValvesInGroup)
                 {
-                    ThValvesAndHolesInsertEngine.InsertValveAndHole(valve);
-                    ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(valve);
+                    if (ThDuctUtils.IsHoleModel(model.ValveBlockName))
+                    {
+                        ThValvesAndHolesInsertEngine.InsertHole(model);
+                    }
+                    else
+                    {
+                        ThValvesAndHolesInsertEngine.InsertValve(model);
+                    }
+                    ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(model);
                 }
             }
         }
@@ -41,11 +48,17 @@ namespace ThMEPHVAC.CAD
         {
             foreach (var valvegroup in OutletValveGroups)
             {
-                foreach (var valve in valvegroup.ValvesInGroup)
+                foreach (var model in valvegroup.ValvesInGroup)
                 {
-
-                    ThValvesAndHolesInsertEngine.InsertValveAndHole(valve);
-                    ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(valve);
+                    if (ThDuctUtils.IsHoleModel(model.ValveBlockName))
+                    {
+                        ThValvesAndHolesInsertEngine.InsertHole(model);
+                    }
+                    else
+                    {
+                        ThValvesAndHolesInsertEngine.InsertValve(model);
+                    }
+                    ThValvesAndHolesInsertEngine.EnableValveAndHoleLayer(model);
                 }
             }
         }

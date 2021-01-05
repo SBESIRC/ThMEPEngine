@@ -176,7 +176,11 @@ namespace ThMEPHVAC.Duct
                 default:
                     return 200;
             }
+        }
 
+        public static bool IsHoleModel(string name)
+        {
+            return ThHvacCommon.WALLHOLE_BLOCK_NAME == name;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace ThMEPHVAC.CAD
 {
     public class ThValvesAndHolesInsertEngine
     {
-        public static ObjectId InsertValveAndHole(ThValve HoleModel)
+        public static ObjectId InsertValve(ThValve HoleModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -48,6 +48,38 @@ namespace ThMEPHVAC.CAD
                 Matrix3d matrix = Matrix3d.Identity
                     .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetAsVector().Negate()))
                     .PreMultiplyBy(rotation)
+                    .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetVectorTo(HoleModel.ValvePosition)))
+                    .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetAsVector()));
+                blockRef.TransformBy(matrix);
+
+                // 返回图块
+                return objId;
+            }
+        }
+
+        public static ObjectId InsertHole(ThValve HoleModel)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blockName = HoleModel.ValveBlockName;
+                var layerName = HoleModel.ValveBlockLayer;
+                Active.Database.ImportValve(blockName, layerName);
+                var objId = Active.Database.InsertValve(blockName, layerName);
+                objId.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
+                objId.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
+                objId.SetValveModel(HoleModel.ValveVisibility);
+
+                // 插入图块时，图块被放置在WCS的原点
+                // 为了在WCS中正确放置图块，图块需要完成转换：
+                //  1. 将图块的中心点移到原点
+                //  2. 将图块在原点旋转指定角度
+                //  3. 将图块放置在指定位置
+                //  4. 补偿第一步平移变换
+                var blockRef = acadDatabase.Element<BlockReference>(objId, true);
+                Point3d holecenter = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, HoleModel.ValveOffsetFromCenter, 0)));
+                Matrix3d matrix = Matrix3d.Identity
+                    .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetAsVector().Negate()))
+                    .PreMultiplyBy(Matrix3d.Rotation(HoleModel.RotationAngle, Vector3d.ZAxis, Point3d.Origin))
                     .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetVectorTo(HoleModel.ValvePosition)))
                     .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetAsVector()));
                 blockRef.TransformBy(matrix);
