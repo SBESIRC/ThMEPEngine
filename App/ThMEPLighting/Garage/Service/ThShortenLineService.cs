@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -58,9 +59,10 @@ namespace ThMEPLighting.Garage.Service
             var shortPt = interPts[0] + vec.MultiplyBy(ShortenParameter.Distance);
             if(ThGeometryTool.IsPointOnLine(line.StartPoint,line.EndPoint, shortPt))
             {
-                if(JudgeHasBranches(interPts[0], shortPt))
+                var branches = FindBranchPts(interPts[0], shortPt);
+                if (branches.Count>0)
                 {
-                    return line.StartPoint;
+                    return branches.First();
                 }
                 else
                 {
@@ -78,9 +80,10 @@ namespace ThMEPLighting.Garage.Service
             var shortPt = interPts[0] + vec.MultiplyBy(ShortenParameter.Distance);
             if (ThGeometryTool.IsPointOnLine(line.StartPoint, line.EndPoint, shortPt))
             {
-                if (JudgeHasBranches(interPts[0], shortPt))
+                var branches = FindBranchPts(interPts[0], shortPt);
+                if (branches.Count>0)
                 {
-                    return line.EndPoint;
+                    return branches.First();
                 }
                 else
                 {
@@ -92,8 +95,9 @@ namespace ThMEPLighting.Garage.Service
                 return line.EndPoint;
             }
         }
-        private bool JudgeHasBranches(Point3d intersPt,Point3d shortPt)
+        private List<Point3d> FindBranchPts(Point3d intersPt,Point3d shortPt)
         {
+            var results = new List<Point3d>();
             var extVec = intersPt.GetVectorTo(shortPt);
             var outline = ThDrawTool.ToOutline(intersPt, 
                 shortPt, ThGarageLightCommon.RepeatedPointDistance);
@@ -105,10 +109,20 @@ namespace ThMEPLighting.Garage.Service
                 .ForEach(o=> objs.Add(o));
             var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var crossObjs=spatialIndex.SelectCrossingPolygon(outline);
-            return crossObjs
+            var unParallels = crossObjs
                 .Cast<Line>()
                 .Where(o => !extVec.IsParallelToEx(o.StartPoint.GetVectorTo(o.EndPoint)))
-                .Any();
+                .ToList();
+            var shortLine = new Line(intersPt, shortPt);
+            unParallels.ForEach(o =>
+            {
+                var pts = new Point3dCollection();
+                shortLine.IntersectWith(o, Intersect.ExtendBoth, pts, IntPtr.Zero, IntPtr.Zero);
+                pts.Cast<Point3d>()
+                .Where(p=>ThGeometryTool.IsPointInLine(intersPt, shortPt,p))
+                .ForEach(p=>results.Add(p));
+            });
+            return results.OrderBy(o => intersPt.DistanceTo(o)).ToList();
         }
         private Point3dCollection IntersectPts(Line extendLine)
         {
