@@ -28,12 +28,31 @@ namespace ThMEPHVAC.CAD
                 objId.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
                 objId.SetValveModel(HoleModel.ValveVisibility);
 
-                // 设置开洞位置
+                // 插入图块时，图块被放置在WCS的原点
+                // 为了在WCS中正确放置图块，图块需要完成转换：
+                //  1. 将图块的中心点移到原点
+                //  2. 将图块在原点旋转指定角度
+                //  3. 将图块放置在指定位置
+                //  4. 补偿第一步平移变换
                 var blockRef = acadDatabase.Element<BlockReference>(objId, true);
                 Point3d holecenter = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, HoleModel.ValveOffsetFromCenter, 0)));
-                blockRef.TransformBy(Matrix3d.Displacement(holecenter.GetVectorTo(HoleModel.ValvePosition)) * Matrix3d.Rotation(HoleModel.RotationAngle, Vector3d.ZAxis, holecenter));
+                Matrix3d rotation = Matrix3d.Identity;
+                if (HoleModel.RotationAngle >= 0 && HoleModel.RotationAngle < Math.PI)
+                {
+                    rotation = Matrix3d.Rotation(HoleModel.RotationAngle, Vector3d.ZAxis, Point3d.Origin);
+                }
+                else
+                {
+                    rotation = Matrix3d.Rotation(HoleModel.RotationAngle - Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                }
+                Matrix3d matrix = Matrix3d.Identity
+                    .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetAsVector().Negate()))
+                    .PreMultiplyBy(rotation)
+                    .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetVectorTo(HoleModel.ValvePosition)))
+                    .PreMultiplyBy(Matrix3d.Displacement(holecenter.GetAsVector()));
+                blockRef.TransformBy(matrix);
 
-                // 返回开洞图块
+                // 返回图块
                 return objId;
             }
         }
