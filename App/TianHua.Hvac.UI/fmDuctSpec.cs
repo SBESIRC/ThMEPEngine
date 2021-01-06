@@ -7,7 +7,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ThMEPHAVC.CAD;
 using ThMEPHVAC;
+using ThMEPHVAC.CAD;
 using TianHua.Publics.BaseCode;
 
 namespace TianHua.Hvac.UI
@@ -16,6 +18,8 @@ namespace TianHua.Hvac.UI
     {
         public string SelectedInnerDuctSize { get; set; }
         public string SelectedOuterDuctSize { get; set; }
+
+        DuctSpecModel m_DuctSpecModel { get; set; }
         public fmDuctSpec()
         {
             InitializeComponent();
@@ -29,31 +33,49 @@ namespace TianHua.Hvac.UI
 
         public void InitForm(DuctSpecModel _DuctSpecModel)
         {
+            m_DuctSpecModel = _DuctSpecModel;
+
             TxtAirVolume.Text = FuncStr.NullToStr(_DuctSpecModel.AirVolume);
 
             TxtAirSpeed.Text = FuncStr.NullToStr(_DuctSpecModel.AirSpeed);
 
             ListBoxOuterTube.DataSource = _DuctSpecModel.ListOuterTube;
 
-      
-
             ListBoxInnerTube.DataSource = _DuctSpecModel.ListInnerTube;
-
-      
 
             ListBoxOuterTube.SelectedItem = _DuctSpecModel.OuterTube;
 
             ListBoxInnerTube.SelectedItem = _DuctSpecModel.InnerTube;
+
+            if (_DuctSpecModel.InnerAnalysisType != AnalysisResultType.OK)
+            {
+                ListBoxInnerTube.Enabled = false;
+                TxtInnerTube1.Enabled = false;
+                TxtInnerTube2.Enabled = false;
+
+            }
+
+            if (_DuctSpecModel.OuterAnalysisType != AnalysisResultType.OK)
+            {
+                ListBoxOuterTube.Enabled = false;
+                TxtOuterTube1.Enabled = false;
+                TxtOuterTube2.Enabled = false;
+            }
+
+
         }
 
         private void Rad_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (Rad.Text == "推荐")
             {
+                layoutControlItem5.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
+                layoutControlItem6.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem7.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem4.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem8.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem9.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
+
 
                 layoutControlItem10.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem21.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
@@ -70,6 +92,8 @@ namespace TianHua.Hvac.UI
             }
             else
             {
+                layoutControlItem5.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
+                layoutControlItem6.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem7.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem4.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem8.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
@@ -86,14 +110,14 @@ namespace TianHua.Hvac.UI
                 layoutControlItem18.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
 
-                this.Size = new Size(170, 370);
+                this.Size = new Size(170, 335);
             }
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
 
- 
+
         }
 
         private void ListBoxOuterTube_SelectedValueChanged(object sender, EventArgs e)
@@ -128,7 +152,7 @@ namespace TianHua.Hvac.UI
 
         private void Rad_Properties_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(Rad.EditValue.ToString() == "推荐")
+            if (Rad.EditValue.ToString() == "推荐")
             {
                 SetIndexOutDuctSizeByDefault();
             }
@@ -150,6 +174,79 @@ namespace TianHua.Hvac.UI
             SelectedInnerDuctSize = FuncStr.NullToStr(ListBoxInnerTube.SelectedValue);
         }
 
+        private void TxtAirSpeed_EditValueChanged(object sender, EventArgs e)
+        {
+            if (FuncStr.NullToStr(TxtAirSpeed.Text) == string.Empty) { return; }
 
+            if (FuncStr.NullToDouble(TxtAirSpeed.Text) > m_DuctSpecModel.MaxAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MaxAirSpeed); }
+
+            if (FuncStr.NullToDouble(TxtAirSpeed.Text) < m_DuctSpecModel.MinAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); }
+
+            ThDuctSelectionEngine _ThDuctSelectionEngine = new ThDuctSelectionEngine(FuncStr.NullToDouble(TxtAirVolume), FuncStr.NullToDouble(TxtAirSpeed.Text));
+
+
+            m_DuctSpecModel.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            m_DuctSpecModel.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            m_DuctSpecModel.OuterTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendOuterDuctSize;
+            m_DuctSpecModel.InnerTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendInnerDuctSize;
+
+            ListBoxOuterTube.DataSource = m_DuctSpecModel.ListOuterTube;
+
+            ListBoxInnerTube.DataSource = m_DuctSpecModel.ListInnerTube;
+
+            ListBoxOuterTube.SelectedItem = m_DuctSpecModel.OuterTube;
+
+            ListBoxInnerTube.SelectedItem = m_DuctSpecModel.InnerTube;
+
+
+        }
+
+        private void TxtOuterTube1_EditValueChanged(object sender, EventArgs e)
+        {
+            if (FuncStr.NullToStr(TxtOuterTube1.Text) == string.Empty || FuncStr.NullToStr(TxtOuterTube2.Text) == string.Empty) { return; }
+
+            var _AirSpeed = FuncStr.NullToDouble(TxtAirVolume.Text) / 3600 / (FuncStr.NullToDouble(TxtOuterTube1.Text) * FuncStr.NullToDouble(TxtOuterTube2.Text) / 1000000);
+
+            LabAirSpeedOuter.Text = string.Format("计算风速 {0} m/s", _AirSpeed.ToString("0.#"));
+
+        }
+
+        private void TxtOuterTube2_EditValueChanged(object sender, EventArgs e)
+        {
+            if (FuncStr.NullToStr(TxtOuterTube1.Text) == string.Empty || FuncStr.NullToStr(TxtOuterTube2.Text) == string.Empty) { return; }
+
+            var _AirSpeed = FuncStr.NullToDouble(TxtAirVolume.Text) / 3600 / (FuncStr.NullToDouble(TxtOuterTube1.Text) * FuncStr.NullToDouble(TxtOuterTube2.Text) / 1000000);
+
+            LabAirSpeedOuter.Text = string.Format("计算风速 {0} m/s", _AirSpeed.ToString("0.#"));
+        }
+
+        private void TxtInnerTube1_EditValueChanged(object sender, EventArgs e)
+        {
+            if (FuncStr.NullToStr(TxtInnerTube1.Text) == string.Empty || FuncStr.NullToStr(TxtInnerTube2.Text) == string.Empty) { return; }
+
+            var _AirSpeed = FuncStr.NullToDouble(TxtAirVolume.Text) / 3600 / (FuncStr.NullToDouble(TxtInnerTube1.Text) * FuncStr.NullToDouble(TxtInnerTube2.Text) / 1000000);
+
+            LabAirSpeedInner.Text = string.Format("计算风速 {0} m/s", _AirSpeed.ToString("0.#"));
+        }
+
+        private void TxtInnerTube2_EditValueChanged(object sender, EventArgs e)
+        {
+            if (FuncStr.NullToStr(TxtInnerTube1.Text) == string.Empty || FuncStr.NullToStr(TxtInnerTube2.Text) == string.Empty) { return; }
+
+            var _AirSpeed = FuncStr.NullToDouble(TxtAirVolume.Text) / 3600 / (FuncStr.NullToDouble(TxtInnerTube1.Text) * FuncStr.NullToDouble(TxtInnerTube2.Text) / 1000000);
+
+            LabAirSpeedInner.Text = string.Format("计算风速 {0} m/s", _AirSpeed.ToString("0.#"));
+        }
+
+
+
+
+
+
+
+        private void TxtAirSpeed_ParseEditValue(object sender, DevExpress.XtraEditors.Controls.ConvertEditValueEventArgs e)
+        {
+
+        }
     }
 }

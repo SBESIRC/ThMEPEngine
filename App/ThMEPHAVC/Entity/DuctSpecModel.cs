@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPHAVC.CAD;
 
 namespace ThMEPHVAC
 {
@@ -49,12 +50,12 @@ namespace ThMEPHVAC
        /// <summary>
        /// 机房内管段分析结果
        /// </summary>
-        public string InnerAnalysisType { get; set; }
+        public AnalysisResultType InnerAnalysisType { get; set; }
 
         /// <summary>
         /// 机房外管段分析结果
         /// </summary>
-        public string OuterAnalysisType { get; set; }
+        public AnalysisResultType OuterAnalysisType { get; set; }
 
     }
 }
