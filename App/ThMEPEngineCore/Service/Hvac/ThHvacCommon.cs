@@ -47,7 +47,7 @@
         // 风机图层
         public const string MODEL_LAYER_DUAL = "H-DUAL-FBOX";
         public const string MODEL_LAYER_FIRE = "H-FIRE-FBOX";
-        public const string MODEL_LAYER_ERUP = "H-EQUP-FBOX";
+        public const string MODEL_LAYER_EQUP = "H-EQUP-FBOX";
 
         // 风机块属性名
         public const string BLOCK_ATTRIBUTE_EQUIPMENT_SYMBOL = "设备符号";

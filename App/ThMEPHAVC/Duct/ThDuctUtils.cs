@@ -17,7 +17,7 @@ namespace ThMEPHVAC.Duct
                     return ThHvacCommon.DUCT_LAYER_DUAL;
                 case ThHvacCommon.MODEL_LAYER_FIRE:
                     return ThHvacCommon.DUCT_LAYER_FIRE;
-                case ThHvacCommon.MODEL_LAYER_ERUP:
+                case ThHvacCommon.MODEL_LAYER_EQUP:
                     return ThHvacCommon.DUCT_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
@@ -32,8 +32,8 @@ namespace ThMEPHVAC.Duct
                     return ThHvacCommon.CENTERLINE_LAYER_DUAL;
                 case ThHvacCommon.MODEL_LAYER_FIRE:
                     return ThHvacCommon.CENTERLINE_LAYER_FIRE;
-                case ThHvacCommon.MODEL_LAYER_ERUP:
-                    return ThHvacCommon.FLANGE_LAYER_VENT;
+                case ThHvacCommon.MODEL_LAYER_EQUP:
+                    return ThHvacCommon.CENTERLINE_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
             }
@@ -47,7 +47,7 @@ namespace ThMEPHVAC.Duct
                     return ThHvacCommon.VALVE_LAYER_DUAL;
                 case ThHvacCommon.MODEL_LAYER_FIRE:
                     return ThHvacCommon.VALVE_LAYER_FIRE;
-                case ThHvacCommon.MODEL_LAYER_ERUP:
+                case ThHvacCommon.MODEL_LAYER_EQUP:
                     return ThHvacCommon.VALVE_LAYER_EQUP;
                 default:
                     throw new NotSupportedException();
@@ -72,7 +72,7 @@ namespace ThMEPHVAC.Duct
                     return ThHvacCommon.FLANGE_LAYER_DUAL;
                 case ThHvacCommon.MODEL_LAYER_FIRE:
                     return ThHvacCommon.FLANGE_LAYER_FIRE;
-                case ThHvacCommon.MODEL_LAYER_ERUP:
+                case ThHvacCommon.MODEL_LAYER_EQUP:
                     return ThHvacCommon.FLANGE_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
