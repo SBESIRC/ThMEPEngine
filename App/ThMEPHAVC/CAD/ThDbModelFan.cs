@@ -293,7 +293,12 @@ namespace ThMEPHVAC.CAD
 
         private string GetFanScenario()
         {
-            return Model.GetModelScenario();
+            var scenario = Model.GetModelScenario();
+            if (string.IsNullOrEmpty(scenario))
+            {
+                return "平时送风";
+            }
+            return scenario;
         }
     }
 }
