@@ -90,8 +90,8 @@ namespace ThMEPHVAC.CAD
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
-            string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(fanmodel.FanScenario);
-            string flangeLinerLayer = ThDuctUtils.DuctFlangeLineLayerName(modelLayer);
+            string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
+            string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(modelLayer);
             DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer, flangeLinerLayer);
             DrawDuctInDWG(InletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
             DrawDuctInDWG(InletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
@@ -102,8 +102,8 @@ namespace ThMEPHVAC.CAD
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
-            string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(fanmodel.FanScenario);
-            string flangeLinerLayer = ThDuctUtils.DuctFlangeLineLayerName(modelLayer);
+            string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
+            string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(modelLayer);
             DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, flangeLinerLayer);
             DrawDuctInDWG(OutletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
             DrawDuctInDWG(OutletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
@@ -501,7 +501,10 @@ namespace ThMEPHVAC.CAD
             {
                 var obj = acadDatabase.Database.AddLayer(centerlinelayer);
                 acadDatabase.Database.SetLayerColor(centerlinelayer, 252);
+                acadDatabase.Database.UnOffLayer(centerlinelayer);
+                acadDatabase.Database.UnLockLayer(centerlinelayer);
                 acadDatabase.Database.UnPrintLayer(centerlinelayer);
+                acadDatabase.Database.UnFrozenLayer(centerlinelayer);
                 return obj;
             }
         }

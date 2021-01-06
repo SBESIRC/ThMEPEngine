@@ -13,74 +13,42 @@ namespace ThMEPHVAC.Duct
         {
             switch (modelLayer)
             {
-                case "H-DUAL-FBOX":
+                case ThHvacCommon.MODEL_LAYER_DUAL:
                     return ThHvacCommon.DUCT_LAYER_DUAL;
-                case "H-FIRE-FBOX":
+                case ThHvacCommon.MODEL_LAYER_FIRE:
                     return ThHvacCommon.DUCT_LAYER_FIRE;
-                case "H-EQUP-FBOX":
+                case ThHvacCommon.MODEL_LAYER_ERUP:
                     return ThHvacCommon.DUCT_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
             }
         }
 
-        public static string DuctCenterLineLayerName(string scenario)
-        {
-            if (scenario.Contains("消防"))
-            {
-                return ThHvacCommon.FIRE_CENTERLINE_LAYER;
-            }
-            else if (scenario.Contains("兼用"))
-            {
-                return ThHvacCommon.DUAL_CENTERLINE_LAYER;
-            }
-            else
-            {
-                return ThHvacCommon.VENT_CENTERLINE_LAYER;
-            }
-        }
-
-        public static string DuctFlangeLineLayerName(string modelLayer)
+        public static string DuctCenterLineLayerName(string modelLayer)
         {
             switch (modelLayer)
             {
-                case "H-DUAL-FBOX":
-                    return ThHvacCommon.DUAL_FLANGE_LAYER;
-                case "H-FIRE-FBOX":
-                    return ThHvacCommon.FIRE_FLANGE_LAYER;
-                case "H-EQUP-FBOX":
-                    return ThHvacCommon.VENT_FLANGE_LAYER;
+                case ThHvacCommon.MODEL_LAYER_DUAL:
+                    return ThHvacCommon.CENTERLINE_LAYER_DUAL;
+                case ThHvacCommon.MODEL_LAYER_FIRE:
+                    return ThHvacCommon.CENTERLINE_LAYER_FIRE;
+                case ThHvacCommon.MODEL_LAYER_ERUP:
+                    return ThHvacCommon.FLANGE_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
             }
         }
 
-
-        public static string FireValveLayerName(string modelLayer)
+        public static string ValveLayerName(string modelLayer)
         {
             switch (modelLayer)
             {
-                case "H-DUAL-FBOX":
-                    return ThHvacCommon.H_DAPP_DDAMP;
-                case "H-FIRE-FBOX":
-                    return ThHvacCommon.H_DAPP_FDAMP;
-                case "H-EQUP-FBOX":
-                    return ThHvacCommon.H_DAPP_EDAMP;
-                default:
-                    throw new NotSupportedException();
-            }
-        }
-
-        public static string AirValveLayerName(string modelLayer)
-        {
-            switch (modelLayer)
-            {
-                case "H-DUAL-FBOX":
-                    return ThHvacCommon.H_DAPP_DDAMP;
-                case "H-FIRE-FBOX":
-                    return ThHvacCommon.H_DAPP_FDAMP;
-                case "H-EQUP-FBOX":
-                    return ThHvacCommon.H_DAPP_EDAMP;
+                case ThHvacCommon.MODEL_LAYER_DUAL:
+                    return ThHvacCommon.VALVE_LAYER_DUAL;
+                case ThHvacCommon.MODEL_LAYER_FIRE:
+                    return ThHvacCommon.VALVE_LAYER_FIRE;
+                case ThHvacCommon.MODEL_LAYER_ERUP:
+                    return ThHvacCommon.VALVE_LAYER_EQUP;
                 default:
                     throw new NotSupportedException();
             }
@@ -88,44 +56,24 @@ namespace ThMEPHVAC.Duct
 
         public static string SilencerLayerName(string modelLayer)
         {
-            switch (modelLayer)
-            {
-                case "H-DUAL-FBOX":
-                    return ThHvacCommon.H_DAPP_DDAMP;
-                case "H-FIRE-FBOX":
-                    return ThHvacCommon.H_DAPP_FDAMP;
-                case "H-EQUP-FBOX":
-                    return ThHvacCommon.H_DAPP_EDAMP;
-                default:
-                    throw new NotSupportedException();
-            }
+            return ValveLayerName(modelLayer);
         }
 
         public static string HoseLayerName(string modelLayer)
         {
-            switch (modelLayer)
-            {
-                case "H-DUAL-FBOX":
-                    return ThHvacCommon.H_DAPP_DDAMP;
-                case "H-FIRE-FBOX":
-                    return ThHvacCommon.H_DAPP_FDAMP;
-                case "H-EQUP-FBOX":
-                    return ThHvacCommon.H_DAPP_EDAMP;
-                default:
-                    throw new NotSupportedException();
-            }
+            return ValveLayerName(modelLayer);
         }
 
         public static string FlangeLayerName(string modelLayer)
         {
             switch (modelLayer)
             {
-                case "H-DUAL-FBOX":
-                    return ThHvacCommon.H_DAPP_DAPP;
-                case "H-FIRE-FBOX":
-                    return ThHvacCommon.H_DAPP_FAPP;
-                case "H-EQUP-FBOX":
-                    return ThHvacCommon.H_DAPP_AAPP;
+                case ThHvacCommon.MODEL_LAYER_DUAL:
+                    return ThHvacCommon.FLANGE_LAYER_DUAL;
+                case ThHvacCommon.MODEL_LAYER_FIRE:
+                    return ThHvacCommon.FLANGE_LAYER_FIRE;
+                case ThHvacCommon.MODEL_LAYER_ERUP:
+                    return ThHvacCommon.FLANGE_LAYER_VENT;
                 default:
                     throw new NotSupportedException();
             }

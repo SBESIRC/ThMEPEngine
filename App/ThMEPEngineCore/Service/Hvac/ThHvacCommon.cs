@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace ThMEPEngineCore.Service.Hvac
+﻿namespace ThMEPEngineCore.Service.Hvac
 {
     public class ThHvacCommon
     {
@@ -19,36 +13,43 @@ namespace ThMEPEngineCore.Service.Hvac
         public const string FILEVALVE_BLOCK_NAME = "防火阀";
         public const string HOSE_BLOCK_NAME = "风机软接";
 
+        // 中心线线型
+        public const string CENTERLINE_LINETYPE = "CENTER2";
+
         // XDATA
         public const string RegAppName_FanSelection = "THCAD_FAN_SELECTION";
         public const string RegAppName_Model_Foundation = "THCAD_FAN_FOUNDATION";
 
         // 图层
-        public const string FOUNDATION_LAYER = "H-BASE";
         public const string WALLHOLE_LAYER = "H-HOLE";
-        public const string H_DAPP_DDAMP = "H-DAPP-DDAMP";
-        public const string H_DAPP_FDAMP = "H-DAPP-FDAMP";
-        public const string H_DAPP_EDAMP = "H-DAPP-EDAMP";
-        public const string H_DAPP_DAPP = "H-DAPP-DAPP";
-        public const string H_DAPP_FAPP = "H-DAPP-FAPP";
-        public const string H_DAPP_AAPP = "H-DAPP-AAPP";
+        public const string FOUNDATION_LAYER = "H-BASE";
+
+        // 阀图层
+        public const string VALVE_LAYER_DUAL = "H-DAPP-DDAMP";
+        public const string VALVE_LAYER_FIRE = "H-DAPP-FDAMP";
+        public const string VALVE_LAYER_EQUP = "H-DAPP-EDAMP";
 
         // 中心线图层
-        public const string CENTERLINE_LINETYPE = "CENTER2";
-        public const string FIRE_CENTERLINE_LAYER = "H-DUCT-FIRE-MID";
-        public const string DUAL_CENTERLINE_LAYER = "H-DUCT-DUAL-MID";
-        public const string VENT_CENTERLINE_LAYER = "H-DUCT-VENT-MID";
+        public const string CENTERLINE_LAYER_DUAL = "H-DUCT-DUAL-MID";
+        public const string CENTERLINE_LAYER_FIRE = "H-DUCT-FIRE-MID";
+        public const string CENTERLINE_LAYER_VENT = "H-DUCT-VENT-MID";
 
-        // 管道法兰线图层
-        public const string FIRE_FLANGE_LAYER = "H-DAPP-FAPP";
-        public const string DUAL_FLANGE_LAYER = "H-DAPP-DAPP";
-        public const string VENT_FLANGE_LAYER = "H-DAPP-AAPP";
+        // 法兰图层
+        public const string FLANGE_LAYER_DUAL = "H-DAPP-DAPP";
+        public const string FLANGE_LAYER_FIRE = "H-DAPP-FAPP";
+        public const string FLANGE_LAYER_VENT = "H-DAPP-AAPP";
 
+        // 风管图层
         public const string DUCT_LAYER_DUAL = "H-DUCT-DUAL";
         public const string DUCT_LAYER_FIRE = "H-DUCT-FIRE";
         public const string DUCT_LAYER_VENT = "H-DUCT-VENT";
 
-        // 风机块属性
+        // 风机图层
+        public const string MODEL_LAYER_DUAL = "H-DUAL-FBOX";
+        public const string MODEL_LAYER_FIRE = "H-FIRE-FBOX";
+        public const string MODEL_LAYER_ERUP = "H-EQUP-FBOX";
+
+        // 风机块属性名
         public const string BLOCK_ATTRIBUTE_EQUIPMENT_SYMBOL = "设备符号";
         public const string BLOCK_ATTRIBUTE_STOREY_AND_NUMBER = "楼层-编号";
         public const string BLOCK_ATTRIBUTE_FAN_USAGE = "风机功能";
@@ -72,7 +73,7 @@ namespace ThMEPEngineCore.Service.Hvac
         public const string BLOCK_ATTRIBUTE_VALUE_FIRE_POWER = "消防电源";
         public const string BLOCK_ATTRIBUTE_VALUE_NON_FIRE_POWER = "非消防电源";
 
-        // 风机块动态属性
+        // 风机块动态属性名
         public const string BLOCK_DYNAMIC_PROPERTY_ANGLE1 = "角度1";
         public const string BLOCK_DYNAMIC_PROPERTY_ANGLE2 = "角度2";
         public const string BLOCK_DYNAMIC_PROPERTY_ROTATE1 = "翻转状态1";
@@ -96,7 +97,7 @@ namespace ThMEPEngineCore.Service.Hvac
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL = "出风口竖";
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL = "出风口横";
 
-        //阀块动态属性
+        //阀块动态属性名
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY = "可见性";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT = "高度";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA = "宽度或直径";
