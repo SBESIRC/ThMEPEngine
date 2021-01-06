@@ -21,7 +21,7 @@ namespace ThMEPLighting.EmgLight.Service
             var resPolys = lines.SelectMany(x =>
             {
                 var linePoly = StructUtils.ExpandLine(x, tol,0,tol,0);
-                InsertLightService.ShowGeometry(linePoly, 44);
+                //InsertLightService.ShowGeometry(linePoly, 44);
                 return polys.Where(y =>
                 {
                     var polyCollection = new DBObjectCollection() { y };
@@ -43,7 +43,8 @@ namespace ThMEPLighting.EmgLight.Service
         {
 
             var linePolys = StructUtils.createRecBuffer(lines, length);
-            InsertLightService.ShowGeometry(linePolys, 30);
+            
+            //InsertLightService.ShowGeometry(linePolys, 30);
             List<Polyline> upPolyline = new List<Polyline>();
             List<Polyline> downPolyline = new List<Polyline>();
             foreach (var poly in polyline)

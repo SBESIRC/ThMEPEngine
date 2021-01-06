@@ -62,6 +62,41 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="lines"></param>
         /// <param name="length"></param>
         /// <returns></returns>
+        //public static List<Polyline> createRecBuffer(List<Line> lines, double length)
+        //{
+        //    //var newLines = lines.Select(x => x.Normalize()).ToList();
+        //    var newLines = lines;
+        //    List<Polyline> linePolys = new List<Polyline>();
+
+        //    foreach (var line in newLines)
+        //    {
+
+        //        var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
+
+        //        //不需要前后延伸
+        //        //line.StartPoint = line.StartPoint - lineDir * length;
+        //        //line.EndPoint = line.EndPoint + lineDir * length;
+
+        //        //find single sided buffer direction
+        //        var bufferLength = length;
+        //        if (Math.Abs(lineDir.X) > Math.Abs(lineDir.Y))
+        //        {
+        //            if (lineDir.X < 0)
+        //            {
+        //                bufferLength = -bufferLength;
+        //            }
+        //        }
+        //        else
+        //        {
+        //            if (lineDir.Y < 0)
+        //            {
+        //                bufferLength = -bufferLength;
+        //            }
+        //        }
+        //        linePolys.AddRange(new DBObjectCollection() { line }.SingleSidedBuffer(bufferLength).Cast<Polyline>().ToList());
+        //    }
+        //    return linePolys;
+        //}
         public static List<Polyline> createRecBuffer(List<Line> lines, double length)
         {
             //var newLines = lines.Select(x => x.Normalize()).ToList();
@@ -70,30 +105,8 @@ namespace ThMEPLighting.EmgLight.Service
 
             foreach (var line in newLines)
             {
-                
-                var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
+                linePolys.Add (ExpandLine(line, length, 0, 0, 0));
 
-                //不需要前后延伸
-                //line.StartPoint = line.StartPoint - lineDir * length;
-                //line.EndPoint = line.EndPoint + lineDir * length;
-
-                //find single sided buffer direction
-                var bufferLength = length;
-                if (Math.Abs(lineDir.X) > Math.Abs(lineDir.Y))
-                {
-                    if (lineDir.X < 0)
-                    {
-                        bufferLength = -bufferLength;
-                    }
-                }
-                else
-                {
-                    if (lineDir.Y < 0)
-                    {
-                        bufferLength = -bufferLength;
-                    }
-                }
-                linePolys.AddRange(new DBObjectCollection() { line }.SingleSidedBuffer(bufferLength).Cast<Polyline>().ToList());
             }
             return linePolys;
         }
