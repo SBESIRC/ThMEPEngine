@@ -3,6 +3,7 @@ using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPLighting.EmgLight.Service
 {
@@ -129,6 +130,25 @@ namespace ThMEPLighting.EmgLight.Service
                 pointC.ColorIndex = ci;
                 pointC.LineWeight = lw;
                 acdb.ModelSpace.Add(pointC);
+
+            }
+        }
+
+        public static void ShowGeometry(Point3d pt, string s, int ci, LineWeight lw = LineWeight.LineWeight025)
+        {
+
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+
+                DBText text = new DBText();
+                text.Position = pt;
+                text.ColorIndex = ci;
+                text.LineWeight = lw;
+                text.TextString = s;
+                text.Rotation = 0;
+                text.Height = 1000;
+                text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLEP5");
+                acdb.ModelSpace.Add(text);
 
             }
         }

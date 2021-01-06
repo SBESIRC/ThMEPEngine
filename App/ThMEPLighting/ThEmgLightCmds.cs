@@ -1,13 +1,13 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Runtime;
-using Dreambuild.AutoCAD;
-using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+using NFox.Cad;
+using AcHelper;
+using Linq2Acad;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
@@ -59,7 +59,7 @@ namespace ThMEPLighting
 
                 //处理外包框线
                 //
-              //  var plines = HandleFrame(frameLst);
+                //  var plines = HandleFrame(frameLst);
 
                 foreach (Polyline plFrame in frameLst)
                 {
@@ -81,35 +81,44 @@ namespace ThMEPLighting
                     var parkingLinesService = new ParkingLinesService();
                     var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
 
-                    //debug
-                    foreach (List<Line> parkinglineString in parkingLines)
+                    //将车道线排序,点按排序方向排列,合并连续线段
+                    List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
+
+                   bool debug = false;
+                    if ( debug == false)
                     {
-                        InsertLightService.ShowGeometry(parkinglineString, 80);
+                        ////debug
+                        //foreach (List<Line> parkinglineString in parkingLines)
+                        //{
+                        //    InsertLightService.ShowGeometry(parkinglineString, 80);
+                        //}
+
+                        //foreach (List<Line> parkinglineString in otherPLines)
+                        //{
+
+                        //    InsertLightService.ShowGeometry(parkinglineString, 10);
+
+                        //}
+
+                        //获取构建信息
+                        var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+                        GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
+
+
+                        //主车道布置信息
+                        LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
+                        var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
+                        //layoutInfo = layoutService.LayoutLight(plFrame, otherPLines, columns, walls);
+
+                        //InsertLightService.InsertSprayBlock(layoutInfo);
+
+
+
+                        ////副车道布置信息
+                        // LayoutWithParkingLineForLight layoutSecondaryService = new LayoutWithParkingLineForLight();
+                        //  var resLayoutInfo = layoutService.LayoutLight(frame, otherPLines, columns, walls);
+
                     }
-
-                    foreach (List<Line> parkinglineString in otherPLines)
-                    {
-
-                        InsertLightService.ShowGeometry(parkinglineString, 10);
-
-
-                    }
-
-                    //获取构建信息
-                    var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
-                    GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
-
-
-                    //主车道布置信息
-                    LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
-                    var layoutInfo = layoutService.LayoutLight(plFrame, parkingLines, columns, walls);
-                    //InsertLightService.InsertSprayBlock(layoutInfo);
-
-                    ////副车道布置信息
-                    // LayoutWithParkingLineForLight layoutSecondaryService = new LayoutWithParkingLineForLight();
-                    //  var resLayoutInfo = layoutService.LayoutLight(frame, otherPLines, columns, walls);
-
-
                 }
 
             }

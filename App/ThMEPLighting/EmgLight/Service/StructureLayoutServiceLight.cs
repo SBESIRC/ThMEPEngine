@@ -1,8 +1,8 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.EmgLight.Service
@@ -209,7 +209,7 @@ namespace ThMEPLighting.EmgLight.Service
 
 
         /// <summary>
-        /// 找到柱与车道线平行,最近的边
+        /// 找到柱与车道线平行且最近的边
         /// </summary>
         /// <param name="polyline"></param>
         /// <param name="pt"></param>

@@ -15,31 +15,13 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="polylines"></param>
         /// <param name="columns"></param>
         /// <returns></returns>
-        public List<Polyline> GetStruct(List<Line> lines, List<Polyline> polys, double tol)
+        public static List<Polyline> GetStruct(List<Line> lines, List<Polyline> polys, double tol)
         {
-            //var resPolys = lines.SelectMany(x =>
-            //{
-            //    var linePoly = StructUtils.ExpandLine(x, tol);
-            //    InsertLightService.ShowGeometry(linePoly, 44);
-            //    var polyCollection = new DBObjectCollection() { linePoly };
-            //    return polys.Where(y => y.Intersection(polyCollection).Count > 0).ToList();
-            //}).ToList();
-
-            //var resPolys = lines.SelectMany(x =>
-            //{
-            //    var linePoly = StructUtils.ExpandLine(x, tol);
-            //    InsertLightService.ShowGeometry(linePoly, 44);
-            //    return polys.Where(y =>
-            //    {
-            //        var polyCollection = new DBObjectCollection() { y };
-            //        return linePoly.Intersection(polyCollection).Count > 0;
-            //    }).ToList();
-            //}).ToList();
-
+           
             var resPolys = lines.SelectMany(x =>
             {
-                var linePoly = StructUtils.ExpandLine(x, tol);
-
+                var linePoly = StructUtils.ExpandLine(x, tol,0,tol,0);
+                //InsertLightService.ShowGeometry(linePoly, 44);
                 return polys.Where(y =>
                 {
                     var polyCollection = new DBObjectCollection() { y };
@@ -57,11 +39,12 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="columns"></param>
         /// <param name="line"></param>
         /// <returns></returns>
-        public List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines, double length)
+        public static List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines, double length)
         {
 
             var linePolys = StructUtils.createRecBuffer(lines, length);
-
+            
+            //InsertLightService.ShowGeometry(linePolys, 30);
             List<Polyline> upPolyline = new List<Polyline>();
             List<Polyline> downPolyline = new List<Polyline>();
             foreach (var poly in polyline)
