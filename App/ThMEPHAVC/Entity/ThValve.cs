@@ -2,7 +2,8 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
-
+using ThMEPHVAC.IO;
+using System.Linq;
 
 namespace ThMEPHVAC.Entity
 {
@@ -38,85 +39,108 @@ namespace ThMEPHVAC.Entity
             ValvesInGroup = CreateValvesFromValveGroup(fanlayer);
         }
 
-        private List<ThValve> CreateValvesFromValveGroup(string fanlayer)
+        private List<ThValve> SetInnerValveGroup(string fanlayer)
         {
             List<ThValve> valves = new List<ThValve>();
-            //进风段
-            if (Parameters.ValveGroupPosion == ValveGroupPosionType.Inlet)
+
+            var hole = CreateHole();
+            var firevalve = CreateFireValve(fanlayer);
+            hole.ValveOffsetFromCenter = -hole.Length;
+            firevalve.ValveOffsetFromCenter = 0;
+            valves.AddRange(new List<ThValve> { firevalve, hole });
+
+            return valves;
+        }
+
+        private List<ThValve> SetOuterValveGroup(string fanlayer)
+        {
+            List<ThValve> valves = new List<ThValve>();
+
+            var silencer = CreateSilencer(fanlayer);
+            var checkvalve = CreateCheckValve(fanlayer);
+            var hole = CreateHole();
+            var firevalve = CreateFireValve(fanlayer);
+
+            //正常情况下，空间足够
+            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
             {
-                var silencer = CreateSilencer(fanlayer);
-                var hole = CreateHole();
-                var firevalve = CreateFireValve(fanlayer);
                 silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
                 hole.ValveOffsetFromCenter = -hole.Length;
                 firevalve.ValveOffsetFromCenter = 0;
-                switch (Parameters.FanScenario)
+                checkvalve.ValveOffsetFromCenter = firevalve.Length;
+            }
+            //机房内空间放不下防火阀加止回阀
+            else
+            {
+                //机房内空间连一个止回阀都放不下
+                if (Parameters.ValveToFanSpacing < checkvalve.Length)
                 {
-                    case "消防排烟兼平时排风":
-                        valves.AddRange(new List<ThValve> { silencer, hole, firevalve });
-                        break;
-                    case "消防补风兼平时送风":
-                    case "消防排烟":
-                    case "消防补风":
-                    case "消防正压送风":
-                        valves.AddRange(new List<ThValve> { hole, firevalve });
-                        break;
-                    default:
-                        valves.AddRange(new List<ThValve> { hole, firevalve });
-                        break;
+                    silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - checkvalve.Length - hole.Length;
+                    firevalve.ValveOffsetFromCenter = -firevalve.Length - checkvalve.Length - hole.Length;
+                    checkvalve.ValveOffsetFromCenter = -checkvalve.Length - hole.Length;
+                    hole.ValveOffsetFromCenter = -hole.Length;
+
+                }
+                //机房内空间可以放一个止回阀
+                else
+                {
+                    silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - hole.Length;
+                    firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
+                    hole.ValveOffsetFromCenter = -hole.Length;
+                    checkvalve.ValveOffsetFromCenter = 0;
+                }
+            }
+
+            switch (Parameters.FanScenario)
+            {
+                case "消防排烟":
+                case "消防补风":
+                case "消防加压送风":
+                    valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
+                    break;
+                default:
+                    valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole, silencer });
+                    break;
+            }
+
+            return valves;
+        }
+
+        private List<ThValve> CreateValvesFromValveGroup(string fanlayer)
+        {
+            List<ThValve> valves = new List<ThValve>();
+
+            var jsonReader = new ThDuctInOutMappingJsonReader();
+            var innerRomDuctPosition = jsonReader.Mappings.First(d => d.WorkingScenario == Parameters.FanScenario).InnerRoomDuctType;
+            
+            //设置风机进风口段阀组
+            if (Parameters.ValveGroupPosion == ValveGroupPosionType.Inlet)
+            {
+                //若当前工作场景中，风机进风口段对应机房内管段
+                if (innerRomDuctPosition == "进风段")
+                {
+                    return SetInnerValveGroup(fanlayer);
+                }
+                //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
+                else
+                {
+                    return SetOuterValveGroup(fanlayer);
                 }
             }
             //出风段
             else
             {
-                var silencer = CreateSilencer(fanlayer);
-                var checkvalve = CreateCheckValve(fanlayer);
-                var hole = CreateHole();
-                var firevalve = CreateFireValve(fanlayer);
-
-                switch (Parameters.FanScenario)
+                //若当前工作场景中，风机进风口段对应机房内管段
+                if (innerRomDuctPosition == "进风段")
                 {
-                    case "消防排烟兼平时排风":
-                        hole.ValveOffsetFromCenter = -hole.Length;
-                        firevalve.ValveOffsetFromCenter = 0;
-                        checkvalve.ValveOffsetFromCenter = firevalve.Length;
-                        valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
-                        break;
-                    case "消防补风兼平时送风":
-                        silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
-                        hole.ValveOffsetFromCenter = -hole.Length;
-                        firevalve.ValveOffsetFromCenter = 0;
-                        checkvalve.ValveOffsetFromCenter = firevalve.Length;
-                        valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole, silencer });
-                        break;
-                    case "消防排烟":
-                        hole.ValveOffsetFromCenter = -hole.Length;
-                        firevalve.ValveOffsetFromCenter = 0;
-                        checkvalve.ValveOffsetFromCenter = firevalve.Length;
-                        valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
-                        break;
-                    case "消防补风":
-                        hole.ValveOffsetFromCenter = -hole.Length;
-                        firevalve.ValveOffsetFromCenter = 0;
-                        checkvalve.ValveOffsetFromCenter = firevalve.Length;
-                        valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
-                        break;
-                    case "消防正压送风":
-                        firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
-                        hole.ValveOffsetFromCenter = -hole.Length;
-                        checkvalve.ValveOffsetFromCenter = 0;
-                        valves.AddRange(new List<ThValve> { checkvalve, hole, firevalve });
-                        break;
-                    default:
-                        firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
-                        hole.ValveOffsetFromCenter = -hole.Length;
-                        checkvalve.ValveOffsetFromCenter = 0;
-                        valves.AddRange(new List<ThValve> { checkvalve, hole, firevalve });
-                        break;
+                    return SetOuterValveGroup(fanlayer);
                 }
-
+                //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
+                else
+                {
+                    return SetInnerValveGroup(fanlayer);
+                }
             }
-            return valves;
         }
 
         private ThValve CreateSilencer(string fanlayer)
@@ -208,6 +232,7 @@ namespace ThMEPHVAC.Entity
         public double RotationAngle { get; set; }
         public string FanScenario { get; set; }
         public double DuctWidth { get; set; }
+        public double ValveToFanSpacing { get; set; }
         public Point3d GroupInsertPoint { get; set; }
         public ValveGroupPosionType ValveGroupPosion { get; set; }
     }

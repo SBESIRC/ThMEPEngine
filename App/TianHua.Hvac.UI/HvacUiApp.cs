@@ -63,9 +63,9 @@ namespace TianHua.Hvac.UI
                 ThFanInletOutletAnalysisEngine inAndOutAnalysisEngine = new ThFanInletOutletAnalysisEngine(DbFanModel);
                 inAndOutAnalysisEngine.InletAnalysis();
                 inAndOutAnalysisEngine.OutletAnalysis();
-                if (inAndOutAnalysisEngine.InletAnalysisResult != AnalysisResultType.OK || inAndOutAnalysisEngine.OutletAnalysisResult != AnalysisResultType.OK)
+                if (inAndOutAnalysisEngine.InletAnalysisResult != AnalysisResultType.OK && inAndOutAnalysisEngine.OutletAnalysisResult != AnalysisResultType.OK)
                 {
-                    //
+                    return;
                 }
                 ThDuctSelectionEngine ductselectionengine = new ThDuctSelectionEngine(DbFanModel);
 

@@ -71,30 +71,29 @@ namespace ThMEPHVAC.CAD
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> centerlinegraph)
         {
             List<ThValveGroup> valvegroups = new List<ThValveGroup>();
-            using (DBObjectCollection lineobjs = new DBObjectCollection())
+
+            var walllines = wallobjects.Cast<Line>();
+            foreach (var centeredge in centerlinegraph.Edges)
             {
-                centerlinegraph.Edges.ToList().ForEach(e => lineobjs.Add(new Line(e.Source.Position, e.Target.Position)));
-                var walllines = wallobjects.Cast<Line>();
-                foreach (var centerline in lineobjs.Cast<Line>())
+                var centerline = new Line(centeredge.Source.Position, centeredge.Target.Position);
+                foreach (var wallline in walllines)
                 {
-                    foreach (var wallline in walllines)
+                    Point3dCollection IntersectPoints = new Point3dCollection();
+                    centerline.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
+                    if (IntersectPoints.Count > 0)
                     {
-                        Point3dCollection IntersectPoints = new Point3dCollection();
-                        centerline.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
-                        if (IntersectPoints.Count > 0)
+                        double holeangle = centerline.Angle >= 0.5 * Math.PI ? centerline.Angle - 0.5 * Math.PI : centerline.Angle + 1.5 * Math.PI;
+                        var groupparameters = new ThValveGroupParameters()
                         {
-                            double holeangle = centerline.Angle >= 0.5 * Math.PI ? centerline.Angle - 0.5 * Math.PI : centerline.Angle + 1.5 * Math.PI;
-                            var groupparameters = new ThValveGroupParameters()
-                            {
-                                GroupInsertPoint = IntersectPoints[0],
-                                DuctWidth = ductwidth,
-                                RotationAngle = holeangle,
-                                FanScenario = fanmodel.FanScenario,
-                                ValveGroupPosion = valvePosion,
-                            };
-                            var valvegroup = new ThValveGroup(groupparameters, fanmodel.Data.BlockLayer);
-                            valvegroups.Add(valvegroup);
-                        }
+                            GroupInsertPoint = IntersectPoints[0],
+                            DuctWidth = ductwidth,
+                            RotationAngle = holeangle,
+                            FanScenario = fanmodel.FanScenario,
+                            ValveGroupPosion = valvePosion,
+                            ValveToFanSpacing = IntersectPoints[0].DistanceTo(centerline.StartPoint) - centeredge.SourceShrink,
+                        };
+                        var valvegroup = new ThValveGroup(groupparameters, fanmodel.Data.BlockLayer);
+                        valvegroups.Add(valvegroup);
                     }
                 }
             }
