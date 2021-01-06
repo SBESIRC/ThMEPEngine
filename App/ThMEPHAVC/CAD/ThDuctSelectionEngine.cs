@@ -5,7 +5,7 @@ using ThMEPHVAC.IO;
 
 namespace ThMEPHVAC.CAD
 {
-    public class ThDuctSelectionEngine
+    public class ThDuctSizeInfor
     {
         //出口管段推荐尺寸
         public string RecommendOuterDuctSize { get; set; }
@@ -13,14 +13,26 @@ namespace ThMEPHVAC.CAD
         public string RecommendInnerDuctSize { get; set; }
         //管道尺寸信息
         public List<string> DefaultDuctsSizeString { get; set; }
+    }
+    public class ThDuctSelectionEngine
+    {
+        public ThDuctSizeInfor DuctSizeInfor { get; set; }
         public ThDuctSelectionEngine(double fanvolume, double airspeed)
         {
+            DuctSizeInfor = GetUpdateDuctSizeInfor(fanvolume, airspeed);
+        }
+        public ThDuctSizeInfor GetUpdateDuctSizeInfor(double fanvolume, double airspeed)
+        {
             var defaultCandidateDucts = GetDefaultCandidateDucts(fanvolume, airspeed);
-            DefaultDuctsSizeString = GetDefaultDuctsSizeString(defaultCandidateDucts);
             var recommendOuterDuct = defaultCandidateDucts.First(d => d.AspectRatio == defaultCandidateDucts.Max(f => f.AspectRatio));
-            RecommendOuterDuctSize = recommendOuterDuct.DuctWidth + "x" + recommendOuterDuct.DuctHeight;
             var recommendInnerDuct = defaultCandidateDucts.First(d => d.AspectRatio == defaultCandidateDucts.Min(f => f.AspectRatio));
-            RecommendInnerDuctSize = recommendInnerDuct.DuctWidth + "x" + recommendInnerDuct.DuctHeight;
+
+            return new ThDuctSizeInfor()
+            {
+                DefaultDuctsSizeString = GetDefaultDuctsSizeString(defaultCandidateDucts),
+                RecommendOuterDuctSize = recommendOuterDuct.DuctWidth + "x" + recommendOuterDuct.DuctHeight,
+                RecommendInnerDuctSize = recommendInnerDuct.DuctWidth + "x" + recommendInnerDuct.DuctHeight
+            };
         }
         private List<DuctSizeParameter> GetDefaultCandidateDucts(double fanvolume, double airspeed)
         {
