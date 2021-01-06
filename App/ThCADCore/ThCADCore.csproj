@@ -34,6 +34,7 @@
     <Compile Include="NTS\ThCADCoreNTSEarCutTriangulationBuilder.cs" />
     <Compile Include="NTS\ThCADCoreNTSEntityExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSExtension.cs" />
+    <Compile Include="NTS\ThCADCoreNTSFastGeometryClipper.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometryClipper.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometryComparer.cs" />
     <Compile Include="NTS\ThCADCoreNTSDbExtension.cs" />

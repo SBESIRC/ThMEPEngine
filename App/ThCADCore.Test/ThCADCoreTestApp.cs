@@ -648,24 +648,30 @@ namespace ThCADCore.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
+                var result1 = Active.Editor.GetEntity("\n请选择框线");
+                if (result1.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                var result2 = Active.Editor.GetEntity("请选择框线");
+                var result2 = Active.Editor.GetSelection();
                 if (result2.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                var curve = acadDatabase.Element<Polyline>(result.ObjectId);
-                var frame = acadDatabase.Element<Polyline>(result2.ObjectId);
-                foreach (Entity diagram in frame.Trim(curve))
+                var objs = new List<DBObject>();
+                var frame = acadDatabase.Element<Polyline>(result1.ObjectId);
+                var clipper = new ThCADCoreNTSFastGeometryClipper(frame.ToNTSPolygon().EnvelopeInternal);
+                foreach (var obj in result2.Value.GetObjectIds())
                 {
-                    diagram.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(diagram);
+                    var curve = acadDatabase.Element<Curve>(obj);
+                    objs.AddRange(clipper.clip(curve.ToNTSGeometry(), true).ToDbObjects());
+                }
+                foreach (Entity obj in objs)
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
                 }
             }
         }
