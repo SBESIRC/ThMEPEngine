@@ -7,25 +7,24 @@ namespace ThMEPHVAC.CAD
 {
     public class ThDuctSelectionEngine
     {
-        public List<DuctSizeParameter> DefaultCandidateDucts { get; set; }
-        public ThDbModelFan FanModel { get; set; }
-        public DuctSizeParameter DefaultRecommendDuct { get; set; }
-        public DuctSizeParameter RecommendOuterDuct { get; set; }
+        //出口管段推荐尺寸
         public string RecommendOuterDuctSize { get; set; }
-        public DuctSizeParameter RecommendInnerDuct { get; set; }
+        //入口管段推荐尺寸
         public string RecommendInnerDuctSize { get; set; }
-        public ThDuctSelectionEngine(ThDbModelFan fanmodel)
+        //管道尺寸信息
+        public List<string> DefaultDuctsSizeString { get; set; }
+        public ThDuctSelectionEngine(double fanvolume, double airspeed)
         {
-            FanModel = fanmodel;
-            DefaultCandidateDucts = GetDefaultCandidateDucts();
-            RecommendOuterDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Max(f => f.AspectRatio));
-            RecommendOuterDuctSize = RecommendOuterDuct.DuctWidth + "x" + RecommendOuterDuct.DuctHeight;
-            RecommendInnerDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Min(f => f.AspectRatio));
-            RecommendInnerDuctSize = RecommendInnerDuct.DuctWidth + "x" + RecommendInnerDuct.DuctHeight;
+            var defaultCandidateDucts = GetDefaultCandidateDucts(fanvolume, airspeed);
+            DefaultDuctsSizeString = GetDefaultDuctsSizeString(defaultCandidateDucts);
+            var recommendOuterDuct = defaultCandidateDucts.First(d => d.AspectRatio == defaultCandidateDucts.Max(f => f.AspectRatio));
+            RecommendOuterDuctSize = recommendOuterDuct.DuctWidth + "x" + recommendOuterDuct.DuctHeight;
+            var recommendInnerDuct = defaultCandidateDucts.First(d => d.AspectRatio == defaultCandidateDucts.Min(f => f.AspectRatio));
+            RecommendInnerDuctSize = recommendInnerDuct.DuctWidth + "x" + recommendInnerDuct.DuctHeight;
         }
-        private List<DuctSizeParameter> GetDefaultCandidateDucts()
+        private List<DuctSizeParameter> GetDefaultCandidateDucts(double fanvolume, double airspeed)
         {
-            double calculateDuctArea = FanModel.FanVolume / 3600.0 / ThFanSelectionUtils.GetDefaultAirSpeed(FanModel.FanScenario);
+            double calculateDuctArea = fanvolume / 3600.0 / airspeed;
             var jsonReader = new ThDuctParameterJsonReader();
             var biggerDucts = jsonReader.Parameters.Where(d => d.SectionArea > calculateDuctArea).OrderBy(d => d.SectionArea);
             var satisfiedDucts = biggerDucts.Where(d=> d.SectionArea - calculateDuctArea < 0.15 * calculateDuctArea).ToList();
@@ -40,10 +39,12 @@ namespace ThMEPHVAC.CAD
             }
             return satisfiedDucts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
         }
-        public List<string> GetDefaultDuctsSizeString()
+        
+        //获取管道尺寸信息列表
+        private List<string> GetDefaultDuctsSizeString(List<DuctSizeParameter> defaultcandidateducts)
         {
             List<string> DuctsSizeString = new List<string>();
-            DefaultCandidateDucts.ForEach(d=> DuctsSizeString.Add($"{d.DuctWidth}x{d.DuctHeight}"));
+            defaultcandidateducts.ForEach(d=> DuctsSizeString.Add($"{d.DuctWidth}x{d.DuctHeight}"));
             return DuctsSizeString;
         }
     }

@@ -67,7 +67,7 @@ namespace TianHua.Hvac.UI
                 {
                     return;
                 }
-                ThDuctSelectionEngine ductselectionengine = new ThDuctSelectionEngine(DbFanModel);
+                ThDuctSelectionEngine ductselectionengine = new ThDuctSelectionEngine(DbFanModel.FanVolume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario));
 
                 //进出口段与机房内外段的对应关系
                 var jsonReader = new ThDuctInOutMappingJsonReader();
@@ -79,8 +79,8 @@ namespace TianHua.Hvac.UI
                     MaxAirSpeed = ThFanSelectionUtils.GetMaxAirSpeed(DbFanModel.FanScenario),
                     MinAirSpeed = ThFanSelectionUtils.GetMinAirSpeed(DbFanModel.FanScenario),
                     AirVolume = DbFanModel.FanVolume,
-                    ListOuterTube = ductselectionengine.GetDefaultDuctsSizeString(),
-                    ListInnerTube = ductselectionengine.GetDefaultDuctsSizeString(),
+                    ListOuterTube = ductselectionengine.DefaultDuctsSizeString,
+                    ListInnerTube = ductselectionengine.DefaultDuctsSizeString,
                     OuterTube = ductselectionengine.RecommendOuterDuctSize,
                     InnerTube = ductselectionengine.RecommendInnerDuctSize,
                     InnerAnalysisType = innerRomDuctPosition == "进风段"? inAndOutAnalysisEngine.InletAnalysisResult.ToString() : inAndOutAnalysisEngine.OutletAnalysisResult.ToString(),

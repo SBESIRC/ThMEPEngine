@@ -28,6 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD\ThDefaultDuctInformationService.cs" />
     <Compile Include="CAD\ThDuctSelectionEngine.cs" />
     <Compile Include="CAD\ThDbModelFan.cs" />
     <Compile Include="CAD\ThFanInletOutletAnalysisEngine.cs" />
