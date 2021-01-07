@@ -231,7 +231,7 @@ namespace ThMEPHVAC.CAD
         private Point3d GetFanInletBasePoint()
         {
             string blockname = Data.EffectiveName;
-            Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.GetAsVector());
+            Matrix3d ocs2Wcs = Data.BlockTransform;
             if (blockname.Contains("直进") || blockname.Contains("侧进"))
             {
                 Point3d inletposition = CreatePointFromProperty(
@@ -260,7 +260,7 @@ namespace ThMEPHVAC.CAD
 
         private Point3d GetFanOutletBasePoint()
         {
-            Matrix3d ocs2Wcs = Matrix3d.Displacement(Data.Position.GetAsVector());
+            Matrix3d ocs2Wcs = Data.BlockTransform;
             if (Model.IsAXIALModel())
             {
                 Point3d axialinletposition = CreatePointFromProperty(
