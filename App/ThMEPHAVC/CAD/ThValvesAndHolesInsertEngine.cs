@@ -39,14 +39,15 @@ namespace ThMEPHVAC.CAD
                 Point3d holeinsertpoint = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, HoleModel.ValveOffsetFromCenter, 0)));
                 Point3d valvecenterpoint = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, -0.5 * HoleModel.Length, 0)));
                 Matrix3d rotation = Matrix3d.Identity;
-                if (HoleModel.RotationAngle >=0 && HoleModel.RotationAngle <= 0.5 * Math.PI ||
-                    HoleModel.RotationAngle > 1.5 * Math.PI && HoleModel.RotationAngle <= 2 * Math.PI)
+                if (HoleModel.IsFireValve())
                 {
-                    rotation = Matrix3d.Identity;
-                }
-                else
-                {
-                    rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                    // 为了保持文字方向朝上,
+                    // 若管道中心线处于三四象限（180，360]，则补偿阀的旋转角度，即旋转180度
+                    // 若换算到管道中心线的法向方向，则其处于二三象限（90,270]时需要补偿阀的旋转
+                    if ((HoleModel.RotationAngle > 0.5 * Math.PI && HoleModel.RotationAngle <= 1.5 * Math.PI))
+                    {
+                        rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                    }
                 }
                 Matrix3d matrix = Matrix3d.Identity
                     .PreMultiplyBy(Matrix3d.Displacement(valvecenterpoint.GetAsVector().Negate()))

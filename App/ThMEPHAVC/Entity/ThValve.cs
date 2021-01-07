@@ -24,6 +24,9 @@ namespace ThMEPHVAC.Entity
         public string VisibilityPropertyName { get; set; }
         public string WidthPropertyName { get; set; }
         public string LengthPropertyName { get; set; }
+        /// <summary>
+        /// 风管中心线法向量旋转角度（顺时针）
+        /// </summary>
         public double RotationAngle { get; set; }
         public double ValveOffsetFromCenter { get; set; }
     }

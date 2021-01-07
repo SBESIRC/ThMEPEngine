@@ -27,7 +27,7 @@
         // 阀图层
         public const string VALVE_LAYER_DUAL = "H-DAPP-DDAMP";
         public const string VALVE_LAYER_FIRE = "H-DAPP-FDAMP";
-        public const string VALVE_LAYER_EQUP = "H-DAPP-EDAMP";
+        public const string VALVE_LAYER_EQUP = "H-DAPP-ADAMP";
 
         // 中心线图层
         public const string CENTERLINE_LAYER_DUAL = "H-DUCT-DUAL-MID";

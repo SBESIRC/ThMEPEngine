@@ -35,6 +35,7 @@
     <Compile Include="CAD\ThHvacDuctFittingFactoryService.cs" />
     <Compile Include="CAD\ThHvacValveDbExtension.cs" />
     <Compile Include="CAD\ThInletOutletDuctDrawEngine.cs" />
+    <Compile Include="Duct\ThValveExtension.cs" />
     <Compile Include="CAD\ThValvesAndHolesInsertEngine.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
