@@ -87,6 +87,20 @@ namespace ThMEPEngineCore.Service.Hvac
         }
 
         /// <summary>
+        /// 获取风机编号
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <returns></returns>
+        public List<int> GetModelNumbers(string identifier)
+        {
+            var numbers = new List<int>();
+            Geometries.Cast<ObjectId>()
+                .Where(o => o.IsModel(identifier))
+                .ForEach(o => numbers.Add(o.GetModelNumber()));
+            return numbers;
+        }
+
+        /// <summary>
         /// 获取指定编号的风机图块
         /// </summary>
         /// <param name="identifier"></param>

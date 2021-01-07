@@ -4,6 +4,7 @@ using DotNetARX;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -213,21 +214,26 @@ namespace TianHua.FanSelection.UI.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
+                    .ForEach(o => o.ObjectId.ModifyModelAttributes(dataModel.Attributes()));
+            }
+        }
+
+        public static void ModifyModelNumbers(FanDataModel dataModel)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
                 var models = acadDatabase.ModelSpace
                     .OfType<BlockReference>()
-                    .Where(o => o.ObjectId.IsModel(dataModel.ID));
-                foreach(var model in models)
+                    .Where(o => o.ObjectId.IsModel(dataModel.ID))
+                    .OrderBy(o => o.ObjectId.GetModelNumber()).ToList();
+                var numbers = dataModel.ListVentQuan.OrderBy(o => o).ToList();
+                for (int i = 0; i < models.Count; i++)
                 {
-                    var number = model.ObjectId.GetModelNumber();
-                    if (dataModel.ListVentQuan.Contains(number))
-                    {
-                        model.ObjectId.ModifyModelAttributes(dataModel.Attributes());
-                        model.ObjectId.SetModelNumber(dataModel.InstallFloor, number);
-                    }
-                    else
-                    {
-                        throw new NotSupportedException();
-                    }
+                    models[i].ObjectId.SetModelNumber(dataModel.InstallFloor, numbers[i]);
+
                 }
             }
         }

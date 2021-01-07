@@ -1,6 +1,7 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
+using System.Linq;
 using ThCADExtension;
 using AcHelper.Commands;
 using System.Collections.Generic;
@@ -66,11 +67,16 @@ namespace TianHua.FanSelection.UI.CAD
                     }
 
                     // 风机规格和型号变化
-                    bool bModified = false;
                     if (ThFanSelectionEngine.IsModelNameChanged(model, _FanDataModel))
                     {
-                        bModified = true;
                         ThFanSelectionEngine.ModifyModelNames(_FanDataModel);
+                    }
+
+                    // 风机编号变化
+                    var numbers = dbManager.GetModelNumbers(_FanDataModel.ID);
+                    if (!Enumerable.SequenceEqual(numbers.OrderBy(t => t), _FanDataModel.ListVentQuan.OrderBy(t => t)))
+                    {
+                        ThFanSelectionEngine.ModifyModelNumbers(_FanDataModel);
                     }
 
                     // 参数变化
@@ -78,20 +84,12 @@ namespace TianHua.FanSelection.UI.CAD
                     var attributes = new Dictionary<string, string>(blockReference.Attributes);
                     if (_FanDataModel.IsAttributeModified(attributes))
                     {
-                        bModified = true;
                         ThFanSelectionEngine.ModifyModels(_FanDataModel);
-                        ThFanSelectionEngine.ZoomToModels(_FanDataModel);
                     }
 
-                    // 风机图块没有变化
-                    if (!bModified)
-                    {
-                        ThFanSelectionEngine.ZoomToModels(_FanDataModel);
-                    }
+                    // 导航到图块
+                    ThFanSelectionEngine.ZoomToModels(_FanDataModel);
                 }
-
-                // 清除风机参数
-                ThFanSelectionService.Instance.Model = null;
             }
         }
     }
