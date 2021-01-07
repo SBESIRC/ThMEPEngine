@@ -176,13 +176,16 @@ namespace TianHua.Hvac.UI
 
         private void TxtAirSpeed_EditValueChanged(object sender, EventArgs e)
         {
-            if (FuncStr.NullToStr(TxtAirSpeed.Text) == string.Empty || FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
+            if (FuncStr.NullToStr(TxtAirSpeed.Text) == string.Empty) { return; }
 
             var _AirSpeed = FuncStr.NullToStr(TxtAirSpeed.Text);
 
             if (FuncStr.NullToDouble(TxtAirSpeed.Text) > m_DuctSpecModel.MaxAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MaxAirSpeed); _AirSpeed = FuncStr.NullToStr(m_DuctSpecModel.MaxAirSpeed); }
 
             if (FuncStr.NullToDouble(TxtAirSpeed.Text) < m_DuctSpecModel.MinAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); _AirSpeed = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); }
+
+
+            //if (FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
 
             ThDuctSelectionEngine _ThDuctSelectionEngine = new ThDuctSelectionEngine(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed)  );
 

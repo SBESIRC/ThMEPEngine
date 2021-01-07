@@ -2419,12 +2419,12 @@ namespace TianHua.FanSelection.UI
             string _ErrorStr = string.Empty;
             if (_FocusedColumn.FieldName == "InstallSpace")
             {
-                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr(e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum);
+                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr(e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum && !p.IsErased);
             }
 
             if (_FocusedColumn.FieldName == "InstallFloor")
             {
-                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == FuncStr.NullToStr(e.Value) && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum);
+                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == FuncStr.NullToStr(e.Value) && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum && !p.IsErased);
             }
             if (_FocusedColumn.FieldName == "VentNum")
             {
@@ -2749,7 +2749,7 @@ namespace TianHua.FanSelection.UI
                 JsonExporter.Instance.SaveToFile(_Path, Encoding.UTF8, _JsonFanDesign);
 
                 var _Json = FuncJson.Serialize(m_ListFan);
-                JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _Json);
+                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportPath().Replace(FuncStr.NullToStr(m_FanDesign.Name), "") + FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _Json);
 
 
                 this.Text = "风机选型 - " + m_FanDesign.Name;
@@ -2763,7 +2763,7 @@ namespace TianHua.FanSelection.UI
                 JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportCatalogPath(), Encoding.UTF8, _JsonFanDesign);
 
                 var _JsonFan = FuncJson.Serialize(m_ListFan);
-                JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
+                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportPath().Replace(FuncStr.NullToStr(m_FanDesign.Name), "") + FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
             }
         }
 
