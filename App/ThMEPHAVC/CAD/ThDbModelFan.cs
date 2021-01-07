@@ -91,11 +91,10 @@ namespace ThMEPHVAC.CAD
 
         private string GetIntakeForm()
         {
-            if (Model.IsHTFCModel())
+            if (Model.IsRawHTFCModel())
             {
                 // 从离心风机块名解析处进风形式
-                var blocknamesplit = Data.EffectiveName.Replace(" ", "").Split('、');
-                return blocknamesplit[1];
+                return Data.EffectiveName.Replace(" ", "").Split('、')[1];
             }
             else
             {
@@ -115,7 +114,7 @@ namespace ThMEPHVAC.CAD
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
                     .First().Value) * 180 / Math.PI;
-            if (Model.IsAXIALModel())
+            if (Model.IsRawAXIALModel())
             {
                 var redius = Convert.ToDouble(Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
@@ -178,7 +177,7 @@ namespace ThMEPHVAC.CAD
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
                     .First().Value) * 180 / Math.PI;
-            if (Model.IsAXIALModel())
+            if (Model.IsRawAXIALModel())
             {
                 var redius = Convert.ToDouble(Data.CustomProperties
                     .Cast<DynamicBlockReferenceProperty>()
@@ -241,7 +240,7 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
-                if (Model.IsAXIALModel())
+                if (Model.IsRawAXIALModel())
                 {
                     Point3d axialinletposition = CreatePointFromProperty(
                         ThHvacCommon.BLOCK_DYNMAIC_PROPERTY_BASE_POINT_X,
@@ -261,7 +260,7 @@ namespace ThMEPHVAC.CAD
         private Point3d GetFanOutletBasePoint()
         {
             Matrix3d ocs2Wcs = Data.BlockTransform;
-            if (Model.IsAXIALModel())
+            if (Model.IsRawAXIALModel())
             {
                 Point3d axialinletposition = CreatePointFromProperty(
                     ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_X,

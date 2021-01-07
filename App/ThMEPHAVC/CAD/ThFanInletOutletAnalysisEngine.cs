@@ -228,7 +228,7 @@ namespace ThMEPHAVC.CAD
 
         private bool ApproximateEqualTo(double valuea, double valueb, double tolerance)
         {
-            return Math.Abs(valuea - valueb) < tolerance;
+            return Math.Abs(valuea - valueb) < tolerance || Math.Abs(Math.Abs(valuea - valueb) - 360) < tolerance;
         }
     }
 }

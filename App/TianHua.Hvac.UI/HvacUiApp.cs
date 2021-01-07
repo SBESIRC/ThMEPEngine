@@ -49,8 +49,7 @@ namespace TianHua.Hvac.UI
                 foreach (var oid in fanselectionresult.Value.GetObjectIds())
                 {
                     var obj = oid.GetDBObject();
-                    // 仅测试用，支持非天华风机选型生成的风机
-                    if (obj.IsModel() || obj.IsRawModel())
+                    if (obj.IsRawModel())
                     {
                         modelobjectid = oid;
                     }
