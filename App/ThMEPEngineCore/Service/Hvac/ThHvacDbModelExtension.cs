@@ -110,6 +110,17 @@ namespace ThMEPEngineCore.Service.Hvac
             return !string.IsNullOrEmpty(dBObject.GetModelIdentifier());
         }
 
+        public static bool IsRawModel(this DBObject dBObject)
+        {
+            if (dBObject is BlockReference reference)
+            {
+                var blockName = reference.GetEffectiveName();
+                return (blockName.Contains(ThHvacCommon.HTFC_BLOCK_NAME) 
+                    || blockName.Contains(ThHvacCommon.AXIAL_BLOCK_NAME));
+            }
+            return false;
+        }
+
         public static bool IsModel(this ObjectId obj, string identifier)
         {
             var model = obj.GetObject(OpenMode.ForRead, true);

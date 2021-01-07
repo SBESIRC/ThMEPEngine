@@ -44,22 +44,27 @@ namespace TianHua.Hvac.UI
                     return;
                 }
 
-                var lineobjects = new DBObjectCollection();
                 ObjectId modelobjectid = ObjectId.Null;
-                foreach (var oid in fanselectionresult.Value.GetObjectIds().ToList())
+                var lineobjects = new DBObjectCollection();
+                foreach (var oid in fanselectionresult.Value.GetObjectIds())
                 {
                     var obj = oid.GetDBObject();
-                    if (obj.IsModel())
+                    // 仅测试用，支持非天华风机选型生成的风机
+                    if (obj.IsModel() || obj.IsRawModel())
                     {
                         modelobjectid = oid;
                     }
-                    else
+                    else if (obj is Curve curve)
                     {
-                        lineobjects.Add(obj);
+                        lineobjects.Add(curve.Clone() as Curve);
                     }
                 }
-                ThDbModelFan DbFanModel = new ThDbModelFan(modelobjectid, lineobjects);
+                if (modelobjectid.IsNull)
+                {
+                    return;
+                }
 
+                ThDbModelFan DbFanModel = new ThDbModelFan(modelobjectid, lineobjects);
                 ThFanInletOutletAnalysisEngine inAndOutAnalysisEngine = new ThFanInletOutletAnalysisEngine(DbFanModel);
                 inAndOutAnalysisEngine.InletAnalysis();
                 inAndOutAnalysisEngine.OutletAnalysis();
@@ -128,15 +133,6 @@ namespace TianHua.Hvac.UI
                 }
 
                 Active.Editor.WriteMessage(inAndOutAnalysisEngine.InletAnalysisResult + "," + inAndOutAnalysisEngine.OutletAnalysisResult);
-                //if (inAndOutAnalysisEngine.InletAnalysisResult != AnalysisResultType.OK || inAndOutAnalysisEngine.OutletAnalysisResult != AnalysisResultType.OK)
-                //{
-                //    var acuteAnglePositions = inAndOutAnalysisEngine.InletAcuteAnglePositions.Union(inAndOutAnalysisEngine.OutletAcuteAnglePositions);
-                //    foreach (var point in acuteAnglePositions)
-                //    {
-                //        acadDatabase.ModelSpace.Add(new Circle(point, Vector3d.ZAxis, 600));
-                //    }
-                //}
-
             }
         }
 
