@@ -105,7 +105,7 @@ namespace ThMEPLighting.EmgLight.Service
         //    return resPolys;
         //}
 
-        public List<Polyline> FilterColumns(List<Polyline> columns, Line line, Polyline frame)
+        public static List<Polyline> FilterColumns(List<Polyline> columns, Line line, Polyline frame)
         {
             if (columns.Count <= 0)
             {
@@ -117,12 +117,11 @@ namespace ThMEPLighting.EmgLight.Service
 
             var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
 
-            StructureLayoutServiceLight layoutServiceLight = new StructureLayoutServiceLight();
             foreach (Polyline structure in columns)
             {
                 //平行于车道线的边
                 //var newPoly = column.Buffer(200)[0] as Polyline;
-                var layoutInfo = layoutServiceLight.GetColumnParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
+                var layoutInfo = StructureLayoutServiceLight.GetColumnParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
 
 
                 //选与防火框不相交且在防火框内
@@ -152,7 +151,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="expandLength"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public List<Polyline> FilterWalls(List<Polyline> walls, Line line, Polyline frame)
+        public static List<Polyline> FilterWalls(List<Polyline> walls, Line line, Polyline frame)
         {
             //List<Polyline> layoutWalls = new List<Polyline>();
             //layoutWalls = FilterColumns(walls, line, frame);
@@ -176,12 +175,11 @@ namespace ThMEPLighting.EmgLight.Service
 
             var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
 
-            StructureLayoutServiceLight layoutServiceLight = new StructureLayoutServiceLight();
             foreach (Polyline structure in walls)
             {
                 //平行于车道线的边
                 //var newPoly = column.Buffer(200)[0] as Polyline;
-                var layoutInfo = layoutServiceLight.GetWallParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
+                var layoutInfo = StructureLayoutServiceLight.GetWallParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
 
 
                 //选与防火框不相交且在防火框内
@@ -202,7 +200,5 @@ namespace ThMEPLighting.EmgLight.Service
             }
             return layoutColumns;
         }
-
-
     }
 }

@@ -61,46 +61,6 @@ namespace ThMEPLighting.EmgLight.Service
         //    return ptDic;
         //}
 
-        ///// <summary>
-        ///// 计算墙上排布点和方向
-        ///// </summary>
-        ///// <param name="wall"></param>
-        ///// <param name="pt"></param>
-        ///// <param name="dir"></param>
-        ///// <returns></returns>
-        //private (Point3d, Vector3d)? GetWallLayoutPoint(Polyline wall, Point3d pt, Vector3d dir)
-        //{
-        //    var layoutLine = GetLayoutStructLine(wall, pt, dir, out Point3d closetPt);
-        //    if (layoutLine == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    Point3d sPt = layoutLine.StartPoint;
-        //    Point3d ePt = layoutLine.EndPoint;
-        //    Vector3d moveDir = (ePt - sPt).GetNormal();
-
-        //    //计算排布点
-        //    var layoutPt = closetPt;
-        //    if (sPt.DistanceTo(layoutPt) < lightTol)
-        //    {
-        //        layoutPt = layoutPt + moveDir * (lightTol - sPt.DistanceTo(layoutPt));
-        //    }
-        //    if (ePt.DistanceTo(layoutPt) < lightTol)
-        //    {
-        //        layoutPt = layoutPt - moveDir * (lightTol - ePt.DistanceTo(layoutPt));
-        //    }
-
-        //    //计算排布方向
-        //    var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
-        //    var compareDir = (pt - layoutPt).GetNormal();
-        //    if (layoutDir.DotProduct(compareDir) < 0)
-        //    {
-        //        layoutDir = -layoutDir;
-        //    }
-
-        //    return (layoutPt, layoutDir);
-        //}
 
         ///// <summary>
         ///// 计算柱上排布点和方向
@@ -109,30 +69,24 @@ namespace ThMEPLighting.EmgLight.Service
         ///// <param name="pt"></param>
         ///// <param name="dir"></param>
         ///// <returns></returns>
-        //private (Point3d, Vector3d)? GetColumnLayoutPoint(Polyline column, Point3d pt, Vector3d dir)
-        //{
-        //    var layoutLine = GetLayoutStructLine(column, pt, dir, out Point3d closetPt);
-        //    if (layoutLine == null)
-        //    {
-        //        return null;
-        //    }
+        private (Point3d, Vector3d)? GetColumnLayoutPoint(Polyline column, Point3d pt, Vector3d dir)
+        {
+            Point3d sPt = column.StartPoint;
+            Point3d ePt = column.EndPoint;
 
-        //    Point3d sPt = layoutLine.StartPoint;
-        //    Point3d ePt = layoutLine.EndPoint;
+            //计算排布点
+            var layoutPt = new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0);
 
-        //    //计算排布点
-        //    var layoutPt = new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0);
+            //计算排布方向
+            var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
+            var compareDir = (pt - layoutPt).GetNormal();
+            if (layoutDir.DotProduct(compareDir) < 0)
+            {
+                layoutDir = -layoutDir;
+            }
 
-        //    //计算排布方向
-        //    var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
-        //    var compareDir = (pt - layoutPt).GetNormal();
-        //    if (layoutDir.DotProduct(compareDir) < 0)
-        //    {
-        //        layoutDir = -layoutDir;
-        //    }
-
-        //    return (layoutPt, layoutDir);
-        //}
+            return (layoutPt, layoutDir);
+        }
 
         ///// <summary>
         ///// 找到构建边
@@ -169,7 +123,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="pt"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public List<Polyline> GetWallParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        public static List<Polyline> GetWallParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
         {
            
             var closetPt = polyline.GetClosestPointTo(pt, false);
@@ -215,7 +169,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="pt"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        public static List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
         {
             var closetPt = polyline.GetClosestPointTo(pt, false);
             layoutPt = closetPt;

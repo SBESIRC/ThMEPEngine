@@ -50,6 +50,7 @@ namespace ThMEPLighting.EmgLight.Service
             foreach (var poly in polyline)
             {
                 var intersecRes = linePolys.Where(x => x.Contains(poly) || x.Intersects(poly)).ToList();
+                 intersecRes = linePolys.Where(x => x.Contains(poly.StartPoint) || x.Intersects(poly)).ToList();
                 if (intersecRes.Count > 0)
                 {
                     upPolyline.Add(poly);
