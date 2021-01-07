@@ -458,9 +458,11 @@ namespace ThMEPHVAC.CAD
                         // 绘制风管
                         foreach (Curve dbobj in Segment.Representation)
                         {
+                            dbobj.ColorIndex = 256;
                             dbobj.LayerId = layerObj.ObjectId;
                             dbobj.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(dbobj);
+                            dbobj.SetDatabaseDefaults();
                         }
 
                         // 绘制风管中心线
@@ -468,18 +470,22 @@ namespace ThMEPHVAC.CAD
                         var layerId = CreateDuctCenterlineLayer(centerlinelayer);
                         foreach (Curve dbobj in Segment.Centerline)
                         {
+                            dbobj.ColorIndex = 256;
                             dbobj.LayerId = layerId;
                             dbobj.LinetypeId = linetypeId;
                             dbobj.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(dbobj);
+                            dbobj.SetDatabaseDefaults();
                         }
 
                         // 绘制法兰线
                         foreach (Curve dbobj in Segment.FlangeLine)
                         {
+                            dbobj.ColorIndex = 256;
                             dbobj.LayerId = flangelayerObj.ObjectId;
                             dbobj.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(dbobj);
+                            dbobj.SetDatabaseDefaults();
                         }
                     }
                 }
