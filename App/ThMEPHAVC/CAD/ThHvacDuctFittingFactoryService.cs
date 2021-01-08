@@ -57,11 +57,12 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters)
+        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, bool isupordownopening)
         {
             return new ThIfcDuctSegment(parameters)
             {
                 Centerline = CreateDuctSegmentCenterLine(parameters),
+                FlangeLine = CreateDuctFlangeGeometries(parameters, isupordownopening),
                 Representation = CreateDuctSegmentGeometries(parameters)
             };
         }
@@ -74,46 +75,36 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public void DuctSegmentHandle(DBObjectCollection originduct,DBObjectCollection ductcenterlines, double sourcecutdistance, double targetcutdistance)
+        public void DuctSegmentHandle(DBObjectCollection ductsidelines, DBObjectCollection ductflanges,DBObjectCollection ductcenterlines, double sourcecutdistance, double targetcutdistance)
         {
             List<string> a = new List<string>();
-            var groupedlines = originduct.Cast<Line>().GroupBy(l => Math.Abs(l.Angle) < 0.01 || Math.Abs(l.Angle - Math.PI) < 0.01).ToList();
 
-            foreach (var linegroup in groupedlines)
+            //处理水平线
+            foreach (Line line in ductsidelines)
             {
-                //处理水平线
-                if (Math.Abs(linegroup.First().Angle) < 0.01 || Math.Abs(linegroup.First().Angle - Math.PI) < 0.01 )
+                if (line.StartPoint.X < line.EndPoint.X)
                 {
-                    foreach (var line in linegroup)
-                    {
-                        if (line.StartPoint.X < line.EndPoint.X)
-                        {
-                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
-                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
-                        }
-                        else
-                        {
-                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
-                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
-                        }
-                    }
+                    line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                    line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
                 }
-                //处理竖直线
                 else
                 {
-                    foreach (var line in linegroup)
-                    {
-                        if (line.StartPoint.X < 0)
-                        {
-                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
-                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
-                        }
-                        else
-                        {
-                            line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
-                            line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
-                        }
-                    }
+                    line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                    line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                }
+            }
+            //处理竖直线
+            foreach (Line line in ductflanges)
+            {
+                if (line.StartPoint.X < 0)
+                {
+                    line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                    line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(sourcecutdistance, 0, 0)));
+                }
+                else
+                {
+                    line.EndPoint = line.EndPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
+                    line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
                 }
             }
 
@@ -675,7 +666,35 @@ namespace ThMEPHVAC.CAD
                 new Line(new Point3d(-parameters.Length / 2.0,0,0),new Point3d(parameters.Length / 2.0,0,0)),
             };
         }
+        private DBObjectCollection CreateDuctFlangeGeometries(ThIfcDuctSegmentParameters parameters, bool isupordownopening)
+        {
+            Line leftflange = new Line()
+            {
+                StartPoint = new Point3d(-parameters.Length / 2.0, 0.5 * parameters.Width, 0),
+                EndPoint = new Point3d(-parameters.Length / 2.0, -0.5 * parameters.Width, 0),
+            };
 
+            Line rightflange = new Line()
+            {
+                StartPoint = new Point3d(parameters.Length / 2.0, 0.5 * parameters.Width, 0),
+                EndPoint = new Point3d(parameters.Length / 2.0, -0.5 * parameters.Width, 0),
+            };
+            if (isupordownopening)
+            {
+                return new DBObjectCollection()
+                {
+                    rightflange,
+                };
+            }
+            else
+            {
+                return new DBObjectCollection()
+                {
+                    rightflange,
+                    leftflange,
+                };
+            }
+        }
         private DBObjectCollection CreateDuctSegmentGeometries(ThIfcDuctSegmentParameters parameters)
         {
             //绘制辅助中心线
@@ -691,24 +710,10 @@ namespace ThMEPHVAC.CAD
             Line ductUpperLine = (Line)ductUpperLineCollection[0];
             Line ductBelowLine = (Line)ductBelowLineCollection[0];
 
-            //绘制管道端线
-            Line ductUpperEndLine = new Line()
-            {
-                StartPoint = ductUpperLine.StartPoint,
-                EndPoint = ductBelowLine.StartPoint,
-            };
-            Line ductBelowEndLine = new Line()
-            {
-                StartPoint = ductUpperLine.EndPoint,
-                EndPoint = ductBelowLine.EndPoint,
-            };
-
             return new DBObjectCollection()
             {
                 ductUpperLine,
                 ductBelowLine,
-                ductUpperEndLine,
-                ductBelowEndLine
             };
         }
     }
