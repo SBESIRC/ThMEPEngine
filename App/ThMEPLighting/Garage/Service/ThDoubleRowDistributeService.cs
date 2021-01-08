@@ -15,7 +15,7 @@ namespace ThMEPLighting.Garage.Service
     /// </summary>
     public class ThDoubleRowDistributeService
     {
-        private List<ThFirstEdgeData> FirstEdgeDatas { get; set; }
+        private ThLightGraphService LightGraph { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
         private ThWireOffsetDataService WireOffsetDataService { get; set; }
         /// <summary>
@@ -24,33 +24,28 @@ namespace ThMEPLighting.Garage.Service
         private List<ThLightEdge> FirstLightEdges { get; set; }
         
         private ThDoubleRowDistributeService(
-            List<ThFirstEdgeData> firstEdgeDatas, 
+            ThLightGraphService lightGraph, 
             ThLightArrangeParameter arrangeParameter,
             ThWireOffsetDataService wireOffsetDataService)
         {
-            FirstEdgeDatas = firstEdgeDatas;
+            LightGraph = lightGraph;
             ArrangeParameter = arrangeParameter;
             WireOffsetDataService = wireOffsetDataService;
             FirstLightEdges = new List<ThLightEdge>();
         }
         public static List<ThLightEdge> Distribute(
-            List<ThFirstEdgeData> firstEdgeDatas,
+            ThLightGraphService lightGraph,
             ThLightArrangeParameter arrangeParameter,
             ThWireOffsetDataService wireOffsetDataService)
         {
             var instance = new ThDoubleRowDistributeService(
-                firstEdgeDatas, arrangeParameter, wireOffsetDataService);
+                lightGraph, arrangeParameter, wireOffsetDataService);
             instance.Distribute();
             return instance.FirstLightEdges;
         }
         private void Distribute()
-        {
-            FirstEdgeDatas.ForEach(o=> Distribute(o));
-        }
-        private void Distribute(ThFirstEdgeData firstEdgeData)
-        {
-            var firstLightGraph = ThLightGraphService.Build(firstEdgeData.FirstLightEdges, firstEdgeData.Start);
-            firstLightGraph.Links.ForEach(o=>BuildEdgePoints(o));
+        {            
+            LightGraph.Links.ForEach(o=>BuildEdgePoints(o));
         }
         private void BuildEdgePoints(ThLinkPath singleLinkPath)
         {

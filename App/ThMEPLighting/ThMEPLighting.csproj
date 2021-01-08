@@ -37,7 +37,6 @@
     <Compile Include="Garage\Engine\ThDoubleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThInnerOuterCirclesEngine.cs" />
-    <Compile Include="Garage\Engine\ThOuterCircleDistributionEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
@@ -56,7 +55,6 @@
     <Compile Include="Garage\Service\ThAlignLineHeadService.cs" />
     <Compile Include="Garage\Service\ThBuildCableTrayService.cs" />
     <Compile Include="Garage\Service\ThBuildDoubleRowPosService.cs" />
-    <Compile Include="Garage\Service\ThBuildFirstEdgesService.cs" />
     <Compile Include="Garage\Service\ThBuildSingleRowPosService.cs" />
     <Compile Include="Garage\Service\ThDistributeLightService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeExService.cs" />
@@ -66,6 +64,8 @@
     <Compile Include="Garage\Service\ThEliminateService.cs" />
     <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />
     <Compile Include="Garage\Service\ThFilterLinkService.cs" />
+    <Compile Include="Garage\Service\ThFilterShortLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindFirstEdgePortsService.cs" />
     <Compile Include="Garage\Service\ThFindLinkService.cs" />
     <Compile Include="Garage\Service\ThFindSideLinesService.cs" />
     <Compile Include="Garage\Service\ThFindStartIndexService.cs" />
@@ -73,6 +73,7 @@
     <Compile Include="Common\ThLightGraphService.cs" />
     <Compile Include="Garage\Service\ThPrintService.cs" />
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
+    <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />
     <Compile Include="Garage\Service\ThShortenLineService.cs" />
     <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
     <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
@@ -81,7 +82,7 @@
     <Compile Include="Garage\Service\ThOffsetLineService.cs" />
     <Compile Include="Garage\Service\ThQueryLineService.cs" />
     <Compile Include="Garage\Service\ThRacewayGroupService.cs" />
-    <Compile Include="Garage\Service\ThRemoveShortCenterLineService.cs" />
+    <Compile Include="Garage\Service\ThFilterMainCenterLineService.cs" />
     <Compile Include="Garage\Service\ThSingleRowNumberService.cs" />
     <Compile Include="Garage\Service\ThSplitLightEdgeService.cs" />
     <Compile Include="Garage\Service\ThSplitLineService.cs" />

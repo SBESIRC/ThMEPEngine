@@ -15,6 +15,8 @@ using ThMEPLighting.Garage.Engine;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using QuickGraph;
+using QuickGraph.Algorithms;
 
 namespace ThMEPLighting
 {
@@ -111,7 +113,7 @@ namespace ThMEPLighting
                     IsSingleRow = GetArrangeWay(),
                     LoopNumber = 4,
                     PaperRatio = 100,
-                    MinimumEdgeLength=2000
+                    MinimumEdgeLength=2800
                 };
                 var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();
@@ -314,7 +316,58 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THCDHL", CommandFlags.Modal)]
         public void THCDHL()
         {
-
+            //using (AcadDatabase acdb = AcadDatabase.Active())
+            //{
+            //    var pso = new PromptSelectionOptions()
+            //    {
+            //        MessageForAdding = "\n请选择布灯的区域框线",
+            //    };
+            //    TypedValue[] tvs = new TypedValue[]
+            //    {
+            //         new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
+            //    };
+            //    SelectionFilter sf = new SelectionFilter(tvs);
+            //    var result = Active.Editor.GetSelection(pso, sf);
+            //    if (result.Status == PromptStatus.OK)
+            //    {
+            //        var lines = new List<Line>();
+            //        result.Value.GetObjectIds().ForEach(o => lines.Add(acdb.Element<Line>(o)));
+            //        var edges = new List<STaggedEdge<ThVertex, double>>();
+            //        foreach (var line in lines)
+            //        {
+            //            var spVertex = new ThVertex
+            //            {
+            //                X = line.StartPoint.X,
+            //                Y = line.StartPoint.Y
+            //            };
+            //            var epVertex = new ThVertex
+            //            {
+            //                X = line.EndPoint.X,
+            //                Y = line.EndPoint.Y
+            //            };
+            //            var edge = new STaggedEdge<ThVertex,double>(spVertex, epVertex,line.Length);
+            //            edges.Add(edge);
+            //        }
+            //        var graph = edges.ToAdjacencyGraph<ThVertex, STaggedEdge<ThVertex, double>>();
+            //        Func<STaggedEdge<ThVertex, double>, double> edgeWeights = e => e.Tag;
+            //        ThVertex root = new ThVertex()
+            //        {
+            //            X = lines[0].StartPoint.X,
+            //            Y = lines[0].StartPoint.Y,
+            //        };
+            //        var tryGetPaths = graph.ShortestPathsDijkstra(edgeWeights, root);
+            //        // query path for given vertices
+            //        ThVertex target = new ThVertex()
+            //        {
+            //            X = lines[lines.Count - 1].StartPoint.X,
+            //            Y = lines[lines.Count - 1].StartPoint.Y,
+            //        };
+            //        IEnumerable<STaggedEdge<ThVertex, double>> path;
+            //        if (tryGetPaths(target, out path))
+            //            foreach (var edge in path)
+            //                Console.WriteLine(edge);
+            //    }
+            //}
         }
     }
 }

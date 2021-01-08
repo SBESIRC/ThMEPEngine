@@ -185,7 +185,7 @@ namespace ThMEPLighting.Common
         {
             return lines.Where(o => line.IsCoincide(o, tolerance)).Any();
         }    
-        public static bool HasCommon(this Line first,Line second)
+        public static bool HasCommon(this Line first,Line second,double tolerance=1.0)
         {
             if(first.Length==0.0 || second.Length==0.0)
             {
@@ -199,7 +199,19 @@ namespace ThMEPLighting.Common
                 var newEp = ThGeometryTool.GetProjectPtOnLine(first.EndPoint, second.StartPoint, second.EndPoint);
                 var pts = new List<Point3d>() { newSp, newEp, second.StartPoint, second.EndPoint };
                 var maxItem = pts.GetCollinearMaxPts();
-                return (maxItem.Item1.DistanceTo(maxItem.Item2) - 1.0) <= (first.Length + second.Length);
+                var sum = first.Length + second.Length;           
+                if (Math.Abs(maxItem.Item1.DistanceTo(maxItem.Item2)- sum)<= tolerance)
+                {
+                    return false;
+                }
+                else if(maxItem.Item1.DistanceTo(maxItem.Item2)< sum)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
             }
             else
             {
@@ -238,6 +250,30 @@ namespace ThMEPLighting.Common
                 return lightEdgeAngle;
             }
             return 0.0;
+        }
+        /// <summary>
+        /// 判断两根线相连、共线、不重叠
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static bool IsCollinearLinkAndNotOverlap(this Line first,Line second, double tolerance = 1.0)
+        {
+            return first.IsLink(second, tolerance) &&
+                ThGeometryTool.IsCollinearEx(
+                    first.StartPoint,first.EndPoint,
+                    second.StartPoint, second.EndPoint) && 
+                !ThGeometryTool.IsOverlapEx(
+                    first.StartPoint, first.EndPoint,
+                    second.StartPoint, second.EndPoint);
+        }
+        public static Point3d GetNextLinkPt(Line line, Point3d start)
+        {
+            Point3d lineSp = line.StartPoint;
+            Point3d lineEp = line.EndPoint;
+            return start.DistanceTo(lineSp) < start.DistanceTo(lineEp) ?
+                lineEp : lineSp;
         }
     }
 }

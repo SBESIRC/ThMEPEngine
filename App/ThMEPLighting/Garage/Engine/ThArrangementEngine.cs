@@ -93,8 +93,13 @@ namespace ThMEPLighting.Garage.Engine
                     splitLineEngine.Split();                   
                     splitLineEngine.Results.ForEach(o=> DxLines.AddRange(o.Value));                    
                 }
-                //取消过滤无需布灯的短线(20210104)
-                //DxLines = ThRemoveShortCenterLineService.Remove(DxLines, ArrangeParameter.MinimumEdgeLength);
+                //单排取消过滤无需布灯的短线(20210104)
+                if(!ArrangeParameter.IsSingleRow)
+                {
+                    //T形短线取消，对于T形的主边不做处理
+                    DxLines = ThFilterTTypeCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
+                    DxLines = ThFilterMainCenterLineService.Filter(DxLines, ArrangeParameter.RacywaySpace/2.0);
+                }
             }
         }
         protected ObjectIdList Print(List<ThLightEdge> lightEdges)

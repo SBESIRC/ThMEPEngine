@@ -56,7 +56,11 @@ namespace ThMEPLighting.Garage.Service
                     }
                     else
                     {
-                        throw new NotSupportedException();
+                        var other = FindCanableIntersects(currentWire, wires);
+                        if(other!=null)
+                        {
+                            Link(currentWire, other, false);
+                        }
                     }
                 }
                 else if (wires.Count() > 2)
@@ -64,6 +68,19 @@ namespace ThMEPLighting.Garage.Service
                     throw new NotSupportedException();
                 }
             }
+        }
+        private ThWireOffsetData FindCanableIntersects(ThWireOffsetData current ,List<ThWireOffsetData> others)
+        {
+            foreach(var other in others)
+            {
+                var pts = new Point3dCollection();
+                current.First.IntersectWith(other.First, Intersect.ExtendThis, pts, IntPtr.Zero, IntPtr.Zero);
+                if(pts.Count>0)
+                {
+                    return other;
+                }
+            }
+            return null;
         }
         private List<Line> Find(Line center, Point3d portPt)
         {
