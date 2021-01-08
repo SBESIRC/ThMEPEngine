@@ -26,7 +26,6 @@
   <ItemGroup>
     <Compile Include="EmgLight\LayoutWithParkingLineForLight.cs" />
     <Compile Include="EmgLight\Model\StructModel.cs" />
-    <Compile Include="EmgLight\Service\CheckService.cs" />
     <Compile Include="EmgLight\Service\InsertLightService.cs" />
     <Compile Include="Common\LaneServer.cs" />
     <Compile Include="EmgLight\Service\StructureLayoutServiceLight.cs" />
