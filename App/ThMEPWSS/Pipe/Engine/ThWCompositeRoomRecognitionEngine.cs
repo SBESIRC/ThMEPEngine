@@ -131,7 +131,7 @@ namespace ThMEPWSS.Pipe.Engine
                     
                     var s = balconyroom1[i].Balcony.Boundary as Polyline;
                     var s1 = balconyroom1[j].Balcony.Boundary as Polyline;
-                    if (s.GetCenter().DistanceTo(s1.GetCenter()) < 4000)
+                    if (s.GetCenter().DistanceTo(s1.GetCenter()) < ThWPipeCommon.MAX_BALCONY_TO_BALCONY_DISTANCE)
                     {
                         num = 1;
                         var newBalcony = CreateNewBalcony(balconyroom1[i], balconyroom1[j]);

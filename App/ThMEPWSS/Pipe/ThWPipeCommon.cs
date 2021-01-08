@@ -119,6 +119,10 @@
         /// </summary>
         public const double MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE = 4900;
         /// <summary>
+        /// 可并行相邻阳台最远距离
+        /// </summary>
+        public const double MAX_BALCONY_TO_BALCONY_DISTANCE = 4000;
+        /// <summary>
         /// 厨房到阳台最大距离
         /// </summary>
         public const double MAX_KITCHEN_TO_BALCONY_DISTANCE = 9000;
