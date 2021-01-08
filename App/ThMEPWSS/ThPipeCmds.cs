@@ -628,8 +628,8 @@ namespace ThMEPWSS
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THROOFFLOOR", CommandFlags.Modal)]
-        public void Throoffloor()
+        [CommandMethod("TIANHUACAD", "THPYS", CommandFlags.Modal)]
+        public void ThPYS()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
