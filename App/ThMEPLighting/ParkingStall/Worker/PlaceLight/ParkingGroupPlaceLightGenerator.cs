@@ -72,13 +72,27 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
                 var secondSegment = lineSegments[1];
                 var position = PolylineCenter(firstSegment.SegmentLine, secondSegment.SegmentLine);
 
+                var polyShortLines = new List<Line>();
+                var polyLongLines = new List<Line>();
+                foreach (var lineNode in polyNode.LineSegments)
+                {
+                    if (lineNode.SegmentLineLengthType == LineLengthType.LONG_TYPE)
+                    {
+                        polyLongLines.Add(lineNode.SegmentLine);
+                    }
+                    else if (lineNode.SegmentLineLengthType == LineLengthType.SHORT_TYPE)
+                    {
+                        polyShortLines.Add(lineNode.SegmentLine);
+                    }
+                }
+
                 if (firstSegment.SegmentLineLengthType == LineLengthType.LONG_TYPE)
                 {
-                    LightPlaceInfos.Add(new LightPlaceInfo(position, firstSegment.SegmentLine, secondSegment.SegmentLine));
+                    LightPlaceInfos.Add(new LightPlaceInfo(position, firstSegment.SegmentLine, secondSegment.SegmentLine, polyLongLines, polyShortLines));
                 }
                 else if (firstSegment.SegmentLineLengthType == LineLengthType.SHORT_TYPE)
                 {
-                    LightPlaceInfos.Add(new LightPlaceInfo(position, secondSegment.SegmentLine, firstSegment.SegmentLine));
+                    LightPlaceInfos.Add(new LightPlaceInfo(position, secondSegment.SegmentLine, firstSegment.SegmentLine, polyLongLines, polyShortLines));
                 }
             }
 
@@ -121,6 +135,11 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
                 var polylineNode = SetPolyInfo(bigPoly, lines);
                 var firstSegment = polylineNode.LineSegments[0];
                 var secondSegment = polylineNode.LineSegments[1];
+
+                if (polylineNode.LineSegments.Count > 4)
+                    throw new Exception("Count");
+
+                // 收集短边和长边
                 if (firstSegment.SegmentLineLengthType == LineLengthType.LONG_TYPE)
                 {
                     LightPlaceInfos[i].BigGroupInfo = new BigGroupInformation(bigPoly, firstSegment.SegmentLine, secondSegment.SegmentLine);

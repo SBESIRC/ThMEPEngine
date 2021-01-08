@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPLighting.ParkingStall.Assistant;
 using ThMEPLighting.ParkingStall.Geometry;
@@ -39,9 +40,16 @@ namespace ThMEPLighting.ParkingStall.Worker.PlaceLight
 
         public void Do()
         {
-            var pts = CalculatePoints(m_parkPolylines);
-            CalculateProfile(pts);
+            CalculateMinProfile(m_parkPolylines);
             GroupInfo = new ParkGroupInfo(m_profile, m_parkPolylines.First());
+        }
+
+        private void CalculateMinProfile(List<Polyline> polylines)
+        {
+            var objs = new DBObjectCollection();
+
+            polylines.ForEach(p => objs.Add(p));
+            m_profile = objs.GetMinimumRectangle();
         }
 
         private void CalculateProfile(List<Point3d> ptLst)
