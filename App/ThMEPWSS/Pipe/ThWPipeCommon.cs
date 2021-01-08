@@ -17,7 +17,7 @@
         /// <summary>
         /// 洗衣机到台盆最大距离（阳台区域）
         /// </summary>
-        public const double MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = 900;
+        public const double MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = 1300;
         /// <summary>
         /// 洗衣机地漏到排水管最大距离（阳台区域）
         /// </summary>
@@ -105,7 +105,7 @@
         /// <summary>
         /// 卫生间到冷凝管最大距离
         /// </summary>
-        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 2300;
+        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 2600;
         /// <summary>
         /// 卫生间到地漏最大距离
         /// </summary>
@@ -129,11 +129,15 @@
         /// <summary>
         /// 设备平台区域最大面积
         /// </summary>
-        public const double MAX_DEVICEPLATFORM_AREA = 1.1;
+        public const double MAX_DEVICEPLATFORM_AREA = 1.3;
         /// <summary>
         /// 基点圆区域最大面积
         /// </summary>
         public const double MAX_BASECIRCLE_AREA = 140;
+        /// <summary>
+        /// 角度公差
+        /// </summary>
+        public const double MAX_ANGEL_TOLERANCE = 0.1;
         /// <summary>
         /// 图层
         /// </summary>

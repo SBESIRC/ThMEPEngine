@@ -35,10 +35,9 @@ namespace ThMEPWSS.Pipe.Engine
             foreach (var waterBucket in sideWaterBucket)
             {
                 var minPt = waterBucket.GeometricExtents.MinPoint;
-                var maxPt = waterBucket.GeometricExtents.MaxPoint;
+                var maxPt = waterBucket.GeometricExtents.MaxPoint;                              
                 double SIDEWATERBUCKET_X_INDENT = 0;
-                double SIDEWATERBUCKET_Y_INDENT = 0;
-                
+                double SIDEWATERBUCKET_Y_INDENT = 0;               
                 if (!(boundary.GetCenter().Y - waterBucket.Position.Y > 14000))//排除技术要求
                 {
                     if (maxPt.X - minPt.X < maxPt.Y - minPt.Y)//纵向放置
@@ -55,7 +54,14 @@ namespace ThMEPWSS.Pipe.Engine
                     }
                     else
                     {
-                        SIDEWATERBUCKET_Y_INDENT = (maxPt.Y - minPt.Y) / 2;
+                        if (waterBucket.Position.Y == minPt.Y)//基点偏下放置
+                        {
+                            SIDEWATERBUCKET_Y_INDENT = (maxPt.Y - minPt.Y) / 2;
+                        }
+                        else
+                        {
+                            SIDEWATERBUCKET_Y_INDENT = (-maxPt.Y +minPt.Y) / 2;
+                        }
                         SIDEWATERBUCKET_X_INDENT = (maxPt.Y - minPt.Y) / 8 * 3 - SIDEWATERBUCKET_X_INDENT / 320 * 6;
                         Vector3d dis = new Vector3d(SIDEWATERBUCKET_X_INDENT, -SIDEWATERBUCKET_Y_INDENT, 0);
                         Vector3d dis1 = new Vector3d(-SIDEWATERBUCKET_X_INDENT, -SIDEWATERBUCKET_Y_INDENT, 0);

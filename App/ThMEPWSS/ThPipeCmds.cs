@@ -176,6 +176,7 @@ namespace ThMEPWSS
                         Polyline device_other = null;
                         BlockReference floordrain = null;
                         BlockReference bbasinline = null;
+                        List<Polyline> condensepipes = new List<Polyline>();
                         var bfloordrain = new List<BlockReference>();
                         var devicefloordrain = new List<BlockReference>();
                         var rainpipe = new List<Polyline>();
@@ -235,6 +236,14 @@ namespace ThMEPWSS
                                 break;
                             }
                         }
+                        foreach (var devicePlatform in compositeBalcony.DevicePlatforms)//考虑多余一个冷凝管
+                        {
+                            if (devicePlatform.CondensePipes.Count > 0)
+                            {
+                                Polyline s = devicePlatform.CondensePipes[0].Outline as Polyline;
+                                condensepipes.Add(s);
+                            }
+                        }
                         foreach (var devicePlatform in compositeBalcony.DevicePlatforms)
                         {
                             if (devicePlatform.RoofRainPipes.Count > 0)
@@ -263,7 +272,7 @@ namespace ThMEPWSS
                         var thWToiletFloordrainEngine = new ThWToiletFloordrainEngine();
                         var thWDeviceFloordrainEngine = new ThWDeviceFloordrainEngine();
                         var FloordrainEngine = new ThWCompositeFloordrainEngine(thWBalconyFloordrainEngine, thWToiletFloordrainEngine, thWDeviceFloordrainEngine);
-                        FloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe, tfloordrain, tboundary, devicefloordrain, roofrainpipe, bbasinline);
+                        FloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe, tfloordrain, tboundary, devicefloordrain, roofrainpipe, bbasinline,condensepipes);
                         for (int i = 0; i < FloordrainEngine.Floordrain.Count; i++)
                         {
                             Matrix3d scale = Matrix3d.Scaling(2.0, FloordrainEngine.Floordrain[i].Position);
@@ -320,15 +329,34 @@ namespace ThMEPWSS
                             var ent = devicefloordrain[i].GetTransformedCopy(scale);
                             acadDatabase.ModelSpace.Add(ent);
                         }
-                        for (int i = 0; i < FloordrainEngine.Condensepipe_tofloordrain.Count - 1; i++)
+                        if (FloordrainEngine.Condensepipe_tofloordrains.Count > 1)
                         {
-                            Polyline ent_line1 = new Polyline();
-                            ent_line1.AddVertexAt(0, FloordrainEngine.Condensepipe_tofloordrain[i].ToPoint2d(), 0, 35, 35);
-                            ent_line1.AddVertexAt(1, FloordrainEngine.Condensepipe_tofloordrain[i + 1].ToPoint2d(), 0, 35, 35);
-                            //ent_line1.Linetype = "DASHDOT";
-                            //ent_line1.Layer = "W-RAIN-PIPE";
-                            ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                            acadDatabase.ModelSpace.Add(ent_line1);
+                            foreach (Point3dCollection Rainpipe_to in FloordrainEngine.Condensepipe_tofloordrains)
+                            {
+                                for (int i = 0; i < Rainpipe_to.Count - 1; i++)
+                                {
+                                    Polyline ent_line1 = new Polyline();
+                                    ent_line1.AddVertexAt(0, Rainpipe_to[i].ToPoint2d(), 0, 35, 35);
+                                    ent_line1.AddVertexAt(1, Rainpipe_to[i + 1].ToPoint2d(), 0, 35, 35);
+                                    //ent_line1.Linetype = "DASHDOT";
+                                    //ent_line1.Layer = "W-RAIN-PIPE";
+                                    ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                                    acadDatabase.ModelSpace.Add(ent_line1);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            for (int i = 0; i < FloordrainEngine.Condensepipe_tofloordrain.Count - 1; i++)
+                            {
+                                Polyline ent_line1 = new Polyline();
+                                ent_line1.AddVertexAt(0, FloordrainEngine.Condensepipe_tofloordrain[i].ToPoint2d(), 0, 35, 35);
+                                ent_line1.AddVertexAt(1, FloordrainEngine.Condensepipe_tofloordrain[i + 1].ToPoint2d(), 0, 35, 35);
+                                //ent_line1.Linetype = "DASHDOT";
+                                //ent_line1.Layer = "W-RAIN-PIPE";
+                                ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                                acadDatabase.ModelSpace.Add(ent_line1);
+                            }
                         }
                         if (FloordrainEngine.Rainpipe_tofloordrains.Count > 1)
                         {
@@ -382,7 +410,7 @@ namespace ThMEPWSS
         }
         private bool IsValidBalconyForFloorDrain(ThWBalconyRoom balconyContainer)
         {
-            return balconyContainer.FloorDrains.Count > 1&& balconyContainer.Washmachines.Count>0;
+            return balconyContainer.FloorDrains.Count > 0&& balconyContainer.Washmachines.Count>0;
         }
         private static List<Polyline> GetNewPipes(List<Polyline> rain_pipe)
         {
@@ -916,7 +944,10 @@ namespace ThMEPWSS
                             closestool = composite.Toilet.Closestools[0].Outline as Polyline;
                             if (composite.Toilet.CondensePipes.Count > 0)
                             {
-                                npipe.Add(composite.Toilet.CondensePipes[0].Outline as Polyline);
+                                foreach (var pipe in composite.Toilet.CondensePipes)
+                                {
+                                    npipe.Add(pipe.Outline as Polyline);
+                                }
                             }
                             if (composite.Toilet.RoofRainPipes.Count > 0)
                             {
@@ -1166,6 +1197,7 @@ namespace ThMEPWSS
                             Polyline device_other = null;
                             BlockReference floordrain = null;
                             BlockReference bbasinline = null;
+                            List<Polyline> condensepipes = new List<Polyline>();
                             var bfloordrain = new List<BlockReference>();
                             var devicefloordrain = new List<BlockReference>();
                             var rainpipe = new List<Polyline>();
@@ -1208,10 +1240,10 @@ namespace ThMEPWSS
                                 device = compositeBalcony.DevicePlatforms[0].DevicePlatforms[0].Boundary.Clone() as Polyline;
                                 device.Closed = true;
                             }
-                            if (compositeBalcony.DevicePlatforms.Count > 1)
+                            if (compositeBalcony.DevicePlatforms.Count>1)
                             {
                                 Polyline temp = compositeBalcony.DevicePlatforms[1].DevicePlatforms[0].Boundary as Polyline;
-                                if (!(temp.Equals(device)))
+                                if ((temp.GetCenter().DistanceTo(device.GetCenter())>2))
                                 {
                                     device_other = compositeBalcony.DevicePlatforms[1].DevicePlatforms[0].Boundary.Clone() as Polyline;
                                     device_other.Closed = true;
@@ -1221,13 +1253,12 @@ namespace ThMEPWSS
                                     device_other = compositeBalcony.DevicePlatforms[2].DevicePlatforms[0].Boundary.Clone() as Polyline;
                                     device_other.Closed = true;
                                 }
-                            }
+                            }                        
                             foreach (var devicePlatform in compositeBalcony.DevicePlatforms)
                             {
                                 if (devicePlatform.CondensePipes.Count > 0)
                                 {
-                                    condensepipe = devicePlatform.CondensePipes[0].Outline as Polyline;
-                                    npipe.Add(condensepipe);
+                                    condensepipe = devicePlatform.CondensePipes[0].Outline as Polyline;                                   
                                     break;
                                 }
                             }                           
@@ -1258,12 +1289,20 @@ namespace ThMEPWSS
                             {
                                 bbasinline = compositeBalcony.Balcony.BasinTools[0].Outline as BlockReference;
                             }
-
+                            foreach (var devicePlatform in compositeBalcony.DevicePlatforms)//考虑多余一个冷凝管
+                            {
+                                if (devicePlatform.CondensePipes.Count > 0)
+                                {
+                                    Polyline s = devicePlatform.CondensePipes[0].Outline as Polyline;
+                                    npipe.Add(s);
+                                    condensepipes.Add(s);
+                                }
+                            }
                             var thWBalconyFloordrainEngine = new ThWBalconyFloordrainEngine();
                             var thWToiletFloordrainEngine = new ThWToiletFloordrainEngine();
                             var thWDeviceFloordrainEngine = new ThWDeviceFloordrainEngine();
                             var FloordrainEngine = new ThWCompositeFloordrainEngine(thWBalconyFloordrainEngine, thWToiletFloordrainEngine, thWDeviceFloordrainEngine);
-                            FloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe, tfloordrain, tboundary, devicefloordrain, roofrainpipe, bbasinline);
+                            FloordrainEngine.Run(bfloordrain, bboundary, rainpipe, downspout, washingmachine, device, device_other, condensepipe, tfloordrain, tboundary, devicefloordrain, roofrainpipe, bbasinline, condensepipes);
                             for (int i = 0; i < FloordrainEngine.Floordrain.Count; i++)
                             {//放大标识其他地漏
                                 Matrix3d scale = Matrix3d.Scaling(2.0, FloordrainEngine.Floordrain[i].Position);
@@ -1331,17 +1370,37 @@ namespace ThMEPWSS
                                 var ent = devicefloordrain[i].GetTransformedCopy(scale);
                                 acadDatabase.ModelSpace.Add(ent);
                             }
-                            for (int i = 0; i < FloordrainEngine.Condensepipe_tofloordrain.Count - 1; i++)
+                            if (FloordrainEngine.Condensepipe_tofloordrains.Count > 1)
                             {
-                                Polyline ent_line1 = new Polyline();
-                                ent_line1.AddVertexAt(0, FloordrainEngine.Condensepipe_tofloordrain[i].ToPoint2d(), 0, 35, 35);
-                                ent_line1.AddVertexAt(1, FloordrainEngine.Condensepipe_tofloordrain[i + 1].ToPoint2d(), 0, 35, 35);
-                                //ent_line1.Linetype = "DASHDOT";
-                                //ent_line1.Layer = "W-RAIN-PIPE";
-                                //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-                                ent_line1.Color=Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
-                                acadDatabase.ModelSpace.Add(ent_line1);
-                                normalCopys.Add(ent_line1);
+                                foreach (Point3dCollection Rainpipe_ in FloordrainEngine.Condensepipe_tofloordrains)
+                                {
+                                    for (int i = 0; i < Rainpipe_.Count - 1; i++)
+                                    {
+                                        Polyline ent_line1 = new Polyline();
+                                        ent_line1.AddVertexAt(0, Rainpipe_[i].ToPoint2d(), 0, 35, 35);
+                                        ent_line1.AddVertexAt(1, Rainpipe_[i + 1].ToPoint2d(), 0, 35, 35);
+                                        //ent_line1.Linetype = "DASHDOT";
+                                        //ent_line1.Layer = "W-RAIN-PIPE";
+                                        ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                                        acadDatabase.ModelSpace.Add(ent_line1);
+                                        normalCopys.Add(ent_line1);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                for (int i = 0; i < FloordrainEngine.Condensepipe_tofloordrain.Count - 1; i++)
+                                {
+                                    Polyline ent_line1 = new Polyline();
+                                    ent_line1.AddVertexAt(0, FloordrainEngine.Condensepipe_tofloordrain[i].ToPoint2d(), 0, 35, 35);
+                                    ent_line1.AddVertexAt(1, FloordrainEngine.Condensepipe_tofloordrain[i + 1].ToPoint2d(), 0, 35, 35);
+                                    //ent_line1.Linetype = "DASHDOT";
+                                    //ent_line1.Layer = "W-RAIN-PIPE";
+                                    //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+                                    ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+                                    acadDatabase.ModelSpace.Add(ent_line1);
+                                    normalCopys.Add(ent_line1);
+                                }
                             }
                             if (FloordrainEngine.Rainpipe_tofloordrains.Count > 1)
                             {

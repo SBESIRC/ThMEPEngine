@@ -125,13 +125,16 @@ namespace ThMEPWSS.Pipe.Engine
             }
             for (int i = 0; i < balconyroom1.Count; i++)
             {
+                int num = 0;
                 for (int j = i + 1; j < balconyroom1.Count; j++)
                 {
-                    var s = balconyRooms[i].Balcony.Boundary as Polyline;
-                    var s1 = balconyRooms[j].Balcony.Boundary as Polyline;
+                    
+                    var s = balconyroom1[i].Balcony.Boundary as Polyline;
+                    var s1 = balconyroom1[j].Balcony.Boundary as Polyline;
                     if (s.GetCenter().DistanceTo(s1.GetCenter()) < 4000)
                     {
-                        var newBalcony = CreateNewBalcony(balconyRooms[i], balconyRooms[j]);
+                        num = 1;
+                        var newBalcony = CreateNewBalcony(balconyroom1[i], balconyroom1[j]);
                         var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
                         foreach (var devicePlatformRoom in devicePlatformRooms)
                         {
@@ -143,6 +146,19 @@ namespace ThMEPWSS.Pipe.Engine
                         }
                         FloorDrainRooms.Add(new ThWCompositeBalconyRoom(newBalcony, devicePlatformIncludingRoom));
                     }
+                }
+                if(num==0)
+                {
+                    var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
+                    foreach (var devicePlatformRoom in devicePlatformRooms)
+                    {
+
+                        if (IsBalconyPair(balconyroom1[i], devicePlatformRoom))
+                        {
+                            devicePlatformIncludingRoom.Add(devicePlatformRoom);
+                        }
+                    }
+                    FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyroom1[i], GetDeviceRoom(devicePlatformIncludingRoom, balconyroom1[i])));
                 }
             }
         }
@@ -198,6 +214,51 @@ namespace ThMEPWSS.Pipe.Engine
             }
 
             return GeomUtils.CalculateProfile(vertices);        
+        }
+        private static List<ThWDevicePlatformRoom> GetDeviceRoom(List<ThWDevicePlatformRoom> deviceRoom,ThWBalconyRoom balconyRoom)
+        {
+            var devicerooms = new List<ThWDevicePlatformRoom>();
+            var deviceLeftRooms = new List<ThWDevicePlatformRoom>();
+            var deviceRightRooms = new List<ThWDevicePlatformRoom>();
+            if (deviceRoom.Count==1)
+            {
+                devicerooms.Add(deviceRoom[0]);
+            }
+            else if(deviceRoom.Count>1)
+            {
+                foreach(var room in deviceRoom)
+                {
+                    var boundary = room.DevicePlatforms[0].Boundary as Polyline;
+                    var boundary1 = balconyRoom.Balcony.Boundary as Polyline;
+                    if (boundary.GetCenter().X< boundary1.GetCenter().X)
+                    {
+                        deviceLeftRooms.Add(room);
+                    }
+                    else
+                    {
+                        deviceRightRooms.Add(room);
+                    }
+                }
+            }
+            devicerooms.Add(GetTrueRoom(deviceLeftRooms, balconyRoom));
+            devicerooms.Add(GetTrueRoom(deviceRightRooms, balconyRoom));
+            return devicerooms;
+        }
+        private static ThWDevicePlatformRoom GetTrueRoom(List<ThWDevicePlatformRoom> deviceRoom, ThWBalconyRoom balconyRoom)
+        {
+            double dis = double.MaxValue;
+            ThWDevicePlatformRoom trueRoom = null;
+            for(int i=0;i< deviceRoom.Count;i++)
+            {
+                var boundary = deviceRoom[i].DevicePlatforms[0].Boundary as Polyline;
+                var boundary1 = balconyRoom.Balcony.Boundary as Polyline;
+                if (boundary.GetCenter().DistanceTo(boundary1.GetCenter())< dis)
+                {
+                    dis = boundary.GetCenter().DistanceTo(boundary1.GetCenter());
+                    trueRoom = deviceRoom[i];
+                }
+            }
+            return trueRoom;
         }
     }
 }
