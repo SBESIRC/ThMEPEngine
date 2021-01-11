@@ -41,6 +41,12 @@ namespace ThMEPEngineCore.Service
         /// <returns></returns>
         public List<List<Line>> CreateNodedParkingLines(Polyline roomPoly, List<Line> parkingLines, out List<List<Line>> otherPLins)
         {
+            otherPLins = new List<List<Line>>();
+            if (parkingLines.Count <= 0)
+            {
+                return new List<List<Line>>();
+            }
+
             parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>()
                 .Select(y => {
                     var dir = (y.EndPoint - y.StartPoint).GetNormal();

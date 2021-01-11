@@ -73,6 +73,10 @@ namespace ThMEPElectrical
 
                     //获取车道线
                     var lanes = GetLanes(plFrame, acdb);
+                    if (lanes.Count <= 0)
+                    {
+                        continue;
+                    }
 
                     //处理车道线
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
