@@ -37,7 +37,7 @@ namespace ThMEPLighting.Garage.Engine
 
                 //识别内外圈
                 var innerOuterCircles = new List<ThWireOffsetData>();
-                using (var innerOuterEngine = new ThInnerOuterCirclesEngine())
+                using (var innerOuterEngine = new ThInnerOuterCirclesEngine(regionBorder.RegionBorder))
                 {
                     //需求变化2020.12.23,非灯线不参与编号传递
                     innerOuterEngine.Reconize(DxLines,new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);

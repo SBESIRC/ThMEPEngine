@@ -17,6 +17,7 @@ using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using QuickGraph;
 using QuickGraph.Algorithms;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPLighting
 {
@@ -368,6 +369,107 @@ namespace ThMEPLighting
             //                Console.WriteLine(edge);
             //    }
             //}
+        }
+        [CommandMethod("TIANHUACAD", "THLaneLineTest", CommandFlags.Modal)]
+        public void THTest()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var pso = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "\n请选择布灯的区域框线",
+                };
+                TypedValue[] tvs = new TypedValue[]
+                {
+                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
+                };
+                var per = Active.Editor.GetEntity("\n请选择布灯的区域框线");
+                Polyline border = new Polyline();
+                if(per.Status==PromptStatus.OK)
+                {
+                    border = acdb.Element<Polyline>(per.ObjectId);
+                }
+                else
+                {
+                    return;
+                }
+                SelectionFilter sf = new SelectionFilter(tvs);
+                var result = Active.Editor.GetSelection(pso, sf);
+                if (result.Status == PromptStatus.OK)
+                {
+                    var lines = new List<Line>();
+                    result.Value.GetObjectIds().ForEach(o => lines.Add(acdb.Element<Line>(o)));
+                    var laneLine = new ParkingLinesService();
+                    var auxiliaryLines = new List<List<Line>>();
+                    var mainLines = new List<List<Line>>();
+                    mainLines = laneLine.CreateNodedParkingLines(border,lines,out auxiliaryLines);
+                    mainLines.ForEach(o =>
+                    {
+                        var polyline =laneLine.CreateParkingLineToPolyline(o);
+                        polyline.ColorIndex = 1;
+                        acdb.ModelSpace.Add(polyline);
+                    });
+                    auxiliaryLines.ForEach(o =>
+                    {
+                        var polyline = laneLine.CreateParkingLineToPolyline(o);
+                        polyline.ColorIndex = 3;
+                        acdb.ModelSpace.Add(polyline);
+                    });
+                }
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THMergeTest", CommandFlags.Modal)]
+        public void ThMergeTest()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var per = Active.Editor.GetEntity("\n请选择布灯的区域框线");
+                Polyline border = new Polyline();
+                if (per.Status == PromptStatus.OK)
+                {
+                    border = acdb.Element<Polyline>(per.ObjectId);
+                }
+                else
+                {
+                    return;
+                }
+                TypedValue[] tvs = new TypedValue[]
+                {
+                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
+                };
+                var pso = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "\n请选择布灯线",
+                };
+                SelectionFilter sf = new SelectionFilter(tvs);
+                var result = Active.Editor.GetSelection(pso, sf);
+                if (result.Status == PromptStatus.OK)
+                {
+                    double offsetDistance = 1350;
+                    var dxLines = new List<Line>();
+                    result.Value.GetObjectIds().ForEach(o => dxLines.Add(acdb.Element<Line>(o)));
+                    //合并主道线，辅道线
+                    var mergeCurves = ThMergeLightCenterLines.Merge(border, dxLines);
+                    mergeCurves.Print(5);
+                    //通过中心线往两侧偏移
+                    var offsetCurves = Offset(mergeCurves, offsetDistance);
+                    //让1号线、2号线连接
+                    ThExtendService.Extend(offsetCurves);
+                    //为中心线找到对应的1号线和2号线
+                    var dxWireOffsetDatas = ThFindFirstLinesService.Find(offsetCurves, offsetDistance);
+                    dxWireOffsetDatas.Print();
+                }
+            }
+        }
+        private List<Tuple<Curve, Curve, Curve>> Offset(List<Curve> curves, double offsetDis)
+        {
+            var results = new List<Tuple<Curve, Curve, Curve>>();
+            curves.ForEach(o =>
+            {
+                var instance = ThOffsetLineService.Offset(o, offsetDis);
+                results.Add(Tuple.Create(o, instance.First, instance.Second));
+            });
+            return results;
         }
     }
 }

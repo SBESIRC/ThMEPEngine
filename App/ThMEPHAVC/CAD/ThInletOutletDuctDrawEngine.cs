@@ -92,9 +92,10 @@ namespace ThMEPHVAC.CAD
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
             string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(modelLayer);
-            DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer, ductLayer);
-            DrawDuctInDWG(InletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
-            DrawDuctInDWG(InletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
+            string ducttextlayer = ThDuctUtils.DuctTextLayerName(modelLayer);
+            DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer, ductLayer, ducttextlayer);
+            DrawDuctInDWG(InletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
+            DrawDuctInDWG(InletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
             DrawHoseInDWG(InletDuctHoses, modelLayer);
         }
 
@@ -104,9 +105,10 @@ namespace ThMEPHVAC.CAD
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
             string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(modelLayer);
-            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, ductLayer);
-            DrawDuctInDWG(OutletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer);
-            DrawDuctInDWG(OutletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer);
+            string ducttextlayer = ThDuctUtils.DuctTextLayerName(modelLayer);
+            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, ductLayer, ducttextlayer);
+            DrawDuctInDWG(OutletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
+            DrawDuctInDWG(OutletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
             DrawHoseInDWG(OutletDuctHoses, modelLayer);
         }
 
@@ -229,10 +231,11 @@ namespace ThMEPHVAC.CAD
                     Height = InletDuctHeight,
                     Length = ductgraphedge.EdgeLength
                 };
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, isUpOrDownOpening);
-                ductFittingFactoryService.DuctSegmentHandle(ductSegment.Representation, ductSegment.FlangeLine, ductSegment.Centerline, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
+                bool islongestduct = InletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct);
+                ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
                 Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
                 ductSegment.Matrix = Matrix3d.Displacement(centerpoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                 InletDuctSegments.Add(ductSegment);
@@ -338,10 +341,11 @@ namespace ThMEPHVAC.CAD
                     Height = OutletDuctHeight,
                     Length = ductgraphedge.EdgeLength
                 };
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, isUpOrDownOpening);
-                ductFittingFactoryService.DuctSegmentHandle(ductSegment.Representation, ductSegment.FlangeLine, ductSegment.Centerline, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
+                bool islongestduct = OutletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct);
+                ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
                 Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
                 ductSegment.Matrix = Matrix3d.Displacement(centerpoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                 OutletDuctSegments.Add(ductSegment);
@@ -449,7 +453,7 @@ namespace ThMEPHVAC.CAD
             return hose;
         }
 
-        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string ductlayer, string centerlinelayer, string flangelayer)
+        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string ductlayer, string centerlinelayer, string flangelayer, string textlayer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -498,6 +502,18 @@ namespace ThMEPHVAC.CAD
                             acadDatabase.ModelSpace.Add(dbobj);
                             dbobj.SetDatabaseDefaults();
                         }
+
+                        //插入管道信息标注
+                        if (!Segment.InformationText.IsNull())
+                        {
+                            var textstyleId = CreateDuctTextStyle();
+                            Segment.InformationText.TextStyleId = textstyleId;
+                            var layerobj = acadDatabase.Layers.ElementOrDefault(textlayer, true);
+                            Segment.InformationText.LayerId = layerobj.ObjectId;
+                            Segment.InformationText.TransformBy(Segment.Matrix);
+                            acadDatabase.ModelSpace.Add(Segment.InformationText);
+                            Segment.InformationText.SetDatabaseDefaults();
+                        }
                     }
                 }
             }
@@ -534,5 +550,15 @@ namespace ThMEPHVAC.CAD
                 return acadDatabase.Linetypes.ElementOrDefault(ThHvacCommon.CENTERLINE_LINETYPE).ObjectId;
             }
         }
+
+        private ObjectId CreateDuctTextStyle()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.ImportTextStyle(ThHvacCommon.DUCT_TEXT_STYLE, true);
+                return acadDatabase.TextStyles.ElementOrDefault(ThHvacCommon.DUCT_TEXT_STYLE).ObjectId;
+            }
+        }
+
     }
 }

@@ -63,14 +63,17 @@
     <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
     <Compile Include="Garage\Service\ThEliminateService.cs" />
     <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />
+    <Compile Include="Garage\Service\ThExtendService.cs" />
     <Compile Include="Garage\Service\ThFilterLinkService.cs" />
     <Compile Include="Garage\Service\ThFilterShortLinesService.cs" />
     <Compile Include="Garage\Service\ThFindFirstEdgePortsService.cs" />
+    <Compile Include="Garage\Service\ThFindFirstLinesService.cs" />
     <Compile Include="Garage\Service\ThFindLinkService.cs" />
     <Compile Include="Garage\Service\ThFindSideLinesService.cs" />
     <Compile Include="Garage\Service\ThFindStartIndexService.cs" />
     <Compile Include="Garage\Service\ThJoinLinesService.cs" />
     <Compile Include="Common\ThLightGraphService.cs" />
+    <Compile Include="Garage\Service\ThMergeLightCenterLines.cs" />
     <Compile Include="Garage\Service\ThPrintService.cs" />
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
     <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />

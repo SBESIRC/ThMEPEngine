@@ -5,6 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model.Hvac;
+using Autodesk.AutoCAD.Colors;
 
 namespace ThMEPHVAC.CAD
 {
@@ -57,14 +58,40 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, bool isupordownopening)
+        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, double ductangle, bool isupordownopening, bool islongestduct)
         {
             return new ThIfcDuctSegment(parameters)
             {
                 Centerline = CreateDuctSegmentCenterLine(parameters),
                 FlangeLine = CreateDuctFlangeGeometries(parameters, isupordownopening),
-                Representation = CreateDuctSegmentGeometries(parameters)
+                Representation = CreateDuctSegmentGeometries(parameters),
+                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct),
             };
+        }
+
+        private DBText CreateDuctInformation(ThIfcDuctSegmentParameters parameters, double ductangle, bool islongestduct)
+        {
+            if (!islongestduct)
+            {
+                return null;
+            }
+            else
+            {
+                DBText infortext = new DBText()
+                {
+                    TextString = $"{parameters.Width}x{parameters.Height}（h+X.XXm）",
+                    Height = 450,
+                    WidthFactor = 0.7,
+                    Color = Color.FromColorIndex(ColorMethod.ByLayer, (int)ColorIndex.BYLAYER),
+                    HorizontalMode = TextHorizontalMode.TextLeft,
+                    Oblique = 0,
+                };
+                if (ductangle > 0.5 * Math.PI && ductangle <= 1.5 * Math.PI)
+                {
+                    infortext.Rotation = Math.PI;
+                }
+                return infortext;
+            }
         }
 
         public ThIfcDuctSegment CreateVerticalDuctSegment(ThIfcDuctSegmentParameters parameters)
@@ -75,12 +102,12 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public void DuctSegmentHandle(DBObjectCollection ductsidelines, DBObjectCollection ductflanges,DBObjectCollection ductcenterlines, double sourcecutdistance, double targetcutdistance)
+        public void DuctSegmentHandle(ThIfcDuctSegment ductsegment, double sourcecutdistance, double targetcutdistance)
         {
             List<string> a = new List<string>();
 
             //处理水平线
-            foreach (Line line in ductsidelines)
+            foreach (Line line in ductsegment.Representation)
             {
                 if (line.StartPoint.X < line.EndPoint.X)
                 {
@@ -94,7 +121,7 @@ namespace ThMEPHVAC.CAD
                 }
             }
             //处理竖直线
-            foreach (Line line in ductflanges)
+            foreach (Line line in ductsegment.FlangeLine)
             {
                 if (line.StartPoint.X < 0)
                 {
@@ -107,8 +134,8 @@ namespace ThMEPHVAC.CAD
                     line.StartPoint = line.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
                 }
             }
-
-            foreach (Line centerline in ductcenterlines)
+            //处理中心线
+            foreach (Line centerline in ductsegment.Centerline)
             {
                 if (centerline.StartPoint.X < centerline.EndPoint.X)
                 {
@@ -121,6 +148,20 @@ namespace ThMEPHVAC.CAD
                     centerline.StartPoint = centerline.StartPoint.TransformBy(Matrix3d.Displacement(new Vector3d(-targetcutdistance, 0, 0)));
                 }
 
+            }
+            //设置文字信息的水平竖直位置
+            if (!ductsegment.InformationText.IsNull())
+            {
+                var textbounding = ductsegment.InformationText.GeometricExtents;
+                double textlength = textbounding.MaxPoint.X - textbounding.MinPoint.X;
+                if (ductsegment.InformationText.Rotation == Math.PI)
+                {
+                    ductsegment.InformationText.Position = new Point3d(0.5 * textlength + 0.5 * (sourcecutdistance - targetcutdistance), -0.5 * ductsegment.Parameters.Width - 75, 0);
+                }
+                else
+                {
+                    ductsegment.InformationText.Position = new Point3d(-0.5 * textlength + 0.5 * (sourcecutdistance - targetcutdistance), 0.5 * ductsegment.Parameters.Width + 75, 0);
+                }
             }
         }
 

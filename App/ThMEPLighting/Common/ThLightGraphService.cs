@@ -124,11 +124,11 @@ namespace ThMEPLighting.Common
         }
         private List<ThLightEdge> SearchEdges(Point3d portPt, double length)
         {
-            Polyline envelope = ThDrawTool.CreateSquare(portPt, length);
+            Polyline envelope = ThDrawTool.CreateSquare(portPt, length*2.0);
             var searchObjs = SpatialIndex.SelectCrossingPolygon(envelope);
             var linkLines = searchObjs
                 .Cast<Line>()
-                .Where(o => ThGarageLightUtils.IsLink(o, portPt))
+                .Where(o => ThGarageLightUtils.IsLink(o, portPt, length))
                 .ToList();
             return Edges
                 .Where(o => linkLines.Contains(o.Edge))
@@ -148,6 +148,7 @@ namespace ThMEPLighting.Common
                   o.Edge.StartPoint, o.Edge.EndPoint)).ToList();
             if (unCollinearEdges.Count > 0)
             {
+                //对于多个分支，后期可增强权重逻辑，选择优先通道
                 return unCollinearEdges[0];
             }
             return null;
