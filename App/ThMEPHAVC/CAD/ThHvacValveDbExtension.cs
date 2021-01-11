@@ -42,6 +42,15 @@ namespace ThMEPHVAC.CAD
             }
         }
 
+        public static void ImportTextStyle(this Database database, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(name), replaceIfDuplicate);
+            }
+        }
+
         public static void SetValveModel(this ObjectId obj, string model)
         {
             var dynamicProperties = obj.GetDynProperties();

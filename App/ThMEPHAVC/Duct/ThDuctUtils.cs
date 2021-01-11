@@ -79,6 +79,21 @@ namespace ThMEPHVAC.Duct
             }
         }
 
+        public static string DuctTextLayerName(string modelLayer)
+        {
+            switch (modelLayer)
+            {
+                case ThHvacCommon.MODEL_LAYER_DUAL:
+                    return ThHvacCommon.DUCT_TEXT_LAYER_DUAL;
+                case ThHvacCommon.MODEL_LAYER_FIRE:
+                    return ThHvacCommon.DUCT_TEXT_LAYER_FIRE;
+                case ThHvacCommon.MODEL_LAYER_EQUP:
+                    return ThHvacCommon.DUCT_TEXT_LAYER_VENT;
+                default:
+                    throw new NotSupportedException();
+            }
+        }
+
         public static string FireValveBlockName()
         {
             return ThHvacCommon.FILEVALVE_BLOCK_NAME;

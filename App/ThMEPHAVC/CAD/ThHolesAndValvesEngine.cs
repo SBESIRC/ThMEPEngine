@@ -76,13 +76,14 @@ namespace ThMEPHVAC.CAD
             foreach (var centeredge in centerlinegraph.Edges)
             {
                 var centerline = new Line(centeredge.Source.Position, centeredge.Target.Position);
+                var centerlinevector = new Vector2d(centeredge.Target.Position.X - centeredge.Source.Position.X, centeredge.Target.Position.Y - centeredge.Source.Position.Y);
                 foreach (var wallline in walllines)
                 {
                     Point3dCollection IntersectPoints = new Point3dCollection();
                     centerline.IntersectWith(wallline, Intersect.OnBothOperands, IntersectPoints, new IntPtr(), new IntPtr());
                     if (IntersectPoints.Count > 0)
                     {
-                        double holeangle = centerline.Angle >= 0.5 * Math.PI ? centerline.Angle - 0.5 * Math.PI : centerline.Angle + 1.5 * Math.PI;
+                        double holeangle = centerlinevector.Angle >= 0.5 * Math.PI ? centerlinevector.Angle - 0.5 * Math.PI : centerlinevector.Angle + 1.5 * Math.PI;
                         var groupparameters = new ThValveGroupParameters()
                         {
                             GroupInsertPoint = IntersectPoints[0],

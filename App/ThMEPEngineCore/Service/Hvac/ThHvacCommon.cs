@@ -44,6 +44,14 @@
         public const string DUCT_LAYER_FIRE = "H-DUCT-FIRE";
         public const string DUCT_LAYER_VENT = "H-DUCT-VENT";
 
+        // 风管文字图层
+        public const string DUCT_TEXT_LAYER_DUAL = "H-DIMS-DUAL";
+        public const string DUCT_TEXT_LAYER_FIRE = "H-DIMS-FIRE";
+        public const string DUCT_TEXT_LAYER_VENT = "H-DIMS-DUCT";
+
+        //风管文字样式名
+        public const string DUCT_TEXT_STYLE = "TH-STYLE3";
+
         // 风机图层
         public const string MODEL_LAYER_DUAL = "H-DUAL-FBOX";
         public const string MODEL_LAYER_FIRE = "H-FIRE-FBOX";
