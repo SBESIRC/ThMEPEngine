@@ -16,47 +16,20 @@ namespace ThMEPHVAC.CAD
 {
     public class ThValvesAndHolesInsertEngine
     {
-        public static ObjectId InsertValve(ThValve HoleModel)
+        public static ObjectId InsertValve(ThValve ValveModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var blockName = HoleModel.ValveBlockName;
-                var layerName = HoleModel.ValveBlockLayer;
+                var blockName = ValveModel.ValveBlockName;
+                var layerName = ValveModel.ValveBlockLayer;
                 Active.Database.ImportValve(blockName, layerName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
-                objId.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
-                objId.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
-                objId.SetValveModel(HoleModel.ValveVisibility);
+                objId.SetValveWidth(ValveModel.Width, ValveModel.WidthPropertyName);
+                objId.SetValveHeight(ValveModel.Length, ValveModel.LengthPropertyName);
+                objId.SetValveModel(ValveModel.ValveVisibility);
 
-                // 插入图块时，图块被放置在WCS的原点
-                // 为了在WCS中正确放置图块，图块需要完成转换：
-                //  1. 将图块的中心点移到原点
-                //  2. 依据图块的实际放置角度，考虑是否需要旋转一个补偿角度(180)，使文字方向转正
-                //  3. 补偿第一步平移变换
-                //  4. 基于图块插入点将图块旋转到管线的角度
-                //  5. 将图块平移到管线上指定位置
                 var blockRef = acadDatabase.Element<BlockReference>(objId, true);
-                Point3d holeinsertpoint = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, HoleModel.ValveOffsetFromCenter, 0)));
-                Point3d valvecenterpoint = blockRef.Position.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * HoleModel.Width, -0.5 * HoleModel.Length, 0)));
-                Matrix3d rotation = Matrix3d.Identity;
-                if (HoleModel.IsFireValve())
-                {
-                    // 为了保持文字方向朝上,
-                    // 若管道中心线处于三四象限（180，360]，则补偿阀的旋转角度，即旋转180度
-                    // 若换算到管道中心线的法向方向，则其处于二三象限（90,270]时需要补偿阀的旋转
-                    if ((HoleModel.RotationAngle > 0.5 * Math.PI && HoleModel.RotationAngle <= 1.5 * Math.PI))
-                    {
-                        rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
-                    }
-                }
-                Matrix3d matrix = Matrix3d.Identity
-                    .PreMultiplyBy(Matrix3d.Displacement(valvecenterpoint.GetAsVector().Negate()))
-                    .PreMultiplyBy(rotation)
-                    .PreMultiplyBy(Matrix3d.Displacement(valvecenterpoint.GetAsVector()))
-                    .PreMultiplyBy(Matrix3d.Rotation(HoleModel.RotationAngle, Vector3d.ZAxis, holeinsertpoint))
-                    .PreMultiplyBy(Matrix3d.Displacement(holeinsertpoint.GetVectorTo(HoleModel.ValvePosition)));
-                    
-                blockRef.TransformBy(matrix);
+                blockRef.TransformBy(ValveModel.Marix);
 
                 // 返回图块
                 return objId;

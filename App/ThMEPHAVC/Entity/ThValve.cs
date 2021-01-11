@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.IO;
 using System.Linq;
+using System;
 
 namespace ThMEPHVAC.Entity
 {
@@ -29,6 +30,59 @@ namespace ThMEPHVAC.Entity
         /// </summary>
         public double RotationAngle { get; set; }
         public double ValveOffsetFromCenter { get; set; }
+        public ValveGroupPosionType ValvePosionType { get; set; }
+        public Matrix3d Marix
+        {
+            get
+            {
+                return GetValveMatrix();
+            }
+        }
+        private Matrix3d GetValveMatrix()
+        {
+            Point3d holeinsertpoint = Point3d.Origin.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * Width, ValveOffsetFromCenter, 0)));
+            Point3d valvecenterpoint = Point3d.Origin.TransformBy(Matrix3d.Displacement(new Vector3d(0.5 * Width, -0.5 * Length, 0)));
+
+            Matrix3d rotation = Matrix3d.Identity;
+            if (ValveBlockName == ThDuctUtils.FireValveBlockName())
+            {
+                // 为了保持文字方向朝上,
+                // 若管道中心线处于三四象限（180，360]，则补偿阀的旋转角度，即旋转180度
+                // 若换算到管道中心线的法向方向，则其处于二三象限（90,270]时需要补偿阀的旋转
+                if ((RotationAngle > 0.5 * Math.PI && RotationAngle <= 1.5 * Math.PI))
+                {
+                    rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                }
+            }
+            else if (ValveVisibility == ThDuctUtils.CheckValveModelName() && ValvePosionType == ValveGroupPosionType.Inlet)
+            {
+                rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
+            }
+            // 为了在WCS中正确放置图块，图块需要完成转换：
+            //  1. 将图块的中心点移到原点
+            //  2. 依据图块的实际放置角度，考虑是否需要旋转一个补偿角度(180)，使文字方向转正
+            //  3. 补偿第一步平移变换
+            //  4. 基于图块插入点将图块旋转到管线的角度
+            //  5. 将图块平移到管线上指定位置
+            var marix = Matrix3d.Identity
+                .PreMultiplyBy(Matrix3d.Displacement(valvecenterpoint.GetAsVector().Negate()))
+                .PreMultiplyBy(rotation)
+                .PreMultiplyBy(Matrix3d.Displacement(valvecenterpoint.GetAsVector()))
+                .PreMultiplyBy(Matrix3d.Rotation(RotationAngle, Vector3d.ZAxis, holeinsertpoint))
+                .PreMultiplyBy(Matrix3d.Displacement(holeinsertpoint.GetVectorTo(ValvePosition)));
+
+            return marix;
+        }
+    }
+
+    public class ThValveGroupParameters
+    {
+        public double RotationAngle { get; set; }
+        public string FanScenario { get; set; }
+        public double DuctWidth { get; set; }
+        public double ValveToFanSpacing { get; set; }
+        public Point3d GroupInsertPoint { get; set; }
+        public ValveGroupPosionType ValveGroupPosion { get; set; }
     }
 
     public class ThValveGroup
@@ -42,6 +96,7 @@ namespace ThMEPHVAC.Entity
             ValvesInGroup = CreateValvesFromValveGroup(fanlayer);
         }
 
+        //设置机房内管段阀组
         private List<ThValve> SetInnerValveGroup(string fanlayer)
         {
             List<ThValve> valves = new List<ThValve>();
@@ -54,13 +109,14 @@ namespace ThMEPHVAC.Entity
 
             return valves;
         }
-
-        private List<ThValve> SetOuterValveGroup(string fanlayer)
+        
+        //设置机房外管段阀组
+        private List<ThValve> SetOuterValveGroup(string fanlayer, ValveGroupPosionType valveposiontype)
         {
             List<ThValve> valves = new List<ThValve>();
 
             var silencer = CreateSilencer(fanlayer);
-            var checkvalve = CreateCheckValve(fanlayer);
+            var checkvalve = CreateCheckValve(fanlayer, valveposiontype);
             var hole = CreateHole();
             var firevalve = CreateFireValve(fanlayer);
 
@@ -127,7 +183,7 @@ namespace ThMEPHVAC.Entity
                 //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
                 else
                 {
-                    return SetOuterValveGroup(fanlayer);
+                    return SetOuterValveGroup(fanlayer, ValveGroupPosionType.Inlet);
                 }
             }
             //出风段
@@ -136,7 +192,7 @@ namespace ThMEPHVAC.Entity
                 //若当前工作场景中，风机进风口段对应机房内管段
                 if (innerRomDuctPosition == "进风段")
                 {
-                    return SetOuterValveGroup(fanlayer);
+                    return SetOuterValveGroup(fanlayer, ValveGroupPosionType.Outlet);
                 }
                 //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
                 else
@@ -195,7 +251,7 @@ namespace ThMEPHVAC.Entity
             };
         }
 
-        private ThValve CreateCheckValve(string fanlayer)
+        private ThValve CreateCheckValve(string fanlayer, ValveGroupPosionType valveposiontype)
         {
             return new ThValve()
             {
@@ -209,6 +265,7 @@ namespace ThMEPHVAC.Entity
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
+                ValvePosionType = valveposiontype,
             };
         }
 
@@ -228,15 +285,5 @@ namespace ThMEPHVAC.Entity
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
             };
         }
-    }
-
-    public class ThValveGroupParameters
-    {
-        public double RotationAngle { get; set; }
-        public string FanScenario { get; set; }
-        public double DuctWidth { get; set; }
-        public double ValveToFanSpacing { get; set; }
-        public Point3d GroupInsertPoint { get; set; }
-        public ValveGroupPosionType ValveGroupPosion { get; set; }
     }
 }

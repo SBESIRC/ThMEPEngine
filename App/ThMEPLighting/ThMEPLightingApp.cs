@@ -75,5 +75,15 @@ namespace ThMEPLighting
                 packageManager.GenerateLaneGroup();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THSubGroupAdjustor", CommandFlags.Modal)]
+        public void THSubGroupAdjustor()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.LaneSubGroupOptimization();
+            }
+        }
     }
 }

@@ -117,6 +117,16 @@
     <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\IndexerCalculator.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\LaneGroupCalculator.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\NearLightPlaceCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\CenterBaseLineCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\CoordinateTransform.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupGapDivider\ParallelParkGroupGapDivider.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupGapDivider\ParkGroupGapDivider.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupGapDivider\ReverseParkGroupGapDivider.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupMove\ParallelSubGroupMover.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupMove\ReverseSubGroupMover.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupMove\SubGroupMover.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\LightPlaceInfoExtractor.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\SubGroupPosOptimization.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\GenerateValidParkPolys.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\IntersectParkRelatedNodeCalculator.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\NearParksDivider.cs" />

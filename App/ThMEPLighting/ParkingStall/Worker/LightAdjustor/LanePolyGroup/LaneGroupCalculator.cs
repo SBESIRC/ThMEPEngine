@@ -13,25 +13,33 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
         private List<LightPlaceInfo> m_lightPlaceInfos;
         private List<Polyline> m_extendPolylines;
 
+
+        public List<LaneGroup> LaneGroups
+        {
+            get;
+            set;
+        }
+
         public LaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> polylines)
         {
             m_lightPlaceInfos = lightPlaceInfos;
             m_extendPolylines = polylines;
         }
 
-        public static void MakeLaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> extendLanePolys)
+        public static List<LaneGroup> MakeLaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> extendLanePolys)
         {
             var laneGroupCalculator = new LaneGroupCalculator(lightPlaceInfos, extendLanePolys);
             laneGroupCalculator.Do();
+            return laneGroupCalculator.LaneGroups;
         }
 
         public void Do()
         {
             // 初步计算再细分
-            var laneGroups = CalculateLaneGroupFirstStep();
+            LaneGroups = CalculateLaneGroupFirstStep();
 
             // 删除无效的车位块
-            DifferentiationGroupInfo(laneGroups);
+            DifferentiationGroupInfo(LaneGroups);
         }
 
         private void DifferentiationGroupInfo(List<LaneGroup> laneGroups)

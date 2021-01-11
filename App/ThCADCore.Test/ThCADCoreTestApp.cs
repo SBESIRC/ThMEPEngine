@@ -704,6 +704,32 @@ namespace ThCADCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThClosePoint", CommandFlags.Modal)]
+        public void ThClosePoint()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetEntity("请选择框线");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var line = acadDatabase.Element<Line>(result.ObjectId);
+                var circle = acadDatabase.Element<Circle>(result2.ObjectId);
+                var closestPt = line.GetClosestPointTo(circle.Center, true);
+
+                var verticalLine = new Line(closestPt, circle.Center);
+
+                acadDatabase.ModelSpace.Add(verticalLine);
+            }
+        }
 
         [CommandMethod("TIANHUACAD", "ThPBuffer", CommandFlags.Modal)]
         public void ThBuffer()

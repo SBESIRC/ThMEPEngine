@@ -94,20 +94,20 @@ namespace ThMEPLighting.ParkingStall.Worker.ParkingGroup
         {
             foreach (var lineSegment in polylineNode.LineSegments)
             {
-                if (IsInLineSegment(line, lineSegment))
+                if (IsInLineSegment(line, lineSegment, 1e-4))
                     return lineSegment;
             }
 
             return null;
         }
 
-        private bool IsInLineSegment(Line line, LineSegment lineSegment)
+        private bool IsInLineSegment(Line line, LineSegment lineSegment, double tolerance)
         {
             var srcPtS = line.StartPoint;
             var srcPtE = line.EndPoint;
 
             var segmentLine = lineSegment.SegmentLine;
-            if (GeomUtils.IsPointOnLine(srcPtS, segmentLine) && GeomUtils.IsPointOnLine(srcPtE, segmentLine))
+            if (GeomUtils.IsPointOnLine(srcPtS, segmentLine, tolerance) && GeomUtils.IsPointOnLine(srcPtE, segmentLine, tolerance))
                 return true;
 
             return false;

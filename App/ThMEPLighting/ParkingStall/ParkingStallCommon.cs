@@ -27,7 +27,11 @@ namespace ThMEPLighting.ParkingStall
         public static readonly string LANELINE_LAYER_NAME = "E-LANE-CENTER";
 
 
+        public static readonly double ReverseGapGroup = 1000; // 子分组倒车入库间距
+        public static readonly double ParallelGapGroup = 400; // 子分组侧方停车间距
+        public static readonly double SubGroupPosTolerance = 10; // 灯中心线间距多少视为一组
 
-
+        public static readonly double ReverseMaxMoveDistance = 850; // 倒车入库最大调整距离
+        public static readonly double ParallelMaxMoveDistance = 350; // 侧方停车最大调整
     }
 }
