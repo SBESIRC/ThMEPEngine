@@ -70,6 +70,26 @@ namespace ThMEPEngineCore.CAD
             double distance = Math.Cos(angle) * secondVec.Length;
             return startPt + firstVec.GetNormal().MultiplyBy(distance);
         }
+        public static Point3d GetProjectPtOnPolyline(this Polyline polyline, Point3d pt, bool isClose)
+        {
+            List<Line> lines = new List<Line>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
+            }
+
+            if (!isClose)
+            {
+                lines.RemoveAt(lines.Count - 1);
+            }
+
+            List<Point3d> resPt = new List<Point3d>();
+            foreach (var line in lines)
+            {
+                resPt.Add(GetProjectPtOnLine(pt, line.StartPoint, line.EndPoint));
+            }
+            return resPt.OrderBy(x => x.DistanceTo(pt)).First();
+        }
         /// <summary>
         /// 判断点是否再Polyline内
         /// 0.点在polyline上    1.点在polyline内    -1.点在polyline外

@@ -16,7 +16,7 @@ namespace ThMEPElectrical.Broadcast
         readonly double endLength = 10000;  //10米左右补端头一点
         readonly double tol = 5000;
         readonly double exLength = 800;
-        readonly double minLength = 12000;    //起点到终点直线小于12米不布置点
+        readonly double minLength = 15000;    //起点到终点直线小于12米不布置点
 
         public Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> LayoutBraodcast(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> mainLayoutInfo
             , List<List<Line>> otherLines, List<Polyline> columns, List<Polyline> walls, Polyline frame)
@@ -55,7 +55,7 @@ namespace ThMEPElectrical.Broadcast
                     }
                     else if (eLayoutInfo == null || eLayoutInfo.Count <= 0)
                     {
-                        //副车道起点未连接主车道
+                        //副车道终点未连接主车道
                        layoutPts =  CalLayoutEndPoints(pLines, lineSPt, lineEPt, layoutSPt, layoutEPt, lLineSPt, lLineEPt, false);
                     }
 
