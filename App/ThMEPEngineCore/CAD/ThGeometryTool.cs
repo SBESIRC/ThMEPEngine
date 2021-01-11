@@ -314,5 +314,49 @@ namespace ThMEPEngineCore.CAD
             return IsOverlap(first.StartPoint, first.EndPoint, 
                 second.StartPoint, second.EndPoint, includedJoin);
         }
+        public static bool IsPointOnPolyline(this Point3d pt,Polyline polyline,double tolerance=0.0001)
+        {
+            for(int i=0;i<polyline.NumberOfVertices;i++)
+            {
+               var segmentType = polyline.GetSegmentType(i);
+                if(segmentType==SegmentType.Line)
+                {
+                   var lineSegment = polyline.GetLineSegmentAt(i);
+                    if (IsPointOnLine(lineSegment.StartPoint, lineSegment.EndPoint, pt))
+                    {
+                        return true;
+                    }                    
+                }
+                else if(segmentType == SegmentType.Arc)
+                {
+                    var arcSegment = polyline.GetArcSegmentAt(i);
+                    Arc arc = new Arc(arcSegment.Center, arcSegment.Normal, 
+                        arcSegment.Radius, arcSegment.StartAngle, arcSegment.EndAngle);
+                    if (pt.IsPointOnArc(arc))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            return false;
+        }
+        public static bool IsPointOnLine(this Point3d pt, Line line, double tolerance = 0.0001)
+        {
+            return IsPointOnLine(line.StartPoint, line.EndPoint, pt, tolerance);
+        }
+        public static bool IsPointOnArc(this Point3d pt, Arc arc, double tolerance = 0.0001)
+        {
+            if (Math.Abs(pt.DistanceTo(arc.Center) - arc.Radius) <= tolerance)
+            {
+                var vec = arc.Center.GetVectorTo(pt);
+                var ang = vec.GetAngleTo(Vector3d.XAxis, arc.Normal);
+                return ang >= arc.StartAngle && ang <= arc.EndAngle;
+            }
+            return false;
+        }
     }
 }

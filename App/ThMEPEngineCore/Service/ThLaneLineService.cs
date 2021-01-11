@@ -296,5 +296,36 @@ namespace ThMEPEngineCore.Service
 
             return resLines;
         }
+        /// <summary>
+        /// 将车道线创建为polyline
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public Polyline CreateParkingLineToPolyline(List<Line> lines)
+        {
+            HandleParkingLines(lines, out Point3d sp, out Point3d ep);
+            lines = HandleParkingLinesDir(lines, sp);
+            List<Point3d> allPts = new List<Point3d>();
+            foreach (var line in lines)
+            {
+                if (allPts.Where(x => x.IsEqualTo(line.StartPoint)).Count() <= 0)
+                {
+                    allPts.Add(line.StartPoint);
+                }
+
+                if (allPts.Where(x => x.IsEqualTo(line.EndPoint)).Count() <= 0)
+                {
+                    allPts.Add(line.EndPoint);
+                }
+            }
+
+            Polyline polyline = new Polyline();
+            for (int i = 0; i < allPts.Count; i++)
+            {
+                polyline.AddVertexAt(i, allPts[i].ToPoint2D(), 0, 0, 0);
+            }
+
+            return polyline;
+        }
     }
 }

@@ -10,9 +10,14 @@ namespace ThMEPLighting.Garage.Engine
 {
     public class ThInnerOuterCirclesEngine : IDisposable
     {
-        public List<ThWireOffsetData> WireOffsetDatas { get; private set; }       
-        public ThInnerOuterCirclesEngine()
+        /// <summary>
+        /// 创建内外圈
+        /// </summary>
+        public List<ThWireOffsetData> WireOffsetDatas { get; private set; }   
+        private Polyline Border { get; set; }
+        public ThInnerOuterCirclesEngine(Polyline border)
         {            
+            Border = border;
             WireOffsetDatas = new List<ThWireOffsetData>();
         } 
         public void Dispose()
@@ -20,19 +25,54 @@ namespace ThMEPLighting.Garage.Engine
         }
         public void Reconize(List<Line> dxLines,List<Line> fdxLines, double offsetDistance)
         {
+            var splitLineTuple = Split(dxLines, fdxLines);
+            //单位化
+            var dxNomalLines = new List<Line>();
+            var fdxNomalLines = new List<Line>();
+            using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
+            {
+                splitLineTuple.Item1.ForEach(o => dxNomalLines.Add(o.Normalize()));
+                splitLineTuple.Item2.ForEach(o => fdxNomalLines.Add(o.Normalize()));
+            }
+            //创建非灯线的偏移
+            fdxNomalLines.ForEach(o =>
+            {
+                var offsetLines = ThOffsetLineService.Offset(o, false ? offsetDistance : 0.0);
+                var offsetData = new ThWireOffsetData
+                {
+                    Center = o,
+                    First = offsetLines.First as Line,
+                    Second = offsetLines.Second as Line,
+                    IsDX = false
+                };
+                WireOffsetDatas.Add(offsetData);
+            });
+            //从小汤车道线合并服务中获取合并的主道线，辅道线
+            var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines);
+            //mergeCurves.Print(5);
+            //通过中心线往两侧偏移
+            var offsetCurves = Offset(mergeCurves,offsetDistance);
+            //让1号线、2号线连接
+            ThExtendService.Extend(offsetCurves);
+            //为中心线找到对应的1号线和2号线
+            var dxWireOffsetDatas=ThFindFirstLinesService.Find(offsetCurves, offsetDistance);
+            WireOffsetDatas.AddRange(dxWireOffsetDatas);
+        }  
+        private Tuple<List<Line>,List<Line>> Split(List<Line> dxLines, List<Line> fdxLines)
+        {
             //在T型、十字型处分割线
             var totalLines = new List<Line>();
-            dxLines.ForEach(o => totalLines.Add(new Line(o.StartPoint,o.EndPoint)));
+            dxLines.ForEach(o => totalLines.Add(new Line(o.StartPoint, o.EndPoint)));
             fdxLines.ForEach(o => totalLines.Add(new Line(o.StartPoint, o.EndPoint)));
-            
+
             var splitDxLines = new List<Line>();
             var splitFdxLines = new List<Line>();
-            using (var splitEngine=new ThSplitLineEngine(totalLines))
+            using (var splitEngine = new ThSplitLineEngine(totalLines))
             {
                 splitEngine.Split();
                 foreach (var item in splitEngine.Results)
                 {
-                    if(dxLines.IsContains(item.Key))
+                    if (dxLines.IsContains(item.Key))
                     {
                         if (item.Value.Count > 0)
                         {
@@ -43,7 +83,7 @@ namespace ThMEPLighting.Garage.Engine
                             splitDxLines.Add(new Line(item.Key.StartPoint, item.Key.EndPoint));
                         }
                     }
-                    else if(fdxLines.IsContains(item.Key))
+                    else if (fdxLines.IsContains(item.Key))
                     {
                         if (item.Value.Count > 0)
                         {
@@ -54,33 +94,19 @@ namespace ThMEPLighting.Garage.Engine
                             splitFdxLines.Add(new Line(item.Key.StartPoint, item.Key.EndPoint));
                         }
                     }
-                }             
+                }
             }
-           
-            //单位化
-            var nomalLines = new List<Line>();
-            using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
+            return Tuple.Create(splitDxLines, splitFdxLines);
+        }
+        private List<Tuple<Curve, Curve, Curve>> Offset(List<Curve> curves, double offsetDis)
+        {
+            var results = new List<Tuple<Curve, Curve, Curve>>();
+            curves.ForEach(o =>
             {
-                splitDxLines.ForEach(o => nomalLines.Add(o.Normalize()));
-                splitFdxLines.ForEach(o => nomalLines.Add(o.Normalize()));
-            }
-            //创建1号、2号线
-            nomalLines.ForEach(o =>
-            {
-                bool isDx = splitDxLines.IsContains(o);
-                var offsetLines = ThOffsetLineService.Offset(o, isDx ? offsetDistance : 0.0);
-                var offsetData = new ThWireOffsetData
-                {
-                    Center = o,
-                    First = offsetLines.First,
-                    Second = offsetLines.Second,
-                    IsDX = isDx
-                };
-                WireOffsetDatas.Add(offsetData);
+                var instance = ThOffsetLineService.Offset(o, offsetDis);
+                results.Add(Tuple.Create(o, instance.First, instance.Second));
             });
-
-            //连接弯头、T型、
-            ThLinkElbowService.Link(WireOffsetDatas);
-        }        
+            return results;
+        }
     }
 }

@@ -6,6 +6,7 @@ using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage.Model;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -47,6 +48,30 @@ namespace ThMEPLighting.Garage.Service
                         GroupTools.CreateGroup(acadDatabase.Database, groupName, objIds);
                         colorIndex++;
                     }
+                });
+            }
+        }
+        public static void Print(this List<ThWireOffsetData> wireDatas)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                wireDatas.ForEach(o =>
+                {
+                    o.First.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(o.First);
+                    o.Second.ColorIndex = 3;
+                    acadDatabase.ModelSpace.Add(o.Second);
+                });
+            }
+        }
+        public static void Print(this List<Curve> curves,short colorIndex)
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                curves.ForEach(o =>
+                {
+                    o.ColorIndex = colorIndex;
+                    acadDatabase.ModelSpace.Add(o);                    
                 });
             }
         }
