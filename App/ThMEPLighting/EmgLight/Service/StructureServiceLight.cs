@@ -35,7 +35,6 @@ namespace ThMEPLighting.EmgLight.Service
             return resPolys;
         }
 
-
         /// <summary>
         /// 沿着线将柱分隔成上下两部分
         /// </summary>

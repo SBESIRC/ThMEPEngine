@@ -409,23 +409,23 @@ namespace ThMEPLighting.EmgLight.Service
             return bReturn;
         }
 
-        //public static void checkIfInLayout(List<Polyline> layout, Polyline column,bool otherSideLayout, ref List<(Polyline,bool)> uniformSideLayout)
-        //{
-        //    var connectLayout = layout.Where(x => x.StartPoint == column.StartPoint ||
-        //                            x.StartPoint == column.EndPoint ||
-        //                            x.EndPoint == column.StartPoint ||
-        //                            x.EndPoint == column.EndPoint).ToList();
+        public static void checkIfInLayout(List<Polyline> layout, Polyline column, int index, ref List<(Polyline, int)> uniformSideLayout)
+        {
+            var connectLayout = layout.Where(x => x.StartPoint == column.StartPoint ||
+                                    x.StartPoint == column.EndPoint ||
+                                    x.EndPoint == column.StartPoint ||
+                                    x.EndPoint == column.EndPoint).ToList();
 
-        //    if (connectLayout.Count > 0)
-        //    {
-        //        uniformSideLayout.Add((connectLayout.First(),otherSideLayout);
-        //    }
-        //    else
-        //    {
-        //        uniformSideLayout.Add((column, otherSideLayout));
-        //    }
+            if (connectLayout.Count > 0)
+            {
+                uniformSideLayout.Add((connectLayout.First(), index));
+            }
+            else
+            {
+                uniformSideLayout.Add((column, index));
+            }
 
-        //}
+        }
 
 
 
