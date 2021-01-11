@@ -12,16 +12,30 @@ namespace ThMEPLighting.EmgLight.Service
     public class StructureLayoutServiceLight
     {
         static double TolLight = 400;
+        
+        public  static void AddLayoutStructPt(List <Polyline> layoutList, List<Line> lane, ref Dictionary<Polyline, (Point3d, Vector3d)>  layoutPtInfo)
+        {
+            (Point3d, Vector3d) layoutInfo ;
+            var laneDir = lane.Last().EndPoint - lane.First().StartPoint;
 
+            foreach (var structure in layoutList)
+            {
+                if (layoutPtInfo.ContainsKey(structure) == false)
+                {
+                    layoutInfo = GetLayoutPoint(structure, laneDir);
+                    layoutPtInfo.Add(structure, layoutInfo);
+                }
+            }
+        }
 
-        /// <summary>
-        /// 计算柱上排布点和方向
-        /// </summary>
-        /// <param name="column"></param>
-        /// <param name="pt"></param>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        private (Point3d, Vector3d)? GetColumnLayoutPoint(Polyline structure, Point3d pt, Vector3d dir)
+            /// <summary>
+            /// 计算柱上排布点和方向
+            /// </summary>
+            /// <param name="column"></param>
+            /// <param name="pt"></param>
+            /// <param name="dir"></param>
+            /// <returns></returns>
+            public static (Point3d, Vector3d) GetLayoutPoint(Polyline structure, Vector3d laneDir)
         {
             Point3d sPt = structure.StartPoint;
             Point3d ePt = structure.EndPoint;
@@ -30,56 +44,17 @@ namespace ThMEPLighting.EmgLight.Service
             var layoutPt = new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0);
 
             //计算排布方向
-            var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
-            var compareDir = (pt - layoutPt).GetNormal();
-            if (layoutDir.DotProduct(compareDir) < 0)
+
+            var StructDir = (ePt - sPt).GetNormal();
+            var layoutDir = Vector3d.ZAxis.CrossProduct(StructDir);
+           
+            if (laneDir.DotProduct(StructDir) > 0)
             {
                 layoutDir = -layoutDir;
             }
 
             return (layoutPt, layoutDir);
         }
-
-        /// <summary>
-        /// 计算墙上排布点和方向
-        /// </summary>
-        /// <param name="wall"></param>
-        /// <param name="pt"></param>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        //private (Point3d, Vector3d)? GetWallLayoutPoint(Polyline wall, Point3d pt, Vector3d dir)
-        //{
-        //    if (layoutLine == null)
-        //    {
-        //        return null;
-        //    }
-
-        //    Point3d sPt = layoutLine.StartPoint;
-        //    Point3d ePt = layoutLine.EndPoint;
-        //    Vector3d moveDir = (ePt - sPt).GetNormal();
-
-        //    //计算排布点
-        //    var layoutPt = closetPt;
-        //    if (sPt.DistanceTo(layoutPt) < broadcastTol)
-        //    {
-        //        layoutPt = layoutPt + moveDir * (broadcastTol - sPt.DistanceTo(layoutPt));
-        //    }
-        //    if (ePt.DistanceTo(layoutPt) < broadcastTol)
-        //    {
-        //        layoutPt = layoutPt - moveDir * (broadcastTol - ePt.DistanceTo(layoutPt));
-        //    }
-
-        //    //计算排布方向
-        //    var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
-        //    var compareDir = (pt - layoutPt).GetNormal();
-        //    if (layoutDir.DotProduct(compareDir) < 0)
-        //    {
-        //        layoutDir = -layoutDir;
-        //    }
-
-        //    return (layoutPt, layoutDir);
-        //}
-
 
         /// <summary>
         /// 找到墙与车道线平行的边

@@ -8,8 +8,8 @@ namespace ThMEPLighting
 {
     public class ThMEPLightingCommon
     {
-        public static readonly string BroadcastLayerName = "E-FAS-DEVC";     //消防应急广播图层
-        public static readonly string BroadcastBlockName = "E-BFAS410-4";     //消防应急广播图块名
+        public static readonly string EmgLightLayerName = "E-LITE-LITE";     //消防应急广播图层
+        public static readonly string EmgLightBlockName = "E-BFEL810";     //消防应急广播图块名
 
         public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";
     }

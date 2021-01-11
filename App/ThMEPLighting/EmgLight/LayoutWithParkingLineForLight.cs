@@ -4,7 +4,6 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
 using ThMEPLighting.EmgLight.Service;
 
 namespace ThMEPLighting.EmgLight
@@ -40,10 +39,10 @@ namespace ThMEPLighting.EmgLight
         /// <param name="columns"></param>
         /// <param name="walls"></param>
         /// <returns></returns>
-        public Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> LayoutLight(Polyline frame, List<List<Line>> mainLines, List<Polyline> columns, List<Polyline> walls)
+        public Dictionary<Polyline, (Point3d, Vector3d)> LayoutLight(Polyline frame, List<List<Line>> mainLines, List<Polyline> columns, List<Polyline> walls)
         {
-            Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> layoutInfo = new Dictionary<List<Line>, Dictionary<Point3d, Vector3d>>();
-            List<Polyline> Layout = new List<Polyline>();
+            Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo = new Dictionary<Polyline, (Point3d, Vector3d)>();
+            List<Polyline> layoutList = new List<Polyline>();
 
             for (int i = 0; i < mainLines.Count; i++)
             {
@@ -54,16 +53,16 @@ namespace ThMEPLighting.EmgLight
                 //var handleLines = parkingLinesService.HandleParkingLines(lines, out Point3d sPt, out Point3d ePt);
 
                 //特别短的线跳过
-                if (lane[0].Length < TolLightRangeMin )
+                if (lane[0].Length < TolLightRangeMin)
                 {
                     continue;
                 }
 
                 //找到构建上可布置面,用第一条车道线的头尾判定
-                var filterColmuns = StructureServiceLight.FilterStructure(columns, lane.First(), frame,"c");
-                var filterWalls = StructureServiceLight.FilterStructure(walls, lane.First(), frame,"w");
+                var filterColmuns = StructureServiceLight.FilterStructure(columns, lane.First(), frame, "c");
+                var filterWalls = StructureServiceLight.FilterStructure(walls, lane.First(), frame, "w");
 
-                
+
 
                 ////获取该车道线上的构建
                 //StructureServiceLight structureService = new StructureServiceLight();
@@ -84,11 +83,10 @@ namespace ThMEPLighting.EmgLight
                 //InsertLightService.ShowGeometry(usefulWalls[0], 142, LineWeight.LineWeight035);
                 //InsertLightService.ShowGeometry(usefulWalls[1], 11, LineWeight.LineWeight035);
 
-                if ((usefulColumns == null || usefulColumns .Count==0 ) && (usefulWalls == null || usefulWalls.Count == 0))
+                if ((usefulColumns == null || usefulColumns.Count == 0) && (usefulWalls == null || usefulWalls.Count == 0))
                 {
                     continue;
                 }
-                
 
                 ////找出平均的一边. -1:no side 0:left 1:right.
                 bool debug = false;
@@ -100,20 +98,21 @@ namespace ThMEPLighting.EmgLight
 
                     if (uniformSide == 0 || uniformSide == 1)
                     {
-                        LayoutUniformSide(usefulColumns, uniformSide, lane, columnDistList, out var uniformSideLayout, ref Layout);
-                        LayoutOppositeSide(usefulColumns, usefulWalls, uniformSide, lane, columnDistList, uniformSideLayout, ref Layout);
+                        LayoutUniformSide(usefulColumns, uniformSide, lane, columnDistList, out var uniformSideLayout, ref layoutList);
+                        LayoutOppositeSide(usefulColumns, usefulWalls, uniformSide, lane, columnDistList, uniformSideLayout, ref layoutList);
                     }
                     else
                     {
-                        LayoutBothNonUniformSide(usefulColumns, usefulWalls, lane, ref Layout);
+                        LayoutBothNonUniformSide(usefulColumns, usefulWalls, lane, ref layoutList);
                     }
-                    //Layout.AddRange(LayoutTemp);
+
                 }
 
+                StructureLayoutServiceLight.AddLayoutStructPt(layoutList, lane, ref layoutPtInfo);
 
             }
 
-            return layoutInfo;
+            return layoutPtInfo;
         }
 
         /// <summary>
@@ -375,8 +374,8 @@ namespace ThMEPLighting.EmgLight
                 importLayout[0] = StructureLayoutServiceLight.OrderingColumns(importLayout[0], ExtendLineList);
                 importLayout[1] = StructureLayoutServiceLight.OrderingColumns(importLayout[1], ExtendLineList);
 
-                InsertLightService.ShowGeometry(importLayout[0], 142, LineWeight.LineWeight035);
-                InsertLightService.ShowGeometry(importLayout[1], 11, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(importLayout[0], 142, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(importLayout[1], 11, LineWeight.LineWeight035);
 
 
                 //有bug, 前一柱的左边布线也会算,需要建立column的数据结构解决, 暂时不考虑
@@ -412,7 +411,7 @@ namespace ThMEPLighting.EmgLight
                 else if (importLayout[uniformSide].Count > 0)
                 {
                     //情况A:
-                    
+
                     uniformSideLayout.Add(importLayout[uniformSide][0]);
                     LastHasNoLightColumn = 0;
                     sum = importLayout[uniformSide][0].Distance(Columns[uniformSide][0]);
@@ -459,7 +458,9 @@ namespace ThMEPLighting.EmgLight
                 StructureLayoutServiceLight.distToLine(Lines, StructUtils.GetStructCenter(fisrtStruct), out ptOnLine);
 
                 var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
-                InsertLightService.ShowGeometry(importLayout[0], 142, LineWeight.LineWeight035);
+
+                //InsertLightService.ShowGeometry(importLayout[0], 142, LineWeight.LineWeight035);
+
                 if (importLayout[0].Contains(fisrtStruct))
                 {
                     currSide = 0;
@@ -546,7 +547,7 @@ namespace ThMEPLighting.EmgLight
                     var ExtendLine = new Line(ExtendLineStart, ExtendLineEnd);
                     var ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane, 0, TolLane, 0);
 
-                    InsertLightService.ShowGeometry(ExtendPoly, 20);
+                    //InsertLightService.ShowGeometry(ExtendPoly, 20);
 
                     Polyline tempStruct;
                     //找框内对面是否有位置布灯
@@ -554,7 +555,7 @@ namespace ThMEPLighting.EmgLight
 
                     if (bAdded == true)
                     {
-                    
+
                         //框内对面有位置布灯
                         ThisLaneLayout.Add(tempStruct);
                         currSide = currSide == 0 ? 1 : 0;
@@ -573,7 +574,7 @@ namespace ThMEPLighting.EmgLight
                         }
 
                         StructureLayoutServiceLight.distToLine(Lines, StructUtils.GetStructCenter(tempStruct), out ptOnLine);
-                       
+
 
 
                     }
@@ -600,7 +601,7 @@ namespace ThMEPLighting.EmgLight
                             ExtendLine = new Line(ExtendLineStart, ExtendLineEnd);
                             ExtendPoly = StructUtils.ExpandLine(ExtendLine, TolLane, 0, TolLane, 0);
 
-                            InsertLightService.ShowGeometry(ExtendPoly, 20);
+                            //InsertLightService.ShowGeometry(ExtendPoly, 20);
 
                             currSide = currSide == 0 ? 1 : 0;
                             //找框内对面是否有位置布灯

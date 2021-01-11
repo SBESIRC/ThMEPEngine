@@ -4,25 +4,23 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using ThCADExtension;
 
 namespace ThMEPLighting.EmgLight.Service
 {
     public static class InsertLightService
     {
         private static double scaleNum = 100;
-        public static void InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo)
+        public static void InsertSprayBlock(Dictionary<Polyline, (Point3d, Vector3d)> insertPtInfo)
         {
             using (var db = AcadDatabase.Active())
             {
-                //  db.Database.ImportModel();
-                foreach (var ptDic in insertPtInfo)
+                db.Database.ImportModel();
+                foreach (var ptInfo in insertPtInfo)
                 {
-                    foreach (var ptInfo in ptDic.Value)
-                    {
-                        db.Database.InsertModel(ptInfo.Key + ptInfo.Value * scaleNum * 1.5, -ptInfo.Value, new Dictionary<string, string>(){
-                            { "F","W" },
-                        });
-                    }
+
+                    db.Database.InsertModel(ptInfo.Value.Item1 + ptInfo.Value.Item2 * scaleNum * 1.5, -ptInfo.Value.Item2, new Dictionary<string, string>() { });
+
                 }
             }
         }
@@ -39,8 +37,8 @@ namespace ThMEPLighting.EmgLight.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                    ThMEPLightingCommon.BroadcastLayerName,
-                    ThMEPLightingCommon.BroadcastBlockName,
+                    ThMEPLightingCommon.EmgLightLayerName,
+                    ThMEPLightingCommon.EmgLightBlockName,
                     pt,
                     new Scale3d(scaleNum),
                     rotateAngle,
@@ -48,15 +46,15 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
-        //public static void ImportModel(this Database database)
-        //{
-        //    using (AcadDatabase currentDb = AcadDatabase.Use(database))
-        //    using (AcadDatabase blockDb = AcadDatabase.Open(BlockDwgPath(), DwgOpenMode.ReadOnly, false))
-        //    {
-        //        currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThMEPCommon.BroadcastBlockName), false);
-        //        currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPCommon.BroadcastLayerName), false);
-        //    }
-        //}
+        public static void ImportModel(this Database database)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingEmgLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThMEPLightingCommon.EmgLightBlockName), false);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.EmgLightLayerName), false);
+            }
+        }
 
         //private static string BlockDwgPath()
         //{
