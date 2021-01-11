@@ -1466,7 +1466,8 @@ namespace ThMEPWSS
                 //阳台空间形心
                 Point3d balconypoint = new Point3d(x1/ FloorEngines.TopFloors[0].CompositeBalconyRooms.Count,
                     y1/ FloorEngines.TopFloors[0].CompositeBalconyRooms.Count,0);
-                composite_Engine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipes, rain_pipes, pboundary, divideLines, roofrain_pipes, toiletpoint, balconypoint);
+                ThCADCoreNTSSpatialIndex obstacle = null;
+                composite_Engine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipes, rain_pipes, pboundary, divideLines, roofrain_pipes, toiletpoint, balconypoint,obstacle);
                 for (int j = 0; j < composite_Engine.PipeEngine.Fpipeindex.Count; j++)
                 {
                     for (int i = 0; i < composite_Engine.PipeEngine.Fpipeindex[j].Count; i++)
@@ -2246,7 +2247,7 @@ namespace ThMEPWSS
                             Polyline pboundary1 = null;
                             pboundary1 = FloorEngines.RoofFloors[0].RoofFloor.Boundary as Polyline;
                             List<Polyline> noline = new List<Polyline>();
-                            composite_Engine1.Run(noline, noline, noline, noline, noline, noline, noline, pboundary1, divideLines1, roofRoofRainPipes,toiletpoint,balconypoint);
+                            composite_Engine1.Run(noline, noline, noline, noline, noline, noline, noline, pboundary1, divideLines1, roofRoofRainPipes,toiletpoint,balconypoint,obstacle);
                             //对顶层屋顶雨水管重新排序
                             for (int j = 0; j < composite_Engine1.PipeEngine.RoofRainpipeindex.Count; j++)
                             {

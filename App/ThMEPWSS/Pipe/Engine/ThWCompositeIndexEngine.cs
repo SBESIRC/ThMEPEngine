@@ -1,8 +1,9 @@
 ﻿using System;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Pipe.Model;
 using System.Collections.Generic;
+
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -21,9 +22,9 @@ namespace ThMEPWSS.Pipe.Engine
             FpipeDublicated = new List<List<Point3dCollection>>();
         }
 
-        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary, List<Line> divideLines, List<Polyline> roofrainpipe,Point3d toiletPoint,Point3d balconyPoint)
+        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary, List<Line> divideLines, List<Polyline> roofrainpipe,Point3d toiletPoint,Point3d balconyPoint, ThCADCoreNTSSpatialIndex obstacle)
         {
-            PipeEngine.Run(fpipe,tpipe, wpipe, ppipe,dpipe, npipe,rainpipe,pboundary,divideLines, roofrainpipe, toiletPoint, balconyPoint);
+            PipeEngine.Run(fpipe,tpipe, wpipe, ppipe,dpipe, npipe,rainpipe,pboundary,divideLines, roofrainpipe, toiletPoint, balconyPoint, obstacle);
             FpipeDublicated = GetDublicated(PipeEngine.Fpipeindex, PipeEngine.Tpipeindex, PipeEngine.Wpipeindex, PipeEngine.Ppipeindex, PipeEngine.Dpipeindex, PipeEngine.Npipeindex, PipeEngine.Rainpipeindex, PipeEngine.RoofRainpipeindex) ;
            
         }

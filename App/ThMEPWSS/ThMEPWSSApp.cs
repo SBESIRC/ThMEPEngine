@@ -1,4 +1,5 @@
 ﻿using AcHelper;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
@@ -201,7 +202,8 @@ namespace ThMEPWSS
                 }             
                 var PipeindexEngine = new ThWInnerPipeIndexEngine();
                 var compositeEngine = new ThWCompositeIndexEngine(PipeindexEngine);
-                compositeEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary,divideLines,roofrainpipe,Point3d.Origin, Point3d.Origin);
+                ThCADCoreNTSSpatialIndex obstacle = null;
+                compositeEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary,divideLines,roofrainpipe,Point3d.Origin, Point3d.Origin,obstacle);
                 for (int j=0;j < compositeEngine.PipeEngine.Fpipeindex.Count;j++)
                 {   
                     for (int i = 0; i < compositeEngine.PipeEngine.Fpipeindex[j].Count; i++)
