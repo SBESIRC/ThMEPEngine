@@ -19,7 +19,7 @@ namespace ThMEPLighting.EmgLight.Service
                 foreach (var ptInfo in insertPtInfo)
                 {
 
-                    db.Database.InsertModel(ptInfo.Value.Item1 + ptInfo.Value.Item2 * scaleNum * 1.5, -ptInfo.Value.Item2, new Dictionary<string, string>() { });
+                    db.Database.InsertModel(ptInfo.Value.Item1 + ptInfo.Value.Item2 * scaleNum * 2.25, ptInfo.Value.Item2, new Dictionary<string, string>() { });
 
                 }
             }
@@ -27,12 +27,13 @@ namespace ThMEPLighting.EmgLight.Service
 
         public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, Dictionary<string, string> attNameValues)
         {
-            double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir);
-            //控制旋转角度
-            if (layoutDir.DotProduct(-Vector3d.XAxis) < 0)
-            {
-                rotateAngle = -rotateAngle;
-            }
+            double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir, Vector3d.ZAxis);
+
+            ////控制旋转角度
+            //if (layoutDir.DotProduct(-Vector3d.XAxis) < 0)
+            //{
+            //    rotateAngle = -rotateAngle;
+            //}
 
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -151,32 +152,5 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
-        //public static void ShowGeometry(List<Entity> lines, int ci, LineWeight lw = LineWeight.LineWeight025)
-        //{
-
-        //    using (AcadDatabase acdb = AcadDatabase.Active())
-        //    {
-        //        foreach (Entity line in lines)
-        //        {
-
-        //            var showPl = line.Clone() as Entity;
-        //            showPl.ColorIndex = ci;
-        //            showPl.LineWeight = lw;
-        //            acdb.ModelSpace.Add(showPl);
-        //        }
-        //    }
-        //}
-        //public static void ShowGeometry(Entity line, int ci, LineWeight lw = LineWeight.LineWeight025)
-        //{
-        //    using (AcadDatabase acdb = AcadDatabase.Active())
-        //    {
-
-        //        var showPl = line.Clone() as Entity;
-        //        showPl.ColorIndex = ci;
-        //        showPl.LineWeight = lw;
-        //        acdb.ModelSpace.Add(showPl);
-
-        //    }
-        //}
     }
 }

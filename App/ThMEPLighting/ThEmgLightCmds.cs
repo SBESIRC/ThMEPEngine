@@ -77,43 +77,33 @@ namespace ThMEPLighting
                     //获取车道线
                     var lanes = GetLanes(plFrame, acdb);
 
-                    //处理车道线
-                    var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
-                    var parkingLinesService = new ParkingLinesService();
-                    var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
-
-                    //将车道线排序,点按排序方向排列,合并连续线段
-                    List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
-
-                   bool debug = false;
-                    if ( debug == false)
+                    if (lanes.Count > 0)
                     {
-                        ////debug
-                        //foreach (List<Line> parkinglineString in parkingLines)
-                        //{
-                        //    InsertLightService.ShowGeometry(parkinglineString, 80);
-                        //}
+                        //处理车道线
+                        var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
+                        var parkingLinesService = new ParkingLinesService();
+                        var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
 
-                        //foreach (List<Line> parkinglineString in otherPLines)
-                        //{
+                        //将车道线排序,点按排序方向排列,合并连续线段
+                        List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
 
-                        //    InsertLightService.ShowGeometry(parkinglineString, 10);
+                        bool debug = false;
+                        if (debug == false)
+                        {
 
-                        //}
+                            //获取构建信息
+                            var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+                            GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
 
-                        //获取构建信息
-                        var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
-                        GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
+                            //主车道布置信息
+                            LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
+                            var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
 
+                            InsertLightService.InsertSprayBlock(layoutInfo);
 
-                        //主车道布置信息
-                        LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
-                        var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
-                  
-                        InsertLightService.InsertSprayBlock(layoutInfo);
-
-
+                        }
                     }
+                    
                 }
 
             }

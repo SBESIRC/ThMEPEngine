@@ -15,16 +15,16 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="line"></param>
         /// <param name="distance"></param>
         /// <returns></returns>
-        public static Polyline ExpandLine(Line line, double up, double right,double down,double left)
+        public static Polyline ExpandLine(Line line, double up, double right, double down, double left)
         {
             Vector3d lineDir = line.Delta.GetNormal();
             Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
-           
+
             //向前延伸
             Point3d p1 = line.StartPoint - lineDir * left + moveDir * up;
-            Point3d p2 = line.EndPoint + lineDir* right + moveDir * up;
+            Point3d p2 = line.EndPoint + lineDir * right + moveDir * up;
             Point3d p3 = line.EndPoint + lineDir * right - moveDir * down;
-            Point3d p4 = line.StartPoint - lineDir* left - moveDir * down;
+            Point3d p4 = line.StartPoint - lineDir * left - moveDir * down;
 
             Polyline polyline = new Polyline() { Closed = true };
             polyline.AddVertexAt(0, p1.ToPoint2D(), 0, 0, 0);
@@ -105,7 +105,7 @@ namespace ThMEPLighting.EmgLight.Service
 
             foreach (var line in newLines)
             {
-                linePolys.Add (ExpandLine(line, length, 0, 0, 0));
+                linePolys.Add(ExpandLine(line, length, 0, 0, 0));
 
             }
             return linePolys;

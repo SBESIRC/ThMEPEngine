@@ -12,30 +12,30 @@ namespace ThMEPLighting.EmgLight.Service
     public class StructureLayoutServiceLight
     {
         static double TolLight = 400;
-        
-        public  static void AddLayoutStructPt(List <Polyline> layoutList, List<Line> lane, ref Dictionary<Polyline, (Point3d, Vector3d)>  layoutPtInfo)
+
+        public static void AddLayoutStructPt(List<Polyline> layoutList, List<Line> lane, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
         {
-            (Point3d, Vector3d) layoutInfo ;
-            var laneDir = lane.Last().EndPoint - lane.First().StartPoint;
+            (Point3d, Vector3d) layoutInfo;
+            //var laneDir = (lane.Last().EndPoint - lane.First().StartPoint).GetNormal();
 
             foreach (var structure in layoutList)
             {
                 if (layoutPtInfo.ContainsKey(structure) == false)
                 {
-                    layoutInfo = GetLayoutPoint(structure, laneDir);
+                    layoutInfo = GetLayoutPoint(structure, lane);
                     layoutPtInfo.Add(structure, layoutInfo);
                 }
             }
         }
 
-            /// <summary>
-            /// 计算柱上排布点和方向
-            /// </summary>
-            /// <param name="column"></param>
-            /// <param name="pt"></param>
-            /// <param name="dir"></param>
-            /// <returns></returns>
-            public static (Point3d, Vector3d) GetLayoutPoint(Polyline structure, Vector3d laneDir)
+        /// <summary>
+        /// 计算柱上排布点和方向
+        /// </summary>
+        /// <param name="column"></param>
+        /// <param name="pt"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static (Point3d, Vector3d) GetLayoutPoint(Polyline structure, List<Line> lane)
         {
             Point3d sPt = structure.StartPoint;
             Point3d ePt = structure.EndPoint;
@@ -44,11 +44,13 @@ namespace ThMEPLighting.EmgLight.Service
             var layoutPt = new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0);
 
             //计算排布方向
-
             var StructDir = (ePt - sPt).GetNormal();
             var layoutDir = Vector3d.ZAxis.CrossProduct(StructDir);
-           
-            if (laneDir.DotProduct(StructDir) > 0)
+
+            distToLine(lane, layoutPt, out var prjPt);
+            var compareDir = (prjPt - layoutPt).GetNormal();
+
+            if (layoutDir.DotProduct(compareDir) < 0)
             {
                 layoutDir = -layoutDir;
             }
@@ -135,26 +137,26 @@ namespace ThMEPLighting.EmgLight.Service
         public static List<Polyline> breakWall(List<Polyline> walls)
         {
             List<Polyline> returnWalls = new List<Polyline>();
-            
+
             foreach (var wall in walls)
             {
                 Polyline restWall = wall;
                 bool doOnce = false;
                 while (restWall.Length > TolLight)
                 {
-                  Point3d breakPt= restWall.GetPointAtDist(TolLight);
+                    Point3d breakPt = restWall.GetPointAtDist(TolLight);
                     Polyline breakWall = new Polyline();
-                    breakWall.AddVertexAt(breakWall.NumberOfVertices, restWall.StartPoint.ToPoint2D() , 0, 0, 0);
+                    breakWall.AddVertexAt(breakWall.NumberOfVertices, restWall.StartPoint.ToPoint2D(), 0, 0, 0);
                     breakWall.AddVertexAt(breakWall.NumberOfVertices, breakPt.ToPoint2D(), 0, 0, 0);
                     returnWalls.Add(breakWall);
 
                     restWall.SetPointAt(0, breakPt.ToPoint2D());
                     doOnce = true;
                 }
-                
-                if (doOnce==true && restWall.Length> 0)
+
+                if (doOnce == true && restWall.Length > 0)
                 {
-                    returnWalls.Last().SetPointAt(returnWalls.Last().NumberOfVertices -1,restWall.EndPoint.ToPoint2D ());
+                    returnWalls.Last().SetPointAt(returnWalls.Last().NumberOfVertices - 1, restWall.EndPoint.ToPoint2D());
                 }
 
             }
@@ -343,7 +345,6 @@ namespace ThMEPLighting.EmgLight.Service
             Polyline lineTemp = new Polyline();
 
             midPoint = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
-            //InsertLightService.ShowGeometry (midPoint, 40);
             distToLine(lines, midPoint, out prjMidPt);
 
             // return distProject;
@@ -407,6 +408,25 @@ namespace ThMEPLighting.EmgLight.Service
 
             return bReturn;
         }
+
+        //public static void checkIfInLayout(List<Polyline> layout, Polyline column,bool otherSideLayout, ref List<(Polyline,bool)> uniformSideLayout)
+        //{
+        //    var connectLayout = layout.Where(x => x.StartPoint == column.StartPoint ||
+        //                            x.StartPoint == column.EndPoint ||
+        //                            x.EndPoint == column.StartPoint ||
+        //                            x.EndPoint == column.EndPoint).ToList();
+
+        //    if (connectLayout.Count > 0)
+        //    {
+        //        uniformSideLayout.Add((connectLayout.First(),otherSideLayout);
+        //    }
+        //    else
+        //    {
+        //        uniformSideLayout.Add((column, otherSideLayout));
+        //    }
+
+        //}
+
 
 
     }
