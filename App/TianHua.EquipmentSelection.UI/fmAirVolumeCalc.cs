@@ -26,11 +26,7 @@ namespace TianHua.FanSelection.UI
             InitializeComponent();
         }
 
-        private void BtnOK_Click(object sender, EventArgs e)
-        {
-
-        }
-
+ 
         public void InitForm(FanDataModel _FanDataModel)
         {
             var _Json = FuncJson.Serialize(_FanDataModel);

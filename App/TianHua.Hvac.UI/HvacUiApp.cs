@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using Linq2Acad;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHAVC.CAD;
 using ThMEPHVAC;
@@ -63,7 +64,9 @@ namespace TianHua.Hvac.UI
                     return;
                 }
 
-                ThDbModelFan DbFanModel = new ThDbModelFan(modelobjectid, lineobjects);
+                var simplifierCenterLines = new DBObjectCollection();
+                ThLaneLineSimplifier.Simplify(lineobjects,100.0).ForEach(l=> simplifierCenterLines.Add(l));
+                ThDbModelFan DbFanModel = new ThDbModelFan(modelobjectid, simplifierCenterLines);
                 ThFanInletOutletAnalysisEngine inAndOutAnalysisEngine = new ThFanInletOutletAnalysisEngine(DbFanModel);
                 inAndOutAnalysisEngine.InletAnalysis();
                 inAndOutAnalysisEngine.OutletAnalysis();
@@ -116,9 +119,14 @@ namespace TianHua.Hvac.UI
                 foreach (var oid in wallselectionresult.Value.GetObjectIds().ToList())
                 {
                     var obj = oid.GetDBObject();
-                    wallobjects.Add(obj);
+                    if (obj is Curve curveobj)
+                    {
+                        wallobjects.Add(curveobj);
+                    }
                 }
-                ThHolesAndValvesEngine holesAndValvesEngine = new ThHolesAndValvesEngine(DbFanModel, wallobjects, inoutductdrawengine.InletDuctWidth, inoutductdrawengine.OutletDuctWidth, inAndOutAnalysisEngine.InletCenterLineGraph, inAndOutAnalysisEngine.OutletCenterLineGraph);
+                var simplifierWallLines = new DBObjectCollection();
+                ThLaneLineSimplifier.Simplify(wallobjects, 100.0).ForEach(l=> simplifierWallLines.Add(l));
+                ThHolesAndValvesEngine holesAndValvesEngine = new ThHolesAndValvesEngine(DbFanModel, simplifierWallLines, inoutductdrawengine.InletDuctWidth, inoutductdrawengine.OutletDuctWidth, inAndOutAnalysisEngine.InletCenterLineGraph, inAndOutAnalysisEngine.OutletCenterLineGraph);
                 
                 if (inAndOutAnalysisEngine.InletAnalysisResult == AnalysisResultType.OK)
                 {

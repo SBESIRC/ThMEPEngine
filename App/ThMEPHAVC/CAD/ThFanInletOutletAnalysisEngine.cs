@@ -60,17 +60,8 @@ namespace ThMEPHAVC.CAD
             //进口处无连线
             if (InletCenterLineGraph.Edges.Count() == 0)
             {
-                if (FanModel.IntakeForm.Contains("上进") || FanModel.IntakeForm.Contains("下进"))
-                {
-                    InletAnalysisResult = AnalysisResultType.OK;
-                    return;
-                }
-                //非上进或下进，且进口处没有连线
-                else
-                {
-                    InletAnalysisResult = AnalysisResultType.Wrong_Empty;
-                    return;
-                }
+                InletAnalysisResult = AnalysisResultType.Wrong_Empty;
+                return;
             }
             //进口处有连线
             else
@@ -144,17 +135,8 @@ namespace ThMEPHAVC.CAD
             //出口处无连线
             if (OutletCenterLineGraph.Edges.Count() == 0)
             {
-                if (FanModel.IntakeForm.Contains("上出") || FanModel.IntakeForm.Contains("下出"))
-                {
-                    OutletAnalysisResult = AnalysisResultType.OK;
-                    return;
-                }
-                //直出，且出口处没有连线
-                else
-                {
-                    OutletAnalysisResult = AnalysisResultType.Wrong_Empty;
-                    return;
-                }
+                OutletAnalysisResult = AnalysisResultType.Wrong_Empty;
+                return;
             }
             //出口处有连线
             else

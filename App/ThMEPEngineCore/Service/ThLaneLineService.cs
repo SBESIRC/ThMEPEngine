@@ -41,6 +41,12 @@ namespace ThMEPEngineCore.Service
         /// <returns></returns>
         public List<List<Line>> CreateNodedParkingLines(Polyline roomPoly, List<Line> parkingLines, out List<List<Line>> otherPLins)
         {
+            otherPLins = new List<List<Line>>();
+            if (parkingLines.Count <= 0)
+            {
+                return new List<List<Line>>();
+            }
+
             parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>()
                 .Select(y => {
                     var dir = (y.EndPoint - y.StartPoint).GetNormal();
@@ -88,11 +94,14 @@ namespace ThMEPEngineCore.Service
         {
             List<Line> yPLines = new List<Line>();
             List<Line> xPLines = new List<Line>();
+            var maxLengthLine = parkingLines.OrderByDescending(x => x.Length).First();
+            var xAxis = (maxLengthLine.EndPoint - maxLengthLine.StartPoint).GetNormal();
+            var yAxis = Vector3d.ZAxis.CrossProduct(xAxis);
             foreach (var pLine in parkingLines)
             {
                 Vector3d pDir = (pLine.EndPoint - pLine.StartPoint).GetNormal();
-                double yDotValue = pDir.DotProduct(Vector3d.YAxis);
-                double xDotValue = pDir.DotProduct(Vector3d.XAxis);
+                double yDotValue = pDir.DotProduct(yAxis);
+                double xDotValue = pDir.DotProduct(xAxis);
                 if (Math.Abs(yDotValue) > Math.Abs(xDotValue))
                 {
                     yPLines.Add(pLine);
@@ -296,6 +305,7 @@ namespace ThMEPEngineCore.Service
 
             return resLines;
         }
+
         /// <summary>
         /// 将车道线创建为polyline
         /// </summary>

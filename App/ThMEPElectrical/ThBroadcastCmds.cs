@@ -20,6 +20,8 @@ using ThMEPElectrical.Broadcast.Service;
 using DotNetARX;
 using ThMEPElectrical.Business.Procedure;
 using ThMEPEngineCore.Service;
+using ThMEPElectrical.ConnectPipe;
+using ThMEPElectrical.BlockConvert;
 
 namespace ThMEPElectrical
 {
@@ -71,6 +73,10 @@ namespace ThMEPElectrical
 
                     //获取车道线
                     var lanes = GetLanes(plFrame, acdb);
+                    if (lanes.Count <= 0)
+                    {
+                        continue;
+                    }
 
                     //处理车道线
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
@@ -149,6 +155,58 @@ namespace ThMEPElectrical
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THLG", CommandFlags.Modal)]
+        public void ThBroadcastConnetPipe()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                acadDatabase.Database.UnFrozenLayer(ThMEPCommon.BroadcastLayerName);
+                acadDatabase.Database.UnLockLayer(ThMEPCommon.BroadcastLayerName);
+                acadDatabase.Database.UnOffLayer(ThMEPCommon.BroadcastLayerName);
+                List<Curve> frameLst = new List<Curve>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acadDatabase.Element<Polyline>(obj);
+                    var plFrame = ThMEPFrameService.Normalize(frame);
+                    frameLst.Add(plFrame);
+                }
+                var plines = HandleFrame(frameLst);
+                var holeInfo = CalHoles(plines);
+                foreach (var pline in holeInfo)
+                {
+                    //获取广播图块
+                    var broadcast = GetBroadcastBlocks(pline.Key);
+
+                    //获取车道线
+                    var lanes = GetLanes(pline.Key, acadDatabase);
+
+                    //处理车道线
+                    var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
+
+                    ConnetPipeService connetPipeService = new ConnetPipeService();
+                    connetPipeService.ConnetPipe(pline, handleLines, broadcast);
+                }
+            }
+        }
+
         /// <summary>
         /// 处理外包框线
         /// </summary>
@@ -165,6 +223,31 @@ namespace ThMEPElectrical
             }
 
             return resPLines;
+        }
+
+        /// <summary>
+        /// 计算外包框和其中的洞
+        /// </summary>
+        /// <param name="frames"></param>
+        /// <returns></returns>
+        private Dictionary<Polyline, List<Polyline>> CalHoles(List<Polyline> frames)
+        {
+            frames = frames.OrderByDescending(x => x.Area).ToList();
+
+            Dictionary<Polyline, List<Polyline>> holeDic = new Dictionary<Polyline, List<Polyline>>(); //外包框和洞口
+            while (frames.Count > 0)
+            {
+                var firFrame = frames[0];
+                frames.Remove(firFrame);
+
+                var bufferFrames = firFrame.Buffer(1)[0] as Polyline;
+                var holes = frames.Where(x => bufferFrames.Contains(x)).ToList();
+                frames.RemoveAll(x => holes.Contains(x));
+
+                holeDic.Add(firFrame, holes);
+            }
+
+            return holeDic;
         }
 
         /// <summary>
@@ -222,6 +305,44 @@ namespace ThMEPElectrical
                 arcWall.ForEach(x => objs.Add(x));
                 thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
                 walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList());
+            }
+        }
+
+        /// <summary>
+        /// 获取广播图块
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private List<BlockReference> GetBroadcastBlocks(Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThMEPCommon.BroadcastLayerName);
+                acadDatabase.Database.UnLockLayer(ThMEPCommon.BroadcastLayerName);
+                acadDatabase.Database.UnOffLayer(ThMEPCommon.BroadcastLayerName);
+
+                //获取广播
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filterlist = OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.LayerName) == ThMEPCommon.BroadcastLayerName &
+                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+                var braodcasts = new List<BlockReference>();
+                var allBraodcasts = Active.Editor.SelectAll(filterlist);
+                if (allBraodcasts.Status == PromptStatus.OK)
+                {
+                    using (AcadDatabase acdb = AcadDatabase.Active())
+                    {
+                        foreach (ObjectId obj in allBraodcasts.Value.GetObjectIds())
+                        {
+                            braodcasts.Add(acdb.Element<BlockReference>(obj));
+                        }
+                    }
+                }
+                var objs = new DBObjectCollection();
+                return braodcasts.Where(o => polyline.Contains(o.Position)).ToList();
             }
         }
 

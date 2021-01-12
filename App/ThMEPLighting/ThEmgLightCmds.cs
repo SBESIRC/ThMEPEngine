@@ -15,6 +15,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting
 {

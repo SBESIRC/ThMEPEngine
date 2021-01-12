@@ -18,6 +18,7 @@ namespace TianHua.AutoCAD.ThCui
                 {
                     var havcMenu = theMenu.AddSubMenu(-1, "暖通", "ID_THMEPTOOLSET_HAVC");
                     havcMenu.AddMenuItem(-1, "风机选型", "ID_THFJ");
+                    havcMenu.AddMenuItem(-1, "机房平面", "ID_THFJF");
                 }
                 {
                     var elecMenu = theMenu.AddSubMenu(-1, "电气", "ID_THMEPTOOLSET_ELECTRICAL");
