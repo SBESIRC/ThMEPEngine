@@ -33,10 +33,13 @@ namespace ThMEPEngineCore.Engine
                 {
                     curves = archWallDbExtension.WallCurves.ToCollection();
                 }
-                var results = ThArchitectureWallSimplifier.Normalize(curves);
-                results = ThArchitectureWallSimplifier.Simplify(results);
-                results = ThArchitectureWallSimplifier.BuildArea(results);
-                results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
+                if (curves.Count > 0)
+                {
+                    var results = ThArchitectureWallSimplifier.Normalize(curves);
+                    results = ThArchitectureWallSimplifier.Simplify(results);
+                    results = ThArchitectureWallSimplifier.BuildArea(results);
+                    results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
+                }
             }
         }
     }
