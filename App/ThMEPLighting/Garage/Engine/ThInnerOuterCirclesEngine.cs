@@ -29,11 +29,8 @@ namespace ThMEPLighting.Garage.Engine
             //单位化
             var dxNomalLines = new List<Line>();
             var fdxNomalLines = new List<Line>();
-            using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
-            {
-                splitLineTuple.Item1.ForEach(o => dxNomalLines.Add(o.Normalize()));
-                splitLineTuple.Item2.ForEach(o => fdxNomalLines.Add(o.Normalize()));
-            }
+            splitLineTuple.Item1.ForEach(o => dxNomalLines.Add(NormalizeLaneLine(o)));
+            splitLineTuple.Item2.ForEach(o => fdxNomalLines.Add(NormalizeLaneLine(o)));
             //创建非灯线的偏移
             fdxNomalLines.ForEach(o =>
             {
@@ -47,7 +44,7 @@ namespace ThMEPLighting.Garage.Engine
                 };
                 WireOffsetDatas.Add(offsetData);
             });
-            //从小汤车道线合并服务中获取合并的主道线，辅道线
+            //从小汤车道线合并服务中获取合并的主道线，辅道线            
             var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines);
             //mergeCurves.Print(5);
             //通过中心线往两侧偏移
@@ -58,6 +55,17 @@ namespace ThMEPLighting.Garage.Engine
             var dxWireOffsetDatas=ThFindFirstLinesService.Find(offsetCurves, offsetDistance);
             WireOffsetDatas.AddRange(dxWireOffsetDatas);
         }  
+
+        private Line NormalizeLaneLine(Line line,double tolerance=0.5)
+        {
+            var newLine = new Line(line.StartPoint,line.EndPoint);
+            if(Math.Abs(line.StartPoint.Y- line.EndPoint.Y)<= tolerance)
+            {
+                newLine = new Line(line.StartPoint, line.EndPoint);
+            }
+            return newLine.Normalize();
+        }
+
         private Tuple<List<Line>,List<Line>> Split(List<Line> dxLines, List<Line> fdxLines)
         {
             //在T型、十字型处分割线
