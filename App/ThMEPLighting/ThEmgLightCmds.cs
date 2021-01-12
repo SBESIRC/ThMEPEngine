@@ -87,6 +87,18 @@ namespace ThMEPLighting
                         //将车道线排序,点按排序方向排列,合并连续线段
                         List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
 
+
+                        for (int i = 0; i < mergedOrderedLane.Count; i++)
+                        {
+                            for (int j = 0; j < mergedOrderedLane[i].Count; j++)
+                            {
+                                InsertLightService.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), 161);
+                                //InsertLightService.ShowGeometry(OrderedMergedLane[i][j].EndPoint, string.Format("orderM {0}-{1}-end", i, j), 161);
+                            }
+                        }
+                        //InsertLightService.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), 20, LineWeight.LineWeight050);
+
+
                         bool debug = false;
                         if (debug == false)
                         {
