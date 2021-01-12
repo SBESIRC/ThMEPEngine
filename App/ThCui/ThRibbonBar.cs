@@ -41,6 +41,15 @@ namespace TianHua.AutoCAD.ThCui
                 "IDI_THCAD_THFJ_SMALL",
                 "IDI_THCAD_THFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
+
+            // 风机选型
+            row.AddNewButton("机房平面",
+                "天华机房平面",
+                "THFJF",
+                "",
+                "IDI_THCAD_THFJF_SMALL",
+                "IDI_THCAD_THFJF_LARGE",
+                RibbonButtonStyle.LargeWithText);
         }
         private static void CreateElectricPanel(RibbonTabSource tab)
         {
