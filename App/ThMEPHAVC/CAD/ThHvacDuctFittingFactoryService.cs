@@ -270,7 +270,7 @@ namespace ThMEPHVAC.CAD
         private DBObjectCollection CreateElbowCenterline(ThIfcDuctElbowParameters parameters)
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
-            var centerarc = new Arc(parameters.CenterPoint, parameters.PipeOpenWidth, 0, elbowengle);
+            var centerarc = new Arc(parameters.CenterPoint, 0.7 * parameters.PipeOpenWidth, 0, elbowengle);
             return new DBObjectCollection()
             {
                 centerarc,
@@ -290,8 +290,8 @@ namespace ThMEPHVAC.CAD
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
             //创建弯头内外侧圆弧
-            Arc outerarc = new Arc(parameters.CenterPoint, 1.5 * parameters.PipeOpenWidth, 0, elbowengle);
-            Arc innerarc = new Arc(parameters.CenterPoint, 0.5 * parameters.PipeOpenWidth, 0, elbowengle);
+            Arc outerarc = new Arc(parameters.CenterPoint, 1.2 * parameters.PipeOpenWidth, 0, elbowengle);
+            Arc innerarc = new Arc(parameters.CenterPoint, 0.2 * parameters.PipeOpenWidth, 0, elbowengle);
             //创建弯头两端的50mm延申段
             Line outerendextendline = new Line()
             {
@@ -352,8 +352,8 @@ namespace ThMEPHVAC.CAD
         {
             var elbowengle = parameters.ElbowDegree * Math.PI / 180;
             //创建弯头内外侧圆弧
-            Arc outerarc = new Arc(parameters.CenterPoint, 1.5 * parameters.PipeOpenWidth, 0, elbowengle);
-            Arc innerarc = new Arc(parameters.CenterPoint, 0.5 * parameters.PipeOpenWidth, 0, elbowengle);
+            Arc outerarc = new Arc(parameters.CenterPoint, 1.2 * parameters.PipeOpenWidth, 0, elbowengle);
+            Arc innerarc = new Arc(parameters.CenterPoint, 0.2 * parameters.PipeOpenWidth, 0, elbowengle);
             //创建弯头两端的50mm延申段
             Line outerendextendline = new Line()
             {

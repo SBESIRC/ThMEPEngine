@@ -49,7 +49,7 @@ namespace ThMEPEngineCore.Model.Hvac
         {
             Parameters = parameters;
             Parameters.CornerPoint = Point3d.Origin;
-            Parameters.CenterPoint = Parameters.CornerPoint + new Vector3d(-Parameters.PipeOpenWidth, -Math.Abs(Parameters.PipeOpenWidth * Math.Tan(0.5 * (Parameters.ElbowDegree * Math.PI / 180))), 0);
+            Parameters.CenterPoint = Parameters.CornerPoint + new Vector3d(-0.7 * Parameters.PipeOpenWidth, -Math.Abs(0.7 * Parameters.PipeOpenWidth * Math.Tan(0.5 * (Parameters.ElbowDegree * Math.PI / 180))), 0);
             var Bisectorvector = new Vector2d(Parameters.CenterPoint.X - Parameters.CornerPoint.X , Parameters.CenterPoint.Y - Parameters.CornerPoint.Y);
             Parameters.BisectorAngle = Bisectorvector.Angle;
         }
