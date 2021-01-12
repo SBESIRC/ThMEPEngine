@@ -94,8 +94,9 @@
     <Compile Include="ConnectPipe\Service\ConnectBroadcastService.cs" />
     <Compile Include="ConnectPipe\Service\GeUtils.cs" />
     <Compile Include="ConnectPipe\Service\MainLanesConnectPipeSrevice.cs" />
+    <Compile Include="ConnectPipe\Service\PathfindingByPointService.cs" />
     <Compile Include="ConnectPipe\Service\PathfindingUitlsService.cs" />
-    <Compile Include="ConnectPipe\Service\PathfindingWithDirUtils.cs" />
+    <Compile Include="ConnectPipe\Service\PathfindingWithDirServce.cs" />
     <Compile Include="Core\PackageManager.cs" />
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Geometry\ABBRectangle.cs" />

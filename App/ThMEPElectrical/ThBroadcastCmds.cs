@@ -208,6 +208,45 @@ namespace ThMEPElectrical
             }
         }
 
+        #region test
+        [CommandMethod("TIANHUACAD", "PlTest", CommandFlags.Modal)]
+        public void PlTest()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取块参照
+                var blocks = acadDatabase.ModelSpace
+                 .OfType<BlockReference>().ToList();
+
+                foreach (var block in blocks)
+                {
+                    var entities = GetEntity(block, acadDatabase);
+                    
+                }
+            }
+        }
+
+        private List<Entity> GetEntity(BlockReference blockReference, AcadDatabase acadDatabase)
+        {
+            List<Entity> entities = new List<Entity>();
+            var blockTRecord = acadDatabase.Element<BlockTableRecord>(blockReference.BlockTableRecord);
+            foreach (var objId in blockTRecord)
+            {
+                var rBlock = acadDatabase.Element<Entity>(objId);
+                if (rBlock is BlockReference bblock)
+                {
+                    entities.AddRange(GetEntity(bblock, acadDatabase));
+                }
+                else
+                {
+                    entities.Add(rBlock);
+                }
+            }
+
+            return entities;    
+        }
+        #endregion
+
         /// <summary>
         /// 处理外包框线
         /// </summary>
