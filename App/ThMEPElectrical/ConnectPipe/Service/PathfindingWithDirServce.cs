@@ -9,18 +9,20 @@ using ThMEPElectrical.ConnectPipe.Dijkstra;
 
 namespace ThMEPElectrical.ConnectPipe.Service
 {
-    public class PathfindingWithDirUtils
+    public class PathfindingWithDirServce
     {
         readonly double distance = 1500;      //1.5m内能可以连接
         readonly double moveLength = 200;     //副车道连接线要移动200  
         readonly double tolAngle = 0.2;       //0.2以内可以认为两条线平行
-        public Polyline Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<List<Polyline>> mainPolys, List<List<Polyline>> endingPolys, List<Polyline> fingdingPoly, List<Vector3d> dirs)
+        public Polyline Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<List<Polyline>> mainPolys, List<List<Polyline>> endingPolys, 
+            List<Polyline> fingdingPoly, List<Point3d> otherPLineBroadcast, List<Vector3d> dirs)
         {
             var sPts = GeUtils.FindingPolyPoints(fingdingPoly);
             var polyPts = mainPolys.Select(x => GeUtils.FindingPolyPoints(x)).ToList();
             var checkPolys = endingPolys.SelectMany(x => x).ToList();
 
             List<Polyline> firstConnectPoly = new List<Polyline>();
+            List<Polyline> secondConnectPoly = new List<Polyline>();
             List<Polyline> LowestConnectPoly = new List<Polyline>();
             //计算连接线
             for (int i = 0; i < polyPts.Count; i++)
@@ -59,15 +61,23 @@ namespace ThMEPElectrical.ConnectPipe.Service
                         {
                             firstConnectPoly.Add(connectPoly);
                         }
+                        if (CalFirstConnectByOtherPLines(otherPLineBroadcast, connectPoly))
+                        {
+                            secondConnectPoly.Add(connectPoly);
+                        }
                         LowestConnectPoly.Add(connectPoly);
                     }
                 }
             }
 
-            //计算连接线中最短连接线（优先上下连接，最低优先级没有规则）
+            //计算连接线中最短连接线（优先上下连接，其次根据副车道点位连接，最低优先级没有规则）
             if (firstConnectPoly.Count > 0)
             {
                 return CalShortestLength(firstConnectPoly, checkPolys);
+            }
+            else if (secondConnectPoly.Count > 0)
+            {
+                return CalShortestLength(secondConnectPoly, checkPolys);
             }
             else
             {
@@ -100,6 +110,30 @@ namespace ThMEPElectrical.ConnectPipe.Service
             }
 
             return maxPoly;
+        }
+
+        /// <summary>
+        /// 优先根据副车道点位选出连接线（如果连接线穿过副车道点位优先选择）
+        /// </summary>
+        /// <param name="broadcasts"></param>
+        /// <param name="connectPoly"></param>
+        /// <returns></returns>
+        private bool CalFirstConnectByOtherPLines(List<Point3d> broadcasts, Polyline connectPoly)
+        {
+            var connectPt = broadcasts.Where(x =>
+            {
+                var closetPt = connectPoly.GetClosestPointTo(x, false);
+                if (closetPt.DistanceTo(x) < distance)
+                {
+                    return true;
+                }
+                return false;
+            }).ToList();
+            if (connectPt.Count > 0)
+            {
+                return true;
+            }
+            return false;
         }
 
         /// <summary>

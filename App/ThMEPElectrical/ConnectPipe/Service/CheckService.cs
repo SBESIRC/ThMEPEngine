@@ -21,6 +21,16 @@ namespace ThMEPElectrical.ConnectPipe.Service
         }
 
         /// <summary>
+        /// 检查副车道连接线
+        /// </summary>
+        /// <returns></returns>
+        public static bool CheckOtherConnectLines(KeyValuePair<Polyline, List<Polyline>> holeInfo, Polyline usePoly, List<Polyline> endingPolys)
+        {
+            return CheckUsefulLine(usePoly, endingPolys) && CheckFrameLine(holeInfo.Key, usePoly) &&
+                CheckHolesLine(holeInfo.Value, usePoly) && CheckConnectPtNum(usePoly.EndPoint, endingPolys);
+        }
+
+        /// <summary>
         /// 判断该线是否与洞口相交
         /// </summary>
         /// <param name="polyline"></param>
@@ -69,6 +79,20 @@ namespace ThMEPElectrical.ConnectPipe.Service
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// 检查一个连接点最多只能有四个连接线
+        /// </summary>
+        /// <param name="connectPt"></param>
+        /// <param name="endingPolys"></param>
+        /// <returns></returns>
+        public static bool CheckConnectPtNum(Point3d connectPt, List<Polyline> endingPolys)
+        {
+            var checkPolys = endingPolys.Where(x => x.StartPoint.IsEqualTo(connectPt, new Tolerance(1, 1)) ||
+                 x.EndPoint.IsEqualTo(connectPt, new Tolerance(1, 1)))
+                .ToList();
+            return checkPolys.Count < 4;
         }
     }
 }

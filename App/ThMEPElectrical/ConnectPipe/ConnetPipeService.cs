@@ -38,6 +38,7 @@ namespace ThMEPElectrical.ConnectPipe
                 .ToDictionary(x => x.Key, y => y.Value);
             var otherParkingPolysDic = GetBroadcastWithParkingLine(otherParkingPolys, broadcasts);
 
+            //连接车道线广播
             ConnectBroadcastService connectBroadcastService = new ConnectBroadcastService();
             connectBroadcastService.ConnectBroadcast(plInfo, mainParkingPolysDic, otherParkingPolysDic);
 
@@ -90,7 +91,7 @@ namespace ThMEPElectrical.ConnectPipe
                     return true;
                 }
 
-                return true;
+                return false;
             }).ToList();
         }
     }
