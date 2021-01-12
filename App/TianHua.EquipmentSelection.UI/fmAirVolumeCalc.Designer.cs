@@ -121,7 +121,7 @@
             this.BtnOK.StyleController = this.layoutControl1;
             this.BtnOK.TabIndex = 33;
             this.BtnOK.Text = "确定";
-            this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
+            //this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
             // 
             // Gdc
             // 
