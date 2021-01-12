@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThMEPElectrical.ConnectPipe.Model;
 using ThMEPElectrical.ConnectPipe.Service;
+using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical.ConnectPipe

@@ -103,7 +103,6 @@
     <Compile Include="Geometry\GeomUtils.cs" />
     <Compile Include="Geometry\MinRectangle.cs" />
     <Compile Include="Geometry\MPolygonProfileFinder.cs" />
-    <Compile Include="Lane\ThLaneDbExtension.cs" />
     <Compile Include="Layout\ILayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamLayout.cs" />
     <Compile Include="Layout\MBeamLayout\MainBeamPolygonLayout.cs" />

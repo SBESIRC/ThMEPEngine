@@ -19,6 +19,7 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.ParkingStall.Geometry;
 using ThMEPLighting.ParkingStall.Worker.LightAdjustor;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPLighting.ParkingStall.Core
 {

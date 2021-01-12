@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.Service
+namespace ThMEPEngineCore.LaneLine
 {
     public class ParkingLinesService
     {

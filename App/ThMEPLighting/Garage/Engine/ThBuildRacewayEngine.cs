@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using EndCapStyle = NetTopologySuite.Operation.Buffer.EndCapStyle;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPLighting.Garage.Engine
 {

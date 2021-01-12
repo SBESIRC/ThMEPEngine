@@ -195,7 +195,7 @@
     <Compile Include="Service\Hvac\ThHvacDbModelManager.cs" />
     <Compile Include="Service\Hvac\ThHvacCommon.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelExtension.cs" />
-    <Compile Include="Service\ThLaneLineService.cs" />
+    <Compile Include="LaneLine\ThLaneLineService.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
@@ -219,7 +219,7 @@
     <Compile Include="Extension\ThIfcBeamExtension.cs" />
     <Compile Include="Service\ThGravityWaterBucketDbExtension.cs" />
     <Compile Include="Service\ThGravityWaterBucketLayerManager.cs" />
-    <Compile Include="Service\ThLaneLineSimplifier.cs" />
+    <Compile Include="LaneLine\ThLaneLineSimplifier.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
     <Compile Include="Service\ThLineBeamOutliner.cs" />

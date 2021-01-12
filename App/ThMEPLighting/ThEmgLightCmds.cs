@@ -16,6 +16,7 @@ using ThMEPEngineCore.Service;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.Common;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPLighting
 {
