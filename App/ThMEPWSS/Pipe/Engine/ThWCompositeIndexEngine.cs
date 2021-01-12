@@ -10,23 +10,21 @@ namespace ThMEPWSS.Pipe.Engine
     public class ThWCompositeIndexEngine : IDisposable
     {
         public ThWInnerPipeIndexEngine PipeEngine { get; set; }
-        public List<List<Point3dCollection>> FpipeDublicated { get; set; }
-
-
+        public List<List<Point3dCollection>> FpipeDublicated { get; set; }    
         public void Dispose()
         {
         }
         public ThWCompositeIndexEngine(ThWInnerPipeIndexEngine pipeEngine)
         {
             PipeEngine = pipeEngine;
-            FpipeDublicated = new List<List<Point3dCollection>>();
+            FpipeDublicated = new List<List<Point3dCollection>>();          
         }
 
         public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary, List<Line> divideLines, List<Polyline> roofrainpipe,Point3d toiletPoint,Point3d balconyPoint, ThCADCoreNTSSpatialIndex obstacle)
         {
             PipeEngine.Run(fpipe,tpipe, wpipe, ppipe,dpipe, npipe,rainpipe,pboundary,divideLines, roofrainpipe, toiletPoint, balconyPoint, obstacle);
             FpipeDublicated = GetDublicated(PipeEngine.Fpipeindex, PipeEngine.Tpipeindex, PipeEngine.Wpipeindex, PipeEngine.Ppipeindex, PipeEngine.Dpipeindex, PipeEngine.Npipeindex, PipeEngine.Rainpipeindex, PipeEngine.RoofRainpipeindex) ;
-           
+                  
         }
         private static List<List<Point3dCollection>> GetDublicated(List<Point3dCollection> pipe1,List<Point3dCollection> pipe2, List<Point3dCollection> pipe3,List<Point3dCollection> pipe4,  List<Point3dCollection> pipe5, List<Point3dCollection> pipe6, List<Point3dCollection> pipe7, List<Point3dCollection> pipe8)
         {
@@ -90,6 +88,7 @@ namespace ThMEPWSS.Pipe.Engine
                         column.Add(pipe);
                     }
                 }
+
                 result.Add(Getorder(column));//区间组合
             }
             return result;
@@ -164,7 +163,7 @@ namespace ThMEPWSS.Pipe.Engine
                         pipes[j] = temp;
                     }
                 }
-            }
+            }      
             return pipes;
         }
     }
