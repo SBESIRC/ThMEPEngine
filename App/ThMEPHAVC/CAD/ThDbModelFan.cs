@@ -114,6 +114,8 @@ namespace ThMEPHVAC.CAD
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
                     .First().Value) * 180 / Math.PI;
+            double blockrotation = Data.Rotation * 180 / Math.PI;
+            double totalrotation = angle2Property + blockrotation > 360 ? angle2Property + blockrotation - 360 : angle2Property + blockrotation;
             if (Model.IsRawAXIALModel())
             {
                 var redius = Convert.ToDouble(Data.CustomProperties
@@ -125,7 +127,7 @@ namespace ThMEPHVAC.CAD
                     IsCircleOpening = true,
                     Width = redius,
                     Height = redius,
-                    Angle = angle2Property <= 270 ? angle2Property + 90 : angle2Property - 180 - 90
+                    Angle = totalrotation <= 270 ? totalrotation + 90 : totalrotation - 180 - 90
                 };
             }
             else
@@ -144,11 +146,11 @@ namespace ThMEPHVAC.CAD
                     };
                     if (blockname.Contains("直进"))
                     {
-                        fanopening.Angle = angle2Property <= 180 ? angle2Property + 180 : angle2Property - 180;
+                        fanopening.Angle = totalrotation <= 180 ? totalrotation + 180 : totalrotation - 180;
                     }
                     else
                     {
-                        fanopening.Angle = angle2Property <= 270 ? angle2Property + 90 : angle2Property - 180 - 90;
+                        fanopening.Angle = totalrotation <= 270 ? totalrotation + 90 : totalrotation - 180 - 90;
                     }
                     return fanopening;
                 }
@@ -157,7 +159,7 @@ namespace ThMEPHVAC.CAD
                     return new FanOpening()
                     {
                         IsCircleOpening = false,
-                        Angle = angle2Property,
+                        Angle = totalrotation,
                         Height = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL)
@@ -177,6 +179,8 @@ namespace ThMEPHVAC.CAD
                     .Cast<DynamicBlockReferenceProperty>()
                     .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ANGLE2)
                     .First().Value) * 180 / Math.PI;
+            double blockrotation = Data.Rotation * 180 / Math.PI;
+            double totalrotation = angle2Property + blockrotation > 360 ? angle2Property + blockrotation - 360 : angle2Property + blockrotation;
             if (Model.IsRawAXIALModel())
             {
                 var redius = Convert.ToDouble(Data.CustomProperties
@@ -188,7 +192,7 @@ namespace ThMEPHVAC.CAD
                     IsCircleOpening = true,
                     Width = redius,
                     Height = redius,
-                    Angle = angle2Property < 90 ? angle2Property + 270 : angle2Property - 90
+                    Angle = totalrotation < 90 ? totalrotation + 270 : totalrotation - 90
                 };
             }
             else
@@ -200,7 +204,7 @@ namespace ThMEPHVAC.CAD
                     {
                         IsCircleOpening = false,
                         Height = 0,
-                        Angle = angle2Property,
+                        Angle = totalrotation,
                         Width = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)
@@ -212,7 +216,7 @@ namespace ThMEPHVAC.CAD
                     return new FanOpening()
                     {
                         IsCircleOpening = false,
-                        Angle = angle2Property,
+                        Angle = totalrotation,
                         Height = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
                         .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL)
