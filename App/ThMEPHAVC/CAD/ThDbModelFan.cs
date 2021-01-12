@@ -146,11 +146,23 @@ namespace ThMEPHVAC.CAD
                     };
                     if (blockname.Contains("直进"))
                     {
-                        fanopening.Angle = totalrotation <= 180 ? totalrotation + 180 : totalrotation - 180;
+                        fanopening.Angle = totalrotation < 180 ? totalrotation + 180 : totalrotation - 180;
                     }
                     else
                     {
-                        fanopening.Angle = totalrotation <= 270 ? totalrotation + 90 : totalrotation - 180 - 90;
+                        string BlockFliped = Data.CustomProperties
+                        .Cast<DynamicBlockReferenceProperty>()
+                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2)
+                        .First().Value.ToString();
+                        var realrotationangle = totalrotation == 270 ? totalrotation + 90 : totalrotation - 180 - 90;
+                        if (BlockFliped == "1")
+                        {
+                            fanopening.Angle = realrotationangle < 180 ? realrotationangle + 180 : realrotationangle - 180;
+                        }
+                        else
+                        {
+                            fanopening.Angle = realrotationangle;
+                        }
                     }
                     return fanopening;
                 }
