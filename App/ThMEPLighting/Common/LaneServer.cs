@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using System.Linq;
 
-namespace ThMEPLighting.EmgLight.Service
+namespace ThMEPLighting.Common
 {
     public class LaneServer
     {
@@ -56,7 +56,7 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     nodeCollection.Remove(path.First().StartPoint);
                     nodeCollection.Remove(path.Last().EndPoint);
-                    
+
                 }
 
                 orderedMergedLanes.AddRange(optimalOrderedMergedLanes);
@@ -65,14 +65,14 @@ namespace ThMEPLighting.EmgLight.Service
 
 
 
-            for (int i = 0; i < orderedMergedLanes.Count; i++)
-            {
-                for (int j = 0; j < orderedMergedLanes[i].Count; j++)
-                {
-                    InsertLightService.ShowGeometry(orderedMergedLanes[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), 161);
-                    //InsertLightService.ShowGeometry(OrderedMergedLane[i][j].EndPoint, string.Format("orderM {0}-{1}-end", i, j), 161);
-                }
-            }
+            //for (int i = 0; i < orderedMergedLanes.Count; i++)
+            //{
+            //    for (int j = 0; j < orderedMergedLanes[i].Count; j++)
+            //    {
+            //        InsertLightService.ShowGeometry(orderedMergedLanes[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), 161);
+            //        //InsertLightService.ShowGeometry(OrderedMergedLane[i][j].EndPoint, string.Format("orderM {0}-{1}-end", i, j), 161);
+            //    }
+            //}
 
             return orderedMergedLanes;
         }
@@ -181,13 +181,13 @@ namespace ThMEPLighting.EmgLight.Service
             return bReturn;
         }
 
-        private static List<List<Line>> findOptimalLanes(List<List<Line>> orderedMergedLanesPart, Dictionary<Point3d, List<ThLightEdge>>  nodeCollection, Point3d startPoint)
+        private static List<List<Line>> findOptimalLanes(List<List<Line>> orderedMergedLanesPart, Dictionary<Point3d, List<ThLightEdge>> nodeCollection, Point3d startPoint)
         {
             List<List<List<Line>>> allOrderedMergedLanes = new List<List<List<Line>>>();
 
             allOrderedMergedLanes.Add(orderedMergedLanesPart);
 
-           
+
 
             //找到各线段终点并重新计算
             foreach (var path in orderedMergedLanesPart)
@@ -209,22 +209,22 @@ namespace ThMEPLighting.EmgLight.Service
             }
 
             //找到车道线分段最少的为最优解
-          var  minCount = allOrderedMergedLanes[0].Count;
-          var minIndex = 0;
-          for (int i =0; i< allOrderedMergedLanes.Count;i++)
+            var minCount = allOrderedMergedLanes[0].Count;
+            var minIndex = 0;
+            for (int i = 0; i < allOrderedMergedLanes.Count; i++)
             {
-                if (allOrderedMergedLanes[i].Count < minCount )
+                if (allOrderedMergedLanes[i].Count < minCount)
                 {
                     minCount = allOrderedMergedLanes[i].Count;
                     minIndex = i;
                 }
-                InsertLightService.ShowGeometry(allOrderedMergedLanes[i][0][0].StartPoint, string.Format("allOrdered - Start {0}", i), 20);
+                //InsertLightService.ShowGeometry(allOrderedMergedLanes[i][0][0].StartPoint, string.Format("allOrdered - Start {0}", i), 20);
             }
 
-         var ba =   allOrderedMergedLanes.Where (a=>a.Count == (allOrderedMergedLanes.Select(x => x.Count).Min())).ToList ()[0];
+            var ba = allOrderedMergedLanes.Where(a => a.Count == (allOrderedMergedLanes.Select(x => x.Count).Min())).ToList()[0];
 
+            //InsertLightService.ShowGeometry(allOrderedMergedLanes[minIndex][0][0].StartPoint, string.Format("final start!!!"), 20, LineWeight.LineWeight050);
 
-            InsertLightService.ShowGeometry(allOrderedMergedLanes[minIndex][0][0].StartPoint, string.Format("final start!!!"), 20,LineWeight.LineWeight050);
             return allOrderedMergedLanes[minIndex];
         }
     }
