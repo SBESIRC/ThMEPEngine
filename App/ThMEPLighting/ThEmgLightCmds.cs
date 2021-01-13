@@ -77,6 +77,9 @@ namespace ThMEPLighting
                     //获取车道线
                     var lanes = GetLanes(plFrame, acdb);
 
+
+                  
+
                     if (lanes.Count > 0)
                     {
                         //处理车道线
@@ -185,6 +188,32 @@ namespace ThMEPLighting
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
         }
+
+        //public void THExtractArchWall()
+        //{
+        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
+        //    using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+        //    {
+        //        var result = Active.Editor.GetEntity("\n选择框线");
+        //        if (result.Status != PromptStatus.OK)
+        //        {
+        //            return;
+        //        }
+        //        Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+        //        archWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
+        //        archWallEngine.Elements.ForEach(o =>
+        //        {
+        //            if (o.Outline is Curve curve)
+        //            {
+        //                acadDatabase.ModelSpace.Add(curve.WashClone());
+        //            }
+        //            else if (o.Outline is MPolygon mPolygon)
+        //            {
+        //                acadDatabase.ModelSpace.Add(mPolygon);
+        //            }
+        //        });
+        //    }
+        //}
 
 
     }

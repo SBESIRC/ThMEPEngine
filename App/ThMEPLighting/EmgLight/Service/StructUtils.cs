@@ -10,21 +10,29 @@ namespace ThMEPLighting.EmgLight.Service
     class StructUtils
     {
         /// <summary>
-        /// 扩张line成polyline
+        /// 扩张line成polyline, 以线方向为准
+        /// P1-----------------P2
+        /// |      left        |
+        /// |down [s====>e] up |
+        /// |      right       |
+        /// P4-----------------P3
         /// </summary>
         /// <param name="line"></param>
-        /// <param name="distance"></param>
+        /// <param name="left"></param>
+        /// <param name="up"></param>
+        /// <param name="right"></param>
+        /// <param name="down"></param>
         /// <returns></returns>
-        public static Polyline ExpandLine(Line line, double up, double right, double down, double left)
+        public static Polyline ExpandLine(Line line, double left, double up, double right, double down)
         {
             Vector3d lineDir = line.Delta.GetNormal();
             Vector3d moveDir = Vector3d.ZAxis.CrossProduct(lineDir);
 
             //向前延伸
-            Point3d p1 = line.StartPoint - lineDir * left + moveDir * up;
-            Point3d p2 = line.EndPoint + lineDir * right + moveDir * up;
-            Point3d p3 = line.EndPoint + lineDir * right - moveDir * down;
-            Point3d p4 = line.StartPoint - lineDir * left - moveDir * down;
+            Point3d p1 = line.StartPoint - lineDir * down + moveDir * left;
+            Point3d p2 = line.EndPoint + lineDir * up + moveDir * left;
+            Point3d p3 = line.EndPoint + lineDir * up - moveDir * right;
+            Point3d p4 = line.StartPoint - lineDir * down - moveDir * right;
 
             Polyline polyline = new Polyline() { Closed = true };
             polyline.AddVertexAt(0, p1.ToPoint2D(), 0, 0, 0);
