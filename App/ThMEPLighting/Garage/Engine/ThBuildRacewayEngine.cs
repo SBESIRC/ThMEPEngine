@@ -42,20 +42,38 @@ namespace ThMEPLighting.Garage.Engine
             using (var acadDb = AcadDatabase.Active())
             {
                 var lineObjs = new DBObjectCollection();
-                Lines.ForEach(o=> lineObjs.Add(o));
-                var centerLines = ThLaneLineSimplifier.Simplify(lineObjs, 100.0);               
+                Lines.ForEach(o => lineObjs.Add(o));
+                var centerLines = ThLaneLineSimplifier.Simplify(lineObjs, 100.0);
                 var dbObjs = new DBObjectCollection();
                 centerLines.ForEach(o => dbObjs.Add(o));
                 var bufferObjs = dbObjs.LineMerge().Buffer(Width / 2.0, EndCapStyle.Flat);
                 var sideParameter = new ThFindSideLinesParameter
                 {
-                    CenterLines= centerLines,
-                    SideLines= bufferObjs.GetLines(),
+                    CenterLines = centerLines,
+                    SideLines = bufferObjs.GetLines(),
                     HalfWidth = Width / 2.0
                 };
+                //查找合并线buffer后，获取中心线对应的两边线槽线
                 var instane = ThFindSideLinesService.Find(sideParameter);
-                CenterWithSides = instane.SideLinesDic;
                 CenterWithPorts = instane.PortLinesDic;
+                //用中心线分割合并的线槽
+                ThCableTrayCutService.Cut(instane.SideLinesDic, Width);
+                var sidelines = new List<Line>();
+                instane.SideLinesDic.ForEach(o => sidelines.AddRange(o.Value));
+                var splitCenterLines = new List<Line>();
+                using (var splitEngine=new ThSplitLineEngine(instane.SideLinesDic.Select(o=>o.Key).ToList()))
+                {
+                    splitEngine.Split();
+                    splitEngine.Results.ForEach(o=>splitCenterLines.AddRange(o.Value));
+                }
+                var newSideParameter = new ThFindSideLinesParameter
+                {
+                    CenterLines = splitCenterLines,
+                    SideLines = sidelines,
+                    HalfWidth = Width / 2.0
+                };       
+                //对中心线分割后，找到其对应的两边
+                CenterWithSides = ThFindCenterPairLinesService.Find(newSideParameter);
             }
         }
         public ObjectIdList CreateGroup(ThRacewayParameter layerParameter)

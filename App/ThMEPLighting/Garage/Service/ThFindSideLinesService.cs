@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -14,25 +15,19 @@ namespace ThMEPLighting.Garage.Service
         public Dictionary<Line, List<Line>> SideLinesDic { get; set; }
         public Dictionary<Line, List<Line>> PortLinesDic { get; set; }
 
-        private ThFindSideLinesParameter FindParameter { get; set; }
+        protected ThFindSideLinesParameter FindParameter { get; set; }
 
-        private ThCADCoreNTSSpatialIndex SideSpatialIndex { get; set; }
+        protected ThCADCoreNTSSpatialIndex SideSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex CenterSpatialIndex { get; set; }
-        private double SideTolerance = 1.0;
+        protected double SideTolerance = 1.0;
 
-        private ThFindSideLinesService(ThFindSideLinesParameter findParameter)
+        protected ThFindSideLinesService(ThFindSideLinesParameter findParameter)
         {
             FindParameter = findParameter;
             SideLinesDic = new Dictionary<Line, List<Line>>();
             PortLinesDic = new Dictionary<Line, List<Line>>();
-            SideSpatialIndex = BuildSpatialIndex(FindParameter.SideLines);
-            CenterSpatialIndex = BuildSpatialIndex(FindParameter.CenterLines);
-        }
-        private ThCADCoreNTSSpatialIndex BuildSpatialIndex(List<Line> lines)
-        {
-            DBObjectCollection objs = new DBObjectCollection();
-            lines.ForEach(o => objs.Add(o));
-            return new ThCADCoreNTSSpatialIndex(objs);
+            SideSpatialIndex = ThGarageLightUtils.BuildSpatialIndex(FindParameter.SideLines);
+            CenterSpatialIndex = ThGarageLightUtils.BuildSpatialIndex(FindParameter.CenterLines);
         }
         public static ThFindSideLinesService Find(ThFindSideLinesParameter findParameter)
         {
@@ -124,7 +119,7 @@ namespace ThMEPLighting.Garage.Service
             return false;
         }
 
-        private bool DistanceIsValid(Line first,Line second)
+        protected bool DistanceIsValid(Line first,Line second)
         {
             double dis = first.Distance(second);
             return dis >= (FindParameter.HalfWidth - SideTolerance / 2.0) &&
