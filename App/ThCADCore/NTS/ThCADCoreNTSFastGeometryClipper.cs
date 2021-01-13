@@ -570,13 +570,19 @@ namespace ThCADCore.NTS
         /** Builds a linear ring representing the clipping area */
         public LinearRing buildBoundsString(GeometryFactory gf)
         {
-            var coordinates = new List<Coordinate>();
-            coordinates.Add(new Coordinate(xmin, ymin));
-            coordinates.Add(new Coordinate(xmin, ymax));
-            coordinates.Add(new Coordinate(xmax, ymax));
-            coordinates.Add(new Coordinate(xmax, ymin));
-            coordinates.Add(new Coordinate(xmin, ymin));
-            return gf.CreateLinearRing(coordinates.ToArray());
+            CoordinateSequence cs = gf.CoordinateSequenceFactory.Create(5, 2);
+
+            cs.SetOrdinate(0, 0, xmin);
+            cs.SetOrdinate(0, 1, ymin);
+            cs.SetOrdinate(1, 0, xmin);
+            cs.SetOrdinate(1, 1, ymax);
+            cs.SetOrdinate(2, 0, xmax);
+            cs.SetOrdinate(2, 1, ymax);
+            cs.SetOrdinate(3, 0, xmax);
+            cs.SetOrdinate(3, 1, ymin);
+            cs.SetOrdinate(4, 0, xmin);
+            cs.SetOrdinate(4, 1, ymin);
+            return gf.CreateLinearRing(cs.ToCoordinateArray());
         }
 
         /** Recursively clips a collection */
@@ -681,6 +687,7 @@ namespace ThCADCore.NTS
 
             // grab all the factories a
             GeometryFactory gf = line.Factory;
+            CoordinateSequenceFactory csf = gf.CoordinateSequenceFactory;
             CoordinateSequence coords = line.CoordinateSequence;
 
             // first step
@@ -724,10 +731,12 @@ namespace ThCADCore.NTS
                             double[] clippedSegment = clipSegment(segment);
                             if (clippedSegment != null)
                             {
-                                var coordinates = new List<Coordinate>();
-                                coordinates.Add(new Coordinate(clippedSegment[0], clippedSegment[1]));
-                                coordinates.Add(new Coordinate(clippedSegment[2], clippedSegment[3]));
-                                clipped.Add(gf.CreateLineString(coordinates.ToArray()));
+                                CoordinateSequence cs = csf.Create(2, coords.Dimension, coords.Measures);
+                                cs.SetOrdinate(0, 0, clippedSegment[0]);
+                                cs.SetOrdinate(0, 1, clippedSegment[1]);
+                                cs.SetOrdinate(1, 0, clippedSegment[2]);
+                                cs.SetOrdinate(1, 1, clippedSegment[3]);
+                                clipped.Add(gf.CreateLineString(cs.ToCoordinateArray()));
                             }
                         }
                     }
@@ -791,18 +800,20 @@ namespace ThCADCore.NTS
                 if (cs0.GetOrdinate(0, 0) == cs1.GetOrdinate(cs1.Count - 1, 0)
                         && cs0.GetOrdinate(0, 1) == cs1.GetOrdinate(cs1.Count - 1, 1))
                 {
-                    var cs = new List<Coordinate>();
+                    var cs = csf.Create(cs0.Count + cs1.Count - 1, 2);
                     for (int i = 0; i < cs1.Count; i++)
                     {
-                        cs.Add(new Coordinate(cs1.GetOrdinate(i, 0), cs1.GetOrdinate(i, 1)));
+                        cs.SetOrdinate(i, 0, cs1.GetOrdinate(i, 0));
+                        cs.SetOrdinate(i, 1, cs1.GetOrdinate(i, 1));
                     }
                     for (int i = 1; i < cs0.Count; i++)
                     {
-                        cs.Add(new Coordinate(cs1.GetOrdinate(i + cs1.Count - 1, 0), cs1.GetOrdinate(i + cs1.Count - 1, 1)));
+                        cs.SetOrdinate(i + cs1.Count - 1, 0, cs0.GetOrdinate(i, 0));
+                        cs.SetOrdinate(i + cs1.Count - 1, 1, cs0.GetOrdinate(i, 1));
                     }
                     clipped.RemoveAt(0);
                     clipped.RemoveAt(clipped.Count - 1);
-                    clipped.Add(gf.CreateLineString(cs.ToArray()));
+                    clipped.Add(gf.CreateLineString(cs.ToCoordinateArray()));
                 }
             }
 
