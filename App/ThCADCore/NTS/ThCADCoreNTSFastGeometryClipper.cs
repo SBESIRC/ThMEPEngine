@@ -669,7 +669,7 @@ namespace ThCADCore.NTS
             var coordinates = new List<Coordinate>();
             for(int i = 0; i < ordinates.Count; i+=2)
             {
-                coordinates.Add(new Coordinate(i, i + 1));
+                coordinates.Add(new Coordinate(ordinates[i], ordinates[i + 1]));
             }
             return coordinates.ToArray();
         }
