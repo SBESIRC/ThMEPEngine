@@ -185,6 +185,10 @@ namespace ThMEPLighting.Common
         {
             return lines.Where(o => line.IsCoincide(o, tolerance)).Any();
         }    
+        public static bool IsContains(this List<Point3d> pts,Point3d pt ,double tolerance=1.0)
+        {
+            return pts.Where(o => pt.DistanceTo(o)<=tolerance).Any();
+        }
         public static bool HasCommon(this Line first,Line second,double tolerance=1.0)
         {
             if(first.Length==0.0 || second.Length==0.0)
