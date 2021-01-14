@@ -97,16 +97,24 @@ namespace ThMEPHVAC.Entity
         }
 
         //设置机房内管段阀组
-        private List<ThValve> SetInnerValveGroup(string fanlayer)
+        private List<ThValve> SetInnerValveGroup(string fanlayer, ValveGroupPosionType valveposiontype)
         {
             List<ThValve> valves = new List<ThValve>();
 
             var hole = CreateHole();
-            var firevalve = CreateFireValve(fanlayer);
             hole.ValveOffsetFromCenter = -hole.Length;
+            var firevalve = CreateFireValve(fanlayer);
             firevalve.ValveOffsetFromCenter = 0;
-            valves.AddRange(new List<ThValve> { firevalve, hole });
+            var checkvalve = CreateCheckValve(fanlayer, valveposiontype);
+            checkvalve.ValveOffsetFromCenter = firevalve.Length;
 
+            valves.AddRange(new List<ThValve> { firevalve, hole });
+            //空间足够，阀组中添加截止阀
+            //若空间不够，截止阀在机房外设置
+            if (valveposiontype== ValveGroupPosionType.Outlet && Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
+            {
+                valves.Add(checkvalve);
+            }
             return valves;
         }
         
@@ -128,19 +136,18 @@ namespace ThMEPHVAC.Entity
                 firevalve.ValveOffsetFromCenter = 0;
                 checkvalve.ValveOffsetFromCenter = firevalve.Length;
             }
-            //机房内空间放不下防火阀加止回阀
+            //机房外空间放不下防火阀加止回阀
             else
             {
-                //机房内空间连一个止回阀都放不下
+                //机房外空间连一个止回阀都放不下
                 if (Parameters.ValveToFanSpacing < checkvalve.Length)
                 {
                     silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - checkvalve.Length - hole.Length;
-                    firevalve.ValveOffsetFromCenter = -firevalve.Length - checkvalve.Length - hole.Length;
-                    checkvalve.ValveOffsetFromCenter = -checkvalve.Length - hole.Length;
+                    checkvalve.ValveOffsetFromCenter = -checkvalve.Length - firevalve.Length - hole.Length;
+                    firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
                     hole.ValveOffsetFromCenter = -hole.Length;
-
                 }
-                //机房内空间可以放一个止回阀
+                //机房外空间可以放一个止回阀
                 else
                 {
                     silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - hole.Length;
@@ -178,7 +185,7 @@ namespace ThMEPHVAC.Entity
                 //若当前工作场景中，风机进风口段对应机房内管段
                 if (innerRomDuctPosition == "进风段")
                 {
-                    return SetInnerValveGroup(fanlayer);
+                    return SetInnerValveGroup(fanlayer, ValveGroupPosionType.Inlet);
                 }
                 //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
                 else
@@ -197,7 +204,7 @@ namespace ThMEPHVAC.Entity
                 //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
                 else
                 {
-                    return SetInnerValveGroup(fanlayer);
+                    return SetInnerValveGroup(fanlayer, ValveGroupPosionType.Outlet);
                 }
             }
         }
@@ -212,6 +219,7 @@ namespace ThMEPHVAC.Entity
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.SILENCER_BLOCK_NAME,
                 ValveBlockLayer = ThDuctUtils.SilencerLayerName(fanlayer),
+                ValveVisibility = "",
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
@@ -228,6 +236,7 @@ namespace ThMEPHVAC.Entity
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.WALLHOLE_BLOCK_NAME,
                 ValveBlockLayer = ThHvacCommon.WALLHOLE_LAYER,
+                ValveVisibility = "",
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,

@@ -23,6 +23,17 @@ namespace ThMEPHVAC.CAD
         {
             InletValveGroups = GetValveGroup(fanmodel, wallobjects, inletductwidth, ValveGroupPosionType.Inlet, inletcenterlinegraph);
             OutletValveGroups = GetValveGroup(fanmodel, wallobjects, outletductwidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
+
+            if (OutletValveGroups.Any(g=>g.ValvesInGroup.Any(v=>v.ValveVisibility.Contains("止回阀"))))
+            {
+                foreach (var inletgroup in InletValveGroups)
+                {
+                    if (inletgroup.ValvesInGroup.Count>0)
+                    {
+                        inletgroup.ValvesInGroup.RemoveAll(v => v.ValveVisibility.Contains("止回阀"));
+                    }
+                }
+            }
         }
 
         public void RunInletValvesInsertEngine()
