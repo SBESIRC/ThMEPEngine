@@ -214,7 +214,7 @@ namespace ThMEPHVAC.Entity
             return new ThValve()
             {
                 Length = 1600,
-                Width = Parameters.DuctWidth,
+                Width = Parameters.DuctWidth + 200,
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.SILENCER_BLOCK_NAME,
