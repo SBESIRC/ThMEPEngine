@@ -466,63 +466,57 @@ namespace ThMEPHVAC.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var layerObj = acadDatabase.Layers.ElementOrDefault(ductlayer, true);
-                var flangelayerObj = acadDatabase.Layers.ElementOrDefault(flangelayer, true);
-                if (layerObj != null)
+                foreach (var Segment in DuctSegments)
                 {
-                    layerObj.IsOff = false;
-                    layerObj.IsFrozen = false;
-                    layerObj.IsLocked = false;
-                    flangelayerObj.IsOff = false;
-                    flangelayerObj.IsFrozen = false;
-                    flangelayerObj.IsLocked = false;
-
-                    foreach (var Segment in DuctSegments)
+                    // 绘制风管
+                    var linetypeId = ByLayerLineTypeId();
+                    var layerId = CreateLayer(ductlayer);
+                    foreach (Curve dbobj in Segment.Representation)
                     {
-                        // 绘制风管
-                        foreach (Curve dbobj in Segment.Representation)
-                        {
-                            dbobj.ColorIndex = 256;
-                            dbobj.LayerId = layerObj.ObjectId;
-                            dbobj.TransformBy(Segment.Matrix);
-                            acadDatabase.ModelSpace.Add(dbobj);
-                            dbobj.SetDatabaseDefaults();
-                        }
+                        dbobj.ColorIndex = 256;
+                        dbobj.LayerId = layerId;
+                        dbobj.LinetypeId = linetypeId;
+                        dbobj.TransformBy(Segment.Matrix);
+                        acadDatabase.ModelSpace.Add(dbobj);
+                        dbobj.SetDatabaseDefaults();
+                    }
 
-                        // 绘制风管中心线
-                        var linetypeId = CreateDuctCenterlinetype();
-                        var layerId = CreateDuctCenterlineLayer(centerlinelayer);
-                        foreach (Curve dbobj in Segment.Centerline)
-                        {
-                            dbobj.ColorIndex = 256;
-                            dbobj.LayerId = layerId;
-                            dbobj.LinetypeId = linetypeId;
-                            dbobj.TransformBy(Segment.Matrix);
-                            acadDatabase.ModelSpace.Add(dbobj);
-                            dbobj.SetDatabaseDefaults();
-                        }
+                    // 绘制风管中心线
+                    linetypeId = CreateDuctCenterlinetype();
+                    layerId = CreateDuctCenterlineLayer(centerlinelayer);
+                    foreach (Curve dbobj in Segment.Centerline)
+                    {
+                        dbobj.ColorIndex = 256;
+                        dbobj.LayerId = layerId;
+                        dbobj.LinetypeId = linetypeId;
+                        dbobj.TransformBy(Segment.Matrix);
+                        acadDatabase.ModelSpace.Add(dbobj);
+                        dbobj.SetDatabaseDefaults();
+                    }
 
-                        // 绘制法兰线
-                        foreach (Curve dbobj in Segment.FlangeLine)
-                        {
-                            dbobj.ColorIndex = 256;
-                            dbobj.LayerId = flangelayerObj.ObjectId;
-                            dbobj.TransformBy(Segment.Matrix);
-                            acadDatabase.ModelSpace.Add(dbobj);
-                            dbobj.SetDatabaseDefaults();
-                        }
+                    // 绘制法兰线
+                    linetypeId = ByLayerLineTypeId();
+                    layerId = CreateLayer(flangelayer);
+                    foreach (Curve dbobj in Segment.FlangeLine)
+                    {
+                        dbobj.ColorIndex = 256;
+                        dbobj.LayerId = layerId;
+                        dbobj.LinetypeId = linetypeId;
+                        dbobj.TransformBy(Segment.Matrix);
+                        acadDatabase.ModelSpace.Add(dbobj);
+                        dbobj.SetDatabaseDefaults();
+                    }
 
-                        //插入管道信息标注
-                        if (!Segment.InformationText.IsNull())
-                        {
-                            var textstyleId = CreateDuctTextStyle();
-                            Segment.InformationText.TextStyleId = textstyleId;
-                            var layerobj = acadDatabase.Layers.ElementOrDefault(textlayer, true);
-                            Segment.InformationText.LayerId = layerobj.ObjectId;
-                            Segment.InformationText.TransformBy(Segment.Matrix);
-                            acadDatabase.ModelSpace.Add(Segment.InformationText);
-                            Segment.InformationText.SetDatabaseDefaults();
-                        }
+                    //插入管道信息标注
+                    if (!Segment.InformationText.IsNull())
+                    {
+                        var textlayerId = CreateLayer(textlayer);
+                        var textstyleId = CreateDuctTextStyle();
+                        Segment.InformationText.LayerId = textlayerId;
+                        Segment.InformationText.TextStyleId = textstyleId;
+                        Segment.InformationText.TransformBy(Segment.Matrix);
+                        acadDatabase.ModelSpace.Add(Segment.InformationText);
+                        Segment.InformationText.SetDatabaseDefaults();
                     }
                 }
             }
@@ -551,6 +545,36 @@ namespace ThMEPHVAC.CAD
             }
         }
 
+        private ObjectId CreateLayer(string name)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.ImportLayer(name, false);
+                acadDatabase.Database.UnOffLayer(name);
+                acadDatabase.Database.UnLockLayer(name);
+                acadDatabase.Database.UnPrintLayer(name);
+                acadDatabase.Database.UnFrozenLayer(name);
+                return acadDatabase.Layers.ElementOrDefault(name).ObjectId;
+            }
+        }
+
+        private ObjectId ByLayerLineTypeId()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                return SymbolUtilityServices.GetLinetypeByLayerId(acadDatabase.Database);
+            }
+        }
+
+        private ObjectId CreateDuctTextStyle()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.ImportTextStyle(ThHvacCommon.DUCT_TEXT_STYLE, false);
+                return acadDatabase.TextStyles.ElementOrDefault(ThHvacCommon.DUCT_TEXT_STYLE).ObjectId;
+            }
+        }
+
         private ObjectId CreateDuctCenterlinetype()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -559,15 +583,5 @@ namespace ThMEPHVAC.CAD
                 return acadDatabase.Linetypes.ElementOrDefault(ThHvacCommon.CENTERLINE_LINETYPE).ObjectId;
             }
         }
-
-        private ObjectId CreateDuctTextStyle()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                acadDatabase.Database.ImportTextStyle(ThHvacCommon.DUCT_TEXT_STYLE, true);
-                return acadDatabase.TextStyles.ElementOrDefault(ThHvacCommon.DUCT_TEXT_STYLE).ObjectId;
-            }
-        }
-
     }
 }
