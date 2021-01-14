@@ -13,8 +13,14 @@ namespace ThMEPLighting.Common
         private Point3d Start { get; set; }
         private List<ThLightEdge> Edges { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-
         public List<ThLinkPath> Links { get; set; }
+        public Point3d StartPoint
+        {
+            get
+            {
+                return Start;
+            }
+        }
         private ThLightGraphService(List<ThLightEdge> edges, Point3d start)
         {
             Edges = edges;
@@ -146,12 +152,15 @@ namespace ThMEPLighting.Common
             var unCollinearEdges = linkEdges.Where(o => !ThGeometryTool.IsCollinearEx(
                   currentEdge.Edge.StartPoint, currentEdge.Edge.EndPoint,
                   o.Edge.StartPoint, o.Edge.EndPoint)).ToList();
-            if (unCollinearEdges.Count > 0)
+            if (unCollinearEdges.Count == 1)
             {
                 //对于多个分支，后期可增强权重逻辑，选择优先通道
                 return unCollinearEdges[0];
             }
-            return null;
+            else
+            {
+                return null;
+            }
         }
         /// <summary>
         /// 查找主分支连接的次分支
@@ -229,6 +238,15 @@ namespace ThMEPLighting.Common
         public ThLinkPath()
         {
             Path = new List<ThLightEdge>();
+        }
+        public double Length
+        {
+            get
+            {
+                double sum = 0;
+                Path.ForEach(p => sum += p.Edge.Length);
+                return sum;
+            }            
         }
     }
 }

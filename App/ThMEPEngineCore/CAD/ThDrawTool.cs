@@ -79,7 +79,7 @@ namespace ThMEPEngineCore.CAD
             outline.AddVertexAt(3, new Point2d(pt4.X, pt4.Y), 0, 0, 0);
             return outline;
         }
-        public static Polyline CreateSquare(Point3d pt, double edgeLength)
+        public static Polyline CreateSquare(this Point3d pt, double edgeLength)
         {
             Polyline polyline = new Polyline
             {

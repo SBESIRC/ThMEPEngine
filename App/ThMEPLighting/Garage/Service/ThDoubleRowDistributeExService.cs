@@ -59,7 +59,7 @@ namespace ThMEPLighting.Garage.Service
                  StartPt, EndPt, ThGarageLightCommon.RepeatedPointDistance);
             //找出哪些分支已经布灯
             var branchEdges = DistributedEdges
-                .Where(o => branchLines.Contains(o.Edge))
+                .Where(o => branchLines.IsContains(o.Edge))
                 .Where(o => o.LightNodes.Count > 0 || IsNeibourEdgeDistributed(o))
                 .Where(o=>o.IsDX)
                 .ToList();
