@@ -97,16 +97,42 @@ namespace ThMEPHVAC.Entity
         }
 
         //设置机房内管段阀组
-        private List<ThValve> SetInnerValveGroup(string fanlayer)
+        private List<ThValve> SetInnerValveGroup(string fanlayer, ValveGroupPosionType valveposiontype)
         {
             List<ThValve> valves = new List<ThValve>();
 
             var hole = CreateHole();
             var firevalve = CreateFireValve(fanlayer);
-            hole.ValveOffsetFromCenter = -hole.Length;
-            firevalve.ValveOffsetFromCenter = 0;
-            valves.AddRange(new List<ThValve> { firevalve, hole });
+            var checkvalve = CreateCheckValve(fanlayer, valveposiontype);
+            
+            //空间足够
+            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
+            {
+                hole.ValveOffsetFromCenter = -hole.Length;
+                firevalve.ValveOffsetFromCenter = 0;
+                valves.AddRange(new List<ThValve> { firevalve, hole });
+                //机房内对应风机出口
+                if (valveposiontype == ValveGroupPosionType.Outlet)
+                {
+                    checkvalve.ValveOffsetFromCenter = firevalve.Length;
+                    valves.Add(checkvalve);
+                }
+            }
+            //若空间不够，防火阀移至洞外
+            else
+            {
+                firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
+                hole.ValveOffsetFromCenter = -hole.Length;
+                valves.AddRange(new List<ThValve> { firevalve, hole });
 
+                //若空间能放下一个止回阀，且风机出口在机房外
+                //洞内放置防火阀
+                if (Parameters.ValveToFanSpacing > checkvalve.Length && valveposiontype == ValveGroupPosionType.Outlet)
+                {
+                    checkvalve.ValveOffsetFromCenter = 0;
+                    valves.Add(checkvalve);
+                }
+            }
             return valves;
         }
         
@@ -121,26 +147,28 @@ namespace ThMEPHVAC.Entity
             var firevalve = CreateFireValve(fanlayer);
 
             //正常情况下，空间足够
-            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
+            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length + silencer.Length)
             {
-                silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
+                //silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
                 hole.ValveOffsetFromCenter = -hole.Length;
                 firevalve.ValveOffsetFromCenter = 0;
-                checkvalve.ValveOffsetFromCenter = firevalve.Length;
+                silencer.ValveOffsetFromCenter = firevalve.Length;
+                checkvalve.ValveOffsetFromCenter = firevalve.Length + silencer.Length;
             }
-            //机房内空间放不下防火阀加止回阀
+            //机房外空间放不下防火阀加止回阀加消音器
             else
             {
-                //机房内空间连一个止回阀都放不下
-                if (Parameters.ValveToFanSpacing < checkvalve.Length)
+                //若能放得下一个止回阀加防火阀，则将消音器移至洞外
+                if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
                 {
-                    silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - checkvalve.Length - hole.Length;
-                    firevalve.ValveOffsetFromCenter = -firevalve.Length - checkvalve.Length - hole.Length;
-                    checkvalve.ValveOffsetFromCenter = -checkvalve.Length - hole.Length;
+                    silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
                     hole.ValveOffsetFromCenter = -hole.Length;
-
+                    firevalve.ValveOffsetFromCenter = 0;
+                    checkvalve.ValveOffsetFromCenter = firevalve.Length;
                 }
-                //机房内空间可以放一个止回阀
+
+                //放不下止回阀加防火阀
+                //把防火阀移至洞外
                 else
                 {
                     silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - hole.Length;
@@ -178,7 +206,7 @@ namespace ThMEPHVAC.Entity
                 //若当前工作场景中，风机进风口段对应机房内管段
                 if (innerRomDuctPosition == "进风段")
                 {
-                    return SetInnerValveGroup(fanlayer);
+                    return SetInnerValveGroup(fanlayer, ValveGroupPosionType.Inlet);
                 }
                 //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
                 else
@@ -197,7 +225,7 @@ namespace ThMEPHVAC.Entity
                 //若当前工作场景中，风机出风口段对应机房内管段，即风机进风口段对应机房外管段
                 else
                 {
-                    return SetInnerValveGroup(fanlayer);
+                    return SetInnerValveGroup(fanlayer, ValveGroupPosionType.Outlet);
                 }
             }
         }
@@ -207,11 +235,12 @@ namespace ThMEPHVAC.Entity
             return new ThValve()
             {
                 Length = 1600,
-                Width = Parameters.DuctWidth,
+                Width = Parameters.DuctWidth + 200,
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.SILENCER_BLOCK_NAME,
                 ValveBlockLayer = ThDuctUtils.SilencerLayerName(fanlayer),
+                ValveVisibility = "",
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
@@ -228,6 +257,7 @@ namespace ThMEPHVAC.Entity
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.WALLHOLE_BLOCK_NAME,
                 ValveBlockLayer = ThHvacCommon.WALLHOLE_LAYER,
+                ValveVisibility = "",
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,

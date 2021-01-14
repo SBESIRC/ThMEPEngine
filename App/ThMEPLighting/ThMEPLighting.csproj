@@ -71,6 +71,7 @@
     <Compile Include="Garage\Service\ThFindFirstLinesService.cs" />
     <Compile Include="Garage\Service\ThFindLinkService.cs" />
     <Compile Include="Garage\Service\ThFindCenterPairLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindLongestPathService.cs" />
     <Compile Include="Garage\Service\ThFindSideLinesService.cs" />
     <Compile Include="Garage\Service\ThFindStartIndexService.cs" />
     <Compile Include="Garage\Service\ThJoinLinesService.cs" />

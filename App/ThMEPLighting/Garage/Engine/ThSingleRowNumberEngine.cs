@@ -45,6 +45,8 @@ namespace ThMEPLighting.Garage.Engine
                 }
                 //对灯线边建图
                 var lightGraph = ThLightGraphService.Build(lightEdges, findSp);
+                //找到从ports中的点出发拥有最长边的图
+                lightGraph = ThFindLongestPathService.Find(ports, lightGraph);          
                 ThSingleRowNumberService.Number(lightGraph, ArrangeParameter);
                 lightGraph.Links.ForEach(o => DxLightEdges.AddRange(o.Path));
                 lightEdges = LineEdges.Where(o => o.IsTraversed == false).ToList();                
