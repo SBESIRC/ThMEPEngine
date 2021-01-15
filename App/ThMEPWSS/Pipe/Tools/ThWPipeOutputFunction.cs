@@ -8,6 +8,8 @@ using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Plumbing;
+using static ThMEPWSS.ThPipeCmds;
 
 namespace ThMEPWSS.Pipe.Tools
 {
@@ -385,6 +387,155 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return tag;
         }
-
+        public static List<BlockReference> GetGravityWaterBuckets(List<ThIfcGravityWaterBucket> GravityWaterBuckets)
+        {
+            var gravityWaterBucket = new List<BlockReference>();
+            foreach (var gravity in GravityWaterBuckets)
+            {
+                BlockReference block = null;
+                block = gravity.Outline as BlockReference;
+                gravityWaterBucket.Add(block);
+            }
+            return gravityWaterBucket;
+        }
+        public static List<BlockReference> GetSideWaterBuckets(List<ThIfcSideEntryWaterBucket> GravityWaterBuckets)
+        {
+            var gravityWaterBucket = new List<BlockReference>();
+            foreach (var gravity in GravityWaterBuckets)
+            {
+                BlockReference block = null;
+                block = gravity.Outline as BlockReference;
+                gravityWaterBucket.Add(block);
+            }
+            return gravityWaterBucket;
+        }
+        public static List<Polyline> GetroofRainPipe(List<ThIfcRoofRainPipe> RoofRainPipes)
+        {
+            var roofRainPipe = new List<Polyline>();
+            foreach (var pipe in RoofRainPipes)
+            {
+                Polyline block = null;
+                block = pipe.Outline as Polyline;
+                roofRainPipe.Add(block);
+            }
+            return roofRainPipe;
+        }
+        public static List<DBText> GetListText(Point3dCollection points, Point3dCollection points1, string s)
+        {
+            var texts = new List<DBText>();
+            for (int i = 0; i < points.Count; i++)
+            {
+                texts.Add(TaggingBuckettext(points1[4 * i + 2], s));
+            }
+            return texts;
+        }
+        public static List<DBText> GetListText1(Point3dCollection points, Point3dCollection points1, string s)
+        {
+            var texts = new List<DBText>();
+            for (int i = 0; i < points.Count; i++)
+            {
+                texts.Add(TaggingBuckettext(points1[4 * i + 3], s));
+            }
+            return texts;
+        }
+        public static DBText TaggingBuckettext(Point3d tag, string s)
+        {
+            return new DBText()
+            {
+                Height = 200,
+                Position = tag,
+                TextString = s,
+                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
+            };
+        }
+        public static Polyline CreatePolyline(Point3d point1, Point3d point2)
+        {
+            Polyline ent_line1 = new Polyline();
+            ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
+            ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);
+            //ent_line1.Linetype = "DASHDED";
+            //ent_line1.Layer = "W-DRAI-DOME-PIPE";
+            //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
+            ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+            return ent_line1;
+        }
+        public static List<BlockReference> GetListFloorDrain(ThWCompositeBalconyRoom compositeBalcony, ThWTopBalconyParameters parameters)
+        {
+            var floodrains = new List<BlockReference>();
+            foreach (var FloorDrain in compositeBalcony.Balcony.FloorDrains)
+            {
+                parameters.floordrain = FloorDrain.Outline as BlockReference;
+                floodrains.Add(parameters.floordrain);
+            }
+            return floodrains;
+        }
+        public static Polyline CreateRainline(Point3d point1, Point3d point2)
+        {
+            Polyline ent_line1 = new Polyline();
+            ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
+            ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);
+            //ent_line1.Linetype = "DASHDOT";
+            //ent_line1.Layer = "W-RAIN-PIPE";
+            ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+            return ent_line1;
+        }
+        public void InputKitchenParameters(ThWCompositeRoom composite, ThWTopCompositeParameters parameters, ThWTopParameters parameters0)
+        {
+            if (IsValidKitchenContainer(composite.Kitchen))
+            {
+                parameters.boundary = composite.Kitchen.Kitchen.Boundary as Polyline;
+                parameters.outline = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                parameters.basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
+                if (composite.Kitchen.Pypes.Count > 0)
+                {
+                    parameters.pype = composite.Kitchen.Pypes[0].Boundary as Polyline;
+                }
+                else
+                {
+                    parameters.pype = new Polyline();
+                }
+                if (composite.Kitchen.RainPipes.Count > 0)
+                {
+                    parameters0.rain_pipe.Add(composite.Kitchen.RainPipes[0].Outline as Polyline);
+                }
+                if (composite.Kitchen.RoofRainPipes.Count > 0)
+                {
+                    Polyline s = composite.Kitchen.RoofRainPipes[0].Outline as Polyline;
+                    parameters0.roofrain_pipe.Add(s);
+                    parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
+                    parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
+                }
+            }
+        }
+        public bool IsValidKitchenContainer(ThWKitchenRoom kitchenContainer)
+        {
+            return (kitchenContainer.Kitchen != null && kitchenContainer.DrainageWells.Count == 1);
+        }
+        public bool IsValidToiletContainer(ThWToiletRoom toiletContainer)
+        {
+            return toiletContainer.Toilet != null &&
+                toiletContainer.DrainageWells.Count == 1 &&
+                toiletContainer.Closestools.Count == 1 &&
+                toiletContainer.FloorDrains.Count > 0;
+        }
+        public bool IsValidToiletContainerForFloorDrain(ThWToiletRoom toiletContainer)
+        {
+            return toiletContainer.Toilet != null &&
+                toiletContainer.FloorDrains.Count > 0;
+        }
+        public bool IsValidBalconyForFloorDrain(ThWBalconyRoom balconyContainer)
+        {
+            return balconyContainer.FloorDrains.Count > 0 && balconyContainer.Washmachines.Count > 0;
+        }
+        public static List<Polyline> GetListRainPipes(ThWCompositeBalconyRoom compositeBalcony)
+        {
+            var rainpipes = new List<Polyline>();
+            foreach (var RainPipe in compositeBalcony.Balcony.RainPipes)
+            {
+                var ent = RainPipe.Outline as Polyline;
+                rainpipes.Add(ent);
+            }
+            return rainpipes;
+        }
     }
 }
