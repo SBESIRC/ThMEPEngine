@@ -104,6 +104,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "消防应急广播.dwg");
         }
 
+        // 电气地库应急照明图块
+        public static string LightingEmgLightDwgPath()
+        {
+            return Path.Combine(SupportPath(), "地库应急照明图块.dwg");
+        }
+
         // 消防喷淋块
         public static string SprinklerDwgPath()
         {
