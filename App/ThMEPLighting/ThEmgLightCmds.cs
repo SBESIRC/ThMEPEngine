@@ -78,9 +78,6 @@ namespace ThMEPLighting
                     //获取车道线
                     var lanes = GetLanes(plFrame, acdb);
 
-
-                  
-
                     if (lanes.Count > 0)
                     {
                         //处理车道线
@@ -102,14 +99,20 @@ namespace ThMEPLighting
                         }
                         InsertLightService.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), 20, LineWeight.LineWeight050);
 
+                        //获取构建信息
+                        var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+                        InsertLightService.ShowGeometry(bufferFrame, 120, LineWeight.LineWeight050);
+                        GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
+                        List<Polyline> arcWalls = new List<Polyline>();
+                        getArchWall(acdb, bufferFrame, ref arcWalls);
+
+                        //InsertLightService.ShowGeometry(walls, 10,LineWeight.LineWeight035);
+                        //InsertLightService.ShowGeometry(columns, 70, LineWeight.LineWeight035);
+                        //InsertLightService.ShowGeometry(arcWalls, 130, LineWeight.LineWeight035);
 
                         bool debug = false;
                         if (debug == false)
                         {
-
-                            //获取构建信息
-                            var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
-                            GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
 
                             //主车道布置信息
                             LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
@@ -119,7 +122,7 @@ namespace ThMEPLighting
 
                         }
                     }
-                    
+
                 }
 
             }
@@ -215,6 +218,41 @@ namespace ThMEPLighting
         //        });
         //    }
         //}
+
+        public void getArchWall(AcadDatabase acdb, Polyline bufferedFrame, ref List<Polyline> walls)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+            {
+                archWallEngine.Recognize(acadDatabase.Database, bufferedFrame.Vertices());
+                //archWallEngine.Elements.ForEach(o =>
+                //{
+                //    if (o.Outline is Curve curve)
+                //    {
+                //        acadDatabase.ModelSpace.Add(curve.WashClone());
+                //    }
+                //    else if (o.Outline is MPolygon mPolygon)
+                //    {
+                //        acadDatabase.ModelSpace.Add(mPolygon);
+                //    }
+                //});
+                List<Polyline> archWall = new List<Polyline>();
+                foreach (var o in archWallEngine.Elements)
+                {
+                    if (o.Outline is Polyline polyline)
+                    {
+                        archWall.Add(polyline);
+                    }
+                    //else if (o.Outline is MPolygon mPolygon)
+                    //{
+                    //    acadDatabase.ModelSpace.Add(mPolygon);
+               
+                    //}
+                }
+
+                walls = archWall;
+            }
+        }
 
 
     }

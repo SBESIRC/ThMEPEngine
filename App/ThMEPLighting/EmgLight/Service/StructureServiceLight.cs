@@ -96,6 +96,7 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     layoutInfo = GetColumnParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
                 }
+
                 else if (type == "w")
                 {
                     layoutInfo = GetWallParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
