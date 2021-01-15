@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPEngineCore.Test
 {
@@ -270,6 +271,30 @@ namespace ThMEPEngineCore.Test
                 else
                 {
                     Active.Editor.WriteMessage("不共线");
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THRemoveDangles", CommandFlags.Modal)]
+        public void THRemoveDangles()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var objs = Active.Editor.GetSelection();
+                if (objs.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var result = new DBObjectCollection();
+                foreach (var obj in objs.Value.GetObjectIds())
+                {
+                    result.Add(acadDatabase.Element<Curve>(obj));
+                }
+                var lines = ThLaneLineSimplifier.RemoveDangles(result, 100);
+                foreach (var obj in lines)
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
                 }
             }
         }
