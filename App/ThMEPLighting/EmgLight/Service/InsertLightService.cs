@@ -69,10 +69,13 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 foreach (Polyline pl in Polylines)
                 {
-                    var showPl = pl.Clone() as Polyline;
-                    showPl.ColorIndex = ci;
-                    showPl.LineWeight = lw;
-                    acdb.ModelSpace.Add(showPl);
+                    if (pl != null)
+                    {
+                        var showPl = pl.Clone() as Polyline;
+                        showPl.ColorIndex = ci;
+                        showPl.LineWeight = lw;
+                        acdb.ModelSpace.Add(showPl);
+                    }
                 }
             }
         }
@@ -81,24 +84,26 @@ namespace ThMEPLighting.EmgLight.Service
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-
-                var showPl = Polyline.Clone() as Polyline;
-                showPl.ColorIndex = ci;
-                showPl.LineWeight = lw;
-                acdb.ModelSpace.Add(showPl);
-
+                if (Polyline != null)
+                {
+                    var showPl = Polyline.Clone() as Polyline;
+                    showPl.ColorIndex = ci;
+                    showPl.LineWeight = lw;
+                    acdb.ModelSpace.Add(showPl);
+                }
             }
         }
         public static void ShowGeometry(Line line, int ci, LineWeight lw = LineWeight.LineWeight025)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-
-                var showPl = line.Clone() as Line;
-                showPl.ColorIndex = ci;
-                showPl.LineWeight = lw;
-                acdb.ModelSpace.Add(showPl);
-
+                if (line != null)
+                {
+                    var showPl = line.Clone() as Line;
+                    showPl.ColorIndex = ci;
+                    showPl.LineWeight = lw;
+                    acdb.ModelSpace.Add(showPl);
+                }
             }
         }
 
@@ -109,11 +114,14 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 foreach (Line line in lines)
                 {
+                    if (line != null)
+                    {
 
-                    var showPl = line.Clone() as Line;
-                    showPl.ColorIndex = ci;
-                    showPl.LineWeight = lw;
-                    acdb.ModelSpace.Add(showPl);
+                        var showPl = line.Clone() as Line;
+                        showPl.ColorIndex = ci;
+                        showPl.LineWeight = lw;
+                        acdb.ModelSpace.Add(showPl);
+                    }
                 }
             }
         }
@@ -123,13 +131,14 @@ namespace ThMEPLighting.EmgLight.Service
 
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                if (pt != null)
+                {
 
-
-                var pointC = new Circle(pt, new Vector3d(0, 0, 1), 200);
-                pointC.ColorIndex = ci;
-                pointC.LineWeight = lw;
-                acdb.ModelSpace.Add(pointC);
-
+                    var pointC = new Circle(pt, new Vector3d(0, 0, 1), 200);
+                    pointC.ColorIndex = ci;
+                    pointC.LineWeight = lw;
+                    acdb.ModelSpace.Add(pointC);
+                }
             }
         }
 
@@ -138,16 +147,19 @@ namespace ThMEPLighting.EmgLight.Service
 
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                if (pt != null)
+                {
 
-                DBText text = new DBText();
-                text.Position = pt;
-                text.ColorIndex = ci;
-                text.LineWeight = lw;
-                text.TextString = s;
-                text.Rotation = 0;
-                text.Height = 1000;
-                text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLEP5");
-                acdb.ModelSpace.Add(text);
+                    DBText text = new DBText();
+                    text.Position = pt;
+                    text.ColorIndex = ci;
+                    text.LineWeight = lw;
+                    text.TextString = s;
+                    text.Rotation = 0;
+                    text.Height = 1000;
+                    text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLEP5");
+                    acdb.ModelSpace.Add(text);
+                }
 
             }
         }

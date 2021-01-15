@@ -105,18 +105,18 @@ namespace ThMEPLighting.EmgLight.Service
         //    }
         //    return linePolys;
         //}
-        public static List<Polyline> createRecBuffer(List<Line> lines, double length)
-        {
-            //var newLines = lines.Select(x => x.Normalize()).ToList();
-            var newLines = lines;
-            List<Polyline> linePolys = new List<Polyline>();
+        //public static List<Polyline> createRecBuffer(List<Line> lines, double length)
+        //{
+        //    //var newLines = lines.Select(x => x.Normalize()).ToList();
+        //    var newLines = lines;
+        //    List<Polyline> linePolys = new List<Polyline>();
 
-            foreach (var line in newLines)
-            {
-                linePolys.Add(ExpandLine(line, length, 0, 0, 0));
+        //    foreach (var line in newLines)
+        //    {
+        //        linePolys.Add(ExpandLine(line, length, 0, 0, 0));
 
-            }
-            return linePolys;
-        }
+        //    }
+        //    return linePolys;
+        //}
     }
 }
