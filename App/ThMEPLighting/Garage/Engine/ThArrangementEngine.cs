@@ -126,7 +126,7 @@ namespace ThMEPLighting.Garage.Engine
                             var alignPt = n.Position + normalLine.StartPoint.GetVectorTo(normalLine.EndPoint)
                             .GetPerpendicularVector()
                             .GetNormal()
-                            .MultiplyBy(ArrangeParameter.LightNumberTextOffsetHeight + ArrangeParameter.LightNumberTextHeight / 2.0);
+                            .MultiplyBy(ArrangeParameter.Width/2.0 + 100 + ArrangeParameter.LightNumberTextHeight / 2.0);
                             code.Height = ArrangeParameter.LightNumberTextHeight;
                             code.WidthFactor = ArrangeParameter.LightNumberTextWidthFactor;
                             code.Position = alignPt;
