@@ -37,10 +37,12 @@
     <Compile Include="Garage\Engine\ThDoubleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThInnerOuterCirclesEngine.cs" />
+    <Compile Include="Garage\Engine\ThLaneLineGraphEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
     <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
+    <Compile Include="Garage\Model\ThEdge.cs" />
     <Compile Include="Garage\Model\ThEntityParameter.cs" />
     <Compile Include="Garage\Model\ThFindSideLinesParameter.cs" />
     <Compile Include="Garage\Model\ThLightArrangeParameter.cs" />
@@ -51,6 +53,7 @@
     <Compile Include="Garage\Model\ThRegionBorder.cs" />
     <Compile Include="Garage\Model\ThRegionLightEdge.cs" />
     <Compile Include="Garage\Model\ThShortenParameter.cs" />
+    <Compile Include="Garage\Model\ThVertex.cs" />
     <Compile Include="Garage\Model\ThWireOffsetData.cs" />
     <Compile Include="Garage\Service\ThAlignLineHeadService.cs" />
     <Compile Include="Garage\Service\ThBuildCableTrayService.cs" />
