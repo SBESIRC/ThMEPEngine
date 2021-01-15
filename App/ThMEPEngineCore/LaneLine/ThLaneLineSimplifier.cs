@@ -26,6 +26,7 @@ namespace ThMEPEngineCore.LaneLine
             for (int i = 0; i < lines.Count; i++) 
             {
                 FindCentroidAndConn(lines,FindCloseLinesToPoint(lines[i].StartPoint, lines, threshold));
+                FindCentroidAndConn(lines, FindCloseLinesToPoint(lines[i].EndPoint, lines, threshold));
             }
 
             return lines;
@@ -33,24 +34,61 @@ namespace ThMEPEngineCore.LaneLine
 
         private static List<Line> BreakLine(List<Line> lines)
         {
-            var linesTidal = lines;
+            var linesTidal = new List<Line>();
             for (int i = 0; i < lines.Count; i++)
             {
-                for (int j = i + 1; j < lines.Count; j++) 
-                {
-                    var points = new Point3dCollection();
-                    lines[i].IntersectWith(lines[j], 0, points, IntPtr.Zero, IntPtr.Zero);
-                    foreach(Point3d point in points)
-                    {
-                        linesTidal.Add(new Line(lines[0].StartPoint, point));
-                        linesTidal.Add(new Line(lines[0].EndPoint, point));
-                        linesTidal.Add(new Line(lines[1].StartPoint, point));
-                        linesTidal.Add(new Line(lines[1].EndPoint, point));
-                    }
-                }
+                var linesTemp = new List<Line>(lines);
+                linesTemp.RemoveAt(i);
+                linesTidal.AddRange(ConnIntersectPoints(lines[i], linesTemp));
             }
             return linesTidal;
         }
+
+
+        //找出所有相交点和端点，排序、去重、连接
+        private static List<Line> ConnIntersectPoints(Line line,List<Line> lines)
+        {
+            var points = new List<Point3d>();
+
+            points.Add(line.StartPoint);
+            for (int i = 0; i < lines.Count; i++) 
+            {
+                var pointsTemp = new Point3dCollection();
+                line.IntersectWith(lines[i], 0, pointsTemp, IntPtr.Zero, IntPtr.Zero);
+                foreach(Point3d point in pointsTemp)
+                {
+                    points.Add(point);
+                }
+            }
+            points.Add(line.EndPoint);
+
+            points.Sort();
+            points.Distinct();
+
+            var linesTidal = new List<Line>();
+            for (int j = 0; j < points.Count - 1; j++) 
+            {
+                linesTidal.Add(new Line(points[j], points[j + 1]));
+            }
+
+            return linesTidal;
+        }
+
+        //判断点是否为线的端点
+        private static bool IsEndpoint(Point3d point, Line line)
+        {
+            bool flag = false;
+            if (point == line.StartPoint || point == line.EndPoint)
+            {
+                return true;
+            }
+            return flag;
+        }
+
+        //private static void RMDupl(List<Line> lines)
+        //{
+        //    lines[0].li
+        //}
 
         private static void RMLine(List<Line> lines,double threshold)
         {
@@ -158,10 +196,6 @@ namespace ThMEPEngineCore.LaneLine
 
             return distance;
         }
-
-        
-
-
 
         public static List<Line> Simplify(DBObjectCollection curves, double threshold)
         {
