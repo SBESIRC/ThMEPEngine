@@ -74,8 +74,8 @@ namespace ThMEPLighting.EmgLight
                 var usefulWalls = StructureServiceLight.SeparateColumnsByLine(brokeWall, lane, TolLane);
 
                 ////for debug
-                InsertLightService.ShowGeometry(usefulColumns[0], 142, LineWeight.LineWeight035);
-                InsertLightService.ShowGeometry(usefulColumns[1], 11, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(usefulColumns[0], 142, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(usefulColumns[1], 11, LineWeight.LineWeight035);
                 //InsertLightService.ShowGeometry(usefulWalls[0], 142, LineWeight.LineWeight035);
                 //InsertLightService.ShowGeometry(usefulWalls[1], 11, LineWeight.LineWeight035);
 
@@ -85,7 +85,9 @@ namespace ThMEPLighting.EmgLight
                 }
 
                 StructureLayoutServiceLight layoutServer = new StructureLayoutServiceLight(usefulColumns, usefulWalls, lane, TolLightRangeMin, TolLightRangeMax);
-                bool debug = true;
+                
+
+                bool debug = false;
 
                 if (debug == false)
                 {
@@ -101,16 +103,15 @@ namespace ThMEPLighting.EmgLight
                     if (uniformSide == 0 || uniformSide == 1)
                     {
                         LayoutUniformSide(layoutServer.UsefulColumns, uniformSide, lane, columnDistList, layoutServer, out var uniformSideLayout, ref layoutList);
-
                         //LayoutUniformSide2(layoutServer.UsefulColumns, uniformSide, lane, layoutServer, out var uniformSideLayout, ref layoutList);
                         LayoutOppositeSide(uniformSide, lane, uniformSideLayout, layoutServer, ref layoutList);
+
                     }
                     else
                     {
 
                         uniformSide = layoutServer.UsefulColumns[0].Count >= layoutServer.UsefulColumns[1].Count ? 0 : 1;
-                        InsertLightService.ShowGeometry(layoutServer.UsefulStruct[uniformSide], 161, LineWeight.LineWeight050);
-
+                        
                         columnDistList = new List<List<double>>();
                         columnDistList.Add(layoutServer.GetColumnDistList(layoutServer.UsefulStruct[0]));
                         columnDistList.Add(layoutServer.GetColumnDistList(layoutServer.UsefulStruct[1]));
@@ -567,7 +568,6 @@ namespace ThMEPLighting.EmgLight
                 }
             }
 
-            InsertLightService.ShowGeometry(uniformSideLayout.Select(x => x.Item1).ToList(), 70, LineWeight.LineWeight050);
             layout.AddRange(uniformSideLayout.Select(x => x.Item1).ToList());
 
         }
@@ -775,7 +775,6 @@ namespace ThMEPLighting.EmgLight
                     nonUniformSideLayout.Add(closestStruct);
 
                 }
-
 
                 InsertLightService.ShowGeometry(nonUniformSideLayout, 210, LineWeight.LineWeight050);
                 Layout.AddRange(nonUniformSideLayout.Distinct().ToList());

@@ -99,7 +99,7 @@ namespace ThMEPLighting
                                 //InsertLightService.ShowGeometry(OrderedMergedLane[i][j].EndPoint, string.Format("orderM {0}-{1}-end", i, j), 161);
                             }
                         }
-                        //InsertLightService.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), 20, LineWeight.LineWeight050);
+                        InsertLightService.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), 20, LineWeight.LineWeight050);
 
 
                         bool debug = false;

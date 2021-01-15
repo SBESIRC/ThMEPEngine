@@ -129,7 +129,7 @@ namespace ThMEPLighting.EmgLight.Service
             List<double> distX = new List<double>();
             for (int i = 0; i < structList.Count - 1; i++)
             {
-                distX.Add((getCenter(structList[i]) - getCenter(structList[i + 1])).Length);
+                distX.Add((getCenterInLaneCoor (structList[i]) - getCenterInLaneCoor(structList[i + 1])).Length);
             }
 
             return distX;
@@ -268,7 +268,7 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 for (int i = 0; i < lane.Count; i++)
                 {
-                    if (laneTrans[i].StartPoint.X <= centerPt.X && centerPt.X <= laneTrans[i].EndPoint.X)
+                    if (laneTrans[i].StartPoint.X <= centerPtTrans.X && centerPtTrans.X <= laneTrans[i].EndPoint.X)
 
                     {
                         prjPt = lane[i].GetClosestPointTo(centerPt, false);
@@ -295,14 +295,15 @@ namespace ThMEPLighting.EmgLight.Service
             var ptNew = TransformPointToLine(pt, lane);
             prjPt = new Point3d();
 
-            List<Line> transLines = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
-
-            if (ptNew.X < transLines.First().StartPoint.X)
+            if (laneTrans.Count == 0) {
+                laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
+            }
+            if (ptNew.X < laneTrans.First().StartPoint.X)
             {
                 prjPt = lane[0].GetClosestPointTo(pt, true);
 
             }
-            else if (ptNew.X > transLines.Last().EndPoint.X)
+            else if (ptNew.X > laneTrans.Last().EndPoint.X)
             {
                 prjPt = lane.Last().GetClosestPointTo(pt, true);
 
@@ -311,7 +312,7 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 for (int i = 0; i < lane.Count; i++)
                 {
-                    if (transLines[i].StartPoint.X <= ptNew.X && ptNew.X <= transLines[i].EndPoint.X)
+                    if (laneTrans[i].StartPoint.X <= ptNew.X && ptNew.X <= laneTrans[i].EndPoint.X)
 
                     {
                         prjPt = lane[i].GetClosestPointTo(pt, false);
@@ -350,7 +351,7 @@ namespace ThMEPLighting.EmgLight.Service
         {
             minDist = 10000;
             closestStruct = null;
-            
+
             for (int i = 0; i < structList.Count; i++)
             {
 
@@ -364,7 +365,7 @@ namespace ThMEPLighting.EmgLight.Service
                 if (structList[i].Distance(Pt) <= minDist)
                 {
                     minDist = structList[i].Distance(Pt);
-                
+
                     if (connectLayout.Count > 0)
                     {
                         closestStruct = connectLayout.First();
@@ -462,7 +463,7 @@ namespace ThMEPLighting.EmgLight.Service
             var segStartTrans = TransformPointToLine(Segment.StartPoint, lane);
             var segEndTrans = TransformPointToLine(Segment.EndPoint, lane);
 
-          var inExtendStruct =  structList.Where(x => getCenterInLaneCoor(x).X <= segEndTrans.X && getCenterInLaneCoor(x).X > segStartTrans.X).ToList();
+            var inExtendStruct = structList.Where(x => getCenterInLaneCoor(x).X <= segEndTrans.X && getCenterInLaneCoor(x).X > segStartTrans.X).ToList();
 
             if (inExtendStruct.Count > 0)
             {
@@ -575,11 +576,48 @@ namespace ThMEPLighting.EmgLight.Service
 
         private void filterOverlapStruc()
         {
-            for (int i=0;i<usefulStruct .Count;i++)
-            {
-                for (int j = 0; j < usefulStruct.Count; j++)
-                {
 
+            for (int i = 0; i < usefulStruct.Count; i++)
+            {
+                List<Polyline> removeList = new List<Polyline>();
+
+                for (int curr = 0; curr < usefulStruct[i].Count; curr++)
+                {
+                    for (int j = curr; j < usefulStruct[i].Count; j++)
+                    {
+                        if (j != curr && removeList.Contains(usefulStruct[i][j]) == false)
+                        {
+                            var currCenter = getCenterInLaneCoor(usefulStruct[i][curr]);
+                            var closeStart = TransformPointToLine(usefulStruct[i][j].StartPoint, lane);
+                            var closeEnd = TransformPointToLine(usefulStruct[i][j].EndPoint, lane);
+
+                            if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                            {
+                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(usefulStruct[i][j]).Y))
+                                {
+                                    removeList.Add(usefulStruct[i][curr]);
+                                }
+                            }
+
+                            currCenter = getCenterInLaneCoor(usefulStruct[i][j]);
+                            closeStart = TransformPointToLine(usefulStruct[i][curr].StartPoint, lane);
+                            closeEnd = TransformPointToLine(usefulStruct[i][curr].EndPoint, lane);
+                            if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                            {
+                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(usefulStruct[i][curr]).Y))
+                                {
+                                    removeList.Add(usefulStruct[i][j]);
+                                }
+                            }
+                        }
+
+                    }
+                }
+                foreach (var removeStru in removeList)
+                {
+                    usefulColumns[i].Remove(removeStru);
+                    usefulWalls[i].Remove(removeStru);
+                    usefulStruct[i].Remove(removeStru);
                 }
             }
         }
