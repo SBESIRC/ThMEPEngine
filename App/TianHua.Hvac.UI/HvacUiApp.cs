@@ -66,7 +66,7 @@ namespace TianHua.Hvac.UI
                 }
 
                 var simplifierCenterLines = new DBObjectCollection();
-                ThLaneLineSimplifier.Simplify(lineobjects,100.0).ForEach(l=> simplifierCenterLines.Add(l));
+                ThLaneLineSimplifier.RemoveDangles(lineobjects,100.0).ForEach(l=> simplifierCenterLines.Add(l));
                 ThDbModelFan DbFanModel = new ThDbModelFan(modelobjectid, simplifierCenterLines);
                 ThFanInletOutletAnalysisEngine inAndOutAnalysisEngine = new ThFanInletOutletAnalysisEngine(DbFanModel);
                 inAndOutAnalysisEngine.InletAnalysis();
@@ -126,7 +126,7 @@ namespace TianHua.Hvac.UI
                     }
                 }
                 var simplifierWallLines = new DBObjectCollection();
-                ThLaneLineSimplifier.Simplify(wallobjects, 100.0).ForEach(l=> simplifierWallLines.Add(l));
+                ThLaneLineSimplifier.RemoveDangles(wallobjects, 100.0).ForEach(l=> simplifierWallLines.Add(l));
                 ThHolesAndValvesEngine holesAndValvesEngine = new ThHolesAndValvesEngine(DbFanModel, simplifierWallLines, inoutductdrawengine.InletDuctWidth, inoutductdrawengine.OutletDuctWidth, inAndOutAnalysisEngine.InletCenterLineGraph, inAndOutAnalysisEngine.OutletCenterLineGraph);
                 
                 if (inAndOutAnalysisEngine.InletAnalysisResult == AnalysisResultType.OK)

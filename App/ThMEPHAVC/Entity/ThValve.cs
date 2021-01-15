@@ -126,7 +126,7 @@ namespace ThMEPHVAC.Entity
                 valves.AddRange(new List<ThValve> { firevalve, hole });
 
                 //若空间能放下一个止回阀，且风机出口在机房外
-                //洞内放置防火阀
+                //洞内放置止回阀
                 if (Parameters.ValveToFanSpacing > checkvalve.Length && valveposiontype == ValveGroupPosionType.Outlet)
                 {
                     checkvalve.ValveOffsetFromCenter = 0;
@@ -149,7 +149,6 @@ namespace ThMEPHVAC.Entity
             //正常情况下，空间足够
             if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length + silencer.Length)
             {
-                //silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
                 hole.ValveOffsetFromCenter = -hole.Length;
                 firevalve.ValveOffsetFromCenter = 0;
                 silencer.ValveOffsetFromCenter = firevalve.Length;
@@ -183,6 +182,10 @@ namespace ThMEPHVAC.Entity
                 case "消防排烟":
                 case "消防补风":
                 case "消防加压送风":
+                    if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length + silencer.Length)
+                    {
+                        checkvalve.ValveOffsetFromCenter -= silencer.Length;
+                    }
                     valves.AddRange(new List<ThValve> { checkvalve, firevalve, hole });
                     break;
                 default:
