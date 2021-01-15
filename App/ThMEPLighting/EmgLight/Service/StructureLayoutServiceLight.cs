@@ -1,245 +1,625 @@
 ﻿using System;
 using NFox.Cad;
+using Linq2Acad;
 using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 
 namespace ThMEPLighting.EmgLight.Service
 {
     public class StructureLayoutServiceLight
     {
-        readonly double lightTol = 100;
+        private List<List<Polyline>> usefulColumns;
+        private List<List<Polyline>> usefulWalls;
+        private List<List<Polyline>> usefulStruct;
+        private List<Line> lane;
+        private Dictionary<Polyline, Point3d> dictStructureCenter = new Dictionary<Polyline, Point3d>();
+        private Dictionary<Polyline, Point3d> dictStructureCenterInLaneCoor = new Dictionary<Polyline, Point3d>();
+        private List<Line> laneTrans = new List<Line>();
 
-        ///// <summary>
-        ///// 计算布置点和方向
-        ///// </summary>
-        ///// <param name="layoutPts"></param>
-        ///// <param name="columns"></param>
-        ///// <param name="walls"></param>
-        ///// <param name="dir"></param>
-        ///// <returns></returns>
-        //public Dictionary<Point3d, Vector3d> GetLayoutStructPtLight(List<Point3d> layoutPts, List<Polyline> columns, List<Polyline> walls, Vector3d dir)
-        //{
-        //    Dictionary<Point3d, Vector3d> ptDic = new Dictionary<Point3d, Vector3d>();
-        //    var column = columns.Distinct().ToDictionary(x => x, y => y.Distance(layoutPts[0])).OrderBy(x => x.Value).ToList();
-        //    var wall = walls.Distinct().ToDictionary(x => x, y => y.Distance(layoutPts[0])).OrderBy(x => x.Value).ToList();
+        int TolLightRangeMin = 4000;
+        int TolLightRangeMax = 8500;
 
-        //    if (column.Count <= 0 && wall.Count <= 0)
-        //    {
-        //        return null;
-        //    }
 
-        //    foreach (var col in column)
-        //    {
+        public StructureLayoutServiceLight(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, int TolLightRangeMin, int TolLightRangeMax)
+        {
+            this.usefulColumns = usefulColumns;
+            this.usefulWalls = usefulWalls;
+            this.lane = lane;
+            this.TolLightRangeMin = TolLightRangeMin;
+            this.TolLightRangeMax = TolLightRangeMax;
 
-        //        (Point3d, Vector3d)? layoutInfo = null;
-        //        layoutInfo = GetColumnLayoutPoint(col.Key, layoutPts[0], dir);
+            usefulStruct = new List<List<Polyline>>();
+            usefulStruct.Add(new List<Polyline>());
+            usefulStruct[0].AddRange(usefulColumns[0]);
+            usefulStruct[0].AddRange(usefulWalls[0]);
+            usefulStruct.Add(new List<Polyline>());
+            usefulStruct[1].AddRange(usefulColumns[1]);
+            usefulStruct[1].AddRange(usefulWalls[1]);
 
-        //        //if (wall.Count <= 0 || (column.Count > 0 && column.First().Value < wall.First().Value))
-        //        //{
-        //        //    layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
-        //        //}
-        //        //else
-        //        //{
-        //        //    layoutInfo = GetWallLayoutPoint(wall.First().Key, pt, dir);
-        //        //    if (layoutInfo == null && column.Count > 0)
-        //        //    {
-        //        //        layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
-        //        //    }
-        //        //}
+            //必须先构建中心点
+            BuildStructCenter(usefulStruct);
+            BuildStructCenterInLaneCoor(usefulStruct);
 
-        //        if (layoutInfo.HasValue)
-        //        {
-        //            if (!ptDic.Keys.Contains(layoutInfo.Value.Item1))
-        //            {
-        //                ptDic.Add(layoutInfo.Value.Item1, layoutInfo.Value.Item2);
-        //            }
-        //        }
-        //    }
+            this.usefulColumns[0] = OrderingStruct(this.usefulColumns[0]);
+            this.usefulColumns[1] = OrderingStruct(this.usefulColumns[1]);
 
-        //    return ptDic;
-        //}
+            this.usefulWalls[0] = OrderingStruct(this.usefulWalls[0]);
+            this.usefulWalls[1] = OrderingStruct(this.usefulWalls[1]);
 
-        ///// <summary>
-        ///// 计算墙上排布点和方向
-        ///// </summary>
-        ///// <param name="wall"></param>
-        ///// <param name="pt"></param>
-        ///// <param name="dir"></param>
-        ///// <returns></returns>
-        //private (Point3d, Vector3d)? GetWallLayoutPoint(Polyline wall, Point3d pt, Vector3d dir)
-        //{
-        //    var layoutLine = GetLayoutStructLine(wall, pt, dir, out Point3d closetPt);
-        //    if (layoutLine == null)
-        //    {
-        //        return null;
-        //    }
+            usefulStruct[0] = OrderingStruct(usefulStruct[0]);
+            usefulStruct[1] = OrderingStruct(usefulStruct[1]);
 
-        //    Point3d sPt = layoutLine.StartPoint;
-        //    Point3d ePt = layoutLine.EndPoint;
-        //    Vector3d moveDir = (ePt - sPt).GetNormal();
+            filterOverlapStruc();
 
-        //    //计算排布点
-        //    var layoutPt = closetPt;
-        //    if (sPt.DistanceTo(layoutPt) < lightTol)
-        //    {
-        //        layoutPt = layoutPt + moveDir * (lightTol - sPt.DistanceTo(layoutPt));
-        //    }
-        //    if (ePt.DistanceTo(layoutPt) < lightTol)
-        //    {
-        //        layoutPt = layoutPt - moveDir * (lightTol - ePt.DistanceTo(layoutPt));
-        //    }
+        }
 
-        //    //计算排布方向
-        //    var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
-        //    var compareDir = (pt - layoutPt).GetNormal();
-        //    if (layoutDir.DotProduct(compareDir) < 0)
-        //    {
-        //        layoutDir = -layoutDir;
-        //    }
+        public List<List<Polyline>> UsefulColumns
+        {
+            get
+            {
+                return usefulColumns;
+            }
 
-        //    return (layoutPt, layoutDir);
-        //}
+        }
+        public List<List<Polyline>> UsefulWalls
+        {
+            get
+            {
+                return usefulWalls;
+            }
 
-        ///// <summary>
-        ///// 计算柱上排布点和方向
-        ///// </summary>
-        ///// <param name="column"></param>
-        ///// <param name="pt"></param>
-        ///// <param name="dir"></param>
-        ///// <returns></returns>
-        //private (Point3d, Vector3d)? GetColumnLayoutPoint(Polyline column, Point3d pt, Vector3d dir)
-        //{
-        //    var layoutLine = GetLayoutStructLine(column, pt, dir, out Point3d closetPt);
-        //    if (layoutLine == null)
-        //    {
-        //        return null;
-        //    }
+        }
 
-        //    Point3d sPt = layoutLine.StartPoint;
-        //    Point3d ePt = layoutLine.EndPoint;
+        public List<List<Polyline>> UsefulStruct
+        {
+            get
+            {
+                return usefulStruct;
+            }
 
-        //    //计算排布点
-        //    var layoutPt = new Point3d((sPt.X + ePt.X) / 2, (sPt.Y + ePt.Y) / 2, 0);
+        }
 
-        //    //计算排布方向
-        //    var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
-        //    var compareDir = (pt - layoutPt).GetNormal();
-        //    if (layoutDir.DotProduct(compareDir) < 0)
-        //    {
-        //        layoutDir = -layoutDir;
-        //    }
+        public void AddLayoutStructPt(List<Polyline> layoutList, List<Line> lane, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
+        {
+            (Point3d, Vector3d) layoutInfo;
 
-        //    return (layoutPt, layoutDir);
-        //}
-
-        ///// <summary>
-        ///// 找到构建边
-        ///// </summary>
-        ///// <param name="polyline"></param>
-        ///// <param name="pt"></param>
-        ///// <param name="dir"></param>
-        ///// <returns></returns>
-        //private Line GetLayoutStructLine(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
-        //{
-        //    var closetPt = polyline.GetClosestPointTo(pt, false);
-        //    layoutPt = closetPt;
-        //    List<Line> lines = new List<Line>();
-        //    for (int i = 0; i < polyline.NumberOfVertices; i++)
-        //    {
-        //        lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
-        //    }
-
-        //    Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
-        //    var layoutLine = lines.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
-        //        .Where(x =>
-        //        {
-        //            var xDir = (x.EndPoint - x.StartPoint).GetNormal();
-        //            return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
-        //        }).FirstOrDefault();
-
-        //    return layoutLine;
-        //}
+            foreach (var structure in layoutList)
+            {
+                if (layoutPtInfo.ContainsKey(structure) == false)
+                {
+                    layoutInfo = GetLayoutPoint(structure);
+                    layoutPtInfo.Add(structure, layoutInfo);
+                }
+            }
+        }
 
         /// <summary>
-        /// 找到墙与车道线平行的边
+        /// 计算柱上排布点和方向
         /// </summary>
-        /// <param name="polyline"></param>
+        /// <param name="column"></param>
         /// <param name="pt"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public List<Polyline> GetWallParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        public (Point3d, Vector3d) GetLayoutPoint(Polyline structure)
         {
-           
-            var closetPt = polyline.GetClosestPointTo(pt, false);
-            layoutPt = closetPt;
-            List<Polyline> structureSegment = new List<Polyline>();
 
+            //计算排布点
+            var layoutPt = getCenter(structure);
 
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            //计算排布方向
+            var StructDir = (structure.EndPoint - structure.StartPoint).GetNormal();
+            var layoutDir = Vector3d.ZAxis.CrossProduct(StructDir);
+
+            distToLine(structure, out var prjPt);
+            var compareDir = (prjPt - layoutPt).GetNormal();
+
+            if (layoutDir.DotProduct(compareDir) < 0)
             {
-              Polyline plTemp =  new Polyline();
-                plTemp.AddVertexAt(0, polyline.GetPoint2dAt(i), 0, 0, 0);
-                plTemp.AddVertexAt(0, polyline.GetPoint2dAt((i + 1) % polyline.NumberOfVertices), 0, 0, 0);
-                 structureSegment.Add(plTemp);
+                layoutDir = -layoutDir;
             }
 
-            dir = dir.GetNormal();
-            Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
+            return (layoutPt, layoutDir);
+        }
 
-            //var layoutLine = lines.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
-            //    .Where(x =>
-            //    {
-            //        var xDir = (x.EndPoint - x.StartPoint).GetNormal();
-            //        return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
-            //    }).FirstOrDefault();
+        public List<double> GetColumnDistList(List<Polyline> structList)
+        {
+            List<double> distX = new List<double>();
+            for (int i = 0; i < structList.Count - 1; i++)
+            {
+                distX.Add((getCenterInLaneCoor (structList[i]) - getCenterInLaneCoor(structList[i + 1])).Length);
+            }
 
-            
-            var structureLayoutSegment = structureSegment.Where(x =>
-               {
-                   var xDir = (x.EndPoint - x.StartPoint).GetNormal();
-                   //bool bParallel = Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
-                   bool bAngle = Math.Abs(dir.DotProduct(xDir)) / (dir.Length * xDir.Length) > Math.Abs(Math.Cos(30 * Math.PI/180));
-                   return bAngle;
-               }).ToList();
-           
-            return structureLayoutSegment;
+            return distX;
+
+        }
+
+        private List<Polyline> OrderingStruct(List<Polyline> structList)
+        {
+            //Vector3d xDir = (lane.First().EndPoint - lane.First().StartPoint).GetNormal();
+            //Vector3d yDir = Vector3d.ZAxis.CrossProduct(xDir);
+            //Vector3d zDir = Vector3d.ZAxis;
+            //Matrix3d matrix = new Matrix3d(
+            //    new double[] {
+            //        xDir.X, yDir.X, zDir.X, 0,
+            //        xDir.Y, yDir.Y, zDir.Y, 0,
+            //        xDir.Z, yDir.Z, zDir.Z, 0,
+            //        0.0, 0.0, 0.0, 1.0
+            //    });
+
+            //var orderColumns = structList.OrderBy(x => StructUtils.GetStructCenter(x).TransformBy(matrix.Inverse()).X).ToList();
+            var orderedStruct = structList.OrderBy(x => getCenterInLaneCoor(x).X).ToList();
+            return orderedStruct;
+        }
+
+        private static Point3d TransformPointToLine(Point3d pt, List<Line> lane)
+        {
+            //getAngleTo根据右手定则旋转(一般逆时针)
+            var rotationangle = Vector3d.XAxis.GetAngleTo((lane.Last().EndPoint - lane.First().StartPoint), Vector3d.ZAxis);
+            Matrix3d matrix = Matrix3d.Displacement(lane.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+
+            var transedPt = pt.TransformBy(matrix.Inverse());
+
+            return transedPt;
+        }
+
+        /// <summary>
+        /// 找到给定点投影到lanes尾的多线段和距离. 如果点在起点外,则返回投影到向前延长线到最末的距离和多线段.如果点在端点外,则返回点到端点的距离(负数)和多线段
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="pt1"></param>
+        /// <param name="PolylineToEnd"></param>
+        /// <returns></returns>
+        public double distToLineEnd(Polyline structure, out Polyline PolylineToEnd)
+        {
+            double distToEnd = -1;
+            Point3d prjPt;
+            PolylineToEnd = new Polyline();
+            int timeToCheck = 0;
+
+            Point3d centerPtTrans;
+            Point3d centerPt;
+            if (laneTrans.Count == 0)
+            {
+                laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
+            }
+
+            centerPt = getCenter(structure);
+            centerPtTrans = getCenterInLaneCoor(structure);
+
+            if (centerPtTrans.X < laneTrans.First().StartPoint.X)
+            {
+                prjPt = lane[0].GetClosestPointTo(centerPt, true);
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
+                foreach (var l in lane)
+                {
+                    PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, l.StartPoint.ToPoint2D(), 0, 0, 0);
+                }
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
+                distToEnd = PolylineToEnd.Length;
+            }
+            else if (centerPtTrans.X > laneTrans.Last().EndPoint.X)
+            {
+                prjPt = lane.Last().GetClosestPointTo(centerPt, true);
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
+                distToEnd = -PolylineToEnd.Length;
+            }
+            else
+            {
+                for (int i = 0; i < lane.Count; i++)
+                {
+                    if (timeToCheck == 0 && laneTrans[i].StartPoint.X <= centerPtTrans.X && centerPtTrans.X <= laneTrans[i].EndPoint.X)
+                    {
+                        prjPt = lane[i].GetClosestPointTo(centerPt, false);
+                        PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
+                        timeToCheck = 1;
+                    }
+                    else if (timeToCheck > 0)
+                    {
+                        PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane[i].StartPoint.ToPoint2D(), 0, 0, 0);
+                    }
+                }
+
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
+                distToEnd = PolylineToEnd.Length;
+            }
+
+
+            return distToEnd;
+
+        }
+
+        /// <summary>
+        /// 找点到线的投影点,如果点在线外,则返回延长线上的投影点
+        /// </summary>
+        /// <param name="lanes"></param>
+        /// <param name="pt1"></param>
+        /// <param name="prjPt"></param>
+        /// <returns></returns>
+        public double distToLine(Polyline structure, out Point3d prjPt)
+        {
+            double distProject = -1;
+            prjPt = new Point3d();
+
+            Point3d centerPtTrans;
+            Point3d centerPt;
+            if (laneTrans.Count == 0)
+            {
+                laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
+            }
+
+            centerPt = getCenter(structure);
+            centerPtTrans = getCenterInLaneCoor(structure);
+
+            if (centerPtTrans.X < laneTrans.First().StartPoint.X)
+            {
+                prjPt = lane[0].GetClosestPointTo(centerPt, true);
+
+            }
+            else if (centerPtTrans.X > laneTrans.Last().EndPoint.X)
+            {
+                prjPt = lane.Last().GetClosestPointTo(centerPt, true);
+
+            }
+            else
+            {
+                for (int i = 0; i < lane.Count; i++)
+                {
+                    if (laneTrans[i].StartPoint.X <= centerPtTrans.X && centerPtTrans.X <= laneTrans[i].EndPoint.X)
+
+                    {
+                        prjPt = lane[i].GetClosestPointTo(centerPt, false);
+                        break;
+                    }
+                }
+            }
+
+            distProject = prjPt.DistanceTo(centerPt);
+            return distProject;
+
+        }
+
+        /// <summary>
+        /// 找点到线的投影点,如果点在线外,则返回延长线上的投影点
+        /// </summary>
+        /// <param name="lane"></param>
+        /// <param name="pt1"></param>
+        /// <param name="prjPt"></param>
+        /// <returns></returns>
+        private double distToLine(Point3d pt, out Point3d prjPt)
+        {
+            double distProject = -1;
+            var ptNew = TransformPointToLine(pt, lane);
+            prjPt = new Point3d();
+
+            if (laneTrans.Count == 0) {
+                laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
+            }
+            if (ptNew.X < laneTrans.First().StartPoint.X)
+            {
+                prjPt = lane[0].GetClosestPointTo(pt, true);
+
+            }
+            else if (ptNew.X > laneTrans.Last().EndPoint.X)
+            {
+                prjPt = lane.Last().GetClosestPointTo(pt, true);
+
+            }
+            else
+            {
+                for (int i = 0; i < lane.Count; i++)
+                {
+                    if (laneTrans[i].StartPoint.X <= ptNew.X && ptNew.X <= laneTrans[i].EndPoint.X)
+
+                    {
+                        prjPt = lane[i].GetClosestPointTo(pt, false);
+                        break;
+                    }
+
+
+                }
+            }
+
+            distProject = prjPt.DistanceTo(pt);
+            return distProject;
+
         }
 
 
         /// <summary>
-        /// 找到柱与车道线平行且最近的边
+        /// 两点中点到线的投影点
         /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="pt"></param>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        public List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        /// <param name="lines"></param>
+        /// <param name="pt1"></param>
+        /// <param name="pt2"></param>
+        /// <param name="prjMidPt"></param>
+        public void findMidPointOnLine(Point3d pt1, Point3d pt2, out Point3d prjMidPt)
         {
-            var closetPt = polyline.GetClosestPointTo(pt, false);
-            layoutPt = closetPt;
 
-            List<Polyline> structureSegment = new List<Polyline>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            Point3d midPoint;
+
+            midPoint = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
+            distToLine(midPoint, out prjMidPt);
+
+            // return distProject;
+        }
+
+        public static void findClosestStruct(List<Polyline> structList, Point3d Pt, List<Polyline> Layout, out double minDist, out Polyline closestStruct)
+        {
+            minDist = 10000;
+            closestStruct = null;
+
+            for (int i = 0; i < structList.Count; i++)
             {
-                Polyline plTemp = new Polyline();
-                plTemp.AddVertexAt(0, polyline.GetPoint2dAt(i), 0, 0, 0);
-                plTemp.AddVertexAt(0, polyline.GetPoint2dAt((i + 1) % polyline.NumberOfVertices), 0, 0, 0);
-                structureSegment.Add(plTemp);
+
+                var connectLayout = Layout.Where(x => x.StartPoint == structList[i].StartPoint ||
+                                    x.StartPoint == structList[i].EndPoint ||
+                                    x.EndPoint == structList[i].StartPoint ||
+                                    x.EndPoint == structList[i].EndPoint).ToList();
+
+
+
+                if (structList[i].Distance(Pt) <= minDist)
+                {
+                    minDist = structList[i].Distance(Pt);
+
+                    if (connectLayout.Count > 0)
+                    {
+                        closestStruct = connectLayout.First();
+                    }
+                    else
+                    {
+                        closestStruct = structList[i];
+                    }
+
+                }
+            }
+        }
+
+        /// <summary>
+        ///给定框内是否有布置点,如果有,找沿PolylineToEnd距离tol长度的点最近的构建. 此点必须在框内
+        /// </summary>
+        /// <param name="ExtendPoly"></param>
+        /// <param name="structList"></param>
+        /// <param name="PolylineToEnd"></param>
+        /// <param name="tol"></param>
+        /// <param name="Layout"></param>
+        /// <param name="tempStruct">返回找沿PolylineToEnd距离tol长度的点最近的构建</param>
+        /// <param name="index">tempStruct在structList的index. 如果index>structList.count则判断后面没有柱子 如果为-1则后面还有柱子</param>
+        /// <returns>给定框内是否有布置点</returns>
+        //public bool FindPolyInLaneSegement( List<Polyline> structList, Polyline PolylineToEnd, double tol, List<Polyline> Layout, out Polyline tempStruct, out int index)
+        //{
+        //    bool bReturn = false;
+        //    index = -1;
+        //    tempStruct = null;
+
+        //    var segmentEnd = PolylineToEnd.GetPointAtDist(tol);
+        //    var segmentStartTransToLane = TransformPointToLine(PolylineToEnd.StartPoint, lane);
+        //    var segmentEndTransToLane = TransformPointToLine(segmentEnd, lane);
+
+        //    structList.Select ()
+
+
+        //    if (inExtendStruct.Count > 0)
+        //    {
+        //        //框内有位置布灯
+        //        findClosestStruct(structList, segmentEnd, Layout, out double minDist, out tempStruct, out index);
+        //        bReturn = true;
+
+        //    }
+        //    else
+        //    {
+        //        //检查最近点后面是否有构建
+        //        var transPtOnLine = TransformPointToLine(ptOnLine, lane);
+        //       if(getCenterInLaneCoor ( structList.First ()).X >= transPtOnLine.X)
+        //        {
+        //            index = structList.Count + 1;
+        //        }
+        //          bReturn = false;
+        //    }
+
+
+        //    return bReturn;
+        //}
+
+        public static bool FindPolyInExtendPoly(Polyline ExtendPoly, List<Polyline> structList, Polyline PolylineToEnd, double tol, List<Polyline> Layout, out Polyline tempStruct, out int index)
+        {
+            bool bReturn = false;
+            index = -1;
+            var inExtendStruct = structList.Where(x =>
+            {
+                return (ExtendPoly.Contains(x) || ExtendPoly.Intersects(x));
+            }).ToList();
+
+            tempStruct = null;
+            var ptOnLine = PolylineToEnd.GetPointAtDist(tol);
+
+            if (inExtendStruct.Count > 0)
+            {
+                //框内有位置布灯
+                findClosestStruct(inExtendStruct, ptOnLine, Layout, out double minDist, out tempStruct);
+                bReturn = true;
+
+            }
+            else
+            {
+                index = -1;
+                bReturn = false;
             }
 
-            Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
-            var structureLayoutSegment = structureSegment.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
-                .Where(x =>
-                {
-                    var xDir = (x.EndPoint - x.StartPoint).GetNormal();
-                    // return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
-                    bool bAngle = Math.Abs(dir.DotProduct(xDir)) / (dir.Length * xDir.Length) > Math.Abs(Math.Cos(30 * Math.PI/ 180));
-                    return bAngle;
-                }).ToList();
 
-            return structureLayoutSegment;
+            return bReturn;
+        }
+
+        public bool FindPolyInSegment(Line Segment, List<Polyline> structList, List<Polyline> Layout, out Polyline tempStruct, out int index)
+        {
+            bool bReturn = false;
+            index = -1;
+            tempStruct = null;
+
+            var segStartTrans = TransformPointToLine(Segment.StartPoint, lane);
+            var segEndTrans = TransformPointToLine(Segment.EndPoint, lane);
+
+            var inExtendStruct = structList.Where(x => getCenterInLaneCoor(x).X <= segEndTrans.X && getCenterInLaneCoor(x).X > segStartTrans.X).ToList();
+
+            if (inExtendStruct.Count > 0)
+            {
+                //框内有位置布灯
+                findClosestStruct(inExtendStruct, Segment.EndPoint, Layout, out double minDist, out tempStruct);
+                bReturn = true;
+
+            }
+            else
+            {
+                index = -1;
+                bReturn = false;
+            }
+
+
+            return bReturn;
+        }
+
+        public static void checkIfInLayout(List<Polyline> layout, Polyline column, int index, ref List<(Polyline, int)> uniformSideLayout)
+        {
+            var connectLayout = layout.Where(x => x.StartPoint == column.StartPoint ||
+                                    x.StartPoint == column.EndPoint ||
+                                    x.EndPoint == column.StartPoint ||
+                                    x.EndPoint == column.EndPoint).ToList();
+
+            if (connectLayout.Count > 0)
+            {
+                uniformSideLayout.Add((connectLayout.First(), index));
+            }
+            else
+            {
+                uniformSideLayout.Add((column, index));
+            }
+
+        }
+
+        private void BuildStructCenter(List<List<Polyline>> structList)
+        {
+            foreach (var structureSide in structList)
+            {
+                foreach (var s in structureSide)
+                {
+                    if (dictStructureCenter.ContainsKey(s) == false)
+                    {
+                        dictStructureCenter.Add(s, StructUtils.GetStructCenter(s));
+                    }
+                }
+            }
+        }
+
+        private void BuildStructCenterInLaneCoor(List<List<Polyline>> structList)
+        {
+            foreach (var structureSide in structList)
+            {
+                foreach (var s in structureSide)
+                {
+                    if (dictStructureCenterInLaneCoor.ContainsKey(s) == false)
+                    {
+                        dictStructureCenterInLaneCoor.Add(s, TransformPointToLine(dictStructureCenter[s], lane));
+                    }
+                }
+
+
+            }
+        }
+
+        public List<List<Polyline>> BuildHeadLayout(List<Polyline> layout, double TolLane)
+        {
+            //车道线往前做框buffer
+            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, TolLightRangeMin);
+            var FilteredLayout = StructureServiceLight.GetStruct(ExtendLineList, layout, TolLane);
+            var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
+
+            BuildStructCenter(importLayout);
+            BuildStructCenterInLaneCoor(importLayout);
+
+            importLayout[0] = OrderingStruct(importLayout[0]);
+            importLayout[1] = OrderingStruct(importLayout[1]);
+
+            return importLayout;
+        }
+
+        private Point3d getCenterInLaneCoor(Polyline structure)
+        {
+            Point3d ptTrans;
+            Point3d centerPt;
+
+            if (dictStructureCenterInLaneCoor.TryGetValue(structure, out ptTrans) == false)
+            {
+                centerPt = getCenter(structure);
+
+                ptTrans = TransformPointToLine(centerPt, lane);
+                dictStructureCenterInLaneCoor.Add(structure, ptTrans);
+            }
+            return ptTrans;
+        }
+
+        public Point3d getCenter(Polyline structure)
+        {
+            Point3d centerPt;
+
+            if (dictStructureCenter.TryGetValue(structure, out centerPt) == false)
+            {
+                centerPt = StructUtils.GetStructCenter(structure);
+                dictStructureCenter.Add(structure, centerPt);
+            }
+
+            return centerPt;
+        }
+
+        private void filterOverlapStruc()
+        {
+
+            for (int i = 0; i < usefulStruct.Count; i++)
+            {
+                List<Polyline> removeList = new List<Polyline>();
+
+                for (int curr = 0; curr < usefulStruct[i].Count; curr++)
+                {
+                    for (int j = curr; j < usefulStruct[i].Count; j++)
+                    {
+                        if (j != curr && removeList.Contains(usefulStruct[i][j]) == false)
+                        {
+                            var currCenter = getCenterInLaneCoor(usefulStruct[i][curr]);
+                            var closeStart = TransformPointToLine(usefulStruct[i][j].StartPoint, lane);
+                            var closeEnd = TransformPointToLine(usefulStruct[i][j].EndPoint, lane);
+
+                            if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                            {
+                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(usefulStruct[i][j]).Y))
+                                {
+                                    removeList.Add(usefulStruct[i][curr]);
+                                }
+                            }
+
+                            currCenter = getCenterInLaneCoor(usefulStruct[i][j]);
+                            closeStart = TransformPointToLine(usefulStruct[i][curr].StartPoint, lane);
+                            closeEnd = TransformPointToLine(usefulStruct[i][curr].EndPoint, lane);
+                            if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                            {
+                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(usefulStruct[i][curr]).Y))
+                                {
+                                    removeList.Add(usefulStruct[i][j]);
+                                }
+                            }
+                        }
+
+                    }
+                }
+                foreach (var removeStru in removeList)
+                {
+                    usefulColumns[i].Remove(removeStru);
+                    usefulWalls[i].Remove(removeStru);
+                    usefulStruct[i].Remove(removeStru);
+                }
+            }
         }
     }
 }
