@@ -24,7 +24,7 @@ namespace ThMEPLighting
     {
         int bufferLength = 100;
 
-        [CommandMethod("TIANHUACAD", "THEL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THYJZM", CommandFlags.Modal)]
         public void ThEmgLight()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())

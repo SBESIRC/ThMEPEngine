@@ -102,18 +102,36 @@ namespace ThMEPHVAC.Entity
             List<ThValve> valves = new List<ThValve>();
 
             var hole = CreateHole();
-            hole.ValveOffsetFromCenter = -hole.Length;
             var firevalve = CreateFireValve(fanlayer);
-            firevalve.ValveOffsetFromCenter = 0;
             var checkvalve = CreateCheckValve(fanlayer, valveposiontype);
-            checkvalve.ValveOffsetFromCenter = firevalve.Length;
-
-            valves.AddRange(new List<ThValve> { firevalve, hole });
-            //空间足够，阀组中添加截止阀
-            //若空间不够，截止阀在机房外设置
-            if (valveposiontype== ValveGroupPosionType.Outlet && Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
+            
+            //空间足够
+            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
             {
-                valves.Add(checkvalve);
+                hole.ValveOffsetFromCenter = -hole.Length;
+                firevalve.ValveOffsetFromCenter = 0;
+                valves.AddRange(new List<ThValve> { firevalve, hole });
+                //机房内对应风机出口
+                if (valveposiontype == ValveGroupPosionType.Outlet)
+                {
+                    checkvalve.ValveOffsetFromCenter = firevalve.Length;
+                    valves.Add(checkvalve);
+                }
+            }
+            //若空间不够，防火阀移至洞外
+            else
+            {
+                firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
+                hole.ValveOffsetFromCenter = -hole.Length;
+                valves.AddRange(new List<ThValve> { firevalve, hole });
+
+                //若空间能放下一个止回阀，且风机出口在机房外
+                //洞内放置防火阀
+                if (Parameters.ValveToFanSpacing > checkvalve.Length && valveposiontype == ValveGroupPosionType.Outlet)
+                {
+                    checkvalve.ValveOffsetFromCenter = 0;
+                    valves.Add(checkvalve);
+                }
             }
             return valves;
         }
@@ -129,25 +147,28 @@ namespace ThMEPHVAC.Entity
             var firevalve = CreateFireValve(fanlayer);
 
             //正常情况下，空间足够
-            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
+            if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length + silencer.Length)
             {
-                silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
+                //silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
                 hole.ValveOffsetFromCenter = -hole.Length;
                 firevalve.ValveOffsetFromCenter = 0;
-                checkvalve.ValveOffsetFromCenter = firevalve.Length;
+                silencer.ValveOffsetFromCenter = firevalve.Length;
+                checkvalve.ValveOffsetFromCenter = firevalve.Length + silencer.Length;
             }
-            //机房外空间放不下防火阀加止回阀
+            //机房外空间放不下防火阀加止回阀加消音器
             else
             {
-                //机房外空间连一个止回阀都放不下
-                if (Parameters.ValveToFanSpacing < checkvalve.Length)
+                //若能放得下一个止回阀加防火阀，则将消音器移至洞外
+                if (Parameters.ValveToFanSpacing > checkvalve.Length + firevalve.Length)
                 {
-                    silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - checkvalve.Length - hole.Length;
-                    checkvalve.ValveOffsetFromCenter = -checkvalve.Length - firevalve.Length - hole.Length;
-                    firevalve.ValveOffsetFromCenter = -firevalve.Length - hole.Length;
+                    silencer.ValveOffsetFromCenter = -silencer.Length - hole.Length;
                     hole.ValveOffsetFromCenter = -hole.Length;
+                    firevalve.ValveOffsetFromCenter = 0;
+                    checkvalve.ValveOffsetFromCenter = firevalve.Length;
                 }
-                //机房外空间可以放一个止回阀
+
+                //放不下止回阀加防火阀
+                //把防火阀移至洞外
                 else
                 {
                     silencer.ValveOffsetFromCenter = -silencer.Length - firevalve.Length - hole.Length;
