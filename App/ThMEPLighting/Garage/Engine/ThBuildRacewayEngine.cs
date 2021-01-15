@@ -13,6 +13,7 @@ using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using EndCapStyle = NetTopologySuite.Operation.Buffer.EndCapStyle;
 using ThMEPEngineCore.LaneLine;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -81,11 +82,7 @@ namespace ThMEPLighting.Garage.Engine
             var results = new ObjectIdList();
             CenterWithSides.ForEach(o =>
             {
-                var ports = new List<Line>();
-                if (CenterWithPorts.ContainsKey(o.Key))
-                {
-                    ports = CenterWithPorts[o.Key];
-                }
+                var ports = FindPorts(o.Key, CenterWithPorts);
                 var groupParameter = new ThRacewayGroupParameter
                 {
                     RacewayParameter = layerParameter,
@@ -95,6 +92,21 @@ namespace ThMEPLighting.Garage.Engine
                 };
                 results.AddRange(ThRacewayGroupService.Create(groupParameter));
             });
+            return results;
+        }
+        private List<Line> FindPorts(Line center, Dictionary<Line, List<Line>> centerPorts)
+        {
+            var results = new List<Line>();
+            var ports = new List<Line>();
+            centerPorts.Where(o => ThGeometryTool.IsCollinearEx(
+                center.StartPoint, center.EndPoint, o.Key.StartPoint, o.Key.EndPoint)).ForEach(o => ports.AddRange(o.Value));
+            var spaticalIndex = ThGarageLightUtils.BuildSpatialIndex(ports);
+            var spSquare = ThDrawTool.CreateSquare(center.StartPoint, 1.0);
+            var epSquare = ThDrawTool.CreateSquare(center.EndPoint, 1.0);
+            var spObjs = spaticalIndex.SelectCrossingPolygon(spSquare);
+            var epObjs = spaticalIndex.SelectCrossingPolygon(epSquare);
+            spObjs.Cast<Line>().ForEach(o => results.Add(o));
+            epObjs.Cast<Line>().ForEach(o => results.Add(o));
             return results;
         }
         public List<Point3d> GetPorts()
