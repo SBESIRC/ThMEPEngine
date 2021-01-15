@@ -16,6 +16,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore
 {
@@ -338,6 +339,42 @@ namespace ThMEPEngineCore
             dbText.Layer = "0";
             dbText.Height = 200;
             return dbText;
+        }
+        [CommandMethod("TIANHUACAD", "ThExportGeo", CommandFlags.Modal)]
+        public void ThExportGeo()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var pso = new PromptSelectionOptions();
+                pso.MessageForAdding = "\n选择线";
+                var tvs = new TypedValue[]
+                {
+                    new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
+                };
+                var sf = new SelectionFilter(tvs);
+                var result = Active.Editor.GetSelection(pso, sf);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var lines = new List<Line>();
+                result.Value.GetObjectIds().Cast<ObjectId>().ForEach(o => lines.Add(acadDatabase.Element<Line>(o)));
+
+                // 输出GeoJson文件
+                // 线
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Line.geojson", Active.DocumentName))))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                {
+                    Indentation = 4,
+                    IndentChar = ' ',
+                    Formatting = Formatting.Indented,
+                })
+                {
+                    var geoJsonWriter = new ThLineGeoJsonWriter();
+                    geoJsonWriter.Write(lines, writer);
+                }
+            }
         }
     }
 }
