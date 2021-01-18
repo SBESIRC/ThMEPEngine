@@ -16,6 +16,7 @@ namespace ThMEPWSS.Pipe.Output
     {
         public void LayoutTag(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, ThWRoofParameters parameters1, ThWRoofDeviceParameters parameters2, AcadDatabase acadDatabase, ThWInnerPipeIndexEngine PipeindexEngine, ThWCompositeIndexEngine composite_Engine)
         {
+            var tag_frames = new List<Polyline>();//用来收纳所有文字框
             var rain_pipes = ThWPipeOutputFunction.GetNewPipes(parameters0.rain_pipe);//雨水管去重复
             var npipes = ThWPipeOutputFunction.GetNewPipes(parameters0.npipe);//冷凝管去重
             var roofrain_pipes = ThWPipeOutputFunction.GetNewPipes(parameters0.roofrain_pipe);//屋顶雨水管去重                                            
@@ -29,6 +30,7 @@ namespace ThMEPWSS.Pipe.Output
             //阳台空间形心
             Point3d balconypoint = new Point3d(x1 / FloorEngines.TopFloors[0].CompositeBalconyRooms.Count,
             y1 / FloorEngines.TopFloors[0].CompositeBalconyRooms.Count, 0);
+
             //定义障碍              
             ThCADCoreNTSSpatialIndex obstacle = null;
             obstacle = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetObstacle(FloorEngines.Columns));
@@ -40,6 +42,7 @@ namespace ThMEPWSS.Pipe.Output
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.Fpipeindex[j].Count; i++)
                 {
+                    ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                     double Yoffset = 0.0;
                     //此处添加同行调整后如果碰撞的情况
                     if (composite_Engine.FpipeDublicated.Count > 0)
@@ -53,14 +56,14 @@ namespace ThMEPWSS.Pipe.Output
                         GetVectorTo(ThWPipeOutputFunction.GetRadialPoint(dublicatePoint, obstacle)));
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
-                    Point3d tag3 = Point3d.Origin;
+                    Point3d tag3 = Point3d.Origin;              
                     if (Yoffset > 0 && PipeindexEngine.Fpipeindex[j][i].X == PipeindexEngine.Fpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Fpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍                                                       
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        PipeindexEngine.Fpipeindex_tag[j][3 * i+2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍                                                              
+                            tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                            tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                            tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);                      
                     }
                     else
                     {
@@ -102,6 +105,7 @@ namespace ThMEPWSS.Pipe.Output
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             for (int j = 0; j < composite_Engine.PipeEngine.Tpipeindex.Count; j++)
@@ -109,6 +113,7 @@ namespace ThMEPWSS.Pipe.Output
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.Tpipeindex[j].Count; i++)
                 {
+                    ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
@@ -122,13 +127,13 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset > 0 && PipeindexEngine.Tpipeindex[j][i].X == PipeindexEngine.Tpipeindex_tag[j][3 * i].X)
+                    if (Yoffset >=0 && PipeindexEngine.Tpipeindex[j][i].X == PipeindexEngine.Tpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.Tpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     else
                     {
@@ -164,6 +169,7 @@ namespace ThMEPWSS.Pipe.Output
                         acadDatabase.ModelSpace.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             for (int j = 0; j < composite_Engine.PipeEngine.Wpipeindex.Count; j++)
@@ -171,6 +177,7 @@ namespace ThMEPWSS.Pipe.Output
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.Wpipeindex[j].Count; i++)
                 {
+                    ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
@@ -185,13 +192,13 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset > 0 && PipeindexEngine.Wpipeindex[j][i].X == PipeindexEngine.Wpipeindex_tag[j][3 * i].X)
+                    if (Yoffset >= 0 && PipeindexEngine.Wpipeindex[j][i].X == PipeindexEngine.Wpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.Wpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     else
                     {
@@ -233,6 +240,7 @@ namespace ThMEPWSS.Pipe.Output
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             for (int j = 0; j < composite_Engine.PipeEngine.Ppipeindex.Count; j++)
@@ -240,6 +248,7 @@ namespace ThMEPWSS.Pipe.Output
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.Ppipeindex[j].Count; i++)
                 {
+                    ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
@@ -253,13 +262,13 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset > 0.0 && PipeindexEngine.Ppipeindex[j][i].X == PipeindexEngine.Ppipeindex_tag[j][3 * i].X)
+                    if (Yoffset >= 0.0 && PipeindexEngine.Ppipeindex[j][i].X == PipeindexEngine.Ppipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.Ppipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     else
                     {
@@ -301,6 +310,7 @@ namespace ThMEPWSS.Pipe.Output
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             for (int j = 0; j < composite_Engine.PipeEngine.Dpipeindex.Count; j++)
@@ -308,6 +318,7 @@ namespace ThMEPWSS.Pipe.Output
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.Dpipeindex[j].Count; i++)
                 {
+                    ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
@@ -321,13 +332,13 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset > 0.0 && PipeindexEngine.Dpipeindex[j][i].X == PipeindexEngine.Dpipeindex_tag[j][3 * i].X)
+                    if (Yoffset >= 0.0 && PipeindexEngine.Dpipeindex[j][i].X == PipeindexEngine.Dpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.Dpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     else
                     {
@@ -363,6 +374,7 @@ namespace ThMEPWSS.Pipe.Output
                         acadDatabase.ModelSpace.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             for (int j = 0; j < composite_Engine.PipeEngine.Npipeindex.Count; j++)
@@ -370,6 +382,7 @@ namespace ThMEPWSS.Pipe.Output
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.Npipeindex[j].Count; i++)
                 {
+                    ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
@@ -383,13 +396,13 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset > 0 && PipeindexEngine.Npipeindex[j][i].X == PipeindexEngine.Npipeindex_tag[j][3 * i].X)
+                    if (Yoffset >= 0 && PipeindexEngine.Npipeindex[j][i].X == PipeindexEngine.Npipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.Npipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     else
                     {
@@ -428,6 +441,7 @@ namespace ThMEPWSS.Pipe.Output
                         acadDatabase.ModelSpace.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             for (int j = 0; j < composite_Engine.PipeEngine.Rainpipeindex.Count; j++)
@@ -435,6 +449,7 @@ namespace ThMEPWSS.Pipe.Output
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.Rainpipeindex[j].Count; i++)
                 {
+                    ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
@@ -447,13 +462,13 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset > 0 && PipeindexEngine.Rainpipeindex[j][i].X == PipeindexEngine.Rainpipeindex_tag[j][3 * i].X)
+                    if (Yoffset >= 0 && PipeindexEngine.Rainpipeindex[j][i].X == PipeindexEngine.Rainpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.Rainpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     else
                     {
@@ -492,10 +507,12 @@ namespace ThMEPWSS.Pipe.Output
                         acadDatabase.ModelSpace.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             for (int j = 0; j < composite_Engine.PipeEngine.RoofRainpipeindex.Count; j++)
             {
+                ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
                 Point3d dublicatePoint = Point3d.Origin;
                 for (int i = 0; i < composite_Engine.PipeEngine.RoofRainpipeindex[j].Count; i++)
                 {
@@ -512,13 +529,13 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset > 0 && PipeindexEngine.RoofRainpipeindex[j][i].X == PipeindexEngine.RoofRainpipeindex_tag[j][3 * i].X)
+                    if (Yoffset >= 0 && PipeindexEngine.RoofRainpipeindex[j][i].X == PipeindexEngine.RoofRainpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.RoofRainpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
-                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i, matrix1, Matrix);
-                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i + 1, matrix1, Matrix);
-                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i + 2, matrix1, Matrix);
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     tag1 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i];
                     tag2 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 1];
@@ -560,6 +577,7 @@ namespace ThMEPWSS.Pipe.Output
                         parameters0.copyrooftags.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
             if (FloorEngines.RoofFloors.Count > 0)

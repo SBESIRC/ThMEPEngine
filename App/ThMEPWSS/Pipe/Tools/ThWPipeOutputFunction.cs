@@ -373,20 +373,55 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return polylines;
         }
-        public static Point3d GetTag(DBObjectCollection fontBox, Point3dCollection Pipeindex, int i, Matrix3d matrix1, Matrix3d Matrix)
+        public static Point3d GetTag(DBObjectCollection fontBox, Point3dCollection Pipeindex, int i, Matrix3d matrix1, Matrix3d Matrix, ThCADCoreNTSSpatialIndex obstacle)
         {
             Point3d tag = Point3d.Origin;
 
-            if (fontBox.Count > 0)
+            if (fontBox.Count > 0|| obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i])).Count > 0)
             {
-                tag = Pipeindex[i];
-
+                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i])).Count>0)
+                {
+                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i/3*3]);
+                }
+                else
+                {
+                    tag = Pipeindex[i];
+                }
             }
             else
             {
                 tag = Pipeindex[i].TransformBy(matrix1).TransformBy(Matrix);
             }
             return tag;
+        }
+        public static Point3d GetRadialFontPoint(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle, Point3d Fpipeindex1)
+        {
+            Point3d point = Point3d.Origin;
+            for (int j = 0; j < 6; j++)
+            {
+                Point3d point1 = Fpipeindex1 - 250 * (j )*Vector3d.YAxis.GetNormal();
+                Point3d point2 = Fpipeindex1 + 250 * (j) * Vector3d.YAxis.GetNormal();
+                var fontBox = obstacle.SelectCrossingPolygon(GetBoundary(175*7, point1));
+                var fontBox1 = obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, point2));
+                if (fontBox.Count > 0)
+                {
+                    if (fontBox1.Count > 0)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        point = point2;
+                        break;
+                    }
+                }
+                else
+                {
+                    point = point1;
+                    break;
+                }
+            }
+            return Fpipeindex+ Fpipeindex1.GetVectorTo(point);
         }
         public static List<BlockReference> GetGravityWaterBuckets(List<ThIfcGravityWaterBucket> GravityWaterBuckets)
         {
@@ -537,6 +572,15 @@ namespace ThMEPWSS.Pipe.Tools
                 rainpipes.Add(ent);
             }
             return rainpipes;
+        }
+        public static DBObjectCollection GetFont(List<Polyline> polylines)
+        {
+            var font = new DBObjectCollection();
+            foreach(Polyline polyline in polylines)
+            {
+                font.Add(polyline); 
+            }
+            return font;
         }
     }
 }
