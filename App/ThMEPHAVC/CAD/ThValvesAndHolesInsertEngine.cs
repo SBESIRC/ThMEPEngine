@@ -22,7 +22,8 @@ namespace ThMEPHVAC.CAD
             {
                 var blockName = ValveModel.ValveBlockName;
                 var layerName = ValveModel.ValveBlockLayer;
-                Active.Database.ImportValve(blockName, layerName);
+                Active.Database.ImportLayer(layerName);
+                Active.Database.ImportValve(blockName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
                 objId.SetValveWidth(ValveModel.Width, ValveModel.WidthPropertyName);
                 objId.SetValveHeight(ValveModel.Length, ValveModel.LengthPropertyName);
@@ -42,7 +43,8 @@ namespace ThMEPHVAC.CAD
             {
                 var blockName = HoleModel.ValveBlockName;
                 var layerName = HoleModel.ValveBlockLayer;
-                Active.Database.ImportValve(blockName, layerName);
+                Active.Database.ImportLayer(layerName);
+                Active.Database.ImportValve(blockName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
                 objId.SetValveWidth(HoleModel.Width, HoleModel.WidthPropertyName);
                 objId.SetValveHeight(HoleModel.Length, HoleModel.LengthPropertyName);
@@ -72,7 +74,8 @@ namespace ThMEPHVAC.CAD
             {
                 var blockName = ThHvacCommon.HOSE_BLOCK_NAME;
                 var layerName = ThDuctUtils.HoseLayerName(modellayer);
-                Active.Database.ImportValve(blockName, layerName);
+                Active.Database.ImportLayer(layerName);
+                Active.Database.ImportValve(blockName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
                 objId.SetValveWidth(hose.Parameters.Width, ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA);
                 objId.SetValveHeight(hose.Parameters.Length, ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH);

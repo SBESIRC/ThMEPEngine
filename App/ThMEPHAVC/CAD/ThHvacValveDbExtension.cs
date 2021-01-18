@@ -24,13 +24,12 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public static void ImportValve(this Database database, string name, string layer)
+        public static void ImportValve(this Database database, string name, bool replaceIfDuplicate = false)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                currentDb.Database.ImportLayer(layer);
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
+                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), replaceIfDuplicate);
             }
         }
 
@@ -39,7 +38,7 @@ namespace ThMEPHVAC.CAD
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), false);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
             }
         }
 
