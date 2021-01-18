@@ -696,7 +696,7 @@ namespace ThMEPHVAC.CAD
                 UpperLine,
                 LowerLine,
                 LeftLine,
-                RightLine
+                //RightLine
             };
         }
 
@@ -720,21 +720,18 @@ namespace ThMEPHVAC.CAD
                 StartPoint = new Point3d(parameters.Length / 2.0, 0.5 * parameters.Width, 0),
                 EndPoint = new Point3d(parameters.Length / 2.0, -0.5 * parameters.Width, 0),
             };
-            if (isupordownopening)
+            //if (isupordownopening)
+            //{
+            //    return new DBObjectCollection()
+            //    {
+            //        rightflange,
+            //    };
+            //}
+            return new DBObjectCollection()
             {
-                return new DBObjectCollection()
-                {
-                    rightflange,
-                };
-            }
-            else
-            {
-                return new DBObjectCollection()
-                {
-                    rightflange,
-                    leftflange,
-                };
-            }
+                rightflange,
+                leftflange,
+            };
         }
         private DBObjectCollection CreateDuctSegmentGeometries(ThIfcDuctSegmentParameters parameters)
         {

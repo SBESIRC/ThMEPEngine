@@ -22,7 +22,7 @@ namespace ThMEPLighting.Garage.Engine
             regionBorders.ForEach(o =>
             {
                 var collectIds = Arrange(o);
-                ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds);
+                ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds,ArrangeParameter.Width);
             });
         }
         private ObjectIdList Arrange(ThRegionBorder regionBorder)

@@ -197,12 +197,12 @@ namespace ThMEPHVAC.CAD
                         Angle = totalrotation,
                         Height = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL)
+                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)
                         .First().Value),
 
                         Width = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL)
+                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_INLET_VERTICAL)
                         .First().Value),
                     };
                 }
@@ -254,12 +254,12 @@ namespace ThMEPHVAC.CAD
                         Angle = totalrotation,
                         Height = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL)
+                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)
                         .First().Value),
 
                         Width = Convert.ToDouble(Data.CustomProperties
                         .Cast<DynamicBlockReferenceProperty>()
-                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL)
+                        .Where(d => d.PropertyName == ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL)
                         .First().Value),
                     };
                 }
