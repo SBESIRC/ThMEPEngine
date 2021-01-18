@@ -36,7 +36,54 @@ namespace ThMEPWSS.Pipe.Output
             obstacle = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetObstacle(FloorEngines.Columns));
             composite_Engine.Run(parameters0.fpipe, parameters0.tpipe, parameters0.wpipe, parameters0.ppipe, parameters0.dpipe, npipes,
                 rain_pipes, parameters0.pboundary, parameters0.divideLines, roofrain_pipes, toiletpoint, balconypoint, obstacle);
-            //首先得到比对的第一行重复标注         
+            //首先得到比对的第一行重复标注  
+            GetFpipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase);
+            GetTpipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase);
+            GetWpipeindex(composite_Engine, tag_frames, parameters0,PipeindexEngine, obstacle, acadDatabase);
+            GetPpipeindex(composite_Engine, tag_frames, parameters0,PipeindexEngine, obstacle, acadDatabase);
+            GetDpipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase);
+            GetNpipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase);
+            GetRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase);
+            GetRoofRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase);
+            GetCopiedPipeindex(FloorEngines, parameters0, acadDatabase, obstacle, parameters1, parameters2, composite_Engine, toiletpoint, balconypoint);         
+        }
+        public static void LayoutToiletPipe(ThWCompositePipeEngine compositeEngine, ThWTopParameters parameters0, AcadDatabase acadDatabase)
+        {
+            for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
+            {
+                var toilet = compositeEngine.ToiletPipes[i];
+                var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
+                ThWPipeOutputFunction.GetListFpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.fpipe.Add(o));
+                ThWPipeOutputFunction.GetListPpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.ppipe.Add(o));
+                ThWPipeOutputFunction.GetListWpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.wpipe.Add(o));
+                ThWPipeOutputFunction.GetListTpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.tpipe.Add(o));
+                ThWPipeOutputFunction.GetListDpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.dpipe.Add(o));
+                ThWPipeOutputFunction.GetListCopypipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.copypipes.Add(o));
+                ThWPipeOutputFunction.GetListNormalCopypipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.normalCopys.Add(o));
+                //在顶层打印                              
+                ThWPipeOutputFunction.GetEntityPolyline(toilet, compositeEngine.ToiletPipes).ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
+        public static void LayoutToiletPipe1(ThWCompositePipeEngine compositeEngine, ThWTopParameters parameters0, AcadDatabase acadDatabase)
+        {
+            for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
+            {
+                var toilet = compositeEngine.ToiletPipes[i];
+                var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
+                ThWPipeOutputFunction.GetListFpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.fpipe.Add(o));
+                ThWPipeOutputFunction.GetListPpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.ppipe.Add(o));
+                ThWPipeOutputFunction.GetListWpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.wpipe.Add(o));
+                ThWPipeOutputFunction.GetListTpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.tpipe.Add(o));
+                ThWPipeOutputFunction.GetListDpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.dpipe.Add(o));
+                ThWPipeOutputFunction.GetListCopypipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.copypipes.Add(o));
+                ThWPipeOutputFunction.GetListNormalCopypipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.normalCopys.Add(o));
+                //在顶层打印                              
+                ThWPipeOutputFunction.GetEntityPolyline1(toilet, compositeEngine.ToiletPipes).ForEach(o => acadDatabase.ModelSpace.Add(o));
+            }
+        }
+       private static void GetFpipeindex(ThWCompositeIndexEngine composite_Engine,List<Polyline> tag_frames, ThWTopParameters parameters0,
+           ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle,AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.Fpipeindex.Count; j++)
             {
                 Point3d dublicatePoint = Point3d.Origin;
@@ -56,14 +103,14 @@ namespace ThMEPWSS.Pipe.Output
                         GetVectorTo(ThWPipeOutputFunction.GetRadialPoint(dublicatePoint, obstacle)));
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
-                    Point3d tag3 = Point3d.Origin;              
+                    Point3d tag3 = Point3d.Origin;
                     if (Yoffset > 0 && PipeindexEngine.Fpipeindex[j][i].X == PipeindexEngine.Fpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Fpipeindex_tag[j][3 * i+2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍                                                              
-                            tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
-                            tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
-                            tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);                      
+                        PipeindexEngine.Fpipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍                                                              
+                        tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
+                        tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
+                        tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Fpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
                     else
                     {
@@ -108,6 +155,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetTpipeindex(ThWCompositeIndexEngine composite_Engine, List<Polyline> tag_frames, ThWTopParameters parameters0,
+           ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle, AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.Tpipeindex.Count; j++)
             {
                 Point3d dublicatePoint = Point3d.Origin;
@@ -127,7 +178,7 @@ namespace ThMEPWSS.Pipe.Output
                     Point3d tag1 = Point3d.Origin;
                     Point3d tag2 = Point3d.Origin;
                     Point3d tag3 = Point3d.Origin;
-                    if (Yoffset >=0 && PipeindexEngine.Tpipeindex[j][i].X == PipeindexEngine.Tpipeindex_tag[j][3 * i].X)
+                    if (Yoffset >= 0 && PipeindexEngine.Tpipeindex[j][i].X == PipeindexEngine.Tpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
                         PipeindexEngine.Tpipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
@@ -172,6 +223,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetWpipeindex(ThWCompositeIndexEngine composite_Engine, List<Polyline> tag_frames, ThWTopParameters parameters0,
+        ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle, AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.Wpipeindex.Count; j++)
             {
                 Point3d dublicatePoint = Point3d.Origin;
@@ -243,6 +298,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetPpipeindex(ThWCompositeIndexEngine composite_Engine, List<Polyline> tag_frames, ThWTopParameters parameters0,
+       ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle, AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.Ppipeindex.Count; j++)
             {
                 Point3d dublicatePoint = Point3d.Origin;
@@ -313,6 +372,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetDpipeindex(ThWCompositeIndexEngine composite_Engine, List<Polyline> tag_frames, ThWTopParameters parameters0,
+       ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle, AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.Dpipeindex.Count; j++)
             {
                 Point3d dublicatePoint = Point3d.Origin;
@@ -377,6 +440,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetNpipeindex(ThWCompositeIndexEngine composite_Engine, List<Polyline> tag_frames, ThWTopParameters parameters0,
+      ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle, AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.Npipeindex.Count; j++)
             {
                 Point3d dublicatePoint = Point3d.Origin;
@@ -444,6 +511,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetRainPipeindex(ThWCompositeIndexEngine composite_Engine, List<Polyline> tag_frames, ThWTopParameters parameters0,
+      ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle, AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.Rainpipeindex.Count; j++)
             {
                 Point3d dublicatePoint = Point3d.Origin;
@@ -510,6 +581,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetRoofRainPipeindex(ThWCompositeIndexEngine composite_Engine, List<Polyline> tag_frames, ThWTopParameters parameters0,
+      ThWInnerPipeIndexEngine PipeindexEngine, ThCADCoreNTSSpatialIndex obstacle, AcadDatabase acadDatabase)
+        {
             for (int j = 0; j < composite_Engine.PipeEngine.RoofRainpipeindex.Count; j++)
             {
                 ThCADCoreNTSSpatialIndex obstacle_tag = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetFont(tag_frames));
@@ -583,6 +658,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7, tag3));
                 }
             }
+        }
+        private static void GetCopiedPipeindex(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, ThCADCoreNTSSpatialIndex obstacle,
+      ThWRoofParameters parameters1, ThWRoofDeviceParameters parameters2, ThWCompositeIndexEngine composite_Engine,Point3d toiletpoint, Point3d balconypoint)
+        {
             if (FloorEngines.RoofFloors.Count > 0)
             {
                 foreach (var ent in parameters0.copypipes)
@@ -868,40 +947,5 @@ namespace ThMEPWSS.Pipe.Output
                 }
             }
         }
-        public static void LayoutToiletPipe(ThWCompositePipeEngine compositeEngine, ThWTopParameters parameters0, AcadDatabase acadDatabase)
-        {
-            for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
-            {
-                var toilet = compositeEngine.ToiletPipes[i];
-                var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
-                ThWPipeOutputFunction.GetListFpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.fpipe.Add(o));
-                ThWPipeOutputFunction.GetListPpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.ppipe.Add(o));
-                ThWPipeOutputFunction.GetListWpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.wpipe.Add(o));
-                ThWPipeOutputFunction.GetListTpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.tpipe.Add(o));
-                ThWPipeOutputFunction.GetListDpipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.dpipe.Add(o));
-                ThWPipeOutputFunction.GetListCopypipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.copypipes.Add(o));
-                ThWPipeOutputFunction.GetListNormalCopypipes(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.normalCopys.Add(o));
-                //在顶层打印                              
-                ThWPipeOutputFunction.GetEntityPolyline(toilet, compositeEngine.ToiletPipes).ForEach(o => acadDatabase.ModelSpace.Add(o));
-            }
-        }
-        public static void LayoutToiletPipe1(ThWCompositePipeEngine compositeEngine, ThWTopParameters parameters0, AcadDatabase acadDatabase)
-        {
-            for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
-            {
-                var toilet = compositeEngine.ToiletPipes[i];
-                var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
-                ThWPipeOutputFunction.GetListFpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.fpipe.Add(o));
-                ThWPipeOutputFunction.GetListPpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.ppipe.Add(o));
-                ThWPipeOutputFunction.GetListWpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.wpipe.Add(o));
-                ThWPipeOutputFunction.GetListTpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.tpipe.Add(o));
-                ThWPipeOutputFunction.GetListDpipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.dpipe.Add(o));
-                ThWPipeOutputFunction.GetListCopypipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.copypipes.Add(o));
-                ThWPipeOutputFunction.GetListNormalCopypipes1(toilet, compositeEngine.ToiletPipes).ForEach(o => parameters0.normalCopys.Add(o));
-                //在顶层打印                              
-                ThWPipeOutputFunction.GetEntityPolyline1(toilet, compositeEngine.ToiletPipes).ForEach(o => acadDatabase.ModelSpace.Add(o));
-            }
-        }
-       
     }
 }
