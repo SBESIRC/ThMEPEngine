@@ -139,29 +139,29 @@ namespace ThMEPHVAC.CAD
 
             bool isUpOrDownOpening = FanInOutType.Contains("上进") || FanInOutType.Contains("下进");
             //对于进口为上进的，首先需要画出管口俯视图
-            if (isUpOrDownOpening)
-            {
-                var DuctParameters = new ThIfcDuctSegmentParameters()
-                {
-                    Width = InletDuctWidth,
-                    Height = InletDuctHeight,
-                    Length = 0
-                };
-                double rotateangle = InletOpening.NormalAngle * Math.PI / 180 + 0.5 * Math.PI;
-                if (InletCenterLineGraph.Edges.Count() != 0)
-                {
-                    var firstinletedge = InletCenterLineGraph.Edges.First(e => e.Source.IsStartVertexOfGraph);
-                    var firstcenterlinevector = firstinletedge.Target.Position - firstinletedge.Source.Position;
-                    double firstcenterlineangle = firstcenterlinevector.AngleOnPlane(new Plane(firstinletedge.Target.Position, Vector3d.ZAxis));
-                    rotateangle = firstcenterlineangle < Math.PI ? Vector3d.XAxis.GetAngleTo(firstcenterlinevector) : 2 * Math.PI - Vector3d.XAxis.GetAngleTo(firstcenterlinevector);
-                }
+            //if (isUpOrDownOpening)
+            //{
+            //    var DuctParameters = new ThIfcDuctSegmentParameters()
+            //    {
+            //        Width = Math.Max(InletDuctWidth, InletOpening.Width),
+            //        Height = Math.Max(InletDuctHeight, InletOpening.Height),
+            //        Length = 0
+            //    };
+            //    double rotateangle = InletOpening.NormalAngle * Math.PI / 180 + 0.5 * Math.PI;
+            //    if (InletCenterLineGraph.Edges.Count() != 0)
+            //    {
+            //        var firstinletedge = InletCenterLineGraph.Edges.First(e => e.Source.IsStartVertexOfGraph);
+            //        var firstcenterlinevector = firstinletedge.Target.Position - firstinletedge.Source.Position;
+            //        double firstcenterlineangle = firstcenterlinevector.AngleOnPlane(new Plane(firstinletedge.Target.Position, Vector3d.ZAxis));
+            //        rotateangle = firstcenterlineangle < Math.PI ? Vector3d.XAxis.GetAngleTo(firstcenterlinevector) : 2 * Math.PI - Vector3d.XAxis.GetAngleTo(firstcenterlinevector);
+            //    }
 
-                var ductSegment = ductFittingFactoryService.CreateVerticalDuctSegment(DuctParameters);
-                ductSegment.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis,Point3d.Origin);
-                InletDuctSegments.Add(ductSegment);
-            }
+            //    var ductSegment = ductFittingFactoryService.CreateVerticalDuctSegment(DuctParameters);
+            //    ductSegment.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, Point3d.Origin);
+            //    InletDuctSegments.Add(ductSegment);
+            //}
 
-            else if(InletOpening.Width != InletDuctWidth)
+            if(!isUpOrDownOpening && InletOpening.Width != InletDuctWidth)
             {
                 if (InletCenterLineGraph.Edges.Count() == 0)
                 {
@@ -239,7 +239,14 @@ namespace ThMEPHVAC.CAD
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = InletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct);
-                ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
+                if (isUpOrDownOpening)
+                {
+                    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * InletOpening.Height, ductgraphedge.TargetShrink);
+                }
+                else
+                {
+                    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
+                }
                 Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
                 ductSegment.Matrix = Matrix3d.Displacement(centerpoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                 InletDuctSegments.Add(ductSegment);
@@ -251,30 +258,30 @@ namespace ThMEPHVAC.CAD
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
             bool isUpOrDownOpening = FanInOutType.Contains("上出") || FanInOutType.Contains("下出");
             //对于出口为上出或下出的，首先需要画出管口俯视图
-            if (isUpOrDownOpening)
-            {
-                var DuctParameters = new ThIfcDuctSegmentParameters()
-                {
-                    Width = OutletDuctWidth,
-                    Height = OutletDuctHeight,
-                    Length = 0
-                };
+            //if (isUpOrDownOpening)
+            //{
+            //    var DuctParameters = new ThIfcDuctSegmentParameters()
+            //    {
+            //        Width = Math.Max(OutletDuctWidth, OutletOpening.Width),
+            //        Height = Math.Max(OutletDuctHeight, OutletOpening.Height),
+            //        Length = 0
+            //    };
 
-                double rotateangle = OutletOpening.NormalAngle * Math.PI / 180 + 0.5 * Math.PI;
-                if (OutletCenterLineGraph.Edges.Count() != 0)
-                {
-                    var firstoutletedge = OutletCenterLineGraph.Edges.First(e => e.Source.IsStartVertexOfGraph);
-                    var firstcenterlinevector = firstoutletedge.Target.Position - firstoutletedge.Source.Position;
-                    double firstcenterlineangle = firstcenterlinevector.AngleOnPlane(new Plane(firstoutletedge.Target.Position, Vector3d.ZAxis));
-                    rotateangle = firstcenterlineangle < Math.PI ? Vector3d.XAxis.GetAngleTo(firstcenterlinevector) : 2 * Math.PI - Vector3d.XAxis.GetAngleTo(firstcenterlinevector);
-                }
+            //    double rotateangle = OutletOpening.NormalAngle * Math.PI / 180 + 0.5 * Math.PI;
+            //    if (OutletCenterLineGraph.Edges.Count() != 0)
+            //    {
+            //        var firstoutletedge = OutletCenterLineGraph.Edges.First(e => e.Source.IsStartVertexOfGraph);
+            //        var firstcenterlinevector = firstoutletedge.Target.Position - firstoutletedge.Source.Position;
+            //        double firstcenterlineangle = firstcenterlinevector.AngleOnPlane(new Plane(firstoutletedge.Target.Position, Vector3d.ZAxis));
+            //        rotateangle = firstcenterlineangle < Math.PI ? Vector3d.XAxis.GetAngleTo(firstcenterlinevector) : 2 * Math.PI - Vector3d.XAxis.GetAngleTo(firstcenterlinevector);
+            //    }
 
-                var ductSegment = ductFittingFactoryService.CreateVerticalDuctSegment(DuctParameters);
-                ductSegment.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, Point3d.Origin);
-                OutletDuctSegments.Add(ductSegment);
-            }
+            //    var ductSegment = ductFittingFactoryService.CreateVerticalDuctSegment(DuctParameters);
+            //    ductSegment.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, Point3d.Origin);
+            //    OutletDuctSegments.Add(ductSegment);
+            //}
 
-            else if (OutletOpening.Width != OutletDuctWidth)
+            if(!isUpOrDownOpening && OutletOpening.Width != OutletDuctWidth)
             {
                 if (OutletCenterLineGraph.Edges.Count() == 0)
                 {
@@ -354,7 +361,15 @@ namespace ThMEPHVAC.CAD
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = OutletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct);
-                ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
+                if (isUpOrDownOpening)
+                {
+                    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * OutletOpening.Height, ductgraphedge.TargetShrink);
+                }
+                else
+                {
+                    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
+                }
+
                 Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
                 ductSegment.Matrix = Matrix3d.Displacement(centerpoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                 OutletDuctSegments.Add(ductSegment);
