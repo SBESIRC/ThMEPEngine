@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model;
 using ThCADExtension;
+using System;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -37,6 +38,19 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     var curve = o.Outline as Curve;
                     Columns.Add(curve.WashClone());
+                });
+                var shearWallEngine = new ThShearWallRecognitionEngine();
+                shearWallEngine.Recognize(database, pts);
+                shearWallEngine.Elements.ForEach(o =>
+                {
+                    if (o.Outline is Curve curve)
+                    {
+                        Columns.Add(curve.WashClone());
+                    }
+                    else if (o.Outline is MPolygon mPolygon)
+                    {                   
+                        throw new NotSupportedException();
+                    }
                 });
                 var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();               
                 RoofDeviceEngine.Recognize(database, pts);

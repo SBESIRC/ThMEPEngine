@@ -130,7 +130,7 @@ namespace ThMEPWSS.Pipe.Output
                     if (Yoffset >=0 && PipeindexEngine.Tpipeindex[j][i].X == PipeindexEngine.Tpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Tpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
+                        PipeindexEngine.Tpipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
                         tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
                         tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
                         tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Tpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
@@ -195,7 +195,7 @@ namespace ThMEPWSS.Pipe.Output
                     if (Yoffset >= 0 && PipeindexEngine.Wpipeindex[j][i].X == PipeindexEngine.Wpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Wpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
+                        PipeindexEngine.Wpipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
                         tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
                         tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
                         tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Wpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
@@ -265,7 +265,7 @@ namespace ThMEPWSS.Pipe.Output
                     if (Yoffset >= 0.0 && PipeindexEngine.Ppipeindex[j][i].X == PipeindexEngine.Ppipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Ppipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
+                        PipeindexEngine.Ppipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
                         tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
                         tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
                         tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Ppipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
@@ -335,7 +335,7 @@ namespace ThMEPWSS.Pipe.Output
                     if (Yoffset >= 0.0 && PipeindexEngine.Dpipeindex[j][i].X == PipeindexEngine.Dpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Dpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
+                        PipeindexEngine.Dpipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
                         tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
                         tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
                         tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Dpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
@@ -399,7 +399,7 @@ namespace ThMEPWSS.Pipe.Output
                     if (Yoffset >= 0 && PipeindexEngine.Npipeindex[j][i].X == PipeindexEngine.Npipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Npipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
+                        PipeindexEngine.Npipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
                         tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
                         tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
                         tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Npipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
@@ -465,7 +465,7 @@ namespace ThMEPWSS.Pipe.Output
                     if (Yoffset >= 0 && PipeindexEngine.Rainpipeindex[j][i].X == PipeindexEngine.Rainpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.Rainpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
+                        PipeindexEngine.Rainpipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
                         tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
                         tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
                         tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.Rainpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
@@ -532,14 +532,17 @@ namespace ThMEPWSS.Pipe.Output
                     if (Yoffset >= 0 && PipeindexEngine.RoofRainpipeindex[j][i].X == PipeindexEngine.RoofRainpipeindex_tag[j][3 * i].X)
                     {
                         var fontBox = obstacle.SelectCrossingPolygon(ThWPipeOutputFunction.GetBoundary(175 * 7,
-                        PipeindexEngine.RoofRainpipeindex_tag[j][3 * i].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
+                        PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 2].TransformBy(matrix1).TransformBy(Matrix)));//新生成的仍要考虑躲避障碍
                         tag1 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i, matrix1, Matrix, obstacle_tag);
                         tag2 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i + 1, matrix1, Matrix, obstacle_tag);
                         tag3 = ThWPipeOutputFunction.GetTag(fontBox, PipeindexEngine.RoofRainpipeindex_tag[j], 3 * i + 2, matrix1, Matrix, obstacle_tag);
                     }
-                    tag1 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i];
-                    tag2 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 1];
-                    tag3 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 2];
+                    else
+                    {
+                        tag1 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i];
+                        tag2 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 1];
+                        tag3 = PipeindexEngine.RoofRainpipeindex_tag[j][3 * i + 2];
+                    }
                     Circle circle = CreateCircle(PipeindexEngine.RoofRainpipeindex[j][i]);
                     acadDatabase.ModelSpace.Add(circle);
                     acadDatabase.ModelSpace.Add(CreateLine(PipeindexEngine.RoofRainpipeindex[j][i], tag1));
