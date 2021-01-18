@@ -29,6 +29,7 @@ namespace ThMEPHVAC.CAD
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
             using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
+                currentDb.Database.ImportLayer(layer);
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
             }
         }
