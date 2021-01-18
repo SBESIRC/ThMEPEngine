@@ -22,6 +22,10 @@ using ThMEPElectrical.Business.Procedure;
 using ThMEPEngineCore.Service;
 using ThMEPElectrical.ConnectPipe;
 using ThMEPElectrical.BlockConvert;
+using Autodesk.AutoCAD.ApplicationServices;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System.IO;
 using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPElectrical
@@ -107,7 +111,7 @@ namespace ThMEPElectrical
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THGBMQ", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THGBMQ", CommandFlags.Modal)] 
         public void ThBroadcastBlindArea()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -202,6 +206,7 @@ namespace ThMEPElectrical
                     //处理车道线
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
 
+                    //车道广播连管
                     ConnetPipeService connetPipeService = new ConnetPipeService();
                     connetPipeService.ConnetPipe(pline, handleLines, broadcast);
                 }
@@ -212,27 +217,70 @@ namespace ThMEPElectrical
         [CommandMethod("TIANHUACAD", "PlTest", CommandFlags.Modal)]
         public void PlTest()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            List<Entity> entities = new List<Entity>();
+            Database db = Application.DocumentManager.MdiActiveDocument.Database;
+            Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
+            var entSelected = ed.SelectAll();
+            if (entSelected.Status != PromptStatus.OK) return;
+            using (Transaction trans = db.TransactionManager.StartTransaction())
             {
-                // 获取块参照
-                var blocks = acadDatabase.ModelSpace
-                 .OfType<BlockReference>().ToList();
-
-                foreach (var block in blocks)
+                foreach (var id in entSelected.Value.GetObjectIds())
                 {
-                    var entities = GetEntity(block, acadDatabase);
-                    
+                    Entity  entity = (Entity)trans.GetObject(id, OpenMode.ForRead);
+                    if (entity is BlockReference block)
+                    {
+                        entities.AddRange(GetEntity(block, trans));
+                    }
+                    else
+                    {
+                        entities.Add(entity);
+                    }
                 }
+                trans.Commit();
+            }
+
+            List<EntityInfo> entityInfos = new List<EntityInfo>();
+            //foreach (var item in entities)
+            //{
+            //    EntityInfo entityInfo = new EntityInfo();
+            //    entityInfo.cad_type = item.GetType().Name;
+            //    entityInfo.id = (double)item.ObjectId.OldIdPtr;
+            //    try
+            //    {
+            //        entityInfo.entity_layoutName = item.BlockName;
+            //    }
+            //    catch (System.Exception)
+            //    {
+            //    }
+            //    entityInfo.entity_layersName = item.Layer;
+            //    entityInfo.entity_geomExtents = new List<Point3d>();
+            //    try
+            //    {
+            //        entityInfo.entity_geomExtents.Add(item.GeometricExtents.MinPoint);
+            //        entityInfo.entity_geomExtents.Add(item.GeometricExtents.MaxPoint);
+            //    }
+            //    catch (System.Exception)
+            //    {
+            //    }
+            //    entityInfos.Add(entityInfo);
+            //}
+
+            string str = JsonConvert.SerializeObject(entityInfos);
+            using (FileStream fs = new FileStream("C://Users//tangyongjing//Desktop//json.txt", FileMode.OpenOrCreate))
+            {
+                StreamWriter sw = new StreamWriter(fs);
+                sw.Write(str);
+                sw.Close();
             }
         }
 
-        private List<Entity> GetEntity(BlockReference blockReference, AcadDatabase acadDatabase)
+        private List<Entity> GetEntity(BlockReference blockReference, Transaction acadDatabase)
         {
             List<Entity> entities = new List<Entity>();
-            var blockTRecord = acadDatabase.Element<BlockTableRecord>(blockReference.BlockTableRecord);
-            foreach (var objId in blockTRecord)
+            DBObjectCollection obj = new DBObjectCollection();
+            blockReference.Explode(obj);
+            foreach (Entity rBlock in obj)
             {
-                var rBlock = acadDatabase.Element<Entity>(objId);
                 if (rBlock is BlockReference bblock)
                 {
                     entities.AddRange(GetEntity(bblock, acadDatabase));
@@ -417,4 +465,17 @@ namespace ThMEPElectrical
             return braodcasts.Select(o => o.Position).ToList();
         }
     }
+
+    #region test
+    public class EntityInfo
+    {
+        public string cad_type { get; set; }
+        //public double x_side { get; set; }
+        //public double y_side { get; set; }
+        public double id { get; set; }
+        public string entity_layoutName { get; set; }
+        public string entity_layersName { get; set; }
+        public List<Point3d> entity_geomExtents { get; set; }
+    }
+    #endregion
 }

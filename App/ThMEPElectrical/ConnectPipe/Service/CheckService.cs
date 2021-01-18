@@ -11,6 +11,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
 {
     public static class CheckService
     {
+        static readonly double tol = 3500;   //3.5米以内我们认为不相交
         /// <summary>
         /// 检查连接线
         /// </summary>
@@ -67,14 +68,17 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <returns></returns>
         public static bool CheckUsefulLine(Polyline usePoly, List<Polyline> endingPolys)
         {
-            Line connectLine = new Line(usePoly.StartPoint, usePoly.EndPoint);
+            ///Line connectLine = new Line(usePoly.StartPoint, usePoly.EndPoint);
             foreach (var poly in endingPolys)
             {
-                var intersectPt = connectLine.IntersectWithEx(poly);
-                if (intersectPt.Count > 0 &&
-                    !(intersectPt[0].IsEqualTo(poly.StartPoint, new Tolerance(1, 1)) || intersectPt[0].IsEqualTo(poly.EndPoint, new Tolerance(1, 1))))
+                var intersectPt = usePoly.IntersectWithEx(poly);
+                foreach (Point3d pt in intersectPt)
                 {
-                    return false;
+                    if (pt.DistanceTo(usePoly.StartPoint) > tol &&
+                        pt.DistanceTo(usePoly.EndPoint) > tol)
+                    {
+                        return false;
+                    }
                 }
             }
 

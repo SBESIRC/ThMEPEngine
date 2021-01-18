@@ -13,7 +13,8 @@ namespace ThMEPElectrical.ConnectPipe.Service
     {
         readonly double distance = 1500;      //1.5m内能可以连接
 
-        public void ConnectBroadcast(KeyValuePair<Polyline, List<Polyline>> holeInfo, Dictionary<Polyline, List<BlockReference>> mainParkingBroadcast, Dictionary<Polyline, List<BlockReference>> otherParkingBroadcast)
+        public List<Polyline> ConnectBroadcast(KeyValuePair<Polyline, List<Polyline>> holeInfo, Dictionary<Polyline, List<BlockReference>> mainParkingBroadcast,
+            Dictionary<Polyline, List<BlockReference>> otherParkingBroadcast)
         {
             //区分连管顺序的优先级
             var firstBroadcasts = mainParkingBroadcast.Where(x => x.Value.Count() > 1).ToDictionary(x => x.Key, y => y.Value);
@@ -29,13 +30,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
             //将副车道和单个点主车道都连接上
             var allConnectPolys = ConnectOtherParkingLines(holeInfo, connectPolys, secondBroadcasts, thirdBroadcasts);
 
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                foreach (var item in allConnectPolys)
-                {
-                    acdb.ModelSpace.Add(item);
-                }
-            }
+            return allConnectPolys;
         }
 
         #region 主车道连接
@@ -44,28 +39,27 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// </summary>
         /// <param name="mainBlockLines"></param>
         /// <returns></returns>
-        private List<List<Polyline>> ConnectMainParkingLines(KeyValuePair<Polyline, List<Polyline>> holeInfo, 
+        private List<List<Polyline>> ConnectMainParkingLines(KeyValuePair<Polyline, List<Polyline>> holeInfo,
             List<List<Polyline>> mainBlockLines, Dictionary<Polyline, List<BlockReference>> otherParkingBroadcast)
         {
-            var orderBlockLines = OrderBlocklines(mainBlockLines);
             var otherBlockLines = otherParkingBroadcast.Select(x => x.Key).ToList();
             var otherBlockPts = otherParkingBroadcast.SelectMany(x => x.Value.Select(y => y.Position)).ToList();
 
             PathfindingUitlsService pathfindingUitls = new PathfindingUitlsService();
             PathfindingWithDirServce pathfindingWithDirUtils = new PathfindingWithDirServce();
-            List<List<Polyline>> resPolys = new List<List<Polyline>>() { orderBlockLines.First() };
-            List<List<Polyline>> findingPolys = new List<List<Polyline>>() { orderBlockLines.First() };
-            for (int i = 1; i < orderBlockLines.Count; i++)
+            List<List<Polyline>> resPolys = new List<List<Polyline>>() { mainBlockLines.First() };
+            List<List<Polyline>> findingPolys = new List<List<Polyline>>() { mainBlockLines.First() };
+            for (int i = 1; i < mainBlockLines.Count; i++)
             {
-                var dirs = CalConnectDirByOtherLanes(orderBlockLines[i], otherBlockLines);
-                Polyline connectPoly = pathfindingWithDirUtils.Pathfinding(holeInfo, findingPolys, resPolys, orderBlockLines[i], otherBlockPts, dirs);
+                var dirs = CalConnectDirByOtherLanes(mainBlockLines[i], otherBlockLines);
+                Polyline connectPoly = pathfindingWithDirUtils.Pathfinding(holeInfo, findingPolys, resPolys, mainBlockLines[i], otherBlockPts, dirs);
                 if (connectPoly == null)
                 {
-                    connectPoly = pathfindingUitls.Pathfinding(holeInfo, findingPolys, resPolys, orderBlockLines[i]);
+                    connectPoly = pathfindingUitls.Pathfinding(holeInfo, findingPolys, resPolys, mainBlockLines[i]);
                 }
                 resPolys.Add(new List<Polyline>() { connectPoly });
-                resPolys.Add(orderBlockLines[i]);
-                findingPolys.Add(orderBlockLines[i]);
+                resPolys.Add(mainBlockLines[i]);
+                findingPolys.Add(mainBlockLines[i]);
             }
 
             return resPolys;
@@ -80,7 +74,16 @@ namespace ThMEPElectrical.ConnectPipe.Service
         private List<Vector3d> CalConnectDirByOtherLanes(List<Polyline> mainBlockLines, List<Polyline> otherBlockLines)
         {
             var directions = otherBlockLines.Select(x => (x.EndPoint - x.StartPoint).GetNormal()).ToList();
-            directions.AddRange(mainBlockLines.Select(x => Vector3d.ZAxis.CrossProduct((x.EndPoint - x.StartPoint).GetNormal())));
+            directions.AddRange(mainBlockLines.Select(x =>
+            {
+                List<Line> lines = new List<Line>();
+                for (int i = 0; i < x.NumberOfVertices - 1; i++)
+                {
+                    lines.Add(new Line(x.GetPoint3dAt(i), x.GetPoint3dAt(i + 1)));
+                }
+                var line = lines.OrderBy(y => y.Length).Last();
+                return Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
+            }));
             directions = directions.Distinct().ToList();
 
             return directions;
@@ -111,28 +114,6 @@ namespace ThMEPElectrical.ConnectPipe.Service
 
             return resLines;
         }
-
-        /// <summary>
-        /// 从上到下排序广播线
-        /// </summary>
-        /// <param name="mainBlockLines"></param>
-        /// <returns></returns>
-        private List<List<Polyline>> OrderBlocklines(List<List<Polyline>> mainBlockLines)
-        {
-            var maxLengthLine = mainBlockLines.SelectMany(x => x).OrderByDescending(x => x.Length).First();
-            var xDir = (maxLengthLine.EndPoint - maxLengthLine.StartPoint).GetNormal();
-            var zDir = Vector3d.ZAxis;
-            var yDir = zDir.CrossProduct(xDir);
-            Matrix3d matrix = new Matrix3d(
-                new double[] {
-                    xDir.X, yDir.X, zDir.X, 0,
-                    xDir.Y, yDir.Y, zDir.Y, 0,
-                    xDir.Z, yDir.Z, zDir.Z, 0,
-                    0.0, 0.0, 0.0, 1.0
-            });
-
-            return mainBlockLines.OrderByDescending(x => x.First().StartPoint.Y).ToList();
-        }
         #endregion
 
         #region 副车道连接
@@ -149,26 +130,55 @@ namespace ThMEPElectrical.ConnectPipe.Service
         {
             List<BlockReference> secondBroadcasts = secondBroadcastsInfo.SelectMany(x => x.Value).ToList();
             List<BlockReference> thirdBroadcasts = thirdBroadcastsInfo.SelectMany(x => x.Value).ToList();
-
             var allMainConnectPolys = mainConnectPolys.SelectMany(x => x).ToList();
-            PathfindingByPointService pathfindingByPoint = new PathfindingByPointService();
-            //已连接线如果穿过副车道广播，则重新连接上这个副车道点位
-            thirdBroadcasts = FilterBroadcastPts(allMainConnectPolys, thirdBroadcasts, out Dictionary<Polyline, List<Point3d>> singlePtDic);
-            foreach (var dicInfo in singlePtDic)
-            {
-                allMainConnectPolys.Remove(dicInfo.Key);
-                allMainConnectPolys.AddRange(CalFirstConnectByOtherPLines(dicInfo.Value, dicInfo.Key));
-            }
 
+            //修正车道线
+            allMainConnectPolys = ReviseParkingLines(allMainConnectPolys, thirdBroadcasts);
+            allMainConnectPolys = ReviseParkingLines(allMainConnectPolys, secondBroadcasts);
+
+            List<BlockReference> otherBroadcasts = new List<BlockReference>();
+            PathfindingByPointService pathfindingByPoint = new PathfindingByPointService();
             //单个点主车道链接上去
-            var allConnectPolys = pathfindingByPoint.Pathfinding(holeInfo, allMainConnectPolys, secondBroadcasts);
+            var allConnectPolys = pathfindingByPoint.Pathfinding(holeInfo, allMainConnectPolys, secondBroadcasts, ref otherBroadcasts);
 
             //副车道链接上去
-            allConnectPolys = pathfindingByPoint.Pathfinding(holeInfo, allConnectPolys, thirdBroadcasts);
+            allConnectPolys = pathfindingByPoint.Pathfinding(holeInfo, allConnectPolys, thirdBroadcasts, ref otherBroadcasts);
+
+            //有的点在现有已连接线上连不上不去，重新寻找连接线
+            while (otherBroadcasts.Count > 0)
+            {
+                List<BlockReference> resOtherBroadcasts = new List<BlockReference>();
+                //连接剩余点
+                allConnectPolys = pathfindingByPoint.Pathfinding(holeInfo, allConnectPolys, otherBroadcasts, ref resOtherBroadcasts);
+                if (otherBroadcasts.Count > resOtherBroadcasts.Count)
+                {
+                    otherBroadcasts = resOtherBroadcasts;
+                }
+                else
+                {
+                    break;
+                }
+            }
 
             return allConnectPolys;
         }
 
+        /// <summary>
+        /// 如果现有车道线穿过剩下的广播点，则修正车道线
+        /// </summary>
+        /// <param name="allConnectPolys"></param>
+        /// <param name="broadcasts"></param>
+        /// <returns></returns>
+        private List<Polyline> ReviseParkingLines(List<Polyline> allConnectPolys, List<BlockReference> broadcasts)
+        {
+            broadcasts = FilterBroadcastPts(allConnectPolys, broadcasts, out Dictionary<Polyline, List<Point3d>> singlePtDic);
+            foreach (var dicInfo in singlePtDic)
+            {
+                allConnectPolys.Remove(dicInfo.Key);
+                allConnectPolys.AddRange(CalFirstConnectByOtherPLines(dicInfo.Value, dicInfo.Key));
+            }
+            return allConnectPolys.Where(x => x != null).ToList();
+        }
 
         /// <summary>
         /// 找到一些不需要伸出支管的广播点
@@ -233,15 +243,15 @@ namespace ThMEPElectrical.ConnectPipe.Service
             {
                 allPolyPts.Add(connectPoly.GetPoint3dAt(i));
             }
-            allPolyPts = GeUtils.OrderPoints(allPolyPts, (connectPoly.EndPoint - connectPoly.StartPoint).GetNormal());
 
             var resConnectPoly = new List<Polyline>();
             if (connectPtDic.Count > 0)
             {
-                var sPt = allPolyPts.First();
+                var sPt = connectPoly.StartPoint;
                 allPolyPts.Remove(sPt);
                 while (allPolyPts.Count > 0)
                 {
+                    allPolyPts = GeUtils.OrderPoints(allPolyPts, sPt);
                     List<Point3d> usePts = new List<Point3d>() { sPt };
                     if (connectPtKeys.Contains(sPt))
                     {
@@ -260,6 +270,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     }
                     allPolyPts = allPolyPts.Except(usePts).ToList();
 
+                    usePts = GeUtils.OrderPoints(usePts, sPt);
                     Polyline polyline = new Polyline();
                     for (int i = 0; i < usePts.Count; i++)
                     {

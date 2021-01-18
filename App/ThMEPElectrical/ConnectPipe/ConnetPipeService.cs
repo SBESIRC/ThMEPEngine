@@ -24,30 +24,35 @@ namespace ThMEPElectrical.ConnectPipe
             {
                 return;
             }
+            broadcasts = broadcasts.Distinct().ToList();
 
             //分类车道线，将车道分为主车道和副车道
             var parkingLinesService = new ParkingLinesService();
             var mainPLines = parkingLinesService.CreateNodedParkingLines(plInfo.Key, parkingLines, out List<List<Line>> otherPLines);
-            
+
             //将车道线做成polyline
-            var mainParkingPolys = mainPLines.Select(x => parkingLinesService.CreateParkingLineToPolyline(x)).ToList();
-            var otherParkingPolys = otherPLines.Select(x => parkingLinesService.CreateParkingLineToPolyline(x)).ToList();
+            var mainParkingPolys = mainPLines.Select(x => parkingLinesService.CreateParkingLineToPolylineByTol(x)).ToList();
+            var otherParkingPolys = otherPLines.Select(x => parkingLinesService.CreateParkingLineToPolylineByTol(x)).ToList();
             
-            //找到主车道上布置的广播
-            var mainParkingPolysDic = GetBroadcastWithParkingLine(mainParkingPolys, broadcasts)
-                .Where(x => x.Value != null && x.Value.Count > 0)
-                .ToDictionary(x => x.Key, y => y.Value);
+            //排序车道线
+            mainParkingPolys = OrderBlocklines(mainParkingPolys);
+            otherParkingPolys = OrderBlocklines(otherParkingPolys);
+
+            //找到车道上布置的广播
+            var mainParkingPolysDic = GetBroadcastWithParkingLine(mainParkingPolys, broadcasts);
             var otherParkingPolysDic = GetBroadcastWithParkingLine(otherParkingPolys, broadcasts);
+            MatchAllBroadcats(mainParkingPolysDic, otherParkingPolysDic, mainParkingPolys, otherParkingPolys, broadcasts);
+            mainParkingPolysDic = mainParkingPolysDic.Where(x => x.Value != null && x.Value.Count > 0).ToDictionary(x => x.Key, y => y.Value);
+            otherParkingPolysDic = otherParkingPolysDic.Where(x => x.Value != null && x.Value.Count > 0).ToDictionary(x => x.Key, y => y.Value);
 
             //连接车道线广播
             ConnectBroadcastService connectBroadcastService = new ConnectBroadcastService();
-            connectBroadcastService.ConnectBroadcast(plInfo, mainParkingPolysDic, otherParkingPolysDic);
+            var connectPolys = connectBroadcastService.ConnectBroadcast(plInfo, mainParkingPolysDic, otherParkingPolysDic);
 
-            //var s = mainParkingPolysDic.ToDictionary(x => x.Key, y => y.Value.Select(z => new BroadcastModel(z)).ToList());
-            ////主车道上的连管
-            //MainLanesConnectPipeSrevice mainLanesConnectPipe = new MainLanesConnectPipeSrevice();
-            //mainLanesConnectPipe.ConnectPipe(s);
-        } 
+            //创建真实连管线
+            CreatePipeLineService createPipeLineService = new CreatePipeLineService();
+            createPipeLineService.CreatePipe(connectPolys, broadcasts);
+        }
 
         /// <summary>
         /// 找到车道布置的广播
@@ -81,7 +86,7 @@ namespace ThMEPElectrical.ConnectPipe
             var broads = broadcasts.Where(x => bufferPoly.Contains(x.Position)).ToList();
             var dir = (polyline.EndPoint - polyline.StartPoint).GetNormal();
             var otherDir = Vector3d.ZAxis.CrossProduct(dir);
-            
+
             return broads.Where(x =>
             {
                 var broadcastDir = -x.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
@@ -94,6 +99,78 @@ namespace ThMEPElectrical.ConnectPipe
 
                 return false;
             }).ToList();
+        }
+
+        /// <summary>
+        /// 为所有广播点补全所有车道线
+        /// </summary>
+        /// <param name="mainParkingPolysDic"></param>
+        /// <param name="otherParkingPolysDic"></param>
+        /// <param name="mainParkingPoly"></param>
+        /// <param name="otherParkingPoly"></param>
+        /// <param name="broadcasts"></param>
+        private void MatchAllBroadcats(Dictionary<Polyline, List<BlockReference>> mainParkingPolysDic, Dictionary<Polyline, List<BlockReference>> otherParkingPolysDic,
+            List<Polyline> mainParkingPoly, List<Polyline> otherParkingPoly, List<BlockReference> broadcasts)
+        {
+            //找到剩余广播
+            broadcasts = broadcasts.Except(mainParkingPolysDic.SelectMany(x => x.Value)).ToList();
+            broadcasts = broadcasts.Except(otherParkingPolysDic.SelectMany(x => x.Value)).ToList();
+
+            List<Polyline> allPolys = new List<Polyline>(mainParkingPoly);
+            allPolys.AddRange(otherParkingPoly);
+            foreach (var bCast in broadcasts)
+            {
+                var closePoly = allPolys.OrderBy(x => x.GetClosestPointTo(bCast.Position, false).DistanceTo(bCast.Position)).First();
+                if (mainParkingPoly.Contains(closePoly))
+                {
+                    if (mainParkingPolysDic.ContainsKey(closePoly))
+                    {
+                        mainParkingPolysDic[closePoly].Add(bCast);
+                    }
+                    else
+                    {
+                        mainParkingPolysDic.Add(closePoly, new List<BlockReference>() { bCast });
+                    }
+                }
+                else
+                {
+                    if (otherParkingPolysDic.ContainsKey(closePoly))
+                    {
+                        otherParkingPolysDic[closePoly].Add(bCast);
+                    }
+                    else
+                    {
+                        otherParkingPolysDic.Add(closePoly, new List<BlockReference>() { bCast });
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 从上到下排序广播线
+        /// </summary>
+        /// <param name="mainBlockLines"></param>
+        /// <returns></returns>
+        private List<Polyline> OrderBlocklines(List<Polyline> mainBlockLines)
+        {
+            if (mainBlockLines.Count <= 0)
+            {
+                return mainBlockLines;
+            }
+
+            var maxLengthLine = mainBlockLines.OrderByDescending(x => x.Length).First();
+            var xDir = (maxLengthLine.EndPoint - maxLengthLine.StartPoint).GetNormal();
+            var zDir = Vector3d.ZAxis;
+            var yDir = zDir.CrossProduct(xDir);
+            Matrix3d matrix = new Matrix3d(
+                new double[] {
+                    xDir.X, yDir.X, zDir.X, 0,
+                    xDir.Y, yDir.Y, zDir.Y, 0,
+                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    0.0, 0.0, 0.0, 1.0
+            });
+
+            return mainBlockLines.OrderByDescending(x => x.StartPoint.Y).ToList();
         }
     }
 }

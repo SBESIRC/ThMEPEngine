@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,10 +12,11 @@ namespace ThMEPElectrical.ConnectPipe.Service
 {
     public class PathfindingWithDirServce
     {
-        readonly double distance = 1500;      //1.5m内能可以连接
-        readonly double moveLength = 200;     //副车道连接线要移动200  
+        readonly double distance = 3000;      //3m内能可以连接
+        readonly double moveLength = 500;     //副车道连接线要移动200  
         readonly double tolAngle = 0.2;       //0.2以内可以认为两条线平行
-        public Polyline Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<List<Polyline>> mainPolys, List<List<Polyline>> endingPolys, 
+        readonly double maxLengthTol = 4000;  //最不利路径4米以内的话选最短的连接线
+        public Polyline Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<List<Polyline>> mainPolys, List<List<Polyline>> endingPolys,
             List<Polyline> fingdingPoly, List<Point3d> otherPLineBroadcast, List<Vector3d> dirs)
         {
             var sPts = GeUtils.FindingPolyPoints(fingdingPoly);
@@ -45,16 +47,18 @@ namespace ThMEPElectrical.ConnectPipe.Service
                         secondPt = sPt;
                     }
 
-                    if (GeUtils.GetDistanceByDir(firstPt, secondPt, dir, out Point3d projectPt) < (distance - moveLength))
+                    if (GeUtils.GetDistanceByDir(firstPt, secondPt, dir, out Point3d projectPt) < distance)
                     {
-                        Polyline connectPoly = new Polyline();
-                        connectPoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
-                        connectPoly.AddVertexAt(1, projectPt.ToPoint2D(), 0, 0, 0);
-                        connectPoly.AddVertexAt(2, sPt.ToPoint2D(), 0, 0, 0);
-
+                        Polyline connectPoly = MoveConnectPoly(polyPts[i], connectPt, projectPt, sPt);
                         if (!CheckService.CheckConnectLines(holeInfo, connectPoly, checkPolys))
                         {
-                            continue;
+                            //如果与现有线相交，则换个方向连接试试
+                            GeUtils.GetDistanceByDir(secondPt, firstPt, dir, out projectPt);
+                            connectPoly = MoveConnectPoly(polyPts[i], connectPt, projectPt, sPt, true);
+                            if (!CheckService.CheckConnectLines(holeInfo, connectPoly, checkPolys))
+                            {
+                                continue;
+                            }
                         }
 
                         if (CalFirstConnectByDir(checkPolys, connectPoly))
@@ -102,7 +106,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 findingCheckPolys.Add(poly);
                 DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(findingCheckPolys.Cast<Curve>().ToList());
                 var length = dijkstra.FindingAllPathMinLength(poly.EndPoint).OrderByDescending(x => x).First();
-                if (length < maxLength)
+                if (length + maxLengthTol < maxLength)
                 {
                     maxLength = length;
                     maxPoly = poly;
@@ -174,6 +178,39 @@ namespace ThMEPElectrical.ConnectPipe.Service
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// 竖向连接线移动200的距离
+        /// </summary>
+        /// <param name="connectPts"></param>
+        /// <param name="connectPt"></param>
+        /// <param name="connectPoly"></param>
+        /// <returns></returns>
+        private Polyline MoveConnectPoly(List<Point3d> connectPts, Point3d connectPt, Point3d projectPt, Point3d endPt, bool isTrue = false)
+        {
+            var connectDir = (connectPts.First() - connectPts.Last()).GetNormal();
+            if (connectPts.Last().IsEqualTo(connectPt, new Tolerance(1, 1)))
+            {
+                connectDir = -connectDir;
+            }
+            if (isTrue)
+            {
+                connectDir = -connectDir;
+            }
+
+            Point3d moveConnectPt = connectPt + connectDir * moveLength;
+            Point3d moveProjectPt = projectPt + connectDir * moveLength;
+            Point3d moveEndPt = endPt + connectDir * moveLength;
+
+            Polyline movePoly = new Polyline();
+            movePoly.AddVertexAt(0, connectPt.ToPoint2D(), 0, 0, 0);
+            movePoly.AddVertexAt(1, moveConnectPt.ToPoint2D(), 0, 0, 0);
+            movePoly.AddVertexAt(2, moveProjectPt.ToPoint2D(), 0, 0, 0);
+            movePoly.AddVertexAt(3, moveEndPt.ToPoint2D(), 0, 0, 0);
+            movePoly.AddVertexAt(4, endPt.ToPoint2D(), 0, 0, 0);
+            
+            return movePoly;
         }
     }
 }

@@ -27,12 +27,14 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 var closetPt = polyline.GetClosestPointTo(broadcast.Position, false);
                 ptInfo.Add(new KeyValuePair<Point3d, Point3d>(broadcast.Position, closetPt));
             }
-
+            
             distance = ptInfo.Select(x => x.Key.DistanceTo(x.Value))
-                .OrderBy(x => x).GroupBy(x => Math.Floor(x / 10))
+                .OrderBy(x => x)
+                .GroupBy(x => Math.Floor(x / 10))
                 .OrderByDescending(x => x.Count())
                 .First()
-                .Key * 10;
+                .ToList()
+                .First();
             dir = blocks.Select(x => x.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal()).First();
         }
 
@@ -89,15 +91,19 @@ namespace ThMEPElectrical.ConnectPipe.Service
             for (int i = 0; i < blockPts.Count - 1; i++)
             {
                 Polyline resLine = new Polyline();
-                var currentPt = polyline.GetClosestPointTo(blockPts[i].TransformBy(matrix.Inverse()), false);
-                var nextPt = polyline.GetClosestPointTo(blockPts[i + 1].TransformBy(matrix.Inverse()), false);
+                var currentBlockPt = blockPts[i].TransformBy(matrix.Inverse());
+                var nextBlockPt = blockPts[i + 1].TransformBy(matrix.Inverse());
+                var currentPt = polyline.GetClosestPointTo(currentBlockPt, false);
+                var nextPt = polyline.GetClosestPointTo(nextBlockPt, false);
                 var matchPolyPts = polyPts.Where(x => blockPts[i].X < x.X && x.X < blockPts[i + 1].X).ToList();
-                resLine.AddVertexAt(0, currentPt.ToPoint2D(), 0, 0, 0);
+                resLine.AddVertexAt(0, currentBlockPt.ToPoint2D(), 0, 0, 0);
+                resLine.AddVertexAt(1, currentPt.ToPoint2D(), 0, 0, 0);
                 for (int j = 0; j < matchPolyPts.Count; j++)
                 {
-                    resLine.AddVertexAt(j + 1, matchPolyPts[j].TransformBy(matrix.Inverse()).ToPoint2D(), 0, 0, 0);
+                    resLine.AddVertexAt(j + 2, matchPolyPts[j].TransformBy(matrix.Inverse()).ToPoint2D(), 0, 0, 0);
                 }
-                resLine.AddVertexAt(matchPolyPts.Count + 1, nextPt.ToPoint2D(), 0, 0, 0);
+                resLine.AddVertexAt(matchPolyPts.Count + 2, nextPt.ToPoint2D(), 0, 0, 0);
+                resLine.AddVertexAt(matchPolyPts.Count + 3, nextBlockPt.ToPoint2D(), 0, 0, 0);
                 lines.Add(resLine);
             }
 

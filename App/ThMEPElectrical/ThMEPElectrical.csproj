@@ -92,6 +92,7 @@
     <Compile Include="ConnectPipe\Service\BlockUtils.cs" />
     <Compile Include="ConnectPipe\Service\CheckService.cs" />
     <Compile Include="ConnectPipe\Service\ConnectBroadcastService.cs" />
+    <Compile Include="ConnectPipe\Service\CreatePipeLineService.cs" />
     <Compile Include="ConnectPipe\Service\GeUtils.cs" />
     <Compile Include="ConnectPipe\Service\MainLanesConnectPipeSrevice.cs" />
     <Compile Include="ConnectPipe\Service\PathfindingByPointService.cs" />

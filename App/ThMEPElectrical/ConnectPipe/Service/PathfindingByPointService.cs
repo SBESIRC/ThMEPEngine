@@ -11,20 +11,26 @@ namespace ThMEPElectrical.ConnectPipe.Service
 {
     public class PathfindingByPointService
     {
-        public List<Polyline> Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<Polyline> mainConnectPolys, List<BlockReference> broadcasts)
+        public List<Polyline> Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<Polyline> mainConnectPolys, 
+            List<BlockReference> broadcasts, ref List<BlockReference> otherBroadcasts)
         {
             var connectPts = FindingPolyPoints(mainConnectPolys);
-            var broadcastPts = broadcasts.Select(x => x.Position).ToList();
+            var broadcastPts = broadcasts.OrderBy(x => connectPts.Select(y=>y.DistanceTo(x.Position)).OrderBy(y => y).First()).ToList();   //根据现有连接主车道距离排序
 
             var connectPolys = new List<Polyline>(mainConnectPolys);
             //连接剩余其他副车道点
             foreach (var bPt in broadcastPts)
             {
+                connectPts = FindingPolyPoints(connectPolys);
                 var maxLength = CalMostUnfavorableValue(connectPolys, connectPts);
-                var connectPoly = CalConnectPoly(holeInfo, connectPolys, connectPts, bPt, maxLength);
+                var connectPoly = CalConnectPoly(holeInfo, connectPolys, connectPts, bPt.Position, maxLength);
                 if (connectPoly != null)
                 {
                     connectPolys.Add(connectPoly);
+                }
+                else
+                {
+                    otherBroadcasts.Add(bPt);
                 }
             }
 
@@ -54,18 +60,20 @@ namespace ThMEPElectrical.ConnectPipe.Service
 
                 if (CheckService.CheckOtherConnectLines(holeInfo, connectPoly, mainConnectPolys))
                 {
-                    if (isFirst)
+                    var connectPolys = new List<Polyline>(mainConnectPolys);
+                    connectPolys.Add(connectPoly);
+                    DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(connectPolys.Cast<Curve>().ToList());
+                    var length = dijkstra.FindingAllPathMinLength(broadcastPt).OrderByDescending(x => x).First();
+                    if (length > maxLength)
                     {
-                        var connectPolys = new List<Polyline>(mainConnectPolys);
-                        connectPolys.Add(connectPoly);
-                        DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(connectPolys.Cast<Curve>().ToList());
-                        var length = dijkstra.FindingAllPathMinLength(broadcastPt).OrderByDescending(x => x).First();
-                        if (length > maxLength)
+                        if (!isFirst)
                         {
-                            firPoly = connectPoly;
-                            isFirst = false;
-                            continue;
+                            return firPoly;
                         }
+
+                        firPoly = connectPoly;
+                        isFirst = false;
+                        continue;
                     }
 
                     return connectPoly;

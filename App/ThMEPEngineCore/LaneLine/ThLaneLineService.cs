@@ -337,5 +337,43 @@ namespace ThMEPEngineCore.LaneLine
 
             return polyline;
         }
+
+        /// <summary>
+        /// 将车道线创建为polyline(容差内合并成一根线)
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public Polyline CreateParkingLineToPolylineByTol(List<Line> lines)
+        {
+            HandleParkingLines(lines, out Point3d sp, out Point3d ep);
+            lines = HandleParkingLinesDir(lines, sp);
+            List<Point3d> allPts = new List<Point3d>();
+            foreach (var line in lines)
+            {
+                var sPtLst = allPts.Where(x => x.DistanceTo(line.StartPoint) < parkingLineTolerance).ToList();
+                if (sPtLst.Count <= 0)
+                {
+                    allPts.Add(line.StartPoint);
+                    allPts.Add(line.EndPoint);
+                }
+                else
+                {
+                    var dir = (line.EndPoint - line.StartPoint).GetNormal();
+                    Ray ray = new Ray();
+                    ray.UnitDir = dir;
+                    ray.BasePoint = sPtLst.First();
+                    var ePt = ray.GetClosestPointTo(line.EndPoint, true);
+                    allPts.Add(ePt);
+                }
+            }
+
+            Polyline polyline = new Polyline();
+            for (int i = 0; i < allPts.Count; i++)
+            {
+                polyline.AddVertexAt(i, allPts[i].ToPoint2D(), 0, 0, 0);
+            }
+
+            return polyline;
+        }
     }
 }

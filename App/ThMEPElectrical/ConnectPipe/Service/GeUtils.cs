@@ -62,6 +62,26 @@ namespace ThMEPElectrical.ConnectPipe.Service
         }
 
         /// <summary>
+        /// 按起始点开始排序
+        /// </summary>
+        /// <param name="points"></param>
+        /// <param name="dir"></param>
+        /// <returns></returns>
+        public static List<Point3d> OrderPoints(List<Point3d> points, Point3d sPt)
+        {
+            List<Point3d> resPts = new List<Point3d>();
+            while (points.Count > 0)
+            {
+                var resPt = points.OrderBy(x => x.DistanceTo(sPt)).First();
+                resPts.Add(resPt);
+                points.Remove(resPt);
+                sPt = resPt;
+            }
+
+            return resPts;
+        }
+
+        /// <summary>
         /// 计算一点在另一点上指定方向的投影距离
         /// </summary>
         /// <param name="sPt"></param>
@@ -99,6 +119,28 @@ namespace ThMEPElectrical.ConnectPipe.Service
             }
 
             return sPts;
+        }
+
+        /// <summary>
+        /// 计算两根平行线的距离
+        /// </summary>
+        /// <param name="firLine"></param>
+        /// <param name="secLine"></param>
+        /// <returns></returns>
+        public static double CalParallelLineDistance(Line firLine, Line secLine)
+        {
+            var xDir = (firLine.EndPoint - firLine.StartPoint).GetNormal();
+            var zDir = Vector3d.ZAxis;
+            var yDir = zDir.CrossProduct(xDir);
+            Matrix3d matrix = new Matrix3d(
+                new double[] {
+                    xDir.X, yDir.X, zDir.X, 0,
+                    xDir.Y, yDir.Y, zDir.Y, 0,
+                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    0.0, 0.0, 0.0, 1.0
+            });
+
+            return Math.Abs(firLine.StartPoint.TransformBy(matrix).Y - secLine.StartPoint.TransformBy(matrix).Y);
         }
     }
 }
