@@ -60,7 +60,6 @@ namespace ThMEPLighting
                 }
 
                 //处理外包框线
-                //
                 //  var plines = HandleFrame(frameLst);
 
                 foreach (Polyline plFrame in frameLst)
@@ -101,14 +100,13 @@ namespace ThMEPLighting
 
                         //获取构建信息
                         var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
-                        InsertLightService.ShowGeometry(bufferFrame, 120, LineWeight.LineWeight050);
                         GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
-                        List<Polyline> arcWalls = new List<Polyline>();
-                        getArchWall(acdb, bufferFrame, ref arcWalls);
+                        getArchWall(acdb, bufferFrame, ref walls);
 
-                        //InsertLightService.ShowGeometry(walls, 10,LineWeight.LineWeight035);
+                        //InsertLightService.ShowGeometry(plFrame, 120, LineWeight.LineWeight050);
+                        //InsertLightService.ShowGeometry(walls, 10, LineWeight.LineWeight035);
                         //InsertLightService.ShowGeometry(columns, 70, LineWeight.LineWeight035);
-                        //InsertLightService.ShowGeometry(arcWalls, 130, LineWeight.LineWeight035);
+
 
                         bool debug = false;
                         if (debug == false)
@@ -193,67 +191,21 @@ namespace ThMEPLighting
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
         }
 
-        //public void THExtractArchWall()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
-        //    {
-        //        var result = Active.Editor.GetEntity("\n选择框线");
-        //        if (result.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-        //        Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-        //        archWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
-        //        archWallEngine.Elements.ForEach(o =>
-        //        {
-        //            if (o.Outline is Curve curve)
-        //            {
-        //                acadDatabase.ModelSpace.Add(curve.WashClone());
-        //            }
-        //            else if (o.Outline is MPolygon mPolygon)
-        //            {
-        //                acadDatabase.ModelSpace.Add(mPolygon);
-        //            }
-        //        });
-        //    }
-        //}
-
         public void getArchWall(AcadDatabase acdb, Polyline bufferedFrame, ref List<Polyline> walls)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
             {
                 archWallEngine.Recognize(acadDatabase.Database, bufferedFrame.Vertices());
-                //archWallEngine.Elements.ForEach(o =>
-                //{
-                //    if (o.Outline is Curve curve)
-                //    {
-                //        acadDatabase.ModelSpace.Add(curve.WashClone());
-                //    }
-                //    else if (o.Outline is MPolygon mPolygon)
-                //    {
-                //        acadDatabase.ModelSpace.Add(mPolygon);
-                //    }
-                //});
-                List<Polyline> archWall = new List<Polyline>();
+              
                 foreach (var o in archWallEngine.Elements)
                 {
                     if (o.Outline is Polyline polyline)
                     {
-                        archWall.Add(polyline);
+                        walls.Add(polyline);
                     }
-                    //else if (o.Outline is MPolygon mPolygon)
-                    //{
-                    //    acadDatabase.ModelSpace.Add(mPolygon);
-               
-                    //}
                 }
-
-                walls = archWall;
             }
         }
-
-
     }
 }

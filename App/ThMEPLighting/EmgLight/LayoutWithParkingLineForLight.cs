@@ -57,21 +57,29 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
-                //找到构建上可布置面,用第一条车道线的头尾判定
-                var filterColmuns = StructureServiceLight.FilterStructure(columns, lane.First(), frame, "c");
-                var filterWalls = StructureServiceLight.FilterStructure(walls, lane.First(), frame, "w");
+                if (columns.Count == 0 && walls.Count == 0)
+                {
+                    continue;
+                }
 
                 ////获取该车道线上的构建
-                //StructureServiceLight structureService = new StructureServiceLight();
-                var closeColumn = StructureServiceLight.GetStruct(lane, filterColmuns, TolLane);
-                var closeWall = StructureServiceLight.GetStruct(lane, filterWalls, TolLane);
+                var closeColumn = StructureServiceLight.GetStruct(lane, columns, TolLane);
+                var closeWall = StructureServiceLight.GetStruct(lane, walls, TolLane);
+
+                //InsertLightService.ShowGeometry(closeColumn, 142, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(closeWall, 142, LineWeight.LineWeight035);
+
+                //找到构建上可布置面,用第一条车道线的头尾判定
+                var filterColmuns = StructureServiceLight.getStructureParallelPart(closeColumn, lane.First(), "c");
+                var filterWalls = StructureServiceLight.getStructureParallelPart(closeWall, lane.First(), "w");
 
                 //破墙
-                var brokeWall = StructureServiceLight.breakWall(closeWall);
+                var brokeWall = StructureServiceLight.breakWall(filterWalls);
 
-                ////将构建分为上下部分
-                var usefulColumns = StructureServiceLight.SeparateColumnsByLine(closeColumn, lane, TolLane);
+                var usefulColumns = StructureServiceLight.SeparateColumnsByLine(filterColmuns, lane, TolLane);
                 var usefulWalls = StructureServiceLight.SeparateColumnsByLine(brokeWall, lane, TolLane);
+
+                StructureLayoutServiceLight layoutServer = new StructureLayoutServiceLight(usefulColumns, usefulWalls, lane, frame, TolLightRangeMin, TolLightRangeMax);
 
                 ////for debug
                 //InsertLightService.ShowGeometry(usefulColumns[0], 142, LineWeight.LineWeight035);
@@ -79,18 +87,23 @@ namespace ThMEPLighting.EmgLight
                 //InsertLightService.ShowGeometry(usefulWalls[0], 142, LineWeight.LineWeight035);
                 //InsertLightService.ShowGeometry(usefulWalls[1], 11, LineWeight.LineWeight035);
 
-                if (usefulColumns[0].Count == 0 && usefulColumns[1].Count == 0 && usefulWalls[0].Count == 0 && usefulWalls[1].Count == 0)
-                {
-                    continue;
-                }
-
-                StructureLayoutServiceLight layoutServer = new StructureLayoutServiceLight(usefulColumns, usefulWalls, lane, TolLightRangeMin, TolLightRangeMax);
-                
-
                 bool debug = false;
+
+                
+                    if (usefulColumns[0].Count == 0 && usefulColumns[1].Count == 0 && usefulWalls[0].Count == 0 && usefulWalls[1].Count == 0)
+                    {
+                        continue;
+                    }
+
+               
+                //InsertLightService.ShowGeometry(usefulColumns[0], 142, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(usefulColumns[1], 11, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(usefulWalls[0], 142, LineWeight.LineWeight035);
+                //InsertLightService.ShowGeometry(usefulWalls[1], 11, LineWeight.LineWeight035);
 
                 if (debug == false)
                 {
+
                     ////找出平均的一边. -1:no side 0:left 1:right.
                     int uniformSide = FindUniformDistributionSide(layoutServer, lane, out var columnDistList);
 
@@ -111,7 +124,7 @@ namespace ThMEPLighting.EmgLight
                     {
 
                         uniformSide = layoutServer.UsefulColumns[0].Count >= layoutServer.UsefulColumns[1].Count ? 0 : 1;
-                        
+
                         columnDistList = new List<List<double>>();
                         columnDistList.Add(layoutServer.GetColumnDistList(layoutServer.UsefulStruct[0]));
                         columnDistList.Add(layoutServer.GetColumnDistList(layoutServer.UsefulStruct[1]));
@@ -741,7 +754,11 @@ namespace ThMEPLighting.EmgLight
 
                             //遍历所有对面柱墙,可能会很慢
                             StructureLayoutServiceLight.findClosestStruct(layoutServer.UsefulStruct[nonUniformSide], midPt, Layout, out minDist, out closestStruct);
-                            nonUniformSideLayout.Add(closestStruct);
+                            if (closestStruct != null)
+                            {
+                                nonUniformSideLayout.Add(closestStruct);
+                            }
+
 
                         }
 
@@ -772,7 +789,10 @@ namespace ThMEPLighting.EmgLight
                     layoutServer.distToLine(layoutServer.UsefulColumns[uniformSide].Last(), out var LastPrjPtOnLine);
                     StructureLayoutServiceLight.findClosestStruct(layoutServer.UsefulStruct[nonUniformSide], LastPrjPtOnLine, Layout, out minDist, out closestStruct);
 
-                    nonUniformSideLayout.Add(closestStruct);
+                    if (closestStruct != null)
+                    {
+                        nonUniformSideLayout.Add(closestStruct);
+                    }
 
                 }
 

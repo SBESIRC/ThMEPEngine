@@ -67,6 +67,10 @@ namespace ThMEPLighting.EmgLight.Service
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                if (Polylines==null)
+                {
+                    return;
+                }
                 foreach (Polyline pl in Polylines)
                 {
                     if (pl != null)
@@ -112,6 +116,11 @@ namespace ThMEPLighting.EmgLight.Service
 
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                if (lines == null)
+                {
+                    return;
+                }
+
                 foreach (Line line in lines)
                 {
                     if (line != null)

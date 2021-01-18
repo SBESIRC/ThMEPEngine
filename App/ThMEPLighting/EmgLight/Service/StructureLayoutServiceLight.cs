@@ -18,18 +18,20 @@ namespace ThMEPLighting.EmgLight.Service
         private Dictionary<Polyline, Point3d> dictStructureCenter = new Dictionary<Polyline, Point3d>();
         private Dictionary<Polyline, Point3d> dictStructureCenterInLaneCoor = new Dictionary<Polyline, Point3d>();
         private List<Line> laneTrans = new List<Line>();
+        private Polyline frame;
 
         int TolLightRangeMin = 4000;
         int TolLightRangeMax = 8500;
 
 
-        public StructureLayoutServiceLight(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, int TolLightRangeMin, int TolLightRangeMax)
+        public StructureLayoutServiceLight(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame, int TolLightRangeMin, int TolLightRangeMax)
         {
             this.usefulColumns = usefulColumns;
             this.usefulWalls = usefulWalls;
             this.lane = lane;
             this.TolLightRangeMin = TolLightRangeMin;
             this.TolLightRangeMax = TolLightRangeMax;
+            this.frame = frame;
 
             usefulStruct = new List<List<Polyline>>();
             usefulStruct.Add(new List<Polyline>());
@@ -52,7 +54,14 @@ namespace ThMEPLighting.EmgLight.Service
             usefulStruct[0] = OrderingStruct(usefulStruct[0]);
             usefulStruct[1] = OrderingStruct(usefulStruct[1]);
 
+            //滤掉重合部分
             filterOverlapStruc();
+
+            //滤掉框后边的部分
+            filterStrucBehindFrame();
+
+            //滤掉框外边的部分
+            getInsideFramePart();
 
         }
 
@@ -88,7 +97,7 @@ namespace ThMEPLighting.EmgLight.Service
 
             foreach (var structure in layoutList)
             {
-                if (layoutPtInfo.ContainsKey(structure) == false)
+                if (structure != null && layoutPtInfo.ContainsKey(structure) == false)
                 {
                     layoutInfo = GetLayoutPoint(structure);
                     layoutPtInfo.Add(structure, layoutInfo);
@@ -129,7 +138,7 @@ namespace ThMEPLighting.EmgLight.Service
             List<double> distX = new List<double>();
             for (int i = 0; i < structList.Count - 1; i++)
             {
-                distX.Add((getCenterInLaneCoor (structList[i]) - getCenterInLaneCoor(structList[i + 1])).Length);
+                distX.Add((getCenterInLaneCoor(structList[i]) - getCenterInLaneCoor(structList[i + 1])).Length);
             }
 
             return distX;
@@ -295,7 +304,8 @@ namespace ThMEPLighting.EmgLight.Service
             var ptNew = TransformPointToLine(pt, lane);
             prjPt = new Point3d();
 
-            if (laneTrans.Count == 0) {
+            if (laneTrans.Count == 0)
+            {
                 laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
             }
             if (ptNew.X < laneTrans.First().StartPoint.X)
@@ -621,5 +631,56 @@ namespace ThMEPLighting.EmgLight.Service
                 }
             }
         }
+
+        public void filterStrucBehindFrame()
+        {
+            List<Polyline> removeList = new List<Polyline>();
+            for (int i = 0; i < usefulStruct.Count; i++)
+            {
+                var layoutInfo = usefulStruct[i].Where(x =>
+                {
+                    Point3dCollection pts = new Point3dCollection();
+                    //选不在防火墙凹后的
+                    distToLine(getCenter(x), out var prjPt);
+                    Line l = new Line(prjPt, getCenter(x));
+                    l.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    return pts.Count > 0;
+                }).ToList();
+
+                foreach (var removeStru in layoutInfo)
+                {
+                    usefulStruct[i].Remove(removeStru);
+                    usefulColumns[i].Remove(removeStru);
+                    usefulWalls[i].Remove(removeStru);
+                }
+            }
+        }
+
+        public void getInsideFramePart()
+        {
+            List<Polyline> removeList = new List<Polyline>();
+
+            for (int i = 0; i < usefulStruct.Count; i++)
+            {
+                //选与防火框不相交且在防火框内
+                var layoutInfo = usefulStruct[i].Where(x =>
+                {
+                    Point3dCollection pts = new Point3dCollection();
+                    x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    return pts.Count > 0 || frame.Contains(x) == false;
+
+                }).ToList();
+
+                foreach (var removeStru in layoutInfo)
+                {
+                    usefulStruct[i].Remove(removeStru);
+                    usefulColumns[i].Remove(removeStru);
+                    usefulWalls[i].Remove(removeStru);
+                }
+            }
+
+        }
+
+
     }
 }

@@ -9,7 +9,7 @@ using NFox.Cad;
 
 namespace ThMEPLighting.EmgLight.Service
 {
-    class StructureServiceLight    
+    class StructureServiceLight
     {
         static double TolLight = 400;
         /// <summary>
@@ -42,6 +42,8 @@ namespace ThMEPLighting.EmgLight.Service
         /// <returns></returns>
         public static List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines, double tol)
         {
+
+
             //上下做框筛选框内构建. 不能直接transformToLine判断y值正负:打散很长的墙以后需要再筛选一遍
             var resPolys = lines.SelectMany(x =>
             {
@@ -77,13 +79,8 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="frame"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static List<Polyline> FilterStructure(List<Polyline> structrues, Line line, Polyline frame, string type)
+        public static List<Polyline> getStructureParallelPart(List<Polyline> structrues, Line line, string type)
         {
-            if (structrues.Count <= 0)
-            {
-                return null;
-            }
-
             List<Polyline> layoutColumns = new List<Polyline>();
 
             var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
@@ -103,17 +100,19 @@ namespace ThMEPLighting.EmgLight.Service
                 }
 
 
-
-                //选与防火框不相交且在防火框内
                 if (layoutInfo != null)
                 {
+                    //if (441633 <= layoutInfo[0].StartPoint.X && layoutInfo[0].StartPoint.X <= 464408 && 425557 <= layoutInfo[0].StartPoint.Y && layoutInfo[0].StartPoint.Y <= 428204)
+                    //{
+                    //    InsertLightService.ShowGeometry(layoutInfo, 40, LineWeight.LineWeight035);
+                    //}
 
-                    layoutInfo = layoutInfo.Where(x =>
-                    {
-                        Point3dCollection pts = new Point3dCollection();
-                        x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                        return pts.Count <= 0 && frame.Contains(x.StartPoint);
-                    }).ToList();
+                    //layoutInfo = layoutInfo.Where(x =>
+                    //{
+                    //    Point3dCollection pts = new Point3dCollection();
+                    //    x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    //    return pts.Count <= 0 && frame.Contains(x.StartPoint);
+                    //}).ToList();
 
                     layoutColumns.AddRange(layoutInfo);
 
@@ -122,6 +121,23 @@ namespace ThMEPLighting.EmgLight.Service
             }
             return layoutColumns;
         }
+
+        //public static List<Polyline> getInsideFramePart(List<Polyline> structrues, Polyline frame)
+        //{
+        //    List<Polyline> layoutColumns = new List<Polyline>();
+
+        //    //选与防火框不相交且在防火框内
+        //    var layoutInfo = structrues.Where(x =>
+        //      {
+        //          Point3dCollection pts = new Point3dCollection();
+        //          x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+        //          return pts.Count <= 0 && frame.Contains(x);
+        //      }).ToList();
+
+        //    layoutColumns.AddRange(layoutInfo);
+
+        //    return layoutColumns;
+        //}
 
 
         /// <summary>
