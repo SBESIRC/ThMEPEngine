@@ -109,6 +109,7 @@
     <Compile Include="ParkingStall\Geometry\GeomUtils.cs" />
     <Compile Include="ParkingStall\Model\LaneGroup.cs" />
     <Compile Include="ParkingStall\Model\LanePolyline.cs" />
+    <Compile Include="ParkingStall\Model\LightLaneGroup.cs" />
     <Compile Include="ParkingStall\Model\LightPlaceInfo.cs" />
     <Compile Include="ParkingStall\Model\LineSegment.cs" />
     <Compile Include="ParkingStall\Model\NearParks.cs" />
@@ -125,6 +126,7 @@
     <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\GroupInfoDifferentiation.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\IndexerCalculator.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\LaneGroupCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\LaneGroupDrawer.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\NearLightPlaceCalculator.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\CenterBaseLineCalculator.cs" />
     <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\CoordinateTransform.cs" />
