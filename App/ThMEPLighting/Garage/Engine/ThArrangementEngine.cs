@@ -144,11 +144,11 @@ namespace ThMEPLighting.Garage.Engine
                             code.SetDatabaseDefaults(acadDatabase.Database);
                             var codeId = acadDatabase.ModelSpace.Add(code);
                             objIds.Add(codeId);
-                            TypedValueList codeValueList = new TypedValueList
-                                  {
-                                { (int)DxfCode.ExtendedDataAsciiString, n.Number},
-                                  };
-                            XDataTools.AddXData(codeId, ThGarageLightCommon.ThGarageLightAppName, codeValueList);
+                            //TypedValueList codeValueList = new TypedValueList
+                            //      {
+                            //    { (int)DxfCode.ExtendedDataAsciiString, n.Number},
+                            //      };
+                            //XDataTools.AddXData(codeId, ThGarageLightCommon.ThGarageLightAppName, codeValueList);
                         }
                         var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                             RacewayParameter.LaneLineBlockParameter.Layer,
@@ -157,7 +157,8 @@ namespace ThMEPLighting.Garage.Engine
                         TypedValueList blkValueList = new TypedValueList
                                   {
                                 { (int)DxfCode.ExtendedDataAsciiString, n.Number},
-                                { (int)DxfCode.ExtendedDataAsciiString, m.Pattern}
+                                { (int)DxfCode.ExtendedDataAsciiString, m.Pattern},
+                                { (int)DxfCode.ExtendedDataReal, normalLine.Angle},
                                   };
                         objIds.Add(blkId);
                         XDataTools.AddXData(blkId, ThGarageLightCommon.ThGarageLightAppName, blkValueList);
