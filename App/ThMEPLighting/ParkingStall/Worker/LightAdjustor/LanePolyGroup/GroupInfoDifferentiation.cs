@@ -25,7 +25,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
             m_laneGroup = laneGroup;
         }
 
-        public static void MakeGroupInfoDifferentiation(LaneGroup laneGroup)
+        public static void  MakeGroupInfoDifferentiation(LaneGroup laneGroup)
         {
             var groupInfoDifferentiation = new GroupInfoDifferentiation(laneGroup);
             groupInfoDifferentiation.Do();
@@ -45,9 +45,9 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
 
             // 再次细分
             CalculateParkingStallTypeInfos();
-            // debug
-            //DrawGroupInfo(m_laneGroup);
-            DrawPileGroupInfo(m_laneGroup);
+            //// debug
+            ////DrawGroupInfo(m_laneGroup);
+            //DrawPileGroupInfo(m_laneGroup);
         }
 
         private void CalculateParkingStallTypeInfos()
@@ -210,10 +210,61 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
 
         /// <summary>
         /// 定义类型，消除无效的车位块信息
+        /// 
+        /// change 如果车位可以分配给多个车道线，则优先分配给倒车入库的那个车道线
+        /// 
+        /// 车位属于某个车道线的一侧的集合里面 以及被属于的类型
         /// </summary>
         /// <param name="laneDirection"></param>
         /// <param name="lightPlaceInfos"></param>
         private void CalculateLightPlaceInfos(Vector3d laneDirection, List<LightPlaceInfo> lightPlaceInfos)
+        {
+            var invalidLightPlaceInfos = new List<LightPlaceInfo>();
+
+            foreach (var lightPlaceInfo in lightPlaceInfos)
+            {
+                var parkingTypeLine = lightPlaceInfo.LongDirLength;
+                var longLineDirection = (parkingTypeLine.EndPoint - parkingTypeLine.StartPoint).GetNormal();
+
+                var rad = laneDirection.GetAngleTo(longLineDirection);
+                var angle = rad / Math.PI * 180;
+
+                if (angle > 45 && angle < 135)
+                {
+                    // 倒车入库
+                    lightPlaceInfo.ParkingSpace_TypeInfo = ParkingSpace_Type.Reverse_stall_Parking;
+                    lightPlaceInfo.IsUsed = true;
+
+                    lightPlaceInfo.lightsLst.Add(new LightPlaceOneSide(lightPlaceInfos, lightPlaceInfo.ParkingSpace_TypeInfo));
+                }
+                else
+                {
+                    // 侧方停车
+                    // 长度或者宽度异常
+                    var parkingStallGroupLongLine = lightPlaceInfo.BigGroupInfo.BigGroupLongLine;
+                    var parkingStallGroupShortLine = lightPlaceInfo.BigGroupInfo.BigGroupShortLine;
+                    
+                    if (parkingStallGroupLongLine.Length > ParkingStallCommon.ParkingStallGroupLengthRestrict
+                        || parkingStallGroupShortLine.Length > ParkingStallCommon.ParkingStallGroupWidthRestrict)
+                    {
+                        invalidLightPlaceInfos.Add(lightPlaceInfo);
+                        continue;
+                    }
+
+                    lightPlaceInfo.ParkingSpace_TypeInfo = ParkingSpace_Type.Parallel_Parking;
+                    lightPlaceInfo.IsUsed = true;
+
+                    lightPlaceInfo.lightsLst.Add(new LightPlaceOneSide(lightPlaceInfos, lightPlaceInfo.ParkingSpace_TypeInfo));
+                }
+            }
+
+            foreach (var invalidLight in invalidLightPlaceInfos)
+            {
+                lightPlaceInfos.Remove(invalidLight);
+            }
+        }
+
+        private void CalculateLightPlaceInfosSrc(Vector3d laneDirection, List<LightPlaceInfo> lightPlaceInfos)
         {
             var invalidLightPlaceInfos = new List<LightPlaceInfo>();
 
@@ -243,7 +294,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
                     // 长度或者宽度异常
                     var parkingStallGroupLongLine = lightPlaceInfo.BigGroupInfo.BigGroupLongLine;
                     var parkingStallGroupShortLine = lightPlaceInfo.BigGroupInfo.BigGroupShortLine;
-                    
+
                     if (parkingStallGroupLongLine.Length > ParkingStallCommon.ParkingStallGroupLengthRestrict
                         || parkingStallGroupShortLine.Length > ParkingStallCommon.ParkingStallGroupWidthRestrict)
                     {
@@ -261,7 +312,6 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
                 lightPlaceInfos.Remove(invalidLight);
             }
         }
-        
 
         private Vector3d CalculateDirection()
         {

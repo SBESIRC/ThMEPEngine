@@ -48,6 +48,8 @@ namespace ThMEPLighting.ParkingStall.Model
 
         public bool IsUsed = false;
 
+        public List<LightPlaceOneSide> lightsLst = new List<LightPlaceOneSide>();
+
         public ParkingSpace_Type ParkingSpace_TypeInfo = ParkingSpace_Type.Invalid;
 
         // 用于细分组的传导相关组计算
