@@ -1,4 +1,7 @@
-﻿using NetTopologySuite.Geometries;
+﻿using NFox.Cad;
+using System.Linq;
+using System.Collections.Generic;
+using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
@@ -19,20 +22,25 @@ namespace ThCADCore.NTS
             return clipper.Clip(curve, inverted);
         }
 
-        public DBObjectCollection Clip(Curve curve, bool inverted = false)
-        {
-            return Clip(curve.ToNTSGeometry(), inverted).ToDbCollection();
-        }
-
         public static DBObjectCollection Clip(AcPolygon polygon, DBObjectCollection curves, bool inverted = false)
         {
             var clipper = new ThCADCoreNTSGeometryClipper(polygon);
             return clipper.Clip(curves, inverted);
         }
 
+        public DBObjectCollection Clip(Curve curve, bool inverted = false)
+        {
+            return Clip(curve.ToNTSGeometry(), inverted).ToDbCollection();
+        }
+
         public DBObjectCollection Clip(DBObjectCollection curves, bool inverted = false)
         {
-            return Clip(curves.ToMultiLineString(), inverted).ToDbCollection();
+            var objs = new List<DBObject>();
+            foreach(Curve curve in curves)
+            {
+                objs.AddRange(Clip(curve, inverted).Cast<DBObject>());
+            }
+            return objs.ToCollection();
         }
 
         private Geometry Clip(Geometry other, bool inverted = false)
