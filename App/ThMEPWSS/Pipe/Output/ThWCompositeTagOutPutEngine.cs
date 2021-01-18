@@ -31,7 +31,7 @@ namespace ThMEPWSS.Pipe.Output
             y1 / FloorEngines.TopFloors[0].CompositeBalconyRooms.Count, 0);
             //定义障碍              
             ThCADCoreNTSSpatialIndex obstacle = null;
-            obstacle = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetObstacle());
+            obstacle = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetObstacle(FloorEngines.Columns));
             composite_Engine.Run(parameters0.fpipe, parameters0.tpipe, parameters0.wpipe, parameters0.ppipe, parameters0.dpipe, npipes,
                 rain_pipes, parameters0.pboundary, parameters0.divideLines, roofrain_pipes, toiletpoint, balconypoint, obstacle);
             //首先得到比对的第一行重复标注         

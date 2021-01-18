@@ -3,6 +3,9 @@ using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
+using ThCADExtension;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -14,8 +17,10 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWTopFloorRoom> TopFloors { get; set; }
 
         public List<ThWTopFloorRoom> NormalFloors { get; set; }
+        public List<Curve> Columns { get; set; }
         public ThWCompositeFloorRecognitionEngine()
         {
+            Columns =new List<Curve>();
             RoofDeviceFloors = new List<ThWRoofDeviceFloorRoom>();
             RoofFloors = new List<ThWRoofFloorRoom>();
             TopFloors = new List<ThWTopFloorRoom>();
@@ -25,7 +30,15 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();
+               
+                var ColumnRecognitionEngine=new ThColumnRecognitionEngine();
+                ColumnRecognitionEngine.Recognize(database, pts);
+                ColumnRecognitionEngine.Elements.ForEach(o =>
+                {
+                    var curve = o.Outline as Curve;
+                    Columns.Add(curve.WashClone());
+                });
+                var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();               
                 RoofDeviceEngine.Recognize(database, pts);
                 RoofDeviceFloors = RoofDeviceEngine.Rooms;
                 var RoofEngine = new ThWRoofFloorRecognitionEngine()

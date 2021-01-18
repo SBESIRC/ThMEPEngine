@@ -107,12 +107,13 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return y;
         }
-        public static DBObjectCollection GetObstacle()
+        public static DBObjectCollection GetObstacle(List<Curve> objects)
         {
             DBObjectCollection obstacles = new DBObjectCollection();//定义障碍
             var poly = new Polyline();
             poly.CreatePolygon(new Point2d(698345.6372, 482936.8358), 4, 100);
             obstacles.Add(poly);
+            objects.ForEach(o => obstacles.Add(o));
             return obstacles;
         }
         public static Point3d GetRadialPoint(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle)
