@@ -39,6 +39,14 @@ namespace ThMEPHVAC.CAD
             }
         }
 
+        public double LowFanVolume 
+        {
+            get
+            {
+                return GetLowFanVolume();
+            }
+        }
+
         public FanOpening FanInlet
         {
             get
@@ -107,6 +115,21 @@ namespace ThMEPHVAC.CAD
             var fanvolumevaluestring = Data.Attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_VOLUME];
             return fanvolumevaluestring.Replace(" ", "").Replace("风量：", "").Replace("cmh", "").NullToDouble();
         }
+
+        private double GetLowFanVolume()
+        {
+            var fanvolumevaluestring = Data.Attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_VOLUME];
+            var volumegroup = fanvolumevaluestring.Replace(" ", "").Replace("风量：", "").Replace("cmh", "").Split('/');
+            if (volumegroup.Count() < 2)
+            {
+                return 0;
+            }
+            else
+            {
+                return volumegroup.Min(s=>s.NullToDouble());
+            }
+        }
+
 
         private FanOpening GetFanInlet()
         {
