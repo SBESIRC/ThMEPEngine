@@ -352,13 +352,41 @@ namespace ThMEPEngineCore
                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
                 };
                 var sf = new SelectionFilter(tvs);
-                var result = Active.Editor.GetSelection(pso, sf);
-                if (result.Status != PromptStatus.OK)
+                var result1 = Active.Editor.GetSelection(pso, sf);
+                if (result1.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                var lines = new List<Line>();
-                result.Value.GetObjectIds().Cast<ObjectId>().ForEach(o => lines.Add(acadDatabase.Element<Line>(o)));
+                var result2 = Active.Editor.GetSelection(pso, sf);
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var firstLines = new List<Line>();
+                result1.Value.GetObjectIds().Cast<ObjectId>().ForEach(o => firstLines.Add(acadDatabase.Element<Line>(o)));
+
+                var secondLines = new List<Line>();
+                result2.Value.GetObjectIds().Cast<ObjectId>().ForEach(o => secondLines.Add(acadDatabase.Element<Line>(o)));
+
+                var geometry1 = new ThGeometry()
+                {
+                    Segments = firstLines
+                };
+                geometry1.Properties.Add("Category","Wall");
+                geometry1.Properties.Add("Product", "China");
+                geometry1.Properties.Add("Price", "128");
+
+                var geometry2 = new ThGeometry()
+                {
+                    Segments = secondLines
+                };
+                geometry2.Properties.Add("Category", "Wall");
+                geometry2.Properties.Add("Product", "USA");
+                geometry2.Properties.Add("Price", "100");
+
+                var geos = new List<ThGeometry>();
+                geos.Add(geometry1);
+                geos.Add(geometry2);
 
                 // 输出GeoJson文件
                 // 线
@@ -371,8 +399,8 @@ namespace ThMEPEngineCore
                     Formatting = Formatting.Indented,
                 })
                 {
-                    var geoJsonWriter = new ThLineGeoJsonWriter();
-                    geoJsonWriter.Write(lines, writer);
+                    var geoJsonWriter = new ThGeometryJsonWriter();
+                    geoJsonWriter.Write(geos, writer);
                 }
             }
         }
