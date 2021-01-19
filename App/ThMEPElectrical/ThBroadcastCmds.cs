@@ -239,7 +239,7 @@ namespace ThMEPElectrical
                 trans.Commit();
             }
 
-            List<EntityInfo> entityInfos = new List<EntityInfo>();
+            //List<EntityInfo> entityInfos = new List<EntityInfo>();
             //foreach (var item in entities)
             //{
             //    EntityInfo entityInfo = new EntityInfo();
@@ -265,13 +265,13 @@ namespace ThMEPElectrical
             //    entityInfos.Add(entityInfo);
             //}
 
-            string str = JsonConvert.SerializeObject(entityInfos);
-            using (FileStream fs = new FileStream("C://Users//tangyongjing//Desktop//json.txt", FileMode.OpenOrCreate))
-            {
-                StreamWriter sw = new StreamWriter(fs);
-                sw.Write(str);
-                sw.Close();
-            }
+            //string str = JsonConvert.SerializeObject(entityInfos);
+            //using (FileStream fs = new FileStream("C://Users//tangyongjing//Desktop//json.txt", FileMode.OpenOrCreate))
+            //{
+            //    StreamWriter sw = new StreamWriter(fs);
+            //    sw.Write(str);
+            //    sw.Close();
+            //}
         }
 
         private List<Entity> GetEntity(BlockReference blockReference, Transaction acadDatabase)
