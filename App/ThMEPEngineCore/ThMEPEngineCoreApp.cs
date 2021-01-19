@@ -345,52 +345,33 @@ namespace ThMEPEngineCore
         public void ThExportGeo()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var exportEngine = new ThGemometryExportEngine())
             {
-                var pso = new PromptSelectionOptions();
-                pso.MessageForAdding = "\n选择线";
-                var tvs = new TypedValue[]
-                {
-                    new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
-                };
-                var sf = new SelectionFilter(tvs);
-                var result1 = Active.Editor.GetSelection(pso, sf);
-                if (result1.Status != PromptStatus.OK)
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                var result2 = Active.Editor.GetSelection(pso, sf);
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var firstLines = new List<Line>();
-                result1.Value.GetObjectIds().Cast<ObjectId>().ForEach(o => firstLines.Add(acadDatabase.Element<Line>(o)));
-
-                var secondLines = new List<Line>();
-                result2.Value.GetObjectIds().Cast<ObjectId>().ForEach(o => secondLines.Add(acadDatabase.Element<Line>(o)));
-
-                var geometry1 = new ThGeometry()
-                {
-                    Segments = firstLines
-                };
-                geometry1.Properties.Add("Category","Wall");
-                geometry1.Properties.Add("Product", "China");
-                geometry1.Properties.Add("Price", "128");
-
-                var geometry2 = new ThGeometry()
-                {
-                    Segments = secondLines
-                };
-                geometry2.Properties.Add("Category", "Wall");
-                geometry2.Properties.Add("Product", "USA");
-                geometry2.Properties.Add("Price", "100");
-
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                exportEngine.Export(acadDatabase.Database, frame.Vertices());
                 var geos = new List<ThGeometry>();
-                geos.Add(geometry1);
-                geos.Add(geometry2);
+                var objIds = new ObjectIdList();
+                exportEngine.Spaces.ForEach(o =>
+                {
+                    o.Boundary.ColorIndex = 5;
+                    o.Boundary.SetDatabaseDefaults();
+                    objIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
+                    var geometry = new ThGeometry();
+                    geometry.Segments = (o.Boundary as Polyline).ToLines();
+                    o.Properties.ForEach(p => geometry.Properties.Add(p.Key, p.Value));
+                    geos.Add(geometry);
+                });
+                if(objIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
+                }               
 
                 // 输出GeoJson文件
-                // 线
                 var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Line.geojson", Active.DocumentName))))
                 using (JsonTextWriter writer = new JsonTextWriter(geoJson)
@@ -417,6 +398,7 @@ namespace ThMEPEngineCore
                 extractEngine.Spaces.ForEach(o =>
                 {
                     o.ColorIndex = 1;
+                    o.SetDatabaseDefaults();
                     spaceIds.Add(acadDatabase.ModelSpace.Add(o));
                     var geometry = new ThGeometry();                    
                     geometry.Properties.Add("Category", "Space");
@@ -429,6 +411,7 @@ namespace ThMEPEngineCore
                 extractEngine.Doors.ForEach(o =>
                 {
                     o.ColorIndex = 2;
+                    o.SetDatabaseDefaults();
                     doorIds.Add(acadDatabase.ModelSpace.Add(o));
                     var geometry = new ThGeometry();
                     geometry.Properties.Add("Category", "Door");
@@ -443,6 +426,7 @@ namespace ThMEPEngineCore
                     e.Value.ForEach(v =>
                     {
                         v.ColorIndex = 2;
+                        v.SetDatabaseDefaults();
                         equipIds.Add(acadDatabase.ModelSpace.Add(v));
                         var geometry = new ThGeometry();
                         geometry.Properties.Add("Category", "Equipment");
