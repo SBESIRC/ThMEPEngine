@@ -372,5 +372,10 @@ namespace ThMEPLighting.ParkingStall.Core
                 BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
             }
         }
+
+        public void LaneConnect()
+        {
+
+        }
     }
 }
