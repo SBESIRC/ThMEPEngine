@@ -30,7 +30,6 @@ namespace ThMEPWSS.Pipe.Output
             //阳台空间形心
             Point3d balconypoint = new Point3d(x1 / FloorEngines.TopFloors[0].CompositeBalconyRooms.Count,
             y1 / FloorEngines.TopFloors[0].CompositeBalconyRooms.Count, 0);
-
             //定义障碍              
             ThCADCoreNTSSpatialIndex obstacle = null;
             obstacle = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetObstacle(FloorEngines.Columns));

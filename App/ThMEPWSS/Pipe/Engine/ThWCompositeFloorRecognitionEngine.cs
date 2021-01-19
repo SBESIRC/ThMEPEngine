@@ -53,8 +53,9 @@ namespace ThMEPWSS.Pipe.Engine
                     }
                 });
                 var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();               
-                RoofDeviceEngine.Recognize(database, pts);
+                RoofDeviceEngine.Recognize(database, pts);             
                 RoofDeviceFloors = RoofDeviceEngine.Rooms;
+                RoofDeviceEngine.TagNameFrames.ForEach(o => Columns.Add(o));
                 var RoofEngine = new ThWRoofFloorRecognitionEngine()
                 {
                     Spaces = RoofDeviceEngine.Spaces
