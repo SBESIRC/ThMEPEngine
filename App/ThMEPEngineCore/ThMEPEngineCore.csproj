@@ -78,6 +78,7 @@
     <Compile Include="Engine\ThClosestoolRecognitionEngine.cs" />
     <Compile Include="Engine\ThCondensePipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
+    <Compile Include="Engine\ThExtractGeometryEngine.cs" />
     <Compile Include="Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />

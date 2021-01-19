@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using DotNetARX;
 
 namespace ThMEPEngineCore
 {
@@ -392,6 +393,70 @@ namespace ThMEPEngineCore
                 // 线
                 var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
                 using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Line.geojson", Active.DocumentName))))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                {
+                    Indentation = 4,
+                    IndentChar = ' ',
+                    Formatting = Formatting.Indented,
+                })
+                {
+                    var geoJsonWriter = new ThGeometryJsonWriter();
+                    geoJsonWriter.Write(geos, writer);
+                }
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractGeo", CommandFlags.Modal)]
+        public void ThExtractGeo()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine =new ThExtractGeometryEngine())
+            {
+                extractEngine.Extract(acadDatabase.Database);
+                var geos = new List<ThGeometry>();
+                var spaceIds = new ObjectIdList();
+                extractEngine.Spaces.ForEach(o =>
+                {
+                    o.ColorIndex = 1;
+                    spaceIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();                    
+                    geometry.Properties.Add("Category", "Space");
+                    geometry.Segments = o.ToLines();
+                    geos.Add(geometry);
+                });
+                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), spaceIds);
+
+                var doorIds = new ObjectIdList();
+                extractEngine.Doors.ForEach(o =>
+                {
+                    o.ColorIndex = 2;
+                    doorIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "Door");
+                    geometry.Segments = o.ToLines();
+                    geos.Add(geometry);
+                });
+                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), doorIds);
+
+                var equipIds = new ObjectIdList();
+                extractEngine.Equipments.ForEach(e =>
+                {
+                    e.Value.ForEach(v =>
+                    {
+                        v.ColorIndex = 2;
+                        equipIds.Add(acadDatabase.ModelSpace.Add(v));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "Equipment");
+                        geometry.Properties.Add("Name", e.Key);
+                        geometry.Segments = v.ToLines();
+                        geos.Add(geometry);
+                    });
+                });
+                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), equipIds);
+
+                // 输出GeoJson文件
+                // 线
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Info.geojson", Active.DocumentName))))
                 using (JsonTextWriter writer = new JsonTextWriter(geoJson)
                 {
                     Indentation = 4,

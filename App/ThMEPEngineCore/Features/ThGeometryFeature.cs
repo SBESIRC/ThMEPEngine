@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Features
                 {
                     var objs = new DBObjectCollection();
                     geometry.Segments.ForEach(o=> objs.Add(o));
-                    var geo = objs.ToNTSNodedLineStrings();
+                    var geo = objs.ToMultiLineString();
                     var attributesTable = new AttributesTable(geometry.Properties);
                     var feature = new Feature(geo, attributesTable);
                     return feature;
