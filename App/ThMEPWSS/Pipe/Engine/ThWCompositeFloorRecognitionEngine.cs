@@ -52,6 +52,13 @@ namespace ThMEPWSS.Pipe.Engine
                         throw new NotSupportedException();
                     }
                 });
+                var innerDoorEngine = new ThInnerDoorRecognitionEngine();
+                innerDoorEngine.Recognize(database, pts);
+                innerDoorEngine.Elements.ForEach(o =>
+                {
+                    Polyline curve = o.Outline as Polyline;           
+                        Columns.Add(curve.WashClone());                               
+                });
                 var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();               
                 RoofDeviceEngine.Recognize(database, pts);             
                 RoofDeviceFloors = RoofDeviceEngine.Rooms;

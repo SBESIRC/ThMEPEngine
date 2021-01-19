@@ -130,6 +130,7 @@
     <Compile Include="Model\Hvac\ThIfcPipeSegment.cs" />
     <Compile Include="Model\Hvac\ThIfcValve.cs" />
     <Compile Include="Model\Plumbing\ThIfcGravityWaterBucket.cs" />
+    <Compile Include="Model\Plumbing\ThIfcInnerDoor.cs" />
     <Compile Include="Model\Plumbing\ThIfcSideEntryWaterBucket.cs" />
     <Compile Include="Model\ThGeometry.cs" />
     <Compile Include="Model\ThIfcFlowController.cs" />
@@ -224,6 +225,8 @@
     <Compile Include="Service\ThGravityWaterBucketDbExtension.cs" />
     <Compile Include="Service\ThGravityWaterBucketLayerManager.cs" />
     <Compile Include="LaneLine\ThLaneLineSimplifier.cs" />
+    <Compile Include="Service\ThInnerDoorDbExtension.cs" />
+    <Compile Include="Service\ThInnerDoorLayerManager.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
     <Compile Include="Service\ThLineBeamOutliner.cs" />

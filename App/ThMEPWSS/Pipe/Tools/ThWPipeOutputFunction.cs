@@ -377,7 +377,7 @@ namespace ThMEPWSS.Pipe.Tools
         {
             Point3d tag = Point3d.Origin;
 
-            if (fontBox.Count > 0|| obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i])).Count > 0)
+            if (fontBox.Count > 0)
             {
                 if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i])).Count>0)
                 {
@@ -390,7 +390,19 @@ namespace ThMEPWSS.Pipe.Tools
             }
             else
             {
-                tag = Pipeindex[i].TransformBy(matrix1).TransformBy(Matrix);
+                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i])).Count > 0)
+                {
+                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i / 3 * 3]);
+                }
+                else
+                {
+                    if (Matrix.Translation == new Vector3d(0, 0, 0))
+                    { tag = Pipeindex[i]; }
+                    else
+                    {
+                        tag = Pipeindex[i].TransformBy(matrix1).TransformBy(Matrix);
+                    }
+                }
             }
             return tag;
         }
