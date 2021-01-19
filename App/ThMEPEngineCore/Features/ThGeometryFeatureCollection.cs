@@ -7,12 +7,12 @@ using System.Collections.Generic;
 
 namespace ThMEPEngineCore.Features
 {
-    public class ThLineFeatureCollection
+    public class ThGeometryFeatureCollection
     {
-        public static FeatureCollection Construct(List<Line> lines)
+        public static FeatureCollection Construct(List<ThGeometry> geos)
         {
             var features = new FeatureCollection();
-            lines.ForEach(o => features.Add(ThLineFeature.Construct(o)));
+            geos.ForEach(o => features.Add(ThGeometryFeature.Construct(o)));
             return features;
         }
     }

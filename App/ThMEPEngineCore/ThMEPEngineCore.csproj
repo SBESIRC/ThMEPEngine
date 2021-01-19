@@ -98,16 +98,16 @@
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThWashMachineRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
-    <Compile Include="Features\ThLineFeatureCollection.cs" />
+    <Compile Include="Features\ThGeometryFeatureCollection.cs" />
     <Compile Include="Features\ThBeamFeatureCollection.cs" />
     <Compile Include="Features\ThColumnFeature.cs" />
     <Compile Include="Features\ThColumnFeatureCollection.cs" />
-    <Compile Include="Features\ThLineFeature.cs" />
+    <Compile Include="Features\ThGeometryFeature.cs" />
     <Compile Include="Features\ThShearWallFeatureCollection.cs" />
     <Compile Include="Features\ThThShearWallFeature.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
     <Compile Include="IO\ThBeamGeoJsonReader.cs" />
-    <Compile Include="IO\ThLineGeoJsonWriter.cs" />
+    <Compile Include="IO\ThGeometryJsonWriter.cs" />
     <Compile Include="IO\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
     <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
@@ -131,6 +131,7 @@
     <Compile Include="Model\Hvac\ThIfcValve.cs" />
     <Compile Include="Model\Plumbing\ThIfcGravityWaterBucket.cs" />
     <Compile Include="Model\Plumbing\ThIfcSideEntryWaterBucket.cs" />
+    <Compile Include="Model\ThGeometry.cs" />
     <Compile Include="Model\ThIfcFlowController.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowMovingDevice.cs" />

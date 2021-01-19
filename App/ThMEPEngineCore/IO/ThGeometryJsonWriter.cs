@@ -10,11 +10,11 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.IO
 {
-    public class ThLineGeoJsonWriter : GeoJsonWriter
+    public class ThGeometryJsonWriter : GeoJsonWriter
     {
-        public void Write(List<Line> lines, JsonWriter writer)
+        public void Write(List<ThGeometry> geos, JsonWriter writer)
         {
-            ThLineFeatureCollection.Construct(lines)
+            ThGeometryFeatureCollection.Construct(geos)
                 .OrderBy(o => o.Geometry, new ThCADCoreNTSGeometryComparer()).ForEach(o => Write(o, writer));
         }
     }

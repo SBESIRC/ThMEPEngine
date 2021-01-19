@@ -564,7 +564,7 @@ namespace ThMEPHVAC.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                acadDatabase.Database.ImportLayer(name, false);
+                acadDatabase.Database.ImportLayer(name);
                 acadDatabase.Database.UnOffLayer(name);
                 acadDatabase.Database.UnLockLayer(name);
                 acadDatabase.Database.UnPrintLayer(name);
@@ -585,7 +585,7 @@ namespace ThMEPHVAC.CAD
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                acadDatabase.Database.ImportTextStyle(ThHvacCommon.DUCT_TEXT_STYLE, false);
+                acadDatabase.Database.ImportTextStyle(ThHvacCommon.DUCT_TEXT_STYLE);
                 return acadDatabase.TextStyles.ElementOrDefault(ThHvacCommon.DUCT_TEXT_STYLE).ObjectId;
             }
         }
