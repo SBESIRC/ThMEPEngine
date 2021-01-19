@@ -357,157 +357,170 @@ namespace ThMEPLighting.EmgLight.Service
             // return distProject;
         }
 
-        public static void findClosestStruct(List<Polyline> structList, Point3d Pt, List<Polyline> Layout, out double minDist, out Polyline closestStruct)
-        {
-            minDist = 10000;
-            closestStruct = null;
+        //public static void findClosestStruct(List<Polyline> structList, Point3d Pt, List<Polyline> Layout, out double minDist, out Polyline closestStruct)
+        //{
+        //    minDist = 10000;
+        //    closestStruct = null;
 
-            for (int i = 0; i < structList.Count; i++)
-            {
+        //    for (int i = 0; i < structList.Count; i++)
+        //    {
 
-                var connectLayout = Layout.Where(x => x.StartPoint == structList[i].StartPoint ||
-                                    x.StartPoint == structList[i].EndPoint ||
-                                    x.EndPoint == structList[i].StartPoint ||
-                                    x.EndPoint == structList[i].EndPoint).ToList();
+        //        var connectLayout = Layout.Where(x => x.StartPoint == structList[i].StartPoint ||
+        //                            x.StartPoint == structList[i].EndPoint ||
+        //                            x.EndPoint == structList[i].StartPoint ||
+        //                            x.EndPoint == structList[i].EndPoint).ToList();
 
 
 
-                if (structList[i].Distance(Pt) <= minDist)
-                {
-                    minDist = structList[i].Distance(Pt);
+        //        if (structList[i].Distance(Pt) <= minDist)
+        //        {
+        //            minDist = structList[i].Distance(Pt);
 
-                    if (connectLayout.Count > 0)
-                    {
-                        closestStruct = connectLayout.First();
-                    }
-                    else
-                    {
-                        closestStruct = structList[i];
-                    }
+        //            if (connectLayout.Count > 0)
+        //            {
+        //                closestStruct = connectLayout.First();
+        //            }
+        //            else
+        //            {
+        //                closestStruct = structList[i];
+        //            }
 
-                }
-            }
-        }
+        //        }
+        //    }
+        //}
 
-        /// <summary>
-        ///给定框内是否有布置点,如果有,找沿PolylineToEnd距离tol长度的点最近的构建. 此点必须在框内
-        /// </summary>
-        /// <param name="ExtendPoly"></param>
-        /// <param name="structList"></param>
-        /// <param name="PolylineToEnd"></param>
-        /// <param name="tol"></param>
-        /// <param name="Layout"></param>
-        /// <param name="tempStruct">返回找沿PolylineToEnd距离tol长度的点最近的构建</param>
-        /// <param name="index">tempStruct在structList的index. 如果index>structList.count则判断后面没有柱子 如果为-1则后面还有柱子</param>
-        /// <returns>给定框内是否有布置点</returns>
-        //public bool FindPolyInLaneSegement( List<Polyline> structList, Polyline PolylineToEnd, double tol, List<Polyline> Layout, out Polyline tempStruct, out int index)
+        //public static bool FindPolyInExtendPoly(Polyline ExtendPoly, List<Polyline> structList, Polyline PolylineToEnd, double tol, List<Polyline> Layout, out Polyline tempStruct, out int index)
         //{
         //    bool bReturn = false;
         //    index = -1;
+        //    var inExtendStruct = structList.Where(x =>
+        //    {
+        //        return (ExtendPoly.Contains(x) || ExtendPoly.Intersects(x));
+        //    }).ToList();
+
         //    tempStruct = null;
-
-        //    var segmentEnd = PolylineToEnd.GetPointAtDist(tol);
-        //    var segmentStartTransToLane = TransformPointToLine(PolylineToEnd.StartPoint, lane);
-        //    var segmentEndTransToLane = TransformPointToLine(segmentEnd, lane);
-
-        //    structList.Select ()
-
+        //    var ptOnLine = PolylineToEnd.GetPointAtDist(tol);
 
         //    if (inExtendStruct.Count > 0)
         //    {
         //        //框内有位置布灯
-        //        findClosestStruct(structList, segmentEnd, Layout, out double minDist, out tempStruct, out index);
+        //        findClosestStruct(inExtendStruct, ptOnLine, Layout, out double minDist, out tempStruct);
         //        bReturn = true;
 
         //    }
         //    else
         //    {
-        //        //检查最近点后面是否有构建
-        //        var transPtOnLine = TransformPointToLine(ptOnLine, lane);
-        //       if(getCenterInLaneCoor ( structList.First ()).X >= transPtOnLine.X)
-        //        {
-        //            index = structList.Count + 1;
-        //        }
-        //          bReturn = false;
+        //        index = -1;
+        //        bReturn = false;
         //    }
 
 
         //    return bReturn;
         //}
 
-        public static bool FindPolyInExtendPoly(Polyline ExtendPoly, List<Polyline> structList, Polyline PolylineToEnd, double tol, List<Polyline> Layout, out Polyline tempStruct, out int index)
+        private static void findClosestStruct(List<Polyline> structList, Point3d Pt, List<Polyline> Layout, double tol, out Polyline closestStruct)
+        {
+            double minDist = 10000;
+            closestStruct = null;
+
+            for (int i = 0; i < structList.Count; i++)
+            {
+
+                var connectLayout = checkIfInLayout(Layout, structList[i], tol);
+
+
+                if (structList[i].Distance(Pt) <= minDist)
+                {
+                    minDist = structList[i].Distance(Pt);
+
+                    if (connectLayout != null)
+                    {
+                        closestStruct = connectLayout;
+                    }
+                    else
+                    {
+                        closestStruct = structList[i];
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <param name="Pt"></param>
+        /// <param name="ExtendPoly"></param>
+        /// <param name="Layout"></param>
+        /// <param name="tol">structure tol以内有没有已经布点</param>
+        /// <param name="closestStruct"></param>
+        /// <returns></returns>
+        public bool FindClosestStructToPt(List<Polyline> structList, Point3d Pt, Polyline ExtendPoly, List<Polyline> Layout, out Polyline closestStruct)
         {
             bool bReturn = false;
-            index = -1;
-            var inExtendStruct = structList.Where(x =>
-            {
-                return (ExtendPoly.Contains(x) || ExtendPoly.Intersects(x));
-            }).ToList();
+            closestStruct = null;
 
-            tempStruct = null;
-            var ptOnLine = PolylineToEnd.GetPointAtDist(tol);
-
+            FindPolyInExtendPoly(structList, ExtendPoly, out var inExtendStruct);
             if (inExtendStruct.Count > 0)
             {
                 //框内有位置布灯
-                findClosestStruct(inExtendStruct, ptOnLine, Layout, out double minDist, out tempStruct);
+                findClosestStruct(inExtendStruct, Pt, Layout, TolLightRangeMin, out closestStruct);
                 bReturn = true;
-
             }
             else
             {
-                index = -1;
                 bReturn = false;
             }
-
-
             return bReturn;
         }
 
-        public bool FindPolyInSegment(Line Segment, List<Polyline> structList, List<Polyline> Layout, out Polyline tempStruct, out int index)
+        private static void FindPolyInExtendPoly(List<Polyline> structList, Polyline ExtendPoly, out List<Polyline> inExtendStruct)
         {
-            bool bReturn = false;
-            index = -1;
-            tempStruct = null;
+            inExtendStruct = structList.Where(x =>
+           {
+               return (ExtendPoly.Contains(x) || ExtendPoly.Intersects(x));
+           }).ToList();
 
-            var segStartTrans = TransformPointToLine(Segment.StartPoint, lane);
-            var segEndTrans = TransformPointToLine(Segment.EndPoint, lane);
-
-            var inExtendStruct = structList.Where(x => getCenterInLaneCoor(x).X <= segEndTrans.X && getCenterInLaneCoor(x).X > segStartTrans.X).ToList();
-
-            if (inExtendStruct.Count > 0)
-            {
-                //框内有位置布灯
-                findClosestStruct(inExtendStruct, Segment.EndPoint, Layout, out double minDist, out tempStruct);
-                bReturn = true;
-
-            }
-            else
-            {
-                index = -1;
-                bReturn = false;
-            }
-
-
-            return bReturn;
         }
 
-        public static void checkIfInLayout(List<Polyline> layout, Polyline column, int index, ref List<(Polyline, int)> uniformSideLayout)
+        public static void checkIfInLayout(List<Polyline> layout, Polyline structure, int index, double tol, ref List<(Polyline, int)> uniformSideLayout)
         {
-            var connectLayout = layout.Where(x => x.StartPoint == column.StartPoint ||
-                                    x.StartPoint == column.EndPoint ||
-                                    x.EndPoint == column.StartPoint ||
-                                    x.EndPoint == column.EndPoint).ToList();
 
-            if (connectLayout.Count > 0)
+            var connectLayout = checkIfInLayout(layout, structure, tol);
+
+            if (connectLayout != null)
             {
-                uniformSideLayout.Add((connectLayout.First(), index));
+                uniformSideLayout.Add((connectLayout, index));
             }
             else
             {
-                uniformSideLayout.Add((column, index));
+                uniformSideLayout.Add((structure, index));
             }
 
+        }
+
+        /// <summary>
+        /// layout到structure TolRangeMin以内找离structure最近的,没有返回null
+        /// </summary>
+        /// <param name="layout"></param>
+        /// <param name="structure"></param>
+        /// <returns></returns>
+        private static Polyline checkIfInLayout(List<Polyline> layout, Polyline structure, double Tol)
+        {
+            double minDist = Tol + 1;
+            Polyline closestLayout = null;
+
+            for (int i = 0; i < layout.Count; i++)
+            {
+                var dist = layout[i].StartPoint.DistanceTo(structure.StartPoint);
+                if (dist <= minDist && dist < Tol)
+                {
+                    minDist = dist;
+                    closestLayout = layout[i];
+                }
+            }
+
+            return closestLayout;
         }
 
         private void BuildStructCenter(List<List<Polyline>> structList)
@@ -543,7 +556,7 @@ namespace ThMEPLighting.EmgLight.Service
         public List<List<Polyline>> BuildHeadLayout(List<Polyline> layout, double TolLane)
         {
             //车道线往前做框buffer
-            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, TolLightRangeMin);
+            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, TolLightRangeMax);
             var FilteredLayout = StructureServiceLight.GetStruct(ExtendLineList, layout, TolLane);
             var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
 
@@ -556,7 +569,7 @@ namespace ThMEPLighting.EmgLight.Service
             return importLayout;
         }
 
-        private Point3d getCenterInLaneCoor(Polyline structure)
+        public Point3d getCenterInLaneCoor(Polyline structure)
         {
             Point3d ptTrans;
             Point3d centerPt;
@@ -641,7 +654,7 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     Point3dCollection pts = new Point3dCollection();
                     //选不在防火墙凹后的
-                    distToLine(getCenter(x), out var prjPt);
+                    distToLine(x, out var prjPt);
                     Line l = new Line(prjPt, getCenter(x));
                     l.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
                     return pts.Count > 0;
