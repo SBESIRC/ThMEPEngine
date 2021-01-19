@@ -73,7 +73,12 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <returns></returns>
         private List<Vector3d> CalConnectDirByOtherLanes(List<Polyline> mainBlockLines, List<Polyline> otherBlockLines)
         {
-            var directions = otherBlockLines.Select(x => (x.EndPoint - x.StartPoint).GetNormal()).ToList();
+            var dirInfo = otherBlockLines.GroupBy(x => (x.EndPoint - x.StartPoint).GetNormal()).ToList();
+            var directions = dirInfo.Where(x => x.Count() >= 2).Select(x => x.Key).ToList();
+            if (dirInfo.Count > 0)
+            {
+                directions.Add(dirInfo.OrderByDescending(x => x.Sum(y => y.Length)).First().Key);
+            }
             directions.AddRange(mainBlockLines.Select(x =>
             {
                 List<Line> lines = new List<Line>();

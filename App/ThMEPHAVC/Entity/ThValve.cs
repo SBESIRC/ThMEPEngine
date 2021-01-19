@@ -237,7 +237,7 @@ namespace ThMEPHVAC.Entity
         {
             return new ThValve()
             {
-                Length = 1600,
+                Length = 1000,
                 Width = Parameters.DuctWidth + 200,
                 RotationAngle = Parameters.RotationAngle,
                 ValvePosition = Parameters.GroupInsertPoint,

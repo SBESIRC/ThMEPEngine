@@ -7,6 +7,7 @@ namespace ThMEPEngineCore
     {
         public static string BUILDELEMENT_PROPERTY_CATEGORY = "Category";
         public static string BUILDELEMENT_PROPERTY_USER_TYPE = "UserType";
+        public static string BUILDELEMENT_PROPERTY_Boundary = "边界";
         public static string BUILDELEMENT_PROPERTY_MATERIAL = "材质";
         public static string BUILDELEMENT_PROPERTY_LAYER = "图层";
         public static string BUILDELEMENT_PROPERTY_PROJECT_LEVEL = "投影层次";
@@ -16,7 +17,8 @@ namespace ThMEPEngineCore
             BUILDELEMENT_PROPERTY_USER_TYPE,
             BUILDELEMENT_PROPERTY_MATERIAL,
             BUILDELEMENT_PROPERTY_LAYER,
-            BUILDELEMENT_PROPERTY_PROJECT_LEVEL
+            BUILDELEMENT_PROPERTY_PROJECT_LEVEL,
+            BUILDELEMENT_PROPERTY_Boundary
         };
 
         // 图层

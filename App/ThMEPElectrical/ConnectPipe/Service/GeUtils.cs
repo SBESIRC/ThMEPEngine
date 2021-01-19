@@ -140,7 +140,72 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     0.0, 0.0, 0.0, 1.0
             });
 
-            return Math.Abs(firLine.StartPoint.TransformBy(matrix).Y - secLine.StartPoint.TransformBy(matrix).Y);
+            return Math.Abs(firLine.StartPoint.TransformBy(matrix.Inverse()).Y - secLine.StartPoint.TransformBy(matrix.Inverse()).Y);
+        }
+
+        /// <summary>
+        /// 找到polyline中的最长线
+        /// </summary>
+        /// <param name="connectPolys"></param>
+        /// <returns></returns>
+        public static Dictionary<Polyline, Line> CalLongestLineByPoly(List<Polyline> connectPolys)
+        {
+            Dictionary<Polyline, Line> polyDic = new Dictionary<Polyline, Line>();
+            foreach (var poly in connectPolys)
+            {
+                List<Line> lines = new List<Line>();
+                for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+                {
+                    lines.Add(new Line(poly.GetPoint3dAt(i), poly.GetPoint3dAt(i + 1)));
+                }
+                var longestLine = lines.OrderByDescending(x => x.Length).First();
+                polyDic.Add(poly, longestLine);
+            }
+
+            return polyDic;
+        }
+
+        /// <summary>
+        /// 判断点是否在线上
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="pt"></param>
+        /// <returns></returns>
+        public static bool IsPointOnLine(Line line, Point3d pt)
+        {
+            var closetPt = line.GetClosestPointTo(pt, false);
+            return closetPt.DistanceTo(pt) < 1;
+        }
+
+        /// <summary>
+        /// 去除连接线上多余点
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static Polyline HandleConnectPolys(Polyline polyline)
+        {
+            if (polyline.NumberOfVertices <= 2)
+            {
+                return polyline;
+            }
+
+            List<Point3d> pts = new List<Point3d>() { polyline.StartPoint, polyline.EndPoint };
+            for (int i = 1; i < polyline.NumberOfVertices - 1; i++)
+            {
+                Line line = new Line(polyline.GetPoint3dAt(i - 1), polyline.GetPoint3dAt(i + 1));
+                if (line.GetClosestPointTo(polyline.GetPoint3dAt(i), true).DistanceTo(polyline.GetPoint3dAt(i)) > 1)
+                {
+                    pts.Add(polyline.GetPoint3dAt(i));
+                }
+            }
+
+            Polyline resPoly = new Polyline();
+            for (int i = 0; i < pts.Count; i++)
+            {
+                resPoly.AddVertexAt(i, pts[i].ToPoint2D(), 0, 0, 0);
+            }
+
+            return resPoly;
         }
     }
 }

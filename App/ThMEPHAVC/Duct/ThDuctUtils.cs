@@ -56,12 +56,12 @@ namespace ThMEPHVAC.Duct
 
         public static string SilencerLayerName(string modelLayer)
         {
-            return ValveLayerName(modelLayer);
+            return FlangeLayerName(modelLayer);
         }
 
         public static string HoseLayerName(string modelLayer)
         {
-            return ValveLayerName(modelLayer);
+            return FlangeLayerName(modelLayer);
         }
 
         public static string FlangeLayerName(string modelLayer)

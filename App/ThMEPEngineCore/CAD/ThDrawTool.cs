@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ThCADExtension;
 using System.Linq;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -126,6 +127,17 @@ namespace ThMEPEngineCore.CAD
                 }
             });
             return lines;
+        }
+        public static List<Line> ToLines(this Polyline polyline,double length=50.0)
+        {
+            var results = new List<Line>();
+            var newPolyline=polyline.TessellatePolylineWithArc(length);
+            var polylineSegments = new PolylineSegmentCollection(newPolyline);
+            foreach (var segment in polylineSegments)
+            {
+                results.Add(new Line(segment.StartPoint.ToPoint3d(), segment.EndPoint.ToPoint3d()));
+            }
+            return results;
         }
     }
 }

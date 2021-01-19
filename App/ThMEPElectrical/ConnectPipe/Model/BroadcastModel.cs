@@ -44,6 +44,11 @@ namespace ThMEPElectrical.ConnectPipe.Model
         /// </summary>
         public Point3d RightConnectPt { get; set; }
 
+        /// <summary>
+        /// 连接小支管
+        /// </summary>
+        public Dictionary<Point3d, List<Polyline>> ConnectInfo { get; set; }
+
         public BroadcastModel(BlockReference block)
         {
             Broadcast = block;
@@ -55,6 +60,12 @@ namespace ThMEPElectrical.ConnectPipe.Model
             TopConnectPt = topBasicPt.TransformBy(matrix);
             LeftConnectPt = leftBasicPt.TransformBy(matrix);
             RightConnectPt = rightBasicPt.TransformBy(matrix);
+
+            //初始化连接信息
+            ConnectInfo = new Dictionary<Point3d, List<Polyline>>();
+            ConnectInfo.Add(TopConnectPt, new List<Polyline>());
+            ConnectInfo.Add(LeftConnectPt, new List<Polyline>());
+            ConnectInfo.Add(RightConnectPt, new List<Polyline>());
         }
     }
 }

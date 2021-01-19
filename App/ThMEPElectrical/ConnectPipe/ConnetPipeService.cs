@@ -49,9 +49,13 @@ namespace ThMEPElectrical.ConnectPipe
             ConnectBroadcastService connectBroadcastService = new ConnectBroadcastService();
             var connectPolys = connectBroadcastService.ConnectBroadcast(plInfo, mainParkingPolysDic, otherParkingPolysDic);
 
+            //修正连管线
+            CorrectPipeConnectService correctPipeConnectService = new CorrectPipeConnectService();
+            var correctPipe = correctPipeConnectService.CorrectPipe(connectPolys);
+            
             //创建真实连管线
             CreatePipeLineService createPipeLineService = new CreatePipeLineService();
-            createPipeLineService.CreatePipe(connectPolys, broadcasts);
+            createPipeLineService.CreatePipe(correctPipe, broadcasts);
         }
 
         /// <summary>

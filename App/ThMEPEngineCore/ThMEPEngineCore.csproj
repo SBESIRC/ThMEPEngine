@@ -78,9 +78,11 @@
     <Compile Include="Engine\ThClosestoolRecognitionEngine.cs" />
     <Compile Include="Engine\ThCondensePipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
+    <Compile Include="Engine\ThExtractGeometryEngine.cs" />
     <Compile Include="Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
+    <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
@@ -203,6 +205,8 @@
     <Compile Include="LaneLine\ThLaneLineService.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
+    <Compile Include="Service\ThRoomLayerManager.cs" />
+    <Compile Include="Service\ThRoomDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
