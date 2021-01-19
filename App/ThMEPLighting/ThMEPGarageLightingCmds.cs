@@ -6,6 +6,8 @@ using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using ThMEPLighting.Common;
+using QuickGraph.Algorithms;
+using ThMEPEngineCore.LaneLine;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
@@ -15,10 +17,6 @@ using ThMEPLighting.Garage.Engine;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
-using QuickGraph;
-using QuickGraph.Algorithms;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPLighting
 {
@@ -72,10 +70,6 @@ namespace ThMEPLighting
                         if (jigRes.Status == PromptStatus.OK)
                             jigger.AllVertexes.Add(jigger.LastVertex);
                     } while (jigRes.Status == PromptStatus.OK);
-                    if (jigRes.Status == PromptStatus.Cancel)
-                    {
-                        return null;
-                    }
                     var wcsVertexes = jigger.WcsVertexes;
                     if (wcsVertexes.Count > 1)
                     {
@@ -318,58 +312,42 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THCDHL", CommandFlags.Modal)]
         public void THCDHL()
         {
-            //using (AcadDatabase acdb = AcadDatabase.Active())
-            //{
-            //    var pso = new PromptSelectionOptions()
-            //    {
-            //        MessageForAdding = "\n请选择布灯的区域框线",
-            //    };
-            //    TypedValue[] tvs = new TypedValue[]
-            //    {
-            //         new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
-            //    };
-            //    SelectionFilter sf = new SelectionFilter(tvs);
-            //    var result = Active.Editor.GetSelection(pso, sf);
-            //    if (result.Status == PromptStatus.OK)
-            //    {
-            //        var lines = new List<Line>();
-            //        result.Value.GetObjectIds().ForEach(o => lines.Add(acdb.Element<Line>(o)));
-            //        var edges = new List<STaggedEdge<ThVertex, double>>();
-            //        foreach (var line in lines)
-            //        {
-            //            var spVertex = new ThVertex
-            //            {
-            //                X = line.StartPoint.X,
-            //                Y = line.StartPoint.Y
-            //            };
-            //            var epVertex = new ThVertex
-            //            {
-            //                X = line.EndPoint.X,
-            //                Y = line.EndPoint.Y
-            //            };
-            //            var edge = new STaggedEdge<ThVertex,double>(spVertex, epVertex,line.Length);
-            //            edges.Add(edge);
-            //        }
-            //        var graph = edges.ToAdjacencyGraph<ThVertex, STaggedEdge<ThVertex, double>>();
-            //        Func<STaggedEdge<ThVertex, double>, double> edgeWeights = e => e.Tag;
-            //        ThVertex root = new ThVertex()
-            //        {
-            //            X = lines[0].StartPoint.X,
-            //            Y = lines[0].StartPoint.Y,
-            //        };
-            //        var tryGetPaths = graph.ShortestPathsDijkstra(edgeWeights, root);
-            //        // query path for given vertices
-            //        ThVertex target = new ThVertex()
-            //        {
-            //            X = lines[lines.Count - 1].StartPoint.X,
-            //            Y = lines[lines.Count - 1].StartPoint.Y,
-            //        };
-            //        IEnumerable<STaggedEdge<ThVertex, double>> path;
-            //        if (tryGetPaths(target, out path))
-            //            foreach (var edge in path)
-            //                Console.WriteLine(edge);
-            //    }
-            //}
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            using (var laneLineGraph =new ThLaneLineGraphEngine())
+            {
+                var pso = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "\n请选择布灯的区域框线",
+                };
+                TypedValue[] tvs = new TypedValue[]
+                {
+                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Line)).DxfName)
+                };
+                SelectionFilter sf = new SelectionFilter(tvs);
+                var result = Active.Editor.GetSelection(pso, sf);
+                if (result.Status == PromptStatus.OK)
+                {
+                    var lines = new DBObjectCollection();
+                    result.Value.GetObjectIds().ForEach(o => lines.Add(acdb.Element<Line>(o)));
+                    var startRes = Active.Editor.GetPoint("选择起点");
+                    laneLineGraph.BuildGraph(lines, startRes.Value);
+                    Func<ThEdge<ThVertex>, double> edgeWeights = e => e.Length;
+                    var tryGetPaths = laneLineGraph.Graph.ShortestPathsDijkstra(edgeWeights, laneLineGraph.GraphStartVertex);
+                    // query path for given vertices
+                    ThVertex target = new ThVertex((lines[lines.Count - 1] as Line).StartPoint);
+                    IEnumerable<ThEdge<ThVertex>> path;
+                    var endRes = Active.Editor.GetPoint("选择终点");
+                    if (tryGetPaths(laneLineGraph.GetVertex(endRes.Value), out path))
+                    {
+                        foreach (var edge in path)
+                        {
+                            var line = new Line(edge.Source.Position, edge.Target.Position);
+                            line.ColorIndex = 1;
+                            acdb.ModelSpace.Add(line);
+                        }
+                    }  
+                }
+            }
         }
         [CommandMethod("TIANHUACAD", "THLaneLineTest", CommandFlags.Modal)]
         public void THTest()
