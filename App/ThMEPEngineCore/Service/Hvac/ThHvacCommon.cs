@@ -108,6 +108,7 @@
         //阀块动态属性名
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY = "可见性";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT = "高度";
+        public const string BLOCK_DYNAMIC_PROPERTY_CHECK_VALVE_HEIGHT = "阀门长度";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA = "宽度或直径";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH = "宽度";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH = "长度";

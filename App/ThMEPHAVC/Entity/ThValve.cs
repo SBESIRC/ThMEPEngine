@@ -296,7 +296,7 @@ namespace ThMEPHVAC.Entity
                 ValveBlockLayer = ThDuctUtils.ValveLayerName(fanlayer),
                 ValveVisibility = ThDuctUtils.CheckValveModelName(),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA,
-                LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
+                LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_CHECK_VALVE_HEIGHT,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
                 ValvePosionType = valveposiontype,
             };
