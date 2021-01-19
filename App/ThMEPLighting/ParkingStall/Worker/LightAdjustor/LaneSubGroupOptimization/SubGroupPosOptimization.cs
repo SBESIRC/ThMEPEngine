@@ -33,6 +33,9 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
 
         private void OptimizeOneSideInfo(Polyline lanePoly, LaneParkingStallSide laneParkingStallSide)
         {
+            if (laneParkingStallSide.LightPlaceInfos.Count == 0)
+                return;
+
             OptimizeParkingStallTypeInfo(lanePoly, laneParkingStallSide.ParallelParkingStall);
             OptimizeParkingStallTypeInfo(lanePoly, laneParkingStallSide.ReverseParkingStall);
         }
@@ -44,6 +47,9 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
         /// <param name="parkingStallTypeInfo"></param>
         private void OptimizeParkingStallTypeInfo(Polyline lanePoly, ParkingStallTypeInfo parkingStallTypeInfo)
         {
+            if (parkingStallTypeInfo.LightPlaceInfos.Count == 0)
+                return;
+
             foreach (var dividerGroupInfo in parkingStallTypeInfo.parkingDividerGroupInfos)
             {
                 OptimizeParkingDividerGroupInfo(lanePoly, dividerGroupInfo);
@@ -52,6 +58,9 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
 
         private void OptimizeParkingDividerGroupInfo(Polyline lanePoly, ParkingDividerGroupInfo parkingDividerGroupInfo)
         {
+            if (parkingDividerGroupInfo.DividerLightPlaceInfos.Count == 0)
+                return;
+
             var parkingStallType = parkingDividerGroupInfo.DividerLightPlaceInfos.First().ParkingSpace_TypeInfo;
 
             if (parkingStallType == ParkingSpace_Type.Reverse_stall_Parking)

@@ -85,5 +85,15 @@ namespace ThMEPLighting
                 packageManager.LaneSubGroupOptimization();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THLaneConnect", CommandFlags.Modal)]
+        public void THLaneConnect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.LaneConnect();
+            }
+        }
     }
 }
