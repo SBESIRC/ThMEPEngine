@@ -24,6 +24,15 @@ namespace TianHua.FanSelection.UI
             this.textEdit3.Text = Model.ExhaustModel.Axial_FuelFloor;
             this.textEdit4.Text = Model.ExhaustModel.Axial_CalcAirVolum;
             Model.ExhaustModel.Final_CalcAirVolum = Model.ExhaustModel.Axial_CalcAirVolum;
+            if (Model.ExhaustModel.SpaceType.IsNull())
+            {
+                this.SpacetypeBox.SelectedIndex = 0;
+            }
+
+            else
+            {
+                this.SpacetypeBox.SelectedItem = Model.ExhaustModel.SpaceType.NullToStr();
+            }
         }
 
         private void textEdit1ValueChanged(object sender, EventArgs e)
@@ -54,7 +63,7 @@ namespace TianHua.FanSelection.UI
             Model.ExhaustModel.Axial_CalcAirVolum = this.textEdit4.Text;
             Model.ExhaustModel.Final_CalcAirVolum = Model.ExhaustModel.Axial_CalcAirVolum;
 
-            if (model.SpaceHeight.NullToDouble() < 3)
+            if (model.SpaceHeight.NullToDouble() < 3 || SpacetypeBox.Text == "单层空间")
             {
                 this.textEdit1.ReadOnly = true;
             }
@@ -63,6 +72,12 @@ namespace TianHua.FanSelection.UI
                 this.textEdit1.ReadOnly = false;
             }
             OnVolumChanged();
+        }
+
+        private void comboBoxEdit1_EditValueChanged(object sender, EventArgs e)
+        {
+            Model.ExhaustModel.SpaceType = SpacetypeBox.SelectedItem.NullToStr();
+            UpdateCalcAirVolum(Model.ExhaustModel);
         }
     }
 }
