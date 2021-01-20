@@ -165,8 +165,8 @@ namespace ThMEPWSS.Pipe.Tools
             };
             polyline.AddVertexAt(0, new Point2d(point.X, point.Y), 0.0, 0.0, 0.0);
             polyline.AddVertexAt(1, new Point2d(point.X + width, point.Y), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(2, new Point2d(point.X + width, point.Y + 175), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(3, new Point2d(point.X, point.Y + 175), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(2, new Point2d(point.X + width, point.Y + 200), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(point.X, point.Y + 200), 0.0, 0.0, 0.0);
             return polyline;
         }
         public static double GetOffset(List<Point3dCollection> dublicatedPoints, Point3d indexPipe)
@@ -390,9 +390,9 @@ namespace ThMEPWSS.Pipe.Tools
             }
             else
             {
-                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i])).Count > 0)
+                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i+2])).Count > 0)
                 {
-                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i / 3 * 3]);
+                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i]);
                 }
                 else
                 {
@@ -404,6 +404,21 @@ namespace ThMEPWSS.Pipe.Tools
                     }
                 }
             }
+            return tag;
+        }
+        public static Point3d GetTag1(Point3dCollection Pipeindex, int i,ThCADCoreNTSSpatialIndex obstacle)
+
+        {
+                Point3d tag = Point3d.Origin;                 
+                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7, Pipeindex[i+2])).Count > 0)
+                {
+                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i]);
+                }
+                else
+                {
+                    tag = Pipeindex[i];
+                }
+           
             return tag;
         }
         public static Point3d GetRadialFontPoint(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle, Point3d Fpipeindex1)

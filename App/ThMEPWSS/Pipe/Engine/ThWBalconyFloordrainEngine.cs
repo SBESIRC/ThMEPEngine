@@ -453,10 +453,20 @@ namespace ThMEPWSS.Pipe.Engine
             var points = new Point3dCollection();            
             Point3d point = new Point3d(center_spout.X, Floordrain_washing[0].Position.Y, 0);
             Point3d point1 = bboundary.ToCurve3d().GetClosestPointTo(point).Point;
+            Point3d point2 = device.ToCurve3d().GetClosestPointTo(point).Point;
             points.Add(center_spout + ThWPipeCommon.COMMONRADIUS * center_spout.GetVectorTo(point).GetNormal());
-            points.Add(point -point.DistanceTo(point1) * center_spout.GetVectorTo(point).GetNormal());
-            points.Add(point - point.DistanceTo(point1) * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
-            points.Add(Floordrain_washing[0].Position + ThWPipeCommon.COMMONRADIUS * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
+            if (center_spout.DistanceTo(Floordrain_washing[0].Position) < 1000)
+            {             
+                points.Add(point - point.DistanceTo(point1) * center_spout.GetVectorTo(point).GetNormal());
+                points.Add(point - point.DistanceTo(point1) * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
+                points.Add(Floordrain_washing[0].Position + ThWPipeCommon.COMMONRADIUS * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
+            }
+            else
+            {
+                points.Add(point - point.DistanceTo(point2) * center_spout.GetVectorTo(point).GetNormal());
+                points.Add(point - point.DistanceTo(point2) * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
+                points.Add(Floordrain_washing[0].Position + ThWPipeCommon.COMMONRADIUS * Floordrain_washing[0].Position.GetVectorTo(point).GetNormal());
+            }
             return points;
         }
         private static Point3d new_downspout(Polyline bboundary, Polyline rainpipe, List<BlockReference> Floordrain_washing, Polyline device)//新的排水管井

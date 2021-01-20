@@ -59,6 +59,13 @@ namespace ThMEPWSS.Pipe.Engine
                     Polyline curve = o.Outline as Polyline;           
                         Columns.Add(curve.WashClone());                               
                 });
+                var deviceEngineEngine = new ThDeviceRecognitionEngine();
+                deviceEngineEngine.Recognize(database, pts);
+                deviceEngineEngine.Elements.ForEach(o =>
+                {
+                    Polyline curve = o.Outline as Polyline;
+                    Columns.Add(curve.WashClone());
+                });
                 var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();               
                 RoofDeviceEngine.Recognize(database, pts);             
                 RoofDeviceFloors = RoofDeviceEngine.Rooms;

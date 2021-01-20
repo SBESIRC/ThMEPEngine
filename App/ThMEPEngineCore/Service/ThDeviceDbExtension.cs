@@ -5,16 +5,15 @@ using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
 namespace ThMEPEngineCore.Service
 {
-    public class ThInnerDoorDbExtension : ThDbExtension, IDisposable
+    public class ThDeviceDbExtension : ThDbExtension, IDisposable
     {
-        public List<Entity> InnerDoors { get; set; }
-        public ThInnerDoorDbExtension(Database db) : base(db)
+        public List<Entity> Devices { get; set; }
+        public ThDeviceDbExtension(Database db) : base(db)
         {
-            LayerFilter = ThInnerDoorLayerManager.XrefLayers(db);
-            InnerDoors = new List<Entity>();
+            LayerFilter = ThDeviceLayerManager.XrefLayers(db);
+            Devices = new List<Entity>();
         }
         public void Dispose()
         {
@@ -33,7 +32,7 @@ namespace ThMEPEngineCore.Service
                         }
                         BlockTableRecord btr = acadDatabase.Element<BlockTableRecord>(blkRef.BlockTableRecord);
                         var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        InnerDoors.AddRange(BuildElementCurves(blkRef, mcs2wcs));
+                        Devices.AddRange(BuildElementCurves(blkRef, mcs2wcs));
                     }
                 }
             }
@@ -61,18 +60,21 @@ namespace ThMEPEngineCore.Service
                                 {
                                     if (CheckLayerValid(blockObj))
                                     {
-                                        var minPt = blockObj.GeometricExtents.MinPoint;
-                                        var maxPt = blockObj.GeometricExtents.MaxPoint;
-                                        Polyline polyline = new Polyline()
+                                        if (blockObj.Bounds != null)
                                         {
-                                            Closed = true
-                                        };
-                                        polyline.AddVertexAt(0, new Point2d(minPt.X, minPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.AddVertexAt(1, new Point2d(maxPt.X, minPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.AddVertexAt(2, new Point2d(maxPt.X, maxPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.AddVertexAt(3, new Point2d(minPt.X, maxPt.Y), 0.0, 0.0, 0.0);
-                                        polyline.TransformBy(matrix);
-                                        ents.Add(polyline);
+                                            var minPt = blockObj.GeometricExtents.MinPoint;
+                                            var maxPt = blockObj.GeometricExtents.MaxPoint;
+                                            Polyline polyline = new Polyline()
+                                            {
+                                                Closed = true
+                                            };
+                                            polyline.AddVertexAt(0, new Point2d(minPt.X, minPt.Y), 0.0, 0.0, 0.0);
+                                            polyline.AddVertexAt(1, new Point2d(maxPt.X, minPt.Y), 0.0, 0.0, 0.0);
+                                            polyline.AddVertexAt(2, new Point2d(maxPt.X, maxPt.Y), 0.0, 0.0, 0.0);
+                                            polyline.AddVertexAt(3, new Point2d(minPt.X, maxPt.Y), 0.0, 0.0, 0.0);
+                                            polyline.TransformBy(matrix);
+                                            ents.Add(polyline);
+                                        }
                                     }
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
@@ -89,7 +91,7 @@ namespace ThMEPEngineCore.Service
                 }
                 return ents;
             }
-        }    
+        }
 
         public override void BuildElementTexts()
         {

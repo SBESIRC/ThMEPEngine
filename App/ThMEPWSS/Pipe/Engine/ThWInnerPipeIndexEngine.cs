@@ -354,7 +354,7 @@ namespace ThMEPWSS.Pipe.Engine
         private static Point3d GetRadialPoint(Point3d Fpipeindex,double width,Vector3d normal, ThCADCoreNTSSpatialIndex obstacle)
         {
             Point3d point = Point3d.Origin;
-            for (int j = 0; j < 6; j++)
+            for (int j = 0; j <=6; j++)
             {
                 Point3d point1 = Fpipeindex + normal * 250 * (j + 2);
                 if(normal.X<0)
@@ -400,10 +400,8 @@ namespace ThMEPWSS.Pipe.Engine
             Point3dCollection points = new Point3dCollection();
             for (int i = 0; i < nums.Count; i++)
             {
-                if (GetRadialPoint(Fpipeindex, width, normals[i], obstacle) == null)
-                {
-                   
-                        continue;          
+                if (GetRadialPoint(Fpipeindex, width, normals[i], obstacle) == Point3d.Origin)
+                {                                             
                 }
                 else
                 {

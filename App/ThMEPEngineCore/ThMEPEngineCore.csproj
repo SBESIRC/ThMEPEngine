@@ -131,6 +131,7 @@
     <Compile Include="Model\Hvac\ThIfcPipeFitting.cs" />
     <Compile Include="Model\Hvac\ThIfcPipeSegment.cs" />
     <Compile Include="Model\Hvac\ThIfcValve.cs" />
+    <Compile Include="Model\Plumbing\ThIfcDevice.cs" />
     <Compile Include="Model\Plumbing\ThIfcGravityWaterBucket.cs" />
     <Compile Include="Model\Plumbing\ThIfcInnerDoor.cs" />
     <Compile Include="Model\Plumbing\ThIfcSideEntryWaterBucket.cs" />
@@ -221,6 +222,8 @@
     <Compile Include="Service\ThClosestoolLayerManager.cs" />
     <Compile Include="Service\ThCondensePipeDbExtension.cs" />
     <Compile Include="Service\ThCondensePipeLayerManager.cs" />
+    <Compile Include="Service\ThDeviceDbExtension.cs" />
+    <Compile Include="Service\ThDeviceLayerManager.cs" />
     <Compile Include="Service\ThFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
