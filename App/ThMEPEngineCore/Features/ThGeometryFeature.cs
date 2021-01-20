@@ -1,4 +1,5 @@
-﻿using ThCADCore.NTS;
+﻿using System;
+using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using NetTopologySuite.Features;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,12 +15,17 @@ namespace ThMEPEngineCore.Features
             {
                 using (var ov = new ThCADCoreNTSFixedPrecision())
                 {
-                    var objs = new DBObjectCollection();
-                    geometry.Segments.ForEach(o=> objs.Add(o));
-                    var geo = objs.ToMultiLineString();
-                    var attributesTable = new AttributesTable(geometry.Properties);
-                    var feature = new Feature(geo, attributesTable);
-                    return feature;
+                    if(geometry.Boundary is Polyline polyline)
+                    {
+                        var geo = polyline.ToNTSLineString();
+                        var attributesTable = new AttributesTable(geometry.Properties);
+                        var feature = new Feature(geo, attributesTable);
+                        return feature;
+                    }
+                    else
+                    {
+                        throw new NotSupportedException(); 
+                    }
                 }
             }
             return null;

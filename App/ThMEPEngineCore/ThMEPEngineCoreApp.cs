@@ -362,7 +362,7 @@ namespace ThMEPEngineCore
                     o.Boundary.SetDatabaseDefaults();
                     objIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
                     var geometry = new ThGeometry();
-                    geometry.Segments = (o.Boundary as Polyline).ToLines();
+                    geometry.Boundary = o.Boundary as Polyline;
                     o.Properties.ForEach(p => geometry.Properties.Add(p.Key, p.Value));
                     geos.Add(geometry);
                 });
@@ -402,10 +402,13 @@ namespace ThMEPEngineCore
                     spaceIds.Add(acadDatabase.ModelSpace.Add(o));
                     var geometry = new ThGeometry();                    
                     geometry.Properties.Add("Category", "Space");
-                    geometry.Segments = o.ToLines();
+                    geometry.Boundary = o;
                     geos.Add(geometry);
                 });
-                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), spaceIds);
+                if(spaceIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), spaceIds);
+                }               
 
                 var doorIds = new ObjectIdList();
                 extractEngine.Doors.ForEach(o =>
@@ -415,31 +418,56 @@ namespace ThMEPEngineCore
                     doorIds.Add(acadDatabase.ModelSpace.Add(o));
                     var geometry = new ThGeometry();
                     geometry.Properties.Add("Category", "Door");
-                    geometry.Segments = o.ToLines();
+                    geometry.Boundary = o;
                     geos.Add(geometry);
                 });
-                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), doorIds);
-
+                if(doorIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), doorIds);
+                }                
+                
                 var equipIds = new ObjectIdList();
                 extractEngine.Equipments.ForEach(e =>
                 {
                     e.Value.ForEach(v =>
                     {
-                        v.ColorIndex = 2;
+                        v.ColorIndex = 3;
                         v.SetDatabaseDefaults();
                         equipIds.Add(acadDatabase.ModelSpace.Add(v));
                         var geometry = new ThGeometry();
                         geometry.Properties.Add("Category", "Equipment");
                         geometry.Properties.Add("Name", e.Key);
-                        geometry.Segments = v.ToLines();
+                        geometry.Boundary = v;
                         geos.Add(geometry);
                     });
                 });
-                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), equipIds);
+                if(equipIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), equipIds);
+                }               
+
+                var obstructIds = new ObjectIdList();
+                extractEngine.Obstructs.ForEach(o =>
+                {
+                    o.ColorIndex = 4;
+                    o.SetDatabaseDefaults();
+                    obstructIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "Obstruct");
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                });
+                if(obstructIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), obstructIds);
+                }               
 
                 // 输出GeoJson文件
                 // 线
-                var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var docPath = Active.Document.Name;
+                var fileInfo = new FileInfo(docPath);
+                //var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var path = fileInfo.Directory.FullName;
                 using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Info.geojson", Active.DocumentName))))
                 using (JsonTextWriter writer = new JsonTextWriter(geoJson)
                 {

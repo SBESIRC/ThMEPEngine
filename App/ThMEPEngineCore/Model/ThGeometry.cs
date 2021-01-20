@@ -11,10 +11,9 @@ namespace ThMEPEngineCore.Model
     {
         public Dictionary<string, object> Properties { get; set; }
 
-        public List<Line> Segments { get; set; }
+        public Entity Boundary { get; set; }
         public ThGeometry()
         {
-            Segments = new List<Line>();
             Properties = new Dictionary<string, object>();
         }
     }
