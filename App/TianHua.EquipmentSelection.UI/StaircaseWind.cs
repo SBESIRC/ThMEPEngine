@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TianHua.FanSelection.Model;
 using System.Text.RegularExpressions;
+using TianHua.Publics.BaseCode;
 
 namespace TianHua.FanSelection.UI
 {
@@ -32,6 +33,7 @@ namespace TianHua.FanSelection.UI
             CheckPanel.Controls.Clear();
             subview = new ModelValidation(Model);
             CheckPanel.Controls.Add(subview);
+            N2Value.Text = Model.N2.ToString();
 
             switch (model.Load)
             {
@@ -348,6 +350,12 @@ namespace TianHua.FanSelection.UI
             Model.StairN1 = GetN1Value();
             UpdateWithModel();
             subview.Refresh();
+        }
+
+        private void N2Value_EditValueChanged(object sender, EventArgs e)
+        {
+            Model.N2 = N2Value.Text.NullToDouble();
+            UpdateWithModel();
         }
     }
 }
