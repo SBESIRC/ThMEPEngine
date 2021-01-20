@@ -83,13 +83,7 @@ namespace ThCADExtension
         // 暖通管道设备块
         public static string HvacPipeDwgPath()
         {
-            return Path.Combine(SupportPath(), "暖通.设备.管道.dwg");
-        }
-
-        // 暖通作业模板
-        public static string HvacDwgPath()
-        {
-            return Path.Combine(SupportPath(), "暖通.作业.模板.dwg");
+            return Path.Combine(SupportPath(), "暖通图层图块.dwg");
         }
 
         // 电气烟感/温感图块

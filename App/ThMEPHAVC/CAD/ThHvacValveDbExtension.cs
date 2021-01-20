@@ -36,7 +36,7 @@ namespace ThMEPHVAC.CAD
         public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
             }
@@ -45,7 +45,7 @@ namespace ThMEPHVAC.CAD
         public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
             }
@@ -54,7 +54,7 @@ namespace ThMEPHVAC.CAD
         public static void ImportTextStyle(this Database database, string name, bool replaceIfDuplicate = false)
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.HvacPipeDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(name), replaceIfDuplicate);
             }
