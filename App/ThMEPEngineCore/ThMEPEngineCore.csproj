@@ -113,6 +113,8 @@
     <Compile Include="IO\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
     <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
+    <Compile Include="LaneLine\ThLaneLineNodingEngine.cs" />
+    <Compile Include="LaneLine\ThLaneLineUnionEngine.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierFitting.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierSegment.cs" />
     <Compile Include="Model\Electrical\ThIfcCableFitting.cs" />
@@ -279,6 +281,7 @@
     <Compile Include="Service\ThVerticalComponentBeamLinkExtension.cs" />
     <Compile Include="Service\ThWashMachineDbExtension.cs" />
     <Compile Include="Service\ThWashMachineLayerManager.cs" />
+    <Compile Include="LaneLine\ThLaneLineJoinEngine.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />

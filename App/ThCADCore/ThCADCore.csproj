@@ -42,6 +42,7 @@
     <Compile Include="NTS\ThCADCoreNTSGeExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSGeometrySmoother.cs" />
     <Compile Include="NTS\ThCADCoreNTSHatchExtension.cs" />
+    <Compile Include="NTS\ThCADCoreNTSKdTree.cs" />
     <Compile Include="NTS\ThCADCoreNTSLineExtension.cs" />
     <Compile Include="NTS\ThCADCoreNTSMatch.cs" />
     <Compile Include="NTS\ThCADCoreNTSMPolygonExtension.cs" />
