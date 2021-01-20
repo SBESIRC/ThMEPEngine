@@ -84,6 +84,7 @@
             this.OnGound = new System.Windows.Forms.RadioButton();
             this.label5 = new System.Windows.Forms.Label();
             this.L3 = new DevExpress.XtraEditors.TextEdit();
+            this.N2Value = new DevExpress.XtraEditors.TextEdit();
             this.L1 = new DevExpress.XtraEditors.TextEdit();
             this.Lj = new DevExpress.XtraEditors.TextEdit();
             this.label14 = new System.Windows.Forms.Label();
@@ -127,6 +128,7 @@
             this.simpleLabelItem3 = new DevExpress.XtraLayout.SimpleLabelItem();
             this.simpleLabelItem4 = new DevExpress.XtraLayout.SimpleLabelItem();
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.xtraTabControl1)).BeginInit();
@@ -161,6 +163,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.panelControl1)).BeginInit();
             this.panelControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.L3.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.N2Value.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.L1.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Lj.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layerCount.Properties)).BeginInit();
@@ -196,6 +199,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.simpleLabelItem3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.simpleLabelItem4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
             this.SuspendLayout();
             // 
             // layoutControl1
@@ -210,6 +214,7 @@
             this.layoutControl1.Controls.Add(this.panelControl2);
             this.layoutControl1.Controls.Add(this.panelControl1);
             this.layoutControl1.Controls.Add(this.L3);
+            this.layoutControl1.Controls.Add(this.N2Value);
             this.layoutControl1.Controls.Add(this.L1);
             this.layoutControl1.Controls.Add(this.Lj);
             this.layoutControl1.Controls.Add(this.label14);
@@ -674,9 +679,9 @@
             // 
             // MoveDown
             // 
-            this.MoveDown.Location = new System.Drawing.Point(357, 180);
+            this.MoveDown.Location = new System.Drawing.Point(367, 180);
             this.MoveDown.Name = "MoveDown";
-            this.MoveDown.Size = new System.Drawing.Size(31, 22);
+            this.MoveDown.Size = new System.Drawing.Size(21, 22);
             this.MoveDown.StyleController = this.layoutControl1;
             this.MoveDown.TabIndex = 42;
             this.MoveDown.Text = "∨";
@@ -684,9 +689,9 @@
             // 
             // MoveUp
             // 
-            this.MoveUp.Location = new System.Drawing.Point(322, 180);
+            this.MoveUp.Location = new System.Drawing.Point(342, 180);
             this.MoveUp.Name = "MoveUp";
-            this.MoveUp.Size = new System.Drawing.Size(31, 22);
+            this.MoveUp.Size = new System.Drawing.Size(21, 22);
             this.MoveUp.StyleController = this.layoutControl1;
             this.MoveUp.TabIndex = 41;
             this.MoveUp.Text = "∧";
@@ -694,9 +699,9 @@
             // 
             // Delete
             // 
-            this.Delete.Location = new System.Drawing.Point(288, 180);
+            this.Delete.Location = new System.Drawing.Point(318, 180);
             this.Delete.Name = "Delete";
-            this.Delete.Size = new System.Drawing.Size(30, 22);
+            this.Delete.Size = new System.Drawing.Size(20, 22);
             this.Delete.StyleController = this.layoutControl1;
             this.Delete.TabIndex = 40;
             this.Delete.Text = "-";
@@ -704,9 +709,9 @@
             // 
             // Add
             // 
-            this.Add.Location = new System.Drawing.Point(254, 180);
+            this.Add.Location = new System.Drawing.Point(294, 180);
             this.Add.Name = "Add";
-            this.Add.Size = new System.Drawing.Size(30, 22);
+            this.Add.Size = new System.Drawing.Size(20, 22);
             this.Add.StyleController = this.layoutControl1;
             this.Add.TabIndex = 39;
             this.Add.Text = "+";
@@ -818,6 +823,20 @@
             this.L3.StyleController = this.layoutControl1;
             this.L3.TabIndex = 35;
             // 
+            // N2Value
+            // 
+            this.N2Value.Location = new System.Drawing.Point(240, 180);
+            this.N2Value.MaximumSize = new System.Drawing.Size(35, 0);
+            this.N2Value.Name = "N2Value";
+            this.N2Value.Properties.BorderStyle = DevExpress.XtraEditors.Controls.BorderStyles.Simple;
+            this.N2Value.Properties.Mask.EditMask = "[1-9][0-9]{0,2}";
+            this.N2Value.Properties.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
+            this.N2Value.Properties.Mask.ShowPlaceHolders = false;
+            this.N2Value.Size = new System.Drawing.Size(35, 20);
+            this.N2Value.StyleController = this.layoutControl1;
+            this.N2Value.TabIndex = 34;
+            this.N2Value.EditValueChanged += new System.EventHandler(this.N2Value_EditValueChanged);
+            // 
             // L1
             // 
             this.L1.Location = new System.Drawing.Point(107, 386);
@@ -871,9 +890,10 @@
             this.label7.Font = new System.Drawing.Font("宋体", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label7.Location = new System.Drawing.Point(12, 180);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(238, 22);
+            this.label7.Size = new System.Drawing.Size(122, 22);
             this.label7.TabIndex = 18;
             this.label7.Text = "疏散门（前室）";
+            this.label7.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             // 
             // layerCount
             // 
@@ -963,7 +983,8 @@
             this.simpleLabelItem2,
             this.simpleLabelItem3,
             this.simpleLabelItem4,
-            this.layoutControlItem1});
+            this.layoutControlItem1,
+            this.layoutControlItem2});
             this.layoutControlGroup1.Name = "Root";
             this.layoutControlGroup1.Size = new System.Drawing.Size(400, 615);
             this.layoutControlGroup1.TextVisible = false;
@@ -1034,7 +1055,7 @@
             this.layoutControlItem15.Control = this.label7;
             this.layoutControlItem15.Location = new System.Drawing.Point(0, 168);
             this.layoutControlItem15.Name = "layoutControlItem15";
-            this.layoutControlItem15.Size = new System.Drawing.Size(242, 26);
+            this.layoutControlItem15.Size = new System.Drawing.Size(126, 26);
             this.layoutControlItem15.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem15.TextVisible = false;
             // 
@@ -1158,36 +1179,36 @@
             // layoutControlItem12
             // 
             this.layoutControlItem12.Control = this.Add;
-            this.layoutControlItem12.Location = new System.Drawing.Point(242, 168);
+            this.layoutControlItem12.Location = new System.Drawing.Point(282, 168);
             this.layoutControlItem12.Name = "layoutControlItem12";
-            this.layoutControlItem12.Size = new System.Drawing.Size(34, 26);
+            this.layoutControlItem12.Size = new System.Drawing.Size(24, 26);
             this.layoutControlItem12.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem12.TextVisible = false;
             // 
             // layoutControlItem13
             // 
             this.layoutControlItem13.Control = this.Delete;
-            this.layoutControlItem13.Location = new System.Drawing.Point(276, 168);
+            this.layoutControlItem13.Location = new System.Drawing.Point(306, 168);
             this.layoutControlItem13.Name = "layoutControlItem13";
-            this.layoutControlItem13.Size = new System.Drawing.Size(34, 26);
+            this.layoutControlItem13.Size = new System.Drawing.Size(24, 26);
             this.layoutControlItem13.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem13.TextVisible = false;
             // 
             // layoutControlItem14
             // 
             this.layoutControlItem14.Control = this.MoveUp;
-            this.layoutControlItem14.Location = new System.Drawing.Point(310, 168);
+            this.layoutControlItem14.Location = new System.Drawing.Point(330, 168);
             this.layoutControlItem14.Name = "layoutControlItem14";
-            this.layoutControlItem14.Size = new System.Drawing.Size(35, 26);
+            this.layoutControlItem14.Size = new System.Drawing.Size(25, 26);
             this.layoutControlItem14.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem14.TextVisible = false;
             // 
             // layoutControlItem16
             // 
             this.layoutControlItem16.Control = this.MoveDown;
-            this.layoutControlItem16.Location = new System.Drawing.Point(345, 168);
+            this.layoutControlItem16.Location = new System.Drawing.Point(355, 168);
             this.layoutControlItem16.Name = "layoutControlItem16";
-            this.layoutControlItem16.Size = new System.Drawing.Size(35, 26);
+            this.layoutControlItem16.Size = new System.Drawing.Size(25, 26);
             this.layoutControlItem16.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem16.TextVisible = false;
             // 
@@ -1209,7 +1230,7 @@
             this.simpleLabelItem1.Name = "simpleLabelItem1";
             this.simpleLabelItem1.Size = new System.Drawing.Size(380, 18);
             this.simpleLabelItem1.Text = "计算结果";
-            this.simpleLabelItem1.TextSize = new System.Drawing.Size(84, 14);
+            this.simpleLabelItem1.TextSize = new System.Drawing.Size(99, 14);
             // 
             // simpleLabelItem2
             // 
@@ -1220,7 +1241,7 @@
             this.simpleLabelItem2.Name = "simpleLabelItem2";
             this.simpleLabelItem2.Size = new System.Drawing.Size(380, 18);
             this.simpleLabelItem2.Text = "空间属性";
-            this.simpleLabelItem2.TextSize = new System.Drawing.Size(84, 14);
+            this.simpleLabelItem2.TextSize = new System.Drawing.Size(99, 14);
             // 
             // simpleLabelItem3
             // 
@@ -1229,7 +1250,7 @@
             this.simpleLabelItem3.Name = "simpleLabelItem3";
             this.simpleLabelItem3.Size = new System.Drawing.Size(380, 18);
             this.simpleLabelItem3.Text = "系统负担高度：";
-            this.simpleLabelItem3.TextSize = new System.Drawing.Size(84, 14);
+            this.simpleLabelItem3.TextSize = new System.Drawing.Size(99, 14);
             // 
             // simpleLabelItem4
             // 
@@ -1240,7 +1261,7 @@
             this.simpleLabelItem4.Name = "simpleLabelItem4";
             this.simpleLabelItem4.Size = new System.Drawing.Size(380, 18);
             this.simpleLabelItem4.Text = "基本信息";
-            this.simpleLabelItem4.TextSize = new System.Drawing.Size(84, 14);
+            this.simpleLabelItem4.TextSize = new System.Drawing.Size(99, 14);
             // 
             // layoutControlItem1
             // 
@@ -1250,6 +1271,16 @@
             this.layoutControlItem1.Size = new System.Drawing.Size(380, 136);
             this.layoutControlItem1.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem1.TextVisible = false;
+            // 
+            // layoutControlItem2
+            // 
+            this.layoutControlItem2.Control = this.N2Value;
+            this.layoutControlItem2.CustomizationFormText = "漏风疏散门数量N2";
+            this.layoutControlItem2.Location = new System.Drawing.Point(126, 168);
+            this.layoutControlItem2.Name = "layoutControlItem2";
+            this.layoutControlItem2.Size = new System.Drawing.Size(156, 26);
+            this.layoutControlItem2.Text = "漏风疏散门数量N2";
+            this.layoutControlItem2.TextSize = new System.Drawing.Size(99, 14);
             // 
             // StaircaseNoWind
             // 
@@ -1295,6 +1326,7 @@
             this.panelControl1.ResumeLayout(false);
             this.panelControl1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.L3.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.N2Value.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.L1.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Lj.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layerCount.Properties)).EndInit();
@@ -1330,6 +1362,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.simpleLabelItem3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.simpleLabelItem4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
             this.ResumeLayout(false);
 
         }
@@ -1435,5 +1468,7 @@
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit repositoryItemTextEdit11;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn15;
         private DevExpress.XtraEditors.Repository.RepositoryItemTextEdit repositoryItemTextEdit12;
+        private DevExpress.XtraEditors.TextEdit N2Value;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem2;
     }
 }
