@@ -94,6 +94,7 @@ namespace TianHua.FanSelection.UI
 
         private void lowLoad_CheckedChanged(object sender, EventArgs e)
         {
+            Model.StairN1 = GetN1Value();
             if (lowLoad.Checked)
             {
                 Model.Load = StaircaseAirModel.LoadHeight.LoadHeightLow;
@@ -105,6 +106,7 @@ namespace TianHua.FanSelection.UI
 
         private void middleLoad_CheckedChanged(object sender, EventArgs e)
         {
+            Model.StairN1 = GetN1Value();
             if (middleLoad.Checked)
             {
                 Model.Load = StaircaseAirModel.LoadHeight.LoadHeightMiddle;
@@ -114,6 +116,7 @@ namespace TianHua.FanSelection.UI
 
         private void highLoad_CheckedChanged(object sender, EventArgs e)
         {
+            Model.StairN1 = GetN1Value();
             if (highLoad.Checked)
             {
                 Model.Load = StaircaseAirModel.LoadHeight.LoadHeightHigh;
