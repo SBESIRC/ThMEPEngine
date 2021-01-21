@@ -2,6 +2,7 @@
 using Linq2Acad;
 using ThCADCore.NTS;
 using System.Linq;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
@@ -252,6 +253,30 @@ namespace ThMEPEngineCore
                     acadDatabase.ModelSpace.Add(line);
                     line.SetDatabaseDefaults();
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THFRAME", CommandFlags.Modal)]
+        public void ThFrame()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+                objs.Cast<Polyline>().Select(o => ThMEPFrameService.Normalize(o)).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o);
+                    o.SetDatabaseDefaults();
+                });
             }
         }
     }

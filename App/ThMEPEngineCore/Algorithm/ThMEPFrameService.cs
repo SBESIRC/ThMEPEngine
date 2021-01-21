@@ -4,7 +4,6 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -24,9 +23,8 @@ namespace ThMEPEngineCore.Algorithm
             var clone = frame.Clone() as Polyline;
             clone.Closed = true;
 
-            // 处理共线和自交的情况
-            var results = clone.PreprocessAsPolygon();
-            return results.Cast<Polyline>().OrderByDescending(o => o.Area).First();
+            // 处理各种“Invalid Polygon“的情况
+            return clone.MakeValid().Cast<Polyline>().OrderByDescending(o => o.Area).First();
         }
 
         public DBObjectCollection RegionsFromFrame(Polyline frame)
