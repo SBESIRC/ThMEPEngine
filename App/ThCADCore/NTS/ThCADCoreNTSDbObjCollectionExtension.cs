@@ -83,26 +83,6 @@ namespace ThCADCore.NTS
             return objs;
         }
 
-        public static DBObjectCollection UnionLineStrings(this DBObjectCollection curves)
-        {
-            // Unioning a set of LineStrings has the effect of noding and dissolving the input linework. 
-            // In this context "fully noded" means that there will be an endpoint or 
-            // node in the result for every endpoint or line segment crossing in the input. 
-            // "Dissolved" means that any duplicate (i.e. coincident) line segments or 
-            // portions of line segments will be reduced to a single line segment in the result.
-            var results = UnaryUnionOp.Union(curves.ToNTSLineStrings());
-            if (results is MultiLineString geometries)
-            {
-                var objs = new DBObjectCollection();
-                geometries.ToDbPolylines().ForEach(o => objs.Add(o));
-                return objs;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
         public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
         {
             var geometry = curves.Combine();

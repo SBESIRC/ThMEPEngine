@@ -810,29 +810,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThPolyEqual", CommandFlags.Modal)]
-        public void ThPolyEqual()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-
-                var plFirst = pline.Clone() as Polyline;
-                var plSecond = pline.Clone() as Polyline;
-
-                if (plFirst.Equals(plSecond))
-                {
-                    int i = 0;
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThSpatialIndex", CommandFlags.Modal)]
         public void ThSpatialIndex()
         {
