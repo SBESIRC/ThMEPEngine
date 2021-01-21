@@ -17,6 +17,10 @@ namespace ThMEPEngineCore.CAD
 
             // 首先获取第一个分割符“：”
             int index = hyperlink.IndexOf('：');
+            if (index == -1)
+            {
+                return propertySet;
+            }
             propertySet.Section = hyperlink.Substring(0, index);
 
             // 按分割符“__”分割属性
@@ -91,6 +95,23 @@ namespace ThMEPEngineCore.CAD
             {
                 return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
                     && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+            }
+        }
+        /// <summary>
+        /// 是否为结构梁
+        /// </summary>
+        public bool IsDoor
+        {
+            get
+            {
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_DOOR;
+                }
+                else
+                {
+                    return false;
+                }                
             }
         }
     }

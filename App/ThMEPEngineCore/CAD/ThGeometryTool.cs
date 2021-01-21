@@ -221,6 +221,15 @@ namespace ThMEPEngineCore.CAD
             obb.TransformBy(counterClockwiseMat);
             return obb;
         }
+        public static Polyline TextOBB(this MText mText)
+        {
+            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * mText.Rotation, Vector3d.ZAxis, mText.Location);
+            var newText = mText.GetTransformedCopy(clockwiseMat) as MText;
+            Polyline obb = newText.GeometricExtents.ToRectangle();
+            Matrix3d counterClockwiseMat = Matrix3d.Rotation(mText.Rotation, Vector3d.ZAxis, mText.Location);
+            obb.TransformBy(counterClockwiseMat);
+            return obb;
+        }
         public static Point3dCollection EntityVertices(this Entity entity)
         {
             // 暂不支持弧

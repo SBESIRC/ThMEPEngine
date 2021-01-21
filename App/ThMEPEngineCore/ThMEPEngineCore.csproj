@@ -70,6 +70,7 @@
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
+    <Compile Include="Engine\ThDoorRecognitionEngine.cs" />
     <Compile Include="Engine\ThArchitectureWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBasinRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
@@ -208,6 +209,10 @@
     <Compile Include="LaneLine\ThLaneLineService.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
+    <Compile Include="Service\ThDoorMarkDbExtension.cs" />
+    <Compile Include="Service\ThMatchDoorStoneService.cs" />
+    <Compile Include="Service\ThDoorStoneDbExtension.cs" />
+    <Compile Include="Service\ThBuildDoorService.cs" />
     <Compile Include="Service\ThRoomLayerManager.cs" />
     <Compile Include="Service\ThRoomDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallDbExtension.cs" />

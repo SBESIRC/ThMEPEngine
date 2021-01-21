@@ -341,8 +341,8 @@ namespace ThMEPEngineCore
             dbText.Height = 200;
             return dbText;
         }
-        [CommandMethod("TIANHUACAD", "ThExportGeo", CommandFlags.Modal)]
-        public void ThExportGeo()
+        [CommandMethod("TIANHUACAD", "ThExtractSpace", CommandFlags.Modal)]
+        public void ThExtractSpace()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var exportEngine = new ThGemometryExportEngine())
@@ -479,6 +479,27 @@ namespace ThMEPEngineCore
                     var geoJsonWriter = new ThGeometryJsonWriter();
                     geoJsonWriter.Write(geos, writer);
                 }
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THExtractDoor", CommandFlags.Modal)]
+        public void THExtractDoor()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var doorEngine = new ThDoorRecognitionEngine(1.0))
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                doorEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                doorEngine.Elements.ForEach(o =>
+                {
+                    o.Outline.ColorIndex = 4;
+                    o.Outline.SetDatabaseDefaults();
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                });
             }
         }
     }
