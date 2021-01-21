@@ -62,6 +62,12 @@
     <Compile Include="CAD\ElectricalUIDbExtension.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
+    <Compile Include="fmBasementLighting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmBasementLighting.Designer.cs">
+      <DependentUpon>fmBasementLighting.cs</DependentUpon>
+    </Compile>
     <Compile Include="fmBlockConvert.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +82,9 @@
     </Compile>
     <Compile Include="FuncControlStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="fmBasementLighting.resx">
+      <DependentUpon>fmBasementLighting.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="fmBlockConvert.resx">
       <DependentUpon>fmBlockConvert.cs</DependentUpon>
     </EmbeddedResource>
