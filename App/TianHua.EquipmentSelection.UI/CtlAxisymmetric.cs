@@ -63,13 +63,18 @@ namespace TianHua.FanSelection.UI
             Model.ExhaustModel.Axial_CalcAirVolum = this.textEdit4.Text;
             Model.ExhaustModel.Final_CalcAirVolum = Model.ExhaustModel.Axial_CalcAirVolum;
 
-            if (model.SpaceHeight.NullToDouble() < 3 || SpacetypeBox.Text == "单层空间")
+            if (model.SpaceHeight.NullToDouble() <= 3)
             {
                 this.textEdit1.ReadOnly = true;
+                this.SpacetypeBox.ReadOnly = true;
             }
             else
             {
-                this.textEdit1.ReadOnly = false;
+                this.SpacetypeBox.ReadOnly = false;
+                if (SpacetypeBox.Text == "多层空间")
+                {
+                    this.textEdit1.ReadOnly = false;
+                }
             }
             OnVolumChanged();
         }
