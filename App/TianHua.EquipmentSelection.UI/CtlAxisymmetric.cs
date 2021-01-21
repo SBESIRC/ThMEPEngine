@@ -75,6 +75,10 @@ namespace TianHua.FanSelection.UI
                 {
                     this.textEdit1.ReadOnly = false;
                 }
+                else
+                {
+                    this.textEdit1.ReadOnly = true;
+                }
             }
             OnVolumChanged();
         }
