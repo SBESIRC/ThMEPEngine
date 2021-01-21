@@ -23,11 +23,14 @@ namespace ThMEPEngineCore.LaneLine
                     var tag = Guid.NewGuid().ToString();
                     var buffer = o.ToNTSLineString().Buffer(1.0) as Polygon;
                     var objs = index.SelectCrossingPolygon(buffer.Shell.ToDbPolyline());
-                    objs.Cast<Line>().Where(l =>
+                    if (objs.Count > 1)
                     {
-                        var angle = o.LineDirection().GetAngleTo(l.LineDirection());
-                        return (angle <= Math.PI / 180.0 || angle >= Math.PI - Math.PI / 180.0);
-                    }).ForEach(l => index.AddTag(l, tag));
+                        var lines = objs.Cast<Line>().Where(l => IsParallel(o, l));
+                        if (lines.Count() > 1)
+                        {
+                            lines.ForEach(l => index.AddTag(l, tag));
+                        }
+                    }
                 }
             });
             var results = new DBObjectCollection();
@@ -44,6 +47,12 @@ namespace ThMEPEngineCore.LaneLine
                 }
             }
             return results;
+        }
+
+        private static bool IsParallel(Line line1, Line line2)
+        {
+            var angle = line1.LineDirection().GetAngleTo(line2.LineDirection());
+            return (angle <= Math.PI / 180.0 || angle >= Math.PI - Math.PI / 180.0);
         }
 
         private static Curve MergeLines(List<Line> lines)
