@@ -12,6 +12,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Command
 {
@@ -50,7 +51,8 @@ namespace ThMEPElectrical.Command
                 foreach (var frameId in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
-                    LoadLaneLines(acadDatabase.Database, frame).Cast<Entity>().ForEach(o =>
+                    var normalizedFrame = ThMEPFrameService.Normalize(frame);
+                    LoadLaneLines(acadDatabase.Database, normalizedFrame).Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
