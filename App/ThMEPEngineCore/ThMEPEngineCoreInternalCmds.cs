@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPEngineCore
 {
@@ -223,6 +224,34 @@ namespace ThMEPEngineCore
                 }
                 acadDatabase.ModelSpace.Add(pline);
                 pline.SetDatabaseDefaults();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THLANELINECLEAN", CommandFlags.Modal)]
+        public void ThLaneLineClean()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                var lines = ThLaneLineNodingEngine.Noding(objs);
+                lines = ThLaneLineUnionEngine.Union(lines);
+                lines = ThLaneLineJoinEngine.Join(lines);
+                foreach (Line line in lines)
+                {
+                    acadDatabase.ModelSpace.Add(line);
+                    line.SetDatabaseDefaults();
+                }
             }
         }
     }

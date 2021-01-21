@@ -1,9 +1,12 @@
 ﻿using System;
 using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPEngineCore.LaneLine
 {
@@ -11,8 +14,22 @@ namespace ThMEPEngineCore.LaneLine
     {
         public static DBObjectCollection Noding(DBObjectCollection curves)
         {
+            var results = new List<Line>();
             var objs = ExplodeCurves(curves);
-            return objs.ToCollection().ToNTSNodedLineStrings().ToDbCollection();
+            var geometry = objs.ToCollection().ToNTSNodedLineStrings();
+            if (geometry is LineString line)
+            {
+                results.Add(line.ToDbline());
+            }
+            else if (geometry is MultiLineString lines)
+            {
+                results.AddRange(lines.Geometries.Cast<LineString>().Select(o => o.ToDbline()));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return results.ToCollection();
         }
 
         private static List<Curve> ExplodeCurves(DBObjectCollection curves)

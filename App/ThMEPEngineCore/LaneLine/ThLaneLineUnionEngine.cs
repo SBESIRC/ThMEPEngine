@@ -55,7 +55,7 @@ namespace ThMEPEngineCore.LaneLine
             return (angle <= Math.PI / 180.0 || angle >= Math.PI - Math.PI / 180.0);
         }
 
-        private static Curve MergeLines(List<Line> lines)
+        private static Line MergeLines(List<Line> lines)
         {
             var geometries = new List<Geometry>();
             lines.Cast<Line>().ForEach(o => geometries.Add(o.ToNTSGeometry().Buffer(1.0)));
@@ -72,7 +72,7 @@ namespace ThMEPEngineCore.LaneLine
             }
         }
 
-        private static Curve CenterLine(Polygon polygon)
+        private static Line CenterLine(Polygon polygon)
         {
             var rectangle = MinimumDiameter.GetMinimumRectangle(polygon) as Polygon;
             var shell = rectangle.Shell.ToDbPolyline();
