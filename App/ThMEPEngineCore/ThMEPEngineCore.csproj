@@ -287,6 +287,7 @@
     <Compile Include="Service\ThWashMachineDbExtension.cs" />
     <Compile Include="Service\ThWashMachineLayerManager.cs" />
     <Compile Include="LaneLine\ThLaneLineJoinEngine.cs" />
+    <Compile Include="Algorithm\ThMEPCollisionDetector.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
