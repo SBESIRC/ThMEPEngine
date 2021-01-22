@@ -18,15 +18,9 @@ namespace ThCADCore.NTS
             return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection();
         }
 
-        /// <summary>
-        /// 支持MPolygon的数据格式
-        /// </summary>
-        /// <param name="polygon"></param>
-        /// <param name="curves"></param>
-        /// <returns></returns>
         public static DBObjectCollection DifferenceMP(this AcPolygon polygon, DBObjectCollection curves)
         {
-            return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDBCollectionMP();
+            return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection(true);
         }
 
         public static DBObjectCollection Intersection(this AcPolygon polygon, DBObjectCollection curves)
@@ -71,11 +65,6 @@ namespace ThCADCore.NTS
             return Centroid.GetCentroid(polygon.ToNTSPolygon()).ToAcGePoint3d();
         }
 
-        /// <summary>
-        /// 处理无效的多边形
-        /// </summary>
-        /// <param name="polygon"></param>
-        /// <returns></returns>
         public static DBObjectCollection MakeValid(this AcPolygon polygon)
         {
             // zero-width buffer trick:

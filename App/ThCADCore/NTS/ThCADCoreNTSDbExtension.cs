@@ -122,7 +122,7 @@ namespace ThCADCore.NTS
             return plines;
         }
 
-        public static List<DBObject> ToDbObjects(this Geometry geometry)
+        public static List<DBObject> ToDbObjects(this Geometry geometry, bool keepHoles = false)
         {
             var objs = new List<DBObject>();
             if (geometry.IsEmpty)
@@ -139,68 +139,28 @@ namespace ThCADCore.NTS
             }
             else if (geometry is Polygon polygon)
             {
-                objs.AddRange(polygon.ToDbPolylines());
+                if (keepHoles)
+                {
+                    objs.Add(polygon.ToDbMPolygon());
+                }
+                else
+                {
+                    objs.AddRange(polygon.ToDbPolylines());
+                }
             }
             else if (geometry is MultiLineString lineStrings)
             {
-                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
             }
             else if (geometry is MultiPolygon polygons)
             {
-                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
             }
             else if (geometry is GeometryCollection geometries)
             {
-                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
             }
             else if (geometry is Point point) 
-            {
-                objs.Add(point.ToDbPoint());
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
-        }
-
-        /// <summary>
-        /// MPolygon数据格式流转
-        /// </summary>
-        /// <param name="geometry"></param>
-        /// <returns></returns>
-        public static List<DBObject> ToDbObjectsMP(this Geometry geometry)
-        {
-            var objs = new List<DBObject>();
-            if (geometry.IsEmpty)
-            {
-                return objs;
-            }
-            if (geometry is LineString lineString)
-            {
-                objs.Add(lineString.ToDbPolyline());
-            }
-            else if (geometry is LinearRing linearRing)
-            {
-                objs.Add(linearRing.ToDbPolyline());
-            }
-            else if (geometry is Polygon polygon)
-            {
-                objs.Add(polygon.ToDbMPolygon());
-            }
-            else if (geometry is MultiLineString lineStrings)
-            {
-                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
-            }
-            else if (geometry is MultiPolygon polygons)
-            {
-                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
-            }
-            else if (geometry is GeometryCollection geometries)
-            {
-                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
-            }
-            else if (geometry is Point point)
             {
                 objs.Add(point.ToDbPoint());
             }

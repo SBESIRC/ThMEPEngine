@@ -80,17 +80,7 @@ namespace ThCADCore.NTS
             return GeometryCombiner.Combine(geometries);
         }
 
-        /// <summary>
-        /// 支持MPolygon 数据格式的流转
-        /// </summary>
-        /// <param name="geometry"></param>
-        /// <returns></returns>
-        public static DBObjectCollection ToDBCollectionMP(this Geometry geometry)
-        {
-            return geometry.ToDbObjectsMP().ToCollection<DBObject>();
-        }
-
-        public static DBObjectCollection ToDbCollection(this Geometry geometry)
+        public static DBObjectCollection ToDbCollection(this Geometry geometry, bool keepHoles = false)
         {
             return geometry.ToDbObjects().ToCollection<DBObject>();
         }
