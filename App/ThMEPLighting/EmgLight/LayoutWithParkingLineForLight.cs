@@ -106,7 +106,7 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
-                bool debug = true;
+                bool debug = false;
 
                 ////找出平均的一边. -1:no side 0:left 1:right.
                 int uniformSide = FindUniformDistributionSide(layoutServer, lane, out var columnDistList);
