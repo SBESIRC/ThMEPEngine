@@ -26,8 +26,16 @@ namespace ThMEPHVAC.CAD
                 Active.Database.ImportValve(blockName);
                 var objId = Active.Database.InsertValve(blockName, layerName);
                 objId.SetValveWidth(ValveModel.Width, ValveModel.WidthPropertyName);
-                objId.SetValveHeight(ValveModel.Length, ValveModel.LengthPropertyName);
                 objId.SetValveModel(ValveModel.ValveVisibility);
+                switch (ValveModel.ValveBlockName)
+                {
+                    case ThHvacCommon.SILENCER_BLOCK_NAME:
+                        objId.SetValveTextHeight(250, ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT);
+                        break;
+                    default:
+                        objId.SetValveHeight(ValveModel.Length, ValveModel.LengthPropertyName);
+                        break;
+                }
 
                 var blockRef = acadDatabase.Element<BlockReference>(objId, true);
                 blockRef.TransformBy(ValveModel.Marix);

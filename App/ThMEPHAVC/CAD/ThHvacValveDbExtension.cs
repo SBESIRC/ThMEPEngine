@@ -99,7 +99,20 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public static Point3d GetValveBasePoint(this ObjectId obj)
+        public static void SetValveTextHeight(this ObjectId obj, double height, string textheightproperty)
+        {
+            var dynamicProperties = obj.GetDynProperties();
+            if (dynamicProperties.Contains(textheightproperty))
+            {
+                dynamicProperties.SetValue(textheightproperty, height);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static Point3d GetValveBasePoint(this ObjectId obj) 
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {

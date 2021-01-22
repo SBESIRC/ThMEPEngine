@@ -46,10 +46,20 @@ namespace ThMEPHVAC.Entity
             Matrix3d rotation = Matrix3d.Identity;
             if (ValveBlockName == ThDuctUtils.FireValveBlockName())
             {
-                // 为了保持文字方向朝上,
+                // 为了保持防火阀文字方向朝上,
                 // 若管道中心线处于三四象限（180，360]，则补偿阀的旋转角度，即旋转180度
                 // 若换算到管道中心线的法向方向，则其处于二三象限（90,270]时需要补偿阀的旋转
                 if ((RotationAngle > 0.5 * Math.PI && RotationAngle <= 1.5 * Math.PI))
+                {
+                    rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                }
+            }
+            else if (ValveBlockName == ThDuctUtils.SilencerBlockName())
+            {
+                // 为了保持消声器文字方向朝上,
+                // 若管道中心线处于二三象限（90，270]，则补偿阀的旋转角度，即旋转180度
+                // 若换算到管道中心线的法向方向，则其处于一四象限（0,180]时需要补偿阀的旋转
+                if ((RotationAngle > 0 && RotationAngle <= Math.PI))
                 {
                     rotation = Matrix3d.Rotation(Math.PI, Vector3d.ZAxis, Point3d.Origin);
                 }
@@ -243,7 +253,7 @@ namespace ThMEPHVAC.Entity
                 ValvePosition = Parameters.GroupInsertPoint,
                 ValveBlockName = ThHvacCommon.SILENCER_BLOCK_NAME,
                 ValveBlockLayer = ThDuctUtils.SilencerLayerName(fanlayer),
-                ValveVisibility = "",
+                ValveVisibility = ThDuctUtils.SilencerModelName(),
                 WidthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH,
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,

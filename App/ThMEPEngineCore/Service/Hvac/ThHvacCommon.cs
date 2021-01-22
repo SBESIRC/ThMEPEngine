@@ -112,5 +112,6 @@
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTHDIA = "宽度或直径";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH = "宽度";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH = "长度";
+        public const string BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT = "字高";
     }
 }

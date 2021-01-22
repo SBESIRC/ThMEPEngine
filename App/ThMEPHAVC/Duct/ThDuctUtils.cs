@@ -99,6 +99,11 @@ namespace ThMEPHVAC.Duct
             return ThHvacCommon.FILEVALVE_BLOCK_NAME;
         }
 
+        public static string SilencerBlockName()
+        {
+            return ThHvacCommon.SILENCER_BLOCK_NAME;
+        }
+
         public static string FireValveModelName(string scenario)
         {
             switch (scenario)
@@ -116,6 +121,11 @@ namespace ThMEPHVAC.Duct
         public static string CheckValveModelName()
         {
             return "风管止回阀";
+        }
+
+        public static string SilencerModelName()
+        {
+            return "ZP100";
         }
 
         public static string ElectricValveModelName()
