@@ -160,8 +160,7 @@ namespace ThMEPEngineCore.Engine
             using (var spaceBoundaryDbExtension = new ThSpaceBoundaryRecognition(database))
             {
                 spaceBoundaryDbExtension.BuildElementCurves();
-                List<Curve> curves = new List<Curve>();
-                
+                List<Curve> curves = new List<Curve>();             
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();

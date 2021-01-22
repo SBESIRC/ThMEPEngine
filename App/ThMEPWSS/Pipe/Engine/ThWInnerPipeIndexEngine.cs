@@ -309,7 +309,7 @@ namespace ThMEPWSS.Pipe.Engine
                 {  
                     var points= new Point3dCollection();
                     List<Vector3d> normals = new List<Vector3d>();
-                    for (int j = 0; j < 24; j++)
+                    for (int j = 0; j < 12; j++)
                     {
                         Point3d point = new Point3d(Fpipeindex[i].X, Fpipeindex[i].Y - 1, 0);                   
                         Vector3d normal = Fpipeindex[i].GetVectorTo(point).GetNormal().RotateBy(j*Math.PI/6, Vector3d.ZAxis);
@@ -376,20 +376,20 @@ namespace ThMEPWSS.Pipe.Engine
         {
             var nums = new List<int>();
             nums.Add(0);
-            nums.Add(11);
-            for(int i=1;i<5;i++)
+            nums.Add(6);
+            for(int i=1;i<3;i++)
             {
                 nums.Add(i);
             }
-            for (int i = 23; i > 17; i--)
+            for (int i = 11; i > 9; i--)
             {
                 nums.Add(i);
             }
-            for (int i = 6; i < 11; i++)
+            for (int i = 4; i < 6; i++)
             {
                 nums.Add(i);
             }         
-            for (int i = 16; i > 11; i--)
+            for (int i = 8; i > 6; i--)
             {
                 nums.Add(i);
             }
@@ -400,12 +400,12 @@ namespace ThMEPWSS.Pipe.Engine
             Point3dCollection points = new Point3dCollection();
             for (int i = 0; i < nums.Count; i++)
             {
-                if (GetRadialPoint(Fpipeindex, width, normals[i], obstacle) == Point3d.Origin)
+                if (GetRadialPoint(Fpipeindex, width, normals[nums[i]], obstacle) == Point3d.Origin)
                 {                                             
                 }
                 else
                 {
-                    var point=GetRadialPoint(Fpipeindex, width, normals[i], obstacle);
+                    var point=GetRadialPoint(Fpipeindex, width, normals[nums[i]], obstacle);
                     points = GetPoints(point,i);//得到标注点组
                     break;
                 }
