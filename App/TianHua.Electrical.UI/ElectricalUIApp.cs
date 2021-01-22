@@ -24,11 +24,13 @@ namespace TianHua.Electrical.UI
         public void Initialize()
         {
             SmokeLayoutUI = null;
+            BasementLightingUI = null;
         }
 
         public void Terminate()
         {
             SmokeLayoutUI = null;
+            BasementLightingUI = null;
         }
 
         [CommandMethod("TIANHUACAD", "THYWG", CommandFlags.Modal)]

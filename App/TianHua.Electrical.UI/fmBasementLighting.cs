@@ -31,7 +31,12 @@ namespace TianHua.Electrical.UI
         {
             InitForm();
 
-        }        
+        }
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
+        }
 
         private void RadLUX_SelectedIndexChanged(object sender, EventArgs e)
         {
