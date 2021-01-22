@@ -9,18 +9,19 @@ using NFox.Cad;
 
 namespace ThMEPLighting.EmgLight.Service
 {
-    class StructureServiceLight    
+    class StructureServiceLight
     {
         static double TolLight = 400;
+
         /// <summary>
         /// 获取停车线周边构建信息
         /// </summary>
-        /// <param name="polylines"></param>
-        /// <param name="columns"></param>
+        /// <param name="lines"></param>
+        /// <param name="polys"></param>
+        /// <param name="tol"></param>
         /// <returns></returns>
         public static List<Polyline> GetStruct(List<Line> lines, List<Polyline> polys, double tol)
         {
-
             var resPolys = lines.SelectMany(x =>
             {
                 var linePoly = StructUtils.ExpandLine(x, tol, 0, tol, 0);
@@ -37,8 +38,9 @@ namespace ThMEPLighting.EmgLight.Service
         /// <summary>
         /// 沿着线将柱分隔成上下两部分
         /// </summary>
-        /// <param name="columns"></param>
-        /// <param name="line"></param>
+        /// <param name="polyline"></param>
+        /// <param name="lines"></param>
+        /// <param name="tol"></param>
         /// <returns></returns>
         public static List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines, double tol)
         {
@@ -74,16 +76,10 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structrues"></param>
         /// <param name="line"></param>
-        /// <param name="frame"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static List<Polyline> FilterStructure(List<Polyline> structrues, Line line, Polyline frame, string type)
+        public static List<Polyline> getStructureParallelPart(List<Polyline> structrues, Line line, string type)
         {
-            if (structrues.Count <= 0)
-            {
-                return null;
-            }
-
             List<Polyline> layoutColumns = new List<Polyline>();
 
             var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
@@ -100,28 +96,13 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     layoutInfo = GetWallParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
                 }
-
-
-
-                //选与防火框不相交且在防火框内
                 if (layoutInfo != null)
                 {
-
-                    layoutInfo = layoutInfo.Where(x =>
-                    {
-                        Point3dCollection pts = new Point3dCollection();
-                        x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                        return pts.Count <= 0 && frame.Contains(x.StartPoint);
-                    }).ToList();
-
                     layoutColumns.AddRange(layoutInfo);
-
                 }
-
             }
             return layoutColumns;
         }
-
 
         /// <summary>
         /// 找到墙与车道线平行的边
@@ -129,6 +110,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="polyline"></param>
         /// <param name="pt"></param>
         /// <param name="dir"></param>
+        /// <param name="layoutPt"></param>
         /// <returns></returns>
         private static List<Polyline> GetWallParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
         {
@@ -159,13 +141,13 @@ namespace ThMEPLighting.EmgLight.Service
             return structureLayoutSegment;
         }
 
-
         /// <summary>
         /// 找到柱与车道线平行且最近的边
         /// </summary>
         /// <param name="polyline"></param>
         /// <param name="pt"></param>
         /// <param name="dir"></param>
+        /// <param name="layoutPt"></param>
         /// <returns></returns>
         private static List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
         {
@@ -197,7 +179,6 @@ namespace ThMEPLighting.EmgLight.Service
         /// 大于TolLight的墙拆分成TolLight(尾点不够和前面合并)
         /// </summary>
         /// <param name="walls"></param>
-        /// <param name="lane"></param>
         /// <returns></returns>
         public static List<Polyline> breakWall(List<Polyline> walls)
         {
@@ -223,7 +204,10 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     returnWalls.Last().SetPointAt(returnWalls.Last().NumberOfVertices - 1, restWall.EndPoint.ToPoint2D());
                 }
-
+                else
+                {
+                    returnWalls.Add(wall);
+                }
             }
 
             return returnWalls;

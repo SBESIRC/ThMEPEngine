@@ -5,6 +5,7 @@ using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
 using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
@@ -12,23 +13,23 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.Common;
 using ThMEPEngineCore.LaneLine;
+using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting
 {
     public class ThEmgLightCmds
     {
-        int bufferLength = 100;
-
         [CommandMethod("TIANHUACAD", "THYJZM", CommandFlags.Modal)]
         public void ThEmgLight()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                int bufferLength = 100;
+                string LayerLane = "lLane";
 
                 // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
@@ -37,7 +38,6 @@ namespace ThMEPLighting
                     MessageForAdding = "选择区域",
                     RejectObjectsOnLockedLayers = true,
                 };
-
                 var dxfNames = new string[]
                 {
                     RXClass.GetClass(typeof(Polyline)).DxfName,
@@ -49,37 +49,14 @@ namespace ThMEPLighting
                     return;
                 }
 
-                //获取外包框
-                List<Curve> frameLst = new List<Curve>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
+                    //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
                     var plFrame = ThMEPFrameService.Normalize(frame);
-                    frameLst.Add(frame);
-
-                }
-
-                //处理外包框线
-                //
-                //  var plines = HandleFrame(frameLst);
-
-                foreach (Polyline plFrame in frameLst)
-                {
-
-                    ////删除原有构建
-                    // plFrame.ClearBroadCast();
-                    // plFrame.ClearBlindArea();
-                    //}
-
-                    //foreach (ObjectId obj in result.Value.GetObjectIds())
-                    //{
-                    //    var frame = acdb.Element<Polyline>(obj);
 
                     //获取车道线
                     var lanes = GetLanes(plFrame, acdb);
-
-
-                  
 
                     if (lanes.Count > 0)
                     {
@@ -90,58 +67,31 @@ namespace ThMEPLighting
 
                         //将车道线排序,点按排序方向排列,合并连续线段
                         List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
-
-
                         for (int i = 0; i < mergedOrderedLane.Count; i++)
                         {
                             for (int j = 0; j < mergedOrderedLane[i].Count; j++)
                             {
-                                InsertLightService.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), 161);
-                                //InsertLightService.ShowGeometry(OrderedMergedLane[i][j].EndPoint, string.Format("orderM {0}-{1}-end", i, j), 161);
+                                DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), LayerLane, Color.FromRgb(128, 159, 225));
                             }
                         }
-                        InsertLightService.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), 20, LineWeight.LineWeight050);
+                        DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), LayerLane, Color.FromRgb(255, 0, 0));
 
+                        //获取构建信息
+                        var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+                        GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
+                        getArchWall(acdb, bufferFrame, ref walls);
 
-                        bool debug = false;
-                        if (debug == false)
-                        {
+                        //主车道布置信息
+                        LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
+                        var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
 
-                            //获取构建信息
-                            var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
-                            GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
+                        //布置构建
+                        InsertLightService.InsertSprayBlock(layoutInfo);
 
-                            //主车道布置信息
-                            LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
-                            var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
-
-                            InsertLightService.InsertSprayBlock(layoutInfo);
-
-                        }
                     }
-                    
                 }
-
             }
         }
-
-        /// <summary>
-        /// 处理外包框线
-        /// </summary>
-        /// <param name="frameLst"></param>
-        /// <returns></returns>
-        //private List<Polyline> HandleFrame(List<Curve> frameLst)
-        //{
-        //    var polygonInfos = NoUserCoordinateWorker.MakeNoUserCoordinateWorker(frameLst);
-        //    List<Polyline> resPLines = new List<Polyline>();
-        //    foreach (var pInfo in polygonInfos)
-        //    {
-        //        resPLines.Add(pInfo.ExternalProfile);
-        //        resPLines.AddRange(pInfo.InnerProfiles);
-        //    }
-
-        //    return resPLines;
-        //}
 
         /// <summary>
         /// 获取车道线
@@ -155,9 +105,7 @@ namespace ThMEPLighting
                 .Where(o => o.Layer == ThMEPLightingCommon.LANELINE_LAYER_NAME);
             laneLines.ForEach(x => objs.Add(x));
 
-            //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
             return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
@@ -190,32 +138,27 @@ namespace ThMEPLighting
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
         }
 
-        //public void THExtractArchWall()
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
-        //    {
-        //        var result = Active.Editor.GetEntity("\n选择框线");
-        //        if (result.Status != PromptStatus.OK)
-        //        {
-        //            return;
-        //        }
-        //        Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-        //        archWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
-        //        archWallEngine.Elements.ForEach(o =>
-        //        {
-        //            if (o.Outline is Curve curve)
-        //            {
-        //                acadDatabase.ModelSpace.Add(curve.WashClone());
-        //            }
-        //            else if (o.Outline is MPolygon mPolygon)
-        //            {
-        //                acadDatabase.ModelSpace.Add(mPolygon);
-        //            }
-        //        });
-        //    }
-        //}
+        /// <summary>
+        /// 取建筑墙
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <param name="bufferedFrame"></param>
+        /// <param name="walls"></param>
+        public void getArchWall(AcadDatabase acdb, Polyline bufferedFrame, ref List<Polyline> walls)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+            {
+                archWallEngine.Recognize(acadDatabase.Database, bufferedFrame.Vertices());
 
-
+                foreach (var o in archWallEngine.Elements)
+                {
+                    if (o.Outline is Polyline polyline)
+                    {
+                        walls.Add(polyline);
+                    }
+                }
+            }
+        }
     }
 }
