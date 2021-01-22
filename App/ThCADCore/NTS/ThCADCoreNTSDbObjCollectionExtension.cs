@@ -39,48 +39,13 @@ namespace ThCADCore.NTS
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
-            // The buffer(0) trick is sometimes faster, 
-            // but can be less robust and can sometimes take a long time to complete. 
-            // This is particularly the case where there is a high degree of overlap between the polygons. 
-            // In this case, buffer(0) is forced to compute with all line segments from the outset, 
-            // whereas cascading can eliminate many segments at each stage of processing. 
-            // The best situation for using buffer(0) is the trivial case where 
-            // there is no overlap between the input geometries. 
-            // However, this case is likely rare in practice.
-            return curves.ToNTSMultiPolygon().Buffer(0);
+            // https://lin-ear-th-inking.blogspot.com/2007/11/fast-polygon-merging-in-jts-using.html
+            return curves.ToNTSMultiPolygon().Union();
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
-            if (curves.Count <= 0)
-            {
-                return curves;
-            }
-
-            var objs = new DBObjectCollection();
-            var result = CascadedPolygonUnion.Union(curves.ToNTSPolygons().ToArray());
-            if (result is Polygon bufferPolygon)
-            {
-                foreach (var poly in bufferPolygon.ToDbPolylines())
-                {
-                    objs.Add(poly);
-                }
-            }
-            else if (result is MultiPolygon mPolygon)
-            {
-                foreach (Polygon item in mPolygon.Geometries)
-                {
-                    foreach (var poly in item.ToDbPolylines())
-                    {
-                        objs.Add(poly);
-                    }
-                }
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
+            return curves.UnionGeometries().ToDbCollection();
         }
 
         public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
