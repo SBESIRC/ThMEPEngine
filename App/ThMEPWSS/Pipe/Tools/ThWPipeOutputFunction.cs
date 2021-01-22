@@ -169,6 +169,44 @@ namespace ThMEPWSS.Pipe.Tools
             polyline.AddVertexAt(3, new Point2d(point.X, point.Y + 200), 0.0, 0.0, 0.0);
             return polyline;
         }
+        public static Polyline GetCircleBoundary(Circle circle)
+        {
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            polyline.AddVertexAt(0, new Point2d(circle.Center.X+ circle.Radius, circle.Center.Y), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(1, new Point2d(circle.Center.X, circle.Center.Y+ circle.Radius), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(2, new Point2d(circle.Center.X - circle.Radius, circle.Center.Y), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(circle.Center.X, circle.Center.Y - circle.Radius), 0.0, 0.0, 0.0);
+            return polyline;
+        }
+        public static Polyline GetPolylineBoundary(Curve curve)
+        {
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            Point3d minpt = curve.GeometricExtents.MinPoint;
+            Point3d maxpt= curve.GeometricExtents.MaxPoint;
+            polyline.AddVertexAt(0, new Point2d(minpt.X-1, minpt.Y-1), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(1, new Point2d(maxpt.X+1, minpt.Y - 1), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(2, new Point2d(maxpt.X + 1, maxpt.Y+1), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(minpt.X - 1, maxpt.Y + 1), 0.0, 0.0, 0.0);
+            return polyline;
+        }
+        public static Polyline GetTextBoundary(double width, double height, Point3d point)
+        {
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            polyline.AddVertexAt(0, new Point2d(point.X, point.Y), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(1, new Point2d(point.X + width, point.Y), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(2, new Point2d(point.X + width, point.Y + height), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(point.X, point.Y + height), 0.0, 0.0, 0.0);
+            return polyline;
+        }
         public static double GetOffset(List<Point3dCollection> dublicatedPoints, Point3d indexPipe)
         {
             int num = 0;
@@ -256,19 +294,19 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return polylines;
         }
-        public static List<Polyline> GetListCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
         {
-            var polylines = new List<Polyline>();
+            var polylines = new List<Entity>();
             if (toilet.Identifier.Contains('F') || toilet.Identifier.Contains('P') || toilet.Identifier.Contains('W'))
             {
-                GetPolyline(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+                GetEntity(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListNormalCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListNormalCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
         {
-            var polylines = new List<Polyline>();
-            GetPolyline(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+            var polylines = new List<Entity>();
+            GetEntity(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             return polylines;
         }
         public static List<Polyline> GetListFpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
@@ -316,19 +354,19 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return polylines;
         }
-        public static List<Polyline> GetListCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
         {
-            var polylines = new List<Polyline>();
+            var polylines = new List<Entity>();
             if (toilet.Identifier.Contains('F') || toilet.Identifier.Contains('P') || toilet.Identifier.Contains('W'))
             {
-                GetPolyline1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+                GetEntity1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListNormalCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListNormalCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
         {
-            var polylines = new List<Polyline>();
-            GetPolyline1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+            var polylines = new List<Entity>();
+            GetEntity1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             return polylines;
         }
         public static List<Polyline> GetPolyline(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
@@ -339,6 +377,17 @@ namespace ThMEPWSS.Pipe.Tools
                 var offset = Matrix3d.Displacement(200 * ToiletPipes[0].Center.GetVectorTo(ToiletPipes[1].Center).GetNormal());
                 Entity polyline = item.GetTransformedCopy(toilet.Matrix.PostMultiplyBy(offset));
                 polylines.Add(GetCopyPipes(polyline));
+            }
+            return polylines;
+        }
+        public static List<Entity> GetEntity(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        {
+            var polylines = new List<Entity>();
+            foreach (Entity item in toilet.Representation)
+            {
+                var offset = Matrix3d.Displacement(200 * ToiletPipes[0].Center.GetVectorTo(ToiletPipes[1].Center).GetNormal());
+                Entity polyline = item.GetTransformedCopy(toilet.Matrix.PostMultiplyBy(offset));
+                polylines.Add(polyline);
             }
             return polylines;
         }
@@ -360,6 +409,16 @@ namespace ThMEPWSS.Pipe.Tools
             {
                 var polyline = item.GetTransformedCopy(toilet.Matrix);
                 polylines.Add(GetCopyPipes(polyline));
+            }
+            return polylines;
+        }
+        public static List<Entity> GetEntity1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        {
+            var polylines = new List<Entity>();
+            foreach (Entity item in toilet.Representation)
+            {
+                var polyline = item.GetTransformedCopy(toilet.Matrix);
+                polylines.Add(polyline);
             }
             return polylines;
         }

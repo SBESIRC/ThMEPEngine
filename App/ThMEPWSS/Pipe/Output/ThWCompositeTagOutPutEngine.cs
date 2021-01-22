@@ -17,6 +17,7 @@ namespace ThMEPWSS.Pipe.Output
         public void LayoutTag(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, ThWRoofParameters parameters1, ThWRoofDeviceParameters parameters2, AcadDatabase acadDatabase, ThWInnerPipeIndexEngine PipeindexEngine, ThWCompositeIndexEngine composite_Engine)
         {
             var tag_frames = new List<Polyline>();//用来收纳所有文字框
+            var f_pipes= ThWPipeOutputFunction.GetNewPipes(parameters0.fpipe);
             var rain_pipes = ThWPipeOutputFunction.GetNewPipes(parameters0.rain_pipe);//雨水管去重复
             var npipes = ThWPipeOutputFunction.GetNewPipes(parameters0.npipe);//冷凝管去重
             var roofrain_pipes = ThWPipeOutputFunction.GetNewPipes(parameters0.roofrain_pipe);//屋顶雨水管去重                                            
@@ -33,7 +34,7 @@ namespace ThMEPWSS.Pipe.Output
             //定义障碍              
             ThCADCoreNTSSpatialIndex obstacle = null;
             obstacle = new ThCADCoreNTSSpatialIndex(ThWPipeOutputFunction.GetObstacle(FloorEngines.Columns));
-            composite_Engine.Run(parameters0.fpipe, parameters0.tpipe, parameters0.wpipe, parameters0.ppipe, parameters0.dpipe, npipes,
+            composite_Engine.Run(f_pipes, parameters0.tpipe, parameters0.wpipe, parameters0.ppipe, parameters0.dpipe, npipes,
                 rain_pipes, parameters0.pboundary, parameters0.divideLines, roofrain_pipes, toiletpoint, balconypoint, obstacle);
             //首先得到比对的第一行重复标注  
             GetFpipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase);
