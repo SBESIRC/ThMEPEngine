@@ -102,18 +102,6 @@ namespace ThMEPLighting.EmgLight.Service
 
                 if (layoutInfo != null)
                 {
-                    //if (441633 <= layoutInfo[0].StartPoint.X && layoutInfo[0].StartPoint.X <= 464408 && 425557 <= layoutInfo[0].StartPoint.Y && layoutInfo[0].StartPoint.Y <= 428204)
-                    //{
-                    //    InsertLightService.ShowGeometry(layoutInfo, 40, LineWeight.LineWeight035);
-                    //}
-
-                    //layoutInfo = layoutInfo.Where(x =>
-                    //{
-                    //    Point3dCollection pts = new Point3dCollection();
-                    //    x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                    //    return pts.Count <= 0 && frame.Contains(x.StartPoint);
-                    //}).ToList();
-
                     layoutColumns.AddRange(layoutInfo);
 
                 }
@@ -121,24 +109,6 @@ namespace ThMEPLighting.EmgLight.Service
             }
             return layoutColumns;
         }
-
-        //public static List<Polyline> getInsideFramePart(List<Polyline> structrues, Polyline frame)
-        //{
-        //    List<Polyline> layoutColumns = new List<Polyline>();
-
-        //    //选与防火框不相交且在防火框内
-        //    var layoutInfo = structrues.Where(x =>
-        //      {
-        //          Point3dCollection pts = new Point3dCollection();
-        //          x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-        //          return pts.Count <= 0 && frame.Contains(x);
-        //      }).ToList();
-
-        //    layoutColumns.AddRange(layoutInfo);
-
-        //    return layoutColumns;
-        //}
-
 
         /// <summary>
         /// 找到墙与车道线平行的边
@@ -239,6 +209,10 @@ namespace ThMEPLighting.EmgLight.Service
                 if (doOnce == true && restWall.Length > 0)
                 {
                     returnWalls.Last().SetPointAt(returnWalls.Last().NumberOfVertices - 1, restWall.EndPoint.ToPoint2D());
+                }
+                else
+                {
+                    returnWalls.Add(wall);
                 }
 
             }

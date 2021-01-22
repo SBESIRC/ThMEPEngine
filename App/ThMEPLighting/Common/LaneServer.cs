@@ -18,12 +18,6 @@ namespace ThMEPLighting.Common
             mainLanes.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
             secondaryLanes.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
 
-            //for (int i = 0; i < edges.Count; i++)
-            //{
-            //    InsertLightService.ShowGeometry(edges[i].Edge.StartPoint, string.Format("edge {0}-start", i), 40);
-            //    InsertLightService.ShowGeometry(edges[i].Edge.EndPoint, string.Format("edge{0}-end", i), 40);
-            //}
-
             //找起点
             Dictionary<Point3d, List<ThLightEdge>> nodeCollection = LaneServer.FindStartPoint(edges);
 
@@ -51,28 +45,13 @@ namespace ThMEPLighting.Common
 
                 var optimalOrderedMergedLanes = findOptimalLanes(orderedMergedLanesPart, nodeCollection, startPoint);
 
-
                 foreach (var path in optimalOrderedMergedLanes)
                 {
                     nodeCollection.Remove(path.First().StartPoint);
                     nodeCollection.Remove(path.Last().EndPoint);
-
                 }
-
                 orderedMergedLanes.AddRange(optimalOrderedMergedLanes);
             }
-
-
-
-
-            //for (int i = 0; i < orderedMergedLanes.Count; i++)
-            //{
-            //    for (int j = 0; j < orderedMergedLanes[i].Count; j++)
-            //    {
-            //        InsertLightService.ShowGeometry(orderedMergedLanes[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), 161);
-            //        //InsertLightService.ShowGeometry(OrderedMergedLane[i][j].EndPoint, string.Format("orderM {0}-{1}-end", i, j), 161);
-            //    }
-            //}
 
             return orderedMergedLanes;
         }
@@ -132,7 +111,6 @@ namespace ThMEPLighting.Common
 
         private static Dictionary<Point3d, List<ThLightEdge>> FindStartPoint(List<ThLightEdge> edges)
         {
-            // Point3d startPt = new Point3d();
 
             Dictionary<Point3d, List<ThLightEdge>> startEndPtCollect = new Dictionary<Point3d, List<ThLightEdge>>();
 
@@ -187,8 +165,6 @@ namespace ThMEPLighting.Common
 
             allOrderedMergedLanes.Add(orderedMergedLanesPart);
 
-
-
             //找到各线段终点并重新计算
             foreach (var path in orderedMergedLanesPart)
             {
@@ -203,8 +179,6 @@ namespace ThMEPLighting.Common
                     //按顺序排布车道线点并合并同一条线的车道线
                     var LanesPart = mergeOrderedLane(orderedLane);
                     allOrderedMergedLanes.Add(LanesPart);
-
-                    //repeatEdge.ForEach(x => x.IsTraversed = false);
                 }
             }
 
@@ -218,12 +192,9 @@ namespace ThMEPLighting.Common
                     minCount = allOrderedMergedLanes[i].Count;
                     minIndex = i;
                 }
-                //InsertLightService.ShowGeometry(allOrderedMergedLanes[i][0][0].StartPoint, string.Format("allOrdered - Start {0}", i), 20);
             }
 
-            var ba = allOrderedMergedLanes.Where(a => a.Count == (allOrderedMergedLanes.Select(x => x.Count).Min())).ToList()[0];
-
-            //InsertLightService.ShowGeometry(allOrderedMergedLanes[minIndex][0][0].StartPoint, string.Format("final start!!!"), 20, LineWeight.LineWeight050);
+            //var ba = allOrderedMergedLanes.Where(a => a.Count == (allOrderedMergedLanes.Select(x => x.Count).Min())).ToList()[0];
 
             return allOrderedMergedLanes[minIndex];
         }

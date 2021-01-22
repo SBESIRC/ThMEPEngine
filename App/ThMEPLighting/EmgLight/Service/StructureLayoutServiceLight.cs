@@ -54,15 +54,6 @@ namespace ThMEPLighting.EmgLight.Service
             usefulStruct[0] = OrderingStruct(usefulStruct[0]);
             usefulStruct[1] = OrderingStruct(usefulStruct[1]);
 
-            //滤掉重合部分
-            filterOverlapStruc();
-
-            //滤掉框后边的部分
-            filterStrucBehindFrame();
-
-            //滤掉框外边的部分
-            getInsideFramePart();
-
         }
 
         public List<List<Polyline>> UsefulColumns
@@ -122,7 +113,7 @@ namespace ThMEPLighting.EmgLight.Service
             var StructDir = (structure.EndPoint - structure.StartPoint).GetNormal();
             var layoutDir = Vector3d.ZAxis.CrossProduct(StructDir);
 
-            distToLine(structure, out var prjPt);
+            prjPtToLine(structure, out var prjPt);
             var compareDir = (prjPt - layoutPt).GetNormal();
 
             if (layoutDir.DotProduct(compareDir) < 0)
@@ -138,7 +129,7 @@ namespace ThMEPLighting.EmgLight.Service
             List<double> distX = new List<double>();
             for (int i = 0; i < structList.Count - 1; i++)
             {
-                distX.Add((getCenterInLaneCoor(structList[i]) - getCenterInLaneCoor(structList[i + 1])).Length);
+                distX.Add(Math.Abs(getCenterInLaneCoor(structList[i]).X - getCenterInLaneCoor(structList[i + 1]).X));
             }
 
             return distX;
@@ -181,9 +172,8 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="pt1"></param>
         /// <param name="PolylineToEnd"></param>
         /// <returns></returns>
-        public double distToLineEnd(Polyline structure, out Polyline PolylineToEnd)
+        public void prjPtToLineEnd(Polyline structure, out Polyline PolylineToEnd)
         {
-            double distToEnd = -1;
             Point3d prjPt;
             PolylineToEnd = new Polyline();
             int timeToCheck = 0;
@@ -207,14 +197,12 @@ namespace ThMEPLighting.EmgLight.Service
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, l.StartPoint.ToPoint2D(), 0, 0, 0);
                 }
                 PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
-                distToEnd = PolylineToEnd.Length;
             }
             else if (centerPtTrans.X > laneTrans.Last().EndPoint.X)
             {
                 prjPt = lane.Last().GetClosestPointTo(centerPt, true);
                 PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
                 PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
-                distToEnd = -PolylineToEnd.Length;
             }
             else
             {
@@ -231,13 +219,8 @@ namespace ThMEPLighting.EmgLight.Service
                         PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane[i].StartPoint.ToPoint2D(), 0, 0, 0);
                     }
                 }
-
                 PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
-                distToEnd = PolylineToEnd.Length;
             }
-
-
-            return distToEnd;
 
         }
 
@@ -248,9 +231,8 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="pt1"></param>
         /// <param name="prjPt"></param>
         /// <returns></returns>
-        public double distToLine(Polyline structure, out Point3d prjPt)
+        public void prjPtToLine(Polyline structure, out Point3d prjPt)
         {
-            double distProject = -1;
             prjPt = new Point3d();
 
             Point3d centerPtTrans;
@@ -285,10 +267,6 @@ namespace ThMEPLighting.EmgLight.Service
                     }
                 }
             }
-
-            distProject = prjPt.DistanceTo(centerPt);
-            return distProject;
-
         }
 
         /// <summary>
@@ -425,22 +403,10 @@ namespace ThMEPLighting.EmgLight.Service
 
             for (int i = 0; i < structList.Count; i++)
             {
-
-                var connectLayout = checkIfInLayout(Layout, structList[i], tol);
-
-
                 if (structList[i].Distance(Pt) <= minDist)
                 {
                     minDist = structList[i].Distance(Pt);
-
-                    if (connectLayout != null)
-                    {
-                        closestStruct = connectLayout;
-                    }
-                    else
-                    {
-                        closestStruct = structList[i];
-                    }
+                    closestStruct = structList[i];
                 }
             }
         }
@@ -483,46 +449,9 @@ namespace ThMEPLighting.EmgLight.Service
 
         }
 
-        public static void checkIfInLayout(List<Polyline> layout, Polyline structure, int index, double tol, ref List<(Polyline, int)> uniformSideLayout)
-        {
+        
 
-            var connectLayout = checkIfInLayout(layout, structure, tol);
-
-            if (connectLayout != null)
-            {
-                uniformSideLayout.Add((connectLayout, index));
-            }
-            else
-            {
-                uniformSideLayout.Add((structure, index));
-            }
-
-        }
-
-        /// <summary>
-        /// layout到structure TolRangeMin以内找离structure最近的,没有返回null
-        /// </summary>
-        /// <param name="layout"></param>
-        /// <param name="structure"></param>
-        /// <returns></returns>
-        private static Polyline checkIfInLayout(List<Polyline> layout, Polyline structure, double Tol)
-        {
-            double minDist = Tol + 1;
-            Polyline closestLayout = null;
-
-            for (int i = 0; i < layout.Count; i++)
-            {
-                var dist = layout[i].StartPoint.DistanceTo(structure.StartPoint);
-                if (dist <= minDist && dist < Tol)
-                {
-                    minDist = dist;
-                    closestLayout = layout[i];
-                }
-            }
-
-            return closestLayout;
-        }
-
+  
         private void BuildStructCenter(List<List<Polyline>> structList)
         {
             foreach (var structureSide in structList)
@@ -597,7 +526,7 @@ namespace ThMEPLighting.EmgLight.Service
             return centerPt;
         }
 
-        private void filterOverlapStruc()
+        public void filterOverlapStruc()
         {
 
             for (int i = 0; i < usefulStruct.Count; i++)
@@ -654,7 +583,7 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     Point3dCollection pts = new Point3dCollection();
                     //选不在防火墙凹后的
-                    distToLine(x, out var prjPt);
+                    prjPtToLine(x, out var prjPt);
                     Line l = new Line(prjPt, getCenter(x));
                     l.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
                     return pts.Count > 0;

@@ -24,6 +24,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmgLight\Assistant\DrawUtils.cs" />
     <Compile Include="EmgLight\LayoutWithParkingLineForLight.cs" />
     <Compile Include="EmgLight\Model\StructModel.cs" />
     <Compile Include="EmgLight\Service\InsertLightService.cs" />
