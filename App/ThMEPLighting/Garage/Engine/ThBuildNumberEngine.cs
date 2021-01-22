@@ -21,7 +21,6 @@ namespace ThMEPLighting.Garage.Engine
         {
             LineEdges = lineEdges; //保持顺序，不要放在后面
             Ports = ports.PtOnLines(LineEdges.Where(o=>o.IsDX).Select(o=>o.Edge).ToList());
-            Sort();
             if (Ports.Count>0)
             {
                 Start=Ports.First();

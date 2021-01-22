@@ -129,6 +129,10 @@
       <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
       <Name>ThMEPElectrical</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ThMEPLighting\ThMEPLighting.csproj">
+      <Project>{6eb17675-61ba-4669-a2ed-da7a8a4af715}</Project>
+      <Name>ThMEPLighting</Name>
+    </ProjectReference>
     <ProjectReference Include="..\TianHua.Electrical\TianHua.Electrical.csproj">
       <Project>{c74a25a1-1991-4eb7-bd43-808cd8df4b32}</Project>
       <Name>TianHua.Electrical</Name>

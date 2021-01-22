@@ -172,6 +172,7 @@
             this.BtnCircuitInfo.StyleController = this.layoutControl1;
             this.BtnCircuitInfo.TabIndex = 23;
             this.BtnCircuitInfo.Text = "回路统计";
+            this.BtnCircuitInfo.Click += new System.EventHandler(this.BtnCircuitInfo_Click);
             // 
             // BtnCircuitLabel
             // 
@@ -182,6 +183,7 @@
             this.BtnCircuitLabel.StyleController = this.layoutControl1;
             this.BtnCircuitLabel.TabIndex = 22;
             this.BtnCircuitLabel.Text = "回路标注";
+            this.BtnCircuitLabel.Click += new System.EventHandler(this.BtnCircuitLabel_Click);
             // 
             // BtnLayout
             // 
@@ -192,6 +194,7 @@
             this.BtnLayout.StyleController = this.layoutControl1;
             this.BtnLayout.TabIndex = 0;
             this.BtnLayout.Text = "布置";
+            this.BtnLayout.Click += new System.EventHandler(this.BtnLayout_Click);
             // 
             // RadCircuit
             // 

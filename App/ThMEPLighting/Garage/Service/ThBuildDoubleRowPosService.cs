@@ -61,6 +61,10 @@ namespace ThMEPLighting.Garage.Service
         }
         private void BuildByExtractFromCad(ThLineSplitParameter splitParameter)
         {
+            if(ArrangeParameter.LightBlockQueryService==null)
+            {
+                return;
+            }
             var line = new Line(splitParameter.LineSp, splitParameter.LineEp);
             var installPoints = ArrangeParameter.LightBlockQueryService.Query(line);
             DistributePoints(installPoints);

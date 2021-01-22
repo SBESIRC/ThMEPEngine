@@ -1,4 +1,6 @@
-﻿using System;
+﻿using AcHelper;
+using AcHelper.Commands;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -7,6 +9,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ThMEPElectrical;
+using ThMEPLighting;
 using TianHua.Publics.BaseCode;
 
 namespace TianHua.Electrical.UI
@@ -27,22 +31,7 @@ namespace TianHua.Electrical.UI
         {
             InitForm();
 
-        }
-
-        private void BtnLaneCenterline_Click(object sender, EventArgs e)
-        {
-      
-        }
-
-        private void BtnDraw_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void BtnNoDraw_Click(object sender, EventArgs e)
-        {
-
-        }
+        }        
 
         private void RadLUX_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -107,5 +96,87 @@ namespace TianHua.Electrical.UI
         {
             BtnLayout.Focus();
         }
+        #region----------Commands----------
+        private void BtnLaneCenterline_Click(object sender, EventArgs e)
+        {
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD");
+        }
+
+        private void BtnDraw_Click(object sender, EventArgs e)
+        {
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THDXC");
+        }
+
+        private void BtnNoDraw_Click(object sender, EventArgs e)
+        {
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THFDXC");
+        }
+
+        private void BtnLayout_Click(object sender, EventArgs e)
+        {
+            CollectParameter();
+            ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate = true;
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THCDZM");
+        }
+
+        private void BtnCircuitLabel_Click(object sender, EventArgs e)
+        {
+            CollectParameter();
+            ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate = false;
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THCDBH");
+        }
+
+        private void BtnCircuitInfo_Click(object sender, EventArgs e)
+        {
+            SetFocusToDwgView();
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THCDTJ");
+        }
+
+        private void CollectParameter()
+        {
+            ThMEPLightingService.Instance.LightArrangeUiParameter.IsSingleRow = FuncStr.NullToStr(RadLamp.EditValue) == "单排";
+            double width = 0.0;
+            if(double.TryParse(TxtWidth.Text,out width))
+            {
+                ThMEPLightingService.Instance.LightArrangeUiParameter.Width = width;
+            }
+            double racywaySpace = 0.0;
+            if (double.TryParse(TxtDistance.Text, out racywaySpace))
+            {
+                ThMEPLightingService.Instance.LightArrangeUiParameter.RacywaySpace = racywaySpace;
+            }
+            double lightInterval = 0.0;
+            if (double.TryParse(TxtSpacing.Text, out lightInterval))
+            {
+                ThMEPLightingService.Instance.LightArrangeUiParameter.Interval = lightInterval;
+            }
+            if (FuncStr.NullToStr(RadCircuit.EditValue) == "自动计算")
+            {
+                ThMEPLightingService.Instance.LightArrangeUiParameter.AutoCalculate = true;
+            }
+            else
+            {
+                int loopNumber = 0;
+                if (int.TryParse(TxtCircuitNum.Text, out loopNumber))
+                {
+                    ThMEPLightingService.Instance.LightArrangeUiParameter.LoopNumber = loopNumber;
+                }
+            }
+        }
+        private void SetFocusToDwgView()
+        {
+            //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
+#if ACAD2012
+            Autodesk.AutoCAD.Internal.Utils.SetFocusToDwgView();
+#else
+            Active.Document.Window.Focus();
+#endif
+        }
+        #endregion
     }
 }

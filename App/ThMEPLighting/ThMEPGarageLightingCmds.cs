@@ -98,19 +98,9 @@ namespace ThMEPLighting
         public void ThCdzm()
         {
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
-            {                
+            {
                 //输入参数
-                var arrangeParameter = new ThLightArrangeParameter
-                {
-                    Width = 300,
-                    Interval = 2700,
-                    Margin = 800,
-                    RacywaySpace = 2700,
-                    IsSingleRow = GetArrangeWay(),
-                    LoopNumber = 4,
-                    PaperRatio = 100,
-                    MinimumEdgeLength=2800
-                };
+                var arrangeParameter = GetUiParameters();
                 var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();
                 //以上是准备输入参数
@@ -125,6 +115,28 @@ namespace ThMEPLighting
                 }
                 arrangeEngine.Arrange(regionBorders);
             }
+        }
+        private ThLightArrangeParameter GetUiParameters()
+        {
+            // From UI
+            var arrangeParameter = new ThLightArrangeParameter()
+            {                
+                Margin = 800,
+                AutoCalculate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoCalculate,
+                AutoGenerate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate,
+                Interval = ThMEPLightingService.Instance.LightArrangeUiParameter.Interval,
+                IsSingleRow = ThMEPLightingService.Instance.LightArrangeUiParameter.IsSingleRow,
+                LoopNumber = ThMEPLightingService.Instance.LightArrangeUiParameter.LoopNumber,
+                RacywaySpace= ThMEPLightingService.Instance.LightArrangeUiParameter.RacywaySpace,
+                Width = ThMEPLightingService.Instance.LightArrangeUiParameter.Width,
+            };
+
+            // 自定义
+            arrangeParameter.Margin = 800.0;
+            arrangeParameter.PaperRatio = 100;
+            arrangeParameter.MinimumEdgeLength = 2800;
+
+            return arrangeParameter;
         }
         private List<ThRegionBorder> GetFireRegionBorders()
         {
@@ -213,19 +225,8 @@ namespace ThMEPLighting
         public void THCDBH()
         {
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
-            {                
-                //输入参数来源于面板或(后期记录到灯块中)
-                var arrangeParameter = new ThLightArrangeParameter
-                {
-                    Width = 300,
-                    Interval = 2700,
-                    Margin = 800,
-                    RacywaySpace = 2700,
-                    IsSingleRow = GetArrangeWay(),
-                    LoopNumber = 4,
-                    PaperRatio = 100,
-                    AutoGenerate=false,
-                };
+            {
+                var arrangeParameter = GetUiParameters();
                 var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();
                 //创建块的索引，偏于后期查询

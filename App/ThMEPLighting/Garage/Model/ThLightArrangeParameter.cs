@@ -34,6 +34,10 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public bool AutoGenerate { get; set; } = true;
         /// <summary>
+        /// 自动计算回路数量
+        /// </summary>
+        public bool AutoCalculate { get; set; }
+        /// <summary>
         /// 图纸比例
         /// </summary>
         public int PaperRatio { get; set; }
