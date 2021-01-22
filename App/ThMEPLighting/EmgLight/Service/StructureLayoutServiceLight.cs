@@ -1,11 +1,13 @@
 ﻿using System;
-using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
+using Linq2Acad;
 using ThCADCore.NTS;
+using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting.EmgLight.Service
 {
@@ -22,7 +24,6 @@ namespace ThMEPLighting.EmgLight.Service
 
         int TolLightRangeMin = 4000;
         int TolLightRangeMax = 8500;
-
 
         public StructureLayoutServiceLight(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame, int TolLightRangeMin, int TolLightRangeMax)
         {
@@ -62,7 +63,6 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 return usefulColumns;
             }
-
         }
         public List<List<Polyline>> UsefulWalls
         {
@@ -70,7 +70,6 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 return usefulWalls;
             }
-
         }
 
         public List<List<Polyline>> UsefulStruct
@@ -79,13 +78,17 @@ namespace ThMEPLighting.EmgLight.Service
             {
                 return usefulStruct;
             }
-
         }
 
+        /// <summary>
+        /// 将构建中点当布置点,计算布置方向,加入最后的list
+        /// </summary>
+        /// <param name="layoutList"></param>
+        /// <param name="lane"></param>
+        /// <param name="layoutPtInfo"></param>
         public void AddLayoutStructPt(List<Polyline> layoutList, List<Line> lane, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
         {
             (Point3d, Vector3d) layoutInfo;
-
             foreach (var structure in layoutList)
             {
                 if (structure != null && layoutPtInfo.ContainsKey(structure) == false)
@@ -97,11 +100,9 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
-        /// 计算柱上排布点和方向
+        /// 计算构建上排布和方向
         /// </summary>
-        /// <param name="column"></param>
-        /// <param name="pt"></param>
-        /// <param name="dir"></param>
+        /// <param name="structure"></param>
         /// <returns></returns>
         public (Point3d, Vector3d) GetLayoutPoint(Polyline structure)
         {
@@ -124,6 +125,11 @@ namespace ThMEPLighting.EmgLight.Service
             return (layoutPt, layoutDir);
         }
 
+        /// <summary>
+        /// 计算构建在车道线坐标系下的x坐标差
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <returns></returns>
         public List<double> GetColumnDistList(List<Polyline> structList)
         {
             List<double> distX = new List<double>();
@@ -136,30 +142,28 @@ namespace ThMEPLighting.EmgLight.Service
 
         }
 
+        /// <summary>
+        /// 将构建沿车道线坐标系排序
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <returns></returns>
         private List<Polyline> OrderingStruct(List<Polyline> structList)
         {
-            //Vector3d xDir = (lane.First().EndPoint - lane.First().StartPoint).GetNormal();
-            //Vector3d yDir = Vector3d.ZAxis.CrossProduct(xDir);
-            //Vector3d zDir = Vector3d.ZAxis;
-            //Matrix3d matrix = new Matrix3d(
-            //    new double[] {
-            //        xDir.X, yDir.X, zDir.X, 0,
-            //        xDir.Y, yDir.Y, zDir.Y, 0,
-            //        xDir.Z, yDir.Z, zDir.Z, 0,
-            //        0.0, 0.0, 0.0, 1.0
-            //    });
-
-            //var orderColumns = structList.OrderBy(x => StructUtils.GetStructCenter(x).TransformBy(matrix.Inverse()).X).ToList();
             var orderedStruct = structList.OrderBy(x => getCenterInLaneCoor(x).X).ToList();
             return orderedStruct;
         }
 
+        /// <summary>
+        /// 将点pt转到lane坐标系内
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="lane"></param>
+        /// <returns></returns>
         private static Point3d TransformPointToLine(Point3d pt, List<Line> lane)
         {
             //getAngleTo根据右手定则旋转(一般逆时针)
             var rotationangle = Vector3d.XAxis.GetAngleTo((lane.Last().EndPoint - lane.First().StartPoint), Vector3d.ZAxis);
             Matrix3d matrix = Matrix3d.Displacement(lane.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
-
             var transedPt = pt.TransformBy(matrix.Inverse());
 
             return transedPt;
@@ -168,8 +172,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <summary>
         /// 找到给定点投影到lanes尾的多线段和距离. 如果点在起点外,则返回投影到向前延长线到最末的距离和多线段.如果点在端点外,则返回点到端点的距离(负数)和多线段
         /// </summary>
-        /// <param name="lines"></param>
-        /// <param name="pt1"></param>
+        /// <param name="structure"></param>
         /// <param name="PolylineToEnd"></param>
         /// <returns></returns>
         public void prjPtToLineEnd(Polyline structure, out Polyline PolylineToEnd)
@@ -227,8 +230,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <summary>
         /// 找点到线的投影点,如果点在线外,则返回延长线上的投影点
         /// </summary>
-        /// <param name="lanes"></param>
-        /// <param name="pt1"></param>
+        /// <param name="structure"></param>
         /// <param name="prjPt"></param>
         /// <returns></returns>
         public void prjPtToLine(Polyline structure, out Point3d prjPt)
@@ -248,19 +250,16 @@ namespace ThMEPLighting.EmgLight.Service
             if (centerPtTrans.X < laneTrans.First().StartPoint.X)
             {
                 prjPt = lane[0].GetClosestPointTo(centerPt, true);
-
             }
             else if (centerPtTrans.X > laneTrans.Last().EndPoint.X)
             {
                 prjPt = lane.Last().GetClosestPointTo(centerPt, true);
-
             }
             else
             {
                 for (int i = 0; i < lane.Count; i++)
                 {
                     if (laneTrans[i].StartPoint.X <= centerPtTrans.X && centerPtTrans.X <= laneTrans[i].EndPoint.X)
-
                     {
                         prjPt = lane[i].GetClosestPointTo(centerPt, false);
                         break;
@@ -272,8 +271,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <summary>
         /// 找点到线的投影点,如果点在线外,则返回延长线上的投影点
         /// </summary>
-        /// <param name="lane"></param>
-        /// <param name="pt1"></param>
+        /// <param name="pt"></param>
         /// <param name="prjPt"></param>
         /// <returns></returns>
         private double distToLine(Point3d pt, out Point3d prjPt)
@@ -289,25 +287,20 @@ namespace ThMEPLighting.EmgLight.Service
             if (ptNew.X < laneTrans.First().StartPoint.X)
             {
                 prjPt = lane[0].GetClosestPointTo(pt, true);
-
             }
             else if (ptNew.X > laneTrans.Last().EndPoint.X)
             {
                 prjPt = lane.Last().GetClosestPointTo(pt, true);
-
             }
             else
             {
                 for (int i = 0; i < lane.Count; i++)
                 {
                     if (laneTrans[i].StartPoint.X <= ptNew.X && ptNew.X <= laneTrans[i].EndPoint.X)
-
                     {
                         prjPt = lane[i].GetClosestPointTo(pt, false);
                         break;
                     }
-
-
                 }
             }
 
@@ -316,87 +309,28 @@ namespace ThMEPLighting.EmgLight.Service
 
         }
 
-
         /// <summary>
         /// 两点中点到线的投影点
         /// </summary>
-        /// <param name="lines"></param>
         /// <param name="pt1"></param>
         /// <param name="pt2"></param>
         /// <param name="prjMidPt"></param>
         public void findMidPointOnLine(Point3d pt1, Point3d pt2, out Point3d prjMidPt)
         {
-
             Point3d midPoint;
 
             midPoint = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
             distToLine(midPoint, out prjMidPt);
 
-            // return distProject;
         }
 
-        //public static void findClosestStruct(List<Polyline> structList, Point3d Pt, List<Polyline> Layout, out double minDist, out Polyline closestStruct)
-        //{
-        //    minDist = 10000;
-        //    closestStruct = null;
-
-        //    for (int i = 0; i < structList.Count; i++)
-        //    {
-
-        //        var connectLayout = Layout.Where(x => x.StartPoint == structList[i].StartPoint ||
-        //                            x.StartPoint == structList[i].EndPoint ||
-        //                            x.EndPoint == structList[i].StartPoint ||
-        //                            x.EndPoint == structList[i].EndPoint).ToList();
-
-
-
-        //        if (structList[i].Distance(Pt) <= minDist)
-        //        {
-        //            minDist = structList[i].Distance(Pt);
-
-        //            if (connectLayout.Count > 0)
-        //            {
-        //                closestStruct = connectLayout.First();
-        //            }
-        //            else
-        //            {
-        //                closestStruct = structList[i];
-        //            }
-
-        //        }
-        //    }
-        //}
-
-        //public static bool FindPolyInExtendPoly(Polyline ExtendPoly, List<Polyline> structList, Polyline PolylineToEnd, double tol, List<Polyline> Layout, out Polyline tempStruct, out int index)
-        //{
-        //    bool bReturn = false;
-        //    index = -1;
-        //    var inExtendStruct = structList.Where(x =>
-        //    {
-        //        return (ExtendPoly.Contains(x) || ExtendPoly.Intersects(x));
-        //    }).ToList();
-
-        //    tempStruct = null;
-        //    var ptOnLine = PolylineToEnd.GetPointAtDist(tol);
-
-        //    if (inExtendStruct.Count > 0)
-        //    {
-        //        //框内有位置布灯
-        //        findClosestStruct(inExtendStruct, ptOnLine, Layout, out double minDist, out tempStruct);
-        //        bReturn = true;
-
-        //    }
-        //    else
-        //    {
-        //        index = -1;
-        //        bReturn = false;
-        //    }
-
-
-        //    return bReturn;
-        //}
-
-        private static void findClosestStruct(List<Polyline> structList, Point3d Pt, List<Polyline> Layout, double tol, out Polyline closestStruct)
+        /// <summary>
+        /// 找距离pt最近的构建
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <param name="Pt"></param>
+        /// <param name="closestStruct"></param>
+        private static void findClosestStruct(List<Polyline> structList, Point3d Pt, out Polyline closestStruct)
         {
             double minDist = 10000;
             closestStruct = null;
@@ -412,16 +346,14 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
-        /// 
+        /// 找ExtendPoly框内且离Pt点最近的构建
         /// </summary>
         /// <param name="structList"></param>
         /// <param name="Pt"></param>
         /// <param name="ExtendPoly"></param>
-        /// <param name="Layout"></param>
-        /// <param name="tol">structure tol以内有没有已经布点</param>
         /// <param name="closestStruct"></param>
         /// <returns></returns>
-        public bool FindClosestStructToPt(List<Polyline> structList, Point3d Pt, Polyline ExtendPoly, List<Polyline> Layout, out Polyline closestStruct)
+        public bool FindClosestStructToPt(List<Polyline> structList, Point3d Pt, Polyline ExtendPoly, out Polyline closestStruct)
         {
             bool bReturn = false;
             closestStruct = null;
@@ -430,7 +362,7 @@ namespace ThMEPLighting.EmgLight.Service
             if (inExtendStruct.Count > 0)
             {
                 //框内有位置布灯
-                findClosestStruct(inExtendStruct, Pt, Layout, TolLightRangeMin, out closestStruct);
+                findClosestStruct(inExtendStruct, Pt, out closestStruct);
                 bReturn = true;
             }
             else
@@ -440,6 +372,12 @@ namespace ThMEPLighting.EmgLight.Service
             return bReturn;
         }
 
+        /// <summary>
+        /// 判断框内是否有构建
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <param name="ExtendPoly"></param>
+        /// <param name="inExtendStruct"></param>
         private static void FindPolyInExtendPoly(List<Polyline> structList, Polyline ExtendPoly, out List<Polyline> inExtendStruct)
         {
             inExtendStruct = structList.Where(x =>
@@ -449,9 +387,10 @@ namespace ThMEPLighting.EmgLight.Service
 
         }
 
-        
-
-  
+        /// <summary>
+        /// 构建中心点坐标
+        /// </summary>
+        /// <param name="structList"></param>
         private void BuildStructCenter(List<List<Polyline>> structList)
         {
             foreach (var structureSide in structList)
@@ -466,6 +405,10 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        /// <summary>
+        /// 构建中心点在车道线坐标系的坐标
+        /// </summary>
+        /// <param name="structList"></param>
         private void BuildStructCenterInLaneCoor(List<List<Polyline>> structList)
         {
             foreach (var structureSide in structList)
@@ -477,17 +420,23 @@ namespace ThMEPLighting.EmgLight.Service
                         dictStructureCenterInLaneCoor.Add(s, TransformPointToLine(dictStructureCenter[s], lane));
                     }
                 }
-
-
             }
         }
 
+        /// <summary>
+        /// 找出车道线起点前后的已布构建,并按车道线排序
+        /// </summary>
+        /// <param name="layout"></param>
+        /// <param name="TolLane"></param>
+        /// <returns></returns>
         public List<List<Polyline>> BuildHeadLayout(List<Polyline> layout, double TolLane)
         {
             //车道线往前做框buffer
             var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, TolLightRangeMax);
             var FilteredLayout = StructureServiceLight.GetStruct(ExtendLineList, layout, TolLane);
             var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
+
+            DrawUtils.ShowGeometry(ExtendLineList, "lLaneHead", Color.FromRgb(141, 118, 12));
 
             BuildStructCenter(importLayout);
             BuildStructCenterInLaneCoor(importLayout);
@@ -498,6 +447,11 @@ namespace ThMEPLighting.EmgLight.Service
             return importLayout;
         }
 
+        /// <summary>
+        /// 计算构建中点在车道线坐标系下的坐标.并存入dictionary
+        /// </summary>
+        /// <param name="structure"></param>
+        /// <returns></returns>
         public Point3d getCenterInLaneCoor(Polyline structure)
         {
             Point3d ptTrans;
@@ -513,6 +467,11 @@ namespace ThMEPLighting.EmgLight.Service
             return ptTrans;
         }
 
+        /// <summary>
+        /// 计算构建中点并存入dictionary
+        /// </summary>
+        /// <param name="structure"></param>
+        /// <returns></returns>
         public Point3d getCenter(Polyline structure)
         {
             Point3d centerPt;
@@ -526,13 +485,15 @@ namespace ThMEPLighting.EmgLight.Service
             return centerPt;
         }
 
+        /// <summary>
+        /// 滤掉对于车道线重叠的构建
+        /// </summary>
         public void filterOverlapStruc()
         {
 
             for (int i = 0; i < usefulStruct.Count; i++)
             {
                 List<Polyline> removeList = new List<Polyline>();
-
                 for (int curr = 0; curr < usefulStruct[i].Count; curr++)
                 {
                     for (int j = curr; j < usefulStruct[i].Count; j++)
@@ -574,6 +535,9 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        /// <summary>
+        /// 过滤对于车道线防火墙凹点外的构建
+        /// </summary>
         public void filterStrucBehindFrame()
         {
             List<Polyline> removeList = new List<Polyline>();
@@ -598,6 +562,9 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        /// <summary>
+        /// 过滤防火墙相交或不在防火墙内的构建
+        /// </summary>
         public void getInsideFramePart()
         {
             List<Polyline> removeList = new List<Polyline>();

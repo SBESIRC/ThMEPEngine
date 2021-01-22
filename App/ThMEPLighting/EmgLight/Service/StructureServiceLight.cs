@@ -12,15 +12,16 @@ namespace ThMEPLighting.EmgLight.Service
     class StructureServiceLight
     {
         static double TolLight = 400;
+
         /// <summary>
         /// 获取停车线周边构建信息
         /// </summary>
-        /// <param name="polylines"></param>
-        /// <param name="columns"></param>
+        /// <param name="lines"></param>
+        /// <param name="polys"></param>
+        /// <param name="tol"></param>
         /// <returns></returns>
         public static List<Polyline> GetStruct(List<Line> lines, List<Polyline> polys, double tol)
         {
-
             var resPolys = lines.SelectMany(x =>
             {
                 var linePoly = StructUtils.ExpandLine(x, tol, 0, tol, 0);
@@ -37,13 +38,12 @@ namespace ThMEPLighting.EmgLight.Service
         /// <summary>
         /// 沿着线将柱分隔成上下两部分
         /// </summary>
-        /// <param name="columns"></param>
-        /// <param name="line"></param>
+        /// <param name="polyline"></param>
+        /// <param name="lines"></param>
+        /// <param name="tol"></param>
         /// <returns></returns>
         public static List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines, double tol)
         {
-
-
             //上下做框筛选框内构建. 不能直接transformToLine判断y值正负:打散很长的墙以后需要再筛选一遍
             var resPolys = lines.SelectMany(x =>
             {
@@ -76,7 +76,6 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structrues"></param>
         /// <param name="line"></param>
-        /// <param name="frame"></param>
         /// <param name="type"></param>
         /// <returns></returns>
         public static List<Polyline> getStructureParallelPart(List<Polyline> structrues, Line line, string type)
@@ -93,19 +92,14 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     layoutInfo = GetColumnParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
                 }
-
                 else if (type == "w")
                 {
                     layoutInfo = GetWallParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
                 }
-
-
                 if (layoutInfo != null)
                 {
                     layoutColumns.AddRange(layoutInfo);
-
                 }
-
             }
             return layoutColumns;
         }
@@ -116,6 +110,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="polyline"></param>
         /// <param name="pt"></param>
         /// <param name="dir"></param>
+        /// <param name="layoutPt"></param>
         /// <returns></returns>
         private static List<Polyline> GetWallParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
         {
@@ -146,13 +141,13 @@ namespace ThMEPLighting.EmgLight.Service
             return structureLayoutSegment;
         }
 
-
         /// <summary>
         /// 找到柱与车道线平行且最近的边
         /// </summary>
         /// <param name="polyline"></param>
         /// <param name="pt"></param>
         /// <param name="dir"></param>
+        /// <param name="layoutPt"></param>
         /// <returns></returns>
         private static List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
         {
@@ -184,7 +179,6 @@ namespace ThMEPLighting.EmgLight.Service
         /// 大于TolLight的墙拆分成TolLight(尾点不够和前面合并)
         /// </summary>
         /// <param name="walls"></param>
-        /// <param name="lane"></param>
         /// <returns></returns>
         public static List<Polyline> breakWall(List<Polyline> walls)
         {
@@ -214,7 +208,6 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     returnWalls.Add(wall);
                 }
-
             }
 
             return returnWalls;

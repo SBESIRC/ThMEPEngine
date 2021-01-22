@@ -17,7 +17,6 @@ using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.Common;
 using ThMEPEngineCore.LaneLine;
-using ThMEPLighting.ParkingStall.Business.UserInteraction;
 using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting
@@ -29,9 +28,8 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                string LayerStruct = "struct";
                 int bufferLength = 100;
-                string LayerLane = "lane";
+                string LayerLane = "lLane";
 
                 // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
@@ -73,7 +71,7 @@ namespace ThMEPLighting
                         {
                             for (int j = 0; j < mergedOrderedLane[i].Count; j++)
                             {
-                                DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), LayerLane, Color.FromRgb  (128,159,225));
+                                DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), LayerLane, Color.FromRgb(128, 159, 225));
                             }
                         }
                         DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), LayerLane, Color.FromRgb(255, 0, 0));
@@ -83,19 +81,13 @@ namespace ThMEPLighting
                         GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
                         getArchWall(acdb, bufferFrame, ref walls);
 
-                        DrawUtils.ShowGeometry(columns, LayerStruct, Color.FromRgb(0, 255, 0), LineWeight.LineWeight035);
-                        DrawUtils.ShowGeometry(walls, LayerStruct, Color.FromRgb(255, 255, 0), LineWeight.LineWeight035);
+                        //主车道布置信息
+                        LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
+                        var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
 
-                        bool debug = false;
-                        if (debug == false)
-                        {
-                            //主车道布置信息
-                            LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
-                            var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
+                        //布置构建
+                        InsertLightService.InsertSprayBlock(layoutInfo);
 
-                            InsertLightService.InsertSprayBlock(layoutInfo);
-
-                        }
                     }
                 }
             }
@@ -113,7 +105,6 @@ namespace ThMEPLighting
                 .Where(o => o.Layer == ThMEPLightingCommon.LANELINE_LAYER_NAME);
             laneLines.ForEach(x => objs.Add(x));
 
-            //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
@@ -147,6 +138,12 @@ namespace ThMEPLighting
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
         }
 
+        /// <summary>
+        /// 取建筑墙
+        /// </summary>
+        /// <param name="acdb"></param>
+        /// <param name="bufferedFrame"></param>
+        /// <param name="walls"></param>
         public void getArchWall(AcadDatabase acdb, Polyline bufferedFrame, ref List<Polyline> walls)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

@@ -29,12 +29,6 @@ namespace ThMEPLighting.EmgLight.Service
         {
             double rotateAngle = Vector3d.YAxis.GetAngleTo(layoutDir, Vector3d.ZAxis);
 
-            ////控制旋转角度
-            //if (layoutDir.DotProduct(-Vector3d.XAxis) < 0)
-            //{
-            //    rotateAngle = -rotateAngle;
-            //}
-
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
@@ -56,12 +50,5 @@ namespace ThMEPLighting.EmgLight.Service
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.EmgLightLayerName), false);
             }
         }
-
-        //private static string BlockDwgPath()
-        //{
-        //    return System.IO.Path.Combine(ThCADCommon.SupportPath(), ThMEPCommon.BroadcastDwgName);
-        //}
-
-        
     }
 }
