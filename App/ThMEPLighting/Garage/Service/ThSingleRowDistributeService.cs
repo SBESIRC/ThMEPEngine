@@ -8,36 +8,32 @@ using ThMEPLighting.Garage.Worker;
 
 namespace ThMEPLighting.Garage.Service
 {
-    public class ThSingleRowNumberService: ThNumberService
-    {        
-        private ThSingleRowNumberService(
+    public class ThSingleRowDistributeService
+    {
+        private ThLightGraphService LightGraph { get; set; }
+        private ThLightArrangeParameter ArrangeParameter { get; set; }
+        private ThSingleRowDistributeService(
             ThLightGraphService lightGraph,
             ThLightArrangeParameter arrangeParameter)
-            :base(lightGraph, arrangeParameter)
-        {            
+        {
+            LightGraph = lightGraph;
+            ArrangeParameter = arrangeParameter;
         }
-        public static void Number(ThLightGraphService lightGraph,
+        public static void Distribute(ThLightGraphService lightGraph,
             ThLightArrangeParameter arrangeParameter)
         {
-            var instance = new ThSingleRowNumberService(lightGraph, arrangeParameter);
-            instance.Number();
+            var instance = new ThSingleRowDistributeService(lightGraph, arrangeParameter);
+            instance.Distribute();
         }
-        protected override void Number()
+        private void Distribute()
         {
-            LightGraph.Links.ForEach(o => Number(o));
+            if(LightGraph!=null && ArrangeParameter!=null)
+            {
+                LightGraph.Links.ForEach(o => Distribute(o));
+            }            
         }
-        private void Number(ThLinkPath singleLinkPath)
+        private void Distribute(ThLinkPath singleLinkPath)
         {
-            var findStartIndex = ThFindStartIndexService.Find(LightGraph, singleLinkPath, ArrangeParameter.LoopNumber,true);  
-            if(!findStartIndex.IsFind)
-            {
-                return;
-            }
-            int startIndex = findStartIndex.StartIndex;
-            if(!singleLinkPath.Path[0].IsDX)
-            {
-                startIndex = findStartIndex.FindIndex;
-            }
             Point3d start = singleLinkPath.Start;            
             for (int i=0;i< singleLinkPath.Path.Count; i++)
             {
@@ -59,10 +55,10 @@ namespace ThMEPLighting.Garage.Service
                         break;  //拐弯
                     }
                 }
-                i = j - 1;                
-                //对当前直段编号
-                var numberInstance = ThSingleRowLightNumber.Build(edges, ArrangeParameter.LoopNumber, startIndex);
-                startIndex = numberInstance.LastIndex; //下一段的起始序号
+                i = j - 1;
+                //建造路线上的灯(计算或从图纸获取)
+                var singleRowNumberInstance=ThBuildSingleRowPosService.Build(start,edges, ArrangeParameter);
+                start = singleRowNumberInstance.EndPt; //下一段的起始点是上一段的结束点
             }
         }   
     }
