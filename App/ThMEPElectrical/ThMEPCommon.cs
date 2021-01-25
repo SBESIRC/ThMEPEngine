@@ -25,7 +25,7 @@ namespace ThMEPElectrical
         public const string BLINDAREA_HATCH_LAYER_NAME = "E-FD-DA";
 
         // 图层
-        public const short LANELINE_LAYER_COLORINDEX = 6;
+        public const short LANELINE_LAYER_COLORINDEX = 2;
         public const string LANELINE_LAYER_NAME = "E-LANE-CENTER";
 
         // 常量
