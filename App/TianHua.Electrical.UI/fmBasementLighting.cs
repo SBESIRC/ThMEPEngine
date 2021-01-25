@@ -125,7 +125,7 @@ namespace TianHua.Electrical.UI
             CollectParameter();
             ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate = true;
             SetFocusToDwgView();
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THCDZM");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THCDZMBZ");
         }
 
         private void BtnCircuitLabel_Click(object sender, EventArgs e)
