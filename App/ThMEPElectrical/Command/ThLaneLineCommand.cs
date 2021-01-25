@@ -65,15 +65,21 @@ namespace ThMEPElectrical.Command
         {
             using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
-                // 提取车道中心线
-                laneLineEngine.Recognize(database, frame.Vertices());
+                var nFrame = ThMEPFrameService.NormalizeEx(frame);
+                if (nFrame.Area > 0)
+                {
+                    // 提取车道中心线
+                    var bFrame = ThMEPFrameService.Buffer(nFrame, 10000.0);
+                    laneLineEngine.Recognize(database, bFrame.Vertices());
 
-                // 车道中心线处理
-                var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
-                var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
+                    // 车道中心线处理
+                    var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
+                    var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
 
-                // 框线相交处打断
-                return ThCADCoreNTSGeometryClipper.Clip(frame, lines.ToCollection());
+                    // 框线相交处打断
+                    return ThCADCoreNTSGeometryClipper.Clip(nFrame, lines.ToCollection());
+                }
+                return new DBObjectCollection();
             }
         }
     }

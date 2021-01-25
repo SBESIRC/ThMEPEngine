@@ -36,6 +36,10 @@ namespace ThMEPHVAC.CAD
                         objId.SetValveHeight(ValveModel.Length, ValveModel.LengthPropertyName);
                         break;
                 }
+                if (ValveModel.ValveVisibility == ThHvacCommon.BLOCK_VALVE_VISIBILITY_CHECK)
+                {
+                    objId.SetValveTextRotate(ValveModel.TextRotateAngle, ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE_FIRE);
+                }
 
                 var blockRef = acadDatabase.Element<BlockReference>(objId, true);
                 blockRef.TransformBy(ValveModel.Marix);

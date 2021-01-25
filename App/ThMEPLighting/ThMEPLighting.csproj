@@ -29,6 +29,7 @@
     <Compile Include="EmgLight\Model\StructModel.cs" />
     <Compile Include="EmgLight\Service\InsertLightService.cs" />
     <Compile Include="Common\LaneServer.cs" />
+    <Compile Include="EmgLight\Service\RemoveBlockService.cs" />
     <Compile Include="EmgLight\Service\StructureLayoutServiceLight.cs" />
     <Compile Include="EmgLight\Service\StructureServiceLight.cs" />
     <Compile Include="EmgLight\Service\StructUtils.cs" />
@@ -86,6 +87,7 @@
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
     <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />
     <Compile Include="Garage\Service\ThShortenLineService.cs" />
+    <Compile Include="Garage\Service\ThSingleRowDistributeService.cs" />
     <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
     <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
     <Compile Include="Garage\Service\ThLinkElbowService.cs" />

@@ -112,6 +112,20 @@ namespace ThMEPHVAC.CAD
             }
         }
 
+        public static void SetValveTextRotate(this ObjectId obj, double angle, string textrotateproperty)
+        {
+            var dynamicProperties = obj.GetDynProperties();
+            if (dynamicProperties.Contains(textrotateproperty))
+            {
+                dynamicProperties.SetValue(textrotateproperty, angle);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+
         public static Point3d GetValveBasePoint(this ObjectId obj) 
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

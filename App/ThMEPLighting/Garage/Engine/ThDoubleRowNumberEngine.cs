@@ -73,7 +73,8 @@ namespace ThMEPLighting.Garage.Engine
                 var firstLightGraph = ThLightGraphService.Build(firstLightEdges, FirstStart);
                 //布点
                 var distributedEdges = ThDoubleRowDistributeService.Distribute(
-                    firstLightGraph, ArrangeParameter, WireOffsetDataService);                
+                    firstLightGraph, ArrangeParameter, WireOffsetDataService);
+                UpdateLoopNumber(firstLightGraph);
                 //获取 firstLightGraph 中所有的边
                 var firstGraphEdges = new List<ThLightEdge>();
                 firstLightGraph.Links.ForEach(o=>firstGraphEdges.AddRange(o.Path));
@@ -182,6 +183,28 @@ namespace ThMEPLighting.Garage.Engine
                 });
                 SecondLightEdges.Add(secondLightEdge);
             });
+        }
+        /// <summary>
+        /// 自动计算灯回路编号
+        /// </summary>
+        /// <param name="lightGraph"></param>
+        private void UpdateLoopNumber(ThLightGraphService lightGraph)
+        {
+            if (ArrangeParameter.AutoCalculate)
+            {
+                int numOfLights = 0;
+                lightGraph.Links.ForEach(l => l.Path.ForEach(p => numOfLights += p.LightNodes.Count));
+                ArrangeParameter.LoopNumber = CalculateLoopNumber(numOfLights)*2;
+            }
+        }
+        private int CalculateLoopNumber(int lightNumbers)
+        {
+            double number = Math.Ceiling(lightNumbers * 1.0 / 25);
+            if (number < 4)
+            {
+                number = 4;
+            }
+            return (int)number;
         }
     }
 }

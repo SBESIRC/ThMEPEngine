@@ -10,8 +10,10 @@ namespace ThMEPLighting.Garage.Service
     {
         private Point3dCollection mAllVertexes = new Point3dCollection();
         private Point3d mLastVertex;
-        public ThDrawPolylineJigger()
+        private short Color { get; set; }
+        public ThDrawPolylineJigger(short color)
         {
+            Color = (short)(color%256);
         }
         ~ThDrawPolylineJigger()
         {
@@ -63,7 +65,7 @@ namespace ThMEPLighting.Garage.Service
             if (geo != null)
             {
                 geo.PushModelTransform(UCS);
-
+                draw.SubEntityTraits.Color = Color;
                 Point3dCollection tempPts = new Point3dCollection();
                 foreach (Point3d pt in mAllVertexes)
                 {

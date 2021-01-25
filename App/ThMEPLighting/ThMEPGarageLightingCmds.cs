@@ -27,12 +27,12 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var polyline = PolylineJig();
+                short colorIndex = 6;
+                var polyline = PolylineJig(colorIndex);
                 if (polyline == null)
                 {
                     return;
-                }
-                short colorIndex = 6;
+                }                
                 ThLayerTool.CreateLayer(ThGarageLightCommon.DxCenterLineLayerName,
                     Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
                 polyline.Layer = ThGarageLightCommon.DxCenterLineLayerName;
@@ -44,25 +44,25 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var polyline = PolylineJig();
+                short colorIndex = 1;
+                var polyline = PolylineJig(colorIndex);
                 if (polyline == null)
                 {
                     return;
-                }
-                short colorIndex = 1;
+                }                
                 ThLayerTool.CreateLayer(ThGarageLightCommon.FdxCenterLineLayerName,
                     Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
                 polyline.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
                 acdb.ModelSpace.Add(polyline);
             }
         }
-        private Polyline PolylineJig()
+        private Polyline PolylineJig(short colorIndex)
         {            
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 try
                 {
-                    var jigger = new ThDrawPolylineJigger();
+                    var jigger = new ThDrawPolylineJigger(colorIndex);
                     PromptResult jigRes;
                     do
                     {
@@ -94,8 +94,8 @@ namespace ThMEPLighting
             }
             return null;
         }
-        [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
-        public void ThCdzm()
+        [CommandMethod("TIANHUACAD", "THCDZMBZ", CommandFlags.Modal)]
+        public void THCDZMBZ()
         {
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
             {

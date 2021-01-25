@@ -126,8 +126,8 @@ namespace TianHua.Electrical.UI
             return Path.Combine(ThCADCommon.SupportPath(), ThBConvertCommon.BLOCK_MAP_RULES_FILE);
         }
 
-        [CommandMethod("TIANHUACAD", "THGLA", CommandFlags.Modal)]
-        public void THGLA()
+        [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
+        public void THCDZM()
         {
             if (BasementLightingUI == null)
             {
