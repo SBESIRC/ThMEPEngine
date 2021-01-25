@@ -42,6 +42,10 @@ namespace ThMEPElectrical.ConnectPipe.Service
         private List<List<Polyline>> ConnectMainParkingLines(KeyValuePair<Polyline, List<Polyline>> holeInfo,
             List<List<Polyline>> mainBlockLines, Dictionary<Polyline, List<BlockReference>> otherParkingBroadcast)
         {
+            if (mainBlockLines == null || mainBlockLines.Count <= 0)
+            {
+                return new List<List<Polyline>>();
+            }
             var otherBlockLines = otherParkingBroadcast.Select(x => x.Key).ToList();
             var otherBlockPts = otherParkingBroadcast.SelectMany(x => x.Value.Select(y => y.Position)).ToList();
 

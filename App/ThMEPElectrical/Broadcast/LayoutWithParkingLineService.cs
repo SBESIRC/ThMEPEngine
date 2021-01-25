@@ -13,7 +13,7 @@ namespace ThMEPElectrical.Broadcast
 {
     public class LayoutWithParkingLineService
     {
-        readonly double protectRange = 27000;
+        readonly double protectRange = 34000;
         readonly double oneProtect = 21000;
         readonly double tol = 6000;
         readonly double exLength = 800;

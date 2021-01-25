@@ -18,7 +18,7 @@ namespace ThMEPElectrical.Broadcast.Service
             Vector3d xDir = (line.EndPoint - line.StartPoint).GetNormal();
             Vector3d yDir = Vector3d.ZAxis.CrossProduct(xDir);
             Vector3d zDir = Vector3d.ZAxis;
-            Matrix3d matrix = new Matrix3d(
+            Matrix3d matrix = new Matrix3d( 
                 new double[] {
                     xDir.X, yDir.X, zDir.X, line.StartPoint.X,
                     xDir.Y, yDir.Y, zDir.Y, line.StartPoint.Y,

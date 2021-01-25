@@ -153,10 +153,11 @@ namespace ThMEPElectrical.ConnectPipe.Service
             Dictionary<Polyline, Line> polyDic = new Dictionary<Polyline, Line>();
             foreach (var poly in connectPolys)
             {
+                var handleLine = HandleConnectPolys(poly);
                 List<Line> lines = new List<Line>();
-                for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+                for (int i = 0; i < handleLine.NumberOfVertices - 1; i++)
                 {
-                    lines.Add(new Line(poly.GetPoint3dAt(i), poly.GetPoint3dAt(i + 1)));
+                    lines.Add(new Line(handleLine.GetPoint3dAt(i), handleLine.GetPoint3dAt(i + 1)));
                 }
                 var longestLine = lines.OrderByDescending(x => x.Length).First();
                 polyDic.Add(poly, longestLine);
@@ -189,15 +190,25 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 return polyline;
             }
 
-            List<Point3d> pts = new List<Point3d>() { polyline.StartPoint, polyline.EndPoint };
-            for (int i = 1; i < polyline.NumberOfVertices - 1; i++)
+            List<Point3d> allPts = new List<Point3d>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
-                Line line = new Line(polyline.GetPoint3dAt(i - 1), polyline.GetPoint3dAt(i + 1));
-                if (line.GetClosestPointTo(polyline.GetPoint3dAt(i), true).DistanceTo(polyline.GetPoint3dAt(i)) > 1)
+                if (!allPts.Any(x => x.IsEqualTo(polyline.GetPoint3dAt(i), new Tolerance(1, 1))))
                 {
-                    pts.Add(polyline.GetPoint3dAt(i));
+                    allPts.Add(polyline.GetPoint3dAt(i));
                 }
             }
+
+            List<Point3d> pts = new List<Point3d>() { allPts.First()};
+            for (int i = 1; i < allPts.Count - 1; i++)
+            {
+                Line line = new Line(allPts[i - 1], allPts[i + 1]);
+                if (!IsPointOnLine(line, allPts[i]))
+                {
+                    pts.Add(allPts[i]);
+                }
+            }
+            pts.Add(allPts.Last());
 
             Polyline resPoly = new Polyline();
             for (int i = 0; i < pts.Count; i++)

@@ -34,7 +34,8 @@ namespace ThMEPElectrical.ConnectPipe.Service
                     || x.Key.EndPoint.IsEqualTo(poly.Key.EndPoint)))
                     .Where(x => {
                         var xDir = (x.Value.EndPoint - x.Value.StartPoint).GetNormal();
-                        if (xDir.IsParallelTo(dir, new Tolerance(0.001, 0.001)) && GeUtils.CalParallelLineDistance(poly.Value, x.Value) > 10)
+                        var dsitance = GeUtils.CalParallelLineDistance(poly.Value, x.Value);
+                        if (xDir.IsParallelTo(dir, new Tolerance(0.001, 0.001)) && dsitance > 10 && dsitance < 1000)
                         {
                             return true;
                         }

@@ -14,6 +14,10 @@ namespace ThMEPElectrical.ConnectPipe.Service
         public List<Polyline> Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<Polyline> mainConnectPolys, 
             List<BlockReference> broadcasts, ref List<BlockReference> otherBroadcasts)
         {
+            if (mainConnectPolys.Count <= 0)
+            {
+                return new List<Polyline>();
+            }
             var connectPts = FindingPolyPoints(mainConnectPolys);
             var broadcastPts = broadcasts.OrderBy(x => connectPts.Select(y=>y.DistanceTo(x.Position)).OrderBy(y => y).First()).ToList();   //根据现有连接主车道距离排序
 

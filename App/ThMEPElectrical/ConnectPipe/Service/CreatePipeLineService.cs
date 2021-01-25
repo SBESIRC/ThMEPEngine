@@ -94,7 +94,8 @@ namespace ThMEPElectrical.ConnectPipe.Service
         /// <returns></returns>
         private Polyline CreateOfftakeByPolyline(Polyline polyline, BroadcastModel broadcast)
         {
-            var longestLine = GeUtils.CalLongestLineByPoly(new List<Polyline>() { polyline }).Values.First();
+            var handleLine = GeUtils.HandleConnectPolys(polyline);
+            var longestLine = GeUtils.CalLongestLineByPoly(new List<Polyline>() { handleLine }).Values.First();
             List<Point3d> pts = new List<Point3d>() { longestLine.StartPoint, longestLine.EndPoint };
             pts = pts.OrderBy(x => x.DistanceTo(broadcast.Position)).ToList();
 
