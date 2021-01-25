@@ -23,7 +23,7 @@ namespace ThMEPLighting.EmgLight.Service
         private Polyline frame;
 
         int TolLightRangeMin = 4000;
-        int TolLightRangeMax = 8500;
+        int TolLightRangeMax = 8900;
 
         public StructureLayoutServiceLight(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame, int TolLightRangeMin, int TolLightRangeMax)
         {

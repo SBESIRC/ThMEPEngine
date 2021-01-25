@@ -17,7 +17,7 @@ namespace ThMEPLighting.EmgLight
         double TolUniformSideLenth = 0.6;
         int TolAvgColumnDist = 7900;
         int TolLightRangeMin = 4000;
-        int TolLightRangeMax = 8600;
+        int TolLightRangeMax = 8900;
         int TolLaneProtect = 1000;
 
         string LayerStruct = "lStruct";
@@ -55,13 +55,15 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
+                DrawUtils.ShowGeometry(frame, "lFrame", Color.FromRgb(0, 255, 255), LineWeight.LineWeight035);
+                
                 //获取该车道线上的构建
                 var closeColumn = StructureServiceLight.GetStruct(lane, columns, TolLane);
                 var closeWall = StructureServiceLight.GetStruct(lane, walls, TolLane);
 
                 //找到构建上可布置面,用第一条车道线的头尾判定
-                var filterColmuns = StructureServiceLight.getStructureParallelPart(closeColumn, lane.First(), "c");
-                var filterWalls = StructureServiceLight.getStructureParallelPart(closeWall, lane.First(), "w");
+                var filterColmuns = StructureServiceLight.getStructureParallelPart(closeColumn, lane);
+                var filterWalls = StructureServiceLight.getStructureParallelPart(closeWall, lane);
 
                 //破墙
                 var brokeWall = StructureServiceLight.breakWall(filterWalls);
@@ -74,17 +76,23 @@ namespace ThMEPLighting.EmgLight
 
                 //滤掉重合部分
                 layoutServer.filterOverlapStruc();
-                //滤掉框后边的部分
-                layoutServer.filterStrucBehindFrame();
+               
                 //滤掉框外边的部分
                 layoutServer.getInsideFramePart();
+                
+                //滤掉框后边的部分
+                layoutServer.filterStrucBehindFrame();
+                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
 
-                DrawUtils.ShowGeometry(usefulColumns[0], LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(usefulColumns[1], LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(usefulWalls[0], LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(usefulWalls[1], LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
+                if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
+                    layoutServer.UsefulWalls[0].Count == 0 && layoutServer.UsefulWalls[1].Count == 0)
+                {
+                    continue;
+                }
 
-                if (usefulColumns[0].Count == 0 && usefulColumns[1].Count == 0 && usefulWalls[0].Count == 0 && usefulWalls[1].Count == 0)
+                var b = false;
+                if (b == true)
                 {
                     continue;
                 }

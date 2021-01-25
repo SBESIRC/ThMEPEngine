@@ -78,24 +78,19 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="line"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static List<Polyline> getStructureParallelPart(List<Polyline> structrues, Line line, string type)
+        public static List<Polyline> getStructureParallelPart(List<Polyline> structrues, List<Line> lane)
         {
             List<Polyline> layoutColumns = new List<Polyline>();
 
-            var LineDir = (line.EndPoint - line.StartPoint).GetNormal();
+            var LineDir = (lane.Last ().EndPoint - lane.First().StartPoint).GetNormal();
 
             foreach (Polyline structure in structrues)
             {
                 //平行于车道线的边
                 List<Polyline> layoutInfo = null;
-                if (type == "c")
-                {
-                    layoutInfo = GetColumnParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
-                }
-                else if (type == "w")
-                {
-                    layoutInfo = GetWallParallelPart(structure, line.StartPoint, LineDir, out Point3d closetPt);
-                }
+               
+                layoutInfo = GetWallParallelPart(structure, LineDir);
+
                 if (layoutInfo != null)
                 {
                     layoutColumns.AddRange(layoutInfo);
@@ -112,13 +107,10 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="dir"></param>
         /// <param name="layoutPt"></param>
         /// <returns></returns>
-        private static List<Polyline> GetWallParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        private static List<Polyline> GetWallParallelPart(Polyline polyline, Vector3d dir)
         {
 
-            var closetPt = polyline.GetClosestPointTo(pt, false);
-            layoutPt = closetPt;
             List<Polyline> structureSegment = new List<Polyline>();
-
 
             for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
@@ -149,11 +141,10 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="dir"></param>
         /// <param name="layoutPt"></param>
         /// <returns></returns>
-        private static List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir, out Point3d layoutPt)
+        private static List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir)
         {
             var closetPt = polyline.GetClosestPointTo(pt, false);
-            layoutPt = closetPt;
-
+            
             List<Polyline> structureSegment = new List<Polyline>();
             for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
