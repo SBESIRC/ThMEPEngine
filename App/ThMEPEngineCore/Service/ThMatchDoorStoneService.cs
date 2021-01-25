@@ -1,188 +1,93 @@
-﻿using System;
-using ThCADCore.NTS;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using System.Text.RegularExpressions;
-using System.Linq;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.CAD;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThMatchDoorStoneService
     {
-        /// <summary>
-        /// 返回门的轮廓
-        /// </summary>
-        private List<Polyline> Outlines { get; set; }
-        private double FindRatio { get; set; }
-        private ThCADCoreNTSSpatialIndex DoorStoneSpatialIndex { get; set; }
-        private ThCADCoreNTSSpatialIndex DoorMarkSpatialIndex { get; set; }
-        private DBObjectCollection DoorStones { get; set; }
-        private DBObjectCollection DoorMarks { get; set; }
-        private ThMatchDoorStoneService(
-            DBObjectCollection doorStones, 
-            DBObjectCollection texts,
-            double findRatio=1.0)
+        private Tuple<Line,Line> Pair { get; set; }
+        private List<Polyline> Stones { get; set; }
+        private Vector3d Direction { get; set; }
+        private double Length { get; set; }
+        private double DistanceTolerance { get; set; } = 5.0;
+        private double AngleTolerance { get; set; } = 2.0;
+        private ThMatchDoorStoneService(List<Polyline> stones, Vector3d direction,double length)
         {
-            DoorStones = doorStones;
-            DoorMarks = texts;
-            FindRatio = findRatio;
-            DoorStoneSpatialIndex = new ThCADCoreNTSSpatialIndex(doorStones);
-            DoorMarkSpatialIndex = new ThCADCoreNTSSpatialIndex(texts);
-            Outlines = new List<Polyline>();
+            Stones = stones;
+            Direction = direction;
+            Length = length;
         }
-        public static List<Polyline> Match(
-            DBObjectCollection doorStones, 
-            DBObjectCollection texts, 
-            double findRatio = 1.0)
+        public static Tuple<Line, Line> Match(List<Polyline> stones,Vector3d direction,double length)
         {
-            var instance = new ThMatchDoorStoneService(doorStones, texts, findRatio);
+            var instance = new ThMatchDoorStoneService(stones, direction, length);
             instance.Match();
-            return instance.Outlines;
+            return instance.Pair;
         }
         private void Match()
         {
-            DoorMarks.Cast<Entity>().ForEach(o =>
+            for(int i=0;i<Stones.Count-1;i++)
+            {
+                var firstLines = Stones[i].ToLines();
+                for (int j = i + 1; j < Stones.Count; j++)
                 {
-                    var content = GetTextString(o);
-                    var strList = Parse(content);
-                    double length = 0.0;
-                    if(strList.Count>=2 && strList.Count <= 3)
+                    var secondLines = Stones[j].ToLines();
+                    var pairs = Match(firstLines, secondLines);
+                    if(pairs.Count==1)
                     {
-                       length = GetLength(strList);
+                        Pair = pairs[0];
+                        break;
                     }
-                    if (length > 0)
+                }
+                if(Pair != null)
+                {
+                    break;
+                }
+            }
+        }
+        private List<Tuple<Line, Line>> Match(List<Line> firstLines,List<Line> secondLines)
+        {
+            var pairs = new List<Tuple<Line, Line>>();
+            firstLines.ForEach(f =>
+            {
+                var firstDir = f.StartPoint.GetVectorTo(f.EndPoint);
+                secondLines.ForEach(s =>
+                {
+                    var secondDir = s.StartPoint.GetVectorTo(s.EndPoint);
+                    //保持判断顺序
+                    if(
+                    ThGeometryTool.IsParallelToEx(firstDir, secondDir) &&
+                    IsRightAngle(firstDir,AngleTolerance) &&
+                    IsEqual(f,s,DistanceTolerance) && 
+                    IsEqualToLength(f, s,DistanceTolerance))
                     {
-                        var info = GetTextInfo(o);
-                        if (info != null)
-                        {
-                            double height = info.Item1;
-                            Line center= info.Item2;
-                            var envelope = CreateEnvelope(center, height, length);
-                            var stones = FindStones(envelope);
-                            var vec = center.StartPoint.GetVectorTo(center.EndPoint);
-                            //通过文字周围的门垛找到匹配的一对，创建其轮廓
-                            var outline = ThBuildDoorService.Build(stones, vec, length);
-                            if(outline!=null)
-                            {
-                                Outlines.Add(outline);
-                            }
-                        }
+                        pairs.Add(Tuple.Create(f,s));
                     }
                 });
+            });
+            return pairs;
         }
-        private List<Polyline> FindStones(Polyline envelope)
+        private bool IsRightAngle(Vector3d vec,double tolerance=2.0)
         {
-           return DoorStoneSpatialIndex.SelectCrossingPolygon(envelope).Cast<Polyline>().ToList();
+            var rad = Direction.GetAngleTo(vec);
+            var ang = (rad / Math.PI) * 180.0;
+            ang %= 180.0;
+            return Math.Abs(ang-90.0)<= tolerance;
         }
-        private Polyline CreateEnvelope(Line center,double height,double length)
+        private bool IsEqual(Line first, Line second, double tolerance = 5.0)
         {
-            var vec = center.StartPoint.GetVectorTo(center.EndPoint).GetNormal();
-            var midPt = ThGeometryTool.GetMidPt(center.StartPoint, center.EndPoint);
-            var sp = midPt - vec.MultiplyBy(length / 2.0);
-            var ep = midPt + vec.MultiplyBy(length / 2.0);
-            return ThDrawTool.ToOutline(sp, ep, (FindRatio + 0.5) * height);
+            return Math.Abs(first.Length - second.Length) <= tolerance;
         }
-        private string GetTextString(Entity ent)
+        private bool IsEqualToLength(Line first, Line second, double tolerance = 5.0)
         {
-            if(ent is DBText dbText)
-            {
-                return dbText.TextString;
-            }
-            else if(ent is MText mText)
-            {
-                return mText.Contents;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-        private double GetLength(List<string> values)
-        {
-            string lengthStr = values[1];
-            double length = double.Parse(lengthStr.Substring(0, 2))*100.0;
-            if(values.Count==3)
-            {
-                switch(values[2])
-                {
-                    case "a":
-                        length += 50.0;
-                        break;
-                    default:
-                        length += 0.0;
-                        break;
-                }
-            }
-            return length;
-        }
-        private List<string> Parse(string content)
-        {
-            var results = new List<string>();
-            string pattern1 = @"[M]{1}\d+[a-z*]?";
-            var regex = new Regex(pattern1);
-            var matches = regex.Matches(content);
-            if(matches.Count==1)
-            {
-                if(matches[0].Value.Length==content.Length)
-                {
-                    results.Add("M");
-                    string pattern2 = @"\d+";
-                    var regex1 = new Regex(pattern2);
-                    results.Add(regex1.Match(matches[0].Value).Value);
-                    string pattern3 = @"[a-z]{1}$";
-                    var regex2 = new Regex(pattern3);
-                    var matches1 = regex2.Matches(matches[0].Value);
-                    if(matches1.Count==1)
-                    {
-                        results.Add(matches1[0].Value);
-                    }
-                    return results;
-                }
-                else
-                {
-                    return results;
-                }
-            }
-            else
-            {
-                return results;
-            }
-        }
-        /// <summary>
-        /// 获取文字的高度和中心线
-        /// </summary>
-        /// <param name="ent"></param>
-        /// <returns></returns>
-        private Tuple<double,Line> GetTextInfo(Entity ent)
-        {
-            var boundary = new Polyline();
-            if (ent is DBText dbText)
-            {
-                boundary= dbText.TextOBB();
-            }
-            else if (ent is MText mText)
-            {
-                boundary = mText.TextOBB();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            var lines=boundary.ToLines();
-            lines=lines.OrderBy(o => o.Length).ToList();
-            if(lines.Count==4)
-            {
-                var sp = ThGeometryTool.GetMidPt(lines[0].StartPoint, lines[0].EndPoint);
-                var ep = ThGeometryTool.GetMidPt(lines[1].StartPoint, lines[1].EndPoint);
-                return Tuple.Create(Math.Max(lines[0].Length, lines[2].Length),new Line(sp, ep));
-            }
-            else
-            {
-                return null;
-            }
+            var firstMidPt = first.StartPoint.GetMidPt(first.EndPoint);
+            var secondMidPt = second.StartPoint.GetMidPt(second.EndPoint);
+            return Math.Abs(firstMidPt.DistanceTo(secondMidPt)-Length) <= tolerance;
         }
     }
 }
