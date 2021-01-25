@@ -208,7 +208,10 @@ namespace ThMEPElectrical
 
                     //车道广播连管
                     ConnetPipeService connetPipeService = new ConnetPipeService();
-                    connetPipeService.ConnetPipe(pline, handleLines, broadcast);
+                    var resPolys = connetPipeService.ConnetPipe(pline, handleLines, broadcast);
+
+                    //创建连管线
+                    InsertConnectPipeService.InsertConnectPipe(resPolys);
                 }
             }
         }

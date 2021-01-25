@@ -18,11 +18,11 @@ namespace ThMEPElectrical.ConnectPipe
     {
         readonly double tol = 8000;
 
-        public void ConnetPipe(KeyValuePair<Polyline, List<Polyline>> plInfo, List<Line> parkingLines, List<BlockReference> broadcasts)
+        public List<Polyline> ConnetPipe(KeyValuePair<Polyline, List<Polyline>> plInfo, List<Line> parkingLines, List<BlockReference> broadcasts)
         {
             if (broadcasts.Count <= 0)
             {
-                return;
+                return new List<Polyline>();
             }
             broadcasts = broadcasts.Distinct().ToList();
 
@@ -55,7 +55,9 @@ namespace ThMEPElectrical.ConnectPipe
             
             //创建真实连管线
             CreatePipeLineService createPipeLineService = new CreatePipeLineService();
-            createPipeLineService.CreatePipe(correctPipe, broadcasts);
+            var resPolys = createPipeLineService.CreatePipe(correctPipe, broadcasts);
+
+            return resPolys;
         }
 
         /// <summary>

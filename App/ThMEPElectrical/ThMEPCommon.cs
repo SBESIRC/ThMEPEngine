@@ -15,6 +15,10 @@ namespace ThMEPElectrical
         public static readonly string BroadcastBlockName = "E-BFAS410-4";     //消防应急广播图块名
         public static readonly string BlindAreaLayer = "E-MQ-XFGB";     //广播盲区图层
 
+        //连管
+        public static readonly string ConnectPipeLayerName = "E-BRST-WIRE";     //广播连管图层
+        public static readonly string ConnectPipeLineType = "TH_B";     //广播连管线型
+
         // 烟感温感
         public const string SENSORLAYERNMAE = "E-FAS-DEVC";
         public const string SMOKE_SENSOR_BLOCK_NAME = "E-BFAS110";

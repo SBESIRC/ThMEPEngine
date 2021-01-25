@@ -15,7 +15,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
     {
         readonly double tol = 1000;
         readonly double checkTol = 250;
-        public void CreatePipe(List<Polyline> connectPolys, List<BlockReference> broadcasts)
+        public List<Polyline> CreatePipe(List<Polyline> connectPolys, List<BlockReference> broadcasts)
         {
             //计算小支管信息
             Dictionary<Polyline, List<Polyline>> connectPtInfo = new Dictionary<Polyline, List<Polyline>>();
@@ -33,13 +33,8 @@ namespace ThMEPElectrical.ConnectPipe.Service
 
             //处理有相交的连接线
             resPolys = CorrectIntersectPipeLine(resPolys);
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var item in resPolys)
-                {
-                    db.ModelSpace.Add(item);
-                }
-            }
+
+            return resPolys;
         }
 
         /// <summary>
