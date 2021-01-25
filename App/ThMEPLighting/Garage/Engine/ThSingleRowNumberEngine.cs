@@ -49,12 +49,7 @@ namespace ThMEPLighting.Garage.Engine
                 //找到从ports中的点出发拥有最长边的图
                 lightGraph = ThFindLongestPathService.Find(ports, lightGraph);
                 ThSingleRowDistributeService.Distribute(lightGraph, ArrangeParameter);
-                if(ArrangeParameter.AutoCalculate)
-                {
-                    int numOfLights = 0;
-                    lightGraph.Links.ForEach(l => l.Path.ForEach(p => numOfLights += p.LightNodes.Count));
-                    ArrangeParameter.LoopNumber = CalculateLoopNumber(numOfLights);
-                }
+                UpdateLoopNumber(lightGraph);                
                 ThSingleRowNumberService.Number(lightGraph, ArrangeParameter);
                 lightGraph.Links.ForEach(o => DxLightEdges.AddRange(o.Path));
                 lightEdges = LineEdges.Where(o => o.IsTraversed == false).ToList();                
@@ -74,6 +69,15 @@ namespace ThMEPLighting.Garage.Engine
             } while (lightEdges.Count > 0);
             //指定为中心线
             DxLightEdges.ForEach(o => o.Pattern = EdgePattern.Center);
+        }
+        private void UpdateLoopNumber(ThLightGraphService lightGraph)
+        {
+            if (ArrangeParameter.AutoCalculate)
+            {
+                int numOfLights = 0;
+                lightGraph.Links.ForEach(l => l.Path.ForEach(p => numOfLights += p.LightNodes.Count));
+                ArrangeParameter.LoopNumber = CalculateLoopNumber(numOfLights);
+            }
         }
         private int CalculateLoopNumber(int lightNumbers)
         {
