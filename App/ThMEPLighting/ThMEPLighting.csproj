@@ -86,6 +86,7 @@
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
     <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />
     <Compile Include="Garage\Service\ThShortenLineService.cs" />
+    <Compile Include="Garage\Service\ThSingleRowDistributeService.cs" />
     <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
     <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
     <Compile Include="Garage\Service\ThLinkElbowService.cs" />

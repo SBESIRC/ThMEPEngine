@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using System;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -46,7 +47,14 @@ namespace ThMEPLighting.Garage.Engine
                 //对灯线边建图
                 var lightGraph = ThLightGraphService.Build(lightEdges, findSp);
                 //找到从ports中的点出发拥有最长边的图
-                lightGraph = ThFindLongestPathService.Find(ports, lightGraph);          
+                lightGraph = ThFindLongestPathService.Find(ports, lightGraph);
+                ThSingleRowDistributeService.Distribute(lightGraph, ArrangeParameter);
+                if(ArrangeParameter.AutoCalculate)
+                {
+                    int numOfLights = 0;
+                    lightGraph.Links.ForEach(l => l.Path.ForEach(p => numOfLights += p.LightNodes.Count));
+                    ArrangeParameter.LoopNumber = CalculateLoopNumber(numOfLights);
+                }
                 ThSingleRowNumberService.Number(lightGraph, ArrangeParameter);
                 lightGraph.Links.ForEach(o => DxLightEdges.AddRange(o.Path));
                 lightEdges = LineEdges.Where(o => o.IsTraversed == false).ToList();                
@@ -66,6 +74,15 @@ namespace ThMEPLighting.Garage.Engine
             } while (lightEdges.Count > 0);
             //指定为中心线
             DxLightEdges.ForEach(o => o.Pattern = EdgePattern.Center);
+        }
+        private int CalculateLoopNumber(int lightNumbers)
+        {
+            double number = Math.Ceiling(lightNumbers*1.0 / 25);
+            if(number < 3)
+            {
+                number = 3;
+            }
+            return (int)number;
         }
     }
 }
