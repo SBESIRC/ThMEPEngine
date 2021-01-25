@@ -31,6 +31,30 @@ namespace ThMEPHVAC.Entity
         public double RotationAngle { get; set; }
         public double ValveOffsetFromCenter { get; set; }
         public ValveGroupPosionType ValvePosionType { get; set; }
+        public double TextRotateAngle 
+        {
+            get
+            {
+                return SetTextAngle();
+            }
+        }
+        private double SetTextAngle()
+        {
+            switch (ValveVisibility)
+            {
+                case ThHvacCommon.BLOCK_VALVE_VISIBILITY_CHECK:
+                    if (RotationAngle > 0 && RotationAngle <= Math.PI)
+                    {
+                        return Math.PI;
+                    }
+                    else
+                    {
+                        return 0;
+                    }
+                default:
+                    return 0;
+            }
+        }
         public Matrix3d Marix
         {
             get

@@ -110,27 +110,27 @@ namespace ThMEPHVAC.Duct
             {
                 case "消防排烟":
                 case "消防排烟兼平时排风":
-                    return "280度防火阀（反馈）FDH";
+                    return ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_280;
                 case "厨房排油烟":
-                    return "150度防火阀";
+                    return ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_150;
                 default:
-                    return "70度防火阀（反馈）FDS";
+                    return ThHvacCommon.BLOCK_VALVE_VISIBILITY_FIRE_70;
             }
         }
 
         public static string CheckValveModelName()
         {
-            return "风管止回阀";
+            return ThHvacCommon.BLOCK_VALVE_VISIBILITY_CHECK;
         }
 
         public static string SilencerModelName()
         {
-            return "ZP100";
+            return ThHvacCommon.BLOCK_VALVE_VISIBILITY_SILENCER_100;
         }
 
         public static string ElectricValveModelName()
         {
-            return "电动多叶调节阀";
+            return ThHvacCommon.BLOCK_VALVE_VISIBILITY_ELECTRIC;
         }
 
         public static string HoleLayerName()

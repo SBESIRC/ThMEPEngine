@@ -104,6 +104,7 @@
         public const string BLOCK_DYNAMIC_PROPERTY_INLET_HORIZONTAL = "进风口横";
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_VERTICAL = "出风口竖";
         public const string BLOCK_DYNAMIC_PROPERTY_OUTLET_HORIZONTAL = "出风口横";
+        public const string BLOCK_DYNAMIC_PROPERTY_TEXT_ROTATE_FIRE = "字旋转";
 
         //阀块动态属性名
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY = "可见性";
@@ -113,5 +114,14 @@
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH = "宽度";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH = "长度";
         public const string BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT = "字高";
+
+        //阀块可见性属性值
+        public const string BLOCK_VALVE_VISIBILITY_FIRE_280 = "280度防火阀（反馈）FDH";
+        public const string BLOCK_VALVE_VISIBILITY_FIRE_150 = "150度防火阀";
+        public const string BLOCK_VALVE_VISIBILITY_FIRE_70 = "70度防火阀（反馈）FDS";
+        public const string BLOCK_VALVE_VISIBILITY_CHECK = "风管止回阀";
+        public const string BLOCK_VALVE_VISIBILITY_SILENCER_100 = "ZP100";
+        public const string BLOCK_VALVE_VISIBILITY_SILENCER_200 = "ZP200";
+        public const string BLOCK_VALVE_VISIBILITY_ELECTRIC = "电动多叶调节风阀";
     }
 }
