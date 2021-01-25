@@ -370,9 +370,9 @@ namespace ThMEPEngineCore.LaneLine
             var line_inclined = new List<Line>();
             foreach (var line in lines)
             {
-                var angle_x = line.Delta.ToVector2d().GetAngleTo(new Vector2d(1.0, 0.0));
+                var angle_x = line.LineDirection().ToVector2d().GetAngleTo(new Vector2d(1.0, 0.0));
                 angle_x = Math.Min(angle_x, Math.PI - angle_x);
-                var angle_y = line.Delta.ToVector2d().GetAngleTo(new Vector2d(0.0, 1.0));
+                var angle_y = line.LineDirection().ToVector2d().GetAngleTo(new Vector2d(0.0, 1.0));
                 angle_y = Math.Min(angle_y, Math.PI - angle_y);
                 if (angle_x < Math.PI / 18.0 || angle_y < Math.PI / 18.0)
                 {
@@ -459,10 +459,10 @@ namespace ThMEPEngineCore.LaneLine
             {
                 if (o is Line line)
                 {
-                    // 排除弧线两端直线平行或近乎平行的情况
+                    // 排除弧线两端直线平行或近乎平行的情况 “U型”
                     var vector_another = isStartPoint ? new Vector2d(-Math.Sin(arc.EndAngle), Math.Cos(arc.EndAngle)) : new Vector2d(Math.Sin(arc.StartAngle), -Math.Cos(arc.StartAngle));
-                    var angle = line.Delta.ToVector2d().GetAngleTo(vector_another);
-                    if (Math.Min(angle, Math.PI - angle) > Math.PI / 18.0)  // 容差为12°
+                    var angle = line.LineDirection().ToVector2d().GetAngleTo(vector_another);
+                    if (Math.Min(angle, Math.PI - angle) > Math.PI / 90.0)  // 容差为2°
                     {
                         candidates.Add(o);
                     }
@@ -485,7 +485,8 @@ namespace ThMEPEngineCore.LaneLine
             if (candidates.Count == 0)
             {
                 var vector_another = isStartPoint ? new Vector2d(-Math.Sin(arc.EndAngle), Math.Cos(arc.EndAngle)) : new Vector2d(Math.Sin(arc.StartAngle), -Math.Cos(arc.StartAngle));
-                var angle2X_a = vector_another.GetAngleTo(new Vector2d(1.0, 0.0));
+                // 弧的另一端点延伸方向与x轴的夹角
+                var angle2X_a = vector_another.GetAngleTo(new Vector2d(1.0, 0.0)); 
                 angle2X_a = Math.Min(angle2X_a, Math.PI - angle2X_a);
                 if (angle2X_a < Math.PI / 90.0 || Math.PI / 2.0 - angle2X_a < Math.PI / 90.0) //容差为2°
                 {
@@ -608,7 +609,7 @@ namespace ThMEPEngineCore.LaneLine
 
         private static bool IsLooseCollinear(Line line1, Line line2, double tolerance)
         {
-            var angle = line1.Delta.GetAngleTo(line2.Delta);
+            var angle = line1.LineDirection().GetAngleTo(line2.LineDirection());
             angle = Math.Min(angle, Math.PI - angle);
             if (angle < tolerance)
             {
@@ -623,7 +624,7 @@ namespace ThMEPEngineCore.LaneLine
             lines.ForEach(o =>
             {
                 // 找到与线段o有重合点、重合段的线段
-                var collinear = lines.FindAll(x => (x.Delta.GetAngleTo(o.Delta) < tolerance || x.Delta.GetAngleTo(o.Delta) > (Math.PI - tolerance)) &&
+                var collinear = lines.FindAll(x => IsLooseCollinear(o, x, tolerance) &&
                 (Math.Abs(x.StartPoint.DistanceTo(o.StartPoint) + x.StartPoint.DistanceTo(o.EndPoint) - o.Length) < 1.0 ||
                 Math.Abs(x.EndPoint.DistanceTo(o.StartPoint) + x.EndPoint.DistanceTo(o.EndPoint) - o.Length) < 1.0));
                 collinear.Remove(o);
