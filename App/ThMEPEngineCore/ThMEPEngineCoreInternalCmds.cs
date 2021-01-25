@@ -255,29 +255,5 @@ namespace ThMEPEngineCore
                 }
             }
         }
-
-        [CommandMethod("TIANHUACAD", "THFRAME", CommandFlags.Modal)]
-        public void ThFrame()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
-                }
-                objs.Cast<Polyline>().Select(o => ThMEPFrameService.Normalize(o)).ForEach(o =>
-                {
-                    acadDatabase.ModelSpace.Add(o);
-                    o.SetDatabaseDefaults();
-                });
-            }
-        }
     }
 }

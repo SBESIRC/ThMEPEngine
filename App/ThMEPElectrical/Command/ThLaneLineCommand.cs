@@ -51,8 +51,8 @@ namespace ThMEPElectrical.Command
                 foreach (var frameId in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
-                    var normalizedFrame = ThMEPFrameService.Normalize(frame);
-                    LoadLaneLines(acadDatabase.Database, normalizedFrame).Cast<Entity>().ForEach(o =>
+                    var lines = LoadLaneLines(acadDatabase.Database, frame);
+                    lines.Cast<Curve>().Where(o => o is Line).ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
