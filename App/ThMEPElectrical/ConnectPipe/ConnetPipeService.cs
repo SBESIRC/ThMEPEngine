@@ -16,7 +16,7 @@ namespace ThMEPElectrical.ConnectPipe
 {
     public class ConnetPipeService
     {
-        readonly double tol = 6000;
+        readonly double tol = 8000;
 
         public void ConnetPipe(KeyValuePair<Polyline, List<Polyline>> plInfo, List<Line> parkingLines, List<BlockReference> broadcasts)
         {

@@ -37,11 +37,6 @@ namespace ThMEPElectrical.Broadcast.Service
                 {
                     columns.Remove(orderColumns.Last());
                 }
-                //var moveColumns = polyCols.Where(x => !plFrame.Contains(StructUtils.GetStructCenter(x))).ToList();
-                //foreach (var col in moveColumns)
-                //{
-                //    columns.Remove(col);
-                //}
             }
             
             return columns;
@@ -53,8 +48,7 @@ namespace ThMEPElectrical.Broadcast.Service
             Line layoutLine = IsLayoutColumn(newPoly, pt, dir);
             Point3dCollection pts = new Point3dCollection();
             layoutLine.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-            if (pts.Count > 0)
-            {
+            if (pts.Count > 0)            {
                 return false;
             }
 
