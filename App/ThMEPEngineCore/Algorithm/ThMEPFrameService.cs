@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
@@ -19,12 +20,42 @@ namespace ThMEPEngineCore.Algorithm
 
         public static Polyline Normalize(Polyline frame)
         {
-            // 处理框线不闭合的情况
-            var clone = frame.Clone() as Polyline;
+            // 创建封闭多段线
+            var clone = frame.WashClone() as Polyline;
             clone.Closed = true;
 
             // 处理各种“Invalid Polygon“的情况
             return clone.MakeValid().Cast<Polyline>().OrderByDescending(o => o.Area).First();
+        }
+
+        public static Polyline NormalizeEx(Polyline frame)
+        {
+            if (IsClosed(frame))
+            {
+                return Normalize(frame);
+            }
+            // 返回"Dummy"框线
+            // 暂时不支持分割线的情况
+            return new Polyline();
+        }
+
+        public static Polyline Buffer(Polyline frame, double distance)
+        {
+            var results = frame.Buffer(distance);
+            if (results.Count == 1)
+            {
+                return results[0] as Polyline;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static bool IsClosed(Polyline frame)
+        {
+            // 支持真实闭合或视觉闭合
+            return frame.Closed || (frame.StartPoint.DistanceTo(frame.EndPoint) <= ThMEPEngineCoreCommon.LOOSE_CLOSED_POLYLINE);
         }
 
         public DBObjectCollection RegionsFromFrame(Polyline frame)
