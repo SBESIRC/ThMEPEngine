@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Linq2Acad;
 using Autodesk.AutoCAD.ApplicationServices;
 using Autodesk.AutoCAD.Colors;
@@ -22,7 +19,7 @@ namespace ThMEPLighting.EmgLight.Assistant
 
             using (var db = AcadDatabase.Active())
             {
-                CreateLayer(LayerName);
+                CreateLayer(LayerName,color);
                 foreach (var curve in curves)
                 {
                     if (curve != null)
@@ -48,7 +45,7 @@ namespace ThMEPLighting.EmgLight.Assistant
             using (var db = AcadDatabase.Active())
             {
 
-                CreateLayer(LayerName);
+                CreateLayer(LayerName,color);
 
                 var clone = curve.Clone() as Entity;
                 clone.Layer = LayerName;
@@ -68,7 +65,7 @@ namespace ThMEPLighting.EmgLight.Assistant
             using (var db = AcadDatabase.Active())
             {
 
-                CreateLayer(LayerName);
+                CreateLayer(LayerName,color);
 
                 var clone = new Circle(pt, new Vector3d(0, 0, 1), 200);
                 clone.Layer = LayerName;
@@ -88,7 +85,7 @@ namespace ThMEPLighting.EmgLight.Assistant
             using (var db = AcadDatabase.Active())
             {
 
-                CreateLayer(LayerName);
+                CreateLayer(LayerName,color);
 
                 DBText text = new DBText();
                 text.Position = pt;
@@ -110,14 +107,14 @@ namespace ThMEPLighting.EmgLight.Assistant
         /// </summary>
         /// <param name="allLayers"></param>
         /// <param name="aimLayer"></param>
-        private static ObjectId CreateLayer(string aimLayer)
+        public static ObjectId CreateLayer(string aimLayer,Color color,bool IsPlottable =false)
         {
             LayerTableRecord layerRecord = null;
             using (var db = AcadDatabase.Active())
             {
                 foreach (var layer in db.Layers)
                 {
-                    if (layer.Name.Equals(aimLayer))
+                    if (layer.Name.ToUpper().Equals(aimLayer.ToUpper()))
                     {
                         layerRecord = db.Layers.Element(aimLayer);
                         break;
@@ -128,9 +125,12 @@ namespace ThMEPLighting.EmgLight.Assistant
                 if (layerRecord == null)
                 {
                     layerRecord = db.Layers.Create(aimLayer);
-                    //layerRecord.Color = color;
-                    //layerRecord.LineWeight = lineWeight;
-                    layerRecord.IsPlottable = false;
+                    if (color==null)
+                    {
+                        color = Color.FromRgb (255, 0, 0);
+                    }
+                    layerRecord.Color = color;
+                    layerRecord.IsPlottable = IsPlottable;
                 }
                 //else
                 //{
@@ -198,7 +198,7 @@ namespace ThMEPLighting.EmgLight.Assistant
         {
             var curves = new List<Entity>();
             geom.ForEach(e => curves.Add(e));
-            DrawUtils.DrawProfileDebug(curves, LayerName,color,lineWeight );
+            DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
         }
         public static void ShowGeometry(List<Polyline> geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
         {
@@ -216,9 +216,9 @@ namespace ThMEPLighting.EmgLight.Assistant
         {
             DrawUtils.DrawProfileDebug(pt, LayerName, color, lineWeight);
         }
-        public static void ShowGeometry(Point3d pt, string s,  string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        public static void ShowGeometry(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
         {
-            DrawUtils.DrawProfileDebug(pt,s, LayerName, color, lineWeight);
+            DrawUtils.DrawProfileDebug(pt, s, LayerName, color, lineWeight);
         }
 
     }

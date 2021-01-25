@@ -54,16 +54,23 @@ namespace ThMEPLighting
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
                     var plFrame = ThMEPFrameService.Normalize(frame);
+                    var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+
+                    //如果没有layer 创建layer
+                    DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
+
+                    //清除layer
+                    bufferFrame.ClearEmergencyLight();
 
                     //获取车道线
-                    var lanes = GetLanes(plFrame, acdb);
+                    var lanes = GetLanes(bufferFrame, acdb);
 
                     if (lanes.Count > 0)
                     {
                         //处理车道线
                         var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
                         var parkingLinesService = new ParkingLinesService();
-                        var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
+                        var parkingLines = parkingLinesService.CreateNodedParkingLines(bufferFrame, handleLines, out List<List<Line>> otherPLines);
 
                         //将车道线排序,点按排序方向排列,合并连续线段
                         List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
@@ -77,13 +84,18 @@ namespace ThMEPLighting
                         DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), LayerLane, Color.FromRgb(255, 0, 0));
 
                         //获取构建信息
-                        var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
                         GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
                         getArchWall(acdb, bufferFrame, ref walls);
 
+                        var b = false;
+                        if (b == true)
+                        {
+                            return;
+                        }
+
                         //主车道布置信息
                         LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
-                        var layoutInfo = layoutService.LayoutLight(plFrame, mergedOrderedLane, columns, walls);
+                        var layoutInfo = layoutService.LayoutLight(bufferFrame, mergedOrderedLane, columns, walls);
 
                         //布置构建
                         InsertLightService.InsertSprayBlock(layoutInfo);
@@ -125,6 +137,7 @@ namespace ThMEPLighting
 
             //获取柱
             columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+
             var objs = new DBObjectCollection();
             columns.ForEach(x => objs.Add(x));
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
