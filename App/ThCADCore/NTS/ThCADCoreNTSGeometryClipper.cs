@@ -35,12 +35,7 @@ namespace ThCADCore.NTS
 
         public DBObjectCollection Clip(DBObjectCollection curves, bool inverted = false)
         {
-            var objs = new List<DBObject>();
-            foreach(Curve curve in curves)
-            {
-                objs.AddRange(Clip(curve, inverted).Cast<DBObject>());
-            }
-            return objs.ToCollection();
+            return Clip(curves.ToNTSNodedLineStrings(), inverted).ToDbCollection();
         }
 
         private Geometry Clip(Geometry other, bool inverted = false)

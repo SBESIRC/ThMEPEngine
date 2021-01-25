@@ -5,9 +5,9 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries.Utilities;
+using NTSDimension = NetTopologySuite.Geometries.Dimension;
 
 namespace ThCADCore.NTS
 {
@@ -34,7 +34,14 @@ namespace ThCADCore.NTS
 
         public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
         {
-            return UnaryUnionOp.Union(curves.ToNTSLineStrings());
+            // UnaryUnionOp.Union()有Robust issue
+            // 会抛出"non-noded intersection" TopologyException
+            // 为了规避这个问题，这里使用Geometry.Union()
+            // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
+            var mLineString = ToMultiLineString(curves);
+            Geometry nodedLineStrings = ThCADCoreNTSService.Instance.GeometryFactory.CreateEmpty(NTSDimension.Curve);
+            mLineString.Geometries.ForEach(o => nodedLineStrings = nodedLineStrings.Union(o));
+            return nodedLineStrings;
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
@@ -64,12 +71,7 @@ namespace ThCADCore.NTS
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
         {
-            var geometries = new List<Geometry>();
-            foreach (Curve curve in curves)
-            {
-                geometries.Add(curve.ToNTSGeometry());
-            }
-            // 暂时过滤掉Polygon
+            var geometries = curves.Cast<Curve>().Select(o => o.ToNTSGeometry());
             var lineStrings = geometries.Where(o => o is LineString).Cast<LineString>();
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
