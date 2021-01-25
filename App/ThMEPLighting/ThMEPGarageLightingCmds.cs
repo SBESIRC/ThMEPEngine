@@ -94,8 +94,8 @@ namespace ThMEPLighting
             }
             return null;
         }
-        [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
-        public void ThCdzm()
+        [CommandMethod("TIANHUACAD", "CDZMBZ", CommandFlags.Modal)]
+        public void CDZMBZ()
         {
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
             {
