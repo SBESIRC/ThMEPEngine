@@ -67,7 +67,10 @@ namespace ThMEPLighting.Garage.Engine
         protected void Preprocess(ThRegionBorder regionBorder)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var precessEngine=new ThLightLinePreprocessEngine())
             {
+                precessEngine.RemoveLength = ThGarageLightCommon.ThShortLightLineLength;
+
                 var dxWashLines = WashClone(regionBorder.DxCenterLines);
                 var fdxWashLines = WashClone(regionBorder.FdxCenterLines);
 
@@ -78,27 +81,24 @@ namespace ThMEPLighting.Garage.Engine
                 {
                     Border = regionBorder.RegionBorder,
                     DxLines = dxTrimLines,
-                    FdxLines= fdxWashLines,
-                    Distance= ThGarageLightCommon.RegionBorderBufferDistance
+                    FdxLines = fdxWashLines,
+                    Distance = ThGarageLightCommon.RegionBorderBufferDistance
                 };
                 var shortDxLines = ThShortenLineService.Shorten(shortenPara);
-                //共线，重叠处理，分割处理
-                var fdxMergeLines = ThLineMerger.Merge(fdxWashLines);
-                var dxMergeLines = ThLineMerger.Merge(shortDxLines);
-                
-                FdxLines.AddRange(fdxMergeLines);
-                //分割
-                using (var splitLineEngine = new ThSplitLineEngine(dxMergeLines))
-                {
-                    splitLineEngine.Split();                   
-                    splitLineEngine.Results.ForEach(o=> DxLines.AddRange(o.Value));                    
-                }
+
+                shortDxLines =precessEngine.Preprocess(shortDxLines);
+                fdxWashLines = precessEngine.Preprocess(fdxWashLines);
+
+                var cutResult = precessEngine.Cut(shortDxLines, fdxWashLines);
+                DxLines.AddRange(cutResult.Item1);
+                FdxLines.AddRange(cutResult.Item2);
+
                 //单排取消过滤无需布灯的短线(20210104)
-                if(!ArrangeParameter.IsSingleRow)
+                if (!ArrangeParameter.IsSingleRow)
                 {
                     //T形短线取消，对于T形的主边不做处理
                     DxLines = ThFilterTTypeCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
-                    DxLines = ThFilterMainCenterLineService.Filter(DxLines, ArrangeParameter.RacywaySpace/2.0);
+                    DxLines = ThFilterMainCenterLineService.Filter(DxLines, ArrangeParameter.RacywaySpace / 2.0);
                 }
             }
         }

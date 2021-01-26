@@ -11,5 +11,6 @@
         public static readonly double LineCoincideTolerance = 1e-4; //线重合容差
         public static readonly string LaneLineLightBlockName = "E-BL001-1";
         public static readonly string ThGarageLightAppName = "ThGarageLight";
+        public static readonly double ThShortLightLineLength = 5.0;
     }
 }
