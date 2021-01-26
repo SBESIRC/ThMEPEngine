@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Model;
-
+using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -51,11 +51,25 @@ namespace ThMEPWSS.Pipe.Engine
         }
          private List<Line> GetLines(Database database)
         {
+            var Columns = new List<Line>();         
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (var divisionLinesDbExtension = new ThDivisionLinesDbExtension(database))
             {
-                var lines = acadDatabase.ModelSpace.OfType<Line>().Where(lineInfo => lineInfo.Layer.Contains(ThWPipeCommon.AD_FLOOR_AREA)).ToList();
-                return lines;
-            }           
+                divisionLinesDbExtension.BuildElementCurves();
+                Columns = divisionLinesDbExtension.Lines;
+            }
+            if (Columns.Count > 0)
+            {
+                return Columns;
+            }
+            else
+            {
+                using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+                {
+                    var lines = acadDatabase.ModelSpace.OfType<Line>().Where(lineInfo => lineInfo.Layer.Contains(ThWPipeCommon.AD_FLOOR_AREA)).ToList();
+                    return lines;
+                }
+            }
         }
     }
 }

@@ -183,17 +183,24 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public static Polyline GetPolylineBoundary(Curve curve)
         {
-            Polyline polyline = new Polyline()
+            if (curve != null)
             {
-                Closed = true
-            };
-            Point3d minpt = curve.GeometricExtents.MinPoint;
-            Point3d maxpt= curve.GeometricExtents.MaxPoint;
-            polyline.AddVertexAt(0, new Point2d(minpt.X-1, minpt.Y-1), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(1, new Point2d(maxpt.X+1, minpt.Y - 1), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(2, new Point2d(maxpt.X + 1, maxpt.Y+1), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(3, new Point2d(minpt.X - 1, maxpt.Y + 1), 0.0, 0.0, 0.0);
-            return polyline;
+                Polyline polyline = new Polyline()
+                {
+                    Closed = true
+                };
+                Point3d minpt = curve.GeometricExtents.MinPoint;
+                Point3d maxpt = curve.GeometricExtents.MaxPoint;
+                polyline.AddVertexAt(0, new Point2d(minpt.X - 1, minpt.Y - 1), 0.0, 0.0, 0.0);
+                polyline.AddVertexAt(1, new Point2d(maxpt.X + 1, minpt.Y - 1), 0.0, 0.0, 0.0);
+                polyline.AddVertexAt(2, new Point2d(maxpt.X + 1, maxpt.Y + 1), 0.0, 0.0, 0.0);
+                polyline.AddVertexAt(3, new Point2d(minpt.X - 1, maxpt.Y + 1), 0.0, 0.0, 0.0);
+                return polyline;
+            }
+            else
+            {
+                return new Polyline();
+            }
         }
         public static Polyline GetTextBoundary(double width, double height, Point3d point)
         {

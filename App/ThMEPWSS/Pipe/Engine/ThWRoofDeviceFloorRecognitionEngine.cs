@@ -30,6 +30,11 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> ElevationFrames { get; set; }
         public List<Curve> AxialCircleTags { get; set; }
         public List<Curve> AxialAxisTags { get; set; }
+        public List<Curve> ExternalTags { get; set; }
+        public List<Curve> Wells { get; set; }
+        public List<Curve> DimensionTags { get; set; }
+        public List<Curve> RainPipes { get; set; }
+        public List<Curve> PositionTags { get; set; }
         public ThWRoofDeviceFloorRecognitionEngine()
         {
             Rooms = new List<ThWRoofDeviceFloorRoom>();
@@ -44,6 +49,11 @@ namespace ThMEPWSS.Pipe.Engine
             ElevationFrames = new List<Curve>();
             AxialCircleTags = new List<Curve>();
             AxialAxisTags = new List<Curve>();
+            ExternalTags= new List<Curve>();
+            Wells = new List<Curve>();
+            DimensionTags= new List<Curve>();
+            RainPipes= new List<Curve>();
+            PositionTags = new List<Curve>();
         }
         public override void Recognize(Database database, Point3dCollection pts)
         {
@@ -65,6 +75,12 @@ namespace ThMEPWSS.Pipe.Engine
                 GetElevationFrames(database, pts).ForEach(o => ElevationFrames.Add(o));
                 GetAxialCircleTag(database, pts).ForEach(o => AxialCircleTags.Add(o));
                 GetAxialAxisTags(database, pts).ForEach(o => AxialAxisTags.Add(o));
+                GetExternalTags(database, pts).ForEach(o => ExternalTags.Add(o));
+                //本图元素
+                GetWells(database, pts).ForEach(o => Wells.Add(o));
+                GetAllTags(database, pts).ForEach(o => DimensionTags.Add(o));
+                GetRainPipes(database, pts).ForEach(o => RainPipes.Add(o));
+                GetPositionTags(database, pts).ForEach(o => PositionTags.Add(o));
                 var baseCircles = new List<ThIfcSpace>();
                 var gravityWaterBuckets = GetgravityWaterBuckets(database, pts);
                 var sideEntryWaterBuckets = GetsideEntryWaterBuckets(database, pts);
@@ -72,6 +88,78 @@ namespace ThMEPWSS.Pipe.Engine
                 Rooms = ThRoofDeviceFloorRoomService.Build(this.Spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);
             }
         }
+        private static List<Curve> GetPositionTags(Database database, Point3dCollection pts)
+        {
+            var Columns = new List<Curve>();
+            var circles = new List<Curve>();
+            var texts = new List<DBText>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (var positionTagsDbExtension = new ThPositionTagsDbExtension(database))
+            {
+                positionTagsDbExtension.BuildElementCurves();
+                Columns = positionTagsDbExtension.Polylines;
+                positionTagsDbExtension.BuildElementTexts();
+                texts = positionTagsDbExtension.texts;
+            }
+            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
+            texts.ForEach(o => circles.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position)));
+            return circles;
+        }
+        private static List<Curve> GetRainPipes(Database database, Point3dCollection pts)
+        {
+            var Columns = new List<Curve>();
+            var circles = new List<Curve>();           
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (var rainPipesDbExtension = new ThRainPipesDbExtension(database))
+            {
+                rainPipesDbExtension.BuildElementCurves();
+                Columns = rainPipesDbExtension.Polylines;              
+            }
+            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
+            return circles;
+        }
+        private static List<Curve> GetAllTags(Database database, Point3dCollection pts)
+        {
+            var Columns = new List<Curve>();
+            var circles = new List<Curve>();
+            var texts = new List<DBText>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (var dimensionTagsDbExtension = new ThDimensionTagsDbExtension(database))
+            {
+                dimensionTagsDbExtension.BuildElementCurves();
+                Columns = dimensionTagsDbExtension.Polylines;
+                dimensionTagsDbExtension.BuildElementTexts();
+                texts = dimensionTagsDbExtension.texts;
+            }
+            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
+            texts.ForEach(o => circles.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position)));
+            return circles;
+        }
+        private static List<Curve> GetWells(Database database, Point3dCollection pts)
+        {
+            var Columns = new List<Curve>();
+            var WellsEngine = new ThWWellsRecognitionEngine();
+            WellsEngine.Recognize(database, pts);
+            WellsEngine.Elements.ForEach(o =>
+            {
+                Polyline curve = o.Outline as Polyline;
+                Columns.Add(curve.WashClone());
+            });
+            return Columns;
+        }
+        private static List<Curve> GetExternalTags(Database database, Point3dCollection pts)
+        {
+            var Columns = new List<Curve>();
+            var ExternalTagsEngine = new ThWExternalTagsRecognitionEngine();
+            ExternalTagsEngine.Recognize(database, pts);
+            ExternalTagsEngine.Elements.ForEach(o =>
+            {
+                Polyline curve = o.Outline as Polyline;
+                Columns.Add(curve.WashClone());
+            });
+            return Columns;
+        }
+
         private static List<Curve> GetAxialAxisTags(Database database, Point3dCollection pts)
         {
             var Columns = new List<Curve>();
@@ -184,8 +272,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             var Columns = new List<Curve>();                             
             var architectureElevationEngine = new ThWArchitectureElevationRecognitionEngine();
-            architectureElevationEngine.Recognize(database, pts);
-            
+            architectureElevationEngine.Recognize(database, pts);         
             architectureElevationEngine.DbTexts.ForEach(o =>
             {
              
