@@ -28,8 +28,9 @@ namespace ThMEPElectrical.Broadcast
             }
         }
 
-        public static void InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo)
+        public static List<BlockReference> InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo)
         {
+            List<BlockReference> broadcasts = new List<BlockReference>();
             using (var db = AcadDatabase.Active())
             {
                 db.Database.ImportModel();
@@ -37,12 +38,15 @@ namespace ThMEPElectrical.Broadcast
                 {
                     foreach (var ptInfo in ptDic.Value)
                     {
-                        db.Database.InsertModel(ptInfo.Key + ptInfo.Value * scaleNum * 1.5, -ptInfo.Value, new Dictionary<string, string>(){
+                        var id = db.Database.InsertModel(ptInfo.Key + ptInfo.Value * scaleNum * 1.5, -ptInfo.Value, new Dictionary<string, string>(){
                             { "F","W" },
                         });
+                        broadcasts.Add(db.Element<BlockReference>(id));
                     }
                 }
             }
+
+            return broadcasts;
         }
 
         public static ObjectId InsertModel(this Database database, Point3d pt, Vector3d layoutDir, Dictionary<string, string> attNameValues)

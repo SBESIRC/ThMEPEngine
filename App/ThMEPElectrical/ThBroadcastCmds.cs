@@ -70,8 +70,10 @@ namespace ThMEPElectrical
 
                 //处理外包框线
                 var plines = HandleFrame(frameLst);
-                foreach (var plFrame in plines)
+                var holeInfo = CalHoles(plines);
+                foreach (var plInfo in holeInfo)
                 {
+                    var plFrame = plInfo.Key;
                     //删除原有构建
                     plFrame.ClearBroadCast();
                     plFrame.ClearBlindArea();
@@ -106,7 +108,14 @@ namespace ThMEPElectrical
                     blindAreaService.PrintBlindArea(layoutPts, plFrame, BlindAreaRadius);
 
                     //放置广播
-                    InsertBroadcastService.InsertSprayBlock(resLayoutInfo);
+                    var broadcasts = InsertBroadcastService.InsertSprayBlock(resLayoutInfo);
+
+                    //车道广播连管
+                    ConnetPipeService connetPipeService = new ConnetPipeService();
+                    var resPolys = connetPipeService.ConnetPipe(plInfo, handleLines, broadcasts);
+
+                    //创建连管线
+                    InsertConnectPipeService.InsertConnectPipe(resPolys);
                 }
             }
         }
