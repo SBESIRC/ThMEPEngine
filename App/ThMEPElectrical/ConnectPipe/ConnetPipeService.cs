@@ -56,7 +56,13 @@ namespace ThMEPElectrical.ConnectPipe
             //创建真实连管线
             CreatePipeLineService createPipeLineService = new CreatePipeLineService();
             var resPolys = createPipeLineService.CreatePipe(correctPipe, broadcasts);
-
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                foreach (var item in correctPipe)
+                {
+                    acdb.ModelSpace.Add(item);
+                }
+            }
             return resPolys;
         }
 

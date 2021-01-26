@@ -13,9 +13,9 @@ namespace ThMEPElectrical.Broadcast.Service
 {
     public class PrintBlindAreaService
     {
-        public void PrintBlindArea(List<Point3d> layoutPts, Polyline roomPoly, double protectRange)
+        public void PrintBlindArea(List<Point3d> layoutPts, KeyValuePair<Polyline, List<Polyline>> polyInfo, double protectRange)
         {
-            var blindAreas = CalProtectBlindArea(layoutPts, roomPoly, protectRange);
+            var blindAreas = CalProtectBlindArea(layoutPts, polyInfo, protectRange);
             InsertBlindArea(blindAreas);
         }
 
@@ -48,7 +48,7 @@ namespace ThMEPElectrical.Broadcast.Service
         /// <param name="columns"></param>
         /// <param name="roomPoly"></param>
         /// <returns></returns>
-        public List<Polyline> CalProtectBlindArea(List<Point3d> layoutPts, Polyline roomPoly, double protectRange)
+        public List<Polyline> CalProtectBlindArea(List<Point3d> layoutPts, KeyValuePair<Polyline, List<Polyline>> polyInfo, double protectRange)
         {
             var objs = new DBObjectCollection();
             foreach (var pt in layoutPts)
@@ -60,8 +60,36 @@ namespace ThMEPElectrical.Broadcast.Service
                 }
             }
 
-            var blindAreas = roomPoly.Difference(objs).Cast<Polyline>().ToList();
-            return blindAreas;
+            var blindAreas = polyInfo.Key.Difference(objs);
+            var holes = new DBObjectCollection();
+            foreach (var hole in polyInfo.Value)
+            {
+                holes.Add(hole);
+            }
+
+            List<Polyline> areas = new List<Polyline>();
+            foreach (Polyline bArea in blindAreas)
+            {
+                areas.AddRange(bArea.Difference(holes).Cast<Polyline>().ToList());
+            }
+
+            var pFrame = polyInfo.Key.Buffer(-5)[0] as Polyline;
+            List<Polyline> frames = new List<Polyline>() { pFrame };
+            frames.AddRange(polyInfo.Value.Select(x => x.Buffer(5)[0] as Polyline));
+            List<Polyline> blindAreaLst = new List<Polyline>();
+            foreach (Polyline area in areas)
+            {
+                foreach (var frame in frames)
+                {
+                    if (frame.Intersects(area))
+                    {
+                        blindAreaLst.Add(area);
+                        break;
+                    }
+                }
+            }
+
+            return blindAreaLst;
         }
     }
 }

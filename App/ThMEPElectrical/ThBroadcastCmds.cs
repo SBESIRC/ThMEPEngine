@@ -105,7 +105,7 @@ namespace ThMEPElectrical
                     //计算广播盲区
                     var layoutPts = resLayoutInfo.SelectMany(x => x.Value.Keys).ToList();
                     PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
-                    blindAreaService.PrintBlindArea(layoutPts, plFrame, BlindAreaRadius);
+                    blindAreaService.PrintBlindArea(layoutPts, plInfo, BlindAreaRadius);
 
                     //放置广播
                     var broadcasts = InsertBroadcastService.InsertSprayBlock(resLayoutInfo);
@@ -154,8 +154,10 @@ namespace ThMEPElectrical
                     frameLst.Add(plFrame);
                 }
                 var plines = HandleFrame(frameLst);
-                foreach (var pline in plines)
+                var holeInfo = CalHoles(plines);
+                foreach (var plInfo in holeInfo)
                 {
+                    var pline = plInfo.Key;
                     //删除原有盲区
                     pline.ClearBlindArea();
 
@@ -164,12 +166,12 @@ namespace ThMEPElectrical
 
                     //打印盲区
                     PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
-                    blindAreaService.PrintBlindArea(pts, pline, BlindAreaRadius);
+                    blindAreaService.PrintBlindArea(pts, plInfo, BlindAreaRadius);
                 }
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THLG", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THGBLX", CommandFlags.Modal)]
         public void ThBroadcastConnetPipe()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
