@@ -41,6 +41,7 @@
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Pipe\Engine\ThWArchitectureElevationRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWExternalTagsRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWInnerDoorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
@@ -55,6 +56,7 @@
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWToiletRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWWellsRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
     <Compile Include="Pipe\Output\ThWCompositeTagOutPutEngine.cs" />
     <Compile Include="Pipe\Output\ThWRoofDeviceFloorOutPutEngine.cs" />
