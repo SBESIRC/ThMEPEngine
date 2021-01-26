@@ -4,9 +4,10 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using System.Collections.Generic;
+using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.LaneLine
@@ -18,18 +19,19 @@ namespace ThMEPEngineCore.LaneLine
             var index = new ThCADCoreNTSSpatialIndex(curves);
             curves.Cast<Line>().ForEach(o =>
             {
-                if (index.Tag(o) == null)
+                var buffer = Buffer(o, 1.0);
+                var objs = index.SelectCrossingPolygon(buffer.Shell.ToDbPolyline());
+                if (objs.Count > 1)
                 {
-                    var tag = Guid.NewGuid().ToString();
-                    var buffer = o.ToNTSLineString().Buffer(1.0) as Polygon;
-                    var objs = index.SelectCrossingPolygon(buffer.Shell.ToDbPolyline());
-                    if (objs.Count > 1)
+                    var lines = objs.Cast<Line>().Where(l => IsParallel(o, l));
+                    if (lines.Count() > 1)
                     {
-                        var lines = objs.Cast<Line>().Where(l => IsParallel(o, l));
-                        if (lines.Count() > 1)
+                        var tag = index.Tag(o);
+                        if (tag == null)
                         {
-                            lines.ForEach(l => index.AddTag(l, tag));
+                            tag = Guid.NewGuid().ToString();
                         }
+                        lines.ForEach(l => index.AddTag(l, tag));
                     }
                 }
             });
@@ -55,13 +57,16 @@ namespace ThMEPEngineCore.LaneLine
             return (angle <= Math.PI / 180.0 || angle >= Math.PI - Math.PI / 180.0);
         }
 
+        private static Polygon Buffer(Line line, double distance)
+        {
+            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat) as Polygon;
+        }
+
         private static Line MergeLines(List<Line> lines)
         {
-            var geometries = new List<Geometry>();
-            lines.Cast<Line>().ForEach(o => geometries.Add(o.ToNTSGeometry().Buffer(1.0)));
-            var polygons = geometries.Cast<Polygon>().ToArray();
+            var polygons = lines.Select(o => Buffer(o, 1.0)).ToArray();
             var multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons);
-            var results = multiPolygon.Buffer(0.0);
+            var results = multiPolygon.Union();
             if (results is Polygon polygon)
             {
                 return CenterLine(polygon);
