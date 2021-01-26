@@ -15,6 +15,10 @@ namespace ThMEPEngineCore.LaneLine
         public static DBObjectCollection Noding(DBObjectCollection curves)
         {
             var results = new List<Line>();
+            if(curves.Count==0)
+            {
+                return new DBObjectCollection();
+            }
             var objs = ExplodeCurves(curves);
             var geometry = objs.ToCollection().ToNTSNodedLineStrings();
             if (geometry is LineString line)
