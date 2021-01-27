@@ -103,8 +103,8 @@ namespace TianHua.Electrical.UI
         }
         #region----------Commands----------
         private void BtnLaneCenterline_Click(object sender, EventArgs e)
-        {
-            CollectParameter();
+        {            
+            var para = ThMEPElectricalService.Instance.Parameter;
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD");
         }
