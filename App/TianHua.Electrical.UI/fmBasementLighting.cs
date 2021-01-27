@@ -104,26 +104,28 @@ namespace TianHua.Electrical.UI
         #region----------Commands----------
         private void BtnLaneCenterline_Click(object sender, EventArgs e)
         {
+            CollectParameter();
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THTCD");
         }
 
         private void BtnDraw_Click(object sender, EventArgs e)
         {
+            CollectParameter();
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THDXC");
         }
 
         private void BtnNoDraw_Click(object sender, EventArgs e)
         {
+            CollectParameter();
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THFDXC");
         }
 
         private void BtnLayout_Click(object sender, EventArgs e)
         {
-            CollectParameter();
-            ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate = true;
+            CollectParameter(true);
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THCDZMBZ");
         }
@@ -131,19 +133,20 @@ namespace TianHua.Electrical.UI
         private void BtnCircuitLabel_Click(object sender, EventArgs e)
         {
             CollectParameter();
-            ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate = false;
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THCDBH");
         }
 
         private void BtnCircuitInfo_Click(object sender, EventArgs e)
         {
+            CollectParameter();
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THCDTJ");
         }
 
-        private void CollectParameter()
+        private void CollectParameter(bool autoGenerate = false)
         {
+            ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate = autoGenerate;
             ThMEPLightingService.Instance.LightArrangeUiParameter.IsSingleRow = FuncStr.NullToStr(RadLamp.EditValue) == "单排";
             double width = 0.0;
             if(double.TryParse(TxtWidth.Text,out width))
