@@ -247,6 +247,7 @@ namespace ThMEPEngineCore
 
                 var lines = ThLaneLineExtendEngine.Extend(objs);
                 lines = ThLaneLineMergeExtension.Merge(lines);
+                lines = ThLaneLineUnionEngine.Union(lines);
                 foreach (Line line in lines)
                 {
                     acadDatabase.ModelSpace.Add(line);

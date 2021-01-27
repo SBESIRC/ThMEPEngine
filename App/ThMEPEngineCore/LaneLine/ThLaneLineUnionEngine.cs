@@ -12,7 +12,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.LaneLine
 {
-    public class ThLaneLineUnionEngine
+    public class ThLaneLineUnionEngine : ThLaneLineEngine
     {
         public static DBObjectCollection Union(DBObjectCollection curves)
         {
@@ -45,7 +45,7 @@ namespace ThMEPEngineCore.LaneLine
                 }
                 else
                 {
-                    results.Add(MergeLines(group.ToList()));
+                    results.Add(UnionLines(group.ToList()));
                 }
             }
             return results;
@@ -62,7 +62,7 @@ namespace ThMEPEngineCore.LaneLine
             return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat) as Polygon;
         }
 
-        private static Line MergeLines(List<Line> lines)
+        private static Line UnionLines(List<Line> lines)
         {
             var polygons = lines.Select(o => Buffer(o, 1.0)).ToArray();
             var multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons);
