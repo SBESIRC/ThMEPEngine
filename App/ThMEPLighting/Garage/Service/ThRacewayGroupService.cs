@@ -27,7 +27,7 @@ namespace ThMEPLighting.Garage.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                CreateLayer(acadDatabase.Database);
+                //CreateLayer(acadDatabase.Database);
                 GroupParameter.Center.Layer = GroupParameter.RacewayParameter.CenterLineParameter.Layer;
                 GroupParameter.Sides.ForEach(o => o.Layer = GroupParameter.RacewayParameter.SideLineParameter.Layer);
                 GroupParameter.Ports.ForEach(o => o.Layer = GroupParameter.RacewayParameter.PortLineParameter.Layer);

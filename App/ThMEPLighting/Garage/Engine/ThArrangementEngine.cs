@@ -69,6 +69,7 @@ namespace ThMEPLighting.Garage.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var precessEngine=new ThLightLinePreprocessEngine())
             {
+                Export();
                 precessEngine.RemoveLength = ThGarageLightCommon.ThShortLightLineLength;
 
                 var dxWashLines = WashClone(regionBorder.DxCenterLines);
@@ -105,10 +106,7 @@ namespace ThMEPLighting.Garage.Engine
         protected ObjectIdList Print(List<ThLightEdge> lightEdges)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
             {
-                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
-                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(ArrangeParameter.LightNumberTextStyle), false);
                 var objIds = new ObjectIdList();
                 lightEdges.Where(o => o.IsDX).ForEach(m =>
                   {
@@ -165,6 +163,20 @@ namespace ThMEPLighting.Garage.Engine
                     });
                   });
                 return objIds;
+            }
+        }
+        private void Export()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(ArrangeParameter.LightNumberTextStyle), false);
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.CenterLineParameter.Layer));
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.LaneLineBlockParameter.Layer));
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.NumberTextParameter.Layer));
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.PortLineParameter.Layer));
+                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.SideLineParameter.Layer));
             }
         }
     }
