@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -42,14 +43,7 @@ namespace ThMEPEngineCore.Algorithm
         public static Polyline Buffer(Polyline frame, double distance)
         {
             var results = frame.Buffer(distance);
-            if (results.Count == 1)
-            {
-                return results[0] as Polyline;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            return results.Cast<Polyline>().FindByMax(o => o.Area);
         }
 
         public static bool IsClosed(Polyline frame)
