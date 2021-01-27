@@ -28,8 +28,7 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                int bufferLength = 100;
-                string LayerLane = "lLane";
+               
 
                 // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
@@ -54,7 +53,7 @@ namespace ThMEPLighting
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
                     var plFrame = ThMEPFrameService.Normalize(frame);
-                    var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
+                    var bufferFrame = plFrame.Buffer(EmgLightCommon .BufferFrame)[0] as Polyline;
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
@@ -78,10 +77,10 @@ namespace ThMEPLighting
                         {
                             for (int j = 0; j < mergedOrderedLane[i].Count; j++)
                             {
-                                DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), LayerLane, Color.FromRgb(128, 159, 225));
+                                DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j),EmgLightCommon. LayerLane, Color.FromRgb(128, 159, 225));
                             }
                         }
-                        DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), LayerLane, Color.FromRgb(255, 0, 0));
+                        DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"),EmgLightCommon. LayerLane, Color.FromRgb(255, 0, 0));
 
                         //获取构建信息
                         GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
@@ -94,8 +93,8 @@ namespace ThMEPLighting
                         }
 
                         //主车道布置信息
-                        LayoutWithParkingLineForLight layoutService = new LayoutWithParkingLineForLight();
-                        var layoutInfo = layoutService.LayoutLight(bufferFrame, mergedOrderedLane, columns, walls);
+                        LayoutEmgLightEngine layoutEngine = new LayoutEmgLightEngine();
+                        var layoutInfo = layoutEngine.LayoutLight(bufferFrame, mergedOrderedLane, columns, walls);
 
                         //布置构建
                         InsertLightService.InsertSprayBlock(layoutInfo);
