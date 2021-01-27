@@ -10,8 +10,8 @@ namespace ThMEPEngineCore.LaneLine
     public class ParkingLinesService
     {
         private readonly double tol = 0.9;
-        private readonly double pointTol = 1200;
-        private readonly double parkingLineTolerance = 1000;
+        public double pointTol = 1200;
+        public double parkingLineTolerance = 1000;
 
         /// <summary>
         /// 将车道线分成主车道线和副车道线

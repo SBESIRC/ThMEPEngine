@@ -27,6 +27,14 @@ namespace ThMEPLighting.Garage.Service
             {
                 for (int j = i+1; j < Curves.Count; j++)
                 {
+                    if(Curves[i].Item1 is Line first && Curves[j].Item1 is Line second)
+                    {
+                        if (first.StartPoint.GetVectorTo(first.EndPoint).
+                             IsParallelToEx(second.StartPoint.GetVectorTo(second.EndPoint)))
+                        {
+                            continue;
+                        }
+                    }
                     var pts = new Point3dCollection();
                     Curves[i].Item1.IntersectWith(Curves[j].Item1,
                         Intersect.OnBothOperands,pts,IntPtr.Zero, IntPtr.Zero);

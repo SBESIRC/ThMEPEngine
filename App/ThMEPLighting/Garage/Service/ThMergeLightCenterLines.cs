@@ -27,6 +27,7 @@ namespace ThMEPLighting.Garage.Service
             var auxiliaryLines = new List<List<Line>>();
             var mainLines = new List<List<Line>>();
             var laneLine = new ParkingLinesService();
+            laneLine.parkingLineTolerance = 0;
             //目前会将传入的线延长2mm
             mainLines = laneLine.CreateNodedParkingLines(Border, CenterLines, out auxiliaryLines);
             mainLines.ForEach(o =>
