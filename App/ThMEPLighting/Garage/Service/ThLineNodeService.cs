@@ -1,12 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPEngineCore.LaneLine;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
+using System.Collections.Generic;
+using NetTopologySuite.Geometries;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -29,10 +28,8 @@ namespace ThMEPLighting.Garage.Service
         }
         private void Node()
         {
-            var objs = new DBObjectCollection();
-            Lines.ForEach(o => objs.Add(o));
-            var nodedLines = ThLaneLineNodingEngine.Noding(objs);
-            SpatialIndex = new ThCADCoreNTSSpatialIndex(nodedLines);
+            var nodedLines = NodeLines(Lines.ToCollection());
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(nodedLines.ToCollection());
             Lines.ForEach(o =>
             {
                 var subs = FindSubLines(o);
@@ -46,6 +43,24 @@ namespace ThMEPLighting.Garage.Service
                     Results.Add(Tuple.Create(o, subs));
                 }
             });
+        }
+        private static List<Line> NodeLines(DBObjectCollection curves)
+        {
+            var results = new List<Line>();
+            var geometry = curves.ToNTSNodedLineStrings();
+            if (geometry is LineString line)
+            {
+                results.Add(line.ToDbline());
+            }
+            else if (geometry is MultiLineString lines)
+            {
+                results.AddRange(lines.Geometries.Cast<LineString>().Select(o => o.ToDbline()));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+            return results;
         }
         private List<Line> FindSubLines(Line origin)
         {
