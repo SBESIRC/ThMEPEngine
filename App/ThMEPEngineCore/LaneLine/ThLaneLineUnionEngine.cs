@@ -48,7 +48,7 @@ namespace ThMEPEngineCore.LaneLine
                     results.Add(UnionLines(group.ToList()));
                 }
             }
-            return results;
+            return Noding(results).ToCollection();
         }
 
         private static bool IsParallel(Line line1, Line line2)
