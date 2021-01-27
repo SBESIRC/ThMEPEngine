@@ -77,6 +77,7 @@ namespace ThMEPElectrical
                     //删除原有构建
                     plFrame.ClearBroadCast();
                     plFrame.ClearBlindArea();
+                    plFrame.ClearPipeLines();
 
                     //获取车道线
                     var lanes = GetLanes(plFrame, acdb);
@@ -208,6 +209,9 @@ namespace ThMEPElectrical
                 var holeInfo = CalHoles(plines);
                 foreach (var pline in holeInfo)
                 {
+                    //删除原有连接线
+                    pline.Key.ClearPipeLines();
+
                     //获取广播图块
                     var broadcast = GetBroadcastBlocks(pline.Key);
 
