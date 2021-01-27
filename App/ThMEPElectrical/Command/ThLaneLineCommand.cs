@@ -69,7 +69,7 @@ namespace ThMEPElectrical.Command
                 if (nFrame.Area > 0)
                 {
                     // 提取车道中心线
-                    var bFrame = ThMEPFrameService.Buffer(nFrame, 10000.0);
+                    var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
                     laneLineEngine.Recognize(database, bFrame.Vertices());
 
                     // 车道中心线处理
