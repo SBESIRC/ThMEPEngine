@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.Service
                             var pair = ThMatchDoorStoneService.Match(stones, vec, length);
                             if(pair != null)
                             {
-                                Outlines.Add(outline);
+                                Outlines.Add(CreateDoorOutline(pair));
                             }
                         }
                     }
@@ -170,25 +170,44 @@ namespace ThMEPEngineCore.Service
                 return null;
             }
         }
-        private double GetDoorWidth(Tuple<Line,Line> pair)
+        private double GetDoorWidth(Tuple<Line, Line> pair)
         {
             var firstMidPt = pair.Item1.StartPoint.GetMidPt(pair.Item1.EndPoint);
             var secondMidPt = pair.Item2.StartPoint.GetMidPt(pair.Item2.EndPoint);
             var envelope = ThDrawTool.ToOutline(firstMidPt, secondMidPt, pair.Item1.Length / 2.0);
             var columns = DoorMatchParameter.ObstacleSpatialIndexService.FindColumns(envelope);
-            var architectureWalls = DoorMatchParameter.ObstacleSpatialIndexService.FindArchitectureWalls(envelope); 
             var shearWalls = DoorMatchParameter.ObstacleSpatialIndexService.FindShearWalls(envelope);
+            var architectureWalls = DoorMatchParameter.ObstacleSpatialIndexService.FindArchitectureWalls(envelope);
+            var widths = new List<double>();
+            columns.ForEach(o =>
+            {
+                var res = Analyze(o, DoorMatchParameter.LengthTolerance);
+                res.ForEach(r => widths.Add(r.Item1));
+            });
+            shearWalls.ForEach(o =>
+            {
+                var res = Analyze(o, DoorMatchParameter.LengthTolerance);
+                res.ForEach(r => widths.Add(r.Item1));
+            });
+            architectureWalls.ForEach(o =>
+            {
+                var res = Analyze(o, DoorMatchParameter.LengthTolerance);
+                res.ForEach(r => widths.Add(r.Item1));
+            });
 
+            var filters = widths.Where(o => o >= DoorMatchParameter.DoorMinimumThick
+              && o <= DoorMatchParameter.DoorMaximumThick).OrderByDescending(o => o).ToList();
+            return filters.Count > 0 ? filters.First() : pair.Item1.Length;
         }
-        private Polyline CreateOutlie(Tuple<Line, Line> pair)
+
+        private Polyline CreateDoorOutline(Tuple<Line, Line> pair)
         {
             var width = GetDoorWidth(pair);
-            var firstMidPt = first.StartPoint.GetMidPt(first.EndPoint);
-            var secondMidPt = second.StartPoint.GetMidPt(second.EndPoint);
-            return ThDrawTool.ToRectangle(firstMidPt, secondMidPt, first.Length);
-        }
-        private 
-        private Dictionary<double,List<Line>> Analyze(Polyline polyline,double lengthTolerance)
+            var firstMidPt = pair.Item1.StartPoint.GetMidPt(pair.Item1.EndPoint);
+            var secondMidPt = pair.Item2.StartPoint.GetMidPt(pair.Item2.EndPoint);
+            return ThDrawTool.ToRectangle(firstMidPt, secondMidPt, width);
+        }        
+        private List<Tuple<double,List<Line>>> Analyze(Polyline polyline,double lengthTolerance)
         {
             var results = new Dictionary<double, List<Line>>();
             var lines = polyline.ToLines();
@@ -207,7 +226,7 @@ namespace ThMEPEngineCore.Service
                     results.Add(line.Length,new List<Line> { line});
                 }
             }
-            return results.Where(o=>o.Value.Count==2).OrderBy(o=>o.Key).ToDictionary(k=>);
+            return results.Where(o=>o.Value.Count==2).OrderBy(o=>o.Key).Select(o=>Tuple.Create(o.Key,o.Value)).ToList();
         }
     }
     public class ThDoorMatchParameter

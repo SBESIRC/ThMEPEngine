@@ -232,6 +232,7 @@
     <Compile Include="Service\ThMatchDoorStoneService.cs" />
     <Compile Include="Service\ThDoorStoneDbExtension.cs" />
     <Compile Include="Service\ThBuildDoorService.cs" />
+    <Compile Include="Service\ThObstacleSpatialIndexService.cs" />
     <Compile Include="Service\ThPositionTagsDbExtension.cs" />
     <Compile Include="Service\ThPositionTagsLayerManager.cs" />
     <Compile Include="Service\ThRainPipesDbExtension.cs" />
