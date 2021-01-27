@@ -54,6 +54,7 @@ namespace ThMEPLighting
                     var frame = acdb.Element<Polyline>(obj);
                     var plFrame = ThMEPFrameService.Normalize(frame);
                     var bufferFrame = plFrame.Buffer(EmgLightCommon .BufferFrame)[0] as Polyline;
+                    var shrinkFrame = plFrame.Buffer(EmgLightCommon.shrinkFrame)[0] as Polyline;
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
@@ -62,7 +63,7 @@ namespace ThMEPLighting
                     bufferFrame.ClearEmergencyLight();
 
                     //获取车道线
-                    var lanes = GetLanes(bufferFrame, acdb);
+                    var lanes = GetLanes(shrinkFrame, acdb);
 
                     if (lanes.Count > 0)
                     {
@@ -120,6 +121,7 @@ namespace ThMEPLighting
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
             return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
+           
         }
 
         /// <summary>

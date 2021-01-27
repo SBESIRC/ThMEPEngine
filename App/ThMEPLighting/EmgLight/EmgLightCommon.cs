@@ -16,6 +16,7 @@ namespace ThMEPLighting.EmgLight
         public static int TolLaneProtect = 1000;
         public static int TolLight = 400;
         public static int BufferFrame = 100;
+        public static int shrinkFrame = -100;
 
         public static string LayerStruct = "lStruct";
         public static string LayerStructLayout = "lStructLayout";

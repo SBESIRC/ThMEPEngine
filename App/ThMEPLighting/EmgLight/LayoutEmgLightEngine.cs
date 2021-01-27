@@ -139,7 +139,7 @@ namespace ThMEPLighting.EmgLight
                     LayoutOppositeSide(uniformSide, lane, uniformSideLayout, layoutServer, lanes, ref layoutList);
                 }
 
-                layoutServer.AddLayoutStructPt(layoutList, lane, ref layoutPtInfo);
+                layoutServer.AddLayoutStructPt(layoutList, ref layoutPtInfo);
             }
 
             return layoutPtInfo;

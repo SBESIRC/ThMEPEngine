@@ -82,7 +82,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="layoutList"></param>
         /// <param name="lane"></param>
         /// <param name="layoutPtInfo"></param>
-        public void AddLayoutStructPt(List<Polyline> layoutList, List<Line> lane, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
+        public void AddLayoutStructPt(List<Polyline> layoutList, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
         {
             (Point3d, Vector3d) layoutInfo;
             foreach (var structure in layoutList)

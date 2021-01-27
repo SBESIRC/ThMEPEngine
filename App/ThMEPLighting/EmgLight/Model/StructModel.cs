@@ -11,14 +11,14 @@ namespace ThMEPLighting.EmgLight.Model
     {
         public StructModel(Polyline polyline)
         {
-            columnPoly = polyline;
-            columnCenterPt = StructUtils.GetStructCenter(columnPoly);
+            geometry = polyline;
+            centerPt = StructUtils.GetStructCenter(geometry);
 
         }
 
-        public Polyline columnPoly { get;}
+        public Polyline geometry { get;}
 
-        public Point3d columnCenterPt { get; }
+        public Point3d centerPt { get; }
 
         public Vector3d layoutDirection { get; set; }
 
