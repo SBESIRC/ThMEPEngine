@@ -39,7 +39,8 @@ namespace ThMEPLighting.Garage.Engine
             lines.ForEach(o =>
             {
                 var objs = regionBorder.Trim(o);
-                objs.Cast<Curve>().ForEach(m =>
+                objs.Cast<Entity>()
+                .Where(c=>c is Curve).ToList().ForEach(m =>
                 {
                     if (m is Line line)
                     {
@@ -49,7 +50,7 @@ namespace ThMEPLighting.Garage.Engine
                     {
                         var lineObjs = new DBObjectCollection();
                         polyline.Explode(lineObjs);
-                        lineObjs.Cast<Line>().ForEach(n => results.Add(n));
+                        lineObjs.Cast<Line>().ToList().ForEach(n => results.Add(n));
                     }
                 });
             });
@@ -108,7 +109,7 @@ namespace ThMEPLighting.Garage.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var objIds = new ObjectIdList();
-                lightEdges.Where(o => o.IsDX).ForEach(m =>
+                lightEdges.Where(o => o.IsDX).ToList().ForEach(m =>
                   {
                       var normalLine = m.Edge.Clone() as Line;
                       using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
