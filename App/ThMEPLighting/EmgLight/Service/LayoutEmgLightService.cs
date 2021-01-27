@@ -11,7 +11,7 @@ using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting.EmgLight.Service
 {
-    public class StructureLayoutServiceLight
+    public class LayoutEmgLightService
     {
         private List<List<Polyline>> usefulColumns;
         private List<List<Polyline>> usefulWalls;
@@ -22,16 +22,11 @@ namespace ThMEPLighting.EmgLight.Service
         private List<Line> laneTrans = new List<Line>();
         private Polyline frame;
 
-        int TolLightRangeMin = 4000;
-        int TolLightRangeMax = 8900;
-
-        public StructureLayoutServiceLight(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame, int TolLightRangeMin, int TolLightRangeMax)
+        public LayoutEmgLightService(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame, int TolLightRangeMin, int TolLightRangeMax)
         {
             this.usefulColumns = usefulColumns;
             this.usefulWalls = usefulWalls;
             this.lane = lane;
-            this.TolLightRangeMin = TolLightRangeMin;
-            this.TolLightRangeMax = TolLightRangeMax;
             this.frame = frame;
 
             usefulStruct = new List<List<Polyline>>();
@@ -64,6 +59,7 @@ namespace ThMEPLighting.EmgLight.Service
                 return usefulColumns;
             }
         }
+
         public List<List<Polyline>> UsefulWalls
         {
             get
@@ -86,7 +82,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="layoutList"></param>
         /// <param name="lane"></param>
         /// <param name="layoutPtInfo"></param>
-        public void AddLayoutStructPt(List<Polyline> layoutList, List<Line> lane, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
+        public void AddLayoutStructPt(List<Polyline> layoutList, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
         {
             (Point3d, Vector3d) layoutInfo;
             foreach (var structure in layoutList)
@@ -432,11 +428,12 @@ namespace ThMEPLighting.EmgLight.Service
         public List<List<Polyline>> BuildHeadLayout(List<Polyline> layout, double TolLane)
         {
             //车道线往前做框buffer
-            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, TolLightRangeMax);
+            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, EmgLightCommon.TolLightRangeMax);
             var FilteredLayout = StructureServiceLight.GetStruct(ExtendLineList, layout, TolLane);
             var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
 
-            DrawUtils.ShowGeometry(ExtendLineList, "lLaneHead", Color.FromRgb(141, 118, 12));
+            var extendPoly = StructUtils.ExpandLine(ExtendLineList[0], TolLane, 0, TolLane, 0);
+            DrawUtils.ShowGeometry(extendPoly, EmgLightCommon.LayerLaneHead, Color.FromRgb(141, 118, 12));
 
             BuildStructCenter(importLayout);
             BuildStructCenterInLaneCoor(importLayout);

@@ -11,8 +11,7 @@ namespace ThMEPLighting.EmgLight.Service
 {
     class StructureServiceLight
     {
-        static double TolLight = 400;
-
+        
         /// <summary>
         /// 获取停车线周边构建信息
         /// </summary>
@@ -171,7 +170,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="walls"></param>
         /// <returns></returns>
-        public static List<Polyline> breakWall(List<Polyline> walls)
+        public static List<Polyline> breakWall(List<Polyline> walls, double TolLight)
         {
             List<Polyline> returnWalls = new List<Polyline>();
 

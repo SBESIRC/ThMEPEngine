@@ -10,20 +10,8 @@ using Autodesk.AutoCAD.Colors;
 
 namespace ThMEPLighting.EmgLight
 {
-    class LayoutWithParkingLineForLight
+    class LayoutEmgLightEngine
     {
-
-        int TolLane = 6000;
-        double TolUniformSideLenth = 0.6;
-        int TolAvgColumnDist = 7900;
-        int TolLightRangeMin = 4000;
-        int TolLightRangeMax = 8900;
-        int TolLaneProtect = 1000;
-
-        string LayerStruct = "lStruct";
-        string LayerStructLayout = "lStructLayout";
-        string LayerExtendPoly = "lExtendPoly";
-
         Dictionary<Line, (Polyline, Polyline)> laneHeadProtectRect = new Dictionary<Line, (Polyline, Polyline)>();
 
         /// <summary>
@@ -45,7 +33,7 @@ namespace ThMEPLighting.EmgLight
 
                 //特别短的线跳过
                 var laneLength = lane.Sum(x => x.Length);
-                if (laneLength < TolLightRangeMin)
+                if (laneLength < EmgLightCommon.TolLightRangeMin)
                 {
                     continue;
                 }
@@ -55,35 +43,57 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
-                DrawUtils.ShowGeometry(frame, "lFrame", Color.FromRgb(0, 255, 255), LineWeight.LineWeight035);
-                
+                DrawUtils.ShowGeometry(frame, EmgLightCommon.LayerFrame, Color.FromRgb(0, 255, 255), LineWeight.LineWeight035);
+
                 //获取该车道线上的构建
-                var closeColumn = StructureServiceLight.GetStruct(lane, columns, TolLane);
-                var closeWall = StructureServiceLight.GetStruct(lane, walls, TolLane);
+                var closeColumn = StructureServiceLight.GetStruct(lane, columns, EmgLightCommon.TolLane);
+                var closeWall = StructureServiceLight.GetStruct(lane, walls, EmgLightCommon.TolLane);
+
+                DrawUtils.ShowGeometry(closeColumn, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(closeWall, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
 
                 //找到构建上可布置面,用第一条车道线的头尾判定
                 var filterColmuns = StructureServiceLight.getStructureParallelPart(closeColumn, lane);
                 var filterWalls = StructureServiceLight.getStructureParallelPart(closeWall, lane);
 
                 //破墙
-                var brokeWall = StructureServiceLight.breakWall(filterWalls);
+                var brokeWall = StructureServiceLight.breakWall(filterWalls, EmgLightCommon.TolLight);
+                DrawUtils.ShowGeometry(filterColmuns, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(brokeWall, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
+
 
                 //将构建按车道线方向分成左(0)右(1)两边
-                var usefulColumns = StructureServiceLight.SeparateColumnsByLine(filterColmuns, lane, TolLane);
-                var usefulWalls = StructureServiceLight.SeparateColumnsByLine(brokeWall, lane, TolLane);
+                var usefulColumns = StructureServiceLight.SeparateColumnsByLine(filterColmuns, lane, EmgLightCommon.TolLane);
+                var usefulWalls = StructureServiceLight.SeparateColumnsByLine(brokeWall, lane, EmgLightCommon.TolLane);
 
-                StructureLayoutServiceLight layoutServer = new StructureLayoutServiceLight(usefulColumns, usefulWalls, lane, frame, TolLightRangeMin, TolLightRangeMax);
+                LayoutEmgLightService layoutServer = new LayoutEmgLightService(usefulColumns, usefulWalls, lane, frame, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLightRangeMax);
 
-                //滤掉重合部分
+                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], EmgLightCommon.LayerSeparate, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], EmgLightCommon.LayerSeparate, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
+
+                foreach (Line l in lane)
+                {
+                    var linePoly = StructUtils.ExpandLine(l, EmgLightCommon.TolLane, 0, EmgLightCommon.TolLane, 0);
+                    DrawUtils.ShowGeometry(linePoly, EmgLightCommon.LayerSeparatePoly, Color.FromRgb(141, 118, 12));
+                }
+
+
+                ////滤掉重合部分
                 layoutServer.filterOverlapStruc();
-               
-                //滤掉框外边的部分
+
+                ////滤掉框外边的部分
                 layoutServer.getInsideFramePart();
-                
-                //滤掉框后边的部分
+
+                ////滤掉框后边的部分
                 layoutServer.filterStrucBehindFrame();
-                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
+
+                DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0], EmgLightCommon.LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1], EmgLightCommon.LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0], EmgLightCommon.LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1], EmgLightCommon.LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
+
+                //DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], EmgLightCommon.LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
+                //DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], EmgLightCommon.LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
 
                 if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
                     layoutServer.UsefulWalls[0].Count == 0 && layoutServer.UsefulWalls[1].Count == 0)
@@ -129,7 +139,7 @@ namespace ThMEPLighting.EmgLight
                     LayoutOppositeSide(uniformSide, lane, uniformSideLayout, layoutServer, lanes, ref layoutList);
                 }
 
-                layoutServer.AddLayoutStructPt(layoutList, lane, ref layoutPtInfo);
+                layoutServer.AddLayoutStructPt(layoutList, ref layoutPtInfo);
             }
 
             return layoutPtInfo;
@@ -142,7 +152,7 @@ namespace ThMEPLighting.EmgLight
         /// <param name="lines">车道线</param>
         /// <param name="distList">车道线方向坐标系里面的距离差</param>
         /// <returns>-1:两边都不均匀,0:车道线方向左侧均匀,1:右侧均匀</returns>
-        private int FindUniformDistributionSide(StructureLayoutServiceLight layoutServer, List<Line> lines, out List<List<double>> distList)
+        private int FindUniformDistributionSide(LayoutEmgLightService layoutServer, List<Line> lines, out List<List<double>> distList)
         {
             //上下排序
 
@@ -159,23 +169,23 @@ namespace ThMEPLighting.EmgLight
             int nUniformSide = -1; //-1:no side, 0:left, 1:right
 
             //柱间距总长度>=车道线总长度的60% 
-            if ((bLeft == false) || distList[0].Sum() / lineLength < TolUniformSideLenth)
+            if ((bLeft == false) || distList[0].Sum() / lineLength < EmgLightCommon.TolUniformSideLenth)
             {
                 bLeft = false;
             }
 
-            if ((bRight == false) || distList[1].Sum() / lineLength < TolUniformSideLenth)
+            if ((bRight == false) || distList[1].Sum() / lineLength < EmgLightCommon.TolUniformSideLenth)
             {
                 bRight = false;
             }
 
             //柱数量 > ((车道/平均柱距) * 0.5) 且 柱数量>=3个
-            if (bLeft == false || layoutServer.UsefulColumns[0].Count() < 3 || layoutServer.UsefulColumns[0].Count() < (lineLength / TolAvgColumnDist) * 0.5)
+            if (bLeft == false || layoutServer.UsefulColumns[0].Count() < 3 || layoutServer.UsefulColumns[0].Count() < (lineLength / EmgLightCommon.TolAvgColumnDist) * 0.5)
             {
                 bLeft = false;
             }
 
-            if (bRight == false || layoutServer.UsefulColumns[1].Count() < 3 || layoutServer.UsefulColumns[1].Count() < (lineLength / TolAvgColumnDist) * 0.5)
+            if (bRight == false || layoutServer.UsefulColumns[1].Count() < 3 || layoutServer.UsefulColumns[1].Count() < (lineLength / EmgLightCommon.TolAvgColumnDist) * 0.5)
             {
                 bRight = false;
             }
@@ -213,7 +223,7 @@ namespace ThMEPLighting.EmgLight
         /// <param name="distList"></param>
         /// <param name="uniformSideLayout"></param>
         /// <param name="layout"></param>
-        private void LayoutUniformSide(List<List<Polyline>> usefulStruct, int uniformSide, List<List<double>> distList, StructureLayoutServiceLight layoutServer, List<List<Line>> lanes, out Dictionary<Polyline, int> uniformSideLayout, ref List<Polyline> layout)
+        private void LayoutUniformSide(List<List<Polyline>> usefulStruct, int uniformSide, List<List<double>> distList, LayoutEmgLightService layoutServer, List<List<Line>> lanes, out Dictionary<Polyline, int> uniformSideLayout, ref List<Polyline> layout)
         {
             int layoutStatus = 0; //0:非布灯状态,1:布灯状态
             uniformSideLayout = new Dictionary<Polyline, int>(); //int 为不均匀边布灯的标旗: -1: 头部已经layout的,或尾点对面需要布灯的, -1 标旗不计入均匀边最后的layout 0:和前面隔点, 1:对边
@@ -229,13 +239,13 @@ namespace ThMEPLighting.EmgLight
                     if (i < usefulStruct[uniformSide].Count - 1)
                     {
                         cumulateDist += distList[uniformSide][i];
-                        if (cumulateDist > TolLightRangeMax)
+                        if (cumulateDist > EmgLightCommon.TolLightRangeMax)
                         {
                             //累计距离到下个柱距离>tol, 本柱需标记
                             if (layoutStatus != 0)
                             {
                                 //如果当前状态为布灯状态,将本柱加入
-                                AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], 0, TolLightRangeMin, false, ref uniformSideLayout);
+                                AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], 0, EmgLightCommon.TolLightRangeMin, false, ref uniformSideLayout);
                                 layoutStatus = 0;
                             }
                             else
@@ -247,11 +257,11 @@ namespace ThMEPLighting.EmgLight
                         }
 
                         //本柱到下个柱是否很远
-                        if (distList[uniformSide][i] > TolLightRangeMax)
+                        if (distList[uniformSide][i] > EmgLightCommon.TolLightRangeMax)
                         {
                             //将自己和下个柱加入,累计距离清零
-                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], 1, TolLightRangeMin, true, ref uniformSideLayout);
-                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i + 1], 1, TolLightRangeMin, true, ref uniformSideLayout);
+                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], 1, EmgLightCommon.TolLightRangeMin, true, ref uniformSideLayout);
+                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i + 1], 1, EmgLightCommon.TolLightRangeMin, true, ref uniformSideLayout);
                             layoutStatus = 0;
                             cumulateDist = 0;
                         }
@@ -261,22 +271,22 @@ namespace ThMEPLighting.EmgLight
                         //最后一个点特殊处理
                         if (layoutStatus != 0)
                         {
-                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], 0, TolLightRangeMin, false, ref uniformSideLayout);
+                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], 0, EmgLightCommon.TolLightRangeMin, false, ref uniformSideLayout);
                         }
                         else
                         {
                             //如果末尾还有点,标值-1
-                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], -1, TolLightRangeMin, false, ref uniformSideLayout);
+                            AddToUniformLayoutList(layout, usefulStruct[uniformSide][i], -1, EmgLightCommon.TolLightRangeMin, false, ref uniformSideLayout);
                         }
                     }
                 }
             }
             else
             {
-                AddToUniformLayoutList(layout, usefulStruct[uniformSide][initial], 0, TolLightRangeMin, false, ref uniformSideLayout);
+                AddToUniformLayoutList(layout, usefulStruct[uniformSide][initial], 0, EmgLightCommon.TolLightRangeMin, false, ref uniformSideLayout);
             }
 
-            DrawUtils.ShowGeometry(uniformSideLayout.Where(x => x.Value == 1 || x.Value == 0).Select(y => y.Key).ToList(), LayerStructLayout, Color.FromRgb(0, 255, 0), LineWeight.LineWeight050);
+            DrawUtils.ShowGeometry(uniformSideLayout.Where(x => x.Value == 1 || x.Value == 0).Select(y => y.Key).ToList(), EmgLightCommon.LayerStructLayout, Color.FromRgb(0, 255, 0), LineWeight.LineWeight050);
             layout.AddRange(uniformSideLayout.Where(x => x.Value == 1 || x.Value == 0).Select(y => y.Key).ToList());
 
         }
@@ -293,7 +303,7 @@ namespace ThMEPLighting.EmgLight
         /// <param name="LastHasNoLightColumn"></param>
         /// <param name="sum"></param>
         /// <returns></returns>
-        private int LayoutFirstUniformSide(List<Polyline> layout, List<List<Polyline>> usefulStruct, int uniformSide, StructureLayoutServiceLight layoutServer, List<List<Line>> lanes, ref Dictionary<Polyline, int> uniformSideLayout, ref int LastHasNoLightColumn, ref double sum)
+        private int LayoutFirstUniformSide(List<Polyline> layout, List<List<Polyline>> usefulStruct, int uniformSide, LayoutEmgLightService layoutServer, List<List<Line>> lanes, ref Dictionary<Polyline, int> uniformSideLayout, ref int LastHasNoLightColumn, ref double sum)
         {
             //   A|   |B    |E       [uniform side]
             //-----s[-----------lane----------]e
@@ -310,7 +320,7 @@ namespace ThMEPLighting.EmgLight
             if (layout.Count > 0)
             {
                 ////车道线往前做框buffer,选出车线头部的已布情况
-                var importLayout = layoutServer.BuildHeadLayout(layout, TolLane);
+                var importLayout = layoutServer.BuildHeadLayout(layout, EmgLightCommon.TolLane);
 
                 //情况A:
                 var uniformSideHeadLayout = importLayout[uniformSide].Where(x => layoutServer.getCenterInLaneCoor(x).X < 0).ToList();
@@ -343,7 +353,7 @@ namespace ThMEPLighting.EmgLight
                         for (int i = 0; i < usefulStruct[uniformSide].Count; i++)
                         {
                             var dist = layoutServer.getCenterInLaneCoor(usefulStruct[uniformSide][i]).X - layoutServer.getCenterInLaneCoor(otherSideStartLayout.Last()).X;
-                            if (Math.Abs(dist) > TolLightRangeMax)
+                            if (Math.Abs(dist) > EmgLightCommon.TolLightRangeMax)
                             {
                                 if (i > 0)
                                 {
@@ -408,7 +418,7 @@ namespace ThMEPLighting.EmgLight
         /// <param name="columnDistList"></param>
         /// <param name="uniformSideLayout"></param>
         /// <param name="layout"></param>
-        private void LayoutOppositeSide(int uniformSide, List<Line> lane, Dictionary<Polyline, int> uniformSideLayout, StructureLayoutServiceLight layoutServer, List<List<Line>> lanes, ref List<Polyline> layout)
+        private void LayoutOppositeSide(int uniformSide, List<Line> lane, Dictionary<Polyline, int> uniformSideLayout, LayoutEmgLightService layoutServer, List<List<Line>> lanes, ref List<Polyline> layout)
         {
             int nonUniformSide = uniformSide == 0 ? 1 : 0;
 
@@ -438,10 +448,10 @@ namespace ThMEPLighting.EmgLight
                         //均匀边每个分布,第一个点对边找点
                         layoutServer.prjPtToLine(uniformSideLayout.First().Key, out CloestPt);
 
-                        ExtendPoly = CreateExtendPoly(CloestPt, moveDir, TolLightRangeMin, TolLane);
+                        ExtendPoly = CreateExtendPoly(CloestPt, moveDir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
                         layoutServer.FindClosestStructToPt(layoutServer.UsefulStruct[nonUniformSide], CloestPt, ExtendPoly, out closestStruct);
 
-                        AddToNonUniformLayoutList(layout, closestStruct, TolLightRangeMin, lanes, ref nonUniformSideLayout);
+                        AddToNonUniformLayoutList(layout, closestStruct, EmgLightCommon.TolLightRangeMin, lanes, ref nonUniformSideLayout);
 
                     }
 
@@ -452,19 +462,19 @@ namespace ThMEPLighting.EmgLight
                         {
                             //均匀边每个分布
                             layoutServer.prjPtToLine(uniformSideLayout.ElementAt(i).Key, out CloestPt);
-                            ExtendPoly = CreateExtendPoly(CloestPt, moveDir, TolLightRangeMin, TolLane);
+                            ExtendPoly = CreateExtendPoly(CloestPt, moveDir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
                             layoutServer.FindClosestStructToPt(layoutServer.UsefulStruct[nonUniformSide], CloestPt, ExtendPoly, out closestStruct);
 
-                            AddToNonUniformLayoutList(layout, closestStruct, TolLightRangeMin, lanes, ref nonUniformSideLayout);
+                            AddToNonUniformLayoutList(layout, closestStruct, EmgLightCommon.TolLightRangeMin, lanes, ref nonUniformSideLayout);
                         }
                         else if (uniformSideLayout.ElementAt(i).Value == 0)
                         {
                             //均匀边隔柱分布
                             layoutServer.findMidPointOnLine(layoutServer.getCenter(uniformSideLayout.ElementAt(i - 1).Key), layoutServer.getCenter(uniformSideLayout.ElementAt(i).Key), out var midPt);
-                            ExtendPoly = CreateExtendPoly(midPt, moveDir, TolLightRangeMin, TolLane);
+                            ExtendPoly = CreateExtendPoly(midPt, moveDir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
                             layoutServer.FindClosestStructToPt(layoutServer.UsefulStruct[nonUniformSide], midPt, ExtendPoly, out closestStruct);
 
-                            AddToNonUniformLayoutList(layout, closestStruct, TolLightRangeMin, lanes, ref nonUniformSideLayout);
+                            AddToNonUniformLayoutList(layout, closestStruct, EmgLightCommon.TolLightRangeMin, lanes, ref nonUniformSideLayout);
                         }
                     }
                 }
@@ -478,10 +488,10 @@ namespace ThMEPLighting.EmgLight
                     if (uniformSideLayout.Count > 1)
                     {
                         distToNext = layoutServer.getCenter(uniformSideLayout.Last().Key).DistanceTo(layoutServer.getCenter(uniformSideLayout.ElementAt(uniformSideLayout.Count - 2).Key));
-                        if (distToNext > TolLightRangeMin)
+                        if (distToNext > EmgLightCommon.TolLightRangeMin)
                         {
                             layoutServer.prjPtToLine(uniformSideLayout.Last().Key, out CloestPt);
-                            ExtendPoly = CreateExtendPoly(CloestPt, moveDir, TolLightRangeMin, TolLane);
+                            ExtendPoly = CreateExtendPoly(CloestPt, moveDir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
                         }
                     }
                 }
@@ -489,16 +499,16 @@ namespace ThMEPLighting.EmgLight
                 {
                     //对边最后一个点是已布点,检查车道线后面长度是否需要对面补点
                     layoutServer.prjPtToLineEnd(uniformSideLayout.Last().Key, out var LastPartLines);
-                    if (LastPartLines.Length > TolLightRangeMax)
+                    if (LastPartLines.Length > EmgLightCommon.TolLightRangeMax)
                     {
-                        CloestPt = LastPartLines.GetPointAtDist(TolLightRangeMax);
-                        ExtendPoly = CreateExtendPoly(CloestPt, moveDir, TolLightRangeMin, TolLane);
+                        CloestPt = LastPartLines.GetPointAtDist(EmgLightCommon.TolLightRangeMax);
+                        ExtendPoly = CreateExtendPoly(CloestPt, moveDir, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLane);
                     }
                 }
                 if (ExtendPoly != null)
                 {
                     layoutServer.FindClosestStructToPt(layoutServer.UsefulStruct[nonUniformSide], CloestPt, ExtendPoly, out closestStruct);
-                    AddToNonUniformLayoutList(layout, closestStruct, TolLightRangeMin, lanes, ref nonUniformSideLayout);
+                    AddToNonUniformLayoutList(layout, closestStruct, EmgLightCommon.TolLightRangeMin, lanes, ref nonUniformSideLayout);
                 }
             }
             else
@@ -507,26 +517,26 @@ namespace ThMEPLighting.EmgLight
                 if (layoutServer.UsefulStruct[uniformSide].Count > 0)
                 {
                     //均匀边有构建, 加入[均匀边]最后点
-                    AddToNonUniformLayoutList(layout, layoutServer.UsefulStruct[uniformSide].Last(), TolLightRangeMin, lanes, ref nonUniformSideLayout);
+                    AddToNonUniformLayoutList(layout, layoutServer.UsefulStruct[uniformSide].Last(), EmgLightCommon.TolLightRangeMin, lanes, ref nonUniformSideLayout);
                 }
                 else
                 {
                     //均匀边没有构建,在非均匀边每隔8500布置一个点
-                    AddToNonUniformLayoutList(layout, layoutServer.UsefulStruct[nonUniformSide].First(), TolLightRangeMin, lanes, ref nonUniformSideLayout);
+                    AddToNonUniformLayoutList(layout, layoutServer.UsefulStruct[nonUniformSide].First(), EmgLightCommon.TolLightRangeMin, lanes, ref nonUniformSideLayout);
                     var layIndex = 0;
                     for (int i = 1; i < layoutServer.UsefulStruct[nonUniformSide].Count; i++)
                     {
                         var dist = layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[nonUniformSide][i]).X - layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[nonUniformSide][layIndex]).X;
-                        if (dist > TolLightRangeMax)
+                        if (dist > EmgLightCommon.TolLightRangeMax)
                         {
                             layIndex = i;
-                            AddToNonUniformLayoutList(layout, layoutServer.UsefulStruct[nonUniformSide][i], TolLightRangeMin, lanes, ref nonUniformSideLayout);
+                            AddToNonUniformLayoutList(layout, layoutServer.UsefulStruct[nonUniformSide][i], EmgLightCommon.TolLightRangeMin, lanes, ref nonUniformSideLayout);
                         }
                     }
                 }
             }
 
-            DrawUtils.ShowGeometry(nonUniformSideLayout, LayerStructLayout, Color.FromRgb(255, 0, 255), LineWeight.LineWeight050);
+            DrawUtils.ShowGeometry(nonUniformSideLayout, EmgLightCommon.LayerStructLayout, Color.FromRgb(255, 0, 255), LineWeight.LineWeight050);
             layout.AddRange(nonUniformSideLayout.Distinct().ToList());
         }
 
@@ -572,7 +582,7 @@ namespace ThMEPLighting.EmgLight
             var ExtendLine = new Line(ExtendPolyStart, ExtendPolyEnd);
             var ExtendPoly = StructUtils.ExpandLine(ExtendLine, tolY, 0, tolY, 0);
 
-            DrawUtils.ShowGeometry(ExtendPoly, LayerExtendPoly, Color.FromRgb(141, 118, 12));
+            DrawUtils.ShowGeometry(ExtendPoly, EmgLightCommon.LayerExtendPoly, Color.FromRgb(141, 118, 12));
 
             return ExtendPoly;
         }
@@ -593,8 +603,8 @@ namespace ThMEPLighting.EmgLight
                     if (laneHeadProtectRect.ContainsKey(lanes[i][0]) == false)
                     {
                         var moveDir = lanes[i].Last().EndPoint - lanes[i].First().StartPoint;
-                        var head = CreateExtendPoly(lanes[i].First().StartPoint, moveDir, TolLaneProtect, TolLaneProtect);
-                        var end = CreateExtendPoly(lanes[i].Last().EndPoint, moveDir, TolLaneProtect, TolLaneProtect);
+                        var head = CreateExtendPoly(lanes[i].First().StartPoint, moveDir, EmgLightCommon.TolLaneProtect, EmgLightCommon.TolLaneProtect);
+                        var end = CreateExtendPoly(lanes[i].Last().EndPoint, moveDir, EmgLightCommon.TolLaneProtect, EmgLightCommon.TolLaneProtect);
                         laneHeadProtectRect.Add(lanes[i][0], (head, end));
                     }
                     if (laneHeadProtectRect[lanes[i][0]].Item1.Contains(structure) || laneHeadProtectRect[lanes[i][0]].Item1.Intersects(structure) ||
