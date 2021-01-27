@@ -37,7 +37,7 @@ namespace TianHua.AutoCAD.ThCui
             row.AddNewButton("风机选型",
                 "天华风机选型",
                 "THFJ",
-                "",
+                "为各种应用场景自动选型风机，可插入图块、导出数据表。包含防排烟计算功能。设计数据与图纸绑定。",
                 "IDI_THCAD_THFJ_SMALL",
                 "IDI_THCAD_THFJ_LARGE",
                 RibbonButtonStyle.LargeWithText);
@@ -46,7 +46,7 @@ namespace TianHua.AutoCAD.ThCui
             row.AddNewButton("机房平面",
                 "天华机房平面",
                 "THFJF",
-                "",
+                "基于风机图块与风管中心线，自动生成风管、风阀、开洞等元素。",
                 "IDI_THCAD_THFJF_SMALL",
                 "IDI_THCAD_THFJF_LARGE",
                 RibbonButtonStyle.LargeWithText);
@@ -58,12 +58,72 @@ namespace TianHua.AutoCAD.ThCui
 
             // 烟感温感布置
             row.AddNewButton("烟感温感布置",
-                "天华烟感温感布置",
-                "THYWG",
-                "",
-                "IDI_THCAD_THYWG_SMALL",
-                "IDI_THCAD_THYWG_LARGE",
+            "天华烟感温感布置",
+            "THYWG",
+            "一键布置烟感和温感点位",
+            "IDI_THCAD_THYWG_SMALL",
+            "IDI_THCAD_THYWG_LARGE",
+            RibbonButtonStyle.LargeWithText);
+
+            // 提车道中心线
+            row.AddNewButton("提车道中心线",
+                "天华提车道中心线",
+                "THTCD",
+                "提取建筑底图的车道中心线到本图中，用于车道照明、车道应急照明、广播的布点和连线",
+                "IDI_THCAD_THTCD_SMALL",
+                "IDI_THCAD_THTCD_LARGE",
                 RibbonButtonStyle.LargeWithText);
+
+            // 地库广播
+            row.AddNewButton("地库广播",
+            "天华地库广播",
+            "THGB",
+            "基于提取出的车道中心线，一键布置地库广播点位",
+            "IDI_THCAD_THGB_SMALL",
+            "IDI_THCAD_THGB_LARGE",
+            RibbonButtonStyle.LargeWithText);
+
+            {
+                var subPanel = row.AddNewPanel();
+
+                // 广播连线
+                var subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("广播连线",
+                    "天华广播连线",
+                    "THGBLX",
+                    "基于提取出的车道中心线，一键完成地库广播连线",
+                    "IDI_THCAD_THGBLX_SMALL",
+                    "IDI_THCAD_THGBLX_SMALL",
+                    RibbonButtonStyle.SmallWithText);
+
+                // 广播盲区
+                subRow = subPanel.AddNewRibbonRow();
+                subRow.AddNewButton("广播盲区",
+                    "天华广播盲区",
+                    "THGBMQ",
+                    "基于提取出的车道中心线，检测广播点位布置后，可能的走道端头盲区",
+                    "IDI_THCAD_THGBMQ_SMALL",
+                    "IDI_THCAD_THGBMQ_LARGE",
+                    RibbonButtonStyle.SmallWithText);
+            }
+				
+			// 车道照明
+            row.AddNewButton("车道照明",
+            "天华车道照明",
+            "THCDZM",
+            "基于提取出的车道中心线，一键布置车道线槽灯",
+            "IDI_THCAD_THCDZM_SMALL",
+            "IDI_THCAD_THCDZM_LARGE",
+            RibbonButtonStyle.LargeWithText);
+				
+			// 车道应急照明
+            row.AddNewButton("车道应急照明",
+            "天华车道应急照明",
+            "THYJZM",
+            "基于提取出的车道中心线，一键布置车道壁装应急照明点位",
+            "IDI_THCAD_THYJZM_SMALL",
+            "IDI_THCAD_THYJZM_LARGE",
+            RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
         {
@@ -73,7 +133,7 @@ namespace TianHua.AutoCAD.ThCui
             row.AddNewButton("喷头工具",
                 "天华喷头工具",
                 "THPL",
-                "",
+                "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
                 "IDI_THCAD_THPLPT_SMALL",
                 "IDI_THCAD_THPLPT_LARGE",
                 RibbonButtonStyle.LargeWithText);
