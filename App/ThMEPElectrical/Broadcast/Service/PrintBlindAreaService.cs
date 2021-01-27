@@ -81,7 +81,9 @@ namespace ThMEPElectrical.Broadcast.Service
             {
                 foreach (var frame in frames)
                 {
-                    if (frame.Intersects(area))
+                    Point3dCollection pts = new Point3dCollection();
+                    frame.IntersectWith(area, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    if (pts.Count > 0)
                     {
                         blindAreaLst.Add(area);
                         break;

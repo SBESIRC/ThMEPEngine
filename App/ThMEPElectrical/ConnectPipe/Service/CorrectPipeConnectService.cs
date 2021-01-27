@@ -24,8 +24,14 @@ namespace ThMEPElectrical.ConnectPipe.Service
         {
             var polyDic = GeUtils.CalLongestLineByPoly(connectPolys);
             List<Polyline> resPolys = new List<Polyline>();
+            int index = 0;
             while (polyDic.Count > 0)
             {
+                if (index > 100)
+                {
+                    break;
+                }
+                index++;
                 var poly = polyDic.First();
                 var dir = (poly.Value.EndPoint - poly.Value.StartPoint).GetNormal();
                 var connectPolyDic = polyDic.Where(x => (x.Key.StartPoint.IsEqualTo(poly.Key.StartPoint)
