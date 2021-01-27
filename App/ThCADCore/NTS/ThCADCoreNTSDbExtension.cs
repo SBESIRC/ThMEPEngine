@@ -352,6 +352,11 @@ namespace ThCADCore.NTS
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
         }
 
+        public static LineSegment ToNTSLineSegment(this Line line)
+        {
+            return new LineSegment(line.StartPoint.ToNTSCoordinate(), line.EndPoint.ToNTSCoordinate());
+        }
+
         public static Point ToNTSPoint(this DBPoint point)
         {
             return ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(point.Position.ToNTSCoordinate());

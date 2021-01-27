@@ -245,9 +245,8 @@ namespace ThMEPEngineCore
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
 
-                var lines = ThLaneLineNodingEngine.Noding(objs);
-                lines = ThLaneLineUnionEngine.Union(lines);
-                lines = ThLaneLineJoinEngine.Join(lines);
+                var lines = ThLaneLineExtendEngine.Extend(objs);
+                lines = ThLaneLineMergeExtension.Merge(lines);
                 foreach (Line line in lines)
                 {
                     acadDatabase.ModelSpace.Add(line);

@@ -195,6 +195,18 @@ namespace ThCADCore.NTS
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
 
+        /// <summary>
+        /// Fence Selection
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
+        public DBObjectCollection SelectFence(Line line)
+        {
+            var geometry = ToNTSGeometry(line);
+            return FenceFilter(Query(geometry.EnvelopeInternal),
+                ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
+        }
+
         public DBObjectCollection SelectAll()
         {
             var objs = new DBObjectCollection();
