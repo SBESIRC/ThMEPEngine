@@ -27,7 +27,7 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                short colorIndex = 6;
+                short colorIndex = 2;
                 var polyline = PolylineJig(colorIndex);
                 if (polyline == null)
                 {
