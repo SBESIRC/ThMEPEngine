@@ -97,6 +97,7 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THCDZMBZ", CommandFlags.Modal)]
         public void THCDZMBZ()
         {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
             {
                 //输入参数
@@ -179,7 +180,7 @@ namespace ThMEPLighting
                 }
             }
             return results;
-        }
+        }        
         private bool GetArrangeWay() 
         {
             var options = new PromptKeywordOptions("\n请指定布置方式")
@@ -224,6 +225,7 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THCDBH", CommandFlags.Modal)]
         public void THCDBH()
         {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
             {
                 var arrangeParameter = GetUiParameters();
