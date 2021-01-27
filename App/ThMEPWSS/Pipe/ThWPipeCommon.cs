@@ -146,5 +146,40 @@
         /// 图层
         /// </summary>
         public const string AD_FLOOR_AREA = "AD-FLOOR-AREA";
+        /// <summary>
+        /// 雨水管标注
+        /// </summary>
+        public const string W_RAIN_NOTE = "W-RAIN-NOTE";
+        /// <summary>
+        /// 水管标注
+        /// </summary>
+        public const string W_DRAI_NOTE = "W-DRAI-NOTE";
+        /// <summary>
+        /// 雨水管立管
+        /// </summary>
+        public const string W_RAIN_EQPM = "W-RAIN-EQPM";
+        /// <summary>
+        /// 污水管立管
+        /// </summary>
+        public const string W_DRAI_EQPM = "W-DRAI-EQPM";
+        /// <summary>
+        /// 污废合流管道
+        /// </summary>
+        public const string W_DRAI_SEWA_PIPE = "W-DRAI-SEWA-PIPE"; 
+        public const string W_DRAI_SEWA_PIPE1 = "W-DRAI-DOME-PIPE";
+        /// <summary>
+        /// 通气管
+        /// </summary>
+        public const string W_DRAI_VENT_PIPE = "W-DRAI-VENT-PIPE";
+        /// <summary>
+        /// 雨水管
+        /// </summary>
+        public const string W_RAIN_PIPE = "W-RAIN-PIPE";
+        /// <summary>
+        /// 地漏
+        /// </summary>
+        public const string W_DRAI_FLDR = "W-DRAI-FLDR";
+        
+
     }
 }

@@ -224,6 +224,8 @@
     <Compile Include="Service\ThDoorMarkDbExtension.cs" />
     <Compile Include="Service\ThExternalTagsDbExtension.cs" />
     <Compile Include="Service\ThExternalTagsLayerManager.cs" />
+    <Compile Include="Service\ThLayerNamesDbExtension.cs" />
+    <Compile Include="Service\ThLayerNamesLayerManager.cs" />
     <Compile Include="Service\ThMatchDoorStoneService.cs" />
     <Compile Include="Service\ThDoorStoneDbExtension.cs" />
     <Compile Include="Service\ThBuildDoorService.cs" />

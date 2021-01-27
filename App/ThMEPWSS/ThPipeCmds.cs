@@ -445,8 +445,7 @@ namespace ThMEPWSS
                         block = pipe.Outline as Polyline;
                         roofRainPipe.Add(block);
                     }
-
-                    engine.Run(gravityWaterBucket, sideWaterBucket, roofRainPipe, boundary);
+                    //engine.Run(gravityWaterBucket, sideWaterBucket, roofRainPipe, boundary);
                     for (int i = 0; i < engine.GravityWaterBucketCenter.Count; i++)
                     {
                         Line ent_line = new Line(engine.GravityWaterBucketCenter[i], engine.GravityWaterBucketTag[i]);
@@ -529,7 +528,7 @@ namespace ThMEPWSS
                         baseCircles.Add(block);
                     }
 
-                    engine.Run(gravityWaterBucket, sideWaterBucket, roofRainPipe, boundary);
+                    //engine.Run(gravityWaterBucket, sideWaterBucket, roofRainPipe, boundary);
                     for (int i = 0; i < engine.GravityWaterBucketCenter.Count; i++)
                     {
                         Line ent_line = new Line(engine.GravityWaterBucketCenter[i], engine.GravityWaterBucketTag[i]);
@@ -669,9 +668,8 @@ namespace ThMEPWSS
         public static Line CreateLine(Point3d point1, Point3d point2)
         {
             Line line = new Line(point1, point2);
-            //ent_line.Layer = "W-DRAI-NOTE";
-            //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-            line.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+            line.Layer = "W-RAIN-NOTE";
+            //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);       
             return line;
         }
         public static List<Line> GetCreateLines(Point3dCollection points, Point3dCollection point1s)
@@ -698,7 +696,7 @@ namespace ThMEPWSS
             {
                 Radius = 50,
                 Center = point1,
-                Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255)
+                Layer = ThWPipeCommon.W_RAIN_EQPM,
             };
         }                    
         public class InputInfo
@@ -708,7 +706,9 @@ namespace ThMEPWSS
             public bool IsSeparation=false ;
 
             public int FloorValue=0;
-            
+
+            public int ScaleFactor = 0;
+            public string PipeLayer = null;
             public  void MakeInputInfo()
             {
                 var inputInfo = new InputInfo();
@@ -716,6 +716,8 @@ namespace ThMEPWSS
                 IsCaisson= inputInfo.IsCaisson;
                 IsSeparation = inputInfo.IsSeparation;
                 FloorValue = inputInfo.FloorValue;
+                ScaleFactor = inputInfo.ScaleFactor;
+                PipeLayer= inputInfo.PipeLayer;
             }
             public void Do()
             {
@@ -746,9 +748,117 @@ namespace ThMEPWSS
                     return;
                 }
                 IsCaisson = result.StringResult == "有";
+                var scale_key = new PromptKeywordOptions("\n选择比例系数");
+                scale_key.Keywords.Add("1:50", "Y", "1:50(Y)");
+                scale_key.Keywords.Add("1:100", "N", "1:100(N)");
+                scale_key.Keywords.Add("1:150", "o", "1:150(o)");
+                scale_key.Keywords.Default = "1:50";
+                result = Active.Editor.GetKeywords(scale_key);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                else if(result.StringResult == "1:50")
+                {
+                    ScaleFactor = 1;
+                }
+                else if (result.StringResult == "1:100")
+                {
+                    ScaleFactor = 2;
+                }
+                else
+                {
+                    ScaleFactor = 3;
+                }
+                var pipeStyle_key = new PromptKeywordOptions("\n选择污废处理管样式");
+                pipeStyle_key.Keywords.Add("污水管", "Y", "污水管(Y)");
+                pipeStyle_key.Keywords.Add("废水管", "N", "废水管(N)");
+                pipeStyle_key.Keywords.Add("污废合流管", "o", "污废合流管(o)");
+                pipeStyle_key.Keywords.Default = "污水管";
+                result = Active.Editor.GetKeywords(pipeStyle_key);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                else if (result.StringResult == "污水管")
+                {
+                    PipeLayer = "W-DRAI-SEWA-PIPE";
+                }
+                else if (result.StringResult == "废水管")
+                {
+                    PipeLayer = "W-DRAI-WAST-PIPE";
+                }
+                else
+                {
+                    PipeLayer = "W-DRAI-SEWA-PIPE";
+                }
             }
         }
-             
+        public class InputObstacles
+        {
+            public List<Curve> ObstacleParameters = new List<Curve>();
+            public void Recognize(ThWCompositeFloorRecognitionEngine FloorEngines)
+            {
+                var inputInfo = new InputObstacles();
+                inputInfo.Do(FloorEngines);
+                ObstacleParameters = inputInfo.ObstacleParameters;
+            }
+            public void Do(ThWCompositeFloorRecognitionEngine FloorEngines)
+            {
+                var obstacle_key = new PromptKeywordOptions("\n障碍物");
+                obstacle_key.Keywords.Add("有", "Y", "有(Y)");
+                obstacle_key.Keywords.Add("没有", "N", "没有(N)");
+                obstacle_key.Keywords.Default = "没有";
+                var result = Active.Editor.GetKeywords(obstacle_key);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                if (result.StringResult == "有")
+                {
+                    var obstacleParameters_key = new PromptKeywordOptions("\n障碍物选择");
+                    obstacleParameters_key.Keywords.Add("全部", "Y", "全部(Y)");
+                    obstacleParameters_key.Keywords.Add("非全部", "N", "非全部(N)");
+                    result = Active.Editor.GetKeywords(obstacleParameters_key);
+                    if (result.StringResult == "全部")
+                    {
+                        ObstacleParameters = GetObstacleParameters("全部障碍物",FloorEngines.AllObstacles);
+                    }
+                    else
+                    {
+                        GetObstacleParameters("空间名称",FloorEngines.TagNameFrames).ForEach(o=> ObstacleParameters.Add(o));
+                        GetObstacleParameters("楼梯", FloorEngines.StairFrames).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("结构柱", FloorEngines.Columns).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("剪力墙", FloorEngines.ShearWalls).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("内门", FloorEngines.InnerDoors).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("设备", FloorEngines.Devices).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("建筑墙", FloorEngines.ArchitectureWalls).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("窗", FloorEngines.Windows).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("建筑标高", FloorEngines.ElevationFrames).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("轴向圆圈标注", FloorEngines.AxialCircleTags).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("轴向横线标注", FloorEngines.AxialAxisTags).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("外部尺寸标注", FloorEngines.ExternalTags).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("本图管井", FloorEngines.Wells).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("本图标注", FloorEngines.DimensionTags).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("本图水管", FloorEngines.RainPipes).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("本图定位尺寸", FloorEngines.PositionTags).ForEach(o => ObstacleParameters.Add(o));
+                    }
+                }
+            }
+
+        }
+        public static List<Curve> GetObstacleParameters(string s,List<Curve> curves)
+        {
+            var obstacle_key = new PromptKeywordOptions(s);
+            obstacle_key.Keywords.Add("有", "Y", "有(Y)");
+            obstacle_key.Keywords.Add("没有", "N", "没有(N)");
+            var result = Active.Editor.GetKeywords(obstacle_key);
+            if(result.StringResult == "有")
+            {
+                return curves;
+            }
+            return new List<Curve>();
+        }
       
         [CommandMethod("TIANHUACAD", "THPYS", CommandFlags.Modal)]
         public void ThPYS()
@@ -757,23 +867,27 @@ namespace ThMEPWSS
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
             {
                 FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
+                var userInfo = new InputInfo();
+                userInfo.MakeInputInfo();
+                var obstacleInfo = new InputObstacles();
+                obstacleInfo.Recognize(FloorEngines);
+                if (userInfo.FloorValue == 0)
+                    return;
+
                 //第一类屋顶设备层布置   
                 var parameters2 = new ThWRoofDeviceParameters();
                 if (FloorEngines.RoofDeviceFloors.Count > 0)//存在屋顶设备层
                 {
-                    ThWLayoutRoofDeviceFloorEngine.LayoutRoofDeviceFloor(FloorEngines, parameters2, acadDatabase);
+                    ThWLayoutRoofDeviceFloorEngine.LayoutRoofDeviceFloor(FloorEngines, parameters2, acadDatabase, userInfo.ScaleFactor);
                 }
                 //第二类屋顶层布置
                 var parameters1 = new ThWRoofParameters();
                 if (FloorEngines.RoofFloors.Count > 0)//存在屋顶层
                 {
-                    ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase);
+                    ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase, userInfo.ScaleFactor);
                 }
                 ////第三类顶层布置            
-                var userInfo = new InputInfo();
-                userInfo.MakeInputInfo();
-                if (userInfo.FloorValue == 0)
-                    return;
+               
                 var basecircle2 = FloorEngines.TopFloors[0].BaseCircles[0].Boundary.GetCenter();
                 var parameters0 = new ThWTopParameters();
                 parameters0.baseCenter2.Add(basecircle2);
@@ -786,7 +900,8 @@ namespace ThMEPWSS
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //开始标注 
                 var layoutTag = new ThWCompositeTagOutPutEngine();
-                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine);               
+                
+                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, userInfo.ScaleFactor, userInfo.PipeLayer);               
             }
         }
       

@@ -7,6 +7,7 @@ using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -29,7 +30,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var basepoint = new List<ThIfcSpace>();
                 var compositeroom = Getcompositeroom(database, pts);
                 var compositebalconyroom = Getcompositebalconyroom(database, pts);
-                var divisionLines = GetLines(database);
+                var divisionLines = GetLines(database, this.Spaces);
                 Rooms = ThTopFloorRoomService.Build(this.Spaces, basepoint, compositeroom, compositebalconyroom, divisionLines);
             }
         }
@@ -49,7 +50,7 @@ namespace ThMEPWSS.Pipe.Engine
                 return compositeRoomRecognitionEngine.FloorDrainRooms;
             }
         }
-         private List<Line> GetLines(Database database)
+         private List<Line> GetLines(Database database,List<ThIfcSpace> spaces)
         {
             var Columns = new List<Line>();         
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -60,7 +61,8 @@ namespace ThMEPWSS.Pipe.Engine
             }
             if (Columns.Count > 0)
             {
-                return Columns;
+
+                return GetColumnLines(Columns, spaces);
             }
             else
             {
@@ -70,6 +72,46 @@ namespace ThMEPWSS.Pipe.Engine
                     return lines;
                 }
             }
+        }
+        private static List<Line> GetColumnLines(List<Line> Columns, List<ThIfcSpace> spaces)
+        {
+            var colunmnLines = new List<Line>();
+            foreach(Line column in Columns)
+            {
+                if((column.StartPoint.X>= GetMinPointX(spaces))&&(column.StartPoint.X <= GetMaxPointX(spaces)))
+                {
+                    colunmnLines.Add(column);
+                }
+            }
+            return colunmnLines;
+        }
+        private static double GetMaxPointX(List<ThIfcSpace> spaces)
+        {
+            double baseX = double.MinValue;
+            var maxpoint = Point3d.Origin;
+            for (int i=0;i< spaces.Count;i++)
+            {
+              
+                if ((spaces[i].Boundary.GeometricExtents.MinPoint.X + spaces[i].Boundary.GeometricExtents.MaxPoint.X) / 2 > baseX)
+                {
+                    baseX = (spaces[i].Boundary.GeometricExtents.MinPoint.X + spaces[i].Boundary.GeometricExtents.MaxPoint.X) / 2;                 
+                }
+            }
+            return baseX;
+        }
+        private static double GetMinPointX(List<ThIfcSpace> spaces)
+        {
+            double baseX = double.MaxValue;
+            var minpoint = Point3d.Origin;
+            for (int i = 0; i < spaces.Count; i++)
+            {
+                
+                if ((spaces[i].Boundary.GeometricExtents.MinPoint.X+ spaces[i].Boundary.GeometricExtents.MaxPoint.X)/2 < baseX)
+                {
+                    baseX = (spaces[i].Boundary.GeometricExtents.MinPoint.X + spaces[i].Boundary.GeometricExtents.MaxPoint.X) / 2;
+                }
+            }
+            return baseX;
         }
     }
 }

@@ -20,7 +20,7 @@ namespace ThMEPWSS.Pipe.Output
             parameters0.pboundary = FloorEngines.TopFloors[0].FirstFloor.Boundary as Polyline;
             var thWPipeOutputFunction=new ThWPipeOutputFunction();
             AddCompositeRooms(FloorEngines,  parameters0,  acadDatabase,  userInfo,thWPipeOutputFunction);
-            AddCompositeCompanyRooms(FloorEngines, parameters0, acadDatabase, userInfo, thWPipeOutputFunction);
+            AddCompositeCompanyRooms(FloorEngines, parameters0, acadDatabase, userInfo, thWPipeOutputFunction, userInfo.PipeLayer);
         }
         private static void AddCompositeRooms(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, InputInfo userInfo, ThWPipeOutputFunction thWPipeOutputFunction)
         {
@@ -61,7 +61,7 @@ namespace ThMEPWSS.Pipe.Output
             }
         }
        
-        private static void AddCompositeCompanyRooms(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, InputInfo userInfo, ThWPipeOutputFunction thWPipeOutputFunction)
+        private static void AddCompositeCompanyRooms(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, InputInfo userInfo, ThWPipeOutputFunction thWPipeOutputFunction,string pipeLayer)
         {
             foreach (var compositeBalcony in FloorEngines.TopFloors[0].CompositeBalconyRooms)
             {   //判断是否为正确的Balcony
@@ -163,7 +163,7 @@ namespace ThMEPWSS.Pipe.Output
                     FloordrainEngine.Run(parameters.bfloordrain, parameters.bboundary, parameters.rainpipe, parameters.downspout,
                         parameters.washingmachine, parameters.device, parameters.device_other, parameters.condensepipe, parameters0.tfloordrain,
                         parameters.tboundary, parameters.devicefloordrain, parameters.roofrainpipe, parameters.bbasinline, parameters.condensepipes);
-                    OutputBalconyParameters(FloordrainEngine, acadDatabase, parameters0);
+                    OutputBalconyParameters(FloordrainEngine, acadDatabase, parameters0, FloorEngines, pipeLayer);
                     //阳台输出完毕
                     OutputDeviceplatformParamters(FloordrainEngine, acadDatabase, parameters0, parameters);
                 }
@@ -176,6 +176,7 @@ namespace ThMEPWSS.Pipe.Output
             {
                 acadDatabase.ModelSpace.Add(item.GetTransformedCopy(kitchenPipe.Matrix.PostMultiplyBy(offset)));
                 Entity polyline = item.GetTransformedCopy(kitchenPipe.Matrix.PostMultiplyBy(offset));
+                polyline.Layer = ThWPipeCommon.W_DRAI_EQPM;
                 parameters0.fpipe.Add(ThWPipeOutputFunction.GetCopyPipes(polyline));
                 parameters0.copypipes.Add(polyline);
                 parameters0.normalCopys.Add(polyline);
@@ -187,6 +188,7 @@ namespace ThMEPWSS.Pipe.Output
             {
                 acadDatabase.ModelSpace.Add(item.GetTransformedCopy(kitchenPipe.Matrix));
                 Entity polyline = item.GetTransformedCopy(kitchenPipe.Matrix);
+                polyline.Layer = ThWPipeCommon.W_DRAI_EQPM ;
                 parameters0.fpipe.Add(ThWPipeOutputFunction.GetCopyPipes(polyline));
                 parameters0.copypipes.Add(polyline);
                 parameters0.normalCopys.Add(polyline);
@@ -198,6 +200,7 @@ namespace ThMEPWSS.Pipe.Output
             {
                 Matrix3d scale = Matrix3d.Scaling(2.0, parameters.tfloordrain_[i].Position);
                 var ent = parameters.tfloordrain_[i].GetTransformedCopy(scale);
+                ent.Layer = ThWPipeCommon.W_DRAI_FLDR;
                 acadDatabase.ModelSpace.Add(ent);
                 if (!GeomUtils.PtInLoop(parameters.boundary1, parameters.tfloordrain_[i].Position) && composite.Toilet.CondensePipes.Count > 0)
                 {
@@ -271,45 +274,49 @@ namespace ThMEPWSS.Pipe.Output
                 return;
             }
         }
-        private static void OutputBalconyParameters(ThWCompositeFloordrainEngine FloordrainEngine,AcadDatabase acadDatabase,ThWTopParameters parameters0)
+        private static void OutputBalconyParameters(ThWCompositeFloordrainEngine FloordrainEngine,AcadDatabase acadDatabase,ThWTopParameters parameters0, ThWCompositeFloorRecognitionEngine FloorEngines,string pipeLayer)
         {
             for (int i = 0; i < FloordrainEngine.Floordrain.Count; i++)
             {//放大标识其他地漏
                 Matrix3d scale = Matrix3d.Scaling(2.0, FloordrainEngine.Floordrain[i].Position);
                 var ent = FloordrainEngine.Floordrain[i].GetTransformedCopy(scale);
+                ent.Layer = ThWPipeCommon.W_DRAI_FLDR;
                 acadDatabase.ModelSpace.Add(ent);
             }
             Matrix3d scale_washing = Matrix3d.Scaling(1.0, FloordrainEngine.Floordrain_washing[0].Position);
             var ent_washing = FloordrainEngine.Floordrain_washing[0].GetTransformedCopy(scale_washing);
+            ent_washing.Layer= ThWPipeCommon.W_DRAI_FLDR;
             acadDatabase.ModelSpace.Add(ent_washing);
             for (int i = 0; i < FloordrainEngine.Downspout_to_Floordrain.Count - 1; i++)
             {
-                acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Downspout_to_Floordrain[i], FloordrainEngine.Downspout_to_Floordrain[i + 1]));
-                parameters0.normalCopys.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Downspout_to_Floordrain[i], FloordrainEngine.Downspout_to_Floordrain[i + 1]));
+                acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Downspout_to_Floordrain[i], FloordrainEngine.Downspout_to_Floordrain[i + 1], FloorEngines.Layers, pipeLayer)) ;
+                parameters0.normalCopys.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Downspout_to_Floordrain[i], FloordrainEngine.Downspout_to_Floordrain[i + 1],FloorEngines.Layers, pipeLayer));
             }
             FloordrainEngine.new_circle.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
+            FloordrainEngine.new_circle.Layer= ThWPipeCommon.W_DRAI_EQPM;
             acadDatabase.ModelSpace.Add(FloordrainEngine.new_circle);
             Polyline downpipe = FloordrainEngine.new_circle.Tessellate(50);
+            downpipe.Layer = ThWPipeCommon.W_DRAI_EQPM;
             parameters0.fpipe.Add(downpipe);
             parameters0.copypipes.Add(FloordrainEngine.new_circle);
             parameters0.normalCopys.Add(FloordrainEngine.new_circle);      
             if (FloordrainEngine.Rainpipe_to_Floordrain.Count > 0)
             {
                 for (int i = 0; i < FloordrainEngine.Rainpipe_to_Floordrain.Count - 1; i++)
-                {
-                    acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Rainpipe_to_Floordrain[i], FloordrainEngine.Rainpipe_to_Floordrain[i + 1]));
-                    parameters0.normalCopys.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Rainpipe_to_Floordrain[i], FloordrainEngine.Rainpipe_to_Floordrain[i + 1]));
+                {                  
+                    acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreateRainlines(FloordrainEngine.Rainpipe_to_Floordrain[i], FloordrainEngine.Rainpipe_to_Floordrain[i + 1]));
+                    parameters0.normalCopys.Add(ThWPipeOutputFunction.CreateRainlines(FloordrainEngine.Rainpipe_to_Floordrain[i], FloordrainEngine.Rainpipe_to_Floordrain[i + 1]));
                 }
             }
             if (FloordrainEngine.Bbasinline_to_Floordrain.Count > 0)
             {
                 for (int i = 0; i < FloordrainEngine.Bbasinline_to_Floordrain.Count - 1; i++)
-                {
-                    acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Bbasinline_to_Floordrain[i], FloordrainEngine.Bbasinline_to_Floordrain[i + 1]));
-                    parameters0.normalCopys.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Bbasinline_to_Floordrain[i], FloordrainEngine.Bbasinline_to_Floordrain[i + 1]));
+                {          
+                    acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Bbasinline_to_Floordrain[i], FloordrainEngine.Bbasinline_to_Floordrain[i + 1], FloorEngines.Layers, pipeLayer));
+                    parameters0.normalCopys.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Bbasinline_to_Floordrain[i], FloordrainEngine.Bbasinline_to_Floordrain[i + 1], FloorEngines.Layers, pipeLayer));
                 }
-                acadDatabase.ModelSpace.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0] });
-                parameters0.normalCopys.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0] });
+                acadDatabase.ModelSpace.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0],Layer= ThWPipeCommon.W_DRAI_EQPM });
+                parameters0.normalCopys.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = ThWPipeCommon.W_DRAI_EQPM });
             }
         }
         private static void OutputDeviceplatformParamters(ThWCompositeFloordrainEngine FloordrainEngine, AcadDatabase acadDatabase, ThWTopParameters parameters0,ThWTopBalconyParameters parameters)
@@ -318,6 +325,7 @@ namespace ThMEPWSS.Pipe.Output
             {
                 Matrix3d scale = Matrix3d.Scaling(2.0, parameters.devicefloordrain[i].Position);
                 var ent = parameters.devicefloordrain[i].GetTransformedCopy(scale);
+                ent.Layer = ThWPipeCommon.W_DRAI_FLDR;
                 acadDatabase.ModelSpace.Add(ent);
             }
             if (FloordrainEngine.Condensepipe_tofloordrains.Count > 1)
@@ -325,7 +333,7 @@ namespace ThMEPWSS.Pipe.Output
                 foreach (Point3dCollection Rainpipe_ in FloordrainEngine.Condensepipe_tofloordrains)
                 {
                     for (int i = 0; i < Rainpipe_.Count - 1; i++)
-                    {
+                    {                      
                         acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreateRainline(Rainpipe_[i], Rainpipe_[i + 1]));
                         parameters0.normalCopys.Add(ThWPipeOutputFunction.CreateRainline(Rainpipe_[i], Rainpipe_[i + 1]));
                     }
@@ -334,7 +342,7 @@ namespace ThMEPWSS.Pipe.Output
             else
             {
                 for (int i = 0; i < FloordrainEngine.Condensepipe_tofloordrain.Count - 1; i++)
-                {
+                {                
                     acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreateRainline(FloordrainEngine.Condensepipe_tofloordrain[i], FloordrainEngine.Condensepipe_tofloordrain[i + 1]));
                     parameters0.normalCopys.Add(ThWPipeOutputFunction.CreateRainline(FloordrainEngine.Condensepipe_tofloordrain[i], FloordrainEngine.Condensepipe_tofloordrain[i + 1]));
                 }
@@ -353,7 +361,7 @@ namespace ThMEPWSS.Pipe.Output
             else
             {
                 for (int i = 0; i < FloordrainEngine.Rainpipe_tofloordrain.Count - 1; i++)
-                {
+                {                  
                     acadDatabase.ModelSpace.Add(ThWPipeOutputFunction.CreateRainline(FloordrainEngine.Rainpipe_tofloordrain[i], FloordrainEngine.Rainpipe_tofloordrain[i + 1]));
                     parameters0.normalCopys.Add(ThWPipeOutputFunction.CreateRainline(FloordrainEngine.Rainpipe_tofloordrain[i], FloordrainEngine.Rainpipe_tofloordrain[i + 1]));
                 }

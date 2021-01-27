@@ -48,47 +48,47 @@ namespace ThMEPWSS.Pipe.Engine
             RoofRainpipeindex = new List<Point3dCollection>();
             RoofRainpipeindex_tag = new List<Point3dCollection>();
         }
-        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary,List<Line> divideLines, List<Polyline> roofrainpipe,Point3d toiletPoint,Point3d balconyPoint, ThCADCoreNTSSpatialIndex obstacle)
+        public void Run(List<Polyline> fpipe, List<Polyline> tpipe, List<Polyline> wpipe, List<Polyline> ppipe, List<Polyline> dpipe, List<Polyline> npipe, List<Polyline> rainpipe, Polyline pboundary,List<Line> divideLines, List<Polyline> roofrainpipe,Point3d toiletPoint,Point3d balconyPoint, ThCADCoreNTSSpatialIndex obstacle,int scaleFactor)
         {
             if (fpipe.Count > 0)
             {
                 Fpipeindex = Fpiperun(fpipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                Fpipeindex_tag = Taggingpoint(Fpipeindex, pboundary, obstacle,0);
+                Fpipeindex_tag = Taggingpoint(Fpipeindex, pboundary, obstacle,0,scaleFactor);
             }
             if (tpipe.Count > 0)
             {
                 Tpipeindex = Fpiperun(tpipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                Tpipeindex_tag = Taggingpoint(Tpipeindex, pboundary, obstacle,1);
+                Tpipeindex_tag = Taggingpoint(Tpipeindex, pboundary, obstacle,1, scaleFactor);
             }
             if (wpipe.Count > 0)
             {
                 Wpipeindex = Fpiperun(wpipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                Wpipeindex_tag = Taggingpoint(Wpipeindex, pboundary, obstacle,2);
+                Wpipeindex_tag = Taggingpoint(Wpipeindex, pboundary, obstacle,2, scaleFactor);
             }
             if (ppipe.Count > 0)
             {
                 Ppipeindex = Fpiperun(ppipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                Ppipeindex_tag = Taggingpoint(Ppipeindex, pboundary, obstacle,3);
+                Ppipeindex_tag = Taggingpoint(Ppipeindex, pboundary, obstacle,3, scaleFactor);
             }
             if (dpipe.Count > 0)
             {
                 Dpipeindex = Fpiperun(dpipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                Dpipeindex_tag = Taggingpoint(Dpipeindex, pboundary, obstacle,4);
+                Dpipeindex_tag = Taggingpoint(Dpipeindex, pboundary, obstacle,4, scaleFactor);
             }
             if (npipe.Count > 0)
             {
                 Npipeindex = Fpiperun(npipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                Npipeindex_tag = Taggingpoint(Npipeindex, pboundary, obstacle,5);
+                Npipeindex_tag = Taggingpoint(Npipeindex, pboundary, obstacle,5, scaleFactor);
             }
             if (rainpipe.Count > 0)
             {
                 Rainpipeindex = Fpiperun(rainpipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                Rainpipeindex_tag = Taggingpoint(Rainpipeindex, pboundary, obstacle,6);
+                Rainpipeindex_tag = Taggingpoint(Rainpipeindex, pboundary, obstacle,6, scaleFactor);
             }
             if (roofrainpipe.Count > 0)
             {
                 RoofRainpipeindex = Fpiperun(roofrainpipe, pboundary, divideLines, toiletPoint, balconyPoint);
-                RoofRainpipeindex_tag = Taggingpoint(RoofRainpipeindex, pboundary, obstacle,7);
+                RoofRainpipeindex_tag = Taggingpoint(RoofRainpipeindex, pboundary, obstacle,7, scaleFactor);
             }
         }
         private List<Point3dCollection> Fpiperun(List<Polyline> fpipe, Polyline pboundary, List<Line> divideLines, Point3d toiletPoint,Point3d balconyPoint)
@@ -297,10 +297,10 @@ namespace ThMEPWSS.Pipe.Engine
             return pipes;
         }
 
-        private List<Point3dCollection> Taggingpoint(List<Point3dCollection> Fpipeindexs, Polyline pboundary, ThCADCoreNTSSpatialIndex obstacle,int index)
+        private List<Point3dCollection> Taggingpoint(List<Point3dCollection> Fpipeindexs, Polyline pboundary, ThCADCoreNTSSpatialIndex obstacle,int index,int scaleFactor)
         {
             //得到字宽
-            double width = GetFrontWidth(index)*175;
+            double width = GetFrontWidth(index)*175* scaleFactor;
             var taggingpoints=new List<Point3dCollection>();
             foreach (Point3dCollection Fpipeindex in Fpipeindexs)
             {
@@ -316,7 +316,7 @@ namespace ThMEPWSS.Pipe.Engine
                         normals.Add(normal);
                     }
                     List<int> nums = Renum();
-                    points = (GetCircularPoint(nums, Fpipeindex[i], width, normals, obstacle));
+                    points = (GetCircularPoint(nums, Fpipeindex[i], width, normals, obstacle,scaleFactor));
                     foreach(Point3d point in points)
                     {
                         taggingpoint.Add(point);
@@ -339,7 +339,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return width;
         }
-        private static Polyline GetBoundary(double width, Point3d point)
+        private static Polyline GetBoundary(double width, Point3d point,int scaleFactor)
         {      
             Polyline polyline = new Polyline()
             {
@@ -347,11 +347,11 @@ namespace ThMEPWSS.Pipe.Engine
             };
             polyline.AddVertexAt(0, new Point2d(point.X, point.Y), 0.0, 0.0, 0.0);
             polyline.AddVertexAt(1, new Point2d(point.X+width, point.Y), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(2, new Point2d(point.X + width, point.Y+175), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(3, new Point2d(point.X, point.Y + 175), 0.0, 0.0, 0.0);                   
+            polyline.AddVertexAt(2, new Point2d(point.X + width, point.Y+175* scaleFactor), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(point.X, point.Y + 175* scaleFactor), 0.0, 0.0, 0.0);                   
             return polyline;
         }
-        private static Point3d GetRadialPoint(Point3d Fpipeindex,double width,Vector3d normal, ThCADCoreNTSSpatialIndex obstacle)
+        private static Point3d GetRadialPoint(Point3d Fpipeindex,double width,Vector3d normal, ThCADCoreNTSSpatialIndex obstacle,int scaleFactor)
         {
             Point3d point = Point3d.Origin;
             for (int j = 0; j <=6; j++)
@@ -359,7 +359,7 @@ namespace ThMEPWSS.Pipe.Engine
                 Point3d point1 = Fpipeindex + normal * 250 * (j + 2);
                 if(normal.X<0)
                 { width = -1 * width; }//是否在y轴左侧
-                var fontBox = obstacle.SelectCrossingPolygon(GetBoundary(width, point1));
+                var fontBox = obstacle.SelectCrossingPolygon(GetBoundary(width, point1, scaleFactor));
                 if (fontBox.Count > 0)
                 {
                     continue;
@@ -395,36 +395,36 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return nums;
         }
-        public static Point3dCollection GetCircularPoint(List<int> nums,Point3d Fpipeindex, double width, List<Vector3d> normals, ThCADCoreNTSSpatialIndex obstacle)
+        public static Point3dCollection GetCircularPoint(List<int> nums,Point3d Fpipeindex, double width, List<Vector3d> normals, ThCADCoreNTSSpatialIndex obstacle,int scaleFactor)
         {
             Point3dCollection points = new Point3dCollection();
             for (int i = 0; i < nums.Count; i++)
             {
-                if (GetRadialPoint(Fpipeindex, width, normals[nums[i]], obstacle) == Point3d.Origin)
+                if (GetRadialPoint(Fpipeindex, width, normals[nums[i]], obstacle, scaleFactor) == Point3d.Origin)
                 {                                             
                 }
                 else
                 {
-                    var point=GetRadialPoint(Fpipeindex, width, normals[nums[i]], obstacle);
-                    points = GetPoints(point,i);//得到标注点组
+                    var point=GetRadialPoint(Fpipeindex, width, normals[nums[i]], obstacle, scaleFactor);
+                    points = GetPoints(point,i, scaleFactor);//得到标注点组
                     break;
                 }
             }
             return points;
         }
-        public static Point3dCollection GetPoints(Point3d point,int num)
+        public static Point3dCollection GetPoints(Point3d point,int num,int scaleFactor)
         {
             Point3dCollection taggingpoints = new Point3dCollection();
             taggingpoints.Add(point);
             if (num == 0||(num>=1&&num<5)||(num >=6 && num <11|| num == 1))//y轴右侧
             {
-                taggingpoints.Add(new Point3d(point.X + 800, point.Y, 0));
+                taggingpoints.Add(new Point3d(point.X + 800* scaleFactor, point.Y, 0));
                 taggingpoints.Add(new Point3d(point.X + 35, point.Y+35, 0));     
            
             }
             else
             {       
-                taggingpoints.Add(new Point3d(point.X -800, point.Y, 0));
+                taggingpoints.Add(new Point3d(point.X -800*scaleFactor, point.Y, 0));
                 taggingpoints.Add(new Point3d(point.X - 765, point.Y+35, 0));
             }       
             return taggingpoints;

@@ -35,6 +35,8 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> DimensionTags { get; set; }
         public List<Curve> RainPipes { get; set; }
         public List<Curve> PositionTags { get; set; }
+        public List<Curve> AllObstacles { get; set; }
+        public List<string> Layers { get; set; }
         public ThWRoofDeviceFloorRecognitionEngine()
         {
             Rooms = new List<ThWRoofDeviceFloorRoom>();
@@ -54,6 +56,8 @@ namespace ThMEPWSS.Pipe.Engine
             DimensionTags= new List<Curve>();
             RainPipes= new List<Curve>();
             PositionTags = new List<Curve>();
+            AllObstacles = new List<Curve>();
+            Layers = new List<string>();
         }
         public override void Recognize(Database database, Point3dCollection pts)
         {
@@ -64,29 +68,55 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     this.Spaces = GetSpaces(database, pts);
                 }
+                GetLayers(database, pts).ForEach(o => Layers.Add(o));
                 GetTagNameFrames(database, pts).ForEach(o=> TagNameFrames.Add(o));
+                GetTagNameFrames(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetStarFrames(this.Spaces).ForEach(o => StairFrames.Add(o));
+                GetStarFrames(this.Spaces).ForEach(o => AllObstacles.Add(o));
                 GetColumns(database, pts).ForEach(o => Columns.Add(o));
+                GetColumns(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetShearWalls(database, pts).ForEach(o => ShearWalls.Add(o));
+                GetShearWalls(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetInnerDoors(database, pts).ForEach(o => InnerDoors.Add(o));
+                GetInnerDoors(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetDevices(database, pts).ForEach(o => Devices.Add(o));
+                GetDevices(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetArchitectureWalls(database, pts).ForEach(o => ArchitectureWalls.Add(o));
+                GetArchitectureWalls(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetWindows(database, pts).ForEach(o => Windows.Add(o));
+                GetWindows(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetElevationFrames(database, pts).ForEach(o => ElevationFrames.Add(o));
+                GetElevationFrames(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetAxialCircleTag(database, pts).ForEach(o => AxialCircleTags.Add(o));
+                GetAxialCircleTag(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetAxialAxisTags(database, pts).ForEach(o => AxialAxisTags.Add(o));
+                GetAxialAxisTags(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetExternalTags(database, pts).ForEach(o => ExternalTags.Add(o));
+                GetExternalTags(database, pts).ForEach(o => AllObstacles.Add(o));
                 //本图元素
                 GetWells(database, pts).ForEach(o => Wells.Add(o));
+                GetWells(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetAllTags(database, pts).ForEach(o => DimensionTags.Add(o));
+                GetAllTags(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetRainPipes(database, pts).ForEach(o => RainPipes.Add(o));
+                GetRainPipes(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetPositionTags(database, pts).ForEach(o => PositionTags.Add(o));
+                GetPositionTags(database, pts).ForEach(o => AllObstacles.Add(o));
                 var baseCircles = new List<ThIfcSpace>();
                 var gravityWaterBuckets = GetgravityWaterBuckets(database, pts);
                 var sideEntryWaterBuckets = GetsideEntryWaterBuckets(database, pts);
                 var roofRainPipes = GetroofRainPipes(database, pts);         
                 Rooms = ThRoofDeviceFloorRoomService.Build(this.Spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);
             }
+        }
+        private static List<string> GetLayers(Database database, Point3dCollection pts)
+        {
+            var strings = new List<string>();
+            using (var LayerNamesDbExtension = new ThLayerNamesDbExtension(database))
+            {
+                strings = LayerNamesDbExtension.LayerFilter;      
+            }
+            return strings;
         }
         private static List<Curve> GetPositionTags(Database database, Point3dCollection pts)
         {

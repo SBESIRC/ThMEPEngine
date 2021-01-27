@@ -203,7 +203,7 @@ namespace ThMEPWSS
                 var PipeindexEngine = new ThWInnerPipeIndexEngine();
                 var compositeEngine = new ThWCompositeIndexEngine(PipeindexEngine);
                 ThCADCoreNTSSpatialIndex obstacle = null;
-                compositeEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary,divideLines,roofrainpipe,Point3d.Origin, Point3d.Origin,obstacle);
+                //compositeEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary,divideLines,roofrainpipe,Point3d.Origin, Point3d.Origin,obstacle);
                 for (int j=0;j < compositeEngine.PipeEngine.Fpipeindex.Count;j++)
                 {   
                     for (int i = 0; i < compositeEngine.PipeEngine.Fpipeindex[j].Count; i++)

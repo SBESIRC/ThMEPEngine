@@ -23,7 +23,7 @@ namespace ThMEPWSS.Pipe.Engine
             GravityWaterBucketCenter = new Point3dCollection();
             Center_point= new Point3dCollection();
         }
-        public void Run(List<BlockReference> gravityWaterBucket, List<BlockReference> sideWaterBucket, List<Polyline> roofRainPipe,Polyline boundary)
+        public void Run(List<BlockReference> gravityWaterBucket, List<BlockReference> sideWaterBucket, List<Polyline> roofRainPipe,Polyline boundary,int scaleFactor)
         {
             foreach (var waterBucket in gravityWaterBucket)
             {
@@ -90,8 +90,8 @@ namespace ThMEPWSS.Pipe.Engine
                     Center_point.Add(waterBucket);
                 }
             }                          
-            SideWaterBucketTag = Index(SideWaterBucketCenter,boundary);
-            GravityWaterBucketTag = Index(GravityWaterBucketCenter,boundary);
+            SideWaterBucketTag = Index(SideWaterBucketCenter,boundary, scaleFactor);
+            GravityWaterBucketTag = Index(GravityWaterBucketCenter,boundary, scaleFactor);
         }
         private bool Onleft(BlockReference waterBucket)
         {
@@ -105,14 +105,14 @@ namespace ThMEPWSS.Pipe.Engine
                 return false;
             }
         }
-        private Point3dCollection Index(Point3dCollection centers, Polyline boundary)
+        private Point3dCollection Index(Point3dCollection centers, Polyline boundary,int scaleFactor)
         {
             var index = new Point3dCollection();
             foreach (Point3d center in centers)
             {         
                 index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * ThWPipeCommon.MAX_TAG_XPOSITION);
                 index.Add(center + Vector3d.YAxis.GetNormal() * ThWPipeCommon.MAX_TAG_YPOSITION + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.MAX_TAG_LENGTH));
-                index.Add(center + Vector3d.YAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_YPOSITION - ThWPipeCommon.TEXT_INDENT- ThWPipeCommon.TEXT_HEIGHT) + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.TEXT_INDENT)) ;
+                index.Add(center + Vector3d.YAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_YPOSITION - ThWPipeCommon.TEXT_INDENT- ThWPipeCommon.TEXT_HEIGHT* scaleFactor) + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.TEXT_INDENT)) ;
                 index.Add(center + Vector3d.YAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_YPOSITION + ThWPipeCommon.TEXT_INDENT) + Vector3d.XAxis.GetNormal() * (ThWPipeCommon.MAX_TAG_XPOSITION + ThWPipeCommon.TEXT_INDENT));
             }
             return index;
