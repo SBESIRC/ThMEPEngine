@@ -37,39 +37,12 @@ namespace ThMEPLighting.EmgLight
                 {
                     continue;
                 }
+
                 //跳过完全没有可布点的线
                 if (columns.Count == 0 && walls.Count == 0)
                 {
                     continue;
                 }
-
-                DrawUtils.ShowGeometry(frame, EmgLightCommon.LayerFrame, Color.FromRgb(0, 255, 255), LineWeight.LineWeight035);
-
-                //获取该车道线上的构建
-                var closeColumn = StructureServiceLight.GetStruct(lane, columns, EmgLightCommon.TolLane);
-                var closeWall = StructureServiceLight.GetStruct(lane, walls, EmgLightCommon.TolLane);
-
-                DrawUtils.ShowGeometry(closeColumn, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(closeWall, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
-
-                //找到构建上可布置面,用第一条车道线的头尾判定
-                var filterColmuns = StructureServiceLight.getStructureParallelPart(closeColumn, lane);
-                var filterWalls = StructureServiceLight.getStructureParallelPart(closeWall, lane);
-
-                //破墙
-                var brokeWall = StructureServiceLight.breakWall(filterWalls, EmgLightCommon.TolLight);
-                DrawUtils.ShowGeometry(filterColmuns, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(brokeWall, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
-
-
-                //将构建按车道线方向分成左(0)右(1)两边
-                var usefulColumns = StructureServiceLight.SeparateColumnsByLine(filterColmuns, lane, EmgLightCommon.TolLane);
-                var usefulWalls = StructureServiceLight.SeparateColumnsByLine(brokeWall, lane, EmgLightCommon.TolLane);
-
-                LayoutEmgLightService layoutServer = new LayoutEmgLightService(usefulColumns, usefulWalls, lane, frame, EmgLightCommon.TolLightRangeMin, EmgLightCommon.TolLightRangeMax);
-
-                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], EmgLightCommon.LayerSeparate, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], EmgLightCommon.LayerSeparate, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
 
                 foreach (Line l in lane)
                 {
@@ -77,6 +50,49 @@ namespace ThMEPLighting.EmgLight
                     DrawUtils.ShowGeometry(linePoly, EmgLightCommon.LayerSeparatePoly, Color.FromRgb(141, 118, 12));
                 }
 
+                //获取该车道线上的构建
+                var closeColumn = StructureServiceLight.GetStruct(lane, columns, EmgLightCommon.TolLane);
+                var closeWall = StructureServiceLight.GetStruct(lane, walls, EmgLightCommon.TolLane);
+
+                DrawUtils.ShowGeometry(closeColumn, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(closeWall, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
+
+                var columnSegment = StructureServiceLight.BrakePolylineToLineList(closeColumn);
+                var wallSegment = StructureServiceLight.BrakePolylineToLineList(closeWall);
+                DrawUtils.ShowGeometry(columnSegment, EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(wallSegment, EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
+
+                //找到构建上可布置面,用第一条车道线的头尾判定
+                var parallelColmuns = StructureServiceLight.getStructureParallelPart(columnSegment, lane);
+                var parallelWalls = StructureServiceLight.getStructureParallelPart(wallSegment, lane);
+
+                //破墙
+                var brokeWall = StructureServiceLight.breakWall(parallelWalls, EmgLightCommon.TolLight);
+
+                DrawUtils.ShowGeometry(parallelColmuns, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(brokeWall, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
+
+
+                //过滤柱与墙交叉的部分
+                var filterColumns = StructureServiceLight.FilterStructIntersect(parallelColmuns, walls, EmgLightCommon.TolIntersect);
+                var filterWalls = StructureServiceLight.FilterStructIntersect(brokeWall, columns, EmgLightCommon.TolIntersect);
+                DrawUtils.ShowGeometry(filterColumns, EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(filterWalls, EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
+
+                var b = false;
+                if (b == true)
+                {
+                    continue;
+                }
+
+                //将构建按车道线方向分成左(0)右(1)两边
+                var usefulColumns = StructureServiceLight.SeparateColumnsByLine(filterColumns, lane, EmgLightCommon.TolLane);
+                var usefulWalls = StructureServiceLight.SeparateColumnsByLine(filterWalls, lane, EmgLightCommon.TolLane);
+
+                LayoutEmgLightService layoutServer = new LayoutEmgLightService(usefulColumns, usefulWalls, lane, frame);
+
+                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
 
                 ////滤掉重合部分
                 layoutServer.filterOverlapStruc();
@@ -87,13 +103,13 @@ namespace ThMEPLighting.EmgLight
                 ////滤掉框后边的部分
                 layoutServer.filterStrucBehindFrame();
 
-                DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0], EmgLightCommon.LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1], EmgLightCommon.LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0], EmgLightCommon.LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
-                DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1], EmgLightCommon.LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0], EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1], EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0], EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+                DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1], EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
 
-                //DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], EmgLightCommon.LayerStruct, Color.FromRgb(0, 155, 187), LineWeight.LineWeight035);
-                //DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], EmgLightCommon.LayerStruct, Color.FromRgb(247, 129, 144), LineWeight.LineWeight035);
+                //DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0], EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+                //DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1], EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
 
                 if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
                     layoutServer.UsefulWalls[0].Count == 0 && layoutServer.UsefulWalls[1].Count == 0)
@@ -101,11 +117,7 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
-                var b = false;
-                if (b == true)
-                {
-                    continue;
-                }
+
 
                 ////找出平均的一边. -1:no side 0:left 1:right.
                 int uniformSide = FindUniformDistributionSide(layoutServer, lane, out var columnDistList);
@@ -320,7 +332,7 @@ namespace ThMEPLighting.EmgLight
             if (layout.Count > 0)
             {
                 ////车道线往前做框buffer,选出车线头部的已布情况
-                var importLayout = layoutServer.BuildHeadLayout(layout, EmgLightCommon.TolLane);
+                var importLayout = layoutServer.BuildHeadLayout(layout, EmgLightCommon.TolLightRangeMax, EmgLightCommon.TolLane);
 
                 //情况A:
                 var uniformSideHeadLayout = importLayout[uniformSide].Where(x => layoutServer.getCenterInLaneCoor(x).X < 0).ToList();

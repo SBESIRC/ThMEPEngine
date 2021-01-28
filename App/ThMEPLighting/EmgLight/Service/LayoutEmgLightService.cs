@@ -22,7 +22,7 @@ namespace ThMEPLighting.EmgLight.Service
         private List<Line> laneTrans = new List<Line>();
         private Polyline frame;
 
-        public LayoutEmgLightService(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame, int TolLightRangeMin, int TolLightRangeMax)
+        public LayoutEmgLightService(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame)
         {
             this.usefulColumns = usefulColumns;
             this.usefulWalls = usefulWalls;
@@ -425,10 +425,10 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="layout"></param>
         /// <param name="TolLane"></param>
         /// <returns></returns>
-        public List<List<Polyline>> BuildHeadLayout(List<Polyline> layout, double TolLane)
+        public List<List<Polyline>> BuildHeadLayout(List<Polyline> layout, double TolExtend, double TolLane)
         {
             //车道线往前做框buffer
-            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, EmgLightCommon.TolLightRangeMax);
+            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, TolExtend);
             var FilteredLayout = StructureServiceLight.GetStruct(ExtendLineList, layout, TolLane);
             var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
 

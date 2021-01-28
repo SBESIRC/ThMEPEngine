@@ -11,7 +11,7 @@ namespace ThMEPLighting.EmgLight.Service
 {
     class StructureServiceLight
     {
-        
+
         /// <summary>
         /// 获取停车线周边构建信息
         /// </summary>
@@ -49,7 +49,7 @@ namespace ThMEPLighting.EmgLight.Service
                 var linePoly = StructUtils.ExpandLine(x, tol, 0, 0, 0);
                 return polyline.Where(y =>
                 {
-                    var polyCollection = new DBObjectCollection() { y };
+                    //var polyCollection = new DBObjectCollection() { y };
                     return linePoly.Contains(y) || linePoly.Intersects(y);
                 }).ToList();
             }).ToList();
@@ -61,7 +61,7 @@ namespace ThMEPLighting.EmgLight.Service
                var linePoly = StructUtils.ExpandLine(x, 0, 0, tol, 0);
                return polyline.Where(y =>
               {
-                  var polyCollection = new DBObjectCollection() { y };
+                  //var polyCollection = new DBObjectCollection() { y };
                   return linePoly.Contains(y) || linePoly.Intersects(y);
               }).ToList();
            }).ToList();
@@ -71,31 +71,110 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
-        /// 查找柱或墙平行于车道线且与防火墙不相交的边
+        /// 查找柱或墙平行于车道线
         /// </summary>
         /// <param name="structrues"></param>
         /// <param name="line"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public static List<Polyline> getStructureParallelPart(List<Polyline> structrues, List<Line> lane)
+        public static List<Polyline> getStructureParallelPart(List<Polyline> structureSegment, List<Line> lane)
         {
             List<Polyline> layoutColumns = new List<Polyline>();
 
-            var LineDir = (lane.Last ().EndPoint - lane.First().StartPoint).GetNormal();
+            var LineDir = (lane.Last().EndPoint - lane.First().StartPoint).GetNormal();
 
-            foreach (Polyline structure in structrues)
+            //平行于车道线的边
+            var layoutInfo = GetWallParallelPart(structureSegment, LineDir);
+
+            if (layoutInfo != null && layoutInfo.Count > 0)
             {
-                //平行于车道线的边
-                List<Polyline> layoutInfo = null;
-               
-                layoutInfo = GetWallParallelPart(structure, LineDir);
+                layoutColumns.AddRange(layoutInfo);
+            }
 
-                if (layoutInfo != null)
+            return layoutColumns;
+        }
+
+        public static List<Polyline> BrakePolylineToLineList(List<Polyline> structures)
+        {
+            List<Polyline> structureSegment = new List<Polyline>();
+            foreach (var stru in structures)
+            {
+                for (int i = 0; i < stru.NumberOfVertices; i++)
                 {
-                    layoutColumns.AddRange(layoutInfo);
+                    Polyline plTemp = new Polyline();
+                    plTemp.AddVertexAt(0, stru.GetPoint2dAt(i), 0, 0, 0);
+                    plTemp.AddVertexAt(0, stru.GetPoint2dAt((i + 1) % stru.NumberOfVertices), 0, 0, 0);
+                    structureSegment.Add(plTemp);
                 }
             }
-            return layoutColumns;
+
+            return structureSegment;
+        }
+
+        public static List<Polyline> FilterStructIntersect(List<Polyline> structSeg, List<Polyline> structure, double tol)
+        {
+            List<Polyline> notIntersectSeg = new List<Polyline>();
+
+            foreach (var seg in structSeg)
+            {
+                var bInter = false;
+                var bContain = false;
+
+                foreach (var poly in structure)
+                {
+                    bContain = bContain || poly.Contains(seg);
+                    bInter = poly.Intersects(seg);
+                    if (bInter == true)
+                    {
+                        Point3dCollection pts = new Point3dCollection();
+                        seg.IntersectWith(poly, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+
+                        if (pts.Count > 1)
+                        {
+                            bInter = true;
+                            break;
+                        }
+                        else if (pts.Count == 1)
+                        {
+                            Point3d pt = new Point3d();
+                            if (poly.Contains(seg.StartPoint) == true)
+                            {
+                                pt = seg.StartPoint;
+                            }
+                            if (poly.Contains(seg.EndPoint) == true)
+                            {
+                                pt = seg.EndPoint;
+                            }
+
+                            var l = new Line(pts[0], pt);
+
+                            if (pt.X == 0)
+                            {
+                                bInter = false;
+                            }
+
+                            else if (l.Length < EmgLightCommon.TolIntersect)
+                            {
+                                bInter = false;
+                            }
+                            else
+                            {
+                                bInter = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            bInter = false;
+                        }
+                    }
+                }
+                if (!bInter && !bContain)
+                {
+                    notIntersectSeg.Add(seg);
+                }
+            }
+            return notIntersectSeg;
         }
 
         /// <summary>
@@ -106,19 +185,8 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="dir"></param>
         /// <param name="layoutPt"></param>
         /// <returns></returns>
-        private static List<Polyline> GetWallParallelPart(Polyline polyline, Vector3d dir)
+        private static List<Polyline> GetWallParallelPart(List<Polyline> structureSegment, Vector3d dir)
         {
-
-            List<Polyline> structureSegment = new List<Polyline>();
-
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                Polyline plTemp = new Polyline();
-                plTemp.AddVertexAt(0, polyline.GetPoint2dAt(i), 0, 0, 0);
-                plTemp.AddVertexAt(0, polyline.GetPoint2dAt((i + 1) % polyline.NumberOfVertices), 0, 0, 0);
-                structureSegment.Add(plTemp);
-            }
-
             dir = dir.GetNormal();
             Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
 
@@ -143,7 +211,7 @@ namespace ThMEPLighting.EmgLight.Service
         private static List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir)
         {
             var closetPt = polyline.GetClosestPointTo(pt, false);
-            
+
             List<Polyline> structureSegment = new List<Polyline>();
             for (int i = 0; i < polyline.NumberOfVertices; i++)
             {

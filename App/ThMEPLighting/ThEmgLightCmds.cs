@@ -29,6 +29,9 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+
+
+                // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
@@ -51,6 +54,7 @@ namespace ThMEPLighting
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
                     var nFrame = ThMEPFrameService.NormalizeEx(frame);
+
                     if (nFrame.Area < 1)
                     {
                         continue;
