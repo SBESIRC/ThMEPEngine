@@ -82,6 +82,11 @@ namespace ThCADCore.NTS
             return GeometryCombiner.Combine(geometries);
         }
 
+        public static bool Covers(this DBObjectCollection curves, Line line)
+        {
+            return curves.ToMultiLineString().Covers(line.ToNTSGeometry());
+        }
+
         public static DBObjectCollection ToDbCollection(this Geometry geometry, bool keepHoles = false)
         {
             return geometry.ToDbObjects().ToCollection<DBObject>();

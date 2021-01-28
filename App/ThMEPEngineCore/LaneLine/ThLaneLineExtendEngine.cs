@@ -20,11 +20,16 @@ namespace ThMEPEngineCore.LaneLine
             var spatialIndex = new ThCADCoreNTSSpatialIndex(nodedLines.ToCollection());
             nodedLines.RemoveAll(l =>
             {
-                if (l.Length <= extend_distance)
+                if (l.Length <= extend_distance + 1)
                 {
                     var objs = spatialIndex.SelectFence(l);
                     objs.Remove(l);
-                    return (!IntersectsAtPoint(objs, l.StartPoint) || !IntersectsAtPoint(objs, l.EndPoint));
+                    if (IntersectsAtPoint(objs, l.StartPoint) && IntersectsAtPoint(objs, l.EndPoint))
+                    {
+                        // 若两端有连接，再继续判断是否被“覆盖”
+                        return objs.Covers(l);
+                    }
+                    return true;
                 }
                 return false;
             });
