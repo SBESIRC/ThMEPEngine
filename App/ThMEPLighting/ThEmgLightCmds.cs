@@ -52,9 +52,14 @@ namespace ThMEPLighting
                 {
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
-                    var plFrame = ThMEPFrameService.Normalize(frame);
-                    var bufferFrame = plFrame.Buffer(EmgLightCommon .BufferFrame)[0] as Polyline;
-                    var shrinkFrame = plFrame.Buffer(EmgLightCommon.shrinkFrame)[0] as Polyline;
+                    var nFrame = ThMEPFrameService.NormalizeEx(frame);
+                    if (nFrame.Area <1)
+                    {
+                        continue;
+                    }
+
+                    var bufferFrame = nFrame.Buffer(EmgLightCommon .BufferFrame)[0] as Polyline;
+                    var shrinkFrame = nFrame.Buffer(EmgLightCommon.shrinkFrame)[0] as Polyline;
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
