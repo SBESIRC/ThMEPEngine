@@ -12,6 +12,7 @@ namespace ThMEPEngineCore.LaneLine
     public abstract class ThLaneLineEngine
     {
         protected static readonly double extend_distance = 20.0;
+        protected static readonly double zero_length_distance = 10.0;
 
         public static DBObjectCollection Noding(DBObjectCollection curves)
         {
@@ -30,7 +31,10 @@ namespace ThMEPEngineCore.LaneLine
             {
                 if (curve is Line line)
                 {
-                    objs.Add(line.WashClone() as Line);
+                    if (line.Length > zero_length_distance)
+                    {
+                        objs.Add(line.WashClone() as Line);
+                    }
                 }
                 else if (curve is Polyline polyline)
                 {
