@@ -28,11 +28,6 @@ namespace ThMEPLighting.Garage.Service
         {
             for(int i=0;i< Curves.Count-1;i++)
             {
-                if(Curves[i].Item1.StartPoint.DistanceTo(new Point3d(10942641.6339, 3833112.8624,0))<=2.0 ||
-                    Curves[i].Item1.EndPoint.DistanceTo(new Point3d(10942641.6339, 3833112.8624, 0)) <= 2.0)
-                {
-                    string debug="";
-                }
                 for (int j = i+1; j < Curves.Count; j++)
                 {
                     if(Curves[i].Item1 is Line first && Curves[j].Item1 is Line second)
