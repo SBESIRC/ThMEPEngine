@@ -53,13 +53,17 @@ namespace ThMEPLighting
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
                     var nFrame = ThMEPFrameService.NormalizeEx(frame);
+                   
                     if (nFrame.Area <1)
                     {
                         continue;
                     }
 
-                    var bufferFrame = nFrame.Buffer(EmgLightCommon .BufferFrame)[0] as Polyline;
-                    var shrinkFrame = nFrame.Buffer(EmgLightCommon.shrinkFrame)[0] as Polyline;
+                    var bufferFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
+                    var shrinkFrame = ThMEPFrameService.Buffer(nFrame, -EmgLightCommon.BufferFrame);
+
+                    DrawUtils.ShowGeometry(bufferFrame, EmgLightCommon.LayerFrame, Color.FromRgb(0, 255, 255), LineWeight.LineWeight035);
+                    DrawUtils.ShowGeometry(shrinkFrame, EmgLightCommon.LayerFrame, Color.FromRgb(0, 255, 255), LineWeight.LineWeight035);
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
@@ -95,7 +99,7 @@ namespace ThMEPLighting
                         var b = false;
                         if (b == true)
                         {
-                            return;
+                            continue ;
                         }
 
                         //主车道布置信息
