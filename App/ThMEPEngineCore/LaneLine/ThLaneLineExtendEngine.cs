@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.LaneLine
         public static DBObjectCollection Extend(DBObjectCollection curves)
         {
             var lines = ExplodeCurves(curves).ToCollection();
-            var nodedLines = Noding(CreateExtendedLines(lines));
+            var nodedLines = NodingLines(CreateExtendedLines(lines));
             var spatialIndex = new ThCADCoreNTSSpatialIndex(nodedLines.ToCollection());
             nodedLines.RemoveAll(l =>
             {

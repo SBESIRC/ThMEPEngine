@@ -13,6 +13,16 @@ namespace ThMEPEngineCore.LaneLine
     {
         protected static readonly double extend_distance = 20.0;
 
+        public static DBObjectCollection Noding(DBObjectCollection curves)
+        {
+            return NodingLines(curves).ToCollection();
+        }
+
+        public static DBObjectCollection Explode(DBObjectCollection curves)
+        {
+            return ExplodeCurves(curves).ToCollection();
+        }
+
         protected static List<Curve> ExplodeCurves(DBObjectCollection curves)
         {
             var objs = new List<Curve>();
@@ -36,7 +46,7 @@ namespace ThMEPEngineCore.LaneLine
             return objs;
         }
 
-        protected static List<Line> Noding(DBObjectCollection curves)
+        protected static List<Line> NodingLines(DBObjectCollection curves)
         {
             var results = new List<Line>();
             var geometry = curves.ToNTSNodedLineStrings();
