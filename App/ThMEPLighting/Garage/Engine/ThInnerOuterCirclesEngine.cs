@@ -25,7 +25,7 @@ namespace ThMEPLighting.Garage.Engine
         }
         public void Reconize(List<Line> dxLines,List<Line> fdxLines, double offsetDistance)
         {
-            var splitLineTuple = Split(dxLines, fdxLines);
+            var splitLineTuple = Split(dxLines, fdxLines);           
             //单位化
             var dxNomalLines = new List<Line>();
             var fdxNomalLines = new List<Line>();
@@ -48,7 +48,7 @@ namespace ThMEPLighting.Garage.Engine
             var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines);
             //mergeCurves.Print(5);
             //通过中心线往两侧偏移
-            var offsetCurves = Offset(mergeCurves,offsetDistance);
+            var offsetCurves = Offset(mergeCurves, offsetDistance);
             //让1号线、2号线连接
             ThExtendService.Extend(offsetCurves);
             //为中心线找到对应的1号线和2号线

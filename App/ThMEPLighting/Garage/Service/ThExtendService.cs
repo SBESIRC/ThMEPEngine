@@ -6,6 +6,7 @@ using System.Linq;
 using ThMEPEngineCore.CAD;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -25,6 +26,11 @@ namespace ThMEPLighting.Garage.Service
         {
             for(int i=0;i< Curves.Count-1;i++)
             {
+                if(Curves[i].Item1.StartPoint.DistanceTo(new Point3d(10942641.6339, 3833112.8624,0))<=2.0 ||
+                    Curves[i].Item1.EndPoint.DistanceTo(new Point3d(10942641.6339, 3833112.8624, 0)) <= 2.0)
+                {
+                    string debug="";
+                }
                 for (int j = i+1; j < Curves.Count; j++)
                 {
                     if(Curves[i].Item1 is Line first && Curves[j].Item1 is Line second)
@@ -36,7 +42,7 @@ namespace ThMEPLighting.Garage.Service
                         }
                     }
                     var pts = new Point3dCollection();
-                    Curves[i].Item1.IntersectWith(Curves[j].Item1,
+                    (Curves[i].Item1 as Line).ExtendLine().IntersectWith((Curves[j].Item1 as Line).ExtendLine(),
                         Intersect.OnBothOperands,pts,IntPtr.Zero, IntPtr.Zero);
                     if(pts.Count>0)
                     {

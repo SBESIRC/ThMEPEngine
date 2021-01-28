@@ -67,7 +67,14 @@ namespace ThMEPLighting.Garage.Engine
                     var centerLightGraph = ThLightGraphService.Build(LineEdges, Start);
                     centerLightGraph = ThFindLongestPathService.Find(Ports, centerLightGraph);
                     //获取1号边的端口点和起始点
-                    GetFirstPortsAndStart(firstLightEdges, centerLightGraph.StartPoint);
+                    if(centerLightGraph!=null)
+                    {
+                        GetFirstPortsAndStart(firstLightEdges, centerLightGraph.StartPoint);
+                    }
+                    else
+                    {
+                        GetFirstPortsAndStart(firstLightEdges, LineEdges[0].Edge.StartPoint);
+                    }
                 } 
                 //为1号边建图
                 var firstLightGraph = ThLightGraphService.Build(firstLightEdges, FirstStart);
@@ -150,7 +157,7 @@ namespace ThMEPLighting.Garage.Engine
         private void BuildSecondLightEdges()
         {
             int loopCharLength = ThDoubleRowLightNumber.GetLoopCharLength(ArrangeParameter.LoopNumber);
-            FirstLightEdges.Where(o=>o.IsDX).ForEach(m =>
+            FirstLightEdges.Where(o=>o.IsDX).Where(o=>o.Edge.Length>0).ForEach(m =>
             {
                 var first = WireOffsetDataService.FindFirstBySplitLine(m.Edge);
                 var second = WireOffsetDataService.FindSecondByFirst(first);

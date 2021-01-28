@@ -40,17 +40,41 @@ namespace ThMEPLighting.Garage.Service
         private void Offset(Line line)
         {
             var newLine = line.Normalize();
-            var vec = newLine.StartPoint.GetVectorTo(newLine.EndPoint)
-                   .GetPerpendicularVector().GetNormal();
-            var upSp = newLine.StartPoint + vec.MultiplyBy(OffsetDistance);
-            var upEp = newLine.EndPoint + vec.MultiplyBy(OffsetDistance);
+            var bufferLength = CalOffsetLength(line);
+            var firstPoly = line.GetOffsetCurves(bufferLength)[0] as Line;
+            var secPoly = line.GetOffsetCurves(-bufferLength)[0] as Line;
+            //var vec = newLine.StartPoint.GetVectorTo(newLine.EndPoint)
+            //       .GetPerpendicularVector().GetNormal();
+            //var upSp = newLine.StartPoint + vec.MultiplyBy(OffsetDistance);
+            //var upEp = newLine.EndPoint + vec.MultiplyBy(OffsetDistance);
 
-            var downSp = newLine.StartPoint - vec.MultiplyBy(OffsetDistance);
-            var downEp = newLine.EndPoint - vec.MultiplyBy(OffsetDistance);
+            //var downSp = newLine.StartPoint - vec.MultiplyBy(OffsetDistance);
+            //var downEp = newLine.EndPoint - vec.MultiplyBy(OffsetDistance);
 
-            First = new Line(upSp, upEp);
-            Second = new Line(downSp, downEp);
+            First = firstPoly;
+            Second = secPoly;
         }
+        private double CalOffsetLength(Line line)
+        {
+            var bufferLength = OffsetDistance;
+            var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
+            if (Math.Abs(lineDir.X) > Math.Abs(lineDir.Y))
+            {
+                if (lineDir.X < 0)
+                {
+                    bufferLength = -bufferLength;
+                }
+            }
+            else
+            {
+                if (lineDir.Y < 0)
+                {
+                    bufferLength = -bufferLength;
+                }
+            }
+            return bufferLength;
+        }
+
         private void Offset(Polyline polyline)
         {
             //获取多段线第一段，normalize

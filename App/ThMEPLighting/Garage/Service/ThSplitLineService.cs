@@ -79,12 +79,18 @@ namespace ThMEPLighting.Garage.Service
                 }
                 splitLines.Add(new Line(start, origin.EndPoint));
             }
-            return splitLines;
+            else
+            {
+                splitLines.Add(new Line(origin.StartPoint, origin.EndPoint));
+            }
+            return splitLines.Where(o=>o.Length>1.0).ToList();
         }
         private Point3dCollection BuildBranchPt(Line mainEdge, Line secondaryEdge)
         {
             var pts = new Point3dCollection();
-            mainEdge.IntersectWith(secondaryEdge, Intersect.ExtendBoth, pts, IntPtr.Zero, IntPtr.Zero);
+            var mainLine = mainEdge.ExtendLine();
+            var secondaryLine = secondaryEdge.ExtendLine();
+            mainLine.IntersectWith(secondaryLine, Intersect.ExtendBoth, pts, IntPtr.Zero, IntPtr.Zero);
             return pts;
         }
     }
