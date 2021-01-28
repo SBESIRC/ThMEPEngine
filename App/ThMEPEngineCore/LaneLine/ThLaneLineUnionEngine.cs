@@ -16,27 +16,28 @@ namespace ThMEPEngineCore.LaneLine
     {
         public static DBObjectCollection Union(DBObjectCollection curves)
         {
-            var index = new ThCADCoreNTSSpatialIndex(curves);
-            curves.Cast<Line>().ForEach(o =>
+            var lines = ExplodeCurves(curves).ToCollection();
+            var index = new ThCADCoreNTSSpatialIndex(lines);
+            lines.Cast<Line>().ForEach(o =>
             {
                 var buffer = Buffer(o, 1.0);
                 var objs = index.SelectCrossingPolygon(buffer.Shell.ToDbPolyline());
                 if (objs.Count > 1)
                 {
-                    var lines = objs.Cast<Line>().Where(l => IsParallel(o, l));
-                    if (lines.Count() > 1)
+                    var parallelLines = objs.Cast<Line>().Where(l => IsParallel(o, l));
+                    if (parallelLines.Count() > 1)
                     {
                         var tag = index.Tag(o);
                         if (tag == null)
                         {
                             tag = Guid.NewGuid().ToString();
                         }
-                        lines.ForEach(l => index.AddTag(l, tag));
+                        parallelLines.ForEach(l => index.AddTag(l, tag));
                     }
                 }
             });
             var results = new DBObjectCollection();
-            var groups = curves.Cast<Line>().GroupBy(o => index.Tag(o));
+            var groups = lines.Cast<Line>().GroupBy(o => index.Tag(o));
             foreach (var group in groups)
             {
                 if (group.Key == null)
@@ -66,20 +67,12 @@ namespace ThMEPEngineCore.LaneLine
         {
             var polygons = lines.Select(o => Buffer(o, 1.0)).ToArray();
             var multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons);
-            var results = multiPolygon.Union();
-            if (results is Polygon polygon)
-            {
-                return CenterLine(polygon);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            return CenterLine(multiPolygon.Union());
         }
 
-        private static Line CenterLine(Polygon polygon)
+        private static Line CenterLine(Geometry geometry)
         {
-            var rectangle = MinimumDiameter.GetMinimumRectangle(polygon) as Polygon;
+            var rectangle = MinimumDiameter.GetMinimumRectangle(geometry) as Polygon;
             var shell = rectangle.Shell.ToDbPolyline();
             return new Line(
                 shell.GetPoint3dAt(0) + 0.5 * (shell.GetPoint3dAt(1) - shell.GetPoint3dAt(0)),
