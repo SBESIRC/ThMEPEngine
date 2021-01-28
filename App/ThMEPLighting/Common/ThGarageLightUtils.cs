@@ -17,6 +17,12 @@ namespace ThMEPLighting.Common
 {
     public static class ThGarageLightUtils
     {
+        public static Line ExtendLine(this Line line,double length=1.0)
+        {
+            var dir = (line.EndPoint - line.StartPoint).GetNormal();
+            return new Line(line.StartPoint - dir * length, line.EndPoint + dir * length);
+        }
+  
         public static ObjectId AddLineType(Database db, string linetypeName)
         {
             using(AcadDatabase acadDatabase= AcadDatabase.Use(db))
