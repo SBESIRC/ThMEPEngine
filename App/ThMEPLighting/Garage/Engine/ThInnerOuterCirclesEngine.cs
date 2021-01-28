@@ -50,7 +50,7 @@ namespace ThMEPLighting.Garage.Engine
             //通过中心线往两侧偏移
             var offsetCurves = Offset(mergeCurves, offsetDistance);
             //让1号线、2号线连接
-            ThExtendService.Extend(offsetCurves);
+            offsetCurves=ThExtendService.Extend(offsetCurves);
             //为中心线找到对应的1号线和2号线
             var dxWireOffsetDatas=ThFindFirstLinesService.Find(offsetCurves, offsetDistance);
             WireOffsetDatas.AddRange(dxWireOffsetDatas);
@@ -61,7 +61,14 @@ namespace ThMEPLighting.Garage.Engine
             var newLine = new Line(line.StartPoint,line.EndPoint);
             if(Math.Abs(line.StartPoint.Y- line.EndPoint.Y)<= tolerance)
             {
-                newLine = new Line(line.StartPoint, line.EndPoint);
+                if(line.StartPoint.Y< line.EndPoint.Y)
+                {
+                    newLine = new Line(line.StartPoint, line.EndPoint);
+                }
+                else
+                {
+                    newLine = new Line(line.EndPoint, line.StartPoint);
+                }
             }
             return newLine.Normalize();
         }

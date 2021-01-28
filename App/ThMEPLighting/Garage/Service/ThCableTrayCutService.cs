@@ -63,12 +63,12 @@ namespace ThMEPLighting.Garage.Service
             unParallels.ForEach(o =>
             {
                 var pts = new Point3dCollection();
-                center.IntersectWith(o, Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+                center.ExtendLine(5).IntersectWith(o.ExtendLine(5), Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                 bool isIntersect = pts
                 .Cast<Point3d>()
                 .Where(p => ThGeometryTool.IsPointInLine(center.StartPoint, center.EndPoint, p, Width / 2.0))
                 .Any();
-                if (isIntersect)
+                if (pts.Count > 0)
                 {
                     cutLines.Add(Tuple.Create(pts[0], o));
                 }

@@ -72,7 +72,7 @@ namespace ThMEPLighting.Garage.Engine
                     CenterLines = splitCenterLines,
                     SideLines = sidelines,
                     HalfWidth = Width / 2.0
-                };       
+                };
                 //对中心线分割后，找到其对应的两边
                 CenterWithSides = ThFindCenterPairLinesService.Find(newSideParameter);
             }

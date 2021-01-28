@@ -78,6 +78,13 @@ namespace ThMEPLighting.Garage.Engine
                 lightGraph.Links.ForEach(l => l.Path.ForEach(p => numOfLights += p.LightNodes.Count));
                 ArrangeParameter.LoopNumber = CalculateLoopNumber(numOfLights);
             }
+            else
+            {
+                if(ArrangeParameter.LoopNumber<2)
+                {
+                    ArrangeParameter.LoopNumber = 2;
+                }
+            }
         }
         private int CalculateLoopNumber(int lightNumbers)
         {

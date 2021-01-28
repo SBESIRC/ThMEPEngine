@@ -132,7 +132,7 @@ namespace TianHua.Electrical.UI
 
         private void BtnCircuitLabel_Click(object sender, EventArgs e)
         {
-            CollectParameter();
+            CollectParameter(false);
             SetFocusToDwgView();
             CommandHandlerBase.ExecuteFromCommandLine(false, "THCDBH");
         }
@@ -169,6 +169,7 @@ namespace TianHua.Electrical.UI
             }
             else
             {
+                ThMEPLightingService.Instance.LightArrangeUiParameter.AutoCalculate = false;
                 int loopNumber = 0;
                 if (int.TryParse(TxtCircuitNum.Text, out loopNumber))
                 {

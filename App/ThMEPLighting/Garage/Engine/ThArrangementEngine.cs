@@ -14,6 +14,8 @@ using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.LaneLine;
+using NFox.Cad;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -75,6 +77,27 @@ namespace ThMEPLighting.Garage.Engine
 
                 var dxWashLines = WashClone(regionBorder.DxCenterLines);
                 var fdxWashLines = WashClone(regionBorder.FdxCenterLines);
+                var dxResults = ThLaneLineMergeExtension.Merge(dxWashLines.ToCollection());
+                var dxObjs = new DBObjectCollection();
+                foreach(Entity ent in dxResults)
+                {
+                    if(ent is Line line)
+                    {
+                        if (line.Length > ThGarageLightCommon.ThShortLightLineLength)
+                        {
+                            dxObjs.Add(line);
+                        }
+                    }
+                }     
+                dxResults = ThLaneLineMergeExtension.Noding(dxObjs);
+                dxWashLines = dxResults.Cast<Line>().ToList();
+                //单排取消过滤无需布灯的短线(20210104)
+                if (!ArrangeParameter.IsSingleRow)
+                {
+                    //T形短线取消，对于T形的主边不做处理
+                    dxWashLines = ThFilterTTypeCenterLineService.Filter(dxWashLines, ArrangeParameter.MinimumEdgeLength);
+                    dxWashLines = ThFilterMainCenterLineService.Filter(dxWashLines, ArrangeParameter.RacywaySpace / 2.0);
+                }
 
                 //用房间轮廓线对车道中心线进行打断，线的端点距离边界500
                 var dxTrimLines = Trim(dxWashLines, regionBorder.RegionBorder);
@@ -94,14 +117,6 @@ namespace ThMEPLighting.Garage.Engine
                 var cutResult = precessEngine.Cut(shortDxLines, fdxWashLines);
                 DxLines.AddRange(cutResult.Item1);
                 FdxLines.AddRange(cutResult.Item2);
-
-                //单排取消过滤无需布灯的短线(20210104)
-                if (!ArrangeParameter.IsSingleRow)
-                {
-                    //T形短线取消，对于T形的主边不做处理
-                    DxLines = ThFilterTTypeCenterLineService.Filter(DxLines, ArrangeParameter.MinimumEdgeLength);
-                    DxLines = ThFilterMainCenterLineService.Filter(DxLines, ArrangeParameter.RacywaySpace / 2.0);
-                }
             }
         }
         protected ObjectIdList Print(List<ThLightEdge> lightEdges)

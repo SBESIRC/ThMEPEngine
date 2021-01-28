@@ -205,7 +205,19 @@ namespace ThMEPLighting.Garage.Engine
             }
             else
             {
-                ArrangeParameter.LoopNumber=CalculateLoopNumber(ArrangeParameter.LoopNumber);
+                int loopNumber = ArrangeParameter.LoopNumber;
+                if(loopNumber<4)
+                {
+                    loopNumber = 4;
+                }
+                else
+                {
+                    if(loopNumber% 2 !=0)
+                    {
+                        loopNumber = loopNumber+1;
+                    }
+                    ArrangeParameter.LoopNumber= loopNumber;
+                }
             }
         }
         private int CalculateLoopNumber(int lightNumbers)
@@ -219,5 +231,6 @@ namespace ThMEPLighting.Garage.Engine
             }
             return (int)number / 2;
         }
+       
     }
 }
