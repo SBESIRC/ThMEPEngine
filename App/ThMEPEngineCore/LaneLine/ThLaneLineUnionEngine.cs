@@ -20,7 +20,7 @@ namespace ThMEPEngineCore.LaneLine
             var index = new ThCADCoreNTSSpatialIndex(lines);
             lines.Cast<Line>().ForEach(o =>
             {
-                var buffer = Buffer(o, 1.0);
+                var buffer = Buffer(o, collinear_gap_distance / 2.0);
                 var objs = index.SelectCrossingPolygon(buffer.Shell.ToDbPolyline());
                 if (objs.Count > 1)
                 {
@@ -55,7 +55,8 @@ namespace ThMEPEngineCore.LaneLine
         private static bool IsParallel(Line line1, Line line2)
         {
             var angle = line1.LineDirection().GetAngleTo(line2.LineDirection());
-            return (angle <= Math.PI / 180.0 || angle >= Math.PI - Math.PI / 180.0);
+            return (angle <= parallel_angle_tolerance * Math.PI / 180.0 || 
+                angle >= Math.PI - parallel_angle_tolerance * Math.PI / 180.0);
         }
 
         private static Polygon Buffer(Line line, double distance)
@@ -65,7 +66,7 @@ namespace ThMEPEngineCore.LaneLine
 
         private static Line UnionLines(List<Line> lines)
         {
-            var polygons = lines.Select(o => Buffer(o, 1.0)).ToArray();
+            var polygons = lines.Select(o => Buffer(o, collinear_gap_distance / 2.0)).ToArray();
             var multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons);
             return CenterLine(multiPolygon.Union());
         }

@@ -13,6 +13,8 @@ namespace ThMEPEngineCore.LaneLine
     {
         protected static readonly double extend_distance = 20.0;
         protected static readonly double zero_length_distance = 10.0;
+        protected static readonly double collinear_gap_distance = 2.0;
+        protected static readonly double parallel_angle_tolerance = 1.0;
 
         public static DBObjectCollection Noding(DBObjectCollection curves)
         {
