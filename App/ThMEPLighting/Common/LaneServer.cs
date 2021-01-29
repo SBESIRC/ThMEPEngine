@@ -9,53 +9,6 @@ namespace ThMEPLighting.Common
 {
     public class LaneServer
     {
-        //public static List<List<Line>> getMergedOrderedLane(List<List<Line>> mainLanes, List<List<Line>> secondaryLanes)
-        //{
-
-        //    //车道线顺序
-        //    List<ThLightEdge> edges = new List<ThLightEdge>();
-
-        //    mainLanes.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
-        //    secondaryLanes.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
-
-        //    //找起点
-        //    Dictionary<Point3d, List<ThLightEdge>> nodeCollection = LaneServer.FindStartPoint(edges);
-
-        //    Point3d startPoint = new Point3d();
-        //    List<List<Line>> orderedMergedLanes = new List<List<Line>>();
-        //    bool debug = true;
-
-        //    while (debug == true && isAllTraversed(edges) == false)
-        //    {
-        //        //debug = false;
-        //        foreach (var ptOnce in nodeCollection)
-        //        {
-        //            if (ptOnce.Value.Count == 1)
-        //            {
-        //                startPoint = ptOnce.Key;
-        //                break;
-        //            }
-        //        }
-
-        //        //排序
-        //        ThLightGraphService orderedLane = ThLightGraphService.Build(edges, startPoint);
-        //        //按顺序排布车道线点并合并同一条线的车道线
-        //        var orderedMergedLanesPart = mergeOrderedLane(orderedLane);
-        //        //找这一组里面的最优解
-
-        //        var optimalOrderedMergedLanes = findOptimalLanes(orderedMergedLanesPart, nodeCollection, startPoint);
-
-        //        foreach (var path in optimalOrderedMergedLanes)
-        //        {
-        //            nodeCollection.Remove(path.First().StartPoint);
-        //            nodeCollection.Remove(path.Last().EndPoint);
-        //        }
-        //        orderedMergedLanes.AddRange(optimalOrderedMergedLanes);
-        //    }
-
-        //    return orderedMergedLanes;
-        //}
-
         public static List<List<Line>> getMergedOrderedLane(List<List<Line>> mainLanes, List<List<Line>> secondaryLanes)
         {
 
@@ -73,15 +26,19 @@ namespace ThMEPLighting.Common
         public static Point3d getMergedOrderedLane(List<ThLightEdge> edges)
         {
             Point3d startPoint = new Point3d();
-            List<List<Line>> orderedMergedLanes = new List<List<Line>>();
-            orderedMergedLanes = MergedOrderedLane(edges);
-            startPoint = orderedMergedLanes[0][0].StartPoint;
+
+            var orderedMergedLanes = MergedOrderedLane(edges);
+            if (orderedMergedLanes.Count > 0 && orderedMergedLanes[0].Count > 0)
+            {
+                startPoint = orderedMergedLanes[0][0].StartPoint;
+            }
+
             return startPoint;
         }
 
         private static List<List<Line>> MergedOrderedLane(List<ThLightEdge> edges)
         {
-         
+
             //找起点
             Dictionary<Point3d, List<ThLightEdge>> nodeCollection = LaneServer.FindStartPoint(edges);
 
