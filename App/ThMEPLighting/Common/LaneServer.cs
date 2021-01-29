@@ -18,6 +18,27 @@ namespace ThMEPLighting.Common
             mainLanes.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
             secondaryLanes.ForEach(ls => ls.ForEach(l => edges.Add(new ThLightEdge(l))));
 
+            List<List<Line>> orderedMergedLanes = new List<List<Line>>();
+            orderedMergedLanes = MergedOrderedLane(edges);
+
+            return orderedMergedLanes;
+        }
+        public static Point3d getMergedOrderedLane(List<ThLightEdge> edges)
+        {
+            Point3d startPoint = new Point3d();
+
+            var orderedMergedLanes = MergedOrderedLane(edges);
+            if (orderedMergedLanes.Count > 0 && orderedMergedLanes[0].Count > 0)
+            {
+                startPoint = orderedMergedLanes[0][0].StartPoint;
+            }
+
+            return startPoint;
+        }
+
+        private static List<List<Line>> MergedOrderedLane(List<ThLightEdge> edges)
+        {
+
             //找起点
             Dictionary<Point3d, List<ThLightEdge>> nodeCollection = LaneServer.FindStartPoint(edges);
 
