@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.label9 = new System.Windows.Forms.Label();
             this.TxtCircuitNum = new DevExpress.XtraEditors.TextEdit();
             this.BtnCircuitInfo = new DevExpress.XtraEditors.SimpleButton();
             this.BtnCircuitLabel = new DevExpress.XtraEditors.SimpleButton();
@@ -78,7 +79,6 @@
             this.layoutControlItem18 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem19 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem20 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.label9 = new System.Windows.Forms.Label();
             this.layoutControlItem22 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
@@ -153,6 +153,15 @@
             this.layoutControl1.TabIndex = 0;
             this.layoutControl1.Text = "layoutControl1";
             // 
+            // label9
+            // 
+            this.label9.Location = new System.Drawing.Point(11, 256);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(90, 53);
+            this.label9.TabIndex = 34;
+            this.label9.Text = "线槽排数";
+            this.label9.TextAlign = System.Drawing.ContentAlignment.TopCenter;
+            // 
             // TxtCircuitNum
             // 
             this.TxtCircuitNum.EditValue = "3";
@@ -164,6 +173,7 @@
             this.TxtCircuitNum.Size = new System.Drawing.Size(54, 20);
             this.TxtCircuitNum.StyleController = this.layoutControl1;
             this.TxtCircuitNum.TabIndex = 24;
+            //this.TxtCircuitNum.Validating += new System.ComponentModel.CancelEventHandler(this.TxtCircuitNum_Validating);
             // 
             // BtnCircuitInfo
             // 
@@ -550,7 +560,7 @@
             this.layoutControlItem11.Name = "layoutControlItem11";
             this.layoutControlItem11.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
             this.layoutControlItem11.Size = new System.Drawing.Size(154, 30);
-            this.layoutControlItem11.Text = "线槽距离：";
+            this.layoutControlItem11.Text = "线槽间距：";
             this.layoutControlItem11.TextSize = new System.Drawing.Size(60, 14);
             // 
             // layoutControlItem12
@@ -697,15 +707,6 @@
             this.layoutControlItem20.Size = new System.Drawing.Size(102, 32);
             this.layoutControlItem20.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem20.TextVisible = false;
-            // 
-            // label9
-            // 
-            this.label9.Location = new System.Drawing.Point(11, 256);
-            this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(90, 53);
-            this.label9.TabIndex = 34;
-            this.label9.Text = "线槽排数";
-            this.label9.TextAlign = System.Drawing.ContentAlignment.TopCenter;
             // 
             // layoutControlItem22
             // 

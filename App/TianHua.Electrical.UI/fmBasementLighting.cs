@@ -47,6 +47,7 @@ namespace TianHua.Electrical.UI
                 _Single.Enabled = true;
                 _Double.Enabled = true;
                 RadLamp.EditValue = "单排";
+                TxtDistance.Enabled = false;
             }
             else
             {
@@ -55,6 +56,7 @@ namespace TianHua.Electrical.UI
                 _Single.Enabled = false;
                 _Double.Enabled = true;
                 RadLamp.EditValue = "双排";
+                TxtDistance.Enabled = true;
             }
 
         }
@@ -66,6 +68,8 @@ namespace TianHua.Electrical.UI
                 TxtSpacing.Text = "2700";
 
                 TxtCircuitNum.Text = "3";
+
+                TxtDistance.Enabled = false;
             }
             else
             {
@@ -78,7 +82,7 @@ namespace TianHua.Electrical.UI
                     TxtSpacing.Text = "4000";
                 }
 
-          
+                TxtDistance.Enabled = true;
                 TxtCircuitNum.Text = "4";
             }
         }
@@ -187,5 +191,7 @@ namespace TianHua.Electrical.UI
 #endif
         }
         #endregion
+
+ 
     }
 }
