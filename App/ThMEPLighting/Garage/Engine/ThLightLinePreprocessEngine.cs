@@ -24,21 +24,40 @@ namespace ThMEPLighting.Garage.Engine
 
         public List<Line> Preprocess(List<Line> lines)
         {
+            if (lines.Count <= 0)
+            {
+                return new List<Line>();
+            }
+            DBObjectCollection objs = new DBObjectCollection();
+            foreach (var line in lines)
+            {
+                var newline = line.ExtendLine();
+                objs.Add(newline);
+            }
             //Merge 
-            var mergeLines = ThLineMerger.Merge(lines);
-            var objs = new DBObjectCollection();
-            mergeLines.ForEach(o => objs.Add(o));
+            var handleLines = ThLaneLineUnionEngine.Union(objs);
+            handleLines = ThLaneLineMergeExtension.Merge(handleLines);
+            //var mergeLines = ThLineMerger.Merge(lines);
+            //var objs = new DBObjectCollection();
+            //mergeLines.ForEach(o => objs.Add(o));
 
             //Union
             //var unionLines = ThLaneLineUnionEngine.Union(objs);
 
             //Join
-            var joinLines = ThLaneLineJoinEngine.Join(objs);
+            //var joinLines = ThLaneLineJoinEngine.Join(objs);
 
             //Snap
-
+            var nodedLines = ThLaneLineEngine.Noding(handleLines);
+            using (Linq2Acad.AcadDatabase db =Linq2Acad.AcadDatabase.Active())
+            {
+                foreach (Entity item in nodedLines)
+                {
+                    db.ModelSpace.Add(item);
+                }
+            }
             //过滤短线
-            return FilterShortLines(joinLines.Cast<Line>().ToList());
+            return FilterShortLines(nodedLines.Cast<Line>().ToList());
         }
 
         public Tuple<List<Line>, List<Line>> Cut(List<Line> firstLines, List<Line> secondLines)
@@ -48,10 +67,21 @@ namespace ThMEPLighting.Garage.Engine
             objs.AddRange(secondLines);
             var results = ThLineNodeService.Node(objs);
             var firstSplitLines = new List<Line>();
-            foreach (var item in results.Where(o=> firstLines.IsContains(o.Item1)))
+            using (var acad=Linq2Acad.AcadDatabase.Active())
             {
-                firstSplitLines.AddRange(item.Item2);
+                foreach(var item in results)
+                {
+                    foreach(var line in item.Item2)
+                    {
+                        acad.ModelSpace.Add(line);
+                    }                    
+                }
             }
+
+                foreach (var item in results.Where(o => firstLines.IsContains(o.Item1)))
+                {
+                    firstSplitLines.AddRange(item.Item2);
+                }
             var secondSplitLines = new List<Line>();
             foreach (var item in results.Where(o => secondLines.IsContains(o.Item1)))
             {

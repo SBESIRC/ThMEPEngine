@@ -53,7 +53,7 @@ namespace ThMEPLighting.Garage.Engine
             //4.2 再根据布灯逻辑进行布点
             //5.  编号
 
-            var firstLightEdges = GetFirstEdges();             
+            var firstLightEdges = GetFirstEdges();
             do
             {
                 if (firstLightEdges.Where(o => o.IsDX).Count() == 0)

@@ -38,14 +38,24 @@ namespace ThMEPEngineCore.Algorithm
         {
             var res=LineGroups.Where(o =>
             {
-                bool isOverlap = ThGeometryTool.IsOverlapEx(
-                   line.StartPoint, line.EndPoint, o.Item1, o.Item2);
-                if (!isOverlap)
+                if ((line.EndPoint - line.StartPoint).GetNormal().IsParallelTo((o.Item1 - o.Item2).GetNormal(), new Tolerance(1, 1)))
                 {
-                    return IsJointLink(line.StartPoint,
-                   line.EndPoint, o.Item1, o.Item2);
+                    if (line.EndPoint.IsEqualTo(o.Item1, new Tolerance(1, 1)) ||
+                        line.StartPoint.IsEqualTo(o.Item1, new Tolerance(1, 1)) ||
+                        line.EndPoint.IsEqualTo(o.Item2, new Tolerance(1, 1)) ||
+                        line.StartPoint.IsEqualTo(o.Item2, new Tolerance(1, 1)))
+                    {
+                        return true;
+                    }
+                    return false;
                 }
-                return isOverlap;
+                //bool isOverlap = ThGeometryTool.IsOverlapEx(
+                //   line.StartPoint, line.EndPoint, o.Item1, o.Item2);
+                //if (!isOverlap)
+                //{
+                    
+                //}
+                return false;
             });
             if (!res.Any())
             {

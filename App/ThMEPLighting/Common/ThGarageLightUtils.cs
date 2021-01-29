@@ -12,6 +12,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using GeometryExtensions;
 
 namespace ThMEPLighting.Common
 {
@@ -22,7 +23,31 @@ namespace ThMEPLighting.Common
             var dir = (line.EndPoint - line.StartPoint).GetNormal();
             return new Line(line.StartPoint - dir * length, line.EndPoint + dir * length);
         }
-  
+        /// <summary>
+        /// Poly只能有线段构成
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Polyline ExtendPolyline(this Polyline poly, double length = 1.0)
+        {
+            var sp = poly.GetPoint3dAt(0);
+            var spNext = poly.GetPoint3dAt(1);
+
+            Vector3d spVec = sp.GetVectorTo(spNext).GetNormal();
+            var startExendPt = sp - spVec.MultiplyBy(length);
+
+            var ep = poly.GetPoint3dAt(poly.NumberOfVertices-1);
+            var epPrev = poly.GetPoint3dAt(poly.NumberOfVertices - 2);
+
+            Vector3d epVec = ep.GetVectorTo(epPrev).GetNormal();
+            var endExendPt = ep - epVec.MultiplyBy(length);
+
+            var newPoly = poly.WashClone() as Polyline;
+            newPoly.Extend(true, startExendPt);
+            newPoly.Extend(false, endExendPt);
+            return newPoly;
+        }
         public static ObjectId AddLineType(Database db, string linetypeName)
         {
             using(AcadDatabase acadDatabase= AcadDatabase.Use(db))
@@ -284,6 +309,23 @@ namespace ThMEPLighting.Common
             Point3d lineEp = line.EndPoint;
             return start.DistanceTo(lineSp) < start.DistanceTo(lineEp) ?
                 lineEp : lineSp;
+        }
+        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
+            }
+        }
+
+        public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
+            }
         }
     }
 }

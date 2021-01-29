@@ -37,10 +37,11 @@ namespace ThMEPLighting.Garage.Engine
         public abstract void Arrange(List<ThRegionBorder> regionBorders);
         protected List<Line> Trim(List<Line> lines,Polyline regionBorder)
         {
+            Polyline bufferPoly = regionBorder.Buffer(0)[0] as Polyline;
             List<Line> results = new List<Line>();
             lines.ForEach(o =>
             {
-                var objs = regionBorder.Trim(o);
+                var objs = bufferPoly.Trim(o);
                 objs.Cast<Entity>()
                 .Where(c=>c is Curve).ToList().ForEach(m =>
                 {
@@ -77,31 +78,13 @@ namespace ThMEPLighting.Garage.Engine
 
                 var dxWashLines = WashClone(regionBorder.DxCenterLines);
                 var fdxWashLines = WashClone(regionBorder.FdxCenterLines);
-                var dxResults = ThLaneLineMergeExtension.Merge(dxWashLines.ToCollection());
-                var dxObjs = new DBObjectCollection();
-                foreach(Entity ent in dxResults)
-                {
-                    if(ent is Line line)
-                    {
-                        if (line.Length > ThGarageLightCommon.ThShortLightLineLength)
-                        {
-                            dxObjs.Add(line);
-                        }
-                    }
-                }     
-                dxResults = ThLaneLineMergeExtension.Noding(dxObjs);
-                dxWashLines = dxResults.Cast<Line>().ToList();
-                //单排取消过滤无需布灯的短线(20210104)
-                if (!ArrangeParameter.IsSingleRow)
-                {
-                    //T形短线取消，对于T形的主边不做处理
-                    dxWashLines = ThFilterTTypeCenterLineService.Filter(dxWashLines, ArrangeParameter.MinimumEdgeLength);
-                    dxWashLines = ThFilterMainCenterLineService.Filter(dxWashLines, ArrangeParameter.RacywaySpace / 2.0);
-                }
-
+                //var a = dxWashLines.Select(x => x.Length).ToList();
                 //用房间轮廓线对车道中心线进行打断，线的端点距离边界500
                 var dxTrimLines = Trim(dxWashLines, regionBorder.RegionBorder);
-
+                foreach (var item in dxTrimLines)
+                {
+                    acadDatabase.ModelSpace.Add(item);
+                }
                 var shortenPara = new ThShortenParameter
                 {
                     Border = regionBorder.RegionBorder,
@@ -110,13 +93,20 @@ namespace ThMEPLighting.Garage.Engine
                     Distance = ThGarageLightCommon.RegionBorderBufferDistance
                 };
                 var shortDxLines = ThShortenLineService.Shorten(shortenPara);
-
                 shortDxLines =precessEngine.Preprocess(shortDxLines);
-                fdxWashLines = precessEngine.Preprocess(fdxWashLines);
-
-                var cutResult = precessEngine.Cut(shortDxLines, fdxWashLines);
-                DxLines.AddRange(cutResult.Item1);
-                FdxLines.AddRange(cutResult.Item2);
+                //fdxWashLines = precessEngine.Preprocess(fdxWashLines);                
+                //单排取消过滤无需布灯的短线(20210104)
+                if (!ArrangeParameter.IsSingleRow)
+                {
+                    //T形短线取消，对于T形的主边不做处理
+                    dxWashLines = ThFilterTTypeCenterLineService.Filter(shortDxLines, ArrangeParameter.MinimumEdgeLength);
+                    dxWashLines = ThFilterMainCenterLineService.Filter(dxWashLines, ArrangeParameter.RacywaySpace / 2.0);
+                }
+                //var s = shortDxLines.Select(x => x.Length).ToList();
+                //var cutResult = precessEngine.Cut(shortDxLines, fdxWashLines);
+                DxLines.AddRange(shortDxLines);
+                var s = dxWashLines.Select(x => x.Length).ToList();
+                FdxLines.AddRange(fdxWashLines);
             }
         }
         protected ObjectIdList Print(List<ThLightEdge> lightEdges)
@@ -188,11 +178,41 @@ namespace ThMEPLighting.Garage.Engine
             {
                 acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
                 acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(ArrangeParameter.LightNumberTextStyle), false);
-                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.CenterLineParameter.Layer));
-                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.LaneLineBlockParameter.Layer));
-                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.NumberTextParameter.Layer));
-                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.PortLineParameter.Layer));
-                acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.SideLineParameter.Layer));
+                var centerLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(RacewayParameter.CenterLineParameter.LineType));
+                var laneLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(RacewayParameter.LaneLineBlockParameter.LineType));
+                var numberTextLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(RacewayParameter.NumberTextParameter.LineType));
+                var portLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(RacewayParameter.PortLineParameter.LineType));
+                var sideLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(RacewayParameter.SideLineParameter.LineType));
+
+                var centerLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.CenterLineParameter.Layer));
+                var centerLineLayerLTR = centerLineLayer.Item as LayerTableRecord;
+                centerLineLayerLTR.UpgradeOpen();
+                centerLineLayerLTR.LinetypeObjectId = centerLineLT.Item.Id;
+                centerLineLayerLTR.DowngradeOpen();
+                
+                var laneLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.LaneLineBlockParameter.Layer));
+                var laneLineLTR = laneLineLayer.Item as LayerTableRecord;
+                laneLineLTR.UpgradeOpen();
+                laneLineLTR.LinetypeObjectId = laneLineLT.Item.Id;
+                laneLineLTR.DowngradeOpen();
+
+                var numberTextLayer=acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.NumberTextParameter.Layer));
+                var numberTextLTR = numberTextLayer.Item as LayerTableRecord;
+                numberTextLTR.UpgradeOpen();
+                numberTextLTR.LinetypeObjectId = numberTextLT.Item.Id;
+                numberTextLTR.DowngradeOpen();
+
+                var portLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.PortLineParameter.Layer));
+                var portLineLTR= portLineLayer.Item as LayerTableRecord;
+                portLineLTR.UpgradeOpen();
+                portLineLTR.LinetypeObjectId = portLineLT.Item.Id;
+                portLineLTR.DowngradeOpen();
+
+                var sideLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(RacewayParameter.SideLineParameter.Layer));
+                var sideLineLTR = sideLineLayer.Item as LayerTableRecord;
+                sideLineLTR.UpgradeOpen();
+                sideLineLTR.LinetypeObjectId = sideLineLT.Item.Id;
+                sideLineLTR.DowngradeOpen();
             }
         }
     }

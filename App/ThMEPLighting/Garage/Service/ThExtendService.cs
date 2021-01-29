@@ -110,8 +110,8 @@ namespace ThMEPLighting.Garage.Service
         {
             needChange = false;
             if (curve2.GetClosestPointTo(curve1.StartPoint, false).DistanceTo(curve1.StartPoint) < 1&&
-                !curve1.StartPoint.IsEqualTo(curve2.StartPoint) && 
-                !curve1.StartPoint.IsEqualTo(curve2.EndPoint))
+                !curve1.StartPoint.IsEqualTo(curve2.StartPoint, new Tolerance(5, 5)) && 
+                !curve1.StartPoint.IsEqualTo(curve2.EndPoint, new Tolerance(5, 5)))
             {
                 if (curve2.StartPoint.DistanceTo(curve1.EndPoint) < curve2.EndPoint.DistanceTo(curve1.EndPoint))
                 {
@@ -167,8 +167,8 @@ namespace ThMEPLighting.Garage.Service
                 }
             }
             else if (curve2.GetClosestPointTo(curve1.EndPoint, false).DistanceTo(curve1.EndPoint) < 1 &&
-                !curve1.EndPoint.IsEqualTo(curve2.StartPoint) &&
-                !curve1.EndPoint.IsEqualTo(curve2.EndPoint))
+                !curve1.EndPoint.IsEqualTo(curve2.StartPoint, new Tolerance(5, 5)) &&
+                !curve1.EndPoint.IsEqualTo(curve2.EndPoint, new Tolerance(5, 5)))
             {
                 if (curve2.StartPoint.DistanceTo(curve1.StartPoint) < curve2.EndPoint.DistanceTo(curve1.StartPoint))
                 {
@@ -255,11 +255,11 @@ namespace ThMEPLighting.Garage.Service
             Extend(other.Item3, current.Item2, current.Item3);
         }
         private void Extend(Curve extendLine,Curve first,Curve second)
-        {
+        {            
             var firstPts = new Point3dCollection();
-            extendLine.IntersectWith(first, Intersect.ExtendBoth, firstPts, IntPtr.Zero, IntPtr.Zero);
+            Extend(extendLine).IntersectWith(Extend(first), Intersect.ExtendBoth, firstPts, IntPtr.Zero, IntPtr.Zero);
             var secondPts = new Point3dCollection();
-            extendLine.IntersectWith(second, Intersect.ExtendBoth, secondPts, IntPtr.Zero, IntPtr.Zero);
+            Extend(extendLine).IntersectWith(Extend(second), Intersect.ExtendBoth, secondPts, IntPtr.Zero, IntPtr.Zero);
             var pts = new List<Point3d>();
             pts.AddRange(firstPts.Cast<Point3d>().ToList());
             pts.AddRange(secondPts.Cast<Point3d>().ToList());
@@ -268,7 +268,7 @@ namespace ThMEPLighting.Garage.Service
                 return;
             }
             var fitlerPts = FilterNotOnCurvePts(extendLine, pts);
-            if(fitlerPts.Count==0)
+            if(fitlerPts.Count==0 /*|| firstPts.Count <= 1 || secondPts.Count <= 1*/)
             {
                 return;
             }
@@ -283,7 +283,15 @@ namespace ThMEPLighting.Garage.Service
             {
                 toPoint = fitlerPts.OrderByDescending(o => o.DistanceTo(extendLine.EndPoint)).First();
             }
-            extendLine.Extend(extendStart, toPoint);
+            try
+            {
+                extendLine.Extend(extendStart, toPoint);
+            }
+            catch(System.Exception ex)
+            {
+                return;
+                //throw ex;
+            }
         }
         private List<Point3d> FilterNotOnCurvePts(Curve curve ,List<Point3d> pts)
         {
@@ -301,6 +309,21 @@ namespace ThMEPLighting.Garage.Service
                 throw new NotSupportedException();
             }
             return results;
+        }
+        private Curve Extend(Curve curve)
+        {
+            if(curve is Line line)
+            {
+                return line.ExtendLine();
+            }
+            else if(curve is Polyline polyline)
+            {
+                return polyline.ExtendPolyline();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

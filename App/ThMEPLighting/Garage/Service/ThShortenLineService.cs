@@ -38,7 +38,10 @@ namespace ThMEPLighting.Garage.Service
             ShortenParameter.DxLines.ForEach(o =>
             {
                 var newLine = Shorten(o);
-                Results.Add(newLine);
+                if (newLine.Length > 5)
+                {
+                    Results.Add(newLine);
+                }
                 Deals.Add(o);
             });
         }

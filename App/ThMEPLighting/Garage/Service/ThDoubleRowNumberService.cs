@@ -38,7 +38,7 @@ namespace ThMEPLighting.Garage.Service
             var findStartIndex = ThFindStartIndexService.Find(LightGraph, singleLinkPath, ArrangeParameter.LoopNumber, false);
             if (!findStartIndex.IsFind)
             {
-                return;
+                findStartIndex.StartIndex = 1;
             }
             int startIndex = findStartIndex.StartIndex;
             if (!singleLinkPath.Path[0].IsDX)

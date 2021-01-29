@@ -31,6 +31,10 @@ namespace ThMEPLighting.Garage.Service
                 GroupParameter.Center.Layer = GroupParameter.RacewayParameter.CenterLineParameter.Layer;
                 GroupParameter.Sides.ForEach(o => o.Layer = GroupParameter.RacewayParameter.SideLineParameter.Layer);
                 GroupParameter.Ports.ForEach(o => o.Layer = GroupParameter.RacewayParameter.PortLineParameter.Layer);
+
+                GroupParameter.Sides.ForEach(o => o.Linetype = "Bylayer");
+                GroupParameter.Ports.ForEach(o => o.Linetype = "Bylayer");
+
                 var lines = GroupParameter.GetAll();
                 lines.ForEach(o =>
                 {
