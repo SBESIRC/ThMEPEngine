@@ -35,6 +35,41 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        public static void removeDuplicateStruct(ref List<List<Polyline>> structList)
+        {
+            foreach (var stru in structList)
+            {
+                for (int i = stru.Count - 1; i >= 0; i--)
+                {
+
+                    if (stru[i].StartPoint == stru[i].EndPoint)
+                    {
+                        stru.RemoveAt(i);
+                    }
+                }
+
+                for (int i = 0; i < stru.Count; i++)
+                {
+                    var currS = stru[i].StartPoint;
+                    var currE = stru[i].EndPoint;
+
+                    for (int j = stru.Count - 1; j > i; j--)
+                    {
+                        var compareS = stru[j].StartPoint;
+                        var compareE = stru[j].EndPoint;
+
+                        if (currS == compareS && currE == compareE)
+                        {
+                            stru.RemoveAt(j);
+                        }
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         /// 沿着线将柱分隔成上下两部分
         /// </summary>
         /// <param name="polyline"></param>
@@ -44,7 +79,7 @@ namespace ThMEPLighting.EmgLight.Service
         public static List<List<Polyline>> SeparateColumnsByLine(List<Polyline> polyline, List<Line> lines, double tol)
         {
             //上下做框筛选框内构建. 不能直接transformToLine判断y值正负:打散很长的墙以后需要再筛选一遍
-            var resPolys = lines.SelectMany(x =>
+            var upPolyline = lines.SelectMany(x =>
             {
                 var linePoly = StructUtils.ExpandLine(x, tol, 0, 0, 0);
                 return polyline.Where(y =>
@@ -54,18 +89,18 @@ namespace ThMEPLighting.EmgLight.Service
                 }).ToList();
             }).ToList();
 
-            var upPolyline = resPolys;
 
-            resPolys = lines.SelectMany(x =>
-           {
-               var linePoly = StructUtils.ExpandLine(x, 0, 0, tol, 0);
-               return polyline.Where(y =>
-              {
-                  //var polyCollection = new DBObjectCollection() { y };
-                  return linePoly.Contains(y) || linePoly.Intersects(y);
-              }).ToList();
-           }).ToList();
-            var downPolyline = resPolys;
+
+            var downPolyline = lines.SelectMany(x =>
+                {
+                    var linePoly = StructUtils.ExpandLine(x, 0, 0, tol, 0);
+                    return polyline.Where(y =>
+                   {
+                       //var polyCollection = new DBObjectCollection() { y };
+                       return linePoly.Contains(y) || linePoly.Intersects(y);
+                   }).ToList();
+                }).ToList();
+
 
             return new List<List<Polyline>>() { upPolyline, downPolyline };
         }

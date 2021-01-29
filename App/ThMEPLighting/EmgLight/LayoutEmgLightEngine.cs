@@ -59,35 +59,34 @@ namespace ThMEPLighting.EmgLight
 
                 var columnSegment = StructureServiceLight.BrakePolylineToLineList(closeColumn);
                 var wallSegment = StructureServiceLight.BrakePolylineToLineList(closeWall);
+
                 DrawUtils.ShowGeometry(columnSegment, EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
                 DrawUtils.ShowGeometry(wallSegment, EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
 
                 //找到构建上可布置面,用第一条车道线的头尾判定
                 var parallelColmuns = StructureServiceLight.getStructureParallelPart(columnSegment, lane);
                 var parallelWalls = StructureServiceLight.getStructureParallelPart(wallSegment, lane);
-
                 //破墙
                 var brokeWall = StructureServiceLight.breakWall(parallelWalls, EmgLightCommon.TolLight);
 
                 DrawUtils.ShowGeometry(parallelColmuns, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
                 DrawUtils.ShowGeometry(brokeWall, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
 
-
                 //过滤柱与墙交叉的部分
                 var filterColumns = StructureServiceLight.FilterStructIntersect(parallelColmuns, walls, EmgLightCommon.TolIntersect);
                 var filterWalls = StructureServiceLight.FilterStructIntersect(brokeWall, columns, EmgLightCommon.TolIntersect);
+
                 DrawUtils.ShowGeometry(filterColumns, EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
                 DrawUtils.ShowGeometry(filterWalls, EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
-
-                var b = false;
-                if (b == true)
-                {
-                    continue;
-                }
 
                 //将构建按车道线方向分成左(0)右(1)两边
                 var usefulColumns = StructureServiceLight.SeparateColumnsByLine(filterColumns, lane, EmgLightCommon.TolLane);
                 var usefulWalls = StructureServiceLight.SeparateColumnsByLine(filterWalls, lane, EmgLightCommon.TolLane);
+
+                StructureServiceLight.removeDuplicateStruct(ref usefulColumns);
+
+                StructureServiceLight.removeDuplicateStruct(ref usefulWalls);
+
 
                 LayoutEmgLightService layoutServer = new LayoutEmgLightService(usefulColumns, usefulWalls, lane, frame);
 
@@ -117,7 +116,11 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
-
+                var b = false;
+                if (b == true)
+                {
+                    continue;
+                }
 
                 ////找出平均的一边. -1:no side 0:left 1:right.
                 int uniformSide = FindUniformDistributionSide(layoutServer, lane, out var columnDistList);
