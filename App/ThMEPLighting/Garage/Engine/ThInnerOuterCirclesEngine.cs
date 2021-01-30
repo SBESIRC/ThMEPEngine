@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.LaneLine;
+using System.Linq;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -45,10 +47,9 @@ namespace ThMEPLighting.Garage.Engine
                 WireOffsetDatas.Add(offsetData);
             });
             //从小汤车道线合并服务中获取合并的主道线，辅道线            
-            var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines);
-            //mergeCurves.Print(5);
+            var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines,301);
             //通过中心线往两侧偏移
-            var offsetCurves = Offset(mergeCurves, offsetDistance);
+            var offsetCurves = Offset(mergeCurves.Cast<Curve>().ToList(), offsetDistance);
             //让1号线、2号线连接
             offsetCurves=ThExtendService.Extend(offsetCurves);
             //为中心线找到对应的1号线和2号线
@@ -118,8 +119,11 @@ namespace ThMEPLighting.Garage.Engine
             var results = new List<Tuple<Curve, Curve, Curve>>();
             curves.ForEach(o =>
             {
-                var instance = ThOffsetLineService.Offset(o, offsetDis);
-                results.Add(Tuple.Create(o, instance.First, instance.Second));
+                if (o.GetLength() >= 10)
+                {
+                    var instance = ThOffsetLineService.Offset(o, offsetDis);
+                    results.Add(Tuple.Create(o, instance.First, instance.Second));
+                }
             });
             return results;
         }

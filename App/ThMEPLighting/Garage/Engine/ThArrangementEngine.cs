@@ -37,7 +37,7 @@ namespace ThMEPLighting.Garage.Engine
         public abstract void Arrange(List<ThRegionBorder> regionBorders);
         protected List<Line> Trim(List<Line> lines,Polyline regionBorder)
         {
-            Polyline bufferPoly = regionBorder.Buffer(0)[0] as Polyline;
+            Polyline bufferPoly = regionBorder.Buffer(-50)[0] as Polyline;
             List<Line> results = new List<Line>();
             lines.ForEach(o =>
             {
@@ -77,14 +77,10 @@ namespace ThMEPLighting.Garage.Engine
                 precessEngine.RemoveLength = ThGarageLightCommon.ThShortLightLineLength;
 
                 var dxWashLines = WashClone(regionBorder.DxCenterLines);
-                var fdxWashLines = WashClone(regionBorder.FdxCenterLines);
-                //var a = dxWashLines.Select(x => x.Length).ToList();
+                var ss = dxWashLines.Select(o => o.Length);
+                var fdxWashLines = WashClone(regionBorder.FdxCenterLines);                
                 //用房间轮廓线对车道中心线进行打断，线的端点距离边界500
                 var dxTrimLines = Trim(dxWashLines, regionBorder.RegionBorder);
-                foreach (var item in dxTrimLines)
-                {
-                    acadDatabase.ModelSpace.Add(item);
-                }
                 var shortenPara = new ThShortenParameter
                 {
                     Border = regionBorder.RegionBorder,
@@ -92,20 +88,24 @@ namespace ThMEPLighting.Garage.Engine
                     FdxLines = fdxWashLines,
                     Distance = ThGarageLightCommon.RegionBorderBufferDistance
                 };
-                var shortDxLines = ThShortenLineService.Shorten(shortenPara);
-                shortDxLines =precessEngine.Preprocess(shortDxLines);
+                var dxLines = ThShortenLineService.Shorten(shortenPara);
+                if (dxLines.Count == 0)
+                {
+                    return;
+                }
+                dxLines = precessEngine.Preprocess(dxLines);
                 //fdxWashLines = precessEngine.Preprocess(fdxWashLines);                
                 //单排取消过滤无需布灯的短线(20210104)
                 if (!ArrangeParameter.IsSingleRow)
                 {
                     //T形短线取消，对于T形的主边不做处理
-                    dxWashLines = ThFilterTTypeCenterLineService.Filter(shortDxLines, ArrangeParameter.MinimumEdgeLength);
-                    dxWashLines = ThFilterMainCenterLineService.Filter(dxWashLines, ArrangeParameter.RacywaySpace / 2.0);
+                    dxLines = ThFilterTTypeCenterLineService.Filter(dxLines, ArrangeParameter.MinimumEdgeLength);
+                    dxLines = ThFilterMainCenterLineService.Filter(dxLines, ArrangeParameter.RacywaySpace / 2.0);
                 }
                 //var s = shortDxLines.Select(x => x.Length).ToList();
                 //var cutResult = precessEngine.Cut(shortDxLines, fdxWashLines);
-                DxLines.AddRange(shortDxLines);
-                var s = dxWashLines.Select(x => x.Length).ToList();
+                DxLines.AddRange(dxLines);
+                var s = DxLines.Select(x => x.Length).ToList();
                 FdxLines.AddRange(fdxWashLines);
             }
         }

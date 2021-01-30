@@ -15,6 +15,7 @@ namespace ThMEPLighting.Garage.Service
     public class ThCableTrayCutService
     {
         private Dictionary<Line, List<Line>> CenterSideLines { get; set; }
+        private Dictionary<Line, List<Line>> CutDic { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private double Width { get; set; }
         private ThCableTrayCutService(Dictionary<Line, List<Line>> centerSideLines, double width)
@@ -22,6 +23,7 @@ namespace ThMEPLighting.Garage.Service
             Width = width;
             CenterSideLines = centerSideLines;
             SpatialIndex = ThGarageLightUtils.BuildSpatialIndex(centerSideLines.Select(o => o.Key).ToList());
+            CutDic = new Dictionary<Line, List<Line>>();
         }
         public static void Cut(Dictionary<Line, List<Line>> centerSideLines, double width = 5.0)
         {
@@ -54,6 +56,14 @@ namespace ThMEPLighting.Garage.Service
             {
                 var cutLines = Cut(o, cutPtLines);
                 newSideLines.AddRange(cutLines);
+                if (CutDic.Keys.Contains(o))
+                {
+                    CutDic[o].AddRange(cutLines);
+                }
+                else
+                {
+                    CutDic.Add(o, cutLines);
+                }
             });
             CenterSideLines[center] = newSideLines;
         }

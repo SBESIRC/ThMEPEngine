@@ -269,10 +269,22 @@ namespace ThMEPEngineCore.CAD
             return b.Length * Math.Cos(rad);
         }
         public static Point3dCollection IntersectPts(
-            Line first,Line second,Intersect intersectType)
+            Line first,Line second,Intersect intersectType,double distance=1.0)
         {
             var pts = new Point3dCollection();
-            first.IntersectWith(second, intersectType, pts, IntPtr.Zero, IntPtr.Zero);
+            var firstVec = first.StartPoint.GetVectorTo(first.EndPoint).GetNormal();
+            var secondVec = second.StartPoint.GetVectorTo(second.EndPoint).GetNormal();
+
+            var firstSp = first.StartPoint - firstVec.MultiplyBy(distance);
+            var firstEp = first.EndPoint + firstVec.MultiplyBy(distance);
+
+            var secondSp = second.StartPoint - secondVec.MultiplyBy(distance);
+            var secondEp = second.EndPoint + secondVec.MultiplyBy(distance);
+
+            var firstNew = new Line(firstSp, firstEp);
+            var secondNew = new Line(secondSp, secondEp);
+
+            firstNew.IntersectWith(secondNew, intersectType, pts, IntPtr.Zero, IntPtr.Zero);
             return pts;
         }
         public static Tuple<Point3d,Point3d> GetCollinearMaxPts(this List<Point3d> pts)

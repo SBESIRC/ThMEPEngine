@@ -3,6 +3,8 @@ using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
+using Autodesk.AutoCAD.Geometry;
+using System;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -18,6 +20,8 @@ namespace ThMEPLighting.Garage.Service
         private ThLightGraphService LightGraph { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
         private ThWireOffsetDataService WireOffsetDataService { get; set; }
+        private List<ThLightEdge> graphEdges { get; set; }
+
         /// <summary>
         /// 1号边已布点的边
         /// </summary>
@@ -26,12 +30,14 @@ namespace ThMEPLighting.Garage.Service
         private ThDoubleRowDistributeService(
             ThLightGraphService lightGraph, 
             ThLightArrangeParameter arrangeParameter,
+
             ThWireOffsetDataService wireOffsetDataService)
         {
             LightGraph = lightGraph;
             ArrangeParameter = arrangeParameter;
             WireOffsetDataService = wireOffsetDataService;
             FirstLightEdges = new List<ThLightEdge>();
+            graphEdges = new List<ThLightEdge>();
         }
         public static List<ThLightEdge> Distribute(
             ThLightGraphService lightGraph,
@@ -44,7 +50,11 @@ namespace ThMEPLighting.Garage.Service
             return instance.FirstLightEdges;
         }
         private void Distribute()
-        {            
+        {
+            LightGraph.Links.ForEach(o =>
+            {
+                o.Path.ForEach(p => graphEdges.Add(p));
+            });
             LightGraph.Links.ForEach(o=>BuildEdgePoints(o));
         }
         private void BuildEdgePoints(ThLinkPath singleLinkPath)
@@ -81,12 +91,31 @@ namespace ThMEPLighting.Garage.Service
                 }
                 i = j - 1;
                 //建造路线上的灯(计算或从图纸获取)
-                var maxPts = edges.GetMaxPts();                
+                var maxPts = edges.GetMaxPts();
                 //分析在线路上无需布灯的区域，返回可以布点的区域
-                var splitPts=ThDoubleRowDistributeExService.Distribute(maxPts, ArrangeParameter, WireOffsetDataService, FirstLightEdges);
+                var distributeInstance = new ThDoubleRowDistributeExService(maxPts, ArrangeParameter, graphEdges, FirstLightEdges,WireOffsetDataService);
+                var splitPts= distributeInstance.Distribute();
+                splitPts = RepairDir(splitPts, basePt);
+                basePt = basePt.DistanceTo(maxPts.Item1)> basePt.DistanceTo(maxPts.Item2)?maxPts.Item2:maxPts.Item1;
                 ThBuildDoubleRowPosService.Build(edges, splitPts,ArrangeParameter);
                 FirstLightEdges.AddRange(edges);
             }
-        }      
+        }
+        private List<Tuple<Point3d,Point3d>> RepairDir(List<Tuple<Point3d, Point3d>> splitPts,Point3d startPt)
+        {
+            var results = new List<Tuple<Point3d, Point3d>>();
+            splitPts.ForEach(o =>
+            {
+                if (startPt.DistanceTo(o.Item1) < startPt.DistanceTo(o.Item2))
+                {
+                    results.Add(Tuple.Create(o.Item1, o.Item2));
+                }
+                else
+                {
+                    results.Add(Tuple.Create(o.Item2, o.Item1));
+                }
+            });
+            return results;
+        }
     } 
 }

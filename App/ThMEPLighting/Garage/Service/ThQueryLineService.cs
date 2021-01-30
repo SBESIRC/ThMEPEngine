@@ -22,14 +22,21 @@ namespace ThMEPLighting.Garage.Service
             var instance = new ThQueryLineService(lines);
             return instance;
         }
-        public List<Line> Query(Point3d pt,double squreLength=1.0)
+        public List<Line> Query(Point3d pt,double squreLength=1.0,bool isLink=true)
         {
             Polyline envelope = ThDrawTool.CreateSquare(pt, squreLength);
             var searchObjs = SpatialIndex.SelectCrossingPolygon(envelope);
-            return searchObjs
+            if(isLink)
+            {
+               return searchObjs
                 .Cast<Line>()
                 .Where(o => ThGarageLightUtils.IsLink(o, pt))
                 .ToList();
+            }
+            else
+            {
+                return searchObjs.Cast<Line>().ToList();
+            }
         }
         public List<Line> QueryUnparallellines(Point3d startPt,Point3d endPt,double width=1.0)
         {

@@ -63,7 +63,7 @@ namespace ThMEPLighting.Garage.Service
         }
         public Point3d? FindFirstPtByCenterPt(Point3d centerPt)
         {
-            var results = Ports.Where(o => Math.Abs(centerPt.DistanceTo(o) - OffsetDis) <= 1.0);
+            var results = Ports.Where(o => Math.Abs(centerPt.DistanceTo(o) - OffsetDis) <= 5.0);
             if (results.Count() == 1)
             {
                 return results.First();
@@ -75,7 +75,7 @@ namespace ThMEPLighting.Garage.Service
         }
         private void Find(Line line,Point3d port)
         {
-            var spEnvelope = ThDrawTool.CreateSquare(port, 1.0);
+            var spEnvelope = ThDrawTool.CreateSquare(port, 5.0);
             var objs = SpatialIndex.SelectCrossingPolygon(spEnvelope);
             objs.Remove(line);
             if (objs.Count == 0)

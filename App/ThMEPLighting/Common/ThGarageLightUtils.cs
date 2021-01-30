@@ -18,7 +18,7 @@ namespace ThMEPLighting.Common
 {
     public static class ThGarageLightUtils
     {
-        public static Line ExtendLine(this Line line,double length=1.0)
+        public static Line ExtendLine(this Line line,double length=5.0)
         {
             var dir = (line.EndPoint - line.StartPoint).GetNormal();
             return new Line(line.StartPoint - dir * length, line.EndPoint + dir * length);
@@ -29,7 +29,7 @@ namespace ThMEPLighting.Common
         /// <param name="poly"></param>
         /// <param name="length"></param>
         /// <returns></returns>
-        public static Polyline ExtendPolyline(this Polyline poly, double length = 1.0)
+        public static Polyline ExtendPolyline(this Polyline poly, double length = 5.0)
         {
             var sp = poly.GetPoint3dAt(0);
             var spNext = poly.GetPoint3dAt(1);
@@ -43,11 +43,17 @@ namespace ThMEPLighting.Common
             Vector3d epVec = ep.GetVectorTo(epPrev).GetNormal();
             var endExendPt = ep - epVec.MultiplyBy(length);
 
-            var newPoly = poly.WashClone() as Polyline;
-            newPoly.Extend(true, startExendPt);
-            newPoly.Extend(false, endExendPt);
+            Polyline newPoly = new Polyline();
+            newPoly.AddVertexAt(0, startExendPt.ToPoint2D(), 0, 0, 0);
+            for (int i = 1; i < poly.NumberOfVertices - 1; i++)
+            {
+                newPoly.AddVertexAt(i, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+            }
+            newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
+
             return newPoly;
         }
+
         public static ObjectId AddLineType(Database db, string linetypeName)
         {
             using(AcadDatabase acadDatabase= AcadDatabase.Use(db))
@@ -326,6 +332,26 @@ namespace ThMEPLighting.Common
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
             }
+        }
+
+        public static List<Line> DistinctLines(List<Line> lines)
+        {
+            List<Line> resLines = new List<Line>();
+            foreach (var line in lines)
+            {
+                bool check = resLines.Where(x =>
+                (x.StartPoint.IsEqualTo(line.EndPoint, new Tolerance(1, 1)) &&
+                x.EndPoint.IsEqualTo(line.StartPoint, new Tolerance(1, 1))) ||
+                (x.StartPoint.IsEqualTo(line.StartPoint, new Tolerance(1, 1)) &&
+                x.EndPoint.IsEqualTo(line.EndPoint, new Tolerance(1, 1))))
+                .Count() > 0;
+                if (!check)
+                {
+                    resLines.Add(line);
+                }
+            }
+
+            return resLines;
         }
     }
 }

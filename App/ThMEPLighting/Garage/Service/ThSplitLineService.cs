@@ -88,8 +88,8 @@ namespace ThMEPLighting.Garage.Service
         private Point3dCollection BuildBranchPt(Line mainEdge, Line secondaryEdge)
         {
             var pts = new Point3dCollection();
-            var mainLine = mainEdge.ExtendLine();
-            var secondaryLine = secondaryEdge.ExtendLine();
+            var mainLine = mainEdge.ExtendLine(1.0);
+            var secondaryLine = secondaryEdge.ExtendLine(1.0);
             mainLine.IntersectWith(secondaryLine, Intersect.ExtendBoth, pts, IntPtr.Zero, IntPtr.Zero);
             return pts;
         }

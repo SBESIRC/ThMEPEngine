@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -52,20 +53,32 @@ namespace ThMEPLighting.Garage.Engine
 
                 //电灯编号        
                 //需求变化2020.12.23,非灯线不参与编号传递
-                var centerLightEdges = new List<ThLightEdge>();
-                innerOuterCircles
-                    .Where(o => o.IsDX).ToList()
-                    .ForEach(o => centerLightEdges.Add(new ThLightEdge(o.Center) { IsDX = o.IsDX }));
-                    
+
+                //为了选起点，建图成功
+                var centerLines = new List<Line>();
+                var firstLines = new List<Line>();
+                innerOuterCircles.ForEach(o => centerLines.Add(o.Center));
+                innerOuterCircles.ForEach(o => firstLines.Add(o.First));
+                using (var precessEngine = new ThLightLinePreprocessEngine())
+                {
+                    centerLines=precessEngine.Preprocess(centerLines);
+                    firstLines= precessEngine.Preprocess(firstLines);                    
+                }
+                var centerLightEdges = new List<ThLightEdge>();                
+                centerLines.ForEach(o => centerLightEdges.Add(new ThLightEdge(o.Normalize())));
+
+                var firstLightEdges = new List<ThLightEdge>();
+                firstLines.ForEach(o => firstLightEdges.Add(new ThLightEdge(o.Normalize())));
+                
                 //获取端点在DxLines的Port
                 var centerPorts = GetDxCenterLinePorts(ports,  //灯线端口
-                    centerLightEdges.Where(o=>o.IsDX).Select(o => o.Edge).ToList());                         
+                    centerLightEdges.Where(o=>o.IsDX).Select(o => o.Edge).ToList());
 
                 //创建偏移1、2线索引服务，便于后期查询
                 var wireOffsetDataService=ThWireOffsetDataService.Create(innerOuterCircles);
-
                 using (var buildNumberEngine = new ThDoubleRowNumberEngine(
-                    centerPorts, centerLightEdges, ArrangeParameter, wireOffsetDataService))
+                    centerPorts, centerLightEdges, firstLightEdges,
+                    ArrangeParameter, wireOffsetDataService))
                 {
                     buildNumberEngine.Build();
                     collectIds.AddRange(Print(buildNumberEngine.FirstLightEdges));
@@ -79,22 +92,22 @@ namespace ThMEPLighting.Garage.Engine
             //桥架中心线
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var cableCenterLines = new List<Line>();
+                var firstCurves = new List<Curve>();
+                var secondCurves = new List<Curve>();
                 innerOuterCircles.ForEach(o =>
                 {
-                    cableCenterLines.Add(o.First);
-                    cableCenterLines.Add(o.Second);
+                    firstCurves.Add(o.First.Clone() as Curve);
+                    secondCurves.Add(o.Second.Clone() as Curve);
                 });
-                FdxLines.ForEach(o => cableCenterLines.Add(o)); 
-                using (var buildRacywayEngine = new ThBuildRacewayEngine(
-                    cableCenterLines, ArrangeParameter.Width))
+                using (var buildRacywayEngine = new ThBuildDoubleRacewayEngine(
+                    firstCurves, secondCurves, 
+                    FdxLines.Cast<Curve>().ToList(), 
+                    ArrangeParameter.Width,RacewayParameter))
                 {
                     //创建线槽
                     buildRacywayEngine.Build();
 
-                    //成组
-                    var cableTrayIds = buildRacywayEngine.CreateGroup(RacewayParameter);
-                    collectIds.AddRange(cableTrayIds);
+                    collectIds.AddRange(buildRacywayEngine.DrawObjIs);
 
                     //获取参数
                     return buildRacywayEngine.GetPorts();

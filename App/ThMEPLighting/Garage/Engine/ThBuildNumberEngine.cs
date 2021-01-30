@@ -33,6 +33,7 @@ namespace ThMEPLighting.Garage.Engine
                     Start = dxLightEdges.First().Edge.StartPoint;
                 }
             }
+            Ports = Ports.Distinct().ToList();
             ArrangeParameter = arrangeParameter;            
         }
         protected ThBuildNumberEngine(

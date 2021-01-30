@@ -16,31 +16,33 @@ namespace ThMEPLighting.Garage.Engine
     {
         public List<ThLightEdge> FirstLightEdges { get; set; }
         public List<ThLightEdge> SecondLightEdges { get; set; }
-        public ThWireOffsetDataService WireOffsetDataService { get; set; }
-        private List<Point3d> FirstPorts { get; set; }
-        private Point3d FirstStart { get; set; }
+        private ThWireOffsetDataService WireOffsetDataService { get; set;}
+        private bool isPointStart = false;
         public ThDoubleRowNumberEngine(
             List<Point3d> centerPorts,
             List<ThLightEdge> centerLineEdges,
+            List<ThLightEdge> firstLightEdges,
             ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService)
-            :base(centerPorts, centerLineEdges, arrangeParameter)
+            ThWireOffsetDataService wireOffsetDataService
+            ):base(centerPorts, centerLineEdges, arrangeParameter)
         {
+            FirstLightEdges = firstLightEdges;            
+            SecondLightEdges = new List<ThLightEdge>();            
             WireOffsetDataService = wireOffsetDataService;
-            FirstLightEdges = new List<ThLightEdge>();
-            SecondLightEdges = new List<ThLightEdge>();
-            FirstPorts = new List<Point3d>();
         }
         public ThDoubleRowNumberEngine(
             List<Point3d> centerPorts,
             List<ThLightEdge> centerLineEdges,
+            List<ThLightEdge> firstLightEdges,
             ThLightArrangeParameter arrangeParameter,
-            Point3d centerStart,
-            ThWireOffsetDataService wireOffsetDataService
+            ThWireOffsetDataService wireOffsetDataService,
+            Point3d centerStart
             ) : base(centerPorts, centerLineEdges, arrangeParameter, centerStart)
         {
+            FirstLightEdges = firstLightEdges;            
+            SecondLightEdges = new List<ThLightEdge>();
             WireOffsetDataService = wireOffsetDataService;
-            FirstPorts = new List<Point3d>();
+            isPointStart = true;            
         }
         public override void Build()
         {
@@ -53,113 +55,136 @@ namespace ThMEPLighting.Garage.Engine
             //4.2 再根据布灯逻辑进行布点
             //5.  编号
 
-            var firstLightEdges = GetFirstEdges();
+            //获取一号线上所有的端口点
+            var firstPorts = GetFirstLinePorts(FirstLightEdges.Select(o => o.Edge).ToList());
+            if(Ports.Count==0 || LineEdges.Count==0 || FirstLightEdges.Count==0)
+            {
+                return;
+            }
+            Point3d firstStart;
+            var nubmeredLightEdges = new List<ThLightEdge>();
             do
             {
-                if (firstLightEdges.Where(o => o.IsDX).Count() == 0)
+                if (FirstLightEdges.Where(o => o.IsDX).Count() == 0 )
                 {
                     break;
-                }
-                //对1号线的边建图
-                if(LineEdges.Count>0)
+                }                
+                if(LineEdges.Count>0 && Ports.Count>0)
                 {
-                    //获取中心线路径最长的路径
-                    var centerLightGraph = ThLightGraphService.Build(LineEdges, Start);
-                    centerLightGraph = ThFindLongestPathService.Find(Ports, centerLightGraph);
-                    //获取1号边的端口点和起始点
-                    if(centerLightGraph!=null)
+                    var res = FindPropertyStart(LineEdges, Ports[0]);
+                    if(res!=null)
                     {
-                        GetFirstPortsAndStart(firstLightEdges, centerLightGraph.StartPoint);
+                        firstStart = GetFirstStart(firstPorts, res.Value);
+                    }
+                    else if(firstPorts.Count>0)
+                    {
+                        firstStart=firstPorts[0];
                     }
                     else
                     {
-                        GetFirstPortsAndStart(firstLightEdges, LineEdges[0].Edge.StartPoint);
+                        firstStart = FirstLightEdges[0].Edge.StartPoint;
                     }
-                } 
+                }
+                else if(firstPorts.Count>0)
+                {
+                    firstStart = firstPorts[0];
+                }
+                else 
+                {
+                    firstStart = FirstLightEdges[0].Edge.StartPoint;
+                }
                 //为1号边建图
-                var firstLightGraph = ThLightGraphService.Build(firstLightEdges, FirstStart);
+                var firstLightGraph = ThLightGraphService.Build(FirstLightEdges, firstStart);
+                if(firstLightGraph==null)
+                {
+                    return;
+                }
                 //布点
                 var distributedEdges = ThDoubleRowDistributeService.Distribute(
                     firstLightGraph, ArrangeParameter, WireOffsetDataService);
                 UpdateLoopNumber(firstLightGraph);
-                //获取 firstLightGraph 中所有的边
-                var firstGraphEdges = new List<ThLightEdge>();
-                firstLightGraph.Links.ForEach(o=>firstGraphEdges.AddRange(o.Path));
-                firstGraphEdges.ForEach(o => o.IsTraversed = false);
-                firstLightGraph = ThLightGraphService.Build(firstGraphEdges, firstLightGraph.StartPoint);
                 //对1号线的边编号
                 ThDoubleRowNumberService.Number(firstLightGraph, ArrangeParameter, WireOffsetDataService);
-                firstLightGraph.Links.ForEach(o => FirstLightEdges.AddRange(o.Path));
 
                 //过滤还未遍历的边
-                firstLightEdges = firstLightEdges.Where(o => o.IsTraversed == false).ToList();
-                FirstPorts = FirstPorts.PtOnLines(firstLightEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());
-                if (FirstPorts.Count>0)
-                {
-                    FirstStart = FirstPorts.First();
-                }
-                else if (firstLightEdges.Where(o => o.IsDX).Count() > 0)
-                {
-                    FirstStart = firstLightEdges.Where(o => o.IsDX).First().Edge.StartPoint;
-                }
-                else
-                {
-                    break;
-                }
+                nubmeredLightEdges.AddRange(FirstLightEdges.Where(o => o.IsTraversed).ToList());
+                FirstLightEdges = FirstLightEdges.Where(o => o.IsTraversed == false).ToList();
+                firstPorts = firstPorts.PtOnLines(FirstLightEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());
                 //过滤中心线未遍历的边
                 LineEdges = LineEdges.Where(o => o.IsTraversed == false).ToList();
                 //过滤剩下的端口，
                 Ports = Ports.PtOnLines(LineEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());
-                //设置新的中心线起点
-                if (Ports.Count > 0)
-                {
-                    Start = Ports.First();
-                }
-                else if (LineEdges.Where(o => o.IsDX).Count() > 0)
-                {
-                    Start = LineEdges.Where(o => o.IsDX).First().Edge.StartPoint;
-                }
-            } while (firstLightEdges.Count>0);
+            } while (FirstLightEdges.Count>0);
 
             //对2号线灯编号
-            BuildSecondLightEdges();
+            BuildSecondLightEdges(nubmeredLightEdges);
             //指定边类型
+            FirstLightEdges = nubmeredLightEdges;
             FirstLightEdges.ForEach(o => o.Pattern = EdgePattern.First);
             SecondLightEdges.ForEach(o => o.Pattern = EdgePattern.Second);
         }
-        private void GetFirstPortsAndStart(List<ThLightEdge> firstLightEdges,Point3d centerStart)
+        private Point3d InitCenterStart()
         {
-            var portsInstance = ThFindFirstEdgePortsService.Find(
-                firstLightEdges.Select(o => o.Edge).ToList(), Ports, ArrangeParameter.RacywaySpace / 2.0);
-            FirstPorts = portsInstance.Ports;
-            Point3d? firstStartValue = portsInstance.FindFirstPtByCenterPt(centerStart);
-            if (firstStartValue.HasValue)
+            if(isPointStart)
             {
-                FirstStart = firstStartValue.Value;
+                return Ports.OrderBy(o => o.DistanceTo(Start)).First();
             }
-            else if (firstLightEdges.Count > 0)
+            else
             {
-                FirstStart = firstLightEdges[0].Edge.StartPoint;
+                return Ports.First();
             }
         }
-        private List<ThLightEdge> GetFirstEdges()
+        private Point3d? FindPropertyStart(List<ThLightEdge> lineEdges,Point3d start)
         {
-            var firstLightEdges = new List<ThLightEdge>();
-            var firstSplitLines = new List<Line>();
-            LineEdges.ForEach(o =>
+            if (lineEdges.Count > 0)
             {
-                var first = WireOffsetDataService.FindFirstByCenter(o.Edge);
-                firstSplitLines.AddRange(WireOffsetDataService.FindFirstSplitLines(first));
-            });
-            firstSplitLines.ForEach(o => firstLightEdges.Add(new ThLightEdge(o) { IsDX = true }));
-            return firstLightEdges;
+                //获取中心线路径最长的路径
+                var centerLightGraph = ThLightGraphService.Build(LineEdges, start);
+                var centerEdges = new List<ThLightEdge>();
+                centerLightGraph.Links.ForEach(o => o.Path.ForEach(p => centerEdges.Add(new ThLightEdge(p.Edge))));
+                return LaneServer.getMergedOrderedLane(centerEdges);
+            }
+            else
+            {
+                return null;
+            }
         }
-        private void BuildSecondLightEdges()
+        private List<Point3d> GetFirstPorts(List<Line> firstLines,Point3d centerSp)
+        {
+            var results = new List<Point3d>();
+            var pts = new List<Point3d>();
+            firstLines.ForEach(o => pts.Add(o.StartPoint));
+            firstLines.ForEach(o => pts.Add(o.EndPoint));
+            pts=pts.OrderBy(o => o.DistanceTo(centerSp)).ToList();
+            foreach(var pt in pts)
+            {
+                if(Math.Abs(centerSp.DistanceTo(pt)-ArrangeParameter.RacywaySpace/2.0)<=5.0)
+                {
+                    results.Add(pt);
+                }
+            }
+            return results;
+        }
+        private Point3d GetFirstStart(List<Point3d> firstPorts, Point3d centerStart)
+        {
+            var res = firstPorts.OrderBy(o => o.DistanceTo(centerStart));
+            foreach (var pt in res)
+            {
+                var dis = Math.Abs(pt.DistanceTo(centerStart) - ArrangeParameter.RacywaySpace / 2.0);
+                if(dis<=20.0)
+                {
+                    return pt;
+                }
+            }
+            return res.First();
+        }
+
+        private void BuildSecondLightEdges(List<ThLightEdge> numberedEdges)
         {
             int loopCharLength = ThDoubleRowLightNumber.GetLoopCharLength(ArrangeParameter.LoopNumber);
-            FirstLightEdges.Where(o=>o.IsDX).Where(o=>o.Edge.Length>0).ForEach(m =>
+            numberedEdges.Where(o=>o.IsDX).Where(o=>o.Edge.Length>0).ForEach(m =>
             {
-                var first = WireOffsetDataService.FindFirstBySplitLine(m.Edge);
+                var first = WireOffsetDataService.FindFirstByPt(m.Edge.StartPoint.GetMidPt(m.Edge.EndPoint));
                 var second = WireOffsetDataService.FindSecondByFirst(first);
                 var secondEdgeSp = m.Edge.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
                 var secondEdgeEp = m.Edge.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
@@ -231,6 +256,29 @@ namespace ThMEPLighting.Garage.Engine
             }
             return (int)number / 2;
         }
-       
+        private List<Point3d> GetFirstLinePorts(
+             List<Line> firstLines)
+        {
+            var spatialIndex = ThGarageLightUtils.BuildSpatialIndex(firstLines);
+            var firstPorts = new List<Point3d>();
+            firstLines.ForEach(o =>
+            {
+                var spOutline = ThDrawTool.CreateSquare(o.StartPoint, 2.0);
+                var epOutline = ThDrawTool.CreateSquare(o.EndPoint, 2.0);
+                var spObjs = spatialIndex.SelectCrossingPolygon(spOutline);
+                spObjs.Remove(o);
+                var epObjs = spatialIndex.SelectCrossingPolygon(epOutline);
+                epObjs.Remove(o);
+                if(spObjs.Count==0)
+                {
+                    firstPorts.Add(o.StartPoint);
+                }
+                if (epObjs.Count ==0)
+                {
+                    firstPorts.Add(o.EndPoint);
+                }
+            });
+            return firstPorts;
+        }
     }
 }

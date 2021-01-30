@@ -18,10 +18,11 @@ namespace ThMEPLighting.Garage.Service
         private Point3d StartPt { get; set; }
         private Point3d EndPt { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
-        private ThWireOffsetDataService WireOffsetDataService { get; set; }
         private List<ThLightEdge> DistributedEdges { get; set; }
+        private List<ThLightEdge> GraphEdges { get; set; }
 
         private List<Tuple<Point3d, Point3d>> SplitPoints { get; set; }
+        private ThWireOffsetDataService WireOffsetDataService { get; set; }
 
         /// <summary>
         /// 1号线被分割后产生的线，这些与LightEdges中的边是一致的
@@ -29,34 +30,24 @@ namespace ThMEPLighting.Garage.Service
         /// </summary>
         public Dictionary<Line, List<Line>> OuterSplitDic { get; set; }
 
-        private ThDoubleRowDistributeExService(
+        public ThDoubleRowDistributeExService(
             Tuple<Point3d,Point3d> linePorts, 
             ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService,
-            List<ThLightEdge> distributedEdges)
+            List<ThLightEdge>  graphEdges,
+            List<ThLightEdge> distributedEdges,
+            ThWireOffsetDataService wireOffsetDataService)
         {
             StartPt = linePorts.Item1;
             EndPt = linePorts.Item2;
             ArrangeParameter = arrangeParameter;
-            WireOffsetDataService = wireOffsetDataService;
             DistributedEdges = distributedEdges;
+            GraphEdges = graphEdges;
+            WireOffsetDataService = wireOffsetDataService;
         }
-        public static List<Tuple<Point3d, Point3d>> Distribute(
-            Tuple<Point3d, Point3d> linePorts,
-            ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService,
-            List<ThLightEdge> distributedEdges)
-        {
-            var instance = new ThDoubleRowDistributeExService(
-                linePorts, arrangeParameter, wireOffsetDataService, distributedEdges);
-            instance.Distribute();
-            return instance.SplitPoints;
-        }
-        private void Distribute()
+        public List<Tuple<Point3d, Point3d>> Distribute()
         {
             //找出当前直链上的分支
-            var branchLines = WireOffsetDataService.FirstQueryInstance.QueryUnparallellines(
-                 StartPt, EndPt, ThGarageLightCommon.RepeatedPointDistance);
+            var branchLines = FindBranchLines();
             //找出哪些分支已经布灯
             var branchEdges = DistributedEdges
                 .Where(o => branchLines.IsContains(o.Edge))
@@ -68,7 +59,8 @@ namespace ThMEPLighting.Garage.Service
             var branchOriginFirstLines = new List<Line>();
             branchEdges.ForEach(o =>
             {
-                var orignFirst=WireOffsetDataService.FindFirstBySplitLine(o.Edge);
+                var midPt = o.Edge.StartPoint.GetMidPt(o.Edge.EndPoint);
+                var orignFirst=WireOffsetDataService.FindFirstByPt(midPt);
                 branchOriginFirstLines.Add(orignFirst);
             });
             //找出(未分割前）的1号边对应说的2号边
@@ -84,6 +76,7 @@ namespace ThMEPLighting.Garage.Service
 
             //获取可以布点的区域
             SplitPoints = ObtainArrangedSegments(splitPoints);
+            return SplitPoints;
         }
         /// <summary>
         /// 如果分支上有短线未布灯，但是其相邻边布灯，也视为布灯
@@ -114,7 +107,7 @@ namespace ThMEPLighting.Garage.Service
                 Point3d basePt = StartPt;
                 foreach(var segment in occupiedSections)
                 {
-                    if (ThGeometryTool.IsPointOnLine(segment.Item1, segment.Item2, basePt))
+                    if (ThGeometryTool.IsPointInLine(segment.Item1, segment.Item2, basePt,-1.0))
                     {
                         basePt = GetSplitPt(segment,true);
                         continue;
@@ -126,7 +119,7 @@ namespace ThMEPLighting.Garage.Service
                         basePt = GetSplitPt(segment, true);
                     }
                 }
-                if(ThGeometryTool.IsPointOnLine(StartPt, EndPt, basePt) &&
+                if(ThGeometryTool.IsPointInLine(StartPt, EndPt, basePt,-1.0) &&
                     basePt.DistanceTo(EndPt)>ThGarageLightCommon.RepeatedPointDistance)
                 {
                     results.Add(Tuple.Create(basePt, EndPt));
@@ -187,8 +180,8 @@ namespace ThMEPLighting.Garage.Service
             {
                 if (CheckBranchIsValid(main, o.Item1, o.Item2))
                 {
-                    var firstInters = ThGeometryTool.IntersectPts(main, o.Item1, Intersect.ExtendBoth);
-                    var secondInters = ThGeometryTool.IntersectPts(main, o.Item2, Intersect.ExtendBoth);
+                    var firstInters = ThGeometryTool.IntersectPts(main, o.Item1, Intersect.ExtendBoth,5.0);
+                    var secondInters = ThGeometryTool.IntersectPts(main, o.Item2, Intersect.ExtendBoth,5.0);
                     splitPoints.Add(Tuple.Create(firstInters[0], secondInters[0]));
                 }
             });
@@ -212,14 +205,30 @@ namespace ThMEPLighting.Garage.Service
             {
                 bool isPtOn = ThGeometryTool.IsPointOnLine(StartPt, EndPt, firstInters[0],1.0) ||
                  ThGeometryTool.IsPointOnLine(StartPt, EndPt, secondInters[0], 1.0);
-                bool isProperDis = Math.Abs(firstInters[0].DistanceTo(secondInters[0])
-                    - ArrangeParameter.RacywaySpace) <= 1.0;
-                if(isPtOn && isProperDis)
+                if(isPtOn && CheckDisValid(main, branchFirst, firstInters[0].DistanceTo(secondInters[0])))
                 {
                     return true;
                 }
             }
             return false;
-        }        
+        }      
+        private bool CheckDisValid(Line first ,Line second,double dis)
+        {
+            var firstVec = first.StartPoint.GetVectorTo(first.EndPoint).GetNormal();
+            var secondVec = second.StartPoint.GetVectorTo(second.EndPoint).GetNormal();
+            double rad = firstVec.GetAngleTo(secondVec);
+            if(rad>Math.PI)
+            {
+                rad -= Math.PI;
+            }
+            double verDis = Math.Sin(rad) * dis;
+            return Math.Abs(ArrangeParameter.RacywaySpace- verDis)<=5.0;
+        }
+        private List<Line> FindBranchLines()
+        {
+            var queryInstance = ThQueryLineService.Create(GraphEdges.Select(o=>o.Edge).ToList());
+            return queryInstance.QueryUnparallellines(
+                StartPt, EndPt, ThGarageLightCommon.RepeatedPointDistance);
+        }
     } 
 }

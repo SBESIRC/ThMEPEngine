@@ -345,6 +345,7 @@ namespace ThMEPEngineCore.LaneLine
         /// <returns></returns>
         public Polyline CreateParkingLineToPolylineByTol(List<Line> lines)
         {
+            lines = lines.OrderByDescending(x => x.Length).ToList();
             HandleParkingLines(lines, out Point3d sp, out Point3d ep);
             lines = HandleParkingLinesDir(lines, sp);
             List<Point3d> allPts = new List<Point3d>();

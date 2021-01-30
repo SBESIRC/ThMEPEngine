@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,42 +23,13 @@ namespace ThMEPLighting.Garage.Engine
         {            
         }
 
-        public List<Line> Preprocess(List<Line> lines)
+        public List<Line> Preprocess(List<Line> curves)
         {
-            if (lines.Count <= 0)
-            {
-                return new List<Line>();
-            }
-            DBObjectCollection objs = new DBObjectCollection();
-            foreach (var line in lines)
-            {
-                var newline = line.ExtendLine();
-                objs.Add(newline);
-            }
-            //Merge 
-            var handleLines = ThLaneLineUnionEngine.Union(objs);
-            handleLines = ThLaneLineMergeExtension.Merge(handleLines);
-            //var mergeLines = ThLineMerger.Merge(lines);
-            //var objs = new DBObjectCollection();
-            //mergeLines.ForEach(o => objs.Add(o));
-
-            //Union
-            //var unionLines = ThLaneLineUnionEngine.Union(objs);
-
-            //Join
-            //var joinLines = ThLaneLineJoinEngine.Join(objs);
-
-            //Snap
-            var nodedLines = ThLaneLineEngine.Noding(handleLines);
-            using (Linq2Acad.AcadDatabase db =Linq2Acad.AcadDatabase.Active())
-            {
-                foreach (Entity item in nodedLines)
-                {
-                    db.ModelSpace.Add(item);
-                }
-            }
-            //过滤短线
-            return FilterShortLines(nodedLines.Cast<Line>().ToList());
+            var lines = curves.ToCollection();
+            lines = ThLaneLineUnionEngine.Union(lines);
+            lines = ThLaneLineExtendEngine.Extend(lines);
+            lines = ThLaneLineMergeExtension.Merge(lines);
+            return lines.Cast<Line>().ToList();
         }
 
         public Tuple<List<Line>, List<Line>> Cut(List<Line> firstLines, List<Line> secondLines)
@@ -67,21 +39,10 @@ namespace ThMEPLighting.Garage.Engine
             objs.AddRange(secondLines);
             var results = ThLineNodeService.Node(objs);
             var firstSplitLines = new List<Line>();
-            using (var acad=Linq2Acad.AcadDatabase.Active())
+            foreach (var item in results.Where(o => firstLines.IsContains(o.Item1)))
             {
-                foreach(var item in results)
-                {
-                    foreach(var line in item.Item2)
-                    {
-                        acad.ModelSpace.Add(line);
-                    }                    
-                }
+                firstSplitLines.AddRange(item.Item2);
             }
-
-                foreach (var item in results.Where(o => firstLines.IsContains(o.Item1)))
-                {
-                    firstSplitLines.AddRange(item.Item2);
-                }
             var secondSplitLines = new List<Line>();
             foreach (var item in results.Where(o => secondLines.IsContains(o.Item1)))
             {

@@ -11,5 +11,10 @@ namespace ThMEPEngineCore.LaneLine
         {
             return ExplodeCurves(Simplify(curves.LineMerge())).ToCollection();
         }
+
+        public static DBObjectCollection MergeToPolyline(DBObjectCollection curves)
+        {
+            return Simplify(curves.LineMerge());
+        }
     }
 }

@@ -71,7 +71,7 @@ namespace ThMEPEngineCore.LaneLine
             return results;
         }
 
-        protected static DBObjectCollection Simplify(DBObjectCollection curves)
+        public static DBObjectCollection Simplify(DBObjectCollection curves)
         {
             return curves.Cast<Polyline>().Select(o => o.TPSimplify(extend_distance)).ToCollection();
         }

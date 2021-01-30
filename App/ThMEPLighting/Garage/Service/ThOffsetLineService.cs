@@ -1,6 +1,10 @@
 ﻿using System;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using System.Linq;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -24,25 +28,25 @@ namespace ThMEPLighting.Garage.Service
         }
         private void Offset()
         {
-            if(Center is Line line)
+            if (Center is Line line)
             {
                 Offset(line);
             }
-            else if(Center is Polyline polyline)
+            else if (Center is Polyline polyline)
             {
                 Offset(polyline);
             }
             else
             {
-                throw new NotSupportedException(); 
+                throw new NotSupportedException();
             }
         }
         private void Offset(Line line)
         {
             var newLine = line.Normalize();
-            var bufferLength = CalOffsetLength(line);
-            var firstPoly = line.GetOffsetCurves(bufferLength)[0] as Line;
-            var secPoly = line.GetOffsetCurves(-bufferLength)[0] as Line;
+            var bufferLength = CalOffsetLength(newLine);
+            var firstPoly = newLine.GetOffsetCurves(bufferLength)[0] as Curve;
+            var secPoly = newLine.GetOffsetCurves(-bufferLength)[0] as Curve;
             //var vec = newLine.StartPoint.GetVectorTo(newLine.EndPoint)
             //       .GetPerpendicularVector().GetNormal();
             //var upSp = newLine.StartPoint + vec.MultiplyBy(OffsetDistance);
@@ -54,7 +58,7 @@ namespace ThMEPLighting.Garage.Service
             First = firstPoly;
             Second = secPoly;
         }
-        private double CalOffsetLength(Line line)
+        private double CalOffsetLength(Curve line)
         {
             var bufferLength = OffsetDistance;
             var lineDir = (line.EndPoint - line.StartPoint).GetNormal();
@@ -77,13 +81,21 @@ namespace ThMEPLighting.Garage.Service
 
         private void Offset(Polyline polyline)
         {
+            if (polyline == null)
+            {
+                return;
+            }
+            //var objs = new DBObjectCollection();
+            //objs.Add(polyline);
+            //objs=ThLaneLineEngine.Simplify(objs);
+            //var newPoly=objs[0] as Polyline;
             //获取多段线第一段，normalize
             var lineSeg = polyline.GetLineSegmentAt(0);
             var line = new Line(lineSeg.StartPoint,lineSeg.EndPoint);
             var normalLine = line.Normalize();
             var vec = normalLine.StartPoint.GetVectorTo(normalLine.EndPoint)
                   .GetPerpendicularVector().GetNormal();
-
+            
             var positiveObjs = polyline.GetOffsetCurves(OffsetDistance);
             var negativeObjs = polyline.GetOffsetCurves(OffsetDistance * -1.0);
 
@@ -110,4 +122,5 @@ namespace ThMEPLighting.Garage.Service
             }
         }
     }
+
 }

@@ -39,7 +39,7 @@ namespace ThMEPLighting.Garage.Service
                         }
                     }
                     var pts = new Point3dCollection();
-                    (Curves[i].Item1 as Line).ExtendLine().IntersectWith((Curves[j].Item1 as Line).ExtendLine(),
+                    Extend(Curves[i].Item1).IntersectWith(Extend(Curves[j].Item1),
                         Intersect.OnBothOperands,pts,IntPtr.Zero, IntPtr.Zero);
                     if(pts.Count>0)
                     {
