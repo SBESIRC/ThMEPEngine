@@ -1,9 +1,9 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad;
 
 namespace ThMEPEngineCore.LaneLine
 {
@@ -21,7 +21,7 @@ namespace ThMEPEngineCore.LaneLine
                 }
                 else
                 {
-                    objs.Add(UnionLines(l.Cast<Line>().ToList()));
+                    objs.Add(MergeLines(l.Cast<Line>().ToList()));
                 }
             });
             return objs;
@@ -32,7 +32,7 @@ namespace ThMEPEngineCore.LaneLine
             return Merge(theCurves.Cast<DBObject>().Union(otherCurves.Cast<DBObject>()).ToCollection());
         }
 
-        private static Line UnionLines(List<Line> lines)
+        private static Line MergeLines(List<Line> lines)
         {
             var polygons = lines.Select(o => ExpandBy(o, extend_distance, collinear_gap_distance)).Select(o => o.ToNTSPolygon());
             var multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());

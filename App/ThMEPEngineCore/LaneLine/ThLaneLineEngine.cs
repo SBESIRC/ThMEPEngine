@@ -1,16 +1,15 @@
 ﻿using System;
 using NFox.Cad;
-using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.Geometry;
+using NetTopologySuite.Operation.Buffer;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.LaneLine
 {
@@ -32,11 +31,6 @@ namespace ThMEPEngineCore.LaneLine
         public static DBObjectCollection CleanZeroCurves(DBObjectCollection curves)
         {
             return curves.Cast<Line>().Where(c => c.Length > ThMEPEngineCoreCommon.LOOSE_ZERO_LENGTH).ToCollection();
-        }
-
-        public static DBObjectCollection Simplify(DBObjectCollection curves)
-        {
-            return curves.Cast<Polyline>().Select(o => o.TPSimplify(extend_distance)).ToCollection();
         }
 
         protected static List<Curve> ExplodeCurves(DBObjectCollection curves)
@@ -86,10 +80,10 @@ namespace ThMEPEngineCore.LaneLine
 
         protected static List<DBObjectCollection> GroupParallelLines(DBObjectCollection curves)
         { 
-            // 利用建立空间索引剔除重复对象（几何意义上的重复）
+            // 利用建立空间索引并剔除重复对象（几何意义上的重复）
             var spatialIndex = new ThCADCoreNTSSpatialIndex(curves);
-            var lines = spatialIndex.Geometries.Values.ToCollection();
-            lines.Cast<Line>().ForEach(o =>
+            var lines = spatialIndex.Geometries.Values.Cast<Line>();
+            lines.ForEach(o =>
             {
                 var buffer = ExpandBy(o, extend_distance, collinear_gap_distance);
                 var objs = spatialIndex.SelectCrossingPolygon(buffer);
@@ -113,7 +107,7 @@ namespace ThMEPEngineCore.LaneLine
                 }
             });
             var results = new List<DBObjectCollection>();
-            var groups = lines.Cast<Line>().GroupBy(o => spatialIndex.Tag(o));
+            var groups = lines.GroupBy(o => spatialIndex.Tag(o));
             foreach (var group in groups)
             {
                 if (group.Key == null)
@@ -130,20 +124,14 @@ namespace ThMEPEngineCore.LaneLine
 
         protected static Polyline ExpandBy(Line line, double xOffset, double yOffset)
         {
-            Vector3d xaxis = line.LineDirection();
-            Vector3d yaxis = line.Normal.CrossProduct(xaxis).GetNormal();
-            var pline = new Polyline()
-            {
-                Closed = true,
-            };
-            pline.CreatePolyline(new Point3dCollection()
-            {
-                line.StartPoint - xaxis * xOffset + yaxis * yOffset,
-                line.StartPoint - xaxis * xOffset - yaxis * yOffset,
-                line.EndPoint + xaxis * xOffset - yaxis * yOffset,
-                line.EndPoint + xaxis * xOffset + yaxis * yOffset,
-            });
-            return pline;
+            var direction = line.LineDirection();
+            var centerline = new Line(line.EndPoint + direction * xOffset, line.StartPoint - direction * xOffset);
+            return Buffer(centerline, yOffset);
+        }
+
+        protected static Polyline Buffer(Line line, double distance)
+        { 
+            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
         }
 
         protected static Line CenterLine(Geometry geometry)
