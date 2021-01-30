@@ -10,17 +10,6 @@ namespace ThCADExtension
 {
     public static class ThPolylineExtension
     {
-        public static Polyline ExpandBy(this Polyline rectangle, double deltaX, double deltaY)
-        {
-            var v0 = rectangle.GetPoint3dAt(0) - rectangle.GetPoint3dAt(3);
-            var v1 = rectangle.GetPoint3dAt(0) - rectangle.GetPoint3dAt(1);
-            var p0 = rectangle.GetPoint3dAt(0) + (v0.GetNormal() * deltaY + v1.GetNormal() * deltaX);
-            var p1 = rectangle.GetPoint3dAt(1) + (v0.GetNormal() * deltaY - v1.GetNormal() * deltaX);
-            var p2 = rectangle.GetPoint3dAt(2) - (v0.GetNormal() * deltaY + v1.GetNormal() * deltaX);
-            var p3 = rectangle.GetPoint3dAt(3) - (v0.GetNormal() * deltaY - v1.GetNormal() * deltaX);
-            return CreateRectangle(p0, p1, p2, p3);
-        }
-
         public static Point3dCollection Vertices(this Polyline pLine)
         {
             //https://keanw.com/2007/04/iterating_throu.html
@@ -99,130 +88,127 @@ namespace ThCADExtension
         }
 
         /// <summary>
-        /// 根据弦长分割Polyline中的弧段
+        /// 根据弦长分割Polyline
         /// </summary>
         /// <param name="poly"></param>
         /// <param name="chord"></param>
         /// <returns></returns>
         public static Polyline TessellatePolylineWithChord(this Polyline poly, double chord)
         {
-            var polyline = new PolylineSegmentCollection(poly);
-            var TessellatePolyline = new PolylineSegmentCollection();
-            foreach (var segment in polyline)
-            {
-                // 分割段是直线
-                if (segment.IsLinear)
-                {
-                    TessellatePolyline.Add(segment);
-                }
-                // 分割线是弧线
-                else
-                {
-                    var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);
-                    // 排除弦长大于弧直径的情况
-                    if (chord > 2 * circulararc.Radius)
-                    {
-                        TessellatePolyline.Add(new PolylineSegment(segment.StartPoint, segment.EndPoint));
-                    }
-                    else 
-                    {
-                        var angle = 2 * Math.Asin(chord / (2 * circulararc.Radius));
-                        var ArcSegment = segment.DoTessellate(angle);
-                        foreach (var item in ArcSegment)
-                        {
-                            TessellatePolyline.Add(item);
-                        }
-                    }
-                }
-            }
-            return TessellatePolyline.ToPolyline();
+            var segments = new PolylineSegmentCollection(poly);
+            var tessellateSegments = new PolylineSegmentCollection();
+            segments.ForEach(s => tessellateSegments.AddRange(s.TessellateSegmentWithChord(chord)));
+            return tessellateSegments.ToPolyline();
         }
 
         /// <summary>
-        /// 根据弧长分割Polyline中的弧段
+        /// 根据弦长分割Arc
+        /// </summary>
+        /// <param name="arc"></param>
+        /// <param name="chord"></param>
+        /// <returns></returns>
+        public static Polyline TessellateArcWithChord(this Arc arc, double chord)
+        {
+            var segment = new PolylineSegment(
+                arc.StartPoint.ToPoint2D(),
+                arc.EndPoint.ToPoint2D(),
+                arc.BulgeFromCurve(false));
+            return segment.TessellateSegmentWithChord(chord).ToPolyline();
+        }
+
+        /// <summary>
+        /// 根据弦长分割PolylineSegment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="chord"></param>
+        /// <returns></returns>
+        private static PolylineSegmentCollection TessellateSegmentWithChord(this PolylineSegment segment, double chord)
+        {
+            var segments = new PolylineSegmentCollection();
+            if (segment.IsLinear)
+            {
+                // 分割段是直线
+                segments.Add(segment);
+            }
+            else
+            {
+                // 分割线是弧线
+                var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);
+                // 排除弦长大于弧直径的情况
+                if (chord > 2 * circulararc.Radius)
+                {
+                    segments.Add(new PolylineSegment(segment.StartPoint, segment.EndPoint));
+                }
+                else
+                {
+                    var angle = 2 * Math.Asin(chord / (2 * circulararc.Radius));
+                    segments.AddRange(segment.DoTessellate(angle));
+                }
+            }
+            return segments;
+        }
+
+        /// <summary>
+        /// 根据弧长分割Polyline
         /// </summary>
         /// <param name="poly"></param>
         /// <param name="length"></param>
         /// <returns></returns>
         public static Polyline TessellatePolylineWithArc(this Polyline poly, double length)
         {
-            var polyline = new PolylineSegmentCollection(poly);
-            var TessellatePolyline = new PolylineSegmentCollection();
-            foreach (var segment in polyline)
-            {
-                // 分割线是直线
-                if (segment.IsLinear)
-                {
-                    TessellatePolyline.Add(segment);
-                }
-                // 分割线是弧线
-                else
-                {
-                    var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);
-                    // 排除分割长度大于弧的周长的情况
-                    if (length >= 2 * Math.PI * circulararc.Radius)
-                    {
-                        TessellatePolyline.Add(new PolylineSegment(segment.StartPoint, segment.EndPoint));
-                    }
-                    else
-                    {
-                        var angle = length / circulararc.Radius;
-                        var ArcSegment = segment.DoTessellate(angle);
-                        foreach (var item in ArcSegment)
-                        {
-                            TessellatePolyline.Add(item);
-                        }
-                    }
-                }
-            }
-            return TessellatePolyline.ToPolyline();
+            var segments = new PolylineSegmentCollection(poly);
+            var tessellateSegments = new PolylineSegmentCollection();
+            segments.ForEach(s => tessellateSegments.AddRange(s.TessellateSegmentWithArc(length)));
+            return tessellateSegments.ToPolyline();
         }
 
-        public static Polyline TessellateArcWithChord(this Arc arc, double chord)
-        {
-            if (chord > 2 * arc.Radius)
-            {
-                var arcPolyline = new PolylineSegment(arc.StartPoint.ToPoint2d(), arc.EndPoint.ToPoint2d());
-                return new PolylineSegmentCollection(arcPolyline).ToPolyline();
-            }
-            else
-            {
-                var angle = 2 * Math.Asin(chord / (2 * arc.Radius));
-                var length = angle * arc.Radius;
-                return arc.TessellateArcWithArc(length);
-            }
-        }
-
+        /// <summary>
+        /// 根据弧长分割Arc
+        /// </summary>
+        /// <param name="arc"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
         public static Polyline TessellateArcWithArc(this Arc arc, double length)
         {
-            if (length >= arc.Length)
+            var segment = new PolylineSegment(
+                arc.StartPoint.ToPoint2D(),
+                arc.EndPoint.ToPoint2D(),
+                arc.BulgeFromCurve(false));
+            return segment.TessellateSegmentWithArc(length).ToPolyline();
+        }
+
+        /// <summary>
+        /// 根据弧长分割PolylineSegment
+        /// </summary>
+        /// <param name="segment"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        private static PolylineSegmentCollection TessellateSegmentWithArc(this PolylineSegment segment, double length)
+        {
+            var segments = new PolylineSegmentCollection();
+            if (segment.IsLinear)
             {
-                var arcPolyline = new PolylineSegment(arc.StartPoint.ToPoint2d(), arc.EndPoint.ToPoint2d());
-                return new PolylineSegmentCollection(arcPolyline).ToPolyline();
+                // 分割线是直线
+                segments.Add(segment);
             }
             else
             {
-                var segmentCollection = new PolylineSegmentCollection();
-                var angle = length / arc.Radius;
-                int num = Convert.ToInt32(Math.Floor(arc.TotalAngle / angle)) + 1;
-                for (int i = 1; i <= num; i++)
+                // 分割线是弧线
+                var circulararc = new CircularArc2d(segment.StartPoint, segment.EndPoint, segment.Bulge, false);
+                // 排除分割长度大于弧的周长的情况
+                if (length >= 2 * Math.PI * circulararc.Radius)
                 {
-                    var startAngle = arc.StartAngle + (i - 1) * angle;
-                    var endAngle = arc.StartAngle + i * angle;
-                    if (i == num)
-                    {
-                        endAngle = arc.EndAngle;
-                    }
-                    startAngle = (startAngle > 8 * Math.Atan(1)) ? startAngle - 8 * Math.Atan(1) : startAngle;
-                    startAngle = (startAngle < 0.0) ? startAngle + 8 * Math.Atan(1) : startAngle;
-                    endAngle = (endAngle > 8 * Math.Atan(1)) ? endAngle - 8 * Math.Atan(1) : endAngle;
-                    endAngle = (endAngle < 0.0) ? endAngle + 8 * Math.Atan(1) : endAngle;
-                    var arcSegment = new Arc(arc.Center, arc.Radius, startAngle, endAngle);
-                    segmentCollection.Add(new PolylineSegment(arcSegment.StartPoint.ToPoint2d(), arcSegment.EndPoint.ToPoint2d()));
+                    segments.Add(new PolylineSegment(segment.StartPoint, segment.EndPoint));
                 }
-                return segmentCollection.ToPolyline();
+                else
+                {
+                    var angle = length / circulararc.Radius;
+                    segments.AddRange(segment.DoTessellate(angle));
+                }
             }
+            return segments;
         }
+
         public static Polyline Tessellate(this Circle circle, double length)
         {
             if (length >= 2*Math.PI*circle.Radius)

@@ -1,6 +1,5 @@
 ﻿using System;
 using DotNetARX;
-using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Algorithm;
@@ -327,19 +326,8 @@ namespace ThCADCore.NTS
 
         public static LineString ToNTSLineString(this Arc arc)
         {
-            int segments = (int)Math.Ceiling(arc.Length / ThCADCoreNTSService.Instance.ArcTessellationLength);
-            return arc.ToNTSLineString(segments + 1);
-        }
-
-        public static LineString ToNTSLineString(this Arc arc, int numPoints)
-        {
-            var shapeFactory = new GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
-            {
-                Centre = arc.Center.ToNTSCoordinate(),
-                Size = 2 * arc.Radius,
-                NumPoints = numPoints
-            };
-            return shapeFactory.CreateArc(arc.StartAngle, arc.TotalAngle);
+            var arcLength = ThCADCoreNTSService.Instance.ArcTessellationLength;
+            return arc.TessellateArcWithArc(arcLength).ToNTSLineString();
         }
 
         public static LineString ToNTSLineString(this Line line)
