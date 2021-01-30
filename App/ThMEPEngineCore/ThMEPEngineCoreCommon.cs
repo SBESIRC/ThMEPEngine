@@ -45,6 +45,7 @@ namespace ThMEPEngineCore
         public const int COLORINDEX_BEAM_SECONDARY = 4;
 
         // 全局公差
+        public static double LOOSE_ZERO_LENGTH = 10.0;
         public static double LOOSE_PARALLEL_ANGLE = 1.0;
         public static double LOOSE_CLOSED_POLYLINE = 100.0;
         public static double LOOSE_COLINEAR_DISTANCE = 1.0;

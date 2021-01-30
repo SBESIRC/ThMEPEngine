@@ -1,12 +1,10 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.LaneLine
@@ -15,43 +13,35 @@ namespace ThMEPEngineCore.LaneLine
     {
         public static DBObjectCollection Extend(DBObjectCollection curves)
         {
-            var lines = ExplodeCurves(curves).ToCollection();
-            var nodedLines = NodingLines(CreateExtendedLines(lines));
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(nodedLines.ToCollection());
-            nodedLines.RemoveAll(l =>
+            var extendedLines = CreateExtendedLines(curves);
+            var allLines = curves.Cast<Line>().Union(extendedLines).ToCollection();
+            var spatialIndex = new ThCADCoreNTSSpatialIndex(allLines);
+            extendedLines.RemoveAll(o =>
             {
-                if (l.Length <= extend_distance + 1)
-                {
-                    var objs = spatialIndex.SelectFence(l);
-                    objs.Remove(l);
-                    if (IntersectsAtPoint(objs, l.StartPoint) && IntersectsAtPoint(objs, l.EndPoint))
-                    {
-                        // 若两端有连接，再继续判断是否被“覆盖”
-                        return objs.Covers(l);
-                    }
-                    return true;
-                }
-                return false;
+                var objs = spatialIndex.SelectFence(o);
+                objs.Remove(o);
+                return !IsProperIntersects(objs, o);
             });
-            return nodedLines.ToCollection();
+            return curves.Cast<Line>().Union(extendedLines).ToCollection();
         }
 
-        private static bool IntersectsAtPoint(DBObjectCollection lines, Point3d pt)
+        private static bool IsProperIntersects(DBObjectCollection lines, Line line)
         {
-            return lines.Cast<Line>().Where(o => o.IsOnLine(pt)).Any();
+            var geometry = lines.ToMultiLineString().Intersection(line.ToNTSGeometry());
+            // 判断是否存在多个交点（但是要排查共线的情况）
+            return geometry is MultiPoint;
         }
 
-        private static DBObjectCollection CreateExtendedLines(DBObjectCollection curves)
+        private static List<Line> CreateExtendedLines(DBObjectCollection lines)
         {
             var objs = new List<Line>();
-            objs.AddRange(curves.Cast<Line>());
-            curves.Cast<Line>().ForEach(o =>
+            lines.Cast<Line>().ForEach(o =>
             {
                 var direction = o.LineDirection();
                 objs.Add(new Line(o.EndPoint, o.EndPoint + direction * extend_distance));
                 objs.Add(new Line(o.StartPoint, o.StartPoint - direction * extend_distance));
             });
-            return objs.ToCollection();
+            return objs;
         }
     }
 }

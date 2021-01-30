@@ -117,7 +117,6 @@
     <Compile Include="LaneLine\ThLaneLineEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineExtendEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineMergeExtension.cs" />
-    <Compile Include="LaneLine\ThLaneLineUnionEngine.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierFitting.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierSegment.cs" />
     <Compile Include="Model\Electrical\ThIfcCableFitting.cs" />
@@ -224,6 +223,7 @@
     <Compile Include="Service\ThDoorMarkDbExtension.cs" />
     <Compile Include="Service\ThExternalTagsDbExtension.cs" />
     <Compile Include="Service\ThExternalTagsLayerManager.cs" />
+    <Compile Include="Service\ThLaneLineCleanService.cs" />
     <Compile Include="Service\ThLayerNamesDbExtension.cs" />
     <Compile Include="Service\ThLayerNamesLayerManager.cs" />
     <Compile Include="Service\ThMatchDoorStoneService.cs" />
@@ -306,7 +306,6 @@
     <Compile Include="Service\ThVerticalComponentBeamLinkExtension.cs" />
     <Compile Include="Service\ThWashMachineDbExtension.cs" />
     <Compile Include="Service\ThWashMachineLayerManager.cs" />
-    <Compile Include="LaneLine\ThLaneLineJoinEngine.cs" />
     <Compile Include="Algorithm\ThMEPCollisionDetector.cs" />
     <Compile Include="Service\ThWellsDbExtension.cs" />
     <Compile Include="Service\ThWellsLayerManager.cs" />

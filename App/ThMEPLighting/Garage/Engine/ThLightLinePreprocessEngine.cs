@@ -26,9 +26,9 @@ namespace ThMEPLighting.Garage.Engine
         public List<Line> Preprocess(List<Line> curves)
         {
             var lines = curves.ToCollection();
-            lines = ThLaneLineUnionEngine.Union(lines);
-            lines = ThLaneLineExtendEngine.Extend(lines);
-            lines = ThLaneLineMergeExtension.Merge(lines);
+            //lines = ThLaneLineUnionEngine.Union(lines);
+            //lines = ThLaneLineExtendEngine.Extend(lines);
+            //lines = ThLaneLineMergeExtension.Merge(lines);
             return lines.Cast<Line>().ToList();
         }
 

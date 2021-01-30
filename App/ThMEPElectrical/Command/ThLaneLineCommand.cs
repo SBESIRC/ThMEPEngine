@@ -13,6 +13,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical.Command
 {
@@ -52,6 +53,7 @@ namespace ThMEPElectrical.Command
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
                     var lines = LoadLaneLines(acadDatabase.Database, frame);
+                    lines = CleanLaneLines(lines);
                     lines.Cast<Curve>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
@@ -59,6 +61,16 @@ namespace ThMEPElectrical.Command
                     });
                 }
             }
+        }
+
+        private DBObjectCollection CleanLaneLines(DBObjectCollection curves)
+        {
+            var service = new ThLaneLineCleanService()
+            {
+                CollinearGap = 151,
+                ExtendDistance = 96,
+            };
+            return service.Clean(curves);
         }
 
         private DBObjectCollection LoadLaneLines(Database database, Polyline frame)

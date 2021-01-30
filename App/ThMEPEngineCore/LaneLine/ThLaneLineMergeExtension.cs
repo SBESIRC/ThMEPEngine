@@ -1,7 +1,9 @@
-﻿using NFox.Cad;
-using System.Linq;
+﻿using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
 
 namespace ThMEPEngineCore.LaneLine
 {
@@ -9,12 +11,34 @@ namespace ThMEPEngineCore.LaneLine
     {
         public static DBObjectCollection Merge(DBObjectCollection curves)
         {
-            return ExplodeCurves(Simplify(curves.LineMerge())).ToCollection();
+            var objs = new DBObjectCollection();
+            var parallelLines = GroupParallelLines(curves);
+            parallelLines.ForEach(l =>
+            {
+                if (l.Count == 1)
+                {
+                    objs.Add(l[0] as Line);
+                }
+                else
+                {
+                    objs.Add(UnionLines(l.Cast<Line>().ToList()));
+                }
+            });
+            return objs;
         }
 
-        public static DBObjectCollection MergeToPolyline(DBObjectCollection curves)
+        public static DBObjectCollection Merge(DBObjectCollection theCurves, DBObjectCollection otherCurves)
         {
-            return Simplify(curves.LineMerge());
+            return Merge(theCurves.Cast<DBObject>().Union(otherCurves.Cast<DBObject>()).ToCollection());
+        }
+
+        private static Line UnionLines(List<Line> lines)
+        {
+            var polygons = lines.Select(o => ExpandBy(o, extend_distance, collinear_gap_distance)).Select(o => o.ToNTSPolygon());
+            var multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
+            var centerline =  CenterLine(multiPolygon.Union());
+            var direction = centerline.LineDirection();
+            return new Line(centerline.StartPoint + direction * extend_distance, centerline.EndPoint - direction * extend_distance);
         }
     }
 }

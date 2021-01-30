@@ -42,22 +42,6 @@ namespace ThMEPLighting.Garage.Service
                     Results.Add(polyline);
                 }                
             });
-            var simplifyCurves = new DBObjectCollection();
-            Results.ForEach(x =>
-            {
-                if (x is Polyline polyline)
-                {
-                    var objs = ThLaneLineEngine.Simplify(new DBObjectCollection() { x });
-                    simplifyCurves.Add(objs[0] as Curve);
-                }
-                else
-                {
-                    simplifyCurves.Add(x);
-                }
-            });
-            var lines = ThLaneLineUnionEngine.Union(simplifyCurves);
-            lines = ThLaneLineExtendEngine.Extend(lines);
-            lines = ThLaneLineMergeExtension.Merge(lines);
             mainLines = laneLine.CreateNodedParkingLines(Border, CenterLines, out auxiliaryLines);
             mainLines.ForEach(o =>
             {
@@ -71,7 +55,6 @@ namespace ThMEPLighting.Garage.Service
                     Results.Add(polyline);
                 }
             });
-
             auxiliaryLines.ForEach(o =>
             {
                 if(o.Count==1)

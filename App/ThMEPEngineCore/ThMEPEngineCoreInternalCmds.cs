@@ -1,14 +1,13 @@
 ﻿using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
-using System.Linq;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore
 {
@@ -245,10 +244,8 @@ namespace ThMEPEngineCore
                     objs.Add(acadDatabase.Element<Curve>(obj));
                 }
 
-                var lines = ThLaneLineUnionEngine.Union(objs);
-                lines = ThLaneLineExtendEngine.Extend(lines);
-                lines = ThLaneLineMergeExtension.Merge(lines);
-                foreach (Line line in lines)
+                var service = new ThLaneLineCleanService();
+                foreach (Line line in service.Clean(objs))
                 {
                     acadDatabase.ModelSpace.Add(line);
                     line.SetDatabaseDefaults();
