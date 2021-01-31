@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.LaneLine
 
         public static DBObjectCollection CleanZeroCurves(DBObjectCollection curves)
         {
-            return curves.Cast<Line>().Where(c => c.Length > extend_distance + 1).ToCollection();
+            return curves.Cast<Line>().Where(c => c.Length > extend_distance + ThMEPEngineCoreCommon.LOOSE_ZERO_LENGTH).ToCollection();
         }
 
         protected static List<Curve> ExplodeCurves(DBObjectCollection curves)

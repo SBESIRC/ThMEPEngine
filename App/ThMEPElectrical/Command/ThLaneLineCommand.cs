@@ -67,8 +67,8 @@ namespace ThMEPElectrical.Command
         {
             var service = new ThLaneLineCleanService()
             {
-                CollinearGap = 151,
-                ExtendDistance = 96,
+                CollinearGap = 150.0,
+                ExtendDistance = 150.0,
             };
             return service.Clean(curves);
         }
