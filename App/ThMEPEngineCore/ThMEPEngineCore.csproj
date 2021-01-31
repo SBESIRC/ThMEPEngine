@@ -116,6 +116,7 @@
     <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
     <Compile Include="LaneLine\ThLaneLineEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineExtendEngine.cs" />
+    <Compile Include="LaneLine\ThLaneLineJoinEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineMergeExtension.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierFitting.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierSegment.cs" />
