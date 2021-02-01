@@ -251,8 +251,20 @@ namespace ThMEPEngineCore.LaneLine
             });
 
             List<Point3d> allPts = lines.SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).Select(x => x.TransformBy(matrix)).ToList();
-            sPt = allPts.OrderBy(x => x.X).First().TransformBy(matrix.Inverse());
-            ePt = allPts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse()); 
+            List<Point3d> oneNodePts = new List<Point3d>();
+            foreach (var pt in allPts)
+            {
+                if (allPts.Where(x=>x.IsEqualTo(pt, new Tolerance(1, 1))).Count() <= 1)
+                {
+                    oneNodePts.Add(pt);
+                }
+            }
+            if (oneNodePts.Count <= 0)
+            {
+                oneNodePts = allPts;
+            }
+            sPt = oneNodePts.OrderBy(x => x.X).First().TransformBy(matrix.Inverse());
+            ePt = oneNodePts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse()); 
 
             var handleLines = new List<Line>(lines);
             Point3d comparePt = sPt;

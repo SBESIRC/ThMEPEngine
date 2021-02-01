@@ -14,13 +14,19 @@ namespace ThMEPLighting.Garage.Service
     public class ThExtendService
     {
         private List<Tuple<Curve, Curve, Curve>> Curves { get; set; }
-        private ThExtendService(List<Tuple<Curve ,Curve,Curve>> curves)
+        /// <summary>
+        /// 是车道中心线合并的基准值(线槽宽度)
+        /// </summary>
+        private double Width { get; set; }
+        private double ExtendTolerance = 5.0;
+        private ThExtendService(List<Tuple<Curve ,Curve,Curve>> curves, double width)
         {
             Curves = curves;
+            Width = width;
         }
-        public static List<Tuple<Curve, Curve, Curve>> Extend(List<Tuple<Curve, Curve, Curve>> curves)
+        public static List<Tuple<Curve, Curve, Curve>> Extend(List<Tuple<Curve, Curve, Curve>> curves,double width)
         {
-            var instance = new ThExtendService(curves);
+            var instance = new ThExtendService(curves, width);
             instance.Extend();
             return instance.Curves;
         }
@@ -39,16 +45,33 @@ namespace ThMEPLighting.Garage.Service
                         }
                     }
                     var pts = new Point3dCollection();
-                    Extend(Curves[i].Item1).IntersectWith(Extend(Curves[j].Item1),
+                    Extend(Curves[i].Item1, ExtendTolerance).IntersectWith(Extend(Curves[j].Item1, ExtendTolerance),
                         Intersect.OnBothOperands,pts,IntPtr.Zero, IntPtr.Zero);
                     if(pts.Count>0)
                     {
-                        Extend(Curves[i], Curves[j]);
+                        var current = Curves[i];
+                        var other = Curves[j];
+                        Extend(ref current, ref other);
+                        Curves[i] = current;
+                        Curves[j] = other;
+                    }
+                    else 
+                    {
+                        Extend(Curves[i].Item1, Width+1.0).IntersectWith(Extend(Curves[j].Item1, Width + 1.0),
+                        Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+                        if (pts.Count > 0)
+                        {
+                            var current = Curves[i];
+                            var other = Curves[j];
+                            Extend(ref current, ref other);
+                            Curves[i] = current;
+                            Curves[j] = other;
+                        }
                     }
                 }
             }
 
-            AdjustMergeLine();
+            //AdjustMergeLine();
         }
 
         private void AdjustMergeLine()
@@ -247,14 +270,17 @@ namespace ThMEPLighting.Garage.Service
 
             return isTrue;
         } 
-        private void Extend(Tuple<Curve, Curve, Curve> current, Tuple<Curve, Curve, Curve> other)
+        private void Extend(ref Tuple<Curve, Curve, Curve> current, ref Tuple<Curve, Curve, Curve> other)
         {
-            Extend(current.Item2, other.Item2, other.Item3);
-            Extend(current.Item3, other.Item2, other.Item3);
-            Extend(other.Item2, current.Item2, current.Item3);
-            Extend(other.Item3, current.Item2, current.Item3);
+            var currentItem2 = Extend(current.Item2, other.Item2, other.Item3);
+            var cuurentItem3 = Extend(current.Item3, other.Item2, other.Item3);
+            var otherItem2 = Extend(other.Item2, current.Item2, current.Item3);
+            var otherItem3 = Extend(other.Item3, current.Item2, current.Item3);
+
+            current = new Tuple<Curve, Curve, Curve>(current.Item1, currentItem2, cuurentItem3);
+            other = new Tuple<Curve, Curve, Curve>(other.Item1, otherItem2, otherItem3);
         }
-        private void Extend(Curve extendLine,Curve first,Curve second)
+        private Curve Extend(Curve extendLine,Curve first,Curve second)
         {            
             var firstPts = new Point3dCollection();
             Extend(extendLine).IntersectWith(Extend(first), Intersect.ExtendBoth, firstPts, IntPtr.Zero, IntPtr.Zero);
@@ -265,12 +291,12 @@ namespace ThMEPLighting.Garage.Service
             pts.AddRange(secondPts.Cast<Point3d>().ToList());
             if(pts.Count==0)
             {
-                return;
+                return extendLine;
             }
             var fitlerPts = FilterNotOnCurvePts(extendLine, pts);
             if(fitlerPts.Count==0 /*|| firstPts.Count <= 1 || secondPts.Count <= 1*/)
             {
-                return;
+                return extendLine;
             }
             bool extendStart = fitlerPts[0].DistanceTo(extendLine.StartPoint) 
                 < fitlerPts[0].DistanceTo(extendLine.EndPoint) ? true : false;
@@ -283,15 +309,7 @@ namespace ThMEPLighting.Garage.Service
             {
                 toPoint = fitlerPts.OrderByDescending(o => o.DistanceTo(extendLine.EndPoint)).First();
             }
-            try
-            {
-                extendLine.Extend(extendStart, toPoint);
-            }
-            catch(System.Exception ex)
-            {
-                return;
-                //throw ex;
-            }
+            return ExtendToPoint(extendLine, toPoint);
         }
         private List<Point3d> FilterNotOnCurvePts(Curve curve ,List<Point3d> pts)
         {
@@ -310,15 +328,30 @@ namespace ThMEPLighting.Garage.Service
             }
             return results;
         }
-        private Curve Extend(Curve curve)
+        private Curve Extend(Curve curve,double tolerance=5.0)
         {
             if(curve is Line line)
             {
-                return line.ExtendLine();
+                return line.ExtendLine(tolerance);
             }
             else if(curve is Polyline polyline)
             {
-                return polyline.ExtendPolyline();
+                return polyline.ExtendPolyline(tolerance);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        private Curve ExtendToPoint(Curve curve, Point3d pt)
+        {
+            if (curve is Line line)
+            {
+                return line.ExtendLineToPoint(pt);
+            }
+            else if (curve is Polyline polyline)
+            {
+                return polyline.ExtendPolylineToPoint(pt);
             }
             else
             {

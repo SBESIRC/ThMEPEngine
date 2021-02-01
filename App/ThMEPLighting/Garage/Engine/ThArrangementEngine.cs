@@ -94,16 +94,15 @@ namespace ThMEPLighting.Garage.Engine
                     return;
                 }
                 dxLines = precessEngine.Preprocess(dxLines);
-                //fdxWashLines = precessEngine.Preprocess(fdxWashLines);                
+          
                 //单排取消过滤无需布灯的短线(20210104)
                 if (!ArrangeParameter.IsSingleRow)
-                {
+                {                    
                     //T形短线取消，对于T形的主边不做处理
                     dxLines = ThFilterTTypeCenterLineService.Filter(dxLines, ArrangeParameter.MinimumEdgeLength);
                     dxLines = ThFilterMainCenterLineService.Filter(dxLines, ArrangeParameter.RacywaySpace / 2.0);
-                }
-                //var s = shortDxLines.Select(x => x.Length).ToList();
-                //var cutResult = precessEngine.Cut(shortDxLines, fdxWashLines);
+                    dxLines = ThFilterElbowCenterLineService.Filter(dxLines, ArrangeParameter.MinimumEdgeLength);
+                }                
                 DxLines.AddRange(dxLines);
                 var s = DxLines.Select(x => x.Length).ToList();
                 FdxLines.AddRange(fdxWashLines);

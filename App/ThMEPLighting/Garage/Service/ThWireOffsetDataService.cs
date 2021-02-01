@@ -54,7 +54,7 @@ namespace ThMEPLighting.Garage.Service
         }
         public Line FindFirstByPt(Point3d pt)
         {
-            var firstLines = FirstQueryInstance.Query(pt, 2.0,false);
+            var firstLines = FirstQueryInstance.Query(pt,20.0,false);
             return firstLines[0];
         }
     }

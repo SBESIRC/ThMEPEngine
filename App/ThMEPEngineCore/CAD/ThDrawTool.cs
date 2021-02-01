@@ -123,7 +123,7 @@ namespace ThMEPEngineCore.CAD
                 {
                     var subObjs = new DBObjectCollection();
                     polyline.Explode(subObjs);
-                    lines.AddRange(GetLines(subObjs, length));
+                    lines.AddRange(subObjs.Cast<Line>().ToList());
                 }
                 else if(o is Arc arc)
                 {

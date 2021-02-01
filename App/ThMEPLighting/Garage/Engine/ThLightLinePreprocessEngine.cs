@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Service;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Service;
 
@@ -26,9 +27,15 @@ namespace ThMEPLighting.Garage.Engine
         public List<Line> Preprocess(List<Line> curves)
         {
             var lines = curves.ToCollection();
-            //lines = ThLaneLineUnionEngine.Union(lines);
-            //lines = ThLaneLineExtendEngine.Extend(lines);
-            //lines = ThLaneLineMergeExtension.Merge(lines);
+            var cleanInstance = new ThLaneLineCleanService();
+            lines = cleanInstance.Clean(lines);
+            var extendLines = new DBObjectCollection();
+            foreach(Line line in lines)
+            {
+                extendLines.Add(line.ExtendLine(1.0));
+            }            
+            lines = ThLaneLineEngine.Noding(extendLines);
+            lines = ThLaneLineEngine.CleanZeroCurves(lines);
             return lines.Cast<Line>().ToList();
         }
 

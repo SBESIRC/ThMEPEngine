@@ -15,8 +15,12 @@ namespace ThMEPLighting.Garage.Engine
         /// <summary>
         /// 创建内外圈
         /// </summary>
-        public List<ThWireOffsetData> WireOffsetDatas { get; private set; }   
+        public List<ThWireOffsetData> WireOffsetDatas { get; private set; }
         private Polyline Border { get; set; }
+        /// <summary>
+        /// 线槽宽度
+        /// </summary>
+        public double Width { get; set; } 
         public ThInnerOuterCirclesEngine(Polyline border)
         {            
             Border = border;
@@ -27,12 +31,15 @@ namespace ThMEPLighting.Garage.Engine
         }
         public void Reconize(List<Line> dxLines,List<Line> fdxLines, double offsetDistance)
         {
-            var splitLineTuple = Split(dxLines, fdxLines);           
+            //var splitLineTuple = Split(dxLines, fdxLines);           
             //单位化
             var dxNomalLines = new List<Line>();
             var fdxNomalLines = new List<Line>();
-            splitLineTuple.Item1.ForEach(o => dxNomalLines.Add(NormalizeLaneLine(o)));
-            splitLineTuple.Item2.ForEach(o => fdxNomalLines.Add(NormalizeLaneLine(o)));
+
+            //修正方向
+            dxLines.ForEach(o => dxNomalLines.Add(NormalizeLaneLine(o)));
+            fdxLines.ForEach(o => fdxNomalLines.Add(NormalizeLaneLine(o)));
+
             //创建非灯线的偏移
             fdxNomalLines.ForEach(o =>
             {
@@ -47,11 +54,12 @@ namespace ThMEPLighting.Garage.Engine
                 WireOffsetDatas.Add(offsetData);
             });
             //从小汤车道线合并服务中获取合并的主道线，辅道线            
-            var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines,301);
+             var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines,301);
             //通过中心线往两侧偏移
-            var offsetCurves = Offset(mergeCurves.Cast<Curve>().ToList(), offsetDistance);
+            var offsetCurves = Offset(mergeCurves.Cast<Curve>().ToList(), offsetDistance);            
             //让1号线、2号线连接
-            offsetCurves=ThExtendService.Extend(offsetCurves);
+            offsetCurves =ThExtendService.Extend(offsetCurves, Width);
+            
             //为中心线找到对应的1号线和2号线
             var dxWireOffsetDatas=ThFindFirstLinesService.Find(offsetCurves, offsetDistance);
             WireOffsetDatas.AddRange(dxWireOffsetDatas);

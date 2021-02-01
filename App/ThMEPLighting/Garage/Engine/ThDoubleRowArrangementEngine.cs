@@ -24,7 +24,10 @@ namespace ThMEPLighting.Garage.Engine
             regionBorders.ForEach(o =>
             {
                 var collectIds = Arrange(o);
-                ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds, ArrangeParameter.Width);
+
+                //清除原有构件
+                //暂时取消此功能(20210201),以免误删灯
+                //ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds, ArrangeParameter.Width);
             });
         }
         private ObjectIdList Arrange(ThRegionBorder regionBorder)
@@ -41,13 +44,15 @@ namespace ThMEPLighting.Garage.Engine
                 using (var innerOuterEngine = new ThInnerOuterCirclesEngine(regionBorder.RegionBorder))
                 {
                     //需求变化2020.12.23,非灯线不参与编号传递
+                    //创建1、2号线，车道线merge，配对1、2号线
+                    innerOuterEngine.Width = ArrangeParameter.Width;
                     innerOuterEngine.Reconize(DxLines,new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);
                     innerOuterCircles = innerOuterEngine.WireOffsetDatas;
                 }
 
                 //延伸非灯线
                 FdxLines = ThExtendFdxLinesService.Extend(FdxLines, innerOuterCircles);
-
+ 
                 //创建线槽
                 var ports = BuildCableTray(innerOuterCircles,ref collectIds); //线槽端口
 
@@ -76,6 +81,8 @@ namespace ThMEPLighting.Garage.Engine
 
                 //创建偏移1、2线索引服务，便于后期查询
                 var wireOffsetDataService=ThWireOffsetDataService.Create(innerOuterCircles);
+
+                //布灯
                 using (var buildNumberEngine = new ThDoubleRowNumberEngine(
                     centerPorts, centerLightEdges, firstLightEdges,
                     ArrangeParameter, wireOffsetDataService))
@@ -127,7 +134,7 @@ namespace ThMEPLighting.Garage.Engine
                         ArrangeParameter.RacywaySpace / 2.0);
                     Point3d downSp = o.StartPoint - verVec.MultiplyBy(
                        ArrangeParameter.RacywaySpace / 2.0);
-                    if(innerOuterPorts.Where(k=>k.DistanceTo(upSp)<=1.0 || k.DistanceTo(downSp) <= 1.0).Any())
+                    if(innerOuterPorts.Where(k=>k.DistanceTo(upSp)<=5.0 || k.DistanceTo(downSp) <= 5.0).Any())
                     {
                         centerPorts.Add(o.StartPoint);
                     }
@@ -135,11 +142,15 @@ namespace ThMEPLighting.Garage.Engine
                         ArrangeParameter.RacywaySpace / 2.0);
                     Point3d downEp = o.EndPoint - verVec.MultiplyBy(
                        ArrangeParameter.RacywaySpace / 2.0);
-                    if (innerOuterPorts.Where(k => k.DistanceTo(upEp) <= 1.0 || k.DistanceTo(downEp) <= 1.0).Any())
+                    if (innerOuterPorts.Where(k => k.DistanceTo(upEp) <= 5.0 || k.DistanceTo(downEp) <= 5.0).Any())
                     {
                         centerPorts.Add(o.EndPoint);
                     }
                 });
+            if(centerPorts.Count>1)
+            {
+                centerPorts = centerPorts.Distinct().ToList();
+            }
             return centerPorts;
         }
     }

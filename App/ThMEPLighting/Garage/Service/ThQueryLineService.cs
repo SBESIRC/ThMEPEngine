@@ -24,13 +24,13 @@ namespace ThMEPLighting.Garage.Service
         }
         public List<Line> Query(Point3d pt,double squreLength=1.0,bool isLink=true)
         {
-            Polyline envelope = ThDrawTool.CreateSquare(pt, squreLength);
+            Polyline envelope = ThDrawTool.CreateSquare(pt, squreLength+5.0);
             var searchObjs = SpatialIndex.SelectCrossingPolygon(envelope);
             if(isLink)
             {
                return searchObjs
                 .Cast<Line>()
-                .Where(o => ThGarageLightUtils.IsLink(o, pt))
+                .Where(o => ThGarageLightUtils.IsLink(o, pt,5.0))
                 .ToList();
             }
             else

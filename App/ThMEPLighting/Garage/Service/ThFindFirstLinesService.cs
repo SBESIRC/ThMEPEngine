@@ -71,7 +71,6 @@ namespace ThMEPLighting.Garage.Service
                         var second = FindSideLine(o, rightLines);
                         if (first != null && second!=null)
                         {
-
                             groups.Add(Tuple.Create(o.Normalize(), first.Normalize(), second.Normalize()));
                         }
                     });
@@ -115,7 +114,7 @@ namespace ThMEPLighting.Garage.Service
         }
         private List<Line> FilterLines(Point3d pt, Vector3d centerVec, ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            var outline = ThDrawTool.CreateSquare(pt, 1.0);
+            var outline = ThDrawTool.CreateSquare(pt, 5.0);
             var objs = spatialIndex.SelectCrossingPolygon(outline);
             return objs
                 .Cast<Line>()

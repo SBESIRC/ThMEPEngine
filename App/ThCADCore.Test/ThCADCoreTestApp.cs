@@ -237,42 +237,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThCascadedPolygonUnion", CommandFlags.Modal)]
-        public void ThCascadedPolygonUnion()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-
-                var polygons = new List<Geometry>();
-                objs.Cast<DBObject>().ForEachDbObject(p =>
-                {
-                    if (p is Polyline poly)
-                    {
-                        polygons.Add(poly.ToNTSPolygon());
-                    }
-
-                });
-
-                var cascadedPolygon = CascadedPolygonUnion.Union(polygons);
-                foreach (Entity obj in cascadedPolygon.ToDbCollection())
-                {
-                    obj.ColorIndex = 2;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThOverlayUnion", CommandFlags.Modal)]
         public void ThOverlayUnion()
         {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
+using System.Linq;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -32,7 +33,7 @@ namespace ThMEPLighting.Garage.Service
             mainLines = laneLine.CreateNodedParkingLines(Border, CenterLines, out auxiliaryLines);
             mainLines.ForEach(o =>
             {
-                if(o.Count==1)
+                if (o.Count == 1)
                 {
                     Results.Add(o[0]);
                 }
@@ -40,9 +41,45 @@ namespace ThMEPLighting.Garage.Service
                 {
                     var polyline = laneLine.CreateParkingLineToPolylineByTol(o);
                     Results.Add(polyline);
-                }                
+                }
             });
-            mainLines = laneLine.CreateNodedParkingLines(Border, CenterLines, out auxiliaryLines);
+            auxiliaryLines.ForEach(o =>
+            {
+                if (o.Count == 1)
+                {
+                    Results.Add(o[0]);
+                }
+                else
+                {
+                    var polyline = laneLine.CreateParkingLineToPolylineByTol(o);
+                    Results.Add(polyline);
+                }
+            });
+            //Results.Clear();
+            var simplifyCurves = new DBObjectCollection();
+            Results.ForEach(x =>
+            {
+                if (x is Polyline polyline)
+                {
+                    var mergedLines = ThLaneLineEngine.Explode(new DBObjectCollection() { polyline });
+                    mergedLines = ThLaneLineMergeExtension.Merge(mergedLines);
+                    foreach (var mLine in mergedLines)
+                    {
+                        simplifyCurves.Add(mLine as Curve);
+                    }
+                    
+                }
+                else
+                {
+                    simplifyCurves.Add(x);
+                }
+            });
+            var lines = ThLaneLineExtendEngine.Extend(simplifyCurves);
+            lines = ThLaneLineMergeExtension.Merge(lines);
+            lines = ThLaneLineEngine.Noding(lines);
+            lines = ThLaneLineEngine.CleanZeroCurves(lines);
+            Results.Clear();
+            mainLines = laneLine.CreateNodedParkingLines(Border, lines.Cast<Line>().ToList(), out auxiliaryLines);
             mainLines.ForEach(o =>
             {
                 if (o.Count == 1)
