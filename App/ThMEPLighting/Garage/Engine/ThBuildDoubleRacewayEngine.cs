@@ -119,21 +119,14 @@ namespace ThMEPLighting.Garage.Engine
         }
         public List<Line> GetLines(List<Polyline> objs)
         {
-            List<Line> lines = new List<Line>();
-            objs.ForEach(x =>
-            {
-                var subObjs = new DBObjectCollection();
-                x.Explode(subObjs);
-                lines.AddRange(subObjs.Cast<Line>().ToList());
-            });
-            
-            var NodingLines = ThLaneLineEngine.Noding(lines.ToCollection());
-            var resLines = NodingLines.Cast<Line>().Where(x => x.Length > Width * 1.5).ToList();
-            var repairLines = RepairCableElbow(resLines);
-            repairLines = repairLines.Select(x => x.ExtendLine(1)).ToList();
-            NodingLines = ThLaneLineEngine.Noding(repairLines.ToCollection());
-            resLines = NodingLines.Cast<Line>().Where(x => x.Length > Width * 1.5).ToList();
-
+            var lines = ThLaneLineEngine.Explode(objs.ToCollection());
+            lines = ThLaneLineJoinEngine.Join(lines);
+            var nodingLines = ThLaneLineEngine.Noding(lines);
+            var resLines = nodingLines.Cast<Line>().Where(x => x.Length > Width * 1.5).ToList();
+            var repairLines = RepairCableElbow(resLines).ToCollection();
+            repairLines = ThLaneLineJoinEngine.Join(repairLines);
+            nodingLines = ThLaneLineEngine.Noding(repairLines);
+            resLines = nodingLines.Cast<Line>().Where(x => x.Length > Width * 1.5).ToList();
             return resLines;
         }
         private List<Line> RepairCableElbow(List<Line> lines)
