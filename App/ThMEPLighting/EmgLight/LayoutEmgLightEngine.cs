@@ -67,7 +67,7 @@ namespace ThMEPLighting.EmgLight
                 var parallelColmuns = StructureServiceLight.getStructureParallelPart(columnSegment, lane);
                 var parallelWalls = StructureServiceLight.getStructureParallelPart(wallSegment, lane);
                 //破墙
-                var brokeWall = StructureServiceLight.breakWall(parallelWalls, EmgLightCommon.TolLight);
+                var brokeWall = StructureServiceLight.breakWall(parallelWalls, EmgLightCommon.TolBrakeWall);
 
                 DrawUtils.ShowGeometry(parallelColmuns, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
                 DrawUtils.ShowGeometry(brokeWall, EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
@@ -84,9 +84,7 @@ namespace ThMEPLighting.EmgLight
                 var usefulWalls = StructureServiceLight.SeparateColumnsByLine(filterWalls, lane, EmgLightCommon.TolLane);
 
                 StructureServiceLight.removeDuplicateStruct(ref usefulColumns);
-
-                StructureServiceLight.removeDuplicateStruct(ref usefulWalls);
-
+                                StructureServiceLight.removeDuplicateStruct(ref usefulWalls);
 
                 LayoutEmgLightService layoutServer = new LayoutEmgLightService(usefulColumns, usefulWalls, lane, frame);
 

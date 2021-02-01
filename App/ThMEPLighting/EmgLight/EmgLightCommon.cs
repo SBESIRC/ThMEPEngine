@@ -12,9 +12,10 @@ namespace ThMEPLighting.EmgLight
         public static double TolUniformSideLenth = 0.6;
         public static int TolAvgColumnDist = 7900;
         public static int TolLightRangeMin = 4000;
-        public static int TolLightRangeMax = 8900;
+        public static int TolLightRangeMax = 9000;
         public static int TolLaneProtect = 1000;
-        public static int TolLight = 400;
+        public static int TolBrakeWall= 400;
+        public static int TolInterFilter = 350;
         public static int BufferFrame = 100;
         public static double TolIntersect = 20;
 

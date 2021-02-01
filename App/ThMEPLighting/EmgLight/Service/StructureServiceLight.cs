@@ -171,24 +171,28 @@ namespace ThMEPLighting.EmgLight.Service
                         }
                         else if (pts.Count == 1)
                         {
-                            Point3d pt = new Point3d();
+                            Point3d ptIn = new Point3d();
+                            Point3d ptOut = new Point3d();
                             if (poly.Contains(seg.StartPoint) == true)
                             {
-                                pt = seg.StartPoint;
+                                ptIn = seg.StartPoint;
+                                ptOut = seg.EndPoint;
                             }
                             if (poly.Contains(seg.EndPoint) == true)
                             {
-                                pt = seg.EndPoint;
+                                ptIn = seg.EndPoint;
+                                ptOut = seg.StartPoint ;
                             }
 
-                            var l = new Line(pts[0], pt);
+                            var lIn = new Line(pts[0], ptIn);
+                            var lOut = new Line(pts[0], ptOut);
 
-                            if (pt.X == 0)
+                            if (ptIn.X == 0)
                             {
                                 bInter = false;
                             }
 
-                            else if (l.Length < EmgLightCommon.TolIntersect)
+                            else if (lIn.Length < EmgLightCommon.TolIntersect || lOut.Length >=EmgLightCommon .TolInterFilter)
                             {
                                 bInter = false;
                             }
@@ -204,7 +208,7 @@ namespace ThMEPLighting.EmgLight.Service
                         }
                     }
                 }
-                if (!bInter && !bContain)
+                if (bInter==false && bContain==false)
                 {
                     notIntersectSeg.Add(seg);
                 }
