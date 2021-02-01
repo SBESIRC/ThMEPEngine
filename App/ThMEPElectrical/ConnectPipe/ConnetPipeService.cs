@@ -56,7 +56,7 @@ namespace ThMEPElectrical.ConnectPipe
             //创建真实连管线
             CreatePipeLineService createPipeLineService = new CreatePipeLineService();
             var resPolys = createPipeLineService.CreatePipe(correctPipe, broadcasts);
-            
+           
             return resPolys;
         }
 
@@ -176,7 +176,7 @@ namespace ThMEPElectrical.ConnectPipe
                     0.0, 0.0, 0.0, 1.0
             });
 
-            return mainBlockLines.OrderByDescending(x => x.StartPoint.Y).ToList();
+            return mainBlockLines.OrderByDescending(x => x.StartPoint.TransformBy(matrix.Inverse()).Y).ToList();
         }
     }
 }

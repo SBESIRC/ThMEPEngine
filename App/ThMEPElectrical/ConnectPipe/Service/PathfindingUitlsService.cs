@@ -20,31 +20,40 @@ namespace ThMEPElectrical.ConnectPipe.Service
             var checkPolys = endingPolys.SelectMany(x => x).ToList();
             double maxLength = double.PositiveInfinity;
             Polyline maxPoly = null;
+            List<Polyline> allPolys = new List<Polyline>(); ;
             foreach (var sPt in sPts)
             {
                 foreach (var polyPt in polyPts)
                 {
-                    var connectPt = polyPt.OrderBy(x => x.DistanceTo(sPt)).First();
-                    var connectPoly = new Polyline();
-                    connectPoly.AddVertexAt(0, sPt.ToPoint2D(), 0, 0, 0);
-                    connectPoly.AddVertexAt(1, connectPt.ToPoint2D(), 0, 0, 0);
-                    if (!CheckService.CheckConnectLines(holeInfo, connectPoly, checkPolys))
+                    var orderPts = polyPt.OrderBy(x => x.DistanceTo(sPt)).ToList();
+                    foreach (var connectPt in orderPts)
                     {
-                        continue;
-                    }
+                        var connectPoly = new Polyline();
+                        connectPoly.AddVertexAt(0, sPt.ToPoint2D(), 0, 0, 0);
+                        connectPoly.AddVertexAt(1, connectPt.ToPoint2D(), 0, 0, 0);
+                        allPolys.Add(connectPoly);
+                        if (!CheckService.CheckConnectLines(holeInfo, connectPoly, checkPolys))
+                        {
+                            continue;
+                        }
 
-                    var findingCheckPolys = new List<Polyline>(checkPolys);
-                    findingCheckPolys.Add(connectPoly);
-                    DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(findingCheckPolys.Cast<Curve>().ToList());
-                    var length = dijkstra.FindingAllPathMinLength(sPt).OrderByDescending(x => x).First();
-                    if (length < maxLength)
-                    {
-                        maxLength = length;
-                        maxPoly = connectPoly;
+                        var findingCheckPolys = new List<Polyline>(checkPolys);
+                        findingCheckPolys.Add(connectPoly);
+                        DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(findingCheckPolys.Cast<Curve>().ToList());
+                        var length = dijkstra.FindingAllPathMinLength(sPt).OrderByDescending(x => x).First();
+                        if (length < maxLength)
+                        {
+                            maxLength = length;
+                            maxPoly = connectPoly;
+                        }
                     }
                 }
             }
 
+            if (maxPoly == null)
+            {
+                maxPoly = allPolys.OrderBy(x => x.Length).First();
+            }
             return maxPoly;
         }
 

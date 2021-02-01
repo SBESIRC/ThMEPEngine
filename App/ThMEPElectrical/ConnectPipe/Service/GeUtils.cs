@@ -18,13 +18,15 @@ namespace ThMEPElectrical.ConnectPipe.Service
         public static Polyline BufferPoly(this Polyline polyline, double distance)
         {
             List<Point2d> pts = new List<Point2d>();
-            var polyUp = polyline.GetOffsetCurves(distance)[0] as Polyline;
+            var newPoly = polyline.ExtendPolyline(150);
+            //newPoly.ReverseCurve();
+            var polyUp = newPoly.GetOffsetCurves(distance)[0] as Polyline;
             for (int i = 0; i < polyUp.NumberOfVertices; i++)
             {
                 pts.Add(polyUp.GetPoint2dAt(i));
             }
 
-            var polyDown = polyline.GetOffsetCurves(-distance)[0] as Polyline;
+            var polyDown = newPoly.GetOffsetCurves(-distance)[0] as Polyline;
             for (int i = polyDown.NumberOfVertices - 1; i >= 0; i--)
             {
                 pts.Add(polyDown.GetPoint2dAt(i));
@@ -37,6 +39,37 @@ namespace ThMEPElectrical.ConnectPipe.Service
             }
 
             return resPoly;
+        }
+
+        /// <summary>
+        /// Poly只能有线段构成
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        public static Polyline ExtendPolyline(this Polyline poly, double length = 5.0)
+        {
+            var sp = poly.GetPoint3dAt(0);
+            var spNext = poly.GetPoint3dAt(1);
+
+            Vector3d spVec = sp.GetVectorTo(spNext).GetNormal();
+            var startExendPt = sp - spVec.MultiplyBy(length);
+
+            var ep = poly.GetPoint3dAt(poly.NumberOfVertices - 1);
+            var epPrev = poly.GetPoint3dAt(poly.NumberOfVertices - 2);
+
+            Vector3d epVec = ep.GetVectorTo(epPrev).GetNormal();
+            var endExendPt = ep - epVec.MultiplyBy(length);
+
+            Polyline newPoly = new Polyline();
+            newPoly.AddVertexAt(0, startExendPt.ToPoint2D(), 0, 0, 0);
+            for (int i = 1; i < poly.NumberOfVertices - 1; i++)
+            {
+                newPoly.AddVertexAt(i, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+            }
+            newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
+
+            return newPoly;
         }
 
         /// <summary>

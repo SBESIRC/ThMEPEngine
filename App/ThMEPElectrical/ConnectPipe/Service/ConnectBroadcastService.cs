@@ -61,9 +61,17 @@ namespace ThMEPElectrical.ConnectPipe.Service
                 {
                     connectPoly = pathfindingUitls.Pathfinding(holeInfo, findingPolys, resPolys, mainBlockLines[i]);
                 }
-                resPolys.Add(new List<Polyline>() { connectPoly });
-                resPolys.Add(mainBlockLines[i]);
-                findingPolys.Add(mainBlockLines[i]);
+                if (connectPoly != null)
+                {
+                    resPolys.Add(new List<Polyline>() { connectPoly });
+                    resPolys.Add(mainBlockLines[i]);
+                    findingPolys.Add(mainBlockLines[i]);
+                }
+                else
+                {
+                    resPolys.Add(mainBlockLines[i]);
+                    findingPolys.Add(mainBlockLines[i]);
+                }
             }
 
             return resPolys;

@@ -13,7 +13,7 @@ namespace ThMEPElectrical.ConnectPipe.Service
     public class PathfindingWithDirServce
     {
         readonly double distance = 3000;      //3m内能可以连接
-        readonly double moveLength = 500;     //副车道连接线要移动200  
+        readonly double moveLength = 500;     //副车道连接线要移动500  
         readonly double tolAngle = 0.2;       //0.2以内可以认为两条线平行
         readonly double maxLengthTol = 4000;  //最不利路径4米以内的话选最短的连接线
         public Polyline Pathfinding(KeyValuePair<Polyline, List<Polyline>> holeInfo, List<List<Polyline>> mainPolys, List<List<Polyline>> endingPolys,
