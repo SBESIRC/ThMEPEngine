@@ -1487,6 +1487,12 @@ namespace TianHua.FanSelection.UI
                     {
                         _Fan.IsErased = true;
                         //TreeList.DeleteSelectedNodes();
+                        var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+                        if (_SonFan != null)
+                        {
+                            _SonFan.IsErased = true;
+                        }
+
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
                         using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
@@ -1494,15 +1500,17 @@ namespace TianHua.FanSelection.UI
                             dbManager.EraseModels(_Fan.ID);
                             Active.Editor.Regen();
                         }
+                        ComBoxScene_SelectedValueChanged(null, null);
                     }
                 }
                 else
                 {
                     if (XtraMessageBox.Show(" 是否确认删除低速工况？ ", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        _Fan.IsErased = true;
-                        //TreeList.DeleteSelectedNodes();
+                        //_Fan.IsErased = true;
+                        TreeList.DeleteSelectedNodes();
                         SetFanModel();
+                        ComBoxScene_SelectedValueChanged(null, null);
                     }
                 }
 

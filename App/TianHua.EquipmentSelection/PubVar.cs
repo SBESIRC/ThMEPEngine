@@ -56,7 +56,7 @@ namespace TianHua.FanSelection
         {
             new MotorEfficiency(){ Key ="直连",Value =0.99 },
 
-            new MotorEfficiency(){ Key ="皮带",Value =0.85 }
+            new MotorEfficiency(){ Key ="皮带",Value =0.95 }
         };
 
     }
