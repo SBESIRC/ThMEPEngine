@@ -268,7 +268,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
-				<Command Local="THCDZM" Global="THCDZM" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -278,7 +278,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
-				<Command Local="THCDZM" Global="THCDZM" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -288,7 +288,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
-				<Command Local="THCDZM" Global="THCDZM" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -298,7 +298,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
-				<Command Local="THCDZM" Global="THCDZM" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
