@@ -8,6 +8,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Service;
+using NetTopologySuite.Geometries;
+using System.Linq;
+using NetTopologySuite.Operation.Union;
 
 namespace ThMEPEngineCore
 {
@@ -86,6 +89,32 @@ namespace ThMEPEngineCore
                     objs.Add(acadDatabase.Element<Entity>(obj));
                 }
                 foreach (Entity obj in objs.BuildArea())
+                {
+                    acadDatabase.ModelSpace.Add(obj);
+                    obj.SetDatabaseDefaults();
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THAREAUNION", CommandFlags.Modal)]
+        public void ThAreaUnion()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+
+                var geometry = objs.ToNTSMultiPolygon().Union();
+                foreach (Entity obj in geometry.ToDbCollection())
                 {
                     acadDatabase.ModelSpace.Add(obj);
                     obj.SetDatabaseDefaults();
