@@ -76,6 +76,7 @@
     <Compile Include="Garage\Service\ThExtendService.cs" />
     <Compile Include="Garage\Service\ThFilterLinkService.cs" />
     <Compile Include="Garage\Service\ThFilterShortLinesService.cs" />
+    <Compile Include="Garage\Service\ThFilterElbowCenterLineService.cs" />
     <Compile Include="Garage\Service\ThFindFirstEdgePortsService.cs" />
     <Compile Include="Garage\Service\ThFindFirstLinesService.cs" />
     <Compile Include="Garage\Service\ThFindLinkService.cs" />

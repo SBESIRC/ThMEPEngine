@@ -96,7 +96,7 @@ namespace ThMEPLighting.Garage.Service
                 var distributeInstance = new ThDoubleRowDistributeExService(maxPts, ArrangeParameter, graphEdges, FirstLightEdges,WireOffsetDataService);
                 var splitPts= distributeInstance.Distribute();
                 splitPts = RepairDir(splitPts, basePt);
-                basePt = basePt.DistanceTo(maxPts.Item1)> basePt.DistanceTo(maxPts.Item2)?maxPts.Item2:maxPts.Item1;
+                basePt = basePt.DistanceTo(maxPts.Item2)> basePt.DistanceTo(maxPts.Item1)?maxPts.Item2:maxPts.Item1;
                 ThBuildDoubleRowPosService.Build(edges, splitPts,ArrangeParameter);
                 FirstLightEdges.AddRange(edges);
             }

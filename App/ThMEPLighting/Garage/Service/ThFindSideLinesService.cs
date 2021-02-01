@@ -60,7 +60,7 @@ namespace ThMEPLighting.Garage.Service
         }
         private List<Line> FilterSide(Line center)
         {
-            Polyline outline = ThDrawTool.ToOutline(center.StartPoint, center.EndPoint, FindParameter.HalfWidth + SideTolerance);
+            Polyline outline = ThDrawTool.ToOutline(center.StartPoint, center.EndPoint, FindParameter.HalfWidth + SideTolerance+5);
             var objs=SideSpatialIndex.SelectCrossingPolygon(outline);
             return objs
                 .Cast<Line>()

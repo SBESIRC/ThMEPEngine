@@ -201,7 +201,11 @@ namespace ThMEPLighting.Garage.Engine
                         int firstLightIndex=n.GetIndex();
                         if(firstLightIndex != -1)
                         {
-                            var position = n.Position.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
+                            var newFirst = WireOffsetDataService.FindFirstByPt(n.Position);
+                            var newSecond = WireOffsetDataService.FindSecondByFirst(newFirst);
+
+
+                            var position = n.Position.GetProjectPtOnLine(newSecond.StartPoint, newSecond.EndPoint);
                             int secondLightIndex = firstLightIndex+1;
                             var number = secondLightIndex.ToString().PadLeft(loopCharLength, '0');
                             var secondLightNode = new ThLightNode
@@ -209,7 +213,10 @@ namespace ThMEPLighting.Garage.Engine
                                 Number= ThGarageLightCommon.LightNumberPrefix + number,
                                 Position= position
                             };
-                            secondLightEdge.LightNodes.Add(secondLightNode);
+                            if(ThGarageLightUtils.IsPointOnLines(position, newSecond))
+                            {
+                                secondLightEdge.LightNodes.Add(secondLightNode);
+                            }
                         }
                     }
                 });

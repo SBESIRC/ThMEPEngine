@@ -90,36 +90,42 @@ namespace ThMEPLighting.Garage.Service
             //objs=ThLaneLineEngine.Simplify(objs);
             //var newPoly=objs[0] as Polyline;
             //获取多段线第一段，normalize
-            var lineSeg = polyline.GetLineSegmentAt(0);
-            var line = new Line(lineSeg.StartPoint,lineSeg.EndPoint);
+            //var lineSeg = polyline.GetLineSegmentAt(0);
+            var line = new Line(polyline.StartPoint, polyline.EndPoint);
             var normalLine = line.Normalize();
+            var bufferLength = CalOffsetLength(normalLine);
+            if ((normalLine.EndPoint - normalLine.StartPoint).GetNormal().IsEqualTo((line.EndPoint - line.StartPoint).GetNormal(), new Tolerance(1, 1)))
+            {
+                bufferLength = -bufferLength;
+            }
             var vec = normalLine.StartPoint.GetVectorTo(normalLine.EndPoint)
                   .GetPerpendicularVector().GetNormal();
-            
-            var positiveObjs = polyline.GetOffsetCurves(OffsetDistance);
-            var negativeObjs = polyline.GetOffsetCurves(OffsetDistance * -1.0);
+            var positiveObjs = polyline.GetOffsetCurves(bufferLength);
+            var negativeObjs = polyline.GetOffsetCurves(-bufferLength);
 
             var firstPolyline = positiveObjs[0] as Polyline;
             var secondPolyline= negativeObjs[0] as Polyline;
 
-            var firstVec = polyline.StartPoint.GetVectorTo(firstPolyline.StartPoint);
-            var secondVec = polyline.StartPoint.GetVectorTo(secondPolyline.StartPoint);
+            First = firstPolyline;
+            Second = secondPolyline;
+            //var firstVec = polyline.StartPoint.GetVectorTo(firstPolyline.StartPoint);
+            //var secondVec = polyline.StartPoint.GetVectorTo(secondPolyline.StartPoint);
 
-            if(firstVec.IsCodirectionalTo(
-                vec,new Autodesk.AutoCAD.Geometry.Tolerance(1.0,1.0)))
-            {
-                First = firstPolyline;
-                Second = secondPolyline;
-            }
-            else if(secondVec.IsCodirectionalTo(
-                vec, new Autodesk.AutoCAD.Geometry.Tolerance(1.0, 1.0)))
-            {
-                First = secondPolyline;
-                Second = firstPolyline;
-            }
-            else
-            {
-            }
+            //if(firstVec.IsCodirectionalTo(
+            //    vec,new Autodesk.AutoCAD.Geometry.Tolerance(1.0,1.0)))
+            //{
+            //    First = firstPolyline;
+            //    Second = secondPolyline;
+            //}
+            //else if(secondVec.IsCodirectionalTo(
+            //    vec, new Autodesk.AutoCAD.Geometry.Tolerance(1.0, 1.0)))
+            //{
+            //    First = secondPolyline;
+            //    Second = firstPolyline;
+            //}
+            //else
+            //{
+            //}
         }
     }
 

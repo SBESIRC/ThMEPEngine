@@ -64,18 +64,18 @@ namespace ThMEPLighting.Garage.Engine
                 var objs = new DBObjectCollection();
                 var firstBuffers = Buffer(FirstCurves);
                 var secondBuffers = Buffer(SecondCurves);
+
                 var fdxBuffers = Buffer(FdxCurves);
                 firstBuffers.Cast<Polyline>().ForEach(o => objs.Add(o));
                 secondBuffers.Cast<Polyline>().ForEach(o => objs.Add(o));
                 fdxBuffers.Cast<Polyline>().ForEach(o => objs.Add(o));
-                var unionObjs = objs.UnionPolygons();
-                var unionLines = unionObjs.GetLines();
+                var unionLines = GetLines(objs.Cast<Polyline>().ToList()) ;
                 var sideParameter = new ThFindSideLinesParameter
                 {
                     CenterLines = GetCenterLines(),
                     SideLines = unionLines,
                     HalfWidth = Width / 2.0
-                };
+                };                
                 //查找合并线buffer后，获取中心线对应的两边线槽线
                 var instane = ThFindSideLinesService.Find(sideParameter);
                 CenterWithPorts = instane.PortLinesDic;
@@ -106,9 +106,116 @@ namespace ThMEPLighting.Garage.Engine
                 var unCutLines=GetUnCutLines(instane.SideLinesDic, unionLines);
                 var sideLines = new List<Line>();
                 //sideLines.AddRange(unCutLines);
+
+                //找ports
+                List<Line> allLines = new List<Line>(FirstCurves.Cast<Line>().ToList());
+                allLines.AddRange(SecondCurves.Cast<Line>().ToList());
+                allLines.AddRange(FdxCurves.Cast<Line>().ToList());
+                var ports = AddLine(allLines);
+
                 instane.SideLinesDic.ForEach(o => sideLines.AddRange(o.Value));
-                BuildCableTray(sidelines, CenterWithSides.Select(o => o.Key).ToList());
+                BuildCableTray(sidelines, allLines, ports);
             }
+        }
+        public List<Line> GetLines(List<Polyline> objs)
+        {
+            List<Line> lines = new List<Line>();
+            objs.ForEach(x =>
+            {
+                var subObjs = new DBObjectCollection();
+                x.Explode(subObjs);
+                lines.AddRange(subObjs.Cast<Line>().ToList());
+            });
+            
+            var NodingLines = ThLaneLineEngine.Noding(lines.ToCollection());
+            var resLines = NodingLines.Cast<Line>().Where(x => x.Length > Width * 1.5).ToList();
+            var repairLines = RepairCableElbow(resLines);
+            repairLines = repairLines.Select(x => x.ExtendLine(1)).ToList();
+            NodingLines = ThLaneLineEngine.Noding(repairLines.ToCollection());
+            resLines = NodingLines.Cast<Line>().Where(x => x.Length > Width * 1.5).ToList();
+
+            return resLines;
+        }
+        private List<Line> RepairCableElbow(List<Line> lines)
+        {
+            var extendLines = lines.Select(x =>
+                new Tuple<Line, Line, Line>(x, CreateExtendLine(x, Width + 1, true), CreateExtendLine(x, Width + 1, false))).ToList();
+            var checkLines = new List<Tuple<Line, Line, Line>>(extendLines);
+            List<Line> resLines = new List<Line>();
+            foreach (var lineDic in extendLines)
+            {
+                checkLines.Remove(lineDic);
+                bool sNeedExtend = checkLines.Any(x => {
+                    return (x.Item2.IsIntersects(lineDic.Item2) || x.Item3.IsIntersects(lineDic.Item2))
+                      && !x.Item1.IsIntersects(lineDic.Item1)
+                      && (x.Item1.EndPoint - x.Item1.StartPoint).GetNormal()
+                      .IsEqualTo((lineDic.Item1.EndPoint - lineDic.Item1.StartPoint).GetNormal(), new Tolerance(1, 1));
+                });
+                bool eNeedExtend =
+                    checkLines.Any(x => {
+                        return (x.Item2.IsIntersects(lineDic.Item3) || x.Item3.IsIntersects(lineDic.Item3))
+                          && !x.Item1.IsIntersects(lineDic.Item1)
+                          && (x.Item1.EndPoint - x.Item1.StartPoint).GetNormal()
+                          .IsEqualTo((lineDic.Item1.EndPoint - lineDic.Item1.StartPoint).GetNormal(), new Tolerance(1, 1));
+                    }); 
+
+                var resLine = lineDic.Item1;
+                var dir = (resLine.EndPoint - resLine.StartPoint).GetNormal();
+                if (sNeedExtend && eNeedExtend)
+                {
+                    resLine = new Line(resLine.StartPoint - dir * (Width / 2 + 5), resLine.EndPoint + dir * (Width / 2 + 5));
+                }
+                else if (sNeedExtend)
+                {
+                    resLine = new Line(resLine.StartPoint - dir * (Width / 2 + 5), resLine.EndPoint);
+                }
+                else if (eNeedExtend)
+                {
+                    resLine = new Line(resLine.StartPoint, resLine.EndPoint + dir * (Width / 2 + 5));
+                }
+
+                resLines.Add(resLine);
+            }
+
+            return resLines;
+        }
+        private Line CreateExtendLine(Line line, double length, bool isStart)
+        {
+            var dir = (line.EndPoint - line.StartPoint).GetNormal();
+            var startPoint = line.StartPoint;
+            if (!isStart)
+            {
+                dir = -dir;
+                startPoint = line.EndPoint;
+            }
+
+            return new Line(startPoint, startPoint - dir * length);
+        }
+        private List<Line> AddLine(List<Line> allCurves)
+        {
+            List<Line> lines = new List<Line>();
+            List<Line> checkLines = new List<Line>(allCurves);
+            double moveWidth = Width / 2;
+            foreach (var line in allCurves)
+            {
+                checkLines.Remove(line);
+                var needLines = checkLines.Where(x => ThGarageLightUtils.IsPointOnLines(line.StartPoint, x)).ToList();
+                if (needLines.Count <= 0)
+                {
+                    var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
+                    lines.Add(new Line(line.StartPoint + dir * moveWidth, line.StartPoint - dir * moveWidth));
+                }
+
+                needLines = checkLines.Where(x => ThGarageLightUtils.IsPointOnLines(line.EndPoint, x)).ToList();
+                if (needLines.Count <= 0)
+                {
+                    var dir = Vector3d.ZAxis.CrossProduct((line.EndPoint - line.StartPoint).GetNormal());
+                    lines.Add(new Line(line.EndPoint + dir * moveWidth, line.EndPoint - dir * moveWidth));
+                }
+                checkLines.Add(line);
+            }
+
+            return lines;
         }
         private void CreateGroup()
         {
@@ -180,9 +287,28 @@ namespace ThMEPLighting.Garage.Engine
         private DBObjectCollection Buffer(List<Curve> curves)
         {
             var objs = curves.ToCollection();
-            return objs.LineMerge().Buffer(Width / 2.0, EndCapStyle.Flat);
+            if (objs.Count <= 0)
+            {
+                return objs;
+            }
+            objs=ThLaneLineEngine.Explode(objs);
+            objs=ThLaneLineJoinEngine.Join(objs);
+            objs=objs.LineMerge();
+            var bufferCollection = new DBObjectCollection();
+            foreach (Curve obj in objs)
+            {
+                bufferCollection.Add(new DBObjectCollection() { obj }.Buffer(Width / 2.0)[0]);
+            }
+            using (AcadDatabase db=AcadDatabase.Active())
+            {
+                foreach (Entity item in bufferCollection)
+                {
+                    //db.ModelSpace.Add(item);
+                }
+            }
+            return bufferCollection;
         }
-        private void BuildCableTray(List<Line> cableTrayLines,List<Line> centerLines)
+        private void BuildCableTray(List<Line> cableTrayLines,List<Line> centerLines, List<Line> portsLines)
         {
             using (var acadDb = AcadDatabase.Active())
             {
@@ -195,6 +321,12 @@ namespace ThMEPLighting.Garage.Engine
                 centerLines.ForEach(o =>
                 {
                     o.Layer = RacewayParameter.CenterLineParameter.Layer;
+                    o.Linetype = "Bylayer";
+                    acadDb.ModelSpace.Add(o);
+                });
+                portsLines.ForEach(o =>
+                {
+                    o.Layer = RacewayParameter.PortLineParameter.Layer;
                     o.Linetype = "Bylayer";
                     acadDb.ModelSpace.Add(o);
                 });
@@ -219,18 +351,14 @@ namespace ThMEPLighting.Garage.Engine
         public List<Point3d> GetPorts()
         {
             var ports = new List<Point3d>();
-            using (var fixedPrecision = new ThCADCoreNTSFixedPrecision())
+            CenterWithPorts.ForEach(o =>
             {
-                CenterWithPorts.ForEach(m =>
+                o.Value.ForEach(v =>
                 {
-                    var normalize = m.Key.Normalize();
-                    var pts = new List<Point3d>();
-                    m.Value.ForEach(n =>
-                    pts.Add(ThGeometryTool.GetMidPt(n.StartPoint, n.EndPoint)));
-                    pts=pts.OrderBy(p => normalize.StartPoint.DistanceTo(p)).ToList();
-                    ports.AddRange(pts);
+                    var midPt = v.StartPoint.GetMidPt(v.EndPoint);
+                    ports.Add(midPt);
                 });
-            }                
+            });
             return ports;
         }
         private Tuple<int,int> CheckLine(Line line,List<Line> lines)
