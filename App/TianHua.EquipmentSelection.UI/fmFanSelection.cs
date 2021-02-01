@@ -2815,6 +2815,30 @@ namespace TianHua.FanSelection.UI
                         var _AirCalcValue = _Fan.SysAirVolume / _Fan.VentQuan;
 
                         MainSysAirVolumeCalc(_Fan, _AirCalcValue);
+
+                        var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+
+
+                        if (_SonFan != null)
+                        {
+
+                            if (_SonFan.IsManualInputAirVolume)
+                            {
+                                var _SonAirCalcValue = _SonFan.SysAirVolume / _Fan.VentQuan;
+
+                                SonSysAirVolumeCalc(_SonFan, _SonAirCalcValue);
+                            }
+                            else
+                            {
+
+                                var _SonAirCalcValue = _SonFan.AirCalcValue * _SonFan.AirCalcFactor / _Fan.VentQuan;
+
+                                SonSysAirVolumeCalc(_SonFan, _SonAirCalcValue);
+                            }
+
+
+                        }
+
                     }
                     else
                     {
@@ -2977,6 +3001,7 @@ namespace TianHua.FanSelection.UI
 
         private void TxtVentNum_EditValueChanged(object sender, EventArgs e)
         {
+            CheckSysCheckedChanged();
             SetFanModel();
             TreeList.Refresh();
         }
