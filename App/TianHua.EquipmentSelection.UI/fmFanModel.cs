@@ -215,7 +215,7 @@ namespace TianHua.FanSelection.UI
 
             }
 
-            CalcFanEfficiency(_FanDataModel);
+
 
        
             RGroupFanControl_SelectedIndexChanged(null, null);
@@ -604,7 +604,7 @@ namespace TianHua.FanSelection.UI
 
                 var _SonFan = m_ListFan.Find(p => p.PID == _FanDataModel.ID);
 
-                if (_SonFan != null)
+                if (_SonFan != null && FuncStr.NullToStr(RGroupFanControl.EditValue) != "单速")
                 {
                     var _SonPower = _SonFan.WindResis / (3600 * _AxialFanEfficiency.FanEfficiency * 0.855 * 0.98) * 100;
 
@@ -623,7 +623,7 @@ namespace TianHua.FanSelection.UI
 
                 var _SonFan = m_ListFan.Find(p => p.PID == _FanDataModel.ID);
 
-                if (_SonFan != null)
+                if (_SonFan != null &&  FuncStr.NullToStr(RGroupFanControl.EditValue) != "单速")
                 {
                     var _SonPower = _SonFan.WindResis / (3600 * _AxialFanEfficiency.FanEfficiency * 0.855 * 0.98) * 100;
 
@@ -641,7 +641,7 @@ namespace TianHua.FanSelection.UI
 
                 var _SonFan = m_ListFan.Find(p => p.PID == _FanDataModel.ID);
 
-                if (_SonFan != null)
+                if (_SonFan != null && FuncStr.NullToStr(RGroupFanControl.EditValue) != "单速")
                 {
                     var _SonPower = _SonFan.WindResis / (3600 * _AxialFanEfficiency.FanEfficiency * 0.855 * 0.98) * 100;
 
@@ -695,7 +695,7 @@ namespace TianHua.FanSelection.UI
 
                 var _SonFan = m_ListFan.Find(p => p.PID == _FanDataModel.ID);
 
-                if (_SonFan != null)
+                if (_SonFan != null && FuncStr.NullToStr(RGroupFanControl.EditValue) != "单速")
                 {
 
                     double _Flow = Math.Round(FuncStr.NullToDouble(_SonFan.AirVolume) / 3600, 5);
@@ -723,7 +723,7 @@ namespace TianHua.FanSelection.UI
 
                 var _SonFan = m_ListFan.Find(p => p.PID == _FanDataModel.ID);
 
-                if (_SonFan != null)
+                if (_SonFan != null && FuncStr.NullToStr(RGroupFanControl.EditValue) != "单速")
                 {
                     double _Flow = Math.Round(FuncStr.NullToDouble(_SonFan.AirVolume) / 3600, 5);
                     var _SpecificSpeed = 5.54 * FuncStr.NullToDouble(_FanDataModel.FanModelFanSpeed) * Math.Pow(_Flow, 0.5) / Math.Pow(_SonFan.WindResis, 0.75);
@@ -749,7 +749,7 @@ namespace TianHua.FanSelection.UI
 
                 var _SonFan = m_ListFan.Find(p => p.PID == _FanDataModel.ID);
 
-                if (_SonFan != null)
+                if (_SonFan != null && FuncStr.NullToStr(RGroupFanControl.EditValue) != "单速")
                 {
                     double _Flow = Math.Round(FuncStr.NullToDouble(_SonFan.AirVolume) / 3600, 5);
                     var _SpecificSpeed = 5.54 * FuncStr.NullToDouble(_FanDataModel.FanModelFanSpeed) * Math.Pow(_Flow, 0.5) / Math.Pow(_SonFan.WindResis, 0.75);
@@ -842,7 +842,16 @@ namespace TianHua.FanSelection.UI
                 layoutTmp.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutDouble.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
             }
+
+            var _SonFan = m_ListFan.Find(p => p.PID == m_Fan.ID);
+            if(_SonFan != null)
+            {
+                _SonFan.Control = FuncStr.NullToStr(RGroupFanControl.EditValue);
+            }
+
+
             InitSonFan();
+            CalcFanEfficiency(m_Fan);
         }
 
 

@@ -2974,5 +2974,11 @@ namespace TianHua.FanSelection.UI
                 _Fan.AirVolume = FuncStr.NullToInt(_AirCalcValue);
             }
         }
+
+        private void TxtVentNum_EditValueChanged(object sender, EventArgs e)
+        {
+            SetFanModel();
+            TreeList.Refresh();
+        }
     }
 }

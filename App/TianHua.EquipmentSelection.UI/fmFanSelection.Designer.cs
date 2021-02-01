@@ -756,6 +756,7 @@
             this.TxtVentNum.Mask.EditMask = "[0-9\\-\\,]*";
             this.TxtVentNum.Mask.MaskType = DevExpress.XtraEditors.Mask.MaskType.RegEx;
             this.TxtVentNum.Name = "TxtVentNum";
+            this.TxtVentNum.EditValueChanged += new System.EventHandler(this.TxtVentNum_EditValueChanged);
             // 
             // treeListBand5
             // 
