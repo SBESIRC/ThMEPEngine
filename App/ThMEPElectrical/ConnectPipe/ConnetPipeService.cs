@@ -98,7 +98,8 @@ namespace ThMEPElectrical.ConnectPipe
                 var broadcastDir = -x.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
                 double yDotValue = broadcastDir.DotProduct(otherDir);
                 double xDotValue = broadcastDir.DotProduct(dir);
-                if (Math.Abs(yDotValue) < Math.Abs(xDotValue))
+                var checkDir = (polyline.StartPoint - x.Position).GetNormal();
+                if (Math.Abs(yDotValue) < Math.Abs(xDotValue) && checkDir.DotProduct(broadcastDir) > 0)
                 {
                     return true;
                 }
