@@ -96,10 +96,11 @@ namespace ThMEPElectrical.ConnectPipe
             return broads.Where(x =>
             {
                 var broadcastDir = -x.BlockTransform.CoordinateSystem3d.Xaxis.GetNormal();
+                var checkBroadcastDir = -x.BlockTransform.CoordinateSystem3d.Yaxis.GetNormal();
                 double yDotValue = broadcastDir.DotProduct(otherDir);
                 double xDotValue = broadcastDir.DotProduct(dir);
                 var checkDir = (polyline.StartPoint - x.Position).GetNormal();
-                if (Math.Abs(yDotValue) < Math.Abs(xDotValue) && checkDir.DotProduct(broadcastDir) > 0)
+                if (Math.Abs(yDotValue) < Math.Abs(xDotValue) && checkDir.DotProduct(checkBroadcastDir) > 0)
                 {
                     return true;
                 }
@@ -169,6 +170,7 @@ namespace ThMEPElectrical.ConnectPipe
             var xDir = (maxLengthLine.EndPoint - maxLengthLine.StartPoint).GetNormal();
             var zDir = Vector3d.ZAxis;
             var yDir = zDir.CrossProduct(xDir);
+            yDir = yDir.Y < 0 ? -yDir : yDir;
             Matrix3d matrix = new Matrix3d(
                 new double[] {
                     xDir.X, yDir.X, zDir.X, 0,

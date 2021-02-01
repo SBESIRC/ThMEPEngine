@@ -63,15 +63,19 @@ namespace ThMEPElectrical.Broadcast.Service
             {
                 lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
             }
-
+           
             Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
-            var layoutLine = lines.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
+            var layoutLine = lines.Where(x => x.GetClosestPointTo(closetPt, false).DistanceTo(closetPt) < 1)
                 .Where(x =>
                 {
                     var xDir = (x.EndPoint - x.StartPoint).GetNormal();
                     return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
                 }).FirstOrDefault();
 
+            if (layoutLine == null)
+            {
+                layoutLine = lines.First();
+            }
             return layoutLine;
         }
 

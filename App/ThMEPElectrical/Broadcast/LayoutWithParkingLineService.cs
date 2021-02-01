@@ -52,7 +52,8 @@ namespace ThMEPElectrical.Broadcast
                 var pts = new List<Point3d>() { sPt, ePt };
 
                 //计算布置信息
-                var dir = (lines.First().EndPoint - lines.First().StartPoint).GetNormal();
+                var maxLengthLine = lines.OrderByDescending(x => x.Length).First();
+                var dir = (maxLengthLine.EndPoint - maxLengthLine.StartPoint).GetNormal();
                 StructureLayoutService structureLayoutService = new StructureLayoutService();
                 var lInfo = structureLayoutService.GetLayoutStructPt(pts, filterCols, filterWalls, dir);
 

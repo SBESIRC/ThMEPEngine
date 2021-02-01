@@ -90,7 +90,7 @@ namespace ThMEPElectrical
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
                     var parkingLinesService = new ParkingLinesService();
                     var parkingLines = parkingLinesService.CreateNodedParkingLines(plFrame, handleLines, out List<List<Line>> otherPLines);
-
+                   
                     //获取构建信息
                     var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
                     GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
