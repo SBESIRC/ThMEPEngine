@@ -52,7 +52,7 @@ namespace ThMEPEngineCore.CAD
             if(IsCollinearEx(firstSp, firstEp, secondSp, secondEp))
             {
                 List<Point3d> pts = new List<Point3d> { firstSp, firstEp, secondSp, secondEp };
-                var maxPts=MaxDistancePoints(pts);
+                var maxPts= GetCollinearMaxPts(pts);
                 return (firstSp.DistanceTo(firstEp) + secondSp.DistanceTo(secondEp)) >
                     maxPts.Item1.DistanceTo(maxPts.Item2);
             }
@@ -70,86 +70,6 @@ namespace ThMEPEngineCore.CAD
             double distance = Math.Cos(angle) * secondVec.Length;
             return startPt + firstVec.GetNormal().MultiplyBy(distance);
         }
-        /// <summary>
-        /// 判断点是否再Polyline内
-        /// 0.点在polyline上    1.点在polyline内    -1.点在polyline外
-        /// </summary>
-        /// <returns></returns>
-        public static int PointInPolylineEx(this Polyline polyline, Point3d pt, double tol)
-        {
-            int positionIndex = -1;
-            Point3d closestP = polyline.GetClosestPointTo(pt, false);
-            if (Math.Abs(closestP.DistanceTo(pt)) < tol)
-            {
-                return 0;
-            }
-            Point3d minPt = polyline.GeometricExtents.MinPoint;
-            Point3d maxPt = polyline.GeometricExtents.MaxPoint;
-            if (pt.X < minPt.X || pt.X > maxPt.X || pt.Y < minPt.Y || pt.Y > maxPt.Y)
-            {
-                return -1;
-            }
-            List<LineSegment3d> linesegments = new List<LineSegment3d>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                if (polyline.GetSegmentType(i) == SegmentType.Line)
-                {
-                    linesegments.Add(polyline.GetLineSegmentAt(i));
-                }
-            }
-            bool doMark = true;
-            double increAng = 5.0 / 180.0 * Math.PI;
-            Ray ray = new Ray();
-            ray.BasePoint = pt;
-            ray.UnitDir = Vector3d.XAxis;
-            int count = (int)Math.Round(Math.PI * 2 / increAng);
-            int index = 0;
-            while (doMark)
-            {
-                Point3d otherPt = ray.BasePoint + ray.UnitDir.MultiplyBy(100.0);
-                if (linesegments.Where(o => IsCollinearEx(
-                     ray.BasePoint, otherPt, o.StartPoint, o.EndPoint)).Any())
-                {
-                    Matrix3d mt = Matrix3d.Rotation(increAng, Vector3d.ZAxis, pt);
-                    ray.TransformBy(mt);
-                    if (index++ == count)
-                    {
-                        break;
-                    }
-                }
-                else
-                {
-                    Point3dCollection points = new Point3dCollection();
-                    polyline.IntersectWith(ray, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
-                    BeamInfo.Utils.GetObjectUtils.FilterEqualPoints(points, 1.0);
-                    List<Point3d> intersectPts = new List<Point3d>();
-                    foreach(Point3d ptItem in points)
-                    {
-                        Point3d nearPt = polyline.GetClosestPointTo(ptItem, false);
-                        if (nearPt.DistanceTo(ptItem) < tol)
-                        {
-                            intersectPts.Add(ptItem);
-                        }
-                    }
-                    if (intersectPts.Count > 2)
-                    {
-                        Matrix3d mt = Matrix3d.Rotation(increAng, Vector3d.ZAxis, pt);
-                        ray.TransformBy(mt);
-                        if (index++ == count)
-                        {
-                            break;
-                        }
-                    }
-                    else
-                    {
-                        positionIndex = intersectPts.Count % 2 == 0 ? -1 : 1;
-                        break;
-                    }
-                }
-            }
-            ray.Dispose();
-            return positionIndex;
-        }
         public static bool IsIntersects(this Entity firstEnt, Entity secondEnt)
         {            
             return firstEnt.IntersectWithEx(secondEnt).Count > 0 ? true : false;
@@ -162,13 +82,13 @@ namespace ThMEPEngineCore.CAD
             plane.Dispose();
             return pts;
         }
-        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt)
+        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt,double tolerance=0.0001)
         {
             Vector3d vec = lineSp.GetVectorTo(lineEp);
             Plane plane = new Plane(lineSp, vec);
             Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
             Point3d newPt=outerPt.TransformBy(wcsToUcs);
-            if(Math.Abs(newPt.X)<=0.0001 && Math.Abs(newPt.Y) <= 0.0001)
+            if(Math.Abs(newPt.X)<= tolerance && Math.Abs(newPt.Y) <= tolerance)
             {
                 if(newPt.Z>=0 && newPt.Z<= lineSp.DistanceTo(lineEp))
                 {
@@ -179,11 +99,10 @@ namespace ThMEPEngineCore.CAD
         }
         public static bool IsPointInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt,double tolerance=0.0)
         {
-            if(IsPointOnLine(lineSp, lineEp, outerPt))
-            {
-                return outerPt.DistanceTo(lineSp) > tolerance && outerPt.DistanceTo(lineEp) > tolerance;
-            }
-            return false;
+            Vector3d vec = lineSp.GetVectorTo(lineEp).GetNormal();
+            Point3d sp = lineSp + vec.MultiplyBy(tolerance);
+            Point3d ep = lineEp - vec.MultiplyBy(tolerance);
+            return IsPointOnLine(sp, ep, outerPt);
         }
         public static bool IsProjectionPtInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt)
         {
@@ -199,6 +118,15 @@ namespace ThMEPEngineCore.CAD
             DBText newText = dBText.GetTransformedCopy(clockwiseMat) as DBText;
             Polyline obb = newText.GeometricExtents.ToRectangle();
             Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, Vector3d.ZAxis, dBText.Position);
+            obb.TransformBy(counterClockwiseMat);
+            return obb;
+        }
+        public static Polyline TextOBB(this MText mText)
+        {
+            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * mText.Rotation, Vector3d.ZAxis, mText.Location);
+            var newText = mText.GetTransformedCopy(clockwiseMat) as MText;
+            Polyline obb = newText.GeometricExtents.ToRectangle();
+            Matrix3d counterClockwiseMat = Matrix3d.Rotation(mText.Rotation, Vector3d.ZAxis, mText.Location);
             obb.TransformBy(counterClockwiseMat);
             return obb;
         }
@@ -228,23 +156,148 @@ namespace ThMEPEngineCore.CAD
                 throw new NotSupportedException();
             }
             return pts;
-        }
-        public static Tuple<Point3d,Point3d> MaxDistancePoints(List<Point3d> points)
+        }        
+        public static bool IsPerpendicular(Vector3d firstVec,Vector3d secondVec,double tolerance=1.0)
         {
-            Point3d firstPt = Point3d.Origin;
-            Point3d secondPt = Point3d.Origin;
-            for (int i=0;i<points.Count-1;i++)
+            double rad = firstVec.GetAngleTo(secondVec);
+            double ang = rad / Math.PI * 180.0;
+            return Math.Abs(ang-90.0)<= tolerance;
+        }
+        public static double ProjectionDis(this Vector3d a,Vector3d b)
+        {
+            double rad = a.GetAngleTo(b);
+            return b.Length * Math.Cos(rad);
+        }
+        public static Point3dCollection IntersectPts(
+            Line first,Line second,Intersect intersectType,double distance=1.0)
+        {
+            var pts = new Point3dCollection();
+            var firstVec = first.StartPoint.GetVectorTo(first.EndPoint).GetNormal();
+            var secondVec = second.StartPoint.GetVectorTo(second.EndPoint).GetNormal();
+
+            var firstSp = first.StartPoint - firstVec.MultiplyBy(distance);
+            var firstEp = first.EndPoint + firstVec.MultiplyBy(distance);
+
+            var secondSp = second.StartPoint - secondVec.MultiplyBy(distance);
+            var secondEp = second.EndPoint + secondVec.MultiplyBy(distance);
+
+            var firstNew = new Line(firstSp, firstEp);
+            var secondNew = new Line(secondSp, secondEp);
+
+            firstNew.IntersectWith(secondNew, intersectType, pts, IntPtr.Zero, IntPtr.Zero);
+            return pts;
+        }
+        public static Tuple<Point3d,Point3d> GetCollinearMaxPts(this List<Point3d> pts)
+        {
+            if (pts.Count == 0)
             {
-                for (int j = i+1; j < points.Count; j++)
+                return Tuple.Create(Point3d.Origin, Point3d.Origin);
+            }
+            else if (pts.Count == 1)
+            {
+                return Tuple.Create(pts[0], pts[0]);
+            }
+            else
+            {
+                Point3d first = pts[0];
+                Point3d second = pts[pts.Count - 1];
+                for (int i = 0; i < pts.Count - 1; i++)
                 {
-                    if(points[i].DistanceTo(points[j])> firstPt.DistanceTo(secondPt))
+                    for (int j = i + 1; j < pts.Count; j++)
                     {
-                        firstPt = points[i];
-                        secondPt = points[j];
+                        if (pts[i].DistanceTo(pts[j]) > first.DistanceTo(second))
+                        {
+                            first = pts[i];
+                            second = pts[j];
+                        }
                     }
                 }
+                return Tuple.Create(first, second);
             }
-            return Tuple.Create(firstPt, secondPt);
+        }
+        public static bool IsOverlap(Point3d firstSp, Point3d firstEp, 
+            Point3d secondSp, Point3d secondEp,bool includedJoin=true)
+        {
+            //第二根线在第一根线上的投影是否重叠
+            Vector3d vec = firstSp.GetVectorTo(firstEp).GetNormal();
+            Plane plane = new Plane(firstSp, vec);
+            Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
+            Point3d newSecondSp = secondSp.TransformBy(wcsToUcs);
+            Point3d newSecondEp = secondEp.TransformBy(wcsToUcs);
+            double minZ = Math.Min(newSecondSp.Z, newSecondEp.Z);
+            double maxZ = Math.Max(newSecondSp.Z, newSecondEp.Z);
+            if(includedJoin)
+            {
+                if (maxZ < 0)
+                {
+                    return false;
+                }
+                if (minZ > firstSp.DistanceTo(firstEp))
+                {
+                    return false;
+                }
+            }
+            else
+            {
+                if (maxZ <= 0)
+                {
+                    return false;
+                }
+                if (minZ >= firstSp.DistanceTo(firstEp))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+        public static bool IsOverlap(this Line first ,Line second, bool includedJoin = true)
+        {
+            return IsOverlap(first.StartPoint, first.EndPoint, 
+                second.StartPoint, second.EndPoint, includedJoin);
+        }
+        public static bool IsPointOnPolyline(this Point3d pt,Polyline polyline,double tolerance=0.0001)
+        {
+            for(int i=0;i<polyline.NumberOfVertices;i++)
+            {
+               var segmentType = polyline.GetSegmentType(i);
+                if(segmentType==SegmentType.Line)
+                {
+                   var lineSegment = polyline.GetLineSegmentAt(i);
+                    if (IsPointOnLine(lineSegment.StartPoint, lineSegment.EndPoint, pt))
+                    {
+                        return true;
+                    }                    
+                }
+                else if(segmentType == SegmentType.Arc)
+                {
+                    var arcSegment = polyline.GetArcSegmentAt(i);
+                    Arc arc = new Arc(arcSegment.Center, arcSegment.Normal, 
+                        arcSegment.Radius, arcSegment.StartAngle, arcSegment.EndAngle);
+                    if (pt.IsPointOnArc(arc))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            return false;
+        }
+        public static bool IsPointOnLine(this Point3d pt, Line line, double tolerance = 0.0001)
+        {
+            return IsPointOnLine(line.StartPoint, line.EndPoint, pt, tolerance);
+        }
+        public static bool IsPointOnArc(this Point3d pt, Arc arc, double tolerance = 0.0001)
+        {
+            if (Math.Abs(pt.DistanceTo(arc.Center) - arc.Radius) <= tolerance)
+            {
+                var vec = arc.Center.GetVectorTo(pt);
+                var ang = vec.GetAngleTo(Vector3d.XAxis, arc.Normal);
+                return ang >= arc.StartAngle && ang <= arc.EndAngle;
+            }
+            return false;
         }
     }
 }

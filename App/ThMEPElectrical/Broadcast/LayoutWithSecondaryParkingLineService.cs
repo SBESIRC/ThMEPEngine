@@ -1,23 +1,23 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.Broadcast.Service;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPElectrical.Broadcast
 {
     public class LayoutWithSecondaryParkingLineService
     {
         readonly double pLength = 12500;  //超过12.5米副车道要补点
-        readonly double layoutLength = 31000;  //超过25米补一点
+        readonly double layoutLength = 40000;  //超过31米补一点
         readonly double endLength = 10000;  //10米左右补端头一点
         readonly double tol = 5000;
         readonly double exLength = 800;
-        readonly double minLength = 12000;    //起点到终点直线小于12米不布置点
+        readonly double minLength = 15000;    //起点到终点直线小于12米不布置点
 
         public Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> LayoutBraodcast(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> mainLayoutInfo
             , List<List<Line>> otherLines, List<Polyline> columns, List<Polyline> walls, Polyline frame)
@@ -56,7 +56,7 @@ namespace ThMEPElectrical.Broadcast
                     }
                     else if (eLayoutInfo == null || eLayoutInfo.Count <= 0)
                     {
-                        //副车道起点未连接主车道
+                        //副车道终点未连接主车道
                        layoutPts =  CalLayoutEndPoints(pLines, lineSPt, lineEPt, layoutSPt, layoutEPt, lLineSPt, lLineEPt, false);
                     }
 
@@ -255,48 +255,51 @@ namespace ThMEPElectrical.Broadcast
             double allLength = lines.Sum(x => x.Length) + sLength + eLength;
             if (allLength > pLength)
             {
-                if (allLength > layoutLength)
+                if (isStart)
                 {
-                    Vector3d dir = (lineEPt - lineSPt).GetNormal();
-                    List<Line> resLines = new List<Line>();
-                    if (isStart)
+                    if (structSPt.DistanceTo(lineEPt) <= minLength)
                     {
-                        lineSPt = lineSPt + dir * endLength;
-                        sPt = lineSPt;
-                        resPts.Add(lineSPt);
-                        resLines.Add(new Line(lineSPt, lineEPt));
+                        return resPts;
                     }
-                    else
-                    {
-                        if (structEPt.DistanceTo(lineSPt) <= minLength)
-                        {
-                            return resPts;
-                        }
-                        lineEPt = lineEPt - dir * endLength;
-                        ePt = lineEPt;
-                        resPts.Add(lineEPt);
-                        resLines.Add(new Line(lineSPt, lineEPt));
-                    }
-                    resPts.AddRange(CalLayoutPoints(resLines, lineSPt, lineEPt, sPt, ePt));
                 }
                 else
                 {
-                    if (isStart)
+                    if (structEPt.DistanceTo(lineSPt) <= minLength)
                     {
-                        if (structSPt.DistanceTo(lineEPt) <= minLength)
-                        {
-                            return resPts;
-                        }
+                        return resPts;
                     }
-                    else
-                    {
-                        if (structEPt.DistanceTo(lineSPt) <= minLength)
-                        {
-                            return resPts;
-                        }
-                    }
-                    resPts.Add(new Point3d((lineSPt.X + lineEPt.X) / 2, (lineSPt.Y + lineEPt.Y) / 2, 0));
                 }
+
+                Vector3d dir = (lineEPt - lineSPt).GetNormal();
+                List<Line> resLines = new List<Line>();
+                if (isStart)
+                {
+                    lineSPt = lineSPt + dir * endLength;
+                    sPt = lineSPt;
+                    resPts.Add(lineSPt);
+                    resLines.Add(new Line(lineSPt, lineEPt));
+                }
+                else
+                {
+                    if (structEPt.DistanceTo(lineSPt) <= minLength)
+                    {
+                        return resPts;
+                    }
+                    lineEPt = lineEPt - dir * endLength;
+                    ePt = lineEPt;
+                    resPts.Add(lineEPt);
+                    resLines.Add(new Line(lineSPt, lineEPt));
+                }
+                resPts.AddRange(CalLayoutPoints(resLines, lineSPt, lineEPt, sPt, ePt));
+                //if (allLength > layoutLength)
+                //{
+                   
+                //}
+                //else
+                //{
+                    
+                //    resPts.Add(new Point3d((lineSPt.X + lineEPt.X) / 2, (lineSPt.Y + lineEPt.Y) / 2, 0));
+                //}
             }
 
             return resPts;

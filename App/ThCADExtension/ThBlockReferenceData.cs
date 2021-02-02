@@ -11,6 +11,7 @@ namespace ThCADExtension
         public Point3d Position { get; set; }
         public List<string> Texts { get; set; }
         public string EffectiveName { get; set; }
+        public string BlockLayer { get; set; }
         public Database HostDatabase { get; set; }
         public Matrix3d BlockTransform { get; set; }
         public SortedDictionary<string, string> Attributes { get; set; }
@@ -21,6 +22,7 @@ namespace ThCADExtension
             Position = blockRef.GetBlockPosition();
             Rotation = blockRef.GetBlockRotation();
             EffectiveName = blockRef.GetBlockName();
+            BlockLayer = blockRef.GetBlockLayer();
             CustomProperties = blockRef.GetDynProperties();
             BlockTransform = blockRef.GetBlockTransform();
             Attributes = blockRef.GetAttributesInBlockReference();

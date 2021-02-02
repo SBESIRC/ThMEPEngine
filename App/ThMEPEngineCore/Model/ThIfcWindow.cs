@@ -1,13 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcWindow : ThIfcBuildingElement
     {
-        //
+        public static ThIfcWindow Create(Entity entity)
+        {
+            return new ThIfcWindow()
+            {
+                Outline = entity,
+                Uuid = Guid.NewGuid().ToString()
+            };
+        }
     }
 }

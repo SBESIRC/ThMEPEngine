@@ -9,7 +9,7 @@
         /// <summary>
         /// 洗衣机地漏到雨水管最大距离（阳台区域）
         /// </summary>
-        public const double MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = 700;
+        public const double MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = 1700;
         /// <summary>
         /// 雨水管到地漏最大距离（阳台区域）
         /// </summary>
@@ -17,7 +17,7 @@
         /// <summary>
         /// 洗衣机到台盆最大距离（阳台区域）
         /// </summary>
-        public const double MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = 900;
+        public const double MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE = 1300;
         /// <summary>
         /// 洗衣机地漏到排水管最大距离（阳台区域）
         /// </summary>
@@ -49,11 +49,15 @@
         /// <summary>
         /// 标注线长度
         /// </summary>
-        public const double MAX_TAG_LENGTH = 260;
+        public const double MAX_TAG_LENGTH = 1660;
         /// <summary>
         /// 标注文字缩进
         /// </summary>
         public const double TEXT_INDENT = 40;
+        /// <summary>
+        /// 标注文字高度
+        /// </summary>
+        public const double TEXT_HEIGHT = 200;
         /// <summary>
         /// 侧入式雨水斗X方向缩进
         /// </summary>
@@ -95,9 +99,29 @@
         /// </summary>
         public const double MAX_TOILET_TO_KITCHEN_DISTANCE = 3500;
         /// <summary>
+        /// 厨房到雨水管最大距离
+        /// </summary>
+        public const double MAX_KITCHEN_TO_RAINPIPE_DISTANCE = 5500;
+        /// <summary>
+        /// 卫生间到冷凝管最大距离
+        /// </summary>
+        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 2600;
+        /// <summary>
+        /// 卫生间到地漏最大距离
+        /// </summary>
+        public const double MAX_TOILET_TO_FLOORDRAIN_DISTANCE = 2200;
+        /// <summary>
         /// 阳台到设备平台最大距离
         /// </summary>
-        public const double MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = 4500;
+        public const double MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE = 6000;
+        /// <summary>
+        /// 阳台雨水管到阳台其他地漏最大距离
+        /// </summary>
+        public const double MAX_BALCONYRAINPIPE_TO_FLOORDRAIN_DISTANCE = 4900;
+        /// <summary>
+        /// 可并行相邻阳台最远距离
+        /// </summary>
+        public const double MAX_BALCONY_TO_BALCONY_DISTANCE = 4000;
         /// <summary>
         /// 厨房到阳台最大距离
         /// </summary>
@@ -109,14 +133,53 @@
         /// <summary>
         /// 设备平台区域最大面积
         /// </summary>
-        public const double MAX_DEVICEPLATFORM_AREA = 1;
+        public const double MAX_DEVICEPLATFORM_AREA = 1.3;
         /// <summary>
         /// 基点圆区域最大面积
         /// </summary>
         public const double MAX_BASECIRCLE_AREA = 140;
         /// <summary>
+        /// 角度公差
+        /// </summary>
+        public const double MAX_ANGEL_TOLERANCE = 0.1;
+        /// <summary>
         /// 图层
         /// </summary>
         public const string AD_FLOOR_AREA = "AD-FLOOR-AREA";
+        /// <summary>
+        /// 雨水管标注
+        /// </summary>
+        public const string W_RAIN_NOTE = "W-RAIN-NOTE";
+        /// <summary>
+        /// 水管标注
+        /// </summary>
+        public const string W_DRAI_NOTE = "W-DRAI-NOTE";
+        /// <summary>
+        /// 雨水管立管
+        /// </summary>
+        public const string W_RAIN_EQPM = "W-RAIN-EQPM";
+        /// <summary>
+        /// 污水管立管
+        /// </summary>
+        public const string W_DRAI_EQPM = "W-DRAI-EQPM";
+        /// <summary>
+        /// 污废合流管道
+        /// </summary>
+        public const string W_DRAI_SEWA_PIPE = "W-DRAI-SEWA-PIPE"; 
+        public const string W_DRAI_SEWA_PIPE1 = "W-DRAI-DOME-PIPE";
+        /// <summary>
+        /// 通气管
+        /// </summary>
+        public const string W_DRAI_VENT_PIPE = "W-DRAI-VENT-PIPE";
+        /// <summary>
+        /// 雨水管
+        /// </summary>
+        public const string W_RAIN_PIPE = "W-RAIN-PIPE";
+        /// <summary>
+        /// 地漏
+        /// </summary>
+        public const string W_DRAI_FLDR = "W-DRAI-FLDR";
+        
+
     }
 }

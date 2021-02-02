@@ -14,9 +14,9 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSOperation
     {
-        public static DBObjectCollection Trim(this Polyline polyline, Curve curve)
+        public static DBObjectCollection Trim(this Polyline polyline, Curve curve, bool inverted = false)
         {
-            return ThCADCoreNTSGeometryClipper.Clip(polyline, curve);
+            return ThCADCoreNTSGeometryClipper.Clip(polyline, curve, inverted);
         }
 
         public static DBObjectCollection Buffer(this Polyline polyline, double distance)
@@ -80,13 +80,13 @@ namespace ThCADCore.NTS
             Geometry geometry = builder.Build(objs.Explode().ToMultiLineString());
             if (geometry is Polygon polygon)
             {
-                poylgons.Add(polygon.ToMPolygon());
+                poylgons.Add(polygon.ToDbEntity());
             }
             else if (geometry is MultiPolygon mPolygons)
             {
                 mPolygons.Geometries.Cast<Polygon>().ForEach(o =>
                 {
-                    poylgons.Add(o.ToMPolygon());
+                    poylgons.Add(o.ToDbEntity());
                 });
             }
             else

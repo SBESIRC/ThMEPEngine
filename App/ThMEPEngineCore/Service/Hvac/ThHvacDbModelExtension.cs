@@ -185,6 +185,42 @@ namespace ThMEPEngineCore.Service.Hvac
             return style.Contains(ThHvacCommon.AXIAL_TYPE_NAME);
         }
 
+        public static bool IsRawModel(this DBObject dBObject)
+        {
+            // 仅测试用，支持非天华风机选型生成的风机
+            if (dBObject is BlockReference reference)
+            {
+                var blockName = reference.GetEffectiveName();
+                return (blockName.Contains(ThHvacCommon.HTFC_BLOCK_NAME)
+                    || blockName.Contains(ThHvacCommon.AXIAL_BLOCK_NAME));
+            }
+            return false;
+        }
+
+        public static bool IsRawHTFCModel(this ObjectId obj)
+        {
+            // 仅测试用，支持非天华风机选型生成的风机
+            var dBObject = obj.GetObject(OpenMode.ForRead);
+            if (dBObject is BlockReference reference)
+            {
+                var blockName = reference.GetEffectiveName();
+                return blockName.Contains(ThHvacCommon.HTFC_BLOCK_NAME);
+            }
+            return false;
+        }
+
+        public static bool IsRawAXIALModel(this ObjectId obj)
+        {
+            // 仅测试用，支持非天华风机选型生成的风机
+            var dBObject = obj.GetObject(OpenMode.ForRead);
+            if (dBObject is BlockReference reference)
+            {
+                var blockName = reference.GetEffectiveName();
+                return blockName.Contains(ThHvacCommon.AXIAL_BLOCK_NAME);
+            }
+            return false;
+        }
+
         public static int GetModelNumber(this ObjectId obj)
         {
             var model = obj.GetObject(OpenMode.ForRead, true);

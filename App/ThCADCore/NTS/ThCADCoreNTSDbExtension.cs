@@ -1,4 +1,5 @@
 ﻿using System;
+using DotNetARX;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Algorithm;
@@ -6,7 +7,6 @@ using NetTopologySuite.Utilities;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
 
 namespace ThCADCore.NTS
 {
@@ -14,12 +14,11 @@ namespace ThCADCore.NTS
     {
         public static Polyline ToDbPolyline(this LineString lineString)
         {
-            var pline = new Polyline();
-            for (int i = 0; i < lineString.Coordinates.Length; i++)
+            var pline = new Polyline()
             {
-                pline.AddVertexAt(i, lineString.Coordinates[i].ToAcGePoint2d(), 0, 0, 0);
-            }
-            pline.Closed = lineString.StartPoint.EqualsExact(lineString.EndPoint);
+                Closed = lineString.IsClosed,
+            };
+            pline.CreatePolyline(lineString.Coordinates.ToAcGePoint3ds());
             return pline;
         }
 
@@ -33,19 +32,6 @@ namespace ThCADCore.NTS
             return line;
         }
 
-        public static Polyline ToDbPolyline(this LinearRing linearRing)
-        {
-            var pline = new Polyline()
-            {
-                Closed = true
-            };
-            for (int i = 0; i < linearRing.Coordinates.Length; i++)
-            {
-                pline.AddVertexAt(i, linearRing.Coordinates[i].ToAcGePoint2d(), 0, 0, 0);
-            }
-            return pline;
-        }
-
         public static List<Polyline> ToDbPolylines(this Polygon polygon)
         {
             var plines = new List<Polyline>();
@@ -57,27 +43,19 @@ namespace ThCADCore.NTS
             return plines;
         }
 
-        public static Entity ToDbMPolygon(this Polygon polygon)
+        public static MPolygon ToDbMPolygon(this Polygon polygon)
         {
-            var externalProfile = polygon.Shell.ToDbPolyline();
-            var holes = new List<Curve>();
-            foreach (LinearRing hole in polygon.Holes)
-            {
-                holes.Add(hole.ToDbPolyline());
-            }
-
-            if (holes.Count == 0)
-                return externalProfile;
-
-            //ThMPolygonTool.Initialize();
-            return ThMPolygonTool.CreateMPolygon(externalProfile, holes);
+            List<Curve> holes = new List<Curve>();
+            var shell = polygon.Shell.ToDbPolyline();
+            polygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
+            return ThMPolygonTool.CreateMPolygon(shell, holes);
         }
 
         public static Entity ToDbEntity(this Polygon polygon)
         {
-            if (polygon.Holes.Count() > 0)
+            if (polygon.NumInteriorRings > 0)
             {
-                return polygon.ToMPolygon();
+                return polygon.ToDbMPolygon();
             }
             else
             {
@@ -143,7 +121,7 @@ namespace ThCADCore.NTS
             return plines;
         }
 
-        public static List<DBObject> ToDbObjects(this Geometry geometry)
+        public static List<DBObject> ToDbObjects(this Geometry geometry, bool keepHoles = false)
         {
             var objs = new List<DBObject>();
             if (geometry.IsEmpty)
@@ -160,68 +138,28 @@ namespace ThCADCore.NTS
             }
             else if (geometry is Polygon polygon)
             {
-                objs.AddRange(polygon.ToDbPolylines());
+                if (keepHoles)
+                {
+                    objs.Add(polygon.ToDbMPolygon());
+                }
+                else
+                {
+                    objs.AddRange(polygon.ToDbPolylines());
+                }
             }
             else if (geometry is MultiLineString lineStrings)
             {
-                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
             }
             else if (geometry is MultiPolygon polygons)
             {
-                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
             }
             else if (geometry is GeometryCollection geometries)
             {
-                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects()));
+                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjects(keepHoles)));
             }
             else if (geometry is Point point) 
-            {
-                objs.Add(point.ToDbPoint());
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
-        }
-
-        /// <summary>
-        /// MPolygon数据格式流转
-        /// </summary>
-        /// <param name="geometry"></param>
-        /// <returns></returns>
-        public static List<DBObject> ToDbObjectsMP(this Geometry geometry)
-        {
-            var objs = new List<DBObject>();
-            if (geometry.IsEmpty)
-            {
-                return objs;
-            }
-            if (geometry is LineString lineString)
-            {
-                objs.Add(lineString.ToDbPolyline());
-            }
-            else if (geometry is LinearRing linearRing)
-            {
-                objs.Add(linearRing.ToDbPolyline());
-            }
-            else if (geometry is Polygon polygon)
-            {
-                objs.Add(polygon.ToDbMPolygon());
-            }
-            else if (geometry is MultiLineString lineStrings)
-            {
-                lineStrings.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
-            }
-            else if (geometry is MultiPolygon polygons)
-            {
-                polygons.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
-            }
-            else if (geometry is GeometryCollection geometries)
-            {
-                geometries.Geometries.ForEach(g => objs.AddRange(g.ToDbObjectsMP()));
-            }
-            else if (geometry is Point point)
             {
                 objs.Add(point.ToDbPoint());
             }
@@ -388,19 +326,8 @@ namespace ThCADCore.NTS
 
         public static LineString ToNTSLineString(this Arc arc)
         {
-            int segments = (int)Math.Ceiling(arc.Length / ThCADCoreNTSService.Instance.ArcTessellationLength);
-            return arc.ToNTSLineString(segments + 1);
-        }
-
-        public static LineString ToNTSLineString(this Arc arc, int numPoints)
-        {
-            var shapeFactory = new GeometricShapeFactory(ThCADCoreNTSService.Instance.GeometryFactory)
-            {
-                Centre = arc.Center.ToNTSCoordinate(),
-                Size = 2 * arc.Radius,
-                NumPoints = numPoints
-            };
-            return shapeFactory.CreateArc(arc.StartAngle, arc.TotalAngle);
+            var arcLength = ThCADCoreNTSService.Instance.ArcTessellationLength;
+            return arc.TessellateArcWithArc(arcLength).ToNTSLineString();
         }
 
         public static LineString ToNTSLineString(this Line line)
@@ -411,6 +338,11 @@ namespace ThCADCore.NTS
                 line.EndPoint.ToNTSCoordinate()
             };
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
+        }
+
+        public static LineSegment ToNTSLineSegment(this Line line)
+        {
+            return new LineSegment(line.StartPoint.ToNTSCoordinate(), line.EndPoint.ToNTSCoordinate());
         }
 
         public static Point ToNTSPoint(this DBPoint point)

@@ -28,7 +28,9 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 var closestools = GetClosestools(database, pts);
                 var floorDrains = GetFloorDrains(database, pts);
-                Rooms = ThToiletRoomService.Build(this.Spaces, closestools, floorDrains);
+                var condensePipes = GetCondensePipes(database, pts);
+                var roofRainPipes = GetRoofRainPipes(database, pts);
+                Rooms = ThToiletRoomService.Build(this.Spaces, closestools, floorDrains, condensePipes, roofRainPipes);
             }
         }
         private List<ThIfcClosestool> GetClosestools(Database database, Point3dCollection pts)
@@ -45,6 +47,22 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 floorDrainEngine.Recognize(database, pts);
                 return floorDrainEngine.Elements.Cast<ThIfcFloorDrain>().ToList();
+            }
+        }
+        private List<ThIfcCondensePipe> GetCondensePipes(Database database, Point3dCollection pts)
+        {
+            using (ThCondensePipeRecognitionEngine condensePipesEngine = new ThCondensePipeRecognitionEngine())
+            {
+                condensePipesEngine.Recognize(database, pts);
+                return condensePipesEngine.Elements.Cast<ThIfcCondensePipe>().ToList();
+            }
+        }
+        private List<ThIfcRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
+        {
+            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
+            {
+                roofRainPipesEngine.Recognize(database, pts);
+                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
             }
         }
     }

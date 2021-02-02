@@ -36,6 +36,11 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static bool IsOnLine(this Line line, Point3d pt)
+        {
+            return PointLocation.IsOnLine(pt.ToNTSCoordinate(), line.ToNTSGeometry().Coordinates);
+        }
+
         public static Line Normalize(this Line line)
         {
             var geometry = line.ToNTSLineString();

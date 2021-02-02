@@ -1,26 +1,24 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThArchitectureWallRecognitionEngine : ThBuildingElementRecognitionEngine
     {
-        private const double AbnormalBufferDis = 30.0;
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (ThCADCoreNTSFixedPrecision fixedPrecision=new ThCADCoreNTSFixedPrecision())
             using (var archWallDbExtension = new ThArchitectureWallDbExtension(database))
             {
                 archWallDbExtension.BuildElementCurves();
-                List<Curve> curves = new List<Curve>();
+                var curves = new DBObjectCollection();
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
@@ -33,34 +31,16 @@ namespace ThMEPEngineCore.Engine
                 }
                 else
                 {
-                    curves = archWallDbExtension.WallCurves;
+                    curves = archWallDbExtension.WallCurves.ToCollection();
                 }
-                curves.ForEach(o =>
+                if (curves.Count > 0)
                 {
-                    if (o is Polyline polyline && polyline.Area > 0.0)
-                    {
-                        Elements.Add(ThIfcWall.Create(polyline));
-                    }
-                });
+                    var results = ThArchitectureWallSimplifier.Normalize(curves);
+                    results = ThArchitectureWallSimplifier.Simplify(results);
+                    results = ThArchitectureWallSimplifier.BuildArea(results);
+                    results.Cast<Entity>().ForEach(o => Elements.Add(ThIfcWall.Create(o)));
+                }
             }
-        }
-        private List<Polyline> HandleAbnormalEdge(Polyline origin)
-        {
-            List<Polyline> results = new List<Polyline>();
-            var polyline = origin.ToNTSLineString().ToDbPolyline();
-            var innerObjs = polyline.Buffer(-AbnormalBufferDis);
-            if(innerObjs.Count==0)
-            {
-                return results;
-            }
-            var inner = innerObjs[0] as Polyline;
-            var outerObjs = inner.Buffer(AbnormalBufferDis);
-            if (outerObjs.Count == 0)
-            {
-                return results;
-            }
-            results.Add(outerObjs[0] as Polyline);
-            return results;
         }
     }
 }

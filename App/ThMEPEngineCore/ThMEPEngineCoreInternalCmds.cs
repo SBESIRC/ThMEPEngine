@@ -1,9 +1,16 @@
 ﻿using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Service;
+using NetTopologySuite.Geometries;
+using System.Linq;
+using NetTopologySuite.Operation.Union;
 
 namespace ThMEPEngineCore
 {
@@ -64,6 +71,112 @@ namespace ThMEPEngineCore
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THBUILDAREA", CommandFlags.Modal)]
+        public void ThBuildArea()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                foreach (Entity obj in objs.BuildArea())
+                {
+                    acadDatabase.ModelSpace.Add(obj);
+                    obj.SetDatabaseDefaults();
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THAREAUNION", CommandFlags.Modal)]
+        public void ThAreaUnion()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+
+                var geometry = objs.ToNTSMultiPolygon().Union();
+                foreach (Entity obj in geometry.ToDbCollection())
+                {
+                    acadDatabase.ModelSpace.Add(obj);
+                    obj.SetDatabaseDefaults();
+                }
+            }
+        }
+
+#if ACAD2016
+        [CommandMethod("TIANHUACAD", "THTRIANGULATE", CommandFlags.Modal)]
+        public void ThTriangulate()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var shell = acadDatabase.Element<Polyline>(result.ObjectId);
+
+                var holes = new List<Polyline>();
+                var options = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "请选择洞",
+                };
+                var result2 = Active.Editor.GetSelection(options);
+                if (result2.Status == PromptStatus.OK)
+                {
+                    foreach (var obj in result2.Value.GetObjectIds())
+                    {
+                        holes.Add(acadDatabase.Element<Polyline>(obj));
+                    }
+                }
+                var triangles = ThMEPTriangulationService.EarCut(shell, holes.ToArray());
+                foreach (Polyline triangle in triangles)
+                {
+                    triangle.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(triangle);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPOLYDECOMPOSE", CommandFlags.Modal)]
+        public void ThPolyDecompose()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var poly = acadDatabase.Element<Polyline>(result.ObjectId);
+                foreach (Entity e in ThMEPPolyDecomposer.Decompose(poly))
+                {
+                    e.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(e);
+                }
+            }
+        }
+
+#endif
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
         public void ThCenterline()
@@ -140,6 +253,32 @@ namespace ThMEPEngineCore
                 }
                 acadDatabase.ModelSpace.Add(pline);
                 pline.SetDatabaseDefaults();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THLANELINECLEAN", CommandFlags.Modal)]
+        public void ThLaneLineClean()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                var service = new ThLaneLineCleanService();
+                foreach (Line line in service.Clean(objs))
+                {
+                    acadDatabase.ModelSpace.Add(line);
+                    line.SetDatabaseDefaults();
+                }
             }
         }
     }

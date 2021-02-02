@@ -44,7 +44,7 @@ namespace ThMEPLighting.ParkingStall.CAD
                 {
                     if (space.Boundary is Polyline polyline)
                     {
-                        foreach (var entity in polyline.Buffer(ParkingStallCommon.ParkingPolyExtendLength))
+                        foreach (var entity in polyline.Buffer(ParkingStallCommon.ParkingPolyEnlargeLength))
                         {
                             if (entity is Polyline poly && poly.Closed)
                                 ParkingStallPolys.Add(poly);

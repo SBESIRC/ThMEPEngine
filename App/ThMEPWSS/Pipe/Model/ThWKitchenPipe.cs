@@ -1,4 +1,5 @@
-﻿namespace ThMEPWSS.Pipe.Model
+﻿using Autodesk.AutoCAD.Geometry;
+namespace ThMEPWSS.Pipe.Model
 {
     public class ThWKitchenPipeParameters
     {
@@ -8,10 +9,11 @@
         {
             Diameter = diameter;
             Identifier = string.Format("废水FLx{0}", number);
-        }
+        }    
     }
 
     public class ThWKitchenPipe : ThWPipe
     {
+        public Point3d Center { get; set; }
     }
 }

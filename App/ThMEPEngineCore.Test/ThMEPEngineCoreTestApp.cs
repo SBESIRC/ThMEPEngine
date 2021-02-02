@@ -15,6 +15,7 @@ using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPEngineCore.Test
 {
@@ -274,29 +275,26 @@ namespace ThMEPEngineCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THCenterLine", CommandFlags.Modal)]
-        public void THCenterLine()
+        [CommandMethod("TIANHUACAD", "THRemoveDangles", CommandFlags.Modal)]
+        public void THRemoveDangles()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
+                var objs = Active.Editor.GetSelection();
+                if (objs.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
+                var result = new DBObjectCollection();
+                foreach (var obj in objs.Value.GetObjectIds())
                 {
-                    objs.Add(acadDatabase.Element<Curve>(obj));
+                    result.Add(acadDatabase.Element<Curve>(obj));
                 }
-                foreach(Polyline polyline in objs)
+                var lines = ThLaneLineSimplifier.RemoveDangles(result, 100);
+                foreach (var obj in lines)
                 {
-                    var lines = ThMEPCenterlineService.CenterLineExtraction(polyline, 800);
-                    foreach (var obj in lines)
-                    {
-                        obj.ColorIndex = 1;
-                        acadDatabase.ModelSpace.Add(obj);
-                    }
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
                 }
             }
         }

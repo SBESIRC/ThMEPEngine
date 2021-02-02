@@ -16,6 +16,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using DotNetARX;
 
 namespace ThMEPEngineCore
 {
@@ -130,7 +132,11 @@ namespace ThMEPEngineCore
                     if (o.Outline is Curve curve)
                     {
                         acadDatabase.ModelSpace.Add(curve.WashClone());
-                    }                    
+                    }
+                    else if (o.Outline is MPolygon mPolygon)
+                    {
+                        acadDatabase.ModelSpace.Add(mPolygon);
+                    }
                 });
             }
         }
@@ -334,6 +340,167 @@ namespace ThMEPEngineCore
             dbText.Layer = "0";
             dbText.Height = 200;
             return dbText;
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractSpace", CommandFlags.Modal)]
+        public void ThExtractSpace()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var exportEngine = new ThGemometryExportEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                exportEngine.Export(acadDatabase.Database, frame.Vertices());
+                var geos = new List<ThGeometry>();
+                var objIds = new ObjectIdList();
+                exportEngine.Spaces.ForEach(o =>
+                {
+                    o.Boundary.ColorIndex = 5;
+                    o.Boundary.SetDatabaseDefaults();
+                    objIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
+                    var geometry = new ThGeometry();
+                    geometry.Boundary = o.Boundary as Polyline;
+                    o.Properties.ForEach(p => geometry.Properties.Add(p.Key, p.Value));
+                    geos.Add(geometry);
+                });
+                if(objIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
+                }               
+
+                // 输出GeoJson文件
+                var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Line.geojson", Active.DocumentName))))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                {
+                    Indentation = 4,
+                    IndentChar = ' ',
+                    Formatting = Formatting.Indented,
+                })
+                {
+                    var geoJsonWriter = new ThGeometryJsonWriter();
+                    geoJsonWriter.Write(geos, writer);
+                }
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThExtractGeo", CommandFlags.Modal)]
+        public void ThExtractGeo()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine =new ThExtractGeometryEngine())
+            {
+                extractEngine.Extract(acadDatabase.Database);
+                var geos = new List<ThGeometry>();
+                var spaceIds = new ObjectIdList();
+                extractEngine.Spaces.ForEach(o =>
+                {
+                    o.ColorIndex = 1;
+                    o.SetDatabaseDefaults();
+                    spaceIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();                    
+                    geometry.Properties.Add("Category", "Space");
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                });
+                if(spaceIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), spaceIds);
+                }               
+
+                var doorIds = new ObjectIdList();
+                extractEngine.Doors.ForEach(o =>
+                {
+                    o.ColorIndex = 2;
+                    o.SetDatabaseDefaults();
+                    doorIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "Door");
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                });
+                if(doorIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), doorIds);
+                }                
+                
+                var equipIds = new ObjectIdList();
+                extractEngine.Equipments.ForEach(e =>
+                {
+                    e.Value.ForEach(v =>
+                    {
+                        v.ColorIndex = 3;
+                        v.SetDatabaseDefaults();
+                        equipIds.Add(acadDatabase.ModelSpace.Add(v));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "Equipment");
+                        geometry.Properties.Add("Name", e.Key);
+                        geometry.Boundary = v;
+                        geos.Add(geometry);
+                    });
+                });
+                if(equipIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), equipIds);
+                }               
+
+                var obstructIds = new ObjectIdList();
+                extractEngine.Obstructs.ForEach(o =>
+                {
+                    o.ColorIndex = 4;
+                    o.SetDatabaseDefaults();
+                    obstructIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "Obstruct");
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                });
+                if(obstructIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), obstructIds);
+                }               
+
+                // 输出GeoJson文件
+                // 线
+                var docPath = Active.Document.Name;
+                var fileInfo = new FileInfo(docPath);
+                //var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                var path = fileInfo.Directory.FullName;
+                using (StreamWriter geoJson = File.CreateText(Path.Combine(path, string.Format("{0}.Info.geojson", Active.DocumentName))))
+                using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                {
+                    Indentation = 4,
+                    IndentChar = ' ',
+                    Formatting = Formatting.Indented,
+                })
+                {
+                    var geoJsonWriter = new ThGeometryJsonWriter();
+                    geoJsonWriter.Write(geos, writer);
+                }
+            }
+        }
+        [CommandMethod("TIANHUACAD", "THExtractDoor", CommandFlags.Modal)]
+        public void THExtractDoor()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var doorEngine = new ThDoorRecognitionEngine(1.0))
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                doorEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                doorEngine.Elements.ForEach(o =>
+                {
+                    o.Outline.ColorIndex = 4;
+                    o.Outline.SetDatabaseDefaults();
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                });
+            }
         }
     }
 }

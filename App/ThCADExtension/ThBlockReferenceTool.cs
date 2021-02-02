@@ -41,5 +41,15 @@ namespace ThCADExtension
             else
                 return Point3d.Origin;
         }
+
+        public static string GetBlockLayer(this ObjectId id)
+        {
+            BlockReference bref = id.GetObject(OpenMode.ForRead) as BlockReference;
+            if (bref != null)//如果是块参照
+                return bref.Layer;
+            else
+                return "0";
+        }
+
     }
 }

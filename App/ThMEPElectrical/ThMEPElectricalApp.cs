@@ -28,7 +28,6 @@ namespace ThMEPElectrical
             //
         }
 
-
         [CommandMethod("TIANHUACAD", "THMainBeamRegion", CommandFlags.Modal)]
         public void ThBeamRegion()
         {

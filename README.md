@@ -3,9 +3,13 @@ Tianhua AutoCAD MEP toolkits
 
 # Build environment
 
-Win10 + Visual Studio 2019 Community
+Win10
 
-WiX Toolset v3.11.1 (WiX Toolset Visual Studio 2019 Extension)
+[Visual Studio 2019 Community](https://docs.microsoft.com/en-us/visualstudio/releases/2019/compatibility)
+
+[WiX Toolset v3.11.1](https://wixtoolset.org/releases/) 
+
+[WiX Toolset Visual Studio 2019 Extension](https://marketplace.visualstudio.com/items?itemName=WixToolset.WixToolsetVisualStudio2019Extension)
 
 # C# code styles
 

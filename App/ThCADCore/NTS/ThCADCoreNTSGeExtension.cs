@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.Geometry;
+using NetTopologySuite.Algorithm;
 
 namespace ThCADCore.NTS
 {
@@ -80,14 +81,22 @@ namespace ThCADCore.NTS
             return points;
         }
 
-        public static bool IsReflex(Coordinate p1, Coordinate p2, Coordinate p3)
+        public static bool IsReflex(Point3d p1, Point3d p2, Point3d p3)
         {
             return (p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y) < 0;
         }
 
-        public static bool IsConvex(Coordinate p1, Coordinate p2, Coordinate p3)
+        public static bool IsConvex(Point3d p1, Point3d p2, Point3d p3)
         {
             return (p3.Y - p1.Y) * (p2.X - p1.X) - (p3.X - p1.X) * (p2.Y - p1.Y) > 0;
+        }
+
+        public static bool IsCollinear(Point3d p1, Point3d p2, Point3d p3)
+        {
+            var coordinate1 = p1.ToNTSCoordinate();
+            var coordinate2 = p2.ToNTSCoordinate();
+            var coordinate3 = p3.ToNTSCoordinate();
+            return Orientation.Index(coordinate1, coordinate2, coordinate3) == OrientationIndex.Collinear;
         }
     }
 }

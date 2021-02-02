@@ -73,7 +73,7 @@ namespace ThMEPWSS.Pipe.Service
         private List<Tuple<ThIfcSpace,List<ThIfcSpace>>> DevicePlatformSpaces()
         {
             var PlatformSpaces = new List<Tuple<ThIfcSpace, List<ThIfcSpace>>>();
-            var BalconySpaces= Spaces.Where(m => m.Tags.Where(n => n.Contains("生活阳台")).Any()).ToList();
+            var BalconySpaces= Spaces.Where(m => m.Tags.Where(n => n.Contains("阳台")).Any()).ToList();
             foreach (var BalconySpace in BalconySpaces)
             {
                 var bufferObjs = ThCADCoreNTSOperation.Buffer(BalconySpace.Boundary as Polyline, ThWPipeCommon.BALCONY_BUFFER_DISTANCE);

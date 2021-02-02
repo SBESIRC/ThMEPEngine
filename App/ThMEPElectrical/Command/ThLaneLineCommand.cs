@@ -3,12 +3,17 @@ using NFox.Cad;
 using AcHelper;
 using Linq2Acad;
 using System.Linq;
+using ThCADCore.NTS;
+using ThCADExtension;
 using AcHelper.Commands;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPElectrical.Lane;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPElectrical.Command
 {
@@ -47,12 +52,46 @@ namespace ThMEPElectrical.Command
                 foreach (var frameId in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
-                    acadDatabase.Database.LaneLines(frame).Cast<Entity>().ForEach(o =>
+                    var lines = LoadLaneLines(acadDatabase.Database, frame);
+                    lines = CleanLaneLines(lines);
+                    lines.Cast<Curve>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
                     });
                 }
+            }
+        }
+
+        private DBObjectCollection CleanLaneLines(DBObjectCollection curves)
+        {
+            var service = new ThLaneLineCleanService()
+            {
+                CollinearGap = 150.0,
+                ExtendDistance = 150.0,
+            };
+            return service.Clean(curves);
+        }
+
+        private DBObjectCollection LoadLaneLines(Database database, Polyline frame)
+        {
+            using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
+            {
+                var nFrame = ThMEPFrameService.NormalizeEx(frame);
+                if (nFrame.Area > 0)
+                {
+                    // 提取车道中心线
+                    var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
+                    laneLineEngine.Recognize(database, bFrame.Vertices());
+
+                    // 车道中心线处理
+                    var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
+                    var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
+
+                    // 框线相交处打断
+                    return ThCADCoreNTSGeometryClipper.Clip(nFrame, lines.ToCollection());
+                }
+                return new DBObjectCollection();
             }
         }
     }

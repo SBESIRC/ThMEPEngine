@@ -35,12 +35,13 @@ namespace ThMEPLighting.ParkingStall.Worker.ParkingGroup
         {
             foreach (var nearParksPolylineNode in m_nearParksPolylineNodes)
             {
+                // 每组细分处理工作
                 ParkingRelatedGroups.AddRange(NearParksPolylineNodeIntoParkingRelatedGroup(nearParksPolylineNode));
             }
         }
 
         /// <summary>
-        ///  注意精度损失
+        ///  注意精度损失， 
         /// </summary>
         /// <param name="nearParksPolylineNode"></param>
         /// <returns></returns>

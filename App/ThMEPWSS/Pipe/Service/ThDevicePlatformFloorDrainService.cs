@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Assistant;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -42,7 +43,9 @@ namespace ThMEPWSS.Pipe.Service
         }
         private void Find()
         {
-            var devicePlatformBoundary = DevicePlatformSpace.Boundary as Polyline;
+            // to do curve 封闭逻辑放到模型那边统一预处理，这边只是暂时处理
+            var devicePlatformBoundary = DevicePlatformSpace.Boundary.Clone() as Polyline;
+            devicePlatformBoundary.Closed = true;                   
             var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(devicePlatformBoundary);
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
             FloorDrains = crossFloordrains.Where(o =>

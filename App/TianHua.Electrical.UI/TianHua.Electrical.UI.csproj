@@ -62,6 +62,12 @@
     <Compile Include="CAD\ElectricalUIDbExtension.cs" />
     <Compile Include="ElectricalUIApp.cs" />
     <Compile Include="ElectricalUICommon.cs" />
+    <Compile Include="fmBasementLighting.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmBasementLighting.Designer.cs">
+      <DependentUpon>fmBasementLighting.cs</DependentUpon>
+    </Compile>
     <Compile Include="fmBlockConvert.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -76,6 +82,9 @@
     </Compile>
     <Compile Include="FuncControlStyle.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="fmBasementLighting.resx">
+      <DependentUpon>fmBasementLighting.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="fmBlockConvert.resx">
       <DependentUpon>fmBlockConvert.cs</DependentUpon>
     </EmbeddedResource>
@@ -119,6 +128,10 @@
     <ProjectReference Include="..\ThMEPElectrical\ThMEPElectrical.csproj">
       <Project>{9f81d0c6-08fe-451e-9379-5882f9270e55}</Project>
       <Name>ThMEPElectrical</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ThMEPLighting\ThMEPLighting.csproj">
+      <Project>{6eb17675-61ba-4669-a2ed-da7a8a4af715}</Project>
+      <Name>ThMEPLighting</Name>
     </ProjectReference>
     <ProjectReference Include="..\TianHua.Electrical\TianHua.Electrical.csproj">
       <Project>{c74a25a1-1991-4eb7-bd43-808cd8df4b32}</Project>

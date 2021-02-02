@@ -11,7 +11,7 @@ namespace ThCADExtension
     {
         // https://forums.autodesk.com/t5/net/restore-hatch-boundaries-if-they-have-been-lost-with-net/td-p/3779514
         // https://adndevblog.typepad.com/autocad/2012/04/perimeter-of-a-hatch-using-objectarx-and-autocad-net-api.html
-        public static List<Curve> Boundaries(this Hatch hatch)
+        public static List<Curve> Boundaries(this Hatch hatch,double tolerance=1e-4)
         {
             var curves = new List<Curve>();
             if(hatch==null)
@@ -81,7 +81,12 @@ namespace ThCADExtension
                         //}
                     }
                     segments.Join();
-                    curves.Add(segments.ToPolyline());
+                    var newPoly = segments.ToPolyline();
+                    if (newPoly.StartPoint.IsEqualTo(newPoly.EndPoint,new Tolerance(tolerance, tolerance)))
+                    {
+                        newPoly.Closed = true;
+                    }
+                    curves.Add(newPoly);
                 }
             }
             return curves;

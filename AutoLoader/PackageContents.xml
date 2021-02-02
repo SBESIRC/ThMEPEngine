@@ -101,6 +101,8 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -116,6 +118,8 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -131,6 +135,8 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
             </Commands>
         </ComponentEntry>
@@ -146,7 +152,65 @@
                 <Command Local="THFDCP" Global="THFDCP" />
                 <Command Local="THFDFS" Global="THFDFS" />
                 <Command Local="THYGMQ" Global="THYGMQ" />
+                <Command Local="THGB" Global="THGB" />
+                <Command Local="THGBMQ" Global="THGBMQ" />
                 <Command Local="THUCSCOMPASS" Global="THUCSCOMPASS" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPLighting, 2012 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
+        <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXC" Global="THDXC" />
+                <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THFDXC" Global="THFDXC" />
+                <Command Local="THCDZMBZ" Global="THCDZMBZ" />
+                <Command Local="THCDBH" Global="THCDBH" />
+                <Command Local="THCDTJ" Global="THCDTJ" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPLighting, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXC" Global="THDXC" />
+                <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THFDXC" Global="THFDXC" />
+                <Command Local="THCDZMBZ" Global="THCDZMBZ" />
+                <Command Local="THCDBH" Global="THCDBH" />
+                <Command Local="THCDTJ" Global="THCDTJ" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPLighting, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXC" Global="THDXC" />
+                <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THFDXC" Global="THFDXC" />
+                <Command Local="THCDZMBZ" Global="THCDZMBZ" />
+                <Command Local="THCDBH" Global="THCDBH" />
+                <Command Local="THCDTJ" Global="THCDTJ" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPLighting, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPLighting.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Lighting" AppName="ThMEPLighting" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXC" Global="THDXC" />
+                <Command Local="THYJZM" Global="THYJZM" />
+                <Command Local="THFDXC" Global="THFDXC" />
+                <Command Local="THCDZMBZ" Global="THCDZMBZ" />
+                <Command Local="THCDBH" Global="THCDBH" />
+                <Command Local="THCDTJ" Global="THCDTJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -204,6 +268,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -213,6 +278,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -222,6 +288,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -231,6 +298,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Electrical.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP Electrical UI" AppName="ElectricalUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYWG" Global="THYWG" />
+                <Command Local="THCDZM" Global="THCDZM" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -264,9 +332,45 @@
     <!--Assembly App, Plumbing.UI, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="PlumbingUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Havc.UI, 2012 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
+        <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJF" Global="THFJF" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Havc.UI, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJF" Global="THFJF" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Havc.UI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJF" Global="THFJF" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Havc.UI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Hvac.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for HVAC" AppName="HvacUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJF" Global="THFJF" />
             </Commands>
         </ComponentEntry>
     </Components>

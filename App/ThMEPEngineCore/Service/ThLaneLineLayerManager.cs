@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Service
 {

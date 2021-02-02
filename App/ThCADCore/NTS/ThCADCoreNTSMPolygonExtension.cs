@@ -63,12 +63,5 @@ namespace ThCADCore.NTS
             }
             return objs;
         }
-        public static MPolygon ToMPolygon(this Polygon polygon)
-        {
-            var shell = polygon.Shell.ToDbPolyline();
-            List<Curve> curves = new List<Curve>();
-            polygon.Holes.ForEach(o => curves.Add(o.ToDbPolyline()));
-            return ThMPolygonTool.CreateMPolygon(shell, curves);
-        }
     }
 }

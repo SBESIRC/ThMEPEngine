@@ -26,6 +26,12 @@ namespace ThCADCore.NTS
 
         public static ICollection<Geometry> Polygonize(this Geometry geometry)
         {
+            // Input geometry may contain the following situations, which are invalid in the OGC geometry model:
+            //  A ring which self-touches at discrete points(the so - called "inverted polygon" or "exverted hole")
+            //  A ring which self-touches in one or more line segments
+            //  Rings which touch other ones along one or more line segments
+            // These are "strongly invalid", and will trigger a TopologyException during overlay.
+            // http://lin-ear-th-inking.blogspot.com/2020/06/jts-overlayng-tolerant-topology.html
             var polygonizer = new Polygonizer();
             polygonizer.Add(UnaryUnionOp.Union(geometry));
             return polygonizer.GetPolygons();

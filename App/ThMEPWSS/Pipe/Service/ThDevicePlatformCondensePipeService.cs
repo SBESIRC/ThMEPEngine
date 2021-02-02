@@ -39,8 +39,9 @@ namespace ThMEPWSS.Pipe.Service
             return instance;
         }
         private void Find()
-        {
-            var devicePlatformBoundary = DevicePlatformSpace.Boundary as Polyline;
+        {           
+            var devicePlatformBoundary = DevicePlatformSpace.Boundary.Clone() as Polyline;
+            devicePlatformBoundary.Closed = true;
             var crossObjs = CondensePipeSpatialIndex.SelectCrossingPolygon(devicePlatformBoundary);
             var crossCondensePipe = CondensePipeList.Where(o => crossObjs.Contains(o.Outline));
             CondensePipes = crossCondensePipe.Where(o => devicePlatformBoundary.Contains(o.Outline as Curve)).ToList();

@@ -1,10 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
 using Linq2Acad;
-using System;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using System.Linq;
-using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {

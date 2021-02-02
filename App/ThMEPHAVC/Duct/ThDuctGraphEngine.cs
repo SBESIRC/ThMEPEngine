@@ -13,10 +13,13 @@ namespace ThMEPHVAC.Duct
     public class ThDuctVertex : IEquatable<ThDuctVertex>
     {
         public Point3d Position { get; set; }
+        public bool IsStartVertexOfGraph { get; set; }
+
 
         public ThDuctVertex(Point3d point)
         {
             Position = point;
+            IsStartVertexOfGraph = false;
         }
 
         public bool Equals(ThDuctVertex other)
@@ -33,6 +36,8 @@ namespace ThMEPHVAC.Duct
         public double TotalVolumeInEdgeChain { get; set; }
         public int DraughtCount { get; set; }
         public double EdgeLength { get; private set; }
+        public double SourceShrink { get; set; }
+        public double TargetShrink { get; set; }
         public ThDuctEdge(TVertex source, TVertex target) : base(source, target)
         {
             EdgeLength = source.Position.DistanceTo(target.Position);
@@ -59,6 +64,7 @@ namespace ThMEPHVAC.Duct
             if (ifFirstSearch)
             {
                 source = new ThDuctVertex(sourcepoint);
+                source.IsStartVertexOfGraph = true;
                 Graph.AddVertex(source);
             }
             else
@@ -97,8 +103,7 @@ namespace ThMEPHVAC.Duct
 
             //首先单独处理起始段,探测点为用户指定的起点，第一轮探测
             var poly = new Polyline();
-            Matrix3d mt = Active.Editor.CurrentUserCoordinateSystem;
-            poly.CreatePolygon(searchpoint.TransformBy(mt).ToPoint2D(), 4, 10);
+            poly.CreatePolygon(searchpoint.ToPoint2D(), 4, 10);
             var results = SpatialIndex.SelectCrossingPolygon(poly);
             if (results.Count == 0 || results.Count > 1)
             {

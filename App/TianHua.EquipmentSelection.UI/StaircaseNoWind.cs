@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using TianHua.FanSelection.Model;
 using System.Text.RegularExpressions;
+using TianHua.Publics.BaseCode;
 
 namespace TianHua.FanSelection.UI
 {
@@ -32,6 +33,7 @@ namespace TianHua.FanSelection.UI
             CheckPanel.Controls.Clear();
             subview = new ModelValidation(Model);
             CheckPanel.Controls.Add(subview);
+            N2Value.Text = Model.N2.ToString();
 
             switch (model.Load)
             {
@@ -92,6 +94,7 @@ namespace TianHua.FanSelection.UI
 
         private void lowLoad_Click(object sender, EventArgs e)
         {
+            Model.StairN1 = GetN1Value();
             if (lowLoad.Checked)
             {
                 Model.Load = StaircaseNoAirModel.LoadHeight.LoadHeightLow;
@@ -103,6 +106,7 @@ namespace TianHua.FanSelection.UI
 
         private void middleLoad_Click(object sender, EventArgs e)
         {
+            Model.StairN1 = GetN1Value();
             if (middleLoad.Checked)
             {
                 Model.Load = StaircaseNoAirModel.LoadHeight.LoadHeightMiddle;
@@ -113,6 +117,7 @@ namespace TianHua.FanSelection.UI
 
         private void highLoad_Click(object sender, EventArgs e)
         {
+            Model.StairN1 = GetN1Value();
             if (highLoad.Checked)
             {
                 Model.Load = StaircaseNoAirModel.LoadHeight.LoadHeightHigh;
@@ -350,6 +355,12 @@ namespace TianHua.FanSelection.UI
             gridView3.PostEditor();
             subview.Refresh();
             Model.StairN1 = GetN1Value();
+            UpdateWithModel();
+        }
+
+        private void N2Value_EditValueChanged(object sender, EventArgs e)
+        {
+            Model.N2 = N2Value.Text.NullToDouble();
             UpdateWithModel();
         }
     }

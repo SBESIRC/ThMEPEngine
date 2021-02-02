@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            return (patterns[0] == "S") && (patterns[1] == "P") && (patterns[2] == "H");
+            return ((patterns[0] == "S") && (patterns[1] == "P") && (patterns[2] == "H")|| (patterns[0] == "3") && (patterns[1] == "PIPE") && (patterns[2] == "W"));
         }
     }
 }

@@ -169,5 +169,10 @@ namespace TianHua.FanSelection.Model
         /// 用户输入的估算风量
         /// </summary>
         public string EstimateAirVolum { get; set; }
+
+        /// <summary>
+        /// 轴对称烟羽流的空间类型
+        /// </summary>
+        public string SpaceType { get; set; }
     }
 }

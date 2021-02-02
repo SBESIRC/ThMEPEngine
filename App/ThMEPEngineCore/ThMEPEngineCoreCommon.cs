@@ -7,6 +7,7 @@ namespace ThMEPEngineCore
     {
         public static string BUILDELEMENT_PROPERTY_CATEGORY = "Category";
         public static string BUILDELEMENT_PROPERTY_USER_TYPE = "UserType";
+        public static string BUILDELEMENT_PROPERTY_Boundary = "边界";
         public static string BUILDELEMENT_PROPERTY_MATERIAL = "材质";
         public static string BUILDELEMENT_PROPERTY_LAYER = "图层";
         public static string BUILDELEMENT_PROPERTY_PROJECT_LEVEL = "投影层次";
@@ -16,7 +17,8 @@ namespace ThMEPEngineCore
             BUILDELEMENT_PROPERTY_USER_TYPE,
             BUILDELEMENT_PROPERTY_MATERIAL,
             BUILDELEMENT_PROPERTY_LAYER,
-            BUILDELEMENT_PROPERTY_PROJECT_LEVEL
+            BUILDELEMENT_PROPERTY_PROJECT_LEVEL,
+            BUILDELEMENT_PROPERTY_Boundary
         };
 
         // 图层
@@ -29,6 +31,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_S_BEAM = "结构梁";
         public static string BUILDELEMENT_CATEGORY_S_WALL = "结构墙";
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
+        public static string BUILDELEMENT_CATEGORY_DOOR = "门";
 
         // 梁标注
         public static string BEAM_GEOMETRY_SIZE = "Beam_Geometry_Size";
@@ -42,7 +45,9 @@ namespace ThMEPEngineCore
         public const int COLORINDEX_BEAM_SECONDARY = 4;
 
         // 全局公差
+        public static double LOOSE_ZERO_LENGTH = 10.0;
         public static double LOOSE_PARALLEL_ANGLE = 1.0;
+        public static double LOOSE_CLOSED_POLYLINE = 100.0;
         public static double LOOSE_COLINEAR_DISTANCE = 1.0;
         public static Tolerance GEOMETRY_TOLERANCE = new Tolerance(1.0, 1.0);
 

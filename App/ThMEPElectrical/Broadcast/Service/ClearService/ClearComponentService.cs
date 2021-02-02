@@ -1,7 +1,6 @@
 ﻿using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using DotNetARX;
 using Linq2Acad;
@@ -9,10 +8,7 @@ using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThCADExtension;
 
 namespace ThMEPElectrical.Broadcast.Service.ClearService
 {
@@ -86,6 +82,38 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
                 {
                     line.UpgradeOpen();
                     line.Erase();
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删除喷淋布置线
+        /// </summary>
+        /// <param name="polyline"></param>
+        public static void ClearPipeLines(this Polyline polyline)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(ThMEPCommon.ConnectPipeLayerName);
+                acadDatabase.Database.UnLockLayer(ThMEPCommon.ConnectPipeLayerName);
+                acadDatabase.Database.UnOffLayer(ThMEPCommon.ConnectPipeLayerName);
+                var objs = new DBObjectCollection();
+                var pipeLines = acadDatabase.ModelSpace
+                    .OfType<Line>()
+                    .Where(o => o.Layer == ThMEPCommon.ConnectPipeLayerName);
+                foreach (var line in pipeLines)
+                {
+                    objs.Add(line);
+                }
+
+                var bufferPoly = polyline.Buffer(1)[0] as Polyline;
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var pipes = thCADCoreNTSSpatialIndex.SelectWindowPolygon(bufferPoly).Cast<Line>().ToList();
+
+                foreach (var sLine in pipes)
+                {
+                    sLine.UpgradeOpen();
+                    sLine.Erase();
                 }
             }
         }

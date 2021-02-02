@@ -16,15 +16,16 @@ namespace ThMEPWSS.Pipe.Engine
         public Point3dCollection Condensepipe_tofloordrain { get; set; }
         public Point3dCollection Rainpipe_tofloordrain { get; set; }
         public Point3dCollection RoofRainpipe_tofloordrain { get; set; }
+   
         public ThWDeviceFloordrainEngine()
         {
             Devicefloordrain = new Point3dCollection();
             Condensepipe_tofloordrain = new Point3dCollection();
             Rainpipe_tofloordrain = new Point3dCollection();
-            RoofRainpipe_tofloordrain = new Point3dCollection();
+            RoofRainpipe_tofloordrain = new Point3dCollection();        
         }
 
-        public void Run(Polyline rainpipe, Polyline device, Polyline condensepipe, List<BlockReference> devicefloordrain, Polyline roofrainpipe)
+        public void Run(Polyline rainpipe, Polyline device, List<Polyline> condensepipes, List<BlockReference> devicefloordrain, Polyline roofrainpipe)
         {
             int num=0;
             for (int i = 0; i < devicefloordrain.Count; i++)
@@ -34,34 +35,52 @@ namespace ThMEPWSS.Pipe.Engine
                     num = i;
                 }          
             }
-            
+            Polyline condensepipe = null;
+            int num1 = 0;
+            foreach (Polyline pipe in condensepipes)
+            {               
+                if (GeomUtils.PtInLoop(device, pipe.GetCenter()))
+                {
+                    num1 = 1;
+                    condensepipe = pipe;
+                    break;
+                }
+            }
+            if(num1==0)
+            {
+                condensepipe = condensepipes[0];
+            }
             Devicefloordrain.Add(Isinsidedevice(device, devicefloordrain[num]));
             if (Condensepipe_floordrain(device, condensepipe, devicefloordrain[num]).Count > 0)
             {
                 Condensepipe_tofloordrain = Condensepipe_floordrain(device, condensepipe, devicefloordrain[num]);
-            }
-            else if (Rainpipe_floordrain(device, rainpipe, devicefloordrain[num]).Count > 0)
-            {
-                Rainpipe_tofloordrain = Rainpipe_floordrain(device, rainpipe, devicefloordrain[num]);
-            }
+            }          
             else
             {
-                //throw new ArgumentNullException("Drawing errors");
-            }
-            if (roofrainpipe != null)
-            {
-                if (RoofRainpipe_floordrain(device, roofrainpipe, devicefloordrain[num]).Count > 0)
+                if (Rainpipe_floordrain(device, rainpipe, devicefloordrain[num]).Count > 0)
                 {
-                    RoofRainpipe_tofloordrain = RoofRainpipe_floordrain(device, roofrainpipe, devicefloordrain[num]);
+                    Rainpipe_tofloordrain = Rainpipe_floordrain(device, rainpipe, devicefloordrain[num]);
+                }
+                else
+                {
+                    if (roofrainpipe != null)
+                    {
+                        if (RoofRainpipe_floordrain(device, roofrainpipe, devicefloordrain[num]).Count > 0)
+                        {
+                            RoofRainpipe_tofloordrain = RoofRainpipe_floordrain(device, roofrainpipe, devicefloordrain[num]);
+                        }
+                    }
+                    //throw new ArgumentNullException("Drawing errors");
                 }
             }
+           
         }
     
-        private Point3d Isinsidedevice(Polyline device, BlockReference devicefloordrain)
+        private Point3d Isinsidedevice(Polyline device, BlockReference device_floordrain)
         {     
-            if (GeomUtils.PtInLoop(device, devicefloordrain.Position))
+            if (GeomUtils.PtInLoop(device, device_floordrain.Position))
             {
-                return devicefloordrain.Position;
+                return device_floordrain.Position;
             }
             else
             {
@@ -92,7 +111,10 @@ namespace ThMEPWSS.Pipe.Engine
 
         }
         private Point3dCollection Rainpipe_floordrain(Polyline device, Polyline rainpipe, BlockReference devicefloordrain)
-        {   
+        {   if(rainpipe==null)
+            {
+                return new Point3dCollection();
+            }
             var rainpipe_floordrain = new Point3dCollection();
             if (GeomUtils.PtInLoop(device, rainpipe.GetCenter()))
             {

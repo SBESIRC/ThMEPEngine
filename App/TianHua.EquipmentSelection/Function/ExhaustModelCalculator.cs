@@ -182,8 +182,7 @@ namespace TianHua.FanSelection.Function
         //计算轴对称型Mp值
         public static double GetAxialCalcAirVolum(ExhaustCalcModel model)
         {
-            double hsp = model.SpaceHeight.NullToDouble() < 3 ? 0.5 * model.SpaceHeight.NullToDouble() : model.Axial_HighestHeight.NullToDouble();
-            double hq = 1.6 + 0.1 * hsp;
+            double hq = GetHqValue(model);
             double z = 0;
             if (model.Axial_HangingWallGround.IsNullOrEmptyOrWhiteSpace())
             {
@@ -294,8 +293,7 @@ namespace TianHua.FanSelection.Function
         //获取Z值
         public static double GetZValue(ExhaustCalcModel model)
         {
-            double hsp = model.SpaceHeight.NullToDouble() < 3 ? 0.5 * model.SpaceHeight.NullToDouble() : model.Axial_HighestHeight.NullToDouble();
-            double hq = 1.6 + 0.1 * hsp;
+            double hq = GetHqValue(model);
             double z = 0;
             if (model.Axial_HangingWallGround.IsNullOrEmptyOrWhiteSpace())
             {
@@ -325,7 +323,22 @@ namespace TianHua.FanSelection.Function
         //获取Hq值
         public static double GetHqValue(ExhaustCalcModel model)
         {
-            double hsp = model.SpaceHeight.NullToDouble() < 3 ? 0.5 * model.SpaceHeight.NullToDouble() : model.Axial_HighestHeight.NullToDouble();
+            double hsp = 0;
+            if (model.SpaceHeight.NullToDouble() <= 3)
+            {
+                hsp = 0.5 * model.SpaceHeight.NullToDouble();
+            }
+            else
+            {
+                if (model.SpaceType == "单层空间")
+                {
+                    hsp = model.SpaceHeight.NullToDouble();
+                }
+                else
+                {
+                    hsp = model.Axial_HighestHeight.NullToDouble();
+                }
+            }
             return 1.6 + 0.1 * hsp;
         }
 

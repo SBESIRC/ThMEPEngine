@@ -5,9 +5,9 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
 using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries.Utilities;
+using NTSDimension = NetTopologySuite.Geometries.Dimension;
 
 namespace ThCADCore.NTS
 {
@@ -34,73 +34,25 @@ namespace ThCADCore.NTS
 
         public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
         {
-            return UnaryUnionOp.Union(curves.ToNTSLineStrings());
+            // UnaryUnionOp.Union()有Robust issue
+            // 会抛出"non-noded intersection" TopologyException
+            // 为了规避这个问题，这里使用Geometry.Union()
+            // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
+            var mLineString = ToMultiLineString(curves);
+            Geometry nodedLineStrings = ThCADCoreNTSService.Instance.GeometryFactory.CreateEmpty(NTSDimension.Curve);
+            mLineString.Geometries.ForEach(o => nodedLineStrings = nodedLineStrings.Union(o));
+            return nodedLineStrings;
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
-            // The buffer(0) trick is sometimes faster, 
-            // but can be less robust and can sometimes take a long time to complete. 
-            // This is particularly the case where there is a high degree of overlap between the polygons. 
-            // In this case, buffer(0) is forced to compute with all line segments from the outset, 
-            // whereas cascading can eliminate many segments at each stage of processing. 
-            // The best situation for using buffer(0) is the trivial case where 
-            // there is no overlap between the input geometries. 
-            // However, this case is likely rare in practice.
-            return curves.ToNTSMultiPolygon().Buffer(0);
+            // https://lin-ear-th-inking.blogspot.com/2007/11/fast-polygon-merging-in-jts-using.html
+            return curves.ToNTSMultiPolygon().Union();
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
-            if (curves.Count <= 0)
-            {
-                return curves;
-            }
-
-            var objs = new DBObjectCollection();
-            var result = CascadedPolygonUnion.Union(curves.ToNTSPolygons().ToArray());
-            if (result is Polygon bufferPolygon)
-            {
-                foreach (var poly in bufferPolygon.ToDbPolylines())
-                {
-                    objs.Add(poly);
-                }
-            }
-            else if (result is MultiPolygon mPolygon)
-            {
-                foreach (Polygon item in mPolygon.Geometries)
-                {
-                    foreach (var poly in item.ToDbPolylines())
-                    {
-                        objs.Add(poly);
-                    }
-                }
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return objs;
-        }
-
-        public static DBObjectCollection UnionLineStrings(this DBObjectCollection curves)
-        {
-            // Unioning a set of LineStrings has the effect of noding and dissolving the input linework. 
-            // In this context "fully noded" means that there will be an endpoint or 
-            // node in the result for every endpoint or line segment crossing in the input. 
-            // "Dissolved" means that any duplicate (i.e. coincident) line segments or 
-            // portions of line segments will be reduced to a single line segment in the result.
-            var results = UnaryUnionOp.Union(curves.ToNTSLineStrings());
-            if (results is MultiLineString geometries)
-            {
-                var objs = new DBObjectCollection();
-                geometries.ToDbPolylines().ForEach(o => objs.Add(o));
-                return objs;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            return curves.UnionGeometries().ToDbCollection();
         }
 
         public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
@@ -119,12 +71,7 @@ namespace ThCADCore.NTS
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
         {
-            var geometries = new List<Geometry>();
-            foreach (Curve curve in curves)
-            {
-                geometries.Add(curve.ToNTSGeometry());
-            }
-            // 暂时过滤掉Polygon
+            var geometries = curves.Cast<Curve>().Select(o => o.ToNTSGeometry());
             var lineStrings = geometries.Where(o => o is LineString).Cast<LineString>();
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }
@@ -135,17 +82,12 @@ namespace ThCADCore.NTS
             return GeometryCombiner.Combine(geometries);
         }
 
-        /// <summary>
-        /// 支持MPolygon 数据格式的流转
-        /// </summary>
-        /// <param name="geometry"></param>
-        /// <returns></returns>
-        public static DBObjectCollection ToDBCollectionMP(this Geometry geometry)
+        public static bool Covers(this DBObjectCollection curves, Line line)
         {
-            return geometry.ToDbObjectsMP().ToCollection<DBObject>();
+            return curves.ToMultiLineString().Covers(line.ToNTSGeometry());
         }
 
-        public static DBObjectCollection ToDbCollection(this Geometry geometry)
+        public static DBObjectCollection ToDbCollection(this Geometry geometry, bool keepHoles = false)
         {
             return geometry.ToDbObjects().ToCollection<DBObject>();
         }

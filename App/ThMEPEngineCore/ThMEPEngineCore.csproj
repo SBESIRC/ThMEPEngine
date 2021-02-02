@@ -31,6 +31,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
+    <Compile Include="Algorithm\ThMEPPolyDecomposer.cs" />
+    <Compile Include="Algorithm\ThMEPTriangulationService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
     <Compile Include="Algorithm\ThMEPFrameService.cs" />
@@ -68,6 +70,7 @@
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
+    <Compile Include="Engine\ThDoorRecognitionEngine.cs" />
     <Compile Include="Engine\ThArchitectureWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBasinRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
@@ -76,9 +79,11 @@
     <Compile Include="Engine\ThClosestoolRecognitionEngine.cs" />
     <Compile Include="Engine\ThCondensePipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
+    <Compile Include="Engine\ThExtractGeometryEngine.cs" />
     <Compile Include="Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
+    <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
@@ -88,7 +93,7 @@
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
-    <Compile Include="Engine\ThLaneRecognitionEngine.cs" />
+    <Compile Include="Engine\ThLaneLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
@@ -96,16 +101,23 @@
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThWashMachineRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
+    <Compile Include="Features\ThGeometryFeatureCollection.cs" />
     <Compile Include="Features\ThBeamFeatureCollection.cs" />
     <Compile Include="Features\ThColumnFeature.cs" />
     <Compile Include="Features\ThColumnFeatureCollection.cs" />
+    <Compile Include="Features\ThGeometryFeature.cs" />
     <Compile Include="Features\ThShearWallFeatureCollection.cs" />
     <Compile Include="Features\ThThShearWallFeature.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
     <Compile Include="IO\ThBeamGeoJsonReader.cs" />
+    <Compile Include="IO\ThGeometryJsonWriter.cs" />
     <Compile Include="IO\ThColumnGeoJsonWriter.cs" />
     <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
     <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
+    <Compile Include="LaneLine\ThLaneLineEngine.cs" />
+    <Compile Include="LaneLine\ThLaneLineExtendEngine.cs" />
+    <Compile Include="LaneLine\ThLaneLineJoinEngine.cs" />
+    <Compile Include="LaneLine\ThLaneLineMergeExtension.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierFitting.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierSegment.cs" />
     <Compile Include="Model\Electrical\ThIfcCableFitting.cs" />
@@ -116,14 +128,20 @@
     <Compile Include="Model\Hvac\ThIfcDuctElbow.cs" />
     <Compile Include="Model\Hvac\ThIfcAirTerminal.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctFitting.cs" />
+    <Compile Include="Model\Hvac\ThIfcDuctHose.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctSegment.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctTee.cs" />
     <Compile Include="Model\Hvac\ThIfcDuctReducing.cs" />
     <Compile Include="Model\Hvac\ThIfcFan.cs" />
     <Compile Include="Model\Hvac\ThIfcPipeFitting.cs" />
     <Compile Include="Model\Hvac\ThIfcPipeSegment.cs" />
+    <Compile Include="Model\Hvac\ThIfcValve.cs" />
+    <Compile Include="Model\Plumbing\ThIfcDevice.cs" />
     <Compile Include="Model\Plumbing\ThIfcGravityWaterBucket.cs" />
+    <Compile Include="Model\Plumbing\ThIfcInnerDoor.cs" />
     <Compile Include="Model\Plumbing\ThIfcSideEntryWaterBucket.cs" />
+    <Compile Include="Model\ThGeometry.cs" />
+    <Compile Include="Model\ThIfcFlowController.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowMovingDevice.cs" />
     <Compile Include="Model\ThIfcFlowSegment.cs" />
@@ -190,11 +208,37 @@
     <Compile Include="Service\Hvac\ThHvacDbModelManager.cs" />
     <Compile Include="Service\Hvac\ThHvacCommon.cs" />
     <Compile Include="Service\Hvac\ThHvacDbModelExtension.cs" />
-    <Compile Include="Service\Hvac\ThHvacDuctFittingDbExtension.cs" />
+    <Compile Include="LaneLine\ThLaneLineService.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureDbExtension.cs" />
+    <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
+    <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
+    <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />
+    <Compile Include="Service\ThAxialAxisTagLayerManager.cs" />
+    <Compile Include="Service\ThAxialCircleTagDbExtension.cs" />
+    <Compile Include="Service\ThAxialCircleTagLayerManager.cs" />
+    <Compile Include="Service\ThDimensionTagsDbExtension.cs" />
+    <Compile Include="Service\ThDimensionTagsLayerManager.cs" />
+    <Compile Include="Service\ThDivisionLinesDbExtension.cs" />
+    <Compile Include="Service\ThDivisionLinesLayerManager.cs" />
+    <Compile Include="Service\ThDoorMarkDbExtension.cs" />
+    <Compile Include="Service\ThExternalTagsDbExtension.cs" />
+    <Compile Include="Service\ThExternalTagsLayerManager.cs" />
+    <Compile Include="Service\ThLaneLineCleanService.cs" />
+    <Compile Include="Service\ThLayerNamesDbExtension.cs" />
+    <Compile Include="Service\ThLayerNamesLayerManager.cs" />
+    <Compile Include="Service\ThMatchDoorStoneService.cs" />
+    <Compile Include="Service\ThDoorStoneDbExtension.cs" />
+    <Compile Include="Service\ThBuildDoorService.cs" />
+    <Compile Include="Service\ThPositionTagsDbExtension.cs" />
+    <Compile Include="Service\ThPositionTagsLayerManager.cs" />
+    <Compile Include="Service\ThRainPipesDbExtension.cs" />
+    <Compile Include="Service\ThRainPipesLayerManager.cs" />
+    <Compile Include="Service\ThRoomLayerManager.cs" />
+    <Compile Include="Service\ThRoomDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
+    <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
     <Compile Include="Service\ThBalconyFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThBasintoolDbExtension.cs" />
     <Compile Include="Service\ThBasintoolLayerManager.cs" />
@@ -206,6 +250,8 @@
     <Compile Include="Service\ThClosestoolLayerManager.cs" />
     <Compile Include="Service\ThCondensePipeDbExtension.cs" />
     <Compile Include="Service\ThCondensePipeLayerManager.cs" />
+    <Compile Include="Service\ThDeviceDbExtension.cs" />
+    <Compile Include="Service\ThDeviceLayerManager.cs" />
     <Compile Include="Service\ThFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Service\ThDbExtension.cs" />
@@ -213,14 +259,15 @@
     <Compile Include="Extension\ThIfcBeamExtension.cs" />
     <Compile Include="Service\ThGravityWaterBucketDbExtension.cs" />
     <Compile Include="Service\ThGravityWaterBucketLayerManager.cs" />
-    <Compile Include="Service\ThLaneLineSimplifier.cs" />
+    <Compile Include="LaneLine\ThLaneLineSimplifier.cs" />
+    <Compile Include="Service\ThInnerDoorDbExtension.cs" />
+    <Compile Include="Service\ThInnerDoorLayerManager.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
     <Compile Include="Service\ThLineBeamOutliner.cs" />
     <Compile Include="Service\ThOtherDbExtension.cs" />
     <Compile Include="Service\ThLaneLineLayerManager.cs" />
     <Compile Include="Service\ThLaneLineDbExtension.cs" />
-    <Compile Include="Service\Hvac\ThHvacDuctFittingFactoryService.cs" />
     <Compile Include="Service\ThParkingStallDbExtension.cs" />
     <Compile Include="Service\ThParkingStallLayerManager.cs" />
     <Compile Include="Service\ThRainPipeDbExtension.cs" />
@@ -260,6 +307,11 @@
     <Compile Include="Service\ThVerticalComponentBeamLinkExtension.cs" />
     <Compile Include="Service\ThWashMachineDbExtension.cs" />
     <Compile Include="Service\ThWashMachineLayerManager.cs" />
+    <Compile Include="Algorithm\ThMEPCollisionDetector.cs" />
+    <Compile Include="Service\ThWellsDbExtension.cs" />
+    <Compile Include="Service\ThWellsLayerManager.cs" />
+    <Compile Include="Service\ThWindowDbExtension.cs" />
+    <Compile Include="Service\ThWindowLayerManager.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />
@@ -313,6 +365,9 @@
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+        <Reference Include="ManagedLibrary">
+          <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>

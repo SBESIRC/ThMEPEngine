@@ -1,10 +1,11 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -20,13 +21,35 @@ namespace ThMEPEngineCore.Algorithm
 
         public static Polyline Normalize(Polyline frame)
         {
-            // 处理框线不闭合的情况
-            var clone = frame.Clone() as Polyline;
+            // 创建封闭多段线
+            var clone = frame.WashClone() as Polyline;
             clone.Closed = true;
 
-            // 处理共线和自交的情况
-            var results = clone.PreprocessAsPolygon();
-            return results.Cast<Polyline>().OrderByDescending(o => o.Area).First();
+            // 处理各种“Invalid Polygon“的情况
+            return clone.MakeValid().Cast<Polyline>().OrderByDescending(o => o.Area).First();
+        }
+
+        public static Polyline NormalizeEx(Polyline frame)
+        {
+            if (IsClosed(frame))
+            {
+                return Normalize(frame);
+            }
+            // 返回"Dummy"框线
+            // 暂时不支持分割线的情况
+            return new Polyline();
+        }
+
+        public static Polyline Buffer(Polyline frame, double distance)
+        {
+            var results = frame.Buffer(distance);
+            return results.Cast<Polyline>().FindByMax(o => o.Area);
+        }
+
+        public static bool IsClosed(Polyline frame)
+        {
+            // 支持真实闭合或视觉闭合
+            return frame.Closed || (frame.StartPoint.DistanceTo(frame.EndPoint) <= ThMEPEngineCoreCommon.LOOSE_CLOSED_POLYLINE);
         }
 
         public DBObjectCollection RegionsFromFrame(Polyline frame)

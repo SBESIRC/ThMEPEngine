@@ -29,20 +29,16 @@ namespace ThMEPWSS.Pipe.Service
         }
         private List<ThIfcSpace> Find(ThIfcSpace FirstFloorSpace)
         {
-            var noTagSubSpaces = FirstFloorSpace.SubSpaces.Where(o => o.Tags.Count == 0).ToList();
-            if (noTagSubSpaces.Count != 0)
+            var TagSubSpaces = FirstFloorSpace.SubSpaces.ToList();
+            if (TagSubSpaces.Count != 0)
             {
-                if (noTagSubSpaces.Count == 1)
-                {
-                    if (IsValidSpaceArea(noTagSubSpaces[0]))
+                foreach (var TagSubSpace in TagSubSpaces)
+                    if (IsValidSpaceArea(TagSubSpace))
                     {
-                        BaseCircles.Add(noTagSubSpaces[0]);
+                        BaseCircles.Add(TagSubSpace);
+                        break;
                     }
-                }
-                else
-                {
-                    BaseCircles.Add(noTagSubSpaces.OrderBy(o => o.Boundary.Area).First());
-                }
+
             }
             return BaseCircles;
         }

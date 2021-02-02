@@ -1,5 +1,5 @@
-﻿using Autodesk.AutoCAD.Runtime;
-using Linq2Acad;
+﻿using Linq2Acad;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPLighting.ParkingStall.Core;
 
 namespace ThMEPLighting
@@ -33,6 +33,66 @@ namespace ThMEPLighting
             {
                 var packageManager = new CommandManager();
                 packageManager.GenerateParkGroup();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THGroupLight", CommandFlags.Modal)]
+        public void THGroupLight()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.GenerateGroupLight();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THSrcLane", CommandFlags.Modal)]
+        public void THSrcLane()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.GenerateSrcLaneInfo();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtendLane", CommandFlags.Modal)]
+        public void THExtendLane()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.ExtendLaneInfo();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THLaneGroup", CommandFlags.Modal)]
+        public void THLaneGroup()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.GenerateLaneGroup();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THSubGroupAdjustor", CommandFlags.Modal)]
+        public void THSubGroupAdjustor()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.LaneSubGroupOptimization();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THLaneConnect", CommandFlags.Modal)]
+        public void THLaneConnect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.LaneConnect();
             }
         }
     }

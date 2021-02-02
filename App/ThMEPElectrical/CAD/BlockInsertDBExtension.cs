@@ -27,5 +27,23 @@ namespace ThMEPElectrical.CAD
                 acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
             }
         }
+
+        public static void ImportLinetype(this Database database, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalBroadcastDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(name), replaceIfDuplicate);
+            }
+        }
+
+        public static void ImportLayer(this Database database, string name, bool replaceIfDuplicate = false)
+        {
+            using (AcadDatabase currentDb = AcadDatabase.Use(database))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalBroadcastDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(name), replaceIfDuplicate);
+            }
+        }
     }
 }

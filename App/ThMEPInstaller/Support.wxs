@@ -15,6 +15,15 @@
 			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Fan" Guid="{D510B440-E5DC-430E-816A-0D28F3AA7550}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Block_Fan" Source="$(var.AutoloaderContentsPath)\Support\暖通.选型.风机.dwg" KeyPath="yes" />
 			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" Guid="{125C830F-C903-45DB-AEDD-D364A43FEBA8}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Block_Pipe" Source="$(var.AutoloaderContentsPath)\Support\暖通图层图块.dwg" KeyPath="yes" />
+			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" Guid="{4484A7C6-7202-4B4D-9180-89684485FEA4}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Block_LaneLineLight" Source="$(var.AutoloaderContentsPath)\Support\车道灯图块.dwg" KeyPath="yes" />
+			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" Guid="{8EF2BF90-0220-4317-9722-5BDF61C8FE28}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Block_EmergencyLight" Source="$(var.AutoloaderContentsPath)\Support\地库应急照明图块.dwg" KeyPath="yes" />
+			</Component>
 			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{52925679-6A6D-477F-83DC-7C99E78FC0E1}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\天华提电气块转换配置表.dwg" KeyPath="yes" />
 			</Component>
@@ -57,6 +66,12 @@
 			<Component Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" Guid="{476B199B-7697-4C5B-A3E8-1588E45605FE}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" Source="$(var.AutoloaderContentsPath)\Support\最小排烟量.json" KeyPath="yes" />
 			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" Guid="{C1774E6F-B9FA-4539-ABF3-BC55D799F668}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Duct_Size_Parameter" Source="$(var.AutoloaderContentsPath)\Support\风管尺寸参数信息.json" KeyPath="yes" />
+			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" Guid="{04686F39-60FC-434F-9863-CA6DC8DA0B45}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Duct_Port_Match" Source="$(var.AutoloaderContentsPath)\Support\管道内外段与进出风口对照.json" KeyPath="yes" />
+			</Component>
 		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_Support_DesignData">
 			<Component Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" Guid="{35F09808-BBF0-487A-981C-7235355DC1BD}" Win64="yes">
@@ -76,10 +91,13 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponentsSupport">
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Fan" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanPara" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_Smoke_Proof_Scenario" />
@@ -97,6 +115,8 @@
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Motor_Power_Double_Speed" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_HRR" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Equipment_Minimum_Smoke_Emission" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Size_Parameter" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Duct_Port_Match" />
 		</ComponentGroup>
 	</Fragment>
 </Wix>

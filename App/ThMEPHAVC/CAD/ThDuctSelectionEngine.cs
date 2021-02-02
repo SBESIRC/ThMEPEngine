@@ -1,42 +1,44 @@
-﻿using System.IO;
-using System.Linq;
-using System.Text;
-using ThCADExtension;
-using TianHua.Publics.BaseCode;
+﻿using System.Linq;
 using System.Collections.Generic;
 using TianHua.FanSelection.Function;
+using ThMEPHVAC.IO;
 
 namespace ThMEPHVAC.CAD
 {
-    public class DuctSizeParameter
+    public class ThDuctSizeInfor
     {
-        public double DuctWidth { get; set; }
-        public double DuctHeight { get; set; }
-        public double SectionArea { get; set; }
-        public double AspectRatio { get; set; }
+        //出口管段推荐尺寸
+        public string RecommendOuterDuctSize { get; set; }
+        //入口管段推荐尺寸
+        public string RecommendInnerDuctSize { get; set; }
+        //管道尺寸信息
+        public List<string> DefaultDuctsSizeString { get; set; }
     }
     public class ThDuctSelectionEngine
     {
-        public List<DuctSizeParameter> DefaultCandidateDucts { get; set; }
-        public ThDbModelFan FanModel { get; set; }
-        public DuctSizeParameter DefaultRecommendDuct { get; set; }
-        public DuctSizeParameter RecommendOuterDuct { get; set; }
-        public DuctSizeParameter RecommendInnerDuct { get; set; }
-        public ThDuctSelectionEngine(ThDbModelFan fanmodel)
+        public ThDuctSizeInfor DuctSizeInfor { get; set; }
+        public ThDuctSelectionEngine(double fanvolume, double airspeed)
         {
-            FanModel = fanmodel;
-            DefaultCandidateDucts = GetDefaultCandidateDucts();
-            RecommendOuterDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Max(f => f.AspectRatio));
-            RecommendInnerDuct = DefaultCandidateDucts.First(d => d.AspectRatio == DefaultCandidateDucts.Min(f => f.AspectRatio));
+            DuctSizeInfor = GetUpdateDuctSizeInfor(fanvolume, airspeed);
         }
-
-        private List<DuctSizeParameter> GetDefaultCandidateDucts()
+        public ThDuctSizeInfor GetUpdateDuctSizeInfor(double fanvolume, double airspeed)
         {
-            double calculateDuctArea = FanModel.FanVolume / 3600.0 / ThFanSelectionUtils.GetDefaultAirSpeed(FanModel.FanScenario);
-            var ductParameterString = ReadWord(ThCADCommon.DuctSizeParametersPath());
-            var ductParameterObjs = FuncJson.Deserialize<List<DuctSizeParameter>>(ductParameterString);
+            var defaultCandidateDucts = GetDefaultCandidateDucts(fanvolume, airspeed);
+            var recommendOuterDuct = defaultCandidateDucts.First(d => d.AspectRatio == defaultCandidateDucts.Max(f => f.AspectRatio));
+            var recommendInnerDuct = defaultCandidateDucts.First(d => d.AspectRatio == defaultCandidateDucts.Min(f => f.AspectRatio));
 
-            var biggerDucts = ductParameterObjs.Where(d => d.SectionArea > calculateDuctArea).OrderBy(d => d.SectionArea);
+            return new ThDuctSizeInfor()
+            {
+                DefaultDuctsSizeString = GetDefaultDuctsSizeString(defaultCandidateDucts),
+                RecommendOuterDuctSize = recommendOuterDuct.DuctWidth + "x" + recommendOuterDuct.DuctHeight,
+                RecommendInnerDuctSize = recommendInnerDuct.DuctWidth + "x" + recommendInnerDuct.DuctHeight
+            };
+        }
+        private List<DuctSizeParameter> GetDefaultCandidateDucts(double fanvolume, double airspeed)
+        {
+            double calculateDuctArea = fanvolume / 3600.0 / airspeed;
+            var jsonReader = new ThDuctParameterJsonReader();
+            var biggerDucts = jsonReader.Parameters.Where(d => d.SectionArea > calculateDuctArea).OrderBy(d => d.SectionArea);
             var satisfiedDucts = biggerDucts.Where(d=> d.SectionArea - calculateDuctArea < 0.15 * calculateDuctArea).ToList();
 
             if (satisfiedDucts.Count == 0)
@@ -49,22 +51,13 @@ namespace ThMEPHVAC.CAD
             }
             return satisfiedDucts.OrderByDescending(d => d.DuctWidth).ThenByDescending(d => d.DuctHeight).ToList();
         }
-
-        public string ReadWord(string _Path)
+        
+        //获取管道尺寸信息列表
+        private List<string> GetDefaultDuctsSizeString(List<DuctSizeParameter> defaultcandidateducts)
         {
-            try
-            {
-                using (StreamReader _StreamReader = new StreamReader(_Path, Encoding.Default))
-                {
-                    return _StreamReader.ReadToEnd();
-                }
-            }
-            catch
-            {
-                return string.Empty;
-
-            }
+            List<string> DuctsSizeString = new List<string>();
+            defaultcandidateducts.ForEach(d=> DuctsSizeString.Add($"{d.DuctWidth}x{d.DuctHeight}"));
+            return DuctsSizeString;
         }
-
     }
 }

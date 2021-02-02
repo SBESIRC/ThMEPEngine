@@ -1,7 +1,6 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
@@ -31,9 +30,14 @@ namespace ThMEPWSS.Pipe.Service
             BaseCircles = baseCircles;
             Rooms = new List<ThWRoofDeviceFloorRoom>();
         }
-        public static List<ThWRoofDeviceFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
+        public static List<ThWRoofDeviceFloorRoom> Build(
+            List<ThIfcSpace> spaces, 
+            List<ThIfcGravityWaterBucket> gravityWaterBuckets, 
+            List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, 
+            List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
-            var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);          
+            var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(
+                spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);          
             roofDeviceFloorContainerService.Build();
             return roofDeviceFloorContainerService.Rooms;          
         }   

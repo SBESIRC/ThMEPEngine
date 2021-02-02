@@ -80,10 +80,28 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "暖通.选型.风机.dwg");
         }
 
+        // 暖通管道设备块
+        public static string HvacPipeDwgPath()
+        {
+            return Path.Combine(SupportPath(), "暖通图层图块.dwg");
+        }
+
         // 电气烟感/温感图块
         public static string ElectricalSensorDwgPath()
         {
             return Path.Combine(SupportPath(), "烟感温感图块.dwg");
+        }
+
+        // 电气消防应急广播图块
+        public static string ElectricalBroadcastDwgPath()
+        {
+            return Path.Combine(SupportPath(), "消防应急广播.dwg");
+        }
+
+        // 电气地库应急照明图块
+        public static string LightingEmgLightDwgPath()
+        {
+            return Path.Combine(SupportPath(), "地库应急照明图块.dwg");
         }
 
         // 消防喷淋块
@@ -95,7 +113,13 @@ namespace ThCADExtension
         // 车道线布灯
         public static string LaneLineLightDwgPath()
         {
-            return Path.Combine(SupportPath(), "车道线布灯.dwg");
+            return Path.Combine(SupportPath(), "车道灯图块.dwg");
+        }
+
+        // 车位布灯块
+        public static string ParkStallLightDwgPath()
+        {
+            return Path.Combine(SupportPath(), "车位灯图块.dwg");
         }
 
         // ToolPalette 路径

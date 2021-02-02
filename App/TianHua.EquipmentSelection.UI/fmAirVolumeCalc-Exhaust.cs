@@ -20,6 +20,12 @@ namespace TianHua.FanSelection.UI
 
             Model = FuncJson.Deserialize<FanDataModel>(_Json);
 
+            CheckIsManualInput.Checked = Model.IsManualInputAirVolume;
+            if (CheckIsManualInput.Checked)
+            {
+                TxtManualInput.Text = FuncStr.NullToStr(Model.SysAirVolume);
+            }
+
             if (Model.ExhaustModel.IsNull())
             {
                 TxtCalcValue.Text = "无";
@@ -35,6 +41,9 @@ namespace TianHua.FanSelection.UI
             Model.SysAirVolume = SysAirCalc(Model.AirCalcFactor, maxairvalue);
             TxtFactor.Text = FuncStr.NullToStr(Model.AirCalcFactor);
             TxtAirVolume.Text = FuncStr.NullToStr(Model.SysAirVolume);
+
+
+    
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
@@ -155,6 +164,66 @@ namespace TianHua.FanSelection.UI
                 }
             }
             return FuncStr.NullToInt(sysairvolume);
+        }
+
+        private void CheckIsManualInput_CheckedChanged(object sender, EventArgs e)
+        {
+            if (CheckIsManualInput.Checked)
+            {
+                TxtManualInput.Enabled = true;
+                TxtCalcValue.Enabled = false;
+                TxtEstimatedValue.Enabled = false;
+                TxtFactor.Enabled = false;
+                TxtAirVolume.Enabled = false;
+            }
+            else
+            {
+
+                TxtManualInput.Enabled = false;
+                TxtCalcValue.Enabled = true;
+                TxtEstimatedValue.Enabled = true;
+                TxtFactor.Enabled = true;
+                TxtAirVolume.Enabled = true;
+ 
+  
+            }
+        }
+
+        private void TxtManualInput_EditValueChanged(object sender, EventArgs e)
+        {
+            var _ManualInput = FuncStr.NullToInt(TxtManualInput.Text);
+
+            if (_ManualInput == 0) { return; }
+
+
+            var _Rem = FuncStr.NullToInt(_ManualInput) % 50;
+            if (_Rem != 0)
+            {
+                var _UnitsDigit = FindNum(FuncStr.NullToInt(_ManualInput), 1);
+                var _TensDigit = FindNum(FuncStr.NullToInt(_ManualInput), 2);
+                var _Tmp = FuncStr.NullToInt(_TensDigit.ToString() + _UnitsDigit.ToString());
+                if (_Tmp < 50)
+                {
+                    var _DifferenceValue = 50 - _Tmp;
+                    TxtManualInput.Text = FuncStr.NullToStr(FuncStr.NullToInt(_ManualInput) + _DifferenceValue);
+
+                }
+                else
+                {
+                    var _DifferenceValue = 100 - _Tmp;
+                    TxtManualInput.Text = FuncStr.NullToStr(FuncStr.NullToInt(_ManualInput) + _DifferenceValue);
+                }
+            }
+            else
+            {
+                TxtManualInput.Text = FuncStr.NullToStr(FuncStr.NullToInt(_ManualInput));
+            }
+        }
+
+        public int FindNum(int _Num, int _N)
+        {
+            int _Power = (int)Math.Pow(10, _N);
+            return (_Num - _Num / _Power * _Power) * 10 / _Power;
         }
 
     }

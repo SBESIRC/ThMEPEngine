@@ -17,6 +17,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -38,11 +39,16 @@
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
+    <Compile Include="Pipe\Engine\ThWArchitectureElevationRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWDeviceRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWExternalTagsRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWInnerDoorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeIndexEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDevicePlatformRoomRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWindowRecognition.cs" />
     <Compile Include="Pipe\Engine\ThWTopFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWKitchenRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofDeviceFloorRecognitionEngine.cs" />
@@ -50,7 +56,10 @@
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWToiletRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWWellsRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
+    <Compile Include="Pipe\Output\ThWCompositeTagOutPutEngine.cs" />
+    <Compile Include="Pipe\Output\ThWRoofDeviceFloorOutPutEngine.cs" />
     <Compile Include="Pipe\Model\ThWBalconyRoom.cs" />
     <Compile Include="Pipe\Model\ThWCompositeBalconyRoom.cs" />
     <Compile Include="Pipe\Model\ThWCompositeRoom.cs" />
@@ -64,6 +73,8 @@
     <Compile Include="Pipe\Model\ThWRoom.cs" />
     <Compile Include="Pipe\Model\ThWToiletPipe.cs" />
     <Compile Include="Pipe\Model\ThWToiletRoom.cs" />
+    <Compile Include="Pipe\Output\ThWRoofFloorOutPutEngine.cs" />
+    <Compile Include="Pipe\Output\ThWTopFloorOutPutEngine.cs" />
     <Compile Include="Pipe\Service\ThBalconyBasintoolService.cs" />
     <Compile Include="Pipe\Service\ThBalconyFloorDrainService.cs" />
     <Compile Include="Pipe\Service\ThBalconyRainPipeService.cs" />
@@ -113,6 +124,7 @@
     <Compile Include="Pipe\ThWPipeEngine.cs" />
     <Compile Include="Pipe\ThWPipeZone.cs" />
     <Compile Include="Pipe\Engine\ThWToiletPipeEngine.cs" />
+    <Compile Include="Pipe\Tools\ThWPipeOutputFunction.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Service\CalHolesService.cs" />
     <Compile Include="Service\CheckService.cs" />

@@ -31,6 +31,12 @@
     <Compile Include="CAD\ThDuctSelectionEngine.cs" />
     <Compile Include="CAD\ThDbModelFan.cs" />
     <Compile Include="CAD\ThFanInletOutletAnalysisEngine.cs" />
+    <Compile Include="CAD\ThHolesAndValvesEngine.cs" />
+    <Compile Include="CAD\ThHvacDuctFittingFactoryService.cs" />
+    <Compile Include="CAD\ThHvacValveDbExtension.cs" />
+    <Compile Include="CAD\ThInletOutletDuctDrawEngine.cs" />
+    <Compile Include="Duct\ThValveExtension.cs" />
+    <Compile Include="CAD\ThValvesAndHolesInsertEngine.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeExcelLoder.cs" />
     <Compile Include="Duct\DuctExcelLoder\DuctVolumeInformation.cs" />
     <Compile Include="Duct\GraphSerializeService.cs" />
@@ -40,7 +46,13 @@
     <Compile Include="Duct\ThDuctGraphAnalysisEngine.cs" />
     <Compile Include="Duct\ThDuctGraphEngine.cs" />
     <Compile Include="Duct\ThDuctLineSimplifier.cs" />
+    <Compile Include="Duct\ThDuctUtils.cs" />
     <Compile Include="Duct\ThGraphExtension.cs" />
+    <Compile Include="Entity\DuctSpecModel.cs" />
+    <Compile Include="Entity\ThValve.cs" />
+    <Compile Include="IO\ThDuctInOutMappingJsonReader.cs" />
+    <Compile Include="IO\ThDuctJsonReader.cs" />
+    <Compile Include="IO\ThDuctParameterJsonReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPHAVCApp.cs" />
     <Compile Include="ThMEPHAVCCommon.cs" />

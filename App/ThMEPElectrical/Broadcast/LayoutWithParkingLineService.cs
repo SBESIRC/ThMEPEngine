@@ -1,20 +1,19 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
+﻿using System;
 using NFox.Cad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThCADCore.NTS;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPElectrical.Broadcast.Service;
+using ThMEPEngineCore.LaneLine;
+using Linq2Acad;
 
 namespace ThMEPElectrical.Broadcast
 {
     public class LayoutWithParkingLineService
     {
-        readonly double protectRange = 27000;
+        readonly double protectRange = 34000;
         readonly double oneProtect = 21000;
         readonly double tol = 6000;
         readonly double exLength = 800;
@@ -40,7 +39,7 @@ namespace ThMEPElectrical.Broadcast
                 StructureService structureService = new StructureService();
                 var lineColumn = structureService.GetStruct(lines, columns, tol);
                 var lineWall = structureService.GetStruct(lines, walls, tol);
-
+               
                 //将构建分为上下部分
                 var usefulColumns = structureService.SeparateColumnsByLine(lineColumn, lines, tol * 2);
                 var usefulWalls = structureService.SeparateColumnsByLine(lineWall, lines, tol * 2);
@@ -49,11 +48,12 @@ namespace ThMEPElectrical.Broadcast
                 CheckService checkService = new CheckService();
                 var filterCols = checkService.FilterColumns(usefulColumns[1], lines.First(), frame, sPt, ePt);
                 var filterWalls = checkService.FilterWalls(usefulWalls[1], lines, tol, exLength);
-
+                
                 var pts = new List<Point3d>() { sPt, ePt };
 
                 //计算布置信息
-                var dir = (lines.First().EndPoint - lines.First().StartPoint).GetNormal();
+                var maxLengthLine = lines.OrderByDescending(x => x.Length).First();
+                var dir = (maxLengthLine.EndPoint - maxLengthLine.StartPoint).GetNormal();
                 StructureLayoutService structureLayoutService = new StructureLayoutService();
                 var lInfo = structureLayoutService.GetLayoutStructPt(pts, filterCols, filterWalls, dir);
 
@@ -67,7 +67,7 @@ namespace ThMEPElectrical.Broadcast
                 var lineLayoutPts = GetLayoutLinePoint(lines, pts, sPt, ePt);
 
                 //计算布置信息
-                var otherInfo = structureLayoutService.GetLayoutStructPt(lineLayoutPts, usefulColumns[1], usefulWalls[1], dir);
+                var otherInfo = structureLayoutService.GetLayoutStructPt(lineLayoutPts, filterCols, filterWalls, dir);
                 if (otherInfo != null && otherInfo.Count > 0)
                 {
                     layoutInfo.Add(lines, otherInfo);

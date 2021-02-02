@@ -26,7 +26,9 @@ namespace ThMEPWSS.Pipe.Engine
                     this.Spaces = GetSpaces(database, pts);
                 }
                 var basintools = GetBasintools(database, pts);
-                Rooms = ThKitchenRoomService.Build(this.Spaces, basintools);
+                var rainPipes = GetRainPipes(database, pts);
+                var roofRainPipes = GetRoofRainPipes(database, pts);
+                Rooms = ThKitchenRoomService.Build(this.Spaces, basintools, rainPipes, roofRainPipes);
             }
         }
         private List<ThIfcBasin> GetBasintools(Database database, Point3dCollection pts)
@@ -35,6 +37,22 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 basintoolEngine.Recognize(database, pts);
                 return basintoolEngine.Elements.Cast<ThIfcBasin>().ToList();
+            }
+        }
+        private List<ThIfcRainPipe> GetRainPipes(Database database, Point3dCollection pts)
+        {
+            using (ThRainPipeRecognitionEngine rainPipesEngine = new ThRainPipeRecognitionEngine())
+            {
+                rainPipesEngine.Recognize(database, pts);
+                return rainPipesEngine.Elements.Cast<ThIfcRainPipe>().ToList();
+            }
+        }
+        private List<ThIfcRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
+        {
+            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
+            {
+                roofRainPipesEngine.Recognize(database, pts);
+                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
             }
         }
     }

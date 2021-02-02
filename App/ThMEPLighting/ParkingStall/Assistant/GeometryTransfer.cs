@@ -47,5 +47,10 @@ namespace ThMEPLighting.ParkingStall.Assistant
             }
             return poly;
         }
+
+        public static Point3d ToPoint3d(this Point2d point)
+        {
+            return new Point3d(point.X, point.Y, 0);
+        }
     }
 }

@@ -3,15 +3,18 @@ using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
-using NetTopologySuite.Operation.Union;
-using NetTopologySuite.Operation.Overlay.Snap;
-using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Union;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.Overlay.Snap;
+using Autodesk.AutoCAD.Colors;
+using DotNetARX;
 
 namespace ThCADCore.Test
 {
@@ -113,41 +116,18 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThEarCut", CommandFlags.Modal)]
-        public void ThEarCut()
+        private List<Point2d> Vertices(Polyline poly)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
+            var points = new List<Point2d>();
+            poly.Vertices().Cast<Point3d>().ForEach(o => points.Add(o.ToPoint2D()));
+            return points;
+        }
 
-                var options = new PromptSelectionOptions()
-                {
-                    MessageForAdding = "请选择洞",
-                };
-                var result2 = Active.Editor.GetSelection(options);
-
-                var objs = new DBObjectCollection();
-                if (result2.Status == PromptStatus.OK)
-                {
-                    foreach (var obj in result2.Value.GetObjectIds())
-                    {
-                        objs.Add(acadDatabase.Element<Entity>(obj));
-                    }
-                }
-
-                var pline = acadDatabase.Element<Polyline>(result.ObjectId);
-                var builder = new ThCADCoreNTSEarCutTriangulationBuilder();
-                var triangles = builder.EarCut(pline, objs);
-                foreach(Polyline triangle in triangles)
-                {
-                    triangle.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(triangle);
-                }
-            }
+        private List<List<Point2d>> Vertices(DBObjectCollection holes)
+        {
+            var points = new List<List<Point2d>>();
+            holes.Cast<Polyline>().ForEach(o => points.Add(Vertices(o)));
+            return points;
         }
 
         [CommandMethod("TIANHUACAD", "ThOutline", CommandFlags.Modal)]
@@ -231,30 +211,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THBUILDAREA", CommandFlags.Modal)]
-        public void ThBuildArea()
-        {
-            using (var ov = new ThCADCoreNTSFixedPrecision())
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-                foreach(var obj in objs.BuildArea())
-                {
-                    acadDatabase.ModelSpace.Add(obj as Entity);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThUnaryUnionOp", CommandFlags.Modal)]
         public void ThUnion()
         {
@@ -276,42 +232,6 @@ namespace ThCADCore.Test
                 foreach (Entity obj in geometry.ToDbCollection())
                 {
                     obj.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "ThCascadedPolygonUnion", CommandFlags.Modal)]
-        public void ThCascadedPolygonUnion()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-
-                var polygons = new List<Geometry>();
-                objs.Cast<DBObject>().ForEachDbObject(p =>
-                {
-                    if (p is Polyline poly)
-                    {
-                        polygons.Add(poly.ToNTSPolygon());
-                    }
-
-                });
-
-                var cascadedPolygon = CascadedPolygonUnion.Union(polygons);
-                foreach (Entity obj in cascadedPolygon.ToDbCollection())
-                {
-                    obj.ColorIndex = 2;
                     acadDatabase.ModelSpace.Add(obj);
                 }
             }
@@ -556,8 +476,172 @@ namespace ThCADCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THLineMerger", CommandFlags.Modal)]
+        public void THLineMerger()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result1 = Active.Editor.GetSelection();
+                if (result1.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var dbLst = new DBObjectCollection();
+                foreach (var obj in result1.Value.GetObjectIds())
+                {
+                    dbLst.Add(acadDatabase.Element<Entity>(obj));
+                }
+
+                foreach (Entity diagram in dbLst.LineMerge())
+                {
+                    diagram.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(diagram);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPileGroup", CommandFlags.Modal)]
+        public void THPileGroup()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result1 = Active.Editor.GetSelection();
+                if (result1.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var dbLst1 = new List<Curve>();
+                foreach (var obj in result1.Value.GetObjectIds())
+                {
+                    dbLst1.Add(acadDatabase.Element<Curve>(obj));
+                }
+
+                var totalIds = new ObjectIdList();
+                var ids = DrawProfile(dbLst1, "dbLst");
+                totalIds.AddRange(ids);
+                var groupId = GroupTools.CreateGroup(acadDatabase.Database, "d", totalIds);
+
+                var dbLst2 = new List<Curve>();
+                var result2 = Active.Editor.GetEntity("select");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                dbLst2.Add(acadDatabase.Element<Curve>(result2.ObjectId));
+
+                var ids2 = DrawProfile(dbLst2, "dbLst2");
+                var totalIds2 = new ObjectIdList();
+                totalIds2.AddRange(ids2);
+
+                var groupId2 = GroupTools.CreateGroup(acadDatabase.Database, "d2", totalIds2);
+
+                var totalIds3 = new ObjectIdList();
+                totalIds3.AddRange(totalIds2);
+                totalIds3.AddRange(totalIds);
+
+                var groupId3 = GroupTools.CreateGroup(acadDatabase.Database, "totalIds3", totalIds3);
+
+            }
+        }
+
+        public static List<ObjectId> DrawProfile(List<Curve> curves, string LayerName, Color color = null)
+        {
+            var objectIds = new List<ObjectId>();
+            if (curves == null || curves.Count == 0)
+                return objectIds;
+
+            using (var db = AcadDatabase.Active())
+            {
+                if (color == null)
+                    CreateLayer(LayerName, Color.FromRgb(255, 0, 0));
+                else
+                    CreateLayer(LayerName, color);
+
+                foreach (var curve in curves)
+                {
+                    var clone = curve.Clone() as Curve;
+                    clone.Layer = LayerName;
+                    objectIds.Add(db.ModelSpace.Add(clone));
+                }
+            }
+
+            return objectIds;
+        }
+
+        public static ObjectId CreateLayer(string aimLayer, Color color)
+        {
+            LayerTableRecord layerRecord = null;
+            using (var db = AcadDatabase.Active())
+            {
+                foreach (var layer in db.Layers)
+                {
+                    if (layer.Name.Equals(aimLayer))
+                    {
+                        layerRecord = db.Layers.Element(aimLayer);
+                        break;
+                    }
+                }
+
+                // 创建新的图层
+                if (layerRecord == null)
+                {
+                    layerRecord = db.Layers.Create(aimLayer);
+                    layerRecord.Color = color;
+                    layerRecord.IsPlottable = false;
+                }
+                else
+                {
+                    if (!layerRecord.Color.Equals(color))
+                    {
+                        layerRecord.UpgradeOpen();
+                        layerRecord.Color = color;
+                        layerRecord.IsPlottable = false;
+                        layerRecord.DowngradeOpen();
+                    }
+                }
+            }
+
+            return layerRecord.ObjectId;
+        }
+
         [CommandMethod("TIANHUACAD", "ThTrim", CommandFlags.Modal)]
         public void ThTrim()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result1 = Active.Editor.GetEntity("\n请选择框线");
+                if (result1.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetSelection();
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new List<DBObject>();
+                var frame = acadDatabase.Element<Polyline>(result1.ObjectId);
+                var clipper = new ThCADCoreNTSFastGeometryClipper(frame.ToNTSPolygon().EnvelopeInternal);
+                foreach (var obj in result2.Value.GetObjectIds())
+                {
+                    var curve = acadDatabase.Element<Curve>(obj);
+                    objs.AddRange(clipper.clip(curve.ToNTSGeometry(), true).ToDbObjects());
+                }
+                foreach (Entity obj in objs)
+                {
+                    obj.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(obj);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThPlTrim", CommandFlags.Modal)]
+        public void ThPlTrim()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -575,7 +659,8 @@ namespace ThCADCore.Test
 
                 var curve = acadDatabase.Element<Polyline>(result.ObjectId);
                 var frame = acadDatabase.Element<Polyline>(result2.ObjectId);
-                foreach (Entity diagram in frame.Trim(curve))
+
+                foreach (Entity diagram in curve.ToNTSGeometry().Intersection(frame.ToNTSGeometry()).ToDbCollection())
                 {
                     diagram.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(diagram);
@@ -583,6 +668,32 @@ namespace ThCADCore.Test
             }
         }
 
+        [CommandMethod("TIANHUACAD", "ThClosePoint", CommandFlags.Modal)]
+        public void ThClosePoint()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetEntity("请选择框线");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var line = acadDatabase.Element<Line>(result.ObjectId);
+                var circle = acadDatabase.Element<Circle>(result2.ObjectId);
+                var closestPt = line.GetClosestPointTo(circle.Center, true);
+
+                var verticalLine = new Line(closestPt, circle.Center);
+
+                acadDatabase.ModelSpace.Add(verticalLine);
+            }
+        }
 
         [CommandMethod("TIANHUACAD", "ThPBuffer", CommandFlags.Modal)]
         public void ThBuffer()
@@ -604,6 +715,35 @@ namespace ThCADCore.Test
                 double distanceTolerance = result2.Value;
                 var obj = acadDatabase.Element<Polyline>(result.ObjectId);
                 foreach (Polyline pl in obj.BufferPL(20))
+                {
+                    pl.ColorIndex = 1;
+                    acadDatabase.ModelSpace.Add(pl);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThSingleBuffer", CommandFlags.Modal)]
+        public void ThSingleBuffer()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n请选择对象");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var result2 = Active.Editor.GetDistance("\n请输入距离");
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                double distanceTolerance = result2.Value;
+                var obj = acadDatabase.Element<Entity>(result.ObjectId);
+                var dbCol = new DBObjectCollection();
+                dbCol.Add(obj);
+                foreach (Polyline pl in dbCol.SingleSidedBuffer(distanceTolerance))
                 {
                     pl.ColorIndex = 1;
                     acadDatabase.ModelSpace.Add(pl);

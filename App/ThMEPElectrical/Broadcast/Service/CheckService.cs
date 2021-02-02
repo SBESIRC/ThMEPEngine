@@ -18,7 +18,7 @@ namespace ThMEPElectrical.Broadcast.Service
             Vector3d xDir = (line.EndPoint - line.StartPoint).GetNormal();
             Vector3d yDir = Vector3d.ZAxis.CrossProduct(xDir);
             Vector3d zDir = Vector3d.ZAxis;
-            Matrix3d matrix = new Matrix3d(
+            Matrix3d matrix = new Matrix3d( 
                 new double[] {
                     xDir.X, yDir.X, zDir.X, line.StartPoint.X,
                     xDir.Y, yDir.Y, zDir.Y, line.StartPoint.Y,
@@ -37,11 +37,6 @@ namespace ThMEPElectrical.Broadcast.Service
                 {
                     columns.Remove(orderColumns.Last());
                 }
-                //var moveColumns = polyCols.Where(x => !plFrame.Contains(StructUtils.GetStructCenter(x))).ToList();
-                //foreach (var col in moveColumns)
-                //{
-                //    columns.Remove(col);
-                //}
             }
             
             return columns;
@@ -53,8 +48,7 @@ namespace ThMEPElectrical.Broadcast.Service
             Line layoutLine = IsLayoutColumn(newPoly, pt, dir);
             Point3dCollection pts = new Point3dCollection();
             layoutLine.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-            if (pts.Count > 0)
-            {
+            if (pts.Count > 0)            {
                 return false;
             }
 
@@ -69,15 +63,19 @@ namespace ThMEPElectrical.Broadcast.Service
             {
                 lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
             }
-
+           
             Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
-            var layoutLine = lines.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
+            var layoutLine = lines.Where(x => x.GetClosestPointTo(closetPt, false).DistanceTo(closetPt) < 1)
                 .Where(x =>
                 {
                     var xDir = (x.EndPoint - x.StartPoint).GetNormal();
                     return Math.Abs(otherDir.DotProduct(xDir)) < Math.Abs(dir.DotProduct(xDir));
                 }).FirstOrDefault();
 
+            if (layoutLine == null)
+            {
+                layoutLine = lines.First();
+            }
             return layoutLine;
         }
 

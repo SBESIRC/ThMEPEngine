@@ -24,19 +24,129 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmgLight\Assistant\DrawUtils.cs" />
+    <Compile Include="EmgLight\EmgLightCommon.cs" />
+    <Compile Include="EmgLight\LayoutEmgLightEngine.cs" />
+    <Compile Include="EmgLight\Model\StructModel.cs" />
+    <Compile Include="EmgLight\Service\InsertLightService.cs" />
+    <Compile Include="Common\LaneServer.cs" />
+    <Compile Include="EmgLight\Service\RemoveBlockService.cs" />
+    <Compile Include="EmgLight\Service\LayoutEmgLightService.cs" />
+    <Compile Include="EmgLight\Service\StructureServiceLight.cs" />
+    <Compile Include="EmgLight\Service\StructUtils.cs" />
+    <Compile Include="Garage\Engine\ThArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThBuildNumberEngine.cs" />
+    <Compile Include="Garage\Engine\ThBuildDoubleRacewayEngine.cs" />
+    <Compile Include="Garage\Engine\ThBuildRacewayEngine.cs" />
+    <Compile Include="Garage\Engine\ThDoubleRowArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThDoubleRowNumberEngine.cs" />
+    <Compile Include="Garage\Engine\ThInnerOuterCirclesEngine.cs" />
+    <Compile Include="Garage\Engine\ThLaneLineGraphEngine.cs" />
+    <Compile Include="Garage\Engine\ThLightLinePreprocessEngine.cs" />
+    <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
+    <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
+    <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
+    <Compile Include="Garage\Model\ThEdge.cs" />
+    <Compile Include="Garage\Model\ThEntityParameter.cs" />
+    <Compile Include="Garage\Model\ThFindSideLinesParameter.cs" />
+    <Compile Include="Garage\Model\ThLightArrangeParameter.cs" />
+    <Compile Include="Common\ThLightEdge.cs" />
+    <Compile Include="Common\ThLightNode.cs" />
+    <Compile Include="Garage\Model\ThLightArrangeUiParameter.cs" />
+    <Compile Include="Garage\Model\ThLightSumInfo.cs" />
+    <Compile Include="Garage\Model\ThRacewayGroupParameter.cs" />
+    <Compile Include="Garage\Model\ThRegionBorder.cs" />
+    <Compile Include="Garage\Model\ThRegionLightEdge.cs" />
+    <Compile Include="Garage\Model\ThShortenParameter.cs" />
+    <Compile Include="Garage\Model\ThVertex.cs" />
+    <Compile Include="Garage\Model\ThWireOffsetData.cs" />
+    <Compile Include="Garage\Service\ThAlignLineHeadService.cs" />
+    <Compile Include="Garage\Service\ThBuildCableTrayService.cs" />
+    <Compile Include="Garage\Service\ThBuildDoubleRowPosService.cs" />
+    <Compile Include="Garage\Service\ThBuildSingleRowPosService.cs" />
+    <Compile Include="Garage\Service\ThCableTrayCutService.cs" />
+    <Compile Include="Garage\Service\ThDistributeLightService.cs" />
+    <Compile Include="Garage\Service\ThDoubleRowDistributeExService.cs" />
+    <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
+    <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
+    <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
+    <Compile Include="Garage\Service\ThEliminateService.cs" />
+    <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />
+    <Compile Include="Garage\Service\ThExtendService.cs" />
+    <Compile Include="Garage\Service\ThFilterLinkService.cs" />
+    <Compile Include="Garage\Service\ThFilterShortLinesService.cs" />
+    <Compile Include="Garage\Service\ThFilterElbowCenterLineService.cs" />
+    <Compile Include="Garage\Service\ThFindFirstEdgePortsService.cs" />
+    <Compile Include="Garage\Service\ThFindFirstLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindLinkService.cs" />
+    <Compile Include="Garage\Service\ThFindCenterPairLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindLongestPathService.cs" />
+    <Compile Include="Garage\Service\ThFindSideLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindStartIndexService.cs" />
+    <Compile Include="Garage\Service\ThJoinLinesService.cs" />
+    <Compile Include="Common\ThLightGraphService.cs" />
+    <Compile Include="Garage\Service\ThLineNodeService.cs" />
+    <Compile Include="Garage\Service\ThMergeLightCenterLines.cs" />
+    <Compile Include="Garage\Service\ThPrintService.cs" />
+    <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
+    <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />
+    <Compile Include="Garage\Service\ThShortenLineService.cs" />
+    <Compile Include="Garage\Service\ThSingleRowDistributeService.cs" />
+    <Compile Include="Garage\Worker\ThDoubleRowLightNumber.cs" />
+    <Compile Include="Garage\Worker\ThSingleRowLightNumber.cs" />
+    <Compile Include="Garage\Service\ThLinkElbowService.cs" />
+    <Compile Include="Garage\Service\ThNumberService.cs" />
+    <Compile Include="Garage\Service\ThOffsetLineService.cs" />
+    <Compile Include="Garage\Service\ThQueryLineService.cs" />
+    <Compile Include="Garage\Service\ThRacewayGroupService.cs" />
+    <Compile Include="Garage\Service\ThFilterMainCenterLineService.cs" />
+    <Compile Include="Garage\Service\ThSingleRowNumberService.cs" />
+    <Compile Include="Garage\Service\ThSplitLightEdgeService.cs" />
+    <Compile Include="Garage\Service\ThSplitLineService.cs" />
+    <Compile Include="Garage\Service\ThWireOffsetDataService.cs" />
+    <Compile Include="Common\ThGarageLightCommon.cs" />
+    <Compile Include="Common\ThGarageLightUtils.cs" />
     <Compile Include="ParkingStall\Assistant\DrawUtils.cs" />
     <Compile Include="ParkingStall\Assistant\GeometryTransfer.cs" />
+    <Compile Include="ParkingStall\Business\Block\BlockInsertDBExtension.cs" />
+    <Compile Include="ParkingStall\Business\Block\BlockInsertor.cs" />
     <Compile Include="ParkingStall\Business\UserInteraction\EntityPicker.cs" />
     <Compile Include="ParkingStall\Business\UserInteraction\WallPolygonInfoCalculator.cs" />
     <Compile Include="ParkingStall\CAD\InfoReader.cs" />
     <Compile Include="ParkingStall\Core\CommandManager.cs" />
     <Compile Include="ParkingStall\Geometry\GeomUtils.cs" />
+    <Compile Include="ParkingStall\Model\LaneGroup.cs" />
+    <Compile Include="ParkingStall\Model\LanePolyline.cs" />
+    <Compile Include="ParkingStall\Model\LightLaneGroup.cs" />
+    <Compile Include="ParkingStall\Model\LightPlaceInfo.cs" />
     <Compile Include="ParkingStall\Model\LineSegment.cs" />
     <Compile Include="ParkingStall\Model\NearParks.cs" />
     <Compile Include="ParkingStall\Model\NearParksPolylineNode.cs" />
+    <Compile Include="ParkingStall\Model\ParkGroupInfo.cs" />
     <Compile Include="ParkingStall\Model\ParkingGroup.cs" />
+    <Compile Include="ParkingStall\Model\PointEdgeInfo.cs" />
     <Compile Include="ParkingStall\Model\PolygonInfo.cs" />
     <Compile Include="ParkingStall\ParkingStallCommon.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\ExtendLanePoly\LaneCentralLineGenerator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\ExtendLanePoly\LineExtractor.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\ExtendLanePoly\NodeDegreeCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\ExtendLanePoly\ScatterLines.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\GroupInfoDifferentiation.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\IndexerCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\LaneGroupCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\LaneGroupDrawer.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LanePolyGroup\NearLightPlaceCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\CenterBaseLineCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\CoordinateTransform.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupGapDivider\ParallelParkGroupGapDivider.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupGapDivider\ParkGroupGapDivider.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupGapDivider\ReverseParkGroupGapDivider.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupMove\ParallelSubGroupMover.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupMove\ReverseSubGroupMover.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\GroupMove\SubGroupMover.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\LightPlaceInfoExtractor.cs" />
+    <Compile Include="ParkingStall\Worker\LightAdjustor\LaneSubGroupOptimization\SubGroupPosOptimization.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\GenerateValidParkPolys.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\IntersectParkRelatedNodeCalculator.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\NearParksDivider.cs" />
@@ -44,13 +154,19 @@
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingNearGroup.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingPolyTrans.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupGenerator.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\ParkingGroupPlaceLightGenerator.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GenerateParkGroupProfile.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GroupLightViewer.cs" />
+    <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\ParkLightAngleCalculator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ThEmgLightCmds.cs" />
+    <Compile Include="ThMEPLightingService.cs" />
+    <Compile Include="ThMEPGarageLightingCmds.cs" />
     <Compile Include="ThMEPLightingApp.cs" />
+    <Compile Include="ThMEPLightingCommon.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ParkingStall\Worker\LightAdjustor\" />
     <Folder Include="ParkingStall\Worker\PipeConnector\" />
-    <Folder Include="ParkingStall\Worker\PlaceLight\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>
   <ItemGroup>
@@ -119,5 +235,8 @@
       </ItemGroup>
     </When>
   </Choose>
+  <ItemGroup>
+    <PackageReference Include="QuickGraph" Version="3.6.61119.7" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

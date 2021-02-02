@@ -26,6 +26,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             return new ThWKitchenPipe()
             {
+                Center = center,
                 Identifier = Parameters.Identifier,
                 Matrix = Matrix3d.Displacement(center.GetAsVector()),
                 Representation = new DBObjectCollection()
@@ -51,15 +52,13 @@ namespace ThMEPWSS.Pipe.Engine
             }
             else
             {
-                if (Parallelline(boundary, outline, basinline))
-                {
-                    var pt = FindOutsideVertex(basinline, outline);              
+                var pt = FindOutsideVertex(basinline, outline);
+                if (GetOutsidePipe(pt, basinline))
+                {                              
                     Pipes.Add(Create(pt));
-
                 }
                 else
-                {
-                    var pt = FindOutsideVertex(basinline, outline);
+                {                 
                     Pipes.Add(Create(pt));
                     Pipes.Add(Create(Addpipe(boundary, basinline, pype, outline)));
                 }
@@ -85,43 +84,27 @@ namespace ThMEPWSS.Pipe.Engine
         private Point3d FindInsideVertex(Polyline boundary, Polyline outline)
         {
             var vertices = outline.Vertices();
-
-            Point3d center = outline.GetCenter();
-            Point3d Ray_bou = Point3d.Origin;
-            var pts = new Point3dCollection();
-            List<int> num = new List<int>();
-            List<double> dst = new List<double>();
-            for (int i = 0; i < vertices.Count - 1; i++)
+            var vertices1 = boundary.Vertices();          
+            double dst = double.MaxValue;
+            int num = 0;
+            for (int i = 0; i < vertices.Count; i++)//判断管井中点距外廓距离
             {
-                Point3d midpoint = GetMidPoint(vertices[i], vertices[i + 1]);
-
-                Ray_bou = boundary.ToCurve3d().GetClosestPointTo(midpoint).Point;
-
-                dst.Add(midpoint.DistanceTo(Ray_bou));
-
-
-            }
-
-            for (int i = 0; i < 2; i++)
-            {
-                if (dst[i] < dst[i + 2])
+                double dst1 = double.MaxValue;
+                for (int j=0;j< vertices1.Count;j++)
                 {
-                    num.Add(i);
+                   if(dst1> vertices[i].DistanceTo(vertices1[j]))
+                    {
+                        dst1 = vertices[i].DistanceTo(vertices1[j]);
+                    }                   
                 }
-                else
+                if(dst>dst1)
                 {
-                    num.Add(i + 2);
+                    dst = dst1;
+                    num = i;
                 }
             }
-            Line line2 = new Line(vertices[num[0]], vertices[num[0] + 1]);
-            Line line3 = new Line(vertices[num[1]], vertices[num[1] + 1]);
-            line2.IntersectWith(line3, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-            return pts[0];
-        }
-        private Point3d GetMidPoint(Point3d pt1, Point3d pt2)
-        {
-            return pt1 + pt1.GetVectorTo(pt2) * 0.5;
-        }
+            return vertices[num];
+        }    
         private Vector3d GetDirection(Polyline boundary, Polyline outline, Point3d pt)
         {
             var vertices = outline.Vertices();
@@ -168,47 +151,18 @@ namespace ThMEPWSS.Pipe.Engine
             Line line2 = new Line(evaluate, evaluate1);
             outline.IntersectWith(line2, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
             return pts.Count == 0;
-        }
-        private static bool Parallelline(Polyline boundary, Polyline outline, BlockReference basinline)
+        }    
+        private static bool GetOutsidePipe(Point3d pt, BlockReference basinline)
         {
-            var vertices = boundary.Vertices();
-            Line boundarybaseline = new Line();
-            double dst = double.MaxValue;
-            int a = 0;
-            for (int i = 0; i < vertices.Count - 1; i++)
+            if((pt.X<= basinline.Position.X+500)&& (pt.X >= basinline.Position.X-500))
             {
-                boundarybaseline = new Line(vertices[i], vertices[i + 1]);
-                if (dst > boundarybaseline.GetDistToPoint(basinline.Position))
-                {
-                    dst = boundarybaseline.GetDistToPoint(basinline.Position);
-                    a = i;
-                }
+                return true;
             }
-            //boundarybaseline = new Line(vertices[a], vertices[a + 1]);
-            var vertices_1 = outline.Vertices();
-            Line outlinebaseline = new Line();
-            if (vertices_1[0].DistanceTo(vertices_1[1]) < vertices_1[2].DistanceTo(vertices_1[1]))
+            else if ((pt.Y <= basinline.Position.Y + 500) && (pt.Y >= basinline.Position.Y - 500))
             {
-                if (vertices[a].GetVectorTo(vertices[a + 1]).IsParallelTo(vertices_1[2].GetVectorTo(vertices_1[1])))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
-            else
-            {
-                if (vertices[a].GetVectorTo(vertices[a + 1]).IsParallelTo(vertices_1[0].GetVectorTo(vertices_1[1])))
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
+            return false;
         }
         private Point3d Addpipe(Polyline boundary, BlockReference basinline, Polyline pype, Polyline outline)
         {
@@ -294,13 +248,17 @@ namespace ThMEPWSS.Pipe.Engine
                     a = i;
                 }
             }
-            if (a > 0)
+            if (a > 0&&a< vertices.Count-1)
             {
                 return vertices[a]+ ThWPipeCommon.WELL_TO_WALL_OFFSET * ( vertices[a].GetVectorTo(vertices[a+1]).GetNormal()+ vertices[a].GetVectorTo(vertices[a-1]).GetNormal());
             }
-            else
+            else if(a==0)
             {
                 return vertices[0] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[0].GetVectorTo(vertices[1]).GetNormal() + vertices[1].GetVectorTo(vertices[2]).GetNormal());
+            }
+            else
+            {
+                return vertices[a] + ThWPipeCommon.WELL_TO_WALL_OFFSET * (vertices[a].GetVectorTo(vertices[a-1]).GetNormal() + vertices[a-1].GetVectorTo(vertices[a - 2]).GetNormal());
             }
         }      
     }

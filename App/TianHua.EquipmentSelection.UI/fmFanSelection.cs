@@ -252,7 +252,7 @@ namespace TianHua.FanSelection.UI
 
                     if (m_FanDesign != null)
                     {
-                        var _JsonListFan = ReadTxt(m_FanDesign.Path);
+                        var _JsonListFan = ReadTxt(FuncStr.NullToStr(ThFanSelectionUIUtils.DefaultModelExportPath()) + ".json");
                         m_ListFan = FuncJson.Deserialize<List<FanDataModel>>(_JsonListFan);
 
                         if (m_ListFan != null && m_ListFan.Count > 0)
@@ -387,11 +387,30 @@ namespace TianHua.FanSelection.UI
                 {
                     return;
                 }
-                _Fan.ExhaustModel = _fmAirVolumeCalc.Model.ExhaustModel;
-                _Fan.SysAirVolume = _fmAirVolumeCalc.Model.SysAirVolume;
-                _Fan.AirCalcFactor = _fmAirVolumeCalc.Model.AirCalcFactor;
-                _Fan.AirCalcValue = _fmAirVolumeCalc.Model.AirCalcValue;
-                //_Fan.SysAirVolume = _Fan.AirVolume;
+
+                _Fan.IsManualInputAirVolume = _fmAirVolumeCalc.CheckIsManualInput.Checked;
+
+                if (_fmAirVolumeCalc.CheckIsManualInput.Checked)
+                {
+                    _Fan.SysAirVolume = FuncStr.NullToInt(_fmAirVolumeCalc.TxtManualInput.Text);
+
+                    _Fan.AirVolume = _Fan.SysAirVolume;
+
+
+                    _Fan.ExhaustModel = _fmAirVolumeCalc.Model.ExhaustModel;
+       
+                    _Fan.AirCalcFactor = _fmAirVolumeCalc.Model.AirCalcFactor;
+                    _Fan.AirCalcValue = _fmAirVolumeCalc.Model.AirCalcValue;
+
+                }
+                else
+                {
+                    _Fan.ExhaustModel = _fmAirVolumeCalc.Model.ExhaustModel;
+                    _Fan.SysAirVolume = _fmAirVolumeCalc.Model.SysAirVolume;
+                    _Fan.AirCalcFactor = _fmAirVolumeCalc.Model.AirCalcFactor;
+                    _Fan.AirCalcValue = _fmAirVolumeCalc.Model.AirCalcValue;
+
+                }
                 CheckSysCheckedChanged();
                 SetFanModel();
                 TreeList.Refresh();
@@ -1468,6 +1487,12 @@ namespace TianHua.FanSelection.UI
                     {
                         _Fan.IsErased = true;
                         //TreeList.DeleteSelectedNodes();
+                        var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+                        if (_SonFan != null)
+                        {
+                            _SonFan.IsErased = true;
+                        }
+
                         using (Active.Document.LockDocument())
                         using (AcadDatabase acadDatabase = AcadDatabase.Active())
                         using (ThHvacDbModelManager dbManager = new ThHvacDbModelManager(Active.Database))
@@ -1475,15 +1500,17 @@ namespace TianHua.FanSelection.UI
                             dbManager.EraseModels(_Fan.ID);
                             Active.Editor.Regen();
                         }
+                        ComBoxScene_SelectedValueChanged(null, null);
                     }
                 }
                 else
                 {
                     if (XtraMessageBox.Show(" 是否确认删除低速工况？ ", "提示", MessageBoxButtons.YesNo) == DialogResult.Yes)
                     {
-                        _Fan.IsErased = true;
-                        //TreeList.DeleteSelectedNodes();
+                        //_Fan.IsErased = true;
+                        TreeList.DeleteSelectedNodes();
                         SetFanModel();
+                        ComBoxScene_SelectedValueChanged(null, null);
                     }
                 }
 
@@ -2419,16 +2446,16 @@ namespace TianHua.FanSelection.UI
             string _ErrorStr = string.Empty;
             if (_FocusedColumn.FieldName == "InstallSpace")
             {
-                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr(e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum);
+                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr(e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario  && !p.IsErased);
             }
 
             if (_FocusedColumn.FieldName == "InstallFloor")
             {
-                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == FuncStr.NullToStr(e.Value) && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == _Fan.VentNum);
+                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == FuncStr.NullToStr(e.Value) && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && !p.IsErased);
             }
             if (_FocusedColumn.FieldName == "VentNum")
             {
-                //_List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && p.VentNum == FuncStr.NullToStr(e.Value));
+                _List = m_ListFan.FindAll(p => p.InstallSpace == _Fan.InstallSpace && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && !p.IsErased);
 
                 var _Calculator = new VentSNCalculator(FuncStr.NullToStr(e.Value));
                 if (_Calculator.SerialNumbers.Count > 0)
@@ -2735,8 +2762,8 @@ namespace TianHua.FanSelection.UI
                 m_FanDesign.LastOperationDate = DateTime.Now;
                 m_FanDesign.Name = _Filename.Replace(".dwg", "");
                 m_FanDesign.Status = "0";
-                m_FanDesign.Path = ThFanSelectionUIUtils.DefaultModelExportPath() + "\\" + FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
-
+                // m_FanDesign.Path = ThFanSelectionUIUtils.DefaultModelExportPath() + "\\" + FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
+                m_FanDesign.Path = FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
                 if (m_ListFanDesign == null) m_ListFanDesign = new List<FanDesignDataModel>();
                 m_ListFanDesign.Add(m_FanDesign);
 
@@ -2749,7 +2776,7 @@ namespace TianHua.FanSelection.UI
                 JsonExporter.Instance.SaveToFile(_Path, Encoding.UTF8, _JsonFanDesign);
 
                 var _Json = FuncJson.Serialize(m_ListFan);
-                JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _Json);
+                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportPath().Replace(FuncStr.NullToStr(m_FanDesign.Name), "") + FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _Json);
 
 
                 this.Text = "风机选型 - " + m_FanDesign.Name;
@@ -2763,7 +2790,7 @@ namespace TianHua.FanSelection.UI
                 JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportCatalogPath(), Encoding.UTF8, _JsonFanDesign);
 
                 var _JsonFan = FuncJson.Serialize(m_ListFan);
-                JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
+                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportPath().Replace(FuncStr.NullToStr(m_FanDesign.Name), "") + FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
             }
         }
 
@@ -2788,6 +2815,30 @@ namespace TianHua.FanSelection.UI
                         var _AirCalcValue = _Fan.SysAirVolume / _Fan.VentQuan;
 
                         MainSysAirVolumeCalc(_Fan, _AirCalcValue);
+
+                        var _SonFan = m_ListFan.Find(p => p.PID == _Fan.ID);
+
+
+                        if (_SonFan != null)
+                        {
+
+                            if (_SonFan.IsManualInputAirVolume)
+                            {
+                                var _SonAirCalcValue = _SonFan.SysAirVolume / _Fan.VentQuan;
+
+                                SonSysAirVolumeCalc(_SonFan, _SonAirCalcValue);
+                            }
+                            else
+                            {
+
+                                var _SonAirCalcValue = _SonFan.AirCalcValue * _SonFan.AirCalcFactor / _Fan.VentQuan;
+
+                                SonSysAirVolumeCalc(_SonFan, _SonAirCalcValue);
+                            }
+
+
+                        }
+
                     }
                     else
                     {
@@ -2946,6 +2997,13 @@ namespace TianHua.FanSelection.UI
             {
                 _Fan.AirVolume = FuncStr.NullToInt(_AirCalcValue);
             }
+        }
+
+        private void TxtVentNum_EditValueChanged(object sender, EventArgs e)
+        {
+            CheckSysCheckedChanged();
+            SetFanModel();
+            TreeList.Refresh();
         }
     }
 }

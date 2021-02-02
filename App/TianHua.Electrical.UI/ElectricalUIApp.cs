@@ -12,22 +12,25 @@ using ThMEPElectrical.BlockConvert;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using ThMEPLighting.Garage.Model;
 
 namespace TianHua.Electrical.UI
 {
     public class ElectricalUIApp : IExtensionApplication
     {
         private fmSmokeLayout SmokeLayoutUI { get; set; }
-
+        private fmBasementLighting BasementLightingUI { get; set; }
 
         public void Initialize()
         {
             SmokeLayoutUI = null;
+            BasementLightingUI = null;
         }
 
         public void Terminate()
         {
             SmokeLayoutUI = null;
+            BasementLightingUI = null;
         }
 
         [CommandMethod("TIANHUACAD", "THYWG", CommandFlags.Modal)]
@@ -123,6 +126,15 @@ namespace TianHua.Electrical.UI
             return Path.Combine(ThCADCommon.SupportPath(), ThBConvertCommon.BLOCK_MAP_RULES_FILE);
         }
 
+        [CommandMethod("TIANHUACAD", "THCDZM", CommandFlags.Modal)]
+        public void THCDZM()
+        {
+            if (BasementLightingUI == null)
+            {
+                BasementLightingUI = new fmBasementLighting();
+            }
+            AcadApp.ShowModelessDialog(BasementLightingUI);
+        }
         private string LayoutType
         {
             get
