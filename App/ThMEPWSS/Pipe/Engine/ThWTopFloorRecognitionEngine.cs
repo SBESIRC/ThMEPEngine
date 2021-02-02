@@ -1,13 +1,12 @@
 ﻿using Linq2Acad;
-using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
-using Dreambuild.AutoCAD;
+using DotNetARX;
+using ThMEPWSS.Pipe.Tools;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -23,16 +22,91 @@ namespace ThMEPWSS.Pipe.Engine
             Rooms = new List<ThWTopFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
+                var blockCollection = new List<BlockReference>();
+                blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");             
+                var StandardSpaces = new List<ThIfcSpace>();
+                var NonStandardSpaces = new List<ThIfcSpace>();
+                if (blockCollection.Count > 0)
+                {                   
+                    StandardSpaces = GetStandardSpaces(blockCollection);
+                    NonStandardSpaces = GetNonStandardSpaces(blockCollection);
+                }
                 if (this.Spaces.Count == 0)
                 {
                     this.Spaces = GetSpaces(database, pts);
                 }
-                var basepoint = new List<ThIfcSpace>();
+                var basepoint = GetBaseCircles(blockCollection);
                 var compositeroom = Getcompositeroom(database, pts);
                 var compositebalconyroom = Getcompositebalconyroom(database, pts);
-                var divisionLines = GetLines(database, this.Spaces);
-                Rooms = ThTopFloorRoomService.Build(this.Spaces, basepoint, compositeroom, compositebalconyroom, divisionLines);
+                var divisionLines = GetLines(blockCollection, this.Spaces);
+                Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);
             }
+        }
+        public static List<ThIfcSpace> GetBaseCircles(List<BlockReference> blocks)
+        {
+            var FloorSpaces = new List<ThIfcSpace>();
+            foreach (BlockReference block in blocks)
+            {
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("标准层"))
+                {
+                    var s = new DBObjectCollection();
+                    block.Explode(s);
+                    List<Circle> circle = new List<Circle>();
+                    foreach (var s1 in s)
+                    {
+                        if (s1.GetType().Name.Contains("Circle"))
+                        {
+                            Circle baseCircle = s1 as Circle;
+                            FloorSpaces.Add(new ThIfcSpace { Boundary = baseCircle });
+                        }
+                    }
+                }
+            }
+            return FloorSpaces;
+        }
+        public static List<Curve> GetBoundaryCurves(List<BlockReference> blockCollection)
+        {
+            var blockCurves = new List<Curve>();
+            foreach (BlockReference block in blockCollection)
+            {
+                blockCurves.Add(ThWPipeOutputFunction.GetBlockBoundary(block));
+            }
+            return blockCurves;
+        }
+        public static List<ThIfcSpace> GetStandardSpaces(List<BlockReference> blocks)
+        {
+            var FloorSpaces = new List<ThIfcSpace>();
+
+            foreach (BlockReference block in blocks)
+            {
+                var blockBounds = new List<BlockReference>();
+                var blockString = new List<string>();
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("标准层"))
+                {
+                    blockBounds.Add(block);
+                }
+                blockString.Add(BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号"));
+                if (blockBounds.Count > 0)
+                {
+                    FloorSpaces.Add(new ThIfcSpace { Boundary = GetBoundaryCurves(blockBounds)[0], Tags = blockString });
+                }
+            }
+
+            return FloorSpaces;
+        }
+        public static List<ThIfcSpace> GetNonStandardSpaces(List<BlockReference> blocks)
+        {
+            var FloorSpaces = new List<ThIfcSpace>();
+            var blockBounds = new List<BlockReference>();
+            foreach (BlockReference block in blocks)
+            {
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("非标层"))
+                {
+                    blockBounds.Add(block);
+                }
+            }
+            GetBoundaryCurves(blockBounds).ForEach(o => FloorSpaces.Add(new ThIfcSpace { Boundary = o }));
+            return FloorSpaces;
         }
         private List<ThWCompositeRoom> Getcompositeroom(Database database, Point3dCollection pts)
         {
@@ -50,28 +124,28 @@ namespace ThMEPWSS.Pipe.Engine
                 return compositeRoomRecognitionEngine.FloorDrainRooms;
             }
         }
-         private List<Line> GetLines(Database database,List<ThIfcSpace> spaces)
+         private List<Line> GetLines(List<BlockReference> blocks, List<ThIfcSpace> spaces)
         {
-            var Columns = new List<Line>();         
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var divisionLinesDbExtension = new ThDivisionLinesDbExtension(database))
+            var DivisionLines = new List<Line>();
+            foreach (BlockReference block in blocks)
             {
-                divisionLinesDbExtension.BuildElementCurves();
-                Columns = divisionLinesDbExtension.Lines;
-            }
-            if (Columns.Count > 0)
-            {
-
-                return GetColumnLines(Columns, spaces);
-            }
-            else
-            {
-                using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("标准层"))
                 {
-                    var lines = acadDatabase.ModelSpace.OfType<Line>().Where(lineInfo => lineInfo.Layer.Contains(ThWPipeCommon.AD_FLOOR_AREA)).ToList();
-                    return lines;
+                    var s = new DBObjectCollection();
+                    block.Explode(s);
+                    foreach (var s1 in s)
+                    {
+                        if (s1.GetType().Name.Contains("Line"))
+                        {
+                            Line divisionLine = s1 as Line;
+                            if((divisionLine.StartPoint.X> block.GeometricExtents.MinPoint.X)&&
+                                (divisionLine.StartPoint.X < block.GeometricExtents.MaxPoint.X))
+                            DivisionLines.Add(divisionLine);
+                        }
+                    }
                 }
             }
+            return GetColumnLines(DivisionLines, spaces);
         }
         private static List<Line> GetColumnLines(List<Line> Columns, List<ThIfcSpace> spaces)
         {

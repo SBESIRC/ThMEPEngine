@@ -58,7 +58,7 @@ namespace ThMEPWSS.Pipe.Engine
         public override void Recognize(Database database, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {                           
+            {                  
                 var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();               
                 RoofDeviceEngine.Recognize(database, pts);             
                 RoofDeviceFloors = RoofDeviceEngine.Rooms;
@@ -80,16 +80,10 @@ namespace ThMEPWSS.Pipe.Engine
                 RoofDeviceEngine.PositionTags.ForEach(o => PositionTags.Add(o));
                 RoofDeviceEngine.AllObstacles.ForEach(o => AllObstacles.Add(o));
                 RoofDeviceEngine.Layers.ForEach(o => Layers.Add(o));
-                var RoofEngine = new ThWRoofFloorRecognitionEngine()
-                {
-                    Spaces = RoofDeviceEngine.Spaces
-                };
+                var RoofEngine = new ThWRoofFloorRecognitionEngine();            
                 RoofEngine.Recognize(database, pts);
                 RoofFloors = RoofEngine.Rooms;
-                var FirstEngine = new ThWTopFloorRecognitionEngine()
-                {
-                    Spaces = RoofEngine.Spaces
-                };
+                var FirstEngine = new ThWTopFloorRecognitionEngine();             
                 FirstEngine.Recognize(database, pts);
                 TopFloors = FirstEngine.Rooms;
                 if (TopFloors.Count > 0)

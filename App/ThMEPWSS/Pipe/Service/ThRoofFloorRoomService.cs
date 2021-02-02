@@ -39,7 +39,7 @@ namespace ThMEPWSS.Pipe.Service
         private void Build()
         {
             //找主体空间 空间框线包含“顶层设备空间”
-            var roofFloorSpaces = GetRoofFloorSpaces();
+            var roofFloorSpaces = Spaces;
             roofFloorSpaces.ForEach(o =>
             {
                 Rooms.Add(CreateRoofFloorContainer(o));
@@ -53,12 +53,8 @@ namespace ThMEPWSS.Pipe.Service
                 RoofRainPipes = ThRoofFloorRoofRainPipeService.Find(roofFloorSpace, RoofRainPipes),
                 GravityWaterBuckets = ThRoofFloorGravityWaterBucketService.Find(roofFloorSpace, GravityWaterBuckets),
                 SideEntryWaterBuckets = ThRoofFloorSideEntryWaterBucketService.Find(roofFloorSpace, SideEntryWaterBuckets),
-                BaseCircles = ThRoofFloorBaseCircleService.Find(roofFloorSpace, BaseCircles),
+                BaseCircles = BaseCircles,
             };
-        }
-        private List<ThIfcSpace> GetRoofFloorSpaces()
-        {
-            return Spaces.Where(m => m.Tags.Where(n => n.Contains("RF")&&n.EndsWith("F")).Any()).ToList();
         }
     }
 }

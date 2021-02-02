@@ -87,9 +87,6 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThFindSpaceRangedSpaces.cs" />
-    <Compile Include="Pipe\Service\ThRoofDeviceFloorBaseCircleService.cs" />
-    <Compile Include="Pipe\Service\ThRoofFloorBasicCircleService.cs" />
-    <Compile Include="Pipe\Service\ThTopFloorBaseCircleService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeRoomService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorDivisionLineService.cs" />

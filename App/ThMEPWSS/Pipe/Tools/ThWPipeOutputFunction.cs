@@ -16,13 +16,15 @@ namespace ThMEPWSS.Pipe.Tools
 {
     public class ThWPipeOutputFunction
     {
-        public static DBText Taggingtext(Point3d tag, string s,int scaleFactor)
+        public static DBText Taggingtext(Point3d tag, string s, int scaleFactor)
         {
+            var textStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
             return new DBText()
             {
-                Height = 175* scaleFactor,
+                Height = 175 * scaleFactor,
                 Position = tag,
-                TextString = s,//原来为{floor.Value}        
+                TextString = s,//原来为{floor.Value}     
+                TextStyleId = textStyleId,
             };
         }
         public bool Checkbucket(Point3d pipe, Point3d bucket, Polyline wboundary)
@@ -116,10 +118,10 @@ namespace ThMEPWSS.Pipe.Tools
             objects.ForEach(o => obstacles.Add(o));
             return obstacles;
         }
-        public static Point3d GetRadialPoint(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle,int scaleFactor)
+        public static Point3d GetRadialPoint(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle, int scaleFactor)
         {
             Point3d point = Point3d.Origin;
-            double width = 175 * 7*scaleFactor;
+            double width = 175 * 7 * scaleFactor;
             Point3d dirPoint = new Point3d(Fpipeindex.X, Fpipeindex.Y - 1, 0);
             Vector3d normal = Fpipeindex.GetVectorTo(dirPoint);
             point = GetRadialPoint1(Fpipeindex, obstacle, width, normal, scaleFactor);
@@ -137,7 +139,7 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return point;
         }
-        public static Point3d GetRadialPoint1(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle, double width, Vector3d normal,int scaleFactor)
+        public static Point3d GetRadialPoint1(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle, double width, Vector3d normal, int scaleFactor)
         {
             Point3d point = Point3d.Origin;
             for (int j = 0; j < 6; j++)
@@ -157,7 +159,7 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return point;
         }
-        public static Polyline GetBoundary(double width, Point3d point,int scaleFactor)
+        public static Polyline GetBoundary(double width, Point3d point, int scaleFactor)
         {
             Polyline polyline = new Polyline()
             {
@@ -165,8 +167,8 @@ namespace ThMEPWSS.Pipe.Tools
             };
             polyline.AddVertexAt(0, new Point2d(point.X, point.Y), 0.0, 0.0, 0.0);
             polyline.AddVertexAt(1, new Point2d(point.X + width, point.Y), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(2, new Point2d(point.X + width, point.Y + 200*scaleFactor), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(3, new Point2d(point.X, point.Y + 200*scaleFactor), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(2, new Point2d(point.X + width, point.Y + 200 * scaleFactor), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(point.X, point.Y + 200 * scaleFactor), 0.0, 0.0, 0.0);
             return polyline;
         }
         public static Polyline GetCircleBoundary(Circle circle)
@@ -175,13 +177,34 @@ namespace ThMEPWSS.Pipe.Tools
             {
                 Closed = true
             };
-            polyline.AddVertexAt(0, new Point2d(circle.Center.X+ circle.Radius, circle.Center.Y), 0.0, 0.0, 0.0);
-            polyline.AddVertexAt(1, new Point2d(circle.Center.X, circle.Center.Y+ circle.Radius), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(0, new Point2d(circle.Center.X + circle.Radius, circle.Center.Y), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(1, new Point2d(circle.Center.X, circle.Center.Y + circle.Radius), 0.0, 0.0, 0.0);
             polyline.AddVertexAt(2, new Point2d(circle.Center.X - circle.Radius, circle.Center.Y), 0.0, 0.0, 0.0);
             polyline.AddVertexAt(3, new Point2d(circle.Center.X, circle.Center.Y - circle.Radius), 0.0, 0.0, 0.0);
             return polyline;
         }
         public static Polyline GetPolylineBoundary(Curve curve)
+        {
+            if (curve != null)
+            {
+                Polyline polyline = new Polyline()
+                {
+                    Closed = true
+                };
+                Point3d minpt = curve.GeometricExtents.MinPoint;
+                Point3d maxpt = curve.GeometricExtents.MaxPoint;
+                polyline.AddVertexAt(0, new Point2d(minpt.X - 1, minpt.Y - 1), 0.0, 0.0, 0.0);
+                polyline.AddVertexAt(1, new Point2d(maxpt.X + 1, minpt.Y - 1), 0.0, 0.0, 0.0);
+                polyline.AddVertexAt(2, new Point2d(maxpt.X + 1, maxpt.Y + 1), 0.0, 0.0, 0.0);
+                polyline.AddVertexAt(3, new Point2d(minpt.X - 1, maxpt.Y + 1), 0.0, 0.0, 0.0);
+                return polyline;
+            }
+            else
+            {
+                return new Polyline();
+            }
+        }
+        public static Polyline GetBlockBoundary(BlockReference curve)
         {
             if (curve != null)
             {
@@ -254,155 +277,154 @@ namespace ThMEPWSS.Pipe.Tools
         {
             Circle circle = polyline as Circle;
             Polyline pipe = circle.Tessellate(50);
-            return pipe;           
+            return pipe;
         }
-        public static List<Polyline> GetListFpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListFpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('F'))
             {
-                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer = W_DRAI_EQPM);
                 GetPolyline(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListPpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListPpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('P'))
             {
-                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer =W_DRAI_EQPM);
                 GetPolyline(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListWpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListWpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('W'))
             {
-                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer = W_DRAI_EQPM);
                 GetPolyline(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListTpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListTpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes, string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('T'))
             {
-                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer= ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer= W_DRAI_EQPM);
                 GetPolyline(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
 
             return polylines;
         }
-        public static List<Polyline> GetListDpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListDpipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('D'))
             {
-                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline(toilet, ToiletPipes).ForEach(o => o.Layer = W_DRAI_EQPM);
                 GetPolyline(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Entity> GetListCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             if (toilet.Identifier.Contains('F') || toilet.Identifier.Contains('P') || toilet.Identifier.Contains('W'))
-            {
-                GetEntity(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
-                GetEntity(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+            {             
+                GetEntity(toilet, ToiletPipes, W_DRAI_EQPM).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Entity> GetListNormalCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListNormalCopypipes(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             if (toilet.Identifier.Contains('T'))
             {
-                GetEntity(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetEntity(toilet, ToiletPipes,W_DRAI_EQPM).ForEach(o => o.Layer = W_DRAI_EQPM);
             }
             else
             {
-                GetEntity(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetEntity(toilet, ToiletPipes,W_DRAI_EQPM).ForEach(o => o.Layer = W_DRAI_EQPM);
             }
-            GetEntity(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+            GetEntity(toilet, ToiletPipes, W_DRAI_EQPM).ForEach(o => polylines.Add(o));
             return polylines;
         }
-        public static List<Polyline> GetListFpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListFpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('F'))
             {
-                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = W_DRAI_EQPM);
                 GetPolyline1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListPpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListPpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('P'))
             {
-                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = W_DRAI_EQPM);
                 GetPolyline1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListWpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListWpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('W'))
             {
-                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = W_DRAI_EQPM);
                 GetPolyline1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListTpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListTpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('T'))
             {
-                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = W_DRAI_EQPM);
                 GetPolyline1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Polyline> GetListDpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Polyline> GetListDpipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Polyline>();
             if (toilet.Identifier.Contains('D'))
             {
-                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetPolyline1(toilet, ToiletPipes).ForEach(o => o.Layer =W_DRAI_EQPM);
                 GetPolyline1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Entity> GetListCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             if (toilet.Identifier.Contains('F') || toilet.Identifier.Contains('P') || toilet.Identifier.Contains('W'))
             {
-                GetEntity1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
-                GetEntity1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+                GetEntity1(toilet, ToiletPipes, W_DRAI_EQPM).ForEach(o => o.Layer = W_DRAI_EQPM);
+                GetEntity1(toilet, ToiletPipes, W_DRAI_EQPM).ForEach(o => polylines.Add(o));
             }
             return polylines;
         }
-        public static List<Entity> GetListNormalCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetListNormalCopypipes1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             if (toilet.Identifier.Contains('T'))
             {
-                GetEntity1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetEntity1(toilet, ToiletPipes, W_DRAI_EQPM).ForEach(o => o.Layer = W_DRAI_EQPM);
             }
             else
             {
-                GetEntity1(toilet, ToiletPipes).ForEach(o => o.Layer = ThWPipeCommon.W_DRAI_EQPM);
+                GetEntity1(toilet, ToiletPipes, W_DRAI_EQPM).ForEach(o => o.Layer = W_DRAI_EQPM);
             }
-            GetEntity1(toilet, ToiletPipes).ForEach(o => polylines.Add(o));
+            GetEntity1(toilet, ToiletPipes, W_DRAI_EQPM).ForEach(o => polylines.Add(o));
             return polylines;
         }
         public static List<Polyline> GetPolyline(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
@@ -416,25 +438,26 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return polylines;
         }
-        public static List<Entity> GetEntity(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetEntity(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             foreach (Entity item in toilet.Representation)
             {
                 var offset = Matrix3d.Displacement(200 * ToiletPipes[0].Center.GetVectorTo(ToiletPipes[1].Center).GetNormal());
                 Entity polyline = item.GetTransformedCopy(toilet.Matrix.PostMultiplyBy(offset));
+                polyline.Layer = W_DRAI_EQPM;
                 polylines.Add(polyline);
             }
             return polylines;
         }
-        public static List<Entity> GetEntityPolyline(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetEntityPolyline(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             foreach (Entity item in toilet.Representation)
             {
                 var offset = Matrix3d.Displacement(200 * ToiletPipes[0].Center.GetVectorTo(ToiletPipes[1].Center).GetNormal());
                 Entity polyline = item.GetTransformedCopy(toilet.Matrix.PostMultiplyBy(offset));
-                polyline.Layer = ThWPipeCommon.W_DRAI_EQPM;
+                polyline.Layer = W_DRAI_EQPM;
                 polylines.Add(polyline);
             }
             return polylines;
@@ -449,47 +472,48 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return polylines;
         }
-        public static List<Entity> GetEntity1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetEntity1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             foreach (Entity item in toilet.Representation)
             {
                 var polyline = item.GetTransformedCopy(toilet.Matrix);
+                polyline.Layer = W_DRAI_EQPM;
                 polylines.Add(polyline);
             }
             return polylines;
         }
-        public static List<Entity> GetEntityPolyline1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes)
+        public static List<Entity> GetEntityPolyline1(ThWToiletPipe toilet, List<ThWToiletPipe> ToiletPipes,string W_DRAI_EQPM)
         {
             var polylines = new List<Entity>();
             foreach (Entity item in toilet.Representation)
             {
                 var polyline = item.GetTransformedCopy(toilet.Matrix);
-                polyline.Layer = ThWPipeCommon.W_DRAI_EQPM;
+                polyline.Layer = W_DRAI_EQPM;
                 polylines.Add(polyline);
             }
             return polylines;
         }
-        public static Point3d GetTag(DBObjectCollection fontBox, Point3dCollection Pipeindex, int i, Matrix3d matrix1, Matrix3d Matrix, ThCADCoreNTSSpatialIndex obstacle,int scaleFactor)
+        public static Point3d GetTag(DBObjectCollection fontBox, Point3dCollection Pipeindex, int i, Matrix3d matrix1, Matrix3d Matrix, ThCADCoreNTSSpatialIndex obstacle, int scaleFactor,Point3dCollection originPoint)
         {
             Point3d tag = Point3d.Origin;
 
             if (fontBox.Count > 0)
             {
-                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7*scaleFactor, Pipeindex[i],scaleFactor)).Count>0)
+                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7 * scaleFactor, Pipeindex[i], scaleFactor)).Count > 0)
                 {
-                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i/3*3], scaleFactor);
+                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i], scaleFactor, originPoint[i / 3]);
                 }
-                else
+                else 
                 {
                     tag = Pipeindex[i];
                 }
             }
             else
             {
-                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7* scaleFactor, Pipeindex[i+2], scaleFactor)).Count > 0)
+                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7 * scaleFactor, Pipeindex[i + 2], scaleFactor)).Count > 0)
                 {
-                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i], scaleFactor);
+                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i], scaleFactor, originPoint[i/3]);
                 }
                 else
                 {
@@ -503,49 +527,49 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return tag;
         }
-        public static Point3d GetTag1(Point3dCollection Pipeindex, int i,ThCADCoreNTSSpatialIndex obstacle,int scaleFactor)
+        public static Point3d GetTag1(Point3dCollection Pipeindex, int i, ThCADCoreNTSSpatialIndex obstacle, int scaleFactor,Point3dCollection originPoint)
 
         {
-                Point3d tag = Point3d.Origin;                 
-                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7*scaleFactor, Pipeindex[i+2], scaleFactor)).Count > 0)
-                {
-                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i], scaleFactor);
-                }
-                else
-                {
-                    tag = Pipeindex[i];
-                }
-           
+            Point3d tag = Point3d.Origin;
+            if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7 * scaleFactor, Pipeindex[i + 2], scaleFactor)).Count > 0)
+            {
+                tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i], scaleFactor, originPoint[i/3]);
+            }
+            else
+            {
+                tag = Pipeindex[i];
+            }
+
             return tag;
         }
-        public static Point3d GetRadialFontPoint(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle, Point3d Fpipeindex1,int scaleFactor)
+        public static Point3d GetRadialFontPoint(Point3d Fpipeindex, ThCADCoreNTSSpatialIndex obstacle, Point3d Fpipeindex1, int scaleFactor,Point3d originPoint)
         {
             Point3d point = Point3d.Origin;
             for (int j = 0; j < 6; j++)
             {
-                Point3d point1 = Fpipeindex1 - 250 * (j )*Vector3d.YAxis.GetNormal();
+                Point3d point1 = Fpipeindex1 - 250 * (j) * Vector3d.YAxis.GetNormal();
                 Point3d point2 = Fpipeindex1 + 250 * (j) * Vector3d.YAxis.GetNormal();
-                var fontBox = obstacle.SelectCrossingPolygon(GetBoundary(175*7* scaleFactor, point1, scaleFactor));
-                var fontBox1 = obstacle.SelectCrossingPolygon(GetBoundary(175 * 7* scaleFactor, point2, scaleFactor));
+                var fontBox = obstacle.SelectCrossingPolygon(GetBoundary(175 * 7 * scaleFactor, point1, scaleFactor));
+                var fontBox1 = obstacle.SelectCrossingPolygon(GetBoundary(175 * 7 * scaleFactor, point2, scaleFactor));
                 if (fontBox.Count > 0)
                 {
                     if (fontBox1.Count > 0)
                     {
                         continue;
                     }
-                    else
+                    else if(fontBox1.Count ==0&& point2.DistanceTo(originPoint) >10)
                     {
                         point = point2;
                         break;
                     }
                 }
-                else
+                else if(fontBox.Count==0&&point1.DistanceTo(originPoint) > 10)
                 {
                     point = point1;
                     break;
                 }
             }
-            return Fpipeindex+ Fpipeindex1.GetVectorTo(point);
+            return Fpipeindex + Fpipeindex1.GetVectorTo(point);
         }
         public static List<BlockReference> GetGravityWaterBuckets(List<ThIfcGravityWaterBucket> GravityWaterBuckets)
         {
@@ -580,32 +604,34 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return roofRainPipe;
         }
-        public static List<DBText> GetListText(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor)
+        public static List<DBText> GetListText(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor, string W_RAIN_NOTE1)
         {
             var texts = new List<DBText>();
             for (int i = 0; i < points.Count; i++)
             {
-                texts.Add(TaggingBuckettext(points1[4 * i + 2], s, scaleFactor));
+                texts.Add(TaggingBuckettext(points1[4 * i + 2], s, scaleFactor, W_RAIN_NOTE1));
             }
             return texts;
         }
-        public static List<DBText> GetListText1(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor)
+        public static List<DBText> GetListText1(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor, string W_RAIN_NOTE1)
         {
             var texts = new List<DBText>();
             for (int i = 0; i < points.Count; i++)
             {
-                texts.Add(TaggingBuckettext(points1[4 * i + 3], s, scaleFactor));
+                texts.Add(TaggingBuckettext(points1[4 * i + 3], s, scaleFactor, W_RAIN_NOTE1));
             }
             return texts;
         }
-        public static DBText TaggingBuckettext(Point3d tag, string s,int scaleFactor)
+        public static DBText TaggingBuckettext(Point3d tag, string s,int scaleFactor,string W_RAIN_NOTE1)
         {
+            var textStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
             return new DBText()
             {
-                Height = 200* scaleFactor,
+                Height = 200 * scaleFactor,
                 Position = tag,
                 TextString = s,
-                Layer= ThWPipeCommon.W_RAIN_NOTE,
+                TextStyleId = textStyleId,
+                Layer= W_RAIN_NOTE1,
             };
         }
         public static List<string> TextXrefLayers(Database database)
@@ -632,13 +658,13 @@ namespace ThMEPWSS.Pipe.Tools
             {
                 return false;
             }
-            return (patterns[0] == "AREA" && patterns[1] == "FLOOR" && patterns[2] == "AD" );
+            return (patterns[0] == "AREA" && patterns[1] == "FLOOR" && patterns[2] == "AD");
         }
         private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
         {
             return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
-        public static Polyline CreatePolyline(Point3d point1, Point3d point2,List<string> strings,string pipeLayer)
+        public static Polyline CreatePolyline(Point3d point1, Point3d point2, List<string> strings, string pipeLayer)
         {
             Polyline ent_line1 = new Polyline();
             ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
@@ -648,24 +674,110 @@ namespace ThMEPWSS.Pipe.Tools
             //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
             return ent_line1;
         }
-        public static string Get_Layers(List<string> strings,string pipeLayer)
+        public static string Get_Layers(List<string> strings, string pipeLayer)
         {
-            foreach(string s in strings)
+            foreach (string s in strings)
             {
-                if(s.Contains(pipeLayer))
+                if(s.Equals(pipeLayer))
                 {
-                    return ThWPipeCommon.W_DRAI_SEWA_PIPE;
+                    return pipeLayer;
                 }
             }
-            return(ThWPipeCommon.W_DRAI_SEWA_PIPE1);
+            foreach (string s in strings)
+            {
+                if (s.Equals(ThWPipeCommon.W_DRAI_SEWA_PIPE1))
+                {
+                    return ThWPipeCommon.W_DRAI_SEWA_PIPE1;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Equals(ThWPipeCommon.W_DRAI_NOTE))
+                {
+                    return ThWPipeCommon.W_DRAI_NOTE;
+                }
+            }
+            return (null);
         }
-        public static Polyline CreateRainlines(Point3d point1, Point3d point2)
+        public static string Get_Layers1(List<string> strings, string pipeLayer)
+        {
+            foreach (string s in strings)
+            {
+                if (s.Equals(pipeLayer))
+                {
+                    return pipeLayer;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Equals(ThWPipeCommon.W_DRAI_NOTE))
+                {
+                    return ThWPipeCommon.W_DRAI_NOTE;
+                }
+            }
+            return (null);
+        }
+        public static string Get_Layers2(List<string> strings, string pipeLayer)
+        {
+            foreach (string s in strings)
+            {
+                if (s.Equals(pipeLayer))
+                {
+                    return pipeLayer;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Equals(ThWPipeCommon.W_RAIN_EQPM))
+                {
+                    return ThWPipeCommon.W_RAIN_EQPM;
+                }
+            }
+            return (null);
+        }
+        public static string Get_Layers3(List<string> strings, string pipeLayer)
+        {
+            foreach (string s in strings)
+            {
+                if (s.Equals(pipeLayer))
+                {
+                    return pipeLayer;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Equals(ThWPipeCommon.W_DRAI_NOTE))
+                {
+                    return ThWPipeCommon.W_DRAI_NOTE;
+                }
+            }
+            return (null);
+        }
+        public static string Get_Layers4(List<string> strings, string pipeLayer)
+        {
+            foreach (string s in strings)
+            {
+                if (s.Equals(pipeLayer))
+                {
+                    return pipeLayer;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Equals(ThWPipeCommon.W_RAIN_EQPM))
+                {
+                    return ThWPipeCommon.W_RAIN_EQPM;
+                }
+            }
+            return (null);
+        }
+        public static Polyline CreateRainlines(Point3d point1, Point3d point2,string W_RAIN_PIPE)
         {
             Polyline ent_line1 = new Polyline();
             ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
             ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);
             //ent_line1.Linetype = "DASHDED";
-            ent_line1.Layer = ThWPipeCommon.W_RAIN_PIPE;
+            ent_line1.Layer = W_RAIN_PIPE;
             //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
             //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
             return ent_line1;
@@ -680,13 +792,13 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return floodrains;
         }
-        public static Polyline CreateRainline(Point3d point1, Point3d point2)
+        public static Polyline CreateRainline(Point3d point1, Point3d point2,string W_RAIN_PIPE)
         {
             Polyline ent_line1 = new Polyline();
             ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
             ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);
             //ent_line1.Linetype = "DASHDOT";
-            ent_line1.Layer = "W-RAIN-PIPE";        
+            ent_line1.Layer = W_RAIN_PIPE;
             return ent_line1;
         }
         public void InputKitchenParameters(ThWCompositeRoom composite, ThWTopCompositeParameters parameters, ThWTopParameters parameters0)
@@ -750,11 +862,11 @@ namespace ThMEPWSS.Pipe.Tools
         public static DBObjectCollection GetFont(List<Polyline> polylines)
         {
             var font = new DBObjectCollection();
-            foreach(Polyline polyline in polylines)
+            foreach (Polyline polyline in polylines)
             {
-                font.Add(polyline); 
+                font.Add(polyline);
             }
             return font;
-        }
+        }    
     }
 }

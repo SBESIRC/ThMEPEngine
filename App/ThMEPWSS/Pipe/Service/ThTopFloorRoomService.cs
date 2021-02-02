@@ -54,30 +54,25 @@ namespace ThMEPWSS.Pipe.Service
             return new ThWTopFloorRoom()
             {                
                 FirstFloor = firstFloorSpace,
-                BaseCircles = ThTopFloorBaseCircleService.Find(firstFloorSpace, BaseCircles),
+                BaseCircles = BaseCircles,
                 CompositeRooms = ThTopFloorCompositeRoomService.Find(firstFloorSpace, CompositeRooms),
                 CompositeBalconyRooms = ThTopFloorCompositeBalconyRoomService.Find(firstFloorSpace, CompositeBalconyRooms),
                 DivisionLines = ThTopFloorDivisionLineService.Find(firstFloorSpace, DivisionLines),
             };
         }
-
-        /// <summary>
-        /// 选择顶层空间
-        /// </summary>
-        /// <returns></returns>
         private List<ThIfcSpace> GetFirstFloorSpace()
         {
             var FirSpace = new List<ThIfcSpace>();
             string pattern = @"\d+$";
-            string pattern1= @"^\d";
+            string pattern1 = @"^\d";
             var spaces = new List<Tuple<ThIfcSpace, double>>();
             Spaces.ForEach(m =>
             {
                 m.Tags.ForEach(n =>
-                {                  
+                {
                     var match = Regex.Match(n, pattern);
-                    var match_start= Regex.Match(n, pattern1);                 
-                    if (!string.IsNullOrEmpty(match.Value)&& (!string.IsNullOrEmpty(match_start.Value)||n.StartsWith("B")))
+                    var match_start = Regex.Match(n, pattern1);
+                    if (!string.IsNullOrEmpty(match.Value) && (!string.IsNullOrEmpty(match_start.Value) || n.StartsWith("B")))
                     {
                         if (!n.Contains(":"))
                         {
@@ -86,12 +81,12 @@ namespace ThMEPWSS.Pipe.Service
                     }
                 });
             });
-            if(spaces.Count>0)
+            if (spaces.Count > 0)
             {
-                FirSpace.Add(spaces.OrderByDescending(o => o.Item2).First().Item1);            
-                foreach(var space in spaces.OrderByDescending(o => o.Item2))
+                FirSpace.Add(spaces.OrderByDescending(o => o.Item2).First().Item1);
+                foreach (var space in spaces.OrderByDescending(o => o.Item2))
                 {
-                    if(space.Item1!= FirSpace[0])
+                    if (space.Item1 != FirSpace[0])
                     {
                         FirSpace.Add(space.Item1);
                     }

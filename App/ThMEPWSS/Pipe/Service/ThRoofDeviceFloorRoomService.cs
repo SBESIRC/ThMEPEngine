@@ -1,6 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
@@ -44,7 +42,7 @@ namespace ThMEPWSS.Pipe.Service
         private void Build()
         {
             //找主体空间 空间框线包含“顶层设备空间”
-            var roofDeviceFloorSpaces = GetRoofDeviceFloorSpaces();
+            var roofDeviceFloorSpaces = Spaces;
             roofDeviceFloorSpaces.ForEach(o =>
             {
                 Rooms.Add(CreateRoofDeviceFloorContainer(o));
@@ -58,12 +56,9 @@ namespace ThMEPWSS.Pipe.Service
                 RoofRainPipes = ThRoofDeviceFloorRoofRainPipeService.Find(roofDeviceFloorSpace, RoofRainPipes),
                 GravityWaterBuckets = ThRoofDeviceFloorGravityWaterBucketService.Find(roofDeviceFloorSpace, GravityWaterBuckets),
                 SideEntryWaterBuckets = ThRoofDeviceFloorSideEntryWaterBucketService.Find(roofDeviceFloorSpace, SideEntryWaterBuckets),
-                BaseCircles = ThRoofFloorBaseCircleService.Find(roofDeviceFloorSpace, BaseCircles),
+                BaseCircles =BaseCircles,
             };
         }
-        private List<ThIfcSpace> GetRoofDeviceFloorSpaces()
-        {
-            return Spaces.Where(m => m.Tags.Where(n => n.Contains("RFS")).Any()).ToList();
-        }
+       
     }
 }

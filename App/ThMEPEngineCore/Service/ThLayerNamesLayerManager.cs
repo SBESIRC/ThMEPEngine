@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Service
             {
                 return acadDatabase.Layers
                     .Where(o => IsVisibleLayer(o))
-                    .Where(o => IsPositionTagsLayerName(o.Name))
+                    .Where(o => IsLayerNamesLayerName(o.Name))
                     .Select(o => o.Name)
                     .ToList();
             }
@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Service
         {
             return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
-        private static bool IsPositionTagsLayerName(string name)
+        private static bool IsLayerNamesLayerName(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').ToArray();
             if (patterns.Count() < 3)

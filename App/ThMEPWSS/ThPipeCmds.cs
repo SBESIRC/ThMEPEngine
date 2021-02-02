@@ -12,6 +12,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using System.Linq;
 using ThMEPWSS.Pipe.Layout;
 using ThMEPWSS.Pipe.Output;
+using ThMEPWSS.Pipe.Tools;
 
 namespace ThMEPWSS
 {
@@ -668,25 +669,28 @@ namespace ThMEPWSS
         public static Line CreateLine(Point3d point1, Point3d point2)
         {
             Line line = new Line(point1, point2);
-            line.Layer = "W-RAIN-NOTE";
             //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);       
             return line;
         }
-        public static List<Line> GetCreateLines(Point3dCollection points, Point3dCollection point1s)
+        public static List<Line> GetCreateLines(Point3dCollection points, Point3dCollection point1s,string W_RAIN_NOTE1)
         {
             var lines = new List<Line>();
             for (int i = 0; i < points.Count; i++)
             {
-                lines.Add(CreateLine(points[i], point1s[4 * i]));              
+                Line s = CreateLine(points[i], point1s[4 * i]);
+                s.Layer = W_RAIN_NOTE1;
+                lines.Add(s);              
             }
             return lines;
         }
-        public static List<Line> GetCreateLines1(Point3dCollection points, Point3dCollection point1s)
+        public static List<Line> GetCreateLines1(Point3dCollection points, Point3dCollection point1s, string W_RAIN_NOTE1)
         {
             var lines = new List<Line>();
             for (int i = 0; i < points.Count; i++)
             {
-                lines.Add(CreateLine(point1s[4 * i], point1s[4 * i + 1]));
+                Line s = CreateLine(point1s[4 * i], point1s[4 * i + 1]);
+                s.Layer = W_RAIN_NOTE1;
+                lines.Add(s);
             }
             return lines;
         }
@@ -873,18 +877,21 @@ namespace ThMEPWSS
                 obstacleInfo.Recognize(FloorEngines);
                 if (userInfo.FloorValue == 0)
                     return;
-
+                string W_RAIN_NOTE1 = ThWPipeOutputFunction.Get_Layers1(FloorEngines.Layers, ThWPipeCommon.W_RAIN_NOTE);
+                string W_DRAI_EQPM= ThWPipeOutputFunction.Get_Layers2(FloorEngines.Layers, ThWPipeCommon.W_DRAI_EQPM);
+                string W_DRAI_FLDR = ThWPipeOutputFunction.Get_Layers3(FloorEngines.Layers, ThWPipeCommon.W_DRAI_FLDR);
+                string W_RAIN_PIPE= ThWPipeOutputFunction.Get_Layers4(FloorEngines.Layers, ThWPipeCommon.W_RAIN_PIPE);
                 //第一类屋顶设备层布置   
                 var parameters2 = new ThWRoofDeviceParameters();
                 if (FloorEngines.RoofDeviceFloors.Count > 0)//存在屋顶设备层
                 {
-                    ThWLayoutRoofDeviceFloorEngine.LayoutRoofDeviceFloor(FloorEngines, parameters2, acadDatabase, userInfo.ScaleFactor);
+                    ThWLayoutRoofDeviceFloorEngine.LayoutRoofDeviceFloor(FloorEngines, parameters2, acadDatabase, userInfo.ScaleFactor, W_RAIN_NOTE1);
                 }
                 //第二类屋顶层布置
                 var parameters1 = new ThWRoofParameters();
                 if (FloorEngines.RoofFloors.Count > 0)//存在屋顶层
                 {
-                    ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase, userInfo.ScaleFactor);
+                    ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase, userInfo.ScaleFactor, W_RAIN_NOTE1);
                 }
                 ////第三类顶层布置            
                
@@ -894,14 +901,14 @@ namespace ThMEPWSS
                 if (FloorEngines.TopFloors.Count > 0) //存在顶层
                 {
                     var layoutTopFloor = new ThWTopFloorOutPutEngine();
-                    layoutTopFloor.LayoutTopFloor(FloorEngines, parameters0, acadDatabase, userInfo);
+                    layoutTopFloor.LayoutTopFloor(FloorEngines, parameters0, acadDatabase, userInfo, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);
                 }
                 var PipeindexEngine = new ThWInnerPipeIndexEngine();
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //开始标注 
                 var layoutTag = new ThWCompositeTagOutPutEngine();
                 
-                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, userInfo.ScaleFactor, userInfo.PipeLayer);               
+                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, userInfo.ScaleFactor, userInfo.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
             }
         }
       
