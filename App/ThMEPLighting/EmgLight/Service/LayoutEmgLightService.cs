@@ -8,89 +8,97 @@ using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPLighting.EmgLight.Assistant;
+using ThMEPLighting.EmgLight.Model;
 
 namespace ThMEPLighting.EmgLight.Service
 {
     public class LayoutEmgLightService
     {
-        private List<List<Polyline>> usefulColumns;
-        private List<List<Polyline>> usefulWalls;
-        private List<List<Polyline>> usefulStruct;
-        private List<Line> lane;
-        private Dictionary<Polyline, Point3d> dictStructureCenter = new Dictionary<Polyline, Point3d>();
-        private Dictionary<Polyline, Point3d> dictStructureCenterInLaneCoor = new Dictionary<Polyline, Point3d>();
-        private List<Line> laneTrans = new List<Line>();
+        private List<List<ThStruct>> m_usefulColumns;
+        private List<List<ThStruct>> m_usefulWalls;
+        private List<List<ThStruct>> m_usefulStruct;
+        private ThLane m_lane;
+        //private Dictionary<Polyline, Point3d> dictStructureCenter = new Dictionary<Polyline, Point3d>();
+        private Dictionary<ThStruct, Point3d> dictStructureCenterInLaneCoor = new Dictionary<ThStruct, Point3d>();
+        //private List<Line> laneTrans = new List<Line>();
         private Polyline frame;
 
-        public LayoutEmgLightService(List<List<Polyline>> usefulColumns, List<List<Polyline>> usefulWalls, List<Line> lane, Polyline frame)
+        public LayoutEmgLightService(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, ThLane lane, Polyline frame)
         {
-            this.usefulColumns = usefulColumns;
-            this.usefulWalls = usefulWalls;
-            this.lane = lane;
+            this.m_usefulColumns = usefulColumns;
+            this.m_usefulWalls = usefulWalls;
+            this.m_lane = lane;
             this.frame = frame;
 
-            usefulStruct = new List<List<Polyline>>();
-            usefulStruct.Add(new List<Polyline>());
-            usefulStruct[0].AddRange(usefulColumns[0]);
-            usefulStruct[0].AddRange(usefulWalls[0]);
-            usefulStruct.Add(new List<Polyline>());
-            usefulStruct[1].AddRange(usefulColumns[1]);
-            usefulStruct[1].AddRange(usefulWalls[1]);
+            m_usefulStruct = new List<List<ThStruct>>();
+            m_usefulStruct.Add(new List<ThStruct>());
+            m_usefulStruct[0].AddRange(usefulColumns[0]);
+            m_usefulStruct[0].AddRange(usefulWalls[0]);
+            m_usefulStruct.Add(new List<ThStruct>());
+            m_usefulStruct[1].AddRange(usefulColumns[1]);
+            m_usefulStruct[1].AddRange(usefulWalls[1]);
 
             //必须先构建中心点
-            BuildStructCenter(usefulStruct);
-            BuildStructCenterInLaneCoor(usefulStruct);
+            //BuildStructCenter(usefulStruct);
+            BuildStructCenterInLaneCoor(m_usefulStruct);
 
-            this.usefulColumns[0] = OrderingStruct(this.usefulColumns[0]);
-            this.usefulColumns[1] = OrderingStruct(this.usefulColumns[1]);
+            this.m_usefulColumns[0] = OrderingStruct(this.m_usefulColumns[0]);
+            this.m_usefulColumns[1] = OrderingStruct(this.m_usefulColumns[1]);
 
-            this.usefulWalls[0] = OrderingStruct(this.usefulWalls[0]);
-            this.usefulWalls[1] = OrderingStruct(this.usefulWalls[1]);
+            this.m_usefulWalls[0] = OrderingStruct(this.m_usefulWalls[0]);
+            this.m_usefulWalls[1] = OrderingStruct(this.m_usefulWalls[1]);
 
-            usefulStruct[0] = OrderingStruct(usefulStruct[0]);
-            usefulStruct[1] = OrderingStruct(usefulStruct[1]);
+            m_usefulStruct[0] = OrderingStruct(m_usefulStruct[0]);
+            m_usefulStruct[1] = OrderingStruct(m_usefulStruct[1]);
 
         }
 
-        public List<List<Polyline>> UsefulColumns
+        public List<List<ThStruct>> UsefulColumns
         {
             get
             {
-                return usefulColumns;
+                return m_usefulColumns;
             }
         }
 
-        public List<List<Polyline>> UsefulWalls
+        public List<List<ThStruct>> UsefulWalls
         {
             get
             {
-                return usefulWalls;
+                return m_usefulWalls;
             }
         }
 
-        public List<List<Polyline>> UsefulStruct
+        public List<List<ThStruct>> UsefulStruct
         {
             get
             {
-                return usefulStruct;
+                return m_usefulStruct;
             }
         }
 
+        public ThLane thLane
+        {
+            get
+            {
+                return m_lane;
+            }
+        }
         /// <summary>
         /// 将构建中点当布置点,计算布置方向,加入最后的list
         /// </summary>
         /// <param name="layoutList"></param>
         /// <param name="lane"></param>
         /// <param name="layoutPtInfo"></param>
-        public void AddLayoutStructPt(List<Polyline> layoutList, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
+        public void AddLayoutStructPt(List<ThStruct> layoutList, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutPtInfo)
         {
-            (Point3d, Vector3d) layoutInfo;
+
             foreach (var structure in layoutList)
             {
-                if (structure != null && layoutPtInfo.ContainsKey(structure) == false)
+                if (structure != null && layoutPtInfo.ContainsKey(structure.geom) == false)
                 {
-                    layoutInfo = GetLayoutPoint(structure);
-                    layoutPtInfo.Add(structure, layoutInfo);
+                    var layoutInfo = GetLayoutDir(structure);
+                    layoutPtInfo.Add(structure.geom, layoutInfo);
                 }
             }
         }
@@ -100,14 +108,14 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structure"></param>
         /// <returns></returns>
-        public (Point3d, Vector3d) GetLayoutPoint(Polyline structure)
+        public (Point3d, Vector3d) GetLayoutDir(ThStruct structure)
         {
 
             //计算排布点
-            var layoutPt = getCenter(structure);
+            var layoutPt = structure.centerPt;
 
             //计算排布方向
-            var StructDir = (structure.EndPoint - structure.StartPoint).GetNormal();
+            var StructDir = (structure.geom.EndPoint - structure.geom.StartPoint).GetNormal();
             var layoutDir = Vector3d.ZAxis.CrossProduct(StructDir);
 
             prjPtToLine(structure, out var prjPt);
@@ -126,7 +134,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structList"></param>
         /// <returns></returns>
-        public List<double> GetColumnDistList(List<Polyline> structList)
+        public List<double> GetColumnDistList(List<ThStruct> structList)
         {
             List<double> distX = new List<double>();
             for (int i = 0; i < structList.Count - 1; i++)
@@ -143,7 +151,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structList"></param>
         /// <returns></returns>
-        private List<Polyline> OrderingStruct(List<Polyline> structList)
+        private List<ThStruct> OrderingStruct(List<ThStruct> structList)
         {
             var orderedStruct = structList.OrderBy(x => getCenterInLaneCoor(x).X).ToList();
             return orderedStruct;
@@ -155,15 +163,15 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="pt"></param>
         /// <param name="lane"></param>
         /// <returns></returns>
-        private static Point3d TransformPointToLine(Point3d pt, List<Line> lane)
-        {
-            //getAngleTo根据右手定则旋转(一般逆时针)
-            var rotationangle = Vector3d.XAxis.GetAngleTo((lane.Last().EndPoint - lane.First().StartPoint), Vector3d.ZAxis);
-            Matrix3d matrix = Matrix3d.Displacement(lane.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
-            var transedPt = pt.TransformBy(matrix.Inverse());
+        //private static Point3d TransformPointToLine(Point3d pt, List<Line> lane)
+        //{
+        //    //getAngleTo根据右手定则旋转(一般逆时针)
+        //    var rotationangle = Vector3d.XAxis.GetAngleTo((lane.Last().EndPoint - lane.First().StartPoint), Vector3d.ZAxis);
+        //    Matrix3d matrix = Matrix3d.Displacement(lane.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+        //    var transedPt = pt.TransformBy(matrix.Inverse());
 
-            return transedPt;
-        }
+        //    return transedPt;
+        //}
 
         /// <summary>
         /// 找到给定点投影到lanes尾的多线段和距离. 如果点在起点外,则返回投影到向前延长线到最末的距离和多线段.如果点在端点外,则返回点到端点的距离(负数)和多线段
@@ -171,7 +179,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="structure"></param>
         /// <param name="PolylineToEnd"></param>
         /// <returns></returns>
-        public void prjPtToLineEnd(Polyline structure, out Polyline PolylineToEnd)
+        public void prjPtToLineEnd(ThStruct structure, out Polyline PolylineToEnd)
         {
             Point3d prjPt;
             PolylineToEnd = new Polyline();
@@ -179,46 +187,46 @@ namespace ThMEPLighting.EmgLight.Service
 
             Point3d centerPtTrans;
             Point3d centerPt;
-            if (laneTrans.Count == 0)
-            {
-                laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
-            }
+            //if (laneTrans.Count == 0)
+            //{
+            //    laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
+            //}
 
-            centerPt = getCenter(structure);
+            centerPt = structure.centerPt;
             centerPtTrans = getCenterInLaneCoor(structure);
 
-            if (centerPtTrans.X < laneTrans.First().StartPoint.X)
+            if (centerPtTrans.X < m_lane.laneTrans.First().StartPoint.X)
             {
-                prjPt = lane[0].GetClosestPointTo(centerPt, true);
+                prjPt = m_lane.geom.First().GetClosestPointTo(centerPt, true);
                 PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
-                foreach (var l in lane)
+                foreach (var l in m_lane.geom)
                 {
                     PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, l.StartPoint.ToPoint2D(), 0, 0, 0);
                 }
-                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, m_lane.geom.Last().EndPoint.ToPoint2D(), 0, 0, 0);
             }
-            else if (centerPtTrans.X > laneTrans.Last().EndPoint.X)
+            else if (centerPtTrans.X > m_lane.laneTrans.Last().EndPoint.X)
             {
-                prjPt = lane.Last().GetClosestPointTo(centerPt, true);
-                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
+                prjPt = m_lane.geom.Last().GetClosestPointTo(centerPt, true);
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, m_lane.geom.Last().EndPoint.ToPoint2D(), 0, 0, 0);
                 PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
             }
             else
             {
-                for (int i = 0; i < lane.Count; i++)
+                for (int i = 0; i < m_lane.geom.Count; i++)
                 {
-                    if (timeToCheck == 0 && laneTrans[i].StartPoint.X <= centerPtTrans.X && centerPtTrans.X <= laneTrans[i].EndPoint.X)
+                    if (timeToCheck == 0 && m_lane.laneTrans[i].StartPoint.X <= centerPtTrans.X && centerPtTrans.X <= m_lane.laneTrans[i].EndPoint.X)
                     {
-                        prjPt = lane[i].GetClosestPointTo(centerPt, false);
+                        prjPt = m_lane.geom[i].GetClosestPointTo(centerPt, false);
                         PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, prjPt.ToPoint2D(), 0, 0, 0);
                         timeToCheck = 1;
                     }
                     else if (timeToCheck > 0)
                     {
-                        PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane[i].StartPoint.ToPoint2D(), 0, 0, 0);
+                        PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, m_lane.geom[i].StartPoint.ToPoint2D(), 0, 0, 0);
                     }
                 }
-                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, lane.Last().EndPoint.ToPoint2D(), 0, 0, 0);
+                PolylineToEnd.AddVertexAt(PolylineToEnd.NumberOfVertices, m_lane.geom.Last().EndPoint.ToPoint2D(), 0, 0, 0);
             }
 
         }
@@ -229,39 +237,10 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="structure"></param>
         /// <param name="prjPt"></param>
         /// <returns></returns>
-        public void prjPtToLine(Polyline structure, out Point3d prjPt)
+        public void prjPtToLine(ThStruct structure, out Point3d prjPt)
         {
-            prjPt = new Point3d();
-
-            Point3d centerPtTrans;
-            Point3d centerPt;
-            if (laneTrans.Count == 0)
-            {
-                laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
-            }
-
-            centerPt = getCenter(structure);
-            centerPtTrans = getCenterInLaneCoor(structure);
-
-            if (centerPtTrans.X < laneTrans.First().StartPoint.X)
-            {
-                prjPt = lane[0].GetClosestPointTo(centerPt, true);
-            }
-            else if (centerPtTrans.X > laneTrans.Last().EndPoint.X)
-            {
-                prjPt = lane.Last().GetClosestPointTo(centerPt, true);
-            }
-            else
-            {
-                for (int i = 0; i < lane.Count; i++)
-                {
-                    if (laneTrans[i].StartPoint.X <= centerPtTrans.X && centerPtTrans.X <= laneTrans[i].EndPoint.X)
-                    {
-                        prjPt = lane[i].GetClosestPointTo(centerPt, false);
-                        break;
-                    }
-                }
-            }
+            var centerPtTrans = getCenterInLaneCoor(structure);
+            getPrjPtToLine(structure.centerPt, centerPtTrans, out prjPt);
         }
 
         /// <summary>
@@ -270,40 +249,37 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="pt"></param>
         /// <param name="prjPt"></param>
         /// <returns></returns>
-        private double distToLine(Point3d pt, out Point3d prjPt)
+        public void prjPtToLine(Point3d pt, out Point3d prjPt)
         {
-            double distProject = -1;
-            var ptNew = TransformPointToLine(pt, lane);
+            var ptNew = m_lane.TransformPointToLine(pt);
+            getPrjPtToLine(pt, ptNew, out prjPt);
+        }
+
+        private void getPrjPtToLine(Point3d pt, Point3d ptInLaneCoor, out Point3d prjPt)
+        {
             prjPt = new Point3d();
 
-            if (laneTrans.Count == 0)
+            if (ptInLaneCoor.X < m_lane.laneTrans.First().StartPoint.X)
             {
-                laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
+                prjPt = m_lane.geom.First().GetClosestPointTo(pt, true);
             }
-            if (ptNew.X < laneTrans.First().StartPoint.X)
+            else if (ptInLaneCoor.X > m_lane.laneTrans.Last().EndPoint.X)
             {
-                prjPt = lane[0].GetClosestPointTo(pt, true);
-            }
-            else if (ptNew.X > laneTrans.Last().EndPoint.X)
-            {
-                prjPt = lane.Last().GetClosestPointTo(pt, true);
+                prjPt = m_lane.geom.Last().GetClosestPointTo(pt, true);
             }
             else
             {
-                for (int i = 0; i < lane.Count; i++)
+                for (int i = 0; i < m_lane.geom.Count; i++)
                 {
-                    if (laneTrans[i].StartPoint.X <= ptNew.X && ptNew.X <= laneTrans[i].EndPoint.X)
+                    if (m_lane.laneTrans[i].StartPoint.X <= ptInLaneCoor.X && ptInLaneCoor.X <= m_lane.laneTrans[i].EndPoint.X)
                     {
-                        prjPt = lane[i].GetClosestPointTo(pt, false);
+                        prjPt = m_lane.geom[i].GetClosestPointTo(pt, false);
                         break;
                     }
                 }
             }
-
-            distProject = prjPt.DistanceTo(pt);
-            return distProject;
-
         }
+
 
         /// <summary>
         /// 两点中点到线的投影点
@@ -316,29 +292,8 @@ namespace ThMEPLighting.EmgLight.Service
             Point3d midPoint;
 
             midPoint = new Point3d((pt1.X + pt2.X) / 2, (pt1.Y + pt2.Y) / 2, 0);
-            distToLine(midPoint, out prjMidPt);
+            prjPtToLine(midPoint, out prjMidPt);
 
-        }
-
-        /// <summary>
-        /// 找距离pt最近的构建
-        /// </summary>
-        /// <param name="structList"></param>
-        /// <param name="Pt"></param>
-        /// <param name="closestStruct"></param>
-        private static void findClosestStruct(List<Polyline> structList, Point3d Pt, out Polyline closestStruct)
-        {
-            double minDist = 10000;
-            closestStruct = null;
-
-            for (int i = 0; i < structList.Count; i++)
-            {
-                if (structList[i].Distance(Pt) <= minDist)
-                {
-                    minDist = structList[i].Distance(Pt);
-                    closestStruct = structList[i];
-                }
-            }
         }
 
         /// <summary>
@@ -349,7 +304,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="ExtendPoly"></param>
         /// <param name="closestStruct"></param>
         /// <returns></returns>
-        public bool FindClosestStructToPt(List<Polyline> structList, Point3d Pt, Polyline ExtendPoly, out Polyline closestStruct)
+        public bool FindClosestStructToPt(List<ThStruct> structList, Point3d Pt, Polyline ExtendPoly, out ThStruct closestStruct)
         {
             bool bReturn = false;
             closestStruct = null;
@@ -369,43 +324,64 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
-        /// 判断框内是否有构建
+        /// 找距离pt最近的构建
         /// </summary>
         /// <param name="structList"></param>
-        /// <param name="ExtendPoly"></param>
-        /// <param name="inExtendStruct"></param>
-        private static void FindPolyInExtendPoly(List<Polyline> structList, Polyline ExtendPoly, out List<Polyline> inExtendStruct)
+        /// <param name="Pt"></param>
+        /// <param name="closestStruct"></param>
+        private static void findClosestStruct(List<ThStruct> structList, Point3d Pt, out ThStruct closestStruct)
         {
-            inExtendStruct = structList.Where(x =>
-           {
-               return (ExtendPoly.Contains(x) || ExtendPoly.Intersects(x));
-           }).ToList();
+            double minDist = 10000;
+            closestStruct = null;
 
-        }
-
-        /// <summary>
-        /// 构建中心点坐标
-        /// </summary>
-        /// <param name="structList"></param>
-        private void BuildStructCenter(List<List<Polyline>> structList)
-        {
-            foreach (var structureSide in structList)
+            for (int i = 0; i < structList.Count; i++)
             {
-                foreach (var s in structureSide)
+                if (structList[i].geom.Distance(Pt) <= minDist)
                 {
-                    if (dictStructureCenter.ContainsKey(s) == false)
-                    {
-                        dictStructureCenter.Add(s, StructUtils.GetStructCenter(s));
-                    }
+                    minDist = structList[i].geom.Distance(Pt);
+                    closestStruct = structList[i];
                 }
             }
         }
 
         /// <summary>
+        /// 判断框内是否有构建
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <param name="ExtendPoly"></param>
+        /// <param name="inExtendStruct"></param>
+        private static void FindPolyInExtendPoly(List<ThStruct> structList, Polyline ExtendPoly, out List<ThStruct> inExtendStruct)
+        {
+            inExtendStruct = structList.Where(x =>
+           {
+               return (ExtendPoly.Contains(x.geom) || ExtendPoly.Intersects(x.geom));
+           }).ToList();
+
+        }
+
+        ///// <summary>
+        ///// 构建中心点坐标
+        ///// </summary>
+        ///// <param name="structList"></param>
+        //private void BuildStructCenter(List<List<Polyline>> structList)
+        //{
+        //    foreach (var structureSide in structList)
+        //    {
+        //        foreach (var s in structureSide)
+        //        {
+        //            if (dictStructureCenter.ContainsKey(s) == false)
+        //            {
+        //                dictStructureCenter.Add(s, StructUtils.GetStructCenter(s));
+        //            }
+        //        }
+        //    }
+        //}
+
+        /// <summary>
         /// 构建中心点在车道线坐标系的坐标
         /// </summary>
         /// <param name="structList"></param>
-        private void BuildStructCenterInLaneCoor(List<List<Polyline>> structList)
+        private void BuildStructCenterInLaneCoor(List<List<ThStruct>> structList)
         {
             foreach (var structureSide in structList)
             {
@@ -413,7 +389,7 @@ namespace ThMEPLighting.EmgLight.Service
                 {
                     if (dictStructureCenterInLaneCoor.ContainsKey(s) == false)
                     {
-                        dictStructureCenterInLaneCoor.Add(s, TransformPointToLine(dictStructureCenter[s], lane));
+                        dictStructureCenterInLaneCoor.Add(s, m_lane.TransformPointToLine(s.centerPt));
                     }
                 }
             }
@@ -425,17 +401,17 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="layout"></param>
         /// <param name="TolLane"></param>
         /// <returns></returns>
-        public List<List<Polyline>> BuildHeadLayout(List<Polyline> layout, double TolExtend, double TolLane)
+        public List<List<ThStruct>> BuildHeadLayout(List<ThStruct> layout, double TolExtend, double TolLane)
         {
             //车道线往前做框buffer
-            var ExtendLineList = StructureServiceLight.LaneHeadExtend(lane, TolExtend);
-            var FilteredLayout = StructureServiceLight.GetStruct(ExtendLineList, layout, TolLane);
-            var importLayout = StructureServiceLight.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
+            var ExtendLineList = m_lane.LaneHeadExtend( TolExtend);
+            var FilteredLayout = StructureService.GetStruct( layout, ExtendLineList, TolLane);
+            var importLayout = StructureService.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
 
             var extendPoly = StructUtils.ExpandLine(ExtendLineList[0], TolLane, 0, TolLane, 0);
-            DrawUtils.ShowGeometry(extendPoly, EmgLightCommon.LayerLaneHead, Color.FromRgb(141, 118, 12));
+            DrawUtils.ShowGeometry(extendPoly, EmgLightCommon.LayerLaneHead, Color.FromColorIndex(ColorMethod.ByColor,44));
 
-            BuildStructCenter(importLayout);
+            //BuildStructCenter(importLayout);
             BuildStructCenterInLaneCoor(importLayout);
 
             importLayout[0] = OrderingStruct(importLayout[0]);
@@ -449,16 +425,13 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structure"></param>
         /// <returns></returns>
-        public Point3d getCenterInLaneCoor(Polyline structure)
+        public Point3d getCenterInLaneCoor(ThStruct structure)
         {
             Point3d ptTrans;
-            Point3d centerPt;
 
             if (dictStructureCenterInLaneCoor.TryGetValue(structure, out ptTrans) == false)
             {
-                centerPt = getCenter(structure);
-
-                ptTrans = TransformPointToLine(centerPt, lane);
+                ptTrans = m_lane.TransformPointToLine(structure.centerPt);
                 dictStructureCenterInLaneCoor.Add(structure, ptTrans);
             }
             return ptTrans;
@@ -469,18 +442,18 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structure"></param>
         /// <returns></returns>
-        public Point3d getCenter(Polyline structure)
-        {
-            Point3d centerPt;
+        //public Point3d getCenter(Polyline structure)
+        //{
+        //    Point3d centerPt;
 
-            if (dictStructureCenter.TryGetValue(structure, out centerPt) == false)
-            {
-                centerPt = StructUtils.GetStructCenter(structure);
-                dictStructureCenter.Add(structure, centerPt);
-            }
+        //    if (dictStructureCenter.TryGetValue(structure, out centerPt) == false)
+        //    {
+        //        centerPt = StructUtils.GetStructCenter(structure);
+        //        dictStructureCenter.Add(structure, centerPt);
+        //    }
 
-            return centerPt;
-        }
+        //    return centerPt;
+        //}
 
         /// <summary>
         /// 滤掉对于车道线重叠的构建
@@ -488,35 +461,35 @@ namespace ThMEPLighting.EmgLight.Service
         public void filterOverlapStruc()
         {
 
-            for (int i = 0; i < usefulStruct.Count; i++)
+            for (int i = 0; i < m_usefulStruct.Count; i++)
             {
-                List<Polyline> removeList = new List<Polyline>();
-                for (int curr = 0; curr < usefulStruct[i].Count; curr++)
+                List<ThStruct> removeList = new List<ThStruct>();
+                for (int curr = 0; curr < m_usefulStruct[i].Count; curr++)
                 {
-                    for (int j = curr; j < usefulStruct[i].Count; j++)
+                    for (int j = curr; j < m_usefulStruct[i].Count; j++)
                     {
-                        if (j != curr && removeList.Contains(usefulStruct[i][j]) == false)
+                        if (j != curr && removeList.Contains(m_usefulStruct[i][j]) == false)
                         {
-                            var currCenter = getCenterInLaneCoor(usefulStruct[i][curr]);
-                            var closeStart = TransformPointToLine(usefulStruct[i][j].StartPoint, lane);
-                            var closeEnd = TransformPointToLine(usefulStruct[i][j].EndPoint, lane);
+                            var currCenter = getCenterInLaneCoor(m_usefulStruct[i][curr]);
+                            var closeStart = m_lane.TransformPointToLine(m_usefulStruct[i][j].geom.StartPoint);
+                            var closeEnd = m_lane.TransformPointToLine(m_usefulStruct[i][j].geom.EndPoint);
 
                             if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
                             {
-                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(usefulStruct[i][j]).Y))
+                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(m_usefulStruct[i][j]).Y))
                                 {
-                                    removeList.Add(usefulStruct[i][curr]);
+                                    removeList.Add(m_usefulStruct[i][curr]);
                                 }
                             }
 
-                            currCenter = getCenterInLaneCoor(usefulStruct[i][j]);
-                            closeStart = TransformPointToLine(usefulStruct[i][curr].StartPoint, lane);
-                            closeEnd = TransformPointToLine(usefulStruct[i][curr].EndPoint, lane);
+                            currCenter = getCenterInLaneCoor(m_usefulStruct[i][j]);
+                            closeStart = m_lane.TransformPointToLine(m_usefulStruct[i][curr].geom.StartPoint);
+                            closeEnd = m_lane.TransformPointToLine(m_usefulStruct[i][curr].geom.EndPoint);
                             if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
                             {
-                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(usefulStruct[i][curr]).Y))
+                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(m_usefulStruct[i][curr]).Y))
                                 {
-                                    removeList.Add(usefulStruct[i][j]);
+                                    removeList.Add(m_usefulStruct[i][j]);
                                 }
                             }
                         }
@@ -525,9 +498,9 @@ namespace ThMEPLighting.EmgLight.Service
                 }
                 foreach (var removeStru in removeList)
                 {
-                    usefulColumns[i].Remove(removeStru);
-                    usefulWalls[i].Remove(removeStru);
-                    usefulStruct[i].Remove(removeStru);
+                    m_usefulColumns[i].Remove(removeStru);
+                    m_usefulWalls[i].Remove(removeStru);
+                    m_usefulStruct[i].Remove(removeStru);
                 }
             }
         }
@@ -537,24 +510,24 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         public void filterStrucBehindFrame()
         {
-            List<Polyline> removeList = new List<Polyline>();
-            for (int i = 0; i < usefulStruct.Count; i++)
+            List<ThStruct> removeList = new List<ThStruct>();
+            for (int i = 0; i < m_usefulStruct.Count; i++)
             {
-                var layoutInfo = usefulStruct[i].Where(x =>
+                var layoutInfo = m_usefulStruct[i].Where(x =>
                 {
                     Point3dCollection pts = new Point3dCollection();
                     //选不在防火墙凹后的
                     prjPtToLine(x, out var prjPt);
-                    Line l = new Line(prjPt, getCenter(x));
+                    Line l = new Line(prjPt, x.centerPt);
                     l.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
                     return pts.Count > 0;
                 }).ToList();
 
                 foreach (var removeStru in layoutInfo)
                 {
-                    usefulStruct[i].Remove(removeStru);
-                    usefulColumns[i].Remove(removeStru);
-                    usefulWalls[i].Remove(removeStru);
+                    m_usefulStruct[i].Remove(removeStru);
+                    m_usefulColumns[i].Remove(removeStru);
+                    m_usefulWalls[i].Remove(removeStru);
                 }
             }
         }
@@ -564,29 +537,30 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         public void getInsideFramePart()
         {
-            List<Polyline> removeList = new List<Polyline>();
+            List<ThStruct> removeList = new List<ThStruct>();
 
-            for (int i = 0; i < usefulStruct.Count; i++)
+            for (int i = 0; i < m_usefulStruct.Count; i++)
             {
                 //选与防火框不相交且在防火框内
-                var layoutInfo = usefulStruct[i].Where(x =>
+                var layoutInfo = m_usefulStruct[i].Where(x =>
                 {
                     Point3dCollection pts = new Point3dCollection();
-                    x.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                    return pts.Count > 0 || frame.Contains(x) == false;
+                    x.geom.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    return pts.Count > 0 || frame.Contains(x.geom) == false;
 
                 }).ToList();
 
                 foreach (var removeStru in layoutInfo)
                 {
-                    usefulStruct[i].Remove(removeStru);
-                    usefulColumns[i].Remove(removeStru);
-                    usefulWalls[i].Remove(removeStru);
+                    m_usefulStruct[i].Remove(removeStru);
+                    m_usefulColumns[i].Remove(removeStru);
+                    m_usefulWalls[i].Remove(removeStru);
                 }
             }
 
         }
 
+      
 
     }
 }

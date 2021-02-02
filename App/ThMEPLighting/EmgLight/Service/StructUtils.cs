@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Linq;
-using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Colors;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting.EmgLight.Service
 {
@@ -63,5 +64,28 @@ namespace ThMEPLighting.EmgLight.Service
 
             return new Point3d((maxX + minX) / 2, (maxY + minY) / 2, 0);
         }
+
+        /// <summary>
+        /// 已pt点为中心做一个方框
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="moveDir"></param>
+        /// <param name="tolX"></param>
+        /// <param name="tolY"></param>
+        /// <returns></returns>
+        public static Polyline CreateExtendPoly(Point3d pt, Vector3d moveDir, int tolX, int tolY)
+        {
+            moveDir = moveDir.GetNormal();
+            var ExtendPolyStart = pt - moveDir * tolX;
+            var ExtendPolyEnd = pt + moveDir * tolX;
+
+            var ExtendLine = new Line(ExtendPolyStart, ExtendPolyEnd);
+            var ExtendPoly = StructUtils.ExpandLine(ExtendLine, tolY, 0, tolY, 0);
+
+            DrawUtils.ShowGeometry(ExtendPoly, EmgLightCommon.LayerExtendPoly, Color.FromColorIndex ( ColorMethod.ByColor,44));
+
+            return ExtendPoly;
+        }
+
     }
 }
