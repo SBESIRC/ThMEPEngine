@@ -17,18 +17,17 @@ using Autodesk.AutoCAD.Colors;
 
 namespace ThMEPLighting.EmgLight.Service
 {
-    class ThStructFilterService
+    class StructFilterService
     {
         private ThLane m_thLane;
         private List<Polyline> m_columns;
         private List<Polyline> m_walls;
 
-        public ThStructFilterService(ThLane thLane, List<Polyline> columns, List<Polyline> walls)
+        public StructFilterService(ThLane thLane, List<Polyline> columns, List<Polyline> walls)
         {
             m_thLane = thLane;
             m_columns = columns;
             m_walls = walls;
-
         }
 
         public void filterStruct(out List<List<ThStruct>> columnsStructs, out List<List<ThStruct>> wallStructs)
@@ -42,13 +41,13 @@ namespace ThMEPLighting.EmgLight.Service
 
             foreach (Line l in m_thLane.geom)
             {
-                var linePoly = StructUtils.ExpandLine(l, EmgLightCommon.TolLane, 0, EmgLightCommon.TolLane, 0);
+                var linePoly = GeomUtils.ExpandLine(l, EmgLightCommon.TolLane, 0, EmgLightCommon.TolLane, 0);
                 DrawUtils.ShowGeometry(linePoly, EmgLightCommon.LayerSeparatePoly, Color.FromColorIndex(ColorMethod.ByColor, 44));
             }
 
             //打散构建并生成数据结构
-            var columnSegment = StructureService.BrakePolylineToLineList(closeColumn);
-            var wallSegment = StructureService.BrakePolylineToLineList(closeWall);
+            var columnSegment = StructureService.BrakeStructToStructSeg(closeColumn);
+            var wallSegment = StructureService.BrakeStructToStructSeg(closeWall);
 
             DrawUtils.ShowGeometry(columnSegment.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
             DrawUtils.ShowGeometry(wallSegment.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
@@ -64,15 +63,15 @@ namespace ThMEPLighting.EmgLight.Service
             DrawUtils.ShowGeometry(brokeWall.Select(x => x.geom).ToList(), EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
 
             //过滤柱与墙交叉的部分
-            var filterColumns = StructureService.FilterStructIntersect(parallelColmuns, m_walls, EmgLightCommon.TolIntersect);
-            var filterWalls = StructureService.FilterStructIntersect(brokeWall, m_columns, EmgLightCommon.TolIntersect);
+            var filterColumns = FilterStructIntersect(parallelColmuns, m_walls, EmgLightCommon.TolIntersect);
+            var filterWalls = FilterStructIntersect(brokeWall, m_columns, EmgLightCommon.TolIntersect);
 
             DrawUtils.ShowGeometry(filterColumns.Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
             DrawUtils.ShowGeometry(filterWalls.Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
 
             //将构建按车道线方向分成左(0)右(1)两边
-            var usefulColumns = StructureService.SeparateColumnsByLine(filterColumns, m_thLane.geom, EmgLightCommon.TolLane);
-            var usefulWalls = StructureService.SeparateColumnsByLine(filterWalls, m_thLane.geom, EmgLightCommon.TolLane);
+            var usefulColumns = StructureService.SeparateStructByLine(filterColumns, m_thLane.geom, EmgLightCommon.TolLane);
+            var usefulWalls = StructureService.SeparateStructByLine(filterWalls, m_thLane.geom, EmgLightCommon.TolLane);
 
             StructureService.removeDuplicateStruct(ref usefulColumns);
             StructureService.removeDuplicateStruct(ref usefulWalls);
@@ -107,11 +106,11 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="structs"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public List<Polyline> GetStruct(List<Polyline> structs, double tol)
+        private List<Polyline> GetStruct(List<Polyline> structs, double tol)
         {
             var resPolys = m_thLane.geom.SelectMany(x =>
             {
-                var linePoly = StructUtils.ExpandLine(x, tol, 0, tol, 0);
+                var linePoly = GeomUtils.ExpandLine(x, tol, 0, tol, 0);
                 return structs.Where(y =>
                 {
                     return linePoly.Contains(y) || linePoly.Intersects(y);
@@ -120,6 +119,84 @@ namespace ThMEPLighting.EmgLight.Service
 
             return resPolys;
         }
+
+        /// <summary>
+        /// 过滤墙柱相交的构建
+        /// </summary>
+        /// <param name="structSeg"></param>
+        /// <param name="structure"></param>
+        /// <param name="tol"></param>
+        /// <returns></returns>
+        private static List<ThStruct> FilterStructIntersect(List<ThStruct> structSeg, List<Polyline> structure, double tol)
+        {
+            List<ThStruct> notIntersectSeg = new List<ThStruct>();
+
+            foreach (var seg in structSeg)
+            {
+                var bInter = false;
+                var bContain = false;
+
+                foreach (var poly in structure)
+                {
+                    bContain = bContain || poly.Contains(seg.geom);
+                    bInter = poly.Intersects(seg.geom);
+                    if (bInter == true)
+                    {
+                        Point3dCollection pts = new Point3dCollection();
+                        seg.geom.IntersectWith(poly, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+
+                        if (pts.Count > 1)
+                        {
+                            bInter = true;
+                            break;
+                        }
+                        else if (pts.Count == 1)
+                        {
+                            Point3d ptIn = new Point3d();
+                            Point3d ptOut = new Point3d();
+                            if (poly.Contains(seg.geom.StartPoint) == true)
+                            {
+                                ptIn = seg.geom.StartPoint;
+                                ptOut = seg.geom.EndPoint;
+                            }
+                            if (poly.Contains(seg.geom.EndPoint) == true)
+                            {
+                                ptIn = seg.geom.EndPoint;
+                                ptOut = seg.geom.StartPoint;
+                            }
+
+                            var lIn = new Line(pts[0], ptIn);
+                            var lOut = new Line(pts[0], ptOut);
+
+                            if (ptIn.X == 0)
+                            {
+                                bInter = false;
+                            }
+
+                            else if (lIn.Length < EmgLightCommon.TolIntersect || lOut.Length >= EmgLightCommon.TolInterFilter)
+                            {
+                                bInter = false;
+                            }
+                            else
+                            {
+                                bInter = true;
+                                break;
+                            }
+                        }
+                        else
+                        {
+                            bInter = false;
+                        }
+                    }
+                }
+                if (bInter == false && bContain == false)
+                {
+                    notIntersectSeg.Add(seg);
+                }
+            }
+            return notIntersectSeg;
+        }
+
 
     }
 

@@ -53,7 +53,7 @@ namespace ThMEPLighting.EmgLight.Model
             {
                 if (m_headProtectPoly == null)
                 {
-                    m_headProtectPoly = StructUtils.CreateExtendPoly(geom.First().StartPoint, dir, EmgLightCommon.TolLaneProtect, EmgLightCommon.TolLaneProtect);
+                    m_headProtectPoly = GeomUtils.CreateExtendPoly(geom.First().StartPoint, dir, EmgLightCommon.TolLaneProtect, EmgLightCommon.TolLaneProtect);
                 }
                 return m_headProtectPoly;
             }
@@ -65,7 +65,7 @@ namespace ThMEPLighting.EmgLight.Model
             {
                 if (m_endProtectPoly == null)
                 {
-                    m_endProtectPoly = StructUtils.CreateExtendPoly(geom.Last().EndPoint, dir, EmgLightCommon.TolLaneProtect, EmgLightCommon.TolLaneProtect);
+                    m_endProtectPoly = GeomUtils.CreateExtendPoly(geom.Last().EndPoint, dir, EmgLightCommon.TolLaneProtect, EmgLightCommon.TolLaneProtect);
                 }
                 return m_endProtectPoly;
             }

@@ -8,7 +8,7 @@ using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting.EmgLight.Service
 {
-    class StructUtils
+    class GeomUtils
     {
         /// <summary>
         /// 扩张line成polyline, 以线方向为准
@@ -80,12 +80,13 @@ namespace ThMEPLighting.EmgLight.Service
             var ExtendPolyEnd = pt + moveDir * tolX;
 
             var ExtendLine = new Line(ExtendPolyStart, ExtendPolyEnd);
-            var ExtendPoly = StructUtils.ExpandLine(ExtendLine, tolY, 0, tolY, 0);
+            var ExtendPoly = GeomUtils.ExpandLine(ExtendLine, tolY, 0, tolY, 0);
 
             DrawUtils.ShowGeometry(ExtendPoly, EmgLightCommon.LayerExtendPoly, Color.FromColorIndex ( ColorMethod.ByColor,44));
 
             return ExtendPoly;
         }
+
 
     }
 }

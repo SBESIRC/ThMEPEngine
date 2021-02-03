@@ -14,7 +14,7 @@ namespace ThMEPLighting.EmgLight.Model
         {
             geom = structure;
             oriStructGeo = oriStruct;
-            centerPt = StructUtils.GetStructCenter(geom);
+            centerPt = GeomUtils.GetStructCenter(geom);
             dir = (geom.EndPoint - geom.StartPoint).GetNormal();
             //  m_thStructType = type;
 

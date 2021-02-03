@@ -24,7 +24,7 @@ namespace ThMEPLighting.EmgLight.Service
 
             var resPolys = lines.SelectMany(x =>
             {
-                var linePoly = StructUtils.ExpandLine(x, tol, 0, tol, 0);
+                var linePoly = GeomUtils.ExpandLine(x, tol, 0, tol, 0);
                 return structs.Where(y =>
                 {
                     return linePoly.Contains(y.geom) || linePoly.Intersects(y.geom);
@@ -41,12 +41,12 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="lines"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        public static List<List<ThStruct>> SeparateColumnsByLine(List<ThStruct> polyline, List<Line> lines, double tol)
+        public static List<List<ThStruct>> SeparateStructByLine(List<ThStruct> polyline, List<Line> lines, double tol)
         {
             //上下做框筛选框内构建. 不能直接transformToLine判断y值正负:打散很长的墙以后需要再筛选一遍
             var upPolyline = lines.SelectMany(x =>
             {
-                var linePoly = StructUtils.ExpandLine(x, tol, 0, 0, 0);
+                var linePoly = GeomUtils.ExpandLine(x, tol, 0, 0, 0);
                 return polyline.Where(y =>
                 {
                     return linePoly.Contains(y.geom) || linePoly.Intersects(y.geom);
@@ -55,21 +55,22 @@ namespace ThMEPLighting.EmgLight.Service
 
             var downPolyline = lines.SelectMany(x =>
             {
-                var linePoly = StructUtils.ExpandLine(x, 0, 0, tol, 0);
+                var linePoly = GeomUtils.ExpandLine(x, 0, 0, tol, 0);
                 return polyline.Where(y =>
                 {
                     return linePoly.Contains(y.geom) || linePoly.Intersects(y.geom);
                 }).ToList();
             }).ToList();
 
-           var usefulStruct= new List<List<ThStruct>>() { upPolyline, downPolyline };
-           
+            var usefulStruct = new List<List<ThStruct>>() { upPolyline, downPolyline };
+
             return usefulStruct;
         }
 
         /// <summary>
-        /// 
+        /// 清理一个点和重复的项目
         /// </summary>
+        /// <param name="structList"></param>
         public static void removeDuplicateStruct(ref List<List<ThStruct>> structList)
         {
             foreach (var stru in structList)
@@ -107,7 +108,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structures"></param>
         /// <returns></returns>
-        public static List<ThStruct> BrakePolylineToLineList(List<Polyline> structures)
+        public static List<ThStruct> BrakeStructToStructSeg(List<Polyline> structures)
         {
             List<ThStruct> structureSegment = new List<ThStruct>();
             foreach (var stru in structures)
@@ -124,87 +125,12 @@ namespace ThMEPLighting.EmgLight.Service
             return structureSegment;
         }
 
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="structSeg"></param>
-        /// <param name="structure"></param>
-        /// <param name="tol"></param>
-        /// <returns></returns>
-        public static List<ThStruct> FilterStructIntersect(List<ThStruct> structSeg, List<Polyline> structure, double tol)
-        {
-            List<ThStruct> notIntersectSeg = new List<ThStruct>();
-
-            foreach (var seg in structSeg)
-            {
-                var bInter = false;
-                var bContain = false;
-
-                foreach (var poly in structure)
-                {
-                    bContain = bContain || poly.Contains(seg.geom);
-                    bInter = poly.Intersects(seg.geom);
-                    if (bInter == true)
-                    {
-                        Point3dCollection pts = new Point3dCollection();
-                        seg.geom.IntersectWith(poly, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-
-                        if (pts.Count > 1)
-                        {
-                            bInter = true;
-                            break;
-                        }
-                        else if (pts.Count == 1)
-                        {
-                            Point3d ptIn = new Point3d();
-                            Point3d ptOut = new Point3d();
-                            if (poly.Contains(seg.geom.StartPoint) == true)
-                            {
-                                ptIn = seg.geom.StartPoint;
-                                ptOut = seg.geom.EndPoint;
-                            }
-                            if (poly.Contains(seg.geom.EndPoint) == true)
-                            {
-                                ptIn = seg.geom.EndPoint;
-                                ptOut = seg.geom.StartPoint;
-                            }
-
-                            var lIn = new Line(pts[0], ptIn);
-                            var lOut = new Line(pts[0], ptOut);
-
-                            if (ptIn.X == 0)
-                            {
-                                bInter = false;
-                            }
-
-                            else if (lIn.Length < EmgLightCommon.TolIntersect || lOut.Length >= EmgLightCommon.TolInterFilter)
-                            {
-                                bInter = false;
-                            }
-                            else
-                            {
-                                bInter = true;
-                                break;
-                            }
-                        }
-                        else
-                        {
-                            bInter = false;
-                        }
-                    }
-                }
-                if (bInter == false && bContain == false)
-                {
-                    notIntersectSeg.Add(seg);
-                }
-            }
-            return notIntersectSeg;
-        }
 
         /// <summary>
         /// 大于TolLight的墙拆分成TolLight(尾点不够和前面合并)
         /// </summary>
         /// <param name="walls"></param>
+        /// <param name="TolLight"></param>
         /// <returns></returns>
         public static List<ThStruct> breakWall(List<ThStruct> walls, double TolLight)
         {
@@ -239,6 +165,123 @@ namespace ThMEPLighting.EmgLight.Service
 
             return returnWalls;
         }
+
+        /// <summary>
+        /// 找ExtendPoly框内且离Pt点最近的构建
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <param name="Pt"></param>
+        /// <param name="ExtendPoly"></param>
+        /// <param name="closestStruct"></param>
+        /// <returns></returns>
+        public static bool FindClosestStructToPt(List<ThStruct> structList, Point3d Pt, Polyline ExtendPoly, out ThStruct closestStruct)
+        {
+            bool bReturn = false;
+            closestStruct = null;
+
+            FindPolyInExtendPoly(structList, ExtendPoly, out var inExtendStruct);
+            if (inExtendStruct.Count > 0)
+            {
+                //框内有位置布灯
+                findClosestStruct(inExtendStruct, Pt, out closestStruct);
+                bReturn = true;
+            }
+            else
+            {
+                bReturn = false;
+            }
+            return bReturn;
+        }
+
+        /// <summary>
+        /// 找距离pt最近的构建
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <param name="Pt"></param>
+        /// <param name="closestStruct"></param>
+        private static void findClosestStruct(List<ThStruct> structList, Point3d Pt, out ThStruct closestStruct)
+        {
+            double minDist = 10000;
+            closestStruct = null;
+
+            for (int i = 0; i < structList.Count; i++)
+            {
+                if (structList[i].geom.Distance(Pt) <= minDist)
+                {
+                    minDist = structList[i].geom.Distance(Pt);
+                    closestStruct = structList[i];
+                }
+            }
+        }
+
+        /// <summary>
+        /// 判断框内是否有构建
+        /// </summary>
+        /// <param name="structList"></param>
+        /// <param name="ExtendPoly"></param>
+        /// <param name="inExtendStruct"></param>
+        private static void FindPolyInExtendPoly(List<ThStruct> structList, Polyline ExtendPoly, out List<ThStruct> inExtendStruct)
+        {
+            inExtendStruct = structList.Where(x =>
+            {
+                return (ExtendPoly.Contains(x.geom) || ExtendPoly.Intersects(x.geom));
+            }).ToList();
+
+        }
+
+        /// <summary>
+        /// 检查构建是否在车道线头部附近,防止布点到车道线头的墙
+        /// </summary>
+        /// <param name="structure"></param>
+        /// <param name="laneList"></param>
+        /// <returns></returns>
+        public static bool CheckIfInLaneHead(ThStruct structure, List<ThLane> laneList)
+        {
+            bool bReturn = false;
+            if (structure != null)
+            {
+                foreach (var l in laneList)
+                {
+                    if (l.headProtectPoly.Contains(structure.geom) || l.headProtectPoly.Intersects(structure.geom) ||
+                      l.endProtectPoly.Contains(structure.geom) || l.endProtectPoly.Intersects(structure.geom))
+                    {
+                        bReturn = true;
+                        break;
+                    }
+                }
+            }
+
+            return bReturn;
+        }
+
+        /// <summary>
+        /// layout到structure TolRangeMin以内找离structure最近的,没有返回null
+        /// </summary>
+        /// <param name="layout"></param>
+        /// <param name="structure"></param>
+        /// <param name="Tol"></param>
+        /// <returns></returns>
+        public static ThStruct CheckIfInLayout(ThStruct structure, List<ThStruct> layoutList, double Tol)
+        {
+            double minDist = Tol + 1;
+            ThStruct closestLayout = null;
+
+            if (structure != null)
+            {
+                for (int i = 0; i < layoutList.Count; i++)
+                {
+                    var dist = layoutList[i].geom.StartPoint.DistanceTo(structure.geom.StartPoint);
+                    if (dist <= minDist && dist < Tol)
+                    {
+                        minDist = dist;
+                        closestLayout = layoutList[i];
+                    }
+                }
+            }
+            return closestLayout;
+        }
+
+
 
     }
 

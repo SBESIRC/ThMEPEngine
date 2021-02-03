@@ -12,16 +12,16 @@ using ThMEPLighting.EmgLight.Model;
 
 namespace ThMEPLighting.EmgLight.Service
 {
-    public class LayoutEmgLightService
+    public class LayoutService
     {
         private List<List<ThStruct>> m_usefulColumns;
         private List<List<ThStruct>> m_usefulWalls;
         private List<List<ThStruct>> m_usefulStruct;
         private ThLane m_lane;
-        private Dictionary<ThStruct, Point3d> dictStructureCenterInLaneCoor = new Dictionary<ThStruct, Point3d>();
         private Polyline frame;
+        private Dictionary<ThStruct, Point3d> dictStructureCenterInLaneCoor = new Dictionary<ThStruct, Point3d>();
 
-        public LayoutEmgLightService(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, ThLane lane, Polyline frame)
+        public LayoutService(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, ThLane lane, Polyline frame)
         {
             this.m_usefulColumns = usefulColumns;
             this.m_usefulWalls = usefulWalls;
@@ -107,7 +107,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structure"></param>
         /// <returns></returns>
-        public (Point3d, Vector3d) GetLayoutDir(ThStruct structure)
+        private (Point3d, Vector3d) GetLayoutDir(ThStruct structure)
         {
             var layoutDir = Vector3d.ZAxis.CrossProduct(structure.dir );
 
@@ -269,69 +269,6 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
-        /// 找ExtendPoly框内且离Pt点最近的构建
-        /// </summary>
-        /// <param name="structList"></param>
-        /// <param name="Pt"></param>
-        /// <param name="ExtendPoly"></param>
-        /// <param name="closestStruct"></param>
-        /// <returns></returns>
-        public bool FindClosestStructToPt(List<ThStruct> structList, Point3d Pt, Polyline ExtendPoly, out ThStruct closestStruct)
-        {
-            bool bReturn = false;
-            closestStruct = null;
-
-            FindPolyInExtendPoly(structList, ExtendPoly, out var inExtendStruct);
-            if (inExtendStruct.Count > 0)
-            {
-                //框内有位置布灯
-                findClosestStruct(inExtendStruct, Pt, out closestStruct);
-                bReturn = true;
-            }
-            else
-            {
-                bReturn = false;
-            }
-            return bReturn;
-        }
-
-        /// <summary>
-        /// 找距离pt最近的构建
-        /// </summary>
-        /// <param name="structList"></param>
-        /// <param name="Pt"></param>
-        /// <param name="closestStruct"></param>
-        private static void findClosestStruct(List<ThStruct> structList, Point3d Pt, out ThStruct closestStruct)
-        {
-            double minDist = 10000;
-            closestStruct = null;
-
-            for (int i = 0; i < structList.Count; i++)
-            {
-                if (structList[i].geom.Distance(Pt) <= minDist)
-                {
-                    minDist = structList[i].geom.Distance(Pt);
-                    closestStruct = structList[i];
-                }
-            }
-        }
-
-        /// <summary>
-        /// 判断框内是否有构建
-        /// </summary>
-        /// <param name="structList"></param>
-        /// <param name="ExtendPoly"></param>
-        /// <param name="inExtendStruct"></param>
-        private static void FindPolyInExtendPoly(List<ThStruct> structList, Polyline ExtendPoly, out List<ThStruct> inExtendStruct)
-        {
-            inExtendStruct = structList.Where(x =>
-           {
-               return (ExtendPoly.Contains(x.geom) || ExtendPoly.Intersects(x.geom));
-           }).ToList();
-
-        }
-
-        /// <summary>
         /// 构建中心点在车道线坐标系的坐标
         /// </summary>
         /// <param name="structList"></param>
@@ -360,9 +297,9 @@ namespace ThMEPLighting.EmgLight.Service
             //车道线往前做框buffer
             var ExtendLineList = m_lane.LaneHeadExtend( TolExtend);
             var FilteredLayout = StructureService.GetStruct( layout, ExtendLineList, TolLane);
-            var importLayout = StructureService.SeparateColumnsByLine(FilteredLayout, ExtendLineList, TolLane);
+            var importLayout = StructureService.SeparateStructByLine(FilteredLayout, ExtendLineList, TolLane);
 
-            var extendPoly = StructUtils.ExpandLine(ExtendLineList[0], TolLane, 0, TolLane, 0);
+            var extendPoly = GeomUtils.ExpandLine(ExtendLineList[0], TolLane, 0, TolLane, 0);
             DrawUtils.ShowGeometry(extendPoly, EmgLightCommon.LayerLaneHead, Color.FromColorIndex(ColorMethod.ByColor,44));
 
             //BuildStructCenter(importLayout);
@@ -396,7 +333,6 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         public void filterOverlapStruc()
         {
-
             for (int i = 0; i < m_usefulStruct.Count; i++)
             {
                 List<ThStruct> removeList = new List<ThStruct>();
@@ -493,10 +429,8 @@ namespace ThMEPLighting.EmgLight.Service
                     m_usefulWalls[i].Remove(removeStru);
                 }
             }
-
         }
 
-      
 
     }
 }
