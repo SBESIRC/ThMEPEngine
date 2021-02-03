@@ -18,15 +18,13 @@ namespace ThMEPLighting.EmgLight.Service
         private List<List<ThStruct>> m_usefulWalls;
         private List<List<ThStruct>> m_usefulStruct;
         private ThLane m_lane;
-        private Polyline frame;
         private Dictionary<ThStruct, Point3d> dictStructureCenterInLaneCoor = new Dictionary<ThStruct, Point3d>();
 
-        public LayoutService(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, ThLane lane, Polyline frame)
+        public LayoutService(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, ThLane lane)
         {
             this.m_usefulColumns = usefulColumns;
             this.m_usefulWalls = usefulWalls;
             this.m_lane = lane;
-            this.frame = frame;
 
             m_usefulStruct = new List<List<ThStruct>>();
             m_usefulStruct.Add(new List<ThStruct>());
@@ -380,7 +378,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <summary>
         /// 过滤对于车道线防火墙凹点外的构建
         /// </summary>
-        public void filterStrucBehindFrame()
+        public void filterStrucBehindFrame(Polyline frame)
         {
             List<ThStruct> removeList = new List<ThStruct>();
             for (int i = 0; i < m_usefulStruct.Count; i++)
@@ -407,7 +405,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <summary>
         /// 过滤防火墙相交或不在防火墙内的构建
         /// </summary>
-        public void getInsideFramePart()
+        public void getInsideFramePart(Polyline frame)
         {
             List<ThStruct> removeList = new List<ThStruct>();
 

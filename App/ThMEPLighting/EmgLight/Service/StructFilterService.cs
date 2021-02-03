@@ -197,6 +197,30 @@ namespace ThMEPLighting.EmgLight.Service
             return notIntersectSeg;
         }
 
+        public LayoutService moreFilter(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, Polyline frame)
+        {
+            LayoutService layoutServer = new LayoutService(usefulColumns, usefulWalls, m_thLane);
+
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+
+            ////滤掉重合部分
+            layoutServer.filterOverlapStruc();
+
+            ////滤掉框外边的部分
+            layoutServer.getInsideFramePart(frame);
+
+            ////滤掉框后边的部分
+            layoutServer.filterStrucBehindFrame(frame);
+
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+
+            return layoutServer;
+
+        }
 
     }
 
