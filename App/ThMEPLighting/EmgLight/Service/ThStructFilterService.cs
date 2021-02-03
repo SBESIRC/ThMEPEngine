@@ -19,28 +19,28 @@ namespace ThMEPLighting.EmgLight.Service
 {
     class ThStructFilterService
     {
-        private ThLaneService m_thLaneService;
+        private ThLane m_thLane;
         private List<Polyline> m_columns;
         private List<Polyline> m_walls;
 
-        public ThStructFilterService(ThLaneService thLaneService, List<Polyline> columns, List<Polyline> walls)
+        public ThStructFilterService(ThLane thLane, List<Polyline> columns, List<Polyline> walls)
         {
-            m_thLaneService = thLaneService;
+            m_thLane = thLane;
             m_columns = columns;
             m_walls = walls;
 
         }
 
-        public void filterStruct(out List<ThStruct> columnsStructs, out List<ThStruct> wallStructs)
+        public void filterStruct(out List<List<ThStruct>> columnsStructs, out List<List<ThStruct>> wallStructs)
         {
             //获取该车道线上的构建
-            var closeColumn = m_thLaneService.GetStruct(m_columns, EmgLightCommon.TolLane);
-            var closeWall = m_thLaneService.GetStruct(m_walls, EmgLightCommon.TolLane);
+            var closeColumn = GetStruct(m_columns, EmgLightCommon.TolLane);
+            var closeWall = GetStruct(m_walls, EmgLightCommon.TolLane);
 
             DrawUtils.ShowGeometry(closeColumn, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 1), LineWeight.LineWeight035);
             DrawUtils.ShowGeometry(closeWall, EmgLightCommon.LayerGetStruct, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
 
-            foreach (Line l in m_thLaneService.thLane.geom)
+            foreach (Line l in m_thLane.geom)
             {
                 var linePoly = StructUtils.ExpandLine(l, EmgLightCommon.TolLane, 0, EmgLightCommon.TolLane, 0);
                 DrawUtils.ShowGeometry(linePoly, EmgLightCommon.LayerSeparatePoly, Color.FromColorIndex(ColorMethod.ByColor, 44));
@@ -54,8 +54,8 @@ namespace ThMEPLighting.EmgLight.Service
             DrawUtils.ShowGeometry(wallSegment.Select(x => x.geom).ToList(), EmgLightCommon.LayerStructSeg, Color.FromColorIndex(ColorMethod.ByColor, 92), LineWeight.LineWeight035);
 
             //选取构建平行车道线的边
-            var parallelColmuns = m_thLaneService.getStructureParallelPart(columnSegment);
-            var parallelWalls = m_thLaneService.getStructureParallelPart(wallSegment);
+            var parallelColmuns = getStructureParallelPart(columnSegment);
+            var parallelWalls = getStructureParallelPart(wallSegment);
 
             //破墙
             var brokeWall = StructureService.breakWall(parallelWalls, EmgLightCommon.TolBrakeWall);
@@ -70,11 +70,57 @@ namespace ThMEPLighting.EmgLight.Service
             DrawUtils.ShowGeometry(filterColumns.Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
             DrawUtils.ShowGeometry(filterWalls.Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
 
-            columnsStructs = filterColumns;
-            wallStructs = filterWalls;
+            //将构建按车道线方向分成左(0)右(1)两边
+            var usefulColumns = StructureService.SeparateColumnsByLine(filterColumns, m_thLane.geom, EmgLightCommon.TolLane);
+            var usefulWalls = StructureService.SeparateColumnsByLine(filterWalls, m_thLane.geom, EmgLightCommon.TolLane);
+
+            StructureService.removeDuplicateStruct(ref usefulColumns);
+            StructureService.removeDuplicateStruct(ref usefulWalls);
+
+            columnsStructs = usefulColumns;
+            wallStructs = usefulWalls;
         }
-   
-    
+
+        /// <summary>
+        /// 查找柱或墙平行于车道线
+        /// </summary>
+        /// <param name="structrues"></param>
+        /// <param name="line"></param>
+        /// <param name="type"></param>
+        /// <returns></returns>
+        public List<ThStruct> getStructureParallelPart(List<ThStruct> structureSegment)
+        {
+            //平行于车道线的边
+            var structureLayoutSegment = structureSegment.Where(x =>
+            {
+                bool bAngle = Math.Abs(m_thLane.dir.DotProduct(x.dir)) / (m_thLane.dir.Length * x.dir.Length) > Math.Abs(Math.Cos(30 * Math.PI / 180));
+                return bAngle;
+            }).ToList();
+
+
+            return structureLayoutSegment;
+        }
+
+        /// <summary>
+        /// 查找车道线附近的构建
+        /// </summary>
+        /// <param name="structs"></param>
+        /// <param name="tol"></param>
+        /// <returns></returns>
+        public List<Polyline> GetStruct(List<Polyline> structs, double tol)
+        {
+            var resPolys = m_thLane.geom.SelectMany(x =>
+            {
+                var linePoly = StructUtils.ExpandLine(x, tol, 0, tol, 0);
+                return structs.Where(y =>
+                {
+                    return linePoly.Contains(y) || linePoly.Intersects(y);
+                }).ToList();
+            }).ToList();
+
+            return resPolys;
+        }
+
     }
 
 

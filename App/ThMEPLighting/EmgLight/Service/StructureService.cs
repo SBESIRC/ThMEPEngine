@@ -34,6 +34,13 @@ namespace ThMEPLighting.EmgLight.Service
             return resPolys;
         }
 
+        /// <summary>
+        /// 沿着线将柱分隔成上下两部分
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="lines"></param>
+        /// <param name="tol"></param>
+        /// <returns></returns>
         public static List<List<ThStruct>> SeparateColumnsByLine(List<ThStruct> polyline, List<Line> lines, double tol)
         {
             //上下做框筛选框内构建. 不能直接transformToLine判断y值正负:打散很长的墙以后需要再筛选一遍
@@ -55,8 +62,9 @@ namespace ThMEPLighting.EmgLight.Service
                 }).ToList();
             }).ToList();
 
-
-            return new List<List<ThStruct>>() { upPolyline, downPolyline };
+           var usefulStruct= new List<List<ThStruct>>() { upPolyline, downPolyline };
+           
+            return usefulStruct;
         }
 
         /// <summary>
@@ -93,15 +101,6 @@ namespace ThMEPLighting.EmgLight.Service
                 }
             }
         }
-
-        /// <summary>
-        /// 沿着线将柱分隔成上下两部分
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="lines"></param>
-        /// <param name="tol"></param>
-        /// <returns></returns>
-
 
         /// <summary>
         /// 打散构建并生成数据结构
@@ -201,40 +200,6 @@ namespace ThMEPLighting.EmgLight.Service
             }
             return notIntersectSeg;
         }
-
-
-        /// <summary>
-        /// 找到柱与车道线平行且最近的边
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <param name="pt"></param>
-        /// <param name="dir"></param>
-        /// <param name="layoutPt"></param>
-        /// <returns></returns>
-        //private static List<Polyline> GetColumnParallelPart(Polyline polyline, Point3d pt, Vector3d dir)
-        //{
-        //    var closetPt = polyline.GetClosestPointTo(pt, false);
-
-        //    List<Polyline> structureSegment = new List<Polyline>();
-        //    for (int i = 0; i < polyline.NumberOfVertices; i++)
-        //    {
-        //        Polyline plTemp = new Polyline();
-        //        plTemp.AddVertexAt(0, polyline.GetPoint2dAt(i), 0, 0, 0);
-        //        plTemp.AddVertexAt(0, polyline.GetPoint2dAt((i + 1) % polyline.NumberOfVertices), 0, 0, 0);
-        //        structureSegment.Add(plTemp);
-        //    }
-
-        //    Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
-        //    var structureLayoutSegment = structureSegment.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
-        //        .Where(x =>
-        //        {
-        //            var xDir = (x.EndPoint - x.StartPoint).GetNormal();
-        //            bool bAngle = Math.Abs(dir.DotProduct(xDir)) / (dir.Length * xDir.Length) > Math.Abs(Math.Cos(30 * Math.PI / 180));
-        //            return bAngle;
-        //        }).ToList();
-
-        //    return structureLayoutSegment;
-        //}
 
         /// <summary>
         /// 大于TolLight的墙拆分成TolLight(尾点不够和前面合并)

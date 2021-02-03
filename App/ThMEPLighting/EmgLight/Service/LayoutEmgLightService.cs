@@ -18,9 +18,7 @@ namespace ThMEPLighting.EmgLight.Service
         private List<List<ThStruct>> m_usefulWalls;
         private List<List<ThStruct>> m_usefulStruct;
         private ThLane m_lane;
-        //private Dictionary<Polyline, Point3d> dictStructureCenter = new Dictionary<Polyline, Point3d>();
         private Dictionary<ThStruct, Point3d> dictStructureCenterInLaneCoor = new Dictionary<ThStruct, Point3d>();
-        //private List<Line> laneTrans = new List<Line>();
         private Polyline frame;
 
         public LayoutEmgLightService(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, ThLane lane, Polyline frame)
@@ -84,6 +82,7 @@ namespace ThMEPLighting.EmgLight.Service
                 return m_lane;
             }
         }
+
         /// <summary>
         /// 将构建中点当布置点,计算布置方向,加入最后的list
         /// </summary>
@@ -104,29 +103,23 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
-        /// 计算构建上排布和方向
+        /// 计算构建上方向
         /// </summary>
         /// <param name="structure"></param>
         /// <returns></returns>
         public (Point3d, Vector3d) GetLayoutDir(ThStruct structure)
         {
-
-            //计算排布点
-            var layoutPt = structure.centerPt;
-
-            //计算排布方向
-            var StructDir = (structure.geom.EndPoint - structure.geom.StartPoint).GetNormal();
-            var layoutDir = Vector3d.ZAxis.CrossProduct(StructDir);
+            var layoutDir = Vector3d.ZAxis.CrossProduct(structure.dir );
 
             prjPtToLine(structure, out var prjPt);
-            var compareDir = (prjPt - layoutPt).GetNormal();
+            var compareDir = (prjPt - structure.centerPt).GetNormal();
 
             if (layoutDir.DotProduct(compareDir) < 0)
             {
                 layoutDir = -layoutDir;
             }
 
-            return (layoutPt, layoutDir);
+            return (structure.centerPt, layoutDir);
         }
 
         /// <summary>
@@ -158,22 +151,6 @@ namespace ThMEPLighting.EmgLight.Service
         }
 
         /// <summary>
-        /// 将点pt转到lane坐标系内
-        /// </summary>
-        /// <param name="pt"></param>
-        /// <param name="lane"></param>
-        /// <returns></returns>
-        //private static Point3d TransformPointToLine(Point3d pt, List<Line> lane)
-        //{
-        //    //getAngleTo根据右手定则旋转(一般逆时针)
-        //    var rotationangle = Vector3d.XAxis.GetAngleTo((lane.Last().EndPoint - lane.First().StartPoint), Vector3d.ZAxis);
-        //    Matrix3d matrix = Matrix3d.Displacement(lane.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
-        //    var transedPt = pt.TransformBy(matrix.Inverse());
-
-        //    return transedPt;
-        //}
-
-        /// <summary>
         /// 找到给定点投影到lanes尾的多线段和距离. 如果点在起点外,则返回投影到向前延长线到最末的距离和多线段.如果点在端点外,则返回点到端点的距离(负数)和多线段
         /// </summary>
         /// <param name="structure"></param>
@@ -187,11 +164,7 @@ namespace ThMEPLighting.EmgLight.Service
 
             Point3d centerPtTrans;
             Point3d centerPt;
-            //if (laneTrans.Count == 0)
-            //{
-            //    laneTrans = lane.Select(x => new Line(TransformPointToLine(x.StartPoint, lane), TransformPointToLine(x.EndPoint, lane))).ToList();
-            //}
-
+          
             centerPt = structure.centerPt;
             centerPtTrans = getCenterInLaneCoor(structure);
 
@@ -280,7 +253,6 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
-
         /// <summary>
         /// 两点中点到线的投影点
         /// </summary>
@@ -359,24 +331,6 @@ namespace ThMEPLighting.EmgLight.Service
 
         }
 
-        ///// <summary>
-        ///// 构建中心点坐标
-        ///// </summary>
-        ///// <param name="structList"></param>
-        //private void BuildStructCenter(List<List<Polyline>> structList)
-        //{
-        //    foreach (var structureSide in structList)
-        //    {
-        //        foreach (var s in structureSide)
-        //        {
-        //            if (dictStructureCenter.ContainsKey(s) == false)
-        //            {
-        //                dictStructureCenter.Add(s, StructUtils.GetStructCenter(s));
-        //            }
-        //        }
-        //    }
-        //}
-
         /// <summary>
         /// 构建中心点在车道线坐标系的坐标
         /// </summary>
@@ -436,24 +390,6 @@ namespace ThMEPLighting.EmgLight.Service
             }
             return ptTrans;
         }
-
-        /// <summary>
-        /// 计算构建中点并存入dictionary
-        /// </summary>
-        /// <param name="structure"></param>
-        /// <returns></returns>
-        //public Point3d getCenter(Polyline structure)
-        //{
-        //    Point3d centerPt;
-
-        //    if (dictStructureCenter.TryGetValue(structure, out centerPt) == false)
-        //    {
-        //        centerPt = StructUtils.GetStructCenter(structure);
-        //        dictStructureCenter.Add(structure, centerPt);
-        //    }
-
-        //    return centerPt;
-        //}
 
         /// <summary>
         /// 滤掉对于车道线重叠的构建

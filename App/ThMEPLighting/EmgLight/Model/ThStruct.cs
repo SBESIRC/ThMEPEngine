@@ -15,7 +15,8 @@ namespace ThMEPLighting.EmgLight.Model
             geom = structure;
             oriStructGeo = oriStruct;
             centerPt = StructUtils.GetStructCenter(geom);
-          //  m_thStructType = type;
+            dir = (geom.EndPoint - geom.StartPoint).GetNormal();
+            //  m_thStructType = type;
 
         }
 
@@ -25,6 +26,7 @@ namespace ThMEPLighting.EmgLight.Model
         //        return m_thStructType; 
         //    } 
         //}
+        public Vector3d dir { get; }
 
         public Polyline geom { get; }
 
