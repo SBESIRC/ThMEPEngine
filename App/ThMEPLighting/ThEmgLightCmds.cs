@@ -1,22 +1,23 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using NFox.Cad;
 using AcHelper;
+using NFox.Cad;
 using Linq2Acad;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
+using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using ThMEPEngineCore.Algorithm;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Colors;
+using Autodesk.AutoCAD.Runtime;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Algorithm;
+using ThMEPLighting.Common;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
-using ThMEPLighting.Common;
-using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.EmgLight.Assistant;
 
 namespace ThMEPLighting
@@ -28,9 +29,6 @@ namespace ThMEPLighting
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-               
-
-                // 获取框线
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
@@ -53,8 +51,7 @@ namespace ThMEPLighting
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
                     var nFrame = ThMEPFrameService.NormalizeEx(frame);
-                   
-                    if (nFrame.Area <1)
+                    if (nFrame.Area < 1)
                     {
                         continue;
                     }
@@ -77,9 +74,17 @@ namespace ThMEPLighting
                     if (lanes.Count > 0)
                     {
                         //处理车道线
-                        var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
+                        var service = new ThLaneLineCleanService()
+                        {
+                            CollinearGap = 150.0,
+                            ExtendDistance = 150.0,
+                        };
+                        var handleLines = service.Clean(lanes.ToCollection());
                         var parkingLinesService = new ParkingLinesService();
-                        var parkingLines = parkingLinesService.CreateNodedParkingLines(bufferFrame, handleLines, out List<List<Line>> otherPLines);
+                        var parkingLines = parkingLinesService.CreateNodedParkingLines(
+                            bufferFrame,
+                            handleLines.Cast<Line>().ToList(),
+                            out List<List<Line>> otherPLines);
 
                         //将车道线排序,点按排序方向排列,合并连续线段
                         List<List<Line>> mergedOrderedLane = LaneServer.getMergedOrderedLane(parkingLines, otherPLines);
@@ -87,10 +92,10 @@ namespace ThMEPLighting
                         {
                             for (int j = 0; j < mergedOrderedLane[i].Count; j++)
                             {
-                                DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j),EmgLightCommon. LayerLane, Color.FromRgb(128, 159, 225));
+                                DrawUtils.ShowGeometry(mergedOrderedLane[i][j].StartPoint, string.Format("orderM {0}-{1}-start", i, j), EmgLightCommon.LayerLane, Color.FromRgb(128, 159, 225));
                             }
                         }
-                        DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"),EmgLightCommon. LayerLane, Color.FromRgb(255, 0, 0));
+                        DrawUtils.ShowGeometry(mergedOrderedLane[0][0].StartPoint, string.Format("start!"), EmgLightCommon.LayerLane, Color.FromRgb(255, 0, 0));
 
                         //获取构建信息
                         GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
@@ -99,7 +104,7 @@ namespace ThMEPLighting
                         var b = false;
                         if (b == true)
                         {
-                            continue ;
+                            continue;
                         }
 
                         //主车道布置信息
@@ -130,7 +135,7 @@ namespace ThMEPLighting
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
             return sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
-           
+
         }
 
         /// <summary>
