@@ -1,5 +1,6 @@
 ﻿using System;
 using AcHelper;
+using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
 using System.Linq;
@@ -199,28 +200,10 @@ namespace ThMEPLighting
         }
         private List<Line> GetRegionLines(Polyline region,List<string> layers,List<Type> types)
         {
-            var results = new List<Line>();
-            var curves=region.GetRegionCurves(layers, types)
-                            .Where(k => k is Line || k is Polyline)
-                            .Cast<Curve>().ToList();
-            foreach(var item in curves)
-            {
-                if(item is Line line)
-                {
-                    results.Add(line);
-                }
-                else if(item is Polyline polyline)
-                {
-                    var objs = new DBObjectCollection(); //支持由Line组成的Polyline
-                    polyline.Explode(objs);
-                    objs.Cast<Line>().ForEach(o=> results.Add(o));
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            return results;
+            var curves = region.GetRegionCurves(layers, types)
+                .Where(k => k is Line || k is Polyline)
+                .Cast<Curve>().ToCollection();
+            return ThLaneLineEngine.Explode(curves).Cast<Line>().ToList();
         }
         [CommandMethod("TIANHUACAD", "THCDBH", CommandFlags.Modal)]
         public void THCDBH()

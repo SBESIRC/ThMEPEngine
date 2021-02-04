@@ -168,8 +168,10 @@ namespace ThMEPLighting.Garage.Engine
             var ports = new List<Point3d>();
             CenterWithPorts.ForEach(m =>
             {
-                m.Value.ForEach(n =>
-                ports.Add(ThGeometryTool.GetMidPt(n.StartPoint, n.EndPoint)));
+                var pts = new List<Point3d>();
+                var normalize = ThGarageLightUtils.NormalizeLaneLine(m.Key);
+                m.Value.ForEach(n => pts.Add(ThGeometryTool.GetMidPt(n.StartPoint, n.EndPoint)));
+                ports.AddRange(pts.OrderBy(p => normalize.StartPoint.DistanceTo(p)));
             });
             return ports;
         }

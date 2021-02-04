@@ -85,8 +85,8 @@ namespace ThMEPLighting.Garage.Engine
                     ArrangeParameter, wireOffsetDataService))
                 {
                     buildNumberEngine.Build();
-                    collectIds.AddRange(Print(buildNumberEngine.FirstLightEdges));
-                    collectIds.AddRange(Print(buildNumberEngine.SecondLightEdges));
+                    collectIds.AddRange(CreateLightAndNumber(buildNumberEngine.FirstLightEdges));
+                    collectIds.AddRange(CreateLightAndNumber(buildNumberEngine.SecondLightEdges));
                 }
             }
             return collectIds;

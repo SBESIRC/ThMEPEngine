@@ -358,7 +358,23 @@ namespace ThMEPLighting.Common
             {
                 return true;
             }
-            return false;
-        }        
+            return false;   
+        }
+        public static Line NormalizeLaneLine(Line line, double tolerance = 0.5)
+        {
+            var newLine = new Line(line.StartPoint, line.EndPoint);
+            if (Math.Abs(line.StartPoint.Y - line.EndPoint.Y) <= tolerance)
+            {
+                if (line.StartPoint.Y < line.EndPoint.Y)
+                {
+                    newLine = new Line(line.StartPoint, line.EndPoint);
+                }
+                else
+                {
+                    newLine = new Line(line.EndPoint, line.StartPoint);
+                }
+            }
+            return newLine.Normalize();
+        }
     }
 }

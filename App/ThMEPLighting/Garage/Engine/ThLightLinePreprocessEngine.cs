@@ -18,7 +18,7 @@ namespace ThMEPLighting.Garage.Engine
         public double RemoveLength { get; set; }
         public ThLightLinePreprocessEngine()
         {
-            RemoveLength = 5.0;
+            RemoveLength = ThGarageLightCommon.ThShortLightLineLength;
         }
         public void Dispose()
         {            

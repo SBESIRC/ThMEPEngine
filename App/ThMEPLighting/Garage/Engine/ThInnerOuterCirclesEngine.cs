@@ -37,8 +37,8 @@ namespace ThMEPLighting.Garage.Engine
             var fdxNomalLines = new List<Line>();
 
             //修正方向
-            dxLines.ForEach(o => dxNomalLines.Add(NormalizeLaneLine(o)));
-            fdxLines.ForEach(o => fdxNomalLines.Add(NormalizeLaneLine(o)));
+            dxLines.ForEach(o => dxNomalLines.Add(ThGarageLightUtils.NormalizeLaneLine(o)));
+            fdxLines.ForEach(o => fdxNomalLines.Add(ThGarageLightUtils.NormalizeLaneLine(o)));
 
             //创建非灯线的偏移
             fdxNomalLines.ForEach(o =>
@@ -64,23 +64,6 @@ namespace ThMEPLighting.Garage.Engine
             var dxWireOffsetDatas=ThFindFirstLinesService.Find(offsetCurves, offsetDistance);
             WireOffsetDatas.AddRange(dxWireOffsetDatas);
         }  
-
-        private Line NormalizeLaneLine(Line line,double tolerance=0.5)
-        {
-            var newLine = new Line(line.StartPoint,line.EndPoint);
-            if(Math.Abs(line.StartPoint.Y- line.EndPoint.Y)<= tolerance)
-            {
-                if(line.StartPoint.Y< line.EndPoint.Y)
-                {
-                    newLine = new Line(line.StartPoint, line.EndPoint);
-                }
-                else
-                {
-                    newLine = new Line(line.EndPoint, line.StartPoint);
-                }
-            }
-            return newLine.Normalize();
-        }
 
         private Tuple<List<Line>,List<Line>> Split(List<Line> dxLines, List<Line> fdxLines)
         {
