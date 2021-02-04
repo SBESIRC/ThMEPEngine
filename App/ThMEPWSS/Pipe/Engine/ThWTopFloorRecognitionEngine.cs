@@ -7,17 +7,20 @@ using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Model;
 using DotNetARX;
 using ThMEPWSS.Pipe.Tools;
+using ThCADExtension;
+using System;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThWTopFloorRecognitionEngine : ThWRoomRecognitionEngine
+    public class ThWTopFloorRecognitionEngine 
     {
         public List<ThWTopFloorRoom> Rooms { get; set; }
+        public List<ThIfcSpace> Spaces { get; set; }
         public ThWTopFloorRecognitionEngine()
         {
             Rooms = new List<ThWTopFloorRoom>();
         }
-        public override void Recognize(Database database, Point3dCollection pts)
+        public void Recognize(Database database, Point3dCollection pts)
         {
             Rooms = new List<ThWTopFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -25,20 +28,18 @@ namespace ThMEPWSS.Pipe.Engine
                 var blockCollection = new List<BlockReference>();
                 blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");             
                 var StandardSpaces = new List<ThIfcSpace>();
-                var NonStandardSpaces = new List<ThIfcSpace>();
+                var NonStandardSpaces = new List<ThIfcSpace>();             
                 if (blockCollection.Count > 0)
                 {                   
                     StandardSpaces = GetStandardSpaces(blockCollection);
                     NonStandardSpaces = GetNonStandardSpaces(blockCollection);
-                }
-                if (this.Spaces.Count == 0)
-                {
-                    this.Spaces = GetSpaces(database, pts);
-                }
+                }        
+                var thisSpaces = Spaces;             
                 var basepoint = GetBaseCircles(blockCollection);
-                var compositeroom = Getcompositeroom(database, pts);
-                var compositebalconyroom = Getcompositebalconyroom(database, pts);
-                var divisionLines = GetLines(blockCollection, this.Spaces);
+                Polyline bound = StandardSpaces[0].Boundary as Polyline;            
+                var compositeroom = Getcompositeroom(database, bound.Vertices(), thisSpaces).Item1;
+                var compositebalconyroom = Getcompositeroom(database, bound.Vertices(), thisSpaces).Item2;
+                var divisionLines = GetLines(blockCollection, thisSpaces);
                 Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);
             }
         }
@@ -108,20 +109,13 @@ namespace ThMEPWSS.Pipe.Engine
             GetBoundaryCurves(blockBounds).ForEach(o => FloorSpaces.Add(new ThIfcSpace { Boundary = o }));
             return FloorSpaces;
         }
-        private List<ThWCompositeRoom> Getcompositeroom(Database database, Point3dCollection pts)
+        private Tuple<List<ThWCompositeRoom>, List<ThWCompositeBalconyRoom>>  Getcompositeroom(Database database, Point3dCollection pts,List<ThIfcSpace> spaces)
         {
             using (ThWCompositeRoomRecognitionEngine compositeRoomRecognitionEngine = new ThWCompositeRoomRecognitionEngine())
             {
+                compositeRoomRecognitionEngine.Spaces = spaces;
                 compositeRoomRecognitionEngine.Recognize(database, pts);
-                return compositeRoomRecognitionEngine.Rooms;
-            }
-        }
-        private List<ThWCompositeBalconyRoom> Getcompositebalconyroom(Database database, Point3dCollection pts)
-        {
-            using (ThWCompositeRoomRecognitionEngine compositeRoomRecognitionEngine = new ThWCompositeRoomRecognitionEngine())
-            {
-                compositeRoomRecognitionEngine.Recognize(database, pts);
-                return compositeRoomRecognitionEngine.FloorDrainRooms;
+                return Tuple.Create(compositeRoomRecognitionEngine.Rooms, compositeRoomRecognitionEngine.FloorDrainRooms);                  
             }
         }
          private List<Line> GetLines(List<BlockReference> blocks, List<ThIfcSpace> spaces)

@@ -37,7 +37,7 @@ namespace ThMEPWSS.Pipe.Service
             var kitchenContainerService = new ThKitchenRoomService(spaces, basintools, rainPipes, roofRainPipes);           
             kitchenContainerService.Build();
             return kitchenContainerService.KitchenContainers;
-           
+     
         }
       
         private void Build()

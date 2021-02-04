@@ -23,6 +23,6 @@ namespace ThMEPWSS.Pipe.Engine
                 spaceEngine.Recognize(database, pts);
                 return spaceEngine.Spaces;
             }
-        }
+        }        
     }
 }

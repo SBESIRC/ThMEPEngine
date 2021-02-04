@@ -16,9 +16,9 @@ namespace ThMEPWSS.Pipe.Tools
 {
     public class ThWPipeOutputFunction
     {
-        public static DBText Taggingtext(Point3d tag, string s, int scaleFactor)
+        public static DBText Taggingtext(Point3d tag, string s, int scaleFactor, Database db)
         {
-            var textStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+            var textStyleId = GetStyleIds(db,"TH-STYLE3");//费时间
             return new DBText()
             {
                 Height = 175 * scaleFactor,
@@ -604,66 +604,55 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return roofRainPipe;
         }
-        public static List<DBText> GetListText(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor, string W_RAIN_NOTE1)
+        public static List<DBText> GetListText(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor, string W_RAIN_NOTE1, Database db)
         {
             var texts = new List<DBText>();
             for (int i = 0; i < points.Count; i++)
             {
-                texts.Add(TaggingBuckettext(points1[4 * i + 2], s, scaleFactor, W_RAIN_NOTE1));
+                texts.Add(TaggingBuckettext(points1[4 * i + 2], s, scaleFactor, W_RAIN_NOTE1, db));
             }
             return texts;
         }
-        public static List<DBText> GetListText1(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor, string W_RAIN_NOTE1)
+        public static List<DBText> GetListText1(Point3dCollection points, Point3dCollection points1, string s,int scaleFactor, string W_RAIN_NOTE1, Database db)
         {
             var texts = new List<DBText>();
             for (int i = 0; i < points.Count; i++)
             {
-                texts.Add(TaggingBuckettext(points1[4 * i + 3], s, scaleFactor, W_RAIN_NOTE1));
+                texts.Add(TaggingBuckettext(points1[4 * i + 3], s, scaleFactor, W_RAIN_NOTE1, db));
             }
             return texts;
         }
-        public static DBText TaggingBuckettext(Point3d tag, string s,int scaleFactor,string W_RAIN_NOTE1)
+        public static DBText TaggingBuckettext(Point3d tag, string s,int scaleFactor,string W_RAIN_NOTE1, Database db)
         {
-            var textStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+            var textStyleId = GetStyleIds(db, "TH-STYLE3");
             return new DBText()
             {
                 Height = 200 * scaleFactor,
                 Position = tag,
                 TextString = s,
                 TextStyleId = textStyleId,
-                Layer= W_RAIN_NOTE1,
+                Layer= W_RAIN_NOTE1,            
             };
         }
-        public static List<string> TextXrefLayers(Database database)
+        public static ObjectId GetStyleIds(Database db, string styleName)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            //打开文字样式表
+            TextStyleTable st = (TextStyleTable)db.TextStyleTableId.GetObject(OpenMode.ForRead);
+            if (!st.Has(styleName))//如果不存在名为styleName的文字样式，则新建一个文字样式
             {
-                return acadDatabase.Layers
-                    .Where(o => IsVisibleLayer(o))
-                    .Where(o => IsSpaceNameLayer(o.Name))
-                    .Select(o => o.Name)
-                    .ToList();
+                //定义一个新的文字样式表记录
+                TextStyleTableRecord str = new TextStyleTableRecord();
+                str.Name = styleName;//设置文字样式名
+                st.UpgradeOpen();//切换文字样式表的状态为写以添加新的文字样式
+                st.Add(str);//将文字样式表记录的信息添加到文字样式表中
+                //把文字样式表记录添加到事务处理中
+                db.TransactionManager.AddNewlyCreatedDBObject(str, true);
+                st.DowngradeOpen();//为了安全，将文字样式表的状态切换为读
             }
+            return st[styleName];//返回新添加的文字样式表记录的ObjectId
         }
-        private static bool IsSpaceNameLayer(string name)
-        {
-            var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
-            // 图层名未包含S_BEAM
-            if (!layerName.Contains("AD-FLOOR-AREA") && !layerName.Contains("AD-NAME-ROOM"))
-            {
-                return false;
-            }
-            string[] patterns = layerName.Split('-').Reverse().ToArray();
-            if (patterns.Count() < 3)
-            {
-                return false;
-            }
-            return (patterns[0] == "AREA" && patterns[1] == "FLOOR" && patterns[2] == "AD");
-        }
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
-        }
+
+
         public static Polyline CreatePolyline(Point3d point1, Point3d point2, List<string> strings, string pipeLayer)
         {
             Polyline ent_line1 = new Polyline();
@@ -701,21 +690,18 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public static string Get_Layers1(List<string> strings, string pipeLayer)
         {
-            foreach (string s in strings)
+            if(strings.Contains(pipeLayer))
             {
-                if (s.Equals(pipeLayer))
-                {
-                    return pipeLayer;
-                }
+                return pipeLayer;
             }
-            foreach (string s in strings)
+            else if(strings.Contains(ThWPipeCommon.W_DRAI_NOTE))
             {
-                if (s.Equals(ThWPipeCommon.W_DRAI_NOTE))
-                {
-                    return ThWPipeCommon.W_DRAI_NOTE;
-                }
+                return ThWPipeCommon.W_DRAI_NOTE;
             }
-            return (null);
+            else
+            {
+                return "";
+            }
         }
         public static string Get_Layers2(List<string> strings, string pipeLayer)
         {
@@ -771,6 +757,23 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return (null);
         }
+
+        public static string Get_LayersEx(List<string> layers, string pipeLayer,string replaceLayer)
+        {
+            if (layers.Contains(pipeLayer))
+            {
+                return pipeLayer;
+            }
+            else if (layers.Contains(replaceLayer))
+            {
+                return replaceLayer;
+            }
+            else
+            {
+                return "";
+            }
+        }
+
         public static Polyline CreateRainlines(Point3d point1, Point3d point2,string W_RAIN_PIPE)
         {
             Polyline ent_line1 = new Polyline();
@@ -867,6 +870,7 @@ namespace ThMEPWSS.Pipe.Tools
                 font.Add(polyline);
             }
             return font;
-        }    
+        }
+   
     }
 }

@@ -13,6 +13,9 @@ namespace ThMEPWSS.Pipe.Engine
     public class ThWKitchenRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWKitchenRoom> Rooms { get; set; }
+        public List<ThIfcRainPipe> RainPipes { get; set; }
+        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        public List<ThIfcBasin> BasinTools { get; set; }
         public ThWKitchenRoomRecognitionEngine()
         {
             Rooms = new List<ThWKitchenRoom>();
@@ -24,36 +27,9 @@ namespace ThMEPWSS.Pipe.Engine
                 if (this.Spaces.Count == 0)
                 {
                     this.Spaces = GetSpaces(database, pts);
-                }
-                var basintools = GetBasintools(database, pts);
-                var rainPipes = GetRainPipes(database, pts);
-                var roofRainPipes = GetRoofRainPipes(database, pts);
-                Rooms = ThKitchenRoomService.Build(this.Spaces, basintools, rainPipes, roofRainPipes);
+                }                                          
+                Rooms = ThKitchenRoomService.Build(this.Spaces, BasinTools, RainPipes, RoofRainPipes);
             }
-        }
-        private List<ThIfcBasin> GetBasintools(Database database, Point3dCollection pts)
-        {
-            using (ThBasinRecognitionEngine basintoolEngine = new ThBasinRecognitionEngine())
-            {
-                basintoolEngine.Recognize(database, pts);
-                return basintoolEngine.Elements.Cast<ThIfcBasin>().ToList();
-            }
-        }
-        private List<ThIfcRainPipe> GetRainPipes(Database database, Point3dCollection pts)
-        {
-            using (ThRainPipeRecognitionEngine rainPipesEngine = new ThRainPipeRecognitionEngine())
-            {
-                rainPipesEngine.Recognize(database, pts);
-                return rainPipesEngine.Elements.Cast<ThIfcRainPipe>().ToList();
-            }
-        }
-        private List<ThIfcRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
-        {
-            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
-            {
-                roofRainPipesEngine.Recognize(database, pts);
-                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
-            }
-        }
+        }   
     }
 }

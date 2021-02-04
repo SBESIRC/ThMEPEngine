@@ -3,6 +3,9 @@ using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Plumbing;
+using ThMEPEngineCore.Engine;
+using System.Linq;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -29,7 +32,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> RainPipes { get; set; }
         public List<Curve> PositionTags { get; set; }
         public List<Curve> AllObstacles { get; set; }
-        public List<string> Layers { get; set; }
+        public List<string> Layers { get; set; }    
         public ThWCompositeFloorRecognitionEngine()
         {
             TagNameFrames = new List<Curve>();
@@ -58,8 +61,16 @@ namespace ThMEPWSS.Pipe.Engine
         public override void Recognize(Database database, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {                  
-                var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine();               
+            {
+                var GravityWaterBuckets = GetgravityWaterBuckets(database, pts);
+                var SideEntryWaterBuckets = GetsideEntryWaterBuckets(database, pts);
+                var RoofRainPipes = GetroofRainPipes(database, pts);
+                var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine()
+                {   
+                GravityWaterBuckets = GravityWaterBuckets,
+                SideEntryWaterBuckets = SideEntryWaterBuckets,
+                RoofRainPipes = RoofRainPipes
+                };               
                 RoofDeviceEngine.Recognize(database, pts);             
                 RoofDeviceFloors = RoofDeviceEngine.Rooms;
                 RoofDeviceEngine.TagNameFrames.ForEach(o => TagNameFrames.Add(o));
@@ -80,10 +91,18 @@ namespace ThMEPWSS.Pipe.Engine
                 RoofDeviceEngine.PositionTags.ForEach(o => PositionTags.Add(o));
                 RoofDeviceEngine.AllObstacles.ForEach(o => AllObstacles.Add(o));
                 RoofDeviceEngine.Layers.ForEach(o => Layers.Add(o));
-                var RoofEngine = new ThWRoofFloorRecognitionEngine();            
+                var RoofEngine = new ThWRoofFloorRecognitionEngine()
+                {
+                   gravityWaterBuckets= GravityWaterBuckets,
+                   sideEntryWaterBuckets= SideEntryWaterBuckets,
+                   roofRainPipes= RoofRainPipes
+                };            
                 RoofEngine.Recognize(database, pts);
                 RoofFloors = RoofEngine.Rooms;
-                var FirstEngine = new ThWTopFloorRecognitionEngine();             
+                var FirstEngine = new ThWTopFloorRecognitionEngine()
+                {
+                    Spaces= RoofDeviceEngine.Spaces
+                };      
                 FirstEngine.Recognize(database, pts);
                 TopFloors = FirstEngine.Rooms;
                 if (TopFloors.Count > 0)
@@ -93,6 +112,30 @@ namespace ThMEPWSS.Pipe.Engine
                         NormalFloors.Add(TopFloors[i]);
                     }
                 }
+            }
+        }
+        private List<ThIfcGravityWaterBucket> GetgravityWaterBuckets(Database database, Point3dCollection pts)
+        {
+            using (ThGravityWaterBucketRecognitionEngine gravityWaterBucket = new ThGravityWaterBucketRecognitionEngine())
+            {
+                gravityWaterBucket.Recognize(database, pts);
+                return gravityWaterBucket.Elements.Cast<ThIfcGravityWaterBucket>().ToList();
+            }
+        }
+        private List<ThIfcSideEntryWaterBucket> GetsideEntryWaterBuckets(Database database, Point3dCollection pts)
+        {
+            using (ThSideEntryWaterBucketRecognitionEngine sideEntryWaterBucketEngine = new ThSideEntryWaterBucketRecognitionEngine())
+            {
+                sideEntryWaterBucketEngine.Recognize(database, pts);
+                return sideEntryWaterBucketEngine.Elements.Cast<ThIfcSideEntryWaterBucket>().ToList();
+            }
+        }
+        private List<ThIfcRoofRainPipe> GetroofRainPipes(Database database, Point3dCollection pts)
+        {
+            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
+            {
+                roofRainPipesEngine.Recognize(database, pts);
+                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
             }
         }
     }

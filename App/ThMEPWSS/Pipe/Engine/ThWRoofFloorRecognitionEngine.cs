@@ -1,21 +1,23 @@
-﻿using System.Linq;
+﻿using DotNetARX;
 using Linq2Acad;
-using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPEngineCore.Model;
-using DotNetARX;
+
 using ThMEPWSS.Pipe.Tools;
+using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWRoofFloorRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWRoofFloorRoom> Rooms { get; set; }
+        public List<ThIfcGravityWaterBucket> gravityWaterBuckets { get; set; }
+        public List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets { get; set; }
+        public List<ThIfcRoofRainPipe> roofRainPipes { get; set; }
         public ThWRoofFloorRecognitionEngine()
         {
             Rooms = new List<ThWRoofFloorRoom>();
@@ -32,14 +34,7 @@ namespace ThMEPWSS.Pipe.Engine
                 {                 
                     RoofSpaces = GetRoofSpaces(blockCollection);                
                 }
-                if (this.Spaces.Count == 0)
-                {
-                    this.Spaces = GetSpaces(database, pts);
-                }
-                var baseCircles= GetBaseCircles(blockCollection);
-                var gravityWaterBuckets = GetgravityWaterBuckets(database, pts);
-                var sideEntryWaterBuckets = GetsideEntryWaterBuckets(database, pts);
-                var roofRainPipes = GetroofRainPipes(database, pts);
+                var baseCircles= GetBaseCircles(blockCollection);                          
                 Rooms = ThRoofFloorRoomService.Build(RoofSpaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);
             }
         }
@@ -88,30 +83,5 @@ namespace ThMEPWSS.Pipe.Engine
             GetBoundaryCurves(blockBounds).ForEach(o => FloorSpaces.Add(new ThIfcSpace { Boundary = o }));
             return FloorSpaces;
         }
-        private List<ThIfcGravityWaterBucket> GetgravityWaterBuckets(Database database, Point3dCollection pts)
-        {
-            using (ThGravityWaterBucketRecognitionEngine gravityWaterBucket = new ThGravityWaterBucketRecognitionEngine())
-            {
-                gravityWaterBucket.Recognize(database, pts);
-                return gravityWaterBucket.Elements.Cast<ThIfcGravityWaterBucket>().ToList();
-            }
-        }
-        private List<ThIfcSideEntryWaterBucket> GetsideEntryWaterBuckets(Database database, Point3dCollection pts)
-        {
-            using (ThSideEntryWaterBucketRecognitionEngine sideEntryWaterBucketEngine = new ThSideEntryWaterBucketRecognitionEngine())
-            {
-                sideEntryWaterBucketEngine.Recognize(database, pts);
-                return sideEntryWaterBucketEngine.Elements.Cast<ThIfcSideEntryWaterBucket>().ToList();
-            }
-        }
-        private List<ThIfcRoofRainPipe> GetroofRainPipes(Database database, Point3dCollection pts)
-        {
-            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
-            {
-                roofRainPipesEngine.Recognize(database, pts);
-                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
-            }
-        }
-
     }
 }

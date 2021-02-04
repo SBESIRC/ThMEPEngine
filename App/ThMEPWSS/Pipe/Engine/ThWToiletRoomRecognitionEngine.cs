@@ -13,6 +13,9 @@ namespace ThMEPWSS.Pipe.Engine
     public class ThWToiletRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWToiletRoom> Rooms { get; set; }
+        public List<ThIfcFloorDrain> FloorDrains { get; set; }
+        public List<ThIfcCondensePipe> CondensePipes { get; set; }
+        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
         public ThWToiletRoomRecognitionEngine()
         {
             Rooms = new List<ThWToiletRoom>();
@@ -26,11 +29,8 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     this.Spaces = GetSpaces(database, pts);
                 }
-                var closestools = GetClosestools(database, pts);
-                var floorDrains = GetFloorDrains(database, pts);
-                var condensePipes = GetCondensePipes(database, pts);
-                var roofRainPipes = GetRoofRainPipes(database, pts);
-                Rooms = ThToiletRoomService.Build(this.Spaces, closestools, floorDrains, condensePipes, roofRainPipes);
+                var closestools = GetClosestools(database, pts);           
+                Rooms = ThToiletRoomService.Build(this.Spaces, closestools, FloorDrains, CondensePipes, RoofRainPipes);
             }
         }
         private List<ThIfcClosestool> GetClosestools(Database database, Point3dCollection pts)
@@ -41,29 +41,7 @@ namespace ThMEPWSS.Pipe.Engine
                 return closetoolEngine.Elements.Cast<ThIfcClosestool>().ToList();
             }
         }
-        private List<ThIfcFloorDrain> GetFloorDrains(Database database, Point3dCollection pts)
-        {
-            using (ThFloorDrainRecognitionEngine floorDrainEngine = new ThFloorDrainRecognitionEngine())
-            {
-                floorDrainEngine.Recognize(database, pts);
-                return floorDrainEngine.Elements.Cast<ThIfcFloorDrain>().ToList();
-            }
-        }
-        private List<ThIfcCondensePipe> GetCondensePipes(Database database, Point3dCollection pts)
-        {
-            using (ThCondensePipeRecognitionEngine condensePipesEngine = new ThCondensePipeRecognitionEngine())
-            {
-                condensePipesEngine.Recognize(database, pts);
-                return condensePipesEngine.Elements.Cast<ThIfcCondensePipe>().ToList();
-            }
-        }
-        private List<ThIfcRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
-        {
-            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
-            {
-                roofRainPipesEngine.Recognize(database, pts);
-                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
-            }
-        }
+    
+     
     }
 }

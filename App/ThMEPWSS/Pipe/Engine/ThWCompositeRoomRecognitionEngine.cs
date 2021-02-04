@@ -1,4 +1,5 @@
-﻿using Linq2Acad;
+﻿using System.Linq;
+using Linq2Acad;
 using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -6,14 +7,17 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
+using ThMEPEngineCore.Model.Plumbing;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWCompositeRoom> Rooms { get; set; }
-
         public List<ThWCompositeBalconyRoom> FloorDrainRooms { get; set; }
+        public List<ThIfcSpace> Spaces { get; set; }
         public ThWCompositeRoomRecognitionEngine()
         {
             Rooms = new List<ThWCompositeRoom>();
@@ -23,28 +27,98 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var kichenEngine = new ThWKitchenRoomRecognitionEngine();
+                var rainPipes = GetRainPipes(database, pts);
+                var roofRainPipes = GetRoofRainPipes(database, pts);
+                var floorDrains = GetFloorDrains(database, pts);
+                var condensePipes = GetCondensePipes(database, pts);             
+                var washmachines = GetWashmachines(database, pts);              
+                var basinTools = GetBasinTools(database, pts);
+                var kichenEngine = new ThWKitchenRoomRecognitionEngine()
+                {
+                    Spaces = Spaces,
+                    RainPipes = rainPipes,
+                    RoofRainPipes= roofRainPipes,
+                    BasinTools = basinTools
+                };
                 kichenEngine.Recognize(database, pts);
                 var toiletEngine = new ThWToiletRoomRecognitionEngine()
-                {
-                    Spaces = kichenEngine.Spaces
+                {                 
+                    Spaces = kichenEngine.Spaces,
+                    FloorDrains= floorDrains,
+                    CondensePipes= condensePipes,
+                    RoofRainPipes = roofRainPipes
                 };
                 toiletEngine.Recognize(database, pts);
                 GeneratePairInfo(kichenEngine.Rooms, toiletEngine.Rooms);
                 var balconyEngine = new ThWBalconyRoomRecognitionEngine()
                 {
-                    Spaces = toiletEngine.Spaces
+                    Spaces = toiletEngine.Spaces,
+                    FloorDrains = floorDrains,
+                    Washmachines = washmachines,
+                    RainPipes = rainPipes,
+                    BasinTools = basinTools
                 };
                 balconyEngine.Recognize(database, pts);
                 var devicePlatformEngine = new ThWDevicePlatformRoomRecognitionEngine()
                 {
-                    Spaces = balconyEngine.Spaces
+                    Spaces = balconyEngine.Spaces,
+                    FloorDrains = floorDrains,
+                    RainPipes = rainPipes,
+                    CondensePipes = condensePipes,
+                    RoofRainPipes = roofRainPipes
                 };
                 devicePlatformEngine.Recognize(database, pts);
                 GenerateBalconyPairInfo(balconyEngine.Rooms, devicePlatformEngine.Rooms);
             }
         }
-
+        protected List<ThIfcRainPipe> GetRainPipes(Database database, Point3dCollection pts)
+        {
+            using (ThRainPipeRecognitionEngine rainPipesEngine = new ThRainPipeRecognitionEngine())
+            {
+                rainPipesEngine.Recognize(database, pts);
+                return rainPipesEngine.Elements.Cast<ThIfcRainPipe>().ToList();
+            }
+        }
+        protected List<ThIfcRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
+        {
+            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
+            {
+                roofRainPipesEngine.Recognize(database, pts);
+                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
+            }
+        }
+        protected List<ThIfcFloorDrain> GetFloorDrains(Database database, Point3dCollection pts)
+        {
+            using (ThFloorDrainRecognitionEngine floorDrainEngine = new ThFloorDrainRecognitionEngine())
+            {
+                floorDrainEngine.Recognize(database, pts);
+                return floorDrainEngine.Elements.Cast<ThIfcFloorDrain>().ToList();
+            }
+        }
+        protected List<ThIfcCondensePipe> GetCondensePipes(Database database, Point3dCollection pts)
+        {
+            using (ThCondensePipeRecognitionEngine condensePipesEngine = new ThCondensePipeRecognitionEngine())
+            {
+                condensePipesEngine.Recognize(database, pts);
+                return condensePipesEngine.Elements.Cast<ThIfcCondensePipe>().ToList();
+            }
+        }
+        private List<ThIfcWashMachine> GetWashmachines(Database database, Point3dCollection pts)
+        {
+            using (ThWashMachineRecognitionEngine washmachinesEngine = new ThWashMachineRecognitionEngine())
+            {
+                washmachinesEngine.Recognize(database, pts);
+                return washmachinesEngine.Elements.Cast<ThIfcWashMachine>().ToList();
+            }
+        }
+        private List<ThIfcBasin> GetBasinTools(Database database, Point3dCollection pts)
+        {
+            using (ThBasinRecognitionEngine basinToolsEngine = new ThBasinRecognitionEngine())
+            {
+                basinToolsEngine.Recognize(database, pts);
+                return basinToolsEngine.Elements.Cast<ThIfcBasin>().ToList();
+            }
+        }
         /// <summary>
         /// 根据厨房间， 卫生间 生成复合房间信息
         /// </summary>
@@ -87,7 +161,6 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
         }
-
         private bool IsPair(ThWKitchenRoom kitchen, ThWToiletRoom toilet)
         {
             var toiletboundary = toilet.Toilet.Boundary as Polyline;
@@ -162,7 +235,6 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
         }
-
         private bool IsBalconyPair(ThWBalconyRoom balconyRoom, ThWDevicePlatformRoom devicePlatformRoom)
         {
             var balconyRoomboundary = balconyRoom.Balcony.Boundary as Polyline;       
