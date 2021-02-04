@@ -347,16 +347,57 @@ namespace ThMEPLighting.Garage.Service
         {
             if (curve is Line line)
             {
-                return line.ExtendLineToPoint(pt);
+                return ExtendLineToPoint(line, pt);
             }
             else if (curve is Polyline polyline)
             {
-                return polyline.ExtendPolylineToPoint(pt);
+                return ExtendPolylineToPoint(polyline,pt);
             }
             else
             {
                 throw new NotSupportedException();
             }
+        }
+        private Line ExtendLineToPoint(Line line, Point3d pt)
+        {
+            // 
+            bool isStart = pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint) ? true : false;
+            if (isStart)
+            {
+                return new Line(pt, line.EndPoint);
+            }
+            else
+            {
+                return new Line(line.StartPoint, pt);
+            }
+        }
+        /// <summary>
+        /// Poly只能有线段构成
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="length"></param>
+        /// <returns></returns>
+        private Polyline ExtendPolylineToPoint(Polyline poly, Point3d pt)
+        {
+            bool isStart = pt.DistanceTo(poly.StartPoint) < pt.DistanceTo(poly.EndPoint) ? true : false;
+            var startExendPt = poly.StartPoint;
+            var endExendPt = poly.EndPoint;
+            if (isStart)
+            {
+                startExendPt = pt;
+            }
+            else
+            {
+                endExendPt = pt;
+            }
+            Polyline newPoly = new Polyline();
+            newPoly.AddVertexAt(0, startExendPt.ToPoint2D(), 0, 0, 0);
+            for (int i = 1; i < poly.NumberOfVertices - 1; i++)
+            {
+                newPoly.AddVertexAt(i, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
+            }
+            newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
+            return newPoly;
         }
     }
 }

@@ -56,9 +56,6 @@ namespace ThMEPLighting.Garage.Engine
                 //创建线槽
                 var ports = BuildCableTray(innerOuterCircles,ref collectIds); //线槽端口
 
-                //电灯编号        
-                //需求变化2020.12.23,非灯线不参与编号传递
-
                 //为了选起点，建图成功
                 var centerLines = new List<Line>();
                 var firstLines = new List<Line>();
@@ -99,23 +96,21 @@ namespace ThMEPLighting.Garage.Engine
             //桥架中心线
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var firstCurves = new List<Curve>();
+                var centerLines = new List<Line>(); //线槽中心线
                 var secondCurves = new List<Curve>();
                 innerOuterCircles.ForEach(o =>
                 {
-                    firstCurves.Add(o.First.Clone() as Curve);
-                    secondCurves.Add(o.Second.Clone() as Curve);
+                    centerLines.Add(o.First.Clone() as Line);
+                    centerLines.Add(o.Second.Clone() as Line);
                 });
-                using (var buildRacywayEngine = new ThBuildDoubleRacewayEngine(
-                    firstCurves, secondCurves, 
-                    FdxLines.Cast<Curve>().ToList(), 
-                    ArrangeParameter.Width,RacewayParameter))
+                FdxLines.ForEach(o => centerLines.Add(o.Clone() as Line));
+
+                using (var buildRacywayEngine = new ThBuildRacewayEngineEx(
+                    centerLines, ArrangeParameter.Width))
                 {
                     //创建线槽
                     buildRacywayEngine.Build();
-
-                    collectIds.AddRange(buildRacywayEngine.DrawObjIs);
-
+                    collectIds.AddRange(buildRacywayEngine.CreateGroup(RacewayParameter));
                     //获取参数
                     return buildRacywayEngine.GetPorts();
                 }

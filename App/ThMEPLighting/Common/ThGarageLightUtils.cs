@@ -12,7 +12,6 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using GeometryExtensions;
 
 namespace ThMEPLighting.Common
 {
@@ -22,20 +21,6 @@ namespace ThMEPLighting.Common
         {
             var dir = (line.EndPoint - line.StartPoint).GetNormal();
             return new Line(line.StartPoint - dir * length, line.EndPoint + dir * length);
-        }
-        public static Line ExtendLineToPoint(this Line line, Point3d pt)
-        {
-            bool isStart = pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint) ? true : false;
-            Line resLine;
-            if (isStart)
-            {
-                resLine = new Line(pt, line.EndPoint);
-            }
-            else
-            {
-                resLine = new Line(line.StartPoint, pt);
-            }
-            return resLine;
         }
         /// <summary>
         /// Poly只能有线段构成
@@ -66,37 +51,7 @@ namespace ThMEPLighting.Common
             newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
 
             return newPoly;
-        }
-        /// <summary>
-        /// Poly只能有线段构成
-        /// </summary>
-        /// <param name="poly"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public static Polyline ExtendPolylineToPoint(this Polyline poly, Point3d pt)
-        {
-            bool isStart = pt.DistanceTo(poly.StartPoint) < pt.DistanceTo(poly.EndPoint) ? true : false;
-            var startExendPt = poly.StartPoint;
-            var endExendPt = poly.EndPoint;
-            if (isStart)
-            {
-                startExendPt = pt;
-            }
-            else
-            {
-                endExendPt = pt;
-            }
-
-            Polyline newPoly = new Polyline();
-            newPoly.AddVertexAt(0, startExendPt.ToPoint2D(), 0, 0, 0);
-            for (int i = 1; i < poly.NumberOfVertices - 1; i++)
-            {
-                newPoly.AddVertexAt(i, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
-            }
-            newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
-
-            return newPoly;
-        }
+        }        
         public static ObjectId AddLineType(Database db, string linetypeName)
         {
             using(AcadDatabase acadDatabase= AcadDatabase.Use(db))
@@ -404,6 +359,6 @@ namespace ThMEPLighting.Common
                 return true;
             }
             return false;
-        }
+        }        
     }
 }

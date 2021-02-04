@@ -42,6 +42,7 @@
     <Compile Include="Garage\Engine\ThArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildDoubleRacewayEngine.cs" />
+    <Compile Include="Garage\Engine\ThBuildRacewayEngineEx.cs" />
     <Compile Include="Garage\Engine\ThBuildRacewayEngine.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowNumberEngine.cs" />
@@ -77,6 +78,7 @@
     <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
     <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
     <Compile Include="Garage\Service\ThEliminateService.cs" />
+    <Compile Include="Garage\Service\ThCollectCutLinesService.cs" />
     <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />
     <Compile Include="Garage\Service\ThExtendService.cs" />
     <Compile Include="Garage\Service\ThFilterLinkService.cs" />

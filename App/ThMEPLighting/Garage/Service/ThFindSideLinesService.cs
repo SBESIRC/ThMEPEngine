@@ -7,9 +7,14 @@ using ThMEPLighting.Garage.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
+using System;
 
 namespace ThMEPLighting.Garage.Service
 {
+    /// <summary>
+    /// 查找中心线两边的线槽线和端口线
+    /// 不要在此类中创建新的对象返回
+    /// </summary>
     public class ThFindSideLinesService
     {
         public Dictionary<Line, List<Line>> SideLinesDic { get; set; }
@@ -19,7 +24,7 @@ namespace ThMEPLighting.Garage.Service
 
         protected ThCADCoreNTSSpatialIndex SideSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex CenterSpatialIndex { get; set; }
-        protected double SideTolerance = 1.0;
+        protected double SideTolerance = 3.0;
 
         protected ThFindSideLinesService(ThFindSideLinesParameter findParameter)
         {
@@ -41,7 +46,7 @@ namespace ThMEPLighting.Garage.Service
             FindParameter.CenterLines.ForEach(o =>
                 {
                     var lines = FilterSide(o);
-                    if(lines.Count>1)
+                    if(lines.Count>=2)
                     {
                         SideLinesDic.Add(o, lines);
                     }
@@ -60,27 +65,37 @@ namespace ThMEPLighting.Garage.Service
         }
         private List<Line> FilterSide(Line center)
         {
-            Polyline outline = ThDrawTool.ToOutline(center.StartPoint, center.EndPoint, FindParameter.HalfWidth + SideTolerance+5);
-            var objs=SideSpatialIndex.SelectCrossingPolygon(outline);
+            var midPt = center.StartPoint.GetMidPt(center.EndPoint);
+            var vec = center.StartPoint.GetVectorTo(center.EndPoint);
+            var perpendVec = vec.GetPerpendicularVector().GetNormal();
+            var sp = midPt - perpendVec.MultiplyBy(FindParameter.HalfWidth + SideTolerance);
+            var ep = midPt + perpendVec.MultiplyBy(FindParameter.HalfWidth + SideTolerance);
+            Polyline outline = ThDrawTool.ToRectangle(sp, ep,1.0);
+            var objs= SideSpatialIndex.SelectCrossingPolygon(outline);
             return objs
                 .Cast<Line>()
                 .Where(o=>o.Length>0.0)
-                .Where(o => FindParameter.SideLines.Contains(o))
                 .Where(o => ThGeometryTool.IsParallelToEx(center.LineDirection(), o.LineDirection()))
                 .Where(o => DistanceIsValid(center, o))
+                .Where(o=>!IsUsed(o))
                 .ToList();
+        }
+        private bool IsUsed(Line line)
+        {
+            foreach(var item in SideLinesDic)
+            {
+                if(item.Value.IsContains(line))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
         private List<Line> FilterPort(Line center)
         {
             var portLines = new List<Line>();
-            if(IsPort(center, center.StartPoint))
-            {
-                portLines.Add(CreateLine(center, center.StartPoint));
-            }
-            if(IsPort(center, center.EndPoint))
-            {
-                portLines.Add(CreateLine(center, center.EndPoint));
-            }
+            portLines.AddRange(GetPorts(center, center.StartPoint));
+            portLines.AddRange(GetPorts(center, center.EndPoint));
             return portLines;
         }
 
@@ -92,31 +107,32 @@ namespace ThMEPLighting.Garage.Service
             return new Line(sp, ep);
         }
 
-        private bool IsPort(Line center, Point3d portPt)
+        private List<Line> GetPorts(Line center, Point3d portPt)
         {
-            var square = ThDrawTool.CreateSquare(portPt, 1.0);
-            var portObjs = CenterSpatialIndex.SelectCrossingPolygon(square);
+            var results = new List<Line>();
+            var square = ThDrawTool.CreateSquare(portPt, 4.0);
+            var portObjs = SideSpatialIndex.SelectCrossingPolygon(square);
             portObjs.Remove(center);
-            if (portObjs.Count == 0)
+            if (portObjs.Count == 1)
             {
-                var vec = center.LineDirection().GetPerpendicularVector().GetNormal();
-                var sp = portPt + vec.MultiplyBy(FindParameter.HalfWidth + SideTolerance);
-                var ep = portPt - vec.MultiplyBy(FindParameter.HalfWidth + SideTolerance);
-                var rectangle = ThDrawTool.ToOutline(sp, ep, 1.0);
-                var sideObjs = SideSpatialIndex.SelectCrossingPolygon(rectangle);
-                var filterObjs = sideObjs
-                .Cast<Line>()
-                .Where(o => o.Length > 0.0)
-                .Where(o => FindParameter.SideLines.Contains(o))
-                .Where(o => ThGeometryTool.IsParallelToEx(center.LineDirection(), o.LineDirection()))
-                .Where(o => DistanceIsValid(center, o))
-                .ToList();
-                if (filterObjs.Count == 2)
+                var line = portObjs[0] as Line;
+               if (IsUprightAngle(center, line) &&
+                    Math.Abs(line.Length-2* FindParameter.HalfWidth)<=1.0)
                 {
-                    return true;
+                    results.Add(line);
                 }
             }
-            return false;
+            return results;
+        }
+        private bool IsUprightAngle(Line first,Line second)
+        {
+            var firstVec = first.StartPoint.GetVectorTo(first.EndPoint);
+            var secondVec = second.StartPoint.GetVectorTo(second.EndPoint);
+
+            var ang = firstVec.GetAngleTo(secondVec);
+            ang = ang / Math.PI * 180.0;
+
+            return Math.Abs(ang - 90.0) <= 1.0;
         }
 
         protected bool DistanceIsValid(Line first,Line second)

@@ -39,7 +39,7 @@ namespace ThMEPLighting.Garage.Engine
                 cableCenterLines.AddRange(DxLines);
                 cableCenterLines.AddRange(FdxLines);
                 var ports = new List<Point3d>();
-                using (var buildRacywayEngine = new ThBuildRacewayEngine(cableCenterLines, ArrangeParameter.Width))
+                using (var buildRacywayEngine = new ThBuildRacewayEngineEx(cableCenterLines, ArrangeParameter.Width))
                 {
                     //创建线槽
                     buildRacywayEngine.Build();

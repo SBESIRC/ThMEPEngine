@@ -75,5 +75,27 @@ namespace ThMEPLighting.Garage.Service
                 });
             }
         }
+        public static void Print(this Dictionary<Line,List<Line>> cableTrayGroups,short centerColorIndex=1,short sideColorIndex=3)
+        {
+            using (var acadDb = AcadDatabase.Active())
+            {
+                foreach (var center in cableTrayGroups)
+                {
+                    var objIds = new ObjectIdList();
+                    center.Key.ColorIndex = centerColorIndex;
+                    objIds.Add(acadDb.ModelSpace.Add(center.Key));
+                    foreach (var side in center.Value)
+                    {
+                        side.ColorIndex = sideColorIndex;
+                        objIds.Add(acadDb.ModelSpace.Add(side));
+                    }
+                    if (objIds.Count > 0)
+                    {
+                        var groupName = Guid.NewGuid().ToString();
+                        GroupTools.CreateGroup(acadDb.Database, groupName, objIds);
+                    }
+                }
+            }
+        }
     }
 }
