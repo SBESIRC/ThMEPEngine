@@ -59,7 +59,7 @@ namespace ThMEPLighting.EmgLight
                 var layoutServer = StructFilterService.moreFilter(filterColumns, filterWalls, frame);
 
                 if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
-     layoutServer.UsefulWalls[0].Count == 0 && layoutServer.UsefulWalls[1].Count == 0)
+                    layoutServer.UsefulWalls[0].Count == 0 && layoutServer.UsefulWalls[1].Count == 0)
                 {
                     continue;
                 }
