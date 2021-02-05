@@ -1,12 +1,14 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Linq2Acad;
+using NFox.Cad;
 using ThCADExtension;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -16,6 +18,7 @@ namespace ThMEPEngineCore.Engine
         public List<Polyline> Spaces { get; private set; }
         public List<Polyline> Doors { get; private set; }
         public Dictionary<string, List<Polyline>> Equipments {get; private set;}
+        public Dictionary<Polyline, string> ConnectPorts { get; private set; }
         private double ArcLength { get; set; }
         public ThExtractGeometryEngine()
         {
@@ -23,6 +26,7 @@ namespace ThMEPEngineCore.Engine
             Doors = new List<Polyline>();
             Obstructs = new List<Polyline>();
             Equipments = new Dictionary<string, List<Polyline>>();
+            ConnectPorts = new Dictionary<Polyline, string>();
         }
         public void Dispose()
         {            
@@ -34,6 +38,7 @@ namespace ThMEPEngineCore.Engine
             Doors = BuildDoors(database);
             Obstructs = BuildObstructs(database);
             Equipments = BuildEquipments(database);
+            ConnectPorts = BuildConnectPorts(database);
         }
         private List<Polyline> BuildSpaces(Database HostDb)
         {
@@ -58,6 +63,68 @@ namespace ThMEPEngineCore.Engine
         {
             return layerName.ToUpper() == "AD-AREA-OUTL";
         }
+        private Dictionary<Polyline, string> BuildConnectPorts(Database HostDb)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
+            {
+                var results = new Dictionary<Polyline, string>();
+                var boundaries = new List<Polyline>();
+                var texts = new List<Entity>();
+                foreach (var ent in acadDatabase.ModelSpace)
+                {
+                    if(IsConnectPortLayer(ent.Layer))
+                    {
+                        if (ent is Polyline polyline)
+                        {
+                            var newPolyline = polyline.Clone() as Polyline;
+                            boundaries.Add(newPolyline.TessellatePolylineWithArc(ArcLength));
+                        }
+                        else if(ent is DBText dbText)
+                        {
+                            texts.Add(dbText);
+                        }
+                        else if(ent is MText mText)
+                        {
+                            texts.Add(mText);
+                        }
+                    }                    
+                }
+                var textSpatialIndex = new ThCADCoreNTSSpatialIndex(texts.ToCollection());
+                boundaries.ForEach(o =>
+                {
+                   var selObjs = textSpatialIndex.SelectCrossingPolygon(o);
+                   foreach(var item in selObjs)
+                    {
+                        if(item is DBText dbText)
+                        {
+                            if(ValidateText(dbText.TextString))
+                            {
+                                results.Add(o, dbText.TextString);
+                                break;
+                            }                            
+                        }
+                        else if(item is MText mText)
+                        {
+                            if (ValidateText(mText.Contents))
+                            {
+                                results.Add(o, mText.Contents);
+                                break;
+                            }
+                        }
+                    }
+                });
+                return results;
+            }
+        }
+        private bool ValidateText(string content)
+        {
+            string pattern = @"^[\d]+\s{0,}[A-Z]{1,}[\d]+";
+            return Regex.IsMatch(content, pattern);
+        }
+        private bool IsConnectPortLayer(string layerName)
+        {
+            return layerName.ToUpper() == "连通";
+        }
         private List<Polyline> BuildDoors(Database HostDb)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
@@ -74,8 +141,35 @@ namespace ThMEPEngineCore.Engine
                         }
                     }
                 }
+                for (int i = 1; i <= doors.Count; i++)
+                {
+                    var obb = doors[i - 1].GetMinimumRectangle();
+                    var rotatePts = DoorRotateAixPts(obb);
+                    if (rotatePts.Count > 0)
+                    {
+                        var mt = Matrix3d.Rotation(Math.PI / 2.0 * Math.Pow(-1, i), Vector3d.ZAxis, rotatePts[0]);
+                        doors[i - 1].TransformBy(mt);
+                    }
+                }
                 return doors;
             }
+        }
+        private List<Point3d> DoorRotateAixPts(Polyline polyline)
+        {
+            var results = new List<Point3d>();
+            var lines = new List<Line>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                var segment = polyline.GetLineSegmentAt(i);
+                if (segment.Length > 5.0)
+                {
+                    lines.Add(new Line(segment.StartPoint, segment.EndPoint));
+                }
+            }
+            lines = lines.OrderBy(o => o.Length).ToList();
+            results.Add(lines[0].StartPoint.GetMidPt(lines[0].EndPoint));
+            results.Add(lines[1].StartPoint.GetMidPt(lines[1].EndPoint));
+            return results;
         }
         private List<Polyline> BuildObstructs(Database HostDb)
         {

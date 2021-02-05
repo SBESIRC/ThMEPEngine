@@ -460,7 +460,24 @@ namespace ThMEPEngineCore
                 if(obstructIds.Count>0)
                 {
                     GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), obstructIds);
-                }               
+                }
+
+                var connectPortIds = new ObjectIdList();
+                extractEngine.ConnectPorts.ForEach(o =>
+                {
+                    o.Key.ColorIndex = 5;
+                    o.Key.SetDatabaseDefaults();
+                    connectPortIds.Add(acadDatabase.ModelSpace.Add(o.Key));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "ConnectPort");
+                    geometry.Properties.Add("Code", o.Value);
+                    geometry.Boundary = o.Key;
+                    geos.Add(geometry);
+                });
+                if (connectPortIds.Count > 0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), connectPortIds);
+                }
 
                 // 输出GeoJson文件
                 // 线
