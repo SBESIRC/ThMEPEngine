@@ -21,21 +21,15 @@ namespace ThMEPLighting.Garage.Engine
         }
         public override void Arrange(List<ThRegionBorder> regionBorders)
         {
-            regionBorders.ForEach(o =>
-            {
-                var collectIds = Arrange(o);
-
-                //清除原有构件
-                //暂时取消此功能(20210201),以免误删灯
-                //ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds, ArrangeParameter.Width);
-            });
+            regionBorders.ForEach(o => Arrange(o));
         }
-        private ObjectIdList Arrange(ThRegionBorder regionBorder)
-        {
-            var collectIds = new ObjectIdList();
+        private void Arrange(ThRegionBorder regionBorder)
+        {            
             //对传入的线进行清洗    
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                DxLines = new List<Line>();
+                FdxLines = new List<Line>();
                 //对灯线中心线进行修剪、合并、分割和偏移操作
                 Preprocess(regionBorder);
 
@@ -46,75 +40,82 @@ namespace ThMEPLighting.Garage.Engine
                     //需求变化2020.12.23,非灯线不参与编号传递
                     //创建1、2号线，车道线merge，配对1、2号线
                     innerOuterEngine.Width = ArrangeParameter.Width;
-                    innerOuterEngine.Reconize(DxLines,new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);
+                    innerOuterEngine.Reconize(DxLines, new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);
                     innerOuterCircles = innerOuterEngine.WireOffsetDatas;
                 }
-
                 //延伸非灯线
                 FdxLines = ThExtendFdxLinesService.Extend(FdxLines, innerOuterCircles);
- 
-                //创建线槽
-                var ports = BuildCableTray(innerOuterCircles,ref collectIds); //线槽端口
-
-                //为了选起点，建图成功
-                var centerLines = new List<Line>();
-                var firstLines = new List<Line>();
-                innerOuterCircles.ForEach(o => centerLines.Add(o.Center));
-                innerOuterCircles.ForEach(o => firstLines.Add(o.First));
-                using (var precessEngine = new ThLightLinePreprocessEngine())
-                {
-                    centerLines=precessEngine.Preprocess(centerLines);
-                    firstLines= precessEngine.Preprocess(firstLines);                    
-                }
-                var centerLightEdges = new List<ThLightEdge>();                
-                centerLines.ForEach(o => centerLightEdges.Add(new ThLightEdge(o.Normalize())));
-
-                var firstLightEdges = new List<ThLightEdge>();
-                firstLines.ForEach(o => firstLightEdges.Add(new ThLightEdge(o.Normalize())));
-                
-                //获取端点在DxLines的Port
-                var centerPorts = GetDxCenterLinePorts(ports,  //灯线端口
-                    centerLightEdges.Where(o=>o.IsDX).Select(o => o.Edge).ToList());
-
-                //创建偏移1、2线索引服务，便于后期查询
-                var wireOffsetDataService=ThWireOffsetDataService.Create(innerOuterCircles);
-
-                //布灯
-                using (var buildNumberEngine = new ThDoubleRowNumberEngine(
-                    centerPorts, centerLightEdges, firstLightEdges,
-                    ArrangeParameter, wireOffsetDataService))
-                {
-                    buildNumberEngine.Build();
-                    collectIds.AddRange(CreateLightAndNumber(buildNumberEngine.FirstLightEdges));
-                    collectIds.AddRange(CreateLightAndNumber(buildNumberEngine.SecondLightEdges));
-                }
+                //创建电缆桥架
+                var ports = BuildCableTray(regionBorder, innerOuterCircles);
+                //创建灯编号
+                BuildLightNumer(ports, regionBorder,innerOuterCircles);
             }
-            return collectIds;
         }
-        private List<Point3d> BuildCableTray(List<ThWireOffsetData> innerOuterCircles,ref ObjectIdList collectIds)
+        private void BuildLightNumer(
+            List<Point3d> ports,
+            ThRegionBorder regionBorder,
+            List<ThWireOffsetData> innerOuterCircles)
         {
-            //桥架中心线
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            //为了选起点，建图成功
+            var centerLines = new List<Line>();
+            var firstLines = new List<Line>();
+            innerOuterCircles.ForEach(o => centerLines.Add(o.Center));
+            innerOuterCircles.ForEach(o => firstLines.Add(o.First));
+            using (var precessEngine = new ThLightLinePreprocessEngine())
             {
-                var centerLines = new List<Line>(); //线槽中心线
-                var secondCurves = new List<Curve>();
-                innerOuterCircles.ForEach(o =>
-                {
-                    centerLines.Add(o.First.Clone() as Line);
-                    centerLines.Add(o.Second.Clone() as Line);
-                });
-                FdxLines.ForEach(o => centerLines.Add(o.Clone() as Line));
-
-                using (var buildRacywayEngine = new ThBuildRacewayEngineEx(
-                    centerLines, ArrangeParameter.Width))
-                {
-                    //创建线槽
-                    buildRacywayEngine.Build();
-                    collectIds.AddRange(buildRacywayEngine.CreateGroup(RacewayParameter));
-                    //获取参数
-                    return buildRacywayEngine.GetPorts();
-                }
+                centerLines = precessEngine.Preprocess(centerLines);
+                firstLines = precessEngine.Preprocess(firstLines);
             }
+            var centerLightEdges = new List<ThLightEdge>();
+            centerLines.ForEach(o => centerLightEdges.Add(new ThLightEdge(o.Normalize())));
+
+            var firstLightEdges = new List<ThLightEdge>();
+            firstLines.ForEach(o => firstLightEdges.Add(new ThLightEdge(o.Normalize())));
+
+            //获取端点在DxLines的Port
+            var centerPorts = GetDxCenterLinePorts(ports,  //灯线端口
+                centerLightEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());
+
+            //创建偏移1、2线索引服务，便于后期查询
+            var wireOffsetDataService = ThWireOffsetDataService.Create(innerOuterCircles);
+            //布灯
+            using (var buildNumberEngine = new ThDoubleRowNumberEngine(
+                centerPorts, centerLightEdges, firstLightEdges,
+                ArrangeParameter, wireOffsetDataService))
+            {
+                buildNumberEngine.Build();
+                regionBorder.LightEdges.AddRange(buildNumberEngine.FirstLightEdges);
+                regionBorder.LightEdges.AddRange(buildNumberEngine.SecondLightEdges);
+            }
+        }
+        private List<Point3d> BuildCableTray(
+            ThRegionBorder regionBorder, 
+            List<ThWireOffsetData> innerOuterCircles)
+        {
+            //创建线槽
+            var cableCenterLines = new List<Line>(); //线槽中心线
+            var secondCurves = new List<Curve>();
+            innerOuterCircles.ForEach(o =>
+            {
+                cableCenterLines.Add(o.First.Clone() as Line);
+                cableCenterLines.Add(o.Second.Clone() as Line);
+            });
+            FdxLines.ForEach(o => cableCenterLines.Add(o.Clone() as Line));
+            var ports = new List<Point3d>();
+            using (var buildRacywayEngine = new ThBuildRacewayEngineEx(
+                cableCenterLines, ArrangeParameter.Width))
+            {
+                //创建线槽
+                buildRacywayEngine.Build();
+                ports = buildRacywayEngine.GetPorts();
+                //电缆桥架的边线和中线及配对的结果返回给->regionBorder
+                //便于后期打印
+                regionBorder.CableTrayCenters = buildRacywayEngine.SplitCenters;
+                regionBorder.CableTraySides = buildRacywayEngine.SplitSides;
+                regionBorder.CableTrayGroups = buildRacywayEngine.CenterWithSides;
+                regionBorder.CableTrayPorts = buildRacywayEngine.CenterWithPorts;
+            }
+            return ports;
         }
         private List<Point3d> GetDxCenterLinePorts(
             List<Point3d> innerOuterPorts,

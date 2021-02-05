@@ -26,8 +26,6 @@ namespace ThMEPLighting.Garage.Engine
             ThLightArrangeParameter arrangeParameter,
             ThRacewayParameter racewayParameter)
         {
-            DxLines = new List<Line>();
-            FdxLines = new List<Line>();
             ArrangeParameter = arrangeParameter;
             RacewayParameter = racewayParameter;
         }
@@ -93,54 +91,7 @@ namespace ThMEPLighting.Garage.Engine
                 FdxLines.AddRange(regionBorder.FdxCenterLines);
             }
         }
-        protected ObjectIdList CreateLightAndNumber(List<ThLightEdge> lightEdges)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var objIds = new ObjectIdList();
-                lightEdges.Where(o => o.IsDX).ForEach(m =>
-                {
-                    var normalLine = ThGarageLightUtils.NormalizeLaneLine(m.Edge);
-                    m.LightNodes.ForEach(n =>
-                    {
-                        if (!string.IsNullOrEmpty(n.Number))
-                        {
-                            DBText code = new DBText();
-                            code.TextString = n.Number;
-                            var alignPt = n.Position + normalLine.StartPoint.GetVectorTo(normalLine.EndPoint)
-                              .GetPerpendicularVector()
-                              .GetNormal()
-                              .MultiplyBy(ArrangeParameter.Width / 2.0 + 100 + ArrangeParameter.LightNumberTextHeight / 2.0);
-                            code.Height = ArrangeParameter.LightNumberTextHeight;
-                            code.WidthFactor = ArrangeParameter.LightNumberTextWidthFactor;
-                            code.Position = alignPt;
-                            double angle = normalLine.Angle / Math.PI * 180.0;
-                            angle = ThGarageLightUtils.LightNumberAngle(angle);
-                            angle = angle / 180.0 * Math.PI;
-                            code.Rotation = angle;
-                            code.HorizontalMode = TextHorizontalMode.TextCenter;
-                            code.VerticalMode = TextVerticalMode.TextVerticalMid;
-                            code.AlignmentPoint = code.Position;
-                            code.ColorIndex = RacewayParameter.NumberTextParameter.ColorIndex;
-                            code.Layer = RacewayParameter.NumberTextParameter.Layer;
-                            code.TextStyleId = acadDatabase.TextStyles.Element(ArrangeParameter.LightNumberTextStyle).Id;
-                            code.SetDatabaseDefaults(acadDatabase.Database);
-                            var codeId = acadDatabase.ModelSpace.Add(code);
-                            objIds.Add(codeId);
-
-                            var blkId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
-                                  RacewayParameter.LaneLineBlockParameter.Layer,
-                                  ThGarageLightCommon.LaneLineLightBlockName,
-                                  n.Position,
-                                  new Scale3d(ArrangeParameter.PaperRatio),
-                                  normalLine.Angle);
-                            objIds.Add(blkId);
-                        }
-                    });
-                });
-                return objIds;
-            }
-        }
+        
         private void Export()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

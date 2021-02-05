@@ -291,14 +291,7 @@ namespace ThMEPLighting.Garage.Engine
             foreach (Curve obj in objs)
             {
                 bufferCollection.Add(new DBObjectCollection() { obj }.Buffer(Width / 2.0)[0]);
-            }
-            using (AcadDatabase db=AcadDatabase.Active())
-            {
-                foreach (Entity item in bufferCollection)
-                {
-                    //db.ModelSpace.Add(item);
-                }
-            }
+            }            
             return bufferCollection;
         }
         private void BuildCableTray(List<Line> cableTrayLines,List<Line> centerLines, List<Line> portsLines)

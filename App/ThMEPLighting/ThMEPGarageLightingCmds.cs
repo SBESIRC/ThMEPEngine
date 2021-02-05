@@ -116,6 +116,9 @@ namespace ThMEPLighting
                     arrangeEngine = new ThDoubleRowArrangementEngine(arrangeParameter, racewayParameter);
                 }
                 arrangeEngine.Arrange(regionBorders);
+
+                //输出
+                regionBorders.ForEach(o => ThCreateLightToDatabaseService.Create(o, racewayParameter, arrangeParameter));
             }
         }
         private ThLightArrangeParameter GetUiParameters()
@@ -228,6 +231,9 @@ namespace ThMEPLighting
                     arrangeEngine = new ThDoubleRowArrangementEngine(arrangeParameter, racewayParameter);
                 }
                 arrangeEngine.Arrange(regionBorders);
+
+                //输出
+                regionBorders.ForEach(o => ThCreateLightToDatabaseService.Create(o, racewayParameter, arrangeParameter));
             }
         }
         [CommandMethod("TIANHUACAD", "THCDTJ", CommandFlags.Modal)]

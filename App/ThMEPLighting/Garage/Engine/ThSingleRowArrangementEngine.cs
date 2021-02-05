@@ -18,22 +18,19 @@ namespace ThMEPLighting.Garage.Engine
         }
         public override void Arrange(List<ThRegionBorder> regionBorders)
         {
-            regionBorders.ForEach(o =>
-            {
-                var collectIds = Arrange(o);
-                //ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds,ArrangeParameter.Width);
-            });
+            regionBorders.ForEach(o => Arrange(o));
         }
-        private ObjectIdList Arrange(ThRegionBorder regionBorder)
+        private void Arrange(ThRegionBorder regionBorder)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                DxLines = new List<Line>();
+                FdxLines = new List<Line>();
                 // 预处理
                 Preprocess(regionBorder);
 
                 // 根据桥架中心线建立线槽
                 var ports = new List<Point3d>();
-                var collectIds = new ObjectIdList();
                 var cableCenterLines = new List<Line>();
                 cableCenterLines.AddRange(DxLines);
                 cableCenterLines.AddRange(FdxLines);
@@ -41,7 +38,12 @@ namespace ThMEPLighting.Garage.Engine
                 {
                     buildRacywayEngine.Build();
                     ports = buildRacywayEngine.GetPorts();
-                    collectIds.AddRange(buildRacywayEngine.CreateGroup(RacewayParameter));
+                    //电缆桥架的边线和中线及配对的结果返回给->regionBorder
+                    //便于后期打印
+                    regionBorder.CableTrayCenters = buildRacywayEngine.SplitCenters;
+                    regionBorder.CableTraySides = buildRacywayEngine.SplitSides; 
+                    regionBorder.CableTrayGroups = buildRacywayEngine.CenterWithSides;
+                    regionBorder.CableTrayPorts = buildRacywayEngine.CenterWithPorts;
                 }
 
                 // 创建灯和编号
@@ -49,12 +51,10 @@ namespace ThMEPLighting.Garage.Engine
                 DxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o)));        
                 using (var buildNumberEngine = new ThSingleRowNumberEngine(ports, lightEdges, ArrangeParameter))
                 {
-                    buildNumberEngine.Build();                    
-                    collectIds.AddRange(CreateLightAndNumber(buildNumberEngine.DxLightEdges));
+                    buildNumberEngine.Build();
+                    //将创建的灯边返回给->regionBorder
+                    regionBorder.LightEdges = buildNumberEngine.DxLightEdges;
                 }
-
-                // 返回灯和编号
-                return collectIds;
             }
         }    
     }

@@ -72,6 +72,7 @@
     <Compile Include="Garage\Service\ThBuildDoubleRowPosService.cs" />
     <Compile Include="Garage\Service\ThBuildSingleRowPosService.cs" />
     <Compile Include="Garage\Service\ThCableTrayCutService.cs" />
+    <Compile Include="Garage\Service\ThCreateLightToDatabaseService.cs" />
     <Compile Include="Garage\Service\ThDistributeLightService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeExService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />

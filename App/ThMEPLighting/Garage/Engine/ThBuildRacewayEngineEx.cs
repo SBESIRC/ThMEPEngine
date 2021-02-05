@@ -27,14 +27,14 @@ namespace ThMEPLighting.Garage.Engine
         /// <summary>
         /// 被切割的线槽边线
         /// </summary>
-        private List<Line> SplitSides { get; set; }
+        public List<Line> SplitSides { get; set; }
         /// <summary>
         /// 被切割的中心线
         /// </summary>
-        private List<Line> SplitCenters { get; set; }
+        public List<Line> SplitCenters { get; set; }
 
-        private Dictionary<Line, List<Line>> CenterWithSides { get; set; }
-        private Dictionary<Line, List<Line>> CenterWithPorts { get; set; }
+        public Dictionary<Line, List<Line>> CenterWithSides { get; set; }
+        public Dictionary<Line, List<Line>> CenterWithPorts { get; set; }
 
         /// <summary>
         /// 线槽宽度
@@ -71,15 +71,10 @@ namespace ThMEPLighting.Garage.Engine
                     HalfWidth = Width / 2.0
                 };
 
-                //ThPrintService.Print(sideLines.Cast<Curve>().ToList(), 1);
-                //ThPrintService.Print(centerLines.Cast<Curve>().ToList(), 1);
-
                 //查找合并线buffer后，获取中心线对应的两边线槽线
                 var instane = ThFindSideLinesService.Find(sideParameter);
                 CenterWithPorts = instane.PortLinesDic;
                 CenterWithSides = instane.SideLinesDic;
-
-                //instane.SideLinesDic.Print(1, 3);
             }
         }
         private DBObjectCollection Preprocess()
@@ -113,6 +108,7 @@ namespace ThMEPLighting.Garage.Engine
             var handleObjs = ThLaneLineEngine.Noding(cableObjs);           
             return handleObjs.Cast<Line>().Where(o=>o.Length> (cutLineLength + 1.0)).ToList();
         }
+
         private List<Line> SplitCenterLines(List<Line> centerLines)
         {
             // 获取要切割线槽的线
@@ -120,49 +116,8 @@ namespace ThMEPLighting.Garage.Engine
             centerLines.ForEach(o => extendLines.Add(o.ExtendLine(2.0)));
             var handleObjs = ThLaneLineEngine.Noding(extendLines.ToCollection());
             return handleObjs.Cast<Line>().Where(o => o.Length > 5.0).ToList();
-        }
-        public ObjectIdList CreateGroup(ThRacewayParameter layerParameter)
-        {
-            using (var acadDb = AcadDatabase.Active())
-            {
-                var results = new ObjectIdList();
-                //先将Buffer后的边线提交到Database
-                SplitCenters.ForEach(o => o.Layer= layerParameter.CenterLineParameter.Layer);
-                SplitCenters.ForEach(o => results.Add(acadDb.ModelSpace.Add(o)));
-
-                SplitSides.ForEach(o => o.Layer = layerParameter.SideLineParameter.Layer);                
-                SplitSides.ForEach(o => results.Add(acadDb.ModelSpace.Add(o)));
-
-                CenterWithSides.ForEach(o =>
-                {
-                    var groupIds = new ObjectIdList();
-                    o.Value.ForEach(v=> groupIds.Add(v.Id));
-                    var ports = FindPorts(o.Key, CenterWithPorts);
-                    ports.ForEach(p=> groupIds.Add(p.Id));
-                    var groupName = Guid.NewGuid().ToString();
-                    GroupTools.CreateGroup(acadDb.Database, groupName, groupIds);
-                });
-                return results;
-            }         
-        }
-        private List<Line> FindPorts(Line center, Dictionary<Line, List<Line>> centerPorts)
-        {
-            if(centerPorts.ContainsKey(center))
-            {
-                return centerPorts[center];
-            }
-            else
-            {
-                foreach(var item in centerPorts)
-                {
-                    if(center.IsCoincide(item.Key,1.0))
-                    {
-                        return item.Value;
-                    }
-                }
-            }
-            return new List<Line>();
-        }
+        }  
+        
         public List<Point3d> GetPorts()
         {
             var ports = new List<Point3d>();
