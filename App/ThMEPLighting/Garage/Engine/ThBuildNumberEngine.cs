@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Engine
 {
-    public abstract class ThBuildNumberEngine : IDisposable
+    public abstract class ThBuildNumberEngine
     {        
         protected List<ThLightEdge> LineEdges { get; set; }
         protected Point3d Start { get; set; }
@@ -47,27 +47,6 @@ namespace ThMEPLighting.Garage.Engine
                 //获取与传入的起始点最接近的端点
                 Start = Ports.OrderBy(o => start.DistanceTo(o)).First();
             }            
-        }    
-        private void Sort()
-        {
-            //对于端点，按照所在边的长度进行排序
-            var portEdges = new Dictionary<Point3d, double>();
-            Ports.ForEach(o =>
-            {
-               var results= LineEdges.Where(k => k.Edge.IsLink(
-                   o, ThGarageLightCommon.RepeatedPointDistance));
-                if(results.Count()==1)
-                {
-                    portEdges.Add(o, results.First().Edge.Length);
-                }
-            });
-            Ports=portEdges
-                .OrderByDescending(o => o.Value)
-                .Select(o=>o.Key)
-                .ToList();
-        }
-        public void Dispose()
-        {            
         }
         public abstract void Build();
     }

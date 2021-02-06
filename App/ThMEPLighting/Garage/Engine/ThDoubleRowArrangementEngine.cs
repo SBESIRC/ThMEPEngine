@@ -1,13 +1,11 @@
-﻿using Linq2Acad;
-using DotNetARX;
-using System.Linq;
-using ThMEPLighting.Common;
+﻿using System.Linq;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADCore.NTS;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -24,32 +22,29 @@ namespace ThMEPLighting.Garage.Engine
             regionBorders.ForEach(o => Arrange(o));
         }
         private void Arrange(ThRegionBorder regionBorder)
-        {            
-            //对传入的线进行清洗    
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                DxLines = new List<Line>();
-                FdxLines = new List<Line>();
-                //对灯线中心线进行修剪、合并、分割和偏移操作
-                Preprocess(regionBorder);
+        {
+            // 预处理
+            Preprocess(regionBorder);
 
-                //识别内外圈
-                var innerOuterCircles = new List<ThWireOffsetData>();
-                using (var innerOuterEngine = new ThInnerOuterCirclesEngine(regionBorder.RegionBorder))
-                {
-                    //需求变化2020.12.23,非灯线不参与编号传递
-                    //创建1、2号线，车道线merge，配对1、2号线
-                    innerOuterEngine.Width = ArrangeParameter.Width;
-                    innerOuterEngine.Reconize(DxLines, new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);
-                    innerOuterCircles = innerOuterEngine.WireOffsetDatas;
-                }
-                //延伸非灯线
-                FdxLines = ThExtendFdxLinesService.Extend(FdxLines, innerOuterCircles);
-                //创建电缆桥架
-                var ports = BuildCableTray(regionBorder, innerOuterCircles);
-                //创建灯编号
-                BuildLightNumer(ports, regionBorder,innerOuterCircles);
+            //识别内外圈
+            var innerOuterCircles = new List<ThWireOffsetData>();
+            using (var innerOuterEngine = new ThInnerOuterCirclesEngine(regionBorder.RegionBorder))
+            {
+                //需求变化2020.12.23,非灯线不参与编号传递
+                //创建1、2号线，车道线merge，配对1、2号线
+                innerOuterEngine.Width = ArrangeParameter.Width;
+                innerOuterEngine.Reconize(DxLines, new List<Line>(), ArrangeParameter.RacywaySpace / 2.0);
+                innerOuterCircles = innerOuterEngine.WireOffsetDatas;
             }
+
+            //延伸非灯线
+            FdxLines = ThExtendFdxLinesService.Extend(FdxLines, innerOuterCircles);
+            
+            //创建电缆桥架
+            var ports = BuildCableTray(regionBorder, innerOuterCircles);
+            
+            //创建灯编号
+            BuildLightNumer(ports, regionBorder, innerOuterCircles);
         }
         private void BuildLightNumer(
             List<Point3d> ports,
@@ -61,11 +56,8 @@ namespace ThMEPLighting.Garage.Engine
             var firstLines = new List<Line>();
             innerOuterCircles.ForEach(o => centerLines.Add(o.Center));
             innerOuterCircles.ForEach(o => firstLines.Add(o.First));
-            using (var precessEngine = new ThLightLinePreprocessEngine())
-            {
-                centerLines = precessEngine.Preprocess(centerLines);
-                firstLines = precessEngine.Preprocess(firstLines);
-            }
+            centerLines = ThPreprocessLineService.Preprocess(centerLines);
+            firstLines = ThPreprocessLineService.Preprocess(firstLines);
             var centerLightEdges = new List<ThLightEdge>();
             centerLines.ForEach(o => centerLightEdges.Add(new ThLightEdge(o.Normalize())));
 

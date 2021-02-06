@@ -1,13 +1,12 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using DotNetARX;
-using Dreambuild.AutoCAD;
+﻿using System;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
+using DotNetARX;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 
@@ -113,6 +112,53 @@ namespace ThMEPLighting.Garage.Service
                     });
                 });
                 return objIds;
+            }
+        }
+
+        public static void SetDatabaseDefaults(
+            ThRacewayParameter racewayParameter, 
+            ThLightArrangeParameter arrangeParameter)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LaneLineLightDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThGarageLightCommon.LaneLineLightBlockName));
+                acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault(arrangeParameter.LightNumberTextStyle), false);
+                var centerLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(racewayParameter.CenterLineParameter.LineType));
+                var laneLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(racewayParameter.LaneLineBlockParameter.LineType));
+                var numberTextLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(racewayParameter.NumberTextParameter.LineType));
+                var portLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(racewayParameter.PortLineParameter.LineType));
+                var sideLineLT = acadDatabase.Linetypes.Import(blockDb.Linetypes.ElementOrDefault(racewayParameter.SideLineParameter.LineType));
+
+                var centerLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(racewayParameter.CenterLineParameter.Layer));
+                var centerLineLayerLTR = centerLineLayer.Item as LayerTableRecord;
+                centerLineLayerLTR.UpgradeOpen();
+                centerLineLayerLTR.LinetypeObjectId = centerLineLT.Item.Id;
+                centerLineLayerLTR.DowngradeOpen();
+
+                var laneLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(racewayParameter.LaneLineBlockParameter.Layer));
+                var laneLineLTR = laneLineLayer.Item as LayerTableRecord;
+                laneLineLTR.UpgradeOpen();
+                laneLineLTR.LinetypeObjectId = laneLineLT.Item.Id;
+                laneLineLTR.DowngradeOpen();
+
+                var numberTextLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(racewayParameter.NumberTextParameter.Layer));
+                var numberTextLTR = numberTextLayer.Item as LayerTableRecord;
+                numberTextLTR.UpgradeOpen();
+                numberTextLTR.LinetypeObjectId = numberTextLT.Item.Id;
+                numberTextLTR.DowngradeOpen();
+
+                var portLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(racewayParameter.PortLineParameter.Layer));
+                var portLineLTR = portLineLayer.Item as LayerTableRecord;
+                portLineLTR.UpgradeOpen();
+                portLineLTR.LinetypeObjectId = portLineLT.Item.Id;
+                portLineLTR.DowngradeOpen();
+
+                var sideLineLayer = acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(racewayParameter.SideLineParameter.Layer));
+                var sideLineLTR = sideLineLayer.Item as LayerTableRecord;
+                sideLineLTR.UpgradeOpen();
+                sideLineLTR.LinetypeObjectId = sideLineLT.Item.Id;
+                sideLineLTR.DowngradeOpen();
             }
         }
 

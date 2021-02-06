@@ -105,6 +105,11 @@ namespace ThMEPLighting
                 var arrangeParameter = GetUiParameters();
                 var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();
+                if (regionBorders.Count == 0)
+                {
+                    return;
+                }
+
                 //以上是准备输入参数
                 ThArrangementEngine arrangeEngine = null;
                 if (arrangeParameter.IsSingleRow)
@@ -118,95 +123,9 @@ namespace ThMEPLighting
                 arrangeEngine.Arrange(regionBorders);
 
                 //输出
+                ThCreateLightToDatabaseService.SetDatabaseDefaults(racewayParameter, arrangeParameter);
                 regionBorders.ForEach(o => ThCreateLightToDatabaseService.Create(o, racewayParameter, arrangeParameter));
             }
-        }
-        private ThLightArrangeParameter GetUiParameters()
-        {
-            // From UI
-            var arrangeParameter = new ThLightArrangeParameter()
-            {                
-                Margin = 800,
-                AutoCalculate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoCalculate,
-                AutoGenerate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate,
-                Interval = ThMEPLightingService.Instance.LightArrangeUiParameter.Interval,
-                IsSingleRow = ThMEPLightingService.Instance.LightArrangeUiParameter.IsSingleRow,
-                LoopNumber = ThMEPLightingService.Instance.LightArrangeUiParameter.LoopNumber,
-                RacywaySpace= ThMEPLightingService.Instance.LightArrangeUiParameter.RacywaySpace,
-                Width = ThMEPLightingService.Instance.LightArrangeUiParameter.Width,
-            };
-
-            // 自定义
-            arrangeParameter.Margin = 800.0;
-            arrangeParameter.PaperRatio = 100;
-            arrangeParameter.MinimumEdgeLength = 5000;
-
-            return arrangeParameter;
-        }
-        private List<ThRegionBorder> GetFireRegionBorders()
-        {
-            var results = new List<ThRegionBorder>();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var pso = new PromptSelectionOptions()
-                {
-                    MessageForAdding = "\n请选择布灯的区域框线",
-                };
-                TypedValue[] tvs = new TypedValue[]
-                {
-                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Polyline)).DxfName)
-                };
-                SelectionFilter sf = new SelectionFilter(tvs);
-                var result = Active.Editor.GetSelection(pso, sf);
-                if (result.Status == PromptStatus.OK)
-                {                    
-                    result.Value.GetObjectIds().ForEach(o =>
-                    {
-                        var border = acdb.Element<Polyline>(o);
-                        var newBorder = ThMEPFrameService.Normalize(border);
-                        var dxLines = GetRegionLines(newBorder,
-                            new List<string> { ThGarageLightCommon.DxCenterLineLayerName },
-                            new List<Type> { typeof(Line), typeof(Polyline) });
-                        var fdxLines = GetRegionLines(newBorder,
-                        new List<string> { ThGarageLightCommon.FdxCenterLineLayerName },
-                        new List<Type> { typeof(Line), typeof(Polyline) });
-                        if(dxLines.Count>0)
-                        {
-                            var regionBorder = new ThRegionBorder
-                            {
-                                RegionBorder = newBorder,
-                                DxCenterLines = dxLines,
-                                FdxCenterLines = fdxLines
-                            };
-                            results.Add(regionBorder);
-                        }
-                    });
-                }
-            }
-            return results;
-        }        
-        private bool GetArrangeWay() 
-        {
-            var options = new PromptKeywordOptions("\n请指定布置方式")
-            {
-                AllowNone = true
-            };
-            options.Keywords.Add("S", "S", "单排(S)");
-            options.Keywords.Add("D", "D", "双排(D)");
-            options.Keywords.Default = "S";
-            var result3 = Active.Editor.GetKeywords(options);
-            if (result3.Status != PromptStatus.OK)
-            {
-                return true;
-            }
-            return result3.StringResult == "S" ? true : false;
-        }
-        private List<Line> GetRegionLines(Polyline region,List<string> layers,List<Type> types)
-        {
-            var curves = region.GetRegionCurves(layers, types)
-                .Where(k => k is Line || k is Polyline)
-                .Cast<Curve>().ToCollection();
-            return ThLaneLineEngine.Explode(curves).Cast<Line>().ToList();
         }
         [CommandMethod("TIANHUACAD", "THCDBH", CommandFlags.Modal)]
         public void THCDBH()
@@ -217,6 +136,11 @@ namespace ThMEPLighting
                 var arrangeParameter = GetUiParameters();
                 var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();
+                if (regionBorders.Count == 0)
+                {
+                    return;
+                }
+
                 //创建块的索引，偏于后期查询
                 arrangeParameter.LightBlockQueryService= ThQueryLightBlockService.Create(
                         regionBorders.Select(o => o.RegionBorder).ToList());
@@ -233,6 +157,7 @@ namespace ThMEPLighting
                 arrangeEngine.Arrange(regionBorders);
 
                 //输出
+                ThCreateLightToDatabaseService.SetDatabaseDefaults(racewayParameter, arrangeParameter);
                 regionBorders.ForEach(o => ThCreateLightToDatabaseService.Create(o, racewayParameter, arrangeParameter));
             }
         }
@@ -250,56 +175,6 @@ namespace ThMEPLighting
                     o.Value.ForEach(v => Active.Editor.WriteLine("回路：" + v.Nubmer + "，" + "灯具数量：" + v.Count));
                 });
             }
-        }
-        private List<ThRegionLightEdge> GetFireRegionLights()
-        {
-            var results = new List<ThRegionLightEdge>();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var pso = new PromptSelectionOptions()
-                {
-                    MessageForAdding = "\n请选择布灯的区域框线",
-                };
-                TypedValue[] tvs = new TypedValue[]
-                {
-                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Polyline)).DxfName)
-                };
-                SelectionFilter sf = new SelectionFilter(tvs);
-                var result = Active.Editor.GetSelection(pso, sf);
-                if (result.Status == PromptStatus.OK)
-                {
-                    var racewayParameter = new ThRacewayParameter();
-                    result.Value.GetObjectIds().ForEach(o =>
-                    {
-                        var border = acdb.Element<Polyline>(o);
-                        var newBorder = ThMEPFrameService.Normalize(border);
-                        var lineTvs = new TypedValueList
-                            {
-                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
-                                { (int)DxfCode.Start, RXClass.GetClass(typeof(Line)).DxfName},
-                                { (int)DxfCode.LayerName, racewayParameter.CenterLineParameter.Layer}
-                            };
-                        var centerLines  = newBorder.GetEntities(lineTvs).Cast<Line>().ToList();
-
-                        var blkTvs = new TypedValueList
-                            {
-                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
-                                { (int)DxfCode.Start, RXClass.GetClass(typeof(BlockReference)).DxfName},
-                                { (int)DxfCode.LayerName, racewayParameter.LaneLineBlockParameter.Layer}
-                            };
-                        var lightBlks = newBorder.GetEntities(blkTvs).Cast<BlockReference>().ToList();
-
-                        var regionLightEdge = new ThRegionLightEdge
-                        {
-                            RegionBorder = newBorder,
-                            Lights = lightBlks,
-                            Edges = centerLines
-                        };
-                        results.Add(regionLightEdge);
-                    });
-                }
-            }
-            return results;
         }
         [CommandMethod("TIANHUACAD", "THCDHL", CommandFlags.Modal)]
         public void THCDHL()
@@ -340,6 +215,127 @@ namespace ThMEPLighting
                     }  
                 }
             }
+        }
+        private ThLightArrangeParameter GetUiParameters()
+        {
+            // From UI
+            var arrangeParameter = new ThLightArrangeParameter()
+            {
+                Margin = 800,
+                AutoCalculate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoCalculate,
+                AutoGenerate = ThMEPLightingService.Instance.LightArrangeUiParameter.AutoGenerate,
+                Interval = ThMEPLightingService.Instance.LightArrangeUiParameter.Interval,
+                IsSingleRow = ThMEPLightingService.Instance.LightArrangeUiParameter.IsSingleRow,
+                LoopNumber = ThMEPLightingService.Instance.LightArrangeUiParameter.LoopNumber,
+                RacywaySpace = ThMEPLightingService.Instance.LightArrangeUiParameter.RacywaySpace,
+                Width = ThMEPLightingService.Instance.LightArrangeUiParameter.Width,
+            };
+
+            // 自定义
+            arrangeParameter.Margin = 800.0;
+            arrangeParameter.PaperRatio = 100;
+            arrangeParameter.MinimumEdgeLength = 5000;
+
+            return arrangeParameter;
+        }
+        private List<ThRegionLightEdge> GetFireRegionLights()
+        {
+            var results = new List<ThRegionLightEdge>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var pso = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "\n请选择布灯的区域框线",
+                };
+                TypedValue[] tvs = new TypedValue[]
+                {
+                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Polyline)).DxfName)
+                };
+                SelectionFilter sf = new SelectionFilter(tvs);
+                var result = Active.Editor.GetSelection(pso, sf);
+                if (result.Status == PromptStatus.OK)
+                {
+                    var racewayParameter = new ThRacewayParameter();
+                    result.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var border = acdb.Element<Polyline>(o);
+                        var newBorder = ThMEPFrameService.Normalize(border);
+                        var lineTvs = new TypedValueList
+                            {
+                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
+                                { (int)DxfCode.Start, RXClass.GetClass(typeof(Line)).DxfName},
+                                { (int)DxfCode.LayerName, racewayParameter.CenterLineParameter.Layer}
+                            };
+                        var centerLines = newBorder.GetEntities(lineTvs).Cast<Line>().ToList();
+
+                        var blkTvs = new TypedValueList
+                            {
+                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
+                                { (int)DxfCode.Start, RXClass.GetClass(typeof(BlockReference)).DxfName},
+                                { (int)DxfCode.LayerName, racewayParameter.LaneLineBlockParameter.Layer}
+                            };
+                        var lightBlks = newBorder.GetEntities(blkTvs).Cast<BlockReference>().ToList();
+
+                        var regionLightEdge = new ThRegionLightEdge
+                        {
+                            RegionBorder = newBorder,
+                            Lights = lightBlks,
+                            Edges = centerLines
+                        };
+                        results.Add(regionLightEdge);
+                    });
+                }
+            }
+            return results;
+        }
+        private List<ThRegionBorder> GetFireRegionBorders()
+        {
+            var results = new List<ThRegionBorder>();
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var pso = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "\n请选择布灯的区域框线",
+                };
+                TypedValue[] tvs = new TypedValue[]
+                {
+                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Polyline)).DxfName)
+                };
+                SelectionFilter sf = new SelectionFilter(tvs);
+                var result = Active.Editor.GetSelection(pso, sf);
+                if (result.Status == PromptStatus.OK)
+                {
+                    result.Value.GetObjectIds().ForEach(o =>
+                    {
+                        var border = acdb.Element<Polyline>(o);
+                        var newBorder = ThMEPFrameService.Normalize(border);
+                        var dxLines = GetRegionLines(newBorder,
+                            new List<string> { ThGarageLightCommon.DxCenterLineLayerName },
+                            new List<Type> { typeof(Line), typeof(Polyline) });
+                        var fdxLines = GetRegionLines(newBorder,
+                        new List<string> { ThGarageLightCommon.FdxCenterLineLayerName },
+                        new List<Type> { typeof(Line), typeof(Polyline) });
+                        if (dxLines.Count > 0)
+                        {
+                            var regionBorder = new ThRegionBorder
+                            {
+                                RegionBorder = newBorder,
+                                DxCenterLines = dxLines,
+                                FdxCenterLines = fdxLines
+                            };
+                            results.Add(regionBorder);
+                        }
+                    });
+                }
+            }
+            return results;
+        }
+        private List<Line> GetRegionLines(Polyline region, List<string> layers, List<Type> types)
+        {
+            var curves = region.GetRegionCurves(layers, types)
+                .Where(k => k is Line || k is Polyline)
+                .Cast<Curve>().ToCollection();
+            return ThLaneLineEngine.Explode(curves).Cast<Line>().ToList();
         }
     }
 }

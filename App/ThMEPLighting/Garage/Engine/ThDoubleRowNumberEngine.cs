@@ -12,37 +12,24 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Engine
 {
-    public class ThDoubleRowNumberEngine : ThBuildNumberEngine
+    public class ThDoubleRowNumberEngine : ThBuildNumberEngine, IDisposable
     {
         public List<ThLightEdge> FirstLightEdges { get; set; }
         public List<ThLightEdge> SecondLightEdges { get; set; }
         private ThWireOffsetDataService WireOffsetDataService { get; set;}
-        private bool isPointStart = false;
         public ThDoubleRowNumberEngine(
             List<Point3d> centerPorts,
             List<ThLightEdge> centerLineEdges,
             List<ThLightEdge> firstLightEdges,
             ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService
-            ):base(centerPorts, centerLineEdges, arrangeParameter)
+            ThWireOffsetDataService wireOffsetDataService):base(centerPorts, centerLineEdges, arrangeParameter)
         {
             FirstLightEdges = firstLightEdges;            
             SecondLightEdges = new List<ThLightEdge>();            
             WireOffsetDataService = wireOffsetDataService;
         }
-        public ThDoubleRowNumberEngine(
-            List<Point3d> centerPorts,
-            List<ThLightEdge> centerLineEdges,
-            List<ThLightEdge> firstLightEdges,
-            ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService,
-            Point3d centerStart
-            ) : base(centerPorts, centerLineEdges, arrangeParameter, centerStart)
+        public void Dispose()
         {
-            FirstLightEdges = firstLightEdges;            
-            SecondLightEdges = new List<ThLightEdge>();
-            WireOffsetDataService = wireOffsetDataService;
-            isPointStart = true;            
         }
         public override void Build()
         {
@@ -123,17 +110,6 @@ namespace ThMEPLighting.Garage.Engine
             FirstLightEdges.ForEach(o => o.Pattern = EdgePattern.First);
             SecondLightEdges.ForEach(o => o.Pattern = EdgePattern.Second);
         }
-        private Point3d InitCenterStart()
-        {
-            if(isPointStart)
-            {
-                return Ports.OrderBy(o => o.DistanceTo(Start)).First();
-            }
-            else
-            {
-                return Ports.First();
-            }
-        }
         private Point3d? FindPropertyStart(List<ThLightEdge> lineEdges,Point3d start)
         {
             if (lineEdges.Count > 0)
@@ -148,22 +124,6 @@ namespace ThMEPLighting.Garage.Engine
             {
                 return null;
             }
-        }
-        private List<Point3d> GetFirstPorts(List<Line> firstLines,Point3d centerSp)
-        {
-            var results = new List<Point3d>();
-            var pts = new List<Point3d>();
-            firstLines.ForEach(o => pts.Add(o.StartPoint));
-            firstLines.ForEach(o => pts.Add(o.EndPoint));
-            pts=pts.OrderBy(o => o.DistanceTo(centerSp)).ToList();
-            foreach(var pt in pts)
-            {
-                if(Math.Abs(centerSp.DistanceTo(pt)-ArrangeParameter.RacywaySpace/2.0)<=5.0)
-                {
-                    results.Add(pt);
-                }
-            }
-            return results;
         }
         private Point3d GetFirstStart(List<Point3d> firstPorts, Point3d centerStart)
         {

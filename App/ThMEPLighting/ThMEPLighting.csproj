@@ -48,7 +48,6 @@
     <Compile Include="Garage\Engine\ThDoubleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThInnerOuterCirclesEngine.cs" />
     <Compile Include="Garage\Engine\ThLaneLineGraphEngine.cs" />
-    <Compile Include="Garage\Engine\ThLightLinePreprocessEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
@@ -96,6 +95,7 @@
     <Compile Include="Common\ThLightGraphService.cs" />
     <Compile Include="Garage\Service\ThLineNodeService.cs" />
     <Compile Include="Garage\Service\ThMergeLightCenterLines.cs" />
+    <Compile Include="Garage\Service\ThPreprocessLineService.cs" />
     <Compile Include="Garage\Service\ThPrintService.cs" />
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
     <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />
