@@ -10,6 +10,11 @@ namespace ThCADExtension
 {
     public static class ThPolylineExtension
     {
+        /// <summary>
+        /// 多段线顶点集合（不支持圆弧段）
+        /// </summary>
+        /// <param name="pLine"></param>
+        /// <returns></returns>
         public static Point3dCollection Vertices(this Polyline pLine)
         {
             //https://keanw.com/2007/04/iterating_throu.html
@@ -21,12 +26,30 @@ namespace ThCADExtension
             }
 
             // 对于处于“闭合”状态的多段线，要保证其首尾点一致
-            if (pLine.Closed && !vertices[0].Equals(vertices[vertices.Count - 1]))
+            if (pLine.Closed && !vertices[0].IsEqualTo(vertices[vertices.Count - 1]))
             {
                 vertices.Add(vertices[0]);
             }
 
             return vertices;
+        }
+
+        /// <summary>
+        /// 多段线顶点集合（支持圆弧段）
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="chord"></param>
+        /// <returns></returns>
+        public static Point3dCollection VerticesEx(this Polyline poly, double length)
+        {
+            if (poly.HasBulges)
+            {
+                return poly.TessellatePolylineWithArc(length).Vertices();
+            }
+            else
+            {
+                return poly.Vertices();
+            }
         }
 
         public static double[] Coordinates2D(this Polyline pLine)
