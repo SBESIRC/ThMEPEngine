@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.LaneLine
 
         private static Line MergeLines(List<Line> lines)
         {
-            var polygons = lines.Select(o => ExpandBy(o, extend_distance, collinear_gap_distance)).Select(o => o.ToNTSPolygon());
+            var polygons = lines.Select(o => Expand(o, extend_distance, collinear_gap_distance)).Select(o => o.ToNTSPolygon());
             var multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
             var centerline =  CenterLine(multiPolygon.Union());
             var direction = centerline.LineDirection();

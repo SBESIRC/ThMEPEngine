@@ -32,6 +32,12 @@ namespace ThCADExtension
             return Math.Abs(dist1 - dist2);
         }
 
+        // https://www.keanw.com/2012/01/testing-whether-a-point-is-on-any-autocad-curve-using-net.html
+        public static bool IsPointOnCurve(this Curve curve, Point3d pt, Tolerance tolerance)
+        {
+            return pt.IsEqualTo(curve.GetClosestPointTo(pt, false), tolerance);
+        }
+
         public static double BulgeFromCurve(this Curve cv, bool clockwise)
         {
             double bulge = 0.0;

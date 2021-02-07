@@ -50,6 +50,7 @@
     <Compile Include="ThGeExtension.cs" />
     <Compile Include="ThHatchTool.cs" />
     <Compile Include="ThLayerTool.cs" />
+    <Compile Include="ThLineExtension.cs" />
     <Compile Include="ThLinqExtension.cs" />
     <Compile Include="ThMatrix3dExtension.cs" />
     <Compile Include="ThMPolygonTool.cs" />

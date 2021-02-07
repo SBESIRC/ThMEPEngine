@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.LaneLine
             var lines = spatialIndex.Geometries.Values.Cast<Line>();
             lines.ForEach(o =>
             {
-                var buffer = ExpandBy(o, extend_distance, collinear_gap_distance);
+                var buffer = Expand(o, extend_distance, collinear_gap_distance);
                 var objs = spatialIndex.SelectCrossingPolygon(buffer);
                 if (objs.Count > 1)
                 {
@@ -122,11 +122,9 @@ namespace ThMEPEngineCore.LaneLine
             return results;
         }
 
-        protected static Polyline ExpandBy(Line line, double xOffset, double yOffset)
+        protected static Polyline Expand(Line line, double xOffset, double yOffset)
         {
-            var direction = line.LineDirection();
-            var centerline = new Line(line.EndPoint + direction * xOffset, line.StartPoint - direction * xOffset);
-            return Buffer(centerline, yOffset);
+            return Buffer(line.ExtendLine(xOffset), yOffset);
         }
 
         protected static Polyline Buffer(Line line, double distance)

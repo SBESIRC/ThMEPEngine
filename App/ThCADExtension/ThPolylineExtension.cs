@@ -35,11 +35,6 @@ namespace ThCADExtension
             return vertices.Select(o => o.ToPoint2d().ToArray()).SelectMany(o => o).ToArray();
         }
 
-        public static double[] Coordinates2D(this Polyline[] pLines)
-        {
-            return pLines.Select(o => o.Coordinates2D()).SelectMany(o => o).ToArray();
-        }
-
         public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
         {
             var points = new Point3dCollection()
@@ -80,11 +75,6 @@ namespace ThCADExtension
             Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
             Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
             return CreateRectangle(pt1,pt2,pt3,pt4);
-        }
-
-        public static Vector3d LineDirection(this Line line)
-        {
-            return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
         }
 
         /// <summary>
