@@ -28,7 +28,7 @@ namespace ThMEPLighting.Garage.Service
             ArrangeParameter = arrangeParameter;
             RacewayParameter = racewayParameter;
         }
-        public static void Create(
+        public static ObjectIdList Create(
             ThRegionBorder regionBorder,
             ThRacewayParameter racewayParameter,
             ThLightArrangeParameter arrangeParameter)
@@ -36,6 +36,7 @@ namespace ThMEPLighting.Garage.Service
             var instance = new ThCreateLightToDatabaseService(
                 regionBorder, racewayParameter, arrangeParameter);
             instance.Create();
+            return instance.ObjIds;
         }
         private void Create()
         {
@@ -58,6 +59,7 @@ namespace ThMEPLighting.Garage.Service
                 {
                     var groupIds = new ObjectIdList();
                     o.Value.ForEach(v => groupIds.Add(v.Id));
+                    groupIds.Add(o.Key.Id);
                     var ports = FindPorts(o.Key, RegionBorder.CableTrayPorts);
                     ports.ForEach(p => groupIds.Add(p.Id));
                     var groupName = Guid.NewGuid().ToString();

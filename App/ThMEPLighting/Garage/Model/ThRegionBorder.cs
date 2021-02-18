@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.Common;
 
 namespace ThMEPLighting.Garage.Model
@@ -38,13 +39,17 @@ namespace ThMEPLighting.Garage.Model
         /// 线槽中心线和端口线配对
         /// </summary>
         public Dictionary<Line, List<Line>> CableTrayPorts { get; set; }
+        /// <summary>
+        /// 边界到原点的偏移
+        /// </summary>
+        public ThMEPOriginTransformer Transformer { get; set; }
         public ThRegionBorder()
         {
             DxCenterLines = new List<Line>();
             FdxCenterLines = new List<Line>();
-            LightEdges = new List<ThLightEdge>();
             CableTraySides = new List<Line>();
             CableTrayCenters = new List<Line>();
+            LightEdges = new List<ThLightEdge>();
             CableTrayGroups = new Dictionary<Line, List<Line>>();
             CableTrayPorts = new Dictionary<Line, List<Line>>();
         }

@@ -8,6 +8,7 @@ using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -37,28 +38,30 @@ namespace ThMEPLighting.Garage.Engine
         }
         protected void Preprocess(ThRegionBorder regionBorder)
         {
+            DxLines = new List<Line>();
+            FdxLines = new List<Line>();
             // 裁剪并获取框内的车道线
             var dxTrimLines = Trim(regionBorder.DxCenterLines, regionBorder.RegionBorder);
+            var fdxTrimLines = Trim(regionBorder.FdxCenterLines, regionBorder.RegionBorder);
             if (dxTrimLines.Count == 0)
             {
                 return;
-            }
-
+            }            
             // 为了避免线槽和防火卷帘冲突
             // 缩短车道线，和框线保持500的间隙
             var shortenPara = new ThShortenParameter
             {
                 Border = regionBorder.RegionBorder,
                 DxLines = dxTrimLines,
-                FdxLines = regionBorder.FdxCenterLines,
+                FdxLines = fdxTrimLines,
                 Distance = ThGarageLightCommon.RegionBorderBufferDistance
             };
             var dxLines = ThShortenLineService.Shorten(shortenPara);
+            var fdxLines = fdxTrimLines;
             if (dxLines.Count == 0)
             {
                 return;
-            }
-
+            }            
             // 将车道线规整
             dxLines = ThPreprocessLineService.Preprocess(dxLines);
             if (dxLines.Count == 0)
@@ -80,7 +83,7 @@ namespace ThMEPLighting.Garage.Engine
 
             // 保持车道线和非车道线
             DxLines.AddRange(dxLines);
-            FdxLines.AddRange(regionBorder.FdxCenterLines);
+            FdxLines.AddRange(fdxLines);
         }
     }
 }

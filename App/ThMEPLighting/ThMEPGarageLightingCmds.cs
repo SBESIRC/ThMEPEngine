@@ -18,6 +18,7 @@ using ThMEPLighting.Garage.Engine;
 using Autodesk.AutoCAD.EditorInput;
 using ThMEPLighting.Garage.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 
 namespace ThMEPLighting
 {
@@ -101,17 +102,29 @@ namespace ThMEPLighting
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var ov = new ThAppTools.ManagedSystemVariable("GROUPDISPLAYMODE", 0))
             {
-                //输入参数
+                //获取参数
                 var arrangeParameter = GetUiParameters();
-                var racewayParameter = new ThRacewayParameter();
                 var regionBorders = GetFireRegionBorders();
                 if (regionBorders.Count == 0)
                 {
                     return;
                 }
-
-                //以上是准备输入参数
+                regionBorders.ForEach(o =>
+                {
+                    //移动到原点
+                    // 若图元离原点非常远（大于1E+10)，精度会受很大影响
+                    // 为了规避这个问题，我们将图元移回原点
+                    // 最后将处理结果还原到原始位置
+                    var centerPt = o.RegionBorder.GetCentroidPoint();
+                    var transformer = new ThMEPOriginTransformer(centerPt);
+                    transformer.Transform(o.DxCenterLines.ToCollection());
+                    transformer.Transform(o.FdxCenterLines.ToCollection());
+                    transformer.Transform(o.RegionBorder);
+                    o.Transformer = transformer;
+                });
+                //布置
                 ThArrangementEngine arrangeEngine = null;
+                var racewayParameter = new ThRacewayParameter();
                 if (arrangeParameter.IsSingleRow)
                 {
                     arrangeEngine = new ThSingleRowArrangementEngine(arrangeParameter, racewayParameter);
@@ -122,9 +135,16 @@ namespace ThMEPLighting
                 }
                 arrangeEngine.Arrange(regionBorders);
 
-                //输出
                 ThCreateLightToDatabaseService.SetDatabaseDefaults(racewayParameter, arrangeParameter);
-                regionBorders.ForEach(o => ThCreateLightToDatabaseService.Create(o, racewayParameter, arrangeParameter));
+                regionBorders.ForEach(o =>
+                {
+                    //输出到当前图纸并还原回原始位置
+                    var objs = new DBObjectCollection();
+                    var transformer = new ThMEPOriginTransformer(o.RegionBorder.GetCentroidPoint());
+                    var objIds = ThCreateLightToDatabaseService.Create(o, racewayParameter, arrangeParameter);
+                    objIds.ForEach(e => objs.Add(acadDatabase.Element<Entity>(e, true)));
+                    o.Transformer.Reset(objs);
+                });
             }
         }
         [CommandMethod("TIANHUACAD", "THCDBH", CommandFlags.Modal)]
