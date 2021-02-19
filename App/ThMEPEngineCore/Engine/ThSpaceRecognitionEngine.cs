@@ -18,9 +18,8 @@ using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThSpaceRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThSpaceRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public List<ThIfcSpace> Spaces { get; set; }
         private List<DBText> SpaceNames { get; set; }
         private List<Curve> SpaceBoundaries { get; set; }
         private Dictionary<DBText, List<Curve>> TextContainer { get; set; }
