@@ -9,6 +9,7 @@ using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Tools;
 using static ThMEPWSS.ThPipeCmds;
+using DotNetARX;
 
 namespace ThMEPWSS.Pipe.Output
 {
@@ -17,7 +18,7 @@ namespace ThMEPWSS.Pipe.Output
         public void LayoutTag(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, ThWRoofParameters parameters1, 
             ThWRoofDeviceParameters parameters2, AcadDatabase acadDatabase, ThWInnerPipeIndexEngine PipeindexEngine,
             ThWCompositeIndexEngine composite_Engine,List<Curve> obstacleParameters,int scaleFactor,string PipeLayer,string W_DRAI_EQPM,string W_RAIN_NOTE1)
-        {
+        {          
             var tag_frames = new List<Polyline>();//用来收纳所有文字框
             var f_pipes= ThWPipeOutputFunction.GetNewPipes(parameters0.fpipe);
             var rain_pipes = ThWPipeOutputFunction.GetNewPipes(parameters0.rain_pipe);//雨水管去重复
@@ -47,7 +48,16 @@ namespace ThMEPWSS.Pipe.Output
             GetNpipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_DRAI_EQPM);
             GetRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetRoofRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
-            GetCopiedPipeindex(FloorEngines, parameters0, acadDatabase, obstacle, parameters1, parameters2, composite_Engine, toiletpoint, balconypoint, scaleFactor, W_RAIN_NOTE1);         
+            GetCopiedPipeindex(FloorEngines, parameters0, acadDatabase, obstacle, parameters1, parameters2, composite_Engine, toiletpoint, balconypoint, scaleFactor, W_RAIN_NOTE1);
+            var record0 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.TopFloors[0].FirstFloor.Tags[0]}", parameters0.standardEntity);
+            BlockReference standardBlock = new BlockReference(new Point3d(0, 0, 0), record0);
+            acadDatabase.ModelSpace.Add(standardBlock);//管井信息打印到标准层 
+            var record = BlockTools.AddBlockTableRecord(acadDatabase.Database, "大屋面", parameters1.roofEntity);
+            BlockReference roofBlock = new BlockReference(new Point3d(0, 0, 0), record);
+            acadDatabase.ModelSpace.Add(roofBlock);//管井复制到屋顶层
+            var record1 = BlockTools.AddBlockTableRecord(acadDatabase.Database, "小屋面", parameters2.roofDeviceEntity);
+            BlockReference roofDevBlock = new BlockReference(new Point3d(0, 0, 0), record1);
+            acadDatabase.ModelSpace.Add(roofDevBlock);//管井复制到屋顶设备层 
         }
         public static void LayoutToiletPipe(ThWCompositePipeEngine compositeEngine, ThWTopParameters parameters0, AcadDatabase acadDatabase,string W_DRAI_EQPM)
         {
@@ -63,7 +73,7 @@ namespace ThMEPWSS.Pipe.Output
                 ThWPipeOutputFunction.GetListCopypipes(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.copypipes.Add(o));
                 ThWPipeOutputFunction.GetListNormalCopypipes(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.normalCopys.Add(o));
                 //在顶层打印                              
-                ThWPipeOutputFunction.GetEntityPolyline(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => acadDatabase.ModelSpace.Add(o));
+                ThWPipeOutputFunction.GetEntityPolyline(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.standardEntity.Add(o));
             }
         }
         public static void LayoutToiletPipe1(ThWCompositePipeEngine compositeEngine, ThWTopParameters parameters0, AcadDatabase acadDatabase,string W_DRAI_EQPM)
@@ -80,7 +90,7 @@ namespace ThMEPWSS.Pipe.Output
                 ThWPipeOutputFunction.GetListCopypipes1(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.copypipes.Add(o));
                 ThWPipeOutputFunction.GetListNormalCopypipes1(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.normalCopys.Add(o));
                 //在顶层打印                              
-                ThWPipeOutputFunction.GetEntityPolyline1(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => acadDatabase.ModelSpace.Add(o));
+                ThWPipeOutputFunction.GetEntityPolyline1(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.standardEntity.Add(o));
             }
         }
        private static void GetFpipeindex(ThWCompositeIndexEngine composite_Engine,List<Polyline> tag_frames, ThWTopParameters parameters0,
@@ -122,12 +132,12 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Line tag_Yline = CreateLine(PipeindexEngine.Fpipeindex[j][i], tag1);
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copypipes.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);           
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"FL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -140,25 +150,25 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copypipes.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copypipes.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copypipes.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
@@ -204,11 +214,11 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Line tag_Yline = CreateLine(PipeindexEngine.Tpipeindex[j][i], tag1);
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"TL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
@@ -220,22 +230,22 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
@@ -281,12 +291,12 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Line tag_Yline = CreateLine(PipeindexEngine.Wpipeindex[j][i], tag1);
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copypipes.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"WL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -299,25 +309,25 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copypipes.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copypipes.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copypipes.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
@@ -363,12 +373,12 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Line tag_Yline = CreateLine(PipeindexEngine.Ppipeindex[j][i], tag1);
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copypipes.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"PL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -381,25 +391,25 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copypipes.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copypipes.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copypipes.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
@@ -445,11 +455,11 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Line tag_Yline = CreateLine(PipeindexEngine.Dpipeindex[j][i], tag1);
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"DL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
@@ -461,22 +471,22 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7*scaleFactor, tag3, scaleFactor));
@@ -521,15 +531,15 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Circle circle = CreateCircle(PipeindexEngine.Npipeindex[j][i]);
                     circle.Layer = W_DRAI_EQPM;
-                    acadDatabase.ModelSpace.Add(circle);
+                    parameters0.standardEntity.Add(circle);
                     parameters0.normalCopys.Add(circle);
                     Line tag_Yline = CreateLine(PipeindexEngine.Npipeindex[j][i], tag1);
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"NL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer= ThWPipeCommon.W_DRAI_NOTE;
@@ -541,22 +551,22 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
@@ -600,15 +610,15 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Circle circle = CreateCircle(PipeindexEngine.Rainpipeindex[j][i]);
                     circle.Layer = ThWPipeCommon.W_RAIN_EQPM;
-                    acadDatabase.ModelSpace.Add(circle);
+                    parameters0.standardEntity.Add(circle);
                     parameters0.normalCopys.Add(circle);
                     Line tag_Yline = CreateLine(PipeindexEngine.Rainpipeindex[j][i], tag1);
                     tag_Yline.Layer= W_RAIN_NOTE1;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer= W_RAIN_NOTE1;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer= W_RAIN_NOTE1;
@@ -620,22 +630,22 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = W_RAIN_NOTE1;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
@@ -680,16 +690,16 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     Circle circle = CreateCircle(PipeindexEngine.RoofRainpipeindex[j][i]);
                     circle.Layer = ThWPipeCommon.W_RAIN_EQPM;
-                    acadDatabase.ModelSpace.Add(circle);
+                    parameters0.standardEntity.Add(circle);
                     Line tag_Yline = CreateLine(PipeindexEngine.RoofRainpipeindex[j][i], tag1);
                     tag_Yline.Layer = W_RAIN_NOTE1;
-                    acadDatabase.ModelSpace.Add(tag_Yline);
+                    parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copyrooftags.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     parameters0.normalCopys.Add(circle);
                     Line tag_Xline = CreateLine(tag1, tag2);
                     tag_Xline.Layer= W_RAIN_NOTE1;
-                    acadDatabase.ModelSpace.Add(tag_Xline);
+                    parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copyrooftags.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -702,25 +712,25 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = W_RAIN_NOTE1;
                     if (j == 0)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext1);
+                        parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copyrooftags.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext3);
+                        parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copyrooftags.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext2);
+                        parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copyrooftags.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
-                        acadDatabase.ModelSpace.Add(taggingtext);
+                        parameters0.standardEntity.Add(taggingtext);
                         parameters0.copyrooftags.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
@@ -732,13 +742,13 @@ namespace ThMEPWSS.Pipe.Output
       ThWRoofParameters parameters1, ThWRoofDeviceParameters parameters2, ThWCompositeIndexEngine composite_Engine,Point3d toiletpoint, Point3d balconypoint,int scaleFactor,string W_RAIN_NOTE1)
         {
             if (FloorEngines.RoofFloors.Count > 0)
-            {
+            {                          
                 foreach (var ent in parameters0.copypipes)
                 {
                     if (parameters0.baseCenter2.Count > 0)
                     {
                         var offset = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(parameters1.baseCenter1[0]));
-                        acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset));//管井复制到屋顶层
+                        parameters1.roofEntity.Add(ent.GetTransformedCopy(offset));
                         //一定要对屋顶雨水管重排序
                         var PipeindexEngine1 = new ThWInnerPipeIndexEngine();
                         var composite_Engine1 = new ThWCompositeIndexEngine(PipeindexEngine1);
@@ -776,14 +786,14 @@ namespace ThMEPWSS.Pipe.Output
                                     Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255),
                                     Layer = ThWPipeCommon.W_RAIN_EQPM
                                 };
-                                acadDatabase.ModelSpace.Add(circle);
+                                parameters1.roofEntity.Add(circle);
                                 Line ent_line = new Line(PipeindexEngine1.RoofRainpipeindex[j][i], tag1);
                                 Line ent_line1 = new Line(tag1, tag2);
                                 ent_line.Layer = W_RAIN_NOTE1; 
                                 ent_line1.Layer = W_RAIN_NOTE1;
                                 //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);                            
-                                acadDatabase.ModelSpace.Add(ent_line);
-                                acadDatabase.ModelSpace.Add(ent_line1);
+                                parameters1.roofEntity.Add(ent_line);
+                                parameters1.roofEntity.Add(ent_line1);
                                 DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1 + count}", scaleFactor, acadDatabase.Database);
                                 taggingtext.Layer= W_RAIN_NOTE1;
                                 DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1 + count}", scaleFactor, acadDatabase.Database);
@@ -794,19 +804,19 @@ namespace ThMEPWSS.Pipe.Output
                                 taggingtext3.Layer = W_RAIN_NOTE1;
                                 if (j == 0)
                                 {
-                                    acadDatabase.ModelSpace.Add(taggingtext1);
+                                    parameters1.roofEntity.Add(taggingtext1);
                                 }
                                 else if (j == 1)
                                 {
-                                    acadDatabase.ModelSpace.Add(taggingtext3);
+                                    parameters1.roofEntity.Add(taggingtext3);
                                 }
                                 else if (j % 2 == 1)
                                 {
-                                    acadDatabase.ModelSpace.Add(taggingtext2);
+                                    parameters1.roofEntity.Add(taggingtext2);
                                 }
                                 else
                                 {
-                                    acadDatabase.ModelSpace.Add(taggingtext);
+                                    parameters1.roofEntity.Add(taggingtext);
                                 }
                             }
                         }
@@ -823,7 +833,7 @@ namespace ThMEPWSS.Pipe.Output
                                 if ((s1 != null && GeomUtils.PtInLoop(boundary, s1.StartPoint)) || (s2 != null && GeomUtils.PtInLoop(boundary, s2.StartPoint))
                                     || (s3 != null && GeomUtils.PtInLoop(boundary, s3.Center)) || (s4 != null && GeomUtils.PtInLoop(boundary, s4.Position)))
                                 {
-                                    acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层
+                                    parameters2.roofDeviceEntity.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层
                                 }
                             }
                         }
@@ -865,11 +875,11 @@ namespace ThMEPWSS.Pipe.Output
                         }
                         if (s == 0)
                         {
-                            acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset));//管井复制到屋顶层                                                         
+                            parameters1.roofEntity.Add(ent.GetTransformedCopy(offset));//管井复制到屋顶层                                                         
                         }
                         if (s == 0)
                         {
-                            acadDatabase.ModelSpace.Add(alertresult);//生成错误提示    
+                            parameters1.roofEntity.Add(alertresult);//生成错误提示    
                         }
                         if (parameters2.baseCenter0.Count > 0)
                         {
@@ -908,11 +918,11 @@ namespace ThMEPWSS.Pipe.Output
                                 }
                                 if (s1 == 0)
                                 {
-                                    acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层                                                                  
+                                    parameters2.roofDeviceEntity.Add(ent.GetTransformedCopy(offset1));//管井复制到屋顶设备层                                                                  
                                 }
                                 if (s1 == 0)
                                 {
-                                    acadDatabase.ModelSpace.Add(alertresult1);//生成错误提示
+                                    parameters2.roofDeviceEntity.Add(alertresult1);//生成错误提示
                                 }
                             }
                         }
@@ -951,13 +961,13 @@ namespace ThMEPWSS.Pipe.Output
                         }
                         if (s == 0)
                         {
-                            acadDatabase.ModelSpace.Add(parameters0.copyrooftags[i].GetTransformedCopy(offset));//管井复制到屋顶层  
-                            acadDatabase.ModelSpace.Add(parameters0.copyrooftags[i + 1].GetTransformedCopy(offset));
-                            acadDatabase.ModelSpace.Add(parameters0.copyrooftags[i + 2].GetTransformedCopy(offset));
+                            parameters1.roofEntity.Add(parameters0.copyrooftags[i].GetTransformedCopy(offset));//管井复制到屋顶层  
+                            parameters1.roofEntity.Add(parameters0.copyrooftags[i + 1].GetTransformedCopy(offset));
+                            parameters1.roofEntity.Add(parameters0.copyrooftags[i + 2].GetTransformedCopy(offset));
                         }
                         if (s == 0)
                         {
-                            acadDatabase.ModelSpace.Add(alertresult);//生成错误提示    
+                            parameters1.roofEntity.Add(alertresult);//生成错误提示    
                         }
                         if (parameters2.baseCenter0.Count > 0)
                         {
@@ -996,29 +1006,32 @@ namespace ThMEPWSS.Pipe.Output
                                 }
                                 if (s1 == 0)
                                 {
-                                    acadDatabase.ModelSpace.Add(parameters0.copyrooftags[i].GetTransformedCopy(offset1));//管井复制到屋顶设备层 
-                                    acadDatabase.ModelSpace.Add(parameters0.copyrooftags[i + 1].GetTransformedCopy(offset1));
-                                    acadDatabase.ModelSpace.Add(parameters0.copyrooftags[i + 2].GetTransformedCopy(offset1));
+                                    parameters2.roofDeviceEntity.Add(parameters0.copyrooftags[i].GetTransformedCopy(offset1));//管井复制到屋顶设备层 
+                                    parameters2.roofDeviceEntity.Add(parameters0.copyrooftags[i + 1].GetTransformedCopy(offset1));
+                                    parameters2.roofDeviceEntity.Add(parameters0.copyrooftags[i + 2].GetTransformedCopy(offset1));
                                 }
                                 if (s1 == 0)
                                 {
-                                    acadDatabase.ModelSpace.Add(alertresult1);//生成错误提示
+                                    parameters2.roofDeviceEntity.Add(alertresult1);//生成错误提示
                                 }
                             }
                         }
                     }
-                }
-
+                }                                                   
                 if (FloorEngines.NormalFloors.Count > 0)//复制所有管井到标准层
                 {
                     for (int i = 0; i < FloorEngines.NormalFloors.Count; i++)
-                    {
+                    {                       
+                        var normalEntity = new List<Entity>();
                         var offset = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(FloorEngines.NormalFloors[0].BaseCircles[i + 1].Boundary.GetCenter()));
                         foreach (var ent in parameters0.normalCopys)
                         {
-                            acadDatabase.ModelSpace.Add(ent.GetTransformedCopy(offset));
+                            normalEntity.Add(ent.GetTransformedCopy(offset));
                         }
-                    }
+                        var record3 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.NormalFloors[i].FirstFloor.Tags[0]}", normalEntity);
+                        BlockReference normalBlock = new BlockReference(new Point3d(0, 0, 0), record3);
+                        acadDatabase.ModelSpace.Add(normalBlock);//管井复制到标准层
+                    }    
                 }
             }
         }

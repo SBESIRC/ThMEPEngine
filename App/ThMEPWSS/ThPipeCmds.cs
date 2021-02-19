@@ -517,6 +517,7 @@ namespace ThMEPWSS
             public Point3dCollection baseCenter0 = new Point3dCollection();
             public Point3dCollection waterbuckets1 = new Point3dCollection();
             public Point3dCollection waterbuckets2 = new Point3dCollection();
+            public List<Entity> roofDeviceEntity = new List<Entity>();
         }
         public class ThWRoofParameters
         {
@@ -527,6 +528,7 @@ namespace ThMEPWSS
             public ThWWaterBucketEngine engine1 = new ThWWaterBucketEngine();
             public Point3dCollection baseCenter1 = new Point3dCollection();
             public List<Polyline> roofRoofRainPipes = new List<Polyline>();
+            public List<Entity> roofEntity=new List<Entity>();
         }
         public class ThWTopParameters
         {
@@ -546,6 +548,7 @@ namespace ThMEPWSS
             public Polyline pboundary = null;
             public List<Line> divideLines = new List<Line>();
             public List<Polyline> roofrain_pipe = new List<Polyline>();
+            public List<Entity> standardEntity = new List<Entity>();
         }
         public class ThWTopCompositeParameters
         {
