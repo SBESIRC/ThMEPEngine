@@ -28,10 +28,11 @@ namespace ThMEPLighting.EmgLight
         public static string LayerGetStruct = "l1GetStruct";
         public static string LayerStructSeg = "l2StructSeg";
         public static string LayerParallelStruct = "l3ParallelStruct";
-        public static string LayerNotIntersectStruct = "l4NotIntersectStruct";
-        public static string LayerSeparate = "l5Separate";
-        public static string LayerStruct = "l6Struct";
-        public static string LayerStructLayout = "l7StructLayout";
+        public static string LayerNotIntersectStruct = "l6NotIntersectStruct";
+        public static string LayerOverlap = "l5overlap";
+        public static string LayerSeparate = "l4Separate";
+        public static string LayerStruct = "l7Struct";
+        public static string LayerStructLayout = "l8StructLayout";
 
         public enum ThStructType : int
         {

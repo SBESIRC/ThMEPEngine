@@ -71,7 +71,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// 清理一个点和重复的项目
         /// </summary>
         /// <param name="structList"></param>
-        public static void removeDuplicateStruct(ref List<List<ThStruct>> structList)
+        public static void removeDuplicateStruct( List<List<ThStruct>> structList)
         {
             foreach (var stru in structList)
             {

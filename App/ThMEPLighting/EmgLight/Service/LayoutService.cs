@@ -142,7 +142,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// </summary>
         /// <param name="structList"></param>
         /// <returns></returns>
-        private List<ThStruct> OrderingStruct(List<ThStruct> structList)
+        public List<ThStruct> OrderingStruct(List<ThStruct> structList)
         {
             var orderedStruct = structList.OrderBy(x => getCenterInLaneCoor(x).X).ToList();
             return orderedStruct;
@@ -325,110 +325,6 @@ namespace ThMEPLighting.EmgLight.Service
             }
             return ptTrans;
         }
-
-        /// <summary>
-        /// 滤掉对于车道线重叠的构建
-        /// </summary>
-        public void filterOverlapStruc()
-        {
-            for (int i = 0; i < m_usefulStruct.Count; i++)
-            {
-                List<ThStruct> removeList = new List<ThStruct>();
-                for (int curr = 0; curr < m_usefulStruct[i].Count; curr++)
-                {
-                    for (int j = curr; j < m_usefulStruct[i].Count; j++)
-                    {
-                        if (j != curr && removeList.Contains(m_usefulStruct[i][j]) == false)
-                        {
-                            var currCenter = getCenterInLaneCoor(m_usefulStruct[i][curr]);
-                            var closeStart = m_lane.TransformPointToLine(m_usefulStruct[i][j].geom.StartPoint);
-                            var closeEnd = m_lane.TransformPointToLine(m_usefulStruct[i][j].geom.EndPoint);
-
-                            if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
-                            {
-                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(m_usefulStruct[i][j]).Y))
-                                {
-                                    removeList.Add(m_usefulStruct[i][curr]);
-                                }
-                            }
-
-                            currCenter = getCenterInLaneCoor(m_usefulStruct[i][j]);
-                            closeStart = m_lane.TransformPointToLine(m_usefulStruct[i][curr].geom.StartPoint);
-                            closeEnd = m_lane.TransformPointToLine(m_usefulStruct[i][curr].geom.EndPoint);
-                            if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
-                            {
-                                if (Math.Abs(currCenter.Y) > Math.Abs(getCenterInLaneCoor(m_usefulStruct[i][curr]).Y))
-                                {
-                                    removeList.Add(m_usefulStruct[i][j]);
-                                }
-                            }
-                        }
-
-                    }
-                }
-                foreach (var removeStru in removeList)
-                {
-                    m_usefulColumns[i].Remove(removeStru);
-                    m_usefulWalls[i].Remove(removeStru);
-                    m_usefulStruct[i].Remove(removeStru);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 过滤对于车道线防火墙凹点外的构建
-        /// </summary>
-        public void filterStrucBehindFrame(Polyline frame)
-        {
-            List<ThStruct> removeList = new List<ThStruct>();
-            for (int i = 0; i < m_usefulStruct.Count; i++)
-            {
-                var layoutInfo = m_usefulStruct[i].Where(x =>
-                {
-                    Point3dCollection pts = new Point3dCollection();
-                    //选不在防火墙凹后的
-                    prjPtToLine(x, out var prjPt);
-                    Line l = new Line(prjPt, x.centerPt);
-                    l.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                    return pts.Count > 0;
-                }).ToList();
-
-                foreach (var removeStru in layoutInfo)
-                {
-                    m_usefulStruct[i].Remove(removeStru);
-                    m_usefulColumns[i].Remove(removeStru);
-                    m_usefulWalls[i].Remove(removeStru);
-                }
-            }
-        }
-
-        /// <summary>
-        /// 过滤防火墙相交或不在防火墙内的构建
-        /// </summary>
-        public void getInsideFramePart(Polyline frame)
-        {
-            List<ThStruct> removeList = new List<ThStruct>();
-
-            for (int i = 0; i < m_usefulStruct.Count; i++)
-            {
-                //选与防火框不相交且在防火框内
-                var layoutInfo = m_usefulStruct[i].Where(x =>
-                {
-                    Point3dCollection pts = new Point3dCollection();
-                    x.geom.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-                    return pts.Count > 0 || frame.Contains(x.geom) == false;
-
-                }).ToList();
-
-                foreach (var removeStru in layoutInfo)
-                {
-                    m_usefulStruct[i].Remove(removeStru);
-                    m_usefulColumns[i].Remove(removeStru);
-                    m_usefulWalls[i].Remove(removeStru);
-                }
-            }
-        }
-
 
     }
 }

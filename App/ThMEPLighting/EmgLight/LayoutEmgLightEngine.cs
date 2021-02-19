@@ -55,9 +55,9 @@ namespace ThMEPLighting.EmgLight
                 var thLane = laneList[i];
                 var StructFilterService = new StructFilterService(thLane, columns, walls);
 
-                StructFilterService.filterStruct(out var filterColumns, out var filterWalls);
-                var layoutServer = StructFilterService.moreFilter(filterColumns, filterWalls, frame);
-
+               var layoutServer= StructFilterService.getStructSeg();
+                StructFilterService.FilterStruct(layoutServer,frame);
+               
                 if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
                     layoutServer.UsefulWalls[0].Count == 0 && layoutServer.UsefulWalls[1].Count == 0)
                 {

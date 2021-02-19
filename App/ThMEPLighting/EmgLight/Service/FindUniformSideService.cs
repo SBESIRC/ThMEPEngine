@@ -76,17 +76,22 @@ namespace ThMEPLighting.EmgLight.Service
             return nUniformSide;
         }
 
+        /// <summary>
+        /// 有均匀边情况，使用均匀情况。两边都不均匀情况,找柱多的一边,且柱子数>2 以这一边先布, 否则找构建多的一边先布。
+        /// </summary>
+        /// <param name="layoutServer"></param>
+        /// <param name="uniformSideStructsList"></param>
+        /// <param name="uniformSide"></param>
+        /// <param name="distList"></param>
         public static void DetermineStartSide(LayoutService layoutServer, out List<List<ThStruct>> uniformSideStructsList, ref int uniformSide, ref List<List<double>> distList)
         {
 
             if (uniformSide == 0 || uniformSide == 1)
             {
-                //有均匀边情况
                 uniformSideStructsList = layoutServer.UsefulColumns;
             }
             else
             {
-                //两边都不均匀情况,找柱多的一边,且柱子数>2 以这一边先布, 否则找构建多的一边先布
                 uniformSide = layoutServer.UsefulColumns[0].Count >= layoutServer.UsefulColumns[1].Count ? 0 : 1;
 
                 if (layoutServer.UsefulColumns[uniformSide].Count > 2)

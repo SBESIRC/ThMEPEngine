@@ -30,7 +30,7 @@ namespace ThMEPLighting.EmgLight.Service
             m_walls = walls;
         }
 
-        public void filterStruct(out List<List<ThStruct>> columnsStructs, out List<List<ThStruct>> wallStructs)
+        public LayoutService getStructSeg()
         {
             //获取该车道线上的构建
             var closeColumn = GetStruct(m_columns, EmgLightCommon.TolLane);
@@ -62,22 +62,54 @@ namespace ThMEPLighting.EmgLight.Service
             DrawUtils.ShowGeometry(parallelColmuns.Select(x => x.geom).ToList(), EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
             DrawUtils.ShowGeometry(brokeWall.Select(x => x.geom).ToList(), EmgLightCommon.LayerParallelStruct, Color.FromColorIndex(ColorMethod.ByColor, 5), LineWeight.LineWeight035);
 
-            //过滤柱与墙交叉的部分
-            var filterColumns = FilterStructIntersect(parallelColmuns, m_walls, EmgLightCommon.TolIntersect);
-            var filterWalls = FilterStructIntersect(brokeWall, m_columns, EmgLightCommon.TolIntersect);
-
-            DrawUtils.ShowGeometry(filterColumns.Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(filterWalls.Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
 
             //将构建按车道线方向分成左(0)右(1)两边
-            var usefulColumns = StructureService.SeparateStructByLine(filterColumns, m_thLane.geom, EmgLightCommon.TolLane);
-            var usefulWalls = StructureService.SeparateStructByLine(filterWalls, m_thLane.geom, EmgLightCommon.TolLane);
+            var usefulColumns = StructureService.SeparateStructByLine(parallelColmuns, m_thLane.geom, EmgLightCommon.TolLane);
+            var usefulWalls = StructureService.SeparateStructByLine(brokeWall, m_thLane.geom, EmgLightCommon.TolLane);
 
-            StructureService.removeDuplicateStruct(ref usefulColumns);
-            StructureService.removeDuplicateStruct(ref usefulWalls);
+            StructureService.removeDuplicateStruct(usefulColumns);
+            StructureService.removeDuplicateStruct(usefulWalls);
 
-            columnsStructs = usefulColumns;
-            wallStructs = usefulWalls;
+            DrawUtils.ShowGeometry(usefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(usefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(usefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(usefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+
+            LayoutService layoutServer = new LayoutService(usefulColumns, usefulWalls, m_thLane);
+
+            return layoutServer;
+
+        }
+
+        public void FilterStruct(LayoutService layoutServer, Polyline frame)
+        {
+
+            ////滤掉重合部分
+            filterOverlapStruc(layoutServer);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerOverlap, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+
+
+            //过滤柱与墙交叉的部分
+            FilterStructIntersect(layoutServer.UsefulColumns, m_walls, layoutServer, EmgLightCommon.TolIntersect);
+            FilterStructIntersect(layoutServer.UsefulWalls, m_columns, layoutServer, EmgLightCommon.TolIntersect);
+
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerNotIntersectStruct, Color.FromColorIndex(ColorMethod.ByColor, 140), LineWeight.LineWeight035);
+
+            ////滤掉框外边的部分
+            getInsideFramePart(layoutServer, frame);
+
+            ////滤掉框后边的部分
+            filterStrucBehindFrame(layoutServer, frame);
+
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+
         }
 
         /// <summary>
@@ -87,7 +119,7 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="line"></param>
         /// <param name="type"></param>
         /// <returns></returns>
-        public List<ThStruct> getStructureParallelPart(List<ThStruct> structureSegment)
+        private List<ThStruct> getStructureParallelPart(List<ThStruct> structureSegment)
         {
             //平行于车道线的边
             var structureLayoutSegment = structureSegment.Where(x =>
@@ -127,100 +159,214 @@ namespace ThMEPLighting.EmgLight.Service
         /// <param name="structure"></param>
         /// <param name="tol"></param>
         /// <returns></returns>
-        private static List<ThStruct> FilterStructIntersect(List<ThStruct> structSeg, List<Polyline> structure, double tol)
+        private void FilterStructIntersect(List<List<ThStruct>> structList, List<Polyline> structure, LayoutService layoutServer, double tol)
         {
-            List<ThStruct> notIntersectSeg = new List<ThStruct>();
-
-            foreach (var seg in structSeg)
+            List<ThStruct> intersectSegList = new List<ThStruct>();
+            foreach (var structSeg in structList)
             {
-                var bInter = false;
-                var bContain = false;
-
-                foreach (var poly in structure)
+                foreach (var seg in structSeg)
                 {
-                    bContain = bContain || poly.Contains(seg.geom);
-                    bInter = poly.Intersects(seg.geom);
-                    if (bInter == true)
+                    var bInter = false;
+                    var bContain = false;
+
+                    foreach (var poly in structure)
                     {
-                        Point3dCollection pts = new Point3dCollection();
-                        seg.geom.IntersectWith(poly, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
-
-                        if (pts.Count > 1)
+                        if (seg.oriStructGeo == poly)
                         {
-                            bInter = true;
-                            break;
+                            continue;
                         }
-                        else if (pts.Count == 1)
+                        bContain = bContain || poly.Contains(seg.geom);
+                        bInter = poly.Intersects(seg.geom);
+                        if (bInter == true)
                         {
-                            Point3d ptIn = new Point3d();
-                            Point3d ptOut = new Point3d();
-                            if (poly.Contains(seg.geom.StartPoint) == true)
-                            {
-                                ptIn = seg.geom.StartPoint;
-                                ptOut = seg.geom.EndPoint;
-                            }
-                            if (poly.Contains(seg.geom.EndPoint) == true)
-                            {
-                                ptIn = seg.geom.EndPoint;
-                                ptOut = seg.geom.StartPoint;
-                            }
+                            Point3dCollection pts = new Point3dCollection();
+                            seg.geom.IntersectWith(poly, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
 
-                            var lIn = new Line(pts[0], ptIn);
-                            var lOut = new Line(pts[0], ptOut);
-
-                            if (ptIn.X == 0)
-                            {
-                                bInter = false;
-                            }
-
-                            else if (lIn.Length < EmgLightCommon.TolIntersect || lOut.Length >= EmgLightCommon.TolInterFilter)
-                            {
-                                bInter = false;
-                            }
-                            else
+                            if (pts.Count > 1)
                             {
                                 bInter = true;
                                 break;
                             }
-                        }
-                        else
-                        {
-                            bInter = false;
+                            else if (pts.Count == 1)
+                            {
+                                Point3d ptIn = new Point3d();
+                                Point3d ptOut = new Point3d();
+                                if (poly.Contains(seg.geom.StartPoint) == true)
+                                {
+                                    ptIn = seg.geom.StartPoint;
+                                    ptOut = seg.geom.EndPoint;
+                                }
+                                if (poly.Contains(seg.geom.EndPoint) == true)
+                                {
+                                    ptIn = seg.geom.EndPoint;
+                                    ptOut = seg.geom.StartPoint;
+                                }
+
+                                var lIn = new Line(pts[0], ptIn);
+                                var lOut = new Line(pts[0], ptOut);
+
+                                if (ptIn.X == 0)
+                                {
+                                    bInter = false;
+                                }
+
+                                else if (lIn.Length < EmgLightCommon.TolIntersect || lOut.Length >= EmgLightCommon.TolInterFilter)
+                                {
+                                    bInter = false;
+                                }
+                                else
+                                {
+                                    bInter = true;
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                bInter = false;
+                            }
                         }
                     }
-                }
-                if (bInter == false && bContain == false)
-                {
-                    notIntersectSeg.Add(seg);
+
+                    if (bInter == true || bContain == true)
+                    {
+                        intersectSegList.Add(seg);
+                    }
                 }
             }
-            return notIntersectSeg;
+            for (int i = 0; i < layoutServer.UsefulStruct.Count; i++)
+            {
+                foreach (var removeStru in intersectSegList)
+                {
+                    layoutServer.UsefulColumns[i].Remove(removeStru);
+                    layoutServer.UsefulWalls[i].Remove(removeStru);
+                    layoutServer.UsefulStruct[i].Remove(removeStru);
+                }
+            }
         }
 
-        public LayoutService moreFilter(List<List<ThStruct>> usefulColumns, List<List<ThStruct>> usefulWalls, Polyline frame)
+        /// <summary>
+        /// 滤掉对于车道线重叠的构建
+        /// </summary>
+        private void filterOverlapStruc(LayoutService layoutServer)
         {
-            LayoutService layoutServer = new LayoutService(usefulColumns, usefulWalls, m_thLane);
+            for (int i = 0; i < layoutServer.UsefulStruct.Count; i++)
+            {
+                Dictionary<ThStruct, ThStruct> removeList = new Dictionary<ThStruct, ThStruct>();
+                for (int curr = 0; curr < layoutServer.UsefulStruct[i].Count; curr++)
+                {
+                    for (int j = curr; j < layoutServer.UsefulStruct[i].Count; j++)
+                    {
+                        if (j != curr)
+                        {
+                            if (removeList.ContainsKey(layoutServer.UsefulStruct[i][curr]) == false)
+                            {
 
-            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulStruct[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerSeparate, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
 
-            ////滤掉重合部分
-            layoutServer.filterOverlapStruc();
+                                var currCenter = layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][curr]);
+                                var closeStart = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][j].geom.StartPoint);
+                                var closeEnd = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][j].geom.EndPoint);
 
-            ////滤掉框外边的部分
-            layoutServer.getInsideFramePart(frame);
+                                if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                                {
+                                    if (Math.Abs(currCenter.Y) > Math.Abs(layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][j]).Y))
+                                    {
+                                        removeList.Add(layoutServer.UsefulStruct[i][curr], layoutServer.UsefulStruct[i][j]);
+                                        var keys = removeList.Where(q => q.Value == layoutServer.UsefulStruct[i][curr]).Select(q => q.Key).ToList();
+                                        keys.ForEach(k => removeList[k] = layoutServer.UsefulStruct[i][j]);
+                                    }
+                                }
+                            }
+                            if (removeList.ContainsKey(layoutServer.UsefulStruct[i][j]) == false)
+                            {
 
-            ////滤掉框后边的部分
-            layoutServer.filterStrucBehindFrame(frame);
+                                var currCenter = layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][j]);
+                                var closeStart = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][curr].geom.StartPoint);
+                                var closeEnd = layoutServer.thLane.TransformPointToLine(layoutServer.UsefulStruct[i][curr].geom.EndPoint);
+                                if ((closeStart.X <= currCenter.X && currCenter.X <= closeEnd.X) || (closeEnd.X <= currCenter.X && currCenter.X <= closeStart.X))
+                                {
+                                    if (Math.Abs(currCenter.Y) > Math.Abs(layoutServer.getCenterInLaneCoor(layoutServer.UsefulStruct[i][curr]).Y))
+                                    {
+                                        removeList.Add(layoutServer.UsefulStruct[i][j], layoutServer.UsefulStruct[i][curr]);
+                                        var keys = removeList.Where(q => q.Value == layoutServer.UsefulStruct[i][j]).Select(q => q.Key).ToList();
+                                        keys.ForEach(k => removeList[k] = layoutServer.UsefulStruct[i][curr]);
+                                    }
+                                }
+                            }
+                        }
 
-            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulColumns[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 161), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[0].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
-            DrawUtils.ShowGeometry(layoutServer.UsefulWalls[1].Select(x => x.geom).ToList(), EmgLightCommon.LayerStruct, Color.FromColorIndex(ColorMethod.ByColor, 11), LineWeight.LineWeight035);
+                    }
+                }
+                foreach (var removeStru in removeList)
+                {
+                    if (layoutServer.UsefulColumns[i].Remove(removeStru.Key) == true)
+                    {
 
-            return layoutServer;
+                        layoutServer.UsefulColumns[i].Add(removeStru.Value);
+                    }
 
+                    layoutServer.UsefulWalls[i].Remove(removeStru.Key);
+                    layoutServer.UsefulStruct[i].Remove(removeStru.Key);
+                }
+                layoutServer.UsefulColumns[i] = layoutServer.OrderingStruct(layoutServer.UsefulColumns[i]);
+
+            }
+            StructureService.removeDuplicateStruct(layoutServer.UsefulColumns);
         }
+
+        /// <summary>
+        /// 过滤对于车道线防火墙凹点外的构建
+        /// </summary>
+        private void filterStrucBehindFrame(LayoutService layoutServer, Polyline frame)
+        {
+            List<ThStruct> removeList = new List<ThStruct>();
+            for (int i = 0; i < layoutServer.UsefulStruct.Count; i++)
+            {
+                var layoutInfo = layoutServer.UsefulStruct[i].Where(x =>
+                {
+                    Point3dCollection pts = new Point3dCollection();
+                    //选不在防火墙凹后的
+                    layoutServer.prjPtToLine(x, out var prjPt);
+                    Line l = new Line(prjPt, x.centerPt);
+                    l.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    return pts.Count > 0;
+                }).ToList();
+
+                foreach (var removeStru in layoutInfo)
+                {
+                    layoutServer.UsefulStruct[i].Remove(removeStru);
+                    layoutServer.UsefulColumns[i].Remove(removeStru);
+                    layoutServer.UsefulWalls[i].Remove(removeStru);
+                }
+            }
+        }
+
+        /// <summary>
+        /// 过滤防火墙相交或不在防火墙内的构建
+        /// </summary>
+        private void getInsideFramePart(LayoutService layoutServer, Polyline frame)
+        {
+            List<ThStruct> removeList = new List<ThStruct>();
+
+            for (int i = 0; i < layoutServer.UsefulStruct.Count; i++)
+            {
+                //选与防火框不相交且在防火框内
+                var layoutInfo = layoutServer.UsefulStruct[i].Where(x =>
+                {
+                    Point3dCollection pts = new Point3dCollection();
+                    x.geom.IntersectWith(frame, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+                    return pts.Count > 0 || frame.Contains(x.geom) == false;
+
+                }).ToList();
+
+                foreach (var removeStru in layoutInfo)
+                {
+                    layoutServer.UsefulStruct[i].Remove(removeStru);
+                    layoutServer.UsefulColumns[i].Remove(removeStru);
+                    layoutServer.UsefulWalls[i].Remove(removeStru);
+                }
+            }
+        }
+
 
     }
 

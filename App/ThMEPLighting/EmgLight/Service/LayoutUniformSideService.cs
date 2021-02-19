@@ -251,7 +251,5 @@ namespace ThMEPLighting.EmgLight.Service
                 }
             }
         }
-
-
     }
 }
