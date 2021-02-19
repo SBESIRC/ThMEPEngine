@@ -328,22 +328,27 @@ namespace ThMEPLighting
                     result.Value.GetObjectIds().ForEach(o =>
                     {
                         var border = acdb.Element<Polyline>(o);
-                        var newBorder = ThMEPFrameService.Normalize(border);
-                        var dxLines = GetRegionLines(newBorder,
-                            new List<string> { ThGarageLightCommon.DxCenterLineLayerName },
-                            new List<Type> { typeof(Line), typeof(Polyline) });
-                        var fdxLines = GetRegionLines(newBorder,
-                        new List<string> { ThGarageLightCommon.FdxCenterLineLayerName },
-                        new List<Type> { typeof(Line), typeof(Polyline) });
-                        if (dxLines.Count > 0)
+                        var newBorder = ThMEPFrameService.NormalizeEx(border);
+                        if (newBorder.Area > 0)
                         {
-                            var regionBorder = new ThRegionBorder
+                            var dxLines = GetRegionLines(
+                                newBorder,
+                                new List<string> { ThGarageLightCommon.DxCenterLineLayerName },
+                                new List<Type> { typeof(Line), typeof(Polyline) });
+                            var fdxLines = GetRegionLines(
+                                newBorder,
+                                new List<string> { ThGarageLightCommon.FdxCenterLineLayerName },
+                                new List<Type> { typeof(Line), typeof(Polyline) });
+                            if (dxLines.Count > 0)
                             {
-                                RegionBorder = newBorder,
-                                DxCenterLines = dxLines,
-                                FdxCenterLines = fdxLines
-                            };
-                            results.Add(regionBorder);
+                                var regionBorder = new ThRegionBorder
+                                {
+                                    RegionBorder = newBorder,
+                                    DxCenterLines = dxLines,
+                                    FdxCenterLines = fdxLines
+                                };
+                                results.Add(regionBorder);
+                            }
                         }
                     });
                 }
