@@ -17,7 +17,6 @@ namespace ThMEPWSS.Pipe.Engine
     {
         public List<ThWCompositeRoom> Rooms { get; set; }
         public List<ThWCompositeBalconyRoom> FloorDrainRooms { get; set; }
-        public List<ThIfcSpace> Spaces { get; set; }
         public ThWCompositeRoomRecognitionEngine()
         {
             Rooms = new List<ThWCompositeRoom>();

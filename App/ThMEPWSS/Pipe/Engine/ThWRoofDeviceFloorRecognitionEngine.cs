@@ -36,7 +36,6 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> PositionTags { get; set; }
         public List<Curve> AllObstacles { get; set; }
         public List<string> Layers { get; set; }
-        public List<ThIfcSpace> Spaces { get; set; }
         public List<ThIfcGravityWaterBucket> GravityWaterBuckets{get; set; }
         public List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
