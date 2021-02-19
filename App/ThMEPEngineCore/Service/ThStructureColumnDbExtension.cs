@@ -5,7 +5,6 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -77,7 +76,7 @@ namespace ThMEPEngineCore.Service
                             }
                             else if (dbObj is Hatch hatch)
                             {
-                                if (IsBuildElement(hatch) && 
+                                if (IsBuildElement(hatch) &&
                                     CheckLayerValid(hatch))
                                 {
                                     // 暂时不支持有“洞”的填充
