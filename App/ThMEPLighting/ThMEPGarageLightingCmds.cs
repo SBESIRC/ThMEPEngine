@@ -58,44 +58,6 @@ namespace ThMEPLighting
                 acdb.ModelSpace.Add(polyline);
             }
         }
-        private Polyline PolylineJig(short colorIndex)
-        {            
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                try
-                {
-                    var jigger = new ThDrawPolylineJigger(colorIndex);
-                    PromptResult jigRes;
-                    do
-                    {
-                        jigRes = Active.Editor.Drag(jigger);
-                        if (jigRes.Status == PromptStatus.OK)
-                            jigger.AllVertexes.Add(jigger.LastVertex);
-                    } while (jigRes.Status == PromptStatus.OK);
-                    var wcsVertexes = jigger.WcsVertexes;
-                    if (wcsVertexes.Count > 1)
-                    {
-                        Polyline polyline = new Polyline();
-                        for (int i = 0; i < wcsVertexes.Count; i++)
-                        {
-                            Point3d pt3d = wcsVertexes[i];
-                            Point2d pt2d = new Point2d(pt3d.X, pt3d.Y);
-                            polyline.AddVertexAt(i, pt2d, 0, 0, 0);
-                        }
-                        return polyline;
-                    }
-                    else
-                    {
-                        return null;
-                    }                    
-                }
-                catch (System.Exception ex)
-                {
-                    Active.Editor.WriteMessage(ex.ToString());
-                }
-            }
-            return null;
-        }
         [CommandMethod("TIANHUACAD", "THCDZMBZ", CommandFlags.Modal)]
         public void THCDZMBZ()
         {
@@ -236,6 +198,44 @@ namespace ThMEPLighting
                 }
             }
         }
+        private Polyline PolylineJig(short colorIndex)
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                try
+                {
+                    var jigger = new ThDrawPolylineJigger(colorIndex);
+                    PromptResult jigRes;
+                    do
+                    {
+                        jigRes = Active.Editor.Drag(jigger);
+                        if (jigRes.Status == PromptStatus.OK)
+                            jigger.AllVertexes.Add(jigger.LastVertex);
+                    } while (jigRes.Status == PromptStatus.OK);
+                    var wcsVertexes = jigger.WcsVertexes;
+                    if (wcsVertexes.Count > 1)
+                    {
+                        Polyline polyline = new Polyline();
+                        for (int i = 0; i < wcsVertexes.Count; i++)
+                        {
+                            Point3d pt3d = wcsVertexes[i];
+                            Point2d pt2d = new Point2d(pt3d.X, pt3d.Y);
+                            polyline.AddVertexAt(i, pt2d, 0, 0, 0);
+                        }
+                        return polyline;
+                    }
+                    else
+                    {
+                        return null;
+                    }
+                }
+                catch (System.Exception ex)
+                {
+                    Active.Editor.WriteMessage(ex.ToString());
+                }
+            }
+            return null;
+        }
         private ThLightArrangeParameter GetUiParameters()
         {
             // From UI
@@ -279,30 +279,33 @@ namespace ThMEPLighting
                     result.Value.GetObjectIds().ForEach(o =>
                     {
                         var border = acdb.Element<Polyline>(o);
-                        var newBorder = ThMEPFrameService.Normalize(border);
-                        var lineTvs = new TypedValueList
+                        var newBorder = ThMEPFrameService.NormalizeEx(border);
+                        if (newBorder.Area > 0)
+                        {
+                            var lineTvs = new TypedValueList
                             {
                                 { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
                                 { (int)DxfCode.Start, RXClass.GetClass(typeof(Line)).DxfName},
                                 { (int)DxfCode.LayerName, racewayParameter.CenterLineParameter.Layer}
                             };
-                        var centerLines = newBorder.GetEntities(lineTvs).Cast<Line>().ToList();
+                            var centerLines = newBorder.GetEntities(lineTvs).Cast<Line>().ToList();
 
-                        var blkTvs = new TypedValueList
+                            var blkTvs = new TypedValueList
                             {
                                 { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
                                 { (int)DxfCode.Start, RXClass.GetClass(typeof(BlockReference)).DxfName},
                                 { (int)DxfCode.LayerName, racewayParameter.LaneLineBlockParameter.Layer}
                             };
-                        var lightBlks = newBorder.GetEntities(blkTvs).Cast<BlockReference>().ToList();
+                            var lightBlks = newBorder.GetEntities(blkTvs).Cast<BlockReference>().ToList();
 
-                        var regionLightEdge = new ThRegionLightEdge
-                        {
-                            RegionBorder = newBorder,
-                            Lights = lightBlks,
-                            Edges = centerLines
-                        };
-                        results.Add(regionLightEdge);
+                            var regionLightEdge = new ThRegionLightEdge
+                            {
+                                RegionBorder = newBorder,
+                                Lights = lightBlks,
+                                Edges = centerLines
+                            };
+                            results.Add(regionLightEdge);
+                        }
                     });
                 }
             }
@@ -357,10 +360,8 @@ namespace ThMEPLighting
         }
         private List<Line> GetRegionLines(Polyline region, List<string> layers, List<Type> types)
         {
-            var curves = region.GetRegionCurves(layers, types)
-                .Where(k => k is Line || k is Polyline)
-                .Cast<Curve>().ToCollection();
-            return ThLaneLineEngine.Explode(curves).Cast<Line>().ToList();
+            var curves = region.GetRegionCurves(layers, types);
+            return ThLaneLineEngine.Explode(curves.ToCollection()).Cast<Line>().ToList();
         }
     }
 }
