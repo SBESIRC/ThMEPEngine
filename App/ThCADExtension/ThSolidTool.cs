@@ -57,12 +57,25 @@ namespace ThCADExtension
 
         public static Solid ToSolid(this Polyline polyline)
         {
-            // 多段线必须是四边形（四个顶点）
-            return new Solid(
-                polyline.GetPoint3dAt(0),
-                polyline.GetPoint3dAt(1),
-                polyline.GetPoint3dAt(3),
-                polyline.GetPoint3dAt(2));
+            if(polyline.NumberOfVertices == 3)
+            {
+                return new Solid(
+                    polyline.GetPoint3dAt(0),
+                    polyline.GetPoint3dAt(1),
+                    polyline.GetPoint3dAt(2));
+            }
+            else if(polyline.NumberOfVertices == 4)
+            {
+                return new Solid(
+                    polyline.GetPoint3dAt(0),
+                    polyline.GetPoint3dAt(1),
+                    polyline.GetPoint3dAt(3),
+                    polyline.GetPoint3dAt(2));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
 
         public static Solid WashClone(this Solid solid)
