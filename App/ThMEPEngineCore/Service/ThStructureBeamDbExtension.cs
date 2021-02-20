@@ -21,11 +21,6 @@ namespace ThMEPEngineCore.Service
         }
         public void Dispose()
         {
-            foreach (var curve in BeamCurves)
-            {
-                curve.Dispose();
-            }
-            BeamCurves.Clear();
         }
         public override void BuildElementCurves()
         {

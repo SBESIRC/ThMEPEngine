@@ -15,46 +15,53 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThColumnRecognitionEngine : ThBuildingElementRecognitionEngine
     {
-        public override void Recognize(Database database, Point3dCollection polygon)
+        public override List<ThRawIfcBuildingElementData> Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var columnDbExtension = new ThStructureColumnDbExtension(database))
             {
                 columnDbExtension.BuildElementCurves();
-                List<Curve> curves = new List<Curve>();
-                if (polygon.Count > 0)
+                return columnDbExtension.ColumnCurves.Select(o => new ThRawIfcBuildingElementData()
                 {
-                    DBObjectCollection dbObjs = new DBObjectCollection();
-                    columnDbExtension.ColumnCurves.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex columnCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    var pline = new Polyline()
-                    {
-                        Closed = true,
-                    };
-                    pline.CreatePolyline(polygon);
-                    foreach (var filterObj in columnCurveSpatialIndex.SelectCrossingPolygon(pline))
-                    {
-                        curves.Add(filterObj as Curve);
-                    }
-                }
-                else
-                {
-                    curves = columnDbExtension.ColumnCurves;
-                }
-                curves.ToCollection().UnionPolygons().Cast<Curve>()
-                    .ForEach(o =>
-                    {
-                        if (o is Polyline polyline && polyline.Area > 0.0)
-                        {
-                            var bufferObjs = polyline.Buffer(ThMEPEngineCoreCommon.ColumnBufferDistance);
-                            if (bufferObjs.Count == 1)
-                            {
-                                var outline = bufferObjs[0] as Polyline;
-                                Elements.Add(ThIfcColumn.Create(outline));
-                            }
-                        }
-                    });
+                    Geometry=o,
+                }).ToList();                
             }
+        }
+
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
+        {
+            List<Curve> curves = new List<Curve>();
+            var objs = datas.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
+            {
+                ThCADCoreNTSSpatialIndex columnCurveSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var pline = new Polyline()
+                {
+                    Closed = true,
+                };
+                pline.CreatePolyline(polygon);
+                foreach (var filterObj in columnCurveSpatialIndex.SelectCrossingPolygon(pline))
+                {
+                    curves.Add(filterObj as Curve);
+                }
+            }
+            else
+            {
+                curves = objs.Cast<Curve>().ToList();
+            }
+            curves.ToCollection().UnionPolygons().Cast<Curve>()
+                .ForEach(o =>
+                {
+                    if (o is Polyline polyline && polyline.Area > 0.0)
+                    {
+                        var bufferObjs = polyline.Buffer(ThMEPEngineCoreCommon.ColumnBufferDistance);
+                        if (bufferObjs.Count == 1)
+                        {
+                            var outline = bufferObjs[0] as Polyline;
+                            Elements.Add(ThIfcColumn.Create(outline));
+                        }
+                    }
+                });
         }
     }
 }

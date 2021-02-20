@@ -6,6 +6,7 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -17,16 +18,40 @@ namespace ThMEPEngineCore.Engine
         {
             FindRatio = findRaio;
         }
-        public override void Recognize(Database database, Point3dCollection polygon)
+        public override List<ThRawIfcBuildingElementData> Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))            
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var doorStones = GetDoorStones(database, polygon);
-                var doorMarks = GetDoorMarks(database, polygon);
+                var doorStones = GetDoorStones(database, new Point3dCollection());
+                var doorMarks = GetDoorMarks(database, new Point3dCollection());
                 var outlines = ThMatchDoorStoneService.Match(doorStones, doorMarks, FindRatio);
-                outlines.ForEach(o => Elements.Add(new ThIfcDoor() { Outline = o }));
+
+                return outlines.Select(o=>new ThRawIfcBuildingElementData()
+                {
+                    Geometry=o,
+                }).ToList();
             }
         }
+
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
+        {
+            var curves = new DBObjectCollection();
+            var objs = datas.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
+            {
+                var doorStoneSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                foreach (var filterObj in doorStoneSpatialIndex.SelectCrossingPolygon(polygon))
+                {
+                    curves.Add(filterObj as Curve);
+                }
+            }
+            else
+            {
+                curves = objs;
+            }
+            curves.Cast<Curve>().ForEach(o => Elements.Add(new ThIfcDoor() { Outline = o }));
+        }
+
         private DBObjectCollection GetDoorStones(Database database, Point3dCollection polygon)
         {
             using (var doorStoneDbExtension = new ThDoorStoneDbExtension(database))

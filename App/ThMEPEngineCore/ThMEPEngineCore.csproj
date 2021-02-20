@@ -301,7 +301,6 @@
     <Compile Include="Service\ThSpatialIndexService.cs" />
     <Compile Include="Service\ThStructureBeamDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamTextDbExtension.cs" />
-    <Compile Include="Service\ThStructureColumnCurveExtension.cs" />
     <Compile Include="Service\ThStructureDbExtension.cs" />
     <Compile Include="Service\ThStructureUtils.cs" />
     <Compile Include="Service\ThHalfPrimaryBeamLinkExtension.cs" />

@@ -18,11 +18,6 @@ namespace ThMEPEngineCore.Service
         }
         public void Dispose()
         {
-            foreach (var text in BeamTexts)
-            {
-                text.Dispose();
-            }
-            BeamTexts.Clear();
         }
         public override void BuildElementCurves()
         {
