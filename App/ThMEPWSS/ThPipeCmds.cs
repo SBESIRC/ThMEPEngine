@@ -13,6 +13,8 @@ using System.Linq;
 using ThMEPWSS.Pipe.Layout;
 using ThMEPWSS.Pipe.Output;
 using ThMEPWSS.Pipe.Tools;
+using ThMEPWSS.Pipe.Service;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPWSS
 {
@@ -824,6 +826,27 @@ namespace ThMEPWSS
                 layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, userInfo.ScaleFactor, userInfo.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
             }
         }
-      
+        [CommandMethod("TIANHUACAD", "THSTOREYFRAME", CommandFlags.Modal)]
+        public void THSTOREYFRAME()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                PromptPointOptions sf = new PromptPointOptions("\n 选择要插入的基点位置");              
+                var tpipe =new List<Point3d>();
+                for (int i = 0; i < 10; i++)
+                {
+                    var result = Active.Editor.GetPoint(sf);
+                    if (result.Status == PromptStatus.OK)
+                    {
+                        tpipe.Add(result.Value);
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+                ThInsertStoreyFrameService.Insert(tpipe);
+            }
+        }    
     }
 }

@@ -34,14 +34,38 @@ namespace ThMEPWSS.Pipe.Engine
                     StandardSpaces = GetStandardSpaces(blockCollection);
                     NonStandardSpaces = GetNonStandardSpaces(blockCollection);
                 }        
-                var thisSpaces = Spaces;             
-                var basepoint = GetBaseCircles(blockCollection);
-                Polyline bound = StandardSpaces[0].Boundary as Polyline;            
-                var compositeroom = Getcompositeroom(database, bound.Vertices(), thisSpaces).Item1;
-                var compositebalconyroom = Getcompositeroom(database, bound.Vertices(), thisSpaces).Item2;
+                var thisSpaces = Spaces;
+                var basepoint = GetBaseCircles(blockCollection);                 
+                var compositeroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item1;
+                var compositebalconyroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item2;
                 var divisionLines = GetLines(blockCollection, thisSpaces);
                 Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);
             }
+        }
+        public static Point3dCollection GetBoundaryVertices(List<ThIfcSpace> StandardSpaces)
+        {
+            var Vertices = new Point3dCollection();
+            var minpt = new Point3d(double.MinValue,0,0);
+            var maxpt = new Point3d(double.MaxValue, 0, 0);
+            for (int i=0;i< StandardSpaces.Count;i++)
+            {
+                Polyline bound = StandardSpaces[i].Boundary as Polyline;
+                var minpoint = bound.GeometricExtents.MinPoint;
+                var maxpoint = bound.GeometricExtents.MaxPoint;
+                if (maxpoint.X> minpt.X)
+                {
+                    minpt = maxpoint;
+                }
+                if (minpoint.X < maxpt.X)
+                {
+                    maxpt = minpoint;
+                }
+            }            
+            Vertices.Add(maxpt);
+            Vertices.Add(new Point3d(minpt.X, maxpt.Y, 0));
+            Vertices.Add(minpt);
+            Vertices.Add(new Point3d(maxpt.X, minpt.Y, 0));
+            return Vertices;
         }
         public static List<ThIfcSpace> GetBaseCircles(List<BlockReference> blocks)
         {
