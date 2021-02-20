@@ -116,9 +116,11 @@ namespace ThMEPEngineCore.Service
                                 if (IsBuildElement(solid) &&
                                     CheckLayerValid(solid))
                                 {
-                                    var poly = solid.ToPolyline();
-                                    poly.TransformBy(matrix);
-                                    curves.Add(poly);
+                                    // 可能存在2D Solid不规范的情况
+                                    // 这里将原始2d Solid“清洗”处理
+                                    var clone = solid.WashClone();
+                                    clone.TransformBy(matrix);
+                                    curves.Add(clone.ToPolyline());
                                 }
                             }
                         }
