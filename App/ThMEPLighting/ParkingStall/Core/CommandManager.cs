@@ -36,7 +36,18 @@ namespace ThMEPLighting.ParkingStall.Core
             {
                 var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
                 var selectRelatedParkProfiles = InfoReader.MakeParkingStallPolys(wallPtCollection);
-                DrawUtils.DrawProfileDebug(selectRelatedParkProfiles.Polylines2Curves(), "parkingStall");
+                var srcPolys = new List<Polyline>();
+
+                foreach (var relatedParkProfile in selectRelatedParkProfiles)
+                {
+                    foreach (var entity in relatedParkProfile.Buffer(-ParkingStallCommon.ParkingPolyEnlargeLength))
+                    {
+                        if (entity is Polyline poly && poly.Closed)
+                            srcPolys.Add(poly);
+                    }
+                }
+
+                DrawUtils.DrawProfileDebug(srcPolys.Polylines2Curves(), "parkingStall");
             }
         }
 
