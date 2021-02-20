@@ -8,15 +8,15 @@ namespace ThMEPLighting
     {
         public void Initialize()
         {
-            //throw new System.NotImplementedException();
+            //
         }
 
         public void Terminate()
         {
-            //throw new System.NotImplementedException();
+            //
         }
 
-        [CommandMethod("TIANHUACAD", "THParkProfile", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THPARKPROFILE", CommandFlags.Modal)]
         public void THParkProfile()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

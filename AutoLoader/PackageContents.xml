@@ -169,6 +169,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -183,6 +184,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -197,6 +199,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -211,6 +214,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
