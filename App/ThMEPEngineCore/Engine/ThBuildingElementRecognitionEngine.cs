@@ -9,12 +9,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRawIfcBuildingElementData
-    {
-        public object Data { get; set; }
-        public DBObject Geometry { get; set; }
-    }
-
     public abstract class ThBuildingElementRecognitionEngine : IDisposable
     {
         public List<ThIfcBuildingElement> Elements { get; set; }
@@ -32,12 +26,8 @@ namespace ThMEPEngineCore.Engine
         public void Dispose()
         {
         }
-        public abstract List<ThRawIfcBuildingElementData> Extract(Database database);
         public abstract void Recognize(List<ThRawIfcBuildingElementData> objs, Point3dCollection polygon);
-        public void Recognize(Database database, Point3dCollection polygon)
-        {
-            Recognize(Extract(database), polygon);
-        }
+        public abstract void Recognize(Database database, Point3dCollection polygon);
         public IEnumerable<ThIfcBuildingElement> FilterByOutline(DBObjectCollection objs)
         {
             return Elements.Where(o => objs.Contains(o.Outline));

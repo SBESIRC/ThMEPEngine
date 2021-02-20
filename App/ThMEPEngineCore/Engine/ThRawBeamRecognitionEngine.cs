@@ -14,20 +14,31 @@ using NFox.Cad;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRawBeamRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThRawBeamExtractionEngine : ThBuildingElementExtractionEngine
     {
-        public override List<ThRawIfcBuildingElementData> Extract(Database database)
+        public override void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var beamDbExtension = new ThStructureBeamDbExtension(database))
             {
                 //获取梁线
                 beamDbExtension.BuildElementCurves();
-                return beamDbExtension.BeamCurves.Select(o => new ThRawIfcBuildingElementData()
+                Results = beamDbExtension.BeamCurves.Select(o => new ThRawIfcBuildingElementData()
                 {
                     Geometry = o,
                 }).ToList();
             }
+
+        }
+    }
+
+    public class ThRawBeamRecognitionEngine : ThBuildingElementRecognitionEngine
+    {
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThRawBeamExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
@@ -54,6 +65,6 @@ namespace ThMEPEngineCore.Engine
             {
                 Elements.Add(ThIfcLineBeam.Create(o.BeamBoundary));
             });
-        }
+        }     
     }
 }

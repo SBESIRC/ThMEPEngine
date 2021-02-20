@@ -12,19 +12,29 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThBeamRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThBeamExtractionEngine : ThBuildingElementExtractionEngine
     {
-        public override List<ThRawIfcBuildingElementData> Extract(Database database)
+        public override void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var beamTextDbExtension = new ThStructureBeamAnnotationDbExtension(Active.Database))
             {
                 beamTextDbExtension.BuildElementTexts();
-                return beamTextDbExtension.Annotations.Select(o => new ThRawIfcBuildingElementData()
+                Results = beamTextDbExtension.Annotations.Select(o => new ThRawIfcBuildingElementData()
                 {
                     Data = o,
                 }).ToList();
             }
+        }
+    }
+
+    public class ThBeamRecognitionEngine : ThBuildingElementRecognitionEngine
+    {
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThBeamExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)

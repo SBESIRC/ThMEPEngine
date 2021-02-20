@@ -10,19 +10,29 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThShearWallRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThShearWallExtractionEngine : ThBuildingElementExtractionEngine
     {
-        public override List<ThRawIfcBuildingElementData> Extract(Database database)
+        public override void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var shearWallDbExtension = new ThStructureShearWallDbExtension(database))
             {
                 shearWallDbExtension.BuildElementCurves();
-                return shearWallDbExtension.ShearWallCurves.Select(o => new ThRawIfcBuildingElementData()
+                Results = shearWallDbExtension.ShearWallCurves.Select(o => new ThRawIfcBuildingElementData()
                 {
                     Geometry = o,
                 }).ToList();
             }
+        }
+    }
+
+    public class ThShearWallRecognitionEngine : ThBuildingElementRecognitionEngine
+    {
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThShearWallExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
@@ -53,6 +63,6 @@ namespace ThMEPEngineCore.Engine
                     }
                 }
             });
-        }
+        }   
     }
 }

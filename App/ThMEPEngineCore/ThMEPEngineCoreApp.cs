@@ -502,7 +502,7 @@ namespace ThMEPEngineCore
         public void THExtractDoor()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var doorEngine = new ThDoorRecognitionEngine(1.0))
+            using (var doorEngine = new ThDoorRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)

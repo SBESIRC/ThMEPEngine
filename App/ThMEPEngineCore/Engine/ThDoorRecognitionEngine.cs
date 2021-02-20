@@ -11,47 +11,24 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThDoorRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThDoorExtractionEngine : ThBuildingElementExtractionEngine
     {
-        private double FindRatio { get; set; } = 1.0;
-        public ThDoorRecognitionEngine(double findRaio)
+        public double FindRatio { get; set; } = 1.0;
+
+        public override void Extract(Database database)
         {
-            FindRatio = findRaio;
-        }
-        public override List<ThRawIfcBuildingElementData> Extract(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))            
             {
                 var doorStones = GetDoorStones(database, new Point3dCollection());
                 var doorMarks = GetDoorMarks(database, new Point3dCollection());
                 var outlines = ThMatchDoorStoneService.Match(doorStones, doorMarks, FindRatio);
 
-                return outlines.Select(o=>new ThRawIfcBuildingElementData()
+                Results = outlines.Select(o => new ThRawIfcBuildingElementData()
                 {
-                    Geometry=o,
+                    Geometry = o,
                 }).ToList();
             }
         }
-
-        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
-        {
-            var curves = new DBObjectCollection();
-            var objs = datas.Select(o => o.Geometry).ToCollection();
-            if (polygon.Count > 0)
-            {
-                var doorStoneSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                foreach (var filterObj in doorStoneSpatialIndex.SelectCrossingPolygon(polygon))
-                {
-                    curves.Add(filterObj as Curve);
-                }
-            }
-            else
-            {
-                curves = objs;
-            }
-            curves.Cast<Curve>().ForEach(o => Elements.Add(new ThIfcDoor() { Outline = o }));
-        }
-
         private DBObjectCollection GetDoorStones(Database database, Point3dCollection polygon)
         {
             using (var doorStoneDbExtension = new ThDoorStoneDbExtension(database))
@@ -98,6 +75,35 @@ namespace ThMEPEngineCore.Engine
                 }
                 return marks;
             }
+        }
+    }
+
+    public class ThDoorRecognitionEngine : ThBuildingElementRecognitionEngine
+    {
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThDoorExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
+        }
+
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
+        {
+            var curves = new DBObjectCollection();
+            var objs = datas.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
+            {
+                var doorStoneSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                foreach (var filterObj in doorStoneSpatialIndex.SelectCrossingPolygon(polygon))
+                {
+                    curves.Add(filterObj as Curve);
+                }
+            }
+            else
+            {
+                curves = objs;
+            }
+            curves.Cast<Curve>().ForEach(o => Elements.Add(new ThIfcDoor() { Outline = o }));
         }
     }
 }

@@ -11,19 +11,29 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThArchitectureWallRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThArchitectureWallExtractionEngine : ThBuildingElementExtractionEngine
     {
-        public override List<ThRawIfcBuildingElementData> Extract(Database database)
+        public override void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var archWallDbExtension = new ThArchitectureWallDbExtension(database))
             {
                 archWallDbExtension.BuildElementCurves();
-                return archWallDbExtension.WallCurves.Select(o => new ThRawIfcBuildingElementData()
+                Results = archWallDbExtension.WallCurves.Select(o => new ThRawIfcBuildingElementData()
                 {
                     Geometry = o,
                 }).ToList();
             }
+        }
+    }
+
+    public class ThArchitectureWallRecognitionEngine : ThBuildingElementRecognitionEngine
+    {
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThArchitectureWallExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)

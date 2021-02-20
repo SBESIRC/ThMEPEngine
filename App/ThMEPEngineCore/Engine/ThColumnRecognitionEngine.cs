@@ -13,19 +13,29 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThColumnRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThColumnExtractionEngine : ThBuildingElementExtractionEngine
     {
-        public override List<ThRawIfcBuildingElementData> Extract(Database database)
+        public override void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var columnDbExtension = new ThStructureColumnDbExtension(database))
             {
                 columnDbExtension.BuildElementCurves();
-                return columnDbExtension.ColumnCurves.Select(o => new ThRawIfcBuildingElementData()
+                Results = columnDbExtension.ColumnCurves.Select(o => new ThRawIfcBuildingElementData()
                 {
-                    Geometry=o,
-                }).ToList();                
+                    Geometry = o,
+                }).ToList();
             }
+        }
+    }
+
+    public class ThColumnRecognitionEngine : ThBuildingElementRecognitionEngine
+    {
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThColumnExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
