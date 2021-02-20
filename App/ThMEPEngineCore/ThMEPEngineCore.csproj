@@ -102,6 +102,7 @@
     <Compile Include="Engine\ThSpaceRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThWashMachineRecognitionEngine.cs" />
+    <Compile Include="Engine\ThWindowRecognition.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
     <Compile Include="Features\ThGeometryFeatureCollection.cs" />
     <Compile Include="Features\ThBeamFeatureCollection.cs" />
