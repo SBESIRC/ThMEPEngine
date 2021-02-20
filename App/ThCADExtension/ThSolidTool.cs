@@ -57,11 +57,25 @@ namespace ThCADExtension
 
         public static Solid ToSolid(this Polyline polyline)
         {
-            return new Solid(
+            if(polyline.NumberOfVertices==3)
+            {
+                return new Solid(
                 polyline.GetPoint3dAt(0),
                 polyline.GetPoint3dAt(1),
-                polyline.GetPoint3dAt(3),
                 polyline.GetPoint3dAt(2));
+            }
+            else if(polyline.NumberOfVertices == 4)
+            {
+                return new Solid(
+                   polyline.GetPoint3dAt(0),
+                   polyline.GetPoint3dAt(1),
+                   polyline.GetPoint3dAt(3),
+                   polyline.GetPoint3dAt(2));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }
