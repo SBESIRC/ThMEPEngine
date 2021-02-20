@@ -70,8 +70,12 @@ namespace ThMEPEngineCore.Service
                                     {
                                         // 获取车位块的OBB
                                         // 用OBB创建一个矩形多段线来“代替”车位块
+                                        // 在变换到WCS时，由于误差，变换可能包含NonUniform Scaling
+                                        // 考虑到2d Solid支持NonUniform Scaling
+                                        // 这里借用2d Solid来完成变换
                                         var btr = acadDatabase.Blocks.Element(blockObj.BlockTableRecord);
-                                        ents.Add(btr.GeometricExtents().ToRectangle().GetTransformedCopy(mcs2wcs));
+                                        var rectangle = btr.GeometricExtents().ToRectangle();
+                                        ents.Add(GetTransformedRectangle(rectangle, mcs2wcs));
                                     }
                                     ents.AddRange(BuildElementCurves(blockObj, mcs2wcs));
                                 }
@@ -81,6 +85,13 @@ namespace ThMEPEngineCore.Service
                 }
                 return ents;
             }
+        }
+
+        private Polyline GetTransformedRectangle(Polyline rectangle, Matrix3d matrix)
+        {
+            var solid = rectangle.ToSolid();
+            solid.TransformBy(matrix);
+            return solid.ToPolyline();
         }
 
         public override void BuildElementTexts()
