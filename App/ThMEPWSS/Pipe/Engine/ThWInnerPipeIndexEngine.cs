@@ -105,9 +105,12 @@ namespace ThMEPWSS.Pipe.Engine
                     //对各组节点重新排序
                     var pipeindex = new Point3dCollection();
                     List<int> num = new List<int>();
-                    var center = Getcenter(pipeList[i], pboundary, toiletPoint, balconyPoint);
-                    pipeindex= RightIndex(GetPositvevertices(pipeList[i], center), GetNegativevertices(pipeList[i], center), i);                                                                                                           
-                    index.Add(pipeindex);
+                    if (pipeList[i].Count > 0)
+                    {
+                        var center = Getcenter(pipeList[i], pboundary, toiletPoint, balconyPoint);
+                        pipeindex = RightIndex(GetPositvevertices(pipeList[i], center), GetNegativevertices(pipeList[i], center), i);
+                        index.Add(pipeindex);
+                    }            
                 }
                 return index;
             }
