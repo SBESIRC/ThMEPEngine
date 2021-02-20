@@ -36,7 +36,7 @@ namespace ThMEPLighting.Garage.Service
                 var tvs = new TypedValue[]
                 {
                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(BlockReference)).DxfName),
-                    new TypedValue((int)DxfCode.ExtendedDataRegAppName,ThGarageLightCommon.ThGarageLightAppName),
+                    //new TypedValue((int)DxfCode.ExtendedDataRegAppName,ThGarageLightCommon.ThGarageLightAppName),
                 };
                 var sf = new SelectionFilter(tvs);
                 var psr = Active.Editor.SelectAll(sf);

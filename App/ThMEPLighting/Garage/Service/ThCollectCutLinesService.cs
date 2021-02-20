@@ -65,8 +65,7 @@ namespace ThMEPLighting.Garage.Service
         }
         private List<Line> Preprocess(List<Line> lines)
         {
-            var newLines = new List<Line>();
-            lines.ForEach(o => newLines.Add(o.ExtendLine(1.0)));
+            var newLines =ThPreprocessLineService.Preprocess(lines);
             var nodedLines = ThLaneLineEngine.Noding(newLines.ToCollection());
             nodedLines = ThLaneLineEngine.CleanZeroCurves(nodedLines);
             return nodedLines.Cast<Line>().ToList();

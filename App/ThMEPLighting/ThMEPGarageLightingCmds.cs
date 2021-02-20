@@ -284,7 +284,7 @@ namespace ThMEPLighting
                         {
                             var lineTvs = new TypedValueList
                             {
-                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
+                                //{ (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
                                 { (int)DxfCode.Start, RXClass.GetClass(typeof(Line)).DxfName},
                                 { (int)DxfCode.LayerName, racewayParameter.CenterLineParameter.Layer}
                             };
@@ -292,17 +292,25 @@ namespace ThMEPLighting
 
                             var blkTvs = new TypedValueList
                             {
-                                { (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
+                                //{ (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
                                 { (int)DxfCode.Start, RXClass.GetClass(typeof(BlockReference)).DxfName},
                                 { (int)DxfCode.LayerName, racewayParameter.LaneLineBlockParameter.Layer}
                             };
                             var lightBlks = newBorder.GetEntities(blkTvs).Cast<BlockReference>().ToList();
 
+                            var textTvs = new TypedValueList
+                            {
+                                { (int)DxfCode.Start, RXClass.GetClass(typeof(DBText)).DxfName},
+                                { (int)DxfCode.LayerName, racewayParameter.NumberTextParameter.Layer}
+                            };
+                            var numberTexts = newBorder.GetEntities(textTvs).Cast<DBText>().ToList();
+
                             var regionLightEdge = new ThRegionLightEdge
                             {
                                 RegionBorder = newBorder,
                                 Lights = lightBlks,
-                                Edges = centerLines
+                                Edges = centerLines,
+                                Texts = numberTexts
                             };
                             results.Add(regionLightEdge);
                         }

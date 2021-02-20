@@ -12,6 +12,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using System.Text;
+using System.Text.RegularExpressions;
 
 namespace ThMEPLighting.Common
 {
@@ -375,6 +377,21 @@ namespace ThMEPLighting.Common
                 }
             }
             return newLine.Normalize();
+        }
+
+        public static bool IsLightNumber(string text)
+        {
+            var sb = new StringBuilder();
+            sb.Append('^');
+            var str = ThGarageLightCommon.LightNumberPrefix;
+            for (int i=0;i< str.Length;i++)
+            {
+                sb.Append('[');
+                sb.Append(str[i]);
+                sb.Append(']');
+            }
+            sb.Append(@"\d+$");
+            return Regex.IsMatch(text, sb.ToString());
         }
     }
 }

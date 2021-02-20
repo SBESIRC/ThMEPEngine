@@ -5,11 +5,13 @@ using ThMEPLighting.Common;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Garage.Service;
 
 namespace ThMEPLighting.Garage.Engine
 {
     public class ThSumNumberEngine:IDisposable
     {
+        public double FindLength { get; set; } = 500.0;
         public Dictionary<Polyline, List<ThLightSumInfo>> SumInfos { get; set; }
         public ThSumNumberEngine()
         {
@@ -24,10 +26,15 @@ namespace ThMEPLighting.Garage.Engine
             var lightInfos = new List<Tuple<string, EdgePattern>>();
             regionLightEdge.Lights.ForEach(o =>
             {
-                var lightInfo = XDataTools.GetXData(o.ObjectId, ThGarageLightCommon.ThGarageLightAppName);
-                if(lightInfo.Count>2)
+                var lightNumer = ThFindLightBlockNumberService.Find(o.Position, regionLightEdge.Edges, regionLightEdge.Texts,FindLength);
+                //var lightInfo = XDataTools.GetXData(o.ObjectId, ThGarageLightCommon.ThGarageLightAppName);
+                //if(lightInfo.Count>2)
+                //{
+                //    lightInfos.Add(Tuple.Create(lightInfo[1].Value.ToString(), ThLightEdge.Trans(lightInfo[2].Value.ToString())));
+                //}
+                if(!string.IsNullOrEmpty(lightNumer))
                 {
-                    lightInfos.Add(Tuple.Create(lightInfo[1].Value.ToString(), ThLightEdge.Trans(lightInfo[2].Value.ToString())));
+                    lightInfos.Add(Tuple.Create(lightNumer,EdgePattern.Unknown));
                 }
             });
             var sumInfos = new List<ThLightSumInfo>();

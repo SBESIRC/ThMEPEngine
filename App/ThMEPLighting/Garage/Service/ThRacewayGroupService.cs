@@ -40,11 +40,11 @@ namespace ThMEPLighting.Garage.Service
                 {
                     var lineId = acadDatabase.ModelSpace.Add(o);
                     ObjIds.Add(lineId);
-                    TypedValueList lineValueList = new TypedValueList
-                    {
-                        { (int)DxfCode.ExtendedDataAsciiString, "CableTray"},
-                    };
-                    XDataTools.AddXData(lineId, ThGarageLightCommon.ThGarageLightAppName, lineValueList);
+                    //TypedValueList lineValueList = new TypedValueList
+                    //{
+                    //    { (int)DxfCode.ExtendedDataAsciiString, "CableTray"},
+                    //};
+                    //XDataTools.AddXData(lineId, ThGarageLightCommon.ThGarageLightAppName, lineValueList);
                 });
                 var groupName = Guid.NewGuid().ToString();
                 GroupTools.CreateGroup(acadDatabase.Database, groupName, ObjIds);

@@ -225,11 +225,11 @@ namespace ThMEPLighting.Garage.Engine
                     ports.ForEach(p => p.Linetype = "Bylayer");
                     ports.ForEach(p => objIds.Add(acadDatabase.ModelSpace.Add(p)));                   
                     DrawObjIs.AddRange(objIds);
-                    var lineValueList = new TypedValueList
-                    {
-                        { (int)DxfCode.ExtendedDataAsciiString, "CableTray"},
-                    };
-                    objIds.ForEach(l=> XDataTools.AddXData(l, ThGarageLightCommon.ThGarageLightAppName, lineValueList));
+                    //var lineValueList = new TypedValueList
+                    //{
+                    //    { (int)DxfCode.ExtendedDataAsciiString, "CableTray"},
+                    //};
+                    //objIds.ForEach(l=> XDataTools.AddXData(l, ThGarageLightCommon.ThGarageLightAppName, lineValueList));
                     var groupName = Guid.NewGuid().ToString();
                     GroupTools.CreateGroup(acadDatabase.Database, groupName, objIds);
                 }); 

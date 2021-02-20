@@ -86,6 +86,7 @@
     <Compile Include="Garage\Service\ThFilterElbowCenterLineService.cs" />
     <Compile Include="Garage\Service\ThFindFirstEdgePortsService.cs" />
     <Compile Include="Garage\Service\ThFindFirstLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindLightBlockNumberService.cs" />
     <Compile Include="Garage\Service\ThFindLinkService.cs" />
     <Compile Include="Garage\Service\ThFindCenterPairLinesService.cs" />
     <Compile Include="Garage\Service\ThFindLongestPathService.cs" />

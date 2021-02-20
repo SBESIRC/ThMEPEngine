@@ -8,11 +8,15 @@ namespace ThMEPLighting.Garage.Model
         public Polyline RegionBorder { get; set; }
         public List<BlockReference> Lights { get; set; }
         public List<Line> Edges { get; set; }
+
+        public List<DBText> Texts { get; set; }
+
         public ThRegionLightEdge()
         {
             RegionBorder = new Polyline();
             Lights = new List<BlockReference>();
             Edges = new List<Line>();
+            Texts = new List<DBText>();
         }
     }
 }
