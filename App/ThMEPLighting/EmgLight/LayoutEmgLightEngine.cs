@@ -56,6 +56,13 @@ namespace ThMEPLighting.EmgLight
                 var StructFilterService = new StructFilterService(thLane, columns, walls);
 
                var layoutServer= StructFilterService.getStructSeg();
+
+                var b = false;
+                if (b == true)
+                {
+                    continue;
+                }
+
                 StructFilterService.FilterStruct(layoutServer,frame);
                
                 if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
@@ -64,11 +71,6 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
-                var b = false;
-                if (b == true)
-                {
-                    continue;
-                }
 
                 ////找出平均的一边. -1:no side 0:left 1:right.
                 int uniformSide = FindUniformSideService.IfHasUniformSide(layoutServer, out var columnDistList);
