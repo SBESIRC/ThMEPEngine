@@ -5,7 +5,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Features;
 using System.Collections.Generic;
 
-namespace ThMEPEngineCore.IO
+namespace ThMEPEngineCore.IO.GeoJSON
 {
     public class ThShearWallGeoJsonWriter : GeoJsonWriter
     {

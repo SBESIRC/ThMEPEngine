@@ -6,7 +6,7 @@ using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Newtonsoft.Json;
-using ThMEPEngineCore.IO;
+using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;

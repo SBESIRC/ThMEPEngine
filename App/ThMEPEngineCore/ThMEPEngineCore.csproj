@@ -112,11 +112,11 @@
     <Compile Include="Features\ThShearWallFeatureCollection.cs" />
     <Compile Include="Features\ThThShearWallFeature.cs" />
     <Compile Include="Interface\ICalculateBeam.cs" />
-    <Compile Include="IO\ThBeamGeoJsonReader.cs" />
-    <Compile Include="IO\ThGeometryJsonWriter.cs" />
-    <Compile Include="IO\ThColumnGeoJsonWriter.cs" />
-    <Compile Include="IO\ThBeamGeoJsonWriter.cs" />
-    <Compile Include="IO\ThShearWallGeoJsonWriter.cs" />
+    <Compile Include="IO\GeoJSON\ThBeamGeoJsonReader.cs" />
+    <Compile Include="IO\GeoJSON\ThGeometryJsonWriter.cs" />
+    <Compile Include="IO\GeoJSON\ThColumnGeoJsonWriter.cs" />
+    <Compile Include="IO\GeoJSON\ThBeamGeoJsonWriter.cs" />
+    <Compile Include="IO\GeoJSON\ThShearWallGeoJsonWriter.cs" />
     <Compile Include="LaneLine\ThLaneLineEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineExtendEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineJoinEngine.cs" />
@@ -388,6 +388,9 @@
   </Choose>
   <ItemGroup>
     <PackageReference Include="Xbim.Essentials" Version="5.1.297" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="IO\DWG\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

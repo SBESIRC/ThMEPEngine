@@ -7,13 +7,13 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Features;
 using System.Collections.Generic;
 
-namespace ThMEPEngineCore.IO
+namespace ThMEPEngineCore.IO.GeoJSON
 {
-    public class ThBeamGeoJsonWriter : GeoJsonWriter
+    public class ThGeometryJsonWriter : GeoJsonWriter
     {
-        public void Write(List<ThIfcBeam> beams, JsonWriter writer)
+        public void Write(List<ThGeometry> geos, JsonWriter writer)
         {
-            ThBeamFeatureCollection.Construct(beams)
+            ThGeometryFeatureCollection.Construct(geos)
                 .OrderBy(o => o.Geometry, new ThCADCoreNTSGeometryComparer()).ForEach(o => Write(o, writer));
         }
     }

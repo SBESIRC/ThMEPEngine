@@ -6,15 +6,14 @@ using NetTopologySuite.IO;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Features;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.IO
+namespace ThMEPEngineCore.IO.GeoJSON
 {
-    public class ThGeometryJsonWriter : GeoJsonWriter
+    public class ThBeamGeoJsonWriter : GeoJsonWriter
     {
-        public void Write(List<ThGeometry> geos, JsonWriter writer)
+        public void Write(List<ThIfcBeam> beams, JsonWriter writer)
         {
-            ThGeometryFeatureCollection.Construct(geos)
+            ThBeamFeatureCollection.Construct(beams)
                 .OrderBy(o => o.Geometry, new ThCADCoreNTSGeometryComparer()).ForEach(o => Write(o, writer));
         }
     }
