@@ -260,19 +260,21 @@ namespace ThMEPLighting
         }
         private List<ThRegionLightEdge> GetFireRegionLights()
         {
-            var results = new List<ThRegionLightEdge>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var pso = new PromptSelectionOptions()
+                var options = new PromptSelectionOptions()
                 {
+                    AllowDuplicates = false,
                     MessageForAdding = "\n请选择布灯的区域框线",
+                    RejectObjectsOnLockedLayers = true,
                 };
-                TypedValue[] tvs = new TypedValue[]
+                var dxfNames = new string[]
                 {
-                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Polyline)).DxfName)
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
-                SelectionFilter sf = new SelectionFilter(tvs);
-                var result = Active.Editor.GetSelection(pso, sf);
+                var results = new List<ThRegionLightEdge>();
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status == PromptStatus.OK)
                 {
                     var racewayParameter = new ThRacewayParameter();
@@ -282,42 +284,34 @@ namespace ThMEPLighting
                         var newBorder = ThMEPFrameService.NormalizeEx(border);
                         if (newBorder.Area > 0)
                         {
-                            var lineTvs = new TypedValueList
-                            {
-                                //{ (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
-                                { (int)DxfCode.Start, RXClass.GetClass(typeof(Line)).DxfName},
-                                { (int)DxfCode.LayerName, racewayParameter.CenterLineParameter.Layer}
-                            };
-                            var centerLines = newBorder.GetEntities(lineTvs).Cast<Line>().ToList();
+                            var lines = acdb.ModelSpace
+                            .OfType<Line>()
+                            .Where(l => l.Layer == racewayParameter.CenterLineParameter.Layer);
+                            var centerLines = newBorder.SpatialFilter(lines.ToCollection()).Cast<Line>().ToList();
 
-                            var blkTvs = new TypedValueList
-                            {
-                                //{ (int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName},
-                                { (int)DxfCode.Start, RXClass.GetClass(typeof(BlockReference)).DxfName},
-                                { (int)DxfCode.LayerName, racewayParameter.LaneLineBlockParameter.Layer}
-                            };
-                            var lightBlks = newBorder.GetEntities(blkTvs).Cast<BlockReference>().ToList();
+                            var blks = acdb.ModelSpace
+                            .OfType<BlockReference>()
+                            .Where(b => b.Layer == racewayParameter.LaneLineBlockParameter.Layer);
+                            var lightBlks = newBorder.SpatialFilter(blks.ToCollection()).Cast<BlockReference>().ToList();
 
-                            var textTvs = new TypedValueList
-                            {
-                                { (int)DxfCode.Start, RXClass.GetClass(typeof(DBText)).DxfName},
-                                { (int)DxfCode.LayerName, racewayParameter.NumberTextParameter.Layer}
-                            };
-                            var numberTexts = newBorder.GetEntities(textTvs).Cast<DBText>().ToList();
+                            var texts = acdb.ModelSpace
+                            .OfType<DBText>()
+                            .Where(t => t.Layer == racewayParameter.NumberTextParameter.Layer);
+                            var numberTexts = newBorder.SpatialFilter(texts.ToCollection()).Cast<DBText>().ToList();
 
                             var regionLightEdge = new ThRegionLightEdge
                             {
-                                RegionBorder = newBorder,
                                 Lights = lightBlks,
                                 Edges = centerLines,
-                                Texts = numberTexts
+                                Texts = numberTexts,
+                                RegionBorder = newBorder,
                             };
                             results.Add(regionLightEdge);
                         }
                     });
                 }
+                return results;
             }
-            return results;
         }
         private List<ThRegionBorder> GetFireRegionBorders()
         {
