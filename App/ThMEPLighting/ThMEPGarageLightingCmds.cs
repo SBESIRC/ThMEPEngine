@@ -123,9 +123,6 @@ namespace ThMEPLighting
                     return;
                 }
 
-                //创建块的索引，偏于后期查询
-                arrangeParameter.LightBlockQueryService= ThQueryLightBlockService.Create(
-                        regionBorders.Select(o => o.RegionBorder).ToList());
                 //以上是准备输入参数
                 ThArrangementEngine arrangeEngine = null;                
                 if (arrangeParameter.IsSingleRow)

@@ -15,6 +15,7 @@ namespace ThMEPLighting.Garage.Engine
     public class ThSingleRowNumberEngine : ThBuildNumberEngine, IDisposable
     {
         public List<ThLightEdge> DxLightEdges { get; set; }
+        public ThQueryLightBlockService QueryLightBlockService { get; set; }
         public ThSingleRowNumberEngine(
             List<Point3d> ports,
             List<ThLightEdge> lightEdges,
@@ -48,7 +49,7 @@ namespace ThMEPLighting.Garage.Engine
                 var centerStart = LaneServer.getMergedOrderedLane(centerEdges);
                 centerEdges.ForEach(o => o.IsTraversed = false);
                 lightGraph = ThLightGraphService.Build(centerEdges, centerStart);
-                ThSingleRowDistributeService.Distribute(lightGraph, ArrangeParameter);
+                ThSingleRowDistributeService.Distribute(lightGraph, ArrangeParameter, QueryLightBlockService);
                 UpdateLoopNumber(lightGraph);
                 ThSingleRowNumberService.Number(lightGraph, ArrangeParameter);
                 lightGraph.Links.ForEach(o => DxLightEdges.AddRange(o.Path));

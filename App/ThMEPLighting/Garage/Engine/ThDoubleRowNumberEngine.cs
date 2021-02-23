@@ -16,17 +16,16 @@ namespace ThMEPLighting.Garage.Engine
     {
         public List<ThLightEdge> FirstLightEdges { get; set; }
         public List<ThLightEdge> SecondLightEdges { get; set; }
-        private ThWireOffsetDataService WireOffsetDataService { get; set;}
+        public ThWireOffsetDataService WireOffsetDataService { get; set;}
+        public ThQueryLightBlockService QueryLightBlockService { get; set; }
         public ThDoubleRowNumberEngine(
             List<Point3d> centerPorts,
             List<ThLightEdge> centerLineEdges,
             List<ThLightEdge> firstLightEdges,
-            ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService):base(centerPorts, centerLineEdges, arrangeParameter)
+            ThLightArrangeParameter arrangeParameter):base(centerPorts, centerLineEdges, arrangeParameter)
         {
             FirstLightEdges = firstLightEdges;            
-            SecondLightEdges = new List<ThLightEdge>();            
-            WireOffsetDataService = wireOffsetDataService;
+            SecondLightEdges = new List<ThLightEdge>();
         }
         public void Dispose()
         {
@@ -88,7 +87,7 @@ namespace ThMEPLighting.Garage.Engine
                 }
                 //布点
                 var distributedEdges = ThDoubleRowDistributeService.Distribute(
-                    firstLightGraph, ArrangeParameter, WireOffsetDataService);
+                    firstLightGraph, ArrangeParameter, WireOffsetDataService, QueryLightBlockService);
                 UpdateLoopNumber(firstLightGraph);
                 //对1号线的边编号
                 ThDoubleRowNumberService.Number(firstLightGraph, ArrangeParameter, WireOffsetDataService);

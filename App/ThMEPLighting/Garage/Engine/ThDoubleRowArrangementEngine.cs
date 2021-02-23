@@ -72,9 +72,11 @@ namespace ThMEPLighting.Garage.Engine
             var wireOffsetDataService = ThWireOffsetDataService.Create(innerOuterCircles);
             //布灯
             using (var buildNumberEngine = new ThDoubleRowNumberEngine(
-                centerPorts, centerLightEdges, firstLightEdges,
-                ArrangeParameter, wireOffsetDataService))
+                centerPorts, centerLightEdges, firstLightEdges, ArrangeParameter))
             {
+                var service = ThQueryLightBlockService.Create(regionBorder.RegionBorder, RacewayParameter.LaneLineBlockParameter.Layer);
+                buildNumberEngine.QueryLightBlockService = service;
+                buildNumberEngine.WireOffsetDataService = wireOffsetDataService;
                 buildNumberEngine.Build();
                 regionBorder.LightEdges.AddRange(buildNumberEngine.FirstLightEdges);
                 regionBorder.LightEdges.AddRange(buildNumberEngine.SecondLightEdges);

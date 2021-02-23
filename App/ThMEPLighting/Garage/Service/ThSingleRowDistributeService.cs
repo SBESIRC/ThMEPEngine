@@ -4,7 +4,6 @@ using ThMEPLighting.Common;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
-using ThMEPLighting.Garage.Worker;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -12,17 +11,22 @@ namespace ThMEPLighting.Garage.Service
     {
         private ThLightGraphService LightGraph { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
+        private ThQueryLightBlockService QueryLightBlockService { get; set; }
         private ThSingleRowDistributeService(
             ThLightGraphService lightGraph,
-            ThLightArrangeParameter arrangeParameter)
+            ThLightArrangeParameter arrangeParameter,
+            ThQueryLightBlockService queryLightBlockService)
         {
             LightGraph = lightGraph;
             ArrangeParameter = arrangeParameter;
+            QueryLightBlockService = queryLightBlockService;
         }
-        public static void Distribute(ThLightGraphService lightGraph,
-            ThLightArrangeParameter arrangeParameter)
+        public static void Distribute(
+            ThLightGraphService lightGraph,
+            ThLightArrangeParameter arrangeParameter,
+            ThQueryLightBlockService queryLightBlockService)
         {
-            var instance = new ThSingleRowDistributeService(lightGraph, arrangeParameter);
+            var instance = new ThSingleRowDistributeService(lightGraph, arrangeParameter, queryLightBlockService);
             instance.Distribute();
         }
         private void Distribute()
@@ -57,7 +61,7 @@ namespace ThMEPLighting.Garage.Service
                 }
                 i = j - 1;
                 //建造路线上的灯(计算或从图纸获取)
-                var singleRowNumberInstance=ThBuildSingleRowPosService.Build(start,edges, ArrangeParameter);
+                var singleRowNumberInstance=ThBuildSingleRowPosService.Build(start,edges, ArrangeParameter,QueryLightBlockService);
                 start = singleRowNumberInstance.EndPt; //下一段的起始点是上一段的结束点
             }
         }   

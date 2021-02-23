@@ -1,5 +1,4 @@
-﻿using ThMEPLighting.Garage.Service;
-
+﻿
 namespace ThMEPLighting.Garage.Model
 {
     public class ThLightArrangeParameter
@@ -24,7 +23,7 @@ namespace ThMEPLighting.Garage.Model
         /// <summary>
         /// 单排布置
         /// </summary>
-        public bool IsSingleRow { get; set; }
+        public bool IsSingleRow { get; set; } = false;
         /// <summary>
         /// 回路数量
         /// </summary>
@@ -36,17 +35,15 @@ namespace ThMEPLighting.Garage.Model
         /// <summary>
         /// 自动计算回路数量
         /// </summary>
-        public bool AutoCalculate { get; set; }
+        public bool AutoCalculate { get; set; } = false;
         /// <summary>
         /// 图纸比例
         /// </summary>
-        public int PaperRatio { get; set; }
-
-        public ThQueryLightBlockService LightBlockQueryService { get; set; }
+        public double PaperRatio { get; set; } = 1.0;
         /// <summary>
         /// 最小边的长度
         /// </summary>
-        public double MinimumEdgeLength { get; set; }
+        public double MinimumEdgeLength { get; set; } = 100.0;
         /// <summary>
         /// 灯编号文字高度
         /// </summary>

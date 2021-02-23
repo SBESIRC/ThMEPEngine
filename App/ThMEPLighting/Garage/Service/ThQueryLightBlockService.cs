@@ -1,86 +1,57 @@
-﻿using AcHelper;
+﻿using NFox.Cad;
 using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
     public class ThQueryLightBlockService
     {
-        private List<Polyline> Regions { get; set; }
+        private string Layer { get; set; }
+        private Polyline Region { get; set; }
         public ThCADCoreNTSSpatialIndex PrimarySpatialIndex { get; set; }
-        public Dictionary<Polyline, ThCADCoreNTSSpatialIndex> SecondarySpatialIndex { get; set; }
-        private ThQueryLightBlockService(List<Polyline> regions)
+        public ThCADCoreNTSSpatialIndex SecondarySpatialIndex { get; set; }
+        private ThQueryLightBlockService(Polyline region, string layer)
         {
-            Regions = regions;
-            SecondarySpatialIndex = new Dictionary<Polyline, ThCADCoreNTSSpatialIndex>();
+            Layer = layer;
+            Region = region;
         }
-        public static ThQueryLightBlockService Create(List<Polyline> regions)
+        public static ThQueryLightBlockService Create(Polyline region, string layer)
         {
-            var instance = new ThQueryLightBlockService(regions);
-            instance.create();
+            var instance = new ThQueryLightBlockService(region, layer);
+            instance.Create();
             return instance;
         }
-        private void create()
+        private void Create()
         {
             using (var acadDatabase = AcadDatabase.Active())
             {
-                var tvs = new TypedValue[]
-                {
-                    new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(BlockReference)).DxfName),
-                    //new TypedValue((int)DxfCode.ExtendedDataRegAppName,ThGarageLightCommon.ThGarageLightAppName),
-                };
-                var sf = new SelectionFilter(tvs);
-                var psr = Active.Editor.SelectAll(sf);
-                if (psr.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-                {
-                    var blocks = new DBObjectCollection();
-                    psr.Value.GetObjectIds().ForEach(o => blocks.Add(acadDatabase.Element<BlockReference>(o)));
-                    PrimarySpatialIndex = new ThCADCoreNTSSpatialIndex(blocks);
-                    Regions.ForEach(o =>
-                    {
-                        var regionBlocks = PrimarySpatialIndex.SelectCrossingPolygon(o);
-                        SecondarySpatialIndex.Add(o, new ThCADCoreNTSSpatialIndex(regionBlocks));
-                    });
-                }
+                var blks = acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(b => b.Layer == Layer);
+                PrimarySpatialIndex = new ThCADCoreNTSSpatialIndex(blks.ToCollection());
+                SecondarySpatialIndex = new ThCADCoreNTSSpatialIndex(PrimarySpatialIndex.SelectCrossingPolygon(Region));
             }
         }
-
         public List<Point3d> Query(Line edge, double width = 1.0)
         {
-            var results = new List<Point3d>();
-            var spatialIndex = PrimarySpatialIndex;
-            foreach (var item in SecondarySpatialIndex)
-            {
-                if(item.Key.Contains(edge))
-                {
-                    spatialIndex = item.Value;                    
-                    break;
-                }
-            }
             var outline = ThDrawTool.ToOutline(edge.StartPoint, edge.EndPoint, width);
-            var blocks = spatialIndex
+            var blocks = SecondarySpatialIndex
                 .SelectCrossingPolygon(outline)
                 .Cast<BlockReference>().ToList();
-            results = Filter(blocks, edge, width);
-            return results;
+            return Filter(blocks, edge, width);
         }
-
-        private List<Point3d> Filter(List<BlockReference> blocks,Line edge,double tolerance=1.0)
+        private List<Point3d> Filter(List<BlockReference> blocks, Line edge, double tolerance = 1.0)
         {
             var results = new List<Point3d>();
             blocks.ForEach(o =>
                 {
                     var projectionPt = ThGeometryTool.GetProjectPtOnLine(o.Position, edge.StartPoint, edge.EndPoint);
-                    if(projectionPt.DistanceTo(o.Position)<= tolerance)
+                    if (projectionPt.DistanceTo(o.Position) <= tolerance)
                     {
                         if (ThGeometryTool.IsPointOnLine(edge.StartPoint, edge.EndPoint, projectionPt))
                         {

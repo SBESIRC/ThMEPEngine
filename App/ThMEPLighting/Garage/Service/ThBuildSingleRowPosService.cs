@@ -10,28 +10,29 @@ namespace ThMEPLighting.Garage.Service
 {
     public class ThBuildSingleRowPosService
     {
-        private Point3d StartPt { get; set; }
         public Point3d EndPt { get; set; }
-        /// <summary>
-        /// 共线且相连
-        /// </summary>
+        private Point3d StartPt { get; set; }
         private List<ThLightEdge> Edges { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
+        private ThQueryLightBlockService QueryLightBlockService { get; set; }
         private ThBuildSingleRowPosService(
             Point3d startPt,
             List<ThLightEdge> edges,
-            ThLightArrangeParameter arrangeParameter)
+            ThLightArrangeParameter arrangeParameter,
+            ThQueryLightBlockService queryLightBlockService)
         {
             StartPt = startPt;
             Edges = edges;
             ArrangeParameter = arrangeParameter;
+            QueryLightBlockService = queryLightBlockService;
         }
         public static ThBuildSingleRowPosService Build(
             Point3d startPt,
             List<ThLightEdge> edges,
-            ThLightArrangeParameter arrangeParameter)
+            ThLightArrangeParameter arrangeParameter,
+            ThQueryLightBlockService queryLightBlockService)
         {
-            var instance = new ThBuildSingleRowPosService(startPt,edges, arrangeParameter);
+            var instance = new ThBuildSingleRowPosService(startPt,edges, arrangeParameter, queryLightBlockService);
             instance.Build();
             return instance;
         }
@@ -96,13 +97,8 @@ namespace ThMEPLighting.Garage.Service
         }
         private void BuildByExtractFromCad(ThLineSplitParameter SplitParameter)
         {
-            if(ArrangeParameter.LightBlockQueryService==null)
-            {
-                return;
-            }
             var line = new Line(SplitParameter.LineSp, SplitParameter.LineEp);
-            var installPoints = ArrangeParameter.LightBlockQueryService.Query(line);
-            installPoints = installPoints.OrderBy(o => SplitParameter.LineSp.DistanceTo(o)).ToList();
+            var installPoints = QueryLightBlockService.Query(line).OrderBy(o => SplitParameter.LineSp.DistanceTo(o)).ToList();
             DistributePoints(SplitParameter.LineSp, installPoints);
         }
         private void DistributePoints(Point3d startPt, List<Point3d> installPoints)
