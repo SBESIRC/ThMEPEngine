@@ -11,6 +11,7 @@ using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using DotNetARX;
+using ThMEPEngineCore.Temp;
 
 namespace ThMEPEngineCore
 {
@@ -392,17 +394,31 @@ namespace ThMEPEngineCore
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var extractEngine =new ThExtractGeometryEngine())
             {
-                extractEngine.Extract(acadDatabase.Database);
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if(per.Status==PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                extractEngine.Extract(acadDatabase.Database, pts);
                 var geos = new List<ThGeometry>();
                 var spaceIds = new ObjectIdList();
+                short colorIndex = 1;
                 extractEngine.Spaces.ForEach(o =>
                 {
-                    o.ColorIndex = 1;
-                    o.SetDatabaseDefaults();
-                    spaceIds.Add(acadDatabase.ModelSpace.Add(o));
+                    o.Boundary.ColorIndex = colorIndex;
+                    o.Boundary.SetDatabaseDefaults();
+                    spaceIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
                     var geometry = new ThGeometry();                    
                     geometry.Properties.Add("Category", "Space");
-                    geometry.Boundary = o;
+                    for (int i = 1; i <= o.SubSpaces.Count; i++)
+                    {
+                        string key = "SubSpace" + i+" ID=";
+                        geometry.Properties.Add(key, o.SubSpaces[i-1].Uuid);
+                    }
+                    geometry.Boundary = o.Boundary;
                     geos.Add(geometry);
                 });
                 if(spaceIds.Count>0)
@@ -411,9 +427,10 @@ namespace ThMEPEngineCore
                 }               
 
                 var doorIds = new ObjectIdList();
+                colorIndex++;
                 extractEngine.Doors.ForEach(o =>
                 {
-                    o.ColorIndex = 2;
+                    o.ColorIndex = colorIndex;
                     o.SetDatabaseDefaults();
                     doorIds.Add(acadDatabase.ModelSpace.Add(o));
                     var geometry = new ThGeometry();
@@ -424,14 +441,15 @@ namespace ThMEPEngineCore
                 if(doorIds.Count>0)
                 {
                     GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), doorIds);
-                }                
-                
+                }
+
                 var equipIds = new ObjectIdList();
+                colorIndex++;
                 extractEngine.Equipments.ForEach(e =>
                 {
                     e.Value.ForEach(v =>
                     {
-                        v.ColorIndex = 3;
+                        v.ColorIndex = colorIndex;
                         v.SetDatabaseDefaults();
                         equipIds.Add(acadDatabase.ModelSpace.Add(v));
                         var geometry = new ThGeometry();
@@ -444,28 +462,36 @@ namespace ThMEPEngineCore
                 if(equipIds.Count>0)
                 {
                     GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), equipIds);
-                }               
-
-                var obstructIds = new ObjectIdList();
+                }  
+                
+                colorIndex++;
                 extractEngine.Obstructs.ForEach(o =>
                 {
-                    o.ColorIndex = 4;
-                    o.SetDatabaseDefaults();
-                    obstructIds.Add(acadDatabase.ModelSpace.Add(o));
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", "Obstruct");
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
+                    var obstructIds = new ObjectIdList();
+                    o.Key.ColorIndex = colorIndex;
+                    o.Key.SetDatabaseDefaults();
+                    obstructIds.Add(acadDatabase.ModelSpace.Add(o.Key));
+                    o.Value.ForEach(v =>
+                    {
+                        v.ColorIndex = colorIndex;
+                        v.SetDatabaseDefaults();
+                        obstructIds.Add(acadDatabase.ModelSpace.Add(v));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "Obstruct");
+                        geometry.Boundary = v;
+                        geos.Add(geometry);
+                    });
+                    if (obstructIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), obstructIds);
+                    }
                 });
-                if(obstructIds.Count>0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), obstructIds);
-                }
 
                 var connectPortIds = new ObjectIdList();
+                colorIndex++;
                 extractEngine.ConnectPorts.ForEach(o =>
                 {
-                    o.Key.ColorIndex = 5;
+                    o.Key.ColorIndex = colorIndex;
                     o.Key.SetDatabaseDefaults();
                     connectPortIds.Add(acadDatabase.ModelSpace.Add(o.Key));
                     var geometry = new ThGeometry();
@@ -477,6 +503,74 @@ namespace ThMEPEngineCore
                 if (connectPortIds.Count > 0)
                 {
                     GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), connectPortIds);
+                }
+
+                var columnIds = new ObjectIdList();
+                colorIndex++;
+                extractEngine.Columns.ForEach(o =>
+                {
+                    o.ColorIndex = colorIndex;
+                    o.SetDatabaseDefaults();
+                    columnIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "Column");
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                });
+                if (columnIds.Count > 0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), columnIds);
+                }
+
+                var drainageFacilityIds = new ObjectIdList();
+                colorIndex++;
+                extractEngine.DrainageFacilities.ForEach(o =>
+                {
+                    o.ColorIndex = colorIndex;
+                    o.SetDatabaseDefaults();
+                    drainageFacilityIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "DrainageFacility");
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                });
+                if (drainageFacilityIds.Count > 0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageFacilityIds);
+                }
+
+                var laneLineIds = new ObjectIdList();
+                colorIndex++;
+                extractEngine.LaneLines.ForEach(o =>
+                {
+                    o.ColorIndex = colorIndex;
+                    o.SetDatabaseDefaults();
+                    laneLineIds.Add(acadDatabase.ModelSpace.Add(o));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "LaneLine");
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                });
+                if (laneLineIds.Count > 0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), laneLineIds);
+                }
+
+                var parkingStallIds = new ObjectIdList();
+                colorIndex++;
+                extractEngine.ParkingStalls.ForEach(o =>
+                {
+                    o.Boundary.ColorIndex = colorIndex;
+                    o.Boundary.SetDatabaseDefaults();
+                    parkingStallIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add("Category", "ParkingStall");
+                    geometry.Boundary = o.Boundary;
+                    geos.Add(geometry);
+                });
+                if (parkingStallIds.Count > 0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), parkingStallIds);
                 }
 
                 // 输出GeoJson文件

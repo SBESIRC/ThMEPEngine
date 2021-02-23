@@ -4,7 +4,6 @@ namespace ThMEPEngineCore.Model
 {
     public abstract class ThIfcElement : ThIfcProduct
     {
-        public Entity Outline { get; set; }
-        public string Uuid { get; set; }        
+        public Entity Outline { get; set; }       
     }
 }

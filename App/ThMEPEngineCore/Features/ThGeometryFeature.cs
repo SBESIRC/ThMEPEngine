@@ -22,6 +22,13 @@ namespace ThMEPEngineCore.Features
                         var feature = new Feature(geo, attributesTable);
                         return feature;
                     }
+                    else if(geometry.Boundary is Line line)
+                    {
+                        var geo = line.ToNTSLineString();
+                        var attributesTable = new AttributesTable(geometry.Properties);
+                        var feature = new Feature(geo, attributesTable);
+                        return feature;
+                    }
                     else
                     {
                         throw new NotSupportedException(); 

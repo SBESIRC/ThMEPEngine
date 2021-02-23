@@ -81,7 +81,6 @@
     <Compile Include="Engine\ThClosestoolRecognitionEngine.cs" />
     <Compile Include="Engine\ThCondensePipeRecognitionEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
-    <Compile Include="Engine\ThExtractGeometryEngine.cs" />
     <Compile Include="Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
@@ -314,6 +313,15 @@
     <Compile Include="Service\ThWellsLayerManager.cs" />
     <Compile Include="Service\ThWindowDbExtension.cs" />
     <Compile Include="Service\ThWindowLayerManager.cs" />
+    <Compile Include="Temp\ThArrangeObstacleService.cs" />
+    <Compile Include="Temp\ThExtractColumnService.cs" />
+    <Compile Include="Temp\ThExtractConnectPortsService.cs" />
+    <Compile Include="Temp\ThExtractDoorService.cs" />
+    <Compile Include="Temp\ThExtractDrainageFacilityService.cs" />
+    <Compile Include="Temp\ThExtractEquipmentService.cs" />
+    <Compile Include="Temp\ThExtractGeometryEngine.cs" />
+    <Compile Include="Temp\ThExtractService.cs" />
+    <Compile Include="Temp\ThExtractSpaceRecognitionEngine.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />

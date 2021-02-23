@@ -100,14 +100,18 @@ namespace ThMEPEngineCore.CAD
         }
         public static Polyline CreateSquare(this Point3d pt, double edgeLength)
         {
+            return pt.CreateRectangle(edgeLength, edgeLength);
+        }
+        public static Polyline CreateRectangle(this Point3d pt, double length,double width)
+        {
             Polyline polyline = new Polyline
             {
                 Closed = true
             };
-            polyline.AddVertexAt(0, new Point2d(pt.X + edgeLength / 2.0, pt.Y + edgeLength / 2.0), 0, 0, 0);
-            polyline.AddVertexAt(1, new Point2d(pt.X - edgeLength / 2.0, pt.Y + edgeLength / 2.0), 0, 0, 0);
-            polyline.AddVertexAt(2, new Point2d(pt.X - edgeLength / 2.0, pt.Y - edgeLength / 2.0), 0, 0, 0);
-            polyline.AddVertexAt(3, new Point2d(pt.X + edgeLength / 2.0, pt.Y - edgeLength / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(0, new Point2d(pt.X + length / 2.0, pt.Y + width / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(1, new Point2d(pt.X - length / 2.0, pt.Y + width / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(2, new Point2d(pt.X - length / 2.0, pt.Y - width / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(3, new Point2d(pt.X + length / 2.0, pt.Y - width / 2.0), 0, 0, 0);
             return polyline;
         }
         public static List<Line> GetLines(this DBObjectCollection objs,double length=10.0)

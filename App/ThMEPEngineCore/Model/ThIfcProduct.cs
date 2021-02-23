@@ -8,5 +8,6 @@ namespace ThMEPEngineCore.Model
 {
     public abstract class ThIfcProduct
     {
+        public string Uuid { get; set; }
     }
 }
