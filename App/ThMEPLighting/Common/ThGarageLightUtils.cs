@@ -54,80 +54,6 @@ namespace ThMEPLighting.Common
 
             return newPoly;
         }        
-        public static ObjectId AddLineType(Database db, string linetypeName)
-        {
-            using(AcadDatabase acadDatabase= AcadDatabase.Use(db))
-            {
-                var lt = acadDatabase.Element<LinetypeTable>(db.LinetypeTableId);
-                if(!lt.Has(linetypeName))
-                {
-                    lt.UpgradeOpen();
-                    var ltr = new LinetypeTableRecord();
-                    ltr.Name = linetypeName;
-                    lt.Add(ltr);
-                    lt.DowngradeOpen();
-                }
-                return lt[linetypeName];
-            }
-        }
-        public static ObjectId LoadLineType(Database db, string linetypeName)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
-            {
-                var lt = acadDatabase.Element<LinetypeTable>(db.LinetypeTableId);
-                if (!lt.Has(linetypeName))
-                {
-                    db.LoadLineTypeFile(linetypeName,"acad.lin");
-                }
-                return lt[linetypeName];
-            }
-        }
-        public static ObjectId AddLayer(Database db, string layer)
-        {
-            using (AcadDatabase acadDatabase= AcadDatabase.Use(db))
-            {
-                var lt = acadDatabase.Element<LayerTable>(db.LayerTableId);
-                if(!lt.Has(layer))
-                {
-                    lt.UpgradeOpen();
-                    var ltr = new LayerTableRecord();
-                    ltr.Name = layer;
-                    lt.Add(ltr);
-                    lt.DowngradeOpen();
-                }
-                return lt[layer];
-            }
-        }
-        public static List<Entity> GetRegionCurves(this Polyline regionBorder, List<string> layers,List<Type> types)
-        {
-            List<Entity> ents = new List<Entity>();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                int count = types.Count;
-                List<string> starts =new List<string>();
-                types.ForEach(o => starts.Add(RXClass.GetClass(o).DxfName));
-                List<TypedValue> tvs = new List<TypedValue>();
-                if (starts.Count > 0)
-                {
-                    tvs.Add(new TypedValue((int)DxfCode.Start, string.Join(",", starts)));
-                }
-                if (layers.Count>0)
-                {
-                    tvs.Add(new TypedValue((int)DxfCode.LayerName, string.Join(",", layers)));
-                }
-                var pts = regionBorder.Vertices();
-                SelectionFilter sf = new SelectionFilter(tvs.ToArray());
-                var psr = Active.Editor.SelectAll(sf);
-                if (psr.Status == PromptStatus.OK)
-                {
-                    var dbObjs = new DBObjectCollection();
-                    psr.Value.GetObjectIds().ForEach(o => dbObjs.Add(acdb.Element<Entity>(o)));
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    spatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ForEach(o=>ents.Add(o));
-                }
-                return ents;
-            }
-        }
         public static DBObjectCollection SpatialFilter(this Polyline border, DBObjectCollection dbObjs)
         {
             var pts = border.Vertices();
@@ -380,6 +306,16 @@ namespace ThMEPLighting.Common
             }
             sb.Append(@"\d+$");
             return Regex.IsMatch(text, sb.ToString());
+        }
+
+        public static bool IsLightCableCarrierCenterline(Entity e)
+        {
+            return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.DxCenterLineLayerName);
+        }
+
+        public static bool IsNonLightCableCarrierCenterline(Entity e)
+        {
+            return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.FdxCenterLineLayerName);
         }
     }
 }

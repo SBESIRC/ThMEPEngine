@@ -312,19 +312,21 @@ namespace ThMEPLighting
         }
         private List<ThRegionBorder> GetFireRegionBorders()
         {
-            var results = new List<ThRegionBorder>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var pso = new PromptSelectionOptions()
+                var options = new PromptSelectionOptions()
                 {
+                    AllowDuplicates = false,
                     MessageForAdding = "\n请选择布灯的区域框线",
+                    RejectObjectsOnLockedLayers = true,
                 };
-                TypedValue[] tvs = new TypedValue[]
+                var dxfNames = new string[]
                 {
-                     new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(Polyline)).DxfName)
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
                 };
-                SelectionFilter sf = new SelectionFilter(tvs);
-                var result = Active.Editor.GetSelection(pso, sf);
+                var results = new List<ThRegionBorder>();
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
                 if (result.Status == PromptStatus.OK)
                 {
                     result.Value.GetObjectIds().ForEach(o =>
@@ -333,14 +335,10 @@ namespace ThMEPLighting
                         var newBorder = ThMEPFrameService.NormalizeEx(border);
                         if (newBorder.Area > 0)
                         {
-                            var dxLines = GetRegionLines(
-                                newBorder,
-                                new List<string> { ThGarageLightCommon.DxCenterLineLayerName },
-                                new List<Type> { typeof(Line), typeof(Polyline) });
-                            var fdxLines = GetRegionLines(
-                                newBorder,
-                                new List<string> { ThGarageLightCommon.FdxCenterLineLayerName },
-                                new List<Type> { typeof(Line), typeof(Polyline) });
+                            var lines = acdb.ModelSpace
+                            .Where(e => ThGarageLightUtils.IsLightCableCarrierCenterline(e) || ThGarageLightUtils.IsNonLightCableCarrierCenterline(e)).ToList();
+                            var dxLines = GetRegionLines(newBorder, lines.Where(l => ThGarageLightUtils.IsLightCableCarrierCenterline(l)).ToCollection());
+                            var fdxLines = GetRegionLines(newBorder, lines.Where(l => ThGarageLightUtils.IsNonLightCableCarrierCenterline(l)).ToCollection());
                             if (dxLines.Count > 0)
                             {
                                 var regionBorder = new ThRegionBorder
@@ -354,13 +352,13 @@ namespace ThMEPLighting
                         }
                     });
                 }
+                return results;
             }
-            return results;
         }
-        private List<Line> GetRegionLines(Polyline region, List<string> layers, List<Type> types)
+
+        private List<Line> GetRegionLines(Polyline region, DBObjectCollection dbObjs)
         {
-            var curves = region.GetRegionCurves(layers, types);
-            return ThLaneLineEngine.Explode(curves.ToCollection()).Cast<Line>().ToList();
+            return ThLaneLineEngine.Explode(region.SpatialFilter(dbObjs)).Cast<Line>().ToList();
         }
     }
 }
