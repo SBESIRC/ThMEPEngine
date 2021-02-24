@@ -13,13 +13,14 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 
 
+
 namespace ThMEPLighting.EmgLight.Service
 {
     public static class RemoveBlockService
     {
-        public static Dictionary<BlockReference, Point3d> ExtractClearEmergencyLight(ThMEPOriginTransformer transformer)
+        public static Dictionary<Entity, Point3d> ExtractClearEmergencyLight(ThMEPOriginTransformer transformer)
         {
-            var emgLight = new Dictionary<BlockReference, Point3d>();
+            var emgLight = new Dictionary<Entity, Point3d>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.UnFrozenLayer(ThMEPLightingCommon.EmgLightLayerName);
@@ -54,7 +55,44 @@ namespace ThMEPLighting.EmgLight.Service
             return emgLight;
         }
 
-        public static void ClearEmergencyLight(this Polyline polyline, Dictionary<BlockReference, Point3d> emgLight)
+        public static void ClearDrawing()
+        {
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                var LayerName = EmgLightCommon.Layer.Split(',').ToList();
+
+                LayerName.ForEach(x => ClearDrawing(x));
+            }
+
+        }
+
+        public static void ClearDrawing(string layerName)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                LayerTable lt = (LayerTable)acadDatabase.Database.LayerTableId.GetObject(OpenMode.ForRead);
+                if (lt.Has(layerName))
+                {
+                    acadDatabase.Database.UnFrozenLayer(layerName);
+                    acadDatabase.Database.UnLockLayer(layerName);
+                    acadDatabase.Database.UnOffLayer(layerName);
+
+                    var items = acadDatabase.ModelSpace
+                        .OfType<Entity>()
+                        .Where(o => o.Layer == layerName);
+
+                    foreach (var line in items)
+                    {
+                        line.UpgradeOpen();
+                        line.Erase();
+                    }
+
+                    acadDatabase.Database.DeleteLayer(layerName);
+                }
+            }
+        }
+
+        public static void ClearEmergencyLight(this Polyline polyline, Dictionary<Entity, Point3d> emgLight)
         {
 
             var objs = new DBObjectCollection();

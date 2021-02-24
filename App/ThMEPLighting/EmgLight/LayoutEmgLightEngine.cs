@@ -1,13 +1,16 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLight.Model;
+
 
 
 namespace ThMEPLighting.EmgLight
@@ -55,7 +58,7 @@ namespace ThMEPLighting.EmgLight
                 var thLane = laneList[i];
                 var StructFilterService = new StructFilterService(thLane, columns, walls);
 
-               var layoutServer= StructFilterService.getStructSeg();
+                var layoutServer = StructFilterService.getStructSeg();
 
                 var b = false;
                 if (b == true)
@@ -63,8 +66,8 @@ namespace ThMEPLighting.EmgLight
                     continue;
                 }
 
-                StructFilterService.FilterStruct(layoutServer,frame);
-               
+                StructFilterService.FilterStruct(layoutServer, frame);
+
                 if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
                     layoutServer.UsefulWalls[0].Count == 0 && layoutServer.UsefulWalls[1].Count == 0)
                 {
@@ -88,5 +91,19 @@ namespace ThMEPLighting.EmgLight
             return layoutPtInfo;
         }
 
+        public void ResetResult(ref Dictionary<Polyline, (Point3d, Vector3d)> layoutInfo, ThMEPOriginTransformer transformer)
+        {
+
+            Dictionary<Polyline, (Point3d, Vector3d)> resetResult = new Dictionary<Polyline, (Point3d, Vector3d)>();
+
+            layoutInfo.ForEach(x =>
+            {
+                var pt = new Point3d(x.Value.Item1.X, x.Value.Item1.Y, x.Value.Item1.Z);
+                transformer.Reset(ref pt);
+                resetResult.Add(x.Key, (pt, x.Value.Item2));
+            });
+
+            layoutInfo = resetResult;
+        }
     }
 }
