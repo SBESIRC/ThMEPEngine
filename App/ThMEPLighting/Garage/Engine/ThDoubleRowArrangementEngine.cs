@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
@@ -68,15 +69,14 @@ namespace ThMEPLighting.Garage.Engine
             var centerPorts = GetDxCenterLinePorts(ports,  //灯线端口
                 centerLightEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());
 
-            //创建偏移1、2线索引服务，便于后期查询
-            var wireOffsetDataService = ThWireOffsetDataService.Create(innerOuterCircles);
             //布灯
             using (var buildNumberEngine = new ThDoubleRowNumberEngine(
                 centerPorts, centerLightEdges, firstLightEdges, ArrangeParameter))
             {
-                var service = ThQueryLightBlockService.Create(regionBorder.RegionBorder, RacewayParameter.LaneLineBlockParameter.Layer);
-                buildNumberEngine.QueryLightBlockService = service;
+                var wireOffsetDataService = new ThWireOffsetDataService(innerOuterCircles);
                 buildNumberEngine.WireOffsetDataService = wireOffsetDataService;
+                var queryLightBlockService = new ThQueryLightBlockService(regionBorder.Lights.ToCollection());
+                buildNumberEngine.QueryLightBlockService = queryLightBlockService;
                 buildNumberEngine.Build();
                 regionBorder.LightEdges.AddRange(buildNumberEngine.FirstLightEdges);
                 regionBorder.LightEdges.AddRange(buildNumberEngine.SecondLightEdges);

@@ -1,6 +1,4 @@
-﻿using NFox.Cad;
-using Linq2Acad;
-using System.Linq;
+﻿using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
@@ -11,38 +9,15 @@ namespace ThMEPLighting.Garage.Service
 {
     public class ThQueryLightBlockService
     {
-        private string Layer { get; set; }
-        private Polyline Region { get; set; }
-        public ThCADCoreNTSSpatialIndex PrimarySpatialIndex { get; set; }
-        public ThCADCoreNTSSpatialIndex SecondarySpatialIndex { get; set; }
-        private ThQueryLightBlockService(Polyline region, string layer)
+        public ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
+        public ThQueryLightBlockService(DBObjectCollection dbObjs)
         {
-            Layer = layer;
-            Region = region;
-        }
-        public static ThQueryLightBlockService Create(Polyline region, string layer)
-        {
-            var instance = new ThQueryLightBlockService(region, layer);
-            instance.Create();
-            return instance;
-        }
-        private void Create()
-        {
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                var blks = acadDatabase.ModelSpace
-                    .OfType<BlockReference>()
-                    .Where(b => b.Layer == Layer);
-                PrimarySpatialIndex = new ThCADCoreNTSSpatialIndex(blks.ToCollection());
-                SecondarySpatialIndex = new ThCADCoreNTSSpatialIndex(PrimarySpatialIndex.SelectCrossingPolygon(Region));
-            }
+            SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
         }
         public List<Point3d> Query(Line edge, double width = 1.0)
         {
             var outline = ThDrawTool.ToOutline(edge.StartPoint, edge.EndPoint, width);
-            var blocks = SecondarySpatialIndex
-                .SelectCrossingPolygon(outline)
-                .Cast<BlockReference>().ToList();
+            var blocks = SpatialIndex.SelectCrossingPolygon(outline).Cast<BlockReference>().ToList();
             return Filter(blocks, edge, width);
         }
         private List<Point3d> Filter(List<BlockReference> blocks, Line edge, double tolerance = 1.0)

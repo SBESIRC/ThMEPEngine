@@ -307,7 +307,10 @@ namespace ThMEPLighting.Common
             sb.Append(@"\d+$");
             return Regex.IsMatch(text, sb.ToString());
         }
-
+        public static bool IsGarageLight(Entity e)
+        {
+            return (e is BlockReference) && (e.Layer == "E-LITE-LITE");
+        }
         public static bool IsLightCableCarrierCenterline(Entity e)
         {
             return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.DxCenterLineLayerName);

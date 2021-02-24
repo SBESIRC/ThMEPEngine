@@ -79,6 +79,7 @@ namespace ThMEPLighting
                     // 最后将处理结果还原到原始位置
                     var centerPt = o.RegionBorder.GetCentroidPoint();
                     var transformer = new ThMEPOriginTransformer(centerPt);
+                    transformer.Transform(o.Lights.ToCollection());
                     transformer.Transform(o.DxCenterLines.ToCollection());
                     transformer.Transform(o.FdxCenterLines.ToCollection());
                     transformer.Transform(o.RegionBorder);
@@ -124,7 +125,7 @@ namespace ThMEPLighting
                 }
 
                 //以上是准备输入参数
-                ThArrangementEngine arrangeEngine = null;                
+                ThArrangementEngine arrangeEngine = null;
                 if (arrangeParameter.IsSingleRow)
                 {
                     arrangeEngine = new ThSingleRowArrangementEngine(arrangeParameter, racewayParameter);
@@ -335,17 +336,21 @@ namespace ThMEPLighting
                         var newBorder = ThMEPFrameService.NormalizeEx(border);
                         if (newBorder.Area > 0)
                         {
-                            var lines = acdb.ModelSpace
-                            .Where(e => ThGarageLightUtils.IsLightCableCarrierCenterline(e) || ThGarageLightUtils.IsNonLightCableCarrierCenterline(e)).ToList();
-                            var dxLines = GetRegionLines(newBorder, lines.Where(l => ThGarageLightUtils.IsLightCableCarrierCenterline(l)).ToCollection());
-                            var fdxLines = GetRegionLines(newBorder, lines.Where(l => ThGarageLightUtils.IsNonLightCableCarrierCenterline(l)).ToCollection());
+                            var dbOBjs = acdb.ModelSpace
+                            .Where(e => ThGarageLightUtils.IsLightCableCarrierCenterline(e) || 
+                            ThGarageLightUtils.IsNonLightCableCarrierCenterline(e) ||
+                            ThGarageLightUtils.IsGarageLight(e)).ToList();
+                            var dxLights = GetRegionLights(newBorder, dbOBjs.Where(e => ThGarageLightUtils.IsGarageLight(e)).ToCollection());
+                            var dxLines = GetRegionLines(newBorder, dbOBjs.Where(e => ThGarageLightUtils.IsLightCableCarrierCenterline(e)).ToCollection());
+                            var fdxLines = GetRegionLines(newBorder, dbOBjs.Where(e => ThGarageLightUtils.IsNonLightCableCarrierCenterline(e)).ToCollection());
                             if (dxLines.Count > 0)
                             {
                                 var regionBorder = new ThRegionBorder
                                 {
+                                    Lights = dxLights,
                                     RegionBorder = newBorder,
                                     DxCenterLines = dxLines,
-                                    FdxCenterLines = fdxLines
+                                    FdxCenterLines = fdxLines,
                                 };
                                 results.Add(regionBorder);
                             }
@@ -356,6 +361,10 @@ namespace ThMEPLighting
             }
         }
 
+        private List<BlockReference> GetRegionLights(Polyline region, DBObjectCollection dbObjs)
+        {
+            return region.SpatialFilter(dbObjs).Cast<BlockReference>().ToList();
+        }
         private List<Line> GetRegionLines(Polyline region, DBObjectCollection dbObjs)
         {
             return ThLaneLineEngine.Explode(region.SpatialFilter(dbObjs)).Cast<Line>().ToList();

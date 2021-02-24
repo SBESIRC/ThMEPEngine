@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
+using NFox.Cad;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -46,9 +47,8 @@ namespace ThMEPLighting.Garage.Engine
             DxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o)));
             using (var buildNumberEngine = new ThSingleRowNumberEngine(ports, lightEdges, ArrangeParameter))
             {
-                var service = ThQueryLightBlockService.Create(regionBorder.RegionBorder, RacewayParameter.LaneLineBlockParameter.Layer);
-                buildNumberEngine.QueryLightBlockService = service;
-
+                var queryLightBlockService = new ThQueryLightBlockService(regionBorder.Lights.ToCollection());
+                buildNumberEngine.QueryLightBlockService = queryLightBlockService;
                 buildNumberEngine.Build();
                 //将创建的灯边返回给->regionBorder
                 regionBorder.LightEdges = buildNumberEngine.DxLightEdges;
