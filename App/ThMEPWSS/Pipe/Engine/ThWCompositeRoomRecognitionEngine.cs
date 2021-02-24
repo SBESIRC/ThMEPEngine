@@ -5,8 +5,6 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
 
@@ -101,12 +99,12 @@ namespace ThMEPWSS.Pipe.Engine
                 return condensePipesEngine.Elements.Cast<ThWCondensePipe>().ToList();
             }
         }
-        private List<ThIfcWashMachine> GetWashmachines(Database database, Point3dCollection pts)
+        private List<ThWWashingMachine> GetWashmachines(Database database, Point3dCollection pts)
         {
             using (ThWashMachineRecognitionEngine washmachinesEngine = new ThWashMachineRecognitionEngine())
             {
                 washmachinesEngine.Recognize(database, pts);
-                return washmachinesEngine.Elements.Cast<ThIfcWashMachine>().ToList();
+                return washmachinesEngine.Elements.Cast<ThWWashingMachine>().ToList();
             }
         }
         private List<ThWBasin> GetBasinTools(Database database, Point3dCollection pts)

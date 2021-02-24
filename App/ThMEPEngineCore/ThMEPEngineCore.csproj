@@ -92,7 +92,6 @@
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpaceRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
-    <Compile Include="Engine\ThWashMachineRecognitionEngine.cs" />
     <Compile Include="Engine\ThWindowRecognition.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
     <Compile Include="Features\ThGeometryFeatureCollection.cs" />
@@ -133,12 +132,12 @@
     <Compile Include="Model\Plumbing\ThIfcDevice.cs" />
     <Compile Include="Model\Plumbing\ThIfcInnerDoor.cs" />
     <Compile Include="Model\ThGeometry.cs" />
+    <Compile Include="Model\ThIfcElectricAppliance.cs" />
     <Compile Include="Model\ThIfcFlowController.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowMovingDevice.cs" />
     <Compile Include="Model\ThIfcFlowSegment.cs" />
     <Compile Include="Model\Plumbing\ThIfcSanitaryTerminal.cs" />
-    <Compile Include="Model\Plumbing\ThIfcWashMachine.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsElements.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsPathElements.cs" />
     <Compile Include="Model\Segment\ThArcSegment.cs" />

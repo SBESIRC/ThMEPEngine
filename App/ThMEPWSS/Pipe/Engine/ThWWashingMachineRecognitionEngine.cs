@@ -5,8 +5,10 @@ using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Model.Plumbing;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
+using ThMEPWSS.Pipe.Model;
 
-namespace ThMEPEngineCore.Engine
+namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWashMachineRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -34,7 +36,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcWashMachine.Create(o));
+                    Elements.Add(ThWWashingMachine.Create(o));
                 });
             }
         }

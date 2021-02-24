@@ -40,6 +40,7 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Pipe\Engine\ThApplicationPipesEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWWashingMachineRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWSideEntryWaterBucketRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWFloorDrainRecognitionEngine.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Pipe\Engine\ThWWellsRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
     <Compile Include="Pipe\Engine\ThWClosestoolRecognitionEngine.cs" />
+    <Compile Include="Pipe\Model\ThWWashingMachine.cs" />
     <Compile Include="Pipe\Model\ThWGravityWaterBucket.cs" />
     <Compile Include="Pipe\Model\ThWSideEntryWaterBucket.cs" />
     <Compile Include="Pipe\Model\ThWClosestool.cs" />

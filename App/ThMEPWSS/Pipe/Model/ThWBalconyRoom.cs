@@ -1,5 +1,4 @@
 ﻿using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Model
@@ -21,7 +20,7 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 洗衣机
         /// </summary>
-        public List<ThIfcWashMachine> Washmachines { get; set; }
+        public List<ThWWashingMachine> Washmachines { get; set; }
         /// <summary>
         /// 阳台台盆
         /// </summary>
@@ -31,7 +30,7 @@ namespace ThMEPWSS.Pipe.Model
             Balcony = null;
             FloorDrains = new List<ThWFloorDrain>();
             RainPipes = new List<ThWRainPipe>();
-            Washmachines = new List<ThIfcWashMachine>();
+            Washmachines = new List<ThWWashingMachine>();
             BasinTools = new List<ThWBasin>();
         }
     }

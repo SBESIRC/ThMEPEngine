@@ -1,9 +1,8 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Pipe.Model;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -12,12 +11,12 @@ namespace ThMEPWSS.Pipe.Service
         public List<ThWBalconyRoom> BalconyRooms { get; private set; }
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThWFloorDrain> FloorDrains { get; set; }
-        private List<ThIfcWashMachine> Washmachines { get; set; }
+        private List<ThWWashingMachine> Washmachines { get; set; }
         private List<ThWRainPipe> RainPipes { get; set; }
         private List<ThWBasin> Basintools { get; set; }
         private ThBalconyRoomService(
             List<ThIfcSpace> spaces,
-            List<ThIfcWashMachine> washmachines,
+            List<ThWWashingMachine> washmachines,
             List<ThWFloorDrain> floorDrains,
             List<ThWRainPipe> rainPipes,
             List<ThWBasin> basintools)
@@ -30,7 +29,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static List<ThWBalconyRoom> Build(
             List<ThIfcSpace> spaces,
-            List<ThIfcWashMachine> washmachines,
+            List<ThWWashingMachine> washmachines,
             List<ThWFloorDrain> floorDrains,
             List<ThWRainPipe> rainPipes,
             List<ThWBasin> basintools)

@@ -1,21 +1,20 @@
 ﻿using NFox.Cad;
-using System.Linq;
 using Linq2Acad;
+using System.Linq;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-   public class ThWBalconyRoomRecognitionEngine : ThWRoomRecognitionEngine
+    public class ThWBalconyRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWBalconyRoom> Rooms { get; set; }
-        public List<ThIfcWashMachine> Washmachines { get; set; }
+        public List<ThWWashingMachine> Washmachines { get; set; }
         public List<ThWFloorDrain> FloorDrains { get; set; }
         public List<ThWRainPipe> RainPipes { get; set; }
         public List<ThWBasin> BasinTools { get; set; }
