@@ -227,24 +227,36 @@ namespace ThMEPEngineCore.Engine
         /// <param name="area"></param>
         /// <returns></returns>
         private List<Curve> SelectPolylineContainers(List<Curve> curves, Polyline son)
-        {
-            var bufferObjs = son.Buffer(-5.0);
+        {        
             return curves.Where(o =>
             {
                 if (o is Polyline parent)
                 {
-                    return bufferObjs.Cast<Curve>().Where(m =>
-                    {
-                        if (m is Polyline polyline)
-                        {
-                            ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(parent, polyline);
-                            return relation.IsCovers;
-                        }
-                        return false;
-                    }).Any();
+                    return IsCovers(parent, son);
                 }
                 return false;
             }).ToList();
+        }
+
+        private bool IsCovers(Polyline parent,Polyline son,double tolerance=10.0)
+        {            
+            var relation = new ThCADCoreNTSRelate(parent, son);
+            if(!relation.IsCovers)
+            {
+                var pts = son.VerticesEx(50.0);
+                foreach (Point3d pt in pts)
+                {
+                    if (!parent.Contains(pt))
+                    {
+                        var closePt = parent.GetClosestPointTo(pt, false);
+                        if (closePt.DistanceTo(pt) > tolerance)
+                        {
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
         }
     }
 }
