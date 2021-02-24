@@ -17,7 +17,6 @@ namespace ThMEPWSS.Pipe.Engine
         public abstract void Recognize(Database database, Point3dCollection pts);
         protected List<ThIfcSpace> GetSpaces(Database database, Point3dCollection pts)
         {
-            using (var fixedPrecision=new ThCADCoreNTSFixedPrecision())
             using (var spaceEngine = new ThSpaceRecognitionEngine())
             {
                 spaceEngine.Recognize(database, pts);
