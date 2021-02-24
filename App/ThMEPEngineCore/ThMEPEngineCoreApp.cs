@@ -413,6 +413,7 @@ namespace ThMEPEngineCore
                     spaceIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
                     var geometry = new ThGeometry();                    
                     geometry.Properties.Add("Category", "Space");
+                    geometry.Properties.Add("Name", string.Join(";",o.Tags.ToArray()));
                     for (int i = 1; i <= o.SubSpaces.Count; i++)
                     {
                         string key = "SubSpace" + i+" ID=";

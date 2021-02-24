@@ -1,6 +1,8 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
 using System.Linq;
 using System.Collections.Generic;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -23,6 +25,12 @@ namespace ThMEPEngineCore.Temp
                     .Where(o => IsColumnLayer(o.Layer))
                     .Select(o=>o.Clone() as Polyline)
                     .ToList();
+                if(pts.Count>=3)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Columns.ToCollection());
+                    var objs = spatialIndex.SelectCrossingPolygon(pts);
+                    Columns = objs.Cast<Polyline>().ToList();
+                }
             }
         }        
 

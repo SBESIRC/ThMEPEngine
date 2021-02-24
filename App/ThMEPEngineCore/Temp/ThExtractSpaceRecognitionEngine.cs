@@ -43,7 +43,7 @@ namespace ThMEPEngineCore.Temp
                 BuildAreaContainers();
                 CreateSpaceBoundaries();
                 SpaceMatchText();
-                BuildNestedSpace();
+                //BuildNestedSpace();
             }
         }
         private void BuildSpaceSpatialIndex()

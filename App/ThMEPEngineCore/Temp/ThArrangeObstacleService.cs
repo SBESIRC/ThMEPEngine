@@ -18,8 +18,8 @@ namespace ThMEPEngineCore.Temp
         private ThArrangeObstacleService(Polyline regionPoly)
         {
             RegionPoly = regionPoly;
-            Length = 1000;
-            Width = 500;
+            Length = 5000;
+            Width = 5000;
             Obstacles = new List<Polyline>();
         }
         public static List<Polyline> Arrange(Polyline region)

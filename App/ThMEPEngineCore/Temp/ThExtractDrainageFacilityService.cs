@@ -1,4 +1,7 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using Linq2Acad;
+using ThCADCore.NTS;
+using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -34,6 +37,12 @@ namespace ThMEPEngineCore.Temp
                             Facilities.Add(newLine);
                         }
                     }
+                }
+                if (pts.Count >= 3)
+                {
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Facilities.ToCollection());
+                    var objs = spatialIndex.SelectCrossingPolygon(pts);
+                    Facilities = objs.Cast<Curve>().ToList();
                 }
             }
         }        

@@ -8,6 +8,7 @@ using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -102,7 +103,7 @@ namespace ThMEPEngineCore.Temp
                 // 车道中心线处理
                 var curves = engine.Spaces.Select(o => o.Boundary).ToList();
                 var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
-                return lines;
+                return lines.Where(o=>o.Length>=3000).ToList();
             }
         }
         private Dictionary<Polyline,List<Polyline>> BuildObstructs()
