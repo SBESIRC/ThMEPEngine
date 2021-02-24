@@ -4,7 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Tools;
 using static ThMEPWSS.ThPipeCmds;
-
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Layout
 {
@@ -27,10 +27,10 @@ namespace ThMEPWSS.Pipe.Layout
                 GetCreateLines(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters1.roofEntity.Add(o));
                 GetCreateLines1(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters1.roofEntity.Add(o));
                 GetCreateLines1(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters1.roofEntity.Add(o));
-                ThWPipeOutputFunction.GetListText(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, "DN100", scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
-                ThWPipeOutputFunction.GetListText(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, "DN75", scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
-                ThWPipeOutputFunction.GetListText1(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, "重力型雨水斗", scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
-                ThWPipeOutputFunction.GetListText1(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, "重力型雨水斗", scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
+                ThWPipeOutputFunction.GetListText(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, ThTagParametersService.GravityBuckettag, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
+                ThWPipeOutputFunction.GetListText(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, ThTagParametersService.SideBuckettag, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
+                ThWPipeOutputFunction.GetListText1(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, ThTagParametersService.BucketStyle, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
+                ThWPipeOutputFunction.GetListText1(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, "侧入式雨水斗", scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
                 for (int i = 0; i < composite.RoofRainPipes.Count; i++)
                 {
                     parameters1.roofEntity.Add((CreateCircle(composite.RoofRainPipes[i].Outline.GetCenter()))); ;

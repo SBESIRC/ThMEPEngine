@@ -16,6 +16,7 @@ namespace ThMEPWSS.Pipe.Output
     {
         public void LayoutTopFloor(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, InputInfo userInfo,string W_DRAI_EQPM,string W_DRAI_FLDR,string W_RAIN_PIPE)
         {
+            parameters0.standardEntity.Add(new Circle() {Center= parameters0.baseCenter2[0] ,Radius=0.01});
             parameters0.divideLines = FloorEngines.TopFloors[0].DivisionLines;
             parameters0.pboundary = FloorEngines.TopFloors[0].FirstFloor.Boundary as Polyline;
             var thWPipeOutputFunction=new ThWPipeOutputFunction();

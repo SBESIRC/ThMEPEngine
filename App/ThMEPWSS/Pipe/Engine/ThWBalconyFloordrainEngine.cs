@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Assistant;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -152,7 +153,7 @@ namespace ThMEPWSS.Pipe.Engine
             if (parameters.downspout == null)
             {               
                 var center = new_downspout(parameters.boundary, condensepipe, Floordrain_washing, device_other);
-                new_circle = new Circle() { Radius = 50, Center = center };
+                new_circle = new Circle() { Radius = ThTagParametersService.BalconyFpipe, Center = center };
                 if (GeomUtils.PtInLoop(parameters.boundary, center))//判断新生管井是否在阳台
                 {
                     Downspout_to_Floordrain.Add(center);

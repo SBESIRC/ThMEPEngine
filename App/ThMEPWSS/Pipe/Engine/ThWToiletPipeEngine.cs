@@ -28,11 +28,11 @@ namespace ThMEPWSS.Pipe.Engine
             return new ThWToiletPipe()
             {
                 Center = center,
-                Identifier = Parameters.Identifier[index],
+                Identifier = Parameters.Identifier[index].Item1,
                 Matrix = Matrix3d.Displacement(center.GetAsVector()),
                 Representation = new DBObjectCollection()
                 {
-                    new Circle(Point3d.Origin, Vector3d.ZAxis, Parameters.Diameter[index] / 2.0),
+                    new Circle(Point3d.Origin, Vector3d.ZAxis, Parameters.Identifier[index].Item2 / 2.0),
                 },
             };
         }
@@ -43,7 +43,7 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 Vector3d dir = Direction(outline, well);
                 var pt = FindInsideVertex(index_a(outline, well), well);
-                for (int i = 0; i < Parameters.Number; i++)
+                for (int i = 0; i < Parameters.Identifier.Count; i++)
                 {
                     Pipes.Add(Create((pt + i * dir * ThWPipeCommon.TOILET_WELLS_INTERVAL),i));
                 }
@@ -254,7 +254,7 @@ namespace ThMEPWSS.Pipe.Engine
                     dir = vertices[2].GetVectorTo(vertices[1]).GetNormal();
                 }
             }
-            for (int i = 0; i < Parameters.Number; i++)
+            for (int i = 0; i < Parameters.Identifier.Count; i++)
             {
                 pipes.Add(Create((pt + i * dir * ThWPipeCommon.TOILET_WELLS_INTERVAL),i));
             }

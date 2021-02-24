@@ -15,6 +15,8 @@ using ThMEPWSS.Pipe.Output;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Service;
 using NetTopologySuite.Geometries;
+using DotNetARX;
+using System;
 
 namespace ThMEPWSS
 {
@@ -104,7 +106,7 @@ namespace ThMEPWSS
                     var kitchenEngines = new ThWKitchenPipeEngine()
                     {
                         Zone = zone,
-                        Parameters = new ThWKitchenPipeParameters(1, floorResult.Value),
+                        Parameters = new ThWKitchenPipeParameters(1, ThTagParametersService.KaTFpipe),
                     };
                     var compositeEngine = new ThWCompositePipeEngine(kitchenEngines, toiletEngines);
                     compositeEngine.Run(boundary, outline, basinline, pype, boundary1, outline1, closestool);
@@ -134,7 +136,7 @@ namespace ThMEPWSS
                                 for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
                                 {
                                     var toilet = compositeEngine.ToiletPipes[i]; /*+ ;*/
-                                    var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
+                                    var radius = compositeEngine.ToiletPipeEngine.Parameters.Identifier[i].Item2 / 2.0;
                                     foreach (Entity item in toilet.Representation)
                                     {
                                         var offset = Matrix3d.Displacement(200 * compositeEngine.ToiletPipes[0].Center.GetVectorTo(compositeEngine.ToiletPipes[1].Center).GetNormal());
@@ -148,7 +150,7 @@ namespace ThMEPWSS
                             for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
                             {
                                 var toilet = compositeEngine.ToiletPipes[i];
-                                var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
+                                var radius = compositeEngine.ToiletPipeEngine.Parameters.Identifier[i].Item2 / 2.0;
                                 foreach (Entity item in toilet.Representation)
                                 {
                                     acadDatabase.ModelSpace.Add(item.GetTransformedCopy(toilet.Matrix));
@@ -847,6 +849,34 @@ namespace ThMEPWSS
                 }
                 ThInsertStoreyFrameService.Insert(tpipe);
             }
-        }    
+        }
+        [CommandMethod("TIANHUACAD", "THAPPLICATIONPIPE", CommandFlags.Modal)]
+        public static void THAPPLICATIONPIPE()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {              
+                if(!(GetBlockReferences(acadDatabase.Database, ThTagParametersService.sourceFloor).Count>0))
+                {
+                    PromptPointOptions sf = new PromptPointOptions("\n 来源楼层中没有立管图块");
+                    return;
+                }
+                else
+                {
+                    var application = new ThTagParametersService();
+                    application.Read();
+                    ThApplicationPipesEngine.Application(ThTagParametersService.sourceFloor, ThTagParametersService.targetFloors);
+                }
+            }
+        }
+        private static  List<BlockReference> GetBlockReferences(Database db, string blockName)
+        {
+            List<BlockReference> blocks = new List<BlockReference>();
+            var trans = db.TransactionManager;
+            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);                
+            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
+                      where (b.GetBlockName().Contains(blockName)&& b.GetBlockName().Contains("标准层"))
+                      select b).ToList();
+            return blocks;
+        }
     }
 }

@@ -64,7 +64,7 @@ namespace ThMEPWSS.Pipe.Output
             for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
             {
                 var toilet = compositeEngine.ToiletPipes[i];
-                var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
+                var radius = compositeEngine.ToiletPipeEngine.Parameters.Identifier[i].Item2 / 2.0;
                 ThWPipeOutputFunction.GetListFpipes(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.fpipe.Add(o));
                 ThWPipeOutputFunction.GetListPpipes(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.ppipe.Add(o));
                 ThWPipeOutputFunction.GetListWpipes(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.wpipe.Add(o));
@@ -81,7 +81,7 @@ namespace ThMEPWSS.Pipe.Output
             for (int i = 0; i < compositeEngine.ToiletPipes.Count; i++)
             {
                 var toilet = compositeEngine.ToiletPipes[i];
-                var radius = compositeEngine.ToiletPipeEngine.Parameters.Diameter[i] / 2.0;
+                var radius = compositeEngine.ToiletPipeEngine.Parameters.Identifier[i].Item2 / 2.0;
                 ThWPipeOutputFunction.GetListFpipes1(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.fpipe.Add(o));
                 ThWPipeOutputFunction.GetListPpipes1(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.ppipe.Add(o));
                 ThWPipeOutputFunction.GetListWpipes1(toilet, compositeEngine.ToiletPipes, W_DRAI_EQPM).ForEach(o => parameters0.wpipe.Add(o));

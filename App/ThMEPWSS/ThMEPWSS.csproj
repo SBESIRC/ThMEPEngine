@@ -39,6 +39,7 @@
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
+    <Compile Include="Pipe\Engine\ThApplicationPipesEngine.cs" />
     <Compile Include="Pipe\Engine\ThWArchitectureElevationRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWExternalTagsRecognitionEngine.cs" />
@@ -87,6 +88,8 @@
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThFindSpaceRangedSpaces.cs" />
     <Compile Include="Pipe\Service\ThInsertStoreyFrameService.cs" />
+    <Compile Include="Pipe\Service\ThReadStoreyInformationService.cs" />
+    <Compile Include="Pipe\Service\ThTagParametersService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeRoomService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorDivisionLineService.cs" />
