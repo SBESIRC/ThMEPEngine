@@ -3,6 +3,9 @@ using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Model
 {
+    /// <summary>
+    /// 阳台
+    /// </summary>
     public class ThWBalconyRoom : ThWRoom
     { 
         /// <summary>

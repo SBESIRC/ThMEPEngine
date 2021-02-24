@@ -4,6 +4,9 @@ using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {
+    /// <summary>
+    /// 马桶
+    /// </summary>
     public class ThWClosestool: ThIfcSanitaryTerminal
     {
         public static ThWClosestool Create(Entity entity)

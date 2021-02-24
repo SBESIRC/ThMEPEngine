@@ -4,6 +4,9 @@ using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {
+    /// <summary>
+    /// 地漏
+    /// </summary>
     public class ThWFloorDrain : ThIfcSanitaryTerminal
     {
         public UseKind Use { get; set; }

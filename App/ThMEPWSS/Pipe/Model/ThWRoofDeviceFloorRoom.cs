@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {

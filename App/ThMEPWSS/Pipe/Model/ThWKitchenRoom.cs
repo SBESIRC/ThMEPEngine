@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {
@@ -8,7 +7,7 @@ namespace ThMEPWSS.Pipe.Model
     {
         /// <summary>
         /// 厨房空间
-        /// </summary>
+        /// </summary>ng
         public ThIfcSpace Kitchen { get; set; }
         /// <summary>
         /// 台盆
