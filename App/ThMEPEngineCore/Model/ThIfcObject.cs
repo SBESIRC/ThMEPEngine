@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace ThMEPEngineCore.Model
 {
-    public abstract class ThIfcProduct : ThIfcObject
+    public abstract class ThIfcObject
     {
+        public string Uuid { get; set; }
     }
 }
