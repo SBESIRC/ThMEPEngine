@@ -13,7 +13,7 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 台盆
         /// </summary>
-        public List<ThIfcBasin> BasinTools { get; set; }
+        public List<ThWBasin> BasinTools { get; set; }
         /// <summary>
         /// 排油烟管
         /// </summary>
@@ -25,18 +25,18 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 相邻雨水管
         /// </summary>
-        public List<ThIfcRainPipe> RainPipes { get; set; }
+        public List<ThWRainPipe> RainPipes { get; set; }
         /// <summary>
         /// 相邻屋顶雨水管
         /// </summary>
-        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public ThWKitchenRoom()
         {
             Pypes = new List<ThIfcSpace>();
-            BasinTools = new List<ThIfcBasin>();
+            BasinTools = new List<ThWBasin>();
             DrainageWells = new List<ThIfcSpace>();
-            RainPipes = new List<ThIfcRainPipe>();
-            RoofRainPipes = new List<ThIfcRoofRainPipe>();
+            RainPipes = new List<ThWRainPipe>();
+            RoofRainPipes = new List<ThWRoofRainPipe>();
         }
     }
 }

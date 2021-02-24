@@ -8,16 +8,15 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Service;
-using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWKitchenRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWKitchenRoom> Rooms { get; set; }
-        public List<ThIfcRainPipe> RainPipes { get; set; }
-        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
-        public List<ThIfcBasin> BasinTools { get; set; }
+        public List<ThWRainPipe> RainPipes { get; set; }
+        public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
+        public List<ThWBasin> BasinTools { get; set; }
         public ThWKitchenRoomRecognitionEngine()
         {
             Rooms = new List<ThWKitchenRoom>();

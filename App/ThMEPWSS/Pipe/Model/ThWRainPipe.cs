@@ -1,16 +1,16 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.Model.Plumbing
+namespace ThMEPWSS.Pipe.Model
 {
     /// <summary>
-    /// 台盆
+    /// 雨水管
     /// </summary>
-    public class ThIfcBasin : ThIfcSanitaryTerminal
+    public class ThWRainPipe : ThWPipe
     {
-        public static ThIfcBasin Create(Entity entity)
+        public static ThWRainPipe Create(Entity entity)
         {
-            return new ThIfcBasin()
+            return new ThWRainPipe()
             {
                 Outline = entity,
                 Uuid = Guid.NewGuid().ToString()

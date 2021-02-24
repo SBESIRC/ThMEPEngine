@@ -1,17 +1,15 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public class ThRoofFloorRoomService 
+    public class ThRoofFloorRoomService
     {
         private List<ThIfcSpace> BaseCircles { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
-        private List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         private List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
         private List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofFloorRoom> Rooms { get; private set; }
@@ -21,7 +19,7 @@ namespace ThMEPWSS.Pipe.Service
             List<ThIfcSpace> spaces,
             List<ThIfcGravityWaterBucket> gravityWaterBuckets,
             List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets,
-            List<ThIfcRoofRainPipe> roofRainPipes)
+            List<ThWRoofRainPipe> roofRainPipes)
         {
             Spaces = spaces;
             RoofRainPipes = roofRainPipes;
@@ -30,12 +28,12 @@ namespace ThMEPWSS.Pipe.Service
             SideEntryWaterBuckets = sideEntryWaterBuckets;
             Rooms = new List<ThWRoofFloorRoom>();
         }
-        public static List<ThWRoofFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
+        public static List<ThWRoofFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThWRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
             var roofFloorContainerService = new ThRoofFloorRoomService(baseCircles, spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes);
             roofFloorContainerService.Build();
-            return roofFloorContainerService.Rooms;            
-        }      
+            return roofFloorContainerService.Rooms;
+        }
         private void Build()
         {
             //找主体空间 空间框线包含“顶层设备空间”

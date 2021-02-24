@@ -1,40 +1,40 @@
 ﻿using Linq2Acad;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPWSS.Pipe.Model;
 
-namespace ThMEPEngineCore.Engine
+namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThRainPipeRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThWBasinRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var rainPipeDbExtension = new ThRainPipeDbExtension(database))
+            using (var basintoolDbExtension = new ThBasintoolDbExtension(database))
             {
-                rainPipeDbExtension.BuildElementCurves();
+                basintoolDbExtension.BuildElementCurves();
                 List<Entity> ents = new List<Entity>();
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
-                    rainPipeDbExtension.RainPipes.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex rainPipeSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    foreach (var filterObj in rainPipeSpatialIndex.SelectCrossingPolygon(polygon))
+                    basintoolDbExtension.BasinTools.ForEach(o => dbObjs.Add(o));
+                    ThCADCoreNTSSpatialIndex basintoolSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                    foreach (var filterObj in basintoolSpatialIndex.SelectCrossingPolygon(polygon))
                     {
                         ents.Add(filterObj as Entity);
                     }
                 }
                 else
                 {
-                    ents = rainPipeDbExtension.RainPipes;
+                    ents = basintoolDbExtension.BasinTools;
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcRainPipe.Create(o));
+                    Elements.Add(ThWBasin.Create(o));
                 });
             }
         }

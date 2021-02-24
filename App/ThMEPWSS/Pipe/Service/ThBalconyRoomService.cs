@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using ThCADCore.NTS;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
@@ -13,16 +11,16 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWBalconyRoom> BalconyRooms { get; private set; }
         private List<ThIfcSpace> Spaces { get; set; }
-        private List<ThIfcFloorDrain> FloorDrains { get; set; }
+        private List<ThWFloorDrain> FloorDrains { get; set; }
         private List<ThIfcWashMachine> Washmachines { get; set; }
-        private List<ThIfcRainPipe> RainPipes { get; set; }
-        private List<ThIfcBasin> Basintools { get; set; }
+        private List<ThWRainPipe> RainPipes { get; set; }
+        private List<ThWBasin> Basintools { get; set; }
         private ThBalconyRoomService(
             List<ThIfcSpace> spaces,
             List<ThIfcWashMachine> washmachines,
-            List<ThIfcFloorDrain> floorDrains,
-            List<ThIfcRainPipe> rainPipes,
-            List<ThIfcBasin> basintools)
+            List<ThWFloorDrain> floorDrains,
+            List<ThWRainPipe> rainPipes,
+            List<ThWBasin> basintools)
         {
             Spaces = spaces;
             RainPipes = rainPipes;
@@ -31,11 +29,11 @@ namespace ThMEPWSS.Pipe.Service
             Washmachines = washmachines;
         }
         public static List<ThWBalconyRoom> Build(
-            List<ThIfcSpace> spaces, 
+            List<ThIfcSpace> spaces,
             List<ThIfcWashMachine> washmachines,
-            List<ThIfcFloorDrain> floorDrains, 
-            List<ThIfcRainPipe> rainPipes, 
-            List<ThIfcBasin> basintools)
+            List<ThWFloorDrain> floorDrains,
+            List<ThWRainPipe> rainPipes,
+            List<ThWBasin> basintools)
         {
             var service = new ThBalconyRoomService(spaces, washmachines, floorDrains, rainPipes, basintools);
             service.Build();
@@ -50,7 +48,7 @@ namespace ThMEPWSS.Pipe.Service
         {
             ThWBalconyRoom thBalconyRoom = new ThWBalconyRoom();
             thBalconyRoom.Balcony = balconySpace;
-      
+
             var BalconyWashmachineService = ThBalconyWashMachineService.Find(Washmachines, balconySpace);
             thBalconyRoom.Washmachines = BalconyWashmachineService.Washmachines;
 

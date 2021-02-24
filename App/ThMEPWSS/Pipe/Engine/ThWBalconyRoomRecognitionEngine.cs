@@ -5,11 +5,10 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Pipe.Model;
-using ThMEPWSS.Pipe.Service;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPEngineCore.Model;
+using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -17,9 +16,9 @@ namespace ThMEPWSS.Pipe.Engine
     {
         public List<ThWBalconyRoom> Rooms { get; set; }
         public List<ThIfcWashMachine> Washmachines { get; set; }
-        public List<ThIfcFloorDrain> FloorDrains { get; set; }
-        public List<ThIfcRainPipe> RainPipes { get; set; }
-        public List<ThIfcBasin> BasinTools { get; set; }
+        public List<ThWFloorDrain> FloorDrains { get; set; }
+        public List<ThWRainPipe> RainPipes { get; set; }
+        public List<ThWBasin> BasinTools { get; set; }
 
         public ThWBalconyRoomRecognitionEngine()
         {

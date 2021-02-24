@@ -40,6 +40,11 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Pipe\Engine\ThApplicationPipesEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWFloorDrainRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWBasinRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWRoofRainPipeRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWRainPipeRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWCondensePipeRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWArchitectureElevationRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWExternalTagsRecognitionEngine.cs" />
@@ -58,6 +63,13 @@
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWellsRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
+    <Compile Include="Pipe\Engine\ThWClosestoolRecognitionEngine.cs" />
+    <Compile Include="Pipe\Model\ThWClosestool.cs" />
+    <Compile Include="Pipe\Model\ThWFloorDrain.cs" />
+    <Compile Include="Pipe\Model\ThWBasin.cs" />
+    <Compile Include="Pipe\Model\ThWRoofRainPipe.cs" />
+    <Compile Include="Pipe\Model\ThWRainPipe.cs" />
+    <Compile Include="Pipe\Model\ThWCondensePipe.cs" />
     <Compile Include="Pipe\Output\ThWCompositeTagOutPutEngine.cs" />
     <Compile Include="Pipe\Output\ThWRoofDeviceFloorOutPutEngine.cs" />
     <Compile Include="Pipe\Model\ThWBalconyRoom.cs" />

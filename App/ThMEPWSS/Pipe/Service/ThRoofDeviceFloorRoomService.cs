@@ -8,7 +8,7 @@ namespace ThMEPWSS.Pipe.Service
     public class ThRoofDeviceFloorRoomService
     {
         private List<ThIfcSpace> Spaces { get; set; }
-        private List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         private List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
         private List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofDeviceFloorRoom> Rooms { get; private set; }
@@ -18,7 +18,7 @@ namespace ThMEPWSS.Pipe.Service
             List<ThIfcSpace> spaces,
             List<ThIfcGravityWaterBucket> gravityWaterBuckets,
             List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets,
-            List<ThIfcRoofRainPipe> roofRainPipes,
+            List<ThWRoofRainPipe> roofRainPipes,
             List<ThIfcSpace> baseCircles)
         {
             Spaces = spaces;
@@ -32,7 +32,7 @@ namespace ThMEPWSS.Pipe.Service
             List<ThIfcSpace> spaces, 
             List<ThIfcGravityWaterBucket> gravityWaterBuckets, 
             List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, 
-            List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
+            List<ThWRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
             var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(
                 spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);          

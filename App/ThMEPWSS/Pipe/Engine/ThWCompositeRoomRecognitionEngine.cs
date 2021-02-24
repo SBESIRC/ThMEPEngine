@@ -1,15 +1,14 @@
-﻿using System.Linq;
-using Linq2Acad;
-using ThMEPWSS.Pipe.Model;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+﻿using Linq2Acad;
+using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Pipe.Geom;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Geom;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -70,36 +69,36 @@ namespace ThMEPWSS.Pipe.Engine
                 GenerateBalconyPairInfo(balconyEngine.Rooms, devicePlatformEngine.Rooms);
             }
         }
-        protected List<ThIfcRainPipe> GetRainPipes(Database database, Point3dCollection pts)
+        protected List<ThWRainPipe> GetRainPipes(Database database, Point3dCollection pts)
         {
-            using (ThRainPipeRecognitionEngine rainPipesEngine = new ThRainPipeRecognitionEngine())
+            using (ThWRainPipeRecognitionEngine rainPipesEngine = new ThWRainPipeRecognitionEngine())
             {
                 rainPipesEngine.Recognize(database, pts);
-                return rainPipesEngine.Elements.Cast<ThIfcRainPipe>().ToList();
+                return rainPipesEngine.Elements.Cast<ThWRainPipe>().ToList();
             }
         }
-        protected List<ThIfcRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
+        protected List<ThWRoofRainPipe> GetRoofRainPipes(Database database, Point3dCollection pts)
         {
-            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
+            using (ThWRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThWRoofRainPipeRecognitionEngine())
             {
                 roofRainPipesEngine.Recognize(database, pts);
-                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
+                return roofRainPipesEngine.Elements.Cast<ThWRoofRainPipe>().ToList();
             }
         }
-        protected List<ThIfcFloorDrain> GetFloorDrains(Database database, Point3dCollection pts)
+        protected List<ThWFloorDrain> GetFloorDrains(Database database, Point3dCollection pts)
         {
-            using (ThFloorDrainRecognitionEngine floorDrainEngine = new ThFloorDrainRecognitionEngine())
+            using (ThWFloorDrainRecognitionEngine floorDrainEngine = new ThWFloorDrainRecognitionEngine())
             {
                 floorDrainEngine.Recognize(database, pts);
-                return floorDrainEngine.Elements.Cast<ThIfcFloorDrain>().ToList();
+                return floorDrainEngine.Elements.Cast<ThWFloorDrain>().ToList();
             }
         }
-        protected List<ThIfcCondensePipe> GetCondensePipes(Database database, Point3dCollection pts)
+        protected List<ThWCondensePipe> GetCondensePipes(Database database, Point3dCollection pts)
         {
-            using (ThCondensePipeRecognitionEngine condensePipesEngine = new ThCondensePipeRecognitionEngine())
+            using (ThWCondensePipeRecognitionEngine condensePipesEngine = new ThWCondensePipeRecognitionEngine())
             {
                 condensePipesEngine.Recognize(database, pts);
-                return condensePipesEngine.Elements.Cast<ThIfcCondensePipe>().ToList();
+                return condensePipesEngine.Elements.Cast<ThWCondensePipe>().ToList();
             }
         }
         private List<ThIfcWashMachine> GetWashmachines(Database database, Point3dCollection pts)
@@ -110,12 +109,12 @@ namespace ThMEPWSS.Pipe.Engine
                 return washmachinesEngine.Elements.Cast<ThIfcWashMachine>().ToList();
             }
         }
-        private List<ThIfcBasin> GetBasinTools(Database database, Point3dCollection pts)
+        private List<ThWBasin> GetBasinTools(Database database, Point3dCollection pts)
         {
-            using (ThBasinRecognitionEngine basinToolsEngine = new ThBasinRecognitionEngine())
+            using (ThWBasinRecognitionEngine basinToolsEngine = new ThWBasinRecognitionEngine())
             {
                 basinToolsEngine.Recognize(database, pts);
-                return basinToolsEngine.Elements.Cast<ThIfcBasin>().ToList();
+                return basinToolsEngine.Elements.Cast<ThWBasin>().ToList();
             }
         }
         /// <summary>

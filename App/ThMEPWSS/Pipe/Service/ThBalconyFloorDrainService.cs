@@ -4,18 +4,18 @@ using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThBalconyFloorDrainService
     {
-        public List<ThIfcFloorDrain> FloorDrains { get; private set; }
-        private List<ThIfcFloorDrain> FloorDrainList { get; set; }
+        public List<ThWFloorDrain> FloorDrains { get; private set; }
+        private List<ThWFloorDrain> FloorDrainList { get; set; }
         private ThIfcSpace BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         private ThBalconyFloorDrainService(
-           List<ThIfcFloorDrain> floordrainList,
+           List<ThWFloorDrain> floordrainList,
            ThIfcSpace balconySpace,
            ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
@@ -30,7 +30,7 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
         public static ThBalconyFloorDrainService Find(
-          List<ThIfcFloorDrain> floordrains,
+          List<ThWFloorDrain> floordrains,
           ThIfcSpace balconySpace,
           ThCADCoreNTSSpatialIndex floordrainSpatialIndex = null)
         {

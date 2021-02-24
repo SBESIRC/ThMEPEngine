@@ -593,7 +593,7 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return gravityWaterBucket;
         }
-        public static List<Polyline> GetroofRainPipe(List<ThIfcRoofRainPipe> RoofRainPipes)
+        public static List<Polyline> GetroofRainPipe(List<ThWRoofRainPipe> RoofRainPipes)
         {
             var roofRainPipe = new List<Polyline>();
             foreach (var pipe in RoofRainPipes)

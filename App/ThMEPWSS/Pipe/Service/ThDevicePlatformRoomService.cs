@@ -1,32 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
-
 
 namespace ThMEPWSS.Pipe.Service
 {
-    public  class ThDevicePlatformRoomService
+    public class ThDevicePlatformRoomService
     {
         public List<ThWDevicePlatformRoom> DevicePlatformRoom { get; set; }
-        private List<ThIfcSpace> Spaces { get; set; }   
-        private List<ThIfcFloorDrain> FloorDrains { get; set; }
-        private List<ThIfcRainPipe> RainPipes { get; set; }
-        private List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
-        private List<ThIfcCondensePipe> CondensePipes { get; set; }
+        private List<ThIfcSpace> Spaces { get; set; }
+        private List<ThWFloorDrain> FloorDrains { get; set; }
+        private List<ThWRainPipe> RainPipes { get; set; }
+        private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
+        private List<ThWCondensePipe> CondensePipes { get; set; }
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
         private ThDevicePlatformRoomService(
          List<ThIfcSpace> spaces,
-         List<ThIfcFloorDrain> floorDrains,
-         List<ThIfcRainPipe> rainPipes,
-         List<ThIfcCondensePipe> condensePipes,
-         List<ThIfcRoofRainPipe> roofRainPipes
+         List<ThWFloorDrain> floorDrains,
+         List<ThWRainPipe> rainPipes,
+         List<ThWCondensePipe> condensePipes,
+         List<ThWRoofRainPipe> roofRainPipes
         )
-        {  
+        {
             Spaces = spaces;
             FloorDrains = floorDrains;
             RainPipes = rainPipes;
@@ -35,11 +33,11 @@ namespace ThMEPWSS.Pipe.Service
             BuildSpatialIndex();
         }
         public static List<ThWDevicePlatformRoom> Build(
-            List<ThIfcSpace> spaces, 
-            List<ThIfcFloorDrain> floorDrains, 
-            List<ThIfcRainPipe> rainPipes, 
-            List<ThIfcCondensePipe> condensePipes, 
-            List<ThIfcRoofRainPipe> roofRainPipes)
+            List<ThIfcSpace> spaces,
+            List<ThWFloorDrain> floorDrains,
+            List<ThWRainPipe> rainPipes,
+            List<ThWCondensePipe> condensePipes,
+            List<ThWRoofRainPipe> roofRainPipes)
         {
             var service = new ThDevicePlatformRoomService(spaces, floorDrains, rainPipes, condensePipes, roofRainPipes);
             service.Build();
@@ -53,7 +51,7 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThWDevicePlatformRoom> CreateDevicePlatformRooms(List<ThIfcSpace> devicePlatformSpaces)
         {
             var thDevicePlatformRoomlist = new List<ThWDevicePlatformRoom>();
-           
+
             foreach (var devicePlatformSpace in devicePlatformSpaces)
             {
                 ThWDevicePlatformRoom thDevicePlatformRoom = new ThWDevicePlatformRoom();
@@ -70,10 +68,10 @@ namespace ThMEPWSS.Pipe.Service
             }
             return thDevicePlatformRoomlist;
         }
-        private List<Tuple<ThIfcSpace,List<ThIfcSpace>>> DevicePlatformSpaces()
+        private List<Tuple<ThIfcSpace, List<ThIfcSpace>>> DevicePlatformSpaces()
         {
             var PlatformSpaces = new List<Tuple<ThIfcSpace, List<ThIfcSpace>>>();
-            var BalconySpaces= Spaces.Where(m => m.Tags.Where(n => n.Contains("阳台")).Any()).ToList();
+            var BalconySpaces = Spaces.Where(m => m.Tags.Where(n => n.Contains("阳台")).Any()).ToList();
             foreach (var BalconySpace in BalconySpaces)
             {
                 var bufferObjs = ThCADCoreNTSOperation.Buffer(BalconySpace.Boundary as Polyline, ThWPipeCommon.BALCONY_BUFFER_DISTANCE);
@@ -83,8 +81,8 @@ namespace ThMEPWSS.Pipe.Service
                     //获取偏移后，能框选到的空间
                     var crossSpaces = Spaces.Where(o => crossObjs.Contains(o.Boundary));
                     // 找到不包含子空间的，且不含有Tag名称的空间
-                    var balconies = crossSpaces.Where(m => m.SubSpaces.Count==0 && m.Tags.Count==0);
-                    var outerSpaces = balconies.Where(o=> !BalconySpace.Boundary.ToNTSPolygon().Contains(o.Boundary.ToNTSPolygon().Buffer(-5.0)));
+                    var balconies = crossSpaces.Where(m => m.SubSpaces.Count == 0 && m.Tags.Count == 0);
+                    var outerSpaces = balconies.Where(o => !BalconySpace.Boundary.ToNTSPolygon().Contains(o.Boundary.ToNTSPolygon().Buffer(-5.0)));
                     var relatedbalconies = outerSpaces.Where(o => (GetSpaceArea(o) > ThWPipeCommon.MIN_DEVICEPLATFORM_AREA && GetSpaceArea(o) < ThWPipeCommon.MAX_DEVICEPLATFORM_AREA)).ToList();
                     PlatformSpaces.Add(Tuple.Create(BalconySpace, relatedbalconies));
                 }

@@ -142,45 +142,6 @@ namespace ThMEPEngineCore
                 });
             }
         }
-        [CommandMethod("TIANHUACAD", "ThExtractIfcCloseTool", CommandFlags.Modal)]
-        public void ThExtractIfcCloseTool()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var closetoolEngine = new ThClosestoolRecognitionEngine())
-            {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                closetoolEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                closetoolEngine.Elements.ForEach(o =>
-                {
-                    acadDatabase.ModelSpace.Add(o.Outline);
-                });
-            }
-        }
-        [CommandMethod("TIANHUACAD", "ThExtractIfcFloorDrain", CommandFlags.Modal)]
-        public void ThExtractIfcFloorDrain()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var floorDrainEngine = new ThFloorDrainRecognitionEngine())
-            {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                floorDrainEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                floorDrainEngine.Elements.ForEach(o =>
-                {
-                    acadDatabase.ModelSpace.Add(o.Outline);
-                });
-            }
-        }
         [CommandMethod("TIANHUACAD", "ThExtractParkingStall", CommandFlags.Modal)]
         public void ThExtractParkingStall()
         {

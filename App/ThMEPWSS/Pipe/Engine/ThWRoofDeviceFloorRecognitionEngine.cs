@@ -1,17 +1,17 @@
 ﻿using System;
 using Linq2Acad;
+using DotNetARX;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Model.Plumbing;
 using ThMEPEngineCore.Model;
-using ThMEPWSS.Pipe.Tools;
-using ThCADExtension;
-using ThMEPEngineCore.Service;
-using DotNetARX;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -36,31 +36,31 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> PositionTags { get; set; }
         public List<Curve> AllObstacles { get; set; }
         public List<string> Layers { get; set; }
-        public List<ThIfcGravityWaterBucket> GravityWaterBuckets{get; set; }
+        public List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
         public List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
-        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public ThWRoofDeviceFloorRecognitionEngine()
         {
             Rooms = new List<ThWRoofDeviceFloorRoom>();
             TagNameFrames = new List<Curve>();
-            StairFrames= new List<Curve>();
-            Columns= new List<Curve>();
-            ShearWalls= new List<Curve>();
-            InnerDoors= new List<Curve>();
+            StairFrames = new List<Curve>();
+            Columns = new List<Curve>();
+            ShearWalls = new List<Curve>();
+            InnerDoors = new List<Curve>();
             Devices = new List<Curve>();
             ArchitectureWalls = new List<Curve>();
-            Windows= new List<Curve>();
+            Windows = new List<Curve>();
             ElevationFrames = new List<Curve>();
             AxialCircleTags = new List<Curve>();
             AxialAxisTags = new List<Curve>();
-            ExternalTags= new List<Curve>();
+            ExternalTags = new List<Curve>();
             Wells = new List<Curve>();
-            DimensionTags= new List<Curve>();
-            RainPipes= new List<Curve>();
+            DimensionTags = new List<Curve>();
+            RainPipes = new List<Curve>();
             PositionTags = new List<Curve>();
             AllObstacles = new List<Curve>();
             Layers = new List<string>();
-            Spaces = new List<ThIfcSpace>();        
+            Spaces = new List<ThIfcSpace>();
         }
         public override void Recognize(Database database, Point3dCollection pts)
         {
@@ -68,16 +68,16 @@ namespace ThMEPWSS.Pipe.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var blockCollection = new List<BlockReference>();
-                blockCollection = BlockTools.GetAllDynBlockReferences(database,"楼层框定");
+                blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
                 var DeviceSpaces = new List<ThIfcSpace>();
-                var RoofSpaces= new List<ThIfcSpace>();
-                var StandardSpaces= new List<ThIfcSpace>();
-                var NonStandardSpaces= new List<ThIfcSpace>();
-                if (blockCollection.Count>0)
+                var RoofSpaces = new List<ThIfcSpace>();
+                var StandardSpaces = new List<ThIfcSpace>();
+                var NonStandardSpaces = new List<ThIfcSpace>();
+                if (blockCollection.Count > 0)
                 {
                     DeviceSpaces = GetDeviceSpaces(blockCollection);
                     RoofSpaces = GetRoofSpaces(blockCollection);
-                    StandardSpaces= GetStandardSpaces(blockCollection);
+                    StandardSpaces = GetStandardSpaces(blockCollection);
                     NonStandardSpaces = GetNonStandardSpaces(blockCollection);
                 }
                 if (this.Spaces.Count == 0)
@@ -85,7 +85,7 @@ namespace ThMEPWSS.Pipe.Engine
                     this.Spaces = GetSpaces(database, pts);
                 }
                 GetLayers(database, pts).ForEach(o => Layers.Add(o));
-                GetTagNameFrames(database, pts).ForEach(o=> TagNameFrames.Add(o));
+                GetTagNameFrames(database, pts).ForEach(o => TagNameFrames.Add(o));
                 GetTagNameFrames(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetStarFrames(this.Spaces).ForEach(o => StairFrames.Add(o));
                 GetStarFrames(this.Spaces).ForEach(o => AllObstacles.Add(o));
@@ -118,8 +118,8 @@ namespace ThMEPWSS.Pipe.Engine
                 GetRainPipes(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetPositionTags(database, pts).ForEach(o => PositionTags.Add(o));
                 GetPositionTags(database, pts).ForEach(o => AllObstacles.Add(o));
-                var baseCircles = GetBaseCircles(blockCollection);                  
-                      
+                var baseCircles = GetBaseCircles(blockCollection);
+
                 Rooms = ThRoofDeviceFloorRoomService.Build(DeviceSpaces, GravityWaterBuckets, SideEntryWaterBuckets, RoofRainPipes, baseCircles);
             }
         }
@@ -131,7 +131,7 @@ namespace ThMEPWSS.Pipe.Engine
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("小屋面"))
                 {
                     var s = new DBObjectCollection();
-                    block.Explode(s);                 
+                    block.Explode(s);
                     List<Circle> circle = new List<Circle>();
                     foreach (var s1 in s)
                     {
@@ -151,7 +151,7 @@ namespace ThMEPWSS.Pipe.Engine
             var blockBounds = new List<BlockReference>();
             foreach (BlockReference block in blocks)
             {
-                if(BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("小屋面"))
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("小屋面"))
                 {
                     blockBounds.Add(block);
                 }
@@ -164,11 +164,11 @@ namespace ThMEPWSS.Pipe.Engine
             var FloorSpaces = new List<ThIfcSpace>();
             var blockBounds = new List<BlockReference>();
             foreach (BlockReference block in blocks)
-            {               
+            {
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("大屋面"))
                 {
                     blockBounds.Add(block);
-                }                                       
+                }
             }
             GetBoundaryCurves(blockBounds).ForEach(o => FloorSpaces.Add(new ThIfcSpace { Boundary = o }));
             return FloorSpaces;
@@ -176,7 +176,7 @@ namespace ThMEPWSS.Pipe.Engine
         public static List<ThIfcSpace> GetStandardSpaces(List<BlockReference> blocks)
         {
             var FloorSpaces = new List<ThIfcSpace>();
-           
+
             foreach (BlockReference block in blocks)
             {
                 var blockBounds = new List<BlockReference>();
@@ -191,7 +191,7 @@ namespace ThMEPWSS.Pipe.Engine
                     FloorSpaces.Add(new ThIfcSpace { Boundary = GetBoundaryCurves(blockBounds)[0], Tags = blockString });
                 }
             }
-            
+
             return FloorSpaces;
         }
         public static List<ThIfcSpace> GetNonStandardSpaces(List<BlockReference> blocks)
@@ -211,7 +211,7 @@ namespace ThMEPWSS.Pipe.Engine
         public static List<Curve> GetBoundaryCurves(List<BlockReference> blockCollection)
         {
             var blockCurves = new List<Curve>();
-            foreach(BlockReference block in blockCollection)
+            foreach (BlockReference block in blockCollection)
             {
                 blockCurves.Add(ThWPipeOutputFunction.GetBlockBoundary(block));
             }
@@ -222,7 +222,7 @@ namespace ThMEPWSS.Pipe.Engine
             var strings = new List<string>();
             using (var LayerNamesDbExtension = new ThLayerNamesDbExtension(database))
             {
-                strings = LayerNamesDbExtension.LayerFilter;      
+                strings = LayerNamesDbExtension.LayerFilter;
             }
             return strings;
         }
@@ -246,12 +246,12 @@ namespace ThMEPWSS.Pipe.Engine
         private static List<Curve> GetRainPipes(Database database, Point3dCollection pts)
         {
             var Columns = new List<Curve>();
-            var circles = new List<Curve>();           
+            var circles = new List<Curve>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var rainPipesDbExtension = new ThRainPipesDbExtension(database))
             {
                 rainPipesDbExtension.BuildElementCurves();
-                Columns = rainPipesDbExtension.Polylines;              
+                Columns = rainPipesDbExtension.Polylines;
             }
             Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
             return circles;
@@ -325,7 +325,7 @@ namespace ThMEPWSS.Pipe.Engine
             Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetCircleBoundary(o)));
             return circles;
         }
-        private static List<Curve> GetColumns(Database database, Point3dCollection pts )
+        private static List<Curve> GetColumns(Database database, Point3dCollection pts)
         {
             var Columns = new List<Curve>();
             var ColumnRecognitionEngine = new ThColumnRecognitionEngine();
@@ -408,12 +408,12 @@ namespace ThMEPWSS.Pipe.Engine
 
         private static List<Curve> GetTagNameFrames(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();                             
+            var Columns = new List<Curve>();
             var architectureElevationEngine = new ThWArchitectureElevationRecognitionEngine();
-            architectureElevationEngine.Recognize(database, pts);         
+            architectureElevationEngine.Recognize(database, pts);
             architectureElevationEngine.DbTexts.ForEach(o =>
             {
-             
+
                 if (!o.Layer.Contains("LEVL"))
                 {
                     Columns.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position));
@@ -444,12 +444,12 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 Point3d minPoint = space.Boundary.GeometricExtents.MinPoint;
                 Point3d maxPoint = space.Boundary.GeometricExtents.MaxPoint;
-                if (Math.Abs(minPoint.DistanceTo(maxPoint)-5500) < 100)
-                {                                
+                if (Math.Abs(minPoint.DistanceTo(maxPoint) - 5500) < 100)
+                {
                     frame.Add(space.Boundary as Polyline);
                 }
             }
             return frame;
-        }      
+        }
     }
 }

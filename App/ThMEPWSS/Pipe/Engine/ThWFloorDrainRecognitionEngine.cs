@@ -1,24 +1,24 @@
 ﻿using Linq2Acad;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPWSS.Pipe.Model;
 
-namespace ThMEPEngineCore.Engine
+namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThFloorDrainRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThWFloorDrainRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             Elements.AddRange(RecognizeToiletFloorDrain(database, polygon));
             Elements.AddRange(RecognizeBalconyFloorDrain(database, polygon));
         }
-        private List<ThIfcFloorDrain> RecognizeToiletFloorDrain(Database database, Point3dCollection polygon)
+        private List<ThWFloorDrain> RecognizeToiletFloorDrain(Database database, Point3dCollection polygon)
         {
-            List<ThIfcFloorDrain> floorDrains = new List<ThIfcFloorDrain>();
+            List<ThWFloorDrain> floorDrains = new List<ThWFloorDrain>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var floorDrainDbExtension = new ThFloorDrainDbExtension(database))
             {
@@ -40,15 +40,15 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    floorDrains.Add(ThIfcFloorDrain.Create(o));
+                    floorDrains.Add(ThWFloorDrain.Create(o));
                 });
                 floorDrains.ForEach(o => o.Use = UseKind.Toilet);
             }
             return floorDrains;
         }
-        private List<ThIfcFloorDrain> RecognizeBalconyFloorDrain(Database database, Point3dCollection polygon)
+        private List<ThWFloorDrain> RecognizeBalconyFloorDrain(Database database, Point3dCollection polygon)
         {
-            List<ThIfcFloorDrain> floorDrains = new List<ThIfcFloorDrain>();
+            List<ThWFloorDrain> floorDrains = new List<ThWFloorDrain>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var floorDrainDbExtension = new ThBalconyFloorDrainDbExtension(database))
             {
@@ -70,7 +70,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    floorDrains.Add(ThIfcFloorDrain.Create(o));
+                    floorDrains.Add(ThWFloorDrain.Create(o));
                 });
             }
             floorDrains.ForEach(o => o.Use = UseKind.Balcony);

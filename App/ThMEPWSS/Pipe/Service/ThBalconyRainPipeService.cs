@@ -4,18 +4,18 @@ using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThBalconyRainPipeService
     {
-        public List<ThIfcRainPipe> RainPipes { get; private set; }
-        private List<ThIfcRainPipe> RainPipeList { get; set; }
+        public List<ThWRainPipe> RainPipes { get; private set; }
+        private List<ThWRainPipe> RainPipeList { get; set; }
         private ThIfcSpace BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex RainPipeSpatialIndex { get; set; }
         private ThBalconyRainPipeService(
-            List<ThIfcRainPipe> rainPipeList,
+            List<ThWRainPipe> rainPipeList,
             ThIfcSpace balconySpace,
             ThCADCoreNTSSpatialIndex rainPipeSpatialIndex)
         {
@@ -31,7 +31,7 @@ namespace ThMEPWSS.Pipe.Service
 
         }
         public static ThBalconyRainPipeService Find(
-            List<ThIfcRainPipe> rainPipeList,
+            List<ThWRainPipe> rainPipeList,
             ThIfcSpace balconySpace,
             ThCADCoreNTSSpatialIndex rainPipeSpatialIndex = null)
         {

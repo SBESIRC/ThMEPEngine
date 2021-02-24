@@ -130,12 +130,12 @@ namespace ThMEPWSS.Pipe.Engine
                 return sideEntryWaterBucketEngine.Elements.Cast<ThIfcSideEntryWaterBucket>().ToList();
             }
         }
-        private List<ThIfcRoofRainPipe> GetroofRainPipes(Database database, Point3dCollection pts)
+        private List<ThWRoofRainPipe> GetroofRainPipes(Database database, Point3dCollection pts)
         {
-            using (ThRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThRoofRainPipeRecognitionEngine())
+            using (ThWRoofRainPipeRecognitionEngine roofRainPipesEngine = new ThWRoofRainPipeRecognitionEngine())
             {
                 roofRainPipesEngine.Recognize(database, pts);
-                return roofRainPipesEngine.Elements.Cast<ThIfcRoofRainPipe>().ToList();
+                return roofRainPipesEngine.Elements.Cast<ThWRoofRainPipe>().ToList();
             }
         }
     }

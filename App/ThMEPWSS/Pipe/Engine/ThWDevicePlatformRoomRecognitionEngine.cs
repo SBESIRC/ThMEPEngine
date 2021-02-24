@@ -5,20 +5,19 @@ using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Pipe.Model;
 using ThMEPEngineCore.Model;
+using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
-using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWDevicePlatformRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWDevicePlatformRoom> Rooms { get; set; }
-        public List<ThIfcFloorDrain> FloorDrains { get; set; }
-        public List<ThIfcRainPipe> RainPipes { get; set; }
-        public List<ThIfcCondensePipe> CondensePipes { get; set; }
-        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        public List<ThWFloorDrain> FloorDrains { get; set; }
+        public List<ThWRainPipe> RainPipes { get; set; }
+        public List<ThWCondensePipe> CondensePipes { get; set; }
+        public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public ThWDevicePlatformRoomRecognitionEngine()
         {
             Rooms = new List<ThWDevicePlatformRoom>();

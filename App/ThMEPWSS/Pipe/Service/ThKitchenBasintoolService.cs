@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model.Plumbing;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -14,17 +14,17 @@ namespace ThMEPWSS.Pipe.Service
         /// <summary>
         /// 找到的台盆
         /// </summary>
-        public List<ThIfcBasin> Basintools { get; private set; }
-        private List<ThIfcBasin> BasintoolList { get; set; }
+        public List<ThWBasin> Basintools { get; private set; }
+        private List<ThWBasin> BasintoolList { get; set; }
         private ThIfcSpace KitchenSpace { get; set; }
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
         private ThKitchenBasintoolService(
-            List<ThIfcBasin> basintoolList,
+            List<ThWBasin> basintoolList,
             ThIfcSpace kitchenSpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex)
         {
             BasintoolList = basintoolList;
-            Basintools = new List<ThIfcBasin>();
+            Basintools = new List<ThWBasin>();
             KitchenSpace = kitchenSpace;
             BasintoolSpatialIndex = basintoolSpatialIndex;
             if (BasintoolSpatialIndex == null)
@@ -42,7 +42,7 @@ namespace ThMEPWSS.Pipe.Service
         /// <param name="basintoolSpatialIndex">厨房索引空间</param>
         /// <returns></returns>
         public static ThKitchenBasintoolService Find(
-            List<ThIfcBasin> basintoolList,
+            List<ThWBasin> basintoolList,
             ThIfcSpace kitchenSpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex = null)
         {

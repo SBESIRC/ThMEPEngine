@@ -3,12 +3,11 @@ using Linq2Acad;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 using ThMEPEngineCore.Model;
-
-using ThMEPWSS.Pipe.Tools;
-using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -17,24 +16,24 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWRoofFloorRoom> Rooms { get; set; }
         public List<ThIfcGravityWaterBucket> gravityWaterBuckets { get; set; }
         public List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets { get; set; }
-        public List<ThIfcRoofRainPipe> roofRainPipes { get; set; }
+        public List<ThWRoofRainPipe> roofRainPipes { get; set; }
         public ThWRoofFloorRecognitionEngine()
         {
             Rooms = new List<ThWRoofFloorRoom>();
         }
         public override void Recognize(Database database, Point3dCollection pts)
-        {           
+        {
             Rooms = new List<ThWRoofFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var blockCollection = new List<BlockReference>();
-                blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");           
+                blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
                 var RoofSpaces = new List<ThIfcSpace>();
                 if (blockCollection.Count > 0)
-                {                 
-                    RoofSpaces = GetRoofSpaces(blockCollection);                
+                {
+                    RoofSpaces = GetRoofSpaces(blockCollection);
                 }
-                var baseCircles= GetBaseCircles(blockCollection);                          
+                var baseCircles = GetBaseCircles(blockCollection);
                 Rooms = ThRoofFloorRoomService.Build(RoofSpaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);
             }
         }

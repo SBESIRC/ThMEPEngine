@@ -10,7 +10,6 @@ using NFox.Cad;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADExtension;
-using ThMEPEngineCore.Engine;
 using System;
 using ThMEPWSS.Pipe.Engine;
 using DotNetARX;
@@ -199,13 +198,13 @@ namespace ThMEPWSS
                     {
                         roofrainpipe.Add(acadDatabase.Element<Polyline>(objId));
                     }
-                }             
+                }
                 var PipeindexEngine = new ThWInnerPipeIndexEngine();
                 var compositeEngine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //ThCADCoreNTSSpatialIndex obstacle = null;
                 //compositeEngine.Run(fpipe, tpipe, wpipe, ppipe, dpipe, npipe, rainpipe, pboundary,divideLines,roofrainpipe,Point3d.Origin, Point3d.Origin,obstacle);
-                for (int j=0;j < compositeEngine.PipeEngine.Fpipeindex.Count;j++)
-                {   
+                for (int j = 0; j < compositeEngine.PipeEngine.Fpipeindex.Count; j++)
+                {
                     for (int i = 0; i < compositeEngine.PipeEngine.Fpipeindex[j].Count; i++)
                     {
                         int num = 0;
@@ -229,10 +228,10 @@ namespace ThMEPWSS
                         double Yoffset = 250 * num;
                         Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
                         var Matrix = Matrix3d.Displacement(s);
-                        var tag1=PipeindexEngine.Fpipeindex_tag[j][3 * i].TransformBy(Matrix);
-                        var tag2=PipeindexEngine.Fpipeindex_tag[j][3 * i+1].TransformBy(Matrix);
-                        var tag3=PipeindexEngine.Fpipeindex_tag[j][3 * i+2].TransformBy(Matrix);
-                        Line ent_line = new Line(PipeindexEngine.Fpipeindex[j][i], tag1);                        
+                        var tag1 = PipeindexEngine.Fpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.Fpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.Fpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        Line ent_line = new Line(PipeindexEngine.Fpipeindex[j][i], tag1);
                         Line ent_line1 = new Line(tag1, tag2);
                         //ent_line.Layer = "W-DRAI-NOTE";
                         ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
@@ -244,10 +243,10 @@ namespace ThMEPWSS
                             Position = tag3,
                             TextString = $"FL{j}-{i + 1}"//原来为{floor.Value}                        
                         };
-                        DBText taggingtext1 = new DBText()                       
+                        DBText taggingtext1 = new DBText()
                         {
                             Height = 175,
-                            Position = tag3,                           
+                            Position = tag3,
                             TextString = $"FL-{i + 1}"//原来为{floor.Value}                        
                         };
                         if (j > 0)
@@ -285,9 +284,9 @@ namespace ThMEPWSS
                         double Yoffset = -250 * num;
                         Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
                         var Matrix = Matrix3d.Displacement(s);
-                        var tag1=PipeindexEngine.Tpipeindex_tag[j][3 * i].TransformBy(Matrix);
-                        var tag2=PipeindexEngine.Tpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
-                        var tag3=PipeindexEngine.Tpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
+                        var tag1 = PipeindexEngine.Tpipeindex_tag[j][3 * i].TransformBy(Matrix);
+                        var tag2 = PipeindexEngine.Tpipeindex_tag[j][3 * i + 1].TransformBy(Matrix);
+                        var tag3 = PipeindexEngine.Tpipeindex_tag[j][3 * i + 2].TransformBy(Matrix);
                         Line ent_line = new Line(PipeindexEngine.Tpipeindex[j][i], tag1);
                         Line ent_line1 = new Line(tag1, tag2);
                         //ent_line.Layer = "W-DRAI-NOTE";
@@ -298,7 +297,7 @@ namespace ThMEPWSS
                         {
                             Height = 175,
                             Position = tag3,
-                            TextString = $"TL{j}-{i+1}",
+                            TextString = $"TL{j}-{i + 1}",
 
                         };
                         DBText taggingtext1 = new DBText()
@@ -356,7 +355,7 @@ namespace ThMEPWSS
                         {
                             Height = 175,
                             Position = tag3,
-                            TextString = $"WL{j}-{i+1}",
+                            TextString = $"WL{j}-{i + 1}",
 
                         };
                         DBText taggingtext1 = new DBText()
@@ -414,7 +413,7 @@ namespace ThMEPWSS
                         {
                             Height = 175,
                             Position = tag3,
-                            TextString = $"PL{j}-{i+1}",
+                            TextString = $"PL{j}-{i + 1}",
 
                         };
                         DBText taggingtext1 = new DBText()
@@ -472,7 +471,7 @@ namespace ThMEPWSS
                         {
                             Height = 175,
                             Position = tag3,
-                            TextString = $"DL{j}-{i+1}",
+                            TextString = $"DL{j}-{i + 1}",
 
                         };
                         DBText taggingtext1 = new DBText()
@@ -530,7 +529,7 @@ namespace ThMEPWSS
                         {
                             Height = 175,
                             Position = tag3,
-                            TextString = $"NL{j}-{i+1}",                         
+                            TextString = $"NL{j}-{i + 1}",
                         };
                         DBText taggingtext1 = new DBText()
                         {
@@ -546,7 +545,7 @@ namespace ThMEPWSS
                         else
                         {
                             acadDatabase.ModelSpace.Add(taggingtext1);
-                        }                               
+                        }
                     }
                 }
                 for (int j = 0; j < compositeEngine.PipeEngine.Rainpipeindex.Count; j++)
@@ -587,7 +586,7 @@ namespace ThMEPWSS
                         {
                             Height = 175,
                             Position = tag3,
-                            TextString = $"Y2L{j}-{i+1}",
+                            TextString = $"Y2L{j}-{i + 1}",
                         };
                         DBText taggingtext1 = new DBText()
                         {
@@ -732,7 +731,7 @@ namespace ThMEPWSS
         public void ThExtractIfcBasinTool()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var basintoolEngine = new ThBasinRecognitionEngine())
+            using (var basintoolEngine = new ThWBasinRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
