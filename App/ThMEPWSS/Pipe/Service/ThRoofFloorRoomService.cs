@@ -10,15 +10,15 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThIfcSpace> BaseCircles { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
-        private List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
-        private List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
+        private List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
+        private List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofFloorRoom> Rooms { get; private set; }
 
         private ThRoofFloorRoomService(
             List<ThIfcSpace> baseCircles,
             List<ThIfcSpace> spaces,
-            List<ThIfcGravityWaterBucket> gravityWaterBuckets,
-            List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets,
+            List<ThWGravityWaterBucket> gravityWaterBuckets,
+            List<ThWSideEntryWaterBucket> sideEntryWaterBuckets,
             List<ThWRoofRainPipe> roofRainPipes)
         {
             Spaces = spaces;
@@ -28,7 +28,7 @@ namespace ThMEPWSS.Pipe.Service
             SideEntryWaterBuckets = sideEntryWaterBuckets;
             Rooms = new List<ThWRoofFloorRoom>();
         }
-        public static List<ThWRoofFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcGravityWaterBucket> gravityWaterBuckets, List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, List<ThWRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
+        public static List<ThWRoofFloorRoom> Build(List<ThIfcSpace> spaces, List<ThWGravityWaterBucket> gravityWaterBuckets, List<ThWSideEntryWaterBucket> sideEntryWaterBuckets, List<ThWRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
             var roofFloorContainerService = new ThRoofFloorRoomService(baseCircles, spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes);
             roofFloorContainerService.Build();

@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -13,10 +13,10 @@ namespace ThMEPWSS.Pipe.Service
     {
         private ThIfcSpace Space { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        private List<ThIfcSideEntryWaterBucket> Buckets { get; set; }
+        private List<ThWSideEntryWaterBucket> Buckets { get; set; }
         private ThRoofFloorSideEntryWaterBucketService(
             ThIfcSpace space,
-            List<ThIfcSideEntryWaterBucket> buckets)
+            List<ThWSideEntryWaterBucket> buckets)
         {
             Space = space;
             Buckets = buckets;
@@ -25,15 +25,15 @@ namespace ThMEPWSS.Pipe.Service
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
 
-        public static List<ThIfcSideEntryWaterBucket> Find(
+        public static List<ThWSideEntryWaterBucket> Find(
             ThIfcSpace space,
-            List<ThIfcSideEntryWaterBucket> buckets)
+            List<ThWSideEntryWaterBucket> buckets)
         {
             var service = new ThRoofFloorSideEntryWaterBucketService(space, buckets);
             return service.Find();
         }
 
-        public List<ThIfcSideEntryWaterBucket> Find()
+        public List<ThWSideEntryWaterBucket> Find()
         {
             var roofFloorBoundary = Space.Boundary as Polyline;
             var crossObjs = SpatialIndex.SelectCrossingPolygon(roofFloorBoundary);

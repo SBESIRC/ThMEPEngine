@@ -5,13 +5,12 @@ using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Model.Plumbing;
-using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -36,8 +35,8 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> PositionTags { get; set; }
         public List<Curve> AllObstacles { get; set; }
         public List<string> Layers { get; set; }
-        public List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
-        public List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
+        public List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
+        public List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public ThWRoofDeviceFloorRecognitionEngine()
         {

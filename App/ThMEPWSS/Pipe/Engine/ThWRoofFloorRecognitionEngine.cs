@@ -1,21 +1,20 @@
 ﻿using DotNetARX;
 using Linq2Acad;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
-using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWRoofFloorRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWRoofFloorRoom> Rooms { get; set; }
-        public List<ThIfcGravityWaterBucket> gravityWaterBuckets { get; set; }
-        public List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets { get; set; }
+        public List<ThWGravityWaterBucket> gravityWaterBuckets { get; set; }
+        public List<ThWSideEntryWaterBucket> sideEntryWaterBuckets { get; set; }
         public List<ThWRoofRainPipe> roofRainPipes { get; set; }
         public ThWRoofFloorRecognitionEngine()
         {

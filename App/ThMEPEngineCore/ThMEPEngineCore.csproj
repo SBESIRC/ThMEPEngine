@@ -81,10 +81,8 @@
     <Compile Include="Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
     <Compile Include="Engine\ThGemometryExportEngine.cs" />
-    <Compile Include="Engine\ThGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
-    <Compile Include="Engine\ThSideEntryWaterBucketRecognitionEngine.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
@@ -133,9 +131,7 @@
     <Compile Include="Model\Hvac\ThIfcPipeSegment.cs" />
     <Compile Include="Model\Hvac\ThIfcValve.cs" />
     <Compile Include="Model\Plumbing\ThIfcDevice.cs" />
-    <Compile Include="Model\Plumbing\ThIfcGravityWaterBucket.cs" />
     <Compile Include="Model\Plumbing\ThIfcInnerDoor.cs" />
-    <Compile Include="Model\Plumbing\ThIfcSideEntryWaterBucket.cs" />
     <Compile Include="Model\ThGeometry.cs" />
     <Compile Include="Model\ThIfcFlowController.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />

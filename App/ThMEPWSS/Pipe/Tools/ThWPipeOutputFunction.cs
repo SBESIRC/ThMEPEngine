@@ -571,7 +571,7 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return Fpipeindex + Fpipeindex1.GetVectorTo(point);
         }
-        public static List<BlockReference> GetGravityWaterBuckets(List<ThIfcGravityWaterBucket> GravityWaterBuckets)
+        public static List<BlockReference> GetGravityWaterBuckets(List<ThWGravityWaterBucket> GravityWaterBuckets)
         {
             var gravityWaterBucket = new List<BlockReference>();
             foreach (var gravity in GravityWaterBuckets)
@@ -582,7 +582,7 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return gravityWaterBucket;
         }
-        public static List<BlockReference> GetSideWaterBuckets(List<ThIfcSideEntryWaterBucket> GravityWaterBuckets)
+        public static List<BlockReference> GetSideWaterBuckets(List<ThWSideEntryWaterBucket> GravityWaterBuckets)
         {
             var gravityWaterBucket = new List<BlockReference>();
             foreach (var gravity in GravityWaterBuckets)

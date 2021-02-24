@@ -1,19 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Linq2Acad;
+﻿using Linq2Acad;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThMEPWSS.Pipe.Model;
 
-namespace ThMEPEngineCore.Engine
+namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThGravityWaterBucketRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThWGravityWaterBucketRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -38,7 +34,7 @@ namespace ThMEPEngineCore.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcGravityWaterBucket.Create(o));
+                    Elements.Add(ThWGravityWaterBucket.Create(o));
                 });
             }
         }

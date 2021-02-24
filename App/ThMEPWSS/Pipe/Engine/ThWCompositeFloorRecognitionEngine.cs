@@ -1,11 +1,9 @@
 ﻿using Linq2Acad;
-using ThMEPWSS.Pipe.Model;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
-using ThMEPEngineCore.Engine;
-using System.Linq;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -114,20 +112,20 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
         }
-        private List<ThIfcGravityWaterBucket> GetgravityWaterBuckets(Database database, Point3dCollection pts)
+        private List<ThWGravityWaterBucket> GetgravityWaterBuckets(Database database, Point3dCollection pts)
         {
-            using (ThGravityWaterBucketRecognitionEngine gravityWaterBucket = new ThGravityWaterBucketRecognitionEngine())
+            using (ThWGravityWaterBucketRecognitionEngine gravityWaterBucket = new ThWGravityWaterBucketRecognitionEngine())
             {
                 gravityWaterBucket.Recognize(database, pts);
-                return gravityWaterBucket.Elements.Cast<ThIfcGravityWaterBucket>().ToList();
+                return gravityWaterBucket.Elements.Cast<ThWGravityWaterBucket>().ToList();
             }
         }
-        private List<ThIfcSideEntryWaterBucket> GetsideEntryWaterBuckets(Database database, Point3dCollection pts)
+        private List<ThWSideEntryWaterBucket> GetsideEntryWaterBuckets(Database database, Point3dCollection pts)
         {
-            using (ThSideEntryWaterBucketRecognitionEngine sideEntryWaterBucketEngine = new ThSideEntryWaterBucketRecognitionEngine())
+            using (ThWSideEntryWaterBucketRecognitionEngine sideEntryWaterBucketEngine = new ThWSideEntryWaterBucketRecognitionEngine())
             {
                 sideEntryWaterBucketEngine.Recognize(database, pts);
-                return sideEntryWaterBucketEngine.Elements.Cast<ThIfcSideEntryWaterBucket>().ToList();
+                return sideEntryWaterBucketEngine.Elements.Cast<ThWSideEntryWaterBucket>().ToList();
             }
         }
         private List<ThWRoofRainPipe> GetroofRainPipes(Database database, Point3dCollection pts)

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
@@ -9,15 +8,15 @@ namespace ThMEPWSS.Pipe.Service
     {
         private List<ThIfcSpace> Spaces { get; set; }
         private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
-        private List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
-        private List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
+        private List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
+        private List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofDeviceFloorRoom> Rooms { get; private set; }
         private List<ThIfcSpace> BaseCircles { get; set; }
 
         private ThRoofDeviceFloorRoomService(
             List<ThIfcSpace> spaces,
-            List<ThIfcGravityWaterBucket> gravityWaterBuckets,
-            List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets,
+            List<ThWGravityWaterBucket> gravityWaterBuckets,
+            List<ThWSideEntryWaterBucket> sideEntryWaterBuckets,
             List<ThWRoofRainPipe> roofRainPipes,
             List<ThIfcSpace> baseCircles)
         {
@@ -30,8 +29,8 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static List<ThWRoofDeviceFloorRoom> Build(
             List<ThIfcSpace> spaces, 
-            List<ThIfcGravityWaterBucket> gravityWaterBuckets, 
-            List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, 
+            List<ThWGravityWaterBucket> gravityWaterBuckets, 
+            List<ThWSideEntryWaterBucket> sideEntryWaterBuckets, 
             List<ThWRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
             var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(

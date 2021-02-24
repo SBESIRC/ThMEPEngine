@@ -16,11 +16,11 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 重力水斗
         /// </summary>
-        public List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
+        public List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
         /// <summary>
         /// 侧入式水斗
         /// </summary>
-        public List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
+        public List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         /// <summary>
         /// 屋顶雨水管
         /// </summary>
@@ -31,8 +31,8 @@ namespace ThMEPWSS.Pipe.Model
         public List<ThIfcSpace> BaseCircles { get; set; }
         public ThWRoofFloorRoom()
         {
-            GravityWaterBuckets = new List<ThIfcGravityWaterBucket>();
-            SideEntryWaterBuckets = new List<ThIfcSideEntryWaterBucket>();
+            GravityWaterBuckets = new List<ThWGravityWaterBucket>();
+            SideEntryWaterBuckets = new List<ThWSideEntryWaterBucket>();
             RoofRainPipes = new List<ThWRoofRainPipe>();
             BaseCircles = new List<ThIfcSpace>();
         }
