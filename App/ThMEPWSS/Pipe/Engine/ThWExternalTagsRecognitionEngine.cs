@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -34,7 +34,7 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThIfcInnerDoor.Create(o));
+                    Elements.Add(ThWInnerDoor.Create(o));
                 });
             }
         }
