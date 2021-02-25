@@ -363,178 +363,249 @@ namespace ThMEPEngineCore
                     var newFrame = ThMEPFrameService.NormalizeEx(frame);
                     pts = newFrame.VerticesEx(100.0);
                 }
+                extractEngine.ExtractParameter.IsExtractCenterLine = true;
+                extractEngine.ExtractParameter.IsExtractWall = true;
+                extractEngine.ExtractParameter.IsExtractSpace = true;
                 extractEngine.Extract(acadDatabase.Database, pts);
                 var geos = new List<ThGeometry>();
-                var spaceIds = new ObjectIdList();
-                short colorIndex = 1;
-                extractEngine.Spaces.ForEach(o =>
+               
+                short colorIndex = 0;
+                if(extractEngine.Spaces.Count>0)
                 {
-                    o.Boundary.ColorIndex = colorIndex;
-                    o.Boundary.SetDatabaseDefaults();
-                    spaceIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
-                    var geometry = new ThGeometry();                    
-                    geometry.Properties.Add("Category", "Space");
-                    geometry.Properties.Add("Name", string.Join(";",o.Tags.ToArray()));
-                    for (int i = 1; i <= o.SubSpaces.Count; i++)
+                    var spaceIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.Spaces.ForEach(o =>
                     {
-                        string key = "SubSpace" + i+" ID=";
-                        geometry.Properties.Add(key, o.SubSpaces[i-1].Uuid);
-                    }
-                    geometry.Boundary = o.Boundary;
-                    geos.Add(geometry);
-                });
-                if(spaceIds.Count>0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), spaceIds);
-                }               
-
-                var doorIds = new ObjectIdList();
-                colorIndex++;
-                extractEngine.Doors.ForEach(o =>
-                {
-                    o.ColorIndex = colorIndex;
-                    o.SetDatabaseDefaults();
-                    doorIds.Add(acadDatabase.ModelSpace.Add(o));
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", "Door");
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
-                });
-                if(doorIds.Count>0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), doorIds);
-                }
-
-                var equipIds = new ObjectIdList();
-                colorIndex++;
-                extractEngine.Equipments.ForEach(e =>
-                {
-                    e.Value.ForEach(v =>
-                    {
-                        v.ColorIndex = colorIndex;
-                        v.SetDatabaseDefaults();
-                        equipIds.Add(acadDatabase.ModelSpace.Add(v));
+                        o.Boundary.ColorIndex = colorIndex;
+                        o.Boundary.SetDatabaseDefaults();
+                        spaceIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
                         var geometry = new ThGeometry();
-                        geometry.Properties.Add("Category", "Equipment");
-                        geometry.Properties.Add("Name", e.Key);
-                        geometry.Boundary = v;
+                        geometry.Properties.Add("Category", "Space");
+                        geometry.Properties.Add("Name", string.Join(";", o.Tags.ToArray()));
+                        for (int i = 1; i <= o.SubSpaces.Count; i++)
+                        {
+                            string key = "SubSpace" + i + " ID=";
+                            geometry.Properties.Add(key, o.SubSpaces[i - 1].Uuid);
+                        }
+                        geometry.Boundary = o.Boundary;
                         geos.Add(geometry);
                     });
-                });
-                if(equipIds.Count>0)
+                    if (spaceIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), spaceIds);
+                    }
+                }                
+
+                if(extractEngine.Doors.Count>0)
                 {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), equipIds);
-                }  
+                    var doorIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.Doors.ForEach(o =>
+                    {
+                        o.ColorIndex = colorIndex;
+                        o.SetDatabaseDefaults();
+                        doorIds.Add(acadDatabase.ModelSpace.Add(o));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "Door");
+                        geometry.Boundary = o;
+                        geos.Add(geometry);
+                    });
+                    if (doorIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), doorIds);
+                    }
+                }
                 
-                colorIndex++;
-                extractEngine.Obstructs.ForEach(o =>
+                if(extractEngine.Equipments.Count>0)
                 {
-                    var obstructIds = new ObjectIdList();
-                    o.Key.ColorIndex = colorIndex;
-                    o.Key.SetDatabaseDefaults();
-                    obstructIds.Add(acadDatabase.ModelSpace.Add(o.Key));
-                    o.Value.ForEach(v =>
+                    var equipIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.Equipments.ForEach(e =>
                     {
-                        v.ColorIndex = colorIndex;
-                        v.SetDatabaseDefaults();
-                        obstructIds.Add(acadDatabase.ModelSpace.Add(v));
+                        e.Value.ForEach(v =>
+                        {
+                            v.ColorIndex = colorIndex;
+                            v.SetDatabaseDefaults();
+                            equipIds.Add(acadDatabase.ModelSpace.Add(v));
+                            var geometry = new ThGeometry();
+                            geometry.Properties.Add("Category", "Equipment");
+                            geometry.Properties.Add("Name", e.Key);
+                            geometry.Boundary = v;
+                            geos.Add(geometry);
+                        });
+                    });
+                    if (equipIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), equipIds);
+                    }
+                }
+                
+                if(extractEngine.Obstructs.Count>0)
+                {
+                    colorIndex++;
+                    extractEngine.Obstructs.ForEach(o =>
+                    {
+                        var obstructIds = new ObjectIdList();
+                        o.Key.ColorIndex = colorIndex;
+                        o.Key.SetDatabaseDefaults();
+                        obstructIds.Add(acadDatabase.ModelSpace.Add(o.Key));
+                        o.Value.ForEach(v =>
+                        {
+                            v.ColorIndex = colorIndex;
+                            v.SetDatabaseDefaults();
+                            obstructIds.Add(acadDatabase.ModelSpace.Add(v));
+                            var geometry = new ThGeometry();
+                            geometry.Properties.Add("Category", "Obstruct");
+                            geometry.Boundary = v;
+                            geos.Add(geometry);
+                        });
+                        if (obstructIds.Count > 0)
+                        {
+                            GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), obstructIds);
+                        }
+                    });
+                }
+                
+                if(extractEngine.ConnectPorts.Count>0)
+                {
+                    var connectPortIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.ConnectPorts.ForEach(o =>
+                    {
+                        o.Key.ColorIndex = colorIndex;
+                        o.Key.SetDatabaseDefaults();
+                        connectPortIds.Add(acadDatabase.ModelSpace.Add(o.Key));
                         var geometry = new ThGeometry();
-                        geometry.Properties.Add("Category", "Obstruct");
-                        geometry.Boundary = v;
+                        geometry.Properties.Add("Category", "ConnectPort");
+                        geometry.Properties.Add("Code", o.Value);
+                        geometry.Boundary = o.Key;
                         geos.Add(geometry);
                     });
-                    if (obstructIds.Count > 0)
+                    if (connectPortIds.Count > 0)
                     {
-                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), obstructIds);
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), connectPortIds);
                     }
-                });
-
-                var connectPortIds = new ObjectIdList();
-                colorIndex++;
-                extractEngine.ConnectPorts.ForEach(o =>
-                {
-                    o.Key.ColorIndex = colorIndex;
-                    o.Key.SetDatabaseDefaults();
-                    connectPortIds.Add(acadDatabase.ModelSpace.Add(o.Key));
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", "ConnectPort");
-                    geometry.Properties.Add("Code", o.Value);
-                    geometry.Boundary = o.Key;
-                    geos.Add(geometry);
-                });
-                if (connectPortIds.Count > 0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), connectPortIds);
                 }
 
-                var columnIds = new ObjectIdList();
-                colorIndex++;
-                extractEngine.Columns.ForEach(o =>
+                if(extractEngine.Columns.Count>0)
                 {
-                    o.ColorIndex = colorIndex;
-                    o.SetDatabaseDefaults();
-                    columnIds.Add(acadDatabase.ModelSpace.Add(o));
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", "Column");
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
-                });
-                if (columnIds.Count > 0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), columnIds);
+                    var columnIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.Columns.ForEach(o =>
+                    {
+                        o.ColorIndex = colorIndex;
+                        o.SetDatabaseDefaults();
+                        columnIds.Add(acadDatabase.ModelSpace.Add(o));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "Column");
+                        geometry.Boundary = o;
+                        geos.Add(geometry);
+                    });
+                    if (columnIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), columnIds);
+                    }
                 }
 
-                var drainageFacilityIds = new ObjectIdList();
-                colorIndex++;
-                extractEngine.DrainageFacilities.ForEach(o =>
+                if(extractEngine.Walls.Count>0)
                 {
-                    o.ColorIndex = colorIndex;
-                    o.SetDatabaseDefaults();
-                    drainageFacilityIds.Add(acadDatabase.ModelSpace.Add(o));
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", "DrainageFacility");
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
-                });
-                if (drainageFacilityIds.Count > 0)
+                    var wallIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.Walls.ForEach(o =>
+                    {
+                        o.ColorIndex = colorIndex;
+                        o.SetDatabaseDefaults();
+                        wallIds.Add(acadDatabase.ModelSpace.Add(o));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "Wall");
+                        geometry.Boundary = o;
+                        geos.Add(geometry);
+                    });
+                    if (wallIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), wallIds);
+                    }
+                }
+                
+                if(extractEngine.DrainageFacilities.Count>0)
                 {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageFacilityIds);
+                    var drainageFacilityIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.DrainageFacilities.ForEach(o =>
+                    {
+                        o.ColorIndex = colorIndex;
+                        o.SetDatabaseDefaults();
+                        drainageFacilityIds.Add(acadDatabase.ModelSpace.Add(o));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "DrainageFacility");
+                        geometry.Boundary = o;
+                        geos.Add(geometry);
+                    });
+                    if (drainageFacilityIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), drainageFacilityIds);
+                    }
+                }
+                
+                if(extractEngine.LaneLines.Count>0)
+                {
+                    var laneLineIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.LaneLines.ForEach(o =>
+                    {
+                        o.ColorIndex = colorIndex;
+                        o.SetDatabaseDefaults();
+                        laneLineIds.Add(acadDatabase.ModelSpace.Add(o));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "LaneLine");
+                        geometry.Boundary = o;
+                        geos.Add(geometry);
+                    });
+                    if (laneLineIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), laneLineIds);
+                    }
                 }
 
-                var laneLineIds = new ObjectIdList();
-                colorIndex++;
-                extractEngine.LaneLines.ForEach(o =>
+                if(extractEngine.CenterLines.Count>0)
                 {
-                    o.ColorIndex = colorIndex;
-                    o.SetDatabaseDefaults();
-                    laneLineIds.Add(acadDatabase.ModelSpace.Add(o));
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", "LaneLine");
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
-                });
-                if (laneLineIds.Count > 0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), laneLineIds);
+                    var centerLineIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.CenterLines.ForEach(o =>
+                    {
+                        o.ColorIndex = colorIndex;
+                        o.SetDatabaseDefaults();
+                        centerLineIds.Add(acadDatabase.ModelSpace.Add(o));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "中心线");
+                        geometry.Boundary = o;
+                        geos.Add(geometry);
+                    });
+                    if (centerLineIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), centerLineIds);
+                    }
                 }
 
-                var parkingStallIds = new ObjectIdList();
-                colorIndex++;
-                extractEngine.ParkingStalls.ForEach(o =>
+                if(extractEngine.ParkingStalls.Count>0)
                 {
-                    o.Boundary.ColorIndex = colorIndex;
-                    o.Boundary.SetDatabaseDefaults();
-                    parkingStallIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", "ParkingStall");
-                    geometry.Boundary = o.Boundary;
-                    geos.Add(geometry);
-                });
-                if (parkingStallIds.Count > 0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), parkingStallIds);
+                    var parkingStallIds = new ObjectIdList();
+                    colorIndex++;
+                    extractEngine.ParkingStalls.ForEach(o =>
+                    {
+                        o.Boundary.ColorIndex = colorIndex;
+                        o.Boundary.SetDatabaseDefaults();
+                        parkingStallIds.Add(acadDatabase.ModelSpace.Add(o.Boundary));
+                        var geometry = new ThGeometry();
+                        geometry.Properties.Add("Category", "ParkingStall");
+                        geometry.Boundary = o.Boundary;
+                        geos.Add(geometry);
+                    });
+                    if (parkingStallIds.Count > 0)
+                    {
+                        GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), parkingStallIds);
+                    }
                 }
-
                 // 输出GeoJson文件
                 // 线
                 var docPath = Active.Document.Name;
@@ -554,6 +625,7 @@ namespace ThMEPEngineCore
                 }
             }
         }
+        
         [CommandMethod("TIANHUACAD", "THExtractDoor", CommandFlags.Modal)]
         public void THExtractDoor()
         {

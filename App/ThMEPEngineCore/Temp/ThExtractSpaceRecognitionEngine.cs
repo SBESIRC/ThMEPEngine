@@ -23,6 +23,10 @@ namespace ThMEPEngineCore.Temp
         private Dictionary<Curve, List<Curve>> AreaContainer { get; set; }
         private Dictionary<Curve, ThIfcSpace> SpaceIndex { get; set; } //用几何对象快速查找ThIfcSpace对象
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex;
+
+        public string SpaceLayer { get; set; }
+        public string NameLayer { get; set; }
+        
         public ThExtractSpaceRecognitionEngine()
         {
             Spaces = new List<ThIfcSpace>();
@@ -215,11 +219,11 @@ namespace ThMEPEngineCore.Temp
         }
         private bool IsSpaceLayer(string layerName)
         {
-            return layerName.ToUpper() == "AD-AREA-OUTL";
+            return layerName.ToUpper() == SpaceLayer;
         }
         private bool IsSpaceNameLayer(string layerName)
         {
-            return layerName.ToUpper() == "空间名称";
+            return layerName.ToUpper() == NameLayer;
         }
         private void CreateSpaceBoundaries()
         {

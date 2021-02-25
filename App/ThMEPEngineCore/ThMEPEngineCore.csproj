@@ -305,6 +305,8 @@
     <Compile Include="Temp\ThArrangeObstacleService.cs" />
     <Compile Include="Temp\ThExtractColumnService.cs" />
     <Compile Include="Temp\ThExtractConnectPortsService.cs" />
+    <Compile Include="Temp\ThExtractCenterLineService.cs" />
+    <Compile Include="Temp\ThExtractWallService.cs" />
     <Compile Include="Temp\ThExtractDoorService.cs" />
     <Compile Include="Temp\ThExtractDrainageFacilityService.cs" />
     <Compile Include="Temp\ThExtractEquipmentService.cs" />
