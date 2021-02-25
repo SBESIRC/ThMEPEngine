@@ -1,12 +1,14 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
-namespace ThMEPEngineCore.Model.Plumbing
+using ThMEPEngineCore.Model;
+
+namespace ThMEPWSS.Pipe.Model
 {
-   public class ThIfcDevice : ThIfcSanitaryTerminal
+   public class ThWDevice : ThIfcSanitaryTerminal
     {
-        public static ThIfcDevice Create(Entity entity)
+        public static ThWDevice Create(Entity entity)
         {
-            return new ThIfcDevice()
+            return new ThWDevice()
             {
                 Outline = entity,
                 Uuid = Guid.NewGuid().ToString()

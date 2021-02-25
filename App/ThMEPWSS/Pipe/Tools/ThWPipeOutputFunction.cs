@@ -8,9 +8,7 @@ using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
 using static ThMEPWSS.ThPipeCmds;
-using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.Pipe.Tools
 {

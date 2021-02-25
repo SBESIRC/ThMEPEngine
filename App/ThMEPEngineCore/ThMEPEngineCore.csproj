@@ -134,7 +134,6 @@
     <Compile Include="Model\Hvac\ThIfcPipeFitting.cs" />
     <Compile Include="Model\Hvac\ThIfcPipeSegment.cs" />
     <Compile Include="Model\Hvac\ThIfcValve.cs" />
-    <Compile Include="Model\Plumbing\ThIfcDevice.cs" />
     <Compile Include="Model\ThGeometry.cs" />
     <Compile Include="Model\ThIfcElectricAppliance.cs" />
     <Compile Include="Model\ThIfcFlowController.cs" />
