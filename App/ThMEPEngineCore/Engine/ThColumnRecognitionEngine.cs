@@ -17,15 +17,14 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var columnDbExtension = new ThStructureColumnDbExtension(database))
+            var visitor = new ThColumnExtractionVisitor()
             {
-                columnDbExtension.BuildElementCurves();
-                Results = columnDbExtension.ColumnCurves.Select(o => new ThRawIfcBuildingElementData()
-                {
-                    Geometry = o,
-                }).ToList();
-            }
+                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
 
