@@ -1,8 +1,7 @@
 ﻿using System;
-using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Model;
-using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Engine
 {

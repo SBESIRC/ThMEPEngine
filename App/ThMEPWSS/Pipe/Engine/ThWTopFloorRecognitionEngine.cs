@@ -1,14 +1,13 @@
-﻿using Linq2Acad;
+﻿using System;
+using DotNetARX;
+using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
-using ThMEPEngineCore.Model;
-using DotNetARX;
 using ThMEPWSS.Pipe.Tools;
-using ThCADExtension;
-using System;
 
 namespace ThMEPWSS.Pipe.Engine
 {

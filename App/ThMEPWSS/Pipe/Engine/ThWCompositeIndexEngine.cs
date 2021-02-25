@@ -1,9 +1,8 @@
 ﻿using System;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
-
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Pipe.Engine
 {

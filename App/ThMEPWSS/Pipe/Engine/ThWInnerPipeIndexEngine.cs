@@ -5,7 +5,6 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-
 namespace ThMEPWSS.Pipe.Engine
 {
     public  class ThWInnerPipeIndexEngine : IDisposable

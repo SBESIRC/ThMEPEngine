@@ -4,7 +4,6 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
 using Dreambuild.AutoCAD;
-using ThMEPWSS.Assistant;
 
 namespace ThMEPWSS.Pipe.Engine
 {

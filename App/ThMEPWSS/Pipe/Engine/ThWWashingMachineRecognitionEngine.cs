@@ -1,11 +1,10 @@
-﻿using System.Collections.Generic;
-using Linq2Acad;
+﻿using Linq2Acad;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Model.Plumbing;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Engine
