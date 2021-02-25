@@ -49,6 +49,7 @@ namespace ThMEPEngineCore.Engine
                         var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                         if (o.IsBuildElementBlock(blockTableRecord))
                         {
+                            // 提取图元信息
                             foreach (var objId in blockTableRecord)
                             {
                                 var dbObj = acadDatabase.Element<Entity>(objId);
@@ -69,6 +70,9 @@ namespace ThMEPEngineCore.Engine
                                     o.DoExtract(dbObj, matrix);
                                 }
                             }
+
+                            // 过滤XClip外的图元信息
+                            o.DoXClip(blockReference, matrix);
                         }
                     }
                 });

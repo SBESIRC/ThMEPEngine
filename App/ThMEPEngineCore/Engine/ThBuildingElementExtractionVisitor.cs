@@ -17,6 +17,8 @@ namespace ThMEPEngineCore.Engine
 
         public abstract void DoExtract(Entity dbObj, Matrix3d matrix);
 
+        public abstract void DoXClip(BlockReference blockReference, Matrix3d matrix);
+
         public virtual bool IsBuildElement(Entity entity)
         {
             return entity.ObjectId.IsValid;

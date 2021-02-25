@@ -7,6 +7,7 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -21,6 +22,16 @@ namespace ThMEPEngineCore.Engine
             else if (dbObj is Solid solid)
             {
                 HandleSolid(solid, matrix);
+            }
+        }
+
+        public override void DoXClip(BlockReference blockReference, Matrix3d matrix)
+        {
+            var xclip = blockReference.XClipInfo();
+            if (xclip.IsValid)
+            {
+                xclip.TransformBy(matrix);
+                Results.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
             }
         }
 
