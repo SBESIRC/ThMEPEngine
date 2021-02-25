@@ -6,10 +6,6 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWKitchenRoom : ThWRoom
     {
         /// <summary>
-        /// 厨房空间
-        /// </summary>ng
-        public ThIfcSpace Kitchen { get; set; }
-        /// <summary>
         /// 台盆
         /// </summary>
         public List<ThWBasin> BasinTools { get; set; }

@@ -47,7 +47,7 @@ namespace ThMEPWSS.Pipe.Service
         {
             return new ThWRoofFloorRoom()
             {
-                RoofFloor = roofFloorSpace,
+                Space = roofFloorSpace,
                 RoofRainPipes = ThRoofFloorRoofRainPipeService.Find(roofFloorSpace, RoofRainPipes),
                 GravityWaterBuckets = ThRoofFloorGravityWaterBucketService.Find(roofFloorSpace, GravityWaterBuckets),
                 SideEntryWaterBuckets = ThRoofFloorSideEntryWaterBucketService.Find(roofFloorSpace, SideEntryWaterBuckets),

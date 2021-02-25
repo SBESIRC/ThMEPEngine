@@ -680,12 +680,12 @@ namespace ThMEPWSS
                 {
                     ObjectIdCollection objIds = new ObjectIdCollection();
                     DBObjectCollection dbObjs = new DBObjectCollection();
-                    dbObjs.Add(o.Toilet.Boundary);
+                    dbObjs.Add(o.Space.Boundary);
                     o.Closestools.ForEach(m => dbObjs.Add(m.Outline));
                     o.DrainageWells.ForEach(m => dbObjs.Add(m.Boundary));
                     o.FloorDrains.ForEach(m => dbObjs.Add(m.Outline));
                     dbObjs.Cast<Entity>().ForEach(m => objIds.Add(acadDatabase.ModelSpace.Add(m)));
-                    if (o.Toilet != null && o.Closestools.Count == 1 &&
+                    if (o.Space != null && o.Closestools.Count == 1 &&
                     o.DrainageWells.Count == 1 && o.FloorDrains.Count > 0)
                     {
                         dbObjs.Cast<Entity>().ForEach(m => m.ColorIndex = 3);
@@ -710,12 +710,12 @@ namespace ThMEPWSS
                 {
                     ObjectIdCollection objIds = new ObjectIdCollection();
                     DBObjectCollection dbObjs = new DBObjectCollection();
-                    dbObjs.Add(o.Kitchen.Boundary);
+                    dbObjs.Add(o.Space.Boundary);
 
                     o.DrainageWells.ForEach(m => dbObjs.Add(m.Boundary));
 
                     dbObjs.Cast<Entity>().ForEach(m => objIds.Add(acadDatabase.ModelSpace.Add(m)));
-                    if (o.Kitchen != null && o.DrainageWells.Count == 1)
+                    if (o.Space != null && o.DrainageWells.Count == 1)
                     {
                         dbObjs.Cast<Entity>().ForEach(m => m.ColorIndex = 3);
                     }

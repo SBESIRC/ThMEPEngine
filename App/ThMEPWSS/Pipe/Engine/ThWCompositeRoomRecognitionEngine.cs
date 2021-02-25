@@ -159,8 +159,8 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private bool IsPair(ThWKitchenRoom kitchen, ThWToiletRoom toilet)
         {
-            var toiletboundary = toilet.Toilet.Boundary as Polyline;
-            var kitchenboundary = kitchen.Kitchen.Boundary as Polyline;
+            var toiletboundary = toilet.Space.Boundary as Polyline;
+            var kitchenboundary = kitchen.Space.Boundary as Polyline;
             double distance = kitchenboundary.GetCenter().DistanceTo(toiletboundary.GetCenter());
             return distance < ThWPipeCommon.MAX_TOILET_TO_KITCHEN_DISTANCE;
         }
@@ -198,8 +198,8 @@ namespace ThMEPWSS.Pipe.Engine
                 for (int j = i + 1; j < balconyroom1.Count; j++)
                 {
                     
-                    var s = balconyroom1[i].Balcony.Boundary as Polyline;
-                    var s1 = balconyroom1[j].Balcony.Boundary as Polyline;
+                    var s = balconyroom1[i].Space.Boundary as Polyline;
+                    var s1 = balconyroom1[j].Space.Boundary as Polyline;
                     if (s.GetCenter().DistanceTo(s1.GetCenter()) < ThWPipeCommon.MAX_BALCONY_TO_BALCONY_DISTANCE)
                     {
                         num = 1;
@@ -233,17 +233,13 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private bool IsBalconyPair(ThWBalconyRoom balconyRoom, ThWDevicePlatformRoom devicePlatformRoom)
         {
-            var balconyRoomboundary = balconyRoom.Balcony.Boundary as Polyline;       
-            foreach (var deviceplatform in devicePlatformRoom.DevicePlatforms)
+            var balconyRoomboundary = balconyRoom.Space.Boundary as Polyline;
+            var devicePlatformRoomboundary = devicePlatformRoom.Space.Boundary as Polyline;
+            var distance = (devicePlatformRoomboundary.GetCenter().DistanceTo(balconyRoomboundary.GetCenter()));
+            if (distance >= ThWPipeCommon.MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE)
             {
-                var devicePlatformRoomboundary = deviceplatform.Boundary as Polyline;
-
-                var distance=(devicePlatformRoomboundary.GetCenter().DistanceTo(balconyRoomboundary.GetCenter()));
-                if(distance>=ThWPipeCommon.MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE)
-                {
-                    return false;
-                }
-            }        
+                return false;
+            }      
             return true;
         }
         private static ThWBalconyRoom CreateNewBalcony(ThWBalconyRoom balcony1, ThWBalconyRoom balcony2)
@@ -260,14 +256,14 @@ namespace ThMEPWSS.Pipe.Engine
             balcony.RainPipes = balcony1.RainPipes.Count>0? balcony1.RainPipes:balcony2.RainPipes;
             balcony.Washmachines = balcony1.Washmachines.Count > 0 ? balcony1.Washmachines : balcony2.Washmachines;
             balcony.BasinTools = balcony1.BasinTools.Count > 0 ? balcony1.BasinTools : balcony2.BasinTools;
-            balcony.Balcony = new ThMEPEngineCore.Model.ThIfcSpace();
-            balcony.Balcony.Boundary = CreateNewBoundary(balcony1, balcony2);
+            balcony.Space = new ThMEPEngineCore.Model.ThIfcSpace();
+            balcony.Space.Boundary = CreateNewBoundary(balcony1, balcony2);
             return balcony;
         }
         private static Polyline CreateNewBoundary(ThWBalconyRoom balcony1, ThWBalconyRoom balcony2)
         {
-            var boundary1 = balcony1.Balcony.Boundary as Polyline;
-            var boundary2 = balcony2.Balcony.Boundary as Polyline;
+            var boundary1 = balcony1.Space.Boundary as Polyline;
+            var boundary2 = balcony2.Space.Boundary as Polyline;
             var vertice1 = boundary1.Vertices();
             var vertice2 = boundary2.Vertices();
             var vertices= new List<Point3d>();
@@ -296,8 +292,8 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 foreach(var room in deviceRoom)
                 {
-                    var boundary = room.DevicePlatforms[0].Boundary as Polyline;
-                    var boundary1 = balconyRoom.Balcony.Boundary as Polyline;
+                    var boundary = room.Space.Boundary as Polyline;
+                    var boundary1 = balconyRoom.Space.Boundary as Polyline;
                     if (boundary.GetCenter().X< boundary1.GetCenter().X)
                     {
                         deviceLeftRooms.Add(room);
@@ -318,8 +314,8 @@ namespace ThMEPWSS.Pipe.Engine
             ThWDevicePlatformRoom trueRoom = null;
             for(int i=0;i< deviceRoom.Count;i++)
             {
-                var boundary = deviceRoom[i].DevicePlatforms[0].Boundary as Polyline;
-                var boundary1 = balconyRoom.Balcony.Boundary as Polyline;
+                var boundary = deviceRoom[i].Space.Boundary as Polyline;
+                var boundary1 = balconyRoom.Space.Boundary as Polyline;
                 if (boundary.GetCenter().DistanceTo(boundary1.GetCenter())< dis)
                 {
                     dis = boundary.GetCenter().DistanceTo(boundary1.GetCenter());

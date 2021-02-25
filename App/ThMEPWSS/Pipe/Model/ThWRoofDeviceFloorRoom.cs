@@ -9,10 +9,6 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWRoofDeviceFloorRoom : ThWRoom
     {
         /// <summary>
-        /// 屋顶设备层空间
-        /// </summary>
-        public ThIfcSpace RoofDeviceFloor { get; set; }
-        /// <summary>
         /// 重力水斗
         /// </summary>
         public List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }

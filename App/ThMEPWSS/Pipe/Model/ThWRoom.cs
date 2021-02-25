@@ -2,7 +2,8 @@
 
 namespace ThMEPWSS.Pipe.Model
 {
-    public abstract class ThWRoom : ThIfcSpace
+    public abstract class ThWRoom
     {
+        public ThIfcSpace Space { get; set; }
     }
 }

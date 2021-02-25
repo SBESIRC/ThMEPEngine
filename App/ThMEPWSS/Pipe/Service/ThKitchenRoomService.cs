@@ -51,7 +51,7 @@ namespace ThMEPWSS.Pipe.Service
         private ThWKitchenRoom CreateKitchenContainer(ThIfcSpace kitchenSpace)
         {
             ThWKitchenRoom thKitchenContainer = new ThWKitchenRoom();
-            thKitchenContainer.Kitchen = kitchenSpace;
+            thKitchenContainer.Space = kitchenSpace;
             var kitchenDrainwellService = ThKitchenDrainwellService.Find(Spaces, kitchenSpace, SpaceSpatialIndex);
             thKitchenContainer.DrainageWells = kitchenDrainwellService.Drainwells;
             thKitchenContainer.Pypes = kitchenDrainwellService.Pypes;

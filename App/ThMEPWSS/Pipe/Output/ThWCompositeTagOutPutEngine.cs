@@ -49,7 +49,7 @@ namespace ThMEPWSS.Pipe.Output
             GetRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetRoofRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetCopiedPipeindex(FloorEngines, parameters0, acadDatabase, obstacle, parameters1, parameters2, composite_Engine, toiletpoint, balconypoint, scaleFactor, W_RAIN_NOTE1);
-            var record0 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.TopFloors[0].FirstFloor.Tags[0]}", parameters0.standardEntity);
+            var record0 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.TopFloors[0].Space.Tags[0]}", parameters0.standardEntity);
             BlockReference standardBlock = new BlockReference(new Point3d(0, 0, 0), record0);
             acadDatabase.ModelSpace.Add(standardBlock);//管井信息打印到标准层 
             var record = BlockTools.AddBlockTableRecord(acadDatabase.Database, "大屋面", parameters1.roofEntity);
@@ -759,7 +759,7 @@ namespace ThMEPWSS.Pipe.Output
                             line.EndPoint + parameters0.baseCenter2[0].GetVectorTo(parameters1.baseCenter1[0])));
                         }
                         Polyline pboundary1 = null;
-                        pboundary1 = FloorEngines.RoofFloors[0].RoofFloor.Boundary as Polyline;
+                        pboundary1 = FloorEngines.RoofFloors[0].Space.Boundary as Polyline;
                         List<Polyline> noline = new List<Polyline>();
                         composite_Engine1.Run(noline, noline, noline, noline, noline, noline, noline, pboundary1, divideLines1, parameters1.roofRoofRainPipes, toiletpoint, balconypoint, obstacle, scaleFactor);
                         //对顶层屋顶雨水管重新排序
@@ -827,7 +827,7 @@ namespace ThMEPWSS.Pipe.Output
                             Polyline s2 = ent as Polyline;
                             Circle s3 = ent as Circle;
                             DBText s4 = ent as DBText;
-                            foreach (var bound in FloorEngines.RoofDeviceFloors[0].SubSpaces)
+                            foreach (var bound in FloorEngines.RoofDeviceFloors[0].Space.SubSpaces)
                             {
                                 Polyline boundary = bound.Boundary as Polyline;
                                 if ((s1 != null && GeomUtils.PtInLoop(boundary, s1.StartPoint)) || (s2 != null && GeomUtils.PtInLoop(boundary, s2.StartPoint))
@@ -884,7 +884,7 @@ namespace ThMEPWSS.Pipe.Output
                         if (parameters2.baseCenter0.Count > 0)
                         {
                             var offset1 = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0]));
-                            foreach (var bound in FloorEngines.RoofDeviceFloors[0].SubSpaces)
+                            foreach (var bound in FloorEngines.RoofDeviceFloors[0].Space.SubSpaces)
                             {
                                 Polyline boundary = bound.Boundary as Polyline;
                                 if (GeomUtils.PtInLoop(boundary, ent.Center + parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0])))
@@ -972,7 +972,7 @@ namespace ThMEPWSS.Pipe.Output
                         if (parameters2.baseCenter0.Count > 0)
                         {
                             var offset1 = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0]));
-                            foreach (var bound in FloorEngines.RoofDeviceFloors[0].SubSpaces)
+                            foreach (var bound in FloorEngines.RoofDeviceFloors[0].Space.SubSpaces)
                             {
                                 Polyline boundary = bound.Boundary as Polyline;
                                 if (GeomUtils.PtInLoop(boundary, bucket.StartPoint + parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0])))
@@ -1028,7 +1028,7 @@ namespace ThMEPWSS.Pipe.Output
                         {
                             normalEntity.Add(ent.GetTransformedCopy(offset));
                         }
-                        var record3 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.NormalFloors[i].FirstFloor.Tags[0]}", normalEntity);
+                        var record3 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.NormalFloors[i].Space.Tags[0]}", normalEntity);
                         BlockReference normalBlock = new BlockReference(new Point3d(0, 0, 0), record3);
                         acadDatabase.ModelSpace.Add(normalBlock);//管井复制到标准层
                     }    

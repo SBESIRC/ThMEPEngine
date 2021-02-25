@@ -69,7 +69,7 @@ namespace ThMEPWSS
                     BlockReference floordrain = null;
                     if (IsValidKitchenContainer(composite.Kitchen))
                     {
-                        boundary = composite.Kitchen.Kitchen.Boundary as Polyline;
+                        boundary = composite.Kitchen.Space.Boundary as Polyline;
                         outline = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
                         basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
                         if (composite.Kitchen.Pypes.Count > 0)
@@ -83,7 +83,7 @@ namespace ThMEPWSS
                     }
                     if (IsValidToiletContainer(composite.Toilet))
                     {                    
-                        boundary1 = composite.Toilet.Toilet.Boundary as Polyline;
+                        boundary1 = composite.Toilet.Space.Boundary as Polyline;
                         outline1 = composite.Toilet.DrainageWells[0].Boundary as Polyline;
                         closestool = composite.Toilet.Closestools[0].Outline as Polyline;                        
                     }
@@ -189,7 +189,7 @@ namespace ThMEPWSS
                             bfloordrain.Add(floordrain);
                         }
 
-                        bboundary = compositeBalcony.Balcony.Balcony.Boundary as Polyline;
+                        bboundary = compositeBalcony.Balcony.Space.Boundary as Polyline;
                         if (compositeBalcony.Balcony.RainPipes.Count > 0)
                         {
                             foreach (var RainPipe in compositeBalcony.Balcony.RainPipes)
@@ -217,18 +217,18 @@ namespace ThMEPWSS
                         }
                         if (compositeBalcony.DevicePlatforms.Count > 0)
                         {
-                            device = compositeBalcony.DevicePlatforms[0].DevicePlatforms[0].Boundary as Polyline;
+                            device = compositeBalcony.DevicePlatforms[0].Space.Boundary as Polyline;
                         }
                         if (compositeBalcony.DevicePlatforms.Count > 1)
                         {
-                            Polyline temp = compositeBalcony.DevicePlatforms[1].DevicePlatforms[0].Boundary as Polyline;
+                            Polyline temp = compositeBalcony.DevicePlatforms[1].Space.Boundary as Polyline;
                             if (!(temp.Equals(device)))
                             {
-                                device_other = compositeBalcony.DevicePlatforms[1].DevicePlatforms[0].Boundary as Polyline;
+                                device_other = compositeBalcony.DevicePlatforms[1].Space.Boundary as Polyline;
                             }
                             else
                             {
-                                device_other = compositeBalcony.DevicePlatforms[2].DevicePlatforms[0].Boundary as Polyline;
+                                device_other = compositeBalcony.DevicePlatforms[2].Space.Boundary as Polyline;
                             }
                         }
                         foreach (var devicePlatform in compositeBalcony.DevicePlatforms)
@@ -397,18 +397,18 @@ namespace ThMEPWSS
         }
         private bool IsValidToiletContainer(ThWToiletRoom toiletContainer)
         {
-            return toiletContainer.Toilet != null &&
+            return toiletContainer.Space != null &&
                 toiletContainer.DrainageWells.Count == 1 &&
                 toiletContainer.Closestools.Count == 1 &&
                 toiletContainer.FloorDrains.Count > 0;
         }
         private bool IsValidKitchenContainer(ThWKitchenRoom kitchenContainer)
         {
-            return (kitchenContainer.Kitchen != null && kitchenContainer.DrainageWells.Count == 1);
+            return (kitchenContainer.Space != null && kitchenContainer.DrainageWells.Count == 1);
         }
         private bool IsValidToiletContainerForFloorDrain(ThWToiletRoom toiletContainer)
         {
-            return toiletContainer.Toilet != null && 
+            return toiletContainer.Space != null && 
                 toiletContainer.FloorDrains.Count > 0;
         }
         private bool IsValidBalconyForFloorDrain(ThWBalconyRoom balconyContainer)
@@ -431,7 +431,7 @@ namespace ThMEPWSS
 
                 foreach (var composite in compositeEngines.Rooms)
                 {
-                    boundary = composite.RoofDeviceFloor.Boundary as Polyline;
+                    boundary = composite.Space.Boundary as Polyline;
                     foreach (var gravity in composite.GravityWaterBuckets)
                     {
                         BlockReference block = null;

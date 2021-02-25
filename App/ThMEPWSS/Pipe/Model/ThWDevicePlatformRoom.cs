@@ -9,10 +9,6 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWDevicePlatformRoom : ThWRoom
     {
         /// <summary>
-        /// 设备平台区域
-        /// </summary>
-        public List<ThIfcSpace> DevicePlatforms { get; set; }
-        /// <summary>
         /// 地漏
         /// </summary>
         public List<ThWFloorDrain> FloorDrains { get; set; }
@@ -30,7 +26,6 @@ namespace ThMEPWSS.Pipe.Model
         public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public ThWDevicePlatformRoom()
         {
-            DevicePlatforms = new List<ThIfcSpace>();
             FloorDrains = new List<ThWFloorDrain>();
             CondensePipes = new List<ThWCondensePipe>();
             RainPipes = new List<ThWRainPipe>();

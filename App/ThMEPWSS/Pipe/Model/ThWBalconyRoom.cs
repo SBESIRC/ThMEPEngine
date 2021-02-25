@@ -9,10 +9,6 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWBalconyRoom : ThWRoom
     { 
         /// <summary>
-        /// 生活阳台
-        /// </summary>
-        public ThIfcSpace Balcony { get; set; }
-        /// <summary>
         /// 地漏
         /// </summary>
         public List<ThWFloorDrain> FloorDrains { get; set; }
@@ -30,7 +26,6 @@ namespace ThMEPWSS.Pipe.Model
         public List<ThWBasin> BasinTools { get; set; }
         public ThWBalconyRoom()
         {
-            Balcony = null;
             FloorDrains = new List<ThWFloorDrain>();
             RainPipes = new List<ThWRainPipe>();
             Washmachines = new List<ThWWashingMachine>();

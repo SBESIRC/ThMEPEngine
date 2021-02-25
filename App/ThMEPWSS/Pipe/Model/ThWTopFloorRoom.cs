@@ -10,10 +10,6 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWTopFloorRoom : ThWRoom
     {
         /// <summary>
-        /// 顶层空间
-        /// </summary>
-        public ThIfcSpace FirstFloor { get; set; }
-        /// <summary>
         /// 基点圆
         /// </summary>
         public List<ThIfcSpace> BaseCircles { get; set; }       
@@ -31,7 +27,6 @@ namespace ThMEPWSS.Pipe.Model
         public List<Line> DivisionLines { get; set; }
         public ThWTopFloorRoom()
         {
-            FirstFloor = null;
             BaseCircles = new List<ThIfcSpace>();
             CompositeBalconyRooms = new List<ThWCompositeBalconyRoom>();
             CompositeRooms = new List<ThWCompositeRoom>();

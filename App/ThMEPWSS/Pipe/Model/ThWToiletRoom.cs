@@ -6,10 +6,6 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWToiletRoom : ThWRoom
     {
         /// <summary>
-        /// 卫生间空间
-        /// </summary>
-        public ThIfcSpace Toilet { get; set; }
-        /// <summary>
         /// 排水管井
         /// </summary>
         public List<ThIfcSpace> DrainageWells { get; set; }
@@ -28,7 +24,6 @@ namespace ThMEPWSS.Pipe.Model
         public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public ThWToiletRoom()
         {
-            Toilet = null;
             Closestools = new List<ThWClosestool>();
             DrainageWells = new List<ThIfcSpace>();
             FloorDrains = new List<ThWFloorDrain>();
