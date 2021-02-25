@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPEngineCore.Model.Plumbing
+namespace ThMEPEngineCore.Model
 {
     public class ThIfcSanitaryTerminal : ThIfcFlowTerminal
     {

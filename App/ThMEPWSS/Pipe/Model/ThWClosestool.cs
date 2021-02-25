@@ -1,6 +1,6 @@
 ﻿using System;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Model
 {
