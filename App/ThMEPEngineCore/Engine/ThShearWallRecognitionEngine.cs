@@ -1,11 +1,10 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using NFox.Cad;
-using Linq2Acad;
+﻿using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -14,15 +13,14 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var shearWallDbExtension = new ThStructureShearWallDbExtension(database))
+            var visitor = new ThShearWallExtractionVisitor()
             {
-                shearWallDbExtension.BuildElementCurves();
-                Results = shearWallDbExtension.ShearWallCurves.Select(o => new ThRawIfcBuildingElementData()
-                {
-                    Geometry = o,
-                }).ToList();
-            }
+                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
 
@@ -63,6 +61,6 @@ namespace ThMEPEngineCore.Engine
                     }
                 }
             });
-        }   
+        }
     }
 }

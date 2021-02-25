@@ -87,6 +87,7 @@
     <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThShearWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
     <Compile Include="Engine\ThSnapBeamEngine.cs" />
@@ -279,7 +280,6 @@
     <Compile Include="Service\ThSpaceBoundaryRecognition.cs" />
     <Compile Include="Service\ThSpaceNameRecognition.cs" />
     <Compile Include="Service\ThStructureBeamUtils.cs" />
-    <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThSecondaryBeamLinkExtension.cs" />
     <Compile Include="Service\ThOverhangingPrimaryBeamLinkExtension.cs" />
