@@ -71,6 +71,7 @@
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
+    <Compile Include="Engine\ThBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractor.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
@@ -277,7 +278,6 @@
     <Compile Include="Service\ThSpaceNameLayerManager.cs" />
     <Compile Include="Service\ThSpaceBoundaryRecognition.cs" />
     <Compile Include="Service\ThSpaceNameRecognition.cs" />
-    <Compile Include="Service\ThStructureBeamAnnotationDbExtension.cs" />
     <Compile Include="Service\ThStructureBeamUtils.cs" />
     <Compile Include="Service\ThStructureShearWallDbExtension.cs" />
     <Compile Include="Service\ThSubSecondaryBeamLinkExtension.cs" />

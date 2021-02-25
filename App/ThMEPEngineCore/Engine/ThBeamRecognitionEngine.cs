@@ -1,7 +1,4 @@
-﻿using System;
-using AcHelper;
-using DotNetARX;
-using Linq2Acad;
+﻿using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
@@ -16,15 +13,14 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var beamTextDbExtension = new ThStructureBeamAnnotationDbExtension(Active.Database))
+            var visitor = new ThBeamExtractionVisitor()
             {
-                beamTextDbExtension.BuildElementTexts();
-                Results = beamTextDbExtension.Annotations.Select(o => new ThRawIfcBuildingElementData()
-                {
-                    Data = o,
-                }).ToList();
-            }
+                LayerFilter = ThBeamLayerManager.AnnotationXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
 
