@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThMergeBeamEngine : ThBuildingElementPreprocessEngine
+    public class ThMergeBeamEngine : ThBeamPreprocessEngine
     { 
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
 

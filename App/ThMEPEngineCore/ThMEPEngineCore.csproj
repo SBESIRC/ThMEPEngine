@@ -73,6 +73,7 @@
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
     <Compile Include="Engine\ThArchitectureWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamExtractionVisitor.cs" />
+    <Compile Include="Engine\ThBeamPreprocessEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractor.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
@@ -86,7 +87,6 @@
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
     <Compile Include="Engine\ThDistributionElementRecognitionEngine.cs" />
-    <Compile Include="Engine\ThFanRecognitionEngine.cs" />
     <Compile Include="Engine\ThExtendBeamEngine.cs" />
     <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
