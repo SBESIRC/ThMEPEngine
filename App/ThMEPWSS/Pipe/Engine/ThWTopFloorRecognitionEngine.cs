@@ -23,7 +23,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             Rooms = new List<ThWTopFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
+            {    
                 var blockCollection = new List<BlockReference>();
                 blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");             
                 var StandardSpaces = new List<ThIfcSpace>();
@@ -38,7 +38,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var compositeroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item1;
                 var compositebalconyroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item2;
                 var divisionLines = GetLines(blockCollection, thisSpaces);
-                Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);
+                Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);        
             }
         }
         public static Point3dCollection GetBoundaryVertices(List<ThIfcSpace> StandardSpaces)

@@ -97,9 +97,17 @@ namespace ThMEPWSS.Pipe.Engine
                 };            
                 RoofEngine.Recognize(database, pts);
                 RoofFloors = RoofEngine.Rooms;
+                if(!(RoofDeviceEngine.Spaces.Count>0))
+                {
+                    this.Spaces = GetSpaces(database, pts);
+                }
+                else
+                {
+                    this.Spaces = RoofDeviceEngine.Spaces;
+                }
                 var FirstEngine = new ThWTopFloorRecognitionEngine()
                 {
-                    Spaces= RoofDeviceEngine.Spaces
+                    Spaces= this.Spaces
                 };      
                 FirstEngine.Recognize(database, pts);
                 TopFloors = FirstEngine.Rooms;

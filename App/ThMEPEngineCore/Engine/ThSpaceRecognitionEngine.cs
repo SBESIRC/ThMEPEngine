@@ -227,12 +227,29 @@ namespace ThMEPEngineCore.Engine
         /// <param name="area"></param>
         /// <returns></returns>
         private List<Curve> SelectPolylineContainers(List<Curve> curves, Polyline son)
-        {        
+        {
+            //return curves.Where(o =>
+            //{
+            //    if (o is Polyline parent)
+            //    {
+            //        return IsCovers(parent, son);
+            //    }
+            //    return false;
+            //}).ToList();
+            var bufferObjs = son.Buffer(-15.0);
             return curves.Where(o =>
             {
                 if (o is Polyline parent)
                 {
-                    return IsCovers(parent, son);
+                    return bufferObjs.Cast<Curve>().Where(m =>
+                    {
+                        if (m is Polyline polyline)
+                        {
+                            ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(parent, polyline);
+                            return relation.IsCovers;
+                        }
+                        return false;
+                    }).Any();
                 }
                 return false;
             }).ToList();
@@ -240,23 +257,32 @@ namespace ThMEPEngineCore.Engine
 
         private bool IsCovers(Polyline parent,Polyline son,double tolerance=10.0)
         {            
-            var relation = new ThCADCoreNTSRelate(parent, son);
-            if(!relation.IsCovers)
+            if(parent.Equals(son))
             {
-                var pts = son.VerticesEx(50.0);
-                foreach (Point3d pt in pts)
+                return true;
+            }
+            else
+            {
+                bool result = false;
+                var relation = new ThCADCoreNTSRelate(parent, son);
+                result = relation.IsCovers;
+                if (!result)
                 {
-                    if (!parent.Contains(pt))
+                    var pts = son.VerticesEx(50.0);
+                    foreach (Point3d pt in pts)
                     {
-                        var closePt = parent.GetClosestPointTo(pt, false);
-                        if (closePt.DistanceTo(pt) > tolerance)
+                        if (!parent.Contains(pt))
                         {
-                            return false;
+                            var closePt = parent.GetClosestPointTo(pt, false);
+                            if (closePt.DistanceTo(pt) > tolerance)
+                            {
+                                return false;
+                            }
                         }
                     }
                 }
+                return result;
             }
-            return true;
         }
     }
 }

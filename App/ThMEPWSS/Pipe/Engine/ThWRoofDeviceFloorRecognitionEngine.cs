@@ -118,7 +118,6 @@ namespace ThMEPWSS.Pipe.Engine
                 GetPositionTags(database, pts).ForEach(o => PositionTags.Add(o));
                 GetPositionTags(database, pts).ForEach(o => AllObstacles.Add(o));
                 var baseCircles = GetBaseCircles(blockCollection);
-
                 Rooms = ThRoofDeviceFloorRoomService.Build(DeviceSpaces, GravityWaterBuckets, SideEntryWaterBuckets, RoofRainPipes, baseCircles);
             }
         }
