@@ -15,15 +15,15 @@ using Autodesk.AutoCAD.DatabaseServices;
 namespace ThCADCore.NTS
 {
     /// <summary>
-    /// 空间索引DB图元（去除空间重合的DB图元）
+    /// 空间索引DB图元（保留空间重合的DB图元）
     /// </summary>
-    public class ThCADCoreNTSSpatialIndex : IDisposable
+    public class ThCADCoreNTSSpatialIndexEx : IDisposable
     {
         private STRtree<Geometry> Engine { get; set; }
-        public Dictionary<Geometry, DBObject> Geometries { get; set; }
-        public ThCADCoreNTSSpatialIndex(DBObjectCollection objs)
+        public Dictionary<DBObject,Geometry> Geometries { get; set; }
+        public ThCADCoreNTSSpatialIndexEx(DBObjectCollection objs)
         {
-            Geometries = new Dictionary<Geometry, DBObject>();
+            Geometries = new Dictionary<DBObject,Geometry>();
             Update(objs, new DBObjectCollection());
         }
 
@@ -126,17 +126,17 @@ namespace ThCADCore.NTS
             adds.Cast<DBObject>().ForEachDbObject(o =>
             {
                 var geometry = ToNTSGeometry(o);
-                if (!Geometries.Keys.Contains(geometry))
+                if (!Geometries.Keys.Contains(o))
                 {
-                    Geometries.Add(geometry, o);
+                    Geometries.Add(o, geometry);
                 }
             });
             // 移除删除对象
-            Geometries.RemoveAll((k, v) => removals.Contains(v));
+            Geometries.RemoveAll((k, v) => removals.Contains(k));
 
             // 创建新的索引
             Engine = new STRtree<Geometry>();
-            Geometries.Keys.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
+            Geometries.Values.ForEach(g => Engine.Insert(g.EnvelopeInternal, g));
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace ThCADCore.NTS
         public DBObjectCollection SelectAll()
         {
             var objs = new DBObjectCollection();
-            foreach (var item in Geometries.Values)
+            foreach (var item in Geometries.Keys)
             {
                 objs.Add(item);
             }
@@ -222,19 +222,19 @@ namespace ThCADCore.NTS
 
         public void AddTag(DBObject obj, object tag)
         {
-            if (Geometries.ContainsValue(obj))
+            if (Geometries.ContainsKey(obj))
             {
-                Geometries.Where(o => o.Value == obj).First().Key.UserData = tag;
+                Geometries.Where(o => o.Key == obj).First().Value.UserData = tag;
             }
         }
 
         public object Tag(DBObject obj)
         {
-            if (!Geometries.ContainsValue(obj))
+            if (!Geometries.ContainsKey(obj))
             {
                 return null;
             }
-            return Geometries.Where(o => o.Value == obj).First().Key.UserData;
+            return Geometries.Where(o => o.Key == obj).First().Value.UserData;
         }
 
         private DBObjectCollection Query(Envelope envelope)
@@ -242,9 +242,18 @@ namespace ThCADCore.NTS
             var objs = new DBObjectCollection();
             foreach (var geometry in Engine.Query(envelope))
             {
-                if (Geometries.ContainsKey(geometry))
+                if (Geometries.ContainsValue(geometry))
                 {
-                    objs.Add(Geometries[geometry]);
+                    Geometries
+                        .Where(o => o.Value == geometry)
+                        .ToList()
+                        .ForEach(o =>
+                        { 
+                            if(!objs.Contains(o.Key))
+                            {
+                                objs.Add(o.Key);
+                            }
+                        });
                 }
             }
             return objs;
@@ -267,7 +276,16 @@ namespace ThCADCore.NTS
             var objs = new DBObjectCollection();
             foreach (var neighbour in neighbours)
             {
-                objs.Add(Geometries[neighbour]);
+                Geometries
+                       .Where(o => o.Value == neighbour)
+                       .ToList()
+                       .ForEach(o =>
+                       {
+                           if (!objs.Contains(o.Key))
+                           {
+                               objs.Add(o.Key);
+                           }
+                       });
             }
             return objs;
         }
