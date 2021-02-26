@@ -124,12 +124,7 @@ namespace ThMEPEngineCore.LaneLine
 
         protected static Polyline Expand(Line line, double xOffset, double yOffset)
         {
-            return Buffer(line.ExtendLine(xOffset), yOffset);
-        }
-
-        protected static Polyline Buffer(Line line, double distance)
-        { 
-            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
+            return line.ExtendLine(xOffset).Buffer(yOffset);
         }
 
         protected static Line CenterLine(Geometry geometry)

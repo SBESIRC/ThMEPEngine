@@ -1,14 +1,14 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
-using Autodesk.AutoCAD.DatabaseServices;
-using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 using NetTopologySuite.Operation.Linemerge;
-using NFox.Cad;
+using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace ThCADCore.NTS
 {
@@ -26,6 +26,11 @@ namespace ThCADCore.NTS
                 JoinStyle = NTSJoinStyle.Mitre,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
+        }
+
+        public static Polyline Buffer(this Line line, double distance)
+        {
+            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
         }
 
         public static DBObjectCollection BufferPL(this Polyline polyline, double distance)
