@@ -29,6 +29,7 @@ namespace ThMEPEngineCore.Temp
         
         public ThExtractGeometryEngine()
         {
+            ExtractParameter = new ThExtractParameter();
         }
         public void Dispose()
         {            

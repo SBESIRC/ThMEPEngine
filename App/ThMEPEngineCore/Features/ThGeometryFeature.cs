@@ -13,26 +13,23 @@ namespace ThMEPEngineCore.Features
         {
             if (geometry != null)
             {
-                using (var ov = new ThCADCoreNTSFixedPrecision())
+                if (geometry.Boundary is Polyline polyline)
                 {
-                    if(geometry.Boundary is Polyline polyline)
-                    {
-                        var geo = polyline.ToNTSLineString();
-                        var attributesTable = new AttributesTable(geometry.Properties);
-                        var feature = new Feature(geo, attributesTable);
-                        return feature;
-                    }
-                    else if(geometry.Boundary is Line line)
-                    {
-                        var geo = line.ToNTSLineString();
-                        var attributesTable = new AttributesTable(geometry.Properties);
-                        var feature = new Feature(geo, attributesTable);
-                        return feature;
-                    }
-                    else
-                    {
-                        throw new NotSupportedException(); 
-                    }
+                    var geo = polyline.ToNTSLineString();
+                    var attributesTable = new AttributesTable(geometry.Properties);
+                    var feature = new Feature(geo, attributesTable);
+                    return feature;
+                }
+                else if (geometry.Boundary is Line line)
+                {
+                    var geo = line.ToNTSLineString();
+                    var attributesTable = new AttributesTable(geometry.Properties);
+                    var feature = new Feature(geo, attributesTable);
+                    return feature;
+                }
+                else
+                {
+                    throw new NotSupportedException();
                 }
             }
             return null;
