@@ -1,18 +1,14 @@
 ﻿using System;
 using System.Linq;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using System.Collections.Generic;
-using ThMEPEngineCore.Model.Segment;
-using ThMEPEngineCore.BeamInfo.Business;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
-using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThSplitBeamEngine : ThBuildingElementPreprocessEngine
+    public class ThSplitBeamEngine : ThBeamPreprocessEngine
     {
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
 
