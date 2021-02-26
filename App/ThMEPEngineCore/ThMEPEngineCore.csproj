@@ -76,6 +76,9 @@
     <Compile Include="Engine\ThBuildingElementExtractor.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThColumnExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDistributionElementExtractionEngine.cs" />
+    <Compile Include="Engine\ThDistributionElementExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDistributionElementExtractor.cs" />
     <Compile Include="Engine\ThDoorRecognitionEngine.cs" />
     <Compile Include="Engine\ThArchitectureWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
@@ -232,7 +235,6 @@
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
     <Compile Include="Service\ThBalconyFloorDrainDbExtension.cs" />
-    <Compile Include="Service\ThBasintoolDbExtension.cs" />
     <Compile Include="Service\ThBasintoolLayerManager.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
     <Compile Include="Service\ThBeamMerger.cs" />

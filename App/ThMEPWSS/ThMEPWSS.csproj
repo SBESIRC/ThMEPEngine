@@ -40,6 +40,7 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Pipe\Engine\ThApplicationPipesEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWBasinExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWWashingMachineRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWGravityWaterBucketRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWSideEntryWaterBucketRecognitionEngine.cs" />
@@ -102,6 +103,7 @@
     <Compile Include="Pipe\Service\ThBalconyRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThBalconyWashMachineService.cs" />
+    <Compile Include="Pipe\Service\ThBasintoolLayerManager.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformCondensePipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformFloorDrainService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
