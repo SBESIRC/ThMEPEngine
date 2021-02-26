@@ -1,5 +1,4 @@
 ﻿using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
@@ -15,15 +14,14 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var archWallDbExtension = new ThArchitectureWallDbExtension(database))
+            var visitor = new ThArchitectureWallExtractionVisitor()
             {
-                archWallDbExtension.BuildElementCurves();
-                Results = archWallDbExtension.WallCurves.Select(o => new ThRawIfcBuildingElementData()
-                {
-                    Geometry = o,
-                }).ToList();
-            }
+                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
 

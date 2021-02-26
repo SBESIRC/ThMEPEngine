@@ -71,6 +71,7 @@
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
+    <Compile Include="Engine\ThArchitectureWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractor.cs" />
@@ -205,7 +206,6 @@
     <Compile Include="Service\Hvac\ThHvacDbModelExtension.cs" />
     <Compile Include="LaneLine\ThLaneLineService.cs" />
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
-    <Compile Include="Service\ThArchitectureDbExtension.cs" />
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
     <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />
