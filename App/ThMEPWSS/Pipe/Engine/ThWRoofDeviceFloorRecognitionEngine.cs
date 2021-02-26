@@ -275,7 +275,7 @@ namespace ThMEPWSS.Pipe.Engine
         private static List<Curve> GetWells(Database database, Point3dCollection pts)
         {
             var Columns = new List<Curve>();
-            var WellsEngine = new ThWWellsRecognitionEngine();
+            var WellsEngine = new ThWWellRecognitionEngine();
             WellsEngine.Recognize(database, pts);
             WellsEngine.Elements.ForEach(o =>
             {
@@ -287,7 +287,7 @@ namespace ThMEPWSS.Pipe.Engine
         private static List<Curve> GetExternalTags(Database database, Point3dCollection pts)
         {
             var Columns = new List<Curve>();
-            var ExternalTagsEngine = new ThWExternalTagsRecognitionEngine();
+            var ExternalTagsEngine = new ThWExternalTagRecognitionEngine();
             ExternalTagsEngine.Recognize(database, pts);
             ExternalTagsEngine.Elements.ForEach(o =>
             {

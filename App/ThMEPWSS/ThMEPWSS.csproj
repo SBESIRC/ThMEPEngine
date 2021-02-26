@@ -50,7 +50,7 @@
     <Compile Include="Pipe\Engine\ThWCondensePipeRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWArchitectureElevationRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWExternalTagsRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWExternalTagRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWInnerDoorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
@@ -64,10 +64,11 @@
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWToiletRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWWellsRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
     <Compile Include="Pipe\Engine\ThWClosestoolRecognitionEngine.cs" />
     <Compile Include="Pipe\Model\ThWDevice.cs" />
+    <Compile Include="Pipe\Model\ThWExternalTag.cs" />
     <Compile Include="Pipe\Model\ThWInnerDoor.cs" />
     <Compile Include="Pipe\Model\ThWWashingMachine.cs" />
     <Compile Include="Pipe\Model\ThWGravityWaterBucket.cs" />
@@ -78,6 +79,7 @@
     <Compile Include="Pipe\Model\ThWRoofRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWCondensePipe.cs" />
+    <Compile Include="Pipe\Model\ThWWell.cs" />
     <Compile Include="Pipe\Output\ThWCompositeTagOutPutEngine.cs" />
     <Compile Include="Pipe\Output\ThWRoofDeviceFloorOutPutEngine.cs" />
     <Compile Include="Pipe\Model\ThWBalconyRoom.cs" />

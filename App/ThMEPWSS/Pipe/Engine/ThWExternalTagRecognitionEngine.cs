@@ -9,19 +9,19 @@ using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-  public class ThWWellsRecognitionEngine : ThDistributionElementRecognitionEngine
+  public  class ThWExternalTagRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var ThWWellsRecognitionEngine = new ThWellsDbExtension(database))
+            using (var ThWExternalTagsRecognitionEngine = new ThExternalTagsDbExtension(database))
             {
-                ThWWellsRecognitionEngine.BuildElementCurves();
+                ThWExternalTagsRecognitionEngine.BuildElementCurves();
                 List<Entity> ents = new List<Entity>();
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
-                    ThWWellsRecognitionEngine.Wells.ForEach(o => dbObjs.Add(o));
+                    ThWExternalTagsRecognitionEngine.ExternalTags.ForEach(o => dbObjs.Add(o));
                     ThCADCoreNTSSpatialIndex basintoolSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                     foreach (var filterObj in basintoolSpatialIndex.SelectCrossingPolygon(polygon))
                     {
@@ -30,11 +30,11 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 else
                 {
-                    ents = ThWWellsRecognitionEngine.Wells;
+                    ents = ThWExternalTagsRecognitionEngine.ExternalTags;
                 }
                 ents.ForEach(o =>
                 {
-                    Elements.Add(ThWInnerDoor.Create(o));
+                    Elements.Add(ThWExternalTag.Create(o));
                 });
             }
         }
