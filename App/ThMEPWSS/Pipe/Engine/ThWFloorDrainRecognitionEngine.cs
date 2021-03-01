@@ -16,7 +16,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             var visitor = new ThWFloorDrainExtractionVisitor()
             {
-                LayerFilter = ThClosestoolLayerManager.XrefLayers(database),
+                LayerFilter = ThFloorDrainLayerManager.XrefLayers(database),
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
