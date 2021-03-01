@@ -387,9 +387,9 @@ namespace ThMEPWSS
                 Vector3d zDir = Vector3d.ZAxis;
 
                 matrix = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, 0,
-                    xDir.Y, yDir.Y, zDir.Y, 0,
-                    xDir.Z, yDir.Z, zDir.Z, 0,
+                    xDir.X, yDir.X, zDir.X, startPt.X,
+                    xDir.Y, yDir.Y, zDir.Y, startPt.Y,
+                    xDir.Z, yDir.Z, zDir.Z, startPt.Z,
                     0.0, 0.0, 0.0, 1.0});
 
                 return true;
@@ -438,7 +438,7 @@ namespace ThMEPWSS
             {
                 //建筑墙
                 archWallEngine.Recognize(acdb.Database, polyline.Vertices());
-                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Cast<Polyline>().ToList();
+                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is Polyline).Cast<Polyline>().ToList();
                 objs = new DBObjectCollection();
                 arcWall.ForEach(x => objs.Add(x));
                 thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);

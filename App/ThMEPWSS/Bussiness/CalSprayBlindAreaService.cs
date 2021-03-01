@@ -11,17 +11,21 @@ namespace ThMEPWSS.Bussiness
     {
         Vector3d vDir;
         Vector3d tDir;
+        Matrix3d Matrix;
 
         public CalSprayBlindAreaService(Matrix3d matrix)
         {
             vDir = matrix.CoordinateSystem3d.Xaxis;
             tDir = matrix.CoordinateSystem3d.Yaxis;
+            Matrix = matrix;
         }
 
         public void CalSprayBlindArea(List<Point3d> sprays, Polyline polyline, List<Polyline> holes)
         {
-            var sprayData = SprayDataOperateService.CalSprayPoint(sprays, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
+            var transSpray = sprays.Select(x => x.TransformBy(Matrix.Inverse())).ToList();
+            var sprayData = SprayDataOperateService.CalSprayPoint(transSpray, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
             var blindArea = GetRealBlindArea(sprayData, polyline, holes);
+            blindArea.ForEach(x => x.TransformBy(Matrix));
 
             //打印盲区
             InsertBlindArea(blindArea);
@@ -29,9 +33,11 @@ namespace ThMEPWSS.Bussiness
 
         public void CalSprayBlindArea(List<SprayLayoutData> sprays, Polyline polyline, List<Polyline> holes)
         {
-            var sprayPts = sprays.Select(x => x.Position).ToList();
-            var sprayData = SprayDataOperateService.CalSprayPoint(sprayPts, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
+            //var sprayPts = sprays.Select(x => x.Position).ToList();
+            var transSpray = sprays.Select(x => x.Position.TransformBy(Matrix.Inverse())).ToList();
+            var sprayData = SprayDataOperateService.CalSprayPoint(transSpray, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
             var blindArea = GetRealBlindArea(sprayData, polyline, holes);
+            blindArea.ForEach(x => x.TransformBy(Matrix));
 
             //打印盲区
             InsertBlindArea(blindArea);
