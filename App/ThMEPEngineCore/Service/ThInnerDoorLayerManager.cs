@@ -22,7 +22,7 @@ namespace ThMEPEngineCore.Service
         {
             return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
-        private static bool IsInnerDoorLayerName(string name)
+        public static bool IsInnerDoorLayerName(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)

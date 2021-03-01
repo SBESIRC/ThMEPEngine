@@ -101,7 +101,7 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private List<ThWWashingMachine> GetWashmachines(Database database, Point3dCollection pts)
         {
-            using (ThWashMachineRecognitionEngine washmachinesEngine = new ThWashMachineRecognitionEngine())
+            using (ThWWashMachineRecognitionEngine washmachinesEngine = new ThWWashMachineRecognitionEngine())
             {
                 washmachinesEngine.Recognize(database, pts);
                 return washmachinesEngine.Elements.Cast<ThWWashingMachine>().ToList();

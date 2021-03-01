@@ -1,7 +1,8 @@
-﻿using Linq2Acad;
+﻿using System.Linq;
+using NFox.Cad;
+using ThCADExtension;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
@@ -9,34 +10,33 @@ using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
+    public class ThWSideEntryWaterBucketExtractionEngine : ThDistributionElementExtractionEngine
+    {
+        public override void Extract(Database database)
+        {
+            var visitor = new ThWSideEntryWaterBucketExtractionVisitor()
+            {
+                LayerFilter = ThSideEntryWaterBucketLayerManager.XrefLayers(database),
+            };
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
+        }
+    }
     public class ThWSideEntryWaterBucketRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var sideEntryWaterBucketDbExtension = new ThSideEntryWaterBucketDbExtension(database))
+            var engine = new ThWSideEntryWaterBucketExtractionEngine();
+            engine.Extract(database);
+            var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
             {
-                sideEntryWaterBucketDbExtension.BuildElementCurves();
-                List<Entity> ents = new List<Entity>();
-                if (polygon.Count > 0)
-                {
-                    DBObjectCollection dbObjs = new DBObjectCollection();
-                    sideEntryWaterBucketDbExtension.SideEntryWaterBuckets.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex sideEntryWaterBucketSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    foreach (var filterObj in sideEntryWaterBucketSpatialIndex.SelectCrossingPolygon(polygon))
-                    {
-                        ents.Add(filterObj as Entity);
-                    }
-                }
-                else
-                {
-                    ents = sideEntryWaterBucketDbExtension.SideEntryWaterBuckets;
-                }
-                ents.ForEach(o =>
-                {
-                    Elements.Add(ThWSideEntryWaterBucket.Create(o));
-                });
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
+            Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWSideEntryWaterBucket.Create(o)));
         }
     }
 }

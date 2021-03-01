@@ -4,7 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Pipe.Model
 {
-    public class ThWWell : ThIfcSanitaryTerminal
+    public class ThWWell : ThIfcBuildingElement
     {
         public static ThWWell Create(Entity entity)
         {

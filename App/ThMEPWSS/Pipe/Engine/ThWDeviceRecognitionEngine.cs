@@ -1,42 +1,45 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
 
+
 namespace ThMEPWSS.Pipe.Engine
 {
+    public class ThWWDeviceExtractionEngine : ThDistributionElementExtractionEngine
+    {
+        public override void Extract(Database database)
+        {
+            var visitor = new ThWDeviceExtractionVisitor()
+            {
+                LayerFilter = ThDeviceLayerManager.XrefLayers(database),
+            };
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
+        }
+    }
+        
   public  class ThWDeviceRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var deviceDbExtension = new ThDeviceDbExtension(database))
+            var engine = new ThWInnerDoorExtractionEngine();
+            engine.Extract(database);
+            var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
             {
-                deviceDbExtension.BuildElementCurves();
-                List<Entity> ents = new List<Entity>();
-                if (polygon.Count > 0)
-                {
-                    DBObjectCollection dbObjs = new DBObjectCollection();
-                    deviceDbExtension.Devices.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex basintoolSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    foreach (var filterObj in basintoolSpatialIndex.SelectCrossingPolygon(polygon))
-                    {
-                        ents.Add(filterObj as Entity);
-                    }
-                }
-                else
-                {
-                    ents = deviceDbExtension.Devices;
-                }
-                ents.ForEach(o =>
-                {
-                    Elements.Add(ThWDevice.Create(o));
-                });
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
+            Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWInnerDoor.Create(o.GeometricExtents.ToRectangle())));
         }
+    
     }
 }

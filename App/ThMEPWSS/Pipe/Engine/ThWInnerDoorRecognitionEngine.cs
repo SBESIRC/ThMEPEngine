@@ -1,42 +1,42 @@
-﻿using Linq2Acad;
+﻿using NFox.Cad;
+using ThCADExtension;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
+using System.Linq;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThWInnerDoorRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThWInnerDoorExtractionEngine : ThDistributionElementExtractionEngine
     {
-        public override void Recognize(Database database, Point3dCollection polygon)
+        public override void Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var innerDoorDbExtension = new ThInnerDoorDbExtension(database))
+            var visitor = new ThWInnerDoorExtractionVisitor()
             {
-                innerDoorDbExtension.BuildElementCurves();
-                List<Entity> ents = new List<Entity>();
+                LayerFilter = ThInnerDoorLayerManager.XrefLayers(database),
+            };
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
+        }
+    }
+    public class ThWInnerDoorRecognitionEngine : ThDistributionElementRecognitionEngine
+    {    
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {                               
+                var engine = new ThWInnerDoorExtractionEngine();
+                engine.Extract(database);
+                var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
                 if (polygon.Count > 0)
                 {
-                    DBObjectCollection dbObjs = new DBObjectCollection();
-                    innerDoorDbExtension.InnerDoors.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex basintoolSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);                 
-                    foreach (var filterObj in basintoolSpatialIndex.SelectCrossingPolygon(polygon))
-                    {
-                        ents.Add(filterObj as Entity);
-                    }
+                    ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                    dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
                 }
-                else
-                {
-                    ents = innerDoorDbExtension.InnerDoors;
-                }
-                ents.ForEach(o =>
-                {
-                    Elements.Add(ThWInnerDoor.Create(o));
-                });                        
-            }        
+                Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWInnerDoor.Create(o.GeometricExtents.ToRectangle())));       
         }
     }
 }

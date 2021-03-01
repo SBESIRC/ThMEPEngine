@@ -244,7 +244,6 @@
     <Compile Include="Service\ThClosestoolLayerManager.cs" />
     <Compile Include="Service\ThCondensePipeDbExtension.cs" />
     <Compile Include="Service\ThCondensePipeLayerManager.cs" />
-    <Compile Include="Service\ThDeviceDbExtension.cs" />
     <Compile Include="Service\ThDeviceLayerManager.cs" />
     <Compile Include="Service\ThFloorDrainDbExtension.cs" />
     <Compile Include="Service\ThFloorDrainLayerManager.cs" />
@@ -254,7 +253,6 @@
     <Compile Include="Service\ThGravityWaterBucketDbExtension.cs" />
     <Compile Include="Service\ThGravityWaterBucketLayerManager.cs" />
     <Compile Include="LaneLine\ThLaneLineSimplifier.cs" />
-    <Compile Include="Service\ThInnerDoorDbExtension.cs" />
     <Compile Include="Service\ThInnerDoorLayerManager.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />

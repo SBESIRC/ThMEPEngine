@@ -1,42 +1,43 @@
-﻿using Linq2Acad;
+﻿using System.Linq;
+using NFox.Cad;
+using ThCADExtension;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
 
+
 namespace ThMEPWSS.Pipe.Engine
 {
+    public class ThWRoofRainPipeExtractionEngine : ThDistributionElementExtractionEngine
+    {
+        public override void Extract(Database database)
+        {
+            var visitor = new ThWRoofRainPipeExtractionVisitor()
+            {
+                LayerFilter = ThRoofRainPipeLayerManager.XrefLayers(database),
+            };
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
+        }
+    }
     public class ThWRoofRainPipeRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var rainPipeDbExtension = new ThRoofRainPipeDbExtension(database))
+            var engine = new ThWRoofRainPipeExtractionEngine();
+            engine.Extract(database);
+            var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
             {
-                rainPipeDbExtension.BuildElementCurves();
-                List<Entity> ents = new List<Entity>();
-                if (polygon.Count > 0)
-                {
-                    DBObjectCollection dbObjs = new DBObjectCollection();
-                    rainPipeDbExtension.RainPipes.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex roofrainPipeSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    foreach (var filterObj in roofrainPipeSpatialIndex.SelectCrossingPolygon(polygon))
-                    {
-                        ents.Add(filterObj as Entity);
-                    }
-                }
-                else
-                {
-                    ents = rainPipeDbExtension.RainPipes;
-                }
-                ents.ForEach(o =>
-                {
-                    Elements.Add(ThWRoofRainPipe.Create(o));
-                });
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
+            Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWRoofRainPipe.Create(o.GeometricExtents.ToRectangle())));
         }
     }
 }

@@ -6,37 +6,56 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
+using System.Linq;
+using ThMEPEngineCore.Model;
+using NFox.Cad;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-  public class ThWWellRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThWellExtractionEngine : ThBuildingElementExtractionEngine
     {
-        public override void Recognize(Database database, Point3dCollection polygon)
+        public override void Extract(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var ThWWellsRecognitionEngine = new ThWellsDbExtension(database))
+            using (var windowDbExtension = new ThWellsDbExtension(database))
             {
-                ThWWellsRecognitionEngine.BuildElementCurves();
-                List<Entity> ents = new List<Entity>();
-                if (polygon.Count > 0)
+                windowDbExtension.BuildElementCurves();
+                Results = windowDbExtension.Wells.Select(o => new ThRawIfcBuildingElementData()
                 {
-                    DBObjectCollection dbObjs = new DBObjectCollection();
-                    ThWWellsRecognitionEngine.Wells.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex basintoolSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    foreach (var filterObj in basintoolSpatialIndex.SelectCrossingPolygon(polygon))
-                    {
-                        ents.Add(filterObj as Entity);
-                    }
-                }
-                else
-                {
-                    ents = ThWWellsRecognitionEngine.Wells;
-                }
-                ents.ForEach(o =>
-                {
-                    Elements.Add(ThWWell.Create(o));
-                });
+                    Geometry = o,
+                }).ToList();
             }
+        }
+    }
+    public class ThWWellRecognitionEngine : ThBuildingElementRecognitionEngine
+    {      
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThWellExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
+        }
+
+        public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
+        {
+            List<Entity> ents = new List<Entity>();
+            var dbObjs = datas.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
+            {
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(polygon))
+                {
+                    ents.Add(filterObj as Entity);
+                }
+            }
+            else
+            {
+                ents = dbObjs.Cast<Entity>().ToList();
+            }
+            ents.ForEach(o =>
+            {
+                Elements.Add(ThWWell.Create(o));
+            });
         }
     }
 }

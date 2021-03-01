@@ -1,43 +1,43 @@
-﻿using Linq2Acad;
+﻿using System.Linq;
+using NFox.Cad;
+using ThCADExtension;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
 
+
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThWashMachineRecognitionEngine : ThDistributionElementRecognitionEngine
+    public class ThWWashMachineExtractionEngine : ThDistributionElementExtractionEngine
+    {
+        public override void Extract(Database database)
+        {
+            var visitor = new ThWWashMachineExtractionVisitor()
+            {
+                LayerFilter = ThWashMachineLayerManager.XrefLayers(database),
+            };
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
+        }
+    }
+    public class ThWWashMachineRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var washmachineDbExtension = new ThWashMachineDbExtension(database))
+            var engine = new ThWWashMachineExtractionEngine();
+            engine.Extract(database);
+            var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
             {
-                washmachineDbExtension.BuildElementCurves();
-                List<Entity> ents = new List<Entity>();
-
-                if (polygon.Count > 0)
-                {
-                    DBObjectCollection dbObjs = new DBObjectCollection();
-                    washmachineDbExtension.Washmachine.ForEach(o => dbObjs.Add(o));
-                    ThCADCoreNTSSpatialIndex washmachineSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    foreach (var filterObj in washmachineSpatialIndex.SelectCrossingPolygon(polygon))
-                    {
-                        ents.Add(filterObj as Entity);
-                    }
-                }
-                else
-                {
-                    ents = washmachineDbExtension.Washmachine;
-                }
-                ents.ForEach(o =>
-                {
-                    Elements.Add(ThWWashingMachine.Create(o));
-                });
+                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
+            Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWWashingMachine.Create(o)));
         }
     }
 }

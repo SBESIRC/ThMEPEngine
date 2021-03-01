@@ -244,15 +244,17 @@ namespace ThMEPWSS.Pipe.Engine
         private static List<Curve> GetRainPipes(Database database, Point3dCollection pts)
         {
             var Columns = new List<Curve>();
-            var circles = new List<Curve>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var rainPipesDbExtension = new ThRainPipesDbExtension(database))
+            var circles = new List<Curve>();         
+            var innerDoorEngine = new ThWRainPipeRecognitionEngine();
+            innerDoorEngine.Recognize(database, pts);
+            innerDoorEngine.Elements.ForEach(o =>
             {
-                rainPipesDbExtension.BuildElementCurves();
-                Columns = rainPipesDbExtension.Polylines;
-            }
+                Curve curve = o.Outline as Curve;
+                Columns.Add(curve.WashClone());
+            });         
             Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
             return circles;
+
         }
         private static List<Curve> GetAllTags(Database database, Point3dCollection pts)
         {
