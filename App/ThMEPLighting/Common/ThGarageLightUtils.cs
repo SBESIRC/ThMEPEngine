@@ -1,19 +1,14 @@
 ﻿using System;
-using AcHelper;
-using DotNetARX;
-using Linq2Acad;
 using System.Linq;
+using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Text;
-using System.Text.RegularExpressions;
 
 namespace ThMEPLighting.Common
 {
@@ -57,7 +52,7 @@ namespace ThMEPLighting.Common
         public static DBObjectCollection SpatialFilter(this Polyline border, DBObjectCollection dbObjs)
         {
             var pts = border.Vertices();
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+            var spatialIndex = new ThCADCoreNTSSpatialIndexEx(dbObjs);
             return spatialIndex.SelectCrossingPolygon(pts);
         }
         public static ThCADCoreNTSSpatialIndex BuildSpatialIndex(List<Line> lines)
@@ -276,11 +271,24 @@ namespace ThMEPLighting.Common
             }
             return false;   
         }
-        public static Line NormalizeLaneLine(Line line, double tolerance = 0.5)
+        public static Line NormalizeLaneLine(Line line, double tolerance = 1.0)
         {
             var newLine = new Line(line.StartPoint, line.EndPoint);
             if (Math.Abs(line.StartPoint.Y - line.EndPoint.Y) <= tolerance)
             {
+                //近似沿X轴
+                if (line.StartPoint.X < line.EndPoint.X)
+                {
+                    newLine = new Line(line.StartPoint, line.EndPoint);
+                }
+                else
+                {
+                    newLine = new Line(line.EndPoint, line.StartPoint);
+                }
+            }
+            else if(Math.Abs(line.StartPoint.X - line.EndPoint.X) <= tolerance)
+            {
+                //此线是近似沿Y轴
                 if (line.StartPoint.Y < line.EndPoint.Y)
                 {
                     newLine = new Line(line.StartPoint, line.EndPoint);
@@ -290,7 +298,11 @@ namespace ThMEPLighting.Common
                     newLine = new Line(line.EndPoint, line.StartPoint);
                 }
             }
-            return newLine.Normalize();
+            else
+            {
+                newLine = newLine.Normalize();
+            }
+            return newLine;
         }
 
         public static bool IsLightNumber(string text)
@@ -319,6 +331,31 @@ namespace ThMEPLighting.Common
         public static bool IsNonLightCableCarrierCenterline(Entity e)
         {
             return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.FdxCenterLineLayerName);
+        }
+        public static List<Line> FilterDistributedEdges(List<Line> edges,List<Line> dxLines)
+        {
+            var results = new List<Line>();
+            var spatialIndex = BuildSpatialIndex(edges);
+            foreach (Line line in dxLines)
+            {
+                var shortenLine = line.ExtendLine(-5.0);
+                var dxVec = shortenLine.StartPoint.GetVectorTo(shortenLine.EndPoint);
+                var rec = ThDrawTool.ToRectangle(shortenLine.StartPoint, shortenLine.EndPoint, 1.0);
+                var objs = spatialIndex.SelectCrossingPolygon(rec);
+                foreach(Line edge in objs)
+                {
+                    var edgeVec = edge.StartPoint.GetVectorTo(edge.EndPoint);
+                    if (ThGeometryTool.IsParallelToEx(dxVec, edgeVec) && 
+                        HasCommon(shortenLine, edge))
+                    {
+                        if(results.IndexOf(edge)<0)
+                        {
+                            results.Add(edge);
+                        }
+                    }
+                }
+            }
+            return results;
         }
     }
 }

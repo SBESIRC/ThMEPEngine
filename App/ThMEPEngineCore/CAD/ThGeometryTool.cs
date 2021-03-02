@@ -187,6 +187,17 @@ namespace ThMEPEngineCore.CAD
             firstNew.IntersectWith(secondNew, intersectType, pts, IntPtr.Zero, IntPtr.Zero);
             return pts;
         }
+        public static Tuple<Point3d, Point3d> GetCollinearMaxPts(this List<Line> lines)
+        {
+            //传入的线要共线
+            var pts = new List<Point3d>();
+            lines.ForEach(o =>
+            {
+                pts.Add(o.StartPoint);
+                pts.Add(o.EndPoint);
+            });
+            return GetCollinearMaxPts(pts);
+        }
         public static Tuple<Point3d,Point3d> GetCollinearMaxPts(this List<Point3d> pts)
         {
             if (pts.Count == 0)

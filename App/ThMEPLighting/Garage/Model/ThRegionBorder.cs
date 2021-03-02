@@ -40,10 +40,6 @@ namespace ThMEPLighting.Garage.Model
         /// </summary>
         public Dictionary<Line, List<Line>> CableTrayPorts { get; set; }
         /// <summary>
-        /// 车道灯
-        /// </summary>
-        public List<BlockReference> Lights { get; set; }
-        /// <summary>
         /// 边界到原点的偏移
         /// </summary>
         public ThMEPOriginTransformer Transformer { get; set; }

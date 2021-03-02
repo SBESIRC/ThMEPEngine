@@ -67,8 +67,12 @@ namespace ThMEPLighting.Garage.Service
             var firstSecondParis = new List<Tuple<Line, Line>>();
             branchOriginFirstLines.ForEach(o =>
             {
-                var second = WireOffsetDataService.FindSecondByFirst(o);
-                firstSecondParis.Add(Tuple.Create(o, second));
+                var seconds = WireOffsetDataService.FindSecondByFirst(o);
+                if (seconds.Count > 0)
+                {
+                    var result = seconds.GetCollinearMaxPts();
+                    firstSecondParis.Add(Tuple.Create(o, new Line(result.Item1,result.Item2)));
+                }
             });
 
             //获取分支点在此直段上的交点

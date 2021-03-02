@@ -40,6 +40,9 @@
     <Compile Include="EmgLight\Service\StructFilterService.cs" />
     <Compile Include="EmgLight\Service\StructureService.cs" />
     <Compile Include="EmgLight\Service\GeomUtils.cs" />
+    <Compile Include="Garage\Engine\ThDoubleRowLoopArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThSingleRowLoopArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildDoubleRacewayEngine.cs" />
@@ -53,6 +56,10 @@
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
     <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
+    <Compile Include="Garage\Service\ThFindCenterLinePortsService.cs" />
+    <Compile Include="Garage\Service\ThSeparateLightEdgeService.cs" />
+    <Compile Include="Garage\Service\ThBuildFirstSecondPairService.cs" />
+    <Compile Include="Garage\ThGarageInteractionUtils.cs" />
     <Compile Include="Garage\Model\ThEdge.cs" />
     <Compile Include="Garage\Model\ThEntityParameter.cs" />
     <Compile Include="Garage\Model\ThFindSideLinesParameter.cs" />
@@ -78,6 +85,7 @@
     <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
     <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
+    <Compile Include="Garage\Service\ThEliminateNumberTextService.cs" />
     <Compile Include="Garage\Service\ThEliminateService.cs" />
     <Compile Include="Garage\Service\ThCollectCutLinesService.cs" />
     <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />

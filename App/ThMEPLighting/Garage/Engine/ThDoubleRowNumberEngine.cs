@@ -144,42 +144,46 @@ namespace ThMEPLighting.Garage.Engine
             numberedEdges.Where(o=>o.IsDX).Where(o=>o.Edge.Length>0).ForEach(m =>
             {
                 var first = WireOffsetDataService.FindFirstByPt(m.Edge.StartPoint.GetMidPt(m.Edge.EndPoint));
-                var second = WireOffsetDataService.FindSecondByFirst(first);
-                var secondEdgeSp = m.Edge.StartPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
-                var secondEdgeEp = m.Edge.EndPoint.GetProjectPtOnLine(second.StartPoint, second.EndPoint);
-                var secondLightEdge = new ThLightEdge
+                var seconds = WireOffsetDataService.FindSecondByFirst(first);
+                if(seconds.Count>0)
                 {
-                    Edge = new Line(secondEdgeSp, secondEdgeEp),
-                    Id=Guid.NewGuid().ToString(),
-                    Direction= m.Direction
-                };
-                m.LightNodes.ForEach(n =>
-                {
-                    if(!string.IsNullOrEmpty(n.Number))
+                    var pts = new List<Point3d>();
+                    seconds.ForEach(o=>
                     {
-                        int firstLightIndex=n.GetIndex();
-                        if(firstLightIndex != -1)
+                        pts.Add(o.StartPoint);
+                        pts.Add(o.EndPoint);
+                    });
+                    var result = ThGeometryTool.GetCollinearMaxPts(pts);
+                    var secondLightEdge = new ThLightEdge
+                    {
+                        Edge = new Line(result.Item1, result.Item2),
+                        Id = Guid.NewGuid().ToString(),
+                        Direction = m.Direction
+                    };
+                    m.LightNodes.ForEach(n =>
+                    {
+                        if (!string.IsNullOrEmpty(n.Number))
                         {
-                            var newFirst = WireOffsetDataService.FindFirstByPt(n.Position);
-                            var newSecond = WireOffsetDataService.FindSecondByFirst(newFirst);
-
-
-                            var position = n.Position.GetProjectPtOnLine(newSecond.StartPoint, newSecond.EndPoint);
-                            int secondLightIndex = firstLightIndex+1;
-                            var number = secondLightIndex.ToString().PadLeft(loopCharLength, '0');
-                            var secondLightNode = new ThLightNode
-                            {
-                                Number= ThGarageLightCommon.LightNumberPrefix + number,
-                                Position= position
-                            };
-                            if(ThGarageLightUtils.IsPointOnLines(position, newSecond))
-                            {
-                                secondLightEdge.LightNodes.Add(secondLightNode);
+                            int firstLightIndex = n.GetIndex();
+                            if (firstLightIndex != -1)
+                            {                               
+                                var position = n.Position.GetProjectPtOnLine(result.Item1, result.Item2);
+                                int secondLightIndex = firstLightIndex + 1;
+                                var number = secondLightIndex.ToString().PadLeft(loopCharLength, '0');
+                                var secondLightNode = new ThLightNode
+                                {
+                                    Number = ThGarageLightCommon.LightNumberPrefix + number,
+                                    Position = position
+                                };
+                                if (ThGarageLightUtils.IsPointOnLines(position, new Line(result.Item1, result.Item2)))
+                                {
+                                    secondLightEdge.LightNodes.Add(secondLightNode);
+                                }
                             }
                         }
-                    }
-                });
-                SecondLightEdges.Add(secondLightEdge);
+                    });
+                    SecondLightEdges.Add(secondLightEdge);
+                }
             });
         }
         /// <summary>

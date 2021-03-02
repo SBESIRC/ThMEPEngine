@@ -46,9 +46,7 @@ namespace ThMEPLighting.Garage.Engine
             var lightEdges = new List<ThLightEdge>();
             DxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o)));
             using (var buildNumberEngine = new ThSingleRowNumberEngine(ports, lightEdges, ArrangeParameter))
-            {
-                var queryLightBlockService = new ThQueryLightBlockService(regionBorder.Lights.ToCollection());
-                buildNumberEngine.QueryLightBlockService = queryLightBlockService;
+            {                
                 buildNumberEngine.Build();
                 //将创建的灯边返回给->regionBorder
                 regionBorder.LightEdges = buildNumberEngine.DxLightEdges;

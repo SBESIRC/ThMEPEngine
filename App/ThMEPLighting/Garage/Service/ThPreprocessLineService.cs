@@ -12,17 +12,38 @@ namespace ThMEPLighting.Garage.Service
     {
         public static List<Line> Preprocess(List<Line> curves)
         {
-            var lines = curves.ToCollection();
-            var cleanInstance = new ThLaneLineCleanService();
-            lines = cleanInstance.Clean(lines);
-            var extendLines = new DBObjectCollection();
-            foreach (Line line in lines)
+            if(curves.Count==0)
             {
-                extendLines.Add(line.ExtendLine(1.0));
+                return new List<Line>();
             }
-            lines = ThLaneLineEngine.Noding(extendLines);
-            lines = ThLaneLineEngine.CleanZeroCurves(lines);
-            return lines.Cast<Line>().ToList();
+            else
+            {
+                var lines = curves.ToCollection();
+                var cleanInstance = new ThLaneLineCleanService();
+                lines = cleanInstance.Clean(lines);
+                var extendLines = new DBObjectCollection();
+                foreach (Line line in lines)
+                {
+                    extendLines.Add(line.ExtendLine(1.0));
+                }
+                lines = ThLaneLineEngine.Noding(extendLines);
+                lines = ThLaneLineEngine.CleanZeroCurves(lines);
+                return lines.Cast<Line>().ToList();
+            }
+        }
+        public static List<Line> Merge(List<Line> curves)
+        {
+            if (curves.Count == 0)
+            {
+                return new List<Line>();
+            }
+            else
+            {
+                var lines = curves.ToCollection();
+                var cleanInstance = new ThLaneLineCleanService();
+                lines = cleanInstance.Clean(lines);
+                return lines.Cast<Line>().ToList();
+            }
         }
     }
 }

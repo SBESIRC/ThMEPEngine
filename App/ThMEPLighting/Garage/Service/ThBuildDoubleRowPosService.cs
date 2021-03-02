@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
@@ -63,7 +64,9 @@ namespace ThMEPLighting.Garage.Service
         private void BuildByExtractFromCad(ThLineSplitParameter splitParameter)
         {
             var line = new Line(splitParameter.LineSp, splitParameter.LineEp);
-            DistributePoints(QueryLightBlockService.Query(line));
+            var points = QueryLightBlockService.Query(line);
+            points=points.OrderBy(o => o.DistanceTo(splitParameter.LineSp)).ToList();
+            DistributePoints(points);
         }
         private void DistributePoints(List<Point3d> installPoints)
         {

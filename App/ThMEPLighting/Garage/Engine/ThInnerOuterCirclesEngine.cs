@@ -54,7 +54,7 @@ namespace ThMEPLighting.Garage.Engine
                 WireOffsetDatas.Add(offsetData);
             });
             //从小汤车道线合并服务中获取合并的主道线，辅道线            
-             var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines,301);
+             var mergeCurves=ThMergeLightCenterLines.Merge(Border, dxNomalLines, ThGarageLightCommon.LaneMergeRange);
             //通过中心线往两侧偏移
             var offsetCurves = Offset(mergeCurves.Cast<Curve>().ToList(), offsetDistance);            
             //让1号线、2号线连接

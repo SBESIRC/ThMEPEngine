@@ -116,7 +116,49 @@ namespace ThMEPLighting.Garage.Service
                 return objIds;
             }
         }
-
+        public static ObjectIdList CreateNumberTexts(
+            ThRegionLightEdge lightRegion,
+            ThRacewayParameter racewayParameter,
+            ThLightArrangeParameter arrangeParameter)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var objIds = new ObjectIdList();
+                lightRegion.LightEdges.Where(o => o.IsDX).ForEach(m =>
+                {
+                    var normalLine = ThGarageLightUtils.NormalizeLaneLine(m.Edge);
+                    m.LightNodes.ForEach(n =>
+                    {
+                        if (!string.IsNullOrEmpty(n.Number))
+                        {
+                            DBText code = new DBText();
+                            code.TextString = n.Number;
+                            var alignPt = n.Position + normalLine.StartPoint.GetVectorTo(normalLine.EndPoint)
+                              .GetPerpendicularVector()
+                              .GetNormal()
+                              .MultiplyBy(arrangeParameter.Width / 2.0 + 100 + arrangeParameter.LightNumberTextHeight / 2.0);
+                            code.Height = arrangeParameter.LightNumberTextHeight;
+                            code.WidthFactor = arrangeParameter.LightNumberTextWidthFactor;
+                            code.Position = alignPt;
+                            double angle = normalLine.Angle / Math.PI * 180.0;
+                            angle = ThGarageLightUtils.LightNumberAngle(angle);
+                            angle = angle / 180.0 * Math.PI;
+                            code.Rotation = angle;
+                            code.HorizontalMode = TextHorizontalMode.TextCenter;
+                            code.VerticalMode = TextVerticalMode.TextVerticalMid;
+                            code.AlignmentPoint = code.Position;
+                            code.ColorIndex = racewayParameter.NumberTextParameter.ColorIndex;
+                            code.Layer = racewayParameter.NumberTextParameter.Layer;
+                            code.TextStyleId = acadDatabase.TextStyles.Element(arrangeParameter.LightNumberTextStyle).Id;
+                            code.SetDatabaseDefaults(acadDatabase.Database);
+                            var codeId = acadDatabase.ModelSpace.Add(code);
+                            objIds.Add(codeId);
+                        }
+                    });
+                });
+                return objIds;
+            }
+        }
         public static void SetDatabaseDefaults(
             ThRacewayParameter racewayParameter, 
             ThLightArrangeParameter arrangeParameter)

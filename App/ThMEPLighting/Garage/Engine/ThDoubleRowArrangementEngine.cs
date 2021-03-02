@@ -43,7 +43,7 @@ namespace ThMEPLighting.Garage.Engine
             
             //创建电缆桥架
             var ports = BuildCableTray(regionBorder, innerOuterCircles);
-            
+
             //创建灯编号
             BuildLightNumer(ports, regionBorder, innerOuterCircles);
         }
@@ -69,14 +69,21 @@ namespace ThMEPLighting.Garage.Engine
             var centerPorts = GetDxCenterLinePorts(ports,  //灯线端口
                 centerLightEdges.Where(o => o.IsDX).Select(o => o.Edge).ToList());
 
+            //创建1号线和2号线的匹配关系
+            var secondLines = new List<Line>();
+            innerOuterCircles.ForEach(o => secondLines.Add(o.Second));
+            secondLines = ThPreprocessLineService.Merge(secondLines);
+            var buildService = new ThBuildFirstSecondPairService(firstLines,
+                 secondLines, ArrangeParameter.RacywaySpace);
+            buildService.Build();
+            var firstPairs = buildService.Pairs;
+
             //布灯
             using (var buildNumberEngine = new ThDoubleRowNumberEngine(
                 centerPorts, centerLightEdges, firstLightEdges, ArrangeParameter))
             {
-                var wireOffsetDataService = new ThWireOffsetDataService(innerOuterCircles);
+                var wireOffsetDataService = new ThWireOffsetDataService(firstPairs);
                 buildNumberEngine.WireOffsetDataService = wireOffsetDataService;
-                var queryLightBlockService = new ThQueryLightBlockService(regionBorder.Lights.ToCollection());
-                buildNumberEngine.QueryLightBlockService = queryLightBlockService;
                 buildNumberEngine.Build();
                 regionBorder.LightEdges.AddRange(buildNumberEngine.FirstLightEdges);
                 regionBorder.LightEdges.AddRange(buildNumberEngine.SecondLightEdges);

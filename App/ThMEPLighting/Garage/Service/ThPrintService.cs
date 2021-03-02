@@ -97,5 +97,19 @@ namespace ThMEPLighting.Garage.Service
                 }
             }
         }
+        public static void CreateGroup(List<Curve> curves,short colorIndex)
+        {
+            using (var db = AcadDatabase.Active())
+            {
+                var objIds = new ObjectIdList();
+                curves.ForEach(o=>
+                {
+                    o.ColorIndex = colorIndex;
+                    objIds.Add(db.ModelSpace.Add(o));
+                });
+                var groupName = Guid.NewGuid().ToString();
+                GroupTools.CreateGroup(db.Database, groupName, objIds);
+            }
+        }
     }
 }
