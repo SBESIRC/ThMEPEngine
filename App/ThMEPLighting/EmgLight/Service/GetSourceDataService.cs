@@ -70,6 +70,7 @@ namespace ThMEPLighting.EmgLight.Service
 
             List<Curve> laneList = laneLines.Select(x => x.WashClone()).ToList();
 
+            laneList = laneList.Where(x => x != null).ToList();
             laneList.ForEach(x => transformer.Transform(x));
             laneList.ForEach(x => objs.Add(x));
 
