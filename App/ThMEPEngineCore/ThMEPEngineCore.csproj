@@ -192,6 +192,7 @@
     <Compile Include="Model\ThIfcSpatialElement.cs" />
     <Compile Include="Model\ThIfcSpatialStructureElement.cs" />
     <Compile Include="Model\ThIfcSpatialZone.cs" />
+    <Compile Include="Model\ThIfcStair.cs" />
     <Compile Include="Model\ThIfcSystem.cs" />
     <Compile Include="Model\ThIfcWall.cs" />
     <Compile Include="Model\ThIfcWallStandardCase.cs" />
