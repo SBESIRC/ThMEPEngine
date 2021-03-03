@@ -60,14 +60,14 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
+                var RoofRainPipes = GetroofRainPipes(database, pts);
                 var GravityWaterBuckets = GetgravityWaterBuckets(database, pts);
                 var SideEntryWaterBuckets = GetsideEntryWaterBuckets(database, pts);
-                var RoofRainPipes = GetroofRainPipes(database, pts);
                 var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine()
-                {   
-                GravityWaterBuckets = GravityWaterBuckets,
-                SideEntryWaterBuckets = SideEntryWaterBuckets,
-                RoofRainPipes = RoofRainPipes
+                {
+                    RoofRainPipes = RoofRainPipes,
+                    GravityWaterBuckets = GravityWaterBuckets,
+                    SideEntryWaterBuckets = SideEntryWaterBuckets,
                 };               
                 RoofDeviceEngine.Recognize(database, pts);             
                 RoofDeviceFloors = RoofDeviceEngine.Rooms;

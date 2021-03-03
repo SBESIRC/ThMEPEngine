@@ -15,9 +15,9 @@ namespace ThMEPEngineCore.Engine
             Results = new List<ThRawIfcDistributionElementData>();
         }
 
-        public abstract void DoExtract(Entity dbObj, Matrix3d matrix);
+        public abstract void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix);
 
-        public abstract void DoXClip(BlockReference blockReference, Matrix3d matrix);
+        public abstract void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix);
 
         public virtual bool IsBuildElement(Entity entity)
         {

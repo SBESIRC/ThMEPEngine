@@ -45,15 +45,5 @@ namespace ThMEPWSS.Pipe.Engine
                 Rooms = ThToiletRoomService.Build(spaces, closestools, FloorDrains, CondensePipes, RoofRainPipes);
             }
         }
-        private List<ThWClosestool> GetClosestools(Database database, Point3dCollection pts)
-        {
-            using (ThWClosestoolRecognitionEngine closetoolEngine = new ThWClosestoolRecognitionEngine())
-            {
-                closetoolEngine.Recognize(database, pts);
-                return closetoolEngine.Elements.Cast<ThWClosestool>().ToList();
-            }
-        }
-
-
     }
 }

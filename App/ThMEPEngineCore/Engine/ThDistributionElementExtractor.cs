@@ -50,6 +50,7 @@ namespace ThMEPEngineCore.Engine
                         if (o.IsBuildElementBlock(blockTableRecord))
                         {
                             // 提取图元信息
+                            var results = new List<ThRawIfcDistributionElementData>();
                             foreach (var objId in blockTableRecord)
                             {
                                 var dbObj = acadDatabase.Element<Entity>(objId);
@@ -63,7 +64,7 @@ namespace ThMEPEngineCore.Engine
                                     {
                                         if (o.CheckLayerValid(blockObj) && o.IsDistributionElement(blockObj))
                                         {
-                                            o.DoExtract(blockObj, matrix);
+                                            o.DoExtract(results, blockObj, matrix);
                                             continue;
                                         }
                                         var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
@@ -73,7 +74,10 @@ namespace ThMEPEngineCore.Engine
                             }
 
                             // 过滤XClip外的图元信息
-                            //o.DoXClip(blockReference, matrix);
+                            o.DoXClip(results, blockReference, matrix);
+
+                            // 保存XClip过滤后的图元信息
+                            o.Results.AddRange(results);
                         }
                     }
                 });

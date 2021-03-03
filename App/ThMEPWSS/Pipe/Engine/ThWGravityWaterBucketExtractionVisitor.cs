@@ -5,26 +5,26 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Engine
 {
   public  class ThWGravityWaterBucketExtractionVisitor : ThDistributionElementExtractionVisitor
-    {
-        public override void DoExtract(Entity dbObj, Matrix3d matrix)
+    {     
+        public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is BlockReference blkref)
             {
-                HandleBlockReference(blkref, matrix);
+                HandleBlockReference(elements,blkref, matrix);
             }
-        }
-
-        public override void DoXClip(BlockReference blockReference, Matrix3d matrix)
+        }     
+        public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
             var xclip = blockReference.XClipInfo();
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                Results.RemoveAll(o => !IsContain(xclip, o.Geometry));
+                elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
             }
         }
 
@@ -38,9 +38,9 @@ namespace ThMEPWSS.Pipe.Engine
             return false;
         }
 
-        private void HandleBlockReference(BlockReference blkref, Matrix3d matrix)
+        private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            Results.Add(new ThRawIfcDistributionElementData()
+            elements.Add(new ThRawIfcDistributionElementData()
             {
                 Geometry = blkref.GetTransformedCopy(matrix),
             });
@@ -50,7 +50,6 @@ namespace ThMEPWSS.Pipe.Engine
         {
             if (ent is BlockReference br)
             {
-                //TODO: 获取块的OBB
                 return xclip.Contains(br.GeometricExtents.ToRectangle());
             }
             else

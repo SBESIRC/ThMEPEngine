@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Service
             //}
             //return (patterns[0] == "TOLT") && (patterns[1] == "EQPM") && (patterns[2] == "AE");
         }
-        public static bool IsRoofPipeBlockName(string name)
+        public static bool IsRoofRainPipeBlockName(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)

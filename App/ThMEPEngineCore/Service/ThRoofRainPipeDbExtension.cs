@@ -62,7 +62,7 @@ namespace ThMEPEngineCore.Service
                                 if (IsBuildElementBlockReference(blockObj))
                                 {
                                     if (CheckLayerValid(blockObj) &&
-                                        ThRoofRainPipeLayerManager.IsRoofPipeBlockName(blockObj.Name))
+                                        ThRoofRainPipeLayerManager.IsRoofRainPipeBlockName(blockObj.Name))
                                     {
                                         var minPt = blockObj.GeometricExtents.MinPoint;
                                         var maxPt = blockObj.GeometricExtents.MaxPoint;
