@@ -12,6 +12,7 @@ using ThMEPEngineCore.Service;
 using ThCADCore.NTS;
 using NFox.Cad;
 using ThMEPEngineCore.Model;
+using System;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -53,6 +54,8 @@ namespace ThMEPWSS.Pipe.Engine
                 var condensePipes = rainPipesEngine.Elements.Where(o => o is ThWCondensePipe).Cast<ThWCondensePipe>().ToList();
                 var washmachines = rainPipesEngine.Elements.Where(o => o is ThWWashingMachine).Cast<ThWWashingMachine>().ToList();
                 var basinTools = rainPipesEngine.Elements.Where(o => o is ThWBasin).Cast<ThWBasin>().ToList();
+                var floorDrains= rainPipesEngine.Elements.Where(o => o is ThWFloorDrain).Cast<ThWFloorDrain>().ToList();
+                var closets = rainPipesEngine.Elements.Where(o => o is ThWClosestool).Cast<ThWClosestool>().ToList();
                 var kichenEngine = new ThWKitchenRoomRecognitionEngine()
                 {
                     Spaces = Spaces,
@@ -61,13 +64,14 @@ namespace ThMEPWSS.Pipe.Engine
                     BasinTools = basinTools
                 };
                 kichenEngine.Recognize(database, pts);
-                var floorDrains = GetFloorDrains(database, pts);
+                //var floorDrains = GetFloorDrains(database, pts);
                 var toiletEngine = new ThWToiletRoomRecognitionEngine()
                 {                 
                     Spaces = kichenEngine.Spaces,
                     FloorDrains= floorDrains,
                     CondensePipes= condensePipes,
-                    RoofRainPipes = roofRainPipes
+                    RoofRainPipes = roofRainPipes,
+                    closestools=closets
                 };
                 toiletEngine.Recognize(database, pts);
                 GeneratePairInfo(kichenEngine.Rooms, toiletEngine.Rooms);
@@ -118,6 +122,12 @@ namespace ThMEPWSS.Pipe.Engine
                         .ForEach(o => Elements.Add(ThWWashingMachine.Create(o.Geometry)));
                     results.Where(o => ThBasintoolLayerManager.IsBasintoolBlockName(o.Data as string))
                         .ForEach(o => Elements.Add(ThWBasin.Create(o.Geometry)));
+                    results.Where(o => ThFloorDrainLayerManager.IsToiletFloorDrainBlockName(o.Data as string))
+                        .ForEach(o => Elements.Add(ThWFloorDrain.Create(o.Geometry)));
+                    results.Where(o => ThFloorDrainLayerManager.IsBalconyFloorDrainBlockName(o.Data as string))
+                       .ForEach(o => Elements.Add(ThWFloorDrain.Create(o.Geometry)));
+                    results.Where(o => ThClosestoolLayerManager.IsClosetoolBlockName(o.Data as string))
+                     .ForEach(o => Elements.Add(ThWClosestool.Create(o.Geometry.GeometricExtents.ToRectangle())));
                 }                               
             }
         }
@@ -290,11 +300,11 @@ namespace ThMEPWSS.Pipe.Engine
             var balconyRoomboundary = balconyRoom.Space.Boundary as Polyline;
             var devicePlatformRoomboundary = devicePlatformRoom.Space.Boundary as Polyline;
             var distance = (devicePlatformRoomboundary.GetCenter().DistanceTo(balconyRoomboundary.GetCenter()));
-            if (distance >= ThWPipeCommon.MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE)
+            if (distance<ThWPipeCommon.MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE&&(Math.Abs(devicePlatformRoomboundary.GetCenter().Y- balconyRoomboundary.GetCenter().Y)<2000))
             {
-                return false;
+                return true;
             }      
-            return true;
+            return false;
         }
         private static ThWBalconyRoom CreateNewBalcony(ThWBalconyRoom balcony1, ThWBalconyRoom balcony2)
         {

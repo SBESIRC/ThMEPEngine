@@ -38,7 +38,7 @@ namespace ThMEPEngineCore.Service
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)
             {
-                return false;
+                return ((patterns[0] == "卫") && (patterns[1] == "地漏"));             
             }
             return (patterns[0] == "4") && (patterns[1] == "DRAIN") && (patterns[2] == "W");
         }
@@ -47,7 +47,7 @@ namespace ThMEPEngineCore.Service
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)
             {
-                return false;
+                return ((patterns[0] == "卫") && (patterns[1] == "地漏"));
             }
             return (patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2] == "W");
         }

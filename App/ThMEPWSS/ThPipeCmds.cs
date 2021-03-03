@@ -786,14 +786,14 @@ namespace ThMEPWSS
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
-            {
-                FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
+            {               
                 var userInfo = new InputInfo();
                 userInfo.MakeInputInfo();
                 var obstacleInfo = new InputObstacles();
                 obstacleInfo.Recognize(FloorEngines);
                 if (userInfo.FloorValue == 0)
                     return;
+                FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
                 string W_RAIN_NOTE1 = ThWPipeOutputFunction.Get_Layers1(FloorEngines.Layers, ThWPipeCommon.W_RAIN_NOTE);
                 string W_DRAI_EQPM= ThWPipeOutputFunction.Get_Layers2(FloorEngines.Layers, ThWPipeCommon.W_DRAI_EQPM);
                 string W_DRAI_FLDR = ThWPipeOutputFunction.Get_Layers3(FloorEngines.Layers, ThWPipeCommon.W_DRAI_FLDR);

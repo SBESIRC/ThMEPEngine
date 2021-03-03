@@ -130,24 +130,27 @@ namespace ThMEPWSS.Pipe.Engine
             }
             else
             {
+                var dis = double.MaxValue;
                 foreach (Polyline pipe in parameters.condensepipes)
                 {
-                    if (GeomUtils.PtInLoop(device_other, pipe.GetCenter()))
+                    if (pipe.GetCenter().DistanceTo(Floordrain_washing[0].Position) < dis)
                     {
-                        condensepipe = pipe;
-                        break;
-                    }
-                    else
-                    {
-                        if (GeomUtils.PtInLoop(device, pipe.GetCenter()))
+                        dis = pipe.GetCenter().DistanceTo(Floordrain_washing[0].Position);
+                        if (GeomUtils.PtInLoop(device_other, pipe.GetCenter()))
                         {
                             condensepipe = pipe;
-                            break;
                         }
+                        else
+                        {
+                            if (GeomUtils.PtInLoop(device, pipe.GetCenter()))
+                            {
+                                condensepipe = pipe;
+                            }
 
+                        }
                     }
                 }
-            }
+                }
            
             if (parameters.downspout == null)
             {               
@@ -518,7 +521,7 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 else
                 {
-                    linespecific = new Line(vertices_boundary[0], vertices_boundary[b]);
+                    linespecific = new Line(vertices_boundary[b], vertices_boundary[0]);
                 }
             }
 
@@ -527,22 +530,8 @@ namespace ThMEPWSS.Pipe.Engine
             if (rainpipe.GetCenter().DistanceTo(Floordrain_washing[0].Position) > ThWPipeCommon.MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE)
             {
                 //balcony范围内生成新管井
-                var perpendicular_basepoint = linespecific.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;
-                if (b == c)
-                {
-                    center = Floordrain_washing[0].Position + (perpendicular_basepoint.GetVectorTo(vertices_boundary[b]).GetNormal()) * (perpendicular_basepoint.DistanceTo(vertices_boundary[b]) - 100);
-                }
-                else
-                {
-                    for (int i = 0; i < vertices_boundary.Count; i++)
-                    {
-                        if ((i != b) && ((vertices_boundary[b].GetVectorTo(perpendicular_basepoint)).IsCodirectionalTo(perpendicular_basepoint.GetVectorTo(vertices_boundary[i]))))
-                        {
-                            center = Floordrain_washing[0].Position + (vertices_boundary[i].GetVectorTo(perpendicular_basepoint).GetNormal()) * (-vertices_boundary[i].DistanceTo(Floordrain_washing[0].Position) + 100);//生成内部立管
-                            break;
-                        }
-                    }
-                }
+                var perpendicular_basepoint = linespecific.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;                        
+                center = Floordrain_washing[0].Position + (perpendicular_basepoint.GetVectorTo(linespecific.EndPoint).GetNormal()) * (perpendicular_basepoint.DistanceTo(linespecific.EndPoint) - 100);                             
             }
             else
             {

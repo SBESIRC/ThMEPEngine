@@ -17,6 +17,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWFloorDrain> FloorDrains { get; set; }
         public List<ThWCondensePipe> CondensePipes { get; set; }
         public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
+        public List<ThWClosestool> closestools { get; set; }
         public ThWToiletRoomRecognitionEngine()
         {
             Rooms = new List<ThWToiletRoom>();
@@ -41,7 +42,6 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     spaces = this.Spaces;
                 }
-                var closestools = GetClosestools(database, pts);
                 Rooms = ThToiletRoomService.Build(spaces, closestools, FloorDrains, CondensePipes, RoofRainPipes);
             }
         }

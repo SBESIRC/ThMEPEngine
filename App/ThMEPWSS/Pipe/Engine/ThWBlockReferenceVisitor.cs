@@ -53,6 +53,18 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     return true;
                 }
+                if (ThFloorDrainLayerManager.IsToiletFloorDrainBlockName(name))
+                {
+                    return true;
+                }
+                if (ThFloorDrainLayerManager.IsBalconyFloorDrainBlockName(name))
+                {
+                    return true;
+                }
+                if (ThClosestoolLayerManager.IsClosetoolBlockName(name))
+                {
+                    return true;
+                }         
             }
             return false;
         }
