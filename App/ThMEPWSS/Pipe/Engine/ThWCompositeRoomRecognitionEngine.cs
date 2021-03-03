@@ -7,9 +7,32 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
+using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Service;
+using ThCADCore.NTS;
+using NFox.Cad;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Engine
 {
+    public class ThWCompositeExtractionEngine : ThDistributionElementExtractionEngine
+    {
+        public ThWRainPipeExtractionVisitor rainPipes_visitor { get; set; }
+        public ThWRoofRainPipeExtractionVisitor roofRainPipes_visitor { get; set; }
+        public ThWFloorDrainExtractionVisitor floorDrains_visitor { get; set; }
+        public ThWCondensePipeExtractionVisitor condensePipes_visitor { get; set; }
+        public ThWWashMachineExtractionVisitor washmachines_visitor { get; set; }
+        public ThWBasinExtractionVisitor basinTools_visitor { get; set; }
+        public ThWBlockReferenceVisitor common_visitor { get; set; }
+        public override void Extract(Database database)
+        {
+            common_visitor = new ThWBlockReferenceVisitor();
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(common_visitor);
+            extractor.Extract(database);
+        }
+    }
+
     public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWCompositeRoom> Rooms { get; set; }
@@ -23,12 +46,13 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var rainPipes = GetRainPipes(database, pts);
-                var roofRainPipes = GetRoofRainPipes(database, pts);
-                var floorDrains = GetFloorDrains(database, pts);
-                var condensePipes = GetCondensePipes(database, pts);             
-                var washmachines = GetWashmachines(database, pts);              
-                var basinTools = GetBasinTools(database, pts);
+                var rainPipesEngine = new ThWCompositeRecognitionEngine();
+                rainPipesEngine.Recognize(database, pts);
+                var rainPipes = rainPipesEngine.Elements.Where(o => o is ThWRainPipe).Cast<ThWRainPipe>().ToList();
+                var roofRainPipes = rainPipesEngine.Elements.Where(o => o is ThWRoofRainPipe).Cast<ThWRoofRainPipe>().ToList();
+                var condensePipes = rainPipesEngine.Elements.Where(o => o is ThWCondensePipe).Cast<ThWCondensePipe>().ToList();
+                var washmachines = rainPipesEngine.Elements.Where(o => o is ThWWashingMachine).Cast<ThWWashingMachine>().ToList();
+                var basinTools = rainPipesEngine.Elements.Where(o => o is ThWBasin).Cast<ThWBasin>().ToList();
                 var kichenEngine = new ThWKitchenRoomRecognitionEngine()
                 {
                     Spaces = Spaces,
@@ -37,6 +61,7 @@ namespace ThMEPWSS.Pipe.Engine
                     BasinTools = basinTools
                 };
                 kichenEngine.Recognize(database, pts);
+                var floorDrains = GetFloorDrains(database, pts);
                 var toiletEngine = new ThWToiletRoomRecognitionEngine()
                 {                 
                     Spaces = kichenEngine.Spaces,
@@ -67,9 +92,38 @@ namespace ThMEPWSS.Pipe.Engine
                 GenerateBalconyPairInfo(balconyEngine.Rooms, devicePlatformEngine.Rooms);
             }
         }
+        public class ThWCompositeRecognitionEngine : ThDistributionElementRecognitionEngine
+        {
+            public override void Recognize(Database database, Point3dCollection polygon)
+            {
+                using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+                {
+                    var engine = new ThWCompositeExtractionEngine();
+                    engine.Extract(database);
+
+                    var dbObjs = engine.common_visitor.Results.Select(o => o.Geometry).ToCollection();
+                    if (polygon.Count > 0)
+                    {
+                        ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                        dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
+                    }
+                    var results = engine.common_visitor.Results.Where(o => dbObjs.Contains(o.Geometry));
+                    results.Where(o => ThRainPipeLayerManager.IsRainPipeBlockName(o.Data as string))
+                        .ForEach(o => Elements.Add(ThWRainPipe.Create(o.Geometry.GeometricExtents.ToRectangle())));
+                    results.Where(o => ThRoofRainPipeLayerManager.IsRoofPipeBlockName(o.Data as string))
+                        .ForEach(o => Elements.Add(ThWRoofRainPipe.Create(o.Geometry.GeometricExtents.ToRectangle())));
+                    results.Where(o => ThCondensePipeLayerManager.IsCondensePipeBlockName(o.Data as string))
+                        .ForEach(o => Elements.Add(ThWCondensePipe.Create(o.Geometry.GeometricExtents.ToRectangle())));
+                    results.Where(o => ThWashMachineLayerManager.IsWashmachineBlockName(o.Data as string))
+                        .ForEach(o => Elements.Add(ThWWashingMachine.Create(o.Geometry)));
+                    results.Where(o => ThBasintoolLayerManager.IsBasintoolBlockName(o.Data as string))
+                        .ForEach(o => Elements.Add(ThWBasin.Create(o.Geometry)));
+                }                               
+            }
+        }
         protected List<ThWRainPipe> GetRainPipes(Database database, Point3dCollection pts)
         {
-            using (ThWRainPipeRecognitionEngine rainPipesEngine = new ThWRainPipeRecognitionEngine())
+            using (var rainPipesEngine = new ThWCompositeRecognitionEngine())
             {
                 rainPipesEngine.Recognize(database, pts);
                 return rainPipesEngine.Elements.Cast<ThWRainPipe>().ToList();

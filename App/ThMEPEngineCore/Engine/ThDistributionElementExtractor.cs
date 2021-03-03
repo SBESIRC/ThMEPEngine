@@ -73,7 +73,7 @@ namespace ThMEPEngineCore.Engine
                             }
 
                             // 过滤XClip外的图元信息
-                            o.DoXClip(blockReference, matrix);
+                            //o.DoXClip(blockReference, matrix);
                         }
                     }
                 });

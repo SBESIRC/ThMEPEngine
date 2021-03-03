@@ -40,6 +40,7 @@
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
     <Compile Include="Pipe\Engine\ThApplicationPipesEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWWashMachineExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWBasinExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWClosestoolExtractionVisitor.cs" />
