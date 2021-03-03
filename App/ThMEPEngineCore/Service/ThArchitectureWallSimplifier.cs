@@ -29,14 +29,14 @@ namespace ThMEPEngineCore.Service
             var objs = new DBObjectCollection();
             foreach(AcPolygon wall in walls)
             {
-                wall.GetOffsetCurves(OFFSET_DISTANCE)
+                wall.Buffer(-OFFSET_DISTANCE)
                     .Cast<AcPolygon>()
                     .ForEach(o =>
                     {
-                        o.GetOffsetCurves(-OFFSET_DISTANCE)
+                        o.Buffer(OFFSET_DISTANCE)
                         .Cast<AcPolygon>()
                         .ForEach(e => objs.Add(e));
-                    });
+                    });                
             }
             return objs;
         }
