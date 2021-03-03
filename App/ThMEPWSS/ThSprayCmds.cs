@@ -94,8 +94,6 @@ namespace ThMEPWSS
                     //打印喷头变化轨迹
                     MarkService.PrintOriginSpray(sprayPts);
 
-                    plFrame.TransformBy(matrix);
-                    holes.ForEach(x => x.TransformBy(matrix));
                     //打印喷淋点盲区
                     CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
                     calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
@@ -469,9 +467,16 @@ namespace ThMEPWSS
             {
                 foreach (ObjectId obj in allSprays.Value.GetObjectIds())
                 {
-                    dBObjectCollection.Add(acdb.Element<Entity>(obj));
+                    var transEnt = acdb.Element<Entity>(obj).Clone() as Entity;
+                    transEnt.TransformBy(matrix.Inverse());
+                    dBObjectCollection.Add(transEnt);
                 }
             }
+
+            //转换usc
+            plFrame.TransformBy(matrix.Inverse());
+            holes.ForEach(x => x.TransformBy(matrix.Inverse()));
+
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
             var sprays = thCADCoreNTSSpatialIndex.SelectWindowPolygon(plFrame).Cast<Entity>().ToList();
 
@@ -492,7 +497,8 @@ namespace ThMEPWSS
             var sprayPts = sprays.Select(x =>
             {
                 var pts = x.GeometricExtents;
-                return new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
+                var newPt = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
+                return newPt.TransformBy(matrix);
             }).ToList();
             CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
             calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);

@@ -33,8 +33,11 @@ namespace ThMEPWSS.Bussiness
 
         public void CalSprayBlindArea(List<SprayLayoutData> sprays, Polyline polyline, List<Polyline> holes)
         {
-            //var sprayPts = sprays.Select(x => x.Position).ToList();
-            var transSpray = sprays.Select(x => x.Position.TransformBy(Matrix.Inverse())).ToList();
+            var transSpray = sprays.Select(x =>
+            {
+                var transPt = x.Position.TransformBy(Matrix.Inverse());
+                return transPt;
+            }).ToList();
             var sprayData = SprayDataOperateService.CalSprayPoint(transSpray, vDir, tDir, ThWSSUIService.Instance.Parameter.protectRange);
             var blindArea = GetRealBlindArea(sprayData, polyline, holes);
             blindArea.ForEach(x => x.TransformBy(Matrix));
