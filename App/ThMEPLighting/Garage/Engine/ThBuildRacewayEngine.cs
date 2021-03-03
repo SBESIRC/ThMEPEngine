@@ -46,7 +46,7 @@ namespace ThMEPLighting.Garage.Engine
                 var centerLines = ThLaneLineSimplifier.Simplify(lineObjs, 100.0);
                 var dbObjs = new DBObjectCollection();
                 centerLines.ForEach(o => dbObjs.Add(o));
-                var bufferObjs = dbObjs.LineMerge().Buffer(Width / 2.0, EndCapStyle.Flat);
+                var bufferObjs = dbObjs.LineMerge().Buffer(Width / 2.0);
                 var sideParameter = new ThFindSideLinesParameter
                 {
                     CenterLines = centerLines,

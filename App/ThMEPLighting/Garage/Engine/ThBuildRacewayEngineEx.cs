@@ -92,7 +92,7 @@ namespace ThMEPLighting.Garage.Engine
             lineObjs.Cast<Line>().ForEach(o => extends.Add(o.ExtendLine(2.0)));
             var nodes = ThLaneLineEngine.Noding(extends);
             nodes=nodes.Cast<Line>().Where(o => o.Length > 5.0).ToCollection();
-            var bufferObjs = nodes.LineMerge().Buffer(Width / 2.0, EndCapStyle.Flat);
+            var bufferObjs = nodes.LineMerge().Buffer(Width / 2.0);
             //此处不要在延伸了
             // 获取Buffer后所有Polyline的组成线
             return bufferObjs.GetLines().Where(o=>o.Length>1.0).ToList();

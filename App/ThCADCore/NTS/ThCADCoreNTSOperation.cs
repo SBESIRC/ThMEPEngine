@@ -43,25 +43,23 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
-        public static DBObjectCollection Buffer(this DBObjectCollection objs, double distance,
-            EndCapStyle endCapStyle = EndCapStyle.Flat)
+        public static DBObjectCollection Buffer(this DBObjectCollection objs, double distance)
         {
             var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
             {
                 JoinStyle = NTSJoinStyle.Mitre,
-                EndCapStyle = endCapStyle,
+                EndCapStyle = EndCapStyle.Flat,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
-        public static DBObjectCollection SingleSidedBuffer(this DBObjectCollection objs, double distance,
-            EndCapStyle endCapStyle = EndCapStyle.Flat)
+        public static DBObjectCollection SingleSidedBuffer(this DBObjectCollection objs, double distance)
         {
             var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
             {
                 IsSingleSided = true,
                 JoinStyle = NTSJoinStyle.Mitre,
-                EndCapStyle = endCapStyle,
+                EndCapStyle = EndCapStyle.Flat,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
