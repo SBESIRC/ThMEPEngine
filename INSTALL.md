@@ -1,5 +1,5 @@
 # Psake
-First all, install psake via PowerShell gallery
+First all, install psake via [PowerShell gallery](https://www.powershellgallery.com/packages/psake/4.9.0):
 ````PowerShell
 Install-Module -Name psake
 ````
