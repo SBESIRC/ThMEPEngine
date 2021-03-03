@@ -223,6 +223,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
         <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THPYS" Global="THPYS" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
@@ -235,6 +236,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THPYS" Global="THPYS" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
@@ -247,6 +249,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THPYS" Global="THPYS" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
@@ -259,6 +262,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
         <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPWSS.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP WSS" AppName="ThMEPWSS" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THPYS" Global="THPYS" />
                 <Command Local="THPLPT" Global="THPLPT" />
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
