@@ -13,29 +13,29 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThColumnExtractionVisitor : ThBuildingElementExtractionVisitor
     {
-        public override void DoExtract(Entity dbObj, Matrix3d matrix)
+        public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is Hatch hatch)
             {
-                HandleHatch(hatch, matrix);
+                elements.AddRange(HandleHatch(hatch, matrix));
             }
             else if (dbObj is Solid solid)
             {
-                HandleSolid(solid, matrix);
+                elements.AddRange(HandleSolid(solid, matrix));
             }
         }
 
-        public override void DoXClip(BlockReference blockReference, Matrix3d matrix)
+        public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
             var xclip = blockReference.XClipInfo();
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                Results.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
+                elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
             }
         }
 
-        private void HandleHatch(Hatch hatch, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleHatch(Hatch hatch, Matrix3d matrix)
         {
             List<Curve> curves = new List<Curve>();
             if (IsBuildElement(hatch) && CheckLayerValid(hatch))
@@ -71,10 +71,10 @@ namespace ThMEPEngineCore.Engine
                     }
                 });
             }
-            Results.AddRange(curves.Select(o => CreateBuildingElementData(o)));
+            return curves.Select(o => CreateBuildingElementData(o)).ToList();
         }
 
-        private void HandleSolid(Solid solid, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleSolid(Solid solid, Matrix3d matrix)
         {
             List<Curve> curves = new List<Curve>();
             if (IsBuildElement(solid) && CheckLayerValid(solid))
@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.Engine
                 clone.TransformBy(matrix);
                 curves.Add(clone.ToPolyline());
             }
-            Results.AddRange(curves.Select(o => CreateBuildingElementData(o)));
+            return curves.Select(o => CreateBuildingElementData(o)).ToList();
         }
 
         private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve)

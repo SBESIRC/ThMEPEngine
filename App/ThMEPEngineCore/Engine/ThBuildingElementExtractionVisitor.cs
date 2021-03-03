@@ -8,16 +8,16 @@ namespace ThMEPEngineCore.Engine
     public abstract class ThBuildingElementExtractionVisitor
     {
         public List<string> LayerFilter { get; set; }
-        public List<ThRawIfcBuildingElementData> Results { get; protected set; }
+        public List<ThRawIfcBuildingElementData> Results { get; set; }
 
         public ThBuildingElementExtractionVisitor()
         {
             Results = new List<ThRawIfcBuildingElementData>();
         }
 
-        public abstract void DoExtract(Entity dbObj, Matrix3d matrix);
+        public abstract void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix);
 
-        public abstract void DoXClip(BlockReference blockReference, Matrix3d matrix);
+        public abstract void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix);
 
         public virtual bool IsBuildElement(Entity entity)
         {

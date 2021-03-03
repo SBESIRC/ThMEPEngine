@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
@@ -9,20 +10,21 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThShearWallExtractionVisitor : ThBuildingElementExtractionVisitor
     {
-        public override void DoExtract(Entity dbObj, Matrix3d matrix)
+        public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is Hatch hatch)
             {
-                HandleHatch(hatch, matrix);
+                elements.AddRange(HandleHatch(hatch, matrix));
             }
             else if (dbObj is Solid solid)
             {
-                HandleSolid(solid, matrix);
+                elements.AddRange(HandleSolid(solid, matrix));
             }
         }
 
-        private void HandleHatch(Hatch hatch, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleHatch(Hatch hatch, Matrix3d matrix)
         {
+            var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(hatch) && CheckLayerValid(hatch))
             {
                 var newHatch = hatch.GetTransformedCopy(matrix) as Hatch;
@@ -34,37 +36,40 @@ namespace ThMEPEngineCore.Engine
                     // 通过这种处理，将剪力墙的外部和内部区域联通起来，从而获取正确的可用区域
                     ThPolygonToGapPolylineService.ToGapPolyline(polygon).ForEach(o =>
                     {
-                        Results.Add(new ThRawIfcBuildingElementData()
+                        results.Add(new ThRawIfcBuildingElementData()
                         {
                             Geometry = o,
                         });
                     });
                 }
             }
+            return results;
         }
 
-        private void HandleSolid(Solid solid, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> HandleSolid(Solid solid, Matrix3d matrix)
         {
+            var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(solid) && CheckLayerValid(solid))
             {
                 // 可能存在2D Solid不规范的情况
                 // 这里将原始2d Solid“清洗”处理
                 var clone = solid.WashClone();
                 clone.TransformBy(matrix);
-                Results.Add(new ThRawIfcBuildingElementData()
+                results.Add(new ThRawIfcBuildingElementData()
                 {
                     Geometry = clone.ToPolyline(),
                 });
             }
+            return results;
         }
 
-        public override void DoXClip(BlockReference blockReference, Matrix3d matrix)
+        public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
             var xclip = blockReference.XClipInfo();
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                Results.RemoveAll(o =>
+                elements.RemoveAll(o =>
                 {
                     if (o.Geometry is Polyline polyline)
                     {
