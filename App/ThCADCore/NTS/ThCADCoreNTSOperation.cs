@@ -87,7 +87,7 @@ namespace ThCADCore.NTS
             }
             else if (geometry is MultiPolygon mPolygons)
             {
-                mPolygons.Geometries.Cast<Polygon>().ForEach(o =>
+                mPolygons.Geometries.Cast<Polygon>().Where(o=>o.Area>1.0).ForEach(o =>
                 {
                     poylgons.Add(o.ToDbEntity());
                 });
