@@ -1,11 +1,11 @@
 ﻿using System;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Algorithm;
-using System.Collections.Generic;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -36,6 +36,11 @@ namespace ThMEPWSS.Pipe.Engine
                 return ThRoofRainPipeLayerManager.IsRoofRainPipeBlockName(name);
             }
             return false;
+        }
+
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
         }
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements,BlockReference blkref, Matrix3d matrix)

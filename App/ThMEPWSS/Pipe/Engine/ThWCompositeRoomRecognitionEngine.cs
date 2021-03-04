@@ -12,6 +12,7 @@ using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {

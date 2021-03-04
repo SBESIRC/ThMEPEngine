@@ -1,13 +1,11 @@
-﻿using System.Linq;
-using NFox.Cad;
-using ThCADExtension;
+﻿using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
-
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -15,10 +13,7 @@ namespace ThMEPWSS.Pipe.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThWRoofRainPipeExtractionVisitor()
-            {
-                LayerFilter = ThRoofRainPipeLayerManager.XrefLayers(database),
-            };
+            var visitor = new ThWRoofRainPipeExtractionVisitor();
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);

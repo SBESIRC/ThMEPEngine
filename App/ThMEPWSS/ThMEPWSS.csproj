@@ -105,6 +105,8 @@
     <Compile Include="Pipe\Service\ThBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThBalconyWashMachineService.cs" />
     <Compile Include="Pipe\Service\ThBasintoolLayerManager.cs" />
+    <Compile Include="Pipe\Service\ThClosestoolLayerManager.cs" />
+    <Compile Include="Pipe\Service\ThCondensePipeLayerManager.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformCondensePipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformFloorDrainService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRainPipeService.cs" />
@@ -112,8 +114,11 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
     <Compile Include="Pipe\Service\ThFindSpaceRangedSpaces.cs" />
+    <Compile Include="Pipe\Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Pipe\Service\ThInsertStoreyFrameService.cs" />
+    <Compile Include="Pipe\Service\ThRainPipeLayerManager.cs" />
     <Compile Include="Pipe\Service\ThReadStoreyInformationService.cs" />
+    <Compile Include="Pipe\Service\ThRoofRainPipeLayerManager.cs" />
     <Compile Include="Pipe\Service\ThTagParametersService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThTopFloorCompositeRoomService.cs" />
@@ -135,6 +140,7 @@
     <Compile Include="Pipe\Engine\ThWCompositeFloordrainEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceFloordrainEngine.cs" />
     <Compile Include="Pipe\Engine\ThWInnerPipeIndexEngine.cs" />
+    <Compile Include="Pipe\Service\ThWashmachineLayerManager.cs" />
     <Compile Include="Pipe\ThWPipeCommon.cs" />
     <Compile Include="Pipe\Engine\ThWToiletFloordrainEngine.cs" />
     <Compile Include="Model\SprayDataService.cs" />
