@@ -16,6 +16,8 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWGravityWaterBucket> gravityWaterBuckets { get; set; }
         public List<ThWSideEntryWaterBucket> sideEntryWaterBuckets { get; set; }
         public List<ThWRoofRainPipe> roofRainPipes { get; set; }
+        public List<ThIfcSpace> RoofSpaces { get; set; }
+        public List<BlockReference> blockCollection { get; set; }
         public ThWRoofFloorRecognitionEngine()
         {
             Rooms = new List<ThWRoofFloorRoom>();
@@ -24,27 +26,11 @@ namespace ThMEPWSS.Pipe.Engine
         {
             Rooms = new List<ThWRoofFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                var blockCollection = new List<BlockReference>();
-                blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
-                var RoofSpaces = new List<ThIfcSpace>();
-                if (blockCollection.Count > 0)
-                {
-                    RoofSpaces = GetRoofSpaces(blockCollection);
-                }
+            {             
                 var baseCircles = GetBaseCircles(blockCollection);
                 Rooms = ThRoofFloorRoomService.Build(RoofSpaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);
             }
-        }
-        public static List<Curve> GetBoundaryCurves(List<BlockReference> blockCollection)
-        {
-            var blockCurves = new List<Curve>();
-            foreach (BlockReference block in blockCollection)
-            {
-                blockCurves.Add(ThWPipeOutputFunction.GetBlockBoundary(block));
-            }
-            return blockCurves;
-        }
+        }    
         private static List<ThIfcSpace> GetBaseCircles(List<BlockReference> blocks)
         {
             var FloorSpaces = new List<ThIfcSpace>();
@@ -66,20 +52,6 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
             return FloorSpaces;
-        }
-        public static List<ThIfcSpace> GetRoofSpaces(List<BlockReference> blocks)
-        {
-            var FloorSpaces = new List<ThIfcSpace>();
-            var blockBounds = new List<BlockReference>();
-            foreach (BlockReference block in blocks)
-            {
-                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("大屋面"))
-                {
-                    blockBounds.Add(block);
-                }
-            }
-            GetBoundaryCurves(blockBounds).ForEach(o => FloorSpaces.Add(new ThIfcSpace { Boundary = o }));
-            return FloorSpaces;
-        }
+        }  
     }
 }

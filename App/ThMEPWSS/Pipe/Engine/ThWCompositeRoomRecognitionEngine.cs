@@ -16,22 +16,18 @@ using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThWCompositeExtractionEngine : ThDistributionElementExtractionEngine
-    {
-        public ThWBlockReferenceVisitor Visitor { get; set; }
-        public override void Extract(Database database)
-        {
-            Visitor = new ThWBlockReferenceVisitor();
-            var extractor = new ThDistributionElementExtractor();
-            extractor.Accept(Visitor);
-            extractor.Extract(database);
-        }
-    }
-
-    public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
+     public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWCompositeRoom> Rooms { get; set; }
         public List<ThWCompositeBalconyRoom> FloorDrainRooms { get; set; }
+        public List<ThWRainPipe> rainPipes { get; set; }
+        public List<ThWRoofRainPipe> roofRainPipes { get; set; }
+        public List<ThWCondensePipe> condensePipes { get; set; }
+        public List<ThWWashingMachine> washmachines { get; set; }
+        public List<ThWBasin> basinTools { get; set; }
+        public List<ThWFloorDrain> floorDrains { get; set; }
+        public List<ThWClosestool> closets { get; set; }
+
         public ThWCompositeRoomRecognitionEngine()
         {
             Rooms = new List<ThWCompositeRoom>();
@@ -40,16 +36,7 @@ namespace ThMEPWSS.Pipe.Engine
         public override void Recognize(Database database, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                var rainPipesEngine = new ThWCompositeRecognitionEngine();
-                rainPipesEngine.Recognize(database, pts);
-                var rainPipes = rainPipesEngine.Elements.Where(o => o is ThWRainPipe).Cast<ThWRainPipe>().ToList();
-                var roofRainPipes = rainPipesEngine.Elements.Where(o => o is ThWRoofRainPipe).Cast<ThWRoofRainPipe>().ToList();
-                var condensePipes = rainPipesEngine.Elements.Where(o => o is ThWCondensePipe).Cast<ThWCondensePipe>().ToList();
-                var washmachines = rainPipesEngine.Elements.Where(o => o is ThWWashingMachine).Cast<ThWWashingMachine>().ToList();
-                var basinTools = rainPipesEngine.Elements.Where(o => o is ThWBasin).Cast<ThWBasin>().ToList();
-                var floorDrains= rainPipesEngine.Elements.Where(o => o is ThWFloorDrain).Cast<ThWFloorDrain>().ToList();
-                var closets = rainPipesEngine.Elements.Where(o => o is ThWClosestool).Cast<ThWClosestool>().ToList();
+            {                     
                 var kichenEngine = new ThWKitchenRoomRecognitionEngine()
                 {
                     Spaces = Spaces,
@@ -57,8 +44,7 @@ namespace ThMEPWSS.Pipe.Engine
                     RoofRainPipes= roofRainPipes,
                     BasinTools = basinTools
                 };
-                kichenEngine.Recognize(database, pts);
-                //var floorDrains = GetFloorDrains(database, pts);
+                kichenEngine.Recognize(database, pts);            
                 var toiletEngine = new ThWToiletRoomRecognitionEngine()
                 {                 
                     Spaces = kichenEngine.Spaces,
@@ -89,42 +75,7 @@ namespace ThMEPWSS.Pipe.Engine
                 devicePlatformEngine.Recognize(database, pts);
                 GenerateBalconyPairInfo(balconyEngine.Rooms, devicePlatformEngine.Rooms);
             }
-        }
-        public class ThWCompositeRecognitionEngine : ThDistributionElementRecognitionEngine
-        {
-            public override void Recognize(Database database, Point3dCollection polygon)
-            {
-                using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-                {
-                    var engine = new ThWCompositeExtractionEngine();
-                    engine.Extract(database);
-
-                    var dbObjs = engine.Visitor.Results.Select(o => o.Geometry).ToCollection();
-                    if (polygon.Count > 0)
-                    {
-                        ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                        dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                    }
-                    var results = engine.Visitor.Results.Where(o => dbObjs.Contains(o.Geometry));
-                    results.Where(o => ThRainPipeLayerManager.IsRainPipeBlockName(o.Data as string))
-                        .ForEach(o => Elements.Add(ThWRainPipe.Create(o.Geometry.GeometricExtents.ToRectangle())));
-                    results.Where(o => ThRoofRainPipeLayerManager.IsRoofRainPipeBlockName(o.Data as string))
-                        .ForEach(o => Elements.Add(ThWRoofRainPipe.Create(o.Geometry.GeometricExtents.ToRectangle())));
-                    results.Where(o => ThCondensePipeLayerManager.IsCondensePipeBlockName(o.Data as string))
-                        .ForEach(o => Elements.Add(ThWCondensePipe.Create(o.Geometry.GeometricExtents.ToRectangle())));
-                    results.Where(o => ThWashMachineLayerManager.IsWashmachineBlockName(o.Data as string))
-                        .ForEach(o => Elements.Add(ThWWashingMachine.Create(o.Geometry)));
-                    results.Where(o => ThBasintoolLayerManager.IsBasintoolBlockName(o.Data as string))
-                        .ForEach(o => Elements.Add(ThWBasin.Create(o.Geometry)));
-                    results.Where(o => ThFloorDrainLayerManager.IsToiletFloorDrainBlockName(o.Data as string))
-                        .ForEach(o => Elements.Add(ThWFloorDrain.Create(o.Geometry)));
-                    results.Where(o => ThFloorDrainLayerManager.IsBalconyFloorDrainBlockName(o.Data as string))
-                       .ForEach(o => Elements.Add(ThWFloorDrain.Create(o.Geometry)));
-                    results.Where(o => ThClosestoolLayerManager.IsClosetoolBlockName(o.Data as string))
-                     .ForEach(o => Elements.Add(ThWClosestool.Create(o.Geometry.GeometricExtents.ToRectangle())));
-                }                               
-            }
-        }
+        } 
         /// <summary>
         /// 根据厨房间， 卫生间 生成复合房间信息
         /// </summary>

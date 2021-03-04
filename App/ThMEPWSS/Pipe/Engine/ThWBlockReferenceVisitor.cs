@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
@@ -65,7 +66,15 @@ namespace ThMEPWSS.Pipe.Engine
                 if (ThClosestoolLayerManager.IsClosetoolBlockName(name))
                 {
                     return true;
-                }         
+                }
+                if (ThGravityWaterBucketLayerManager.IsGravityWaterBucketBlockName(name))
+                {
+                    return true;
+                }
+                if (ThSideEntryWaterBucketLayerManager.IsSideEntryWaterBucketBlockName(name))
+                {
+                    return true;
+                }
             }
             return false;
         }

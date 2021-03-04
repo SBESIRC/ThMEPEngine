@@ -15,6 +15,16 @@ namespace ThMEPWSS.Pipe.Engine
     {
         public List<ThWTopFloorRoom> Rooms { get; set; }
         public List<ThIfcSpace> Spaces { get; set; }
+        public List<ThIfcSpace> StandardSpaces { get; set; }
+        public List<ThIfcSpace> NonStandardSpaces { get; set; }
+        public List<BlockReference> blockCollection { get; set; }
+        public List<ThWRainPipe> rainPipes { get; set; }
+        public List<ThWRoofRainPipe> roofRainPipes { get; set; }
+        public List<ThWCondensePipe> condensePipes { get; set; }
+        public List<ThWWashingMachine> washmachines { get; set; }
+        public List<ThWBasin> basinTools { get; set; }
+        public List<ThWFloorDrain> floorDrains { get; set; }
+        public List<ThWClosestool> closets { get; set; }
         public ThWTopFloorRecognitionEngine()
         {
             Rooms = new List<ThWTopFloorRoom>();
@@ -23,16 +33,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             Rooms = new List<ThWTopFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {    
-                var blockCollection = new List<BlockReference>();
-                blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");             
-                var StandardSpaces = new List<ThIfcSpace>();
-                var NonStandardSpaces = new List<ThIfcSpace>();             
-                if (blockCollection.Count > 0)
-                {                   
-                    StandardSpaces = GetStandardSpaces(blockCollection);
-                    NonStandardSpaces = GetNonStandardSpaces(blockCollection);
-                }        
+            {                      
                 var thisSpaces = Spaces;
                 var basepoint = GetBaseCircles(blockCollection);                 
                 var compositeroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item1;
@@ -97,46 +98,18 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return blockCurves;
         }
-        public static List<ThIfcSpace> GetStandardSpaces(List<BlockReference> blocks)
-        {
-            var FloorSpaces = new List<ThIfcSpace>();
-
-            foreach (BlockReference block in blocks)
-            {
-                var blockBounds = new List<BlockReference>();
-                var blockString = new List<string>();
-                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("标准层"))
-                {
-                    blockBounds.Add(block);
-                }
-                blockString.Add(BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号"));
-                if (blockBounds.Count > 0)
-                {
-                    FloorSpaces.Add(new ThIfcSpace { Boundary = GetBoundaryCurves(blockBounds)[0], Tags = blockString });
-                }
-            }
-
-            return FloorSpaces;
-        }
-        public static List<ThIfcSpace> GetNonStandardSpaces(List<BlockReference> blocks)
-        {
-            var FloorSpaces = new List<ThIfcSpace>();
-            var blockBounds = new List<BlockReference>();
-            foreach (BlockReference block in blocks)
-            {
-                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("非标层"))
-                {
-                    blockBounds.Add(block);
-                }
-            }
-            GetBoundaryCurves(blockBounds).ForEach(o => FloorSpaces.Add(new ThIfcSpace { Boundary = o }));
-            return FloorSpaces;
-        }
         private Tuple<List<ThWCompositeRoom>, List<ThWCompositeBalconyRoom>>  Getcompositeroom(Database database, Point3dCollection pts,List<ThIfcSpace> spaces)
         {
             using (ThWCompositeRoomRecognitionEngine compositeRoomRecognitionEngine = new ThWCompositeRoomRecognitionEngine())
             {
                 compositeRoomRecognitionEngine.Spaces = spaces;
+                compositeRoomRecognitionEngine.rainPipes = rainPipes;
+                compositeRoomRecognitionEngine.roofRainPipes = roofRainPipes;
+                compositeRoomRecognitionEngine.washmachines = washmachines;
+                compositeRoomRecognitionEngine.floorDrains = floorDrains;
+                compositeRoomRecognitionEngine.condensePipes = condensePipes;
+                compositeRoomRecognitionEngine.closets = closets;
+                compositeRoomRecognitionEngine.basinTools = basinTools;
                 compositeRoomRecognitionEngine.Recognize(database, pts);
                 return Tuple.Create(compositeRoomRecognitionEngine.Rooms, compositeRoomRecognitionEngine.FloorDrainRooms);                  
             }
