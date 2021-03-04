@@ -6,7 +6,7 @@ using ThMEPHVAC.IO;
 using System.Linq;
 using System;
 
-namespace ThMEPHVAC.Entity
+namespace ThMEPHVAC.Model
 {
     public enum ValveGroupPosionType
     {

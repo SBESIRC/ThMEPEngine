@@ -14,6 +14,7 @@ using ThMEPHAVC.CAD;
 using ThMEPHVAC;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.IO;
+using ThMEPHVAC.Model;
 using TianHua.FanSelection.Function;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 

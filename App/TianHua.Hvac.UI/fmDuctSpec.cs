@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using ThMEPHAVC.CAD;
 using ThMEPHVAC;
 using ThMEPHVAC.CAD;
+using ThMEPHVAC.Model;
 using TianHua.Publics.BaseCode;
 
 namespace TianHua.Hvac.UI

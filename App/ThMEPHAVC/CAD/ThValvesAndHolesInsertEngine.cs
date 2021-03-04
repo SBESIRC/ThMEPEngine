@@ -8,7 +8,7 @@ using AcHelper;
 using Autodesk.AutoCAD.DatabaseServices;
 using Linq2Acad;
 using ThMEPEngineCore.Service.Hvac;
-using ThMEPHVAC.Entity;
+using ThMEPHVAC.Model;
 using ThMEPEngineCore.Model.Hvac;
 using ThMEPHVAC.Duct;
 

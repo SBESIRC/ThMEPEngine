@@ -6,7 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using ThMEPEngineCore.Service.Hvac;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPHVAC.Entity;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.CAD
 {

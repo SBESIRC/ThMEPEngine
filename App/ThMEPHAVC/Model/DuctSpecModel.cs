@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPHAVC.CAD;
 
-namespace ThMEPHVAC
+namespace ThMEPHVAC.Model
 {
     public class DuctSpecModel
     {

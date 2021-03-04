@@ -48,8 +48,8 @@
     <Compile Include="Duct\ThDuctLineSimplifier.cs" />
     <Compile Include="Duct\ThDuctUtils.cs" />
     <Compile Include="Duct\ThGraphExtension.cs" />
-    <Compile Include="Entity\DuctSpecModel.cs" />
-    <Compile Include="Entity\ThValve.cs" />
+    <Compile Include="Model\DuctSpecModel.cs" />
+    <Compile Include="Model\ThValve.cs" />
     <Compile Include="IO\ThDuctInOutMappingJsonReader.cs" />
     <Compile Include="IO\ThDuctJsonReader.cs" />
     <Compile Include="IO\ThDuctParameterJsonReader.cs" />
