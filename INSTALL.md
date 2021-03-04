@@ -1,7 +1,9 @@
-# Psake
-First all, install psake via [PowerShell gallery](https://www.powershellgallery.com/packages/psake/4.9.0):
+# How to get started
+Install the [psake](https://www.powershellgallery.com/packages/psake/4.9.0) and  [VSSetup](https://www.powershellgallery.com/packages/VSSetup/2.2.16) PowerShell Modules
+
 ````PowerShell
 Install-Module -Name psake
+Install-Module -Name VSSetup
 ````
 
 # Script
