@@ -111,6 +111,7 @@ namespace ThAnalytics
         public void Initialize()
         {
             ThCybrosService.Instance.Initialize();
+            ThAcsSystemService.Instance.Initialize();
             AcadApp.Idle += new EventHandler(Application_OnIdle);
         }
 

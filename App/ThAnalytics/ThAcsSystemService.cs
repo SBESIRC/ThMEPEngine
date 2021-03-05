@@ -16,23 +16,70 @@ namespace ThAnalytics
         public static ThAcsSystemService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
+        /// <summary>
+        /// 连接器
+        /// </summary>
         private AppConnect AcsConnector { get; set; }
 
-        public bool Initialize()
+        /// <summary>
+        /// 返回结果
+        /// </summary>
+        private NameValueString Response { get; set; }
+
+        public void Initialize()
         {
             AcsConnector = new AppConnect();
-            var acsInfo = AcsConnector.GetCurrentApp(AppInfoType.ACS.ToString(), out _);
-            if (acsInfo != null)
-            {
-                var result = AcsConnector.Invoke(acsInfo, "__TEST__");
-                return !(result == null || result.StartsWith("Error:"));
-            }
-            return false;
+            Response = ACSQM_GETUSER();
         }
 
         public void UnInitialize()
         {
             //
+        }
+
+        /// <summary>
+        /// 用户ID
+        /// </summary>
+        public string UserId
+        {
+            get
+            {
+                if (Response.ContainsName("UserId"))
+                {
+                    return Response["UserId"];
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 项目ID
+        /// </summary>
+        public string ProjectId
+        {
+            get
+            {
+                if (Response.ContainsName("PrjId"))
+                {
+                    return Response["PrjId"];
+                }
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// 项目编号
+        /// </summary>
+        public string ProjectNumber
+        {
+            get
+            {
+                if (Response.ContainsName("PrjNo"))
+                {
+                    return Response["PrjNo"];
+                }
+                return null;
+            }
         }
 
         private NameValueString ACSQM_GETUSER()
