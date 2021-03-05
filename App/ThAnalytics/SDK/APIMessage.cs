@@ -9,7 +9,7 @@ namespace ThAnalytics.SDK
     {
         public static THConfig m_Config = new THConfig()
         {
-            Token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaW0tYXV0by1hY2NvdW50QHRoYXAuY29tLmNuIiwic2NwIjoidXNlciIsImV4cCI6MTY0NjQ2NzM5MSwiYXVkIjoiQ0FEIiwiaWF0IjoxNjE0OTMxMzkxLCJqdGkiOiI4MDI2OWY3My0xNWQ3LTRkNTgtOTJlNC1jZTgxY2Q1ODkwZTUifQ.6SEE_6xzmmvDwj6SYFaaOhWHOmQN4atKPsXs2PXtWOc",
+            Token = "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjaW0tYXV0by1hY2NvdW50QHRoYXAuY29tLmNuIiwic2NwIjoidXNlciIsImV4cCI6MTY0NjQ3NDIyMSwiYXVkIjoiVEhNRVAiLCJpYXQiOjE2MTQ5MzgyMjEsImp0aSI6ImRhNmNlNjAzLWIwMTgtNDRiNS1hMDIyLWUyMzAzZDgwOWFhMCJ9.qyRo50Gsm2AObh1CpvVz_7VxMMCoVx61b7nqWimjlao",
             AppVersion = "V1.0",
             ServerUrl = @"https://cybros.thape.com.cn",
             SSOUrl = @"https://sso.thape.com.cn/users/sign_in"
@@ -20,7 +20,7 @@ namespace ThAnalytics.SDK
             var client = new RestClient(m_Config.ServerUrl);
             var request = new RestRequest("/api/cad_session", Method.POST);
             request.RequestFormat = DataFormat.Json;
-            request.AddHeader("JWT-AUD", "CAD");
+            request.AddHeader("JWT-AUD", "THMEP");
             request.AddHeader("Authorization", m_Config.Token);
             request.AddJsonBody(sessions);
             client.ExecuteAsync(request, response => {
@@ -33,7 +33,7 @@ namespace ThAnalytics.SDK
             var client = new RestClient(m_Config.ServerUrl);
             var request = new RestRequest("/api/cad_operation", Method.POST);
             request.RequestFormat = DataFormat.Json;
-            request.AddHeader("JWT-AUD", "CAD");
+            request.AddHeader("JWT-AUD", "THMEP");
             request.AddHeader("Authorization", m_Config.Token);
             request.AddJsonBody(initiConnection);
             client.ExecuteAsync(request, response => {
