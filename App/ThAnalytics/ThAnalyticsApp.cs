@@ -118,10 +118,8 @@ namespace ThAnalytics
         public void Terminate()
         {
             // unhook DocumentCollection reactors
+            AcadApp.DocumentManager.DocumentBecameCurrent -= DocCollEvent_DocumentBecameCurrent_Handler;
             AcadApp.DocumentManager.DocumentLockModeChanged -= DocCollEvent_DocumentLockModeChanged_Handler;
-
-            // unhook application event handlers
-            //AcadApp.SystemVariableChanged -= AcadApp_SystemVariableChanged;
 
             //end the user session
             ThCybrosService.Instance.EndSession();
@@ -132,22 +130,16 @@ namespace ThAnalytics
             AcadApp.Idle -= new EventHandler(Application_OnIdle);
 
             // hook DocumentCollection reactors
+            AcadApp.DocumentManager.DocumentBecameCurrent += DocCollEvent_DocumentBecameCurrent_Handler;
             AcadApp.DocumentManager.DocumentLockModeChanged += DocCollEvent_DocumentLockModeChanged_Handler;
-
-            // hook event handlers
-            // Fix THAI-868
-            //  在某些场景下，捕捉系统变量变化事件，会有严重的效率问题
-            //  我们不可能穷举所有可能会导致效率问题的系统变量，而且我们也对系统变量不敢兴趣
-            //  这里我们就选择不再捕捉系统变量
-            //AcadApp.SystemVariableChanged += AcadApp_SystemVariableChanged;
 
             //start the user session
             ThCybrosService.Instance.StartSession();
         }
 
-        private void AcadApp_SystemVariableChanged(object sender, SystemVariableChangedEventArgs e)
+        private void DocCollEvent_DocumentBecameCurrent_Handler(object sender, DocumentCollectionEventArgs e)
         {
-            ThCybrosService.Instance.RecordSysVerEvent(e.Name, AcadApp.GetSystemVariable(e.Name).ToString());
+            ThAcsSystemService.Instance.Reset();
         }
 
         private void DocCollEvent_DocumentLockModeChanged_Handler(object sender, DocumentLockModeChangedEventArgs e)

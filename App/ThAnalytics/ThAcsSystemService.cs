@@ -1,4 +1,5 @@
-﻿using AcsCommon;
+﻿using AcHelper;
+using AcsCommon;
 using AcsConnector;
 
 namespace ThAnalytics
@@ -26,68 +27,47 @@ namespace ThAnalytics
         /// </summary>
         private NameValueString Response { get; set; }
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
         public void Initialize()
         {
-            AcsConnector = new AppConnect();
-            Response = ACSQM_GETUSER();
+            Reset();
         }
 
+        /// <summary>
+        /// 反初始化
+        /// </summary>
         public void UnInitialize()
         {
             //
         }
 
         /// <summary>
-        /// 用户ID
+        /// 重置
         /// </summary>
-        public string UserId
+        public void Reset()
         {
-            get
-            {
-                if (Response.ContainsName("UserId"))
-                {
-                    return Response["UserId"];
-                }
-                return null;
-            }
+            AcsConnector = new AppConnect();
+            Response = ACSQM_GETUSER();
         }
 
         /// <summary>
-        /// 项目ID
+        /// 用户ID
         /// </summary>
-        public string ProjectId
-        {
-            get
-            {
-                if (Response.ContainsName("PrjId"))
-                {
-                    return Response["PrjId"];
-                }
-                return null;
-            }
-        }
+        public string UserId => Response.ContainsName("UserId") ? Response["UserId"] : string.Empty;
 
         /// <summary>
         /// 项目编号
         /// </summary>
-        public string ProjectNumber
-        {
-            get
-            {
-                if (Response.ContainsName("PrjNo"))
-                {
-                    return Response["PrjNo"];
-                }
-                return null;
-            }
-        }
+        public string ProjectNumber => Response.ContainsName("PrjNo") ? Response["PrjNo"] : string.Empty;
 
         private NameValueString ACSQM_GETUSER()
         {
             var runArgs = new NameValueString();
             runArgs.Set("IsWait", "True");
             runArgs.Set("OnlyUserName", "False");
-            runArgs.Set("FilePath", "");
+            runArgs.Set("FilePath", Active.DocumentFullPath);
             return RunCmdFunc("ACSQM_GETUSER", runArgs);
         }
 
