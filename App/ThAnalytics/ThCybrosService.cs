@@ -17,9 +17,23 @@ namespace ThAnalytics
         public static ThCybrosService Instance { get { return instance; } }
         //-------------SINGLETON-----------------
 
-        private readonly Dictionary<string, string> thcommanfunctiondict = new Dictionary<string, string>
+        private readonly Dictionary<string, string> THMEPCOMMANDS = new Dictionary<string, string>
         {
-            //
+            // 暖通
+            {"THFJ", "风机选型"},
+            {"THFJF", "机房平面"},
+
+            // 电气
+            {"THYWG", "烟感温感布置"},
+            {"THTCD", "提车道中心线"},
+            {"THGB", "地库广播"},
+            {"THGBLX", "广播连线"},
+            {"THGBMQ", "广播盲区"},
+            {"THCDZM", "车道照明"},
+            {"THYJZM", "车道应急照明"},
+
+            // 给排水
+            {"THPL", "喷头工具"}
         };
 
         public void Initialize()
@@ -42,34 +56,27 @@ namespace ThAnalytics
             THRecordingService.SessionEnd();
         }
 
-        public void RecordCommandEvent(string cmdName, double duration)
-        {
-            Segmentation segmentation = new Segmentation();
-            segmentation.Add("名称", cmdName);
-            if (thcommanfunctiondict.ContainsKey(cmdName))
-            {
-                segmentation.Add("功能", thcommanfunctiondict[cmdName]);
-            }
-            THRecordingService.RecordEvent("CAD命令使用", (int)duration, segmentation);
-        }
-
         public void RecordTHCommandEvent(string cmdName, double duration)
         {
-            if (ThAcsSystemService.Instance.UserId == null ||
-                ThAcsSystemService.Instance.ProjectNumber == null)
+            // 非协同用户
+            if (string.IsNullOrEmpty(ThAcsSystemService.Instance.UserId))
             {
                 return;
             }
 
-            if (thcommanfunctiondict.ContainsKey(cmdName))
+            // 非指定命令
+            if (!THMEPCOMMANDS.ContainsKey(cmdName))
             {
-                Segmentation thsegmentation = new Segmentation();
-                thsegmentation.Add("名称", cmdName);
-                thsegmentation.Add("功能", thcommanfunctiondict[cmdName]);
-                thsegmentation.Add("用户", ThAcsSystemService.Instance.UserId);
-                thsegmentation.Add("项目", ThAcsSystemService.Instance.ProjectNumber);
-                THRecordingService.RecordEvent("天华命令使用", (int)duration, thsegmentation);
+                return;
             }
+
+            // 记录命令事件
+            Segmentation thsegmentation = new Segmentation();
+            thsegmentation.Add("名称", cmdName);
+            thsegmentation.Add("功能", THMEPCOMMANDS[cmdName]);
+            thsegmentation.Add("用户", ThAcsSystemService.Instance.UserId);
+            thsegmentation.Add("项目", ThAcsSystemService.Instance.ProjectNumber);
+            THRecordingService.RecordEvent("天华命令使用", (int)duration, thsegmentation);
         }
 
         public void RecordSysVerEvent(string sysverName, string sysverValue)
