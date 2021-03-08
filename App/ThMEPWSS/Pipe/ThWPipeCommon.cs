@@ -99,6 +99,10 @@
         /// </summary>
         public const double MAX_TOILET_TO_KITCHEN_DISTANCE = 3500;
         /// <summary>
+        /// 特殊场景卫生间到厨房最大距离，应对新增距离远的情况
+        /// </summary>
+        public const double MAX_TOILET_TO_KITCHEN_DISTANCE1 = 5500;
+        /// <summary>
         /// 厨房到雨水管最大距离
         /// </summary>
         public const double MAX_KITCHEN_TO_RAINPIPE_DISTANCE = 5500;
@@ -110,6 +114,10 @@
         /// 卫生间到地漏最大距离
         /// </summary>
         public const double MAX_TOILET_TO_FLOORDRAIN_DISTANCE = 2200;
+        /// <summary>
+        /// 新增特殊场景卫生间到地漏最大距离
+        /// </summary>
+        public const double MAX_TOILET_TO_FLOORDRAIN_DISTANCE1 = 4500;
         /// <summary>
         /// 阳台到设备平台最大距离
         /// </summary>

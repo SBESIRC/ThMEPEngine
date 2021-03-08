@@ -66,11 +66,12 @@ namespace ThMEPWSS.Pipe.Output
         {
             foreach (var compositeBalcony in FloorEngines.TopFloors[0].CompositeBalconyRooms)
             {   //判断是否为正确的Balcony
-                if (thWPipeOutputFunction.IsValidBalconyForFloorDrain(compositeBalcony.Balcony))
+                if (thWPipeOutputFunction.IsValidBalconyForFloorDrain(compositeBalcony.Balcony)&& compositeBalcony.DevicePlatforms[0]!=null)
                 {
                     var parameters = new ThWTopBalconyParameters();
                     ThWPipeOutputFunction.GetListFloorDrain(compositeBalcony, parameters).ForEach(o => parameters.bfloordrain.Add(o));                
                     parameters.bboundary = compositeBalcony.Balcony.Space.Boundary as Polyline;
+                    parameters.bboundary.Closed = true;
                     if (compositeBalcony.Balcony.RainPipes.Count > 0)
                     {
                         ThWPipeOutputFunction.GetListRainPipes(compositeBalcony).ForEach(o => parameters.rainpipe.Add(o));
@@ -83,6 +84,7 @@ namespace ThMEPWSS.Pipe.Output
                             foreach (var RainPipe in devicePlatform.RainPipes)
                             {
                                 var ent = RainPipe.Outline as Polyline;
+                                ent.Closed = true;
                                 parameters.rainpipe.Add(ent);
                                 parameters0.rain_pipe.Add(ent);
                             }
@@ -212,10 +214,58 @@ namespace ThMEPWSS.Pipe.Output
                 }
             }
         }
+        private static Polyline GetToiletBoundary(Polyline roofSpaces, Polyline StandardSpaces)
+        {
+            var pts = new Point3dCollection();
+            pts.Add(roofSpaces.GeometricExtents.MinPoint);
+            pts.Add(roofSpaces.GeometricExtents.MaxPoint);
+            pts.Add(roofSpaces.GeometricExtents.MinPoint);
+            pts.Add(roofSpaces.GeometricExtents.MaxPoint);
+            double minpt_x = double.MinValue;
+            double minpt_y = double.MinValue;
+            double maxpt_x = double.MaxValue;
+            double maxpt_y = double.MaxValue;
+            for (int i = 0; i < pts.Count; i++)
+            {
+                if (pts[i].X > minpt_x)
+                {
+                    minpt_x = pts[i].X;
+                }
+                if (pts[i].Y > minpt_y)
+                {
+                    minpt_y = pts[i].Y;
+                }
+                if (pts[i].X < maxpt_x)
+                {
+                    maxpt_x = pts[i].X;
+                }
+                if (pts[i].Y < maxpt_y)
+                {
+                    maxpt_y = pts[i].Y;
+                }
+            }
+            return GetNewPolyline(maxpt_x, maxpt_y, minpt_x, minpt_y);
+        }
+        private static Polyline GetNewPolyline(double x1, double y1, double x2, double y2)
+        {
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            polyline.AddVertexAt(0, new Point2d(x1, y1), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(1, new Point2d(x2, y1), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(2, new Point2d(x2, y2), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(x1, y2), 0.0, 0.0, 0.0);
+            return polyline;
+        }
         private static void InputToiletParameters(ThWCompositeRoom composite,ThWTopCompositeParameters parameters,ThWTopParameters parameters0)
         {
-            parameters.boundary1 = composite.Toilet.Space.Boundary as Polyline;
+            parameters.boundary1 = composite.Toilet.Space.Boundary as Polyline;  
             parameters.outline1 = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+            if (!(GeomUtils.PtInLoop(parameters.boundary1, parameters.outline1.GetCenter())))
+            {
+                parameters.boundary1 = GetToiletBoundary(parameters.boundary1, parameters.outline1);
+            }
             parameters.closestool = composite.Toilet.Closestools[0].Outline as Polyline;
             if (composite.Toilet.CondensePipes.Count > 0)
             {
@@ -284,10 +334,13 @@ namespace ThMEPWSS.Pipe.Output
                 ent.Layer = W_DRAI_FLDR;
                 parameters0.standardEntity.Add(ent);
             }
-            Matrix3d scale_washing = Matrix3d.Scaling(1.0, FloordrainEngine.Floordrain_washing[0].Position);
-            var ent_washing = FloordrainEngine.Floordrain_washing[0].GetTransformedCopy(scale_washing);
-            ent_washing.Layer= W_DRAI_FLDR;
-            parameters0.standardEntity.Add(ent_washing);
+            if (FloordrainEngine.Floordrain_washing.Count > 0)
+            {
+                Matrix3d scale_washing = Matrix3d.Scaling(1.0, FloordrainEngine.Floordrain_washing[0].Position);
+                var ent_washing = FloordrainEngine.Floordrain_washing[0].GetTransformedCopy(scale_washing);
+                ent_washing.Layer = W_DRAI_FLDR;
+                parameters0.standardEntity.Add(ent_washing);
+            }
             for (int i = 0; i < FloordrainEngine.Downspout_to_Floordrain.Count - 1; i++)
             {
                 parameters0.standardEntity.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Downspout_to_Floordrain[i], FloordrainEngine.Downspout_to_Floordrain[i + 1], FloorEngines.Layers, pipeLayer)) ;
@@ -307,6 +360,11 @@ namespace ThMEPWSS.Pipe.Output
                 {
                     parameters0.standardEntity.Add(ThWPipeOutputFunction.CreateRainlines(FloordrainEngine.Rainpipe_to_Floordrain[i], FloordrainEngine.Rainpipe_to_Floordrain[i + 1], W_RAIN_PIPE));
                     parameters0.normalCopys.Add(ThWPipeOutputFunction.CreateRainlines(FloordrainEngine.Rainpipe_to_Floordrain[i], FloordrainEngine.Rainpipe_to_Floordrain[i + 1], W_RAIN_PIPE));
+                }
+                if(FloordrainEngine.Bbasinline_to_Floordrain.Count==0)
+                {
+                    parameters0.standardEntity.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
+                    parameters0.normalCopys.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
                 }
             }
             if (FloordrainEngine.Bbasinline_to_Floordrain.Count > 0)

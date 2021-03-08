@@ -23,6 +23,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public void Read(Database database)
         {
+            //排序规则为小屋面，大屋面，接着从大到小排列
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var blockCollection = new List<BlockReference>();
@@ -31,21 +32,33 @@ namespace ThMEPWSS.Pipe.Service
                 {
                     DeviceName = GetDeviceName(blockCollection);
                     RoofName = GetRoofName(blockCollection);
-                    StandardSpaceNames = DivideCharacter(GetStandardSpaceName(blockCollection), "标准层");
-                    NonStandardSpaceNames = DivideCharacter(GetNonStandardSpaceName(blockCollection), "非标层");
-                }
+                    StandardSpaceNames = GetSortList(DivideCharacter(GetStandardSpaceName(blockCollection), "标准层"));
+                    NonStandardSpaceNames = GetSortList(DivideCharacter(GetNonStandardSpaceName(blockCollection), "非标层"));
+                }             
             }
         }
+        private static List<Tuple<string, string>> GetSortList(List<Tuple<string, string>> names)
+        {
+            for (int i=0;i< names.Count-1;i++)
+            {
+                for(int j=i;j< names.Count;j++)
+                {
+                    if(int.Parse(names[i].Item1)< int.Parse(names[j].Item1))
+                    {
+                        names[i] = names[j];
+                    }
+                }
+            }
+            return names;
+        }
+
         private static List<Tuple<string,string>> DivideCharacter(List<string> names,string floor)
         {
             var dividesNames = new List<Tuple<string, string>>();
             foreach (string name in names)
             {
-                List<string> characters= ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').ToList();
-                foreach(string character in characters)
-                {
-                    ThStructureUtils.OriginalFromXref(character).ToUpper().Split(',').ToList().ForEach(o => dividesNames.Add(Tuple.Create(o,$"{floor}{name}")));
-                }
+                List<string> characters= ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToList();
+                dividesNames.Add(Tuple.Create(characters[0], $"{floor}"));         
             }
             return dividesNames;
         }

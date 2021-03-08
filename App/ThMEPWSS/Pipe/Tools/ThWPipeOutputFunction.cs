@@ -9,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using static ThMEPWSS.ThPipeCmds;
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Pipe.Tools
 {
@@ -808,6 +809,10 @@ namespace ThMEPWSS.Pipe.Tools
             {
                 parameters.boundary = composite.Kitchen.Space.Boundary as Polyline;
                 parameters.outline = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                if(!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter()))&&!(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter())))
+                {
+                    parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.outline);
+                }
                 parameters.basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
                 if (composite.Kitchen.Pypes.Count > 0)
                 {
@@ -823,12 +828,59 @@ namespace ThMEPWSS.Pipe.Tools
                 }
                 if (composite.Kitchen.RoofRainPipes.Count > 0)
                 {
-                    Polyline s = composite.Kitchen.RoofRainPipes[0].Outline as Polyline;
-                    parameters0.roofrain_pipe.Add(s);
-                    parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
-                    parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
+                    foreach (var rpipe in composite.Kitchen.RoofRainPipes)
+                    {
+                        Polyline s = rpipe.Outline as Polyline;
+                        parameters0.roofrain_pipe.Add(s);
+                        parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
+                        parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
+                    }
                 }
             }
+        }
+        private static Polyline GetkitchenBoundary(Polyline roofSpaces, Polyline StandardSpaces)
+        {
+            var pts = new Point3dCollection();
+            pts.Add(roofSpaces.GeometricExtents.MinPoint);
+            pts.Add(roofSpaces.GeometricExtents.MaxPoint);
+            pts.Add(roofSpaces.GeometricExtents.MinPoint);
+            pts.Add(roofSpaces.GeometricExtents.MaxPoint);
+            double minpt_x = double.MinValue;
+            double minpt_y = double.MinValue;
+            double maxpt_x = double.MaxValue;
+            double maxpt_y = double.MaxValue;
+            for(int i=0;i< pts.Count;i++)
+            {
+                if (pts[i].X > minpt_x)
+                {
+                    minpt_x = pts[i].X;
+                }
+                if (pts[i].Y > minpt_y)
+                {
+                    minpt_y = pts[i].Y;
+                }
+                if (pts[i].X < maxpt_x)
+                {
+                    maxpt_x = pts[i].X;
+                }
+                if (pts[i].Y < maxpt_y)
+                {
+                    maxpt_y = pts[i].Y;
+                }
+            }       
+            return GetNewPolyline(maxpt_x, maxpt_y, minpt_x, minpt_y);
+        }
+        private static Polyline GetNewPolyline(double x1, double y1, double x2, double y2)
+        {
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            polyline.AddVertexAt(0, new Point2d(x1, y1), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(1, new Point2d(x2, y1), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(2, new Point2d(x2, y2), 0.0, 0.0, 0.0);
+            polyline.AddVertexAt(3, new Point2d(x1, y2), 0.0, 0.0, 0.0);
+            return polyline;
         }
         public bool IsValidKitchenContainer(ThWKitchenRoom kitchenContainer)
         {
@@ -848,14 +900,15 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public bool IsValidBalconyForFloorDrain(ThWBalconyRoom balconyContainer)
         {
-            return balconyContainer.FloorDrains.Count > 0 && balconyContainer.Washmachines.Count > 0;
+            return balconyContainer.FloorDrains.Count > 0 ;
         }
         public static List<Polyline> GetListRainPipes(ThWCompositeBalconyRoom compositeBalcony)
         {
             var rainpipes = new List<Polyline>();
             foreach (var RainPipe in compositeBalcony.Balcony.RainPipes)
             {
-                var ent = RainPipe.Outline as Polyline;
+                Polyline ent = RainPipe.Outline as Polyline;
+                ent.Closed = true;
                 rainpipes.Add(ent);
             }
             return rainpipes;

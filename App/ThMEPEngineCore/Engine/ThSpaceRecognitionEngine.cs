@@ -47,13 +47,23 @@ namespace ThMEPEngineCore.Engine
             this.TextContainer = new Dictionary<DBText, List<Curve>>();
             SpaceNames.ForEach(m =>
             {
-                Polyline textBoundary = ThGeometryTool.TextOBB(m);
-                Point3d textCenterPt = ThGeometryTool.GetMidPt(
-                    textBoundary.GetPoint3dAt(0), 
-                    textBoundary.GetPoint3dAt(2));
-                var containers = SelectTextIntersectPolygon(SpaceBoundaries, textBoundary);
-                containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
-                this.TextContainer.Add(m, containers);
+                try
+                {
+                    if (m.GeometricExtents != null)
+                    {
+                        Polyline textBoundary = ThGeometryTool.TextOBB(m);
+                        Point3d textCenterPt = ThGeometryTool.GetMidPt(
+                            textBoundary.GetPoint3dAt(0),
+                            textBoundary.GetPoint3dAt(2));
+                        var containers = SelectTextIntersectPolygon(SpaceBoundaries, textBoundary);
+                        containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
+                        this.TextContainer.Add(m, containers);
+                    }
+                }
+                catch
+                {
+                    //throw new ArgumentNullException();
+                }
             });
         }
         private void BuildAreaContainers()
@@ -149,21 +159,28 @@ namespace ThMEPEngineCore.Engine
             Dictionary<Curve, List<string>> dict = new Dictionary<Curve, List<string>>();
             SpaceNames.ForEach(o =>
             {
-                var curves = TextContainer[o];
-                if (curves.Count > 0)
+                try
                 {
-                    var belonged = curves.Cast<Polyline>().OrderBy(k => k.Area).First();
-                    if (!dict.ContainsKey(belonged))
+                    var curves = TextContainer[o];
+                    if (curves.Count > 0)
                     {
-                        dict.Add(belonged, new List<string> { o.TextString });
-                    }
-                    else
-                    {
-                        if (dict[belonged].IndexOf(o.TextString) < 0)
+                        var belonged = curves.Cast<Polyline>().OrderBy(k => k.Area).First();
+                        if (!dict.ContainsKey(belonged))
                         {
-                            dict[belonged].Add(o.TextString);
+                            dict.Add(belonged, new List<string> { o.TextString });
+                        }
+                        else
+                        {
+                            if (dict[belonged].IndexOf(o.TextString) < 0)
+                            {
+                                dict[belonged].Add(o.TextString);
+                            }
                         }
                     }
+                }
+                catch
+                {
+
                 }
             });
             Spaces.ForEach(o =>

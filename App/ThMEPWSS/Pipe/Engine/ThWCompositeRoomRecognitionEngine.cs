@@ -1,7 +1,5 @@
 ﻿using System;
-using NFox.Cad;
 using Linq2Acad;
-using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
@@ -10,13 +8,10 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
-using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-     public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
+    public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWCompositeRoom> Rooms { get; set; }
         public List<ThWCompositeBalconyRoom> FloorDrainRooms { get; set; }
@@ -83,16 +78,33 @@ namespace ThMEPWSS.Pipe.Engine
         /// <param name="toiletRooms"></param>
         private void GeneratePairInfo(List<ThWKitchenRoom> kitchenRooms, List<ThWToiletRoom> toiletRooms)
         {
+            var toilets = new List<ThWToiletRoom>();
             foreach (var kitchen in kitchenRooms)
             {
                 if (toiletRooms.Count > 0)
                 {
+                    int s = 0;
                     foreach (var toilet in toiletRooms)
                     {
                         if (IsPair(kitchen, toilet))
                         {
                             Rooms.Add(new ThWCompositeRoom(kitchen, toilet));
+                            s = 1;
+                            toilets.Add(toilet);
                             break;
+                        }
+                       
+                    }
+                    if (s == 0)
+                    {
+                        foreach (var toilet in toiletRooms)
+                        {
+                            if (IsDistancedPair(kitchen, toilet))
+                            {
+                                Rooms.Add(new ThWCompositeRoom(kitchen, toilet));
+                                toilets.Add(toilet);
+                                break;
+                            }
                         }
                     }
                 }
@@ -104,17 +116,18 @@ namespace ThMEPWSS.Pipe.Engine
             foreach (var toilet in toiletRooms)
             {
                 int s = 0;
-                foreach (var kitchen in kitchenRooms)
+                
+                foreach (var kitchen in toilets)
                 {
-                    if (IsPair(kitchen, toilet))
+                    if (IsReversePair(kitchen, toilet))
                     {
                         s = 1;
                         break;
-                    }
+                    }               
                 }
                 if(s==0)
-                {                 
-                    Rooms.Add(new ThWCompositeRoom(new ThWKitchenRoom(), toilet));
+                {                        
+                        Rooms.Add(new ThWCompositeRoom(new ThWKitchenRoom(), toilet));                                   
                 }
             }
         }
@@ -124,6 +137,20 @@ namespace ThMEPWSS.Pipe.Engine
             var kitchenboundary = kitchen.Space.Boundary as Polyline;
             double distance = kitchenboundary.GetCenter().DistanceTo(toiletboundary.GetCenter());
             return distance < ThWPipeCommon.MAX_TOILET_TO_KITCHEN_DISTANCE;
+        }
+        private bool IsReversePair(ThWToiletRoom kitchen, ThWToiletRoom toilet)
+        {
+            var toiletboundary = toilet.Space.Boundary as Polyline;
+            var kitchenboundary = kitchen.Space.Boundary as Polyline;
+            double distance = kitchenboundary.GetCenter().DistanceTo(toiletboundary.GetCenter());
+            return distance < 1;
+        }
+        private bool IsDistancedPair(ThWKitchenRoom kitchen, ThWToiletRoom toilet)
+        {
+            var toiletboundary = toilet.Space.Boundary as Polyline;
+            var kitchenboundary = kitchen.Space.Boundary as Polyline;
+            double distance = kitchenboundary.GetCenter().DistanceTo(toiletboundary.GetCenter());
+            return distance < ThWPipeCommon.MAX_TOILET_TO_KITCHEN_DISTANCE1;
         }
         /// <summary>
         /// 根据生活阳台， 设备平台 生成包含阳台地漏房间信息

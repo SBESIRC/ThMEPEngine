@@ -38,6 +38,10 @@ namespace ThMEPWSS.Pipe.Service
                 //如果大于一个，表示绘制不合理，Dead
                 Drainwells.AddRange(noTagSubSpaces);
             }
+            else if(FindNeighbourDrainwell(ToiletSpace, ThWPipeCommon.TOILET_BUFFER_DISTANCE).Count>0)
+            {
+                Drainwells.AddRange(FindNeighbourDrainwell(ToiletSpace, ThWPipeCommon.TOILET_BUFFER_DISTANCE));
+            }
             else
             {
                 var neibourBalconies = FindNeighbouringBalconyWithDrainwell(ToiletSpace, ThWPipeCommon.TOILET_BUFFER_DISTANCE);
@@ -56,6 +60,23 @@ namespace ThMEPWSS.Pipe.Service
                     }
                 }
             }
+        }
+        private List<ThIfcSpace> FindNeighbourDrainwell(ThIfcSpace space, double bufferDis)
+        {
+            //空间轮廓往外括500
+            var bufferObjs = ThCADCoreNTSOperation.Buffer(space.Boundary as Polyline, bufferDis);
+            if (bufferObjs.Count == 0)
+            {
+                return new List<ThIfcSpace>();
+            }
+            var crossObjs = SpaceSpatialIndex.SelectCrossingPolygon(bufferObjs[0] as Polyline);
+            //获取偏移后，能框选到的空间
+            var crossSpaces = Spaces.Where(o => crossObjs.Contains(o.Boundary));
+            //找到含有阳台的空间
+            var balconies = crossSpaces.Where(m =>( m.Tags.Count==0&& m.Boundary.Area<1e6)).ToList();
+            //找到含有排水管井的阳台空间          
+            //
+            return balconies;
         }
     }
 }

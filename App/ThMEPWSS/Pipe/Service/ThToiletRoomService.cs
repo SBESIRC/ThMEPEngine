@@ -66,7 +66,19 @@ namespace ThMEPWSS.Pipe.Service
 
             var toiletFloordrainService = ThToiletFloorDrainService.Find(FloorDrains, toiletSpace, FloorDrainSpatialIndex);
             thToiletContainer.FloorDrains = toiletFloordrainService.FloorDrains;
-
+            if(!(toiletFloordrainService.FloorDrains.Count>0))//加一层过滤，后期可合并到里层
+            {
+                foreach(var FloorDrain in FloorDrains)
+                {
+                    BlockReference block = FloorDrain.Outline as BlockReference;
+                   Polyline boundary= toiletSpace.Boundary as Polyline;
+                    if (block.Position.DistanceTo(boundary.GetCenter())< ThWPipeCommon.MAX_TOILET_TO_FLOORDRAIN_DISTANCE1)
+                    {
+                        thToiletContainer.FloorDrains.Add(FloorDrain);
+                        break;
+                    }
+                }
+            }
             thToiletContainer.CondensePipes = FindCondensePipes(CondensePipes, toiletSpace);
             thToiletContainer.RoofRainPipes = FindRoofRainPipes(RoofRainPipes, toiletSpace);
             return thToiletContainer;

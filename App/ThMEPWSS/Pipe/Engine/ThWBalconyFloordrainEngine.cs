@@ -60,9 +60,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
         }
         public List<BlockReference> Floordrain_washing { get; set; }
-
         public List<BlockReference> Floordrain { get; set; }
-
         public Point3dCollection Downspout_to_Floordrain { get; set; }
         public Point3dCollection Rainpipe_to_Floordrain { get; set; }
         public Point3dCollection Bbasinline_to_Floordrain { get; set; }
@@ -81,6 +79,11 @@ namespace ThMEPWSS.Pipe.Engine
 
         public void Run(ThWBalconyFloordrainEngineParameters parameters)
         {
+            BlockReference washMachine = parameters.washingmachine;
+            if(parameters.washingmachine==null)
+            {
+                washMachine = parameters.basinline;
+            }
             Polyline rainpipe = GetRainPipe(parameters.boundary, parameters.washingmachine, parameters.rainpipes);
             List<BlockReference> floordrain = Isinside(parameters.floordrains, parameters.boundary);
             int num = 0;
@@ -88,25 +91,40 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 num = Washingfloordrain(floordrain, parameters.washingmachine);//确认地漏序号
             }
-            for (int i = 0; i < floordrain.Count; i++)
+            if (parameters.washingmachine != null)
             {
-                if (i != num)
+                for (int i = 0; i < floordrain.Count; i++)
                 {
-                    Floordrain.Add(floordrain[i]);
+                    if (i != num)
+                    {
+                        Floordrain.Add(floordrain[i]);
+                    }
+                    else
+                    {
+                        Floordrain_washing.Add(floordrain[i]);
+                    }
                 }
-                else
-                {
-                    Floordrain_washing.Add(floordrain[i]);
-                }
+            }
+            else
+            {
+                Floordrain = floordrain;
             }
             if (parameters.basinline != null)
             {
-                Bbasinline_Center = GetBbasinline_Center(
-                    parameters.boundary, 
-                    Floordrain_washing, 
-                    parameters.washingmachine, 
-                    parameters.basinline.Position);
+                if (Floordrain_washing.Count > 0)
+                {
+                    Bbasinline_Center = GetBbasinline_Center(
+                        parameters.boundary,
+                        Floordrain_washing,
+                        washMachine,
+                        parameters.basinline.Position);
+                }
+                else
+                {
+                    Bbasinline_Center = GetBbasinline_Center1(washMachine);
+                }
             }
+         
             var device = parameters.device;
             var device_other = parameters.device_other;
             if (device_other == null)
@@ -128,7 +146,7 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 condensepipe = parameters.condensepipe;
             }
-            else
+            else if(Floordrain_washing.Count > 0)
             {
                 var dis = double.MaxValue;
                 foreach (Polyline pipe in parameters.condensepipes)
@@ -150,66 +168,69 @@ namespace ThMEPWSS.Pipe.Engine
                         }
                     }
                 }
-                }
+            }
            
             if (parameters.downspout == null)
-            {               
-                var center = new_downspout(parameters.boundary, condensepipe, Floordrain_washing, device_other);
-                new_circle = new Circle() { Radius = ThTagParametersService.BalconyFpipe, Center = center };
-                if (GeomUtils.PtInLoop(parameters.boundary, center))//判断新生管井是否在阳台
+            {
+                if (Floordrain_washing.Count > 0)
                 {
-                    Downspout_to_Floordrain.Add(center);
-                    foreach (var b_floordrain in Floordrain)
+                    var center = new_downspout(parameters.boundary, condensepipe, Floordrain_washing, device_other);
+                    new_circle = new Circle() { Radius = ThTagParametersService.BalconyFpipe, Center = center };
+                    if (GeomUtils.PtInLoop(parameters.boundary, center))//判断新生管井是否在阳台
                     {
-                        if (Floordrain_washing[0].Position.DistanceTo(b_floordrain.Position) < ThWPipeCommon.MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)
+                        Downspout_to_Floordrain.Add(center);
+                        foreach (var b_floordrain in Floordrain)
                         {
-                            Downspout_to_Floordrain.Add(b_floordrain.Position);
-                            break;
+                            if (Floordrain_washing[0].Position.DistanceTo(b_floordrain.Position) < ThWPipeCommon.MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)
+                            {
+                                Downspout_to_Floordrain.Add(b_floordrain.Position);
+                                break;
+                            }
+                        }
+                        Downspout_to_Floordrain.Add(Floordrain_washing[0].Position);
+                        if (parameters.basinline != null &&
+                            parameters.basinline.Position.DistanceTo(washMachine.Position) < ThWPipeCommon.MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+                        {
+                            if (Bbasinline_Center[0].Y > center.Y)
+                            {
+                                Bbasinline_to_Floordrain.Add(Downspout_to_Floordrain[1]);
+                            }
+                            foreach (Point3d point in Getvertices(parameters.boundary, washMachine, Bbasinline_Center[0], Floordrain_washing, center))
+                            {
+                                Bbasinline_to_Floordrain.Add(point);
+                            }
                         }
                     }
-                    Downspout_to_Floordrain.Add(Floordrain_washing[0].Position);
-                    if (parameters.basinline != null && 
-                        parameters.basinline.Position.DistanceTo(parameters.washingmachine.Position) < ThWPipeCommon.MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
+                    else
                     {
-                        if (Bbasinline_Center[0].Y > center.Y)
+                        foreach (var b_floordrain in Floordrain)
                         {
-                            Bbasinline_to_Floordrain.Add(Downspout_to_Floordrain[1]);
+                            if (Floordrain_washing[0].Position.DistanceTo(b_floordrain.Position) < ThWPipeCommon.MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)
+                            {
+                                Downspout_to_Floordrain = Line_Addvertices(parameters.boundary, center, Floordrain_washing, washMachine, device_other, b_floordrain.Position);
+                                break;
+                            }
                         }
-                        foreach (Point3d point in Getvertices(parameters.boundary, parameters.washingmachine, Bbasinline_Center[0], Floordrain_washing, center))
+                        if (Downspout_to_Floordrain.Count == 0)
                         {
-                            Bbasinline_to_Floordrain.Add(point);
+                            if (center.DistanceTo(Floordrain_washing[0].Position) > 450)
+                            {
+                                Downspout_to_Floordrain = Line_vertices1(parameters.boundary, center, Floordrain_washing, washMachine, device_other);
+                            }
+                            else
+                            {
+                                Downspout_to_Floordrain = Line_vertices(parameters.boundary, center, Floordrain_washing, washMachine, device_other);
+                            }
                         }
-                    }
-                }
-                else
-                {
-                    foreach (var b_floordrain in Floordrain)
-                    {
-                        if (Floordrain_washing[0].Position.DistanceTo(b_floordrain.Position) < ThWPipeCommon.MAX_BALCONYWASHINGFLOORDRAIN_TO_BALCONYFLOORDRAIN)
+                        if (parameters.basinline != null &&
+                            parameters.basinline.Position.DistanceTo(washMachine.Position) < ThWPipeCommon.MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
                         {
-                            Downspout_to_Floordrain = Line_Addvertices(parameters.boundary, center, Floordrain_washing, parameters.washingmachine, device_other, b_floordrain.Position);
-                            break;
+                            Bbasinline_to_Floordrain = Line_Addvertices1(parameters.boundary, center, Floordrain_washing, washMachine, device_other, Bbasinline_Center[0]);
                         }
-                    }
-                    if (Downspout_to_Floordrain.Count == 0)
-                    {
-                        if (center.DistanceTo(Floordrain_washing[0].Position) > 450)
-                        {
-                            Downspout_to_Floordrain = Line_vertices1(parameters.boundary, center, Floordrain_washing, parameters.washingmachine, device_other);
-                        }
-                        else
-                        {
-                            Downspout_to_Floordrain = Line_vertices(parameters.boundary, center, Floordrain_washing, parameters.washingmachine, device_other);
-                        }
-                    }
-                    if (parameters.basinline != null &&
-                        parameters.basinline.Position.DistanceTo(parameters.washingmachine.Position) < ThWPipeCommon.MAX_BALCONYWASHINGMACHINE_TO_BALCONYBASINLINE)
-                    {
-                        Bbasinline_to_Floordrain = Line_Addvertices1(parameters.boundary, center, Floordrain_washing, parameters.washingmachine, device_other, Bbasinline_Center[0]);
                     }
                 }
             }
-            else
+            else if(Floordrain_washing.Count > 0)
             {
                 var center = parameters.downspout.GetCenter();
                 if (GeomUtils.PtInLoop(parameters.boundary, center))
@@ -221,14 +242,14 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     if (center.DistanceTo((Floordrain_washing[0].Position)) <= ThWPipeCommon.MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN)
                     {
-                        Downspout_to_Floordrain = Line_vertices(parameters.boundary, center, Floordrain_washing, parameters.washingmachine, device_other);
+                        Downspout_to_Floordrain = Line_vertices(parameters.boundary, center, Floordrain_washing, washMachine, device_other);
 
                     }
                     else
                     {
                         var new_center = new_downspout(parameters.boundary, condensepipe, Floordrain_washing, device_other);
                         new_circle = new Circle() { Radius = 50, Center = center };
-                        Downspout_to_Floordrain = Line_vertices(parameters.boundary, center, Floordrain_washing, parameters.washingmachine, device_other);
+                        Downspout_to_Floordrain = Line_vertices(parameters.boundary, center, Floordrain_washing, washMachine, device_other);
                     }
                 }
             }
@@ -238,6 +259,10 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     Rainpipe_to_Floordrain.Add((rainpipe.GetCenter() - ThWPipeCommon.COMMONRADIUS * ((Floordrain[0].Position).GetVectorTo(rainpipe.GetCenter()).GetNormal())));
                     Rainpipe_to_Floordrain.Add((Floordrain[0].Position + ThWPipeCommon.COMMONRADIUS * ((Floordrain[0].Position).GetVectorTo(rainpipe.GetCenter()).GetNormal())));
+                    if(Bbasinline_Center.Count>0)
+                    {
+                        Rainpipe_to_Floordrain.Add(Bbasinline_Center[0] - ThWPipeCommon.COMMONRADIUS * ((Floordrain[0].Position).GetVectorTo(Bbasinline_Center[0]).GetNormal()));
+                    }
                 }
                 else
                 {
@@ -263,17 +288,27 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 foreach (var pipe in rainpipes)
                 {
-                    if (GeomUtils.PtInLoop(bboundary, pipe.GetCenter())&&
-                        pipe.GetCenter().Y< washingmachine.Position.Y)
+                    if (washingmachine != null)
+                    {
+                        if (GeomUtils.PtInLoop(bboundary, pipe.GetCenter()) &&
+                            pipe.GetCenter().Y < washingmachine.Position.Y)
+                        {
+                            return pipe;
+                        }
+                    }
+                    else
                     {
                         return pipe;
                     }
                 }
                 foreach (var pipe in rainpipes)
                 {
-                    if (pipe.GetCenter().DistanceTo(washingmachine.Position) >ThWPipeCommon.MAX_RAINPIPE_TO_BALCONYFLOORDRAIN)//洗衣机地漏与洗衣机接近，此处借用参数
+                    if (washingmachine != null)
                     {
-                        return pipe;
+                        if (pipe.GetCenter().DistanceTo(washingmachine.Position) > ThWPipeCommon.MAX_RAINPIPE_TO_BALCONYFLOORDRAIN)//洗衣机地漏与洗衣机接近，此处借用参数
+                        {
+                            return pipe;
+                        }
                     }
                 }
             }
@@ -787,6 +822,23 @@ namespace ThMEPWSS.Pipe.Engine
             vertices.Add(perpendicular_point3 + (center_spout.DistanceTo(perpendicular_point) - perpendicular_point1.DistanceTo(perpendicular_point3)) * (perpendicular_point.GetVectorTo(center_spout).GetNormal() + (perpendicular_point1.GetVectorTo(perpendicular_point).GetNormal())));
             vertices.Add(center_spout + ThWPipeCommon.COMMONRADIUS * center_spout.GetVectorTo(vertices[2]).GetNormal());
             return vertices;
+        }
+        private static Point3dCollection GetBbasinline_Center1( BlockReference baseLine)
+        {
+            Point3dCollection baseCenters = new Point3dCollection();
+            var s = new DBObjectCollection();
+            baseLine.Explode(s);
+            Point3dCollection points = new Point3dCollection();
+            foreach (var s1 in s)
+            {
+                if (s1.GetType().Name.Contains("Circle"))
+                {
+                    Circle baseCircle = s1 as Circle;
+                    points.Add(baseCircle.Center);
+                }
+            }
+            baseCenters.Add(new Point3d((points[0].X+ points[1].X+ points[2].X)/3, (points[0].Y+ points[1].Y+ points[2].Y)/3, 0));
+            return baseCenters;
         }
 
         private static Point3dCollection GetBbasinline_Center(Polyline bboundary,  List<BlockReference> Floordrain_washing, BlockReference washingmachine,Point3d b_floordrain)
