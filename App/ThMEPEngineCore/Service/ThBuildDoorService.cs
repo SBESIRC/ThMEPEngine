@@ -1,99 +1,197 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.CAD;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThBuildDoorService
     {
-        private Polyline Outline { get; set; }
-        private List<Polyline> Stones { get; set; }
-        private Vector3d Direction { get; set; }
-        private double Length { get; set; }
-        private double DistanceTolerance { get; set; } = 5.0;
-        private double AngleTolerance { get; set; } = 2.0;
-        private ThBuildDoorService(List<Polyline> stones, Vector3d direction,double length)
+        public List<Polyline> Outlines { get; private set; }
+        private Dictionary<DBText, List<Polyline>> DoorMarkStones { get; set; }
+        private double Interval { get; set; }
+        public ThBuildDoorService()
         {
-            Stones = stones;
-            Direction = direction;
-            Length = length;
+            Outlines = new List<Polyline>();
+            Interval = ThMEPEngineCoreCommon.DoorStoneInterval;
         }
-        public static Polyline Build(List<Polyline> stones,Vector3d direction,double length)
+        public void Build(List<Tuple<Entity, List<Polyline>, double>> doorMarkStones)
         {
-            var instance = new ThBuildDoorService(stones, direction, length);
-            instance.Build();
-            return instance.Outline;
-        }
-        private void Build()
-        {
-            for(int i=0;i<Stones.Count-1;i++)
+            foreach(var group in doorMarkStones)
             {
-                var firstLines = Stones[i].ToLines();
-                for (int j = i + 1; j < Stones.Count; j++)
+                if (group.Item2.Count == 2)
                 {
-                    var secondLines = Stones[j].ToLines();
-                    var pairs = Match(firstLines, secondLines);
-                    if(pairs.Count==1)
-                    {
-                        Outline = Create(pairs[0].Item1, pairs[0].Item2);
-                        break;
-                    }
-                }
-                if(Outline!=null)
-                {
-                    break;
+                    Outlines.Add(BuildDoor(group.Item2[0], group.Item2[1], group.Item3));
                 }
             }
+            Outlines = Outlines.Where(o => o.Area > 0.0).ToList();
         }
-        private List<Tuple<Line, Line>> Match(List<Line> firstLines,List<Line> secondLines)
+        private Polyline BuildDoor(Polyline firstStone,Polyline secondStone, double length)
         {
-            var pairs = new List<Tuple<Line, Line>>();
-            firstLines.ForEach(f =>
+            //检查两个门垛的两端是否与Length在指定容差内
+            if(!IsValid(firstStone, secondStone, length))
             {
-                var firstDir = f.StartPoint.GetVectorTo(f.EndPoint);
-                secondLines.ForEach(s =>
+                return new Polyline();
+            }
+            //获取门垛的邻居
+            var firstNeibourService = new ThFindDoorstoneNeighborService();
+            firstNeibourService.Find(firstStone);
+
+            var secondNeibourService = new ThFindDoorstoneNeighborService();
+            secondNeibourService.Find(secondStone);
+
+            if(firstNeibourService.Neighbor.Area==0 || secondNeibourService.Neighbor.Area == 0)
+            {
+                return new Polyline();
+            }
+
+            //找到门垛与相邻柱或墙的匹配边
+            var firstPairs = FindPairEdges(firstStone, firstNeibourService.Neighbor);
+            var secondPairs = FindPairEdges(secondStone, secondNeibourService.Neighbor);
+
+            //找到适合创建门的两边
+            var doorPairs = new List<Tuple<Line, Line>>();
+            for(int i=0;i< firstPairs.Count;i++)
+            {
+                for (int j = 0; j < secondPairs.Count; j++)
                 {
-                    var secondDir = s.StartPoint.GetVectorTo(s.EndPoint);
-                    //保持判断顺序
-                    if(
-                    ThGeometryTool.IsParallelToEx(firstDir, secondDir) &&
-                    IsRightAngle(firstDir,AngleTolerance) &&
-                    IsEqual(f,s,DistanceTolerance) && 
-                    IsEqualToLength(f, s,DistanceTolerance))
+                    if(IsValid(firstPairs[i].Item1, secondPairs[j].Item1,length))
                     {
-                        pairs.Add(Tuple.Create(f,s));
-                    }
-                });
+                        doorPairs.Add(Tuple.Create(firstPairs[i].Item2, secondPairs[j].Item2));
+                    }                    
+                }
+            }
+
+            // 创建门
+            var doorOutlines = CreateDoor(doorPairs, firstNeibourService.Kind, secondNeibourService.Kind);
+            return doorOutlines.Count > 0 ? doorOutlines.First():new Polyline();
+        }
+
+        private Polyline BuildDoor(Polyline single, double length,double markTextRotation)
+        {
+            throw new NotSupportedException();
+        }
+        private List<Polyline> CreateDoor(
+            List<Tuple<Line, Line>> doorPairs, 
+            NeighborType firstNeighborType, 
+            NeighborType secondNeighborType)
+        {
+            if ((firstNeighborType  == NeighborType.ArchitecureWall && secondNeighborType  == NeighborType.ArchitecureWall) ||
+                (firstNeighborType == NeighborType.ShearWall && secondNeighborType == NeighborType.ShearWall) ||
+                (firstNeighborType == NeighborType.StructureColumn && secondNeighborType == NeighborType.StructureColumn))
+            {
+                return CreateDoorByCompare(doorPairs);
+            }
+            else if ((firstNeighborType == NeighborType.ArchitecureWall && secondNeighborType == NeighborType.ShearWall) ||
+                (firstNeighborType == NeighborType.ArchitecureWall && secondNeighborType == NeighborType.StructureColumn) ||
+                (firstNeighborType == NeighborType.ShearWall && secondNeighborType == NeighborType.StructureColumn))
+            {
+                return CreateDoorByFirst(doorPairs);
+            }
+            else if((firstNeighborType == NeighborType.ShearWall && secondNeighborType == NeighborType.ArchitecureWall) ||
+                (firstNeighborType == NeighborType.StructureColumn && secondNeighborType == NeighborType.ArchitecureWall) ||
+                (firstNeighborType == NeighborType.StructureColumn && secondNeighborType == NeighborType.ShearWall))
+            {
+                return CreateDoorBySecond(doorPairs);
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        private List<Polyline> CreateDoorByCompare(List<Tuple<Line, Line>> doorPairs)
+        {
+            var results = new List<Polyline>();
+            doorPairs.ForEach(o =>
+            {
+                if (o.Item1.Length <= o.Item2.Length)
+                {
+                    results.Add(CreateDoor(o.Item1, o.Item2));
+                }
+                else
+                {
+                    results.Add(CreateDoor(o.Item2, o.Item1));
+                }
             });
-            return pairs;
+            return results;
         }
-        private bool IsRightAngle(Vector3d vec,double tolerance=2.0)
+        private List<Polyline> CreateDoorByFirst(List<Tuple<Line, Line>> doorPairs)
         {
-            var rad = Direction.GetAngleTo(vec);
-            var ang = (rad / Math.PI) * 180.0;
-            ang %= 180.0;
-            return Math.Abs(ang-90.0)<= tolerance;
+            var results = new List<Polyline>();
+            doorPairs.ForEach(o =>
+            {
+                results.Add(CreateDoor(o.Item1, o.Item2));
+            });
+            return results;
         }
-        private bool IsEqual(Line first, Line second, double tolerance = 5.0)
+        private List<Polyline> CreateDoorBySecond(List<Tuple<Line, Line>> doorPairs)
         {
-            return Math.Abs(first.Length - second.Length) <= tolerance;
+            var results = new List<Polyline>();
+            doorPairs.ForEach(o =>
+            {
+                results.Add(CreateDoor(o.Item2, o.Item1));
+            });
+            return results;
         }
-        private bool IsEqualToLength(Line first, Line second, double tolerance = 5.0)
+        private Polyline CreateDoor(Line first,Line second)
         {
+            //外部控制传入的first和second要平行，且first.Length<=second.Length
+            var perpendVec = first.LineDirection().GetPerpendicularVector().GetNormal();
             var firstMidPt = first.StartPoint.GetMidPt(first.EndPoint);
+            var otherPt = firstMidPt + perpendVec.MultiplyBy(100);
             var secondMidPt = second.StartPoint.GetMidPt(second.EndPoint);
-            return Math.Abs(firstMidPt.DistanceTo(secondMidPt)-Length) <= tolerance;
+            secondMidPt = secondMidPt.GetProjectPtOnLine(firstMidPt, otherPt);
+            var doorThick = ThDoorUtils.GetDoorThick(first);
+            return ThDrawTool.ToRectangle(firstMidPt, secondMidPt, doorThick);
         }
-        private Polyline Create(Line first,Line second)
+        
+        /// <summary>
+        /// 查找门垛与障碍物相邻的边
+        /// </summary>
+        /// <param name="doorStone"></param>
+        /// <param name="obstacle"></param>
+        /// <returns></returns>
+        private List<Tuple<Line,Line>> FindPairEdges(Polyline doorStone,Polyline neighbor)
         {
-            var firstMidPt = first.StartPoint.GetMidPt(first.EndPoint);
-            var secondMidPt = second.StartPoint.GetMidPt(second.EndPoint);
-            return ThDrawTool.ToRectangle(firstMidPt, secondMidPt, first.Length);
+            //Tuple.Create(门垛边，邻居边);
+            var results = new List<Tuple<Line, Line>>();
+            var stoneLines = doorStone.ToLines();         
+            var neighborLines = neighbor.ToLines();
+            for (int i = 0; i < stoneLines.Count; i++)
+            {
+                for (int j = 0; j < neighborLines.Count; j++)
+                {
+                    if(ThDoorUtils.IsQualified(neighborLines[j], stoneLines[i]))
+                    {
+                        results.Add(Tuple.Create(stoneLines[i], neighborLines[j]));
+                    }
+                }
+            }
+            return results;
+        }
+        private bool IsValid(Polyline first, Polyline second, double length)
+        {
+            var firstLines = first.ToLines();
+            var secondLines = second.ToLines();
+            for (int i = 0; i < firstLines.Count; i++)
+            {
+                for (int j = 0; j < secondLines.Count; j++)
+                {
+                    if (IsValid(firstLines[i], secondLines[j], length))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+        private bool IsValid(Line first, Line second, double length)
+        {
+            return first.IsParallelToEx(second) &&
+                Math.Abs(first.Distance(second) - length) <= 2.0; //2.0用于解决小于点误差
         }
     }
 }

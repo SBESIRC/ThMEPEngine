@@ -32,6 +32,12 @@ namespace ThMEPEngineCore.CAD
             double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
             return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
         }
+        public static bool IsParallelToEx(this Line first, Line second)
+        {
+            var firstVec = first.LineDirection();
+            var secondVec = second.LineDirection();
+            return firstVec.IsParallelToEx(secondVec);
+        }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
         {

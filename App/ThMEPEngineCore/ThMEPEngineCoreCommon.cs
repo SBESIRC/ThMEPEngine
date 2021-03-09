@@ -105,5 +105,12 @@ namespace ThMEPEngineCore
         /// 柱子偏移距离（解决NTS精度）
         /// </summary>
         public const double ColumnBufferDistance = 2.5;
+
+        /// <summary>
+        /// 门垛与邻居的间隔
+        /// </summary>
+        public const double DoorStoneInterval=5.0;
+        public const double DoorMaximumThick = 300;
+        public const double DoorMinimumThick = 50;
     }
 }
