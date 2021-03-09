@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
@@ -35,11 +36,20 @@ namespace ThMEPEngineCore.Engine
             {
                 SpaceNames = RecognizeSpaceNameText(database, polygon);
                 SpaceBoundaries = RecognizeSpaceBoundary(database, polygon);
+                DuplicateRemove(SpaceBoundaries);
                 BuildTextContainers();
                 BuildAreaContainers();
                 CreateSpaceBoundaries();
                 SpaceMatchText();
                 BuildNestedSpace();
+            }
+        }
+        private void DuplicateRemove(List<Curve> curves)
+        {
+            if(curves.Count>0)
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(curves.ToCollection());
+                SpaceBoundaries = spatialIndex.SelectAll().Cast<Curve>().ToList();
             }
         }
         private void BuildTextContainers()
@@ -75,14 +85,14 @@ namespace ThMEPEngineCore.Engine
                 {
                     var containers = SelectPolylineContainers(SpaceBoundaries, polyline);
                     containers.Remove(m);
-                    this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
+                    this.AreaContainer.Add(m, containers.Where(o=>(o.Area-m.Area)>10).OrderBy(o => o.Area).ToList());
                 }
                 else if (m is Circle circle)
                 {
                     Polyline polyline1 = circle.Tessellate(50);
                     var containers = SelectPolylineContainers(SpaceBoundaries, polyline1);
                     containers.Remove(m);
-                    this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
+                    this.AreaContainer.Add(m, containers.Where(o => (o.Area - m.Area) > 10).OrderBy(o => o.Area).ToList());
                 }
                 else
                 {
@@ -203,8 +213,7 @@ namespace ThMEPEngineCore.Engine
             {
                 return;
             }
-            double smallestArea = objs.First().Area;
-            foreach (var parentObj in objs.Where(o => o.Area == smallestArea).ToList())
+            foreach (var parentObj in objs)
             {
                 if (SpaceIndex.ContainsKey(parentObj))
                 {
