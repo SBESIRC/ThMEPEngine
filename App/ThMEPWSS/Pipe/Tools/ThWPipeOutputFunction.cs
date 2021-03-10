@@ -1,15 +1,15 @@
 ﻿using System.Linq;
 using Linq2Acad;
-using ThCADCore.NTS;
 using DotNetARX;
+using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using ThMEPWSS.Pipe.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using static ThMEPWSS.ThPipeCmds;
 using ThMEPWSS.Pipe.Geom;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Tools
 {
@@ -805,44 +805,37 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public void InputKitchenParameters(ThWCompositeRoom composite, ThWTopCompositeParameters parameters, ThWTopParameters parameters0)
         {
-            try
+            if (IsValidKitchenContainer(composite.Kitchen))
             {
-                if (IsValidKitchenContainer(composite.Kitchen))
+                parameters.boundary = composite.Kitchen.Space.Boundary as Polyline;
+                parameters.outline = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter())))
                 {
-                    parameters.boundary = composite.Kitchen.Space.Boundary as Polyline;
-                    parameters.outline = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
-                    if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter())))
+                    parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.outline);
+                }
+                parameters.basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
+                if (composite.Kitchen.Pypes.Count > 0)
+                {
+                    parameters.pype = composite.Kitchen.Pypes[0].Boundary as Polyline;
+                }
+                else
+                {
+                    parameters.pype = new Polyline();
+                }
+                if (composite.Kitchen.RainPipes.Count > 0)
+                {
+                    parameters0.rain_pipe.Add(composite.Kitchen.RainPipes[0].Outline as Polyline);
+                }
+                if (composite.Kitchen.RoofRainPipes.Count > 0)
+                {
+                    foreach (var rpipe in composite.Kitchen.RoofRainPipes)
                     {
-                        parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.outline);
-                    }
-                    parameters.basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
-                    if (composite.Kitchen.Pypes.Count > 0)
-                    {
-                        parameters.pype = composite.Kitchen.Pypes[0].Boundary as Polyline;
-                    }
-                    else
-                    {
-                        parameters.pype = new Polyline();
-                    }
-                    if (composite.Kitchen.RainPipes.Count > 0)
-                    {
-                        parameters0.rain_pipe.Add(composite.Kitchen.RainPipes[0].Outline as Polyline);
-                    }
-                    if (composite.Kitchen.RoofRainPipes.Count > 0)
-                    {
-                        foreach (var rpipe in composite.Kitchen.RoofRainPipes)
-                        {
-                            Polyline s = rpipe.Outline as Polyline;
-                            parameters0.roofrain_pipe.Add(s);
-                            parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
-                            parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
-                        }
+                        Polyline s = rpipe.Outline as Polyline;
+                        parameters0.roofrain_pipe.Add(s);
+                        parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
+                        parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
                     }
                 }
-            }
-            catch(System.Exception ex)
-            {
-                string debug = "";
             }
         }
         private static Polyline GetkitchenBoundary(Polyline roofSpaces, Polyline StandardSpaces)
@@ -926,7 +919,7 @@ namespace ThMEPWSS.Pipe.Tools
             foreach (Polyline polyline in polylines)
             {
                 font.Add(polyline);
-            }
+        }
             return font;
         }
    
