@@ -14,15 +14,14 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var windowDbExtension = new ThWindowDbExtension(database))
+            var visitor = new ThWindowExtractionVisitor()
             {
-                windowDbExtension.BuildElementCurves();
-                Results = windowDbExtension.Windows.Select(o => new ThRawIfcBuildingElementData()
-                {
-                    Geometry = o,
-                }).ToList();
-            }
+                LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
         }
     }
 
@@ -37,24 +36,27 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            List<Entity> ents = new List<Entity>();
+            var curves = new List<Curve>();
             var dbObjs = datas.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
             {
-                ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 foreach (var filterObj in spatialIndex.SelectCrossingPolygon(polygon))
                 {
-                    ents.Add(filterObj as Entity);
+                    curves.Add(filterObj as Curve);
                 }
             }
             else
             {
-                ents = dbObjs.Cast<Entity>().ToList();
+                curves = dbObjs.Cast<Curve>().ToList();
             }
-            ents.ForEach(o =>
+
+            //创建窗户的外轮廓
+            //后续，根据需要增加处理...
+            foreach (var obj in curves.ToCollection().Outline())
             {
-                Elements.Add(ThIfcWindow.Create(o));
-            });
+                Elements.Add(ThIfcWindow.Create(obj as Entity));
+            }
         }
     }
 }
