@@ -1,8 +1,7 @@
-﻿using ThCADExtension;
-using ThMEPEngineCore.Model;
+﻿using Linq2Acad;
+using ThCADExtension;
 using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Model
 {
