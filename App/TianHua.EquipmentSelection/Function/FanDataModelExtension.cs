@@ -109,16 +109,6 @@ namespace TianHua.FanSelection.Function
                 throw new ArgumentException();
             }
 
-            //// 设备编号（“楼层-编号”）
-            //if (attributes.ContainsKey(ThFanSelectionCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER))
-            //{
-            //    if (attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER]
-            //        != ThFanSelectionUtils.StoreyNumber(model.InstallFloor, model.VentNum))
-            //    {
-            //        return true;
-            //    }
-            //}
-
             // 风机功能
             if (attributes.ContainsKey(ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_USAGE))
             {
