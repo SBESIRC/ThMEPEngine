@@ -12,6 +12,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
     {
         private List<LightPlaceInfo> m_lightPlaceInfos;
         private List<Polyline> m_extendPolylines;
+        private bool m_bView;
 
 
         public List<LaneGroup> LaneGroups
@@ -20,15 +21,16 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
             set;
         }
 
-        public LaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> polylines)
+        public LaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> polylines, bool bView)
         {
             m_lightPlaceInfos = lightPlaceInfos;
             m_extendPolylines = polylines;
+            m_bView = bView;
         }
 
-        public static List<LaneGroup> MakeLaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> extendLanePolys)
+        public static List<LaneGroup> MakeLaneGroupCalculator(List<LightPlaceInfo> lightPlaceInfos, List<Polyline> extendLanePolys, bool bView)
         {
-            var laneGroupCalculator = new LaneGroupCalculator(lightPlaceInfos, extendLanePolys);
+            var laneGroupCalculator = new LaneGroupCalculator(lightPlaceInfos, extendLanePolys, bView);
             laneGroupCalculator.Do();
             return laneGroupCalculator.LaneGroups;
         }
@@ -54,10 +56,11 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
 
             EraseInvalidParkLights(laneGroups);
 
-            foreach (var drawLaneGroup in laneGroups)
-            {
-                LaneGroupDrawer.MakeDrawLaneGroup(drawLaneGroup);
-            }
+            if (m_bView)
+                foreach (var drawLaneGroup in laneGroups)
+                {
+                    LaneGroupDrawer.MakeDrawLaneGroup(drawLaneGroup);
+                }
         }
 
         private void EraseInvalidParkLights(List<LaneGroup> laneGroups)

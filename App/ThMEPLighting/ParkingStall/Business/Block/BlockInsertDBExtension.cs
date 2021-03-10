@@ -13,11 +13,11 @@ namespace ThMEPLighting.ParkingStall.Business.Block
 {
     public static class BlockInsertDBExtension
     {
-        public static void InsertModel(this Database database, string layer, string name, Point3d position, Scale3d scale, double angle)
+        public static ObjectId InsertModel(this Database database, string layer, string name, Point3d position, Scale3d scale, double angle)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle);
+                return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle);
             }
         }
 
