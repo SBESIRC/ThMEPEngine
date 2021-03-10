@@ -1,10 +1,10 @@
-﻿using DotNetARX;
+﻿using System;
+using DotNetARX;
 using Linq2Acad;
 using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
-using System;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -14,12 +14,16 @@ namespace ThMEPWSS.Pipe.Service
         public string RoofName { get; set; }
         public List<Tuple<string,string>> StandardSpaceNames { get; set; }
         public List<Tuple<string, string>> NonStandardSpaceNames { get; set; }
+        public List<Tuple<string, string>> StoreyNames { get; set; }
+        public static List<BlockReference> Ablocks { get; set; }
         public ThReadStoreyInformationService()
         {
             DeviceName = string.Empty;
             RoofName = string.Empty;
             StandardSpaceNames = new List<Tuple<string,string>>();
             NonStandardSpaceNames = new List<Tuple<string, string>>();
+            StoreyNames = new List<Tuple<string, string>>();
+            Ablocks = new List<BlockReference>();
         }
         public void Read(Database database)
         {
@@ -34,8 +38,18 @@ namespace ThMEPWSS.Pipe.Service
                     RoofName = GetRoofName(blockCollection);
                     StandardSpaceNames = GetSortList(DivideCharacter(GetStandardSpaceName(blockCollection), "标准层"));
                     NonStandardSpaceNames = GetSortList(DivideCharacter(GetNonStandardSpaceName(blockCollection), "非标层"));
-                }             
-            }
+                }
+                StoreyNames.Add(Tuple.Create(DeviceName, "小屋面"));
+                StoreyNames.Add(Tuple.Create(RoofName, "大屋面"));
+                foreach(var StandardSpaceName in StandardSpaceNames)
+                {
+                    StoreyNames.Add(Tuple.Create($"{StandardSpaceName.Item1}{"标准层"}", StandardSpaceName.Item2));
+                }
+                foreach (var NonStandardSpaceName in NonStandardSpaceNames)
+                {
+                    StoreyNames.Add(Tuple.Create($"{NonStandardSpaceName.Item1}{"非标层"}", NonStandardSpaceName.Item2));
+                }
+            }           
         }
         private static List<Tuple<string, string>> GetSortList(List<Tuple<string, string>> names)
         {
@@ -43,9 +57,12 @@ namespace ThMEPWSS.Pipe.Service
             {
                 for(int j=i;j< names.Count;j++)
                 {
-                    if(int.Parse(names[i].Item1)< int.Parse(names[j].Item1))
+                    Tuple<string, string> value = Tuple.Create("","");
+                    if (int.Parse(names[i].Item1)< int.Parse(names[j].Item1))
                     {
+                        value = names[i];
                         names[i] = names[j];
+                        names[j] = value;
                     }
                 }
             }
@@ -58,7 +75,7 @@ namespace ThMEPWSS.Pipe.Service
             foreach (string name in names)
             {
                 List<string> characters= ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToList();
-                dividesNames.Add(Tuple.Create(characters[0], $"{floor}"));         
+                dividesNames.Add(Tuple.Create( $"{characters[0]}",$"{ floor}{ name}"));         
             }
             return dividesNames;
         }
@@ -69,6 +86,7 @@ namespace ThMEPWSS.Pipe.Service
             {
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("小屋面"))
                 {
+                    Ablocks.Add(block);
                     return ("小屋面");
                 }
             }
@@ -81,6 +99,7 @@ namespace ThMEPWSS.Pipe.Service
             {
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("大屋面"))
                 {
+                    Ablocks.Add(block);
                     return ("大屋面");
                 }
             }
@@ -90,13 +109,11 @@ namespace ThMEPWSS.Pipe.Service
         {
             var blockString = new List<string>();
             foreach (BlockReference block in blocks)
-            {
-                var blockBounds = new List<BlockReference>();              
-                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("标准层"))
+            {               
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Equals("标准层"))
                 {
-                    blockBounds.Add(block);
-                }
-                blockString.Add(BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号"));           
+                    blockString.Add(BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号"));
+                }                       
             }
 
             return blockString;
@@ -104,14 +121,12 @@ namespace ThMEPWSS.Pipe.Service
         public static List<string> GetNonStandardSpaceName(List<BlockReference> blocks)
         {
             var blockString = new List<string>();
-            var blockBounds = new List<BlockReference>();
             foreach (BlockReference block in blocks)
             {
-                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("非标层"))
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Equals("非标层"))
                 {
-                    blockBounds.Add(block);
-                }
-                blockString.Add(BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号"));
+                    blockString.Add(BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号"));
+                }              
             }
             return blockString;
         }

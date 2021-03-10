@@ -193,6 +193,7 @@
             this.BtnOK.StyleController = this.layoutControl1;
             this.BtnOK.TabIndex = 25;
             this.BtnOK.Text = "确定";
+            this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
             // 
             // ComBoxLRoofDrain
             // 
@@ -204,6 +205,7 @@
             this.ComBoxLRoofDrain.Size = new System.Drawing.Size(119, 20);
             this.ComBoxLRoofDrain.StyleController = this.layoutControl1;
             this.ComBoxLRoofDrain.TabIndex = 24;
+            this.ComBoxLRoofDrain.SelectedIndexChanged += new System.EventHandler(this.ComBoxLRoofDrain_SelectedIndexChanged);
             // 
             // ComBoxLSpec
             // 
@@ -215,6 +217,7 @@
             this.ComBoxLSpec.Size = new System.Drawing.Size(119, 20);
             this.ComBoxLSpec.StyleController = this.layoutControl1;
             this.ComBoxLSpec.TabIndex = 23;
+            this.ComBoxLSpec.SelectedIndexChanged += new System.EventHandler(this.ComBoxLSpec_SelectedIndexChanged);
             // 
             // RidLRroofDrain
             // 
@@ -231,6 +234,7 @@
             this.RidLRroofDrain.Size = new System.Drawing.Size(196, 26);
             this.RidLRroofDrain.StyleController = this.layoutControl1;
             this.RidLRroofDrain.TabIndex = 22;
+            this.RidLRroofDrain.SelectedIndexChanged += new System.EventHandler(this.RidLRroofDrain_SelectedIndexChanged);
             // 
             // label4
             // 
@@ -240,6 +244,7 @@
             this.label4.TabIndex = 21;
             this.label4.Text = "小屋面雨水斗";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // ComBoxBRoofDrain
             // 
@@ -262,6 +267,7 @@
             this.ComBoxBSpec.Size = new System.Drawing.Size(119, 20);
             this.ComBoxBSpec.StyleController = this.layoutControl1;
             this.ComBoxBSpec.TabIndex = 19;
+            this.ComBoxBSpec.SelectedIndexChanged += new System.EventHandler(this.ComBoxBSpec_SelectedIndexChanged);
             // 
             // RidBRoofDrain
             // 
@@ -287,6 +293,7 @@
             this.label3.TabIndex = 17;
             this.label3.Text = "大屋面雨水斗";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
+            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // ComBoxCondensation
             // 
@@ -398,6 +405,7 @@
             this.RidDrainageWay.Size = new System.Drawing.Size(196, 26);
             this.RidDrainageWay.StyleController = this.layoutControl1;
             this.RidDrainageWay.TabIndex = 6;
+            this.RidDrainageWay.SelectedIndexChanged += new System.EventHandler(this.RidDrainageWay_SelectedIndexChanged);
             this.RidDrainageWay.EditValueChanged += new System.EventHandler(this.RidDrainageWay_EditValueChanged);
             // 
             // label1
@@ -419,6 +427,7 @@
             this.ComBoxScale.Size = new System.Drawing.Size(143, 20);
             this.ComBoxScale.StyleController = this.layoutControl1;
             this.ComBoxScale.TabIndex = 4;
+            this.ComBoxScale.SelectedIndexChanged += new System.EventHandler(this.ComBoxScale_SelectedIndexChanged);
             // 
             // layoutControlGroup1
             // 

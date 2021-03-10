@@ -1,5 +1,6 @@
 ﻿using AcHelper;
 using Linq2Acad;
+using DotNetARX;
 using ThMEPWSS.Pipe;
 using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Model;
@@ -14,9 +15,6 @@ using ThMEPWSS.Pipe.Layout;
 using ThMEPWSS.Pipe.Output;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Service;
-using NetTopologySuite.Geometries;
-using DotNetARX;
-using System;
 
 namespace ThMEPWSS
 {
@@ -786,13 +784,13 @@ namespace ThMEPWSS
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
-            {               
-                var userInfo = new InputInfo();
-                userInfo.MakeInputInfo();
+            {
+                //var userInfo = new InputInfo();
+                //userInfo.MakeInputInfo();
                 var obstacleInfo = new InputObstacles();
                 obstacleInfo.Recognize(FloorEngines);
-                if (userInfo.FloorValue == 0)
-                    return;
+                //if (userInfo.FloorValue == 0)
+                //    return;
                 FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
                 string W_RAIN_NOTE1 = ThWPipeOutputFunction.Get_Layers1(FloorEngines.Layers, ThWPipeCommon.W_RAIN_NOTE);
                 string W_DRAI_EQPM= ThWPipeOutputFunction.Get_Layers2(FloorEngines.Layers, ThWPipeCommon.W_DRAI_EQPM);
@@ -802,13 +800,13 @@ namespace ThMEPWSS
                 var parameters2 = new ThWRoofDeviceParameters();
                 if (FloorEngines.RoofDeviceFloors.Count > 0)//存在屋顶设备层
                 {
-                    ThWLayoutRoofDeviceFloorEngine.LayoutRoofDeviceFloor(FloorEngines, parameters2, acadDatabase, userInfo.ScaleFactor, W_RAIN_NOTE1);
+                    ThWLayoutRoofDeviceFloorEngine.LayoutRoofDeviceFloor(FloorEngines, parameters2, acadDatabase, ThTagParametersService.ScaleFactor, W_RAIN_NOTE1);
                 }
                 //第二类屋顶层布置
                 var parameters1 = new ThWRoofParameters();
                 if (FloorEngines.RoofFloors.Count > 0)//存在屋顶层
                 {
-                    ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase, userInfo.ScaleFactor, W_RAIN_NOTE1);
+                    ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase, ThTagParametersService.ScaleFactor, W_RAIN_NOTE1);
                 }
                 ////第三类顶层布置            
                
@@ -818,14 +816,14 @@ namespace ThMEPWSS
                 if (FloorEngines.TopFloors.Count > 0) //存在顶层
                 {
                     var layoutTopFloor = new ThWTopFloorOutPutEngine();
-                    layoutTopFloor.LayoutTopFloor(FloorEngines, parameters0, acadDatabase, userInfo, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);
+                    layoutTopFloor.LayoutTopFloor(FloorEngines, parameters0, acadDatabase, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);
                 }
                 var PipeindexEngine = new ThWInnerPipeIndexEngine();
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //开始标注 
                 var layoutTag = new ThWCompositeTagOutPutEngine();
                 
-                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, userInfo.ScaleFactor, userInfo.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
+                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, ThTagParametersService.ScaleFactor, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
             }
         }
         [CommandMethod("TIANHUACAD", "THSTOREYFRAME", CommandFlags.Modal)]

@@ -1,16 +1,13 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-  public class ThApplicationPipesEngine
+    public class ThApplicationPipesEngine
     {
         public static void Application(string sourceFloor,List<Tuple<string,bool>> targetFloors)
         {

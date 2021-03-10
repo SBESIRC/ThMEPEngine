@@ -9,21 +9,22 @@ using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Tools;
 using static ThMEPWSS.ThPipeCmds;
 using AcHelper;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Output
 {
     public class ThWTopFloorOutPutEngine
     {
-        public void LayoutTopFloor(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, InputInfo userInfo,string W_DRAI_EQPM,string W_DRAI_FLDR,string W_RAIN_PIPE)
+        public void LayoutTopFloor(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase,string W_DRAI_EQPM,string W_DRAI_FLDR,string W_RAIN_PIPE)
         {
             parameters0.standardEntity.Add(new Circle() {Center= parameters0.baseCenter2[0] ,Radius=0.01});
             parameters0.divideLines = FloorEngines.TopFloors[0].DivisionLines;
             parameters0.pboundary = FloorEngines.TopFloors[0].Space.Boundary as Polyline;
             var thWPipeOutputFunction=new ThWPipeOutputFunction();
-            AddCompositeRooms(FloorEngines,  parameters0,  acadDatabase,  userInfo,thWPipeOutputFunction, W_DRAI_EQPM,W_DRAI_FLDR);
-            AddCompositeCompanyRooms(FloorEngines, parameters0, acadDatabase, userInfo, thWPipeOutputFunction, userInfo.PipeLayer, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);
+            AddCompositeRooms(FloorEngines,  parameters0,  acadDatabase,thWPipeOutputFunction, W_DRAI_EQPM,W_DRAI_FLDR);
+            AddCompositeCompanyRooms(FloorEngines, parameters0, acadDatabase, thWPipeOutputFunction, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);
         }
-        private static void AddCompositeRooms(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, InputInfo userInfo, ThWPipeOutputFunction thWPipeOutputFunction,string W_DRAI_EQPM,string W_DRAI_FLDR)
+        private static void AddCompositeRooms(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, ThWPipeOutputFunction thWPipeOutputFunction,string W_DRAI_EQPM,string W_DRAI_FLDR)
         {
             foreach (var composite in FloorEngines.TopFloors[0].CompositeRooms)
             {
@@ -44,13 +45,13 @@ namespace ThMEPWSS.Pipe.Output
                 var toiletEngines = new ThWToiletPipeEngine()
                 {
                     Zone = zone,
-                    Parameters = new ThWToiletPipeParameters(userInfo.IsSeparation, userInfo.IsCaisson, userInfo.FloorValue),
+                    Parameters = new ThWToiletPipeParameters(ThTagParametersService.IsSeparation, ThTagParametersService.IsCaisson, ThTagParametersService.FloorValue),
 
                 };
                 var kitchenEngines = new ThWKitchenPipeEngine()
                 {
                     Zone = zone,
-                    Parameters = new ThWKitchenPipeParameters(1, userInfo.FloorValue),
+                    Parameters = new ThWKitchenPipeParameters(1, ThTagParametersService.FloorValue),
                 };
                 var compositeEngine = new ThWCompositePipeEngine(kitchenEngines, toiletEngines);
                 compositeEngine.Run(parameters.boundary, parameters.outline, parameters.basinline,
@@ -62,7 +63,7 @@ namespace ThMEPWSS.Pipe.Output
             }
         }
        
-        private static void AddCompositeCompanyRooms(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, InputInfo userInfo, ThWPipeOutputFunction thWPipeOutputFunction,string pipeLayer,string W_DRAI_EQPM,string W_DRAI_FLDR,string W_RAIN_PIPE)
+        private static void AddCompositeCompanyRooms(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, AcadDatabase acadDatabase, ThWPipeOutputFunction thWPipeOutputFunction,string pipeLayer,string W_DRAI_EQPM,string W_DRAI_FLDR,string W_RAIN_PIPE)
         {
             foreach (var compositeBalcony in FloorEngines.TopFloors[0].CompositeBalconyRooms)
             {   //判断是否为正确的Balcony

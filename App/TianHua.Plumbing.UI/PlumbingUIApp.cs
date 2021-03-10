@@ -3,9 +3,10 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.UI
 {
-    public class PlumbingUIApp : IExtensionApplication
+    public class  PlumbingUIApp : IExtensionApplication
     {
         private fmSprinklerLayout SprinklerLayout { get; set; }
+        private fmFloorDrain FmFloorDrain { get; set; }
         public void Initialize()
         {
             SprinklerLayout = null;
@@ -24,6 +25,17 @@ namespace TianHua.Plumbing.UI
                 SprinklerLayout = new fmSprinklerLayout();
             }
             AcadApp.ShowModelessDialog(SprinklerLayout);
+        }
+
+
+        [CommandMethod("TIANHUACAD", "Trandom", CommandFlags.Modal)]
+        public void Trandom()
+        {
+            if (FmFloorDrain == null)
+            {
+                FmFloorDrain = new fmFloorDrain();
+            }
+            AcadApp.ShowModelessDialog(FmFloorDrain);
         }
     }
 }

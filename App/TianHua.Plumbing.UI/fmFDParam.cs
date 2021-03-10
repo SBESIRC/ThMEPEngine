@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ThMEPWSS.Pipe.Service;
 using TianHua.Publics.BaseCode;
 
 namespace TianHua.Plumbing.UI
@@ -89,6 +90,88 @@ namespace TianHua.Plumbing.UI
                 ComBoxHutchWastewater.Enabled = true;
                 ComBoxSewagePipe.Enabled = true;
             }
+        }
+
+        private void ComBoxScale_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void BtnOK_Click(object sender, EventArgs e)
+        {        
+            if(ComBoxScale.SelectedItem.ToString()== "1:50")
+            {
+                ThTagParametersService.ScaleFactor = 1;
+            }
+            else if(ComBoxScale.SelectedItem.ToString() == "1:100")
+            {
+                ThTagParametersService.ScaleFactor = 2;
+            }
+            else
+            {
+                ThTagParametersService.ScaleFactor = 3;
+            }
+            ThTagParametersService.GravityBuckettag1 = ComBoxBSpec.SelectedItem.ToString();
+            ThTagParametersService.GravityBuckettag = ComBoxBSpec.SelectedItem.ToString();
+            ThTagParametersService.BucketStyle = RidBRoofDrain.EditValue.ToString();
+            ThTagParametersService.BucketStyle1 = RidLRroofDrain.EditValue.ToString();
+            ThTagParametersService.SideBuckettag= ComBoxLRoofDrain.EditValue.ToString();
+            ThTagParametersService.SideBuckettag1 = ComBoxBRoofDrain.EditValue.ToString();
+            var l = ComBoxRoofRainwater.SelectedItem.ToString();
+            ThTagParametersService.RoofRainpipe = ComBoxRoofRainwater.SelectedItem!=null? double.Parse(GetDoubleString(ComBoxRoofRainwater.SelectedItem.ToString())): double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.Rainpipe = ComBoxBalconyRain.SelectedItem!= null?double.Parse(GetDoubleString(ComBoxBalconyRain.SelectedItem.ToString())): double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.Npipe = ComBoxCondensation.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxCondensation.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));           
+            ThTagParametersService.KaTFpipe = ComBoxHutchWastewater.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxHutchWastewater.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.BalconyFpipe = ComBoxBalconyWastewater.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxBalconyWastewater.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.ToiletWpipe = ComBoxSewagePipe.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxSewagePipe.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.ToiletTpipe = ComBoxVentStack.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxVentStack.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.IsSeparation = RidDrainageWay.EditValue == "污废分流" ? true : false;
+            ThTagParametersService.IsCaisson = CheckToiletCaisson.Checked ? true : false;
+            ThTagParametersService.PipeLayer = "W-DRAI-SEWA-PIPE";
+    }
+        private static string GetDoubleString(string s)
+        {
+            string result = "";
+            if(s!=null)
+            {
+                result = s.Substring(2, s.Length - 2);
+            }
+            return result;
+        }
+        private void RidDrainageWay_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ComBoxBSpec_SelectedIndexChanged(object sender, EventArgs e)
+        {
+        
+            
+        }
+
+        private void ComBoxLSpec_SelectedIndexChanged(object sender, EventArgs e)
+        {
+           
+        }
+
+        private void label4_Click(object sender, EventArgs e)
+        {
+           // label4.Select();
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void RidLRroofDrain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+       
+        }
+
+        private void ComBoxLRoofDrain_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

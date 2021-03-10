@@ -27,9 +27,9 @@ namespace ThMEPWSS.Pipe.Layout
                 GetCreateLines(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters1.roofEntity.Add(o));
                 GetCreateLines1(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters1.roofEntity.Add(o));
                 GetCreateLines1(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters1.roofEntity.Add(o));
-                ThWPipeOutputFunction.GetListText(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, ThTagParametersService.GravityBuckettag, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
+                ThWPipeOutputFunction.GetListText(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, ThTagParametersService.GravityBuckettag1, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
                 ThWPipeOutputFunction.GetListText(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, ThTagParametersService.SideBuckettag, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
-                ThWPipeOutputFunction.GetListText1(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, ThTagParametersService.BucketStyle, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
+                ThWPipeOutputFunction.GetListText1(parameters1.engine1.GravityWaterBucketCenter, parameters1.engine1.GravityWaterBucketTag, ThTagParametersService.BucketStyle1, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
                 ThWPipeOutputFunction.GetListText1(parameters1.engine1.SideWaterBucketCenter, parameters1.engine1.SideWaterBucketTag, "侧入式雨水斗", scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters1.roofEntity.Add(o));
                 for (int i = 0; i < composite.RoofRainPipes.Count; i++)
                 {
