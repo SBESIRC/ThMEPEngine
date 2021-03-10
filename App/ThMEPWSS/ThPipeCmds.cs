@@ -95,8 +95,7 @@ namespace ThMEPWSS
         }
         public static Line CreateLine(Point3d point1, Point3d point2)
         {
-            Line line = new Line(point1, point2);
-            //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);       
+            Line line = new Line(point1, point2);  
             return line;
         }
         public static List<Line> GetCreateLines(Point3dCollection points, Point3dCollection point1s,string W_RAIN_NOTE1)
@@ -202,12 +201,8 @@ namespace ThMEPWSS
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
             {
-                //var userInfo = new InputInfo();
-                //userInfo.MakeInputInfo();
                 var obstacleInfo = new InputObstacles();
                 obstacleInfo.Recognize(FloorEngines);
-                //if (userInfo.FloorValue == 0)
-                //    return;
                 FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
                 string W_RAIN_NOTE1 = ThWPipeOutputFunction.Get_Layers1(FloorEngines.Layers, ThWPipeCommon.W_RAIN_NOTE);
                 string W_DRAI_EQPM= ThWPipeOutputFunction.Get_Layers2(FloorEngines.Layers, ThWPipeCommon.W_DRAI_EQPM);
@@ -225,8 +220,7 @@ namespace ThMEPWSS
                 {
                     ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase, ThTagParametersService.ScaleFactor, W_RAIN_NOTE1);
                 }
-                ////第三类顶层布置            
-               
+                //第三类顶层布置            
                 var basecircle2 = FloorEngines.TopFloors[0].BaseCircles[0].Boundary.GetCenter();
                 var parameters0 = new ThWTopParameters();
                 parameters0.baseCenter2.Add(basecircle2);
@@ -239,7 +233,6 @@ namespace ThMEPWSS
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //开始标注 
                 var layoutTag = new ThWCompositeTagOutPutEngine();
-                
                 layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, ThTagParametersService.ScaleFactor, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
             }
         }
