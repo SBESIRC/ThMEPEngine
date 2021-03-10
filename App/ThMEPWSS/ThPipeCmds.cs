@@ -135,8 +135,7 @@ namespace ThMEPWSS
             public void Recognize(ThWCompositeFloorRecognitionEngine FloorEngines)
             {
                 var inputInfo = new InputObstacles();
-                inputInfo.Do(FloorEngines);
-                ObstacleParameters = inputInfo.ObstacleParameters;
+                ObstacleParameters = FloorEngines.AllObstacles;              
             }
             public void Do(ThWCompositeFloorRecognitionEngine FloorEngines)
             {
@@ -200,10 +199,12 @@ namespace ThMEPWSS
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
-            {
-                var obstacleInfo = new InputObstacles();
-                obstacleInfo.Recognize(FloorEngines);
+            {                 
                 FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
+                if (FloorEngines.RoofDeviceFloors.Count == 0 && FloorEngines.RoofFloors.Count == 0 && FloorEngines.TopFloors.Count == 0)
+                {
+                    return;
+                }
                 string W_RAIN_NOTE1 = ThWPipeOutputFunction.Get_Layers1(FloorEngines.Layers, ThWPipeCommon.W_RAIN_NOTE);
                 string W_DRAI_EQPM= ThWPipeOutputFunction.Get_Layers2(FloorEngines.Layers, ThWPipeCommon.W_DRAI_EQPM);
                 string W_DRAI_FLDR = ThWPipeOutputFunction.Get_Layers3(FloorEngines.Layers, ThWPipeCommon.W_DRAI_FLDR);
@@ -220,12 +221,12 @@ namespace ThMEPWSS
                 {
                     ThWRoofFloorOutPutEngine.LayoutRoofFloor(FloorEngines, parameters2, parameters1, acadDatabase, ThTagParametersService.ScaleFactor, W_RAIN_NOTE1);
                 }
-                //第三类顶层布置            
-                var basecircle2 = FloorEngines.TopFloors[0].BaseCircles[0].Boundary.GetCenter();
+                //第三类顶层布置   
                 var parameters0 = new ThWTopParameters();
-                parameters0.baseCenter2.Add(basecircle2);
                 if (FloorEngines.TopFloors.Count > 0) //存在顶层
                 {
+                    var basecircle2 = FloorEngines.TopFloors[0].BaseCircles[0].Boundary.GetCenter();                    
+                    parameters0.baseCenter2.Add(basecircle2);
                     var layoutTopFloor = new ThWTopFloorOutPutEngine();
                     layoutTopFloor.LayoutTopFloor(FloorEngines, parameters0, acadDatabase, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);
                 }
@@ -233,7 +234,7 @@ namespace ThMEPWSS
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //开始标注 
                 var layoutTag = new ThWCompositeTagOutPutEngine();
-                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, ThTagParametersService.ScaleFactor, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
+                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, FloorEngines.AllObstacles, ThTagParametersService.ScaleFactor, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
             }
         }
         [CommandMethod("TIANHUACAD", "THLGLC", CommandFlags.Modal)]

@@ -29,6 +29,10 @@ namespace TianHua.Plumbing.UI
             {
                 var storey = new ThReadStoreyInformationService();
                 storey.Read(acadDatabase.Database);
+                if(storey.StoreyNames.Count==0)
+                {
+                    return;
+                }
                 storey.StoreyNames.ForEach(o => floorNames.Add(o.Item2));
                 CheckList.DataSource = storey.StoreyNames.Count>0? floorNames : _List;              
             }

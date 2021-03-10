@@ -43,6 +43,10 @@ namespace TianHua.Plumbing.UI
             {
                 var storey = new ThReadStoreyInformationService();
                 storey.Read(acadDatabase.Database);
+                if(storey.StoreyNames.Count==0)
+                {
+                    return;
+                }
                 storey.StoreyNames.ForEach(o=> floorNames.Add(o.Item1));                
             }
             ListBox.DataSource = floorNames;           
@@ -72,6 +76,10 @@ namespace TianHua.Plumbing.UI
             {
                 var storey = new ThReadStoreyInformationService();
                 storey.Read(acadDatabase.Database);
+                if (storey.StoreyNames.Count==0)
+                {
+                    return;
+                }
                 storey.StoreyNames.ForEach(o => floorNames.Add(o.Item2));
             }
             ThTagParametersService.sourceFloor = ListBox.SelectedIndex != -1 ? floorNames[ListBox.SelectedIndex].ToString(): "";

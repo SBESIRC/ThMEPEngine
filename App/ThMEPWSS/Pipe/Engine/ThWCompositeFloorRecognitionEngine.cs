@@ -1,19 +1,20 @@
-﻿using ThMEPEngineCore.Model;
+﻿using System.Linq;
+using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
-using System.Linq;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Pipe.Model;
-using ThMEPWSS.Pipe.Tools;
-using ThMEPEngineCore.Engine;
 using NFox.Cad;
 using ThCADCore.NTS;
-using ThMEPWSS.Pipe.Service;
 using Dreambuild.AutoCAD;
 using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
+using ThMEPWSS.Pipe.Geom;
+using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Tools;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -142,9 +143,61 @@ namespace ThMEPWSS.Pipe.Engine
         public override void Recognize(Database database, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
+            {       
+                if(!(database.GetEntsInDatabase<BlockReference>().Count>0))
+                {
+                    return;
+                }
+                var blockLists = database.GetEntsInDatabase<BlockReference>();
+                int blockNum = 0;
+                foreach (var block in blockLists)
+                {
+                    if (block.GetEffectiveName() == "楼层框定")
+                    {
+                        blockNum++;
+                        break;
+                    }
+
+                }
+                if (blockNum == 0)
+                {
+                    return;
+                }
+                var BlockCollection1 = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
                 var BlockCollection = new List<BlockReference>();
-                BlockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
+                var blockboundary = new List<Polyline>();
+                foreach (BlockReference block in BlockCollection1)
+                {
+                    blockboundary.Add(ThWPipeOutputFunction.GetBlockBoundary(block));
+                }
+                for (int i = 0; i < BlockCollection1.Count; i++)
+                {
+                    int n = 0;
+                    Polyline polyline = ThWPipeOutputFunction.GetBlockBoundary(BlockCollection1[i]);
+                    for (int j = 0; j < blockboundary.Count; j++)
+                    {
+                        if (j != i)
+                        {
+                            int num = 0;
+                            foreach (Point3d pt in polyline.Vertices())
+                            {
+                                if (GeomUtils.PtInLoop(blockboundary[j], pt))
+                                {
+                                    num++;
+                                }
+                            }
+                            if (num == 5)
+                            {
+                                n++;
+                                break;
+                            }
+                        }
+                    }
+                    if (n == 0)
+                    {
+                        BlockCollection.Add(BlockCollection1[i]);
+                    }
+                }
                 var deviceSpaces = new List<ThIfcSpace>();
                 var roofSpaces = new List<ThIfcSpace>();
                 var standardSpaces = new List<ThIfcSpace>();
@@ -157,6 +210,10 @@ namespace ThMEPWSS.Pipe.Engine
                     standardSpaces = GetStandardSpaces(BlockCollection);
                     nonStandardSpaces = GetNonStandardSpaces(BlockCollection);
                     base_Circles = GetBaseCircles(BlockCollection);
+                }
+                else
+                {
+                    return;
                 }
                 var frameSpaces=new List<ThIfcSpace>();
                 if (deviceSpaces.Count > 0)

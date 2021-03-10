@@ -5,6 +5,11 @@ using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
+using ThMEPWSS.Pipe.Geom;
+using ThMEPWSS.Pipe.Tools;
+using Autodesk.AutoCAD.Geometry;
+using Dreambuild.AutoCAD;
+using ThCADExtension;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -30,8 +35,61 @@ namespace ThMEPWSS.Pipe.Service
             //排序规则为小屋面，大屋面，接着从大到小排列
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
+                if (!(database.GetEntsInDatabase<BlockReference>().Count > 0))
+                {
+                    return;
+                }
+                var blockLists = database.GetEntsInDatabase<BlockReference>();
+                int blockNum = 0;
+                foreach(var block in blockLists)
+                {
+                    if(block.GetEffectiveName()== "楼层框定")
+                    {
+                        blockNum++;
+                        break;
+                    }
+                    
+                }
+                if(blockNum==0)
+                {
+                    return;
+                }
+                var blockCollection1 = new List<BlockReference>();
+                blockCollection1 = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
                 var blockCollection = new List<BlockReference>();
-                blockCollection = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
+                var blockboundary = new List<Polyline>();
+                foreach (BlockReference block in blockCollection1)
+                {
+                    blockboundary.Add(ThWPipeOutputFunction.GetBlockBoundary(block));
+                }
+                for(int i=0;i< blockCollection1.Count;i++)
+                {
+                    int n = 0;
+                    Polyline polyline = ThWPipeOutputFunction.GetBlockBoundary(blockCollection1[i]);
+                    for (int j= 0;j < blockboundary.Count;j++)
+                    {
+                        if (j != i)
+                        {
+                            int num = 0;
+                            foreach (Point3d pt in polyline.Vertices())
+                            {
+                                if (GeomUtils.PtInLoop(blockboundary[j], pt))
+                                {
+                                    num++;
+                                }
+                            }
+                            if (num==5)
+                            {
+                                n++;
+                                break;
+                            }
+                        }
+                    }
+                    if (n==0)
+                    {
+                        blockCollection.Add(blockCollection1[i]);
+                    }
+                }
                 if (blockCollection.Count > 0)
                 {
                     DeviceName = GetDeviceName(blockCollection);
@@ -75,6 +133,11 @@ namespace ThMEPWSS.Pipe.Service
             foreach (string name in names)
             {
                 List<string> characters= ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToList();
+                if (characters[0].Contains(','))
+                {
+                    List<string> characters1= ThStructureUtils.OriginalFromXref(name).ToUpper().Split(',').Reverse().ToList();
+                    characters[0] = characters1[0];
+                }
                 dividesNames.Add(Tuple.Create( $"{characters[0]}",$"{ floor}{ name}"));         
             }
             return dividesNames;
