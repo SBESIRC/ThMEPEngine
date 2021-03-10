@@ -143,78 +143,24 @@ namespace ThMEPWSS.Pipe.Engine
         public override void Recognize(Database database, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {       
-                if(!(database.GetEntsInDatabase<BlockReference>().Count>0))
+            {
+                var engine = new ThWStoreysRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, new Point3dCollection());
+                if (engine.Elements.Count == 0)
                 {
                     return;
                 }
-                var blockLists = database.GetEntsInDatabase<BlockReference>();
-                int blockNum = 0;
-                foreach (var block in blockLists)
-                {
-                    if (block.GetEffectiveName() == "楼层框定")
-                    {
-                        blockNum++;
-                        break;
-                    }
 
-                }
-                if (blockNum == 0)
+                var blockCollection = new List<BlockReference>();
+                engine.Elements.Cast<ThWStoreys>().ForEach(o =>
                 {
-                    return;
-                }
-                var BlockCollection1 = BlockTools.GetAllDynBlockReferences(database, "楼层框定");
-                var BlockCollection = new List<BlockReference>();
-                var blockboundary = new List<Polyline>();
-                foreach (BlockReference block in BlockCollection1)
-                {
-                    blockboundary.Add(ThWPipeOutputFunction.GetBlockBoundary(block));
-                }
-                for (int i = 0; i < BlockCollection1.Count; i++)
-                {
-                    int n = 0;
-                    Polyline polyline = ThWPipeOutputFunction.GetBlockBoundary(BlockCollection1[i]);
-                    for (int j = 0; j < blockboundary.Count; j++)
-                    {
-                        if (j != i)
-                        {
-                            int num = 0;
-                            foreach (Point3d pt in polyline.Vertices())
-                            {
-                                if (GeomUtils.PtInLoop(blockboundary[j], pt))
-                                {
-                                    num++;
-                                }
-                            }
-                            if (num == 5)
-                            {
-                                n++;
-                                break;
-                            }
-                        }
-                    }
-                    if (n == 0)
-                    {
-                        BlockCollection.Add(BlockCollection1[i]);
-                    }
-                }
-                var deviceSpaces = new List<ThIfcSpace>();
-                var roofSpaces = new List<ThIfcSpace>();
-                var standardSpaces = new List<ThIfcSpace>();
-                var nonStandardSpaces = new List<ThIfcSpace>();
-                var base_Circles = new List<ThIfcSpace>();
-                if (BlockCollection.Count > 0)
-                {
-                    deviceSpaces = GetDeviceSpaces(BlockCollection);
-                    roofSpaces = GetRoofSpaces(BlockCollection);
-                    standardSpaces = GetStandardSpaces(BlockCollection);
-                    nonStandardSpaces = GetNonStandardSpaces(BlockCollection);
-                    base_Circles = GetBaseCircles(BlockCollection);
-                }
-                else
-                {
-                    return;
-                }
+                    blockCollection.Add(acadDatabase.Element<BlockReference>(o.ObjectId));
+                });
+                var deviceSpaces = GetDeviceSpaces(blockCollection);
+                var roofSpaces = GetRoofSpaces(blockCollection);
+                var standardSpaces = GetStandardSpaces(blockCollection);
+                var nonStandardSpaces = GetNonStandardSpaces(blockCollection);
+                var base_Circles = GetBaseCircles(blockCollection);
                 var frameSpaces=new List<ThIfcSpace>();
                 if (deviceSpaces.Count > 0)
                 {
@@ -237,7 +183,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var SideEntryWaterBuckets = rainPipesEngine.Elements.Where(o => o is ThWSideEntryWaterBucket).Cast<ThWSideEntryWaterBucket>().ToList();
                 var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine()
                 {
-                    blockCollection = BlockCollection,
+                    blockCollection = blockCollection,
                     DeviceSpaces = deviceSpaces,
                     RoofRainPipes = roofRainPipes,
                     GravityWaterBuckets = GravityWaterBuckets,
@@ -265,7 +211,7 @@ namespace ThMEPWSS.Pipe.Engine
                 RoofDeviceEngine.Layers.ForEach(o => Layers.Add(o));
                 var RoofEngine = new ThWRoofFloorRecognitionEngine()
                 {
-                    blockCollection = BlockCollection,
+                    blockCollection = blockCollection,
                     RoofSpaces = roofSpaces,
                     gravityWaterBuckets = GravityWaterBuckets,                 
                    sideEntryWaterBuckets= SideEntryWaterBuckets,
@@ -284,7 +230,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var FirstEngine = new ThWTopFloorRecognitionEngine()
                 {
                     Spaces= this.Spaces,
-                    blockCollection = BlockCollection,
+                    blockCollection = blockCollection,
                     StandardSpaces= standardSpaces,
                     NonStandardSpaces= nonStandardSpaces,
                     roofRainPipes = roofRainPipes,

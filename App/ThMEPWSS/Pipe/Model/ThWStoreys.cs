@@ -15,9 +15,12 @@ namespace ThMEPWSS.Pipe.Model
     }
     public class ThWStoreys : ThIfcSpatialStructureElement
     {
+        public ObjectId ObjectId { get; }
+
         public ThBlockReferenceData Data { get; }
         public ThWStoreys(ObjectId id)
         {
+            ObjectId = id;
             Data = new ThBlockReferenceData(id);
         }
         public string StoreyNumber => Data.Attributes["楼层编号"];
