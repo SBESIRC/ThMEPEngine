@@ -143,6 +143,8 @@
     <Compile Include="ParkingStall\Model\NearParksPolylineNode.cs" />
     <Compile Include="ParkingStall\Model\ParkGroupInfo.cs" />
     <Compile Include="ParkingStall\Model\ParkingGroup.cs" />
+    <Compile Include="ParkingStall\Model\PipeLighterInfo.cs" />
+    <Compile Include="ParkingStall\Model\PipeLighterPolylInfo.cs" />
     <Compile Include="ParkingStall\Model\PointEdgeInfo.cs" />
     <Compile Include="ParkingStall\Model\PolygonInfo.cs" />
     <Compile Include="ParkingStall\ParkingStallCommon.cs" />
@@ -172,10 +174,16 @@
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingNearGroup.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingPolyTrans.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupGenerator.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\Viewer\LightConnectViewer.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\SideLaneConnect\DivideSideLightCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\LaneGroupInfo\LaneGroupReader.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\SideLaneConnect\LaneSideLightCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\SideLaneConnect\LightConnector.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\ParkingGroupPlaceLightGenerator.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GenerateParkGroupProfile.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GroupLightViewer.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\ParkLightAngleCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\RegionLaneConnect\RegionLaneConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThEmgLightCmds.cs" />
     <Compile Include="ThMEPLightingService.cs" />
@@ -185,7 +193,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="EmgLightConnect\" />
-    <Folder Include="ParkingStall\Worker\PipeConnector\" />
+    <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>
   <ItemGroup>

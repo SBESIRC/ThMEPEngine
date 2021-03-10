@@ -685,9 +685,9 @@ namespace ThCADCore.Test
                     return;
                 }
 
-                var line = acadDatabase.Element<Line>(result.ObjectId);
+                var poly = acadDatabase.Element<Polyline>(result.ObjectId);
                 var circle = acadDatabase.Element<Circle>(result2.ObjectId);
-                var closestPt = line.GetClosestPointTo(circle.Center, true);
+                var closestPt = poly.GetClosestPointTo(circle.Center, true);
 
                 var verticalLine = new Line(closestPt, circle.Center);
 

@@ -20,6 +20,8 @@ using Autodesk.AutoCAD.Geometry;
 using ThMEPLighting.ParkingStall.Geometry;
 using ThMEPLighting.ParkingStall.Worker.LightAdjustor;
 using ThMEPEngineCore.LaneLine;
+using ThMEPLighting.ParkingStall.Worker.PipeConnector;
+using ThMEPLighting.ParkingStall.Worker.RegionLaneConnect;
 
 namespace ThMEPLighting.ParkingStall.Core
 {
@@ -309,7 +311,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
 
                 // 根据车道线信息编组
-                LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys);
+                LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, true);
             }
         }
 
@@ -372,7 +374,7 @@ namespace ThMEPLighting.ParkingStall.Core
                 ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
 
                 // 根据车道线信息编组
-                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys);
+                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, true);
 
                 // 子分组点位调整
                 SubGroupPosOptimization.MakeSubGroupPosOptimization(laneGroups);
@@ -384,9 +386,160 @@ namespace ThMEPLighting.ParkingStall.Core
             }
         }
 
-        public void LaneConnect()
+        public void SideLaneConnect()
         {
+            var wallPolylines = EntityPicker.MakeUserPickPolys();
+            if (wallPolylines.Count == 0)
+                return;
 
+            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            foreach (var polygonInfo in wallPolygonInfos)
+            {
+                var curves = GetLanes(polygonInfo.ExternalProfile);
+                var srcLaneLines = new List<Line>();
+                curves.ForEach(e =>
+                {
+                    if (e is Line line)
+                    {
+                        srcLaneLines.Add(line);
+                    }
+                });
+
+                curves.ForEach(e =>
+                {
+                    if (e is Polyline poly)
+                    {
+                        var polyCurves = GeomUtils.Polyline2Curves(poly, false);
+                        polyCurves.ForEach(pe =>
+                        {
+                            if (pe is Line cline)
+                                srcLaneLines.Add(cline);
+                        });
+                    }
+                });
+
+                var lanePolys = new List<Polyline>();
+                var parkingLineService = new ParkingLinesService();
+                List<List<Line>> tempData;
+                var linesLst = parkingLineService.CreateNodedParkingLines(polygonInfo.ExternalProfile, srcLaneLines, out tempData);
+
+                var horiPolys = Lines2Polyline(linesLst);
+                lanePolys.AddRange(horiPolys);
+                var veriPolys = Lines2Polyline(tempData);
+                lanePolys.AddRange(veriPolys);
+
+                // 延长的车位线
+                var extendPolys = LaneCentralLineGenerator.MakeLaneCentralPolys(lanePolys, polygonInfo, ParkingStallCommon.LaneLineExtendLength);
+
+                var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
+                var selectRelatedParkProfiles = InfoReader.MakeParkingStallPolys(wallPtCollection);
+
+                // 去除内部的车位信息
+                var validParkProfiles = GenerateValidParkPolys.MakeValidParkPolylines(selectRelatedParkProfiles, polygonInfo.InnerProfiles);
+                // 分组车位信息处理
+                var parkingRelatedGroups = ParkingGroupGenerator.MakeParkingGroupGenerator(validParkProfiles);
+
+                // 车位分组布置灯信息
+                var groupLights = ParkingGroupPlaceLightGenerator.MakeParkingPlaceLightGenerator(parkingRelatedGroups);
+
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
+
+                // 根据车道线信息编组
+                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, false);
+
+                // 子分组点位调整
+                SubGroupPosOptimization.MakeSubGroupPosOptimization(laneGroups);
+
+                //// laneGroups 里面组织结构可能会有无效的灯信息
+                var optimzeLightPlaceInfos = LightPlaceInfoExtractor.MakeLightPlaceInfoExtractor(laneGroups);
+
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, Light_Place_Type.LONG_EDGE);
+                BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
+
+                // 连管处理
+                var pipeLighterPolyInfos = LightConnector.MakeLightConnector(laneGroups, srcLaneLines, polygonInfo.InnerProfiles, Light_Place_Type.LONG_EDGE);
+
+                // print
+                LightConnectViewer.MakeLightConnectViewer(pipeLighterPolyInfos);
+            }
+        }
+
+        public void THLaneConnect()
+        {
+            var wallPolylines = EntityPicker.MakeUserPickPolys();
+            if (wallPolylines.Count == 0)
+                return;
+
+            var wallPolygonInfos = WallPolygonInfoCalculator.DoWallPolygonInfoCalculator(wallPolylines);
+            foreach (var polygonInfo in wallPolygonInfos)
+            {
+                var curves = GetLanes(polygonInfo.ExternalProfile);
+                var srcLaneLines = new List<Line>();
+                curves.ForEach(e =>
+                {
+                    if (e is Line line)
+                    {
+                        srcLaneLines.Add(line);
+                    }
+                });
+
+                curves.ForEach(e =>
+                {
+                    if (e is Polyline poly)
+                    {
+                        var polyCurves = GeomUtils.Polyline2Curves(poly, false);
+                        polyCurves.ForEach(pe =>
+                        {
+                            if (pe is Line cline)
+                                srcLaneLines.Add(cline);
+                        });
+                    }
+                });
+
+                var lanePolys = new List<Polyline>();
+                var parkingLineService = new ParkingLinesService();
+                List<List<Line>> tempData;
+                var linesLst = parkingLineService.CreateNodedParkingLines(polygonInfo.ExternalProfile, srcLaneLines, out tempData);
+
+                var horiPolys = Lines2Polyline(linesLst);
+                lanePolys.AddRange(horiPolys);
+                var veriPolys = Lines2Polyline(tempData);
+                lanePolys.AddRange(veriPolys);
+
+                // 延长的车位线
+                var extendPolys = LaneCentralLineGenerator.MakeLaneCentralPolys(lanePolys, polygonInfo, ParkingStallCommon.LaneLineExtendLength);
+
+                var wallPtCollection = polygonInfo.ExternalProfile.Vertices();
+                var selectRelatedParkProfiles = InfoReader.MakeParkingStallPolys(wallPtCollection);
+
+                // 去除内部的车位信息
+                var validParkProfiles = GenerateValidParkPolys.MakeValidParkPolylines(selectRelatedParkProfiles, polygonInfo.InnerProfiles);
+                // 分组车位信息处理
+                var parkingRelatedGroups = ParkingGroupGenerator.MakeParkingGroupGenerator(validParkProfiles);
+
+                // 车位分组布置灯信息
+                var groupLights = ParkingGroupPlaceLightGenerator.MakeParkingPlaceLightGenerator(parkingRelatedGroups);
+
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(groupLights, Light_Place_Type.LONG_EDGE);
+
+                // 根据车道线信息编组
+                var laneGroups = LaneGroupCalculator.MakeLaneGroupCalculator(groupLights, extendPolys, false);
+
+                // 子分组点位调整
+                SubGroupPosOptimization.MakeSubGroupPosOptimization(laneGroups);
+
+                //// laneGroups 里面组织结构可能会有无效的灯信息
+                var optimzeLightPlaceInfos = LightPlaceInfoExtractor.MakeLightPlaceInfoExtractor(laneGroups);
+
+                ParkLightAngleCalculator.MakeParkLightAngleCalculator(optimzeLightPlaceInfos, Light_Place_Type.LONG_EDGE);
+                BlockInsertor.MakeBlockInsert(optimzeLightPlaceInfos);
+
+                // 车道线单侧部分连管处理
+                var pipeLighterPolyInfos = LightConnector.MakeLightConnector(laneGroups, srcLaneLines, polygonInfo.InnerProfiles, Light_Place_Type.LONG_EDGE);
+
+                // 区域部分连管处理
+                RegionLaneConnector.MakeRegionConnector(pipeLighterPolyInfos);
+            }
         }
     }
 }
