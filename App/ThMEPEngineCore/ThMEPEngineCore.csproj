@@ -77,6 +77,8 @@
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractor.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
+    <Compile Include="Engine\ThCurtainWallExtractionVisitor.cs" />
+    <Compile Include="Engine\ThCurtainWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThDoorMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThDoorStoneExtractionVisitor.cs" />
     <Compile Include="Engine\ThColumnExtractionVisitor.cs" />
@@ -222,6 +224,7 @@
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
+    <Compile Include="Service\ThCurtainWallLayerManager.cs" />
     <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />
     <Compile Include="Service\ThAxialAxisTagLayerManager.cs" />
     <Compile Include="Service\ThAxialCircleTagDbExtension.cs" />

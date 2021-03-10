@@ -1,12 +1,17 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Model
 {
     public class ThIfcCurtainWall : ThIfcBuildingElement
     {
+        public static ThIfcCurtainWall Create(Entity curve)
+        {
+            return new ThIfcCurtainWall()
+            {
+                Outline = curve,
+                Uuid = Guid.NewGuid().ToString()
+            };
+        }
     }
 }
