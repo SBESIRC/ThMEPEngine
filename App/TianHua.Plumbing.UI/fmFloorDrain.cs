@@ -4,7 +4,6 @@ using Linq2Acad;
 using AcHelper;
 using AcHelper.Commands;
 using ThMEPWSS.Pipe.Service;
-using System.Windows.Forms;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.UI
@@ -83,8 +82,10 @@ namespace TianHua.Plumbing.UI
                 storey.StoreyNames.ForEach(o => floorNames.Add(o.Item2));
             }
             ThTagParametersService.sourceFloor = ListBox.SelectedIndex != -1 ? floorNames[ListBox.SelectedIndex].ToString(): "";
-            fmFDUse _fmFDUse = new fmFDUse();
-            _fmFDUse.ShowDialog();             
+            using (var dlg = new fmFDUse())
+            {
+                AcadApp.ShowModalDialog(dlg);
+            }      
         }
         private void SetFocusToDwgView()
         {

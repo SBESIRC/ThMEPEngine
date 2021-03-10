@@ -3,13 +3,6 @@ using AcHelper.Commands;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using ThMEPWSS.Pipe.Service;
 
 namespace TianHua.Plumbing.UI
@@ -68,6 +61,11 @@ namespace TianHua.Plumbing.UI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private void CheckList_DoubleClick(object sender, EventArgs e)
+        {
+            var item = CheckList.SelectedItem as string;
         }
     }
 }

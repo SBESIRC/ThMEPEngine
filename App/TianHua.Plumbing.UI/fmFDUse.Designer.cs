@@ -29,21 +29,21 @@
         private void InitializeComponent()
         {
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
-            this.layoutControlGroup1 = new DevExpress.XtraLayout.LayoutControlGroup();
-            this.CheckList = new DevExpress.XtraEditors.CheckedListBoxControl();
-            this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.CheckLabel = new DevExpress.XtraEditors.CheckEdit();
-            this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.BtnOK = new DevExpress.XtraEditors.SimpleButton();
-            this.layoutControlItem4 = new DevExpress.XtraLayout.LayoutControlItem();
             this.BtnCancel = new DevExpress.XtraEditors.SimpleButton();
+            this.BtnOK = new DevExpress.XtraEditors.SimpleButton();
+            this.CheckLabel = new DevExpress.XtraEditors.CheckEdit();
+            this.CheckList = new DevExpress.XtraEditors.CheckedListBoxControl();
+            this.layoutControlGroup1 = new DevExpress.XtraLayout.LayoutControlGroup();
+            this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.layoutControlItem4 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlItem5 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.CheckList)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.CheckLabel.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CheckList)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).BeginInit();
@@ -64,6 +64,47 @@
             this.layoutControl1.TabIndex = 0;
             this.layoutControl1.Text = "layoutControl1";
             // 
+            // BtnCancel
+            // 
+            this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
+            this.BtnCancel.Location = new System.Drawing.Point(105, 295);
+            this.BtnCancel.Name = "BtnCancel";
+            this.BtnCancel.Size = new System.Drawing.Size(85, 22);
+            this.BtnCancel.StyleController = this.layoutControl1;
+            this.BtnCancel.TabIndex = 8;
+            this.BtnCancel.Text = "取消";
+            this.BtnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
+            // 
+            // BtnOK
+            // 
+            this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
+            this.BtnOK.Location = new System.Drawing.Point(10, 295);
+            this.BtnOK.Name = "BtnOK";
+            this.BtnOK.Size = new System.Drawing.Size(85, 22);
+            this.BtnOK.StyleController = this.layoutControl1;
+            this.BtnOK.TabIndex = 7;
+            this.BtnOK.Text = "确定";
+            this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
+            // 
+            // CheckLabel
+            // 
+            this.CheckLabel.Location = new System.Drawing.Point(10, 265);
+            this.CheckLabel.Name = "CheckLabel";
+            this.CheckLabel.Properties.Caption = "仅标注";
+            this.CheckLabel.Size = new System.Drawing.Size(180, 20);
+            this.CheckLabel.StyleController = this.layoutControl1;
+            this.CheckLabel.TabIndex = 6;
+            // 
+            // CheckList
+            // 
+            this.CheckList.Cursor = System.Windows.Forms.Cursors.Default;
+            this.CheckList.Location = new System.Drawing.Point(10, 10);
+            this.CheckList.Name = "CheckList";
+            this.CheckList.Size = new System.Drawing.Size(180, 245);
+            this.CheckList.StyleController = this.layoutControl1;
+            this.CheckList.TabIndex = 5;
+            this.CheckList.DoubleClick += new System.EventHandler(this.CheckList_DoubleClick);
+            // 
             // layoutControlGroup1
             // 
             this.layoutControlGroup1.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
@@ -78,15 +119,6 @@
             this.layoutControlGroup1.Size = new System.Drawing.Size(200, 327);
             this.layoutControlGroup1.TextVisible = false;
             // 
-            // CheckList
-            // 
-            this.CheckList.Cursor = System.Windows.Forms.Cursors.Default;
-            this.CheckList.Location = new System.Drawing.Point(10, 10);
-            this.CheckList.Name = "CheckList";
-            this.CheckList.Size = new System.Drawing.Size(180, 245);
-            this.CheckList.StyleController = this.layoutControl1;
-            this.CheckList.TabIndex = 5;
-            // 
             // layoutControlItem2
             // 
             this.layoutControlItem2.Control = this.CheckList;
@@ -96,15 +128,6 @@
             this.layoutControlItem2.Size = new System.Drawing.Size(190, 255);
             this.layoutControlItem2.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem2.TextVisible = false;
-            // 
-            // CheckLabel
-            // 
-            this.CheckLabel.Location = new System.Drawing.Point(10, 265);
-            this.CheckLabel.Name = "CheckLabel";
-            this.CheckLabel.Properties.Caption = "仅标注";
-            this.CheckLabel.Size = new System.Drawing.Size(180, 20);
-            this.CheckLabel.StyleController = this.layoutControl1;
-            this.CheckLabel.TabIndex = 6;
             // 
             // layoutControlItem3
             // 
@@ -116,16 +139,6 @@
             this.layoutControlItem3.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem3.TextVisible = false;
             // 
-            // BtnOK
-            // 
-            this.BtnOK.Location = new System.Drawing.Point(10, 295);
-            this.BtnOK.Name = "BtnOK";
-            this.BtnOK.Size = new System.Drawing.Size(85, 22);
-            this.BtnOK.StyleController = this.layoutControl1;
-            this.BtnOK.TabIndex = 7;
-            this.BtnOK.Text = "确定";
-            this.BtnOK.Click += new System.EventHandler(this.BtnOK_Click);
-            // 
             // layoutControlItem4
             // 
             this.layoutControlItem4.Control = this.BtnOK;
@@ -135,16 +148,6 @@
             this.layoutControlItem4.Size = new System.Drawing.Size(95, 32);
             this.layoutControlItem4.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem4.TextVisible = false;
-            // 
-            // BtnCancel
-            // 
-            this.BtnCancel.Location = new System.Drawing.Point(105, 295);
-            this.BtnCancel.Name = "BtnCancel";
-            this.BtnCancel.Size = new System.Drawing.Size(85, 22);
-            this.BtnCancel.StyleController = this.layoutControl1;
-            this.BtnCancel.TabIndex = 8;
-            this.BtnCancel.Text = "取消";
-            this.BtnCancel.Click += new System.EventHandler(this.BtnCancel_Click);
             // 
             // layoutControlItem5
             // 
@@ -158,8 +161,10 @@
             // 
             // fmFDUse
             // 
+            this.AcceptButton = this.BtnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.BtnCancel;
             this.ClientSize = new System.Drawing.Size(200, 327);
             this.Controls.Add(this.layoutControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
@@ -173,10 +178,10 @@
             this.Load += new System.EventHandler(this.fmFDUse_Load);
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.CheckList)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.CheckLabel.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CheckList)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).EndInit();
