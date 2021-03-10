@@ -1,12 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using ThMEPWSS.Pipe.Service;
 using TianHua.Publics.BaseCode;
 
@@ -22,8 +15,6 @@ namespace TianHua.Plumbing.UI
         private void fmFDParam_Load(object sender, EventArgs e)
         {
             InitControl();
-
-            
         }
 
         private void InitControl()
@@ -37,7 +28,7 @@ namespace TianHua.Plumbing.UI
             ComBoxHutchWastewater.Properties.Items.AddRange(new List<string> { "DN100", "DN125", "DN150", "DN200" });
             ComBoxHutchWastewater.EditValue = "DN100";
 
-            ComBoxSewagePipe.Properties.Items.AddRange(new List<string> { "DN100",  "DN150", "DN200" });
+            ComBoxSewagePipe.Properties.Items.AddRange(new List<string> { "DN100", "DN150", "DN200" });
             ComBoxSewagePipe.EditValue = "DN100";
 
             ComBoxVentStack.Properties.Items.AddRange(new List<string> { "DN100", "DN150", "DN200" });
@@ -78,7 +69,7 @@ namespace TianHua.Plumbing.UI
 
         private void RidDrainageWay_EditValueChanged(object sender, EventArgs e)
         {
-            if(FuncStr.NullToStr( RidDrainageWay.EditValue) == "污废合流")
+            if (FuncStr.NullToStr(RidDrainageWay.EditValue) == "污废合流")
             {
                 ComBoxSpec.Enabled = true;
                 ComBoxHutchWastewater.Enabled = false;
@@ -98,12 +89,12 @@ namespace TianHua.Plumbing.UI
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
-        {        
-            if(ComBoxScale.SelectedItem.ToString()== "1:50")
+        {
+            if (ComBoxScale.SelectedItem.ToString() == "1:50")
             {
                 ThTagParametersService.ScaleFactor = 1;
             }
-            else if(ComBoxScale.SelectedItem.ToString() == "1:100")
+            else if (ComBoxScale.SelectedItem.ToString() == "1:100")
             {
                 ThTagParametersService.ScaleFactor = 2;
             }
@@ -115,24 +106,23 @@ namespace TianHua.Plumbing.UI
             ThTagParametersService.GravityBuckettag = ComBoxBSpec.SelectedItem.ToString();
             ThTagParametersService.BucketStyle = RidBRoofDrain.EditValue.ToString();
             ThTagParametersService.BucketStyle1 = RidLRroofDrain.EditValue.ToString();
-            ThTagParametersService.SideBuckettag= ComBoxLRoofDrain.EditValue.ToString();
+            ThTagParametersService.SideBuckettag = ComBoxLRoofDrain.EditValue.ToString();
             ThTagParametersService.SideBuckettag1 = ComBoxBRoofDrain.EditValue.ToString();
-            var l = ComBoxRoofRainwater.SelectedItem.ToString();
-            ThTagParametersService.RoofRainpipe = ComBoxRoofRainwater.SelectedItem!=null? double.Parse(GetDoubleString(ComBoxRoofRainwater.SelectedItem.ToString())): double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
-            ThTagParametersService.Rainpipe = ComBoxBalconyRain.SelectedItem!= null?double.Parse(GetDoubleString(ComBoxBalconyRain.SelectedItem.ToString())): double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
-            ThTagParametersService.Npipe = ComBoxCondensation.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxCondensation.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));           
-            ThTagParametersService.KaTFpipe = ComBoxHutchWastewater.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxHutchWastewater.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
-            ThTagParametersService.BalconyFpipe = ComBoxBalconyWastewater.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxBalconyWastewater.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
-            ThTagParametersService.ToiletWpipe = ComBoxSewagePipe.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxSewagePipe.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
-            ThTagParametersService.ToiletTpipe = ComBoxVentStack.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxVentStack.SelectedItem.ToString())):double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
-            ThTagParametersService.IsSeparation = RidDrainageWay.EditValue == "污废分流" ? true : false;
-            ThTagParametersService.IsCaisson = CheckToiletCaisson.Checked ? true : false;
+            ThTagParametersService.RoofRainpipe = ComBoxRoofRainwater.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxRoofRainwater.SelectedItem.ToString())) : double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.Rainpipe = ComBoxBalconyRain.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxBalconyRain.SelectedItem.ToString())) : double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.Npipe = ComBoxCondensation.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxCondensation.SelectedItem.ToString())) : double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.KaTFpipe = ComBoxHutchWastewater.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxHutchWastewater.SelectedItem.ToString())) : double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.BalconyFpipe = ComBoxBalconyWastewater.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxBalconyWastewater.SelectedItem.ToString())) : double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.ToiletWpipe = ComBoxSewagePipe.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxSewagePipe.SelectedItem.ToString())) : double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.ToiletTpipe = ComBoxVentStack.SelectedItem != null ? double.Parse(GetDoubleString(ComBoxVentStack.SelectedItem.ToString())) : double.Parse(GetDoubleString(ComBoxSpec.SelectedItem.ToString()));
+            ThTagParametersService.IsSeparation = RidDrainageWay.EditValue as string == "污废分流";
+            ThTagParametersService.IsCaisson = CheckToiletCaisson.Checked;
             ThTagParametersService.PipeLayer = "W-DRAI-SEWA-PIPE";
-    }
+        }
         private static string GetDoubleString(string s)
         {
             string result = "";
-            if(s!=null)
+            if (s != null)
             {
                 result = s.Substring(2, s.Length - 2);
             }
@@ -145,28 +135,18 @@ namespace TianHua.Plumbing.UI
 
         private void ComBoxBSpec_SelectedIndexChanged(object sender, EventArgs e)
         {
-        
-            
+
+
         }
 
         private void ComBoxLSpec_SelectedIndexChanged(object sender, EventArgs e)
-        {
-           
-        }
-
-        private void label4_Click(object sender, EventArgs e)
-        {
-           // label4.Select();
-        }
-
-        private void label3_Click(object sender, EventArgs e)
         {
 
         }
 
         private void RidLRroofDrain_SelectedIndexChanged(object sender, EventArgs e)
         {
-       
+
         }
 
         private void ComBoxLRoofDrain_SelectedIndexChanged(object sender, EventArgs e)

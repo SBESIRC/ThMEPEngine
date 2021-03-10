@@ -4,6 +4,8 @@ using Linq2Acad;
 using AcHelper;
 using AcHelper.Commands;
 using ThMEPWSS.Pipe.Service;
+using System.Windows.Forms;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.UI
 {
@@ -48,9 +50,10 @@ namespace TianHua.Plumbing.UI
 
         private void BtnParam_Click(object sender, EventArgs e)
         {
-            
-            fmFDParam _fmFDParam = new fmFDParam();
-            _fmFDParam.ShowDialog();
+            using (var dlg = new fmFDParam())
+            {
+                AcadApp.ShowModalDialog(dlg);
+            }
         }
 
         private void BtnLayoutRiser_Click(object sender, EventArgs e)

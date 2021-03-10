@@ -178,6 +178,7 @@
             // 
             // BtnCancel
             // 
+            this.BtnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.BtnCancel.Location = new System.Drawing.Point(117, 669);
             this.BtnCancel.Name = "BtnCancel";
             this.BtnCancel.Size = new System.Drawing.Size(94, 22);
@@ -187,6 +188,7 @@
             // 
             // BtnOK
             // 
+            this.BtnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.BtnOK.Location = new System.Drawing.Point(15, 669);
             this.BtnOK.Name = "BtnOK";
             this.BtnOK.Size = new System.Drawing.Size(92, 22);
@@ -244,7 +246,6 @@
             this.label4.TabIndex = 21;
             this.label4.Text = "小屋面雨水斗";
             this.label4.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label4.Click += new System.EventHandler(this.label4_Click);
             // 
             // ComBoxBRoofDrain
             // 
@@ -293,7 +294,6 @@
             this.label3.TabIndex = 17;
             this.label3.Text = "大屋面雨水斗";
             this.label3.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            this.label3.Click += new System.EventHandler(this.label3_Click);
             // 
             // ComBoxCondensation
             // 
@@ -764,8 +764,10 @@
             // 
             // fmFDParam
             // 
+            this.AcceptButton = this.BtnOK;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.CancelButton = this.BtnCancel;
             this.ClientSize = new System.Drawing.Size(226, 706);
             this.Controls.Add(this.layoutControl1);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
