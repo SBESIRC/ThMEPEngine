@@ -32,54 +32,54 @@ namespace ThMEPEngineCore.Engine
                             continue;
                         }
                         var mcs2wcs = blkRef.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-                        DoExtract(blkRef, mcs2wcs);
+                        Visitors.ForEach(o =>
+                        {
+                            o.Results.AddRange(DoExtract(blkRef, mcs2wcs,o));
+                        });
                     }
                 }
             }
         }
 
-        private void DoExtract(BlockReference blockReference, Matrix3d matrix)
+        private List<ThRawIfcBuildingElementData> DoExtract(
+            BlockReference blockReference,Matrix3d matrix,
+            ThBuildingElementExtractionVisitor visitor)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
             {
-                Visitors.ForEach(o =>
+                var results = new List<ThRawIfcBuildingElementData>();
+                if (visitor.IsBuildElementBlockReference(blockReference))
                 {
-                    if (o.IsBuildElementBlockReference(blockReference))
+                    var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
+                    if (visitor.IsBuildElementBlock(blockTableRecord))
                     {
-                        var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                        if (o.IsBuildElementBlock(blockTableRecord))
+                        // 提取图元信息
+                        foreach (var objId in blockTableRecord)
                         {
-                            // 提取图元信息
-                            var results = new List<ThRawIfcBuildingElementData>();
-                            foreach (var objId in blockTableRecord)
+                            var dbObj = acadDatabase.Element<Entity>(objId);
+                            if (dbObj is BlockReference blockObj)
                             {
-                                var dbObj = acadDatabase.Element<Entity>(objId);
-                                if (dbObj is BlockReference blockObj)
+                                if (blockObj.BlockTableRecord.IsNull)
                                 {
-                                    if (blockObj.BlockTableRecord.IsNull)
-                                    {
-                                        continue;
-                                    }
-                                    if (o.IsBuildElementBlockReference(blockObj))
-                                    {
-                                        var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                        DoExtract(blockObj, mcs2wcs);
-                                    }
+                                    continue;
                                 }
-                                else
+                                if (visitor.IsBuildElementBlockReference(blockObj))
                                 {
-                                    o.DoExtract(results, dbObj, matrix);
+                                    var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
+                                    results.AddRange(DoExtract(blockObj, mcs2wcs, visitor));
                                 }
                             }
-
-                            // 过滤XClip外的图元信息
-                            o.DoXClip(results, blockReference, matrix);
-
-                            // 保存XClip过滤后的图元信息
-                            o.Results.AddRange(results);
+                            else
+                            {
+                                visitor.DoExtract(results, dbObj, matrix);
+                            }
                         }
+
+                        // 过滤XClip外的图元信息
+                        visitor.DoXClip(results, blockReference, matrix);
                     }
-                });
+                }
+                return results;
             }
         }
     }
