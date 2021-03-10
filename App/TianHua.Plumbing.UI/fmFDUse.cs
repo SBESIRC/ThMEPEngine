@@ -50,7 +50,7 @@ namespace TianHua.Plumbing.UI
             //聚焦到CAD
             SetFocusToDwgView();
             //发送命令
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THAPPLICATIONPIPE");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THLGYY");
         }
         private void BtnCancel_Click(object sender, EventArgs e)
         {

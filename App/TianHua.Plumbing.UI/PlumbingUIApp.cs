@@ -28,8 +28,8 @@ namespace TianHua.Plumbing.UI
         }
 
 
-        [CommandMethod("TIANHUACAD", "Trandom", CommandFlags.Modal)]
-        public void Trandom()
+        [CommandMethod("TIANHUACAD", "THPYS", CommandFlags.Modal)]
+        public void THPYS()
         {
             if (FmFloorDrain == null)
             {

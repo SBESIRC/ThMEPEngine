@@ -27,12 +27,11 @@ namespace TianHua.Plumbing.UI
 
         private void BtnFloorFocus_Click(object sender, EventArgs e)
         {
-
             //聚焦到CAD
             SetFocusToDwgView();
 
             //发送命令
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THSTOREYFRAME");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THLGLC");
         }
 
         private void BtnGetFloor_Click(object sender, EventArgs e)
@@ -60,7 +59,7 @@ namespace TianHua.Plumbing.UI
             SetFocusToDwgView();
 
             //发送命令
-            CommandHandlerBase.ExecuteFromCommandLine(false, "THPYS");
+            CommandHandlerBase.ExecuteFromCommandLine(false, "THLGBZ");
         }
 
         private void BtnUse_Click(object sender, EventArgs e)

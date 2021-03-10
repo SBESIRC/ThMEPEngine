@@ -195,8 +195,8 @@ namespace ThMEPWSS
             return new List<Curve>();
         }
       
-        [CommandMethod("TIANHUACAD", "THPYS", CommandFlags.Modal)]
-        public void ThPYS()
+        [CommandMethod("TIANHUACAD", "THLGBZ", CommandFlags.Modal)]
+        public void THLGBZ()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
@@ -236,8 +236,8 @@ namespace ThMEPWSS
                 layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2,acadDatabase, PipeindexEngine,composite_Engine, obstacleInfo.ObstacleParameters, ThTagParametersService.ScaleFactor, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);               
             }
         }
-        [CommandMethod("TIANHUACAD", "THSTOREYFRAME", CommandFlags.Modal)]
-        public void THSTOREYFRAME()
+        [CommandMethod("TIANHUACAD", "THLGLC", CommandFlags.Modal)]
+        public void THLGLC()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -258,8 +258,8 @@ namespace ThMEPWSS
                 ThInsertStoreyFrameService.Insert(tpipe);
             }
         }
-        [CommandMethod("TIANHUACAD", "THAPPLICATIONPIPE", CommandFlags.Modal)]
-        public static void THAPPLICATIONPIPE()
+        [CommandMethod("TIANHUACAD", "THLGYY", CommandFlags.Modal)]
+        public static void THLGYY()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {              
