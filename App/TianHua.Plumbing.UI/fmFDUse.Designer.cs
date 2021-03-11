@@ -103,6 +103,7 @@
             this.CheckList.Size = new System.Drawing.Size(180, 245);
             this.CheckList.StyleController = this.layoutControl1;
             this.CheckList.TabIndex = 5;
+            this.CheckList.SelectedIndexChanged += new System.EventHandler(this.CheckList_SelectedIndexChanged);
             this.CheckList.DoubleClick += new System.EventHandler(this.CheckList_DoubleClick);
             // 
             // layoutControlGroup1

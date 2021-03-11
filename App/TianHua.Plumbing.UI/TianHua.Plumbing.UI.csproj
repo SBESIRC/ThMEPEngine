@@ -208,6 +208,10 @@
       <Project>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</Project>
       <Name>ThMEPWSS</Name>
     </ProjectReference>
+    <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
+      <Project>{6FADC5FA-F54F-4742-BACD-9F1F855E8210}</Project>
+      <Name>TianHua.EquipmentSelection</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

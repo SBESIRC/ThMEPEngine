@@ -4,6 +4,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using ThMEPWSS.Pipe.Service;
+using ThMEPWSS.Pipe.Engine;
 
 namespace TianHua.Plumbing.UI
 {
@@ -37,7 +38,6 @@ namespace TianHua.Plumbing.UI
         }
         private void BtnOK_Click(object sender, EventArgs e)
         {
-
             var result = new List<Tuple<string, bool>>();
             foreach(var item in CheckList.CheckedItems)
             {
@@ -62,10 +62,18 @@ namespace TianHua.Plumbing.UI
             Active.Document.Window.Focus();
 #endif
         }
-
+        //双击事件
         private void CheckList_DoubleClick(object sender, EventArgs e)
         {
             var item = CheckList.SelectedItem as string;
+
+            ThBlockSelectionEngine.ZoomToModels(item);
         }
+        private void CheckList_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+       
+
     }
 }
