@@ -1,14 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using Linq2Acad;
 using AcHelper;
+using Linq2Acad;
 using AcHelper.Commands;
 using ThMEPWSS.Pipe.Service;
+using DevExpress.XtraEditors;
+using System.Collections.Generic;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.UI
 {
-    public partial class fmFloorDrain :  DevExpress.XtraEditors.XtraForm
+    public partial class fmFloorDrain : XtraForm
     {
         public fmFloorDrain()
         {
@@ -42,13 +43,13 @@ namespace TianHua.Plumbing.UI
             {
                 var storey = new ThReadStoreyInformationService();
                 storey.Read(acadDatabase.Database);
-                if(storey.StoreyNames.Count==0)
+                if (storey.StoreyNames.Count == 0)
                 {
                     return;
                 }
-                storey.StoreyNames.ForEach(o=> floorNames.Add(o.Item1));                
+                storey.StoreyNames.ForEach(o => floorNames.Add(o.Item1));
             }
-            ListBox.DataSource = floorNames;           
+            ListBox.DataSource = floorNames;
         }
 
         private void BtnParam_Click(object sender, EventArgs e)
@@ -70,23 +71,13 @@ namespace TianHua.Plumbing.UI
 
         private void BtnUse_Click(object sender, EventArgs e)
         {
-            var floorNames = new List<string>();
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var storey = new ThReadStoreyInformationService();
-                storey.Read(acadDatabase.Database);
-                if (storey.StoreyNames.Count==0)
-                {
-                    return;
-                }
-                storey.StoreyNames.ForEach(o => floorNames.Add(o.Item2));
-            }
-            ThTagParametersService.sourceFloor = ListBox.SelectedIndex != -1 ? floorNames[ListBox.SelectedIndex].ToString(): "";
+            ThTagParametersService.sourceFloor = ListBox.SelectedItem as string;
             using (var dlg = new fmFDUse())
             {
                 AcadApp.ShowModalDialog(dlg);
-            }      
+            }
         }
+
         private void SetFocusToDwgView()
         {
             //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
@@ -96,6 +87,5 @@ namespace TianHua.Plumbing.UI
             Active.Document.Window.Focus();
 #endif
         }
-
     }
 }
