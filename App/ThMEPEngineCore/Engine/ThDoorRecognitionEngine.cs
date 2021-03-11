@@ -8,6 +8,7 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -26,8 +27,16 @@ namespace ThMEPEngineCore.Engine
                 doorMarks.Select(o => o.Data as Entity).ToCollection());
             buildService.Build();
 
-            //构件障碍物索引服务
-            ThObstacleSpatialIndexService.Instance.Build(database, polygon);
+            //构件索引服务
+            ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
+            {
+                BuiltInCategory.OST_ArchitectureWall,
+                BuiltInCategory.OST_Column,                
+                BuiltInCategory.OST_CurtainWall,
+                BuiltInCategory.OST_ShearWall,
+                BuiltInCategory.OST_Window
+            });
+            ThSpatialIndexCacheService.Instance.Build(database, polygon);
 
             // 创建门
             var buildDoor = new ThBuildDoorService();

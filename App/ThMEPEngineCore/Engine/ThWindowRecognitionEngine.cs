@@ -7,6 +7,7 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -53,10 +54,24 @@ namespace ThMEPEngineCore.Engine
 
             //创建窗户的外轮廓
             //后续，根据需要增加处理...
-            foreach (var obj in curves.ToCollection().Outline())
+            if(curves.Count>0)
             {
-                Elements.Add(ThIfcWindow.Create(obj as Entity));
+                var results = curves.ToCollection();                
+                foreach (Curve obj in results.Outline())
+                {
+                    Elements.Add(ThIfcWindow.Create(Wash(obj)));
+                }
             }
+        }
+        private Entity Wash(Curve curve)
+        {
+            var objs = new DBObjectCollection() { curve };
+            objs = ThWindowSimplifier.Simplify(objs);
+            if(objs.Count > 0 && objs[0] is Polyline polyline)
+            {
+                return ThPolylineHandler.Handle(polyline);
+            }
+            return objs.Count > 0 ? objs[0] as Entity : new Polyline();
         }
     }
 }

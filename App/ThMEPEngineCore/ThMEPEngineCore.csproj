@@ -68,6 +68,7 @@
     <Compile Include="CAD\ThDrawTool.cs" />
     <Compile Include="CAD\ThGeometryTool.cs" />
     <Compile Include="Algorithm\ThMEPLineExtension.cs" />
+    <Compile Include="Algorithm\ThPolylineHandler.cs" />
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
@@ -127,6 +128,7 @@
     <Compile Include="LaneLine\ThLaneLineExtendEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineJoinEngine.cs" />
     <Compile Include="LaneLine\ThLaneLineMergeExtension.cs" />
+    <Compile Include="Model\BuiltInCategory.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierFitting.cs" />
     <Compile Include="Model\Electrical\ThIfcCableCarrierSegment.cs" />
     <Compile Include="Model\Electrical\ThIfcCableFitting.cs" />
@@ -225,6 +227,7 @@
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
+    <Compile Include="Service\ThWindowSimplifier.cs" />
     <Compile Include="Service\ThCurtainWallLayerManager.cs" />
     <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />
     <Compile Include="Service\ThAxialAxisTagLayerManager.cs" />
@@ -245,7 +248,7 @@
     <Compile Include="Service\ThLayerNamesLayerManager.cs" />
     <Compile Include="Service\ThMatchDoorStoneService.cs" />
     <Compile Include="Service\ThCollectDoorStoneService.cs" />
-    <Compile Include="Service\ThObstacleSpatialIndexService.cs" />
+    <Compile Include="Service\ThSpatialIndexCacheService.cs" />
     <Compile Include="Service\ThPositionTagsDbExtension.cs" />
     <Compile Include="Service\ThPositionTagsLayerManager.cs" />
     <Compile Include="Service\ThRoomLayerManager.cs" />

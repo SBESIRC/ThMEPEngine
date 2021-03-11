@@ -134,5 +134,36 @@ namespace ThMEPEngineCore.CAD
             }
             return results;
         }
+        public static List<Line> ExplodeLines(this Polyline polyline,double arcLength=5.0)
+        {
+            var results = new List<Line>();
+            var objs = new DBObjectCollection();
+            polyline.Explode(objs);
+            foreach (Curve curve in objs)
+            {
+                if(curve.GetLength()==0.0)
+                {
+                    continue;
+                }
+                if (curve is Line line)
+                {
+                    results.Add(line.WashClone() as Line);
+                }
+                else if(curve is Arc arc)
+                {
+                   var arcPoly = arc.TessellateArcWithArc(arcLength);
+                    results.AddRange(ExplodeLines(arcPoly, arcLength));
+                }
+                else if (curve is Polyline subPoly)
+                {
+                    results.AddRange(ExplodeLines(subPoly, arcLength));
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            return results;
+        }
     }
 }

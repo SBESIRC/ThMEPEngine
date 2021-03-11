@@ -5,6 +5,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Service
 {
@@ -76,31 +77,36 @@ namespace ThMEPEngineCore.Service
         }
         private List<Polyline> CreateDoor(
             List<Tuple<Line, Line>> doorPairs, 
-            NeighborType firstNeighborType, 
-            NeighborType secondNeighborType)
+            BuiltInCategory firstNeighborType,
+            BuiltInCategory secondNeighborType)
         {
-            if ((firstNeighborType  == NeighborType.ArchitecureWall && secondNeighborType  == NeighborType.ArchitecureWall) ||
-                (firstNeighborType == NeighborType.ShearWall && secondNeighborType == NeighborType.ShearWall) ||
-                (firstNeighborType == NeighborType.StructureColumn && secondNeighborType == NeighborType.StructureColumn))
-            {
-                return CreateDoorByCompare(doorPairs);
-            }
-            else if ((firstNeighborType == NeighborType.ArchitecureWall && secondNeighborType == NeighborType.ShearWall) ||
-                (firstNeighborType == NeighborType.ArchitecureWall && secondNeighborType == NeighborType.StructureColumn) ||
-                (firstNeighborType == NeighborType.ShearWall && secondNeighborType == NeighborType.StructureColumn))
-            {
-                return CreateDoorByFirst(doorPairs);
-            }
-            else if((firstNeighborType == NeighborType.ShearWall && secondNeighborType == NeighborType.ArchitecureWall) ||
-                (firstNeighborType == NeighborType.StructureColumn && secondNeighborType == NeighborType.ArchitecureWall) ||
-                (firstNeighborType == NeighborType.StructureColumn && secondNeighborType == NeighborType.ShearWall))
-            {
-                return CreateDoorBySecond(doorPairs);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            //后续根据产品文档再通过条件构件
+            return CreateDoorByCompare(doorPairs);
+            //if ((firstNeighborType  == BuiltInCategory.OST_ArchitectureWall && secondNeighborType  == BuiltInCategory.OST_ArchitectureWall) ||
+            //    (firstNeighborType == BuiltInCategory.OST_ShearWall && secondNeighborType == BuiltInCategory.OST_ShearWall) ||
+            //    (firstNeighborType == BuiltInCategory.OST_Column && secondNeighborType == BuiltInCategory.OST_Column) ||
+            //    (firstNeighborType == BuiltInCategory.OST_Window && secondNeighborType == BuiltInCategory.OST_Window) ||
+            //    (firstNeighborType == BuiltInCategory.OST_CurtainWall && secondNeighborType == BuiltInCategory.OST_CurtainWall)
+            //    )
+            //{
+            //    return CreateDoorByCompare(doorPairs);
+            //}
+            //else if ((firstNeighborType == BuiltInCategory.OST_ArchitectureWall && secondNeighborType == BuiltInCategory.OST_ShearWall) ||
+            //    (firstNeighborType == BuiltInCategory.OST_ArchitectureWall && secondNeighborType == BuiltInCategory.OST_Column) ||
+            //    (firstNeighborType == BuiltInCategory.OST_ShearWall && secondNeighborType == BuiltInCategory.OST_Column))
+            //{
+            //    return CreateDoorByFirst(doorPairs);
+            //}
+            //else if((firstNeighborType == BuiltInCategory.OST_ShearWall && secondNeighborType == BuiltInCategory.OST_ArchitectureWall) ||
+            //    (firstNeighborType == BuiltInCategory.OST_Column && secondNeighborType == BuiltInCategory.OST_ArchitectureWall) ||
+            //    (firstNeighborType == BuiltInCategory.OST_Column && secondNeighborType == BuiltInCategory.OST_ShearWall))
+            //{
+            //    return CreateDoorBySecond(doorPairs);
+            //}
+            //else
+            //{
+            //    throw new NotSupportedException();
+            //}
         }
         private List<Polyline> CreateDoorByCompare(List<Tuple<Line, Line>> doorPairs)
         {
@@ -138,6 +144,10 @@ namespace ThMEPEngineCore.Service
         }
         private Polyline CreateDoor(Line first,Line second)
         {
+            if(first.Length==0 || second.Length == 0)
+            {
+                return new Polyline();
+            }
             //外部控制传入的first和second要平行，且first.Length<=second.Length
             var perpendVec = first.LineDirection().GetPerpendicularVector().GetNormal();
             var firstMidPt = first.StartPoint.GetMidPt(first.EndPoint);
@@ -190,7 +200,8 @@ namespace ThMEPEngineCore.Service
         }
         private bool IsValid(Line first, Line second, double length)
         {
-            return first.IsParallelToEx(second) &&
+            return first.Length>0 && second.Length>0.0 &&
+                first.IsParallelToEx(second) &&
                 Math.Abs(first.Distance(second) - length) <= 2.0; //2.0用于解决小于点误差
         }
     }
