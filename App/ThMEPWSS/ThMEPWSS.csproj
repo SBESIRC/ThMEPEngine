@@ -92,7 +92,7 @@
     <Compile Include="Pipe\Model\ThWKitchenPipe.cs" />
     <Compile Include="Pipe\Model\ThWKitchenRoom.cs" />
     <Compile Include="Pipe\Model\ThWPipe.cs" />
-    <Compile Include="Pipe\Model\ThWRoofDeviceFloorRoom.cs" />
+    <Compile Include="Pipe\Model\ThWRoofTopFloorRoom.cs" />
     <Compile Include="Pipe\Model\ThWRoofFloorRoom.cs" />
     <Compile Include="Pipe\Model\ThWRoom.cs" />
     <Compile Include="Pipe\Model\ThWToiletPipe.cs" />

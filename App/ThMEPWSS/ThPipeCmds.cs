@@ -201,7 +201,7 @@ namespace ThMEPWSS
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
             {                 
                 FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
-                if (FloorEngines.RoofDeviceFloors.Count == 0 && FloorEngines.RoofFloors.Count == 0 && FloorEngines.TopFloors.Count == 0)
+                if (FloorEngines.RoofTopFloors.Count == 0 && FloorEngines.RoofFloors.Count == 0 && FloorEngines.TopFloors.Count == 0)
                 {
                     return;
                 }
@@ -211,7 +211,7 @@ namespace ThMEPWSS
                 string W_RAIN_PIPE= ThWPipeOutputFunction.Get_Layers4(FloorEngines.Layers, ThWPipeCommon.W_RAIN_PIPE);
                 //第一类屋顶设备层布置   
                 var parameters2 = new ThWRoofDeviceParameters();
-                if (FloorEngines.RoofDeviceFloors.Count > 0)//存在屋顶设备层
+                if (FloorEngines.RoofTopFloors.Count > 0)//存在屋顶设备层
                 {
                     ThWLayoutRoofDeviceFloorEngine.LayoutRoofDeviceFloor(FloorEngines, parameters2, acadDatabase, ThTagParametersService.ScaleFactor, W_RAIN_NOTE1);
                 }
