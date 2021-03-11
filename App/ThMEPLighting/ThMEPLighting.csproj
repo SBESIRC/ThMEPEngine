@@ -40,10 +40,15 @@
     <Compile Include="EmgLight\Service\StructFilterService.cs" />
     <Compile Include="EmgLight\Service\StructureService.cs" />
     <Compile Include="EmgLight\Service\GeomUtils.cs" />
-    <Compile Include="FEI\CheckService.cs" />
-    <Compile Include="FEI\CreateMainEvacuationPath.cs" />
+    <Compile Include="FEI\EvacuationPath\CreateMainEvacuationPath.cs" />
+    <Compile Include="FEI\EvacuationPath\CreateMainLanesService.cs" />
+    <Compile Include="FEI\EvacuationPath\CreateStartExtendLineService.cs" />
+    <Compile Include="FEI\EvacuationPath\ExtendLinesService.cs" />
     <Compile Include="FEI\GetPrimitivesService.cs" />
+    <Compile Include="FEI\GeUtils.cs" />
     <Compile Include="FEI\LayoutFEIService.cs" />
+    <Compile Include="FEI\Model\ExtendLineModel.cs" />
+    <Compile Include="FEI\Service\CheckService.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThLoopArrangementEngine.cs" />
