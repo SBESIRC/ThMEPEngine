@@ -11,8 +11,7 @@ using System.Collections.Generic;
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWToiletPipeEngine : IDisposable
-    {
-        public ThWPipeZone Zone { get; set; }
+    { 
         public List<ThWToiletPipe> Pipes { get; set; }
         public ThWToiletPipeParameters Parameters { get; set; }
         

@@ -11,7 +11,6 @@ namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWKitchenPipeEngine : IDisposable
     {
-        public ThWPipeZone Zone { get; set; }
         public List<ThWKitchenPipe> Pipes { get; set; }
         public ThWKitchenPipeParameters Parameters { get; set; }
         public ThWKitchenPipeEngine()
