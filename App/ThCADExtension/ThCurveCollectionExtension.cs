@@ -5,9 +5,9 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADExtension
 {
-    public static class ThDBObjectCollectionExtension
+    public static class ThCurveCollectionExtension
     {
-        public static DBObjectCollection Explode(this DBObjectCollection curves)
+        public static DBObjectCollection ExplodeCurves(this DBObjectCollection curves)
         {
             var lines = new DBObjectCollection();
             curves.Cast<Curve>().ForEach(c =>

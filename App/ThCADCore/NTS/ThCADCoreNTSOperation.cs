@@ -80,7 +80,7 @@ namespace ThCADCore.NTS
         {
             var poylgons = new DBObjectCollection();
             var builder = new ThCADCoreNTSBuildArea();
-            Geometry geometry = builder.Build(objs.Explode().ToMultiLineString());
+            Geometry geometry = builder.Build(objs.ExplodeCurves().ToMultiLineString());
             if (geometry is Polygon polygon)
             {
                 poylgons.Add(polygon.ToDbEntity());
