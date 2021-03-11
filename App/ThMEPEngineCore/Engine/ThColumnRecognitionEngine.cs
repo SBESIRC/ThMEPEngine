@@ -1,6 +1,5 @@
 ﻿using NFox.Cad;
 using DotNetARX;
-using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;

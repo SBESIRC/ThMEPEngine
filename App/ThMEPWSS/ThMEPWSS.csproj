@@ -44,7 +44,6 @@
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWGravityWaterBucketExtractionVisitor.cs" />
-    <Compile Include="Pipe\Engine\ThWInnerDoorExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWRainPipeExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWRainPipeRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofRainPipeExtractionVisitor.cs" />
@@ -55,7 +54,6 @@
     <Compile Include="Pipe\Engine\ThWArchitectureElevationRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWExternalTagRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWInnerDoorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBalconyRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeIndexEngine.cs" />
@@ -64,7 +62,7 @@
     <Compile Include="Pipe\Engine\ThWStoreysRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWTopFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWKitchenRoomRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWRoofDeviceFloorRecognitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWRoofTopFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWToiletRoomRecognitionEngine.cs" />
@@ -73,7 +71,6 @@
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
     <Compile Include="Pipe\Model\ThWDevice.cs" />
     <Compile Include="Pipe\Model\ThWExternalTag.cs" />
-    <Compile Include="Pipe\Model\ThWInnerDoor.cs" />
     <Compile Include="Pipe\Model\ThWStoreys.cs" />
     <Compile Include="Pipe\Model\ThWWashingMachine.cs" />
     <Compile Include="Pipe\Model\ThWGravityWaterBucket.cs" />

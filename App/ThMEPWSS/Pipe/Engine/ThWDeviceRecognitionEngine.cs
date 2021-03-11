@@ -25,12 +25,12 @@ namespace ThMEPWSS.Pipe.Engine
             Results = visitor.Results;
         }
     }
-        
-  public  class ThWDeviceRecognitionEngine : ThDistributionElementRecognitionEngine
+
+    public class ThWDeviceRecognitionEngine : ThDistributionElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThWInnerDoorExtractionEngine();
+            var engine = new ThWWDeviceExtractionEngine();
             engine.Extract(database);
             var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
@@ -38,8 +38,7 @@ namespace ThMEPWSS.Pipe.Engine
                 ThCADCoreNTSSpatialIndex spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
-            Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWInnerDoor.Create(o.GeometricExtents.ToRectangle())));
+            Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWDevice.Create(o.GeometricExtents.ToRectangle())));
         }
-    
     }
 }

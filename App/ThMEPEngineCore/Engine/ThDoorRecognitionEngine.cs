@@ -1,5 +1,4 @@
 ﻿using NFox.Cad;
-using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
@@ -8,7 +7,6 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Engine
 {

@@ -2,6 +2,7 @@
 using Linq2Acad;
 using DotNetARX;
 using ThCADExtension;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -14,7 +15,10 @@ using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThWRoofDeviceFloorRecognitionEngine : ThWRoomRecognitionEngine
+    /// <summary>
+    /// 小屋面
+    /// </summary>
+    public class ThWRoofTopFloorRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWRoofDeviceFloorRoom> Rooms { get; set; }
         public List<Curve> TagNameFrames { get; set; }
@@ -43,7 +47,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThIfcSpace> StandardSpaces { get; set; }
         public List<ThIfcSpace> NonStandardSpaces { get; set; }
         public List<BlockReference> blockCollection { get; set; }
-        public ThWRoofDeviceFloorRecognitionEngine()
+        public ThWRoofTopFloorRecognitionEngine()
         {
             Rooms = new List<ThWRoofDeviceFloorRoom>();
             TagNameFrames = new List<Curve>();
@@ -247,85 +251,40 @@ namespace ThMEPWSS.Pipe.Engine
         }
         private static List<Curve> GetColumns(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
-            var ColumnRecognitionEngine = new ThColumnRecognitionEngine();
-            ColumnRecognitionEngine.Recognize(database, pts);
-            ColumnRecognitionEngine.Elements.ForEach(o =>
-            {
-                var curve = o.Outline as Curve;
-                Columns.Add(curve.WashClone());
-            });
-            return Columns;
+            var engine = new ThColumnRecognitionEngine();
+            engine.Recognize(database, pts);
+            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
         }
         private static List<Curve> GetShearWalls(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
-            var shearWallEngine = new ThShearWallRecognitionEngine();
-            shearWallEngine.Recognize(database, pts);
-            shearWallEngine.Elements.ForEach(o =>
-            {
-                if (o.Outline is Curve curve)
-                {
-                    Columns.Add(curve.WashClone());
-                }
-                else if (o.Outline is MPolygon mPolygon)
-                {
-                    throw new NotSupportedException();
-                }
-            });
-            return Columns;
+            var engine = new ThShearWallRecognitionEngine();
+            engine.Recognize(database, pts);
+            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
         }
         private static List<Curve> GetInnerDoors(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
-            var innerDoorEngine = new ThWInnerDoorRecognitionEngine();
-            innerDoorEngine.Recognize(database, pts);
-            innerDoorEngine.Elements.ForEach(o =>
-            {
-                Polyline curve = o.Outline as Polyline;
-                Columns.Add(curve.WashClone());
-            });
-            return Columns;
-        }
-        private static List<Curve> GetDevices(Database database, Point3dCollection pts)
-        {
-            var Columns = new List<Curve>();
-            var deviceEngineEngine = new ThWDeviceRecognitionEngine();
-            deviceEngineEngine.Recognize(database, pts);
-            deviceEngineEngine.Elements.ForEach(o =>
-            {
-                Polyline curve = o.Outline as Polyline;
-                Columns.Add(curve.WashClone());
-            });
-            return Columns;
-        }
-        private static List<Curve> GetArchitectureWalls(Database database, Point3dCollection pts)
-        {
-            var Columns = new List<Curve>();
-            var architectureWallRecognitionEngine = new ThArchitectureWallRecognitionEngine();
-            architectureWallRecognitionEngine.Recognize(database, pts);
-            architectureWallRecognitionEngine.Elements.ForEach(o =>
-            {
-                if (o.Outline is Curve curve)
-                {
-                    Columns.Add(curve.WashClone());
-                }
-            });
-            return Columns;
+            var engine = new ThDoorRecognitionEngine();
+            engine.Recognize(database, pts);
+            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
         }
         private static List<Curve> GetWindows(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
-            var windowRecognition = new ThWindowRecognitionEngine();
-            windowRecognition.Recognize(database, pts);
-            windowRecognition.Elements.ForEach(o =>
-            {
-                Polyline curve = o.Outline as Polyline;
-                Columns.Add(curve.WashClone());
-            });
-            return Columns;
+            var engine = new ThWindowRecognitionEngine();
+            engine.Recognize(database, pts);
+            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
         }
-
+        private static List<Curve> GetArchitectureWalls(Database database, Point3dCollection pts)
+        {
+            var engine = new ThArchitectureWallRecognitionEngine();
+            engine.Recognize(database, pts);
+            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
+        }
+        private static List<Curve> GetDevices(Database database, Point3dCollection pts)
+        {
+            var engine = new ThWDeviceRecognitionEngine();
+            engine.Recognize(database, pts);
+            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
+        }
         private static List<Curve> GetTagNameFrames(Database database, Point3dCollection pts)
         {
             var Columns = new List<Curve>();

@@ -181,7 +181,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var closets = rainPipesEngine.Elements.Where(o => o is ThWClosestool).Cast<ThWClosestool>().ToList();
                 var GravityWaterBuckets = rainPipesEngine.Elements.Where(o => o is ThWGravityWaterBucket).Cast<ThWGravityWaterBucket>().ToList();  
                 var SideEntryWaterBuckets = rainPipesEngine.Elements.Where(o => o is ThWSideEntryWaterBucket).Cast<ThWSideEntryWaterBucket>().ToList();
-                var RoofDeviceEngine = new ThWRoofDeviceFloorRecognitionEngine()
+                var RoofDeviceEngine = new ThWRoofTopFloorRecognitionEngine()
                 {
                     blockCollection = blockCollection,
                     DeviceSpaces = deviceSpaces,

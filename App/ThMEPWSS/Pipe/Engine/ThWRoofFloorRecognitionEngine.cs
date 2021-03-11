@@ -1,15 +1,18 @@
 ﻿using DotNetARX;
 using Linq2Acad;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
+    /// <summary>
+    /// 大屋面
+    /// </summary>
     public class ThWRoofFloorRecognitionEngine : ThWRoomRecognitionEngine
     {
         public List<ThWRoofFloorRoom> Rooms { get; set; }
