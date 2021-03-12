@@ -82,31 +82,20 @@ namespace ThMEPWSS.Pipe.Engine
                 //获取外参元素
                 GetBuildingElements(database, pts);
                 GetLayers(database, pts).ForEach(o => Layers.Add(o));
-                GetTagNameFrames(database, pts).ForEach(o => TagNameFrames.Add(o));
-                GetTagNameFrames(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetStarFrames(this.Spaces).ForEach(o => StairFrames.Add(o));
-                GetStarFrames(this.Spaces).ForEach(o => AllObstacles.Add(o));
-                GetInnerDoors(database, pts).ForEach(o => InnerDoors.Add(o));
-                GetInnerDoors(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetDevices(database, pts).ForEach(o => Devices.Add(o));
-                GetDevices(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetElevationFrames(database, pts).ForEach(o => ElevationFrames.Add(o));
-                GetElevationFrames(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetAxialCircleTag(database, pts).ForEach(o => AxialCircleTags.Add(o));
-                GetAxialCircleTag(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetAxialAxisTags(database, pts).ForEach(o => AxialAxisTags.Add(o));
-                GetAxialAxisTags(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetExternalTags(database, pts).ForEach(o => ExternalTags.Add(o));
-                GetExternalTags(database, pts).ForEach(o => AllObstacles.Add(o));
+                GetTagNameFrames(database, pts);
+                GetStarFrames(this.Spaces);
+                //TODO: 获取块的GeometricExtents会抛出异常
+                //GetInnerDoors(database, pts);
+                //GetDevices(database, pts);
+                GetElevationFrames(database, pts);
+                GetAxialCircleTag(database, pts);
+                GetAxialAxisTags(database, pts);               
+                GetExternalTags(database, pts);              
                 //获取本图元素
-                GetWells(database, pts).ForEach(o => Wells.Add(o));
-                GetWells(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetAllTags(database, pts).ForEach(o => DimensionTags.Add(o));
-                GetAllTags(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetRainPipes(database, pts).ForEach(o => RainPipes.Add(o));
-                GetRainPipes(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetPositionTags(database, pts).ForEach(o => PositionTags.Add(o));
-                GetPositionTags(database, pts).ForEach(o => AllObstacles.Add(o));
+                GetWells(database, pts);
+                GetAllTags(database, pts);              
+                GetRainPipes(database, pts);             
+                GetPositionTags(database, pts);
                 //指定阻碍物
                 GetAllObstacles();
                 var baseCircles = GetBaseCircles(blockCollection);
@@ -144,163 +133,139 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return strings;
         }
-        private static List<Curve> GetPositionTags(Database database, Point3dCollection pts)
-        {
-            var Columns = new List<Curve>();
+        private void GetPositionTags(Database database, Point3dCollection pts)
+        {           
             var circles = new List<Curve>();
             var texts = new List<DBText>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var positionTagsDbExtension = new ThPositionTagsDbExtension(database))
             {
                 positionTagsDbExtension.BuildElementCurves();
-                Columns = positionTagsDbExtension.Polylines;
+                circles = positionTagsDbExtension.Polylines;
                 positionTagsDbExtension.BuildElementTexts();
                 texts = positionTagsDbExtension.texts;
             }
-            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
-            texts.ForEach(o => circles.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position)));
-            return circles;
+            circles.ForEach(o => PositionTags.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
+            texts.ForEach(o => PositionTags.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position)));       
         }
-        private static List<Curve> GetRainPipes(Database database, Point3dCollection pts)
+        private void GetRainPipes(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
             var circles = new List<Curve>();         
             var innerDoorEngine = new ThWRainPipeRecognitionEngine();
             innerDoorEngine.Recognize(database, pts);
             innerDoorEngine.Elements.ForEach(o =>
             {
                 Curve curve = o.Outline as Curve;
-                Columns.Add(curve.WashClone());
-            });         
-            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
-            return circles;
-
+                circles.Add(curve.WashClone());
+            });
+            circles.ForEach(o => RainPipes.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));       
         }
-        private static List<Curve> GetAllTags(Database database, Point3dCollection pts)
+        private void GetAllTags(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
-            var circles = new List<Curve>();
+            var circles = new List<Curve>();         
             var texts = new List<DBText>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var dimensionTagsDbExtension = new ThDimensionTagsDbExtension(database))
             {
                 dimensionTagsDbExtension.BuildElementCurves();
-                Columns = dimensionTagsDbExtension.Polylines;
+                circles = dimensionTagsDbExtension.Polylines;
                 dimensionTagsDbExtension.BuildElementTexts();
                 texts = dimensionTagsDbExtension.texts;
             }
-            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
-            texts.ForEach(o => circles.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position)));
-            return circles;
+            circles.ForEach(o => DimensionTags.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
+            texts.ForEach(o => DimensionTags.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position)));         
         }
-        private static List<Curve> GetWells(Database database, Point3dCollection pts)
+        private void GetWells(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
-            var WellsEngine = new ThWWellRecognitionEngine();
-            WellsEngine.Recognize(database, pts);
-            WellsEngine.Elements.ForEach(o =>
+            var wellsEngine = new ThWWellRecognitionEngine();
+            wellsEngine.Recognize(database, pts);
+            wellsEngine.Elements.ForEach(o =>
             {
                 Polyline curve = o.Outline as Polyline;
-                Columns.Add(curve.WashClone());
+                Wells.Add(curve.WashClone());
             });
-            return Columns;
         }
-        private static List<Curve> GetExternalTags(Database database, Point3dCollection pts)
-        {
-            var Columns = new List<Curve>();
-            var ExternalTagsEngine = new ThWExternalTagRecognitionEngine();
-            ExternalTagsEngine.Recognize(database, pts);
-            ExternalTagsEngine.Elements.ForEach(o =>
+        private void GetExternalTags(Database database, Point3dCollection pts)
+        {  
+            var externalTagsEngine = new ThWExternalTagRecognitionEngine();
+            externalTagsEngine.Recognize(database, pts);
+            externalTagsEngine.Elements.ForEach(o =>
             {
                 Polyline curve = o.Outline as Polyline;
-                Columns.Add(curve.WashClone());
-            });
-            return Columns;
+                ExternalTags.Add(curve.WashClone());
+            });         
         }
 
-        private static List<Curve> GetAxialAxisTags(Database database, Point3dCollection pts)
+        private void GetAxialAxisTags(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
-            var circles = new List<Curve>();
+            var polylines = new List<Curve>();           
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var axialAxisTagDbExtension = new ThAxialAxisTagDbExtension(database))
             {
                 axialAxisTagDbExtension.BuildElementCurves();
-                Columns = axialAxisTagDbExtension.Polylines;
+                polylines = axialAxisTagDbExtension.Polylines;
             }
-            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));
-            return circles;
+            polylines.ForEach(o => AxialAxisTags.Add(ThWPipeOutputFunction.GetPolylineBoundary(o)));           
         }
 
-        private static List<Curve> GetAxialCircleTag(Database database, Point3dCollection pts)
+        private void GetAxialCircleTag(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Circle>();
-            var circles = new List<Curve>();
+            var circles = new List<Circle>();        
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var axialCircleTagDbExtension = new ThAxialCircleTagDbExtension(database))
             {
                 axialCircleTagDbExtension.BuildElementCurves();
-                Columns = axialCircleTagDbExtension.Circles;
+                circles = axialCircleTagDbExtension.Circles;
             }
-            Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetCircleBoundary(o)));
-            return circles;
+            circles.ForEach(o => AxialCircleTags.Add(ThWPipeOutputFunction.GetCircleBoundary(o)));          
         }
-        private static List<Curve> GetInnerDoors(Database database, Point3dCollection pts)
+        private void GetInnerDoors(Database database, Point3dCollection pts)
         {
             var engine = new ThDoorRecognitionEngine();
             engine.Recognize(database, pts);
-            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
+            InnerDoors=engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();      
         }
-        private static List<Curve> GetDevices(Database database, Point3dCollection pts)
+        private void GetDevices(Database database, Point3dCollection pts)
         {
             var engine = new ThWDeviceRecognitionEngine();
             engine.Recognize(database, pts);
-            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
+            Devices=engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
         }
-        private static List<Curve> GetTagNameFrames(Database database, Point3dCollection pts)
+        private void  GetTagNameFrames(Database database, Point3dCollection pts)
         {
-            var Columns = new List<Curve>();
             var architectureElevationEngine = new ThWArchitectureElevationRecognitionEngine();
             architectureElevationEngine.Recognize(database, pts);
             architectureElevationEngine.DbTexts.ForEach(o =>
             {
-
                 if (!o.Layer.Contains("LEVL"))
                 {
-                    Columns.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position));
+                    TagNameFrames.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position));
                 }
             });
-            return Columns;
         }
-        private static List<Curve> GetElevationFrames(Database database, Point3dCollection pts)
-        {
-            var Columns = new List<Curve>();
+        private void GetElevationFrames(Database database, Point3dCollection pts)
+        {     
             var architectureElevationEngine = new ThWArchitectureElevationRecognitionEngine();
             architectureElevationEngine.Recognize(database, pts);
-
             architectureElevationEngine.DbTexts.ForEach(o =>
             {
-
                 if (o.Layer.Contains("LEVL"))
                 {
-                    Columns.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position));
+                    ElevationFrames.Add(ThWPipeOutputFunction.GetTextBoundary(o.WidthFactor * o.Height, o.Height, o.Position));
                 }
-            });
-            return Columns;
+            });            
         }
-        private static List<Polyline> GetStarFrames(List<ThIfcSpace> spaces)
-        {
-            var frame = new List<Polyline>();
+        private void GetStarFrames(List<ThIfcSpace> spaces)
+        {         
             foreach (ThIfcSpace space in spaces)
             {
                 Point3d minPoint = space.Boundary.GeometricExtents.MinPoint;
                 Point3d maxPoint = space.Boundary.GeometricExtents.MaxPoint;
                 if (Math.Abs(minPoint.DistanceTo(maxPoint) - 5500) < 100)
                 {
-                    frame.Add(space.Boundary as Polyline);
+                    StairFrames.Add(space.Boundary as Polyline);
                 }
-            }
-            return frame;
+            }         
         }
 
         private void GetBuildingElements(Database database, Point3dCollection pts)
@@ -352,6 +317,18 @@ namespace ThMEPWSS.Pipe.Engine
             AllObstacles.AddRange(Columns);
             AllObstacles.AddRange(ShearWalls);
             AllObstacles.AddRange(ArchitectureWalls);
+            AllObstacles.AddRange(Wells);
+            AllObstacles.AddRange(TagNameFrames);
+            AllObstacles.AddRange(StairFrames);
+            AllObstacles.AddRange(InnerDoors); 
+            AllObstacles.AddRange(Devices); 
+            AllObstacles.AddRange(ElevationFrames); 
+            AllObstacles.AddRange(AxialCircleTags); 
+            AllObstacles.AddRange(AxialAxisTags); 
+            AllObstacles.AddRange(ExternalTags); 
+            AllObstacles.AddRange(DimensionTags); 
+            AllObstacles.AddRange(RainPipes); 
+            AllObstacles.AddRange(PositionTags);
         }
     }
 }
