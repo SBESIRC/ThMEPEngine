@@ -9,10 +9,18 @@ namespace ThMEPEngineCore.Features
     {
         public static Feature Construct(ThIfcWall wall)
         {
-            var poly = wall.Outline as Polyline;
-            if (poly != null)
+            if (wall.Outline is Polyline poly)
             {
                 var geometry = poly.ToNTSPolygon();
+                return new Feature()
+                {
+                    Geometry = geometry,
+                    BoundingBox = geometry.EnvelopeInternal,
+                };
+            }
+            else if(wall.Outline is MPolygon mPolygon)
+            {
+                var geometry = mPolygon.ToNTSGeometry();
                 return new Feature()
                 {
                     Geometry = geometry,

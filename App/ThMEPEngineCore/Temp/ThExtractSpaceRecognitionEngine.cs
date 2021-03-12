@@ -246,7 +246,7 @@ namespace ThMEPEngineCore.Temp
                     }
                     else if(o is MText mText)
                     {
-                        textString = mText.Contents;
+                        textString = mText.Text;
                     }
                     var belonged = curves.Cast<Polyline>().OrderBy(k => k.Area).First();
                     if(!dict.ContainsKey(belonged))
