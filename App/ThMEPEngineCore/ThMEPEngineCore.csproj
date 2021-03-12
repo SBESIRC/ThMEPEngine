@@ -157,6 +157,7 @@
     <Compile Include="Model\ThIfcExternalSpatialStructureElement.cs" />
     <Compile Include="Model\ThIfcFeatureElement.cs" />
     <Compile Include="Model\ThIfcFeatureElementSubtraction.cs" />
+    <Compile Include="Model\ThIfcFireSuppressionTerminal.cs" />
     <Compile Include="Model\ThIfcFlowController.cs" />
     <Compile Include="Model\ThIfcFlowFitting.cs" />
     <Compile Include="Model\ThIfcFlowMovingDevice.cs" />
