@@ -1,11 +1,10 @@
 ﻿using System;
 using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Algorithm;
-using ThMEPEngineCore.Service;
-using System.Collections.Generic;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -30,11 +29,7 @@ namespace ThMEPWSS.Pipe.Engine
 
         public override bool IsDistributionElement(Entity entity)
         {
-            if (entity is BlockReference blkref)
-            {
-                return ThInnerDoorLayerManager.IsInnerDoorLayerName(blkref.Layer);
-            }
-            return false;
+            return entity is BlockReference;
         }
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)

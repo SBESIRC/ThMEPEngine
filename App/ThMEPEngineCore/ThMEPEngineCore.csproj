@@ -267,7 +267,6 @@
     <Compile Include="Service\ThGravityWaterBucketDbExtension.cs" />
     <Compile Include="Service\ThGravityWaterBucketLayerManager.cs" />
     <Compile Include="LaneLine\ThLaneLineSimplifier.cs" />
-    <Compile Include="Service\ThInnerDoorLayerManager.cs" />
     <Compile Include="Service\ThLinealBeamSplitterExtension.cs" />
     <Compile Include="Service\ThLineBeamMarkingService.cs" />
     <Compile Include="Service\ThLineBeamOutliner.cs" />
