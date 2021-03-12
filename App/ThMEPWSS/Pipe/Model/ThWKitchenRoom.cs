@@ -25,6 +25,11 @@ namespace ThMEPWSS.Pipe.Model
         /// 相邻屋顶雨水管
         /// </summary>
         public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
+        /// <summary>
+        /// 相邻冷凝管
+        /// </summary>
+        public List<ThWCondensePipe> CondensePipes { get; set; }
+        public List<ThWFloorDrain> FloorDrains { get; set; }
         public ThWKitchenRoom()
         {
             Pypes = new List<ThIfcSpace>();
@@ -32,6 +37,8 @@ namespace ThMEPWSS.Pipe.Model
             DrainageWells = new List<ThIfcSpace>();
             RainPipes = new List<ThWRainPipe>();
             RoofRainPipes = new List<ThWRoofRainPipe>();
+            CondensePipes = new List<ThWCondensePipe>();
+            FloorDrains = new List<ThWFloorDrain>();
         }
     }
 }

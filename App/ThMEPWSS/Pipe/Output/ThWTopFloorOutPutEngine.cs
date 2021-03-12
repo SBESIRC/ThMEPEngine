@@ -263,6 +263,18 @@ namespace ThMEPWSS.Pipe.Output
             {
                 parameters.boundary1 = GetToiletBoundary(parameters.boundary1, parameters.outline1);
             }
+            if (composite.Toilet.DrainageWells.Count > 1)
+            {
+                foreach (var drainWell in composite.Toilet.DrainageWells)
+                {
+                    Polyline wellOutline = drainWell.Boundary as Polyline;
+                    if (GeomUtils.PtInLoop(parameters.boundary1, wellOutline.GetCenter()))
+                    {
+                        parameters.outline1 = wellOutline;
+                        break;
+                    }
+                }
+            }
             parameters.closestool = composite.Toilet.Closestools[0].Outline as Polyline;
             if (composite.Toilet.CondensePipes.Count > 0)
             {
@@ -287,6 +299,13 @@ namespace ThMEPWSS.Pipe.Output
                 parameters0.tfloordrain.Add(parameters.floordrain);
                 parameters.tfloordrain_.Add(parameters.floordrain);
             }
+            foreach (var FloorDrain in composite.Kitchen.FloorDrains)
+            {
+                parameters.floordrain = FloorDrain.Outline as BlockReference;
+                parameters0.tfloordrain.Add(parameters.floordrain);
+                parameters.tfloordrain_.Add(parameters.floordrain);
+            }
+
         }
         private static void AddCompositeKitchenPipe(ThWCompositePipeEngine compositeEngine,AcadDatabase acadDatabase,ThWTopParameters parameters0,string W_DRAI_EQPM)
         {

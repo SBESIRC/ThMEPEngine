@@ -17,6 +17,9 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWRainPipe> RainPipes { get; set; }
         public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public List<ThWBasin> BasinTools { get; set; }
+        public List<ThWCondensePipe> CondensePipes { get; set; }
+        public List<ThWFloorDrain> FloorDrains { get; set; }
+
         public ThWKitchenRoomRecognitionEngine()
         {
             Rooms = new List<ThWKitchenRoom>();
@@ -40,7 +43,7 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                         spaces = this.Spaces;
                 }               
-                Rooms = ThKitchenRoomService.Build(spaces, BasinTools, RainPipes, RoofRainPipes);
+                Rooms = ThKitchenRoomService.Build(spaces, BasinTools, RainPipes, RoofRainPipes, CondensePipes, FloorDrains);
             }
         }   
     }

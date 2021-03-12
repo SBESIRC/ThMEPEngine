@@ -40,7 +40,11 @@ namespace ThMEPWSS.Pipe.Service
                 if (engine.Elements.Count == 0)
                 {
                     return;
-                }
+                }                              
+                engine.Elements.Cast<ThWStoreys>().ForEach(o =>
+                {
+                    ThTagParametersService.blockCollection.Add(acadDatabase.Element<BlockReference>(o.ObjectId));
+                });
                 var objIds = new ObjectIdCollection(engine.Elements.Cast<ThWStoreys>().Select(o => o.ObjectId).ToArray());
                 if (objIds.Count > 0)
                 {

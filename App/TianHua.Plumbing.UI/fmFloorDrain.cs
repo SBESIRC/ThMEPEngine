@@ -23,8 +23,7 @@ namespace TianHua.Plumbing.UI
 
         public void InitForm()
         {
-            List<string> _List = new List<string> { "小屋面", "大屋面", "43F（标）", "44F（标）", "43F（非）" };
-            ListBox.DataSource = _List;
+            ListBox.DataSource = new List<string>(); 
         }
 
         private void BtnFloorFocus_Click(object sender, EventArgs e)
@@ -86,6 +85,11 @@ namespace TianHua.Plumbing.UI
 #else
             Active.Document.Window.Focus();
 #endif
+        }
+
+        private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

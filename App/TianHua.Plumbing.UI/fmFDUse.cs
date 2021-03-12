@@ -17,7 +17,7 @@ namespace TianHua.Plumbing.UI
 
         public void InitForm( )
         {
-            List<string> _List = new List<string> { "小屋面", "大屋面", "43F（标）", "44F（标）", "43F（非）" };
+            List<string> _List = new List<string> {};
             var floorNames = new List<string>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
