@@ -84,9 +84,8 @@ namespace ThMEPWSS.Pipe.Engine
                 GetLayers(database, pts).ForEach(o => Layers.Add(o));
                 GetTagNameFrames(database, pts);
                 GetStarFrames(this.Spaces);
-                //TODO: 获取块的GeometricExtents会抛出异常
                 //GetInnerDoors(database, pts);
-                //GetDevices(database, pts);
+                GetDevices(database, pts);
                 GetElevationFrames(database, pts);
                 GetAxialCircleTag(database, pts);
                 GetAxialAxisTags(database, pts);               
