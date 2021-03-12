@@ -1,22 +1,23 @@
 ﻿using System;
 using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.Runtime;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using NFox.Cad;
-using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.Service;
 using ThMEPWSS.Bussiness;
+using ThMEPWSS.Command;
 using ThMEPWSS.Bussiness.LayoutBussiness;
 
 namespace ThMEPWSS
@@ -354,6 +355,15 @@ namespace ThMEPWSS
                     RayLayoutService layoutDemo = new RayLayoutService();
                     layoutDemo.LayoutSpray(plFrame, columns, beams, walls, holes, matrix, true);
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPL18", CommandFlags.Modal)]
+        public void THPL18()
+        {
+            using (var cmd = new ThSprinklerDistanceCheckCmd())
+            {
+                cmd.Execute();
             }
         }
 
