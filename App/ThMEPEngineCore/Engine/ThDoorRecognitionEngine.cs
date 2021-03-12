@@ -1,5 +1,4 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
@@ -10,74 +9,83 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
+    public class ThDoorExtractionEngine : ThBuildingElementExtractionEngine
+    {
+        public override void Extract(Database database)
+        {
+            var visitor = new ThDoorExtractionVisitor();
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
+        }
+    }
+
     public class ThDoorRecognitionEngine : ThBuildingElementRecognitionEngine
     {
-        public double FindRatio { get; set; } = 1.0;
         public override void Recognize(Database database, Point3dCollection polygon)
-        {        
-            // 搜集门垛
-            var doorStones = GetDoorStones(database, polygon);
-            // 搜集门标注
-            var doorMarks = GetDoorMarks(database, polygon);
-            // 搜集门标注范围内的门垛
-            var buildService = new ThCollectDoorStoneService(
-                doorStones.Select(o=>o.Geometry).ToCollection(),
-                doorMarks.Select(o => o.Data as Entity).ToCollection());
-            buildService.Build();
-
-            //构件索引服务
+        {
+            // 构件索引服务
             ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
             {
                 BuiltInCategory.OST_ArchitectureWall,
-                BuiltInCategory.OST_Column,                
+                BuiltInCategory.OST_Column,
                 BuiltInCategory.OST_CurtainWall,
                 BuiltInCategory.OST_ShearWall,
                 BuiltInCategory.OST_Window
             });
             ThSpatialIndexCacheService.Instance.Build(database, polygon);
 
-            // 创建门
-            var buildDoor = new ThBuildDoorService();
-            buildDoor.Build(buildService.Results);
-
-            buildDoor.Outlines.ForEach(o => Elements.Add(new ThIfcDoor { Outline = o }));
+            // 识别门
+            var engine = new ThDoorExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
         }
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            throw new NotSupportedException();
+            // 搜集门垛
+            var doorStones = GetDoorStones(datas.Where(o => o is ThRawDoorStone).ToList(), polygon);
+            // 搜集门标注
+            var doorMarks = GetDoorMarks(datas.Where(o => o is ThRawDoorMark).ToList(), polygon);
+            // 搜集门标注范围内的门垛
+            var buildService = new ThCollectDoorStoneService(
+                doorStones.Select(o => o.Geometry).ToCollection(),
+                doorMarks.Select(o => o.Data as Entity).ToCollection());
+            buildService.Build();
+
+            // 创建门
+            var buildDoor = new ThBuildDoorService();
+            buildDoor.Build(buildService.Results);
+            buildDoor.Outlines.ForEach(o => Elements.Add(new ThIfcDoor { Outline = o }));
         }
-        private List<ThRawIfcBuildingElementData> GetDoorStones(Database database, Point3dCollection polygon)
+        private List<ThRawIfcBuildingElementData> GetDoorStones(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            var engine = new ThDoorStoneExtractionEngine();
-            engine.Extract(database);
             if (polygon.Count > 0)
             {
                 var dbObjs = new DBObjectCollection();
-                engine.Results.ForEach(o => dbObjs.Add(o.Geometry));
+                datas.ForEach(o => dbObjs.Add(o.Geometry));
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 var filterObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                return engine.Results.Where(o=>filterObjs.Contains(o.Geometry)).ToList();
+                return datas.Where(o => filterObjs.Contains(o.Geometry)).ToList();
             }
             else
             {
-                return engine.Results;
+                return datas;
             }
         }
-        private List<ThRawIfcBuildingElementData> GetDoorMarks(Database database, Point3dCollection polygon)
+        private List<ThRawIfcBuildingElementData> GetDoorMarks(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            var engine = new ThDoorMarkExtractionEngine();
-            engine.Extract(database);
             if (polygon.Count > 0)
             {
                 var dbObjs = new DBObjectCollection();
-                engine.Results.ForEach(o => dbObjs.Add(o.Geometry));
+                datas.ForEach(o => dbObjs.Add(o.Geometry));
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 var filterObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                return engine.Results.Where(o => filterObjs.Contains(o.Geometry)).ToList();
+                return datas.Where(o => filterObjs.Contains(o.Geometry)).ToList();
             }
             else
             {
-                return engine.Results;
+                return datas;
             }
         }
     }

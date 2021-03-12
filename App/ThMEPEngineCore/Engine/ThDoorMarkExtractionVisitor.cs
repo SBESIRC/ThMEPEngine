@@ -9,6 +9,7 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRawDoorMark : ThRawIfcBuildingElementData
     {
+        //
     }
 
     public class ThDoorMarkExtractionVisitor : ThBuildingElementExtractionVisitor
