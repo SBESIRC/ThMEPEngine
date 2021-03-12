@@ -30,7 +30,7 @@ namespace ThMEPEngineCore.Engine
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                elements.RemoveAll(o => !xclip.Contains(GetTextPosition(o.Data)));
+                elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));                
             }
         }
 
@@ -61,21 +61,6 @@ namespace ThMEPEngineCore.Engine
         {
             var thPropertySet = ThPropertySet.CreateWithHyperlink(curve.Hyperlinks[0].Description);
             return thPropertySet.IsDoor;
-        }
-        private Point3d GetTextPosition(object ent)
-        {
-            if (ent is DBText dbText)
-            {
-                return dbText.Position;
-            }
-            else if (ent is MText mText)
-            {
-                return mText.Location;
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
+        }        
     }
 }

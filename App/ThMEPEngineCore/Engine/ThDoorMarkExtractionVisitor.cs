@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -32,7 +33,7 @@ namespace ThMEPEngineCore.Engine
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
+                elements.RemoveAll(o => !xclip.Contains(GetTextPosition(o.Data)));
             }
         }
 
@@ -83,6 +84,21 @@ namespace ThMEPEngineCore.Engine
         {
             var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
             return thPropertySet.IsDoor;
+        }
+        private Point3d GetTextPosition(object ent)
+        {
+            if (ent is DBText dbText)
+            {
+                return dbText.Position;
+            }
+            else if (ent is MText mText)
+            {
+                return mText.Location;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -24,8 +24,8 @@ namespace ThMEPEngineCore.Engine
 
         public override void DoXClip(List<ThRawIfcBuildingElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
-            MarkVisitor.DoXClip(elements, blockReference, matrix);
-            StoneVisitor.DoXClip(elements, blockReference, matrix);
+            MarkVisitor.DoXClip(elements.Where(o=>o is ThRawDoorMark).ToList(), blockReference, matrix);
+            StoneVisitor.DoXClip(elements.Where(o => o is ThRawDoorStone).ToList(), blockReference, matrix);
         }
     }
 }
