@@ -20,7 +20,7 @@ namespace ThMEPWSS.Pipe.Service
         public static double RoofRainpipe = 100;
         public static double Rainpipe = 100;
         public static string sourceFloor = "标准层35";
-        public static int ScaleFactor = 0;
+        public static int ScaleFactor = 1;
         public static bool IsCaisson = false;
         public static bool IsSeparation = false;
         public static string PipeLayer = "";
