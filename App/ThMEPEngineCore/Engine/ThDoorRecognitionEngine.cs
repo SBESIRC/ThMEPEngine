@@ -1,7 +1,7 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
@@ -42,24 +42,9 @@ namespace ThMEPEngineCore.Engine
 
             buildDoor.Outlines.ForEach(o => Elements.Add(new ThIfcDoor { Outline = o }));
         }
-
         public override void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
         {
-            var curves = new DBObjectCollection();
-            var objs = datas.Select(o => o.Geometry).ToCollection();
-            if (polygon.Count > 0)
-            {
-                var doorStoneSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                foreach (var filterObj in doorStoneSpatialIndex.SelectCrossingPolygon(polygon))
-                {
-                    curves.Add(filterObj as Curve);
-                }
-            }
-            else
-            {
-                curves = objs;
-            }
-            curves.Cast<Curve>().ForEach(o => Elements.Add(new ThIfcDoor() { Outline = o }));
+            throw new NotSupportedException();
         }
         private List<ThRawIfcBuildingElementData> GetDoorStones(Database database, Point3dCollection polygon)
         {
