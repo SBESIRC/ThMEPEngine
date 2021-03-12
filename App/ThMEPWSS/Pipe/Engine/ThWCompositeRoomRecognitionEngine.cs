@@ -37,6 +37,8 @@ namespace ThMEPWSS.Pipe.Engine
                     Spaces = Spaces,
                     RainPipes = rainPipes,
                     RoofRainPipes= roofRainPipes,
+                    CondensePipes = condensePipes,
+                    FloorDrains = floorDrains,
                     BasinTools = basinTools
                 };
                 kichenEngine.Recognize(database, pts);            

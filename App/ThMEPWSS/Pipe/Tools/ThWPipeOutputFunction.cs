@@ -813,6 +813,18 @@ namespace ThMEPWSS.Pipe.Tools
                 {
                     parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.outline);
                 }
+                if(composite.Kitchen.DrainageWells.Count>1)
+                {
+                    foreach(var drainWell in composite.Kitchen.DrainageWells)
+                    {
+                        Polyline wellOutline = drainWell.Boundary as Polyline;
+                        if (GeomUtils.PtInLoop(parameters.boundary, wellOutline.GetCenter()))
+                        {
+                            parameters.outline = wellOutline;
+                            break;
+                        }
+                    }
+                }
                 parameters.basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
                 if (composite.Kitchen.Pypes.Count > 0)
                 {
@@ -834,6 +846,13 @@ namespace ThMEPWSS.Pipe.Tools
                         parameters0.roofrain_pipe.Add(s);
                         parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 38.5 });
                         parameters0.copyroofpipes.Add(new Circle() { Center = s.GetCenter(), Radius = 55.0 });
+                    }
+                }
+                if (composite.Kitchen.CondensePipes.Count > 0)
+                {
+                    foreach (var pipe in composite.Kitchen.CondensePipes)
+                    {
+                        parameters0.npipe.Add(pipe.Outline as Polyline);
                     }
                 }
             }
@@ -884,12 +903,12 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public bool IsValidKitchenContainer(ThWKitchenRoom kitchenContainer)
         {
-            return (kitchenContainer.Space != null && kitchenContainer.DrainageWells.Count == 1);
+            return (kitchenContainer.Space != null && kitchenContainer.DrainageWells.Count >0);
         }
         public bool IsValidToiletContainer(ThWToiletRoom toiletContainer)
         {
             return toiletContainer.Space != null &&
-                toiletContainer.DrainageWells.Count == 1 &&
+                toiletContainer.DrainageWells.Count >0 &&
                 toiletContainer.Closestools.Count == 1 &&
                 toiletContainer.FloorDrains.Count > 0;
         }

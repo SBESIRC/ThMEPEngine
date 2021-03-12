@@ -4,6 +4,7 @@ using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -45,16 +46,39 @@ namespace ThMEPWSS.Pipe.Engine
             var target_objs = new DBObjectCollection();
             var entities = new List<Entity>();
             sourceBlock[0].Explode(objs);
-            targetBlock[0].Explode(target_objs);
-            Circle origin = objs[0] as Circle;
-            Circle proposed = target_objs[0] as Circle;
-            var offset = Matrix3d.Displacement(origin.Center.GetVectorTo(proposed.Center));
+            targetBlock[0].Explode(target_objs);                   
+            var offset = Matrix3d.Displacement(GetPoint(sourceBlock[0]).GetVectorTo(GetPoint(targetBlock[0])));
             foreach (object et in objs)
             {
                 Entity ent = et as Entity;
                 entities.Add(ent.GetTransformedCopy(offset));
             }
             acadDatabase.ModelSpace.Add(CreateBlock(acadDatabase.Database, entities, target_objs, targetBlock, name));
+        }
+        private static Point3d GetPoint(BlockReference blockSp)
+        {
+            if (blockSp.GetEffectiveName().Length == 3)
+            {
+                foreach (var block in ThTagParametersService.blockCollection)
+                {
+                    if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Equals(blockSp.GetEffectiveName()))
+                    {
+                        return block.GeometricExtents.MinPoint;
+                    }
+                }
+            }
+            else
+            {
+                var name = blockSp.GetEffectiveName().Substring(3, blockSp.GetEffectiveName().Length - 3);
+                foreach (var block in ThTagParametersService.blockCollection)
+                {            
+                    if (BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号").Equals(name))
+                    {
+                        return block.GeometricExtents.MinPoint;
+                    }
+                }
+            }
+            return new Point3d();
         }
         private static void CopyTags(List<BlockReference> targetBlock, List<BlockReference> sourceBlock, AcadDatabase acadDatabase)
         {
@@ -64,9 +88,8 @@ namespace ThMEPWSS.Pipe.Engine
             var entities = new List<Entity>();
             sourceBlock[0].Explode(objs);
             targetBlock[0].Explode(target_objs);
-            Circle origin = objs[0] as Circle;
-            Circle proposed = target_objs[0] as Circle;
-            var offset = Matrix3d.Displacement(origin.Center.GetVectorTo(proposed.Center));
+          
+            var offset = Matrix3d.Displacement(GetPoint(sourceBlock[0]).GetVectorTo(GetPoint(targetBlock[0])));
             for (int i = 0; i < objs.Count; i++)
             {
                 int n = 0;
@@ -78,7 +101,7 @@ namespace ThMEPWSS.Pipe.Engine
                         if (target_objs[j].GetType().Name == "DBText")
                         {
                             DBText proposeTx = target_objs[j] as DBText;
-                            if (proposeTx.Position.DistanceTo((originTx.Position) + origin.Center.GetVectorTo(proposed.Center)) < 1)
+                            if (proposeTx.Position.DistanceTo((originTx.Position) + GetPoint(sourceBlock[0]).GetVectorTo(GetPoint(targetBlock[0]))) < 1)
                             {
                                 Entity ent1 = objs[i] as Entity;
                                 target_objs[j] = ent1.GetTransformedCopy(offset);

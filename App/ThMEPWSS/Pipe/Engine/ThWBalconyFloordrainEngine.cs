@@ -565,8 +565,22 @@ namespace ThMEPWSS.Pipe.Engine
             if (rainpipe.GetCenter().DistanceTo(Floordrain_washing[0].Position) > ThWPipeCommon.MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE)
             {
                 //balcony范围内生成新管井
-                var perpendicular_basepoint = linespecific.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;                        
-                center = Floordrain_washing[0].Position + (perpendicular_basepoint.GetVectorTo(linespecific.EndPoint).GetNormal()) * (perpendicular_basepoint.DistanceTo(linespecific.EndPoint) - 100);                             
+                var perpendicular_basepoint = linespecific.ToCurve3d().GetClosestPointTo(Floordrain_washing[0].Position).Point;
+                if (perpendicular_basepoint.DistanceTo(linespecific.EndPoint) > 1)
+                {
+                    center = Floordrain_washing[0].Position + (perpendicular_basepoint.GetVectorTo(linespecific.EndPoint).GetNormal()) * (perpendicular_basepoint.DistanceTo(linespecific.EndPoint) - 100);
+                }
+                else
+                {
+                    if (Floordrain_washing[0].Position.X < perpendicular_basepoint.X)
+                    {
+                        center = new Point3d(perpendicular_basepoint.X-2* ThWPipeCommon.COMMONRADIUS, Floordrain_washing[0].Position.Y,0);
+                    }
+                    else
+                    {
+                        center = new Point3d(perpendicular_basepoint.X+2* ThWPipeCommon.COMMONRADIUS, Floordrain_washing[0].Position.Y, 0);
+                    }
+                }
             }
             else
             {

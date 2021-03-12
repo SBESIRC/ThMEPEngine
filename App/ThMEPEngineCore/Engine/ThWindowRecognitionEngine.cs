@@ -53,9 +53,12 @@ namespace ThMEPEngineCore.Engine
 
             //创建窗户的外轮廓
             //后续，根据需要增加处理...
-            foreach (var obj in curves.ToCollection().Outline())
+            if (curves.Count > 0)
             {
-                Elements.Add(ThIfcWindow.Create(obj as Entity));
+                foreach (var obj in curves.ToCollection().Outline())
+                {
+                    Elements.Add(ThIfcWindow.Create(obj as Entity));
+                }
             }
         }
     }

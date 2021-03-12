@@ -79,6 +79,18 @@ namespace ThMEPWSS.Pipe.Service
                     }
                 }
             }
+            else
+            {
+                foreach (var FloorDrain in FloorDrains)
+                {
+                    BlockReference block = FloorDrain.Outline as BlockReference;
+                    Polyline boundary = toiletSpace.Boundary as Polyline;
+                    if (block.Position.DistanceTo(boundary.GetCenter()) < ThWPipeCommon.MAX_TOILET_TO_FLOORDRAIN_DISTANCE2)
+                    {
+                        thToiletContainer.FloorDrains.Add(FloorDrain);
+                    }
+                }
+            }
             thToiletContainer.CondensePipes = FindCondensePipes(CondensePipes, toiletSpace);
             thToiletContainer.RoofRainPipes = FindRoofRainPipes(RoofRainPipes, toiletSpace);
             return thToiletContainer;
