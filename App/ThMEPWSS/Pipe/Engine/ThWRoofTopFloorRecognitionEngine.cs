@@ -79,23 +79,17 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     this.Spaces = GetSpaces(database, pts);
                 }
+                //获取外参元素
+                GetBuildingElements(database, pts);
                 GetLayers(database, pts).ForEach(o => Layers.Add(o));
                 GetTagNameFrames(database, pts).ForEach(o => TagNameFrames.Add(o));
                 GetTagNameFrames(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetStarFrames(this.Spaces).ForEach(o => StairFrames.Add(o));
                 GetStarFrames(this.Spaces).ForEach(o => AllObstacles.Add(o));
-                GetColumns(database, pts).ForEach(o => Columns.Add(o));
-                GetColumns(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetShearWalls(database, pts).ForEach(o => ShearWalls.Add(o));
-                GetShearWalls(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetInnerDoors(database, pts).ForEach(o => InnerDoors.Add(o));
                 GetInnerDoors(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetDevices(database, pts).ForEach(o => Devices.Add(o));
                 GetDevices(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetArchitectureWalls(database, pts).ForEach(o => ArchitectureWalls.Add(o));
-                GetArchitectureWalls(database, pts).ForEach(o => AllObstacles.Add(o));
-                GetWindows(database, pts).ForEach(o => Windows.Add(o));
-                GetWindows(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetElevationFrames(database, pts).ForEach(o => ElevationFrames.Add(o));
                 GetElevationFrames(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetAxialCircleTag(database, pts).ForEach(o => AxialCircleTags.Add(o));
@@ -104,7 +98,7 @@ namespace ThMEPWSS.Pipe.Engine
                 GetAxialAxisTags(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetExternalTags(database, pts).ForEach(o => ExternalTags.Add(o));
                 GetExternalTags(database, pts).ForEach(o => AllObstacles.Add(o));
-                //本图元素
+                //获取本图元素
                 GetWells(database, pts).ForEach(o => Wells.Add(o));
                 GetWells(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetAllTags(database, pts).ForEach(o => DimensionTags.Add(o));
@@ -113,6 +107,8 @@ namespace ThMEPWSS.Pipe.Engine
                 GetRainPipes(database, pts).ForEach(o => AllObstacles.Add(o));
                 GetPositionTags(database, pts).ForEach(o => PositionTags.Add(o));
                 GetPositionTags(database, pts).ForEach(o => AllObstacles.Add(o));
+                //指定阻碍物
+                GetAllObstacles();
                 var baseCircles = GetBaseCircles(blockCollection);
                 Rooms = ThRoofDeviceFloorRoomService.Build(DeviceSpaces, GravityWaterBuckets, SideEntryWaterBuckets, RoofRainPipes, baseCircles);
             }
@@ -249,33 +245,9 @@ namespace ThMEPWSS.Pipe.Engine
             Columns.ForEach(o => circles.Add(ThWPipeOutputFunction.GetCircleBoundary(o)));
             return circles;
         }
-        private static List<Curve> GetColumns(Database database, Point3dCollection pts)
-        {
-            var engine = new ThColumnRecognitionEngine();
-            engine.Recognize(database, pts);
-            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
-        }
-        private static List<Curve> GetShearWalls(Database database, Point3dCollection pts)
-        {
-            var engine = new ThShearWallRecognitionEngine();
-            engine.Recognize(database, pts);
-            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
-        }
         private static List<Curve> GetInnerDoors(Database database, Point3dCollection pts)
         {
             var engine = new ThDoorRecognitionEngine();
-            engine.Recognize(database, pts);
-            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
-        }
-        private static List<Curve> GetWindows(Database database, Point3dCollection pts)
-        {
-            var engine = new ThWindowRecognitionEngine();
-            engine.Recognize(database, pts);
-            return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
-        }
-        private static List<Curve> GetArchitectureWalls(Database database, Point3dCollection pts)
-        {
-            var engine = new ThArchitectureWallRecognitionEngine();
             engine.Recognize(database, pts);
             return engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();
         }
@@ -329,6 +301,57 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
             return frame;
+        }
+
+        private void GetBuildingElements(Database database, Point3dCollection pts)
+        {
+            var extractor = new ThBuildingElementExtractor();
+            var columnVisitor = new ThColumnExtractionVisitor()
+            {
+                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database),
+            };
+            var shearWallVisitor = new ThShearWallExtractionVisitor()
+            {
+                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
+            };
+            var windowVisitor = new ThWindowExtractionVisitor()
+            {
+                LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
+            };
+            var archWallVisitor = new ThArchitectureWallExtractionVisitor()
+            {
+                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
+            };
+            extractor.Accept(columnVisitor);
+            extractor.Accept(shearWallVisitor);
+            extractor.Accept(windowVisitor);
+            extractor.Accept(archWallVisitor);
+            extractor.Extract(database);
+
+            var columnEngine = new ThColumnRecognitionEngine();
+            columnEngine.Recognize(columnVisitor.Results, pts);
+            var columns = columnEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
+            var shearWallEngine = new ThShearWallRecognitionEngine();
+            shearWallEngine.Recognize(shearWallVisitor.Results, pts);
+            var shearWalls = shearWallEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
+            var windowEngine = new ThWindowRecognitionEngine();
+            windowEngine.Recognize(windowVisitor.Results, pts);
+            var windows = windowEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
+            var archWallEngine = new ThArchitectureWallRecognitionEngine();
+            archWallEngine.Recognize(archWallVisitor.Results, pts);
+            var archWalls = archWallEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
+            Windows.AddRange(windows);
+            Columns.AddRange(columns);
+            ShearWalls.AddRange(shearWalls);
+            ArchitectureWalls.AddRange(archWalls);
+        }
+
+        private void GetAllObstacles()
+        {
+            AllObstacles.AddRange(Windows);
+            AllObstacles.AddRange(Columns);
+            AllObstacles.AddRange(ShearWalls);
+            AllObstacles.AddRange(ArchitectureWalls);
         }
     }
 }
