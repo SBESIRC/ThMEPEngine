@@ -20,7 +20,7 @@ namespace ThMEPWSS.Pipe.Engine
     /// </summary>
     public class ThWRoofTopFloorRecognitionEngine : ThWRoomRecognitionEngine
     {
-        public List<ThWRoofDeviceFloorRoom> Rooms { get; set; }
+        public List<ThWRoofTopFloorRoom> Rooms { get; set; }
         public List<Curve> TagNameFrames { get; set; }
         public List<Curve> StairFrames { get; set; }
         public List<Curve> Columns { get; set; }
@@ -49,7 +49,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<BlockReference> blockCollection { get; set; }
         public ThWRoofTopFloorRecognitionEngine()
         {
-            Rooms = new List<ThWRoofDeviceFloorRoom>();
+            Rooms = new List<ThWRoofTopFloorRoom>();
             TagNameFrames = new List<Curve>();
             StairFrames = new List<Curve>();
             Columns = new List<Curve>();
@@ -72,7 +72,7 @@ namespace ThMEPWSS.Pipe.Engine
         }
         public override void Recognize(Database database, Point3dCollection pts)
         {
-            Rooms = new List<ThWRoofDeviceFloorRoom>();
+            Rooms = new List<ThWRoofTopFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {             
                 if (this.Spaces.Count == 0)

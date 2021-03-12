@@ -6,7 +6,7 @@ namespace ThMEPWSS.Pipe.Model
     /// <summary>
     /// 屋顶设备层
     /// </summary>
-    public class ThWRoofDeviceFloorRoom : ThWRoom
+    public class ThWRoofTopFloorRoom : ThWRoom
     {
         /// <summary>
         /// 重力水斗
@@ -24,7 +24,7 @@ namespace ThMEPWSS.Pipe.Model
         /// 基点区域
         /// </summary>
         public List<ThIfcSpace> BaseCircles { get; set; }
-        public ThWRoofDeviceFloorRoom()
+        public ThWRoofTopFloorRoom()
         {
             GravityWaterBuckets = new List<ThWGravityWaterBucket>();
             SideEntryWaterBuckets = new List<ThWSideEntryWaterBucket>();

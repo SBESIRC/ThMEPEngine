@@ -12,7 +12,7 @@ namespace ThMEPWSS.Pipe.Layout
     {
         public static void LayoutRoofDeviceFloor(ThWCompositeFloorRecognitionEngine FloorEngines, ThWRoofDeviceParameters parameters2, AcadDatabase acadDatabase,int scaleFactor,string W_RAIN_NOTE1)
         {
-            foreach (var composite in FloorEngines.RoofDeviceFloors)
+            foreach (var composite in FloorEngines.RoofTopFloors)
             {
                 var basecircle0 = composite.BaseCircles[0].Boundary.GetCenter();
                 parameters2.baseCenter0.Add(basecircle0);

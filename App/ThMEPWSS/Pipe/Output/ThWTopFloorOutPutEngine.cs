@@ -41,16 +41,12 @@ namespace ThMEPWSS.Pipe.Output
                 {
                     InputToiletFloorParameters(composite,  parameters,  parameters0);                 
                 }
-                var zone = new ThWPipeZone();
                 var toiletEngines = new ThWToiletPipeEngine()
                 {
-                    Zone = zone,
                     Parameters = new ThWToiletPipeParameters(ThTagParametersService.IsSeparation, ThTagParametersService.IsCaisson, ThTagParametersService.FloorValue),
-
                 };
                 var kitchenEngines = new ThWKitchenPipeEngine()
                 {
-                    Zone = zone,
                     Parameters = new ThWKitchenPipeParameters(1, ThTagParametersService.FloorValue),
                 };
                 var compositeEngine = new ThWCompositePipeEngine(kitchenEngines, toiletEngines);

@@ -10,7 +10,7 @@ namespace ThMEPWSS.Pipe.Service
         private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         private List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
         private List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
-        public List<ThWRoofDeviceFloorRoom> Rooms { get; private set; }
+        public List<ThWRoofTopFloorRoom> Rooms { get; private set; }
         private List<ThIfcSpace> BaseCircles { get; set; }
 
         private ThRoofDeviceFloorRoomService(
@@ -25,9 +25,9 @@ namespace ThMEPWSS.Pipe.Service
             GravityWaterBuckets = gravityWaterBuckets;
             SideEntryWaterBuckets = sideEntryWaterBuckets;
             BaseCircles = baseCircles;
-            Rooms = new List<ThWRoofDeviceFloorRoom>();
+            Rooms = new List<ThWRoofTopFloorRoom>();
         }
-        public static List<ThWRoofDeviceFloorRoom> Build(
+        public static List<ThWRoofTopFloorRoom> Build(
             List<ThIfcSpace> spaces, 
             List<ThWGravityWaterBucket> gravityWaterBuckets, 
             List<ThWSideEntryWaterBucket> sideEntryWaterBuckets, 
@@ -47,9 +47,9 @@ namespace ThMEPWSS.Pipe.Service
                 Rooms.Add(CreateRoofDeviceFloorContainer(o));
             });
         }
-        private ThWRoofDeviceFloorRoom CreateRoofDeviceFloorContainer(ThIfcSpace roofDeviceFloorSpace)
+        private ThWRoofTopFloorRoom CreateRoofDeviceFloorContainer(ThIfcSpace roofDeviceFloorSpace)
         {
-            return new ThWRoofDeviceFloorRoom()
+            return new ThWRoofTopFloorRoom()
             {
                 Space = roofDeviceFloorSpace,
                 RoofRainPipes = ThRoofDeviceFloorRoofRainPipeService.Find(roofDeviceFloorSpace, RoofRainPipes),

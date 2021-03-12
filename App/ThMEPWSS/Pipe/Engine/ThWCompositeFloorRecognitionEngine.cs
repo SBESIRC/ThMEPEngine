@@ -1,17 +1,16 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
-using NFox.Cad;
+using System.Linq;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Service;
@@ -93,7 +92,7 @@ namespace ThMEPWSS.Pipe.Engine
     }
     public class ThWCompositeFloorRecognitionEngine : ThWRoomRecognitionEngine
     {
-        public List<ThWRoofDeviceFloorRoom> RoofDeviceFloors { get; set; }
+        public List<ThWRoofTopFloorRoom> RoofTopFloors { get; set; }
         public List<ThWRoofFloorRoom> RoofFloors { get; set; }
         public List<ThWTopFloorRoom> TopFloors { get; set; }
         public List<ThWTopFloorRoom> NormalFloors { get; set; }
@@ -135,7 +134,7 @@ namespace ThMEPWSS.Pipe.Engine
             PositionTags = new List<Curve>();
             AllObstacles= new List<Curve>();
             Layers = new List<string>();
-            RoofDeviceFloors = new List<ThWRoofDeviceFloorRoom>();
+            RoofTopFloors = new List<ThWRoofTopFloorRoom>();
             RoofFloors = new List<ThWRoofFloorRoom>();
             TopFloors = new List<ThWTopFloorRoom>();
             NormalFloors= new List<ThWTopFloorRoom>();
@@ -190,7 +189,7 @@ namespace ThMEPWSS.Pipe.Engine
                     SideEntryWaterBuckets = SideEntryWaterBuckets,
                 };               
                 RoofDeviceEngine.Recognize(database, pts);             
-                RoofDeviceFloors = RoofDeviceEngine.Rooms;
+                RoofTopFloors = RoofDeviceEngine.Rooms;
                 RoofDeviceEngine.TagNameFrames.ForEach(o => TagNameFrames.Add(o));
                 RoofDeviceEngine.StairFrames.ForEach(o => StairFrames.Add(o));
                 RoofDeviceEngine.Columns.ForEach(o => Columns.Add(o));
