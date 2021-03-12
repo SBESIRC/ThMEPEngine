@@ -1,23 +1,26 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
+using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThDoorMarkExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThRawDoorStone : ThRawIfcBuildingElementData
+    {
+        //
+    }
+
+    public class ThDoorStoneExtractionVisitor : ThBuildingElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
-            if (dbObj is DBText dbText)
+            if (dbObj is Polyline polyline)
             {
-                elements.AddRange(HandleDbText(dbText, matrix));
-            }
-            else if (dbObj is MText mText)
-            {
-                elements.AddRange(HandleMText(mText, matrix));
+                elements.AddRange(HandlePolyline(polyline, matrix));
             }
         }
 
@@ -27,57 +30,52 @@ namespace ThMEPEngineCore.Engine
             if (xclip.IsValid)
             {
                 xclip.TransformBy(matrix);
-                elements.RemoveAll(o => !xclip.Contains(o.Geometry as Curve));
+                elements.RemoveAll(o => !xclip.Contains(GetTextPosition(o.Data)));
             }
-        }       
-
-        private List<ThRawIfcBuildingElementData> HandleDbText(DBText dbText, Matrix3d matrix)
-        {
-            var texts = new List<DBText>();
-            if (IsBuildElement(dbText) && IsDoorMark(dbText))
-            {               
-                var clone = dbText.Clone() as DBText;
-                clone.TransformBy(matrix);
-                texts.Add(clone);
-            }
-            return texts.Select(o => CreateBuildingElementData(o)).ToList();
-        }
-        private List<ThRawIfcBuildingElementData> HandleMText(MText mText, Matrix3d matrix)
-        {
-            var texts = new List<MText>();
-            if (IsBuildElement(mText) && IsDoorMark(mText))
-            {
-                var clone = mText.Clone() as MText;
-                clone.TransformBy(matrix);
-                texts.Add(clone);
-            }
-            return texts.Select(o => CreateBuildingElementData(o)).ToList();
         }
 
-        private ThRawIfcBuildingElementData CreateBuildingElementData(DBText dbText)
+        private List<ThRawIfcBuildingElementData> HandlePolyline(Polyline polyline, Matrix3d matrix)
         {
-            return new ThRawIfcBuildingElementData()
+            List<Curve> curves = new List<Curve>();
+            if (IsBuildElement(polyline) && IsDoorStone(polyline))
             {
-                Geometry = dbText.TextOBB(),
-                Data= dbText
-            };
+                var clone = polyline.WashClone();
+                clone.TransformBy(matrix);
+                curves.Add(clone);
+            }
+            return curves.Select(o => CreateBuildingElementData(o)).ToList();
         }
-        private ThRawIfcBuildingElementData CreateBuildingElementData(MText mText)
+
+        private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve)
         {
-            return new ThRawIfcBuildingElementData()
+            return new ThRawDoorStone()
             {
-                Geometry = mText.TextOBB(),
-                Data = mText
+                Geometry = curve,
             };
         }
         private new bool IsBuildElement(Entity entity)
         {
             return entity.Hyperlinks.Count > 0;
         }
-        private bool IsDoorMark(Entity entity)
+        private bool IsDoorStone(Curve curve)
         {
-            var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
+            var thPropertySet = ThPropertySet.CreateWithHyperlink(curve.Hyperlinks[0].Description);
             return thPropertySet.IsDoor;
+        }
+        private Point3d GetTextPosition(object ent)
+        {
+            if (ent is DBText dbText)
+            {
+                return dbText.Position;
+            }
+            else if (ent is MText mText)
+            {
+                return mText.Location;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }
