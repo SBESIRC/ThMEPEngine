@@ -1,0 +1,65 @@
+﻿using System.Linq;
+using System.Collections.Generic;
+using NFox.Cad;
+using DotNetARX;
+using ThCADCore.NTS;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
+
+namespace ThMEPEngineCore.Engine
+{
+    public class ThRoomExtractionEngine : ThSpatialElementExtractionEngine
+    {
+        public override void Extract(Database database)
+        {
+            var visitor = new ThRoomExtractionVisitor()
+            {
+                LayerFilter = ThRoomLayerManager.CurveXrefLayers(database),
+            };
+            var extractor = new ThBuildingElementExtractor();
+            extractor.Accept(visitor);
+            extractor.Extract(database);
+            Results = visitor.Results;
+        }
+    }
+    public class ThRoomRecognitionEngine : ThSpatialElementRecognitionEngine
+    {
+        public override void Recognize(Database database, Point3dCollection polygon)
+        {
+            var engine = new ThRoomExtractionEngine();
+            engine.Extract(database);
+            Recognize(engine.Results, polygon);
+        }
+        private void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
+        {
+            var results = new List<ThRawIfcBuildingElementData>();
+            var objs = datas.Select(o => o.Geometry).ToCollection();
+            if (polygon.Count > 0)
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                var pline = new Polyline()
+                {
+                    Closed = true,
+                };
+                pline.CreatePolyline(polygon);
+                var filterObjs = spatialIndex.SelectCrossingPolygon(pline);
+                results = datas.Where(o => filterObjs.Contains(o.Geometry as Curve)).ToList();
+            }
+            else
+            {
+                results = datas;
+            }
+            results.ForEach(o =>
+                {
+                    if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
+                    {
+                        var room = ThIfcRoom.Create(polyline);
+                        room.Name = o.Data as string;
+                        Elements.Add(room);
+                    }
+                });
+        }
+    }
+}

@@ -99,6 +99,8 @@
     <Compile Include="Engine\ThGemometryExportEngine.cs" />
     <Compile Include="Engine\ThMergeBeamEngine.cs" />
     <Compile Include="Engine\ThParkingStallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThRoomExtractionVisitor.cs" />
+    <Compile Include="Engine\ThRoomRecognitionEngine.cs" />
     <Compile Include="Engine\ThShearWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThSimilarityMeasureEngine.cs" />
     <Compile Include="Engine\ThJoinBeamEngine.cs" />
@@ -109,6 +111,7 @@
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpaceRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
+    <Compile Include="Engine\ThSpatialElementExtractionEngine.cs" />
     <Compile Include="Engine\ThWindowExtractionVisitor.cs" />
     <Compile Include="Engine\ThWindowRecognitionEngine.cs" />
     <Compile Include="Features\ThBeamFeature.cs" />
@@ -165,6 +168,7 @@
     <Compile Include="Model\ThIfcFlowMovingDevice.cs" />
     <Compile Include="Model\ThIfcFlowSegment.cs" />
     <Compile Include="Model\ThIfcOpeningElement.cs" />
+    <Compile Include="Model\ThIfcRoom.cs" />
     <Compile Include="Model\ThIfcSanitaryTerminal.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsElements.cs" />
     <Compile Include="Model\Relationship\ThIfcRelConnectsPathElements.cs" />
