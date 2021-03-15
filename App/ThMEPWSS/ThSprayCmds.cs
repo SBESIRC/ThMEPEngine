@@ -165,7 +165,16 @@ namespace ThMEPWSS
         [CommandMethod("TIANHUACAD", "THPLKQ", CommandFlags.Modal)]
         public void ThCreateLayoutArea()
         {
-            using (var cmd = new ThSprinklerLayoutAreaCmd())
+            using (var cmd = new ThSprinklerLayoutAreaCmd() { DoValidate = false, })
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPLKQJ", CommandFlags.Modal)]
+        public void ThCheckLayoutArea()
+        {
+            using (var cmd = new ThSprinklerLayoutAreaCmd() { DoValidate = true,})
             {
                 cmd.Execute();
             }

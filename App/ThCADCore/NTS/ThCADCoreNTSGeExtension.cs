@@ -50,7 +50,11 @@ namespace ThCADCore.NTS
                     ThCADCoreNTSService.Instance.PrecisionModel.MakePrecise(point.X),
                     ThCADCoreNTSService.Instance.PrecisionModel.MakePrecise(point.Y)
                     );
+        }
 
+        public static Point ToNTSPoint(this Point3d point)
+        {
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreatePoint(point.ToNTSCoordinate());
         }
 
         public static Coordinate ToNTSCoordinate(this Point2d point)

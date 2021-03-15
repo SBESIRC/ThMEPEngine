@@ -49,10 +49,12 @@ namespace ThMEPWSS.Bussiness
             var errorSprays = CalIllegalSpary(sprays, layoutAreas);
 
             //打印可布置区域
-            MarkService.PrintLayoutArea(layoutAreas, matrix);
+            layoutAreas.ForEach(o => o.TransformBy(matrix));
+            MarkService.PrintLayoutArea(layoutAreas);
 
             //打印错误喷淋点位
-            MarkService.PrintErrorSpray(errorSprays, matrix);
+            errorSprays.ForEach(o => o.Position.TransformBy(matrix));
+            MarkService.PrintErrorSpray(errorSprays);
         }
 
         /// <summary>

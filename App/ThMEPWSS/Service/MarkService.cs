@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System;
+using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
@@ -14,7 +15,7 @@ namespace ThMEPWSS.Service
         /// 打印错误喷淋点位
         /// </summary>
         /// <param name="errorSprays"></param>
-        public static void PrintErrorSpray(List<SprayLayoutData> errorSprays, Matrix3d matrix)
+        public static void PrintErrorSpray(List<SprayLayoutData> errorSprays)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -26,7 +27,7 @@ namespace ThMEPWSS.Service
                 //打印有问题的但无法移动的喷淋点位
                 foreach (var spray in errorSprays)
                 {
-                    var transPt = spray.Position.TransformBy(matrix);
+                    var transPt = spray.Position;
                     var sprayInnerCircle = new Circle(transPt, Vector3d.ZAxis, 300);
                     sprayInnerCircle.ColorIndex = 30;
                     sprayInnerCircle.LayerId = layerId;
@@ -114,7 +115,7 @@ namespace ThMEPWSS.Service
         /// 打印可布置区域
         /// </summary>
         /// <param name="polylines"></param>
-        public static void PrintLayoutArea(List<Polyline> polylines, Matrix3d matrix)
+        public static void PrintLayoutArea(List<Polyline> polylines)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -125,12 +126,19 @@ namespace ThMEPWSS.Service
                 acdb.Database.UnPrintLayer(ThWSSCommon.Layout_Area_LayerName);
                 foreach (var area in polylines)
                 {
-                    area.TransformBy(matrix);
                     area.ColorIndex = 3;
                     area.LayerId = layerId;
                     acdb.ModelSpace.Add(area);
                 }
             }
+        }
+
+        /// <summary>
+        /// 打印可布区域外的喷淋点位
+        /// </summary>
+        public static void PrintOutOfAreaSpray(Polyline sprinkler)
+        {
+            throw new NotImplementedException();
         }
     }
 }
