@@ -1,19 +1,14 @@
 ﻿using System;
 using AcHelper;
 using Linq2Acad;
-using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Extension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPWSS.Service;
 using ThMEPWSS.Bussiness;
@@ -24,216 +19,6 @@ namespace ThMEPWSS
 {
     public class ThSprayCmds
     {
-        [CommandMethod("TIANHUACAD", "THPLPT", CommandFlags.Modal)]
-        public void ThAutomaticLayoutSpray()
-        {
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                AllowDuplicates = false,
-                MessageForAdding = "选择区域",
-                RejectObjectsOnLockedLayers = true,
-            };
-            var dxfNames = new string[]
-            {
-                RXClass.GetClass(typeof(Polyline)).DxfName,
-            };
-            var filter = ThSelectionFilterTool.Build(dxfNames);
-            var result = Active.Editor.GetSelection(options, filter);
-            if (result.Status != PromptStatus.OK)
-            {
-                return;
-            }
-
-            if (!CalWCSLayoutDirection(out Matrix3d matrix))
-            {
-                return;
-            }
-
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                List<Polyline> polylines = new List<Polyline>();
-                foreach (ObjectId frame in result.Value.GetObjectIds())
-                {
-                    var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
-                    polylines.Add(plFrame);
-                }
-
-                CalHolesService calHolesService = new CalHolesService();
-                var holeDic = calHolesService.CalHoles(polylines);
-                foreach (var holeInfo in holeDic)
-                {
-                    var plFrame = holeInfo.Key;
-                    var holes = holeInfo.Value;
-
-                    //清除原有构件
-                    plFrame.ClearSprayLines();
-                    plFrame.ClearSpray();
-                    plFrame.ClearBlindArea();
-                    plFrame.ClearErrorSprayMark();
-                    plFrame.ClearMoveSprayMark();
-                    plFrame.ClearLayouArea();
-
-                    //获取构建信息
-                    var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
-                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
-
-                    //转换usc
-                    plFrame.TransformBy(matrix.Inverse());
-                    holes.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    columns.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    beams.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    walls.ForEach(x => x.TransformBy(matrix.Inverse()));
-
-                    //生成喷头
-                    RayLayoutService layoutDemo = new RayLayoutService();
-                    var sprayPts = layoutDemo.LayoutSpray(plFrame, columns, beams, walls, holes, matrix, false);
-
-                    //放置喷头
-                    InsertSprinklerService.Insert(sprayPts.Select(o => o.Position).ToList());
-
-                    //打印喷头变化轨迹
-                    MarkService.PrintOriginSpray(sprayPts);
-
-                    //打印喷淋点盲区
-                    CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
-                    calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THPLMQ", CommandFlags.Modal)]
-        public void ThCreateBlindArea()
-        {
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                AllowDuplicates = false,
-                MessageForAdding = "选择区域",
-                RejectObjectsOnLockedLayers = true,
-            };
-            var dxfNames = new string[]
-            {
-                RXClass.GetClass(typeof(Polyline)).DxfName,
-            };
-            var filter = ThSelectionFilterTool.Build(dxfNames);
-            var result = Active.Editor.GetSelection(options, filter);
-            if (result.Status != PromptStatus.OK)
-            {
-                return;
-            }
-
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                //获取方向线
-                if (!CalWCSLayoutDirection(out Matrix3d matrix))
-                {
-                    return;
-                }
-
-                List<Polyline> polylines = new List<Polyline>();
-                foreach (ObjectId frame in result.Value.GetObjectIds())
-                {
-                    var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
-                    polylines.Add(plFrame);
-                }
-
-                CalHolesService calHolesService = new CalHolesService();
-                var holeDic = calHolesService.CalHoles(polylines);
-                foreach (var holeInfo in holeDic)
-                {
-                    var plFrame = holeInfo.Key;
-                    var holes = holeInfo.Value;
-
-                    var bufferPoly = plFrame.Buffer(1)[0] as Polyline;
-                    //清除原有构件
-                    plFrame.ClearBlindArea();
-
-                    //获取构建信息
-                    var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
-                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
-                    holes.AddRange(columns);
-                    holes.AddRange(walls);
-
-                    if (!CalSprayBlindArea(bufferPoly, holes, acdb, matrix))
-                    {
-                        CalSprayLineBlindArea(bufferPoly, holes, acdb);
-                    }
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "THPLKQ", CommandFlags.Modal)]
-        public void ThCreateLayoutArea()
-        {
-            PromptSelectionOptions options = new PromptSelectionOptions()
-            {
-                AllowDuplicates = false,
-                MessageForAdding = "选择区域",
-                RejectObjectsOnLockedLayers = true,
-            };
-            var dxfNames = new string[]
-            {
-                RXClass.GetClass(typeof(Polyline)).DxfName,
-            };
-            var filter = ThSelectionFilterTool.Build(dxfNames);
-            var result = Active.Editor.GetSelection(options, filter);
-            if (result.Status != PromptStatus.OK)
-            {
-                return;
-            }
-
-            if (!CalWCSLayoutDirection(out Matrix3d matrix))
-            {
-                return;
-            }
-
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                List<Polyline> polylines = new List<Polyline>();
-                foreach (ObjectId frame in result.Value.GetObjectIds())
-                {
-                    var plBack = acdb.Element<Polyline>(frame);
-                    var plFrame = ThMEPFrameService.Normalize(plBack);
-                    polylines.Add(plFrame);
-                }
-
-                CalHolesService calHolesService = new CalHolesService();
-                var holeDic = calHolesService.CalHoles(polylines);
-                foreach (var holeInfo in holeDic)
-                {
-                    var plFrame = holeInfo.Key;
-                    var holes = holeInfo.Value;
-
-                    //清除原有构件
-                    plFrame.ClearLayouArea();
-
-                    //获取构建信息
-                    var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
-                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
-
-                    //转换usc
-                    plFrame.TransformBy(matrix.Inverse());
-                    holes.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    columns.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    beams.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    walls.ForEach(x => x.TransformBy(matrix.Inverse()));
-                    holes.AddRange(walls);
-
-                    //不考虑梁
-                    if (!ThWSSUIService.Instance.Parameter.ConsiderBeam)
-                    {
-                        beams = new List<Polyline>();
-                    }
-
-                    //计算可布置区域
-                    var layoutAreas = CreateLayoutAreaService.GetLayoutArea(plFrame, beams, columns, holes, 300);
-
-                    //打印可布置区域
-                    MarkService.PrintLayoutArea(layoutAreas, matrix);
-                }
-            }
-        }
 
         [CommandMethod("TIANHUACAD", "THPLCD", CommandFlags.Modal)]
         public void ThCreateLayoutPtByLine()
@@ -273,7 +58,8 @@ namespace ThMEPWSS
             objs = new DBObjectCollection();
             handleLines.ForEach(x => objs.Add(x));
             handleLines = objs.ToNTSNodedLineStrings().ToDbObjects()
-                .SelectMany(x => {
+                .SelectMany(x =>
+                {
                     DBObjectCollection entitySet = new DBObjectCollection();
                     (x as Polyline).Explode(entitySet);
                     return entitySet.Cast<Line>().ToList();
@@ -311,7 +97,7 @@ namespace ThMEPWSS
                 return;
             }
 
-            if (!CalWCSLayoutDirection(out Matrix3d matrix))
+            if (!ThSprinklerLayoutCmdUtils.CalWCSLayoutDirection(out Matrix3d matrix))
             {
                 return;
             }
@@ -343,7 +129,7 @@ namespace ThMEPWSS
 
                     //获取构建信息
                     var calStructPoly = (plFrame.Clone() as Polyline).Buffer(10000)[0] as Polyline;
-                    GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
+                    ThSprinklerLayoutCmdUtils.GetStructureInfo(acdb, calStructPoly, plFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls);
 
                     //转换usc
                     plFrame.TransformBy(matrix.Inverse());
@@ -358,193 +144,39 @@ namespace ThMEPWSS
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THPLPT", CommandFlags.Modal)]
+        public void ThAutomaticLayoutSpray()
+        {
+            using (var cmd = new ThSprinklerLayoutCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPLMQ", CommandFlags.Modal)]
+        public void ThCreateBlindArea()
+        {
+            using (var cmd = new ThSprinklerBlindAreaCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPLKQ", CommandFlags.Modal)]
+        public void ThCreateLayoutArea()
+        {
+            using (var cmd = new ThSprinklerLayoutAreaCmd())
+            {
+                cmd.Execute();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THPL18", CommandFlags.Modal)]
         public void THPL18()
         {
             using (var cmd = new ThSprinklerDistanceCheckCmd())
             {
                 cmd.Execute();
-            }
-        }
-
-        /// <summary>
-        /// 计算排布方向
-        /// </summary>
-        /// <returns></returns>
-        private bool CalWCSLayoutDirection(out Matrix3d matrix)
-        {
-            matrix = Active.Editor.CurrentUserCoordinateSystem;
-            PromptPointOptions options = new PromptPointOptions("请选择排布方向起始点");
-            var sResult = Active.Editor.GetPoint(options);
-
-            if (sResult.Status == PromptStatus.OK)
-            {
-                var startPt = sResult.Value;
-                var transPt = startPt.TransformBy(Active.Editor.CurrentUserCoordinateSystem);
-                var endPt = Interaction.GetLineEndPoint("请选择终止点", transPt);
-
-                if (System.Double.IsNaN(endPt.X) || System.Double.IsNaN(endPt.Y) || System.Double.IsNaN(endPt.Z))
-                {
-                    return false;
-                }
-
-                transPt = new Point3d(transPt.X, transPt.Y, 0);
-                endPt = new Point3d(endPt.X, endPt.Y, 0);
-                Vector3d xDir = (endPt - transPt).GetNormal();
-                Vector3d yDir = xDir.GetPerpendicularVector().GetNormal();
-                Vector3d zDir = Vector3d.ZAxis;
-
-                matrix = new Matrix3d(new double[]{
-                    xDir.X, yDir.X, zDir.X, startPt.X,
-                    xDir.Y, yDir.Y, zDir.Y, startPt.Y,
-                    xDir.Z, yDir.Z, zDir.Z, startPt.Z,
-                    0.0, 0.0, 0.0, 1.0});
-
-                return true;
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// 获取构建信息
-        /// </summary>
-        /// <param name="acdb"></param>
-        /// <param name="polyline"></param>
-        /// <param name="columns"></param>
-        /// <param name="beams"></param>
-        /// <param name="walls"></param>
-        private void GetStructureInfo(AcadDatabase acdb, Polyline polyline, Polyline pFrame, out List<Polyline> columns, out List<Polyline> beams, out List<Polyline> walls)
-        {
-            var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
-
-            //获取柱
-            columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-            var objs = new DBObjectCollection();
-            columns.ForEach(x => objs.Add(x));
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
-
-            //获取梁
-            var thBeams = allStructure.BeamEngine.Elements.Cast<ThIfcLineBeam>().ToList();
-            thBeams.ForEach(x => x.ExtendBoth(20, 20));
-            beams = thBeams.Select(o => o.Outline).Cast<Polyline>().ToList();
-            objs = new DBObjectCollection();
-            beams.ForEach(x => objs.Add(x));
-            thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            beams = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
-
-            //获取剪力墙
-            walls = allStructure.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
-            objs = new DBObjectCollection();
-            walls.ForEach(x => objs.Add(x));
-            thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
-
-            //建筑构建
-            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
-            {
-                //建筑墙
-                archWallEngine.Recognize(acdb.Database, polyline.Vertices());
-                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is Polyline).Cast<Polyline>().ToList();
-                objs = new DBObjectCollection();
-                arcWall.ForEach(x => objs.Add(x));
-                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList());
-            }
-        }
-
-        /// <summary>
-        /// 计算喷淋布置点盲区
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="acdb"></param>
-        private bool CalSprayBlindArea(Polyline plFrame, List<Polyline> holes, AcadDatabase acdb, Matrix3d matrix)
-        {
-            var dxfNames = new string[]
-            {
-                ThCADCommon.DxfName_TCH_EQUIPMENT_16,
-                ThCADCommon.DxfName_TCH_EQUIPMENT_12,
-                RXClass.GetClass(typeof(BlockReference)).DxfName,
-            };
-            var filterlist = OpFilter.Bulid(o =>
-            o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.SprayLayerName &
-            o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
-
-            var dBObjectCollection = new DBObjectCollection();
-            var allSprays = Active.Editor.SelectAll(filterlist);
-            if (allSprays.Status == PromptStatus.OK)
-            {
-                foreach (ObjectId obj in allSprays.Value.GetObjectIds())
-                {
-                    var transEnt = acdb.Element<Entity>(obj).Clone() as Entity;
-                    transEnt.TransformBy(matrix.Inverse());
-                    dBObjectCollection.Add(transEnt);
-                }
-            }
-
-            //转换usc
-            plFrame.TransformBy(matrix.Inverse());
-            holes.ForEach(x => x.TransformBy(matrix.Inverse()));
-
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
-            var sprays = thCADCoreNTSSpatialIndex.SelectWindowPolygon(plFrame).Cast<Entity>().ToList();
-
-            CheckService checkService = new CheckService();
-            //只需要显示出来的喷淋
-            if(checkService.CheckLayerStatus(acdb.Database, ThWSSCommon.SprayLayerName))
-            {
-                return false;
-            }
-
-            //筛选出正确的喷淋图块
-            sprays = sprays.Where(x => checkService.CheckSprayBlockSize(x, 300)).ToList();
-            if (sprays.Count <= 0)
-            {
-                Active.Editor.WriteMessage("\n 区域未检测到喷头");
-                return false;
-            }
-            var sprayPts = sprays.Select(x =>
-            {
-                var pts = x.GeometricExtents;
-                var newPt = new Point3d((pts.MinPoint.X + pts.MaxPoint.X) / 2, (pts.MinPoint.Y + pts.MaxPoint.Y) / 2, 0);
-                return newPt.TransformBy(matrix);
-            }).ToList();
-            CalSprayBlindAreaService calSprayBlindAreaService = new CalSprayBlindAreaService(matrix);
-            calSprayBlindAreaService.CalSprayBlindArea(sprayPts, plFrame, holes);
-
-            return true;
-        }
-
-        /// <summary>
-        /// 计算喷淋布置线盲区
-        /// </summary>
-        /// <param name="result"></param>
-        /// <param name="acdb"></param>
-        private void CalSprayLineBlindArea(Polyline plFrame, List<Polyline> holes, AcadDatabase acdb)
-        {
-            var filterlist = OpFilter.Bulid(o =>
-                   o.Dxf((int)DxfCode.LayerName) == ThWSSCommon.Layout_Line_LayerName &
-                   o.Dxf((int)DxfCode.Start) == RXClass.GetClass(typeof(Line)).DxfName);
-
-            var dBObjectCollection = new DBObjectCollection();
-            var allLines = Active.Editor.SelectAll(filterlist);
-            if (allLines.Status == PromptStatus.OK)
-            {
-                foreach (ObjectId obj in allLines.Value.GetObjectIds())
-                {
-                    dBObjectCollection.Add(acdb.Element<Line>(obj));
-                }
-
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(dBObjectCollection);
-                var sprayLines = thCADCoreNTSSpatialIndex.SelectWindowPolygon(plFrame).Cast<Line>().ToList();
-
-                CalSprayBlindLineAreaService calSprayBlindAreaService = new CalSprayBlindLineAreaService();
-                calSprayBlindAreaService.CalSprayBlindArea(sprayLines, plFrame);
-            }
-            else
-            {
-                Active.Editor.WriteMessage("\n 区域未检测到喷头");
             }
         }
     }

@@ -39,7 +39,11 @@
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
+    <Compile Include="Command\ThSprinklerBlindAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerDistanceCheckCmd.cs" />
+    <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
+    <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
+    <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThApplicationPipesEngine.cs" />
