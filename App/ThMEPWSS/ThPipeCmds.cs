@@ -163,11 +163,10 @@ namespace ThMEPWSS
                         GetObstacleParameters("空间名称",FloorEngines.TagNameFrames).ForEach(o=> ObstacleParameters.Add(o));
                         GetObstacleParameters("楼梯", FloorEngines.StairFrames).ForEach(o => ObstacleParameters.Add(o));
                         GetObstacleParameters("结构柱", FloorEngines.Columns).ForEach(o => ObstacleParameters.Add(o));
-                        GetObstacleParameters("剪力墙", FloorEngines.ShearWalls).ForEach(o => ObstacleParameters.Add(o));
-                        GetObstacleParameters("内门", FloorEngines.InnerDoors).ForEach(o => ObstacleParameters.Add(o));
-                        GetObstacleParameters("设备", FloorEngines.Devices).ForEach(o => ObstacleParameters.Add(o));
-                        GetObstacleParameters("建筑墙", FloorEngines.ArchitectureWalls).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("墙", FloorEngines.Walls).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("门", FloorEngines.Doors).ForEach(o => ObstacleParameters.Add(o));
                         GetObstacleParameters("窗", FloorEngines.Windows).ForEach(o => ObstacleParameters.Add(o));
+                        GetObstacleParameters("设备", FloorEngines.Devices).ForEach(o => ObstacleParameters.Add(o));
                         GetObstacleParameters("建筑标高", FloorEngines.ElevationFrames).ForEach(o => ObstacleParameters.Add(o));
                         GetObstacleParameters("轴向圆圈标注", FloorEngines.AxialCircleTags).ForEach(o => ObstacleParameters.Add(o));
                         GetObstacleParameters("轴向横线标注", FloorEngines.AxialAxisTags).ForEach(o => ObstacleParameters.Add(o));

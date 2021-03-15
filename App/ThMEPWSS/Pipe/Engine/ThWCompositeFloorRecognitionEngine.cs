@@ -99,10 +99,9 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> TagNameFrames { get; set; }
         public List<Curve> StairFrames { get; set; }
         public List<Curve> Columns { get; set; }
-        public List<Curve> ShearWalls { get; set; }
-        public List<Curve> InnerDoors { get; set; }
+        public List<Curve> Walls { get; set; }
+        public List<Curve> Doors { get; set; }
         public List<Curve> Devices { get; set; }
-        public List<Curve> ArchitectureWalls { get; set; }
         public List<Curve> Windows { get; set; }
         public List<Curve> ElevationFrames { get; set; }
         public List<Curve> AxialCircleTags { get; set; }
@@ -119,10 +118,9 @@ namespace ThMEPWSS.Pipe.Engine
             TagNameFrames = new List<Curve>();
             StairFrames = new List<Curve>();
             Columns = new List<Curve>();
-            ShearWalls = new List<Curve>();
-            InnerDoors = new List<Curve>();
+            Walls = new List<Curve>();
+            Doors = new List<Curve>();
             Devices = new List<Curve>();
-            ArchitectureWalls = new List<Curve>();
             Windows = new List<Curve>();
             ElevationFrames = new List<Curve>();
             AxialCircleTags = new List<Curve>();
@@ -193,10 +191,9 @@ namespace ThMEPWSS.Pipe.Engine
                 RoofDeviceEngine.TagNameFrames.ForEach(o => TagNameFrames.Add(o));
                 RoofDeviceEngine.StairFrames.ForEach(o => StairFrames.Add(o));
                 RoofDeviceEngine.Columns.ForEach(o => Columns.Add(o));
-                RoofDeviceEngine.ShearWalls.ForEach(o => ShearWalls.Add(o));
-                RoofDeviceEngine.InnerDoors.ForEach(o => InnerDoors.Add(o));
+                RoofDeviceEngine.Walls.ForEach(o => Walls.Add(o));
+                RoofDeviceEngine.Doors.ForEach(o => Doors.Add(o));
                 RoofDeviceEngine.Devices.ForEach(o => Devices.Add(o));
-                RoofDeviceEngine.ArchitectureWalls.ForEach(o => ArchitectureWalls.Add(o));
                 RoofDeviceEngine.Windows.ForEach(o => Windows.Add(o));
                 RoofDeviceEngine.ElevationFrames.ForEach(o => ElevationFrames.Add(o));
                 RoofDeviceEngine.AxialCircleTags.ForEach(o => AxialCircleTags.Add(o));

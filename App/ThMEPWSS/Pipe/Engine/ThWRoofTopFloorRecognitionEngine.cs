@@ -6,12 +6,12 @@ using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
+using ThMEPWSS.Engine;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -24,10 +24,9 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> TagNameFrames { get; set; }
         public List<Curve> StairFrames { get; set; }
         public List<Curve> Columns { get; set; }
-        public List<Curve> ShearWalls { get; set; }
-        public List<Curve> InnerDoors { get; set; }
+        public List<Curve> Walls { get; set; }
+        public List<Curve> Doors { get; set; }
         public List<Curve> Devices { get; set; }
-        public List<Curve> ArchitectureWalls { get; set; }
         public List<Curve> Windows { get; set; }
         public List<Curve> ElevationFrames { get; set; }
         public List<Curve> AxialCircleTags { get; set; }
@@ -53,10 +52,9 @@ namespace ThMEPWSS.Pipe.Engine
             TagNameFrames = new List<Curve>();
             StairFrames = new List<Curve>();
             Columns = new List<Curve>();
-            ShearWalls = new List<Curve>();
-            InnerDoors = new List<Curve>();
+            Walls = new List<Curve>();
+            Doors = new List<Curve>();
             Devices = new List<Curve>();
-            ArchitectureWalls = new List<Curve>();
             Windows = new List<Curve>();
             ElevationFrames = new List<Curve>();
             AxialCircleTags = new List<Curve>();
@@ -84,7 +82,6 @@ namespace ThMEPWSS.Pipe.Engine
                 GetLayers(database, pts).ForEach(o => Layers.Add(o));
                 GetTagNameFrames(database, pts);
                 GetStarFrames(this.Spaces);
-                //GetInnerDoors(database, pts);
                 GetDevices(database, pts);
                 GetElevationFrames(database, pts);
                 GetAxialCircleTag(database, pts);
@@ -218,12 +215,6 @@ namespace ThMEPWSS.Pipe.Engine
             }
             circles.ForEach(o => AxialCircleTags.Add(ThWPipeOutputFunction.GetCircleBoundary(o)));          
         }
-        private void GetInnerDoors(Database database, Point3dCollection pts)
-        {
-            var engine = new ThDoorRecognitionEngine();
-            engine.Recognize(database, pts);
-            InnerDoors=engine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve).ToList();      
-        }
         private void GetDevices(Database database, Point3dCollection pts)
         {
             var engine = new ThWDeviceRecognitionEngine();
@@ -269,57 +260,35 @@ namespace ThMEPWSS.Pipe.Engine
 
         private void GetBuildingElements(Database database, Point3dCollection pts)
         {
-            var extractor = new ThBuildingElementExtractor();
-            var columnVisitor = new ThColumnExtractionVisitor()
-            {
-                LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database),
-            };
-            var shearWallVisitor = new ThShearWallExtractionVisitor()
-            {
-                LayerFilter = ThStructureShearWallLayerManager.HatchXrefLayers(database),
-            };
-            var windowVisitor = new ThWindowExtractionVisitor()
-            {
-                LayerFilter = ThWindowLayerManager.CurveXrefLayers(database),
-            };
-            var archWallVisitor = new ThArchitectureWallExtractionVisitor()
-            {
-                LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
-            };
-            extractor.Accept(columnVisitor);
-            extractor.Accept(shearWallVisitor);
-            extractor.Accept(windowVisitor);
-            extractor.Accept(archWallVisitor);
-            extractor.Extract(database);
-
-            var columnEngine = new ThColumnRecognitionEngine();
-            columnEngine.Recognize(columnVisitor.Results, pts);
-            var columns = columnEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
-            var shearWallEngine = new ThShearWallRecognitionEngine();
-            shearWallEngine.Recognize(shearWallVisitor.Results, pts);
-            var shearWalls = shearWallEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
-            var windowEngine = new ThWindowRecognitionEngine();
-            windowEngine.Recognize(windowVisitor.Results, pts);
-            var windows = windowEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
-            var archWallEngine = new ThArchitectureWallRecognitionEngine();
-            archWallEngine.Recognize(archWallVisitor.Results, pts);
-            var archWalls = archWallEngine.Elements.Where(o => o.Outline is Curve).Select(o => o.Outline as Curve);
+            var engine = new ThWObstaclesRecognitionEngine();
+            engine.Recognize(database, pts);
+            var windows = engine.Elements.Where(o => o is ThIfcWindow)
+                .Where(o => o.Outline is Curve)
+                .Select(o => o.Outline as Curve);
             Windows.AddRange(windows);
+            var columns = engine.Elements.Where(o => o is ThIfcColumn)
+                .Where(o => o.Outline is Curve)
+                .Select(o => o.Outline as Curve);
             Columns.AddRange(columns);
-            ShearWalls.AddRange(shearWalls);
-            ArchitectureWalls.AddRange(archWalls);
+            var walls = engine.Elements.Where(o => o is ThIfcWall)
+                .Where(o => o.Outline is Curve)
+                .Select(o => o.Outline as Curve);
+            Walls.AddRange(walls);
+            var doors = engine.Elements.Where(o => o is ThIfcDoor)
+                .Where(o => o.Outline is Curve)
+                .Select(o => o.Outline as Curve);
+            Doors.AddRange(doors);
         }
 
         private void GetAllObstacles()
         {
             AllObstacles.AddRange(Windows);
             AllObstacles.AddRange(Columns);
-            AllObstacles.AddRange(ShearWalls);
-            AllObstacles.AddRange(ArchitectureWalls);
+            AllObstacles.AddRange(Walls);
             AllObstacles.AddRange(Wells);
             AllObstacles.AddRange(TagNameFrames);
             AllObstacles.AddRange(StairFrames);
-            AllObstacles.AddRange(InnerDoors); 
+            AllObstacles.AddRange(Doors); 
             AllObstacles.AddRange(Devices); 
             AllObstacles.AddRange(ElevationFrames); 
             AllObstacles.AddRange(AxialCircleTags); 
