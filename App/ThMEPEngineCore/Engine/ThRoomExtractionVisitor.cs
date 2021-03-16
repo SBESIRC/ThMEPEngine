@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using ThCADExtension;
+﻿using ThCADExtension;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Algorithm;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -31,7 +30,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcBuildingElementData> Handle(Polyline polyline, Matrix3d matrix)
         {
             var results = new List<ThRawIfcBuildingElementData>();
-            if (IsBuildElement(polyline) && CheckLayerValid(polyline) && IsRoom(polyline))
+            if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
                 var clone = polyline.WashClone();
                 clone.TransformBy(matrix);
@@ -40,57 +39,27 @@ namespace ThMEPEngineCore.Engine
             return results;
         }
 
-        private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve,string description)
+        private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve, string description)
         {
-            var propertySet = CreateWithHyperlink(description);
-            var category = "";
-            if(propertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
-            {
-                category = propertySet.Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY];
-            }
             return new ThRawIfcBuildingElementData()
             {
                 Geometry = curve,
-                Data = category
+                Data = description
             };
         }
 
-        private bool IsRoom(Entity entity)
+        public override bool IsBuildElement(Entity entity)
         {
-            var thPropertySet = CreateWithHyperlink(entity.Hyperlinks[0].Description);
-            if( thPropertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY) &&
-                thPropertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_Boundary))
+            if (entity.Hyperlinks.Count > 0)
             {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
-        private new bool IsBuildElement(Entity entity)
-        {
-            return entity.Hyperlinks.Count > 0;
-        }
-
-        private ThPropertySet CreateWithHyperlink(string hyperlink)
-        {
-            var propertySet = new ThPropertySet();
-            propertySet.Section = "";
-            int index = -1;
-            // 按分割符“__”分割属性
-            var properties = Regex.Split(hyperlink.Substring(index + 1, hyperlink.Length - index - 1), "__");
-            foreach (var property in properties)
-            {
-                var keyValue = Regex.Split(property, "：");
-                if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(keyValue[0]))
+                var thPropertySet = ThPropertySet.CreateWithHyperlink2(entity.Hyperlinks[0].Description);
+                if (thPropertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY) &&
+                    thPropertySet.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_Boundary))
                 {
-                    propertySet.Properties.Add(keyValue[0], keyValue[1]);
+                    return true;
                 }
             }
-            // 返回属性集
-            return propertySet;
+            return false;
         }
     }
 }

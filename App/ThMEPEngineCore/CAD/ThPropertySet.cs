@@ -9,6 +9,7 @@ namespace ThMEPEngineCore.CAD
         public Dictionary<string, string> Properties { get; set; }
         public ThPropertySet()
         {
+            Section = string.Empty;
             Properties = new Dictionary<string, string>();
         }
         public static ThPropertySet CreateWithHyperlink(string hyperlink)
@@ -26,6 +27,25 @@ namespace ThMEPEngineCore.CAD
             // 按分割符“__”分割属性
             var properties = Regex.Split(hyperlink.Substring(index + 1, hyperlink.Length - index - 1), "__");
             foreach(var property in properties)
+            {
+                var keyValue = Regex.Split(property, "：");
+                if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(keyValue[0]))
+                {
+                    propertySet.Properties.Add(keyValue[0], keyValue[1]);
+                }
+            }
+
+            // 返回属性集
+            return propertySet;
+        }
+
+        public static ThPropertySet CreateWithHyperlink2(string hyperlink)
+        {
+            var propertySet = new ThPropertySet();
+
+            // 按分割符“__”分割属性
+            var properties = Regex.Split(hyperlink, "__");
+            foreach (var property in properties)
             {
                 var keyValue = Regex.Split(property, "：");
                 if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(keyValue[0]))
@@ -92,7 +112,7 @@ namespace ThMEPEngineCore.CAD
             get
             {
                 if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
-         && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
                 {
                     return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
                     && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
@@ -109,7 +129,7 @@ namespace ThMEPEngineCore.CAD
             get
             {
                 if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
-   && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
                 {
                     return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
                     && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;

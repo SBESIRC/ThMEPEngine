@@ -1,11 +1,12 @@
 ﻿using System.Linq;
-using System.Collections.Generic;
 using NFox.Cad;
 using DotNetARX;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
@@ -52,14 +53,18 @@ namespace ThMEPEngineCore.Engine
                 results = datas;
             }
             results.ForEach(o =>
+            {
+                if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
                 {
-                    if (o.Geometry is Polyline polyline && polyline.Area > 0.0)
+                    var room = ThIfcRoom.Create(polyline);
+                    var properties = ThPropertySet.CreateWithHyperlink2(o.Data as string);
+                    if (properties.Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY))
                     {
-                        var room = ThIfcRoom.Create(polyline);
-                        room.Name = o.Data as string;
-                        Elements.Add(room);
+                        room.Name = properties.Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY];
                     }
-                });
+                    Elements.Add(room);
+                }
+            });
         }
     }
 }
