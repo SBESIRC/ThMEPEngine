@@ -25,6 +25,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_LAYER_WALL = "AE-WALL";
         public static string BUILDELEMENT_LAYER_WINDOW = "AE-WIND";
         public static string BUILDELEMENT_LAYER_CURTAIN_WALL = "AE-WIND";
+        public static string BUILDELEMENT_LAYER_FLOOR = "AE-FLOR";
 
         // 分类
         public static string BUILDELEMENT_CATEGORY_WALL = "墙";
@@ -33,6 +34,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
         public static string BUILDELEMENT_CATEGORY_DOOR = "门";
         public static string BUILDELEMENT_CATEGORY_WINDOW = "窗";
+        public static string BUILDELEMENT_CATEGORY_FLOOR = "楼板";
 
         // 梁标注
         public static string BEAM_GEOMETRY_SIZE = "Beam_Geometry_Size";

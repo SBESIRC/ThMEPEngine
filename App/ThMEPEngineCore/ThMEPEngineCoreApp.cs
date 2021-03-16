@@ -476,5 +476,26 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THExtractFloor", CommandFlags.Modal)]
+        public void THExtractFloor()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var floorEngine = new ThFloorRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                floorEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                floorEngine.Elements.ForEach(o =>
+                {
+                    o.Outline.ColorIndex = 6;
+                    o.Outline.SetDatabaseDefaults();
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                });
+            }
+        }
     }
 }
