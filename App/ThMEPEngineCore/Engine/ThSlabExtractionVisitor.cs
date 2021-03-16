@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThFloorExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThSlabExtractionVisitor : ThBuildingElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -31,7 +31,7 @@ namespace ThMEPEngineCore.Engine
         private List<ThRawIfcBuildingElementData> Handle(Polyline polyline, Matrix3d matrix)
         {
             List<Curve> curves = new List<Curve>();
-            if (IsBuildElement(polyline) && IsFloor(polyline))
+            if (IsBuildElement(polyline) && CheckLayerValid(polyline))
             {
                 var clone = polyline.WashClone();
                 clone.TransformBy(matrix);
@@ -40,15 +40,19 @@ namespace ThMEPEngineCore.Engine
             return curves.Select(o => CreateBuildingElementData(o)).ToList();
         }
 
-        private new bool IsBuildElement(Entity entity)
+        public override bool IsBuildElement(Entity entity)
         {
-            return entity.Hyperlinks.Count > 0;
+            if (entity.Hyperlinks.Count > 0)
+            {
+                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
+                return thPropertySet.IsSlab;
+            }
+            return false;
         }
 
-        private bool IsFloor(Curve curve)
+        public override bool CheckLayerValid(Entity curve)
         {
-            var thPropertySet = ThPropertySet.CreateWithHyperlink(curve.Hyperlinks[0].Description);
-            return thPropertySet.IsFloor;
+            return true;
         }
 
         private ThRawIfcBuildingElementData CreateBuildingElementData(Curve curve)

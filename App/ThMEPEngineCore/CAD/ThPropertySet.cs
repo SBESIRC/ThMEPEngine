@@ -151,7 +151,7 @@ namespace ThMEPEngineCore.CAD
         /// <summary>
         /// 是否为楼板
         /// </summary>
-        public bool IsFloor
+        public bool IsSlab
         {
             get
             {

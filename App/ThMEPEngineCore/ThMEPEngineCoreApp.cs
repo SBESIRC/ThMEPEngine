@@ -476,11 +476,11 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THExtractFloor", CommandFlags.Modal)]
-        public void THExtractFloor()
+        [CommandMethod("TIANHUACAD", "THExtractSlab", CommandFlags.Modal)]
+        public void THExtractSlab()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var floorEngine = new ThFloorRecognitionEngine())
+            using (var floorEngine = new ThSlabRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)

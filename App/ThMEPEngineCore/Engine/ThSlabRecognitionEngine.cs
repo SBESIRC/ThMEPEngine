@@ -1,20 +1,19 @@
-﻿using System;
+﻿using NFox.Cad;
+using DotNetARX;
+using System.Linq;
+using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
-using NFox.Cad;
-using ThCADCore.NTS;
-using DotNetARX;
 using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThFloorExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThSlabExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThFloorExtractionVisitor();
+            var visitor = new ThSlabExtractionVisitor();
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
@@ -22,11 +21,11 @@ namespace ThMEPEngineCore.Engine
         }
     }
 
-    public class ThFloorRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThSlabRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThFloorExtractionEngine();
+            var engine = new ThSlabExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
