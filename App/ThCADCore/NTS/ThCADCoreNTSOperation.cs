@@ -4,10 +4,10 @@ using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
 using NetTopologySuite.Operation.Linemerge;
+using Autodesk.AutoCAD.DatabaseServices;
 using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace ThCADCore.NTS

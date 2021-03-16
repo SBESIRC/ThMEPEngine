@@ -1,12 +1,7 @@
 ﻿using System;
-using NFox.Cad;
-using Dreambuild.AutoCAD;
 using System.Collections.Generic;
-using NetTopologySuite.Simplify;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
-using NetTopologySuite.Operation.Linemerge;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 

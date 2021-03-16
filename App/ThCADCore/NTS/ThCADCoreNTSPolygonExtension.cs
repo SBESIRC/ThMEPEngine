@@ -1,9 +1,7 @@
 ﻿using NFox.Cad;
 using System.Linq;
-using NetTopologySuite.Simplify;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;

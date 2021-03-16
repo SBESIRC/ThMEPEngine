@@ -1,13 +1,10 @@
 ﻿using System;
 using NFox.Cad;
-using System.Linq;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
-using NetTopologySuite.Operation.Polygonize;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
 
 namespace ThCADCore.NTS
 {
@@ -19,14 +16,14 @@ namespace ThCADCore.NTS
             var polygons = new List<Polygon>();
             hatch.Boundaries().ForEach(o =>
             {
-                if(o is Polyline polyline)
+                if (o is Polyline polyline)
                 {
                     polygons.Add(polyline.ToNTSPolygon());
                 }
-                else if(o is Circle circle)
+                else if (o is Circle circle)
                 {
                     var circlePolygon = circle.ToNTSPolygon();
-                    if(circlePolygon!=null)
+                    if (circlePolygon != null)
                     {
                         polygons.Add(circlePolygon);
                     }
@@ -36,7 +33,7 @@ namespace ThCADCore.NTS
             MultiPolygon multiPolygon = ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
             ThCADCoreNTSBuildArea buildArea = new ThCADCoreNTSBuildArea();
             var result = buildArea.Build(multiPolygon);
-            foreach(var ploygon in FilterPolygons(result))
+            foreach (var ploygon in FilterPolygons(result))
             {
                 results.Add(ploygon.ToDbEntity());
             }

@@ -1,6 +1,5 @@
 ﻿using System;
 using NFox.Cad;
-using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
