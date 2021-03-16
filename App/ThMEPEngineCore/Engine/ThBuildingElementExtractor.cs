@@ -1,4 +1,5 @@
 ﻿using Linq2Acad;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -39,6 +40,32 @@ namespace ThMEPEngineCore.Engine
                     }
                 }
             }
+        }
+
+        public void ExtractFromMS(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                acadDatabase.ModelSpace
+                    .OfType<Entity>()
+                    .ForEach(e =>
+                    {
+                        Visitors.ForEach(v =>
+                        {
+                            v.Results.AddRange(DoExtract(e, v));
+                        });
+                    });
+            }
+        }
+
+        private List<ThRawIfcBuildingElementData> DoExtract(Entity e, ThBuildingElementExtractionVisitor visitor)
+        {
+            var results = new List<ThRawIfcBuildingElementData>();
+            if (visitor.IsBuildElement(e) && visitor.CheckLayerValid(e))
+            {
+                visitor.DoExtract(results, e, Matrix3d.Identity);
+            }
+            return results;
         }
 
         private List<ThRawIfcBuildingElementData> DoExtract(
