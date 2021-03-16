@@ -80,6 +80,7 @@
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThRoomSpatialPredicateEngine.cs" />
     <Compile Include="Engine\ThSlabExtractionVisitor.cs" />
     <Compile Include="Engine\ThDoorExtractionVisitor.cs" />
     <Compile Include="Engine\ThDoorMarkExtractionVisitor.cs" />
