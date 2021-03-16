@@ -107,9 +107,13 @@
         /// </summary>
         public const double MAX_KITCHEN_TO_RAINPIPE_DISTANCE = 5500;
         /// <summary>
+        /// 阳台到雨水管最大距离
+        /// </summary>
+        public const double MAX_BALCONY_TO_RAINPIPE_DISTANCE = 2000;
+        /// <summary>
         /// 卫生间到冷凝管最大距离
         /// </summary>
-        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 2600;
+        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 3000;
         /// <summary>
         /// 卫生间到地漏最大距离
         /// </summary>
@@ -165,11 +169,11 @@
         /// <summary>
         /// 水管标注
         /// </summary>
-        public const string W_DRAI_NOTE = "W-DRAI-NOTE";
+        public static string W_DRAI_NOTE = "W-DRAI-NOTE";
         /// <summary>
         /// 雨水管立管
         /// </summary>
-        public const string W_RAIN_EQPM = "W-RAIN-EQPM";
+        public static string W_RAIN_EQPM = "W-RAIN-EQPM";
         /// <summary>
         /// 污水管立管
         /// </summary>

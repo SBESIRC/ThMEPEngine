@@ -236,10 +236,13 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     ThWBalconyFloordrainEngine.Run(parameters2);
                 }
-            }         
-            ThWDeviceFloordrainEngine.Run(rainpipe_Device, device, condensepipes, devicefloordrain, roofrainpipe);
-            Rainpipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Rainpipe_tofloordrain);
-            Condensepipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Condensepipe_tofloordrain);
+            }
+            if (device != null)
+            {
+                ThWDeviceFloordrainEngine.Run(rainpipe_Device, device, condensepipes, devicefloordrain, roofrainpipe);
+                Rainpipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Rainpipe_tofloordrain);
+                Condensepipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Condensepipe_tofloordrain);
+            }
             if (device_other != null)
             {
                 ThWDeviceFloordrainEngine.Run(rainpipe_Device_other, device_other, condensepipes, devicefloordrain, roofrainpipe);

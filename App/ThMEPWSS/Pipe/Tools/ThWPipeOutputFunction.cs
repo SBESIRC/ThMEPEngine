@@ -673,6 +673,13 @@ namespace ThMEPWSS.Pipe.Tools
             }
             foreach (string s in strings)
             {
+                if (s.Contains(pipeLayer))
+                {
+                    return s;
+                }
+            }
+            foreach (string s in strings)
+            {
                 if (s.Equals(ThWPipeCommon.W_DRAI_SEWA_PIPE1))
                 {
                     return ThWPipeCommon.W_DRAI_SEWA_PIPE1;
@@ -687,20 +694,69 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return (null);
         }
+        public static string Get_Layers6(List<string> strings, string pipeLayer)
+        {
+            foreach (string s in strings)
+            {
+                if (s.Equals(pipeLayer))
+                {
+                    return pipeLayer;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Contains(pipeLayer))
+                {
+                    return s;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Equals(ThWPipeCommon.W_RAIN_NOTE))
+                {
+                    return ThWPipeCommon.W_RAIN_NOTE;
+                }
+            }
+            foreach (string s in strings)
+            {
+                if (s.Contains(ThWPipeCommon.W_RAIN_NOTE))
+                {
+                    return s;
+                }
+            }
+            return "";
+        }
         public static string Get_Layers1(List<string> strings, string pipeLayer)
         {
-            if(strings.Contains(pipeLayer))
+            foreach (string s in strings)
             {
-                return pipeLayer;
+                if (s.Equals(pipeLayer))
+                {
+                    return pipeLayer;
+                }
             }
-            else if(strings.Contains(ThWPipeCommon.W_DRAI_NOTE))
+            foreach (string s in strings)
             {
-                return ThWPipeCommon.W_DRAI_NOTE;
+                if (s.Contains(pipeLayer))
+                {
+                    return s;
+                }
             }
-            else
+            foreach (string s in strings)
             {
-                return "";
+                if (s.Equals(ThWPipeCommon.W_DRAI_NOTE))
+                {
+                    return ThWPipeCommon.W_DRAI_NOTE;
+                }
             }
+            foreach (string s in strings)
+            {
+                if (s.Contains(ThWPipeCommon.W_DRAI_NOTE))
+                {
+                    return s;
+                }
+            }
+            return "";
         }
         public static string Get_Layers2(List<string> strings, string pipeLayer)
         {
@@ -713,12 +769,26 @@ namespace ThMEPWSS.Pipe.Tools
             }
             foreach (string s in strings)
             {
+                if (s.Contains(pipeLayer))
+                {
+                    return s;
+                }
+            }
+            foreach (string s in strings)
+            {
                 if (s.Equals(ThWPipeCommon.W_RAIN_EQPM))
                 {
                     return ThWPipeCommon.W_RAIN_EQPM;
+                }              
+            }
+            foreach (string s in strings)
+            {
+                if (s.Contains(ThWPipeCommon.W_RAIN_EQPM))
+                {
+                   return s;
                 }
             }
-            return (null);
+                return (null);
         }
         public static string Get_Layers3(List<string> strings, string pipeLayer)
         {
@@ -731,12 +801,26 @@ namespace ThMEPWSS.Pipe.Tools
             }
             foreach (string s in strings)
             {
+                if (s.Contains(pipeLayer))
+                {
+                    return s;
+                }
+            }
+            foreach (string s in strings)
+            {
                 if (s.Equals(ThWPipeCommon.W_DRAI_NOTE))
                 {
                     return ThWPipeCommon.W_DRAI_NOTE;
                 }
             }
-            return (null);
+            foreach (string s in strings)
+            {
+                if (s.Contains(ThWPipeCommon.W_DRAI_NOTE))
+                {
+                   return s;
+                }
+            }
+            return (ThWPipeCommon.W_DRAI_EQPM);
         }
         public static string Get_Layers4(List<string> strings, string pipeLayer)
         {
@@ -749,29 +833,61 @@ namespace ThMEPWSS.Pipe.Tools
             }
             foreach (string s in strings)
             {
+                if (s.Contains(pipeLayer))
+                {
+                    return s;
+                }
+            }
+            foreach (string s in strings)
+            {
                 if (s.Equals(ThWPipeCommon.W_RAIN_EQPM))
                 {
                     return ThWPipeCommon.W_RAIN_EQPM;
                 }
             }
+            foreach (string s in strings)
+            {
+                if (s.Contains(ThWPipeCommon.W_RAIN_EQPM))
+                {
+                    return s;
+                }
+            }
             return (null);
         }
-
-        public static string Get_LayersEx(List<string> layers, string pipeLayer,string replaceLayer)
+        public static string Get_Layers5(List<string> strings, string pipeLayer)
         {
-            if (layers.Contains(pipeLayer))
+            foreach (string s in strings)
             {
-                return pipeLayer;
+                if (s.Equals(pipeLayer))
+                {
+                    return pipeLayer;
+                }
             }
-            else if (layers.Contains(replaceLayer))
+            foreach (string s in strings)
             {
-                return replaceLayer;
+                if (s.Contains(pipeLayer))
+                {
+                    return s;
+                }
             }
-            else
+            foreach (string s in strings)
             {
-                return "";
+                if (s.Equals(ThWPipeCommon.W_DRAI_EQPM))
+                {
+                    return ThWPipeCommon.W_DRAI_EQPM;
+                }
             }
+            foreach (string s in strings)
+            {
+                if (s.Contains(ThWPipeCommon.W_DRAI_EQPM))
+                {
+                    return s;
+                }
+            }
+            return "";       
         }
+
+        
 
         public static Polyline CreateRainlines(Point3d point1, Point3d point2,string W_RAIN_PIPE)
         {
@@ -808,10 +924,55 @@ namespace ThMEPWSS.Pipe.Tools
             if (IsValidKitchenContainer(composite.Kitchen))
             {
                 parameters.boundary = composite.Kitchen.Space.Boundary as Polyline;
-                parameters.outline = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                if (composite.Kitchen.DrainageWells.Count > 1)
+                {
+                    var kitchenWell = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                    var kitchenWell1 = composite.Kitchen.DrainageWells[1].Boundary as Polyline;
+                    if (composite.Toilet.DrainageWells.Count>0)
+                    {
+                        var toiletWell= composite.Toilet.DrainageWells[0].Boundary as Polyline;
+                        if (kitchenWell.GetCenter().DistanceTo(toiletWell.GetCenter())< kitchenWell1.GetCenter().DistanceTo(toiletWell.GetCenter()))
+                        {
+                            parameters.outline = kitchenWell;
+                        }
+                        else
+                        {
+                            parameters.outline = kitchenWell1;
+                        }
+                    }
+                }
+                else
+                {
+                    var boundary = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                    if (boundary.Area < 100000)
+                    {
+                        parameters.outline = boundary;
+                    }
+                    else
+                    {
+                        if (composite.Toilet.DrainageWells.Count > 1)
+                        {
+                            if((composite.Toilet.DrainageWells[0].Boundary as Polyline).GetCenter().DistanceTo((composite.Kitchen.DrainageWells[0].Boundary as Polyline).GetCenter())>10)
+                            {
+                                parameters.outline = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+                            }
+                            else
+                            {
+                                parameters.outline = composite.Toilet.DrainageWells[1].Boundary as Polyline;
+                            }
+                        }
+                        else
+                        {
+                            parameters.outline = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+                        }
+                    }
+                }
                 if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter())))
                 {
-                    parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.outline);
+                    if (parameters.outline.GetCenter().DistanceTo((composite.Toilet.DrainageWells[0].Boundary as Polyline).GetCenter()) > 10)
+                    {
+                        parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.outline);
+                    }
                 }
                 if(composite.Kitchen.DrainageWells.Count>1)
                 {
@@ -825,14 +986,36 @@ namespace ThMEPWSS.Pipe.Tools
                         }
                     }
                 }
-                parameters.basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
+                if (composite.Kitchen.BasinTools.Count > 0)
+                {
+                    parameters.basinline = composite.Kitchen.BasinTools[0].Outline as BlockReference;
+                }
                 if (composite.Kitchen.Pypes.Count > 0)
                 {
                     parameters.pype = composite.Kitchen.Pypes[0].Boundary as Polyline;
                 }
                 else
                 {
-                    parameters.pype = new Polyline();
+                    if (composite.Kitchen.DrainageWells.Count > 1)
+                    {
+                        if ((composite.Kitchen.DrainageWells[0].Boundary as Polyline).GetCenter().DistanceTo(parameters.outline.GetCenter()) > 10)
+                        {
+                            parameters.pype = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                        }
+                        else
+                        {
+                            parameters.pype = composite.Kitchen.DrainageWells[1].Boundary as Polyline;
+                        }
+                        parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.pype);
+                    }
+                    else
+                    {
+                        if(parameters.outline.GetCenter().DistanceTo((composite.Kitchen.DrainageWells[0].Boundary as Polyline).GetCenter())>10)
+                        {
+                            parameters.pype = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
+                            parameters.boundary = GetkitchenBoundary(parameters.boundary, parameters.pype);
+                        }
+                    }
                 }
                 if (composite.Kitchen.RainPipes.Count > 0)
                 {
@@ -857,7 +1040,7 @@ namespace ThMEPWSS.Pipe.Tools
                 }
             }
         }
-        private static Polyline GetkitchenBoundary(Polyline roofSpaces, Polyline StandardSpaces)
+        public static Polyline GetkitchenBoundary(Polyline roofSpaces, Polyline StandardSpaces)
         {
             var pts = new Point3dCollection();
             pts.Add(roofSpaces.GeometricExtents.MinPoint);

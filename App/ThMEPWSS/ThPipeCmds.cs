@@ -208,6 +208,8 @@ namespace ThMEPWSS
                 string W_DRAI_EQPM= ThWPipeOutputFunction.Get_Layers2(FloorEngines.Layers, ThWPipeCommon.W_DRAI_EQPM);
                 string W_DRAI_FLDR = ThWPipeOutputFunction.Get_Layers3(FloorEngines.Layers, ThWPipeCommon.W_DRAI_FLDR);
                 string W_RAIN_PIPE= ThWPipeOutputFunction.Get_Layers4(FloorEngines.Layers, ThWPipeCommon.W_RAIN_PIPE);
+                ThWPipeCommon.W_RAIN_EQPM = ThWPipeOutputFunction.Get_Layers5(FloorEngines.Layers, ThWPipeCommon.W_RAIN_EQPM);
+                ThWPipeCommon.W_DRAI_NOTE= ThWPipeOutputFunction.Get_Layers6(FloorEngines.Layers, ThWPipeCommon.W_DRAI_NOTE);
                 //第一类屋顶设备层布置   
                 var parameters2 = new ThWRoofDeviceParameters();
                 if (FloorEngines.RoofTopFloors.Count > 0)//存在屋顶设备层

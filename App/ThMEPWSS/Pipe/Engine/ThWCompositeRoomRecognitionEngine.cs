@@ -167,18 +167,48 @@ namespace ThMEPWSS.Pipe.Engine
                 if (balconyRooms[i].FloorDrains.Count > 1 && balconyRooms[i].Washmachines.Count>0)
                 {
                     var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
-                    foreach (var devicePlatformRoom in devicePlatformRooms)
+                    if (devicePlatformRooms.Count > 0)
                     {
-
-                        if (IsBalconyPair(balconyRooms[i], devicePlatformRoom))
+                        foreach (var devicePlatformRoom in devicePlatformRooms)
                         {
-                            devicePlatformIncludingRoom.Add(devicePlatformRoom);
+
+                            if (devicePlatformRoom!=null&&IsBalconyPair(balconyRooms[i], devicePlatformRoom))
+                            {
+                                devicePlatformIncludingRoom.Add(devicePlatformRoom);
+                            }
                         }
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
                     }
-                    FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    else
+                    {
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    }
+
                 } 
+                else if(balconyRooms[i].FloorDrains.Count==1)
+                {
+                    var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
+                    if (devicePlatformRooms.Count > 0)
+                    {
+                        foreach (var devicePlatformRoom in devicePlatformRooms)
+                        {
+
+                            if (devicePlatformRoom != null && IsBalconyPair(balconyRooms[i], devicePlatformRoom))
+                            {
+                                devicePlatformIncludingRoom.Add(devicePlatformRoom);
+                            }
+                        }
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    }
+                    else
+                    {
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    }
+                }
+
                 else
                 {
+
                     balconyroom1.Add(balconyRooms[i]);
                 }
             }

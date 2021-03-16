@@ -63,11 +63,48 @@ namespace ThMEPWSS.Pipe.Output
         {
             foreach (var compositeBalcony in FloorEngines.TopFloors[0].CompositeBalconyRooms)
             {   //判断是否为正确的Balcony
-                if (thWPipeOutputFunction.IsValidBalconyForFloorDrain(compositeBalcony.Balcony)&& compositeBalcony.DevicePlatforms[0]!=null)
+                if (thWPipeOutputFunction.IsValidBalconyForFloorDrain(compositeBalcony.Balcony))
                 {
+                    if(compositeBalcony.DevicePlatforms.Count>0)
+                    {
+                        if(compositeBalcony.DevicePlatforms[0]== null)
+                        {
+                            return;
+                        }
+                    }
                     var parameters = new ThWTopBalconyParameters();
                     ThWPipeOutputFunction.GetListFloorDrain(compositeBalcony, parameters).ForEach(o => parameters.bfloordrain.Add(o));                
                     parameters.bboundary = compositeBalcony.Balcony.Space.Boundary as Polyline;
+                    if (compositeBalcony.Balcony.RainPipes.Count > 0)
+                    {
+                        if (compositeBalcony.DevicePlatforms.Count == 0)
+                        {
+                            if (!(GeomUtils.PtInLoop(parameters.bboundary, compositeBalcony.Balcony.RainPipes[0].Outline.GetCenter())) && parameters.bboundary.GetCenter().DistanceTo(compositeBalcony.Balcony.RainPipes[0].Outline.GetCenter()) < ThWPipeCommon.MAX_BALCONY_TO_RAINPIPE_DISTANCE)
+                            {
+                                parameters.bboundary = ThWPipeOutputFunction.GetkitchenBoundary(parameters.bboundary, compositeBalcony.Balcony.RainPipes[0].Outline as Polyline);
+                            }
+                        }
+                        else
+                        {
+                            if (!(GeomUtils.PtInLoop(parameters.bboundary, compositeBalcony.Balcony.RainPipes[0].Outline.GetCenter())) && parameters.bboundary.GetCenter().DistanceTo(compositeBalcony.Balcony.RainPipes[0].Outline.GetCenter()) < ThWPipeCommon.MAX_BALCONY_TO_RAINPIPE_DISTANCE)
+                            {
+                                int num = 0;
+                                foreach(var room in compositeBalcony.DevicePlatforms)
+                                {
+                                    if(GeomUtils.PtInLoop(room.Space.Boundary as Polyline, compositeBalcony.Balcony.RainPipes[0].Outline.GetCenter()))
+                                    {
+                                        num++;
+                                        break;
+                                    }                                  
+                                }
+                                if(num==0)
+                                {
+                                    parameters.bboundary = ThWPipeOutputFunction.GetkitchenBoundary(parameters.bboundary, compositeBalcony.Balcony.RainPipes[0].Outline as Polyline);
+                                }
+                                
+                            }
+                        }
+                    }
                     parameters.bboundary.Closed = true;
                     if (compositeBalcony.Balcony.RainPipes.Count > 0)
                     {
@@ -257,8 +294,24 @@ namespace ThMEPWSS.Pipe.Output
         }
         private static void InputToiletParameters(ThWCompositeRoom composite,ThWTopCompositeParameters parameters,ThWTopParameters parameters0)
         {
-            parameters.boundary1 = composite.Toilet.Space.Boundary as Polyline;  
-            parameters.outline1 = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+            parameters.boundary1 = composite.Toilet.Space.Boundary as Polyline;
+            if (composite.Toilet.DrainageWells.Count > 1)
+            {
+                var well = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+                var well1= composite.Toilet.DrainageWells[1].Boundary as Polyline;
+                if (well.GetCenter().DistanceTo(parameters.boundary1.GetCenter()) < well.GetCenter().DistanceTo(parameters.boundary1.GetCenter()))
+                {
+                    parameters.outline1 = well;
+                }
+                else
+                {
+                    parameters.outline1 = well1;
+                }
+            }
+            else
+            {
+                parameters.outline1 = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+            }
             if (!(GeomUtils.PtInLoop(parameters.boundary1, parameters.outline1.GetCenter())))
             {
                 parameters.boundary1 = GetToiletBoundary(parameters.boundary1, parameters.outline1);
@@ -379,8 +432,11 @@ namespace ThMEPWSS.Pipe.Output
                 }
                 if(FloordrainEngine.Bbasinline_to_Floordrain.Count==0)
                 {
-                    parameters0.standardEntity.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
-                    parameters0.normalCopys.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
+                    if (FloordrainEngine.Bbasinline_Center.Count > 0)
+                    {
+                        parameters0.standardEntity.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
+                        parameters0.normalCopys.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
+                    }
                 }
             }
             if (FloordrainEngine.Bbasinline_to_Floordrain.Count > 0)
@@ -390,8 +446,11 @@ namespace ThMEPWSS.Pipe.Output
                     parameters0.standardEntity.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Bbasinline_to_Floordrain[i], FloordrainEngine.Bbasinline_to_Floordrain[i + 1], FloorEngines.Layers, pipeLayer));
                     parameters0.normalCopys.Add(ThWPipeOutputFunction.CreatePolyline(FloordrainEngine.Bbasinline_to_Floordrain[i], FloordrainEngine.Bbasinline_to_Floordrain[i + 1], FloorEngines.Layers, pipeLayer));
                 }
-                parameters0.standardEntity.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0],Layer= W_DRAI_EQPM });
-                parameters0.normalCopys.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
+                if (FloordrainEngine.Bbasinline_Center.Count > 0)
+                {
+                    parameters0.standardEntity.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
+                    parameters0.normalCopys.Add(new Circle() { Radius = 50, Center = FloordrainEngine.Bbasinline_Center[0], Layer = W_DRAI_EQPM });
+                }
             }
         }
         private static void OutputDeviceplatformParamters(ThWCompositeFloordrainEngine FloordrainEngine, AcadDatabase acadDatabase, ThWTopParameters parameters0,ThWTopBalconyParameters parameters,string W_DRAI_FLDR,string W_RAIN_PIPE)

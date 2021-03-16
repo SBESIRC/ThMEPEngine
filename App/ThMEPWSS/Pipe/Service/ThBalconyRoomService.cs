@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Model;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -56,10 +57,28 @@ namespace ThMEPWSS.Pipe.Service
 
             var BalconyRainPipeService = ThBalconyRainPipeService.Find(RainPipes, balconySpace);
             thBalconyRoom.RainPipes = BalconyRainPipeService.RainPipes;
+            if (BalconyRainPipeService.RainPipes.Count == 0)
+            {
+                thBalconyRoom.RainPipes = FindRainPipes(RainPipes, balconySpace);
+            }
             var BalconyBasintoolsService = ThBalconyBasintoolService.Find(Basintools, balconySpace);
             thBalconyRoom.BasinTools = BalconyBasintoolsService.Basintools;
 
             return thBalconyRoom;
+        }
+        private static List<ThWRainPipe> FindRainPipes(List<ThWRainPipe> pipes, ThIfcSpace space)
+        {
+            var rainPipes = new List<ThWRainPipe>();
+            foreach (var pipe in pipes)
+            {
+                Polyline s = pipe.Outline as Polyline;
+                if (s.GetCenter().DistanceTo(space.Boundary.GetCenter()) < ThWPipeCommon.MAX_BALCONY_TO_RAINPIPE_DISTANCE)
+                {
+                    rainPipes.Add(pipe);
+                }
+
+            }
+            return rainPipes;
         }
         private List<ThIfcSpace> BalconySpaces()
         {
