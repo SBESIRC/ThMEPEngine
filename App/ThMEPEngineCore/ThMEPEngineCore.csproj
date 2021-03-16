@@ -159,7 +159,6 @@
     <Compile Include="Model\Relationship\ThIfcRelVoidsElement.cs" />
     <Compile Include="Model\ThGeometry.cs" />
     <Compile Include="Model\ThIfcCurtainWall.cs" />
-    <Compile Include="Model\ThIfcFloor.cs" />
     <Compile Include="Model\ThIfcElectricAppliance.cs" />
     <Compile Include="Model\ThIfcExternalSpatialElement.cs" />
     <Compile Include="Model\ThIfcExternalSpatialStructureElement.cs" />

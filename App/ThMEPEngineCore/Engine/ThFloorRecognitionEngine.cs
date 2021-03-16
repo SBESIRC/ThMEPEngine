@@ -55,7 +55,7 @@ namespace ThMEPEngineCore.Engine
                 {
                     if (o is Polyline polyline && polyline.Area > 0.0)
                     {
-                        Elements.Add(ThIfcFloor.Create(polyline));
+                        Elements.Add(ThIfcSlab.Create(polyline));
                     }
                 });
         }
