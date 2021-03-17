@@ -3,7 +3,6 @@ using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using AcHelper.Commands;
 using System.Collections.Generic;
 using TianHua.FanSelection.Function;
 using ThMEPEngineCore.Service.Hvac;
@@ -75,6 +74,15 @@ namespace TianHua.FanSelection.UI.CAD
                     // 风机编号变化
                     var numbers = dbManager.GetModelNumbers(_FanDataModel.ID);
                     if (!Enumerable.SequenceEqual(numbers.OrderBy(t => t), _FanDataModel.ListVentQuan.OrderBy(t => t)))
+                    {
+                        ThFanSelectionEngine.ModifyModelNumbers(_FanDataModel);
+                    }
+
+                    // 风机楼层变化
+                    var storey = _FanDataModel.InstallFloor;
+                    var modelNumber = model.GetModelNumber();
+                    var storeyNumber = model.GetStoreyNumber();
+                    if (storeyNumber != ThFanSelectionUtils.StoreyNumber(storey, modelNumber.ToString()))
                     {
                         ThFanSelectionEngine.ModifyModelNumbers(_FanDataModel);
                     }

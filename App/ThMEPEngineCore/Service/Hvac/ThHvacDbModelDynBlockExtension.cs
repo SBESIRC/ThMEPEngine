@@ -47,6 +47,19 @@ namespace ThMEPEngineCore.Service.Hvac
             }
         }
 
+        public static string GetStoreyNumber(this ObjectId obj)
+        {
+            var attributes = obj.GetAttributesInBlockReference();
+            if (attributes.ContainsKey(ThHvacCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER))
+            {
+                return attributes[ThHvacCommon.BLOCK_ATTRIBUTE_STOREY_AND_NUMBER];
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public static Point3d GetModelBasePoint(this ObjectId obj)
         {
             double position_x = 0, position_y = 0;
