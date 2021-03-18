@@ -188,8 +188,11 @@ namespace ThMEPWSS.Pipe.Output
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
-                        dublicatePoint = ThWPipeOutputFunction.GetdublicatePoint(composite_Engine.FpipeDublicated[j], PipeindexEngine.Tpipeindex[j][i]);
-                        Yoffset = ThWPipeOutputFunction.GetOffset(composite_Engine.FpipeDublicated[j], PipeindexEngine.Tpipeindex[j][i]);
+                        if (j < composite_Engine.FpipeDublicated.Count)
+                        {
+                            dublicatePoint = ThWPipeOutputFunction.GetdublicatePoint(composite_Engine.FpipeDublicated[j], PipeindexEngine.Tpipeindex[j][i]);
+                            Yoffset = ThWPipeOutputFunction.GetOffset(composite_Engine.FpipeDublicated[j], PipeindexEngine.Tpipeindex[j][i]);
+                        }
                     }
                     Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
                     var Matrix = Matrix3d.Displacement(s);
@@ -347,8 +350,11 @@ namespace ThMEPWSS.Pipe.Output
                     double Yoffset = 0.0;
                     if (composite_Engine.FpipeDublicated.Count > 0)
                     {
-                        dublicatePoint = ThWPipeOutputFunction.GetdublicatePoint(composite_Engine.FpipeDublicated[j], PipeindexEngine.Ppipeindex[j][i]);
-                        Yoffset = ThWPipeOutputFunction.GetOffset(composite_Engine.FpipeDublicated[j], PipeindexEngine.Ppipeindex[j][i]);
+                        if (j < composite_Engine.FpipeDublicated.Count)
+                        {
+                            dublicatePoint = ThWPipeOutputFunction.GetdublicatePoint(composite_Engine.FpipeDublicated[j], PipeindexEngine.Ppipeindex[j][i]);
+                            Yoffset = ThWPipeOutputFunction.GetOffset(composite_Engine.FpipeDublicated[j], PipeindexEngine.Ppipeindex[j][i]);
+                        }
                     }
                     Vector3d s = new Vector3d(0.0, Yoffset, 0.0);
                     var Matrix = Matrix3d.Displacement(s);

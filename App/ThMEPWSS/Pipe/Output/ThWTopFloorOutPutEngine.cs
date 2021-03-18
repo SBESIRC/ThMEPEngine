@@ -132,22 +132,45 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     if (compositeBalcony.DevicePlatforms.Count > 0)
                     {
-                        parameters.device = compositeBalcony.DevicePlatforms[0].Space.Boundary.Clone() as Polyline;
-                        parameters.device.Closed = true;
-                    }
-                    if (compositeBalcony.DevicePlatforms.Count > 1)
-                    {
-                        Polyline temp = compositeBalcony.DevicePlatforms[1].Space.Boundary as Polyline;
-                        if ((temp.GetCenter().DistanceTo(parameters.device.GetCenter()) > 2))
+                        if (compositeBalcony.DevicePlatforms.Count < 2)
                         {
-                            parameters.device_other = compositeBalcony.DevicePlatforms[1].Space.Boundary.Clone() as Polyline;
-                            parameters.device_other.Closed = true;
+                            parameters.device = compositeBalcony.DevicePlatforms[0].Space.Boundary.Clone() as Polyline;
+                            parameters.device.Closed = true;
                         }
                         else
                         {
-                            parameters.device_other = compositeBalcony.DevicePlatforms[2].Space.Boundary.Clone() as Polyline;
-                            parameters.device_other.Closed = true;
+                            double dst = double.MaxValue;
+                            if (parameters.washingmachine != null)
+                            {
+                                for (int i = 0; i < compositeBalcony.DevicePlatforms.Count; i++)
+                                {                                   
+                                        if ((compositeBalcony.DevicePlatforms[i].Space.Boundary as Polyline).GetCenter().DistanceTo(parameters.washingmachine.Position) < dst)
+                                        {
+                                            dst = (compositeBalcony.DevicePlatforms[i].Space.Boundary as Polyline).GetCenter().DistanceTo(parameters.washingmachine.Position);
+                                            parameters.device = compositeBalcony.DevicePlatforms[i].Space.Boundary.Clone() as Polyline;
+                                        }                                                                    
+                                }
+                            }
+                            else
+                            {
+                                parameters.device = compositeBalcony.DevicePlatforms[0].Space.Boundary.Clone() as Polyline;
+                            }
+                            parameters.device.Closed = true;
                         }
+                    }
+                    if (compositeBalcony.DevicePlatforms.Count > 1)
+                    {
+                        Polyline temp = parameters.device;
+                        foreach(var device in compositeBalcony.DevicePlatforms)
+                        {
+                            var deviceLine = device.Space.Boundary as Polyline;
+                            if ((temp.GetCenter().DistanceTo(deviceLine.GetCenter()) > ThWPipeCommon.MAX_DEVICE_TO_DEVICE) && (temp.GetCenter().DistanceTo(parameters.bboundary.GetCenter()) < ThWPipeCommon.MAX_DEVICE_TO_BALCONY))
+                            {
+                                parameters.device_other = deviceLine;
+                                parameters.device_other.Closed = true;
+                                break;
+                            }
+                        }                                     
                     }
                     foreach (var devicePlatform in compositeBalcony.DevicePlatforms)
                     {

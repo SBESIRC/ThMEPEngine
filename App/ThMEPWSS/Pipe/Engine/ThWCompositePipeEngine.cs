@@ -38,7 +38,7 @@ namespace ThMEPWSS.Pipe.Engine
 
         public void Run(Polyline boundary, Polyline outline, BlockReference basinline, Polyline pype,Polyline boundary1, Polyline outline1, Polyline urinal)
         {
-            if (boundary != null && outline != null && basinline != null && pype != null)
+            if (boundary != null && outline != null && basinline != null )
             {
                 KitchenPipeEngine.Run(boundary, outline, basinline, pype);
             }

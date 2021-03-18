@@ -11,9 +11,25 @@
         /// </summary>
         public const double MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = 1700;
         /// <summary>
+        /// 相邻设备平台最近距离
+        /// </summary>
+        public const double MAX_DEVICE_TO_DEVICE = 1700;
+        /// <summary>
+        /// 相邻设备平台距阳台最远距离
+        /// </summary>
+        public const double MAX_DEVICE_TO_BALCONY = 4000;
+        /// <summary>
         /// 雨水管到地漏最大距离（阳台区域）
         /// </summary>
         public const double MAX_RAINPIPE_TO_BALCONYFLOORDRAIN = 2000;
+        /// <summary>
+        /// 新增场景新增排水管到洗衣机地漏最小距离（阳台区域）
+        /// </summary>
+        public const double MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = 450;
+        /// <summary>
+        /// 冷凝管管到洗衣机最大距离（阳台区域）
+        /// </summary>
+        public const double MAX_CONDENSEPIPE_TO_WASHMACHINE = 2000;
         /// <summary>
         /// 洗衣机到台盆最大距离（阳台区域）
         /// </summary>
@@ -22,6 +38,10 @@
         /// 洗衣机地漏到排水管最大距离（阳台区域）
         /// </summary>
         public const double MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = 800;
+        /// <summary>
+        /// 新增场景洗衣机到雨水管最大距离（卫生间区域）
+        /// </summary>
+        public const double MAX__RAINPIPE_TO_WASHMACHINE = 550;
         /// <summary>
         /// 立管半径
         /// </summary>

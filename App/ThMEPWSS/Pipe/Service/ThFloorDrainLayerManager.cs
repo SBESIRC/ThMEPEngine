@@ -11,26 +11,26 @@ namespace ThMEPWSS.Pipe.Service
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)
             {
-                if((patterns.Count() ==0) && (patterns[0] == "地漏平面"|| patterns[0] == "地漏"))
+                if((patterns.Count() ==1) && (patterns[0] == "地漏平面"|| patterns[0] == "地漏"))
                 {
                     return true;
                 }
                 return ((patterns[0] == "卫") && (patterns[1] == "地漏"));             
             }
-            return (patterns[0] == "4") && (patterns[1] == "DRAIN") && (patterns[2] == "W")|| (patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2].Substring(patterns[2].Length - 1, 1) == ("W"));
+            return ((patterns[0] == "4") && (patterns[1] == "DRAIN") && (patterns[2] == "W") )|| ((patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2]).Contains("W"));             
         }
         public static bool IsBalconyFloorDrainBlockName(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)
             {
-                if ((patterns.Count() == 0)&&(patterns[0] == "地漏平面"|| patterns[0] == "地漏") &&!(patterns[1].Contains("$")))
+                if ((patterns.Count() >1)&&(patterns[0] == "地漏平面"|| patterns[0] == "地漏") &&!(patterns[1].Contains("$")))
                 {
                     return true;
                 }
                 return ((patterns[0] == "卫") && (patterns[1] == "地漏"));
             }
-            return (patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2].Substring(patterns[2].Length-1,1)==("W"));
+            return (patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2].Contains("W"));
         }
     }
 }
