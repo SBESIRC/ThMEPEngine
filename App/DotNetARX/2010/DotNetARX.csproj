@@ -14,7 +14,7 @@
 		<TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
 		<TargetFrameworkProfile />
 	</PropertyGroup>
-	<Import Project="..\..\TIANHUA.CSharp.General.net472.targets" />
+	<Import Project="..\..\..\Config\TIANHUA.CSharp.General.net472.targets" />
 	<ItemGroup>
 		<Reference Include="System" />
 		<Reference Include="System.Core" />
