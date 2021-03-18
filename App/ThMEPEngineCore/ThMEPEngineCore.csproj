@@ -72,6 +72,10 @@
     <Compile Include="CAD\ThPropertySet.cs" />
     <Compile Include="CAD\ThXrefDbExtension.cs" />
     <Compile Include="Diagnostics\ThIfcBeamDebugExtension.cs" />
+    <Compile Include="Engine\ThAnnotationElementExtractionEngine.cs" />
+    <Compile Include="Engine\ThAnnotationElementExtractionVisitor.cs" />
+    <Compile Include="Engine\ThAnnotationElementExtractor.cs" />
+    <Compile Include="Engine\ThAnnotationElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThArchitectureWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamPreprocessEngine.cs" />
@@ -80,7 +84,14 @@
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallRecognitionEngine.cs" />
-    <Compile Include="Engine\ThRoomSpatialPredicateEngine.cs" />
+    <Compile Include="Engine\ThRoomBuilderEngine.cs" />
+    <Compile Include="Engine\ThRoomMarkExtractionVisitor.cs" />
+    <Compile Include="Engine\ThRoomMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThSpatialElementExtractionVisitor.cs" />
+    <Compile Include="Engine\ThSpatialElementExtractor.cs" />
+    <Compile Include="Model\ThIfcAnnotation.cs" />
+    <Compile Include="Model\ThIfcTextNote.cs" />
+    <Compile Include="Service\ThRoomSpatialPredicateService.cs" />
     <Compile Include="Engine\ThSlabExtractionVisitor.cs" />
     <Compile Include="Engine\ThDoorExtractionVisitor.cs" />
     <Compile Include="Engine\ThDoorMarkExtractionVisitor.cs" />

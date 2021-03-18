@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -17,6 +18,16 @@ namespace ThMEPEngineCore.Engine
             {
                 Spaces.Add(ThIfcParkingStall.Create(curve));
             }
+        }
+
+        public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
         }
     }
 }

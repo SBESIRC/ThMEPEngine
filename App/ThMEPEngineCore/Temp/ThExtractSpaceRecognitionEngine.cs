@@ -342,5 +342,15 @@ namespace ThMEPEngineCore.Temp
                 return false;
             }).ToList();
         }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

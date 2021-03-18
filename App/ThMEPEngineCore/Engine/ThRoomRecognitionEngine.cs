@@ -19,10 +19,22 @@ namespace ThMEPEngineCore.Engine
             {
                 LayerFilter = ThRoomLayerManager.CurveXrefLayers(database),
             };
-            var extractor = new ThBuildingElementExtractor();
+            var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
-            Results = visitor.Results;
+            Results.AddRange(visitor.Results);
+        }
+
+        public override void ExtractFromMS(Database database)
+        {
+            var visitor = new ThRoomExtractionVisitor()
+            {
+                LayerFilter = ThSpaceBoundarLayerManager.CurveXrefLayers(database),
+            };
+            var extractor = new ThSpatialElementExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database);
+            Results.AddRange(visitor.Results);
         }
     }
     public class ThRoomRecognitionEngine : ThSpatialElementRecognitionEngine
@@ -33,9 +45,17 @@ namespace ThMEPEngineCore.Engine
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
-        private void Recognize(List<ThRawIfcBuildingElementData> datas, Point3dCollection polygon)
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var results = new List<ThRawIfcBuildingElementData>();
+            var engine = new ThRoomExtractionEngine();
+            engine.ExtractFromMS(database);
+            Recognize(engine.Results, polygon);
+        }
+
+        public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
+        {
+            var results = new List<ThRawIfcSpatialElementData>();
             var objs = datas.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
             {

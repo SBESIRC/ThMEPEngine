@@ -18,6 +18,11 @@ namespace ThMEPEngineCore.Engine
         public void Dispose()
         {
         }
+
         public abstract void Recognize(Database database, Point3dCollection polygon);
+
+        public abstract void RecognizeMS(Database database, Point3dCollection polygon);
+
+        public abstract void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon);
     }
 }

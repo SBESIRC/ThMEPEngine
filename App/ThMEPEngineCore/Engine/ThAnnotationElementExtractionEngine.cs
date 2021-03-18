@@ -3,20 +3,15 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRawIfcSpatialElementData
+    public class ThRawIfcAnnotationElementData
     {
         public object Data { get; set; }
         public Entity Geometry { get; set; }
     }
 
-    public abstract class ThSpatialElementExtractionEngine
+    public abstract class ThAnnotationElementExtractionEngine
     {
-        public List<ThRawIfcSpatialElementData> Results { get; protected set; }
-
-        public ThSpatialElementExtractionEngine()
-        {
-            Results = new List<ThRawIfcSpatialElementData>();
-        }
+        public List<ThRawIfcAnnotationElementData> Results { get; protected set; }
 
         public abstract void Extract(Database database);
 
