@@ -34,7 +34,7 @@ namespace ThMEPWSS.Pipe.Service
             foreach (var room in compositeBalconyRoom)
             {
                 var bboundary = FirstFloorSpace.Boundary as Polyline;
-                if (GeomUtils.PtInLoop(bboundary, room.Balcony.Space.Boundary.GetCenter()))
+                if (GeomUtils.PtInLoop(bboundary, room.Balcony.Boundary.GetCenter()))
                 {
                     balconyroom.Add(room);
                 }
