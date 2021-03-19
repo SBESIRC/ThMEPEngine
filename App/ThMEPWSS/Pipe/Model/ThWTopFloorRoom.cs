@@ -7,7 +7,7 @@ namespace ThMEPWSS.Pipe.Model
     /// <summary>
     /// 顶层
     /// </summary>
-    public class ThWTopFloorRoom : ThWRoom
+    public class ThWTopFloorRoom : ThIfcRoom
     {
         /// <summary>
         /// 基点圆

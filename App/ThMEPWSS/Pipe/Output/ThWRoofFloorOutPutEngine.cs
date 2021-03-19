@@ -16,7 +16,7 @@ namespace ThMEPWSS.Pipe.Layout
             {
                 var basecircle1 = composite.BaseCircles[0].Boundary.GetCenter();
                 parameters1.baseCenter1.Add(basecircle1);
-                parameters1.r_boundary = composite.Space.Boundary as Polyline;
+                parameters1.r_boundary = composite.Boundary as Polyline;
                 parameters1.gravityWaterBucket1 = ThWPipeOutputFunction.GetGravityWaterBuckets(composite.GravityWaterBuckets);
                 parameters1.sideWaterBucket1 = ThWPipeOutputFunction.GetSideWaterBuckets(composite.SideEntryWaterBuckets);
                 parameters1.roofRainPipe1 = ThWPipeOutputFunction.GetroofRainPipe(composite.RoofRainPipes);

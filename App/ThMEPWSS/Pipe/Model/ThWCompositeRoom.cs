@@ -1,6 +1,8 @@
-﻿namespace ThMEPWSS.Pipe.Model
+﻿using ThMEPEngineCore.Model;
+
+namespace ThMEPWSS.Pipe.Model
 {
-    public class ThWCompositeRoom : ThWRoom
+    public class ThWCompositeRoom : ThIfcRoom
     {
         public ThWToiletRoom Toilet { get; set; }
         public ThWKitchenRoom Kitchen { get; set; }

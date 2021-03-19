@@ -778,7 +778,7 @@ namespace ThMEPWSS.Pipe.Output
                             line.EndPoint + parameters0.baseCenter2[0].GetVectorTo(parameters1.baseCenter1[0])));
                         }
                         Polyline pboundary1 = null;
-                        pboundary1 = FloorEngines.RoofFloors[0].Space.Boundary as Polyline;
+                        pboundary1 = FloorEngines.RoofFloors[0].Boundary as Polyline;
                         List<Polyline> noline = new List<Polyline>();
                         composite_Engine1.Run(noline, noline, noline, noline, noline, noline, noline, pboundary1, divideLines1, parameters1.roofRoofRainPipes, toiletpoint, balconypoint, obstacle, scaleFactor);
                         //对顶层屋顶雨水管重新排序
