@@ -47,7 +47,7 @@ namespace ThMEPWSS.Pipe.Service
         private ThWBalconyRoom CreateBalconyRooms(ThIfcSpace balconySpace)
         {
             ThWBalconyRoom thBalconyRoom = new ThWBalconyRoom();
-            thBalconyRoom.Space = balconySpace;
+            thBalconyRoom.Boundary = balconySpace.Boundary;
 
             var BalconyWashmachineService = ThBalconyWashMachineService.Find(Washmachines, balconySpace);
             thBalconyRoom.Washmachines = BalconyWashmachineService.Washmachines;
