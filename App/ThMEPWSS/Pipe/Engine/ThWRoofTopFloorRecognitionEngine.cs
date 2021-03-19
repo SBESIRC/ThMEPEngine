@@ -77,7 +77,6 @@ namespace ThMEPWSS.Pipe.Engine
                 GetBuildingElements(database, pts);
                 GetLayers(database, pts).ForEach(o => Layers.Add(o));
                 GetTagNameFrames(database, pts);
-                GetStarFrames(this.Spaces);
                 GetDevices(database, pts);
                 GetElevationFrames(database, pts);
                 GetAxialCircleTag(database, pts);
@@ -241,19 +240,6 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             });            
         }
-        private void GetStarFrames(List<ThIfcSpace> spaces)
-        {         
-            foreach (ThIfcSpace space in spaces)
-            {
-                Point3d minPoint = space.Boundary.GeometricExtents.MinPoint;
-                Point3d maxPoint = space.Boundary.GeometricExtents.MaxPoint;
-                if (Math.Abs(minPoint.DistanceTo(maxPoint) - 5500) < 100)
-                {
-                    StairFrames.Add(space.Boundary as Polyline);
-                }
-            }         
-        }
-
         private void GetBuildingElements(Database database, Point3dCollection pts)
         {
             var engine = new ThWObstaclesRecognitionEngine();
