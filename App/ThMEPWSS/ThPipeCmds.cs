@@ -199,7 +199,7 @@ namespace ThMEPWSS
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
             {                 
-                FloorEngines.Recognize(acadDatabase.Database, new Point3dCollection());
+                FloorEngines.Recognize(acadDatabase.Database, ThTagParametersService.framePoints);
                 if (FloorEngines.RoofTopFloors.Count == 0 && FloorEngines.RoofFloors.Count == 0 && FloorEngines.TopFloors.Count == 0)
                 {
                     return;
@@ -283,6 +283,6 @@ namespace ThMEPWSS
                       where (b.GetBlockName().Contains(blockName)&& b.GetBlockName().Contains("标准层"))
                       select b).ToList();
             return blocks;
-        }
+        }    
     }
 }

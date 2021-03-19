@@ -18,7 +18,6 @@ namespace ThMEPWSS.Pipe.Engine
                 var BlockReferencesSelected = BlockTools.GetAllDynBlockReferences(acadDatabase.Database, dataModel);
                 string name = "";
                 var blockReferences = new List<BlockReference>();
-
                 if (dataModel.Length==3)
                 {
                     name = dataModel.Substring(0,1);

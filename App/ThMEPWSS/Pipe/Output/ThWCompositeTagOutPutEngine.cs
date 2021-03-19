@@ -780,7 +780,11 @@ namespace ThMEPWSS.Pipe.Output
                         //对顶层屋顶雨水管重新排序
                         for (int j = 0; j < composite_Engine1.PipeEngine.RoofRainpipeindex.Count; j++)
                         {
-                            int count = composite_Engine.PipeEngine.RoofRainpipeindex[j].Count;
+                            int count = 0;
+                            if(j< composite_Engine.PipeEngine.RoofRainpipeindex.Count)
+                            {
+                                count = composite_Engine.PipeEngine.RoofRainpipeindex[j].Count;
+                            }    
                             for (int i = 0; i < composite_Engine1.PipeEngine.RoofRainpipeindex[j].Count; i++)
                             {
                                 double Yoffset = 0.0;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -27,7 +28,8 @@ namespace ThMEPWSS.Pipe.Service
         public static int FloorValue = 100;
         public static List<Tuple<string, bool>> targetFloors =new List<Tuple<string, bool>>();
         public static List<BlockReference> blockCollection = new List<BlockReference>();
-        public void Read()
+        public static Point3dCollection framePoints = new Point3dCollection();
+       public void Read()
         {
             //targetFloors.Add(Tuple.Create("标准层1", true));
         }

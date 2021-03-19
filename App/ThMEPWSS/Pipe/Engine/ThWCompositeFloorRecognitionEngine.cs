@@ -142,12 +142,11 @@ namespace ThMEPWSS.Pipe.Engine
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var engine = new ThWStoreysRecognitionEngine();
-                engine.Recognize(acadDatabase.Database, new Point3dCollection());
+                engine.Recognize(acadDatabase.Database, pts);
                 if (engine.Elements.Count == 0)
                 {
                     return;
                 }
-
                 var blockCollection = new List<BlockReference>();
                 engine.Elements.Cast<ThWStoreys>().ForEach(o =>
                 {

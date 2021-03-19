@@ -24,8 +24,8 @@ namespace ThMEPWSS.Pipe.Service
         public List<Tuple<string, string>> StoreyNames { get; set; }
         public ThReadStoreyInformationService()
         {
-            DeviceName = string.Empty;
-            RoofName = string.Empty;
+            DeviceName = "";
+            RoofName = "";
             StandardSpaceNames = new List<Tuple<string,string>>();
             NonStandardSpaceNames = new List<Tuple<string, string>>();
             StoreyNames = new List<Tuple<string, string>>();
@@ -36,7 +36,7 @@ namespace ThMEPWSS.Pipe.Service
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var engine = new ThWStoreysRecognitionEngine();
-                engine.Recognize(acadDatabase.Database, new Point3dCollection());
+                engine.Recognize(acadDatabase.Database, ThTagParametersService.framePoints);
                 if (engine.Elements.Count == 0)
                 {
                     return;
@@ -53,8 +53,14 @@ namespace ThMEPWSS.Pipe.Service
                     StandardSpaceNames = GetSortList(DivideCharacter(GetStandardSpaceName(objIds), "标准层"));
                     NonStandardSpaceNames = GetSortList(DivideCharacter(GetNonStandardSpaceName(objIds), "非标层"));
                 }
-                StoreyNames.Add(Tuple.Create(DeviceName, "小屋面"));
-                StoreyNames.Add(Tuple.Create(RoofName, "大屋面"));
+                if(DeviceName!="")
+                {
+                    StoreyNames.Add(Tuple.Create(DeviceName, "小屋面"));
+                }
+                if (RoofName != "")
+                {
+                    StoreyNames.Add(Tuple.Create(RoofName, "大屋面"));
+                }
                 foreach(var StandardSpaceName in StandardSpaceNames)
                 {
                     StoreyNames.Add(Tuple.Create($"{StandardSpaceName.Item1}{"标准层"}", StandardSpaceName.Item2));

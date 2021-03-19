@@ -967,7 +967,7 @@ namespace ThMEPWSS.Pipe.Tools
                         }
                     }
                 }
-                if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter())))
+                if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter()))&& composite.Toilet.DrainageWells.Count>0)
                 {
                     if (parameters.outline.GetCenter().DistanceTo((composite.Toilet.DrainageWells[0].Boundary as Polyline).GetCenter()) > 10)
                     {

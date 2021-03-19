@@ -15,10 +15,20 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                acadDatabase.ModelSpace
-                    .OfType<BlockReference>()
-                    .Where(b => b.GetEffectiveName() == "楼层框定")
-                    .ForEach(b => Elements.Add(new ThWStoreys(b.ObjectId)));
+                if (polygon.Count > 0)
+                {
+                    acadDatabase.ModelSpace
+                        .OfType<BlockReference>()
+                        .Where(b => b.GetEffectiveName() == "楼层框定" && (polygon[0].X -b.Position.X)*(polygon[2].X - b.Position.X)<0&& (polygon[0].Y - b.Position.Y) * (polygon[2].Y - b.Position.Y) < 0)
+                        .ForEach(b => Elements.Add(new ThWStoreys(b.ObjectId)));
+                }
+                else
+                {
+                    acadDatabase.ModelSpace
+                     .OfType<BlockReference>()
+                     .Where(b => b.GetEffectiveName() == "楼层框定" )
+                     .ForEach(b => Elements.Add(new ThWStoreys(b.ObjectId)));
+                }
             }
         }
 
