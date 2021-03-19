@@ -2,6 +2,7 @@
 using System.Linq;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
 using ThMEPWSS.Pipe.Model;
@@ -19,6 +20,16 @@ namespace ThMEPWSS.Pipe.Engine
                     .Where(b => b.GetEffectiveName() == "楼层框定")
                     .ForEach(b => Elements.Add(new ThWStoreys(b.ObjectId)));
             }
+        }
+
+        public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }
