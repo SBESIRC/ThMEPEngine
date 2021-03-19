@@ -50,7 +50,7 @@ namespace ThMEPWSS.Pipe.Output
             GetRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetRoofRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetCopiedPipeindex(FloorEngines, parameters0, acadDatabase, obstacle, parameters1, parameters2, composite_Engine, toiletpoint, balconypoint, scaleFactor, W_RAIN_NOTE1);
-            var record0 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.TopFloors[0].Space.Tags[0]}", parameters0.standardEntity);
+            var record0 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.TopFloors[0].Tags[0]}", parameters0.standardEntity);
             BlockReference standardBlock = new BlockReference(new Point3d(0, 0, 0), record0);
             acadDatabase.ModelSpace.Add(standardBlock);//管井信息打印到标准层 
             var record = BlockTools.AddBlockTableRecord(acadDatabase.Database, "大屋面", parameters1.roofEntity);
@@ -1053,7 +1053,7 @@ namespace ThMEPWSS.Pipe.Output
                         {
                             normalEntity.Add(ent.GetTransformedCopy(offset));
                         }
-                        var record3 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.NormalFloors[i].Space.Tags[0]}", normalEntity);
+                        var record3 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.NormalFloors[i].Tags[0]}", normalEntity);
                         BlockReference normalBlock = new BlockReference(new Point3d(0, 0, 0), record3);
                         acadDatabase.ModelSpace.Add(normalBlock);//管井复制到标准层
                     }    
