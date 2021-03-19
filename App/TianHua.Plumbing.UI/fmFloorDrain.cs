@@ -11,6 +11,7 @@ using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
+using System.ComponentModel;
 
 namespace TianHua.Plumbing.UI
 {
@@ -20,6 +21,14 @@ namespace TianHua.Plumbing.UI
         {
             InitializeComponent();
         }
+
+
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            Hide();
+            e.Cancel = true;
+        }
+
 
         private void fmFloorDrain_Load(object sender, EventArgs e)
         {
