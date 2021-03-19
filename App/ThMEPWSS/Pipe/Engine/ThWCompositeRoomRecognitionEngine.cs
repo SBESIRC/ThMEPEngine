@@ -1,13 +1,14 @@
 ﻿using System;
-using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -30,48 +31,24 @@ namespace ThMEPWSS.Pipe.Engine
         }
         public override void Recognize(Database database, Point3dCollection pts)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {                     
-                var kichenEngine = new ThWKitchenRoomRecognitionEngine()
-                {
-                    Spaces = Spaces,
-                    RainPipes = rainPipes,
-                    RoofRainPipes= roofRainPipes,
-                    CondensePipes = condensePipes,
-                    FloorDrains = floorDrains,
-                    BasinTools = basinTools
-                };
-                kichenEngine.Recognize(database, pts);            
-                var toiletEngine = new ThWToiletRoomRecognitionEngine()
-                {                 
-                    Spaces = kichenEngine.Spaces,
-                    FloorDrains= floorDrains,
-                    CondensePipes= condensePipes,
-                    RoofRainPipes = roofRainPipes,
-                    closestools=closets
-                };
-                toiletEngine.Recognize(database, pts);
-                GeneratePairInfo(kichenEngine.Rooms, toiletEngine.Rooms);
-                var balconyEngine = new ThWBalconyRoomRecognitionEngine()
-                {
-                    Spaces = toiletEngine.Spaces,
-                    FloorDrains = floorDrains,
-                    Washmachines = washmachines,
-                    RainPipes = rainPipes,
-                    BasinTools = basinTools
-                };
-                balconyEngine.Recognize(database, pts);
-                var devicePlatformEngine = new ThWDevicePlatformRoomRecognitionEngine()
-                {
-                    Spaces = balconyEngine.Spaces,
-                    FloorDrains = floorDrains,
-                    RainPipes = rainPipes,
-                    CondensePipes = condensePipes,
-                    RoofRainPipes = roofRainPipes
-                };
-                devicePlatformEngine.Recognize(database, pts);
-                GenerateBalconyPairInfo(balconyEngine.Rooms, devicePlatformEngine.Rooms);
-            }
+            var spaceEngine = new ThSpaceRecognitionEngine();
+                spaceEngine.Recognize(database, pts);
+
+            var kitchenRooms = ThKitchenRoomService.Build(spaceEngine.Spaces, basinTools, 
+                rainPipes, roofRainPipes, condensePipes, floorDrains);
+
+            var toiletRooms = ThToiletRoomService.Build(spaceEngine.Spaces, closets, 
+                floorDrains, condensePipes, roofRainPipes);
+
+            GeneratePairInfo(kitchenRooms, toiletRooms);
+
+            var balconyRooms = ThBalconyRoomService.Build(spaceEngine.Spaces, washmachines, 
+                floorDrains, rainPipes, basinTools);
+
+            var devicePlatforms = ThDevicePlatformRoomService.Build(spaceEngine.Spaces, 
+                floorDrains, rainPipes, condensePipes, roofRainPipes);
+
+            GenerateBalconyPairInfo(balconyRooms, devicePlatforms);
         } 
         /// <summary>
         /// 根据厨房间， 卫生间 生成复合房间信息
