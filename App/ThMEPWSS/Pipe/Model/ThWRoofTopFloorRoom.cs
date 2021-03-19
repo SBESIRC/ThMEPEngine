@@ -6,7 +6,7 @@ namespace ThMEPWSS.Pipe.Model
     /// <summary>
     /// 屋顶设备层
     /// </summary>
-    public class ThWRoofTopFloorRoom : ThWRoom
+    public class ThWRoofTopFloorRoom : ThIfcRoom
     {
         /// <summary>
         /// 重力水斗

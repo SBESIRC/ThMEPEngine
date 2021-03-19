@@ -1,11 +1,12 @@
 ﻿using System.Collections.Generic;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Model
 {
     /// <summary>
     /// 阳台
     /// </summary>
-    public class ThWBalconyRoom : ThWRoom
+    public class ThWBalconyRoom : ThIfcRoom
     { 
         /// <summary>
         /// 地漏

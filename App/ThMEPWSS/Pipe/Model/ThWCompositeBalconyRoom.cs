@@ -1,8 +1,9 @@
 ﻿using System.Collections.Generic;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Model
 {
-   public class ThWCompositeBalconyRoom : ThWRoom
+   public class ThWCompositeBalconyRoom : ThIfcRoom
     {
         public ThWBalconyRoom Balcony { get; set; }
         public List<ThWDevicePlatformRoom> DevicePlatforms { get; set; }

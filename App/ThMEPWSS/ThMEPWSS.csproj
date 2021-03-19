@@ -106,7 +106,6 @@
     <Compile Include="Pipe\Model\ThWPipe.cs" />
     <Compile Include="Pipe\Model\ThWRoofTopFloorRoom.cs" />
     <Compile Include="Pipe\Model\ThWRoofFloorRoom.cs" />
-    <Compile Include="Pipe\Model\ThWRoom.cs" />
     <Compile Include="Pipe\Model\ThWToiletPipe.cs" />
     <Compile Include="Pipe\Model\ThWToiletRoom.cs" />
     <Compile Include="Pipe\Output\ThWRoofFloorOutPutEngine.cs" />

@@ -3,7 +3,7 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPWSS.Pipe.Model
 {
-    public class ThWKitchenRoom : ThWRoom
+    public class ThWKitchenRoom : ThIfcRoom
     {
         /// <summary>
         /// 台盆

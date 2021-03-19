@@ -6,7 +6,7 @@ namespace ThMEPWSS.Pipe.Model
     /// <summary>
     /// 设备平台
     /// </summary>
-    public class ThWDevicePlatformRoom : ThWRoom
+    public class ThWDevicePlatformRoom : ThIfcRoom
     {
         /// <summary>
         /// 地漏
