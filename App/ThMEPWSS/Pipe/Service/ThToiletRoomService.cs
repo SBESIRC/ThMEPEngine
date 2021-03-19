@@ -57,7 +57,7 @@ namespace ThMEPWSS.Pipe.Service
         private ThWToiletRoom CreateToiletContainer(ThIfcSpace toiletSpace)
         {
             ThWToiletRoom thToiletContainer = new ThWToiletRoom();
-            thToiletContainer.Space = toiletSpace;
+            thToiletContainer.Boundary = toiletSpace.Boundary;
             var toiletDrainwellService = ThToiletDrainwellService.Find(Spaces, toiletSpace, SpaceSpatialIndex);
             thToiletContainer.DrainageWells = toiletDrainwellService.Drainwells;
 

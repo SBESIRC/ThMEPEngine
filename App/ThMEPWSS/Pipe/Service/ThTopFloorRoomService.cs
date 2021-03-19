@@ -53,8 +53,8 @@ namespace ThMEPWSS.Pipe.Service
         {
             return new ThWTopFloorRoom()
             {                
-                Space = firstFloorSpace,
                 BaseCircles = BaseCircles,
+                Boundary = firstFloorSpace.Boundary,
                 CompositeRooms = ThTopFloorCompositeRoomService.Find(firstFloorSpace, CompositeRooms),
                 CompositeBalconyRooms = ThTopFloorCompositeBalconyRoomService.Find(firstFloorSpace, CompositeBalconyRooms),
                 DivisionLines = ThTopFloorDivisionLineService.Find(firstFloorSpace, DivisionLines),
