@@ -29,6 +29,7 @@ namespace ThMEPWSS.Pipe.Service
         public static List<Tuple<string, bool>> targetFloors =new List<Tuple<string, bool>>();
         public static List<BlockReference> blockCollection = new List<BlockReference>();
         public static Point3dCollection framePoints = new Point3dCollection();
+        public static Point3dCollection ToiletWells=new Point3dCollection();
        public void Read()
         {
             //targetFloors.Add(Tuple.Create("标准层1", true));

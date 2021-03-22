@@ -30,7 +30,7 @@ namespace ThMEPWSS.Pipe.Service
                 }
                 return ((patterns[0] == "卫") && (patterns[1] == "地漏"));
             }
-            return (patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2].Contains("W"));
+            return ((patterns[0] == "3") && (patterns[1] == "DRAIN") && (patterns[2].Contains("W")))||(patterns[0] == "地漏平面" && !(patterns[1].Contains("$")));
         }
     }
 }

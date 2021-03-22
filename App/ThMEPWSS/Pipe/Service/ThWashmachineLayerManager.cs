@@ -12,6 +12,10 @@ namespace ThMEPWSS.Pipe.Service
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() < 3)
             {
+                if(patterns.Count()==1)
+                {
+                    return (patterns[0] == "$plan$00001623");
+                }
                 return false;
             }
             return (patterns[0] == "9") && (patterns[1] == "TOILET") && (patterns[2] == "A");

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
@@ -16,8 +17,12 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 foreach (var targetFloor in targetFloors)
                 {//check value=false
-                    var sourceBlock= BlockTools.GetAllDynBlockReferences(acadDatabase.Database, sourceFloor);
-                    var targetBlock= BlockTools.GetAllDynBlockReferences(acadDatabase.Database, targetFloor.Item1);
+                    var sourceBlock= GetBlockReferences1(acadDatabase.Database, sourceFloor);                 
+                    var targetBlock= GetBlockReferences(acadDatabase.Database, targetFloor.Item1);
+                    if (targetBlock.Count == 0)
+                    {
+                        continue;
+                    }
                     if (!targetFloor.Item2)
                     {
                         CopyEntities(targetBlock, sourceBlock, acadDatabase);
@@ -28,7 +33,27 @@ namespace ThMEPWSS.Pipe.Engine
                     }
                 }
             }
-        } 
+        }
+        private static List<BlockReference> GetBlockReferences1(Database db, string blockName)
+        {
+            List<BlockReference> blocks = new List<BlockReference>();
+            var trans = db.TransactionManager;
+            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
+            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
+                      where (b.GetBlockName().Contains(blockName.Substring(0, blockName.Length - 3)) && b.GetBlockName().Contains("标准层"))
+                      select b).ToList();
+            return blocks;
+        }
+        private static List<BlockReference> GetBlockReferences(Database db, string blockName)
+        {
+            List<BlockReference> blocks = new List<BlockReference>();
+            var trans = db.TransactionManager;
+            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
+            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
+                      where (b.GetBlockName().Contains(blockName))
+                      select b).ToList();
+            return blocks;
+        }
         private static BlockReference CreateBlock(Database db,List<Entity> entities,DBObjectCollection target_objs,List<BlockReference> targetBlock,string name)
         {           
             targetBlock[0].UpgradeOpen();
@@ -123,5 +148,6 @@ namespace ThMEPWSS.Pipe.Engine
             }
             acadDatabase.ModelSpace.Add(CreateBlock(acadDatabase.Database, entities, target_objs, targetBlock, name));
         }
+
     }
 }

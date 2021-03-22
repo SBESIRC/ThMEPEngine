@@ -317,40 +317,77 @@ namespace ThMEPWSS.Pipe.Output
         }
         private static void InputToiletParameters(ThWCompositeRoom composite,ThWTopCompositeParameters parameters,ThWTopParameters parameters0)
         {
+
             parameters.boundary1 = composite.Toilet.Space.Boundary as Polyline;
             if (composite.Toilet.DrainageWells.Count > 1)
             {
                 var well = composite.Toilet.DrainageWells[0].Boundary as Polyline;
                 var well1= composite.Toilet.DrainageWells[1].Boundary as Polyline;
-                if (well.GetCenter().DistanceTo(parameters.boundary1.GetCenter()) < well.GetCenter().DistanceTo(parameters.boundary1.GetCenter()))
+                if (well != null && well1 != null)
                 {
-                    parameters.outline1 = well;
-                }
-                else
-                {
-                    parameters.outline1 = well1;
+                    if (well.GetCenter().DistanceTo(parameters.boundary1.GetCenter()) < well1.GetCenter().DistanceTo(parameters.boundary1.GetCenter()))
+                    {
+                        parameters.outline1 = well;
+                    }
+                    else
+                    {
+                        parameters.outline1 = well1;
+                    }
                 }
             }
             else
             {
                 parameters.outline1 = composite.Toilet.DrainageWells[0].Boundary as Polyline;
             }
-            if (!(GeomUtils.PtInLoop(parameters.boundary1, parameters.outline1.GetCenter())))
+            if (parameters.outline1 != null)
             {
-                parameters.boundary1 = GetToiletBoundary(parameters.boundary1, parameters.outline1);
+                if (!(GeomUtils.PtInLoop(parameters.boundary1, parameters.outline1.GetCenter())))
+                {
+                    parameters.boundary1 = GetToiletBoundary(parameters.boundary1, parameters.outline1);
+                }
             }
             if (composite.Toilet.DrainageWells.Count > 1)
             {
                 foreach (var drainWell in composite.Toilet.DrainageWells)
                 {
-                    Polyline wellOutline = drainWell.Boundary as Polyline;
-                    if (GeomUtils.PtInLoop(parameters.boundary1, wellOutline.GetCenter()))
+                    var wellOutline = drainWell.Boundary as Polyline;
+                    if (wellOutline != null)
+                    {
+                        if (GeomUtils.PtInLoop(parameters.boundary1, wellOutline.GetCenter()))
+                        {
+                            parameters.outline1 = wellOutline;
+                            break;
+                        }
+                    }
+                }
+            }
+            if(parameters.outline1==null)//特殊情况boundary未先确定
+            {
+                foreach (var drainWell in composite.Toilet.DrainageWells)
+                {
+                    var wellOutline = drainWell.Boundary as Polyline;
+                    if(wellOutline != null)
                     {
                         parameters.outline1 = wellOutline;
                         break;
                     }
                 }
+                if (!(GeomUtils.PtInLoop(parameters.boundary1, parameters.outline1.GetCenter())))
+                {
+                    parameters.boundary1 = GetToiletBoundary(parameters.boundary1, parameters.outline1);
+                }
             }
+            foreach (Point3d point in ThTagParametersService.ToiletWells)
+            {
+                if (parameters.outline1 != null)
+                {
+                    if (point.DistanceTo(parameters.outline1.GetCenter()) < 1)
+                    {
+                        return;
+                    }
+                }
+            }
+            ThTagParametersService.ToiletWells.Add(parameters.outline1.GetCenter());
             parameters.closestool = composite.Toilet.Closestools[0].Outline as Polyline;
             if (composite.Toilet.CondensePipes.Count > 0)
             {

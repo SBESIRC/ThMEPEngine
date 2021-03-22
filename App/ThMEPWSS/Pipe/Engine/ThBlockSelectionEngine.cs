@@ -14,8 +14,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var BlockReferences = BlockTools.GetAllDynBlockReferences(acadDatabase.Database, "楼层框定");
-                var BlockReferencesSelected = BlockTools.GetAllDynBlockReferences(acadDatabase.Database, dataModel);
+                var BlockReferences = BlockTools.GetAllDynBlockReferences(acadDatabase.Database, "楼层框定");            
                 string name = "";
                 var blockReferences = new List<BlockReference>();
                 if (dataModel.Length==3)
@@ -43,10 +42,21 @@ namespace ThMEPWSS.Pipe.Engine
                 }                                           
                 if (blockReferences.Any())
                 {
-                    Active.Editor.ZoomToModels(blockReferences.ToArray(), 2.0);
+                    Active.Editor.ZoomToModels(blockReferences.ToArray(), 2.0);                               
+                    var BlockReferencesSelected = GetBlockReferences(acadDatabase.Database, dataModel);
                     Active.Editor.PickFirstModels(BlockReferencesSelected.Select(o => o.ObjectId).ToArray());
                 }
             }
+        }
+        private static List<BlockReference> GetBlockReferences(Database db, string blockName)
+        {
+            List<BlockReference> blocks = new List<BlockReference>();
+            var trans = db.TransactionManager;
+            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
+            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
+                      where (b.GetBlockName().Contains(blockName))
+                      select b).ToList();
+            return blocks;
         }
 
     }

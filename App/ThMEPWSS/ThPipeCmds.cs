@@ -280,7 +280,7 @@ namespace ThMEPWSS
             var trans = db.TransactionManager;
             BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);                
             blocks = (from b in db.GetEntsInDatabase<BlockReference>()
-                      where (b.GetBlockName().Contains(blockName)&& b.GetBlockName().Contains("标准层"))
+                      where (b.GetBlockName().Contains(blockName.Substring(0, blockName.Length-3))&& b.GetBlockName().Contains("标准层"))
                       select b).ToList();
             return blocks;
         }    

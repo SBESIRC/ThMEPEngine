@@ -941,7 +941,7 @@ namespace ThMEPWSS.Pipe.Tools
                         }
                     }
                 }
-                else
+                else if(composite.Kitchen.DrainageWells.Count==1)
                 {
                     var boundary = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
                     if (boundary.Area < 100000)
@@ -966,6 +966,25 @@ namespace ThMEPWSS.Pipe.Tools
                             parameters.outline = composite.Toilet.DrainageWells[0].Boundary as Polyline;
                         }
                     }
+                }
+                else
+                {
+                     if (composite.Toilet.DrainageWells.Count > 1)
+                        {
+                            if((composite.Toilet.DrainageWells[0].Boundary as Polyline).GetCenter().DistanceTo(parameters.boundary.GetCenter()) <
+                                     (composite.Toilet.DrainageWells[1].Boundary as Polyline).GetCenter().DistanceTo(parameters.boundary.GetCenter()))
+                            {
+                                parameters.outline = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+                            }
+                            else
+                            {
+                                parameters.outline = composite.Toilet.DrainageWells[1].Boundary as Polyline;
+                            }
+                        }
+                        else
+                        {
+                            parameters.outline = composite.Toilet.DrainageWells[0].Boundary as Polyline;
+                        }
                 }
                 if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter()))&& composite.Toilet.DrainageWells.Count>0)
                 {
@@ -1086,14 +1105,14 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public bool IsValidKitchenContainer(ThWKitchenRoom kitchenContainer)
         {
-            return (kitchenContainer.Space != null && kitchenContainer.DrainageWells.Count >0);
+            return (kitchenContainer.Space != null);
         }
         public bool IsValidToiletContainer(ThWToiletRoom toiletContainer)
         {
             return toiletContainer.Space != null &&
                 toiletContainer.DrainageWells.Count >0 &&
-                toiletContainer.Closestools.Count == 1 &&
-                toiletContainer.FloorDrains.Count > 0;
+                toiletContainer.Closestools.Count == 1 
+               ;
         }
         public bool IsValidToiletContainerForFloorDrain(ThWToiletRoom toiletContainer)
         {
