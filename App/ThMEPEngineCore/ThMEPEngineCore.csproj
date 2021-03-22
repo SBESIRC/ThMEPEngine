@@ -91,6 +91,8 @@
     <Compile Include="Engine\ThSpatialElementExtractor.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
     <Compile Include="Model\ThIfcTextNote.cs" />
+    <Compile Include="Service\ThContourRelationQueryService.cs" />
+    <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />
     <Compile Include="Service\ThRoomSpatialPredicateService.cs" />
     <Compile Include="Engine\ThSlabExtractionVisitor.cs" />
     <Compile Include="Engine\ThDoorExtractionVisitor.cs" />

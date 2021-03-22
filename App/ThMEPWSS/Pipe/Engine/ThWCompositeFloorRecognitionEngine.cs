@@ -1,4 +1,5 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
@@ -90,7 +91,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
         }
     }
-    public class ThWCompositeFloorRecognitionEngine : ThWRoomRecognitionEngine
+    public class ThWCompositeFloorRecognitionEngine : ThWRoomRecognitionEngine, IDisposable
     {
         public List<ThWRoofTopFloorRoom> RoofTopFloors { get; set; }
         public List<ThWRoofFloorRoom> RoofFloors { get; set; }
@@ -137,6 +138,10 @@ namespace ThMEPWSS.Pipe.Engine
             TopFloors = new List<ThWTopFloorRoom>();
             NormalFloors= new List<ThWTopFloorRoom>();
         }
+        public void Dispose()
+        {
+            //
+        }
         public override void Recognize(Database database, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
@@ -165,7 +170,16 @@ namespace ThMEPWSS.Pipe.Engine
                 if (roofSpaces.Count > 0)
                 {
                     frameSpaces.Add(roofSpaces[0]);
-                }      
+                }
+
+                // 获取房间空间
+                var builder = new ThRoomBuilderEngine();
+                this.Spaces = builder.Build(database, pts).Select(o => new ThIfcSpace()
+                {
+                    Tags = o.Tags,
+                    Boundary = o.Boundary,
+                }).ToList();
+
                 var rainPipesEngine = new ThWCompositeRecognitionEngine();
                 rainPipesEngine.Recognize(database, GetBoundaryVertices(frameSpaces, standardSpaces));
                 var rainPipes = rainPipesEngine.Elements.Where(o => o is ThWRainPipe).Cast<ThWRainPipe>().ToList();
@@ -179,6 +193,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var SideEntryWaterBuckets = rainPipesEngine.Elements.Where(o => o is ThWSideEntryWaterBucket).Cast<ThWSideEntryWaterBucket>().ToList();
                 var RoofDeviceEngine = new ThWRoofTopFloorRecognitionEngine()
                 {
+                    Spaces = this.Spaces,
                     blockCollection = blockCollection,
                     DeviceSpaces = deviceSpaces,
                     RoofRainPipes = roofRainPipes,
@@ -214,14 +229,6 @@ namespace ThMEPWSS.Pipe.Engine
                 };            
                 RoofEngine.Recognize(database, pts);
                 RoofFloors = RoofEngine.Rooms;
-                if(!(RoofDeviceEngine.Spaces.Count>0))
-                {
-                    this.Spaces = GetSpaces(database, pts);
-                }
-                else
-                {
-                    this.Spaces = RoofDeviceEngine.Spaces;
-                }                          
                 var FirstEngine = new ThWTopFloorRecognitionEngine()
                 {
                     Spaces= this.Spaces,

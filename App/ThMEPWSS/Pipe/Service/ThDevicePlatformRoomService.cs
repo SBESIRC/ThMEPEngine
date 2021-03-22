@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Pipe.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -72,6 +73,9 @@ namespace ThMEPWSS.Pipe.Service
         {
             var PlatformSpaces = new List<Tuple<ThIfcSpace, List<ThIfcSpace>>>();
             var BalconySpaces = Spaces.Where(m => m.Tags.Where(n => n.Contains("阳台")).Any()).ToList();
+
+            var spacePredicateService = new ThSpaceSpatialPredicateService(Spaces);
+
             foreach (var BalconySpace in BalconySpaces)
             {
                 var bufferObjs = ThCADCoreNTSOperation.Buffer(BalconySpace.Boundary as Polyline, ThWPipeCommon.BALCONY_BUFFER_DISTANCE);
@@ -81,7 +85,7 @@ namespace ThMEPWSS.Pipe.Service
                     //获取偏移后，能框选到的空间
                     var crossSpaces = Spaces.Where(o => crossObjs.Contains(o.Boundary));
                     // 找到不包含子空间的，且不含有Tag名称的空间
-                    var balconies = crossSpaces.Where(m => m.SubSpaces.Count == 0 && m.Tags.Count == 0);
+                    var balconies = crossSpaces.Where(m => spacePredicateService.Contains(m).Count == 0 && m.Tags.Count == 0);
                     var outerSpaces = balconies.Where(o => !BalconySpace.Boundary.ToNTSPolygon().Contains(o.Boundary.ToNTSPolygon().Buffer(-5.0)));
                     var relatedbalconies = outerSpaces.Where(o => (GetSpaceArea(o) > ThWPipeCommon.MIN_DEVICEPLATFORM_AREA && GetSpaceArea(o) < ThWPipeCommon.MAX_DEVICEPLATFORM_AREA)).ToList();
                     PlatformSpaces.Add(Tuple.Create(BalconySpace, relatedbalconies));

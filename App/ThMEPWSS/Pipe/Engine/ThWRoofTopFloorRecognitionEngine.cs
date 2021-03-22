@@ -73,10 +73,6 @@ namespace ThMEPWSS.Pipe.Engine
             Rooms = new List<ThWRoofTopFloorRoom>();
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {             
-                if (this.Spaces.Count == 0)
-                {
-                    this.Spaces = GetSpaces(database, pts);
-                }
                 //获取外参元素
                 GetBuildingElements(database, pts);
                 GetLayers(database, pts).ForEach(o => Layers.Add(o));

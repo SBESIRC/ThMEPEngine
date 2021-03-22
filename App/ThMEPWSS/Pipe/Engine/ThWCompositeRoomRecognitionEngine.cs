@@ -5,14 +5,13 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
+    public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine, IDisposable
     {
         public List<ThWCompositeRoom> Rooms { get; set; }
         public List<ThWCompositeBalconyRoom> FloorDrainRooms { get; set; }
@@ -29,23 +28,26 @@ namespace ThMEPWSS.Pipe.Engine
             Rooms = new List<ThWCompositeRoom>();
             FloorDrainRooms= new List<ThWCompositeBalconyRoom>();
         }
+
+        public void Dispose()
+        {
+            //
+        }
+
         public override void Recognize(Database database, Point3dCollection pts)
         {
-            var spaceEngine = new ThSpaceRecognitionEngine();
-                spaceEngine.Recognize(database, pts);
-
-            var kitchenRooms = ThKitchenRoomService.Build(spaceEngine.Spaces, basinTools, 
+            var kitchenRooms = ThKitchenRoomService.Build(Spaces, basinTools, 
                 rainPipes, roofRainPipes, condensePipes, floorDrains);
 
-            var toiletRooms = ThToiletRoomService.Build(spaceEngine.Spaces, closets, 
+            var toiletRooms = ThToiletRoomService.Build(Spaces, closets, 
                 floorDrains, condensePipes, roofRainPipes);
 
             GeneratePairInfo(kitchenRooms, toiletRooms);
 
-            var balconyRooms = ThBalconyRoomService.Build(spaceEngine.Spaces, washmachines, 
+            var balconyRooms = ThBalconyRoomService.Build(Spaces, washmachines, 
                 floorDrains, rainPipes, basinTools);
 
-            var devicePlatforms = ThDevicePlatformRoomService.Build(spaceEngine.Spaces, 
+            var devicePlatforms = ThDevicePlatformRoomService.Build(Spaces, 
                 floorDrains, rainPipes, condensePipes, roofRainPipes);
 
             GenerateBalconyPairInfo(balconyRooms, devicePlatforms);

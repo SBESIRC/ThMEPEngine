@@ -30,7 +30,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         private void Find()
         {
-            var noTagSubSpaces = ToiletSpace.SubSpaces.Where(o => o.Tags.Count == 0).ToList();
+            var noTagSubSpaces = SpacePredicateService.Contains(ToiletSpace).Where(o => o.Tags.Count == 0).ToList();
             if (noTagSubSpaces.Count > 0)
             {
                 //卫生间内有包含没有名字的空间
@@ -49,7 +49,7 @@ namespace ThMEPWSS.Pipe.Service
                 {
                     //从相邻的阳台内部空间中
                     //查找只包含一个没有名字的空间(就认为是排水管井)
-                    noTagSubSpaces = neibourBalconies[0].SubSpaces.Where(o => o.Tags.Count == 0).ToList();
+                    noTagSubSpaces = SpacePredicateService.Contains(neibourBalconies[0]).Where(o => o.Tags.Count == 0).ToList();
                     if(noTagSubSpaces.Count>1)
                     {
                         Drainwells.AddRange(noTagSubSpaces);

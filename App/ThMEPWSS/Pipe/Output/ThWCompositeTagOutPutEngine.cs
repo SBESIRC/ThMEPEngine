@@ -1,15 +1,16 @@
 ﻿using System.Collections.Generic;
+using DotNetARX;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Tools;
 using static ThMEPWSS.ThPipeCmds;
-using DotNetARX;
 
 namespace ThMEPWSS.Pipe.Output
 {
@@ -757,7 +758,10 @@ namespace ThMEPWSS.Pipe.Output
       ThWRoofParameters parameters1, ThWRoofDeviceParameters parameters2, ThWCompositeIndexEngine composite_Engine,Point3d toiletpoint, Point3d balconypoint,int scaleFactor,string W_RAIN_NOTE1)
         {
             if (FloorEngines.RoofFloors.Count > 0)
-            {                          
+            {
+                //
+                var spacePredicateService = new ThSpaceSpatialPredicateService(FloorEngines.Spaces);
+
                 foreach (var ent in parameters0.copypipes)
                 {
                     if (parameters0.baseCenter2.Count > 0)
@@ -848,7 +852,7 @@ namespace ThMEPWSS.Pipe.Output
                             Polyline s2 = ent as Polyline;
                             Circle s3 = ent as Circle;
                             DBText s4 = ent as DBText;
-                            foreach (var bound in FloorEngines.RoofTopFloors[0].Space.SubSpaces)
+                            foreach (var bound in spacePredicateService.Contains(FloorEngines.RoofTopFloors[0].Space))
                             {
                                 Polyline boundary = bound.Boundary as Polyline;
                                 if ((s1 != null && GeomUtils.PtInLoop(boundary, s1.StartPoint)) || (s2 != null && GeomUtils.PtInLoop(boundary, s2.StartPoint))
@@ -905,7 +909,7 @@ namespace ThMEPWSS.Pipe.Output
                         if (parameters2.baseCenter0.Count > 0)
                         {
                             var offset1 = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0]));
-                            foreach (var bound in FloorEngines.RoofTopFloors[0].Space.SubSpaces)
+                            foreach (var bound in spacePredicateService.Contains(FloorEngines.RoofTopFloors[0].Space))
                             {
                                 Polyline boundary = bound.Boundary as Polyline;
                                 if (GeomUtils.PtInLoop(boundary, ent.Center + parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0])))
@@ -993,7 +997,7 @@ namespace ThMEPWSS.Pipe.Output
                         if (parameters2.baseCenter0.Count > 0)
                         {
                             var offset1 = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0]));
-                            foreach (var bound in FloorEngines.RoofTopFloors[0].Space.SubSpaces)
+                            foreach (var bound in spacePredicateService.Contains(FloorEngines.RoofTopFloors[0].Space))
                             {
                                 Polyline boundary = bound.Boundary as Polyline;
                                 if (GeomUtils.PtInLoop(boundary, bucket.StartPoint + parameters0.baseCenter2[0].GetVectorTo(parameters2.baseCenter0[0])))
