@@ -1,18 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
-using AcHelper;
 
 namespace ThMEPHVAC.Model
 {
-    public class ThVTee : ThBaseTee
+    public class ThVTee
     {
         /// <summary>
         /// 宽度

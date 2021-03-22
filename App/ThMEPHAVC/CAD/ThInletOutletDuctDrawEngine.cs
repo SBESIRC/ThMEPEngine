@@ -112,7 +112,6 @@ namespace ThMEPHVAC.CAD
             DrawHoseInDWG(OutletDuctHoses, modelLayer);
         }
 
-
         private void SetInletOutletSize(string scenario, string inouttype, string innerromeductinfo, string outerromeductinfo)
         {
             var jsonReader = new ThDuctInOutMappingJsonReader();
@@ -138,29 +137,6 @@ namespace ThMEPHVAC.CAD
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
             bool isUpOrDownOpening = FanInOutType.Contains("上进") || FanInOutType.Contains("下进");
-            //对于进口为上进的，首先需要画出管口俯视图
-            //if (isUpOrDownOpening)
-            //{
-            //    var DuctParameters = new ThIfcDuctSegmentParameters()
-            //    {
-            //        Width = Math.Max(InletDuctWidth, InletOpening.Width),
-            //        Height = Math.Max(InletDuctHeight, InletOpening.Height),
-            //        Length = 0
-            //    };
-            //    double rotateangle = InletOpening.NormalAngle * Math.PI / 180 + 0.5 * Math.PI;
-            //    if (InletCenterLineGraph.Edges.Count() != 0)
-            //    {
-            //        var firstinletedge = InletCenterLineGraph.Edges.First(e => e.Source.IsStartVertexOfGraph);
-            //        var firstcenterlinevector = firstinletedge.Target.Position - firstinletedge.Source.Position;
-            //        double firstcenterlineangle = firstcenterlinevector.AngleOnPlane(new Plane(firstinletedge.Target.Position, Vector3d.ZAxis));
-            //        rotateangle = firstcenterlineangle < Math.PI ? Vector3d.XAxis.GetAngleTo(firstcenterlinevector) : 2 * Math.PI - Vector3d.XAxis.GetAngleTo(firstcenterlinevector);
-            //    }
-
-            //    var ductSegment = ductFittingFactoryService.CreateVerticalDuctSegment(DuctParameters);
-            //    ductSegment.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, Point3d.Origin);
-            //    InletDuctSegments.Add(ductSegment);
-            //}
-
             if(!isUpOrDownOpening && InletOpening.Width != InletDuctWidth)
             {
                 if (InletCenterLineGraph.Edges.Count() == 0)
@@ -257,29 +233,6 @@ namespace ThMEPHVAC.CAD
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
             bool isUpOrDownOpening = FanInOutType.Contains("上出") || FanInOutType.Contains("下出");
-            //对于出口为上出或下出的，首先需要画出管口俯视图
-            //if (isUpOrDownOpening)
-            //{
-            //    var DuctParameters = new ThIfcDuctSegmentParameters()
-            //    {
-            //        Width = Math.Max(OutletDuctWidth, OutletOpening.Width),
-            //        Height = Math.Max(OutletDuctHeight, OutletOpening.Height),
-            //        Length = 0
-            //    };
-
-            //    double rotateangle = OutletOpening.NormalAngle * Math.PI / 180 + 0.5 * Math.PI;
-            //    if (OutletCenterLineGraph.Edges.Count() != 0)
-            //    {
-            //        var firstoutletedge = OutletCenterLineGraph.Edges.First(e => e.Source.IsStartVertexOfGraph);
-            //        var firstcenterlinevector = firstoutletedge.Target.Position - firstoutletedge.Source.Position;
-            //        double firstcenterlineangle = firstcenterlinevector.AngleOnPlane(new Plane(firstoutletedge.Target.Position, Vector3d.ZAxis));
-            //        rotateangle = firstcenterlineangle < Math.PI ? Vector3d.XAxis.GetAngleTo(firstcenterlinevector) : 2 * Math.PI - Vector3d.XAxis.GetAngleTo(firstcenterlinevector);
-            //    }
-
-            //    var ductSegment = ductFittingFactoryService.CreateVerticalDuctSegment(DuctParameters);
-            //    ductSegment.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, Point3d.Origin);
-            //    OutletDuctSegments.Add(ductSegment);
-            //}
 
             if(!isUpOrDownOpening && OutletOpening.Width != OutletDuctWidth)
             {
@@ -414,11 +367,7 @@ namespace ThMEPHVAC.CAD
 
             foreach (var edge in OutletCenterLineGraph.Edges)
             {
-                if (OutletCenterLineGraph.OutDegree(edge.Target) != 1)
-                {
-                    continue;
-                }
-                else
+                if (OutletCenterLineGraph.OutDegree(edge.Target) == 1)
                 {
                     Vector2d invector = new Vector2d(edge.Source.Position.X - edge.Target.Position.X, edge.Source.Position.Y - edge.Target.Position.Y);
                     var outedge = OutletCenterLineGraph.OutEdges(edge.Target).First();
@@ -436,6 +385,10 @@ namespace ThMEPHVAC.CAD
 
                     outedge.SourceShrink = elbow.Parameters.SingleLength;
                     edge.TargetShrink = elbow.Parameters.SingleLength;
+                }
+                else
+                {
+                    continue;
                 }
             }
         }
@@ -598,5 +551,6 @@ namespace ThMEPHVAC.CAD
                 return acadDatabase.Linetypes.ElementOrDefault(ThHvacCommon.CENTERLINE_LINETYPE).ObjectId;
             }
         }
+
     }
 }

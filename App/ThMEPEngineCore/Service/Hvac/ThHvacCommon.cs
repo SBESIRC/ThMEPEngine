@@ -15,6 +15,7 @@
 
         // 中心线线型
         public const string CENTERLINE_LINETYPE = "CENTER2";
+        public const string CONTINUES_LINETYPE = "CONTINUOUS";
         public const string VTEE_LINETYPE = "DASH";
 
         // XDATA

@@ -42,14 +42,6 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public ThIfcDuctTee CreateTee(ThIfcDuctTeeParameters parameters)
-        {
-            return new ThIfcDuctTee(parameters)
-            {
-                Representation = CreateTeeGeometries(parameters)
-            };
-        }
-
         public ThIfcDuctCross CreateCross(ThIfcDuctCrossParameters parameters)
         {
             return new ThIfcDuctCross(parameters)
@@ -413,114 +405,6 @@ namespace ThMEPHVAC.CAD
                 innerendextendline,
                 outerstartextendline,
                 innerstartextendline,
-            };
-        }
-
-        private DBObjectCollection CreateTeeGeometries(ThIfcDuctTeeParameters parameters)
-        {
-            //创建支路端线
-            Line branchEndLine = new Line()
-            {
-                StartPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter)+50, 0.5*parameters.BranchDiameter, 0),
-                EndPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter) +50, -0.5*parameters.BranchDiameter, 0),
-            };
-
-            //创建主路小端端线
-            Line mainSmallEndLine = new Line()
-            {
-                StartPoint = parameters.CenterPoint + new Vector3d(0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
-                EndPoint = parameters.CenterPoint + new Vector3d(-0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
-            };
-
-            //创建主路大端端线
-            Line mainBigEndLine = new Line()
-            {
-                StartPoint = parameters.CenterPoint + new Vector3d(0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
-                EndPoint = parameters.CenterPoint + new Vector3d(-0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
-            };
-
-            //创建支路50mm直管段
-            Line branchUpStraightLine = new Line()
-            {
-                StartPoint = branchEndLine.StartPoint,
-                EndPoint = branchEndLine.StartPoint + new Vector3d(-50,0,0),
-            };
-            Line branchBelowStraightLine = new Line()
-            {
-                StartPoint = branchEndLine.EndPoint,
-                EndPoint = branchEndLine.EndPoint + new Vector3d(-50, 0, 0),
-            };
-
-            //创建支路下侧圆弧过渡段
-            Point3d circleCenter = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter+parameters.BranchDiameter), -parameters.BranchDiameter, 0);
-            Arc branchInnerArc = new Arc(circleCenter, 0.5 * parameters.BranchDiameter, 0.5 * Math.PI, Math.PI);
-
-            //创建支路上侧圆弧过渡段
-            //首先创建主路上端小管道的内侧线作为辅助线以便于后续计算圆弧交点
-            Ray branchAuxiliaryRay = new Ray()
-            {
-                BasePoint = mainSmallEndLine.StartPoint,
-                SecondPoint = mainSmallEndLine.StartPoint + new Vector3d(0, -5000, 0)
-            };
-            Circle branchAuxiliaryCircle = new Circle()
-            {
-                Center = circleCenter,
-                Radius = 1.5*parameters.BranchDiameter
-            };
-            Point3dCollection Intersectpoints = new Point3dCollection();
-            IntPtr ptr = new IntPtr();
-            branchAuxiliaryRay.IntersectWith(branchAuxiliaryCircle, Intersect.OnBothOperands, Intersectpoints, ptr, ptr);
-            Arc branchOuterArc = new Arc();
-            if (Intersectpoints.Count != 0)
-            {
-                Point3d Intersectpointinarc = Intersectpoints[0];
-                foreach (Point3d point in Intersectpoints)
-                {
-                    if (point.Y > Intersectpointinarc.Y)
-                    {
-                        Intersectpointinarc = point;
-                    }
-                }
-                branchOuterArc.CreateArcSCE(branchUpStraightLine.EndPoint, circleCenter, Intersectpointinarc);
-            }
-
-            //创建主路外侧管线
-            Line outerStraightLine = new Line()
-            {
-                StartPoint = mainBigEndLine.EndPoint,
-                EndPoint = mainBigEndLine.EndPoint + new Vector3d(0,50,0),
-            };
-            Line outerObliqueLine = new Line()
-            {
-                StartPoint = outerStraightLine.EndPoint,
-                EndPoint = mainSmallEndLine.EndPoint,
-            };
-
-            //创建主路内侧管线
-            Line innerUpLine = new Line()
-            {
-                StartPoint = mainSmallEndLine.StartPoint,
-                EndPoint = branchOuterArc.EndPoint,
-            };
-            Line innerBelowLine = new Line()
-            {
-                StartPoint = mainBigEndLine.StartPoint,
-                EndPoint = branchInnerArc.EndPoint,
-            };
-
-            return new DBObjectCollection()
-            {
-                branchEndLine,
-                mainSmallEndLine,
-                mainBigEndLine,
-                branchUpStraightLine,
-                branchBelowStraightLine,
-                branchInnerArc,
-                branchOuterArc,
-                outerStraightLine,
-                outerObliqueLine,
-                innerUpLine,
-                innerBelowLine
             };
         }
 

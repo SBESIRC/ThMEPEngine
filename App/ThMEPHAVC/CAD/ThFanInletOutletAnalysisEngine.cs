@@ -31,6 +31,10 @@ namespace ThMEPHAVC.CAD
         public AnalysisResultType OutletAnalysisResult { get; set; }
         public List<Point3d> InletAcuteAnglePositions { get; set; }
         public List<Point3d> OutletAcuteAnglePositions { get; set; }
+        public Point3d InletTeeCP { get; set; }
+        public Point3d OutletTeeCP { get; set; }
+        public bool IsTeeDirUp { get; set; }
+        
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
         {
             FanModel = fanmodel;
@@ -86,6 +90,10 @@ namespace ThMEPHAVC.CAD
                         {
                             InletAcuteAnglePositions.Add(edge.Target.Position);
                         }
+                    }
+                    else if (InletCenterLineGraph.OutDegree(edge.Target) == 2)
+                    {
+                        InletTeeCP = edge.Target.Position;
                     }
                 }
                 if (InletAcuteAnglePositions.Count != 0)
@@ -163,6 +171,20 @@ namespace ThMEPHAVC.CAD
                             OutletAcuteAnglePositions.Add(edge.Target.Position);
                         }
                     }
+                    else if (OutletCenterLineGraph.OutDegree(edge.Target) == 2)
+                    {
+                        OutletTeeCP = edge.Target.Position;
+                    }
+                    else if (OutletCenterLineGraph.OutDegree(edge.Target) == 0)
+                    { 
+                        if (edge.Source.Position.X == edge.Target.Position.X)
+                        {
+                            if (edge.Source.Position.Y < edge.Target.Position.Y)
+                            {
+                                IsTeeDirUp = true;
+                            }
+                        }
+                    }
                 }
                 if (OutletAcuteAnglePositions.Count != 0)
                 {
@@ -207,7 +229,18 @@ namespace ThMEPHAVC.CAD
             }
         }
 
-
+        public bool HasInletTee()
+        {
+            double EPS = Tolerance.Global.EqualPoint;
+            return (Math.Abs(InletTeeCP.X) < EPS && Math.Abs(InletTeeCP.Y) < EPS) ?
+                    false : true;
+        }
+        public bool HasOutletTee()
+        {
+            double EPS = Tolerance.Global.EqualPoint;
+            return (Math.Abs(OutletTeeCP.X) < EPS && Math.Abs(OutletTeeCP.Y) < EPS) ?
+                    false : true;
+        }
         private bool ApproximateEqualTo(double valuea, double valueb, double tolerance)
         {
             return Math.Abs(valuea - valueb) < tolerance || Math.Abs(Math.Abs(valuea - valueb) - 360) < tolerance;
