@@ -283,6 +283,15 @@ namespace ThMEPWSS
                       where (b.GetBlockName().Contains(blockName.Substring(0, blockName.Length-3))&& b.GetBlockName().Contains("标准层"))
                       select b).ToList();
             return blocks;
-        }    
+        }
+        [CommandMethod("TIANHUACAD", "THTQKJ", CommandFlags.Modal)]
+        public static void THTQKJ()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var Extraction = new ThExtractDbSpaceService();
+                Extraction.Extract(acadDatabase.Database, ThTagParametersService.framePoints);
+            }
+        }
     }
 }
