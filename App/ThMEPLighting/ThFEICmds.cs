@@ -14,6 +14,7 @@ using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.FEI;
 using ThMEPLighting.FEI.AStarAlgorithm;
+using ThMEPLighting.FEI.EvacuationPath;
 
 namespace ThMEPLighting
 {
@@ -70,12 +71,28 @@ namespace ThMEPLighting
                     //获取墙柱信息
                     primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
 
+                    //计算洞口
+                    List<Polyline> holes = new List<Polyline>(pline.Value);
+                    holes.AddRange(columns);
+                    holes.AddRange(walls);
+
                     //获取出入口图块
                     var enterBlcok = primitivesService.GetEvacuationExitBlock(pline.Key);
+
+                    //规划路径
+                    ExtendLinesService extendLines = new ExtendLinesService();
+                    var paths = extendLines.CreateExtendLines(lanes, enterBlcok, pline.Key, holes);
+                    paths.ForEach(x => originTransformer.Reset(x));
+
+                    foreach (var item in paths)
+                    {
+                        acdb.ModelSpace.Add(item);
+                    }
                 }
             }
         }
         [CommandMethod("TIANHUACAD", "thtestAS", CommandFlags.Modal)]
+
         public void test()
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
@@ -109,19 +126,19 @@ namespace ThMEPLighting
                 PromptSelectionOptions sOptions = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
-                    MessageForAdding = "选择起点",
+                    MessageForAdding = "选择起点和终点",
                     RejectObjectsOnLockedLayers = true,
                     SingleOnly = true,
                 };
                 // 获取起点
-                var sResult = Active.Editor.GetSelection(sOptions, filter);
+                var sResult = Active.Editor.GetSelection(sOptions);
                 if (sResult.Status != PromptStatus.OK)
                 {
                     return;
                 }
                 var sp = (acdb.Element<Circle>(sResult.Value.GetObjectIds().First()) as Circle).Center;
                 // 获取起点
-                var eResult = Active.Editor.GetSelection(sOptions, filter);
+                var eResult = Active.Editor.GetSelection(sOptions);
                 if (eResult.Status != PromptStatus.OK)
                 {
                     return;

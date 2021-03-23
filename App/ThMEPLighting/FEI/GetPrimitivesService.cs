@@ -48,6 +48,7 @@ namespace ThMEPLighting.FEI
             {
                 return new List<Line>();
             }
+            sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
 
             //处理车道线
             var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
@@ -137,13 +138,15 @@ namespace ThMEPLighting.FEI
                 });
             }
 
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var blocks = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<BlockReference>().ToList();
-            if (blocks.Count <= 0)
+            List<BlockReference> blocks = new List<BlockReference>();
+            foreach (BlockReference obj in objs)
             {
-                return new List<BlockReference>();
+                if (polyline.Contains(obj.Position))
+                {
+                    blocks.Add(obj);
+                }
             }
-
+            
             return blocks;
         }
     }

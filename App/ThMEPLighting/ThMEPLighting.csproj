@@ -40,14 +40,17 @@
     <Compile Include="EmgLight\Service\StructFilterService.cs" />
     <Compile Include="EmgLight\Service\StructureService.cs" />
     <Compile Include="EmgLight\Service\GeomUtils.cs" />
+    <Compile Include="FEI\AStarAlgorithm\AdjustAStarPath.cs" />
     <Compile Include="FEI\AStarAlgorithm\AStarNode.cs" />
     <Compile Include="FEI\AStarAlgorithm\AStarRoutePlanner.cs" />
+    <Compile Include="FEI\AStarAlgorithm\AStarRoutePlannerToCurve.cs" />
     <Compile Include="FEI\AStarAlgorithm\CompassDirections.cs" />
     <Compile Include="FEI\AStarAlgorithm\CompassDirectionsHelper.cs" />
     <Compile Include="FEI\AStarAlgorithm\CostGetter.cs" />
     <Compile Include="FEI\AStarAlgorithm\GeometryHelper.cs" />
     <Compile Include="FEI\AStarAlgorithm\Map.cs" />
     <Compile Include="FEI\AStarAlgorithm\MapService.cs" />
+    <Compile Include="FEI\AStarAlgorithm\MinHeap.cs" />
     <Compile Include="FEI\AStarAlgorithm\Point.cs" />
     <Compile Include="FEI\AStarAlgorithm\RoutePlanData.cs" />
     <Compile Include="FEI\EvacuationPath\CreateMainEvacuationPath.cs" />

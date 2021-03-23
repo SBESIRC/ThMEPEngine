@@ -19,9 +19,19 @@ namespace ThMEPLighting.FEI.Model
     public enum Priority
     {
         /// <summary>
+        /// 起点延长线
+        /// </summary>
+        startExtendLine,
+
+        /// <summary>
+        /// 起点合并延长线
+        /// </summary>
+        MergeStartLine,
+
+        /// <summary>
         /// 没有遇到洞口处于两端生成的延伸线
         /// </summary>
-        firstLecel,
+        firstLevel,
 
         /// <summary>
         /// 没有遇到洞口处于中间生成的延伸线
@@ -36,6 +46,6 @@ namespace ThMEPLighting.FEI.Model
         /// <summary>
         /// 遇到洞口时处于中间偏移生成的延伸线
         /// </summary>
-        LowestLevel,    
+        LowestLevel,  
     }
 }

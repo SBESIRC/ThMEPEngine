@@ -10,7 +10,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
     /// AStarNode 用于保存规划到当前节点时的各个Cost值以及父节点。
     /// tyj 2021.3.11
     /// </summary>
-    public class AStarNode
+    public class AStarNode : IComparable<AStarNode>
     {
         public AStarNode(Point loc, AStarNode parent, int _costG, int _costH)
         {
@@ -76,6 +76,30 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         {
             this.parentNode = previous;
             this.costG = _costG;
+        }
+
+        /// <summary>
+        /// 判断是否节点相等
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public int CompareTo(AStarNode node)
+        {
+            if (this.location.X == node.location.X &&
+                this.location.Y == node.location.Y)
+            {
+                return 0;
+            }
+
+            int fValue = this.CostF - node.CostF;
+            if (fValue <= 0)
+            {
+                return -1;
+            }
+            else
+            {
+                return 1;
+            }
         }
     }
 }

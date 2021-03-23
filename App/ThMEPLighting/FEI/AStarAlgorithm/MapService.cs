@@ -114,7 +114,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             double xValue = point.X * step;
             double yValue = point.Y * step;
             var pt = new Point3d(xValue, yValue, 0);
-            return pt.TransformBy(moveMatrix).TransformBy(ucsMatrix);
+            return pt.TransformBy(moveMatrix).TransformBy(ucsMatrix.Inverse());
         }
 
         /// <summary>
@@ -189,7 +189,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             }
 
             var pt = new Point3d(xValue, yValue, 0);
-            return pt.TransformBy(moveMatrix).TransformBy(ucsMatrix);
+            return pt.TransformBy(moveMatrix).TransformBy(ucsMatrix.Inverse());
         }
     }
 }

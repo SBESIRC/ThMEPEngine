@@ -17,7 +17,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         /// <summary>
         /// column坐标
         /// </summary>
-        private int x = 0;
+        private int x;
         public int X
         {
             get
@@ -29,11 +29,21 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         /// <summary>
         /// Row坐标
         /// </summary>
-        private int y = 0;
-        public int Y { 
-            get {
+        private int y;
+        public int Y
+        {
+            get
+            {
                 return y;
             }
+        }
+
+        /// <summary>
+        /// 判断当前点是否是拐点
+        /// </summary>
+        public bool IsInflectionPoint
+        {
+            get; set;
         }
     }
 }

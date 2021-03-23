@@ -5,19 +5,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.FEI.AStarAlgorithm
 {
-    /// <summary>
-    /// AStarRoutePlanner A*路径规划。每个单元格Cell的位置用Point表示
-    /// F = G + H 。
-    /// G = 从起点A，沿着产生的路径，移动到网格上指定方格的移动耗费。
-    /// H = 从网格上那个方格移动到终点B的预估移动耗费。使用曼哈顿方法，它计算从当前格到目的格之间水平和垂直的方格的数量总和，忽略对角线方向。
-    /// </summary>
-    public class AStarRoutePlanner
+    public class AStarRoutePlannerToCurve
     {
         CostGetter costGetter = new CostGetter();
         Map map;
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
-        public AStarRoutePlanner(Polyline polyline, Vector3d dir, double step = 400, double avoidDistance = 800)
+        public AStarRoutePlannerToCurve(Polyline polyline, Vector3d dir, double step = 400, double avoidDistance = 800)
         {
             map = new Map(polyline, dir, step, avoidDistance);
         }
@@ -32,37 +26,37 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         }
 
         #region Plan
-        public Polyline Plan(Point3d start, Point3d destination)
-        {
-            //初始化起点终点
-            map.SetStartAndEndPoint(start, destination);
+        //public Polyline Plan(Point3d start, Line endLine)
+        //{
+        //    //初始化起点终点
+        //    map.SetStartAndEndPoint(start, destination);
 
-            if ((!map.ContainsPt(map.startPt)) || (!map.ContainsPt(map.endPt)))
-            {
-                throw new Exception("StartPoint or Destination not in the current map!");
-            }
+        //    if ((!map.ContainsPt(map.startPt)) || (!map.ContainsPt(map.endPt)))
+        //    {
+        //        throw new Exception("StartPoint or Destination not in the current map!");
+        //    }
 
-            RoutePlanData routePlanData = new RoutePlanData(map, map.endPt);
+        //    RoutePlanData routePlanData = new RoutePlanData(map, map.endPt);
 
-            //设置起点
-            AStarNode startNode = new AStarNode(map.startPt, null, 0, 0);
-            routePlanData.OpenedList.Enqueue(startNode);
+        //    //设置起点
+        //    AStarNode startNode = new AStarNode(map.startPt, null, 0, 0);
+        //    routePlanData.OpenedList.Enqueue(startNode);
 
-            AStarNode currenNode = startNode;
+        //    AStarNode currenNode = startNode;
 
-            //从起始节点开始进行路径查找
-            var lastNode = DoPlan(routePlanData, currenNode);
+        //    //从起始节点开始进行路径查找
+        //    var lastNode = DoPlan(routePlanData, currenNode);
 
-            //获取路径点位
-            var resPt = GetPath(routePlanData, lastNode);
+        //    //获取路径点位
+        //    var resPt = GetPath(routePlanData, lastNode);
 
-            //调整路径
-            AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
-            resPt = adjustAStarPath.AdjustPath(resPt, routePlanData);
+        //    //调整路径
+        //    AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
+        //    resPt = adjustAStarPath.AdjustPath(resPt, routePlanData);
 
-            var path = map.CreatePath(resPt);
-            return path;
-        }
+        //    var path = map.CreatePath(resPt);
+        //    return path;
+        //}
         #endregion
 
         #region DoPlan

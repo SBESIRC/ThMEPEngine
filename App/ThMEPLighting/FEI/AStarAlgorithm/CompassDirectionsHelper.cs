@@ -13,10 +13,10 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         #region Static Ctor
         static CompassDirectionsHelper()
         {
-            CompassDirectionsHelper.AllCompassDirections.Add(CompassDirections.UP);
-            CompassDirectionsHelper.AllCompassDirections.Add(CompassDirections.Down);
             CompassDirectionsHelper.AllCompassDirections.Add(CompassDirections.Left);
             CompassDirectionsHelper.AllCompassDirections.Add(CompassDirections.Right);
+            CompassDirectionsHelper.AllCompassDirections.Add(CompassDirections.Down);
+            CompassDirectionsHelper.AllCompassDirections.Add(CompassDirections.UP);
         }
         #endregion
 

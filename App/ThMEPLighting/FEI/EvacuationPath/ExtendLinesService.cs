@@ -12,23 +12,31 @@ namespace ThMEPLighting.FEI.EvacuationPath
 {
     public class ExtendLinesService
     {
-        public void CreateExtendLines(List<List<Line>> xLanes, List<List<Line>> yLanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
+        public List<Line> CreateExtendLines(List<Line> lanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
         {
-            //得到车道方向
-            var xLaneDir = (xLanes.First().First().EndPoint - xLanes.First().First().StartPoint).GetNormal();
-            var yLaneDir = (yLanes.First().First().EndPoint - yLanes.First().First().StartPoint).GetNormal();
+            List<Line> allLanes = new List<Line>(lanes.Select(x => x));
 
-            //
-            foreach (var block in enterBlocks)
-            {
-                var blockDir = block.BlockTransform.CoordinateSystem3d.Yaxis;
+            List<Polyline> resPath = new List<Polyline>();
+           
+            CreateStartExtendLineService startExtendLineService = new CreateStartExtendLineService();
+            var startPath = startExtendLineService.CreateStartLines(frame, allLanes, enterBlocks, holes);
 
-                if (IsXAxisExtend(blockDir, xLaneDir, yLaneDir))
-                {
-                    var extendDir = GetExtendsDirection(block, xLanes);
-                }
-                //var blockDir = GetExtendsDirection(block, xLanes);
-            }
+            return startPath.Select(x => x.line).ToList();
+            ////得到车道方向
+            //var xLaneDir = (xLanes.First().First().EndPoint - xLanes.First().First().StartPoint).GetNormal();
+            //var yLaneDir = (yLanes.First().First().EndPoint - yLanes.First().First().StartPoint).GetNormal();
+
+            ////
+            //foreach (var block in enterBlocks)
+            //{
+            //    var blockDir = block.BlockTransform.CoordinateSystem3d.Yaxis;
+
+            //    if (IsXAxisExtend(blockDir, xLaneDir, yLaneDir))
+            //    {
+            //        var extendDir = GetExtendsDirection(block, xLanes);
+            //    }
+            //    //var blockDir = GetExtendsDirection(block, xLanes);
+            //}
         }
 
         /// <summary>

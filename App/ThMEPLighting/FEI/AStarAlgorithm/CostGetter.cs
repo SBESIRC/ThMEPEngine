@@ -26,6 +26,24 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             return 0;
         }
 
+        public int GetECost(AStarNode currNode, Point nextNode, Point endNode)
+        {
+            // 第一个点或直线点
+            if (currNode.ParentNode == null || nextNode.X == currNode.ParentNode.Location.X
+                    || nextNode.Y == currNode.Location.Y)
+            {
+                return 0;
+            }
+
+            // 拐向终点的点
+            if (nextNode.X == endNode.X || nextNode.Y == endNode.Y)
+            {
+                return 10;
+            }
+
+            // 普通拐点
+            return 20;
+        }
         #endregion
     }
 }

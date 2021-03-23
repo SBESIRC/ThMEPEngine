@@ -32,8 +32,8 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         /// <summary>
         /// OpenedList 开放列表，即存放已经开发但是还未处理的节点。
         /// </summary>
-        private List<AStarNode> openedList = new List<AStarNode>();
-        public List<AStarNode> OpenedList
+        private MinHeap<AStarNode> openedList = new MinHeap<AStarNode>();
+        public MinHeap<AStarNode> OpenedList
         {
             get { return openedList; }
         }
