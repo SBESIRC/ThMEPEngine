@@ -30,8 +30,8 @@ namespace ThMEPEngineCore.Temp
             WaterSupplyPositions.ForEach(o =>
             {
                 var geometry = new ThGeometry();
-                geometry.Properties.Add("Category", Category);
-                geometry.Properties.Add("Group", BuildString(GroupOwner, o));
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });

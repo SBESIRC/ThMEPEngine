@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Temp
         protected string CodePropertyName = "Code";
         protected string NamePropertyName = "Name";
         protected string CategoryPropertyName = "Category";
-        protected string GroupOwnerPropertyName = "GroupOwner";
+        protected string GroupOwnerPropertyName = "GroupId";
         public ThExtractorBase()
         {
             Category = "";
