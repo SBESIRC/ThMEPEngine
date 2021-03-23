@@ -3,7 +3,6 @@ using Linq2Acad;
 using DotNetARX;
 using ThMEPWSS.Pipe;
 using Dreambuild.AutoCAD;
-using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Engine;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
@@ -15,6 +14,7 @@ using ThMEPWSS.Pipe.Layout;
 using ThMEPWSS.Pipe.Output;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Service;
+using ThMEPWSS.Command;
 
 namespace ThMEPWSS
 {
@@ -274,42 +274,40 @@ namespace ThMEPWSS
                 }
             }
         }
-        private static  List<BlockReference> GetBlockReferences(Database db, string blockName)
-        {
-            List<BlockReference> blocks = new List<BlockReference>();
-            var trans = db.TransactionManager;
-            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);                
-            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
-                      where (b.GetBlockName().Contains(blockName.Substring(0, blockName.Length-3))&& b.GetBlockName().Contains("标准层"))
-                      select b).ToList();
-            return blocks;
-        }
         [CommandMethod("TIANHUACAD", "THTQKJ", CommandFlags.Modal)]
         public static void THTQKJ()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var cmd = new ThPipeExtractSpaceCmd())
             {
-                var Extraction = new ThExtractDbSpaceService();
-                Extraction.Extract(acadDatabase.Database, ThTagParametersService.framePoints);
+                cmd.Execute();
             }
         }
         [CommandMethod("TIANHUACAD", "THHZKJ", CommandFlags.Modal)]
         public static void THHZKJ()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var cmd = new ThPipeDrawSpaceCmd())
             {
-                var Drawing = new ThDrawDbSpaceService();
-                Drawing.Draw();
+                cmd.Execute();
             }
         }
         [CommandMethod("TIANHUACAD", "THKJMC", CommandFlags.Modal)]
         public static void THKJMC()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var cmd = new ThPipeDrawSpaceNameCmd())
             {
-                var Drawing = new ThDrawDbSpaceNameService();
-                Drawing.Draw();
+                cmd.Execute();
             }
+        }
+
+        private static List<BlockReference> GetBlockReferences(Database db, string blockName)
+        {
+            List<BlockReference> blocks = new List<BlockReference>();
+            var trans = db.TransactionManager;
+            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
+            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
+                      where (b.GetBlockName().Contains(blockName.Substring(0, blockName.Length - 3)) && b.GetBlockName().Contains("标准层"))
+                      select b).ToList();
+            return blocks;
         }
     }
 }
