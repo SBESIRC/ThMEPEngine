@@ -9,7 +9,7 @@ using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThShearWallExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry
+    public class ThShearWallExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Entity> Walls { get; private set; }
         public ThShearWallExtractor()
@@ -56,6 +56,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), wallIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

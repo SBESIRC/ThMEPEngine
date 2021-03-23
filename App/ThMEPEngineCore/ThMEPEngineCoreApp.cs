@@ -417,7 +417,7 @@ namespace ThMEPEngineCore
                 }
                 //理政  CenterLine,Wall,Space   NameLayer="AD-NAME-ROOM"
                 //马力  建筑空间、停车区域、排水设施、墙、柱、阻挡物 NameLayer="空间名称"
-
+                //给排水大样图测试数据 建筑空间、柱(Db3)、给水点位、给水起点
                 var extractors = new List<ThExtractorBase>()
                 {
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
@@ -428,6 +428,7 @@ namespace ThMEPEngineCore
                     new ThWaterSupplyStartExtractor{ColorIndex=4},
                     new ThToiletGroupExtractor { ColorIndex=5},
                 };
+
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
 

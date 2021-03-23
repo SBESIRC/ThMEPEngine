@@ -12,7 +12,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThLaneLineExtractor : ThExtractorBase,IExtract,IPrint, IBuildGeometry
+    public class ThLaneLineExtractor : ThExtractorBase,IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Line> LaneLines { get; private set; }
         public ThLaneLineExtractor()
@@ -63,6 +63,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), laneLineIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThParkingStallExtractor : ThExtractorBase,IExtract,IPrint, IBuildGeometry
+    public class ThParkingStallExtractor : ThExtractorBase,IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<ThIfcSpace> ParkingStalls { get; private set; }
         public ThParkingStallExtractor()
@@ -56,6 +56,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), parkingStallIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

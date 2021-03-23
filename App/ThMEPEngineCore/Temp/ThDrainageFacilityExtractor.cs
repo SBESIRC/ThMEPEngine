@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThDrainageFacilityExtractor : ThExtractorBase,IExtract,IPrint, IBuildGeometry
+    public class ThDrainageFacilityExtractor : ThExtractorBase,IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Curve> DrainageFacilities { get; private set; }      
         public ThDrainageFacilityExtractor()
@@ -52,6 +52,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), drainageFacilityIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

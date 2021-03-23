@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThDoorExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry
+    public class ThDoorExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry,IGroup
     {
         public List<Polyline> Doors { get; private set; }
 
@@ -54,6 +54,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), doorIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

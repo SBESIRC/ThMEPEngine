@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThCenterLineExtractor :ThExtractorBase, IExtract,IPrint,IBuildGeometry
+    public class ThCenterLineExtractor :ThExtractorBase, IExtract,IPrint,IBuildGeometry,IGroup
     {
         public List<Curve> CenterLines { get; private set; }
         public ThCenterLineExtractor()
@@ -55,6 +55,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), centerLineIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

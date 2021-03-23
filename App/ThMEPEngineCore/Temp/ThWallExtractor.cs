@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThWallExtractor :ThExtractorBase, IExtract,IPrint, IBuildGeometry
+    public class ThWallExtractor :ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Polyline> Walls { get; private set; }
         public ThWallExtractor()
@@ -56,6 +56,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), wallIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

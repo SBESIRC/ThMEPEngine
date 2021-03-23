@@ -9,7 +9,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThConnectPortExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry
+    public class ThConnectPortExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry,IGroup
     {
         public Dictionary<Polyline, string> ConnectPorts { get; private set; }
         public ThConnectPortExtractor()
@@ -55,6 +55,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), connectPortIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }

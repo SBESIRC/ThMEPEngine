@@ -9,7 +9,7 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThEquipmentExtractor :ThExtractorBase,IExtract,IPrint, IBuildGeometry
+    public class ThEquipmentExtractor :ThExtractorBase,IExtract,IPrint, IBuildGeometry,IGroup
     {
         public Dictionary<string, List<Polyline>> Equipments { get; private set; }
         public ThEquipmentExtractor()
@@ -61,6 +61,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), equipIds);
                 }
             }
+        }
+
+        public void Group(Dictionary<Polyline, string> groupId)
+        {
+            throw new NotImplementedException();
         }
     }
 }
