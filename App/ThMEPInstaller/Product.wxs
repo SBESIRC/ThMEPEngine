@@ -11,6 +11,7 @@
             <ComponentGroupRef Id="ProductComponents" />
             <ComponentGroupRef Id="ProductComponentsSupport" />
             <ComponentGroupRef Id="ProductComponentsResources" />
+            <ComponentGroupRef Id="ProductComponentsAcsConnector" />
             <ComponentGroupRef Id="ProductComponentsAppCoreWin64" />
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />

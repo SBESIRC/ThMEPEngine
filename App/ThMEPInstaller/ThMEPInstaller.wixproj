@@ -21,6 +21,7 @@
     <Cultures>zh-CN</Cultures>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="AcsSystem.wxs" />
     <Compile Include="AppCore.wxs" />
     <Compile Include="DevExpress.wxs" />
     <Compile Include="Electrical.wxs" />
