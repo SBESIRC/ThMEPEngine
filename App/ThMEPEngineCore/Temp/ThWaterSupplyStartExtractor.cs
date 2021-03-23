@@ -5,6 +5,8 @@ using Linq2Acad;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -32,7 +34,15 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner, o));
-                geometry.Boundary = o;
+                if (o is Polyline polyline && polyline.IsRectangle())
+                {
+                    var centerPt = ThGeometryTool.GetMidPt(polyline.GetPoint3dAt(0), polyline.GetPoint3dAt(2));
+                    geometry.Boundary = new DBPoint(centerPt);
+                }
+                else
+                {
+                    geometry.Boundary = o;
+                }
                 geos.Add(geometry);
             });
             return geos;

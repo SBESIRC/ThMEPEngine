@@ -4,6 +4,7 @@ using ThMEPEngineCore.Model;
 using NetTopologySuite.Features;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPEngineCore.Features
 {
@@ -23,6 +24,13 @@ namespace ThMEPEngineCore.Features
                 else if (geometry.Boundary is Line line)
                 {
                     var geo = line.ToNTSLineString();
+                    var attributesTable = new AttributesTable(geometry.Properties);
+                    var feature = new Feature(geo, attributesTable);
+                    return feature;
+                }
+                else if (geometry.Boundary is DBPoint dbPoint)
+                {
+                    var geo = new Point(dbPoint.Position.ToNTSCoordinate());
                     var attributesTable = new AttributesTable(geometry.Properties);
                     var feature = new Feature(geo, attributesTable);
                     return feature;
