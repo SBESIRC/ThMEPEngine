@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.Geometry;
 
 namespace ThMEPWSS.Pipe.Service
 {
-  public class ThTagParametersService
+    public class ThTagParametersService
     {
         public static string GravityBuckettag = "DN100";
         public static string GravityBuckettag1 = "DN100";
@@ -26,13 +26,9 @@ namespace ThMEPWSS.Pipe.Service
         public static bool IsSeparation = false;
         public static string PipeLayer = "";
         public static int FloorValue = 100;
-        public static List<Tuple<string, bool>> targetFloors =new List<Tuple<string, bool>>();
+        public static List<Tuple<string, bool>> targetFloors = new List<Tuple<string, bool>>();
         public static List<BlockReference> blockCollection = new List<BlockReference>();
         public static Point3dCollection framePoints = new Point3dCollection();
-        public static Point3dCollection ToiletWells=new Point3dCollection();
-       public void Read()
-        {
-            //targetFloors.Add(Tuple.Create("标准层1", true));
-        }
+        public static Point3dCollection ToiletWells = new Point3dCollection();
     }
 }

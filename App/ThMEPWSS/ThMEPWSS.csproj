@@ -53,7 +53,7 @@
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThApplicationPipesEngine.cs" />
+    <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
     <Compile Include="Pipe\Engine\ThBlockSelectionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceExtractionVisitor.cs" />

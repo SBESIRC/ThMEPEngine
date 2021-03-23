@@ -1,39 +1,44 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
-using Autodesk.AutoCAD.DatabaseServices;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThApplicationPipesEngine
+    public class ThApplyPipesEngine
     {
-        public static void Application(string sourceFloor,List<Tuple<string,bool>> targetFloors)
+        public static void Apply(string sourceFloor,List<Tuple<string,bool>> targetFloors)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
+                var sourceBlock = GetBlockReferences1(acadDatabase.Database, sourceFloor);
+                if (sourceBlock.Count == 0)
+                {
+                    return;
+                }
                 foreach (var targetFloor in targetFloors)
-                {//check value=false
-                    var sourceBlock= GetBlockReferences1(acadDatabase.Database, sourceFloor);                 
+                {
                     var targetBlock= GetBlockReferences(acadDatabase.Database, targetFloor.Item1);
                     if (targetBlock.Count == 0)
                     {
                         continue;
                     }
-                    if (!targetFloor.Item2)
+                    if (targetFloor.Item2)
                     {
-                        CopyEntities(targetBlock, sourceBlock, acadDatabase);
+                        CopyTags(targetBlock, sourceBlock, acadDatabase);
                     }
                     else
-                    {//仅更新标注
-                        CopyTags(targetBlock, sourceBlock, acadDatabase);
+                    {
+                        CopyEntities(targetBlock, sourceBlock, acadDatabase);
                     }
                 }
             }
         }
+
         private static List<BlockReference> GetBlockReferences1(Database db, string blockName)
         {
             List<BlockReference> blocks = new List<BlockReference>();
@@ -44,6 +49,7 @@ namespace ThMEPWSS.Pipe.Engine
                       select b).ToList();
             return blocks;
         }
+
         private static List<BlockReference> GetBlockReferences(Database db, string blockName)
         {
             List<BlockReference> blocks = new List<BlockReference>();
@@ -148,6 +154,5 @@ namespace ThMEPWSS.Pipe.Engine
             }
             acadDatabase.ModelSpace.Add(CreateBlock(acadDatabase.Database, entities, target_objs, targetBlock, name));
         }
-
     }
 }

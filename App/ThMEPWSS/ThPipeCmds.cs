@@ -260,18 +260,8 @@ namespace ThMEPWSS
         public static void THLGYY()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {              
-                if(!(GetBlockReferences(acadDatabase.Database, ThTagParametersService.sourceFloor).Count>0))
-                {
-                    PromptPointOptions sf = new PromptPointOptions("\n 来源楼层中没有立管图块");
-                    return;
-                }
-                else
-                {
-                    var application = new ThTagParametersService();
-                    application.Read();
-                    ThApplicationPipesEngine.Application(ThTagParametersService.sourceFloor, ThTagParametersService.targetFloors);
-                }
+            {
+                ThApplyPipesEngine.Apply(ThTagParametersService.sourceFloor, ThTagParametersService.targetFloors);
             }
         }
         [CommandMethod("TIANHUACAD", "THTQKJ", CommandFlags.Modal)]
@@ -297,17 +287,6 @@ namespace ThMEPWSS
             {
                 cmd.Execute();
             }
-        }
-
-        private static List<BlockReference> GetBlockReferences(Database db, string blockName)
-        {
-            List<BlockReference> blocks = new List<BlockReference>();
-            var trans = db.TransactionManager;
-            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
-            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
-                      where (b.GetBlockName().Contains(blockName.Substring(0, blockName.Length - 3)) && b.GetBlockName().Contains("标准层"))
-                      select b).ToList();
-            return blocks;
         }
     }
 }
