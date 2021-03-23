@@ -120,6 +120,7 @@
     <Compile Include="Pipe\Service\ThDevicePlatformRoofRainPipeService.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformRoomService.cs" />
     <Compile Include="Pipe\Service\ThDrainwellService.cs" />
+    <Compile Include="Pipe\Service\ThDrawDbSpaceNameService.cs" />
     <Compile Include="Pipe\Service\ThDrawDbSpaceService.cs" />
     <Compile Include="Pipe\Service\ThExtractDbSpaceService.cs" />
     <Compile Include="Pipe\Service\ThFindSpaceRangedSpaces.cs" />

@@ -299,9 +299,17 @@ namespace ThMEPWSS
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var Drawing = new ThDrawDbSpaceService();
-                Drawing.Draw(acadDatabase.Database, ThTagParametersService.framePoints);
+                Drawing.Draw();
             }
         }
-        
+        [CommandMethod("TIANHUACAD", "THKJMC", CommandFlags.Modal)]
+        public static void THKJMC()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var Drawing = new ThDrawDbSpaceNameService();
+                Drawing.Draw();
+            }
+        }
     }
 }

@@ -10,7 +10,7 @@ namespace ThMEPWSS.Pipe.Service
 {
     public  class ThDrawDbSpaceService
     {
-        public void Draw(Database db, Point3dCollection pts)
+        public void Draw()
         {
             using (AcadDatabase adb = AcadDatabase.Active())
             {
