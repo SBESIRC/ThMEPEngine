@@ -293,5 +293,15 @@ namespace ThMEPWSS
                 Extraction.Extract(acadDatabase.Database, ThTagParametersService.framePoints);
             }
         }
+        [CommandMethod("TIANHUACAD", "THHZKJ", CommandFlags.Modal)]
+        public static void THHZKJ()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var Drawing = new ThDrawDbSpaceService();
+                Drawing.Draw(acadDatabase.Database, ThTagParametersService.framePoints);
+            }
+        }
+        
     }
 }

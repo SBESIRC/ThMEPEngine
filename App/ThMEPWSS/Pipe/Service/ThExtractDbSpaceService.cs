@@ -51,6 +51,7 @@ namespace ThMEPWSS.Pipe.Service
                 foreach(Polyline polyline in polylines)
                 {               
                     polyline.LayerId = CreateLayer("AI-空间框线", 30, LineWeight.LineWeight020);
+                    polyline.Closed = true;
                     db.ModelSpace.Add(polyline);
                     DBText text= new DBText() {
                         TextString = dictionary[polyline],
