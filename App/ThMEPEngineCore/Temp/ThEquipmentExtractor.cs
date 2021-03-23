@@ -33,8 +33,8 @@ namespace ThMEPEngineCore.Temp
                 e.Value.ForEach(v =>
                 {
                     var geometry = new ThGeometry();
-                    geometry.Properties.Add("Category", Category);
-                    geometry.Properties.Add("Name", e.Key);
+                    geometry.Properties.Add(CategoryPropertyName, Category);
+                    geometry.Properties.Add(NamePropertyName, e.Key);
                     geometry.Boundary = v;
                     geos.Add(geometry);
                 });

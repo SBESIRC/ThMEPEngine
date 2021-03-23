@@ -31,7 +31,7 @@ namespace ThMEPEngineCore.Temp
             Doors.ForEach(o =>
             {                
                 var geometry = new ThGeometry();
-                geometry.Properties.Add("Category", Category);
+                geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });

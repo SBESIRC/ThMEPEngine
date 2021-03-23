@@ -1,13 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
-using System.Linq;
-using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -15,14 +14,11 @@ namespace ThMEPEngineCore.Temp
     {
         public List<Polyline> Columns { get; private set; }
         public bool UseDb3ColumnEngine { get; set; }
-        private Dictionary<Curve, List<Polyline>> ColumnOwner { get; set; }
-
         public ThColumnExtractor()
         {
             Columns = new List<Polyline>();
             Category = "Column";
             UseDb3ColumnEngine = false;
-            ColumnOwner = new Dictionary<Curve, List<Polyline>>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -47,8 +43,8 @@ namespace ThMEPEngineCore.Temp
             Columns.ForEach(o =>
             {                
                 var geometry = new ThGeometry();
-                geometry.Properties.Add("Category", Category);
-                geometry.Properties.Add("Group", BuildString(ColumnOwner,o));
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
@@ -73,12 +69,9 @@ namespace ThMEPEngineCore.Temp
             }
         }
 
-        public void Group(List<Polyline> groups)
+        public void Group(Dictionary<Polyline, string> groupId)
         {
-            Columns.ForEach(o =>
-            {
-                ColumnOwner.Add(o, groups.Where(g => g.Contains(o)).ToList());
-            });
+            Columns.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
         }
     }
 }

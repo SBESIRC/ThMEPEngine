@@ -33,7 +33,7 @@ namespace ThMEPEngineCore.Temp
             ParkingStalls.ForEach(o =>
             {                
                 var geometry = new ThGeometry();
-                geometry.Properties.Add("Category", Category);
+                geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });

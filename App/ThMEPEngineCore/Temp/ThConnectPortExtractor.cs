@@ -31,8 +31,8 @@ namespace ThMEPEngineCore.Temp
             ConnectPorts.ForEach(o =>
             {                
                 var geometry = new ThGeometry();
-                geometry.Properties.Add("Category", Category);
-                geometry.Properties.Add("Code", o.Value);
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Properties.Add(CodePropertyName, o.Value);
                 geometry.Boundary = o.Key;
                 geos.Add(geometry);
             });

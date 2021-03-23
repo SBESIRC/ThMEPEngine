@@ -431,7 +431,7 @@ namespace ThMEPEngineCore
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
 
-                extractEngine.Group((extractors[4] as ThToiletGroupExtractor).ToiletGroups);
+                extractEngine.Group((extractors[4] as ThToiletGroupExtractor).ToiletGroupId);
 
                 extractEngine.OutputGeo(Active.Document.Name);
                 extractEngine.Print(acadDatabase.Database);

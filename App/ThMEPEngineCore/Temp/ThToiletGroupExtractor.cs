@@ -11,9 +11,12 @@ namespace ThMEPEngineCore.Temp
     public class ThToiletGroupExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry,IGroup
     {
         public List<Polyline> ToiletGroups { get; private set; }
+        public Dictionary<Polyline, string> ToiletGroupId { get; private set; }
         public ThToiletGroupExtractor()
         {
             ToiletGroups = new List<Polyline>();
+            ToiletGroupId = new Dictionary<Polyline, string>();
+            Category = "卫生间分组";
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -21,19 +24,22 @@ namespace ThMEPEngineCore.Temp
             var instance = new ThExtractToiletGroupService();
             instance.Extract(database, pts);
             ToiletGroups = instance.ToiletGroups;
+
+            ToiletGroups.ForEach(o => ToiletGroupId.Add(o, Guid.NewGuid().ToString()));
         }
 
 
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            //ToiletGroups.ForEach(o =>
-            //{
-            //    var geometry = new ThGeometry();
-            //    geometry.Properties.Add("Category", Category);
-            //    geometry.Boundary = o;
-            //    geos.Add(geometry);
-            //});
+            ToiletGroups.ForEach(o =>
+            {
+                var geometry = new ThGeometry();
+                geometry.Properties.Add(IdPropertyName, ToiletGroupId[o]);
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Boundary = o;
+                geos.Add(geometry);
+            });
             return geos;
         }        
 
@@ -55,7 +61,7 @@ namespace ThMEPEngineCore.Temp
             }
         }
 
-        public void Group(List<Polyline> groups)
+        public void Group(Dictionary<Polyline, string> groupId)
         {
         }
     }

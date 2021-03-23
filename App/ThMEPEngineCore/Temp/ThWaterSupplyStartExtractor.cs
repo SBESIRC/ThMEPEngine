@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
-using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -13,12 +11,10 @@ namespace ThMEPEngineCore.Temp
     public class ThWaterSupplyStartExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry,IGroup
     {
         public List<Curve> WaterSupplyStarts { get; private set; }
-        private Dictionary<Curve, List<Polyline>> WaterSupplyStartOwner { get; set; }
         public ThWaterSupplyStartExtractor()
         {
             Category = "给水起点";
             WaterSupplyStarts = new List<Curve>();
-            WaterSupplyStartOwner = new Dictionary<Curve, List<Polyline>>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -35,19 +31,16 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add("Category", Category);
-                geometry.Properties.Add("Group", BuildString(WaterSupplyStartOwner,o));
+                geometry.Properties.Add("Group", BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
             return geos;
         }    
         
-        public void Group(List<Polyline> groups)
+        public void Group(Dictionary<Polyline, string> groupId)
         {
-            WaterSupplyStarts.ForEach(o =>
-            {
-                WaterSupplyStartOwner.Add(o, groups.Where(g => g.Contains(o)).ToList());
-            });
+            WaterSupplyStarts.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
         }
 
         public void Print(Database database)
