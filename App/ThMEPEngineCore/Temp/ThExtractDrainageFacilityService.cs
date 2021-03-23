@@ -11,9 +11,11 @@ namespace ThMEPEngineCore.Temp
     public class ThExtractDrainageFacilityService:ThExtractService
     {
         public List<Curve> Facilities { get; set; }
+        public string FacilityLayer { get; set; }
         public ThExtractDrainageFacilityService()
         {
             Facilities = new List<Curve>();
+            FacilityLayer = "排水设施";
         }
         public override void Extract(Database db,Point3dCollection pts)
         {
@@ -49,7 +51,7 @@ namespace ThMEPEngineCore.Temp
 
         private bool IsDrainageFacilityLayer(string layerName)
         {
-            return layerName == "排水设施";
+            return layerName == FacilityLayer;
         }
     }
 }

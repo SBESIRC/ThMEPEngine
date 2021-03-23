@@ -7,10 +7,11 @@ using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
+using ThCADCore.NTS;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThSpaceExtractor :ThExtractorBase,IExtract,IPrint,IBuildGeometry
+    public class ThSpaceExtractor :ThExtractorBase,IExtract,IPrint,IBuildGeometry,IGroup
     {
         public List<ThIfcSpace> Spaces { get; private set; }
         public Dictionary<Polyline, List<Polyline>> Obstacles { get; set; }
@@ -34,6 +35,8 @@ namespace ThMEPEngineCore.Temp
         /// 障碍物种类
         /// </summary>
         public string ObstacleCategory { get; set; }
+
+        private Dictionary<ThIfcSpace, List<Polyline>> SpaceOwner { get; set; }
         public ThSpaceExtractor()
         {
             Spaces = new List<ThIfcSpace>();
@@ -44,6 +47,7 @@ namespace ThMEPEngineCore.Temp
             NameLayer = "AD-NAME-ROOM";
             ObstacleColorIndex = 211;
             ObstacleCategory = "Obstacle";
+            SpaceOwner = new Dictionary<ThIfcSpace, List<Polyline>>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -53,7 +57,6 @@ namespace ThMEPEngineCore.Temp
             {
                 spaceEngine.SpaceLayer = SpaceLayer;
                 spaceEngine.NameLayer = NameLayer;
-                //spaceEngine.NameLayer = "空间名称";
 
                 spaceEngine.Recognize(database, pts);
                 Spaces = spaceEngine.Spaces;
@@ -90,6 +93,7 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add("Category", Category);
                 geometry.Properties.Add("Name", string.Join(";", o.Tags.ToArray()));
+                geometry.Properties.Add("Group", BuildString(SpaceOwner,o));
                 for (int i = 1; i <= o.SubSpaces.Count; i++)
                 {
                     string key = "SubSpace" + i + " ID=";
@@ -164,6 +168,31 @@ namespace ThMEPEngineCore.Temp
                 });
 
             }
+        }
+
+        public void Group(List<Polyline> groups)
+        {
+            Spaces.ForEach(o =>
+            {
+                SpaceOwner.Add(o, groups.Where(g => g.Contains(o.Boundary)).ToList());
+            });
+        }
+
+        private string BuildString(Dictionary<ThIfcSpace, List<Polyline>> owners, ThIfcSpace space)
+        {
+            if (owners.ContainsKey(space))
+            {
+                var points = new List<string>();
+                foreach (Polyline poly in owners[space])
+                {
+                    points.Add(ToString(poly));
+                }
+                if (points.Count > 0)
+                {
+                    return string.Join(";", points.ToArray());
+                }
+            }
+            return "";
         }
     }
 }

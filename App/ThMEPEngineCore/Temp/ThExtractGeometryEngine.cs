@@ -36,6 +36,10 @@ namespace ThMEPEngineCore.Temp
         {
             Extrators.ForEach(o => (o as IExtract).Extract(database, pts));
         }     
+        public void Group(List<Polyline> groups)
+        {
+            Extrators.ForEach(o => (o as IGroup).Group(groups));
+        }
         public void Print(Database database)
         {
             Extrators.ForEach(o => (o as IPrint).Print(database));

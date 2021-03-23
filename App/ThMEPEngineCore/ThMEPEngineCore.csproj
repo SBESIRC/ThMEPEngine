@@ -332,6 +332,7 @@
     <Compile Include="Service\ThWindowLayerManager.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
     <Compile Include="Temp\IExtract.cs" />
+    <Compile Include="Temp\IGroup.cs" />
     <Compile Include="Temp\IPrint.cs" />
     <Compile Include="Temp\ThArrangeObstacleService.cs" />
     <Compile Include="Temp\ThCenterLineExtractor.cs" />
@@ -340,6 +341,9 @@
     <Compile Include="Temp\ThDoorExtractor.cs" />
     <Compile Include="Temp\ThDrainageFacilityExtractor.cs" />
     <Compile Include="Temp\ThEquipmentExtractor.cs" />
+    <Compile Include="Temp\ThExtractWaterSupplyPositionService.cs" />
+    <Compile Include="Temp\ThExtractToiletGroupService.cs" />
+    <Compile Include="Temp\ThExtractWaterSupplyStartService.cs" />
     <Compile Include="Temp\ThExtractColumnService.cs" />
     <Compile Include="Temp\ThExtractConnectPortsService.cs" />
     <Compile Include="Temp\ThExtractCenterLineService.cs" />
@@ -356,6 +360,9 @@
     <Compile Include="Temp\ThSpaceExtractor.cs" />
     <Compile Include="Temp\ThShearWallExtractor.cs" />
     <Compile Include="Temp\ThWallExtractor.cs" />
+    <Compile Include="Temp\ThWaterSupplyPositionExtractor.cs" />
+    <Compile Include="Temp\ThToiletGroupExtractor.cs" />
+    <Compile Include="Temp\ThWaterSupplyStartExtractor.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />

@@ -8,37 +8,37 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThExtractColumnService:ThExtractService
+    public class ThExtractToiletGroupService : ThExtractService
     {
-        public List<Polyline> Columns { get; set; }
-        public string ColumnLayer { get; set; }
-        public ThExtractColumnService()
+        public List<Polyline> ToiletGroups { get; set; }
+        public string ToiletGroupLayer { get; set; }
+        public ThExtractToiletGroupService()
         {
-            Columns = new List<Polyline>();
-            ColumnLayer = "柱";
+            ToiletGroups = new List<Polyline>();
+            ToiletGroupLayer = "卫生间分组";
         }
 
         public override void Extract(Database db,Point3dCollection pts)
         {
             using (var acadDatabase = AcadDatabase.Use(db))
             {
-                Columns=acadDatabase.ModelSpace
+                ToiletGroups = acadDatabase.ModelSpace
                     .OfType<Polyline>()
-                    .Where(o => IsColumnLayer(o.Layer))
+                    .Where(o => IsToiletGroupLayer(o.Layer))
                     .Select(o=>o.Clone() as Polyline)
                     .ToList();
                 if(pts.Count>=3)
                 {
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Columns.ToCollection());
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(ToiletGroups.ToCollection());
                     var objs = spatialIndex.SelectCrossingPolygon(pts);
-                    Columns = objs.Cast<Polyline>().ToList();
+                    ToiletGroups = objs.Cast<Polyline>().ToList();
                 }
             }
         }        
 
-        private bool IsColumnLayer(string layerName)
+        private bool IsToiletGroupLayer(string layerName)
         {
-            return layerName == ColumnLayer;
+            return layerName == ToiletGroupLayer;
         }
     }
 }
