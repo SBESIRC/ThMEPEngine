@@ -32,16 +32,16 @@ namespace ThMEPWSS
                 ThApplyPipesEngine.Apply(ThTagParametersService.sourceFloor, ThTagParametersService.targetFloors);
             }
         }
-        [CommandMethod("TIANHUACAD", "THTQKJ", CommandFlags.Modal)]
-        public static void THTQKJ()
+        [CommandMethod("TIANHUACAD", "THKJTQ", CommandFlags.Modal)]
+        public static void THKJTQ()
         {
             using (var cmd = new ThPipeExtractSpaceCmd())
             {
                 cmd.Execute();
             }
         }
-        [CommandMethod("TIANHUACAD", "THHZKJ", CommandFlags.Modal)]
-        public static void THHZKJ()
+        [CommandMethod("TIANHUACAD", "THKJHZ", CommandFlags.Modal)]
+        public static void THKJHZ()
         {
             using (var cmd = new ThPipeDrawSpaceCmd())
             {
