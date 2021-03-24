@@ -93,7 +93,7 @@ namespace ThMEPWSS.Pipe.Tools
             double x = 0.0;
             for (int i = 0; i < room.Count; i++)
             {
-                Polyline line = room[i].Toilet.Space.Boundary as Polyline;
+                Polyline line = room[i].Toilet.Boundary as Polyline;
                 x += line.GetCenter().X;
             }
             return x;
@@ -103,7 +103,7 @@ namespace ThMEPWSS.Pipe.Tools
             double y = 0.0;
             for (int i = 0; i < room.Count; i++)
             {
-                Polyline line = room[i].Toilet.Space.Boundary as Polyline;
+                Polyline line = room[i].Toilet.Boundary as Polyline;
                 y += line.GetCenter().Y;
             }
             return y;
@@ -113,7 +113,7 @@ namespace ThMEPWSS.Pipe.Tools
             double x = 0.0;
             for (int i = 0; i < room.Count; i++)
             {
-                Polyline line = room[i].Balcony.Space.Boundary as Polyline;
+                Polyline line = room[i].Balcony.Boundary as Polyline;
                 x += line.GetCenter().X;
             }
             return x;
@@ -123,7 +123,7 @@ namespace ThMEPWSS.Pipe.Tools
             double y = 0.0;
             for (int i = 0; i < room.Count; i++)
             {
-                Polyline line = room[i].Balcony.Space.Boundary as Polyline;
+                Polyline line = room[i].Balcony.Boundary as Polyline;
                 y += line.GetCenter().Y;
             }
             return y;
@@ -937,9 +937,9 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public void InputKitchenParameters(ThWCompositeRoom composite, ThWTopCompositeParameters parameters, ThWTopParameters parameters0)
         {
-            if (composite.Kitchen.Space!=null)
+            if (composite.Kitchen.Boundary!=null)
             {
-                parameters.boundary = composite.Kitchen.Space.Boundary as Polyline;
+                parameters.boundary = composite.Kitchen.Boundary as Polyline;
                 if (composite.Kitchen.DrainageWells.Count > 1)
                 {
                     var kitchenWell = composite.Kitchen.DrainageWells[0].Boundary as Polyline;
@@ -1002,7 +1002,7 @@ namespace ThMEPWSS.Pipe.Tools
                             parameters.outline = composite.Toilet.DrainageWells[0].Boundary as Polyline;
                         }
                 }
-                if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Space.Boundary as Polyline, parameters.outline.GetCenter()))&& composite.Toilet.DrainageWells.Count>0)
+                if (!(GeomUtils.PtInLoop(parameters.boundary, parameters.outline.GetCenter())) && !(GeomUtils.PtInLoop(composite.Toilet.Boundary as Polyline, parameters.outline.GetCenter()))&& composite.Toilet.DrainageWells.Count>0)
                 {
                     if (parameters.outline.GetCenter().DistanceTo((composite.Toilet.DrainageWells[0].Boundary as Polyline).GetCenter()) > 10)
                     {
@@ -1121,14 +1121,14 @@ namespace ThMEPWSS.Pipe.Tools
         }
         public bool IsValidToiletContainer(ThWToiletRoom toiletContainer)
         {
-            return toiletContainer.Space != null &&
+            return toiletContainer.Boundary != null &&
                 toiletContainer.DrainageWells.Count >0 &&
                 toiletContainer.Closestools.Count == 1 
                ;
         }
         public bool IsValidToiletContainerForFloorDrain(ThWToiletRoom toiletContainer)
         {
-            return toiletContainer.Space != null &&
+            return toiletContainer.Boundary != null &&
                 toiletContainer.FloorDrains.Count > 0;
         }
         public bool IsValidBalconyForFloorDrain(ThWBalconyRoom balconyContainer)
