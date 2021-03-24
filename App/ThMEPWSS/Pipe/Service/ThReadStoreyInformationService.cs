@@ -2,14 +2,11 @@
 using DotNetARX;
 using Linq2Acad;
 using System.Linq;
+using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
-using ThMEPWSS.Pipe.Geom;
-using ThMEPWSS.Pipe.Tools;
-using Autodesk.AutoCAD.Geometry;
-using Dreambuild.AutoCAD;
-using ThCADExtension;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Model;
 
@@ -24,51 +21,52 @@ namespace ThMEPWSS.Pipe.Service
         public List<Tuple<string, string>> StoreyNames { get; set; }
         public ThReadStoreyInformationService()
         {
-            DeviceName = "";
             RoofName = "";
+            DeviceName = "";
+            StoreyNames = new List<Tuple<string, string>>();
             StandardSpaceNames = new List<Tuple<string,string>>();
             NonStandardSpaceNames = new List<Tuple<string, string>>();
-            StoreyNames = new List<Tuple<string, string>>();
+        }
+        public void Read(ObjectIdCollection objIds)
+        {
+            if (objIds.Count == 0)
+            {
+                return;
+            }
+
+            //排序规则为小屋面，大屋面，接着从大到小排列
+            DeviceName = GetDeviceName(objIds);
+            RoofName = GetRoofName(objIds);
+            StandardSpaceNames = GetSortList(DivideCharacter(GetStandardSpaceName(objIds), "标准层"));
+            NonStandardSpaceNames = GetSortList(DivideCharacter(GetNonStandardSpaceName(objIds), "非标层"));
+            if (DeviceName != "")
+            {
+                StoreyNames.Add(Tuple.Create(DeviceName, "小屋面"));
+            }
+            if (RoofName != "")
+            {
+                StoreyNames.Add(Tuple.Create(RoofName, "大屋面"));
+            }
+            foreach (var StandardSpaceName in StandardSpaceNames)
+            {
+                StoreyNames.Add(Tuple.Create($"{StandardSpaceName.Item1}{"标准层"}", StandardSpaceName.Item2));
+            }
+            foreach (var NonStandardSpaceName in NonStandardSpaceNames)
+            {
+                StoreyNames.Add(Tuple.Create($"{NonStandardSpaceName.Item1}{"非标层"}", NonStandardSpaceName.Item2));
+            }
         }
         public void Read(Database database)
         {
-            //排序规则为小屋面，大屋面，接着从大到小排列
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var engine = new ThWStoreysRecognitionEngine();
-                engine.Recognize(acadDatabase.Database, ThTagParametersService.framePoints);
-                if (engine.Elements.Count == 0)
-                {
-                    return;
-                }                              
+                engine.Recognize(acadDatabase.Database, new Point3dCollection());                           
                 engine.Elements.Cast<ThWStoreys>().ForEach(o =>
                 {
                     ThTagParametersService.blockCollection.Add(acadDatabase.Element<BlockReference>(o.ObjectId));
                 });
-                var objIds = new ObjectIdCollection(engine.Elements.Cast<ThWStoreys>().Select(o => o.ObjectId).ToArray());
-                if (objIds.Count > 0)
-                {
-                    DeviceName = GetDeviceName(objIds);
-                    RoofName = GetRoofName(objIds);
-                    StandardSpaceNames = GetSortList(DivideCharacter(GetStandardSpaceName(objIds), "标准层"));
-                    NonStandardSpaceNames = GetSortList(DivideCharacter(GetNonStandardSpaceName(objIds), "非标层"));
-                }
-                if(DeviceName!="")
-                {
-                    StoreyNames.Add(Tuple.Create(DeviceName, "小屋面"));
-                }
-                if (RoofName != "")
-                {
-                    StoreyNames.Add(Tuple.Create(RoofName, "大屋面"));
-                }
-                foreach(var StandardSpaceName in StandardSpaceNames)
-                {
-                    StoreyNames.Add(Tuple.Create($"{StandardSpaceName.Item1}{"标准层"}", StandardSpaceName.Item2));
-                }
-                foreach (var NonStandardSpaceName in NonStandardSpaceNames)
-                {
-                    StoreyNames.Add(Tuple.Create($"{NonStandardSpaceName.Item1}{"非标层"}", NonStandardSpaceName.Item2));
-                }
+                Read(engine.Elements.Cast<ThWStoreys>().Select(o => o.ObjectId).ToObjectIdCollection());
             }           
         }
         private static List<Tuple<string, string>> GetSortList(List<Tuple<string, string>> names)

@@ -1,17 +1,18 @@
 ﻿using System;
+using NFox.Cad;
 using AcHelper;
-using Linq2Acad;
 using AcHelper.Commands;
-using ThMEPWSS.Pipe.Service;
-using DevExpress.XtraEditors;
+using System.ComponentModel;
 using System.Collections.Generic;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 using Autodesk.AutoCAD.EditorInput;
-using System.Linq;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using System.ComponentModel;
+using ThMEPWSS.Pipe;
+using ThMEPWSS.Pipe.Service;
+using DevExpress.XtraEditors;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
+using System.Linq;
+using Linq2Acad;
 
 namespace TianHua.Plumbing.UI
 {
@@ -51,49 +52,43 @@ namespace TianHua.Plumbing.UI
 
         private void BtnGetFloor_Click(object sender, EventArgs e)
         {
-            var floorNames = new List<string>();
+            //聚焦到CAD
+            SetFocusToDwgView();
+
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var input=SelectPoints();
-                var points =new Point3dCollection();
-                points.Add(input.Item1);
-                points.Add(new Point3d(input.Item1.X, input.Item2.Y,0));
-                points.Add(input.Item2);
-                points.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                ThTagParametersService.framePoints = points;
-                var storey = new ThReadStoreyInformationService();
-                storey.Read(acadDatabase.Database);
-                if (storey.StoreyNames.Count == 0)
+                // 获取楼层框线图块
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择楼层框线",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filter = OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                storey.StoreyNames.ForEach(o => floorNames.Add(o.Item1));
-            }
-            ListBox.DataSource = floorNames;
-        }    
-        private Tuple<Point3d,Point3d> SelectPoints()
-        {
-           var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
-            Point3d leftDownPt = Point3d.Origin;
-            if (ptLeftRes.Status == PromptStatus.OK)
-            {
-                leftDownPt = ptLeftRes.Value;
-            }
-            else
-            {
-                return Tuple.Create(leftDownPt, leftDownPt);
-            }
+                var storeys = result.Value.GetObjectIds()
+                    .Select(o => acadDatabase.Element<BlockReference>(o))
+                    .Where(o => o.GetEffectiveName() == ThWPipeCommon.STOREY_BLOCK_NAME)
+                    .Select(o => o.ObjectId)
+                    .ToObjectIdCollection();
 
-            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
-            if(ptRightRes.Status== PromptStatus.OK)
-            {
-                return Tuple.Create(leftDownPt, ptRightRes.Value);
+                // 获取楼层名称
+                var service = new ThReadStoreyInformationService();
+                service.Read(storeys);
+
+                // 绑定控件
+                ListBox.DataSource = service.StoreyNames.Select(o => o.Item1).ToList();
             }
-            else
-            {
-                return Tuple.Create(leftDownPt, leftDownPt);
-            }
-        }
+        }    
 
         private void BtnParam_Click(object sender, EventArgs e)
         {
@@ -121,6 +116,11 @@ namespace TianHua.Plumbing.UI
             }
         }
 
+        private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
         private void SetFocusToDwgView()
         {
             //  https://adndevblog.typepad.com/autocad/2013/03/use-of-windowfocus-in-autocad-2014.html
@@ -129,11 +129,6 @@ namespace TianHua.Plumbing.UI
 #else
             Active.Document.Window.Focus();
 #endif
-        }
-
-        private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }
