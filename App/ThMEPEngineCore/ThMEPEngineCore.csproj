@@ -125,7 +125,6 @@
     <Compile Include="Engine\ThShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementRecognitionEngine.cs" />
-    <Compile Include="Engine\ThSpaceRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementRecognitionEngine.cs" />
     <Compile Include="Engine\ThSpatialElementExtractionEngine.cs" />
     <Compile Include="Engine\ThWindowExtractionVisitor.cs" />
