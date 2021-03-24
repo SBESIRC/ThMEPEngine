@@ -43,6 +43,7 @@
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
+    <Compile Include="Command\ThPipeCreateCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceNameCmd.cs" />
     <Compile Include="Command\ThPipeExtractSpaceCmd.cs" />

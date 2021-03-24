@@ -7,9 +7,9 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using static ThMEPWSS.ThPipeCmds;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Model;
+using static ThMEPWSS.Command.ThPipeCreateCmd;
 
 namespace ThMEPWSS.Pipe.Tools
 {
