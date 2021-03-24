@@ -12,7 +12,7 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThSpaceExtractor :ThExtractorBase,IExtract,IPrint,IBuildGeometry,IGroup
     {
-        public List<ThIfcSpace> Spaces { get; private set; }
+        public List<ThIfcRoom> Rooms { get; private set; }
         public Dictionary<Polyline, List<Polyline>> Obstacles { get; set; }
         /// <summary>
         /// 障碍物颜色
@@ -25,7 +25,7 @@ namespace ThMEPEngineCore.Temp
         /// <summary>
         /// 空间轮廓图层名
         /// </summary>
-        public string SpaceLayer { get; set; }
+        public string RoomLayer { get; set; }
         /// <summary>
         /// 空间标识名称
         /// </summary>
@@ -37,11 +37,11 @@ namespace ThMEPEngineCore.Temp
 
         public ThSpaceExtractor()
         {
-            Spaces = new List<ThIfcSpace>();
+            Rooms = new List<ThIfcRoom>();
             Obstacles = new Dictionary<Polyline, List<Polyline>>();
             IsBuildObstacle = false;
             Category = "Space";
-            SpaceLayer = "AD-AREA-OUTL";
+            RoomLayer = "AD-AREA-OUTL";
             NameLayer = "AD-NAME-ROOM";
             ObstacleColorIndex = 211;
             ObstacleCategory = "Obstacle";
@@ -50,13 +50,13 @@ namespace ThMEPEngineCore.Temp
         public void Extract(Database database, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            using (var spaceEngine = new ThExtractSpaceRecognitionEngine())
+            using (var roomEngine = new ThExtractRoomRecognitionEngine())
             {
-                spaceEngine.SpaceLayer = SpaceLayer;
-                spaceEngine.NameLayer = NameLayer;
+                roomEngine.RoomLayer = RoomLayer;
+                roomEngine.NameLayer = NameLayer;
 
-                spaceEngine.Recognize(database, pts);
-                Spaces = spaceEngine.Spaces;
+                roomEngine.Recognize(database, pts);
+                Rooms = roomEngine.Rooms;
 
                 if(IsBuildObstacle)
                 {
@@ -68,34 +68,29 @@ namespace ThMEPEngineCore.Temp
         private void BuildObstacles()
         {
             //在停车区域空间
-            var spaces = Spaces
+            var rooms = Rooms
                  .Where(o => o.Tags.Where(g => g.Contains("停车区域")).Any())
                  .Select(o => o.Boundary).ToList();
-            spaces.ForEach(o => Obstacles.Add(o.Clone() as Polyline, ThArrangeObstacleService.Arrange(o as Polyline)));
+            rooms.ForEach(o => Obstacles.Add(o.Clone() as Polyline, ThArrangeObstacleService.Arrange(o as Polyline)));
         }
 
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            geos.AddRange(BuildSpaceGeometries());
+            geos.AddRange(BuildRoomGeometries());
             geos.AddRange(BuildObstacleGeometries());
             return geos;
         }
 
-        private List<ThGeometry> BuildSpaceGeometries()
+        private List<ThGeometry> BuildRoomGeometries()
         {
             var geos = new List<ThGeometry>();
-            Spaces.ForEach(o =>
+            Rooms.ForEach(o =>
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName, string.Join(";", o.Tags.ToArray()));
                 geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner,o.Boundary));
-                for (int i = 1; i <= o.SubSpaces.Count; i++)
-                {
-                    string key = "SubSpace" + i + " ID=";
-                    geometry.Properties.Add(key, o.SubSpaces[i - 1].Uuid);
-                }
                 geometry.Boundary = o.Boundary;
                 geos.Add(geometry);
             });
@@ -120,24 +115,24 @@ namespace ThMEPEngineCore.Temp
 
         public void Print(Database database)
         {
-            PrintSpace(database);
+            PrintRoom(database);
             PrintObstacles(database);
         }
 
-        private void PrintSpace(Database database)
+        private void PrintRoom(Database database)
         {
             using (var db = AcadDatabase.Use(database))
             {
-                var spaceIds = new ObjectIdList();
-                Spaces.ForEach(o =>
+                var roomIds = new ObjectIdList();
+                Rooms.ForEach(o =>
                 {
                     o.Boundary.ColorIndex = ColorIndex;
                     o.Boundary.SetDatabaseDefaults();
-                    spaceIds.Add(db.ModelSpace.Add(o.Boundary));
+                    roomIds.Add(db.ModelSpace.Add(o.Boundary));
                 });
-                if (spaceIds.Count > 0)
+                if (roomIds.Count > 0)
                 {
-                    GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), spaceIds);
+                    GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), roomIds);
                 }
             }
         }
@@ -169,7 +164,7 @@ namespace ThMEPEngineCore.Temp
 
         public void Group(Dictionary<Polyline, string> groupId)
         {
-            Spaces.ForEach(o => GroupOwner.Add(o.Boundary, FindCurveGroupIds(groupId, o.Boundary)));
+            Rooms.ForEach(o => GroupOwner.Add(o.Boundary, FindCurveGroupIds(groupId, o.Boundary)));
         }
     }
 }
