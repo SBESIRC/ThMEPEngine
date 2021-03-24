@@ -12,7 +12,7 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 基点圆
         /// </summary>
-        public List<ThIfcSpace> BaseCircles { get; set; }       
+        public List<ThIfcRoom> BaseCircles { get; set; }       
         /// <summary>
         /// 组合阳台空间
         /// </summary>
@@ -27,7 +27,7 @@ namespace ThMEPWSS.Pipe.Model
         public List<Line> DivisionLines { get; set; }
         public ThWTopFloorRoom()
         {
-            BaseCircles = new List<ThIfcSpace>();
+            BaseCircles = new List<ThIfcRoom>();
             CompositeBalconyRooms = new List<ThWCompositeBalconyRoom>();
             CompositeRooms = new List<ThWCompositeRoom>();
             DivisionLines = new List<Line>();

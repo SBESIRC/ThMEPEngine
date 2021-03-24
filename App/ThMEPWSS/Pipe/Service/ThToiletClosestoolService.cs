@@ -15,11 +15,11 @@ namespace ThMEPWSS.Pipe.Service
         /// </summary>
         public List<ThWClosestool> Closestools { get; private set; }
         private List<ThWClosestool> ClosestoolList { get; set; }
-        private ThIfcSpace ToiletSpace { get; set; }
+        private ThIfcRoom ToiletSpace { get; set; }
         private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
         private ThToiletClosestoolService(
             List<ThWClosestool> closestoolList,
-            ThIfcSpace toiletSpace,
+            ThIfcRoom toiletSpace,
             ThCADCoreNTSSpatialIndex closestoolSpatialIndex)
         {
             ClosestoolList = closestoolList;
@@ -42,7 +42,7 @@ namespace ThMEPWSS.Pipe.Service
         /// <returns></returns>
         public static ThToiletClosestoolService Find(
             List<ThWClosestool> closestoolList,
-            ThIfcSpace toiletSpace,
+            ThIfcRoom toiletSpace,
             ThCADCoreNTSSpatialIndex closestoolSpatialIndex = null)
         {
             var instance = new ThToiletClosestoolService(closestoolList, toiletSpace, closestoolSpatialIndex);

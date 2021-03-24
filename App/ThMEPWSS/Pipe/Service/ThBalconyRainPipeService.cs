@@ -12,11 +12,11 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWRainPipe> RainPipes { get; private set; }
         private List<ThWRainPipe> RainPipeList { get; set; }
-        private ThIfcSpace BalconySpace { get; set; }
+        private ThIfcRoom BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex RainPipeSpatialIndex { get; set; }
         private ThBalconyRainPipeService(
             List<ThWRainPipe> rainPipeList,
-            ThIfcSpace balconySpace,
+            ThIfcRoom balconySpace,
             ThCADCoreNTSSpatialIndex rainPipeSpatialIndex)
         {
             BalconySpace = balconySpace;
@@ -32,7 +32,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static ThBalconyRainPipeService Find(
             List<ThWRainPipe> rainPipeList,
-            ThIfcSpace balconySpace,
+            ThIfcRoom balconySpace,
             ThCADCoreNTSSpatialIndex rainPipeSpatialIndex = null)
         {
             var instance = new ThBalconyRainPipeService(rainPipeList, balconySpace, rainPipeSpatialIndex);

@@ -10,16 +10,16 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThTopFloorRoomService 
     {
-        private List<ThIfcSpace> Spaces { get; set; }
-        private List<ThIfcSpace> BaseCircles { get; set; }
+        private List<ThIfcRoom> Spaces { get; set; }
+        private List<ThIfcRoom> BaseCircles { get; set; }
         private List<ThWCompositeRoom> CompositeRooms { get; set; }
         private List<ThWCompositeBalconyRoom> CompositeBalconyRooms { get; set; }
         private List<Line> DivisionLines { get; set; }      
         public List<ThWTopFloorRoom> Rooms { get; private set; }
 
         private ThTopFloorRoomService(
-            List<ThIfcSpace> spaces,
-            List<ThIfcSpace> baseCircles,          
+            List<ThIfcRoom> spaces,
+            List<ThIfcRoom> baseCircles,          
             List<ThWCompositeRoom> compositeRooms,
             List<ThWCompositeBalconyRoom> compositeBalconyRooms,
             List<Line> divisionLines)
@@ -31,7 +31,7 @@ namespace ThMEPWSS.Pipe.Service
             DivisionLines = divisionLines;
             Rooms = new List<ThWTopFloorRoom>();
         }
-        public static List<ThWTopFloorRoom> Build(List<ThIfcSpace> spaces, List<ThIfcSpace> baseCircles, List<ThWCompositeRoom> compositeRooms, List<ThWCompositeBalconyRoom> compositeBalconyRooms, List<Line> divisionLines)
+        public static List<ThWTopFloorRoom> Build(List<ThIfcRoom> spaces, List<ThIfcRoom> baseCircles, List<ThWCompositeRoom> compositeRooms, List<ThWCompositeBalconyRoom> compositeBalconyRooms, List<Line> divisionLines)
         {
             var firstFloorContainerService = new ThTopFloorRoomService(spaces, baseCircles, compositeRooms, compositeBalconyRooms, divisionLines);
             firstFloorContainerService.Build();
@@ -49,7 +49,7 @@ namespace ThMEPWSS.Pipe.Service
                 Rooms.Add(CreateFirstFloorContainer(o));
             });
         }
-        private ThWTopFloorRoom CreateFirstFloorContainer(ThIfcSpace firstFloorSpace)
+        private ThWTopFloorRoom CreateFirstFloorContainer(ThIfcRoom firstFloorSpace)
         {
             return new ThWTopFloorRoom()
             {                
@@ -60,12 +60,12 @@ namespace ThMEPWSS.Pipe.Service
                 DivisionLines = ThTopFloorDivisionLineService.Find(firstFloorSpace, DivisionLines),
             };
         }
-        private List<ThIfcSpace> GetFirstFloorSpace()
+        private List<ThIfcRoom> GetFirstFloorSpace()
         {
-            var FirSpace = new List<ThIfcSpace>();
+            var FirSpace = new List<ThIfcRoom>();
             string pattern = @"\d+$";
             string pattern1 = @"^\d";
-            var spaces = new List<Tuple<ThIfcSpace, double>>();
+            var spaces = new List<Tuple<ThIfcRoom, double>>();
             Spaces.ForEach(m =>
             {
                 m.Tags.ForEach(n =>

@@ -12,11 +12,11 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWBasin> Basintools { get; private set; }
         private List<ThWBasin> BasintoolList { get; set; }
-        private ThIfcSpace BalconySpace { get; set; }
+        private ThIfcRoom BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
         private ThBalconyBasintoolService(
             List<ThWBasin> basintoolList,
-            ThIfcSpace balconySpace,
+            ThIfcRoom balconySpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex)
         {
             BalconySpace = balconySpace;
@@ -38,7 +38,7 @@ namespace ThMEPWSS.Pipe.Service
         /// <returns></returns>
         public static ThBalconyBasintoolService Find(
             List<ThWBasin> basintoolList,
-            ThIfcSpace balconySpace,
+            ThIfcRoom balconySpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex = null)
         {
             var instance = new ThBalconyBasintoolService(basintoolList, balconySpace, basintoolSpatialIndex);

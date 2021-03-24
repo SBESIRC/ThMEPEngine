@@ -11,7 +11,7 @@ namespace ThMEPWSS.Pipe.Service
     public class ThToiletRoomService
     {
         public List<ThWToiletRoom> ToiletContainers { get; set; }
-        private List<ThIfcSpace> Spaces { get; set; }
+        private List<ThIfcRoom> Spaces { get; set; }
         private List<ThWClosestool> Closestools { get; set; }
         private List<ThWFloorDrain> FloorDrains { get; set; }
         private List<ThWCondensePipe> CondensePipes { get; set; }
@@ -21,7 +21,7 @@ namespace ThMEPWSS.Pipe.Service
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
 
         private ThToiletRoomService(
-            List<ThIfcSpace> spaces,
+            List<ThIfcRoom> spaces,
             List<ThWClosestool> closestools,
             List<ThWFloorDrain> floorDrains,
             List<ThWCondensePipe> condensePipes,
@@ -35,7 +35,7 @@ namespace ThMEPWSS.Pipe.Service
             ToiletContainers = new List<ThWToiletRoom>();
             BuildSpatialIndex();
         }
-        public static List<ThWToiletRoom> Build(List<ThIfcSpace> spaces,
+        public static List<ThWToiletRoom> Build(List<ThIfcRoom> spaces,
             List<ThWClosestool> closestools,
             List<ThWFloorDrain> floorDrains,
             List<ThWCondensePipe> condensePipes,
@@ -54,7 +54,7 @@ namespace ThMEPWSS.Pipe.Service
                 ToiletContainers.Add(CreateToiletContainer(o));
             });
         }
-        private ThWToiletRoom CreateToiletContainer(ThIfcSpace toiletSpace)
+        private ThWToiletRoom CreateToiletContainer(ThIfcRoom toiletSpace)
         {
             ThWToiletRoom thToiletContainer = new ThWToiletRoom();
             thToiletContainer.Boundary = toiletSpace.Boundary;
@@ -95,7 +95,7 @@ namespace ThMEPWSS.Pipe.Service
             thToiletContainer.RoofRainPipes = FindRoofRainPipes(RoofRainPipes, toiletSpace);
             return thToiletContainer;
         }
-        private List<ThIfcSpace> ToiletSpaces()
+        private List<ThIfcRoom> ToiletSpaces()
         {
             return Spaces.Where(m => m.Tags.Where(n => n.Contains("卫生间")).Any()).ToList();
         }
@@ -105,7 +105,7 @@ namespace ThMEPWSS.Pipe.Service
             Spaces.ForEach(o => spaceObjs.Add(o.Boundary));
             SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(spaceObjs);
         }
-        private static List<ThWCondensePipe> FindCondensePipes(List<ThWCondensePipe> pipes, ThIfcSpace space)
+        private static List<ThWCondensePipe> FindCondensePipes(List<ThWCondensePipe> pipes, ThIfcRoom space)
         {
             var condensePipes = new List<ThWCondensePipe>();
             foreach (var pipe in pipes)
@@ -119,7 +119,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             return condensePipes;
         }
-        private static List<ThWRoofRainPipe> FindRoofRainPipes(List<ThWRoofRainPipe> pipes, ThIfcSpace space)
+        private static List<ThWRoofRainPipe> FindRoofRainPipes(List<ThWRoofRainPipe> pipes, ThIfcRoom space)
         {
             var roofRainPipes = new List<ThWRoofRainPipe>();
             foreach (var pipe in pipes)

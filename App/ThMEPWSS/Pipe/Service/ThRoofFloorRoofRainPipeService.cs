@@ -10,10 +10,10 @@ namespace ThMEPWSS.Pipe.Service
     public class ThRoofFloorRoofRainPipeService
     {
         private List<ThWRoofRainPipe> Pipes { get; set; }
-        private ThIfcSpace Space { get; set; }
+        private ThIfcRoom Space { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private ThRoofFloorRoofRainPipeService(
-           ThIfcSpace space,
+           ThIfcRoom space,
            List<ThWRoofRainPipe> pipes)
         {
             Pipes = pipes;
@@ -23,7 +23,7 @@ namespace ThMEPWSS.Pipe.Service
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
         public static List<ThWRoofRainPipe> Find(
-            ThIfcSpace space,
+            ThIfcRoom space,
             List<ThWRoofRainPipe> pipes)
         {
             var service = new ThRoofFloorRoofRainPipeService(space, pipes);

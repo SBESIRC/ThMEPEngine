@@ -23,13 +23,13 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 基点区域
         /// </summary>
-        public List<ThIfcSpace> BaseCircles { get; set; }
+        public List<ThIfcRoom> BaseCircles { get; set; }
         public ThWRoofTopFloorRoom()
         {
             GravityWaterBuckets = new List<ThWGravityWaterBucket>();
             SideEntryWaterBuckets = new List<ThWSideEntryWaterBucket>();
             RoofRainPipes = new List<ThWRoofRainPipe>();
-            BaseCircles= new List<ThIfcSpace>();
+            BaseCircles= new List<ThIfcRoom>();
         }
     }
 }

@@ -11,10 +11,10 @@ namespace ThMEPWSS.Pipe.Service
     public class ThTopFloorCompositeRoomService
     {
         private List<ThWCompositeRoom> CompositeRoom { get; set; }
-        private ThIfcSpace Space { get; set; }
+        private ThIfcRoom Space { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private ThTopFloorCompositeRoomService(
-           ThIfcSpace space,
+           ThIfcRoom space,
            List<ThWCompositeRoom> compositeRoom)
         {
             CompositeRoom = compositeRoom;
@@ -23,12 +23,12 @@ namespace ThMEPWSS.Pipe.Service
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
         public static List<ThWCompositeRoom> Find(
-            ThIfcSpace space,
+            ThIfcRoom space,
             List<ThWCompositeRoom> compositeRoom)
         {          
             return Findspace(space, compositeRoom);
         }
-        private static List<ThWCompositeRoom> Findspace(ThIfcSpace FirstFloorSpace, List<ThWCompositeRoom> compositeRoom)
+        private static List<ThWCompositeRoom> Findspace(ThIfcRoom FirstFloorSpace, List<ThWCompositeRoom> compositeRoom)
         {
             var compositeroom_ = new List<ThWCompositeRoom>();
             foreach (var room in compositeRoom)

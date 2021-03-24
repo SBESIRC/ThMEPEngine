@@ -10,11 +10,11 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThRoofFloorGravityWaterBucketService
     {
-        private ThIfcSpace Space { get; set; }
+        private ThIfcRoom Space { get; set; }
         private List<ThWGravityWaterBucket> Buckets { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private ThRoofFloorGravityWaterBucketService(
-            ThIfcSpace space,
+            ThIfcRoom space,
             List<ThWGravityWaterBucket> buckets)
         {
             Space = space;
@@ -24,7 +24,7 @@ namespace ThMEPWSS.Pipe.Service
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
         public static List<ThWGravityWaterBucket> Find(
-          ThIfcSpace space,
+          ThIfcRoom space,
           List<ThWGravityWaterBucket> buckets)
         {
             var service = new ThRoofFloorGravityWaterBucketService(space, buckets);

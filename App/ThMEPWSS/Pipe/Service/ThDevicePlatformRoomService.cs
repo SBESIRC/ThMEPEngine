@@ -12,14 +12,14 @@ namespace ThMEPWSS.Pipe.Service
     public class ThDevicePlatformRoomService
     {
         public List<ThWDevicePlatformRoom> DevicePlatformRoom { get; set; }
-        private List<ThIfcSpace> Spaces { get; set; }
+        private List<ThIfcRoom> Spaces { get; set; }
         private List<ThWFloorDrain> FloorDrains { get; set; }
         private List<ThWRainPipe> RainPipes { get; set; }
         private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         private List<ThWCondensePipe> CondensePipes { get; set; }
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
         private ThDevicePlatformRoomService(
-         List<ThIfcSpace> spaces,
+         List<ThIfcRoom> spaces,
          List<ThWFloorDrain> floorDrains,
          List<ThWRainPipe> rainPipes,
          List<ThWCondensePipe> condensePipes,
@@ -34,7 +34,7 @@ namespace ThMEPWSS.Pipe.Service
             BuildSpatialIndex();
         }
         public static List<ThWDevicePlatformRoom> Build(
-            List<ThIfcSpace> spaces,
+            List<ThIfcRoom> spaces,
             List<ThWFloorDrain> floorDrains,
             List<ThWRainPipe> rainPipes,
             List<ThWCondensePipe> condensePipes,
@@ -49,7 +49,7 @@ namespace ThMEPWSS.Pipe.Service
             DevicePlatformRoom = new List<ThWDevicePlatformRoom>();
             DevicePlatformSpaces().ForEach(o => DevicePlatformRoom.AddRange(CreateDevicePlatformRooms(o.Item2)));
         }
-        private List<ThWDevicePlatformRoom> CreateDevicePlatformRooms(List<ThIfcSpace> devicePlatformSpaces)
+        private List<ThWDevicePlatformRoom> CreateDevicePlatformRooms(List<ThIfcRoom> devicePlatformSpaces)
         {
             var thDevicePlatformRoomlist = new List<ThWDevicePlatformRoom>();
 
@@ -69,12 +69,12 @@ namespace ThMEPWSS.Pipe.Service
             }
             return thDevicePlatformRoomlist;
         }
-        private List<Tuple<ThIfcSpace, List<ThIfcSpace>>> DevicePlatformSpaces()
+        private List<Tuple<ThIfcRoom, List<ThIfcRoom>>> DevicePlatformSpaces()
         {
-            var PlatformSpaces = new List<Tuple<ThIfcSpace, List<ThIfcSpace>>>();
+            var PlatformSpaces = new List<Tuple<ThIfcRoom, List<ThIfcRoom>>>();
             var BalconySpaces = Spaces.Where(m => m.Tags.Where(n => n.Contains("阳台")).Any()).ToList();
 
-            var spacePredicateService = new ThSpaceSpatialPredicateService(Spaces);
+            var spacePredicateService = new ThRoomSpatialPredicateService(Spaces);
 
             foreach (var BalconySpace in BalconySpaces)
             {
@@ -93,7 +93,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             return PlatformSpaces;
         }
-        private double GetSpaceArea(ThIfcSpace thIfcSpace)
+        private double GetSpaceArea(ThIfcRoom thIfcSpace)
         {
             return thIfcSpace.Boundary.Area / (1000 * 1000);
         }

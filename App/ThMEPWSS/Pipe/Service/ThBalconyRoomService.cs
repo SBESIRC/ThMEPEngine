@@ -10,13 +10,13 @@ namespace ThMEPWSS.Pipe.Service
     public class ThBalconyRoomService
     {
         public List<ThWBalconyRoom> BalconyRooms { get; private set; }
-        private List<ThIfcSpace> Spaces { get; set; }
+        private List<ThIfcRoom> Spaces { get; set; }
         private List<ThWFloorDrain> FloorDrains { get; set; }
         private List<ThWWashingMachine> Washmachines { get; set; }
         private List<ThWRainPipe> RainPipes { get; set; }
         private List<ThWBasin> Basintools { get; set; }
         private ThBalconyRoomService(
-            List<ThIfcSpace> spaces,
+            List<ThIfcRoom> spaces,
             List<ThWWashingMachine> washmachines,
             List<ThWFloorDrain> floorDrains,
             List<ThWRainPipe> rainPipes,
@@ -29,7 +29,7 @@ namespace ThMEPWSS.Pipe.Service
             Washmachines = washmachines;
         }
         public static List<ThWBalconyRoom> Build(
-            List<ThIfcSpace> spaces,
+            List<ThIfcRoom> spaces,
             List<ThWWashingMachine> washmachines,
             List<ThWFloorDrain> floorDrains,
             List<ThWRainPipe> rainPipes,
@@ -44,7 +44,7 @@ namespace ThMEPWSS.Pipe.Service
             BalconyRooms = new List<ThWBalconyRoom>();
             BalconySpaces().ForEach(o => BalconyRooms.Add(CreateBalconyRooms(o)));
         }
-        private ThWBalconyRoom CreateBalconyRooms(ThIfcSpace balconySpace)
+        private ThWBalconyRoom CreateBalconyRooms(ThIfcRoom balconySpace)
         {
             ThWBalconyRoom thBalconyRoom = new ThWBalconyRoom();
             thBalconyRoom.Boundary = balconySpace.Boundary;
@@ -66,7 +66,7 @@ namespace ThMEPWSS.Pipe.Service
 
             return thBalconyRoom;
         }
-        private static List<ThWRainPipe> FindRainPipes(List<ThWRainPipe> pipes, ThIfcSpace space)
+        private static List<ThWRainPipe> FindRainPipes(List<ThWRainPipe> pipes, ThIfcRoom space)
         {
             var rainPipes = new List<ThWRainPipe>();
             foreach (var pipe in pipes)
@@ -80,7 +80,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             return rainPipes;
         }
-        private List<ThIfcSpace> BalconySpaces()
+        private List<ThIfcRoom> BalconySpaces()
         {
             return Spaces.Where(m => m.Tags.Where(n => n.Contains("阳台")).Any()).ToList();
         }

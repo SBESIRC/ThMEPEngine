@@ -13,7 +13,7 @@ namespace ThMEPWSS.Pipe.Service
     public class ThToiletFloorDrainService
     {
         private List<ThWFloorDrain> FloorDrainList { get; set; }
-        private ThIfcSpace ToiletSpace { get; set; }
+        private ThIfcRoom ToiletSpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         /// <summary>
         /// 找到的坐便器
@@ -26,7 +26,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         private ThToiletFloorDrainService(
             List<ThWFloorDrain> floordrainList,
-            ThIfcSpace toiletSpace,
+            ThIfcRoom toiletSpace,
             ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
             FloorDrainList = floordrainList;
@@ -42,7 +42,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static ThToiletFloorDrainService Find(
             List<ThWFloorDrain> floordrains,
-            ThIfcSpace toiletSpace,
+            ThIfcRoom toiletSpace,
             ThCADCoreNTSSpatialIndex floordrainSpatialIndex = null)
         {
             var instance = new ThToiletFloorDrainService(floordrains, toiletSpace, floordrainSpatialIndex);

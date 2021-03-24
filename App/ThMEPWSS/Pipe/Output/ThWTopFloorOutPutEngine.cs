@@ -19,7 +19,7 @@ namespace ThMEPWSS.Pipe.Output
         {
             parameters0.standardEntity.Add(new Circle() {Center= parameters0.baseCenter2[0] ,Radius=0.01});
             parameters0.divideLines = FloorEngines.TopFloors[0].DivisionLines;
-            parameters0.pboundary = FloorEngines.TopFloors[0].Space.Boundary as Polyline;
+            parameters0.pboundary = FloorEngines.TopFloors[0].Boundary as Polyline;
             var thWPipeOutputFunction=new ThWPipeOutputFunction();
             AddCompositeRooms(FloorEngines,  parameters0,  acadDatabase,thWPipeOutputFunction, W_DRAI_EQPM,W_DRAI_FLDR);
             AddCompositeCompanyRooms(FloorEngines, parameters0, acadDatabase, thWPipeOutputFunction, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);
@@ -74,7 +74,7 @@ namespace ThMEPWSS.Pipe.Output
                     }
                     var parameters = new ThWTopBalconyParameters();
                     ThWPipeOutputFunction.GetListFloorDrain(compositeBalcony, parameters).ForEach(o => parameters.bfloordrain.Add(o));                
-                    parameters.bboundary = compositeBalcony.Balcony.Space.Boundary as Polyline;
+                    parameters.bboundary = compositeBalcony.Balcony.Boundary as Polyline;
                     if (compositeBalcony.Balcony.RainPipes.Count > 0)
                     {
                         if (compositeBalcony.DevicePlatforms.Count == 0)
@@ -91,7 +91,7 @@ namespace ThMEPWSS.Pipe.Output
                                 int num = 0;
                                 foreach(var room in compositeBalcony.DevicePlatforms)
                                 {
-                                    if(GeomUtils.PtInLoop(room.Space.Boundary as Polyline, compositeBalcony.Balcony.RainPipes[0].Outline.GetCenter()))
+                                    if(GeomUtils.PtInLoop(room.Boundary as Polyline, compositeBalcony.Balcony.RainPipes[0].Outline.GetCenter()))
                                     {
                                         num++;
                                         break;
@@ -134,7 +134,7 @@ namespace ThMEPWSS.Pipe.Output
                     {
                         if (compositeBalcony.DevicePlatforms.Count < 2)
                         {
-                            parameters.device = compositeBalcony.DevicePlatforms[0].Space.Boundary.Clone() as Polyline;
+                            parameters.device = compositeBalcony.DevicePlatforms[0].Boundary.Clone() as Polyline;
                             parameters.device.Closed = true;
                         }
                         else
@@ -144,16 +144,16 @@ namespace ThMEPWSS.Pipe.Output
                             {
                                 for (int i = 0; i < compositeBalcony.DevicePlatforms.Count; i++)
                                 {                                   
-                                        if ((compositeBalcony.DevicePlatforms[i].Space.Boundary as Polyline).GetCenter().DistanceTo(parameters.washingmachine.Position) < dst)
+                                        if ((compositeBalcony.DevicePlatforms[i].Boundary as Polyline).GetCenter().DistanceTo(parameters.washingmachine.Position) < dst)
                                         {
-                                            dst = (compositeBalcony.DevicePlatforms[i].Space.Boundary as Polyline).GetCenter().DistanceTo(parameters.washingmachine.Position);
-                                            parameters.device = compositeBalcony.DevicePlatforms[i].Space.Boundary.Clone() as Polyline;
+                                            dst = (compositeBalcony.DevicePlatforms[i].Boundary as Polyline).GetCenter().DistanceTo(parameters.washingmachine.Position);
+                                            parameters.device = compositeBalcony.DevicePlatforms[i].Boundary.Clone() as Polyline;
                                         }                                                                    
                                 }
                             }
                             else
                             {
-                                parameters.device = compositeBalcony.DevicePlatforms[0].Space.Boundary.Clone() as Polyline;
+                                parameters.device = compositeBalcony.DevicePlatforms[0].Boundary.Clone() as Polyline;
                             }
                             parameters.device.Closed = true;
                         }
@@ -163,7 +163,7 @@ namespace ThMEPWSS.Pipe.Output
                         Polyline temp = parameters.device;
                         foreach(var device in compositeBalcony.DevicePlatforms)
                         {
-                            var deviceLine = device.Space.Boundary as Polyline;
+                            var deviceLine = device.Boundary as Polyline;
                             if ((temp.GetCenter().DistanceTo(deviceLine.GetCenter()) > ThWPipeCommon.MAX_DEVICE_TO_DEVICE) && (temp.GetCenter().DistanceTo(parameters.bboundary.GetCenter()) < ThWPipeCommon.MAX_DEVICE_TO_BALCONY))
                             {
                                 parameters.device_other = deviceLine;
@@ -318,7 +318,7 @@ namespace ThMEPWSS.Pipe.Output
         private static void InputToiletParameters(ThWCompositeRoom composite,ThWTopCompositeParameters parameters,ThWTopParameters parameters0)
         {
 
-            parameters.boundary1 = composite.Toilet.Space.Boundary as Polyline;
+            parameters.boundary1 = composite.Toilet.Boundary as Polyline;
             if (composite.Toilet.DrainageWells.Count > 1)
             {
                 var well = composite.Toilet.DrainageWells[0].Boundary as Polyline;

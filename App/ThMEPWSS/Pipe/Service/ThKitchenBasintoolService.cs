@@ -16,11 +16,11 @@ namespace ThMEPWSS.Pipe.Service
         /// </summary>
         public List<ThWBasin> Basintools { get; private set; }
         private List<ThWBasin> BasintoolList { get; set; }
-        private ThIfcSpace KitchenSpace { get; set; }
+        private ThIfcRoom KitchenSpace { get; set; }
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
         private ThKitchenBasintoolService(
             List<ThWBasin> basintoolList,
-            ThIfcSpace kitchenSpace,
+            ThIfcRoom kitchenSpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex)
         {
             BasintoolList = basintoolList;
@@ -43,7 +43,7 @@ namespace ThMEPWSS.Pipe.Service
         /// <returns></returns>
         public static ThKitchenBasintoolService Find(
             List<ThWBasin> basintoolList,
-            ThIfcSpace kitchenSpace,
+            ThIfcRoom kitchenSpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex = null)
         {
             var instance = new ThKitchenBasintoolService(basintoolList, kitchenSpace, basintoolSpatialIndex);

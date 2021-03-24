@@ -12,11 +12,11 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWCondensePipe> CondensePipes { get; private set; }
         private List<ThWCondensePipe> CondensePipeList { get; set; }
-        private ThIfcSpace DevicePlatformSpace { get; set; }
+        private ThIfcRoom DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex CondensePipeSpatialIndex { get; set; }
         private ThDevicePlatformCondensePipeService(
             List<ThWCondensePipe> condensePipeList,
-            ThIfcSpace devicePlatformSpace,
+            ThIfcRoom devicePlatformSpace,
             ThCADCoreNTSSpatialIndex condensePipeSpatialIndex)
         {
             CondensePipeList = condensePipeList;
@@ -31,7 +31,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static ThDevicePlatformCondensePipeService Find(
             List<ThWCondensePipe> condensePipeList,
-            ThIfcSpace devicePlatformSpace,
+            ThIfcRoom devicePlatformSpace,
             ThCADCoreNTSSpatialIndex condensePipeSpatialIndex = null)
         {
             var instance = new ThDevicePlatformCondensePipeService(condensePipeList, devicePlatformSpace, condensePipeSpatialIndex);

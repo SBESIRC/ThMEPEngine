@@ -41,10 +41,10 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
         public List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
-        public List<ThIfcSpace> DeviceSpaces { get; set; }
-        public List<ThIfcSpace> RoofSpaces { get; set; }
-        public List<ThIfcSpace> StandardSpaces { get; set; }
-        public List<ThIfcSpace> NonStandardSpaces { get; set; }
+        public List<ThIfcRoom> DeviceSpaces { get; set; }
+        public List<ThIfcRoom> RoofSpaces { get; set; }
+        public List<ThIfcRoom> StandardSpaces { get; set; }
+        public List<ThIfcRoom> NonStandardSpaces { get; set; }
         public List<BlockReference> blockCollection { get; set; }
         public ThWRoofTopFloorRecognitionEngine()
         {
@@ -66,7 +66,7 @@ namespace ThMEPWSS.Pipe.Engine
             PositionTags = new List<Curve>();
             AllObstacles = new List<Curve>();
             Layers = new List<string>();
-            Spaces = new List<ThIfcSpace>();
+            Spaces = new List<ThIfcRoom>();
         }
         public override void Recognize(Database database, Point3dCollection pts)
         {
@@ -93,9 +93,9 @@ namespace ThMEPWSS.Pipe.Engine
                 Rooms = ThRoofDeviceFloorRoomService.Build(DeviceSpaces, GravityWaterBuckets, SideEntryWaterBuckets, RoofRainPipes, baseCircles);
             }
         }
-        public static List<ThIfcSpace> GetBaseCircles(List<BlockReference> blocks)
+        public static List<ThIfcRoom> GetBaseCircles(List<BlockReference> blocks)
         {
-            var FloorSpaces = new List<ThIfcSpace>();
+            var FloorSpaces = new List<ThIfcRoom>();
             foreach (BlockReference block in blocks)
             {
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("小屋面"))
@@ -108,7 +108,7 @@ namespace ThMEPWSS.Pipe.Engine
                         if (s1.GetType().Name.Contains("Circle"))
                         {
                             Circle baseCircle = s1 as Circle;
-                            FloorSpaces.Add(new ThIfcSpace { Boundary = baseCircle });
+                            FloorSpaces.Add(new ThIfcRoom { Boundary = baseCircle });
                         }
                     }
                 }

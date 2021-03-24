@@ -9,22 +9,22 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThKitchenDrainwellService: ThDrainwellService
     {
-        private ThIfcSpace KitchenSpace;
+        private ThIfcRoom KitchenSpace;
         public ThKitchenDrainwellService():base()
         {
-            Pypes = new List<ThIfcSpace>();
+            Pypes = new List<ThIfcRoom>();
         }
         private ThKitchenDrainwellService(
-            List<ThIfcSpace> spaces, 
-            ThIfcSpace kitchenSpace, 
+            List<ThIfcRoom> spaces, 
+            ThIfcRoom kitchenSpace, 
             ThCADCoreNTSSpatialIndex spaceSpatialIndex):base(spaces, spaceSpatialIndex)
         {
-            Pypes = new List<ThIfcSpace>();
+            Pypes = new List<ThIfcRoom>();
             KitchenSpace = kitchenSpace;
         }
         public static ThKitchenDrainwellService Find(
-            List<ThIfcSpace> spaces, 
-            ThIfcSpace kitchenSpace, 
+            List<ThIfcRoom> spaces, 
+            ThIfcRoom kitchenSpace, 
             ThCADCoreNTSSpatialIndex spaceSpatialIndex=null)
         {
             var instance = new ThKitchenDrainwellService(spaces, kitchenSpace, spaceSpatialIndex);
@@ -72,18 +72,18 @@ namespace ThMEPWSS.Pipe.Service
                 }          
             }
         }
-        private List<ThIfcSpace> FindDrainwells()
+        private List<ThIfcRoom> FindDrainwells()
         {
-            List<ThIfcSpace> drainwellSpaces = FindNeighbourToiletDrainwells();
+            List<ThIfcRoom> drainwellSpaces = FindNeighbourToiletDrainwells();
             if (drainwellSpaces.Count==0)
             {
                 drainwellSpaces = FindNeighbourBalconyDrainwells();
             }
             return drainwellSpaces;
         }
-        private List<ThIfcSpace> FindNeighbourToiletDrainwells()
+        private List<ThIfcRoom> FindNeighbourToiletDrainwells()
         {
-            List<ThIfcSpace> drainwellSpaces = new List<ThIfcSpace>();
+            List<ThIfcRoom> drainwellSpaces = new List<ThIfcRoom>();
             var neibourToilets = FindNeighbouringToiletWithDrainwell(KitchenSpace, ThWPipeCommon.KITCHEN_BUFFER_DISTANCE);
             if (neibourToilets.Count > 1)
             {
@@ -110,9 +110,9 @@ namespace ThMEPWSS.Pipe.Service
             }
             return drainwellSpaces;
         }
-        private List<ThIfcSpace> FindNeighbourBalconyDrainwells()
+        private List<ThIfcRoom> FindNeighbourBalconyDrainwells()
         {
-            List<ThIfcSpace> drainwellSpaces = new List<ThIfcSpace>();
+            List<ThIfcRoom> drainwellSpaces = new List<ThIfcRoom>();
             var neibourBalconies = FindNeighbouringBalconyWithDrainwell(KitchenSpace, ThWPipeCommon.KITCHEN_BUFFER_DISTANCE);
             if (neibourBalconies.Count > 1)
             {
@@ -139,22 +139,22 @@ namespace ThMEPWSS.Pipe.Service
             }
             return drainwellSpaces;
         }
-        private bool IsValidSpaceArea(ThIfcSpace thIfcSpace)
+        private bool IsValidSpaceArea(ThIfcRoom thIfcSpace)
         {
             double area= GetSpaceArea(thIfcSpace);
             return area <= ThWPipeCommon.WELLS_MAX_AREA;            
         }
-        private double GetSpaceArea(ThIfcSpace thIfcSpace)
+        private double GetSpaceArea(ThIfcRoom thIfcSpace)
         {
             return thIfcSpace.Boundary.Area / (1000 * 1000);//mm单位
         }
-        private List<ThIfcSpace> FindNeighbourDrainwell(ThIfcSpace space, double bufferDis)
+        private List<ThIfcRoom> FindNeighbourDrainwell(ThIfcRoom space, double bufferDis)
         {
             //空间轮廓往外括500
             var bufferObjs = ThCADCoreNTSOperation.Buffer(space.Boundary as Polyline, bufferDis);
             if (bufferObjs.Count == 0)
             {
-                return new List<ThIfcSpace>();
+                return new List<ThIfcRoom>();
             }
             var crossObjs = SpaceSpatialIndex.SelectCrossingPolygon(bufferObjs[0] as Polyline);
             //获取偏移后，能框选到的空间

@@ -19,7 +19,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWGravityWaterBucket> gravityWaterBuckets { get; set; }
         public List<ThWSideEntryWaterBucket> sideEntryWaterBuckets { get; set; }
         public List<ThWRoofRainPipe> roofRainPipes { get; set; }
-        public List<ThIfcSpace> RoofSpaces { get; set; }
+        public List<ThIfcRoom> RoofSpaces { get; set; }
         public List<BlockReference> blockCollection { get; set; }
         public ThWRoofFloorRecognitionEngine()
         {
@@ -34,9 +34,9 @@ namespace ThMEPWSS.Pipe.Engine
                 Rooms = ThRoofFloorRoomService.Build(RoofSpaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);
             }
         }    
-        private static List<ThIfcSpace> GetBaseCircles(List<BlockReference> blocks)
+        private static List<ThIfcRoom> GetBaseCircles(List<BlockReference> blocks)
         {
-            var FloorSpaces = new List<ThIfcSpace>();
+            var FloorSpaces = new List<ThIfcRoom>();
             foreach (BlockReference block in blocks)
             {
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("大屋面"))
@@ -49,7 +49,7 @@ namespace ThMEPWSS.Pipe.Engine
                         if (s1.GetType().Name.Contains("Circle"))
                         {
                             Circle baseCircle = s1 as Circle;
-                            FloorSpaces.Add(new ThIfcSpace { Boundary = baseCircle });
+                            FloorSpaces.Add(new ThIfcRoom { Boundary = baseCircle });
                         }
                     }
                 }

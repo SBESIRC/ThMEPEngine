@@ -11,11 +11,11 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThRoofFloorSideEntryWaterBucketService
     {
-        private ThIfcSpace Space { get; set; }
+        private ThIfcRoom Space { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private List<ThWSideEntryWaterBucket> Buckets { get; set; }
         private ThRoofFloorSideEntryWaterBucketService(
-            ThIfcSpace space,
+            ThIfcRoom space,
             List<ThWSideEntryWaterBucket> buckets)
         {
             Space = space;
@@ -26,7 +26,7 @@ namespace ThMEPWSS.Pipe.Service
         }
 
         public static List<ThWSideEntryWaterBucket> Find(
-            ThIfcSpace space,
+            ThIfcRoom space,
             List<ThWSideEntryWaterBucket> buckets)
         {
             var service = new ThRoofFloorSideEntryWaterBucketService(space, buckets);

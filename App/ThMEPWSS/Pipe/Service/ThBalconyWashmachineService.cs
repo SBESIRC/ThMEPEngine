@@ -12,11 +12,11 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWWashingMachine> Washmachines { get; private set; }
         private List<ThWWashingMachine> WashmachineList { get; set; }
-        private ThIfcSpace BalconySpace { get; set; }
+        private ThIfcRoom BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex WashmachineSpatialIndex { get; set; }
         private ThBalconyWashMachineService(
            List<ThWWashingMachine> washmachineList,
-           ThIfcSpace balconySpace,
+           ThIfcRoom balconySpace,
            ThCADCoreNTSSpatialIndex washmachineSpatialIndex)
         {
             WashmachineList = washmachineList;
@@ -31,7 +31,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static ThBalconyWashMachineService Find(
          List<ThWWashingMachine> washmachineList,
-         ThIfcSpace balconySpace,
+         ThIfcRoom balconySpace,
          ThCADCoreNTSSpatialIndex washmachineSpatialIndex = null)
         {
             var instance = new ThBalconyWashMachineService(washmachineList, balconySpace, washmachineSpatialIndex);

@@ -14,9 +14,9 @@ namespace ThMEPWSS.Pipe.Engine
     public class ThWTopFloorRecognitionEngine 
     {
         public List<ThWTopFloorRoom> Rooms { get; set; }
-        public List<ThIfcSpace> Spaces { get; set; }
-        public List<ThIfcSpace> StandardSpaces { get; set; }
-        public List<ThIfcSpace> NonStandardSpaces { get; set; }
+        public List<ThIfcRoom> Spaces { get; set; }
+        public List<ThIfcRoom> StandardSpaces { get; set; }
+        public List<ThIfcRoom> NonStandardSpaces { get; set; }
         public List<BlockReference> blockCollection { get; set; }
         public List<ThWRainPipe> rainPipes { get; set; }
         public List<ThWRoofRainPipe> roofRainPipes { get; set; }
@@ -42,7 +42,7 @@ namespace ThMEPWSS.Pipe.Engine
                 Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);        
             }
         }
-        public static Point3dCollection GetBoundaryVertices(List<ThIfcSpace> StandardSpaces)
+        public static Point3dCollection GetBoundaryVertices(List<ThIfcRoom> StandardSpaces)
         {
             var Vertices = new Point3dCollection();
             var minpt = new Point3d(double.MinValue,0,0);
@@ -67,9 +67,9 @@ namespace ThMEPWSS.Pipe.Engine
             Vertices.Add(new Point3d(maxpt.X, minpt.Y, 0));
             return Vertices;
         }
-        public static List<ThIfcSpace> GetBaseCircles(List<BlockReference> blocks)
+        public static List<ThIfcRoom> GetBaseCircles(List<BlockReference> blocks)
         {
-            var FloorSpaces = new List<ThIfcSpace>();
+            var FloorSpaces = new List<ThIfcRoom>();
             foreach (BlockReference block in blocks)
             {
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("标准层"))
@@ -82,7 +82,7 @@ namespace ThMEPWSS.Pipe.Engine
                         if (s1.GetType().Name.Contains("Circle"))
                         {
                             Circle baseCircle = s1 as Circle;
-                            FloorSpaces.Add(new ThIfcSpace { Boundary = baseCircle });
+                            FloorSpaces.Add(new ThIfcRoom { Boundary = baseCircle });
                         }
                     }
                 }
@@ -98,7 +98,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return blockCurves;
         }
-        private Tuple<List<ThWCompositeRoom>, List<ThWCompositeBalconyRoom>>  Getcompositeroom(Database database, Point3dCollection pts,List<ThIfcSpace> spaces)
+        private Tuple<List<ThWCompositeRoom>, List<ThWCompositeBalconyRoom>>  Getcompositeroom(Database database, Point3dCollection pts,List<ThIfcRoom> spaces)
         {
             using (ThWCompositeRoomRecognitionEngine compositeRoomRecognitionEngine = new ThWCompositeRoomRecognitionEngine())
             {
@@ -114,7 +114,7 @@ namespace ThMEPWSS.Pipe.Engine
                 return Tuple.Create(compositeRoomRecognitionEngine.Rooms, compositeRoomRecognitionEngine.FloorDrainRooms);                  
             }
         }
-         private List<Line> GetLines(List<BlockReference> blocks, List<ThIfcSpace> spaces)
+         private List<Line> GetLines(List<BlockReference> blocks, List<ThIfcRoom> spaces)
         {
             var DivisionLines = new List<Line>();
             foreach (BlockReference block in blocks)
@@ -137,7 +137,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return GetColumnLines(DivisionLines, spaces);
         }
-        private static List<Line> GetColumnLines(List<Line> Columns, List<ThIfcSpace> spaces)
+        private static List<Line> GetColumnLines(List<Line> Columns, List<ThIfcRoom> spaces)
         {
             var colunmnLines = new List<Line>();
             foreach(Line column in Columns)
@@ -149,7 +149,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return colunmnLines;
         }
-        private static double GetMaxPointX(List<ThIfcSpace> spaces)
+        private static double GetMaxPointX(List<ThIfcRoom> spaces)
         {
             double baseX = double.MinValue;
             var maxpoint = Point3d.Origin;
@@ -163,7 +163,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
             return baseX;
         }
-        private static double GetMinPointX(List<ThIfcSpace> spaces)
+        private static double GetMinPointX(List<ThIfcRoom> spaces)
         {
             double baseX = double.MaxValue;
             var minpoint = Point3d.Origin;

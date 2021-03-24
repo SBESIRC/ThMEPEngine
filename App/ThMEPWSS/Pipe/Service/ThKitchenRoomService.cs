@@ -11,7 +11,7 @@ namespace ThMEPWSS.Pipe.Service
     public class ThKitchenRoomService 
     {
         public List<ThWKitchenRoom> KitchenContainers { get; set; }
-        private List<ThIfcSpace> Spaces { get; set; }
+        private List<ThIfcRoom> Spaces { get; set; }
         private List<ThWBasin> Basintools { get; set; }
         private List<ThWRainPipe> RainPipes { get; set; }
         private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
@@ -21,7 +21,7 @@ namespace ThMEPWSS.Pipe.Service
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
 
         private ThKitchenRoomService(            
-            List<ThIfcSpace> spaces,
+            List<ThIfcRoom> spaces,
             List<ThWBasin> basintools,
             List<ThWRainPipe> rainPipes,
             List<ThWRoofRainPipe> roofRainPipes,
@@ -37,7 +37,7 @@ namespace ThMEPWSS.Pipe.Service
             KitchenContainers = new List<ThWKitchenRoom>();
             BuildSpatialIndex();
         }
-        public static List<ThWKitchenRoom> Build(List<ThIfcSpace> spaces, List<ThWBasin> basintools, List<ThWRainPipe> rainPipes, List<ThWRoofRainPipe> roofRainPipes, List<ThWCondensePipe> condensePipes, List<ThWFloorDrain> floorDrains)
+        public static List<ThWKitchenRoom> Build(List<ThIfcRoom> spaces, List<ThWBasin> basintools, List<ThWRainPipe> rainPipes, List<ThWRoofRainPipe> roofRainPipes, List<ThWCondensePipe> condensePipes, List<ThWFloorDrain> floorDrains)
         {
             var kitchenContainerService = new ThKitchenRoomService(spaces, basintools, rainPipes, roofRainPipes, condensePipes, floorDrains);           
             kitchenContainerService.Build();
@@ -54,7 +54,7 @@ namespace ThMEPWSS.Pipe.Service
                 KitchenContainers.Add(CreateKitchenContainer(o));
             });
         }
-        private ThWKitchenRoom CreateKitchenContainer(ThIfcSpace kitchenSpace)
+        private ThWKitchenRoom CreateKitchenContainer(ThIfcRoom kitchenSpace)
         {
             ThWKitchenRoom thKitchenContainer = new ThWKitchenRoom();
             thKitchenContainer.Boundary = kitchenSpace.Boundary;
@@ -69,7 +69,7 @@ namespace ThMEPWSS.Pipe.Service
             thKitchenContainer.FloorDrains=GetFloorDrain(FloorDrains, kitchenSpace);
             return thKitchenContainer;
         }
-        private static List<ThWFloorDrain> GetFloorDrain(List<ThWFloorDrain> FloorDrains, ThIfcSpace kitchenSpace)
+        private static List<ThWFloorDrain> GetFloorDrain(List<ThWFloorDrain> FloorDrains, ThIfcRoom kitchenSpace)
         {
             var floorDrainList = new List<ThWFloorDrain>();
             foreach (var FloorDrain in FloorDrains)
@@ -83,7 +83,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             return floorDrainList;
         }
-        private static List<ThWCondensePipe> FindCondensePipes(List<ThWCondensePipe> pipes, ThIfcSpace space)
+        private static List<ThWCondensePipe> FindCondensePipes(List<ThWCondensePipe> pipes, ThIfcRoom space)
         {
             var condensePipes = new List<ThWCondensePipe>();
             foreach (var pipe in pipes)
@@ -97,7 +97,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             return condensePipes;
         }
-        private List<ThIfcSpace> GetKitchenSpaces()
+        private List<ThIfcRoom> GetKitchenSpaces()
         {
             return Spaces.Where(m => m.Tags.Where(n => n.Contains("厨房")).Any()).ToList();
         }
@@ -107,7 +107,7 @@ namespace ThMEPWSS.Pipe.Service
             Spaces.ForEach(o => spaceObjs.Add(o.Boundary));
             SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(spaceObjs);     
         }
-        private static List<ThWRainPipe> FindRainPipes(List<ThWRainPipe> pipes, ThIfcSpace space)
+        private static List<ThWRainPipe> FindRainPipes(List<ThWRainPipe> pipes, ThIfcRoom space)
         {
             var rainPipes = new List<ThWRainPipe>();
             foreach (var pipe in pipes)
@@ -121,7 +121,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             return rainPipes;
         }
-        private static List<ThWRoofRainPipe> FindRoofRainPipes(List<ThWRoofRainPipe> pipes, ThIfcSpace space)
+        private static List<ThWRoofRainPipe> FindRoofRainPipes(List<ThWRoofRainPipe> pipes, ThIfcRoom space)
         {
             var roofRainPipes = new List<ThWRoofRainPipe>();
             foreach (var pipe in pipes)

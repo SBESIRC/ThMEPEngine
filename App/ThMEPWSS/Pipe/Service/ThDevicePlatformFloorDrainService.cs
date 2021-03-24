@@ -12,13 +12,13 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWFloorDrain> FloorDrains { get; private set; }
         private List<ThWFloorDrain> FloorDrainList { get; set; }
-        private ThIfcSpace DevicePlatformSpace { get; set; }
+        private ThIfcRoom DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         /// <summary>
 
         private ThDevicePlatformFloorDrainService(
           List<ThWFloorDrain> floordrainList,
-          ThIfcSpace devicePlatformSpace,
+          ThIfcRoom devicePlatformSpace,
           ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
             FloorDrainList = floordrainList;
@@ -33,7 +33,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static ThDevicePlatformFloorDrainService Find(
          List<ThWFloorDrain> floordrains,
-         ThIfcSpace devicePlatformSpace,
+         ThIfcRoom devicePlatformSpace,
          ThCADCoreNTSSpatialIndex floordrainSpatialIndex = null)
         {
             var instance = new ThDevicePlatformFloorDrainService(floordrains, devicePlatformSpace, floordrainSpatialIndex);

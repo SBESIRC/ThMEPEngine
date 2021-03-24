@@ -6,16 +6,16 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThRoofFloorRoomService
     {
-        private List<ThIfcSpace> BaseCircles { get; set; }
-        private List<ThIfcSpace> Spaces { get; set; }
+        private List<ThIfcRoom> BaseCircles { get; set; }
+        private List<ThIfcRoom> Spaces { get; set; }
         private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         private List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
         private List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
         public List<ThWRoofFloorRoom> Rooms { get; private set; }
 
         private ThRoofFloorRoomService(
-            List<ThIfcSpace> baseCircles,
-            List<ThIfcSpace> spaces,
+            List<ThIfcRoom> baseCircles,
+            List<ThIfcRoom> spaces,
             List<ThWGravityWaterBucket> gravityWaterBuckets,
             List<ThWSideEntryWaterBucket> sideEntryWaterBuckets,
             List<ThWRoofRainPipe> roofRainPipes)
@@ -27,7 +27,7 @@ namespace ThMEPWSS.Pipe.Service
             SideEntryWaterBuckets = sideEntryWaterBuckets;
             Rooms = new List<ThWRoofFloorRoom>();
         }
-        public static List<ThWRoofFloorRoom> Build(List<ThIfcSpace> spaces, List<ThWGravityWaterBucket> gravityWaterBuckets, List<ThWSideEntryWaterBucket> sideEntryWaterBuckets, List<ThWRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
+        public static List<ThWRoofFloorRoom> Build(List<ThIfcRoom> spaces, List<ThWGravityWaterBucket> gravityWaterBuckets, List<ThWSideEntryWaterBucket> sideEntryWaterBuckets, List<ThWRoofRainPipe> roofRainPipes, List<ThIfcRoom> baseCircles)
         {
             var roofFloorContainerService = new ThRoofFloorRoomService(baseCircles, spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes);
             roofFloorContainerService.Build();
@@ -42,7 +42,7 @@ namespace ThMEPWSS.Pipe.Service
                 Rooms.Add(CreateRoofFloorContainer(o));
             });
         }
-        private ThWRoofFloorRoom CreateRoofFloorContainer(ThIfcSpace roofFloorSpace)
+        private ThWRoofFloorRoom CreateRoofFloorContainer(ThIfcRoom roofFloorSpace)
         {
             return new ThWRoofFloorRoom()
             {

@@ -8,20 +8,20 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThToiletDrainwellService : ThDrainwellService
     {       
-        private ThIfcSpace ToiletSpace;       
+        private ThIfcRoom ToiletSpace;       
         private ThToiletDrainwellService() : base()
         {
         }
         private ThToiletDrainwellService(
-            List<ThIfcSpace> spaces, 
-            ThIfcSpace toiletSpace, 
+            List<ThIfcRoom> spaces, 
+            ThIfcRoom toiletSpace, 
             ThCADCoreNTSSpatialIndex spaceSpatialIndex):base(spaces, spaceSpatialIndex)
         {
             ToiletSpace = toiletSpace;
         }
         public static ThToiletDrainwellService Find(
-            List<ThIfcSpace> spaces, 
-            ThIfcSpace toiletSpace, 
+            List<ThIfcRoom> spaces, 
+            ThIfcRoom toiletSpace, 
             ThCADCoreNTSSpatialIndex spaceSpatialIndex=null)
         {
             var instance = new ThToiletDrainwellService(spaces, toiletSpace, spaceSpatialIndex);
@@ -61,13 +61,13 @@ namespace ThMEPWSS.Pipe.Service
                 }
             }
         }
-        private List<ThIfcSpace> FindNeighbourDrainwell(ThIfcSpace space, double bufferDis)
+        private List<ThIfcRoom> FindNeighbourDrainwell(ThIfcRoom space, double bufferDis)
         {
             //空间轮廓往外括500
             var bufferObjs = ThCADCoreNTSOperation.Buffer(space.Boundary as Polyline, bufferDis);
             if (bufferObjs.Count == 0)
             {
-                return new List<ThIfcSpace>();
+                return new List<ThIfcRoom>();
             }
             var crossObjs = SpaceSpatialIndex.SelectCrossingPolygon(bufferObjs[0] as Polyline);
             //获取偏移后，能框选到的空间

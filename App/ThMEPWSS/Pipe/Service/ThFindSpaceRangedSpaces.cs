@@ -8,12 +8,12 @@ namespace ThMEPWSS.Pipe.Service
 {
     public class ThFindSpaceRangedSpaces
     {
-        public List<ThIfcSpace> SearchSpaces = new List<ThIfcSpace>();
-        private ThIfcSpace Space { get; set; }
-        private List<ThIfcSpace> NeibourSpaces { get; set; }
+        public List<ThIfcRoom> SearchSpaces = new List<ThIfcRoom>();
+        private ThIfcRoom Space { get; set; }
+        private List<ThIfcRoom> NeibourSpaces { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private double ClosedDis { get; set; }
-        private ThFindSpaceRangedSpaces(ThIfcSpace space,List<ThIfcSpace> neibourSpaces, double closedDis=0.0)
+        private ThFindSpaceRangedSpaces(ThIfcRoom space,List<ThIfcRoom> neibourSpaces, double closedDis=0.0)
         {
             Space = space;
             ClosedDis = closedDis;
@@ -22,7 +22,7 @@ namespace ThMEPWSS.Pipe.Service
             NeibourSpaces.ForEach(o => dbObjs.Add(o.Boundary));
             SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
         }
-        public static ThFindSpaceRangedSpaces Find(ThIfcSpace space, List<ThIfcSpace> neibourSpaces,double closedDis=0.0)
+        public static ThFindSpaceRangedSpaces Find(ThIfcRoom space, List<ThIfcRoom> neibourSpaces,double closedDis=0.0)
         {
             var instance = new ThFindSpaceRangedSpaces(space, neibourSpaces, closedDis);
             instance.Find();
@@ -30,13 +30,13 @@ namespace ThMEPWSS.Pipe.Service
         }
         private void Find()
         {
-            List<ThIfcSpace> results = new List<ThIfcSpace>();            
+            List<ThIfcRoom> results = new List<ThIfcRoom>();            
             var selObjs = SpatialIndex.SelectCrossingPolygon(Space.Boundary as Polyline);
             SearchSpaces.AddRange(NeibourSpaces.Where(o => selObjs.Contains(o.Boundary)));
             var outsideObjs = NeibourSpaces.Where(o => !selObjs.Contains(o.Boundary)).ToList();
             SearchSpaces.AddRange(outsideObjs.Where(o => IsCloseCurrentSpace(o)));
         }
-        private bool IsCloseCurrentSpace(ThIfcSpace neibourSpace)
+        private bool IsCloseCurrentSpace(ThIfcRoom neibourSpace)
         {
             double dis = neibourSpace.Boundary.Distance(Space.Boundary);
             return dis <= ClosedDis;

@@ -10,24 +10,24 @@ namespace ThMEPWSS.Pipe.Service
     public abstract class ThDrainwellService
     {
         public double ClosedDistance { get; set; } = 500.0;
-        public List<ThIfcSpace> Drainwells { get; set; }
-        public List<ThIfcSpace> Pypes { get; set; }
-        protected List<ThIfcSpace> Spaces { get; set; }
+        public List<ThIfcRoom> Drainwells { get; set; }
+        public List<ThIfcRoom> Pypes { get; set; }
+        protected List<ThIfcRoom> Spaces { get; set; }
         protected ThCADCoreNTSSpatialIndex SpaceSpatialIndex;
-        protected ThSpaceSpatialPredicateService SpacePredicateService { get; set; }
+        protected ThRoomSpatialPredicateService SpacePredicateService { get; set; }
         protected ThDrainwellService()
         {
-            Spaces = new List<ThIfcSpace>();
-            Drainwells = new List<ThIfcSpace>();
-            Pypes= new List<ThIfcSpace>();
-            SpacePredicateService = new ThSpaceSpatialPredicateService(Spaces);
+            Spaces = new List<ThIfcRoom>();
+            Drainwells = new List<ThIfcRoom>();
+            Pypes= new List<ThIfcRoom>();
+            SpacePredicateService = new ThRoomSpatialPredicateService(Spaces);
         }
-        protected ThDrainwellService(List<ThIfcSpace> spaces, 
+        protected ThDrainwellService(List<ThIfcRoom> spaces, 
             ThCADCoreNTSSpatialIndex spaceSpatialIndex=null)
         {
             Spaces = spaces;
-            Drainwells = new List<ThIfcSpace>();
-            Pypes = new List<ThIfcSpace>();
+            Drainwells = new List<ThIfcRoom>();
+            Pypes = new List<ThIfcRoom>();
             SpaceSpatialIndex = spaceSpatialIndex;
             if (SpaceSpatialIndex == null)
             {
@@ -35,20 +35,20 @@ namespace ThMEPWSS.Pipe.Service
                 Spaces.ForEach(o => dbObjs.Add(o.Boundary));
                 SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
-            SpacePredicateService = new ThSpaceSpatialPredicateService(Spaces);
+            SpacePredicateService = new ThRoomSpatialPredicateService(Spaces);
         }
         /// <summary>
         /// 找到空间相邻的且含有排水管井的阳台
         /// </summary>
         /// <param name="toiletSpace"></param>
         /// <returns></returns>
-        protected List<ThIfcSpace> FindNeighbouringBalconyWithDrainwell(ThIfcSpace space,double bufferDis)
+        protected List<ThIfcRoom> FindNeighbouringBalconyWithDrainwell(ThIfcRoom space,double bufferDis)
         {
             //空间轮廓往外括500
             var bufferObjs = ThCADCoreNTSOperation.Buffer(space.Boundary as Polyline, bufferDis);
             if (bufferObjs.Count == 0)
             {
-                return new List<ThIfcSpace>();
+                return new List<ThIfcRoom>();
             }           
 
             var crossObjs = SpaceSpatialIndex.SelectCrossingPolygon(bufferObjs[0] as Polyline);
@@ -66,7 +66,7 @@ namespace ThMEPWSS.Pipe.Service
         /// </summary>
         /// <param name="toiletSpace"></param>
         /// <returns></returns>
-        protected List<ThIfcSpace> FindNeighbouringToiletWithDrainwell(ThIfcSpace kitchenSpace, double bufferDis)
+        protected List<ThIfcRoom> FindNeighbouringToiletWithDrainwell(ThIfcRoom kitchenSpace, double bufferDis)
         {
             //空间轮廓往外括500
             var bufferObjs = ThCADCoreNTSOperation.Buffer(kitchenSpace.Boundary as Polyline, bufferDis);
@@ -90,7 +90,7 @@ namespace ThMEPWSS.Pipe.Service
         /// <param name="space"></param>
         /// <param name="drainwells"></param>
         /// <returns></returns>
-        protected List<ThIfcSpace> FilterDistancedDrainwells(ThIfcSpace space, List<ThIfcSpace> drainwells)
+        protected List<ThIfcRoom> FilterDistancedDrainwells(ThIfcRoom space, List<ThIfcRoom> drainwells)
         {
             var filterInstance = ThFindSpaceRangedSpaces.Find(space, drainwells, ClosedDistance);
             return filterInstance.SearchSpaces;
