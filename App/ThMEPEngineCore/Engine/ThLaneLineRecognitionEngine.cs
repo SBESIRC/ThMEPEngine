@@ -21,12 +21,12 @@ namespace ThMEPEngineCore.Engine
                 lanelineDbExtension.LaneCurves.ForEach(o =>
                 {
                     // 暂时用车道中心线来“表示”车道
-                    Spaces.Add(ThIfcLane.Create(o));
+                    Rooms.Add(ThIfcLane.Create(o));
                 });
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
-                    Spaces.ForEach(o => dbObjs.Add(o.Boundary));
+                    Rooms.ForEach(o => dbObjs.Add(o.Boundary));
                     ThCADCoreNTSSpatialIndex laneSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                     var pline = new Polyline()
                     {
@@ -34,7 +34,7 @@ namespace ThMEPEngineCore.Engine
                     };
                     pline.CreatePolyline(polygon);
                     var filterObjs = laneSpatialIndex.SelectCrossingPolygon(pline);
-                    Spaces = Spaces.Where(o => filterObjs.Contains(o.Boundary)).ToList();
+                    Rooms = Rooms.Where(o => filterObjs.Contains(o.Boundary)).ToList();
                 }
             }
         }
