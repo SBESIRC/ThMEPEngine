@@ -14,18 +14,13 @@ using static ThMEPWSS.Command.ThPipeCreateCmd;
 namespace ThMEPWSS.Pipe.Tools
 {
     public class ThWPipeOutputFunction
-    {
-        public static Line CreateLine(Point3d point1, Point3d point2)
-        {
-            Line line = new Line(point1, point2);
-            return line;
-        }
+    {     
         public static List<Line> GetCreateLines(Point3dCollection points, Point3dCollection point1s, string W_RAIN_NOTE1)
         {
             var lines = new List<Line>();
             for (int i = 0; i < points.Count; i++)
             {
-                Line s = CreateLine(points[i], point1s[4 * i]);
+                Line s = new Line(points[i], point1s[4 * i]);
                 s.Layer = W_RAIN_NOTE1;
                 lines.Add(s);
             }
@@ -36,7 +31,7 @@ namespace ThMEPWSS.Pipe.Tools
             var lines = new List<Line>();
             for (int i = 0; i < points.Count; i++)
             {
-                Line s = CreateLine(point1s[4 * i], point1s[4 * i + 1]);
+                Line s = new Line(point1s[4 * i], point1s[4 * i + 1]);
                 s.Layer = W_RAIN_NOTE1;
                 lines.Add(s);
             }
@@ -931,10 +926,7 @@ namespace ThMEPWSS.Pipe.Tools
             Polyline ent_line1 = new Polyline();
             ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
             ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);
-            //ent_line1.Linetype = "DASHDED";
             ent_line1.Layer = W_RAIN_PIPE;
-            //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);
-            //ent_line1.Color = Autodesk.AutoCAD.Colors.Color.FromRgb(0, 255, 255);
             return ent_line1;
         }
         public static List<BlockReference> GetListFloorDrain(ThWCompositeBalconyRoom compositeBalcony, ThWTopBalconyParameters parameters)
@@ -951,14 +943,13 @@ namespace ThMEPWSS.Pipe.Tools
         {
             Polyline ent_line1 = new Polyline();
             ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
-            ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);
-            //ent_line1.Linetype = "DASHDOT";
+            ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);   
             ent_line1.Layer = W_RAIN_PIPE;
             return ent_line1;
         }
         public void InputKitchenParameters(ThWCompositeRoom composite, ThWTopCompositeParameters parameters, ThWTopParameters parameters0)
         {
-            if (IsValidKitchenContainer(composite.Kitchen))
+            if (composite.Kitchen.Space!=null)
             {
                 parameters.boundary = composite.Kitchen.Space.Boundary as Polyline;
                 if (composite.Kitchen.DrainageWells.Count > 1)
@@ -1139,10 +1130,6 @@ namespace ThMEPWSS.Pipe.Tools
             polyline.AddVertexAt(2, new Point2d(x2, y2), 0.0, 0.0, 0.0);
             polyline.AddVertexAt(3, new Point2d(x1, y2), 0.0, 0.0, 0.0);
             return polyline;
-        }
-        public bool IsValidKitchenContainer(ThWKitchenRoom kitchenContainer)
-        {
-            return (kitchenContainer.Space != null);
         }
         public bool IsValidToiletContainer(ThWToiletRoom toiletContainer)
         {

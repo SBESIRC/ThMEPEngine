@@ -131,12 +131,12 @@ namespace ThMEPWSS.Pipe.Output
                         tag2 = PipeindexEngine.Fpipeindex_tag[j][3 * i + 1] + PipeindexEngine.Fpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                         tag3 = PipeindexEngine.Fpipeindex_tag[j][3 * i + 2] + PipeindexEngine.Fpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                     }
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.Fpipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.Fpipeindex[j][i], tag1);
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copypipes.Add(tag_Xline);
@@ -216,11 +216,11 @@ namespace ThMEPWSS.Pipe.Output
                         tag2 = PipeindexEngine.Tpipeindex_tag[j][3 * i + 1] + PipeindexEngine.Tpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                         tag3 = PipeindexEngine.Tpipeindex_tag[j][3 * i + 2] + PipeindexEngine.Tpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                     }
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.Tpipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.Tpipeindex[j][i], tag1);
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
@@ -293,12 +293,12 @@ namespace ThMEPWSS.Pipe.Output
                         tag2 = PipeindexEngine.Wpipeindex_tag[j][3 * i + 1] + PipeindexEngine.Wpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                         tag3 = PipeindexEngine.Wpipeindex_tag[j][3 * i + 2] + PipeindexEngine.Wpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                     }
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.Wpipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.Wpipeindex[j][i], tag1);
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copypipes.Add(tag_Xline);
@@ -378,12 +378,12 @@ namespace ThMEPWSS.Pipe.Output
                         tag2 = PipeindexEngine.Ppipeindex_tag[j][3 * i + 1] + PipeindexEngine.Ppipeindex_tag[j][3 * i].GetVectorTo(tag1);
                         tag3 = PipeindexEngine.Ppipeindex_tag[j][3 * i + 2] + PipeindexEngine.Ppipeindex_tag[j][3 * i].GetVectorTo(tag1);
                     }
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.Ppipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.Ppipeindex[j][i], tag1);
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copypipes.Add(tag_Xline);
@@ -460,11 +460,11 @@ namespace ThMEPWSS.Pipe.Output
                         tag2 = PipeindexEngine.Dpipeindex_tag[j][3 * i + 1] + PipeindexEngine.Dpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                         tag3 = PipeindexEngine.Dpipeindex_tag[j][3 * i + 2] + PipeindexEngine.Dpipeindex_tag[j][3 * i].GetVectorTo(tag1);
                     }
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.Dpipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.Dpipeindex[j][i], tag1);
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
@@ -543,11 +543,11 @@ namespace ThMEPWSS.Pipe.Output
                     circle.Layer = W_DRAI_EQPM;
                     parameters0.standardEntity.Add(circle);
                     parameters0.normalCopys.Add(circle);
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.Npipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.Npipeindex[j][i], tag1);
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
@@ -625,11 +625,11 @@ namespace ThMEPWSS.Pipe.Output
                     circle.Layer = ThWPipeCommon.W_RAIN_EQPM;
                     parameters0.standardEntity.Add(circle);
                     parameters0.normalCopys.Add(circle);
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.Rainpipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.Rainpipeindex[j][i], tag1);
                     tag_Yline.Layer= W_RAIN_NOTE1;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer= W_RAIN_NOTE1;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.normalCopys.Add(tag_Xline);
@@ -707,13 +707,13 @@ namespace ThMEPWSS.Pipe.Output
                     Circle circle = ThWPipeOutputFunction.CreateCircle(PipeindexEngine.RoofRainpipeindex[j][i]);
                     circle.Layer = ThWPipeCommon.W_RAIN_EQPM;
                     parameters0.standardEntity.Add(circle);
-                    Line tag_Yline = ThWPipeOutputFunction.CreateLine(PipeindexEngine.RoofRainpipeindex[j][i], tag1);
+                    Line tag_Yline = new Line(PipeindexEngine.RoofRainpipeindex[j][i], tag1);
                     tag_Yline.Layer = W_RAIN_NOTE1;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copyrooftags.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     parameters0.normalCopys.Add(circle);
-                    Line tag_Xline = ThWPipeOutputFunction.CreateLine(tag1, tag2);
+                    Line tag_Xline = new Line(tag1, tag2);
                     tag_Xline.Layer= W_RAIN_NOTE1;
                     parameters0.standardEntity.Add(tag_Xline);
                     parameters0.copyrooftags.Add(tag_Xline);
