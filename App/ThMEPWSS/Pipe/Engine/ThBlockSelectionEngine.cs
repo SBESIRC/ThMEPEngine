@@ -30,15 +30,16 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 else
                 {
-                    name = dataModel.Substring(3, dataModel.Length - 3);
-                    if(dataModel.Substring(dataModel.Length - 1, 1)=="层")
-                    {
-                        name = dataModel.Substring(0, dataModel.Length - 3);
-                    }
+                    name = dataModel.Substring(3);                 
                     foreach (var block in BlockReferences)
                     {
-                        string strings = BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号");
-                        if (strings!=null&& strings.Equals(name))
+                        var category = BlockTools.GetDynBlockValue(block.Id, "楼层类型");
+                        if (category.Contains("小屋面") || category.Contains("大屋面"))
+                        {
+                            continue;
+                        }
+                        var number = BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号");
+                        if (name == number)
                         {
                             blockReferences.Add(block);
                         }
@@ -47,21 +48,20 @@ namespace ThMEPWSS.Pipe.Engine
                 if (blockReferences.Any())
                 {
                     Active.Editor.ZoomToModels(blockReferences.ToArray(), 2.0);                               
-                    var BlockReferencesSelected = GetBlockReferences(acadDatabase.Database, dataModel);
-                    Active.Editor.PickFirstModels(BlockReferencesSelected.Select(o => o.ObjectId).ToArray());
                 }
             }
-        }   
-        private static List<BlockReference> GetBlockReferences(Database db, string blockName)
-        {
-            List<BlockReference> blocks = new List<BlockReference>();
-            var trans = db.TransactionManager;
-            BlockTable bt = (BlockTable)trans.GetObject(db.BlockTableId, OpenMode.ForRead);
-            blocks = (from b in db.GetEntsInDatabase<BlockReference>()
-                      where (b.GetBlockName().Contains(blockName))
-                      select b).ToList();
-            return blocks;
         }
 
+        public static void PickFirstModels(string blockName)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var objIds = acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => o.GetBlockName().Contains(blockName))
+                    .Select(o => o.ObjectId);
+                Active.Editor.PickFirstModels(objIds.ToArray());
+            }
+        }
     }
 }

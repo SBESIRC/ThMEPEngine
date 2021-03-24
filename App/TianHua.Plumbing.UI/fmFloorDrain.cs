@@ -88,7 +88,7 @@ namespace TianHua.Plumbing.UI
                 service.Read(storeys);
 
                 // 绑定控件
-                ListBox.DataSource = service.StoreyNames.Select(o => o.Item1).ToList();
+                ListBox.DataSource = service.StoreyNames.Select(o => o.Item2).ToList();
             }
         }    
 

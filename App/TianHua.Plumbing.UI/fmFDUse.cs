@@ -49,8 +49,9 @@ namespace TianHua.Plumbing.UI
         }
         private void CheckList_DoubleClick(object sender, EventArgs e)
         {
-            var item = CheckList.SelectedItem as string;
-            ThBlockSelectionEngine.ZoomToModels(item);
+            var model = CheckList.SelectedItem as string;
+            ThBlockSelectionEngine.ZoomToModels(model);
+            ThBlockSelectionEngine.PickFirstModels(model);
         }
     }
 }
