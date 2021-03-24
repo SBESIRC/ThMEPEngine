@@ -890,9 +890,8 @@ namespace ThMEPWSS.Pipe.Output
                         Polyline alertresult = alert.Tessellate(100);
                         alertresult.Layer = ThWPipeCommon.W_RAIN_EQPM;
                         foreach (Point3d bucket_1 in parameters2.waterbuckets2)
-                        {
-                            var thWPipeOutputFunction = new ThWPipeOutputFunction();
-                            if (thWPipeOutputFunction.Checkbucket(center, bucket_1, parameters1.r_boundary))
+                        {                          
+                            if (center.DistanceTo(bucket_1)<10)
                             {
                                 s += 1;
                                 break;
@@ -933,9 +932,8 @@ namespace ThMEPWSS.Pipe.Output
                                 Circle alert1 = new Circle() { Center = center1, Radius = 100 };
                                 Polyline alertresult1 = alert1.Tessellate(100);
                                 foreach (Point3d bucket_1 in parameters2.waterbuckets1)
-                                {
-                                    var thWPipeOutputFunction = new ThWPipeOutputFunction();
-                                    if (thWPipeOutputFunction.Checkbucket(center1, bucket_1, parameters2.d_boundary))
+                                {          
+                                    if (center1.DistanceTo(bucket_1)<10)
                                     {
                                         s1 += 1;
                                         break;
@@ -976,9 +974,8 @@ namespace ThMEPWSS.Pipe.Output
                         Circle alert = new Circle() { Center = center, Radius = 100 };
                         Polyline alertresult = alert.Tessellate(100);
                         foreach (Point3d bucket_1 in parameters2.waterbuckets2)
-                        {
-                            var thWPipeOutputFunction = new ThWPipeOutputFunction();
-                            if (thWPipeOutputFunction.Checkbucket(center, bucket_1, parameters1.r_boundary))
+                        {                     
+                            if (center.DistanceTo(bucket_1)<10)
                             {
                                 ++s;
                                 break;
@@ -1021,9 +1018,8 @@ namespace ThMEPWSS.Pipe.Output
                                 Circle alert1 = new Circle() { Center = center1, Radius = 100 };
                                 Polyline alertresult1 = alert1.Tessellate(100);
                                 foreach (Point3d bucket_1 in parameters2.waterbuckets1)
-                                {
-                                    var thWPipeOutputFunction = new ThWPipeOutputFunction();
-                                    if (thWPipeOutputFunction.Checkbucket(center1, bucket_1, parameters2.d_boundary))
+                                {                                 
+                                    if (center1.DistanceTo(bucket_1)<10)
                                     {
                                         ++s1;
                                         break;

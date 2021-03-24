@@ -58,18 +58,6 @@ namespace ThMEPWSS.Pipe.Tools
                 TextStyleId = textStyleId,
             };
         }
-        public bool Checkbucket(Point3d pipe, Point3d bucket, Polyline wboundary)
-        {
-
-            if (pipe.DistanceTo(bucket) < 10)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
         public static List<Polyline> GetNewPipes(List<Polyline> rain_pipe)
         {
             var rain_pipes = new List<Polyline>();
