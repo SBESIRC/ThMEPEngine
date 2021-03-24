@@ -8,11 +8,11 @@ namespace ThMEPEngineCore.Engine
 {
     public abstract class ThSpatialElementRecognitionEngine : IDisposable
     {
-        public List<ThIfcSpace> Spaces { get; set; }
+        public List<ThIfcRoom> Rooms { get; set; }
         public List<ThIfcSpatialElement> Elements { get; set; }
         public ThSpatialElementRecognitionEngine()
         {
-            Spaces = new List<ThIfcSpace>();
+            Rooms = new List<ThIfcRoom>();
             Elements = new List<ThIfcSpatialElement>();
         }
         public void Dispose()
