@@ -1,12 +1,10 @@
-﻿using AcHelper;
-using Linq2Acad;
+﻿using Linq2Acad;
 using ThMEPWSS.Pipe;
 using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Engine;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Layout;
 using ThMEPWSS.Pipe.Output;
@@ -176,19 +174,9 @@ namespace ThMEPWSS
         [CommandMethod("TIANHUACAD", "THLGLC", CommandFlags.Modal)]
         public void THLGLC()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var cmd = new ThPipeInsertFloorFrameCmd())
             {
-                PromptPointResult result;
-                var tpipe = new List<Point3d>();
-                do
-                {
-                    result = Active.Editor.GetPoint("\n选择要插入的基点位置");
-                    if (result.Status == PromptStatus.OK)
-                    {
-                        tpipe.Add(result.Value);
-                    }
-                } while (result.Status == PromptStatus.OK);
-                ThInsertStoreyFrameService.Insert(tpipe);
+                cmd.Execute();
             }
         }
         [CommandMethod("TIANHUACAD", "THLGYY", CommandFlags.Modal)]
