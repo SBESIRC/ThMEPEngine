@@ -10,7 +10,7 @@ using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThSpaceExtractor :ThExtractorBase,IExtract,IPrint,IBuildGeometry,IGroup
+    public class ThRoomExtractor :ThExtractorBase,IExtract,IPrint,IBuildGeometry,IGroup
     {
         public List<ThIfcRoom> Rooms { get; private set; }
         public Dictionary<Polyline, List<Polyline>> Obstacles { get; set; }
@@ -35,7 +35,7 @@ namespace ThMEPEngineCore.Temp
         /// </summary>
         public string ObstacleCategory { get; set; }
 
-        public ThSpaceExtractor()
+        public ThRoomExtractor()
         {
             Rooms = new List<ThIfcRoom>();
             Obstacles = new Dictionary<Polyline, List<Polyline>>();

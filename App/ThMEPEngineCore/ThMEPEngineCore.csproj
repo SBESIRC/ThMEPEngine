@@ -354,7 +354,7 @@
     <Compile Include="Temp\ThExtractRoomRecognitionEngine.cs" />
     <Compile Include="Temp\ThLaneLineExtractor.cs" />
     <Compile Include="Temp\ThParkingStallExtractor.cs" />
-    <Compile Include="Temp\ThSpaceExtractor.cs" />
+    <Compile Include="Temp\ThRoomExtractor.cs" />
     <Compile Include="Temp\ThShearWallExtractor.cs" />
     <Compile Include="Temp\ThWallExtractor.cs" />
     <Compile Include="Temp\ThWaterSupplyPositionExtractor.cs" />
