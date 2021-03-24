@@ -207,7 +207,7 @@ namespace ThMEPEngineCore
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
-                engine.Spaces.ForEach(o =>
+                engine.Rooms.ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o.Boundary);
                 });
@@ -371,7 +371,7 @@ namespace ThMEPEngineCore
                 exportEngine.Export(acadDatabase.Database, frame.Vertices());
                 var geos = new List<ThGeometry>();
                 var objIds = new ObjectIdList();
-                exportEngine.Spaces.ForEach(o =>
+                exportEngine.Rooms.ForEach(o =>
                 {
                     o.Boundary.ColorIndex = 5;
                     o.Boundary.SetDatabaseDefaults();
@@ -422,7 +422,7 @@ namespace ThMEPEngineCore
                 {
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
+                    new ThRoomExtractor{ IsBuildObstacle=false,ColorIndex=1},
                     new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
                     new ThWaterSupplyPositionExtractor{ColorIndex=3},
                     new ThWaterSupplyStartExtractor{ColorIndex=4},
