@@ -1,27 +1,24 @@
 ﻿using System;
 using Linq2Acad;
 using System.Linq;
-using ThCADCore.NTS;
-using ThCADExtension;
+using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Geometries;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Model;
-using GeometryExtensions;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThRoomDbExtension : ThDbExtension, IDisposable
     {
-        public List<ThIfcSpace> Rooms { get; set; }
+        public List<ThIfcRoom> Rooms { get; set; }
         public ThRoomDbExtension(Database db) : base(db)
         {
             LayerFilter = ThRoomLayerManager.CurveXrefLayers(db);
-            Rooms = new List<ThIfcSpace>();
+            Rooms = new List<ThIfcRoom>();
         }
         public void Dispose()
         {
@@ -47,11 +44,11 @@ namespace ThMEPEngineCore.Service
             }
         }
 
-        private IEnumerable<ThIfcSpace> BuildRoomSpaces(BlockReference blockReference, Matrix3d matrix)
+        private IEnumerable<ThIfcRoom> BuildRoomSpaces(BlockReference blockReference, Matrix3d matrix)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
-                var spaces = new List<ThIfcSpace>();
+                var rooms = new List<ThIfcRoom>();
                 if (IsBuildElementBlockReference(blockReference))
                 {
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
@@ -69,7 +66,7 @@ namespace ThMEPEngineCore.Service
                                 if (IsBuildElementBlockReference(blockObj))
                                 {
                                     var mcs2wcs = blockObj.BlockTransform.PreMultiplyBy(matrix);
-                                    spaces.AddRange(BuildRoomSpaces(blockObj, mcs2wcs));
+                                    rooms.AddRange(BuildRoomSpaces(blockObj, mcs2wcs));
                                 }
                             }
                             else if (dbObj is Polyline polyline)
@@ -81,22 +78,22 @@ namespace ThMEPEngineCore.Service
                                     if(roomInfo!=null && roomInfo.Properties.Count>0)
                                     {
                                        //var boundary = polyline.GetTransformedCopy(matrix) as Polyline;
-                                        var space = new ThIfcSpace();                                       
+                                        var room = new ThIfcRoom();                                       
                                         foreach(var item in roomInfo.Properties)
                                         {
                                             if (item.Key == "边界")
                                             {
                                                 var boundary = GetRoomBoundary(item.Value);
-                                                space.Boundary = boundary.GetTransformedCopy(matrix) as Polyline;
+                                                room.Boundary = boundary.GetTransformedCopy(matrix) as Polyline;
                                             }
                                             else
                                             {
-                                                space.Properties.Add(item.Key, item.Value);
+                                                room.Properties.Add(item.Key, item.Value);
                                             }
                                         }
-                                       if(space.Boundary.Area>0)
+                                       if(room.Boundary.Area>0)
                                         {
-                                            spaces.Add(space);
+                                            rooms.Add(room);
                                         }
                                     }
                                 }
@@ -106,11 +103,11 @@ namespace ThMEPEngineCore.Service
                         if (xclip.IsValid)
                         {
                             xclip.TransformBy(matrix);
-                            return spaces.Where(o => xclip.Contains(o.Boundary));
+                            return rooms.Where(o => xclip.Contains(o.Boundary));
                         }
                     }
                 }
-                return spaces;
+                return rooms;
             }
         }
         public override void BuildElementTexts()

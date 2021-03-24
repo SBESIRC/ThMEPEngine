@@ -1,23 +1,21 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using Linq2Acad;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThGemometryExportEngine:IDisposable
     {
-        public List<ThIfcSpace> Spaces { get; set; }
+        public List<ThIfcRoom> Rooms { get; set; }
         public ThGemometryExportEngine()
         {
-            Spaces = new List<ThIfcSpace>();
+            Rooms = new List<ThIfcRoom>();
         }
         public void Export(Database database, Point3dCollection polygon)
         {
@@ -35,11 +33,11 @@ namespace ThMEPEngineCore.Engine
                     {
                         polylines.Add(filterObj as Polyline);
                     }
-                    Spaces = roomDbExtension.Rooms.Where(o=> polylines.Contains(o.Boundary)).ToList();
+                    Rooms = roomDbExtension.Rooms.Where(o=> polylines.Contains(o.Boundary)).ToList();
                 }
                 else
                 {
-                    Spaces = roomDbExtension.Rooms;
+                    Rooms = roomDbExtension.Rooms;
                 }
             }
         }
