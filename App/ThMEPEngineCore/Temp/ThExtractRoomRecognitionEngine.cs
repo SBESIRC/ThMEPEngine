@@ -15,7 +15,7 @@ using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThExtractSpaceRecognitionEngine : ThSpatialElementRecognitionEngine
+    public class ThExtractRoomRecognitionEngine : ThSpatialElementRecognitionEngine
     {
         private List<Entity> RoomNames { get; set; }
         private List<Curve> RoomBoundaries { get; set; }
@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Temp
         public string RoomLayer { get; set; }
         public string NameLayer { get; set; }
         
-        public ThExtractSpaceRecognitionEngine()
+        public ThExtractRoomRecognitionEngine()
         {
             Rooms = new List<ThIfcRoom>();
             RoomNames = new List<Entity>();
