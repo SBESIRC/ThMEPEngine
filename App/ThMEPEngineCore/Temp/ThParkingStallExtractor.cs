@@ -11,10 +11,10 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThParkingStallExtractor : ThExtractorBase,IExtract,IPrint, IBuildGeometry,IGroup
     {
-        public List<ThIfcSpace> ParkingStalls { get; private set; }
+        public List<ThIfcRoom> ParkingStalls { get; private set; }
         public ThParkingStallExtractor()
         {
-            ParkingStalls = new List<ThIfcSpace>();
+            ParkingStalls = new List<ThIfcRoom>();
             Category = "ParkingStall";
         }
 
@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.Temp
             using (var engine = new ThParkingStallRecognitionEngine())
             {
                 engine.Recognize(database, pts);
-                ParkingStalls = engine.Spaces;
+                ParkingStalls = engine.Rooms;
             }
         }
 

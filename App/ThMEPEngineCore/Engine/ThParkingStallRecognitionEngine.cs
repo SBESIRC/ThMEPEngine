@@ -16,7 +16,7 @@ namespace ThMEPEngineCore.Engine
             engine.Recognize(new ThParkingStallDbExtension(database), polygon);
             foreach(Curve curve in engine.DbObjects)
             {
-                Spaces.Add(ThIfcParkingStall.Create(curve));
+                Rooms.Add(ThIfcParkingStall.Create(curve));
             }
         }
 
