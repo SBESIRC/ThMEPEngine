@@ -1,7 +1,10 @@
 ﻿using System;
 using NFox.Cad;
 using AcHelper;
+using Linq2Acad;
+using System.Linq;
 using AcHelper.Commands;
+using System.Windows.Forms;
 using System.ComponentModel;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
@@ -11,8 +14,6 @@ using ThMEPWSS.Pipe;
 using ThMEPWSS.Pipe.Service;
 using DevExpress.XtraEditors;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
-using System.Linq;
-using Linq2Acad;
 
 namespace TianHua.Plumbing.UI
 {
@@ -109,10 +110,20 @@ namespace TianHua.Plumbing.UI
 
         private void BtnUse_Click(object sender, EventArgs e)
         {
-            ThTagParametersService.sourceFloor = ListBox.SelectedItem as string;
+            bool apply = false;
             using (var dlg = new fmFDUse())
             {
-                AcadApp.ShowModalDialog(dlg);
+                ThTagParametersService.sourceFloor = ListBox.SelectedItem as string;
+                var result = AcadApp.ShowModalDialog(dlg);
+                apply = result == DialogResult.OK;
+            }
+            if (apply)
+            {
+                //聚焦到CAD
+                SetFocusToDwgView();
+
+                //发送命令
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THLGYY");
             }
         }
 
