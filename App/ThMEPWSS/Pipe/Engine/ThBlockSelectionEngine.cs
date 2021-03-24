@@ -31,6 +31,10 @@ namespace ThMEPWSS.Pipe.Engine
                 else
                 {
                     name = dataModel.Substring(3, dataModel.Length - 3);
+                    if(dataModel.Substring(dataModel.Length - 1, 1)=="层")
+                    {
+                        name = dataModel.Substring(0, dataModel.Length - 3);
+                    }
                     foreach (var block in BlockReferences)
                     {
                         string strings = BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号");
@@ -47,7 +51,7 @@ namespace ThMEPWSS.Pipe.Engine
                     Active.Editor.PickFirstModels(BlockReferencesSelected.Select(o => o.ObjectId).ToArray());
                 }
             }
-        }
+        }   
         private static List<BlockReference> GetBlockReferences(Database db, string blockName)
         {
             List<BlockReference> blocks = new List<BlockReference>();

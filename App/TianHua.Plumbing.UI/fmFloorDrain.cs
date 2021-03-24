@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPWSS.Pipe;
+using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Service;
 using DevExpress.XtraEditors;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -127,9 +128,13 @@ namespace TianHua.Plumbing.UI
             }
         }
 
-        private void ListBox_SelectedIndexChanged(object sender, EventArgs e)
+        private void ListBox_DoubleClick(object sender, EventArgs e)
         {
-
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var storey = ListBox.SelectedItem as string;
+                ThBlockSelectionEngine.ZoomToModels(storey);
+            }
         }
 
         private void SetFocusToDwgView()

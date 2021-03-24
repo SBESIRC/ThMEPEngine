@@ -101,7 +101,7 @@
             this.ListBox.Size = new System.Drawing.Size(182, 300);
             this.ListBox.StyleController = this.layoutControl1;
             this.ListBox.TabIndex = 7;
-            this.ListBox.SelectedIndexChanged += new System.EventHandler(this.ListBox_SelectedIndexChanged);
+            this.ListBox.DoubleClick += new System.EventHandler(this.ListBox_DoubleClick);
             // 
             // BtnParam
             // 
