@@ -28,7 +28,7 @@ namespace ThMEPEngineCore.Temp
                 engine.Recognize(database, pts);
 
                 // 车道中心线处理
-                var curves = engine.Spaces.Select(o => o.Boundary).ToList();
+                var curves = engine.Rooms.Select(o => o.Boundary).ToList();
                 var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
                 LaneLines = lines.Where(o => o.Length >= 3000).ToList();
             }
