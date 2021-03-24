@@ -17,59 +17,57 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThExtractSpaceRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        private List<Entity> SpaceNames { get; set; }
-        private List<Curve> SpaceBoundaries { get; set; }
+        private List<Entity> RoomNames { get; set; }
+        private List<Curve> RoomBoundaries { get; set; }
         private Dictionary<Entity, List<Curve>> TextContainer { get; set; }
         private Dictionary<Curve, List<Curve>> AreaContainer { get; set; }
-        private Dictionary<Curve, ThIfcSpace> SpaceIndex { get; set; } //用几何对象快速查找ThIfcSpace对象
-        private ThCADCoreNTSSpatialIndex SpaceSpatialIndex;
+        private Dictionary<Curve, ThIfcRoom> RoomIndex { get; set; } //用几何对象快速查找ThIfcRoom对象
+        private ThCADCoreNTSSpatialIndex RoomSpatialIndex;
 
-        public string SpaceLayer { get; set; }
+        public string RoomLayer { get; set; }
         public string NameLayer { get; set; }
         
         public ThExtractSpaceRecognitionEngine()
         {
-            Spaces = new List<ThIfcSpace>();
-            SpaceNames = new List<Entity>();
-            SpaceBoundaries = new List<Curve>();
+            Rooms = new List<ThIfcRoom>();
+            RoomNames = new List<Entity>();
+            RoomBoundaries = new List<Curve>();
             TextContainer = new Dictionary<Entity, List<Curve>>();
             AreaContainer = new Dictionary<Curve, List<Curve>>();
-            SpaceIndex = new Dictionary<Curve, ThIfcSpace>();
+            RoomIndex = new Dictionary<Curve, ThIfcRoom>();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 //Load Data
-                SpaceNames = RecognizeSpaceNameText(database, polygon);
-                SpaceBoundaries = RecognizeSpaceBoundary(database, polygon);
+                RoomNames = RecognizeRoomNameText(database, polygon);
+                RoomBoundaries = RecognizeRoomBoundary(database, polygon);
                 BuildTextContainers();
                 BuildAreaContainers();
-                CreateSpaceBoundaries();
-                SpaceMatchText();
-                //BuildNestedSpace();
+                CreateRoomBoundaries();
+                RooomMatchText();
             }
         }
-        private void BuildSpaceSpatialIndex()
+        private void BuildRoomSpatialIndex()
         {
             DBObjectCollection dbObjs = new DBObjectCollection();
-            SpaceBoundaries.ForEach(o => dbObjs.Add(o));
-            SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
+            RoomBoundaries.ForEach(o => dbObjs.Add(o));
+            RoomSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
         }
         public void Print(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                SpaceNames.ForEach(o => acadDatabase.ModelSpace.Add(o));
-                SpaceBoundaries.ForEach(o => acadDatabase.ModelSpace.Add(o));
-                Spaces.ForEach(m=>
+                RoomNames.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                RoomBoundaries.ForEach(o => acadDatabase.ModelSpace.Add(o));
+                Rooms.ForEach(m=>
                 {
                     Point3d cenpt = ThGeometryTool.GetMidPt(
                         m.Boundary.GeometricExtents.MinPoint,
                         m.Boundary.GeometricExtents.MaxPoint);
                     var totalIds = new ObjectIdList();
                     totalIds.Add(m.Boundary.ObjectId);
-                    m.SubSpaces.ForEach(n => totalIds.Add(n.Boundary.ObjectId));
                     m.Tags.ForEach(n=>totalIds.Add(acadDatabase.ModelSpace.Add(CreateText(cenpt,n))));
                     var groupName = Guid.NewGuid().ToString();
                     GroupTools.CreateGroup(database, groupName, totalIds);
@@ -88,7 +86,7 @@ namespace ThMEPEngineCore.Temp
         private void BuildTextContainers()
         {
             this.TextContainer = new Dictionary<Entity, List<Curve>>();
-            SpaceNames.ForEach(m =>
+            RoomNames.ForEach(m =>
             {
                 var textBoundary = new Polyline();
                 if (m is DBText dbText)
@@ -104,7 +102,7 @@ namespace ThMEPEngineCore.Temp
                     Point3d textCenterPt = ThGeometryTool.GetMidPt(
                     textBoundary.GetPoint3dAt(0), textBoundary.GetPoint3dAt(2));
                     //获取包含此文字的轮廓
-                    var containers = SelectTextIntersectPolygon(SpaceBoundaries, textBoundary);
+                    var containers = SelectTextIntersectPolygon(RoomBoundaries, textBoundary);
                     //过滤包含文字中心点的轮廓
                     containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
                     this.TextContainer.Add(m, containers);
@@ -114,18 +112,18 @@ namespace ThMEPEngineCore.Temp
         private void BuildAreaContainers()
         {
             this.AreaContainer = new Dictionary<Curve, List<Curve>>();
-            SpaceBoundaries.ForEach(m =>
+            RoomBoundaries.ForEach(m =>
             {
                 if(m is Polyline polyline)
                 {
-                    var containers = SelectPolylineContainers(SpaceBoundaries, polyline);
+                    var containers = SelectPolylineContainers(RoomBoundaries, polyline);
                     containers.Remove(m);
                     this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
                 }
                 else if(m is Circle circle)//新加的
                 {
                     Polyline polyline1 = circle.Tessellate(50);
-                    var containers = SelectPolylineContainers(SpaceBoundaries, polyline1);
+                    var containers = SelectPolylineContainers(RoomBoundaries, polyline1);
                     containers.Remove(m);
                     this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
                 }
@@ -135,7 +133,7 @@ namespace ThMEPEngineCore.Temp
                 }
             });
         }        
-        private List<Entity> RecognizeSpaceNameText(Database database,Point3dCollection polygon)
+        private List<Entity> RecognizeRoomNameText(Database database,Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
@@ -144,14 +142,14 @@ namespace ThMEPEngineCore.Temp
                 {
                     if (ent is DBText dbText)
                     {
-                        if (IsSpaceNameLayer(dbText.Layer))
+                        if (IsRoomNameLayer(dbText.Layer))
                         {
                             objs.Add(dbText);
                         }
                     }
                     else if (ent is MText mtext)
                     {
-                        if (IsSpaceNameLayer(mtext.Layer))
+                        if (IsRoomNameLayer(mtext.Layer))
                         {
                             objs.Add(mtext);
                         }
@@ -178,7 +176,7 @@ namespace ThMEPEngineCore.Temp
                 return texts;
             }
         }
-        private List<Curve> RecognizeSpaceBoundary(Database HostDb, Point3dCollection polygon)
+        private List<Curve> RecognizeRoomBoundary(Database HostDb, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(HostDb))
             {
@@ -189,14 +187,14 @@ namespace ThMEPEngineCore.Temp
                 {
                     if (ent is Polyline polyline)
                     {
-                        if (IsSpaceLayer(polyline.Layer))
+                        if (IsRoomLayer(polyline.Layer))
                         {
                             var newPolyline = polyline.Clone() as Polyline;
                             objs.Add(newPolyline.TessellatePolylineWithArc(50.0));
                         }
                     }
                 }
-                var spaces = new List<Curve>();
+                var rooms = new List<Curve>();
                 if (polygon.Count > 0)
                 {
                     var spatialIndex = new ThCADCoreNTSSpatialIndex(objs);
@@ -207,34 +205,34 @@ namespace ThMEPEngineCore.Temp
                     pline.CreatePolyline(polygon);
                     foreach (var filterObj in spatialIndex.SelectCrossingPolygon(pline))
                     {
-                        spaces.Add(filterObj as Curve);
+                        rooms.Add(filterObj as Curve);
                     }
                 }
                 else
                 {
-                    spaces = objs.Cast<Curve>().ToList();
+                    rooms = objs.Cast<Curve>().ToList();
                 }
-                return spaces;
+                return rooms;
             }
         }
-        private bool IsSpaceLayer(string layerName)
+        private bool IsRoomLayer(string layerName)
         {
-            return layerName.ToUpper() == SpaceLayer;
+            return layerName.ToUpper() == RoomLayer;
         }
-        private bool IsSpaceNameLayer(string layerName)
+        private bool IsRoomNameLayer(string layerName)
         {
             return layerName.ToUpper() == NameLayer;
         }
-        private void CreateSpaceBoundaries()
+        private void CreateRoomBoundaries()
         {
-            SpaceBoundaries.ForEach(o => Spaces.Add(new ThIfcSpace { Boundary = o}));
-            Spaces.ForEach(o => SpaceIndex.Add(o.Boundary, o));
+            RoomBoundaries.ForEach(o => Rooms.Add(new ThIfcRoom { Boundary = o}));
+            Rooms.ForEach(o => RoomIndex.Add(o.Boundary, o));
         }
-        private void SpaceMatchText()
+        private void RooomMatchText()
         {
             DBObjectCollection dbObjs = new DBObjectCollection();           
             Dictionary<Curve, List<string>> dict = new Dictionary<Curve, List<string>>();
-            SpaceNames.ForEach(o =>
+            RoomNames.ForEach(o =>
             {
                 var curves = TextContainer[o];
                 if (curves.Count > 0)
@@ -262,39 +260,13 @@ namespace ThMEPEngineCore.Temp
                     }
                 }
             });
-            Spaces.ForEach(o =>
+            Rooms.ForEach(o =>
             {
                 if (dict.ContainsKey(o.Boundary))
                 {
                     o.Tags = dict[o.Boundary];
                 }
             });
-        }
-        private void BuildNestedSpace()
-        {
-            Spaces = Spaces.OrderBy(o => o.Boundary.Area).ToList();
-            Spaces.ForEach(o => BuildNestedSpace(o));            
-        }
-        private void BuildNestedSpace(ThIfcSpace thIfcSpace)
-        {
-            var objs = AreaContainer[thIfcSpace.Boundary];
-            if (objs.Count==0)
-            {
-                return;
-            }
-            double smallestArea=objs.First().Area;
-            foreach(var parentObj in objs.Where(o => o.Area == smallestArea).ToList())
-            {
-                if(SpaceIndex.ContainsKey(parentObj))
-                {
-                    var parent = SpaceIndex[parentObj];
-                    if(parent.SubSpaces.IndexOf(thIfcSpace)<0)
-                    {
-                        parent.SubSpaces.Add(thIfcSpace);
-                    }
-                    BuildNestedSpace(parent);
-                }
-            }
         }
         /// <summary>
         /// Crossing selection
