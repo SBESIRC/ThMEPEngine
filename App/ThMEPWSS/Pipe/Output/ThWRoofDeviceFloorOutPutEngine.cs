@@ -26,13 +26,13 @@ namespace ThMEPWSS.Pipe.Layout
                 ThWPipeOutputFunction.GetListText(parameters2.engine.SideWaterBucketCenter, parameters2.engine.SideWaterBucketTag, ThTagParametersService.SideBuckettag, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters2.roofDeviceEntity.Add(o));
                 ThWPipeOutputFunction.GetListText1(parameters2.engine.GravityWaterBucketCenter, parameters2.engine.GravityWaterBucketTag, ThTagParametersService.BucketStyle, scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters2.roofDeviceEntity.Add(o));
                 ThWPipeOutputFunction.GetListText1(parameters2.engine.SideWaterBucketCenter, parameters2.engine.SideWaterBucketTag, "侧入式雨水斗", scaleFactor, W_RAIN_NOTE1, acadDatabase.Database).ForEach(o => parameters2.roofDeviceEntity.Add(o));
-                GetCreateLines(parameters2.engine.GravityWaterBucketCenter, parameters2.engine.GravityWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
-                GetCreateLines1(parameters2.engine.GravityWaterBucketCenter, parameters2.engine.GravityWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
-                GetCreateLines(parameters2.engine.SideWaterBucketCenter, parameters2.engine.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
-                GetCreateLines1(parameters2.engine.SideWaterBucketCenter, parameters2.engine.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
+                ThWPipeOutputFunction.GetCreateLines(parameters2.engine.GravityWaterBucketCenter, parameters2.engine.GravityWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
+                ThWPipeOutputFunction.GetCreateLines1(parameters2.engine.GravityWaterBucketCenter, parameters2.engine.GravityWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
+                ThWPipeOutputFunction.GetCreateLines(parameters2.engine.SideWaterBucketCenter, parameters2.engine.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
+                ThWPipeOutputFunction.GetCreateLines1(parameters2.engine.SideWaterBucketCenter, parameters2.engine.SideWaterBucketTag, W_RAIN_NOTE1).ForEach(o => parameters2.roofDeviceEntity.Add(o));
                 for (int i = 0; i < parameters2.engine.Center_point.Count; i++)
                 {
-                    parameters2.roofDeviceEntity.Add(CreateCircle(parameters2.engine.Center_point[i]));
+                    parameters2.roofDeviceEntity.Add(ThWPipeOutputFunction.CreateCircle(parameters2.engine.Center_point[i]));
                 }
             }
         }

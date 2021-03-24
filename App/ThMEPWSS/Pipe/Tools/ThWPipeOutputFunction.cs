@@ -15,6 +15,43 @@ namespace ThMEPWSS.Pipe.Tools
 {
     public class ThWPipeOutputFunction
     {
+        public static Line CreateLine(Point3d point1, Point3d point2)
+        {
+            Line line = new Line(point1, point2);
+            return line;
+        }
+        public static List<Line> GetCreateLines(Point3dCollection points, Point3dCollection point1s, string W_RAIN_NOTE1)
+        {
+            var lines = new List<Line>();
+            for (int i = 0; i < points.Count; i++)
+            {
+                Line s = CreateLine(points[i], point1s[4 * i]);
+                s.Layer = W_RAIN_NOTE1;
+                lines.Add(s);
+            }
+            return lines;
+        }
+        public static List<Line> GetCreateLines1(Point3dCollection points, Point3dCollection point1s, string W_RAIN_NOTE1)
+        {
+            var lines = new List<Line>();
+            for (int i = 0; i < points.Count; i++)
+            {
+                Line s = CreateLine(point1s[4 * i], point1s[4 * i + 1]);
+                s.Layer = W_RAIN_NOTE1;
+                lines.Add(s);
+            }
+            return lines;
+        }
+        public static Circle CreateCircle(Point3d point1)
+        {
+            return new Circle()
+            {
+                Radius = 50,
+                Center = point1,
+                Layer = ThWPipeCommon.W_RAIN_EQPM,
+            };
+        }
+
         public static DBText Taggingtext(Point3d tag, string s, int scaleFactor, Database db)
         {
             var textStyleId = GetStyleIds(db,"TH-STYLE3");//费时间
