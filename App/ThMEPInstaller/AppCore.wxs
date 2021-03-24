@@ -23,6 +23,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ThMEPCui_Debug" Guid="{DA4F2F82-7879-4238-B87B-A4A038863A8A}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_ThMEPCui_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPCui.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ThMEPAnalytics_Debug" Guid="{5C9AB389-3C85-4D67-A25F-8C5E80C88641}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPAnalytics.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
         <?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
@@ -43,6 +46,9 @@
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Debug" Guid="{428747DA-1443-437A-BB30-87758C98697C}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPCui_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPCui.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" Guid="{4B788EAB-B95F-44CA-B5CC-522C4472423C}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPAnalytics.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
@@ -65,6 +71,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPCui_Debug" Guid="{bcc5267a-2349-42b3-bf67-17f093fb8f91}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPCui_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPCui.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Debug" Guid="{57FF156A-14C7-440F-8EEA-CA2047CAA341}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPAnalytics.dll" />
+        </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
         <?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
@@ -86,6 +95,9 @@
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Debug" Guid="{80C708F7-FD76-4D73-BEFA-294D7D29889F}" Win64="yes">
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPCui_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPCui.dll" />
         </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Debug" Guid="{FF3B9DFA-0E2B-49A3-AF0C-3DFA41BBBA2B}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPAnalytics.dll" />
+        </Component>
     </DirectoryRef>
     <?elseif $(var.Configuration) = Release ?>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
@@ -106,7 +118,10 @@
             <File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPEngineCore.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ThMEPCui_Release" Guid="{DA4F2F82-7879-4238-B87B-A4A038863A8A}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\$(var.Dotfuscated)\ThMEPCui.dll" />
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPCui.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R18_ThMEPAnalytics_Release" Guid="{27C43718-E8A8-465F-A4B7-60CDE5074A21}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R18_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPAnalytics.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
@@ -127,7 +142,10 @@
             <File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPEngineCore.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Release" Guid="{428747DA-1443-437A-BB30-87758C98697C}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\$(var.Dotfuscated)\ThMEPCui.dll" />
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPCui.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" Guid="{204C6325-3BAE-4A52-9147-6B9EB2D61BD9}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPAnalytics.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
@@ -148,7 +166,10 @@
             <File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPEngineCore.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPCui_Release" Guid="{d4e4af73-e8d7-46ab-b183-097de572b975}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\$(var.Dotfuscated)\ThMEPCui.dll" />
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPCui.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Release" Guid="{A446F35F-C2F2-4131-A4AC-53C728298ABD}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPAnalytics.dll" />
         </Component>
     </DirectoryRef>
     <DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
@@ -169,7 +190,10 @@
             <File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPEngineCore_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPEngineCore.dll" />
         </Component>
         <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Release" Guid="{99700CC9-C291-431D-9D5B-FA9EEAAD40F8}" Win64="yes">
-            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\$(var.Dotfuscated)\ThMEPCui.dll" />
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPCui_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPCui.dll" />
+        </Component>
+        <Component Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Release" Guid="{4A170B47-F478-488D-AE33-1E096959281B}" Win64="yes">
+            <File Id="FILE_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPAnalytics.dll" />
         </Component>
     </DirectoryRef>
     <?endif?>
@@ -201,6 +225,10 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPCui_Debug" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ThMEPAnalytics_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Debug" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Debug" />
         <?elseif $(var.Configuration) = Release ?>
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_DotNetARX_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_CADExtension_Release" />
@@ -225,6 +253,10 @@
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPCui_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPCui_Release" />
         <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPCui_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_ThMEPAnalytics_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_ThMEPAnalytics_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_ThMEPAnalytics_Release" />
+        <ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_ThMEPAnalytics_Release" />
         <?endif?>
     </ComponentGroup>
   </Fragment>
