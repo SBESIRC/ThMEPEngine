@@ -10,7 +10,7 @@ using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Tools;
-using static ThMEPWSS.ThPipeCmds;
+using static ThMEPWSS.Command.ThPipeCreateCmd;
 
 namespace ThMEPWSS.Pipe.Output
 {

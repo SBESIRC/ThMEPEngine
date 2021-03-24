@@ -2,9 +2,9 @@
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Engine;
-using static ThMEPWSS.ThPipeCmds;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Service;
+using static ThMEPWSS.Command.ThPipeCreateCmd;
 
 namespace ThMEPWSS.Pipe.Layout
 {

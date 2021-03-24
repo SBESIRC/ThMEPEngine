@@ -7,9 +7,9 @@ using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Model;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Tools;
-using static ThMEPWSS.ThPipeCmds;
 using AcHelper;
 using ThMEPWSS.Pipe.Service;
+using static ThMEPWSS.Command.ThPipeCreateCmd;
 
 namespace ThMEPWSS.Pipe.Output
 {
