@@ -21,19 +21,31 @@ namespace ThAnalytics
         {
             // 暖通
             {"THFJ", "风机选型"},
+            {"THFJSYSTEMCOPY", "复制风机"},
+            {"THFJSYSTEMERASE", "删除风机" },
+            {"THFJSYSTEMINSERT", "插入风机"},
             {"THFJF", "机房平面"},
 
             // 电气
             {"THYWG", "烟感温感布置"},
-            {"THTCD", "提车道中心线"},
+            {"THFDL", "无吊顶避梁"},
+            {"THFDCP", "有吊顶避梁"},
+            {"THFDFS", "无梁楼盖"},
+            {"THYGMQ", "烟感盲区"},
+            {"THTCD",  "提车道中心线"},
+            {"THDXC", "布灯线槽中心线绘制"},
+            {"THFDXC", "非布灯线槽中心线绘制"},
             {"THGB", "地库广播"},
             {"THGBLX", "广播连线"},
             {"THGBMQ", "广播盲区"},
             {"THCDZM", "车道照明"},
+            {"THCDBH", "车道照明编号"},
+            {"THCDTJ", "车道照明回路"},
+            {"THCDZMBZ", "车道照明布置"},
             {"THYJZM", "车道应急照明"},
 
             // 给排水
-            {"THPL", "喷头工具"}
+            {"THPL", "喷头工具"},
         };
 
         public void Initialize()
