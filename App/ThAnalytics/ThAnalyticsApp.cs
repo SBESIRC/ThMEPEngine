@@ -139,7 +139,11 @@ namespace ThAnalytics
 
         private void DocCollEvent_DocumentBecameCurrent_Handler(object sender, DocumentCollectionEventArgs e)
         {
-            ThAcsSystemService.Instance.Reset();
+            // check zero doc state
+            if (e.Document != null)
+            {
+                ThAcsSystemService.Instance.Reset();
+            }
         }
 
         private void DocCollEvent_DocumentLockModeChanged_Handler(object sender, DocumentLockModeChangedEventArgs e)
