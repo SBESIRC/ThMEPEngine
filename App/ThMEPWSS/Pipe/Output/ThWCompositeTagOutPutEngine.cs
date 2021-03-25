@@ -155,12 +155,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
-                    parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.copypipes.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);           
+                    parameters0.normalCopys.Add(tag_Yline);                   
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"FL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"FL-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -171,28 +169,37 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext1.TextString.Length* taggingtext1.Height*(taggingtext1.WidthFactor), tag1.Y, 0);     
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copypipes.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copypipes.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copypipes.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.copypipes.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -240,10 +247,9 @@ namespace ThMEPWSS.Pipe.Output
                     tag_Yline.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"TL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"TL-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -254,24 +260,32 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X-15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -317,12 +331,10 @@ namespace ThMEPWSS.Pipe.Output
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
-                    parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.copypipes.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Yline);          
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"WL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"WL-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -333,28 +345,37 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copypipes.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copypipes.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copypipes.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.copypipes.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -403,11 +424,9 @@ namespace ThMEPWSS.Pipe.Output
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.copypipes.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.copypipes.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();                                    
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"PL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"PL-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -418,28 +437,37 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copypipes.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copypipes.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copypipes.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.copypipes.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.copypipes.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -484,10 +512,9 @@ namespace ThMEPWSS.Pipe.Output
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer= ThWPipeCommon.W_DRAI_NOTE;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"DL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"DL-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -498,24 +525,32 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7*scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -566,11 +601,10 @@ namespace ThMEPWSS.Pipe.Output
                     Line tag_Yline = new Line(PipeindexEngine.Npipeindex[j][i], tag1);
                     tag_Yline.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     parameters0.standardEntity.Add(tag_Yline);
-                    parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Yline);                  
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"NL{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"NL-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -581,24 +615,32 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = ThWPipeCommon.W_DRAI_NOTE;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -649,10 +691,9 @@ namespace ThMEPWSS.Pipe.Output
                     tag_Yline.Layer= W_RAIN_NOTE1;
                     parameters0.standardEntity.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer= W_RAIN_NOTE1;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer= W_RAIN_NOTE1;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -663,24 +704,32 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = W_RAIN_NOTE1;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = W_RAIN_NOTE1;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -733,11 +782,9 @@ namespace ThMEPWSS.Pipe.Output
                     parameters0.copyrooftags.Add(tag_Yline);
                     parameters0.normalCopys.Add(tag_Yline);
                     parameters0.normalCopys.Add(circle);
-                    Line tag_Xline = new Line(tag1, tag2);
-                    tag_Xline.Layer= W_RAIN_NOTE1;
-                    parameters0.standardEntity.Add(tag_Xline);
-                    parameters0.copyrooftags.Add(tag_Xline);
-                    parameters0.normalCopys.Add(tag_Xline);
+                    Line tag_Xline = new Line();
+                    tag_Xline.StartPoint = tag1;
+                    var tpoint = new Point3d();
                     DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext.Layer= W_RAIN_NOTE1;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1}", scaleFactor, acadDatabase.Database);
@@ -748,28 +795,37 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext3.Layer = W_RAIN_NOTE1;
                     if (j == 0)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext1);
                         parameters0.copyrooftags.Add(taggingtext1);
                         parameters0.normalCopys.Add(taggingtext1);
                     }
                     else if (j == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext3);
                         parameters0.copyrooftags.Add(taggingtext3);
                         parameters0.normalCopys.Add(taggingtext3);
                     }
                     else if (j % 2 == 1)
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext2);
                         parameters0.copyrooftags.Add(taggingtext2);
                         parameters0.normalCopys.Add(taggingtext2);
                     }
                     else
                     {
+                        tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                         parameters0.standardEntity.Add(taggingtext);
                         parameters0.copyrooftags.Add(taggingtext);
                         parameters0.normalCopys.Add(taggingtext);
                     }
+                    tag_Xline.EndPoint = tpoint;
+                    tag_Xline.Layer = W_RAIN_NOTE1;
+                    parameters0.standardEntity.Add(tag_Xline);
+                    parameters0.copyrooftags.Add(tag_Xline);
+                    parameters0.normalCopys.Add(tag_Xline);
                     tag_frames.Add(ThWPipeOutputFunction.GetBoundary(175 * 7* scaleFactor, tag3, scaleFactor));
                 }
             }
@@ -833,12 +889,11 @@ namespace ThMEPWSS.Pipe.Output
                                 };
                                 parameters1.roofEntity.Add(circle);
                                 Line ent_line = new Line(PipeindexEngine1.RoofRainpipeindex[j][i], tag1);
-                                Line ent_line1 = new Line(tag1, tag2);
-                                ent_line.Layer = W_RAIN_NOTE1; 
-                                ent_line1.Layer = W_RAIN_NOTE1;
-                                //ent_line.Color = Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByLayer, 256);                            
-                                parameters1.roofEntity.Add(ent_line);
-                                parameters1.roofEntity.Add(ent_line1);
+                                Line ent_line1 = new Line();
+                                ent_line1.StartPoint = tag1;
+                                var tpoint = Point3d.Origin;
+                                ent_line.Layer = W_RAIN_NOTE1;                                                                                    
+                                parameters1.roofEntity.Add(ent_line);                                
                                 DBText taggingtext = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1 + count}", scaleFactor, acadDatabase.Database);
                                 taggingtext.Layer= W_RAIN_NOTE1;
                                 DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1 + count}", scaleFactor, acadDatabase.Database);
@@ -849,20 +904,27 @@ namespace ThMEPWSS.Pipe.Output
                                 taggingtext3.Layer = W_RAIN_NOTE1;
                                 if (j == 0)
                                 {
+                                    tpoint = new Point3d(tag3.X - 15 + taggingtext1.TextString.Length * taggingtext1.Height * (taggingtext1.WidthFactor), tag1.Y, 0);
                                     parameters1.roofEntity.Add(taggingtext1);
                                 }
                                 else if (j == 1)
                                 {
+                                    tpoint = new Point3d(tag3.X - 15 + taggingtext3.TextString.Length * taggingtext3.Height * (taggingtext3.WidthFactor), tag1.Y, 0);
                                     parameters1.roofEntity.Add(taggingtext3);
                                 }
                                 else if (j % 2 == 1)
                                 {
+                                    tpoint = new Point3d(tag3.X - 15 + taggingtext2.TextString.Length * taggingtext2.Height * (taggingtext2.WidthFactor), tag1.Y, 0);
                                     parameters1.roofEntity.Add(taggingtext2);
                                 }
                                 else
                                 {
+                                    tpoint = new Point3d(tag3.X - 15 + taggingtext.TextString.Length * taggingtext.Height * (taggingtext.WidthFactor), tag1.Y, 0);
                                     parameters1.roofEntity.Add(taggingtext);
                                 }
+                                ent_line1.EndPoint = tpoint;
+                                ent_line1.Layer = W_RAIN_NOTE1;
+                                parameters1.roofEntity.Add(ent_line1);
                             }
                         }
                         if (parameters2.baseCenter0.Count > 0)

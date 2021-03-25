@@ -26,12 +26,12 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return lines;
         }
-        public static List<Line> GetCreateLines1(Point3dCollection points, Point3dCollection point1s, string W_RAIN_NOTE1)
+        public static List<Line> GetCreateLines1(Point3dCollection points, Point3dCollection point1s, string W_RAIN_NOTE1,string name,int factor)
         {
             var lines = new List<Line>();
             for (int i = 0; i < points.Count; i++)
             {
-                Line s = new Line(point1s[4 * i], point1s[4 * i + 1]);
+                Line s = new Line(point1s[4 * i], point1s[4 * i]+ (70 +140* factor*(name.Length+1))*(point1s[4 * i].GetVectorTo(point1s[4 * i + 1]).GetNormal()));
                 s.Layer = W_RAIN_NOTE1;
                 lines.Add(s);
             }
@@ -56,6 +56,7 @@ namespace ThMEPWSS.Pipe.Tools
                 Position = tag,
                 TextString = s,//原来为{floor.Value}     
                 TextStyleId = textStyleId,
+                WidthFactor=0.7
             };
         }
         public static List<Polyline> GetNewPipes(List<Polyline> rain_pipe)
@@ -650,7 +651,8 @@ namespace ThMEPWSS.Pipe.Tools
                 Position = tag,
                 TextString = s,
                 TextStyleId = textStyleId,
-                Layer= W_RAIN_NOTE1,            
+                Layer= W_RAIN_NOTE1,    
+                WidthFactor=0.7
             };
         }
         public static ObjectId GetStyleIds(Database db, string styleName)

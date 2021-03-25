@@ -39,6 +39,9 @@ namespace ThMEPWSS.Pipe.Service
             RoofName = GetRoofName(objIds);
             StandardSpaceNames = GetSortList(DivideCharacter(GetStandardSpaceName(objIds), "标准层"));
             NonStandardSpaceNames = GetSortList(DivideCharacter(GetNonStandardSpaceName(objIds), "非标层"));
+            var CompositeSpaceNames = new List<Tuple<string, string>>();
+            DivideCharacter(GetStandardSpaceName(objIds), "标准层").ForEach(o => CompositeSpaceNames.Add(o));
+            DivideCharacter(GetNonStandardSpaceName(objIds), "非标层").ForEach(o => CompositeSpaceNames.Add(o));
             if (DeviceName != "")
             {
                 StoreyNames.Add(Tuple.Create(DeviceName, "小屋面"));
@@ -47,13 +50,10 @@ namespace ThMEPWSS.Pipe.Service
             {
                 StoreyNames.Add(Tuple.Create(RoofName, "大屋面"));
             }
-            foreach (var StandardSpaceName in StandardSpaceNames)
+            var compositeNames=GetSortList(CompositeSpaceNames);
+            foreach (var StandardSpaceName in compositeNames)
             {
-                StoreyNames.Add(Tuple.Create($"{StandardSpaceName.Item1}{"标准层"}", StandardSpaceName.Item2));
-            }
-            foreach (var NonStandardSpaceName in NonStandardSpaceNames)
-            {
-                StoreyNames.Add(Tuple.Create($"{NonStandardSpaceName.Item1}{"非标层"}", NonStandardSpaceName.Item2));
+                StoreyNames.Add(Tuple.Create($"{StandardSpaceName.Item1}", StandardSpaceName.Item2));
             }
         }
         public void Read(Database database)
