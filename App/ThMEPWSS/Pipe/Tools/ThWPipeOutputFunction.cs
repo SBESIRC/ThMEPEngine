@@ -56,6 +56,7 @@ namespace ThMEPWSS.Pipe.Tools
                 Position = tag,
                 TextString = s,//原来为{floor.Value}     
                 TextStyleId = textStyleId,
+                WidthFactor=0.7
             };
         }
         public static List<Polyline> GetNewPipes(List<Polyline> rain_pipe)
@@ -650,7 +651,8 @@ namespace ThMEPWSS.Pipe.Tools
                 Position = tag,
                 TextString = s,
                 TextStyleId = textStyleId,
-                Layer= W_RAIN_NOTE1,            
+                Layer= W_RAIN_NOTE1,    
+                WidthFactor=0.7
             };
         }
         public static ObjectId GetStyleIds(Database db, string styleName)
