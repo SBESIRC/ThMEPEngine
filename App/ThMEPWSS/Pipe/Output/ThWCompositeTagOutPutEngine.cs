@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using DotNetARX;
+﻿using DotNetARX;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Engine;
@@ -50,15 +50,35 @@ namespace ThMEPWSS.Pipe.Output
             GetRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetRoofRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetCopiedPipeindex(FloorEngines, parameters0, acadDatabase, obstacle, parameters1, parameters2, composite_Engine, toiletpoint, balconypoint, scaleFactor, W_RAIN_NOTE1);
-            var record0 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.TopFloors[0].Space.Tags[0]}", parameters0.standardEntity);
-            BlockReference standardBlock = new BlockReference(new Point3d(0, 0, 0), record0);
-            acadDatabase.ModelSpace.Add(standardBlock);//管井信息打印到标准层 
-            var record = BlockTools.AddBlockTableRecord(acadDatabase.Database, "大屋面", parameters1.roofEntity);
-            BlockReference roofBlock = new BlockReference(new Point3d(0, 0, 0), record);
-            acadDatabase.ModelSpace.Add(roofBlock);//管井复制到屋顶层
-            var record1 = BlockTools.AddBlockTableRecord(acadDatabase.Database, "小屋面", parameters2.roofDeviceEntity);
-            BlockReference roofDevBlock = new BlockReference(new Point3d(0, 0, 0), record1);
-            acadDatabase.ModelSpace.Add(roofDevBlock);//管井复制到屋顶设备层 
+
+            var storeys = new Dictionary<string, List<Entity>>()
+            {
+                { "大屋面", parameters1.roofEntity},
+                { "小屋面", parameters2.roofDeviceEntity},
+                { $"标准层{FloorEngines.TopFloors[0].Space.Tags[0]}", parameters0.standardEntity },
+            };
+            foreach(var item in storeys)
+            {
+                if (acadDatabase.Blocks.Contains(item.Key))
+                {
+                    var blk = acadDatabase.Blocks.ElementOrDefault(item.Key, true);
+                    if (blk != null)
+                    {
+                        blk.RedefineBlockTableRecord(item.Value);
+                        acadDatabase.Database.GetAllBlockReferences(item.Key)
+                            .ForEach(o =>
+                            {
+                                o.UpgradeOpen();
+                                o.RecordGraphicsModified(true);
+                            });
+                    }
+                }
+                else
+                {
+                    acadDatabase.Database.AddBlockTableRecord(item.Key, item.Value);
+                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", item.Key, Point3d.Origin, new Scale3d(), 0.0);
+                }
+            }
         }
         public static void LayoutToiletPipe(ThWCompositePipeEngine compositeEngine, ThWTopParameters parameters0, AcadDatabase acadDatabase,string W_DRAI_EQPM)
         {
