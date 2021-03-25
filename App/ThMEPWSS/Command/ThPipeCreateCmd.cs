@@ -134,18 +134,7 @@ namespace ThMEPWSS.Command
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //开始标注 
                 var layoutTag = new ThWCompositeTagOutPutEngine();
-                layoutTag.LayoutTag(
-                    FloorEngines, 
-                    parameters0, 
-                    parameters1, 
-                    parameters2, 
-                    acadDatabase, 
-                    PipeindexEngine, 
-                    composite_Engine, 
-                    FloorEngines.AllObstacles, 
-                    ThTagParametersService.ScaleFactor, 
-                    W_DRAI_EQPM, 
-                    W_RAIN_NOTE1);
+                layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2, acadDatabase, PipeindexEngine, composite_Engine, FloorEngines.AllObstacles, ThTagParametersService.ScaleFactor, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);
             }
         }
     }
