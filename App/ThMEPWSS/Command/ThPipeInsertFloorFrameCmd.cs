@@ -19,17 +19,17 @@ namespace ThMEPWSS.Command
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                PromptPointResult result;
-                var tpipe = new List<Point3d>();
+                PromptPointResult result;               
                 do
                 {
+                    var tpipe = new List<Point3d>();
                     result = Active.Editor.GetPoint("\n选择要插入的基点位置");
                     if (result.Status == PromptStatus.OK)
                     {
                         tpipe.Add(result.Value);
+                        ThInsertStoreyFrameService.Insert(tpipe);
                     }
-                } while (result.Status == PromptStatus.OK);
-                ThInsertStoreyFrameService.Insert(tpipe);
+                } while (result.Status == PromptStatus.OK);              
             }
         }
     }
