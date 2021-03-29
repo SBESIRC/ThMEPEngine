@@ -113,7 +113,8 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> RainPipes { get; set; }
         public List<Curve> PositionTags { get; set; }
         public List<Curve> AllObstacles { get; set; }
-        public List<string> Layers { get; set; }    
+        public List<string> Layers { get; set; }
+        public Dictionary<Point3d, string> NonStandardBaseCircles { get; set; }
         public ThWCompositeFloorRecognitionEngine()
         {
             TagNameFrames = new List<Curve>();
@@ -137,6 +138,7 @@ namespace ThMEPWSS.Pipe.Engine
             RoofFloors = new List<ThWRoofFloorRoom>();
             TopFloors = new List<ThWTopFloorRoom>();
             NormalFloors= new List<ThWTopFloorRoom>();
+            NonStandardBaseCircles = new Dictionary<Point3d, string>();
         }
         public void Dispose()
         {
@@ -244,6 +246,7 @@ namespace ThMEPWSS.Pipe.Engine
                     rainPipes= rainPipes
                 };      
                 FirstEngine.Recognize(database, pts);
+                NonStandardBaseCircles = FirstEngine.NonStandardBaseCircles;
                 TopFloors = FirstEngine.Rooms;
                 if (TopFloors.Count > 0)
                 {

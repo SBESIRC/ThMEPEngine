@@ -25,6 +25,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWBasin> basinTools { get; set; }
         public List<ThWFloorDrain> floorDrains { get; set; }
         public List<ThWClosestool> closets { get; set; }
+        public Dictionary<Point3d,string> NonStandardBaseCircles { get; set; }
         public ThWTopFloorRecognitionEngine()
         {
             Rooms = new List<ThWTopFloorRoom>();
@@ -39,6 +40,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var compositeroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item1;
                 var compositebalconyroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item2;
                 var divisionLines = GetLines(blockCollection, thisSpaces);
+                NonStandardBaseCircles= GetCirclePoints(blockCollection);
                 Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);        
             }
         }
@@ -88,6 +90,29 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
             return FloorSpaces;
+        } 
+         public static Dictionary<Point3d, string> GetCirclePoints(List<BlockReference> blocks)
+        {
+            var points = new Dictionary<Point3d, string>();
+            foreach (BlockReference block in blocks)
+            {
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("非标层"))
+                {
+                    var name = BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号");
+                    var s = new DBObjectCollection();
+                    block.Explode(s);
+                    List<Circle> circle = new List<Circle>();
+                    foreach (var s1 in s)
+                    {
+                        if (s1.GetType().Name.Contains("Circle"))
+                        {
+                            Circle baseCircle = s1 as Circle;
+                            points.Add(baseCircle.Center, name);
+                        }
+                    }
+                }
+            }
+            return points;
         }
         public static List<Curve> GetBoundaryCurves(List<BlockReference> blockCollection)
         {

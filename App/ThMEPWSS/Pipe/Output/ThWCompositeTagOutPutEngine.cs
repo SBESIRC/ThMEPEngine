@@ -11,6 +11,7 @@ using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Geom;
 using ThMEPWSS.Pipe.Tools;
 using static ThMEPWSS.Command.ThPipeCreateCmd;
+using System.Linq;
 
 namespace ThMEPWSS.Pipe.Output
 {
@@ -50,14 +51,40 @@ namespace ThMEPWSS.Pipe.Output
             GetRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetRoofRainPipeindex(composite_Engine, tag_frames, parameters0, PipeindexEngine, obstacle, acadDatabase, scaleFactor, W_RAIN_NOTE1);
             GetCopiedPipeindex(FloorEngines, parameters0, acadDatabase, obstacle, parameters1, parameters2, composite_Engine, toiletpoint, balconypoint, scaleFactor, W_RAIN_NOTE1);
-
             var storeys = new Dictionary<string, List<Entity>>()
             {
                 { "大屋面", parameters1.roofEntity},
                 { "小屋面", parameters2.roofDeviceEntity},
                 { $"标准层{FloorEngines.TopFloors[0].Space.Tags[0]}", parameters0.standardEntity },
             };
-            foreach(var item in storeys)
+            if (FloorEngines.NormalFloors.Count > 0)//复制所有管井到标准层
+            {
+                for (int i = 0; i < FloorEngines.NormalFloors.Count; i++)
+                {
+                    var normalEntity = new List<Entity>();
+                    var offset = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(FloorEngines.NormalFloors[0].BaseCircles[i + 1].Boundary.GetCenter()));
+                    foreach (var ent in parameters0.normalCopys)
+                    {
+                        normalEntity.Add(ent.GetTransformedCopy(offset));
+                    }
+                    storeys.Add($"标准层{FloorEngines.NormalFloors[i].Space.Tags[0]}", normalEntity);              
+                }
+            }
+            var nums = FloorEngines.NonStandardBaseCircles.Keys.ToList();
+            if (nums.Count > 0)
+            {
+                for (int i = 0; i < nums.Count; i++)
+                {
+                    var normalEntity = new List<Entity>();
+                    var offset = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(nums[i]));
+                    foreach (var ent in parameters0.normalCopys)
+                    {
+                        normalEntity.Add(ent.GetTransformedCopy(offset));
+                    }
+                    storeys.Add( $"非标层{FloorEngines.NonStandardBaseCircles[nums[i]]}", normalEntity);                
+                }
+            }
+            foreach (var item in storeys)
             {
                 if (acadDatabase.Blocks.Contains(item.Key))
                 {
@@ -163,9 +190,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"FL-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"FL{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"FL{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"FL-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"FL-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
@@ -254,9 +281,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"TL-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"TL{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"TL{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"TL-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"TL-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
@@ -339,9 +366,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"WL-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"WL{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"WL{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"WL-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"WL-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
@@ -431,9 +458,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"PL-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"PL{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"PL{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"PL-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"PL-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
@@ -519,9 +546,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"DL-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"DL{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"DL{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"DL-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"DL-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
@@ -609,9 +636,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer= ThWPipeCommon.W_DRAI_NOTE;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"NL-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"NL{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"NL{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = ThWPipeCommon.W_DRAI_NOTE;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"NL-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"NL-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = ThWPipeCommon.W_DRAI_NOTE;
                     if (j == 0)
                     {
@@ -698,9 +725,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer= W_RAIN_NOTE1;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = W_RAIN_NOTE1;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = W_RAIN_NOTE1;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y2L-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = W_RAIN_NOTE1;
                     if (j == 0)
                     {
@@ -789,9 +816,9 @@ namespace ThMEPWSS.Pipe.Output
                     taggingtext.Layer= W_RAIN_NOTE1;
                     DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1}", scaleFactor, acadDatabase.Database);
                     taggingtext1.Layer = W_RAIN_NOTE1;
-                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1}‘", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext2.Layer = W_RAIN_NOTE1;
-                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1}’", scaleFactor, acadDatabase.Database);
+                    DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1}'", scaleFactor, acadDatabase.Database);
                     taggingtext3.Layer = W_RAIN_NOTE1;
                     if (j == 0)
                     {
@@ -898,9 +925,9 @@ namespace ThMEPWSS.Pipe.Output
                                 taggingtext.Layer= W_RAIN_NOTE1;
                                 DBText taggingtext1 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1 + count}", scaleFactor, acadDatabase.Database);
                                 taggingtext1.Layer = W_RAIN_NOTE1;
-                                DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1 + count}‘", scaleFactor, acadDatabase.Database);
+                                DBText taggingtext2 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L{j / 2}-{i + 1 + count}'", scaleFactor, acadDatabase.Database);
                                 taggingtext2.Layer = W_RAIN_NOTE1;
-                                DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1 + count}’", scaleFactor, acadDatabase.Database);
+                                DBText taggingtext3 = ThWPipeOutputFunction.Taggingtext(tag3, $"Y1L-{i + 1 + count}'", scaleFactor, acadDatabase.Database);
                                 taggingtext3.Layer = W_RAIN_NOTE1;
                                 if (j == 0)
                                 {
@@ -1120,22 +1147,7 @@ namespace ThMEPWSS.Pipe.Output
                             }
                         }
                     }
-                }                                                   
-                if (FloorEngines.NormalFloors.Count > 0)//复制所有管井到标准层
-                {
-                    for (int i = 0; i < FloorEngines.NormalFloors.Count; i++)
-                    {                       
-                        var normalEntity = new List<Entity>();
-                        var offset = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(FloorEngines.NormalFloors[0].BaseCircles[i + 1].Boundary.GetCenter()));
-                        foreach (var ent in parameters0.normalCopys)
-                        {
-                            normalEntity.Add(ent.GetTransformedCopy(offset));
-                        }
-                        var record3 = BlockTools.AddBlockTableRecord(acadDatabase.Database, $"标准层{FloorEngines.NormalFloors[i].Space.Tags[0]}", normalEntity);
-                        BlockReference normalBlock = new BlockReference(new Point3d(0, 0, 0), record3);
-                        acadDatabase.ModelSpace.Add(normalBlock);//管井复制到标准层
-                    }    
-                }
+                }                                                               
             }
         }
     }
