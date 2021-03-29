@@ -45,7 +45,7 @@ namespace ThMEPWSS.Pipe.Service
             using (AcadDatabase db = AcadDatabase.Active())
             {
                 var texts=new List<DBText>();
-                var textStyleId = ThWPipeOutputFunction.GetStyleIds(db.Database, "TH-STYLE3");
+                var style = db.TextStyles.ElementOrDefault("TH-STYLE3");
                 for (int i = 0; i < points.Count; i++)
                 {
                     DBText text = new DBText()
@@ -53,7 +53,7 @@ namespace ThMEPWSS.Pipe.Service
                         TextString = "未命名",
                         LayerId = ThExtractDbSpaceService.CreateLayer("AI-空间名称", 130),
                         Position = points[i],
-                        TextStyleId = textStyleId,
+                        TextStyleId = style.ObjectId,
                         Height = 200,
                         WidthFactor = 0.7
                     };

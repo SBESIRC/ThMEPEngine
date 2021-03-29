@@ -11,6 +11,7 @@ using ThMEPWSS.Pipe.Layout;
 using ThMEPWSS.Pipe.Output;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Service;
+using ThCADExtension;
 
 namespace ThMEPWSS.Command
 {
@@ -95,7 +96,7 @@ namespace ThMEPWSS.Command
         }
         public void Execute()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var acadDatabase = AcadDatabase.Active())
             using (var FloorEngines = new ThWCompositeFloorRecognitionEngine())
             {
                 FloorEngines.Recognize(acadDatabase.Database, ThTagParametersService.framePoints);
@@ -133,8 +134,21 @@ namespace ThMEPWSS.Command
                 var PipeindexEngine = new ThWInnerPipeIndexEngine();
                 var composite_Engine = new ThWCompositeIndexEngine(PipeindexEngine);
                 //开始标注 
-                var layoutTag = new ThWCompositeTagOutPutEngine();
+                var style = ImportTextStyle("TH-STYLE3");
+                var layoutTag = new ThWCompositeTagOutPutEngine()
+                {
+                    TextStyleId = style,
+                };
                 layoutTag.LayoutTag(FloorEngines, parameters0, parameters1, parameters2, acadDatabase, PipeindexEngine, composite_Engine, FloorEngines.AllObstacles, ThTagParametersService.ScaleFactor, ThTagParametersService.PipeLayer, W_DRAI_EQPM, W_RAIN_NOTE1);
+            }
+        }
+        private ObjectId ImportTextStyle(string name, bool replaceIfDuplicate = false)
+        {
+            using (var activeDb = AcadDatabase.Active())
+            using (var templateDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
+            {
+                activeDb.TextStyles.Import(templateDb.TextStyles.ElementOrDefault(name), replaceIfDuplicate);
+                return activeDb.TextStyles.ElementOrDefault(name).ObjectId;
             }
         }
     }

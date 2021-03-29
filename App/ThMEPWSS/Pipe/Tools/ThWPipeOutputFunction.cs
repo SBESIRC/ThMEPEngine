@@ -49,14 +49,12 @@ namespace ThMEPWSS.Pipe.Tools
 
         public static DBText Taggingtext(Point3d tag, string s, int scaleFactor, Database db)
         {
-            var textStyleId = GetStyleIds(db,"TH-STYLE3");//费时间
             return new DBText()
             {
-                Height = 175 * scaleFactor,
                 Position = tag,
-                TextString = s,//原来为{floor.Value}     
-                TextStyleId = textStyleId,
-                WidthFactor=0.7
+                TextString = s,    
+                WidthFactor=0.7,
+                Height = 175 * scaleFactor,
             };
         }
         public static List<Polyline> GetNewPipes(List<Polyline> rain_pipe)
@@ -642,38 +640,17 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return texts;
         }
-        public static DBText TaggingBuckettext(Point3d tag, string s,int scaleFactor,string W_RAIN_NOTE1, Database db)
+        public static DBText TaggingBuckettext(Point3d tag, string s, int scaleFactor, string W_RAIN_NOTE1, Database db)
         {
-            var textStyleId = GetStyleIds(db, "TH-STYLE3");
             return new DBText()
             {
-                Height = 200 * scaleFactor,
                 Position = tag,
                 TextString = s,
-                TextStyleId = textStyleId,
-                Layer= W_RAIN_NOTE1,    
-                WidthFactor=0.7
+                WidthFactor = 0.7,
+                Layer = W_RAIN_NOTE1,
+                Height = 200 * scaleFactor,
             };
         }
-        public static ObjectId GetStyleIds(Database db, string styleName)
-        {
-            //打开文字样式表
-            TextStyleTable st = (TextStyleTable)db.TextStyleTableId.GetObject(OpenMode.ForRead);
-            if (!st.Has(styleName))//如果不存在名为styleName的文字样式，则新建一个文字样式
-            {
-                //定义一个新的文字样式表记录
-                TextStyleTableRecord str = new TextStyleTableRecord();
-                str.Name = styleName;//设置文字样式名
-                st.UpgradeOpen();//切换文字样式表的状态为写以添加新的文字样式
-                st.Add(str);//将文字样式表记录的信息添加到文字样式表中
-                //把文字样式表记录添加到事务处理中
-                db.TransactionManager.AddNewlyCreatedDBObject(str, true);
-                st.DowngradeOpen();//为了安全，将文字样式表的状态切换为读
-            }
-            return st[styleName];//返回新添加的文字样式表记录的ObjectId
-        }
-
-
         public static Polyline CreatePolyline(Point3d point1, Point3d point2, List<string> strings, string pipeLayer)
         {
             Polyline ent_line1 = new Polyline();

@@ -17,6 +17,8 @@ namespace ThMEPWSS.Pipe.Output
 {
     public  class ThWCompositeTagOutPutEngine
     {
+        public ObjectId TextStyleId { get; set; }
+
         public void LayoutTag(ThWCompositeFloorRecognitionEngine FloorEngines, ThWTopParameters parameters0, ThWRoofParameters parameters1, 
             ThWRoofDeviceParameters parameters2, AcadDatabase acadDatabase, ThWInnerPipeIndexEngine PipeindexEngine,
             ThWCompositeIndexEngine composite_Engine,List<Curve> obstacleParameters,int scaleFactor,string PipeLayer,string W_DRAI_EQPM,string W_RAIN_NOTE1)
@@ -86,6 +88,7 @@ namespace ThMEPWSS.Pipe.Output
             }
             foreach (var item in storeys)
             {
+                item.Value.Where(o => o is DBText).Cast<DBText>().ForEach(o => o.TextStyleId = TextStyleId);
                 if (acadDatabase.Blocks.Contains(item.Key))
                 {
                     var blk = acadDatabase.Blocks.ElementOrDefault(item.Key, true);

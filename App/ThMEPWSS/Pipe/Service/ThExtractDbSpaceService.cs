@@ -46,7 +46,7 @@ namespace ThMEPWSS.Pipe.Service
         {
             using (AcadDatabase db = AcadDatabase.Active())
             {
-                var textStyleId = ThWPipeOutputFunction.GetStyleIds(db.Database, "TH-STYLE3");
+                var style = db.TextStyles.ElementOrDefault("TH-STYLE3");
                 var polylines = dictionary.Select(o => o.Key).ToList();
                 foreach(Polyline polyline in polylines)
                 {               
@@ -57,7 +57,7 @@ namespace ThMEPWSS.Pipe.Service
                         TextString = dictionary[polyline],
                         LayerId = CreateLayer("AI-空间名称", 130),
                         Position= polyline.GetCenter(),
-                        TextStyleId = textStyleId,
+                        TextStyleId = style.ObjectId,
                         Height=200,
                         WidthFactor=0.7
                     } ;

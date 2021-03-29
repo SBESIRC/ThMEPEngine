@@ -128,6 +128,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "楼层定义工具.dwg");
         }
 
+        // 给排水专业图纸
+        public static string WSSDwgPath()
+        {
+            return Path.Combine(SupportPath(), "地上给排水平面图.dwg");
+        }
+
         // ToolPalette 路径
         public static string ToolPalettePath()
         {
