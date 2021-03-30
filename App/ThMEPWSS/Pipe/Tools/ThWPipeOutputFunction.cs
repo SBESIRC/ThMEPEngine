@@ -885,17 +885,6 @@ namespace ThMEPWSS.Pipe.Tools
             }
             return "";       
         }
-
-        
-
-        public static Polyline CreateRainlines(Point3d point1, Point3d point2,string W_RAIN_PIPE)
-        {
-            Polyline ent_line1 = new Polyline();
-            ent_line1.AddVertexAt(0, point1.ToPoint2d(), 0, 35, 35);
-            ent_line1.AddVertexAt(1, point2.ToPoint2d(), 0, 35, 35);
-            ent_line1.Layer = W_RAIN_PIPE;
-            return ent_line1;
-        }
         public static List<BlockReference> GetListFloorDrain(ThWCompositeBalconyRoom compositeBalcony, ThWTopBalconyParameters parameters)
         {
             var floodrains = new List<BlockReference>();
