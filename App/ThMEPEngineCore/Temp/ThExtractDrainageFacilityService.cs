@@ -39,6 +39,14 @@ namespace ThMEPEngineCore.Temp
                             Facilities.Add(newLine);
                         }
                     }
+                    else if(ent is Circle circle)
+                    {
+                        if (IsDrainageFacilityLayer(circle.Layer))
+                        {
+                            var newCircle = circle.Clone() as Circle;
+                            Facilities.Add(newCircle);
+                        }
+                    }
                 }
                 if (pts.Count >= 3)
                 {

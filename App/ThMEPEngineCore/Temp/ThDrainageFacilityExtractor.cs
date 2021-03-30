@@ -30,10 +30,49 @@ namespace ThMEPEngineCore.Temp
             {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Boundary = o;
+                if(o is Line)
+                {
+                    geometry.Properties.Add(NamePropertyName, "排水沟");
+                    geometry.Boundary = o;
+                }
+                else if (o is Polyline polyline)
+                {
+                    if(polyline.Closed)
+                    {
+                        geometry.Properties.Add(NamePropertyName, "集水井");
+                    }
+                    else
+                    {
+                        geometry.Properties.Add(NamePropertyName, "排水沟");
+                    }
+                    geometry.Boundary = o;
+                }
+                else if(o is Circle circle)
+                {
+                    geometry.Properties.Add(NamePropertyName, "地漏");
+                    geometry.Boundary = ToRectangle(circle);
+                }
                 geos.Add(geometry);
             });
             return geos;
+        }
+
+        private Polyline ToRectangle(Circle circle)
+        {
+            var pt1 = new Point2d(circle.Center.X + circle.Radius, circle.Center.Y + circle.Radius);
+            var pt2 = new Point2d(circle.Center.X - circle.Radius, circle.Center.Y + circle.Radius);
+            var pt3 = new Point2d(circle.Center.X - circle.Radius, circle.Center.Y - circle.Radius);
+            var pt4 = new Point2d(circle.Center.X + circle.Radius, circle.Center.Y - circle.Radius);
+
+            var poly = new Polyline()
+            {
+                Closed = true
+            };
+            poly.AddVertexAt(0, pt1, 0, 0, 0);
+            poly.AddVertexAt(1, pt2, 0, 0, 0);
+            poly.AddVertexAt(2, pt3, 0, 0, 0);
+            poly.AddVertexAt(3, pt4, 0, 0, 0);
+            return poly;
         }
 
         public void Print(Database database)
