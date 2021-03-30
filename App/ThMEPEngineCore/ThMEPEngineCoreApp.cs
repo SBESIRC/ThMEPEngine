@@ -418,21 +418,32 @@ namespace ThMEPEngineCore
                 //理政  CenterLine,Wall,Space   NameLayer="AD-NAME-ROOM"
                 //马力  建筑空间、停车区域、排水设施、墙、柱、阻挡物 NameLayer="空间名称"
                 //给排水大样图测试数据 建筑空间、柱(Db3)、给水点位、给水起点
+                //var extractors = new List<ThExtractorBase>()
+                //{
+                //    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
+                //    //通过停车区域的Space来制造阻挡物
+                //    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
+                //    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
+                //    new ThWaterSupplyPositionExtractor{ColorIndex=3},
+                //    new ThWaterSupplyStartExtractor{ColorIndex=4},
+                //    new ThToiletGroupExtractor { ColorIndex=5},
+                //};
+
                 var extractors = new List<ThExtractorBase>()
                 {
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
-                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
-                    new ThWaterSupplyPositionExtractor{ColorIndex=3},
-                    new ThWaterSupplyStartExtractor{ColorIndex=4},
-                    new ThToiletGroupExtractor { ColorIndex=5},
+                    new ThSpaceExtractor{ IsBuildObstacle=true,NameLayer="空间名称",ColorIndex=1},
+                    new ThColumnExtractor{UseDb3ColumnEngine=false,ColorIndex=2},
+                    new ThShearWallExtractor{ColorIndex=3},
+                    new ThDrainageFacilityExtractor{ColorIndex=4},
                 };
+
 
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
 
-                extractEngine.Group((extractors[4] as ThToiletGroupExtractor).ToiletGroupId);
+                //extractEngine.Group((extractors[4] as ThToiletGroupExtractor).ToiletGroupId);
 
                 extractEngine.OutputGeo(Active.Document.Name);
                 extractEngine.Print(acadDatabase.Database);
