@@ -17,6 +17,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
+using System.Text.RegularExpressions;
 
 namespace ThMEPEngineCore.Test
 {
@@ -305,7 +306,7 @@ namespace ThMEPEngineCore.Test
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var pts = GetPoints(@"E:\ZheDa\WashingPtLayout\GeoJsonTest\2.result.txt");
+                var pts = GetPoints(@"E:\ZheDa\WashingPtLayout\GeoJsonTest\8.result.txt");
                 double radius = 500.0;
                 foreach (var pt in pts)
                 {
@@ -350,9 +351,14 @@ namespace ThMEPEngineCore.Test
             {
                 string line = "";
                 while ((line = sr.ReadLine()) != null)
-                {
-                    string[] values = line.Split(' ');
-                    results.Add(new Point3d(Convert.ToDouble(values[0]), Convert.ToDouble(values[1]), 0.0));
+                {                    
+                    List<double> values = new List<double>();
+                    Regex reg = new Regex(@"\d+[.]?\d+");
+                    foreach(Match item in reg.Matches(line))
+                    {
+                        values.Add(Convert.ToDouble(item.Value));
+                    }
+                    results.Add(new Point3d(values[0], values[1], 0.0));
                 }
             }
             return results;
