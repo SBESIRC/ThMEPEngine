@@ -6,34 +6,45 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 
-namespace ThMEPLighting.FEI.AStarAlgorithm
+namespace ThMEPLighting.FEI.AStarAlgorithm.MapService
 {
     public class Map
     {
         double step = 800;
-        double avoidDistance = 800;
+        double avoidHoleDistance = 800;
+        double avoidFrameDistance = 200;
         Polyline polyline = null; //外包框
         List<Polyline> holes = null;
-        MapService mapService;
+        MapHelper mapHelper;
         int columns = 0;
         int rows = 0;
         public Point startPt;
-        public Point endPt;
+        public EndModel endInfo;
         public List<Point> cells = new List<Point>();
         public bool[][] obstacles = null; //障碍物位置，维度：Column * Line    
 
-        public Map(Polyline _polyline, Vector3d xDir, double _step, double _avoidDistance)
+        public Map(Polyline _polyline, Vector3d xDir, EndModel _endInfo, double _step, double _avoidFrameDistance, double _avoidHoleDistance)
         {
             step = _step;
-            avoidDistance = _avoidDistance;
+            avoidHoleDistance = _avoidHoleDistance;
+            avoidFrameDistance = _avoidFrameDistance;
+            endInfo = _endInfo;
 
             //初始化地图服务
-            mapService = new MapService(step);
-
+            if (_endInfo.type == EndInfoType.point)
+            {
+                mapHelper = new ToPointMapHelper(_step);
+            }
+            else if (_endInfo.type == EndInfoType.line)
+            {
+                mapHelper = new ToCurveMapHelper(_step);
+            }
+            
             Vector3d zDir = Vector3d.ZAxis;
             Vector3d yDir = zDir.CrossProduct(xDir);
-            mapService.ucsMatrix = new Matrix3d(new double[] {
+            mapHelper.ucsMatrix = new Matrix3d(new double[] {
                 xDir.X, xDir.Y, xDir.Z, 0,
                 yDir.X, yDir.Y, yDir.Z, 0,
                 zDir.X, zDir.Y, zDir.Z, 0,
@@ -41,12 +52,9 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             });
 
             var clonePoly = _polyline.Clone() as Polyline;
-            clonePoly.TransformBy(mapService.ucsMatrix);
-            this.polyline = clonePoly;//.Buffer(-avoidDistance)[0] as Polyline;
-            using (Linq2Acad.AcadDatabase s = Linq2Acad.AcadDatabase.Active())
-            {
-                s.ModelSpace.Add(clonePoly);
-            }
+            clonePoly.TransformBy(mapHelper.ucsMatrix);
+            this.polyline = clonePoly.Buffer(-avoidFrameDistance)[0] as Polyline;
+            
             //初始化地图
             CreateMap();
         }
@@ -57,96 +65,28 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         /// <param name="holes"></param>
         public void SetObstacle(List<Polyline> _holes)
         {
-            holes = _holes.SelectMany(x => x.Buffer(avoidDistance).Cast<Polyline>()).ToList();
+            holes = _holes.SelectMany(x => x.Buffer(avoidHoleDistance).Cast<Polyline>()).ToList();
         }
 
         /// <summary>
-        /// 设置起点和终点
+        /// 设置起点和终点信息
         /// </summary> 
         /// <param name="_startPt"></param>
         /// <param name="_endPt"></param>
-        public void SetStartAndEndPoint(Point3d _startPt, Point3d _endPt)
+        public void SetStartAndEndInfo(Point3d _startPt)
         {
-            Point3d transSP = _startPt.TransformBy(mapService.ucsMatrix).TransformBy(mapService.moveMatrix.Inverse());
-            Point3d transEP = _endPt.TransformBy(mapService.ucsMatrix).TransformBy(mapService.moveMatrix.Inverse());
-            var valueLst = mapService.SetMapServiceInfo(transSP, transEP);
-            int sPx = valueLst[0];
-            int sPy = valueLst[1];
-            int ePx = valueLst[2];
-            int ePy = valueLst[3];
+            this.startPt = mapHelper.SetStartAndEndInfo(_startPt, endInfo);
+            InitObstacle();
+        }
 
-            this.startPt = new Point(sPx, sPy);    //初始化起点
-            this.endPt = new Point(ePx, ePy);   //初始化终点
-
-            #region 优化计算障碍物(暂时不要)
-            ////重新检测障碍物
-            //int minX = sPx < ePx ? sPx : ePx;
-            //int maxX = sPx >= ePx ? sPx : ePx;
-            //int minY = sPy < ePy ? sPy : ePy;
-            //int maxY = sPy >= ePy ? sPy : ePy;
-            //List<Point> checkPts = new List<Point>();
-            //for (int i = columns - 1; i >= 0; i--)
-            //{
-            //    for (int j = rows - 1; j >= 0; j--)
-            //    {
-            //        if (i == minX || i == maxX)
-            //        {
-            //            checkPts.Add(new Point(i, j));
-            //        }
-            //        if (j == minY || j == maxY)
-            //        {
-            //            checkPts.Add(new Point(i, j));
-            //        }
-
-            //        if (i - 1 < 0 || i - 2 < 0 || j - 1 < 0 || j - 2 < 0)
-            //        {
-            //            checkPts.Add(new Point(i, j));
-            //        }
-
-            //        int changeI = i;
-            //        int changeJ = j;
-            //        if (i > minX && i < maxX)
-            //        {
-            //            changeI = i - 1;
-            //        }
-            //        else if (i > maxX)
-            //        {
-            //            changeI = i - 2; 
-            //        }
-            //        if (j > minY && j < maxY)
-            //        {
-            //            changeJ = j - 1;
-            //        }
-            //        else if (j > maxY)
-            //        {
-            //            changeJ = j - 2;
-            //        }
-            //        this.obstacles[i][j] = this.obstacles[changeI][changeJ];
-            //    }
-            //}
-            //foreach (var pt in checkPts)
-            //{
-            //    this.obstacles[pt.X][pt.Y] = false;
-            //    Point3d cellPt = mapService.TransformMapPoint(pt);
-            //    if (!polyline.Contains(cellPt))
-            //    {
-            //        this.obstacles[pt.X][pt.Y] = true;
-            //        continue;
-            //    }
-            //    foreach (var hole in holes)
-            //    {
-            //        if (hole.Contains(cellPt))
-            //        {
-            //            this.obstacles[pt.X][pt.Y] = true;
-            //            break;
-            //        }
-            //    }
-            //}
-            #endregion
-
+        /// <summary>
+        /// 计算障碍点位信息
+        /// </summary>
+        private void InitObstacle()
+        {
             foreach (var cell in cells)
             {
-                Point3d cellPt = mapService.TransformMapPoint(cell);
+                Point3d cellPt = mapHelper.TransformMapPoint(cell);
                 if (!polyline.Contains(cellPt))
                 {
                     this.obstacles[cell.X][cell.Y] = true;
@@ -177,7 +117,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             Polyline path = new Polyline();
             for (int i = 0; i < points.Count; i++)
             {
-                Point3d cellPt = mapService.TransformMapPoint(points[i]);
+                Point3d cellPt = mapHelper.TransformMapPoint(points[i]);
                 path.AddVertexAt(0, cellPt.ToPoint2D(), 0, 0, 0);
             }
 
@@ -202,10 +142,10 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         private void CreateMap()
         {
             var boundingBox = GetBoungdingBox(polyline);
-            mapService.moveMatrix = Matrix3d.Displacement(boundingBox[0].GetAsVector());
-            Point3d minPt = boundingBox[0].TransformBy(mapService.moveMatrix.Inverse());
-            Point3d maxPt = boundingBox[1].TransformBy(mapService.moveMatrix.Inverse());
-            this.polyline.TransformBy(mapService.ucsMatrix.Inverse());
+            mapHelper.moveMatrix = Matrix3d.Displacement(boundingBox[0].GetAsVector());
+            Point3d minPt = boundingBox[0].TransformBy(mapHelper.moveMatrix.Inverse());
+            Point3d maxPt = boundingBox[1].TransformBy(mapHelper.moveMatrix.Inverse());
+            this.polyline.TransformBy(mapHelper.ucsMatrix.Inverse());
 
             //----规划地图尺寸----
             double xValue = Math.Abs(maxPt.X - minPt.X);

@@ -29,7 +29,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         private List<Point> ReduceInflectionPoint(List<Point> inflectionPoints, RoutePlanData routePlanData)
         {
             List<Point> path = new List<Point>();
-            while (inflectionPoints.Count > 2)
+            while (inflectionPoints.Count > 3)
             {
                 var firPt = inflectionPoints.First();
                 inflectionPoints.Remove(firPt);

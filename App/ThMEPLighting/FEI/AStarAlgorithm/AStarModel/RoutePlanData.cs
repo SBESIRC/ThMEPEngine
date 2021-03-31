@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPLighting.FEI.AStarAlgorithm.MapService;
 
 namespace ThMEPLighting.FEI.AStarAlgorithm
 {
@@ -38,20 +39,10 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             get { return openedList; }
         }
 
-        /// <summary>
-        /// 目的节点的位置。
-        /// </summary>
-        private Point destination;
-        public Point Destination
-        {
-            get { return destination; }
-        }
-
         #region Ctor
-        public RoutePlanData(Map map, Point _destination)
+        public RoutePlanData(Map map)
         {
             this.cellMap = map;
-            this.destination = _destination;
         }
         #endregion
     }

@@ -2,6 +2,9 @@
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.FEI.AStarAlgorithm.MapService;
+using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
+using ThMEPLighting.FEI.AStarAlgorithm.CostGetterService;
 
 namespace ThMEPLighting.FEI.AStarAlgorithm
 {
@@ -13,13 +16,22 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
     /// </summary>
     public class AStarRoutePlanner
     {
-        CostGetter costGetter = new CostGetter();
+        ICostGetter costGetter;
         Map map;
         List<CompassDirections> allCompassDirections = CompassDirectionsHelper.GetAllCompassDirections();
 
-        public AStarRoutePlanner(Polyline polyline, Vector3d dir, double step = 400, double avoidDistance = 800)
+        public AStarRoutePlanner(Polyline polyline, Vector3d dir, EndModel endInfo, double step = 400, double avoidFrameDistance = 200, double avoidHoleDistance = 800)
         {
-            map = new Map(polyline, dir, step, avoidDistance);
+            map = new Map(polyline, dir, endInfo, step, avoidFrameDistance, avoidHoleDistance);
+
+            if (endInfo.type == EndInfoType.line)
+            {
+                costGetter = new ToLineCostGetter();
+            }
+            else if (endInfo.type == EndInfoType.point)
+            {
+                costGetter = new ToPointCostGetter();
+            }
         }
 
         /// <summary>
@@ -32,17 +44,17 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         }
 
         #region Plan
-        public Polyline Plan(Point3d start, Point3d destination)
+        public Polyline Plan(Point3d start)
         {
-            //初始化起点终点
-            map.SetStartAndEndPoint(start, destination);
+            //初始化起点终点信息
+            map.SetStartAndEndInfo(start);
 
-            if ((!map.ContainsPt(map.startPt)) || (!map.ContainsPt(map.endPt)))
+            if (!map.ContainsPt(map.startPt))
             {
                 throw new Exception("StartPoint or Destination not in the current map!");
             }
 
-            RoutePlanData routePlanData = new RoutePlanData(map, map.endPt);
+            RoutePlanData routePlanData = new RoutePlanData(map);
 
             //设置起点
             AStarNode startNode = new AStarNode(map.startPt, null, 0, 0);
@@ -54,7 +66,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             var lastNode = DoPlan(routePlanData, currenNode);
 
             //获取路径点位
-            var resPt = GetPath(routePlanData, lastNode);
+            var resPt = GetPath(lastNode);
 
             //调整路径
             AdjustAStarPath adjustAStarPath = new AdjustAStarPath();
@@ -93,13 +105,8 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
                     }
 
                     AStarNode nextNode = this.GetNodeOnLocation(nextCell, routePlanData);
-                    int costG = this.costGetter.GetCost(currenNode, direction);   //计算G值
-                    int costH = (Math.Abs(nextCell.X - routePlanData.Destination.X) + Math.Abs(nextCell.Y - routePlanData.Destination.Y)) * 10;    //计算H值
-                    if (costH == 0) //costH为0，表示相邻点就是目的点，规划完成，构造结果路径
-                    {
-                        return currenNode;
-                    }
-
+                    int costG = this.costGetter.GetGCost(currenNode, direction);   //计算G值
+                    int costH = this.costGetter.GetHCost(nextCell, routePlanData.CellMap.endInfo);    //计算H值
                     if (nextNode != null)
                     {
                         if (nextNode.CostG > costG)
@@ -112,6 +119,11 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
                     {
                         nextNode = new AStarNode(nextCell, currenNode, costG, costH);
                         routePlanData.OpenedList.Enqueue(nextNode);
+                    }
+
+                    if (costH == 0) //costH为0，表示相邻点就是目的点，规划完成，构造结果路径
+                    {
+                        return nextNode;
                     }
                 }
 
@@ -129,11 +141,10 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         /// <param name="routePlanData"></param>
         /// <param name="lastNode"></param>
         /// <returns></returns>
-        private List<Point> GetPath(RoutePlanData routePlanData, AStarNode lastNode)
+        private List<Point> GetPath(AStarNode lastNode)
         {
             List<Point> route = new List<Point>();
-            routePlanData.Destination.IsInflectionPoint = true;
-            route.Add(routePlanData.Destination);
+            lastNode.Location.IsInflectionPoint = true;
             route.Insert(0, lastNode.Location);
             AStarNode tempNode = lastNode;
             while (tempNode.ParentNode != null)

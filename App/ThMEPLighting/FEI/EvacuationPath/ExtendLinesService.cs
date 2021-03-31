@@ -12,31 +12,58 @@ namespace ThMEPLighting.FEI.EvacuationPath
 {
     public class ExtendLinesService
     {
-        public List<Line> CreateExtendLines(List<Line> lanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
+        double blockDistance = 600;
+        double mergeAngle = Math.PI / 6;
+        public List<Polyline> CreateExtendLines(List<List<Line>> xLanes, List<List<Line>> yLanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
         {
-            List<Line> allLanes = new List<Line>(lanes.Select(x => x));
+            List<Line> allLanes = new List<Line>(xLanes.SelectMany(x => x.Select(y => y)));
+            allLanes.AddRange(yLanes.SelectMany(x => x.Select(y => y)));
 
-            List<Polyline> resPath = new List<Polyline>();
-           
+            //得到车道方向
+            var xlanedir = (xLanes.First().First().EndPoint - xLanes.First().First().StartPoint).GetNormal();
+            var ylanedir = (yLanes.First().First().EndPoint - yLanes.First().First().StartPoint).GetNormal();
+
+            List<ExtendLineModel> resLines = new List<ExtendLineModel>();
             CreateStartExtendLineService startExtendLineService = new CreateStartExtendLineService();
-            var startPath = startExtendLineService.CreateStartLines(frame, allLanes, enterBlocks, holes);
+            CreateMainLanesService createMainLanes = new CreateMainLanesService();
+            while (enterBlocks.Count > 0)
+            {
+                var block = enterBlocks.First();
+                enterBlocks.Remove(block);
 
-            return startPath.Select(x => x.line).ToList();
-            ////得到车道方向
-            //var xLaneDir = (xLanes.First().First().EndPoint - xLanes.First().First().StartPoint).GetNormal();
-            //var yLaneDir = (yLanes.First().First().EndPoint - yLanes.First().First().StartPoint).GetNormal();
+                //计算能够合并的出口
+                var mergeblock = CalMergeEnterBlock(enterBlocks, block);
 
-            ////
-            //foreach (var block in enterBlocks)
-            //{
-            //    var blockDir = block.BlockTransform.CoordinateSystem3d.Yaxis;
+                //计算合并线
+                var blockPt = block.Position;
+                if (mergeblock != null)
+                {
+                    var mergeLine = MergeBlocks(block, mergeblock, holes);
+                    enterBlocks.Remove(mergeblock);
+                    resLines.Add(mergeLine);
+                    blockPt = new Point3d((mergeLine.line.EndPoint.X + mergeLine.line.StartPoint.X) / 2, (mergeLine.line.EndPoint.Y + mergeLine.line.StartPoint.Y) / 2, 0);
+                }
 
-            //    if (IsXAxisExtend(blockDir, xLaneDir, yLaneDir))
-            //    {
-            //        var extendDir = GetExtendsDirection(block, xLanes);
-            //    }
-            //    //var blockDir = GetExtendsDirection(block, xLanes);
-            //}
+                //起点到主车道延伸线
+                var startExtendLines = startExtendLineService.CreateStartLines(frame, allLanes, blockPt, holes);
+
+                //创建主车道延伸线
+                var closetLane = GeUtils.GetClosetLane(allLanes, blockPt);
+                var dir = (closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal();
+                var startPt = startExtendLines.First().line.EndPoint;
+                var extendDir = (closetLane.Value - blockPt).GetNormal();
+                if (IsXAxisExtend(dir, xlanedir, ylanedir))
+                {
+                    resLines.AddRange(createMainLanes.CreateLines(frame, startPt, extendDir, xLanes, holes));
+                }
+                else
+                {
+                    resLines.AddRange(createMainLanes.CreateLines(frame, startPt, extendDir, yLanes, holes));
+                }
+                resLines.AddRange(startExtendLines);
+            }
+
+            return resLines.Select(x => x.line).ToList();
         }
 
         /// <summary>
@@ -50,7 +77,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         {
             double xValue = Math.Abs(dir.DotProduct(xLaneDir));
             double yValue = Math.Abs(dir.DotProduct(yLaneDir));
-            if (xValue < yValue)
+            if (xValue > yValue)
             {
                 return true;
             }
@@ -61,24 +88,47 @@ namespace ThMEPLighting.FEI.EvacuationPath
         }
 
         /// <summary>
-        /// 计算出入口起点延申方向
+        /// 计算得到相对的图块
+        /// </summary>
+        /// <param name="enterBlocks"></param>
+        /// <param name="block"></param>
+        /// <returns></returns>
+        private BlockReference CalMergeEnterBlock(List<BlockReference> enterBlocks, BlockReference block)
+        {
+            var blockDir = block.BlockTransform.CoordinateSystem3d.Yaxis;
+            var mergeBlock = enterBlocks.Where(x => x.Position.DistanceTo(block.Position) < blockDistance)
+                .Where(x =>
+                {
+                    var dir = (x.Position - block.Position).GetNormal();
+                    var angle = dir.GetAngleTo(blockDir);
+                    return angle < mergeAngle || angle > (Math.PI - mergeAngle);
+                })
+                .FirstOrDefault();
+
+            return mergeBlock;
+        }
+
+        /// <summary>
+        /// 合并能合并图块
         /// </summary>
         /// <param name="block"></param>
-        /// <param name="lanes"></param>
+        /// <param name="otherBlock"></param>
+        /// <param name="holes"></param>
         /// <returns></returns>
-        private Vector3d GetExtendsDirection(BlockReference block, List<List<Line>> lanes)
+        private ExtendLineModel MergeBlocks(BlockReference block, BlockReference otherBlock, List<Polyline> holes)
         {
-            var closetPt = lanes.Select(x => x.First().GetClosestPointTo(block.Position, false))
-                .OrderBy(x => x.DistanceTo(block.Position))
-                .First();
-            var dir = (closetPt - block.Position).GetNormal();
-            var blockDir = block.BlockTransform.CoordinateSystem3d.Yaxis;
-            if (blockDir.DotProduct(dir) < 0)
+            var line = new Polyline();
+            line.AddVertexAt(0, block.Position.ToPoint2D(), 0, 0, 0);
+            line.AddVertexAt(0, otherBlock.Position.ToPoint2D(), 0, 0, 0);
+            ExtendLineModel extendLine = new ExtendLineModel();
+            extendLine.line = line;
+            extendLine.priority = Priority.MergeStartLine;
+            if (CheckService.CheckIntersectWithHols(line, holes, out List<Polyline> intersectHoles))
             {
-                blockDir = -blockDir;
+                return null;
             }
 
-            return blockDir;
+            return extendLine;
         }
     }
 }

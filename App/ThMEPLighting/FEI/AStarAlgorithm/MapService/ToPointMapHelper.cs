@@ -4,23 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 
-namespace ThMEPLighting.FEI.AStarAlgorithm
+namespace ThMEPLighting.FEI.AStarAlgorithm.MapService
 {
     /// <summary>
     /// 地图服务：用来控制cad点位和map中的相互转换
     /// </summary>
-    public class MapService
+    public class ToPointMapHelper : MapHelper
     {
-        double step = 800; //步长
-        public MapService() : this(800)
-        { }
-
-        public MapService(double _step)
-        {
-            step = _step;
-        }
-
         public double minRightSpace = 0;
         public double minDownSpace = 0;
         public double maxRightSpace = 0;
@@ -31,14 +23,36 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         public int minRow = 0;
         public int maxRow = 0;
 
-        public Matrix3d moveMatrix;
-        public Matrix3d ucsMatrix;
+        public ToPointMapHelper(double _step) : base(_step) { }
+
+        /// <summary>
+        /// 设置开始和结束信息
+        /// </summary>
+        /// <param name="_startPt"></param>
+        public override Point SetStartAndEndInfo(Point3d _startPt, EndModel endInfo)
+        {
+            Point3d _endPt = endInfo.endPoint;
+            Point3d transSP = _startPt.TransformBy(ucsMatrix).TransformBy(moveMatrix.Inverse());
+            Point3d transEP = _endPt.TransformBy(ucsMatrix).TransformBy(moveMatrix.Inverse());
+            endInfo.endPoint = transEP;
+
+            //设置service信息
+            var valueLst = SetMapServiceInfo(transSP, endInfo);
+            int sPx = valueLst[0];
+            int sPy = valueLst[1];
+            int ePx = valueLst[2];
+            int ePy = valueLst[3];
+
+            endInfo.mapEndPoint = new Point(ePx, ePy);
+            return new Point(sPx, sPy);
+        }
 
         /// <summary>
         /// 设置service信息
         /// </summary>
-        public List<int> SetMapServiceInfo(Point3d transSP, Point3d transEP)
+        public override List<int> SetMapServiceInfo(Point3d transSP, EndModel endInfo)
         {
+            Point3d transEP = endInfo.endPoint;
             //设置地图服务起点信息
             double sColumn = transSP.X / step;
             double sRow = transSP.Y / step;
@@ -105,24 +119,11 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
         }
 
         /// <summary>
-        /// 将map点转到cad（加入起始点前的map）
-        /// </summary>
-        /// <param name="point"></param>
-        /// <returns></returns>
-        public Point3d TransformMapPointByOriginMap(Point point)
-        {
-            double xValue = point.X * step;
-            double yValue = point.Y * step;
-            var pt = new Point3d(xValue, yValue, 0);
-            return pt.TransformBy(moveMatrix).TransformBy(ucsMatrix.Inverse());
-        }
-
-        /// <summary>
         /// 将map点转到cad
         /// </summary>
         /// <param name="point"></param>
         /// <returns></returns>
-        public Point3d TransformMapPoint(Point point)
+        public override Point3d TransformMapPoint(Point point)
         {
             double xValue = point.X * step;
             if (minColumn == maxColumn)

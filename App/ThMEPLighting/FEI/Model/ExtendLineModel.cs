@@ -9,9 +9,11 @@ namespace ThMEPLighting.FEI.Model
 {
     public class ExtendLineModel
     {
-        public Line line { get; set; }
+        public Polyline line { get; set; }
 
         public List<Line> startLane = new List<Line>();
+
+        public List<Line> endLane = new List<Line>();
 
         public Priority priority { get; set; }
     }

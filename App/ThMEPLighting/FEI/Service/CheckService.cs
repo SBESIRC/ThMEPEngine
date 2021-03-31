@@ -18,7 +18,7 @@ namespace ThMEPLighting.FEI.Service
         /// <param name="holes"></param>
         /// <param name="intersectHoles"></param>
         /// <returns></returns>
-        public static bool CheckIntersectWithHols(Line line, List<Polyline> holes, out List<Polyline> intersectHoles)
+        public static bool CheckIntersectWithHols(Curve line, List<Polyline> holes, out List<Polyline> intersectHoles)
         {
             intersectHoles = new List<Polyline>();
             foreach (var hole in holes)
@@ -29,13 +29,13 @@ namespace ThMEPLighting.FEI.Service
                 }
             }
 
-            if (intersectHoles.Count < 0)
+            if (intersectHoles.Count <= 0)
             {
-                return true;
+                return false;
             }
             else
             {
-                return false;
+                return true;
             }
         }
 
@@ -58,18 +58,30 @@ namespace ThMEPLighting.FEI.Service
                 if (intersectPts.Count > 0)
                 {
                     allPts.AddRange(intersectPts.Cast<Point3d>().ToList());
+                    intersectHoles.Add(hole);
                 }
             }
 
-            if (intersectHoles.Count < 0)
+            if (intersectHoles.Count <= 0)
             {
-                return true;
+                return false;
             }
             else
             {
                 interPt = allPts.OrderBy(x => x.DistanceTo(ray.BasePoint)).First();
-                return false;
+                return true;
             }
+        }
+
+        /// <summary>
+        /// 判断是否和外框线相交
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="frame"></param>
+        /// <returns></returns>
+        public static bool CheckIntersectWithFrame(Curve line, Polyline frame)
+        {
+            return frame.IsIntersects(line);
         }
     }
 }

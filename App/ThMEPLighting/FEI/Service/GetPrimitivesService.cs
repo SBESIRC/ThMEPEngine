@@ -11,6 +11,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPLighting.FEI
 {
@@ -26,8 +27,9 @@ namespace ThMEPLighting.FEI
         /// 获取车道线
         /// </summary>
         /// <returns></returns>
-        public List<Line> GetLanes(Polyline polyline)
+        public List<List<Line>> GetLanes(Polyline polyline, out List<List<Line>> otherLanes)
         {
+            otherLanes = new List<List<Line>>();
             var objs = new DBObjectCollection();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -46,14 +48,17 @@ namespace ThMEPLighting.FEI
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
             if (sprayLines.Count <= 0)
             {
-                return new List<Line>();
+                return new List<List<Line>>();
             }
             sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
 
             //处理车道线
             var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
+            var parkingLinesService = new ParkingLinesService();
+            var parkingLines = parkingLinesService.CreateNodedParkingLines(polyline, handleLines, out List<List<Line>> otherPLines);
+            otherLanes = otherPLines;
 
-            return handleLines;
+            return parkingLines;
         }
 
         /// <summary>

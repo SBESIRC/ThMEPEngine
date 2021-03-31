@@ -9,106 +9,108 @@ using ThMEPLighting.FEI.AStarAlgorithm;
 using Linq2Acad;
 using ThMEPLighting.FEI.Service;
 using ThMEPLighting.FEI.Model;
+using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
+using ThCADCore.NTS;
 
 namespace ThMEPLighting.FEI.EvacuationPath
 {
     public class CreateStartExtendLineService
     {
         double distance = 800;
-        double blockDistance = 600;
-        double mergeAngle = Math.PI / 6;
 
-        public List<ExtendLineModel> CreateStartLines(Polyline polyline, List<Line> lanes, List<BlockReference> enterBlocks, List<Polyline> holes)
+        public List<ExtendLineModel> CreateStartLines(Polyline polyline, List<Line> lanes, Point3d blockPt, List<Polyline> holes)
         {
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
-            //起点段路径规划
-            while (enterBlocks.Count > 0)
+
+            //寻找起点
+            var startPt = CreateDistancePoint(polyline, blockPt);
+
+            //找到最近的车道线
+            var closetLane = GeUtils.GetClosetLane(lanes, startPt);
+
+            //创建延伸线
+            //----简单的一条延伸线且不穿洞
+            var extendLine = CreateSymbolExtendLine(closetLane, startPt, holes);
+            if (extendLine != null)
             {
-                var block = enterBlocks.First();
-                enterBlocks.Remove(block);
-
-                //计算能够合并的出口
-                var mergeblock = CalMergeEnterBlock(enterBlocks, block);
-
-                //计算合并线
-                var blockPt = block.Position;
-                if (mergeblock != null)
-                {
-                    var mergeLine = MergeBlocks(block, mergeblock, holes);
-                    enterBlocks.Remove(mergeblock);
-                    resLines.Add(mergeLine);
-                    blockPt = new Point3d((mergeLine.line.EndPoint.X + mergeLine.line.StartPoint.X) / 2, (mergeLine.line.EndPoint.Y + mergeLine.line.StartPoint.Y) / 2, 0);
-                }
-
-                //寻找起点
-                var startPt = CreateDistancePoint(polyline, blockPt);
-
-                //找到最近的车道线
-                var closetLane = GetClosetLane(lanes, startPt);
-
-                //计算逃生路径(用A*算法)
-                var dir = (closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal();
-                AStarRoutePlanner aStarRoute = new AStarRoutePlanner(polyline, dir, 400, 400);
-                //----设置障碍物
-                aStarRoute.SetObstacle(holes);
-                //----计算路径
-                var path = aStarRoute.Plan(startPt, closetLane.Value);
-
-                if (path != null)
-                {
-                    foreach (var line in PLineToLine(path))
-                    {
-                        ExtendLineModel extendLine = new ExtendLineModel();
-                        extendLine.line = line;
-                        extendLine.priority = Priority.startExtendLine;
-                        resLines.Add(extendLine);
-                    }
-                }
+                resLines.Add(extendLine);
+            }
+            else
+            {
+                //----用a*算法计算路径躲洞
+                resLines.AddRange(GetPathByAStar(polyline, closetLane.Key, startPt, holes));
             }
 
             return resLines;
         }
 
         /// <summary>
-        /// 计算得到相对的图块
+        /// 计算简单的延伸线
         /// </summary>
-        /// <param name="enterBlocks"></param>
-        /// <param name="block"></param>
+        /// <param name="closetLane"></param>
+        /// <param name="startPt"></param>
         /// <returns></returns>
-        private BlockReference CalMergeEnterBlock(List<BlockReference> enterBlocks, BlockReference block)
+        public ExtendLineModel CreateSymbolExtendLine(KeyValuePair<Line, Point3d> closetLane, Point3d startPt, List<Polyline> holes)
         {
-            var blockDir = block.BlockTransform.CoordinateSystem3d.Yaxis;
-            var mergeBlock = enterBlocks.Where(x => x.Position.DistanceTo(block.Position) < blockDistance)
-                .Where(x =>
+            Vector3d dir = Vector3d.ZAxis.CrossProduct((closetLane.Value - startPt).GetNormal());
+            if ((closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.1, 0.1)))
+            {
+                Polyline line = new Polyline();
+                line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);
+                line.AddVertexAt(0, closetLane.Value.ToPoint2D(), 0, 0, 0); 
+                if (!SelectService.LineIntersctBySelect(holes, line, 200))
                 {
-                    var dir = (x.Position - block.Position).GetNormal();
-                    var angle = dir.GetAngleTo(blockDir);
-                    return angle < mergeAngle || angle > (Math.PI - mergeAngle);
-                })
-                .FirstOrDefault();
+                    ExtendLineModel extendLine = new ExtendLineModel();
+                    extendLine.line = line;
+                    extendLine.priority = Priority.startExtendLine;
+                    return extendLine;
+                }
+                
+            }
 
-            return mergeBlock;
+            return null;
         }
 
         /// <summary>
-        /// 合并能合并图块
+        /// 使用a*算法寻路
         /// </summary>
-        /// <param name="block"></param>
-        /// <param name="otherBlock"></param>
+        /// <param name="polyline"></param>
+        /// <param name="closetLane"></param>
+        /// <param name="startPt"></param>
         /// <param name="holes"></param>
         /// <returns></returns>
-        private ExtendLineModel MergeBlocks(BlockReference block, BlockReference otherBlock, List<Polyline> holes)
+        private List<ExtendLineModel> GetPathByAStar(Polyline polyline, Line closetLane, Point3d startPt, List<Polyline> holes)
         {
-            var line = new Line(block.Position, otherBlock.Position);
-            ExtendLineModel extendLine = new ExtendLineModel();
-            extendLine.line = line;
-            extendLine.priority = Priority.MergeStartLine;
-            if (CheckService.CheckIntersectWithHols(line, holes, out List<Polyline> intersectHoles))
+            List<ExtendLineModel> resLines = new List<ExtendLineModel>();
+            //计算逃生路径(用A*算法)
+            //----构建寻路地图框线
+            var mapFrame = OptimizeStartExtendLineService.CreateMapFrame(closetLane, startPt, 1000);
+            mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderByDescending(x => x.Area).First();
+
+            //----创建终点信息
+            EndModel endModel = new EndModel();
+            endModel.endLine = closetLane;
+            endModel.type = EndInfoType.line;
+
+            //----初始化寻路类
+            var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
+            AStarRoutePlanner aStarRoute = new AStarRoutePlanner(mapFrame, dir, endModel, 400, 200, 200);
+
+            //----设置障碍物
+            var resHoles = SelectService.SelelctCrossing(holes, mapFrame);
+            aStarRoute.SetObstacle(resHoles);
+
+            //----计算路径
+            var path = aStarRoute.Plan(startPt);
+            if (path != null)
             {
-                return null;
+                ExtendLineModel extendLine = new ExtendLineModel();
+                extendLine.line = path;
+                extendLine.priority = Priority.startExtendLine;
+                resLines.Add(extendLine);
             }
 
-            return extendLine;
+            return resLines;
         }
 
         /// <summary>
@@ -136,42 +138,6 @@ namespace ThMEPLighting.FEI.EvacuationPath
             }
 
             return resPt;
-        }
-
-        /// <summary>
-        /// 获取最近车道线
-        /// </summary>
-        /// <param name="lanes"></param>
-        /// <param name="startPt"></param>
-        /// <returns></returns>
-        private KeyValuePair<Line, Point3d> GetClosetLane(List<Line> lanes, Point3d startPt)
-        {
-            var lanePtInfo = lanes.ToDictionary(x => x, y => y.GetClosestPointTo(startPt, false))
-                .OrderBy(x => x.Value.DistanceTo(startPt))
-                .First();
-
-            return lanePtInfo;
-        }
-
-        /// <summary>
-        /// polyline转换成line
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        private List<Line> PLineToLine(Polyline polyline)
-        {
-            List<Line> resLines = new List<Line>();
-            for (int i = 0; i < polyline.NumberOfVertices - 1; i++)
-            {
-                resLines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt(i + 1)));
-            }
-
-            if (polyline.Closed)
-            {
-                resLines.Add(new Line(polyline.GetPoint3dAt(polyline.NumberOfVertices - 1), polyline.GetPoint3dAt(0)));
-            }
-
-            return resLines;
         }
     }
 }
