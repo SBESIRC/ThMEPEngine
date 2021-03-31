@@ -16,10 +16,20 @@ namespace ThMEPEngineCore.Features
             {
                 if (geometry.Boundary is Polyline polyline)
                 {
-                    var geo = polyline.ToNTSLineString();
-                    var attributesTable = new AttributesTable(geometry.Properties);
-                    var feature = new Feature(geo, attributesTable);
-                    return feature;
+                    if(polyline.Closed)
+                    {
+                        var geo = polyline.ToNTSPolygon();
+                        var attributesTable = new AttributesTable(geometry.Properties);
+                        var feature = new Feature(geo, attributesTable);
+                        return feature;
+                    }
+                    else
+                    {
+                        var geo = polyline.ToNTSLineString();
+                        var attributesTable = new AttributesTable(geometry.Properties);
+                        var feature = new Feature(geo, attributesTable);
+                        return feature;
+                    }
                 }
                 else if (geometry.Boundary is Line line)
                 {
