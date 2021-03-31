@@ -35,6 +35,13 @@ namespace ThMEPEngineCore.Features
                     var feature = new Feature(geo, attributesTable);
                     return feature;
                 }
+                else if(geometry.Boundary is MPolygon mPolygon)
+                {
+                    var geo = mPolygon.ToNTSPolygon();
+                    var attributesTable = new AttributesTable(geometry.Properties);
+                    var feature = new Feature(geo, attributesTable);
+                    return feature;
+                }
                 else
                 {
                     throw new NotSupportedException();

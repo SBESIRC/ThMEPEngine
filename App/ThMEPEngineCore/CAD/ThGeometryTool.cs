@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 using ThCADExtension;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Algorithm.Locate;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -315,6 +318,71 @@ namespace ThMEPEngineCore.CAD
                 return ang >= arc.StartAngle && ang <= arc.EndAngle;
             }
             return false;
+        }
+        public static bool IsContains(this Entity ent, Point3d pt)
+        {
+            if (ent is Polyline polyline)
+            {
+                return polyline.Closed ? polyline.Contains(pt) : false;
+            }
+            else if (ent is MPolygon mPolygon)
+            {
+                var locator = new SimplePointInAreaLocator(mPolygon.ToNTSPolygon());
+                return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
+            }
+            else if (ent is Circle circle)
+            {
+                return pt.DistanceTo(circle.Center) <= circle.Radius;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        public static bool IsContains(this Entity ent, Entity innerLoop)
+        {
+            if(ent is Polyline first)
+            {
+                return Contains(first, innerLoop);
+            }
+            else if(ent is MPolygon mPolygon)
+            {
+                return Contains(mPolygon, innerLoop);
+            }
+            else
+            {
+                return false;
+            }          
+        }
+        private static bool Contains(Polyline firstPoly,Entity entity)
+        {
+            if(entity is Polyline secondPoly)
+            {
+                return firstPoly.Contains(secondPoly);
+            }
+            else if(entity is MPolygon mPolygon)
+            {
+                return firstPoly.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private static bool Contains(MPolygon firstPolygon, Entity entity)
+        {
+            if (entity is Polyline secondPoly)
+            {
+                return firstPolygon.ToNTSPolygon().Contains(secondPoly.ToNTSPolygon());
+            }
+            else if (entity is MPolygon mPolygon)
+            {
+                return firstPolygon.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

@@ -5,6 +5,6 @@ namespace ThMEPEngineCore.Temp
 {
     public interface IGroup
     {
-        void Group(Dictionary<Polyline,string> groupId);
+        void Group(Dictionary<Entity,string> groupId);
     }
 }
