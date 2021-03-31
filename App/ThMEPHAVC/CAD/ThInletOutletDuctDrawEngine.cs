@@ -33,6 +33,7 @@ namespace ThMEPHVAC.CAD
         public double OutletDuctHeight { get; set; }
         public double TeeWidth { get; set; }
         public double TeeHeight { get; set; }
+        public double Elevation { get; set; }
         public string FanInOutType { get; set; }
         public List<ThIfcDistributionElement> InletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> OutletDuctSegments { get; set; }
@@ -50,6 +51,7 @@ namespace ThMEPHVAC.CAD
             string innerductinfo, 
             string outerductinfo,
             string tee_info,
+            string elevation_info,
             DBObjectCollection bypass_line,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph
@@ -75,7 +77,8 @@ namespace ThMEPHVAC.CAD
             SetInletOutletSize(fanmodel.FanScenario, 
                                innerductinfo, 
                                outerductinfo,
-                               tee_info);
+                               tee_info,
+                               elevation_info);
 
             InletDuctSegments = new List<ThIfcDistributionElement>();
             OutletDuctSegments = new List<ThIfcDistributionElement>();
@@ -123,7 +126,8 @@ namespace ThMEPHVAC.CAD
         private void SetInletOutletSize(string scenario, 
                                         string innerromeductinfo, 
                                         string outerromeductinfo,
-                                        string tee_info)
+                                        string tee_info,
+                                        string elevation_info)
         {
             var jsonReader = new ThDuctInOutMappingJsonReader();
             var innerRomDuctPosition = jsonReader.Mappings.First(d=>d.WorkingScenario == scenario).InnerRoomDuctType;
@@ -146,6 +150,7 @@ namespace ThMEPHVAC.CAD
                 TeeWidth = tee_info.Split('x').First().NullToDouble();
                 TeeHeight = tee_info.Split('x').Last().NullToDouble();
             }
+            Elevation = Double.Parse(elevation_info);
         }
 
         private ThIfcDuctSegmentParameters create_duct_param(Point3d tar_srt_pos,
@@ -153,13 +158,12 @@ namespace ThMEPHVAC.CAD
                                                              double duct_width,
                                                              double duct_height,
                                                              double edge_len,
-                                                             DBObjectCollection bypass_lines)
+                                                             DBObjectCollection bypass_lines, 
+                                                             out bool is_bypass)
         {
-            bool IsBypass = ThServiceTee.is_bypass(tar_srt_pos,
-                                                   tar_end_pos,
-                                                   bypass_lines);
-            double Width = IsBypass ? TeeWidth : duct_width;
-            double Height = IsBypass ? TeeHeight : duct_height;
+            is_bypass = ThServiceTee.is_bypass(tar_srt_pos, tar_end_pos, bypass_lines);
+            double Width = is_bypass ? TeeWidth : duct_width;
+            double Height = is_bypass ? TeeHeight : duct_height;
             return new ThIfcDuctSegmentParameters
             {
                 Width = Width,
@@ -238,20 +242,21 @@ namespace ThMEPHVAC.CAD
                     InletCenterLineGraph.OutEdges(firstvertex).FirstOrDefault().SourceShrink = reducing.Parameters.ReducingLength + ThDuctUtils.GetHoseLength(scenario);
                 }
             }
-
+            bool is_bypass = false;
             foreach (var ductgraphedge in InletCenterLineGraph.Edges)
             {
-                var DuctParameters = create_duct_param( ductgraphedge.Source.Position,
+                var DuctParameters = create_duct_param(ductgraphedge.Source.Position,
                                                         ductgraphedge.Target.Position,
                                                         InletDuctWidth,
                                                         InletDuctHeight,
                                                         ductgraphedge.EdgeLength,
-                                                        bypass_line);
+                                                        bypass_line,
+                                                        out is_bypass) ;
 
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = InletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct);
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct, null);
                 if (isUpOrDownOpening)
                 {
                     ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * InletOpening.Height, ductgraphedge.TargetShrink);
@@ -339,7 +344,10 @@ namespace ThMEPHVAC.CAD
                 }
 
             }
-
+            bool is_bypass = false;
+            int i = 0;
+            double a = (Elevation * 1000 + InletDuctHeight - TeeHeight) / 1000;
+            string s_evel = string.Empty;
             foreach (var ductgraphedge in OutletCenterLineGraph.Edges)
             {
                 var DuctParameters = create_duct_param( ductgraphedge.Source.Position,
@@ -347,12 +355,32 @@ namespace ThMEPHVAC.CAD
                                                         OutletDuctWidth,
                                                         OutletDuctHeight,
                                                         ductgraphedge.EdgeLength,
-                                                        bypass_line);
+                                                        bypass_line,
+                                                        out is_bypass);
 
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
-                bool islongestduct = OutletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct);
+                bool text_enable = false;
+                ++i;
+                if (is_bypass)
+                {
+                    text_enable = true;
+                    s_evel = a.ToString();
+                }
+                else
+                {
+                    if (i == OutletCenterLineGraph.Edges.Count() || i == OutletCenterLineGraph.Edges.Count() - 1)
+                    {
+                        text_enable = true;
+                        s_evel = Elevation.ToString();
+                    }
+                }
+
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, 
+                                                                              rotateangle, 
+                                                                              isUpOrDownOpening, 
+                                                                              text_enable,
+                                                                              s_evel);
                 if (isUpOrDownOpening)
                 {
                     ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * OutletOpening.Height, ductgraphedge.TargetShrink);
@@ -526,8 +554,24 @@ namespace ThMEPHVAC.CAD
                         var textstyleId = CreateDuctTextStyle();
                         Segment.InformationText.LayerId = textlayerId;
                         Segment.InformationText.TextStyleId = textstyleId;
-                        Segment.InformationText.TransformBy(Segment.Matrix);
-                        acadDatabase.ModelSpace.Add(Segment.InformationText);
+                        string s = Segment.InformationText.TextString;
+                        string[] str = s.Split(' ');
+                        if (str.Count() == 2)
+                        {
+                            DBText t = Segment.InformationText.Clone() as DBText;
+                            if (t == null)
+                                return;
+                            t.TextString = str[0];
+                            t.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(-2000, 0, 0)));
+                            acadDatabase.ModelSpace.Add(t);
+                            Segment.InformationText.TextString = str[1];
+                            Segment.InformationText.TransformBy(Segment.Matrix);
+                            acadDatabase.ModelSpace.Add(Segment.InformationText);
+                        }
+
+                        //Segment.InformationText.TransformBy(Segment.Matrix);
+
+                        
                         Segment.InformationText.SetDatabaseDefaults();
                     }
                 }

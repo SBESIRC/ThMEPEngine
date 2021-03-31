@@ -46,12 +46,24 @@ namespace TianHua.Hvac.UI
         }
         private void search_valve()
         {
-            string s = (RadType1.Checked) ? listBox1.SelectedItem.ToString() : textBox2.Text;
-
-            string[] str = s.Split('x');
-            IValveWidth = str[0];
-            OValveWidth = (RadType1.Checked) ? str[1] : "";
-            TeeWidth = s;
+            if (RadType1.Checked)
+            {
+                string s = listBox1.SelectedItem.ToString();
+                string[] str = s.Split('x');
+                IValveWidth = str[0];
+                OValveWidth = str[1];
+                TeeWidth = s;
+            }
+            else
+            {
+                if (!string.IsNullOrEmpty(textBox2.Text) && !string.IsNullOrEmpty(textBox3.Text))
+                {
+                    IValveWidth = textBox2.Text;
+                    OValveWidth = textBox3.Text;
+                    TeeWidth = textBox2.Text + "x" + textBox3.Text;
+                }
+            }
+            
         }
         private void buttonOK_Click(object sender, EventArgs e)
         {
