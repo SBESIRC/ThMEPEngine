@@ -13,44 +13,29 @@ namespace ThMEPHVAC.Model
 {
     public class ThServiceTee
     {
-        public static void SeperateIODuct(DBObjectCollection IOLineSet, double SepDis)
+        internal static bool is_bypass(Point3d tar_srt_pos,
+                                       Point3d tar_end_pos,
+                                       DBObjectCollection bypass_lines)
         {
-            if (IOLineSet.Count == 7)
+            if (bypass_lines == null)
+                return false;
+            foreach (Line l in bypass_lines)
             {
-                int ind = 0;
-                double maxX = 0;
-                foreach (Line line in IOLineSet)
+                if ((l.StartPoint.IsEqualTo(tar_srt_pos) &&
+                    l.EndPoint.IsEqualTo(tar_end_pos)) ||
+                    (l.StartPoint.IsEqualTo(tar_end_pos) &&
+                    l.EndPoint.IsEqualTo(tar_srt_pos)))
                 {
-                    if (line.StartPoint.X == line.EndPoint.X)
-                    {
-                        maxX = line.StartPoint.X;
-                        break;
-                    }
+                    return true;
                 }
-                for (int i = 0; i < 7; ++i)
-                {
-                    Line line = IOLineSet[i] as Line;
-                    if (line.StartPoint.X == line.EndPoint.X && line.StartPoint.X > maxX)
-                    {
-                        ind = i;
-                        break;
-                    }
-                }
-                Line l = IOLineSet[ind] as Line;
-                IOLineSet.RemoveAt(ind);
-                // 先插后一条再插前一条
-                Point3d intP = l.StartPoint + new Vector3d(0, SepDis + 125, 0);
-
-                IOLineSet.Insert(ind, new Line(intP + new Vector3d(0, 10, 0), l.EndPoint));
-                IOLineSet.Insert(ind, new Line(l.StartPoint, intP + new Vector3d(0, -10, 0)));
-
-                // intP是伐的插入点
             }
+            return false;
         }
-        public static void TeeRefineDuct(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> LineGraph,
-                                         double IShrink,
-                                         double OShrink1,
-                                         double OShrink2)
+
+        public static void TeeFineTuneDuct(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> LineGraph,
+                                           double IShrink,
+                                           double Shrinkb,
+                                           double Shrinkm)
         {
             foreach (var edge in LineGraph.Edges)
             {
@@ -59,14 +44,14 @@ namespace ThMEPHVAC.Model
                     var out1 = LineGraph.OutEdges(edge.Target).First();
                     var out2 = LineGraph.OutEdges(edge.Target).Last();
                     edge.TargetShrink = IShrink;
-                    out1.SourceShrink = OShrink1;
-                    out2.SourceShrink = OShrink2;
+                    out1.SourceShrink = Shrinkb;
+                    out2.SourceShrink = Shrinkm;
                 }
             }
         }
-        public static ObjectId InsertElectricValve(Point3d DisVec,
-                                            double valvewidth,
-                                            double rotationangle)
+        public static ObjectId InsertElectricValve( Point3d DisVec,
+                                                    double valvewidth,
+                                                    double rotationangle)
         {
             var e = CreateElectricValve(DisVec, valvewidth, rotationangle);
             return SetElectricValve(e);
@@ -89,7 +74,7 @@ namespace ThMEPHVAC.Model
                 return objId;
             }
         }
-        private static ThValve CreateElectricValve(Point3d DisVec,
+        private static ThValve CreateElectricValve( Point3d DisVec,
                                                     double valvewidth,
                                                     double rotationangle)
         {

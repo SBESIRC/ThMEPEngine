@@ -1,14 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using ThMEPHAVC.CAD;
-using ThMEPHVAC;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
 using TianHua.Publics.BaseCode;
@@ -19,7 +11,7 @@ namespace TianHua.Hvac.UI
     {
         public string SelectedInnerDuctSize { get; set; }
         public string SelectedOuterDuctSize { get; set; }
-
+        public string AirVolume { get; set; }
         DuctSpecModel m_DuctSpecModel { get; set; }
         public fmDuctSpec()
         {
@@ -48,22 +40,20 @@ namespace TianHua.Hvac.UI
 
             ListBoxInnerTube.SelectedItem = _DuctSpecModel.InnerTube;
 
-            if (_DuctSpecModel.InnerAnalysisType != AnalysisResultType.OK)
-            {
-                ListBoxInnerTube.Enabled = false;
-                TxtInnerTube1.Enabled = false;
-                TxtInnerTube2.Enabled = false;
+            //if (_DuctSpecModel.InnerAnalysisType != AnalysisResultType.OK)
+            //{
+            //    ListBoxInnerTube.Enabled = false;
+            //    TxtInnerTube1.Enabled = false;
+            //    TxtInnerTube2.Enabled = false;
 
-            }
+            //}
 
-            if (_DuctSpecModel.OuterAnalysisType != AnalysisResultType.OK)
-            {
-                ListBoxOuterTube.Enabled = false;
-                TxtOuterTube1.Enabled = false;
-                TxtOuterTube2.Enabled = false;
-            }
-
-
+            //if (_DuctSpecModel.OuterAnalysisType != AnalysisResultType.OK)
+            //{
+            //    ListBoxOuterTube.Enabled = false;
+            //    TxtOuterTube1.Enabled = false;
+            //    TxtOuterTube2.Enabled = false;
+            //}
         }
 
         private void Rad_SelectedIndexChanged(object sender, EventArgs e)
@@ -117,8 +107,7 @@ namespace TianHua.Hvac.UI
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
-
-
+            AirVolume = TxtAirVolume.Text;
         }
 
         private void ListBoxOuterTube_SelectedValueChanged(object sender, EventArgs e)
@@ -185,11 +174,9 @@ namespace TianHua.Hvac.UI
 
             if (FuncStr.NullToDouble(TxtAirSpeed.Text) < m_DuctSpecModel.MinAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); _AirSpeed = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); }
 
-
             //if (FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
 
-            ThDuctSelectionEngine _ThDuctSelectionEngine = new ThDuctSelectionEngine(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed)  );
-
+            ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed)  );
 
             m_DuctSpecModel.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
             m_DuctSpecModel.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
@@ -203,8 +190,6 @@ namespace TianHua.Hvac.UI
             ListBoxOuterTube.SelectedItem = m_DuctSpecModel.OuterTube;
 
             ListBoxInnerTube.SelectedItem = m_DuctSpecModel.InnerTube;
-
-
         }
 
         private void TxtOuterTube1_EditValueChanged(object sender, EventArgs e)
@@ -243,12 +228,6 @@ namespace TianHua.Hvac.UI
 
             LabAirSpeedInner.Text = string.Format("计算风速 {0} m/s", _AirSpeed.ToString("0.#"));
         }
-
-
-
-
-
-
 
         private void TxtAirSpeed_ParseEditValue(object sender, DevExpress.XtraEditors.Controls.ConvertEditValueEventArgs e)
         {

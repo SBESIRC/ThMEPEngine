@@ -12,6 +12,7 @@ using ThMEPHVAC.IO;
 using ThMEPHVAC.Duct;
 using TianHua.Publics.BaseCode;
 using ThMEPEngineCore.Service.Hvac;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.CAD
 {
@@ -30,6 +31,8 @@ namespace ThMEPHVAC.CAD
         public double OutletDuctWidth { get; set; }
         public double InletDuctHeight { get; set; }
         public double OutletDuctHeight { get; set; }
+        public double TeeWidth { get; set; }
+        public double TeeHeight { get; set; }
         public string FanInOutType { get; set; }
         public List<ThIfcDistributionElement> InletDuctSegments { get; set; }
         public List<ThIfcDistributionElement> OutletDuctSegments { get; set; }
@@ -46,6 +49,8 @@ namespace ThMEPHVAC.CAD
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel, 
             string innerductinfo, 
             string outerductinfo,
+            string tee_info,
+            DBObjectCollection bypass_line,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph
         )
@@ -67,7 +72,10 @@ namespace ThMEPHVAC.CAD
             InletCenterLineGraph = inletcenterlinegraph;
             OutletCenterLineGraph = outletcenterlinegraph;
             FanInOutType = fanmodel.IntakeForm;
-            SetInletOutletSize(fanmodel.FanScenario, fanmodel.IntakeForm, innerductinfo, outerductinfo);
+            SetInletOutletSize(fanmodel.FanScenario, 
+                               innerductinfo, 
+                               outerductinfo,
+                               tee_info);
 
             InletDuctSegments = new List<ThIfcDistributionElement>();
             OutletDuctSegments = new List<ThIfcDistributionElement>();
@@ -78,12 +86,12 @@ namespace ThMEPHVAC.CAD
             InletDuctHoses = new List<ThIfcDistributionElement>();
             OutletDuctHoses = new List<ThIfcDistributionElement>();
 
-            SetInletElbows();
-            SetOutletElbows();
+            SetInletElbows(bypass_line);
+            SetOutletElbows(bypass_line);
             SetInOutHoses(fanmodel.FanScenario);
             bool isAxial = fanmodel.Model.IsAXIALModel();
-            SetInletDucts(fanmodel.FanScenario, isAxial);
-            SetOutletDucts(fanmodel.FanScenario, isAxial);
+            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line);
+            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line);
         }
 
         public void RunInletDrawEngine(ThDbModelFan fanmodel)
@@ -112,7 +120,10 @@ namespace ThMEPHVAC.CAD
             DrawHoseInDWG(OutletDuctHoses, modelLayer);
         }
 
-        private void SetInletOutletSize(string scenario, string inouttype, string innerromeductinfo, string outerromeductinfo)
+        private void SetInletOutletSize(string scenario, 
+                                        string innerromeductinfo, 
+                                        string outerromeductinfo,
+                                        string tee_info)
         {
             var jsonReader = new ThDuctInOutMappingJsonReader();
             var innerRomDuctPosition = jsonReader.Mappings.First(d=>d.WorkingScenario == scenario).InnerRoomDuctType;
@@ -130,9 +141,34 @@ namespace ThMEPHVAC.CAD
                 OutletDuctWidth = innerromeductinfo.Split('x').First().NullToDouble();
                 OutletDuctHeight = innerromeductinfo.Split('x').Last().NullToDouble();
             }
+            if (!string.IsNullOrEmpty(tee_info))
+            {
+                TeeWidth = tee_info.Split('x').First().NullToDouble();
+                TeeHeight = tee_info.Split('x').Last().NullToDouble();
+            }
         }
 
-        private void SetInletDucts(string scenario,bool isaxial)
+        private ThIfcDuctSegmentParameters create_duct_param(Point3d tar_srt_pos,
+                                                             Point3d tar_end_pos,
+                                                             double duct_width,
+                                                             double duct_height,
+                                                             double edge_len,
+                                                             DBObjectCollection bypass_lines)
+        {
+            bool IsBypass = ThServiceTee.is_bypass(tar_srt_pos,
+                                                   tar_end_pos,
+                                                   bypass_lines);
+            double Width = IsBypass ? TeeWidth : duct_width;
+            double Height = IsBypass ? TeeHeight : duct_height;
+            return new ThIfcDuctSegmentParameters
+            {
+                Width = Width,
+                Height = Height,
+                Length = edge_len
+            };
+        }
+
+        private void SetInletDucts(string scenario,bool isaxial, DBObjectCollection bypass_line)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -205,12 +241,13 @@ namespace ThMEPHVAC.CAD
 
             foreach (var ductgraphedge in InletCenterLineGraph.Edges)
             {
-                var DuctParameters = new ThIfcDuctSegmentParameters()
-                {
-                    Width = InletDuctWidth,
-                    Height = InletDuctHeight,
-                    Length = ductgraphedge.EdgeLength
-                };
+                var DuctParameters = create_duct_param( ductgraphedge.Source.Position,
+                                                        ductgraphedge.Target.Position,
+                                                        InletDuctWidth,
+                                                        InletDuctHeight,
+                                                        ductgraphedge.EdgeLength,
+                                                        bypass_line);
+
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = InletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
@@ -225,11 +262,12 @@ namespace ThMEPHVAC.CAD
                 }
                 Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
                 ductSegment.Matrix = Matrix3d.Displacement(centerpoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+
                 InletDuctSegments.Add(ductSegment);
             }
         }
 
-        private void SetOutletDucts(string scenario,bool isaxial)
+        private void SetOutletDucts(string scenario, bool isaxial, DBObjectCollection bypass_line)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
             bool isUpOrDownOpening = FanInOutType.Contains("上出") || FanInOutType.Contains("下出");
@@ -304,12 +342,13 @@ namespace ThMEPHVAC.CAD
 
             foreach (var ductgraphedge in OutletCenterLineGraph.Edges)
             {
-                var DuctParameters = new ThIfcDuctSegmentParameters()
-                {
-                    Width = OutletDuctWidth,
-                    Height = OutletDuctHeight,
-                    Length = ductgraphedge.EdgeLength
-                };
+                var DuctParameters = create_duct_param( ductgraphedge.Source.Position,
+                                                        ductgraphedge.Target.Position,
+                                                        OutletDuctWidth,
+                                                        OutletDuctHeight,
+                                                        ductgraphedge.EdgeLength,
+                                                        bypass_line);
+
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = OutletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
@@ -329,7 +368,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetInletElbows()
+        private void SetInletElbows(DBObjectCollection bypass_lines)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -346,10 +385,13 @@ namespace ThMEPHVAC.CAD
                     Vector2d outvector = new Vector2d(outedge.Target.Position.X - outedge.Source.Position.X , outedge.Target.Position.Y - outedge.Source.Position.Y);
                     var edgeangle = 180 - Math.Acos(invector.DotProduct(outvector) / (invector.Length * outvector.Length)) * 180 / Math.PI;
                     Vector2d bisectoroftwoedge = invector / invector.Length + outvector / outvector.Length;
+
+                    bool IsBypass = ThServiceTee.is_bypass( edge.Source.Position, edge.Target.Position, bypass_lines);
+                    double width = IsBypass ? TeeWidth : InletDuctWidth;
                     var elbowParameters = new ThIfcDuctElbowParameters()
                     {
                         ElbowDegree = edgeangle,
-                        PipeOpenWidth = InletDuctWidth,
+                        PipeOpenWidth = width
                     };
                     var elbow = ductFittingFactoryService.CreateElbow(elbowParameters);
                     elbow.Matrix = Matrix3d.Displacement(edge.Target.Position.GetAsVector()) * Matrix3d.Rotation(bisectoroftwoedge.Angle - elbow.Parameters.BisectorAngle, Vector3d.ZAxis, elbow.Parameters.CornerPoint);
@@ -361,7 +403,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetOutletElbows()
+        private void SetOutletElbows(DBObjectCollection bypass_lines)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -374,10 +416,12 @@ namespace ThMEPHVAC.CAD
                     Vector2d outvector = new Vector2d(outedge.Target.Position.X - outedge.Source.Position.X, outedge.Target.Position.Y - outedge.Source.Position.Y);
                     var edgeangle = 180 - Math.Acos(invector.DotProduct(outvector) / (invector.Length * outvector.Length)) * 180 / Math.PI;
                     Vector2d bisectoroftwoedge = invector / invector.Length + outvector / outvector.Length;
+                    bool IsBypass = ThServiceTee.is_bypass(edge.Source.Position, edge.Target.Position, bypass_lines);
+                    double width = IsBypass ? TeeWidth : OutletDuctWidth;
                     var elbowParameters = new ThIfcDuctElbowParameters()
                     {
                         ElbowDegree = edgeangle,
-                        PipeOpenWidth = OutletDuctWidth,
+                        PipeOpenWidth = width
                     };
                     var elbow = ductFittingFactoryService.CreateElbow(elbowParameters);
                     elbow.Matrix = Matrix3d.Displacement(edge.Target.Position.GetAsVector()) * Matrix3d.Rotation(bisectoroftwoedge.Angle - elbow.Parameters.BisectorAngle, Vector3d.ZAxis, elbow.Parameters.CornerPoint);

@@ -47,15 +47,5 @@ namespace ThMEPHVAC.Model
 
         public string InnerTube { get; set; }
 
-       /// <summary>
-       /// 机房内管段分析结果
-       /// </summary>
-        public AnalysisResultType InnerAnalysisType { get; set; }
-
-        /// <summary>
-        /// 机房外管段分析结果
-        /// </summary>
-        public AnalysisResultType OuterAnalysisType { get; set; }
-
     }
 }
