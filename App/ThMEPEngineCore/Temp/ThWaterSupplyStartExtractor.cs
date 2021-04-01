@@ -48,7 +48,7 @@ namespace ThMEPEngineCore.Temp
             return geos;
         }    
         
-        public void Group(Dictionary<Polyline, string> groupId)
+        public void Group(Dictionary<Entity, string> groupId)
         {
             WaterSupplyStarts.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
         }

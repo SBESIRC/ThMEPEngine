@@ -30,201 +30,379 @@ namespace TianHua.Hvac.UI
         {
             
         }
+        private ObjectIdCollection get_from_prompt(string prompt)
+        {
+            PromptSelectionOptions options = new PromptSelectionOptions()
+            {
+                AllowDuplicates = false,
+                MessageForAdding = prompt,
+                RejectObjectsOnLockedLayers = true,
+            };
+            var result = Active.Editor.GetSelection(options);
+            if (result.Status == PromptStatus.OK)
+            {
+                return result.Value.GetObjectIds().ToObjectIdCollection();
+            }
+            else
+            {
+                return new ObjectIdCollection();
+            }
+        }
+        private ObjectId classify_fan(ObjectIdCollection selections, 
+                                      DBObjectCollection center_lines)
+        {
+            ObjectId fan_id = ObjectId.Null;
+            foreach (ObjectId oid in selections)
+            {
+                var obj = oid.GetDBObject();
+                if (obj.IsRawModel())
+                {
+                    fan_id = oid;
+                }
+                else if (obj is Curve curve)
+                {
+                    center_lines.Add(curve.Clone() as Curve);
+                }
+            }
+            return fan_id;
+        }
+
+        private DBObjectCollection get_fan_and_centerline(ref ObjectId fan_id)
+        {
+            var objIds = get_from_prompt("请选择风机和中心线");
+            if (objIds.Count == 0)
+                return new DBObjectCollection();
+            var tmp = new DBObjectCollection();
+            var center_lines = new DBObjectCollection();
+            
+            fan_id = classify_fan(objIds, tmp);
+            ThLaneLineSimplifier.RemoveDangles(tmp, 100.0).ForEach(l => center_lines.Add(l));
+            return center_lines;
+        }
+
+        private DBObjectCollection get_bypass()
+        {
+            var objIds = get_from_prompt("请选择旁通管");
+            if (objIds.Count == 0)
+                return new DBObjectCollection();
+            Curve c = objIds[0].GetDBObject() as Curve;
+            DBObjectCollection tmp = new DBObjectCollection();
+            tmp.Add(c);
+            List<Line> lines = ThLaneLineSimplifier.RemoveDangles(tmp, 100);
+            if (lines.Count == 2)
+            {
+                foreach (Line l in lines)
+                {
+                    Point3d sp = l.StartPoint;
+                    Point3d ep = l.EndPoint;
+                    if (sp.X == ep.X)
+                    {
+                        if (sp.Y < ep.Y)
+                        {
+                            Point3d intP = new Point3d(sp.X, sp.Y + 3000, 0);
+                            lines.Add(new Line(sp, intP + new Vector3d(0, -10, 0)));
+                            lines.Add(new Line(intP + new Vector3d(0, 10, 0), ep));
+                        }
+                        else
+                        {
+                            Point3d intP = new Point3d(sp.X, ep.Y + 3000, 0);
+                            lines.Add(new Line(ep, intP + new Vector3d(0, -10, 0)));
+                            lines.Add(new Line(intP + new Vector3d(0, 10, 0), sp));
+                        }
+                        lines.Remove(l);
+                        break;
+                    }
+                }
+            }
+            tmp.Clear();
+            lines.ForEachDbObject(o => tmp.Add(o));
+
+            return tmp;
+        }
+
+        private DBObjectCollection get_walls()
+        {
+            var wallobjects = new DBObjectCollection();
+            var objIds = get_from_prompt("请选择内侧墙线");
+            if (objIds.Count == 0)
+                return new DBObjectCollection();
+            foreach (ObjectId oid in objIds)
+            {
+                var obj = oid.GetDBObject();
+                if (obj is Curve curveobj)
+                {
+                    wallobjects.Add(curveobj);
+                }
+            }
+            var wall_lines = new DBObjectCollection();
+            ThLaneLineSimplifier.RemoveDangles(wallobjects, 100.0).ForEach(l => wall_lines.Add(l));
+            return wall_lines;
+        }
+
+        private fmDuctSpec create_duct_diag(ThDbModelFan DbFanModel)
+        {
+            var air_volume = DbFanModel.LowFanVolume == 0 ? DbFanModel.FanVolume : DbFanModel.LowFanVolume;
+            ThDuctParameter duct_param = new ThDuctParameter(air_volume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario));
+            var ductModel = new DuctSpecModel()
+            {
+                AirSpeed = ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario),
+                MaxAirSpeed = ThFanSelectionUtils.GetMaxAirSpeed(DbFanModel.FanScenario),
+                MinAirSpeed = ThFanSelectionUtils.GetMinAirSpeed(DbFanModel.FanScenario),
+                AirVolume = air_volume,
+
+                ListOuterTube = new List<string>(duct_param.DuctSizeInfor.DefaultDuctsSizeString),
+                ListInnerTube = new List<string>(duct_param.DuctSizeInfor.DefaultDuctsSizeString),
+                OuterTube = duct_param.DuctSizeInfor.RecommendOuterDuctSize,
+                InnerTube = duct_param.DuctSizeInfor.RecommendInnerDuctSize
+            };
+            fmDuctSpec fm = new fmDuctSpec();
+            fm.InitForm(ductModel);
+            return fm;
+        }
+
+        private Point3d get_valve_pos(DBObjectCollection bypass_lines, 
+                                      double oft)
+        {
+            Line bl = bypass_lines[0] as Line;
+            double min_y = (bl.EndPoint.Y < bl.StartPoint.Y) ? bl.EndPoint.Y : bl.StartPoint.Y;
+            Point3d valve_pos = bl.StartPoint;
+            if (oft > 0)
+            {
+                // 找到y值最低的点
+                foreach (Line l in bypass_lines)
+                {
+                    if (l.EndPoint.X == l.StartPoint.X)
+                    {
+                        double y = l.EndPoint.Y < l.StartPoint.Y ? l.EndPoint.Y : l.StartPoint.Y;
+                        if (y < min_y)
+                        {
+                            min_y = y;
+                            valve_pos = new Point3d(l.EndPoint.X, y, 0);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                valve_pos = (bl.EndPoint.Y > bl.StartPoint.Y) ? bl.EndPoint : bl.StartPoint;
+            }
+
+            return valve_pos + new Vector3d(0, oft, 0);
+        }
+
+        private ThFanInletOutletAnalysisEngine IOAnalysis(ThDbModelFan Model)
+        {
+            ThFanInletOutletAnalysisEngine io_anay_res = new ThFanInletOutletAnalysisEngine(Model);
+            io_anay_res.InletAnalysis();
+            io_anay_res.OutletAnalysis();
+            if (io_anay_res.InletAnalysisResult != AnalysisResultType.OK &&
+                io_anay_res.OutletAnalysisResult != AnalysisResultType.OK)
+            {
+                return null;
+            }
+            return io_anay_res;
+        }
+
+        private void IODuctHoleAnalysis(ThDbModelFan Model,
+                                        double angle,
+                                        string innerDuctSize,
+                                        string outerDuctSize,
+                                        string tee_size,
+                                        bool is_type2,
+                                        ref int wall_num,
+                                        DBObjectCollection bypass_line,
+                                        ThFanInletOutletAnalysisEngine io_anay_res)
+        {
+            if (bypass_line != null && bypass_line.Count == 0)
+                return;
+
+            ThInletOutletDuctDrawEngine io_draw_eng =
+                new ThInletOutletDuctDrawEngine(Model,
+                                                innerDuctSize,
+                                                outerDuctSize,
+                                                tee_size,
+                                                "3",
+                                                bypass_line, 
+                                                io_anay_res.InletCenterLineGraph,
+                                                io_anay_res.OutletCenterLineGraph);
+            var wall_lines = get_walls();
+            if (wall_lines.Count == 0)
+                return;
+            ThHolesAndValvesEngine holesAndValvesEngine =
+                new ThHolesAndValvesEngine(Model,
+                                           wall_lines,
+                                           bypass_line,
+                                           io_draw_eng.InletDuctWidth,
+                                           io_draw_eng.OutletDuctWidth,
+                                           io_draw_eng.TeeWidth,
+                                           io_anay_res.InletCenterLineGraph,
+                                           io_anay_res.OutletCenterLineGraph);
+            if (io_anay_res.InletAnalysisResult == AnalysisResultType.OK)
+            {
+                if (io_anay_res.HasInletTee())
+                {
+                    double IDuctWidth = io_draw_eng.InletDuctWidth;
+                    double x = IDuctWidth / 2;
+                    double y = x + 100;
+                    io_draw_eng.RunInletDrawEngine(Model);
+                    foreach (Point3d TeeCp in io_anay_res.InletTeeCPPositions)
+                    {
+                        ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, IDuctWidth, IDuctWidth);
+                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector() + new Vector3d(0, -2 * y, 0)) *
+                                       Matrix3d.Mirroring(new Line3d(new Point3d(x, y, 0), new Point3d(-x, y, 0)));
+                        e.RunTeeDrawEngine(Model, mat);
+                    }
+                }
+                else
+                {
+                    io_draw_eng.RunInletDrawEngine(Model);
+                }
+                holesAndValvesEngine.RunInletValvesInsertEngine();
+            }
+
+            if (io_anay_res.OutletAnalysisResult == AnalysisResultType.OK)
+            {
+                if (io_anay_res.HasOutletTee())
+                {
+                    double ODuctWidth = io_draw_eng.OutletDuctWidth;
+                    io_draw_eng.RunOutletDrawEngine(Model);
+                    foreach (Point3d TeeCp in io_anay_res.OutletTeeCPPositions)
+                    {
+                        ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, ODuctWidth, ODuctWidth);
+                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector());
+                        if (is_type2)
+                        {
+                            mat = mat * Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                        }
+                        else 
+                        {
+                            mat = mat * Matrix3d.Mirroring(new Line3d(new Point3d(0, -1, 0), new Point3d(0, 1, 0))) *
+                                        Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                        }
+                        e.RunTeeDrawEngine(Model, mat);
+                    }
+                }
+                else
+                {
+                    io_draw_eng.RunOutletDrawEngine(Model);
+                }
+                holesAndValvesEngine.RunOutletValvesInsertEngine();
+                wall_num = wall_lines.Count;
+            }
+        }
+
 
         [CommandMethod("TIANHUACAD", "THFJF", CommandFlags.Modal)]
         public void Thfjf()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                double SepDis = 3000;
-                var fanopt = new PromptSelectionOptions()
-                {
-                    MessageForAdding = "请选择风机和中心线"
-                };
-                var fanselectionresult = Active.Editor.GetSelection(fanopt);
-                if (fanselectionresult.Status != PromptStatus.OK)
-                {
+                ObjectId fan_id = ObjectId.Null;
+                DBObjectCollection lineobjects = get_fan_and_centerline(ref fan_id);
+                if (fan_id.IsNull || lineobjects.Count == 0)
                     return;
-                }
-
-                ObjectId modelobjectid = ObjectId.Null;
-                var lineobjects = new DBObjectCollection();
-                foreach (var oid in fanselectionresult.Value.GetObjectIds())
+                ThDbModelFan DbFanModel = new ThDbModelFan(fan_id, lineobjects);
+                string innerDuctSize = string.Empty;
+                string outerDuctSize = string.Empty;
+                string airVloume = string.Empty;
+                using (var dlg = create_duct_diag(DbFanModel))
                 {
-                    var obj = oid.GetDBObject();
-                    if (obj.IsRawModel())
+                    if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
                     {
-                        modelobjectid = oid;
-                    }
-                    else if (obj is Curve curve)
-                    {
-                        lineobjects.Add(curve.Clone() as Curve);
+                        innerDuctSize = dlg.SelectedInnerDuctSize;
+                        outerDuctSize = dlg.SelectedOuterDuctSize;
+                        airVloume = dlg.AirVolume;
                     }
                 }
-                if (modelobjectid.IsNull)
+                if (string.IsNullOrEmpty(innerDuctSize) || string.IsNullOrEmpty(outerDuctSize))
                 {
                     return;
                 }
-                
-                var simplifierCenterLines = new DBObjectCollection();
-                ThLaneLineSimplifier.RemoveDangles(lineobjects,100.0).ForEach(l=> simplifierCenterLines.Add(l));
-                ThServiceTee.SeperateIODuct(simplifierCenterLines, SepDis);// 将连接IO的线变为两条线
-                ThDbModelFan DbFanModel = new ThDbModelFan(modelobjectid, simplifierCenterLines);
-                ThFanInletOutletAnalysisEngine inAndOutAnalysisEngine = 
-                    new ThFanInletOutletAnalysisEngine(DbFanModel);
-                inAndOutAnalysisEngine.InletAnalysis();
-                inAndOutAnalysisEngine.OutletAnalysis();
-                if (inAndOutAnalysisEngine.InletAnalysisResult != AnalysisResultType.OK && inAndOutAnalysisEngine.OutletAnalysisResult != AnalysisResultType.OK)
-                {
-                    return;
-                }
-                var calculatevolume = DbFanModel.LowFanVolume == 0 ? DbFanModel.FanVolume : DbFanModel.LowFanVolume;
-                ThDuctSelectionEngine ductselectionengine = new ThDuctSelectionEngine(calculatevolume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario));
 
-                //进出口段与机房内外段的对应关系
-                var jsonReader = new ThDuctInOutMappingJsonReader();
-                var innerRomDuctPosition = jsonReader.Mappings.First(d => d.WorkingScenario == DbFanModel.FanScenario).InnerRoomDuctType;
-
-                var ductModel = new DuctSpecModel()
+                if (DbFanModel.FanScenario == "消防加压送风")
                 {
-                    AirSpeed = ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario),
-                    MaxAirSpeed = ThFanSelectionUtils.GetMaxAirSpeed(DbFanModel.FanScenario),
-                    MinAirSpeed = ThFanSelectionUtils.GetMinAirSpeed(DbFanModel.FanScenario),
-                    AirVolume = calculatevolume,
- 
-                    ListOuterTube = new List<string>(ductselectionengine.DuctSizeInfor.DefaultDuctsSizeString),
-                    ListInnerTube = new List<string>(ductselectionengine.DuctSizeInfor.DefaultDuctsSizeString),
-                    OuterTube = ductselectionengine.DuctSizeInfor.RecommendOuterDuctSize,
-                    InnerTube = ductselectionengine.DuctSizeInfor.RecommendInnerDuctSize,
- 
-                    InnerAnalysisType = innerRomDuctPosition == "进风段"? inAndOutAnalysisEngine.InletAnalysisResult : inAndOutAnalysisEngine.OutletAnalysisResult,
-                    OuterAnalysisType = innerRomDuctPosition == "进风段" ? inAndOutAnalysisEngine.OutletAnalysisResult : inAndOutAnalysisEngine.InletAnalysisResult,
- 
-                };
-
-                fmDuctSpec fmDuct = new fmDuctSpec();
-                fmDuct.InitForm(ductModel);
-                if (fmDuct.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-                double valve_width = 1250;
-                double w1 = valve_width / 2 + 100;
-                double w2 = valve_width + 50;
-                double IShrink = (inAndOutAnalysisEngine.IsTeeDirUp) ? w1 : w2;
-                double OShrink1 = w2;
-                double OShrink2 = (inAndOutAnalysisEngine.IsTeeDirUp) ? w2 : w1;
-                if (inAndOutAnalysisEngine.HasInletTee())
-                {
-                    ThServiceTee.TeeRefineDuct(
-                                        inAndOutAnalysisEngine.InletCenterLineGraph,
-                                        IShrink,
-                                        OShrink1,
-                                        OShrink2);
-                }
-                if (inAndOutAnalysisEngine.HasOutletTee())
-                {
-                    ThServiceTee.TeeRefineDuct(
-                                        inAndOutAnalysisEngine.OutletCenterLineGraph,
-                                        IShrink,
-                                        OShrink1,
-                                        OShrink2);
-                }
-                ThInletOutletDuctDrawEngine inoutductdrawengine = 
-                    new ThInletOutletDuctDrawEngine(DbFanModel, 
-                                                    fmDuct.SelectedInnerDuctSize, 
-                                                    fmDuct.SelectedOuterDuctSize, 
-                                                    inAndOutAnalysisEngine.InletCenterLineGraph, 
-                                                    inAndOutAnalysisEngine.OutletCenterLineGraph);
-
-                var wallopt = new PromptSelectionOptions()
-                {
-                    MessageForAdding = "请选择内侧墙线"
-                };
-                var wallselectionresult = Active.Editor.GetSelection(wallopt);
-                if (wallselectionresult.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var wallobjects = new DBObjectCollection();
-                foreach (var oid in wallselectionresult.Value.GetObjectIds().ToList())
-                {
-                    var obj = oid.GetDBObject();
-                    if (obj is Curve curveobj)
+                    string tee_width = string.Empty;
+                    string tee_pattern = string.Empty;
+                    using (var dlg = new fmBypass(airVloume))
                     {
-                        wallobjects.Add(curveobj);
+                        if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                        {
+                            tee_width = dlg.TeeWidth;
+                            tee_pattern = dlg.tee_pattern;
+                        }
+                        else
+                            return;
                     }
-                }
-                var simplifierWallLines = new DBObjectCollection();
-                ThLaneLineSimplifier.RemoveDangles(wallobjects, 100.0).ForEach(l=> simplifierWallLines.Add(l));
-                ThHolesAndValvesEngine holesAndValvesEngine = 
-                    new ThHolesAndValvesEngine(DbFanModel, 
-                                               simplifierWallLines, 
-                                               inoutductdrawengine.InletDuctWidth, 
-                                               inoutductdrawengine.OutletDuctWidth, 
-                                               inAndOutAnalysisEngine.InletCenterLineGraph, 
-                                               inAndOutAnalysisEngine.OutletCenterLineGraph);
-                
-                if (inAndOutAnalysisEngine.InletAnalysisResult == AnalysisResultType.OK)
-                {
-                    if (inAndOutAnalysisEngine.HasInletTee())
-                    {   
-                        double IDuctWidth = inoutductdrawengine.InletDuctWidth;
-                        double x = IDuctWidth / 2;
-                        double y = x + 100;
-                        ThTee e = new ThTee(inAndOutAnalysisEngine.InletTeeCP,
-                                            IDuctWidth,
-                                            IDuctWidth,
-                                            IDuctWidth);
-                        inoutductdrawengine.RunInletDrawEngine(DbFanModel);
-                        Matrix3d mat = Matrix3d.Displacement(inAndOutAnalysisEngine.InletTeeCP.GetAsVector() + new Vector3d(0, -2 * y, 0)) *
-                                       Matrix3d.Mirroring(new Line3d(new Point3d(x, y, 0), new Point3d(-x, y, 0)));
-                        e.RunTeeDrawEngine(DbFanModel, mat);
+
+                    if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
+                    {
+                        string line_type = (tee_pattern == "RBType4") ?
+                            ThHvacCommon.CONTINUES_LINETYPE :
+                            ThHvacCommon.DASH_LINETYPE;
+                        ThVTee vt = new ThVTee(600, 800, 20);
+                        Point3d valve_pos = DbFanModel.FanInletBasePoint + new Vector3d(45, -475, 0);
+                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
+                        int wall_num = 0;
+                        IODuctHoleAnalysis(DbFanModel, 0, innerDuctSize, outerDuctSize, tee_width, false, ref wall_num, null, io_anay_res);
+                        if (wall_num != 0)
+                        {
+                            vt.RunVTeeDrawEngine(DbFanModel, line_type);
+                            ThServiceTee.InsertElectricValve(valve_pos, 800, Math.PI);
+                        }
                     }
                     else
                     {
-                        inoutductdrawengine.RunInletDrawEngine(DbFanModel);
-                    }
-                    holesAndValvesEngine.RunInletValvesInsertEngine();
-                }
-                if (inAndOutAnalysisEngine.OutletAnalysisResult == AnalysisResultType.OK)
-                {
-                    if (inAndOutAnalysisEngine.HasOutletTee())
-                    {
-                        double angle = (inAndOutAnalysisEngine.IsTeeDirUp) ? Math.PI / 2 : -Math.PI / 2;
-                        double valve_oft = (inAndOutAnalysisEngine.IsTeeDirUp) ? SepDis : -SepDis;
-                        double ODuctWidth = inoutductdrawengine.OutletDuctWidth;
-                        ThTee e = new ThTee(inAndOutAnalysisEngine.OutletTeeCP,
-                                            ODuctWidth,
-                                            ODuctWidth,
-                                            ODuctWidth);
-                        inoutductdrawengine.RunOutletDrawEngine(DbFanModel);
-                        Matrix3d mat = 
-                            Matrix3d.Displacement(inAndOutAnalysisEngine.OutletTeeCP.GetAsVector()) *
-                            Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
-                        e.RunTeeDrawEngine(DbFanModel, mat);
-                        ThServiceTee.InsertElectricValve(
-                            inAndOutAnalysisEngine.OutletTeeCP + new Vector3d(0, valve_oft, 0),
-                            valve_width,
-                            Math.PI);
-                    }
-                    else 
-                    {
-                        inoutductdrawengine.RunOutletDrawEngine(DbFanModel);
-                    }
-                    holesAndValvesEngine.RunOutletValvesInsertEngine();
-                }
+                        // 添加旁通并添加到原Model中
+                        bool is_type2 = tee_pattern == "RBType2";
+                        DBObjectCollection bypass_line = get_bypass();
+                        if (bypass_line.Count == 0)
+                            return;
+                        bypass_line.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
+                        
+                        List<Line> bypass_lines = ThLaneLineSimplifier.RemoveDangles(lineobjects, 5);
+                        double valve_oft = is_type2 ? -3000: 3000;
+                        double angle = is_type2 ? -Math.PI / 2 : Math.PI / 2;
+                        Point3d valve_pos = get_valve_pos(bypass_line, valve_oft);
 
-                // 创建一个VTeeEngine
-                // 用VTeeEngine.RunVTeeDrawEngine(DbFanModel)
-                //ThVTee a = new ThVTee(600, 800, 20);
-                //a.RunVTeeDrawEngine(DbFanModel, ThHvacCommon.CONTINUES_LINETYPE);
-                //a.RunVTeeDrawEngine(DbFanModel, ThHvacCommon.VTEE_LINETYPE);
-                //ThServiceTee.InsertElectricValve(
-                //                      DbFanModel.FanInletBasePoint + new Vector3d(45, -475, 0),
-                //                      800, 
-                //                      Math.PI);
-                Active.Editor.WriteMessage(inAndOutAnalysisEngine.InletAnalysisResult + "," + inAndOutAnalysisEngine.OutletAnalysisResult);
+                        lineobjects.Clear();
+                        bypass_lines.ForEachDbObject(o => lineobjects.Add(o));
+
+                        // 根据添加的旁通重新得到model
+                        ThDbModelFan DbTeeModel = new ThDbModelFan(fan_id, lineobjects);
+                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbTeeModel);
+
+                        double valve_width = Double.Parse(outerDuctSize.Split('x').First());
+                        double bra_width = Double.Parse(tee_width.Split('x').First());
+                        double IShrink = is_type2 ? bra_width + 50 : bra_width + 50;
+                        double OShrinkb = is_type2 ? (bra_width + valve_width) * 0.5 + 50 : bra_width * 0.5 + 100;
+                        double OShrinkm = is_type2 ? bra_width * 0.5 + 100 : (bra_width + valve_width) * 0.5 + 50;
+                        if (io_anay_res.HasInletTee())
+                        {
+                            // Swap Ishrink & ObShrink
+                            ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph,
+                                                         OShrinkb,
+                                                         OShrinkm,
+                                                         IShrink);
+                        }
+                        if (io_anay_res.HasOutletTee())
+                        {
+                            ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph,
+                                                         IShrink,
+                                                         OShrinkb,
+                                                         OShrinkm);
+                        }
+                        int wall_num = 0;
+                        IODuctHoleAnalysis(DbTeeModel, angle, innerDuctSize, outerDuctSize, tee_width, is_type2, ref wall_num, bypass_line, io_anay_res);
+                        if (wall_num != 0)
+                            ThServiceTee.InsertElectricValve(valve_pos, bra_width, Math.PI);
+                    }
+                }
+                else
+                {
+                    ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
+                    int wall_num = 0;
+                    IODuctHoleAnalysis(DbFanModel, 0, innerDuctSize, outerDuctSize, null, false, ref wall_num, null, io_anay_res);
+                }
             }
         }
     }

@@ -16,13 +16,15 @@ namespace ThMEPHVAC.CAD
         public List<ThValveGroup> OutletValveGroups { get; set; }
         public ThHolesAndValvesEngine(ThDbModelFan fanmodel,
             DBObjectCollection wallobjects,
+            DBObjectCollection bypassobjects,
             double inletductwidth,
             double outletductwidth,
+            double teewidth,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
         {
-            InletValveGroups = GetValveGroup(fanmodel, wallobjects, inletductwidth, ValveGroupPosionType.Inlet, inletcenterlinegraph);
-            OutletValveGroups = GetValveGroup(fanmodel, wallobjects, outletductwidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
+            InletValveGroups = GetValveGroup(fanmodel, wallobjects, bypassobjects, inletductwidth, teewidth, ValveGroupPosionType.Inlet, inletcenterlinegraph);
+            OutletValveGroups = GetValveGroup(fanmodel, wallobjects, bypassobjects, outletductwidth, teewidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
 
             if (OutletValveGroups.Any(g=>g.ValvesInGroup.Any(v=>v.ValveVisibility.Contains("止回阀"))))
             {
@@ -74,10 +76,11 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-
         private List<ThValveGroup> GetValveGroup(ThDbModelFan fanmodel,
             DBObjectCollection wallobjects,
+            DBObjectCollection bypassobjects,
             double ductwidth,
+            double teewidth,
             ValveGroupPosionType valvePosion,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> centerlinegraph)
         {
@@ -88,6 +91,8 @@ namespace ThMEPHVAC.CAD
             {
                 var centerline = new Line(centeredge.Source.Position, centeredge.Target.Position);
                 var centerlinevector = new Vector2d(centeredge.Target.Position.X - centeredge.Source.Position.X, centeredge.Target.Position.Y - centeredge.Source.Position.Y);
+                bool IsBypass = ThServiceTee.is_bypass(centeredge.Source.Position, centeredge.Target.Position, bypassobjects);
+                double width = IsBypass ? teewidth : ductwidth;
                 foreach (var wallline in walllines)
                 {
                     Point3dCollection IntersectPoints = new Point3dCollection();
@@ -98,7 +103,7 @@ namespace ThMEPHVAC.CAD
                         var groupparameters = new ThValveGroupParameters()
                         {
                             GroupInsertPoint = IntersectPoints[0],
-                            DuctWidth = ductwidth,
+                            DuctWidth = width,
                             RotationAngle = holeangle,
                             FanScenario = fanmodel.FanScenario,
                             ValveGroupPosion = valvePosion,

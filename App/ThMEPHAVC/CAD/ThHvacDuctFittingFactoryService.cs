@@ -50,18 +50,25 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, double ductangle, bool isupordownopening, bool islongestduct)
+        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, 
+                                                  double ductangle, 
+                                                  bool isupordownopening, 
+                                                  bool islongestduct,
+                                                  string elevation)
         {
             return new ThIfcDuctSegment(parameters)
             {
                 Centerline = CreateDuctSegmentCenterLine(parameters),
                 FlangeLine = CreateDuctFlangeGeometries(parameters, isupordownopening),
                 Representation = CreateDuctSegmentGeometries(parameters),
-                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct),
+                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct, elevation)
             };
         }
 
-        private DBText CreateDuctInformation(ThIfcDuctSegmentParameters parameters, double ductangle, bool islongestduct)
+        private DBText CreateDuctInformation(ThIfcDuctSegmentParameters parameters, 
+                                             double ductangle, 
+                                             bool islongestduct, 
+                                             string elevation)
         {
             if (!islongestduct)
             {
@@ -69,9 +76,19 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
+                string str;
+                if (string.IsNullOrEmpty(elevation))
+                {
+                    str = $"{parameters.Width}x{parameters.Height} (h+X.XXm)";
+                }
+                else
+                {
+                    str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
+                }
+                
                 DBText infortext = new DBText()
                 {
-                    TextString = $"{parameters.Width}x{parameters.Height}（h+X.XXm）",
+                    TextString = str,
                     Height = 450,
                     WidthFactor = 0.7,
                     Color = Color.FromColorIndex(ColorMethod.ByLayer, (int)ColorIndex.BYLAYER),
@@ -217,8 +234,6 @@ namespace ThMEPHVAC.CAD
                 EndPoint = smallendline.StartPoint + new Vector3d(0,-45,0),
             };
 
-
-
             //创建两侧侧壁轮廓线
             double reducinglength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(20 * Math.PI / 180);
             Line leftsideline = new Line();
@@ -240,7 +255,6 @@ namespace ThMEPHVAC.CAD
                 StartPoint = bigendline.EndPoint + new Vector3d(0, 45, 0),
                 EndPoint = bigendline.StartPoint + new Vector3d(0, -45, 0),
             };
-
 
             var reducinglines = new DBObjectCollection() { leftsideline, rightsideline };
             switch (jointype)

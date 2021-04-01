@@ -31,9 +31,8 @@ namespace ThMEPHAVC.CAD
         public AnalysisResultType OutletAnalysisResult { get; set; }
         public List<Point3d> InletAcuteAnglePositions { get; set; }
         public List<Point3d> OutletAcuteAnglePositions { get; set; }
-        public Point3d InletTeeCP { get; set; }
-        public Point3d OutletTeeCP { get; set; }
-        public bool IsTeeDirUp { get; set; }
+        public List<Point3d> InletTeeCPPositions { get; set; }
+        public List<Point3d> OutletTeeCPPositions { get; set; }
         
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
         {
@@ -42,10 +41,13 @@ namespace ThMEPHAVC.CAD
             ThDuctEdge<ThDuctVertex> tempoutletfirstedge = null;
             InletAcuteAnglePositions = new List<Point3d>();
             OutletAcuteAnglePositions = new List<Point3d>();
+            InletTeeCPPositions = new List<Point3d>();
+            OutletTeeCPPositions = new List<Point3d>();
             InletCenterLineGraph = CreateLineGraph(fanmodel.FanInletBasePoint, ref tempinletfirstedge);
             InletStartEdge = tempinletfirstedge;
             OutletCenterLineGraph = CreateLineGraph(fanmodel.FanOutletBasePoint, ref tempoutletfirstedge);
             OutletStartEdge = tempoutletfirstedge;
+
         }
 
         private AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> CreateLineGraph(Point3d basepoint, ref ThDuctEdge<ThDuctVertex> startedge)
@@ -93,7 +95,7 @@ namespace ThMEPHAVC.CAD
                     }
                     else if (InletCenterLineGraph.OutDegree(edge.Target) == 2)
                     {
-                        InletTeeCP = edge.Target.Position;
+                        InletTeeCPPositions.Add(edge.Target.Position);
                     }
                 }
                 if (InletAcuteAnglePositions.Count != 0)
@@ -173,17 +175,7 @@ namespace ThMEPHAVC.CAD
                     }
                     else if (OutletCenterLineGraph.OutDegree(edge.Target) == 2)
                     {
-                        OutletTeeCP = edge.Target.Position;
-                    }
-                    else if (OutletCenterLineGraph.OutDegree(edge.Target) == 0)
-                    { 
-                        if (edge.Source.Position.X == edge.Target.Position.X)
-                        {
-                            if (edge.Source.Position.Y < edge.Target.Position.Y)
-                            {
-                                IsTeeDirUp = true;
-                            }
-                        }
+                        OutletTeeCPPositions.Add(edge.Target.Position);
                     }
                 }
                 if (OutletAcuteAnglePositions.Count != 0)
@@ -228,18 +220,13 @@ namespace ThMEPHAVC.CAD
                 }
             }
         }
-
         public bool HasInletTee()
         {
-            double EPS = Tolerance.Global.EqualPoint;
-            return (Math.Abs(InletTeeCP.X) < EPS && Math.Abs(InletTeeCP.Y) < EPS) ?
-                    false : true;
+            return (InletTeeCPPositions.Count == 0) ? false : true;
         }
         public bool HasOutletTee()
         {
-            double EPS = Tolerance.Global.EqualPoint;
-            return (Math.Abs(OutletTeeCP.X) < EPS && Math.Abs(OutletTeeCP.Y) < EPS) ?
-                    false : true;
+            return (OutletTeeCPPositions.Count == 0) ? false : true;
         }
         private bool ApproximateEqualTo(double valuea, double valueb, double tolerance)
         {

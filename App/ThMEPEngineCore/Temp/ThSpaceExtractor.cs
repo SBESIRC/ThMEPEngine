@@ -12,8 +12,8 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThSpaceExtractor :ThExtractorBase,IExtract,IPrint,IBuildGeometry,IGroup
     {
-        public List<ThIfcSpace> Spaces { get; private set; }
-        public Dictionary<Polyline, List<Polyline>> Obstacles { get; set; }
+        public List<ThTempSpace> Spaces { get; private set; }
+        public Dictionary<Entity, List<Polyline>> Obstacles { get; set; }
         /// <summary>
         /// 障碍物颜色
         /// </summary>
@@ -37,8 +37,8 @@ namespace ThMEPEngineCore.Temp
 
         public ThSpaceExtractor()
         {
-            Spaces = new List<ThIfcSpace>();
-            Obstacles = new Dictionary<Polyline, List<Polyline>>();
+            Spaces = new List<ThTempSpace>();
+            Obstacles = new Dictionary<Entity, List<Polyline>>();
             IsBuildObstacle = false;
             Category = "Space";
             SpaceLayer = "AD-AREA-OUTL";
@@ -56,8 +56,7 @@ namespace ThMEPEngineCore.Temp
                 spaceEngine.NameLayer = NameLayer;
 
                 spaceEngine.Recognize(database, pts);
-                Spaces = spaceEngine.Spaces;
-
+                Spaces = spaceEngine.TempSpaces;               
                 if(IsBuildObstacle)
                 {
                     BuildObstacles();
@@ -70,8 +69,8 @@ namespace ThMEPEngineCore.Temp
             //在停车区域空间
             var spaces = Spaces
                  .Where(o => o.Tags.Where(g => g.Contains("停车区域")).Any())
-                 .Select(o => o.Boundary).ToList();
-            spaces.ForEach(o => Obstacles.Add(o.Clone() as Polyline, ThArrangeObstacleService.Arrange(o as Polyline)));
+                 .Select(o => o.Outline).ToList();
+            spaces.ForEach(o => Obstacles.Add(o.Clone() as Entity, ThArrangeObstacleService.Arrange(o)));
         }
 
         public List<ThGeometry> BuildGeometries()
@@ -90,13 +89,8 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName, string.Join(";", o.Tags.ToArray()));
-                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner,o.Boundary));
-                for (int i = 1; i <= o.SubSpaces.Count; i++)
-                {
-                    string key = "SubSpace" + i + " ID=";
-                    geometry.Properties.Add(key, o.SubSpaces[i - 1].Uuid);
-                }
-                geometry.Boundary = o.Boundary;
+                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner,o.Outline));
+                geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });
             return geos;
@@ -131,9 +125,9 @@ namespace ThMEPEngineCore.Temp
                 var spaceIds = new ObjectIdList();
                 Spaces.ForEach(o =>
                 {
-                    o.Boundary.ColorIndex = ColorIndex;
-                    o.Boundary.SetDatabaseDefaults();
-                    spaceIds.Add(db.ModelSpace.Add(o.Boundary));
+                    o.Outline.ColorIndex = ColorIndex;
+                    o.Outline.SetDatabaseDefaults();
+                    spaceIds.Add(db.ModelSpace.Add(o.Outline));
                 });
                 if (spaceIds.Count > 0)
                 {
@@ -167,7 +161,7 @@ namespace ThMEPEngineCore.Temp
             }
         }
 
-        public void Group(Dictionary<Polyline, string> groupId)
+        public void Group(Dictionary<Entity, string> groupId)
         {
             Spaces.ForEach(o => GroupOwner.Add(o.Boundary, FindCurveGroupIds(groupId, o.Boundary)));
         }

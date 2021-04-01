@@ -31,7 +31,7 @@
     <Compile Include="Model\ThServiceTee.cs" />
     <Compile Include="Model\ThTee.cs" />
     <Compile Include="Model\ThVTee.cs" />
-    <Compile Include="CAD\ThDuctSelectionEngine.cs" />
+    <Compile Include="CAD\ThDuctParameter.cs" />
     <Compile Include="CAD\ThDbModelFan.cs" />
     <Compile Include="CAD\ThFanInletOutletAnalysisEngine.cs" />
     <Compile Include="CAD\ThHolesAndValvesEngine.cs" />

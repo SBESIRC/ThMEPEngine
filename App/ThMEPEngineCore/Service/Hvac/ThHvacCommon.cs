@@ -16,7 +16,7 @@
         // 中心线线型
         public const string CENTERLINE_LINETYPE = "CENTER2";
         public const string CONTINUES_LINETYPE = "CONTINUOUS";
-        public const string VTEE_LINETYPE = "DASH";
+        public const string DASH_LINETYPE = "DASH";
 
         // XDATA
         public const string RegAppName_FanSelection = "THCAD_FAN_SELECTION";

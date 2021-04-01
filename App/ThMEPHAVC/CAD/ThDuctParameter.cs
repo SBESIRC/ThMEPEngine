@@ -14,10 +14,10 @@ namespace ThMEPHVAC.CAD
         //管道尺寸信息
         public List<string> DefaultDuctsSizeString { get; set; }
     }
-    public class ThDuctSelectionEngine
+    public class ThDuctParameter
     {
         public ThDuctSizeInfor DuctSizeInfor { get; set; }
-        public ThDuctSelectionEngine(double fanvolume, double airspeed)
+        public ThDuctParameter(double fanvolume, double airspeed)
         {
             DuctSizeInfor = GetUpdateDuctSizeInfor(fanvolume, airspeed);
         }

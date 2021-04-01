@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.Temp
             }
         }
 
-        public void Group(Dictionary<Polyline, string> groupId)
+        public void Group(Dictionary<Entity, string> groupId)
         {
             throw new NotImplementedException();
         }

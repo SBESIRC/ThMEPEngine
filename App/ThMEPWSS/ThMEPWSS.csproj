@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
+    <Compile Include="Assistant\FengDbgTest.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />
     <Compile Include="Bussiness\BoundaryProtectBussiness\BoundaryProtestService.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="Command\ThPipeDrawSpaceNameCmd.cs" />
     <Compile Include="Command\ThPipeExtractSpaceCmd.cs" />
     <Compile Include="Command\ThPipeInsertFloorFrameCmd.cs" />
+    <Compile Include="Command\ThRainSystemDiagramCmd.cs" />
     <Compile Include="Command\ThSprinklerBlindAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerDistanceCheckCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
@@ -81,9 +83,14 @@
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
+    <Compile Include="Pipe\Model\ThWPipeInterfaces.cs" />
+    <Compile Include="Pipe\Model\ThWPipeRun.cs" />
     <Compile Include="Pipe\Model\ThWDevice.cs" />
     <Compile Include="Pipe\Model\ThWExternalTag.cs" />
+    <Compile Include="Pipe\Model\ThWRainPipeSystem.cs" />
+    <Compile Include="Pipe\Model\ThWRainSystemDiagram.cs" />
     <Compile Include="Pipe\Model\ThWStoreys.cs" />
+    <Compile Include="Pipe\Model\ThWSystemDiagram.cs" />
     <Compile Include="Pipe\Model\ThWWashingMachine.cs" />
     <Compile Include="Pipe\Model\ThWGravityWaterBucket.cs" />
     <Compile Include="Pipe\Model\ThWSideEntryWaterBucket.cs" />
@@ -132,6 +139,7 @@
     <Compile Include="Pipe\Service\ThFloorDrainLayerManager.cs" />
     <Compile Include="Pipe\Service\ThInsertStoreyFrameService.cs" />
     <Compile Include="Pipe\Service\ThRainPipeLayerManager.cs" />
+    <Compile Include="Pipe\Service\ThRainSystemService.cs" />
     <Compile Include="Pipe\Service\ThReadStoreyInformationService.cs" />
     <Compile Include="Pipe\Service\ThRoofRainPipeLayerManager.cs" />
     <Compile Include="Pipe\Service\ThTagParametersService.cs" />
@@ -185,12 +193,16 @@
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
     <Compile Include="Model\ThWSprinkler.cs" />
+    <Compile Include="ThSystemDiagramCmds.cs" />
+    <Content Include="Uitl\todoList.txt" />
+    <Compile Include="Uitl\JsonExtensions.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
     <Compile Include="ThMEPWSSApp.cs" />
     <Compile Include="ThWSSCommon.cs" />
     <Compile Include="Uitl\GeoUtils.cs" />
     <Compile Include="Uitl\OrientedBoundingBox.cs" />
+    <Compile Include="Uitl\SystemDiagramUtils.cs" />
     <Compile Include="Uitl\ThWTangentService.cs" />
     <Compile Include="Uitl\ThWStandardService.cs" />
   </ItemGroup>

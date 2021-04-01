@@ -226,5 +226,6 @@
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR = "小屋面";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR = "标准层";
         public const string STOREY_DYNAMIC_PROPERTY_VALUE_NON_STANDARD_FLOOR = "非标准层";
+        public const string STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR = "非标层";
     }
 }
