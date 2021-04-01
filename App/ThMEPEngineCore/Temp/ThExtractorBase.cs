@@ -4,6 +4,7 @@ using ThCADExtension;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -11,7 +12,7 @@ namespace ThMEPEngineCore.Temp
     {
         public string Category { get; set; }
         public short ColorIndex { get; set; }
-        protected Dictionary<Curve, List<string>> GroupOwner { get; set; }
+        protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
         protected string CodePropertyName = "Code";
         protected string NamePropertyName = "Name";
@@ -20,7 +21,7 @@ namespace ThMEPEngineCore.Temp
         public ThExtractorBase()
         {
             Category = "";
-            GroupOwner = new Dictionary<Curve, List<string>>();
+            GroupOwner = new Dictionary<Entity, List<string>>();
         }
         protected string ToString(Polyline poly)
         {
@@ -41,7 +42,7 @@ namespace ThMEPEngineCore.Temp
             return pt.X + "," + pt.Y + "," + pt.Z;
         }
 
-        protected virtual string BuildString(Dictionary<Curve, List<string>> owners, Curve curve)
+        protected virtual string BuildString(Dictionary<Entity, List<string>> owners, Entity curve)
         {
             if (owners.ContainsKey(curve))
             {
@@ -50,10 +51,10 @@ namespace ThMEPEngineCore.Temp
             return "";
         }
 
-        protected List<string> FindCurveGroupIds(Dictionary<Polyline, string> groupId,Curve curve)
+        protected List<string> FindCurveGroupIds(Dictionary<Entity, string> groupId, Entity curve)
         {
             var ids = new List<string>();
-            var groups = groupId.Select(g => g.Key).ToList().Where(g => g.Contains(curve)).ToList();
+            var groups = groupId.Select(g => g.Key).ToList().Where(g => g.IsContains(curve)).ToList();
             groups.ForEach(g => ids.Add(groupId[g]));
             return ids;
         }
