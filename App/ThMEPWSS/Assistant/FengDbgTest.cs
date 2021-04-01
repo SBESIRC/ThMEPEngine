@@ -74,7 +74,18 @@ namespace ThMEPWSS.DebugNs
     {
       ((Action<string>)ctx["showString"])(str);
     }
-
+    public static void PrintLine(string line)
+    {
+      ((Action<string>)ctx["addline"])(line);
+    }
+    public static void PrintText(string text)
+    {
+      ((Action<string>)ctx["addtext"])(text);
+    }
+    public static void ShowCurrentLogWindow()
+    {
+      ((Action)ctx["showCurrentLogWindow"])();
+    }
 
     public static void FocusMainWindow()
     {
