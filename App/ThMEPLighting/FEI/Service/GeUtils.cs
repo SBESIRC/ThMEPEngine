@@ -63,9 +63,9 @@ namespace ThMEPLighting.FEI.Service
                 0.0, 0.0, 0.0, 1.0,
             });
 
-            List<Line> transLines = new List<Line>(lines);
+            List<Line> transLines = lines.Select(x => x.Clone() as Line).ToList();
             transLines.ForEach(x => x.TransformBy(matrix));
-            List<Line> otherTransLines = new List<Line>(otherLins);
+            List<Line> otherTransLines = otherLins.Select(x => x.Clone() as Line).ToList();
             otherTransLines.ForEach(x => x.TransformBy(matrix));
             var linePts = transLines.SelectMany(x => new List<Point3d>() { x.EndPoint, x.StartPoint }).ToList();
             var otherLinePts = otherTransLines.SelectMany(x => new List<Point3d>() { x.EndPoint, x.StartPoint }).ToList();
@@ -82,11 +82,11 @@ namespace ThMEPLighting.FEI.Service
             }
             else if (maxLineX < maxOtherLineX)
             {
-                return new Line(new Point3d(minOtherLineX, y, 0), new Point3d(maxLineX, y, 0));
+                return new Line(new Point3d(minOtherLineX, y, 0).TransformBy(matrix.Inverse()), new Point3d(maxLineX, y, 0).TransformBy(matrix.Inverse()));
             }
             else
             {
-                return new Line(new Point3d(minLineX, y, 0), new Point3d(maxOtherLineX, y, 0));
+                return new Line(new Point3d(minLineX, y, 0).TransformBy(matrix.Inverse()), new Point3d(maxOtherLineX, y, 0).TransformBy(matrix.Inverse()));
             }
         }
     }

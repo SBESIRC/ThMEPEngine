@@ -121,6 +121,10 @@ namespace ThMEPLighting.FEI.AStarAlgorithm.MapService
                 path.AddVertexAt(0, cellPt.ToPoint2D(), 0, 0, 0);
             }
 
+            if (path.NumberOfVertices <= 1)
+            {
+                return null;
+            }
             return path.DPSimplify(1); 
         }
 

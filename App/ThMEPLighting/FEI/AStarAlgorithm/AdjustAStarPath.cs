@@ -58,6 +58,7 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
             {
                 path.Add(pt);
             }
+            path.Reverse();
             return path;
         }
 

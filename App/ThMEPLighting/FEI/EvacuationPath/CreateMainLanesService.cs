@@ -24,7 +24,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 return pt.DistanceTo(closetPt);
             }).ToList();
 
-            var extendLines = ExtendLine(frame, pt, extendDir, lanes, holes, 1, null);
+            var extendLines = ExtendLine(frame, pt, extendDir, lanes, holes, 0, null);
 
             return extendLines;
         }
@@ -63,33 +63,37 @@ namespace ThMEPLighting.FEI.EvacuationPath
                     ray.IntersectWith(line, Intersect.OnBothOperands, intersectPts, (IntPtr)0, (IntPtr)0);
                     if (intersectPts.Count > 0)
                     {
-                        //判断是否穿洞口
-                        if (CheckService.CheckIntersectWithHols(ray, holes, out List<Polyline> intersectHoles, out Point3d interPt))
-                        {
-                            if (spt.DistanceTo(interPt) <= spt.DistanceTo(intersectPts[0]))  //穿洞
-                            {
-                                var movePts = MoveStartPoint(spt, lineVerticalDir, intersectHoles);
-                                foreach (var mPt in movePts)
-                                {
-                                    var ajustPt = AjustStartPoint(preLanes, mPt, lineVerticalDir);
-                                    if (ajustPt != null)
-                                    {
-                                        resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, i, preLanes));
-                                    }
-                                }
-
-                                return resLines;
-                            }
-                        }
-                        //未穿洞
                         Polyline polyline = new Polyline();
                         polyline.AddVertexAt(0, spt.ToPoint2D(), 0, 0, 0);
                         polyline.AddVertexAt(0, intersectPts[0].ToPoint2D(), 0, 0, 0);
-                        extendLine.line = polyline;
-                        extendLine.priority = Priority.secondLevel;
-                        extendLine.endLane = lanes[i];
-                        resLines.Add(extendLine);
-                        spt = intersectPts[0];
+                        if (CheckService.CheckIntersectWithFrame(polyline, frame))  //穿外包框跳过
+                        {
+                            continue;
+                        }
+                        //判断是否穿洞口
+                        if (CheckService.CheckIntersectWithHols(polyline, holes, out List<Polyline> intersectHoles))
+                        {
+                            var movePts = MoveStartPoint(spt, lineVerticalDir, intersectHoles);
+                            foreach (var mPt in movePts)
+                            {
+                                var ajustPt = AjustStartPoint(preLanes, mPt, lineVerticalDir);
+                                if (ajustPt != null)
+                                {
+                                    resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, i, preLanes));
+                                }
+                            }
+
+                            return resLines;
+                        }
+                        //未穿洞
+                        if (!spt.IsEqualTo(intersectPts[0], new Tolerance(1, 1)))
+                        {
+                            extendLine.line = polyline;
+                            extendLine.priority = Priority.secondLevel;
+                            extendLine.endLane = lanes[i];
+                            resLines.Add(extendLine);
+                            spt = intersectPts[0];
+                        }
                         preLanes = lanes[i];
                         avoidFrame = false;
                         break;
@@ -101,7 +105,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 {
                     if (preLanes != null)
                     {
-                        if (CheckIntersectWithFrame(frame, preLanes, lanes[i], spt, out Line overlapLine))
+                        if (CheckIntersectWithFrame(frame, preLanes, lanes[i], extendDir, spt, out Line overlapLine))
                         {
                             var newLine = CreateExtendLineAvoidFrame(overlapLine, lanes[i], spt, frame, holes);
                             if (newLine != null)
@@ -137,7 +141,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="otherLines"></param>
         /// <param name="sPt"></param>
         /// <returns></returns>
-        private bool CheckIntersectWithFrame(Polyline frame, List<Line> lines, List<Line> otherLines, Point3d sPt, out Line overlapLine)
+        private bool CheckIntersectWithFrame(Polyline frame, List<Line> lines, List<Line> otherLines, Vector3d extendDir, Point3d sPt, out Line overlapLine)
         {
             overlapLine = GeUtils.LineOverlap(lines, otherLines);
             if (overlapLine == null || overlapLine.Length < lapDistance)
@@ -146,11 +150,26 @@ namespace ThMEPLighting.FEI.EvacuationPath
             }
 
             var closetPt = otherLines.Select(x => x.GetClosestPointTo(sPt, true)).OrderBy(x => x.DistanceTo(sPt)).First();
-            Line extendLine = new Line(closetPt, sPt);
+            Line extendLine = new Line(sPt, closetPt);
+
+            //判断是否和延伸方向一致,不一致侧不用再做延伸线
+            if ((closetPt - sPt).GetNormal().DotProduct(extendDir) < 0)
+            {
+                return false;
+            }
 
             return CheckService.CheckIntersectWithFrame(extendLine, frame);
         }
 
+        /// <summary>
+        /// 创建延伸线(躲避外包框)
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="otherLines"></param>
+        /// <param name="sPt"></param>
+        /// <param name="frame"></param>
+        /// <param name="holes"></param>
+        /// <returns></returns>
         private Line CreateExtendLineAvoidFrame(Line line, List<Line> otherLines, Point3d sPt, Polyline frame, List<Polyline> holes)
         {
             var startPt = line.StartPoint.DistanceTo(sPt) < line.EndPoint.DistanceTo(sPt) ? line.StartPoint : line.EndPoint;
@@ -171,7 +190,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
             var transEP = endPt.TransformBy(matrix);
             var moveDir = (transEP - transSP).GetNormal();
             var sP = transSP + moveDir * moveStep;
-            while ( sP.X < transEP.X)
+            while (sP.X < transEP.X)
             {
                 var extendPt = sP.TransformBy(matrix.Inverse());
                 var closePt = otherLines.Select(x => x.GetClosestPointTo(extendPt, false)).OrderBy(x => x.DistanceTo(extendPt)).FirstOrDefault();
@@ -185,7 +204,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                     }
                 }
 
-                sP = sP + xDir * moveStep;
+                sP = sP + moveDir * moveStep;
             }
 
             return null;

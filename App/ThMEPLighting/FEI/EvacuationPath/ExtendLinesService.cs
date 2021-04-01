@@ -21,7 +21,11 @@ namespace ThMEPLighting.FEI.EvacuationPath
 
             //得到车道方向
             var xlanedir = (xLanes.First().First().EndPoint - xLanes.First().First().StartPoint).GetNormal();
-            var ylanedir = (yLanes.First().First().EndPoint - yLanes.First().First().StartPoint).GetNormal();
+            var ylanedir = Vector3d.ZAxis.CrossProduct(xlanedir);
+            if (yLanes.Count > 0)  //只有一个方向车道线
+            {
+                ylanedir = (yLanes.First().First().EndPoint - yLanes.First().First().StartPoint).GetNormal();
+            }
 
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
             CreateStartExtendLineService startExtendLineService = new CreateStartExtendLineService();
@@ -47,20 +51,23 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 //起点到主车道延伸线
                 var startExtendLines = startExtendLineService.CreateStartLines(frame, allLanes, blockPt, holes);
 
-                //创建主车道延伸线
-                var closetLane = GeUtils.GetClosetLane(allLanes, blockPt);
-                var dir = (closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal();
-                var startPt = startExtendLines.First().line.EndPoint;
-                var extendDir = (closetLane.Value - blockPt).GetNormal();
-                if (IsXAxisExtend(dir, xlanedir, ylanedir))
+                if (startExtendLines.Count > 0)
                 {
-                    resLines.AddRange(createMainLanes.CreateLines(frame, startPt, extendDir, xLanes, holes));
+                    //创建主车道延伸线
+                    var closetLane = GeUtils.GetClosetLane(allLanes, blockPt);
+                    var dir = (closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal();
+                    var startPt = startExtendLines.First().line.EndPoint;
+                    var extendDir = (closetLane.Value - blockPt).GetNormal();
+                    if (IsXAxisExtend(dir, xlanedir, ylanedir))
+                    {
+                        resLines.AddRange(createMainLanes.CreateLines(frame, startPt, extendDir, xLanes, holes));
+                    }
+                    else
+                    {
+                        resLines.AddRange(createMainLanes.CreateLines(frame, startPt, extendDir, yLanes, holes));
+                    }
+                    resLines.AddRange(startExtendLines);
                 }
-                else
-                {
-                    resLines.AddRange(createMainLanes.CreateLines(frame, startPt, extendDir, yLanes, holes));
-                }
-                resLines.AddRange(startExtendLines);
             }
 
             return resLines.Select(x => x.line).ToList();

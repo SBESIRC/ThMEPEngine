@@ -16,7 +16,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
 {
     public class CreateStartExtendLineService
     {
-        double distance = 800;
+        double distance = 400;
 
         public List<ExtendLineModel> CreateStartLines(Polyline polyline, List<Line> lanes, Point3d blockPt, List<Polyline> holes)
         {
@@ -30,7 +30,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
 
             //创建延伸线
             //----简单的一条延伸线且不穿洞
-            var extendLine = CreateSymbolExtendLine(closetLane, startPt, holes);
+            var extendLine = CreateSymbolExtendLine(polyline, closetLane, startPt, holes);
             if (extendLine != null)
             {
                 resLines.Add(extendLine);
@@ -50,15 +50,15 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="closetLane"></param>
         /// <param name="startPt"></param>
         /// <returns></returns>
-        public ExtendLineModel CreateSymbolExtendLine(KeyValuePair<Line, Point3d> closetLane, Point3d startPt, List<Polyline> holes)
+        public ExtendLineModel CreateSymbolExtendLine(Polyline frame, KeyValuePair<Line, Point3d> closetLane, Point3d startPt, List<Polyline> holes)
         {
             Vector3d dir = Vector3d.ZAxis.CrossProduct((closetLane.Value - startPt).GetNormal());
             if ((closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.1, 0.1)))
             {
                 Polyline line = new Polyline();
                 line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);
-                line.AddVertexAt(0, closetLane.Value.ToPoint2D(), 0, 0, 0); 
-                if (!SelectService.LineIntersctBySelect(holes, line, 200))
+                line.AddVertexAt(1, closetLane.Value.ToPoint2D(), 0, 0, 0); 
+                if (!SelectService.LineIntersctBySelect(holes, line, 200) && !CheckService.CheckIntersectWithFrame(line, frame))
                 {
                     ExtendLineModel extendLine = new ExtendLineModel();
                     extendLine.line = line;
@@ -94,7 +94,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
 
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarRoutePlanner aStarRoute = new AStarRoutePlanner(mapFrame, dir, endModel, 400, 200, 200);
+            AStarRoutePlanner aStarRoute = new AStarRoutePlanner(mapFrame, dir, endModel, 400, 250, 250);
 
             //----设置障碍物
             var resHoles = SelectService.SelelctCrossing(holes, mapFrame);
