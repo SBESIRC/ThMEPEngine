@@ -207,7 +207,7 @@ namespace TianHua.Hvac.UI
                                         double angle,
                                         string innerDuctSize,
                                         string outerDuctSize,
-                                        string TeeSize,
+                                        string tee_size,
                                         bool is_type2,
                                         ref int wall_num,
                                         DBObjectCollection bypass_line,
@@ -220,7 +220,7 @@ namespace TianHua.Hvac.UI
                 new ThInletOutletDuctDrawEngine(Model,
                                                 innerDuctSize,
                                                 outerDuctSize,
-                                                TeeSize,
+                                                tee_size,
                                                 "3",
                                                 bypass_line, 
                                                 io_anay_res.InletCenterLineGraph,
@@ -340,13 +340,15 @@ namespace TianHua.Hvac.UI
                             ThHvacCommon.CONTINUES_LINETYPE :
                             ThHvacCommon.DASH_LINETYPE;
                         ThVTee vt = new ThVTee(600, 800, 20);
-                        
-                        vt.RunVTeeDrawEngine(DbFanModel, line_type);
                         Point3d valve_pos = DbFanModel.FanInletBasePoint + new Vector3d(45, -475, 0);
                         ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
                         int wall_num = 0;
                         IODuctHoleAnalysis(DbFanModel, 0, innerDuctSize, outerDuctSize, tee_width, false, ref wall_num, null, io_anay_res);
-                        ThServiceTee.InsertElectricValve(valve_pos, 800, Math.PI);
+                        if (wall_num != 0)
+                        {
+                            vt.RunVTeeDrawEngine(DbFanModel, line_type);
+                            ThServiceTee.InsertElectricValve(valve_pos, 800, Math.PI);
+                        }
                     }
                     else
                     {
