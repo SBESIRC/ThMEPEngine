@@ -37,6 +37,7 @@ namespace ThMEPWSS.Pipe.Model
                     case ThWPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR: return StoreyType.LargeRoof;
                     case ThWPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR: return StoreyType.StandardStorey;
                     case ThWPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NON_STANDARD_FLOOR: return StoreyType.NonStandardStorey;
+                    case ThWPipeCommon.STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR: return StoreyType.NonStandardStorey;
                     default: return StoreyType.Unknown;
                 }
             }

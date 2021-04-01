@@ -39,3 +39,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPWSS.ThPipeCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThSprayCmds))]
 [assembly: CommandClass(typeof(ThMEPWSS.ThMEPWSSApp))]
+[assembly: CommandClass(typeof(ThMEPWSS.ThSystemDiagramCmds))]

@@ -30,6 +30,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             var engine = new ThWSideEntryWaterBucketExtractionEngine();
             engine.Extract(database);
+            
             var dbObjs = engine.Results.Select(o => o.Geometry).ToCollection();
             if (polygon.Count > 0)
             {
