@@ -12,6 +12,7 @@ using ThMEPWSS.Pipe.Output;
 using ThMEPWSS.Pipe.Tools;
 using ThMEPWSS.Pipe.Service;
 using ThCADExtension;
+using ThMEPWSS.Pipe.Geom;
 
 namespace ThMEPWSS.Command
 {
@@ -126,7 +127,15 @@ namespace ThMEPWSS.Command
                 var parameters0 = new ThWTopParameters();
                 if (FloorEngines.TopFloors.Count > 0) //存在顶层
                 {
-                    var basecircle2 = FloorEngines.TopFloors[0].BaseCircles[0].Boundary.GetCenter();
+                    var basecircle2 = Point3d.Origin;
+                    foreach (var basecircle in FloorEngines.TopFloors[0].BaseCircles)
+                    {
+                        if(GeomUtils.PtInLoop(FloorEngines.TopFloors[0].Space.Boundary as Polyline, basecircle.Boundary.GetCenter()))
+                        {
+                            basecircle2 = basecircle.Boundary.GetCenter();
+                            break;
+                        }
+                    }   
                     parameters0.baseCenter2.Add(basecircle2);
                     var layoutTopFloor = new ThWTopFloorOutPutEngine();
                     layoutTopFloor.LayoutTopFloor(FloorEngines, parameters0, acadDatabase, W_DRAI_EQPM, W_DRAI_FLDR, W_RAIN_PIPE);

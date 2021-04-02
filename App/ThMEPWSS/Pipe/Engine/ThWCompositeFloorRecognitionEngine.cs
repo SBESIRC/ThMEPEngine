@@ -115,6 +115,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<Curve> AllObstacles { get; set; }
         public List<string> Layers { get; set; }
         public Dictionary<Point3d, string> NonStandardBaseCircles { get; set; }
+        public Dictionary<Point3d, string> StandardBaseCircles { get; set; }
         public ThWCompositeFloorRecognitionEngine()
         {
             TagNameFrames = new List<Curve>();
@@ -139,6 +140,7 @@ namespace ThMEPWSS.Pipe.Engine
             TopFloors = new List<ThWTopFloorRoom>();
             NormalFloors= new List<ThWTopFloorRoom>();
             NonStandardBaseCircles = new Dictionary<Point3d, string>();
+            StandardBaseCircles = new Dictionary<Point3d, string>();
         }
         public void Dispose()
         {
@@ -247,6 +249,7 @@ namespace ThMEPWSS.Pipe.Engine
                 };      
                 FirstEngine.Recognize(database, pts);
                 NonStandardBaseCircles = FirstEngine.NonStandardBaseCircles;
+                StandardBaseCircles= FirstEngine.StandardBaseCircles;
                 TopFloors = FirstEngine.Rooms;
                 if (TopFloors.Count > 0)
                 {
@@ -310,7 +313,8 @@ namespace ThMEPWSS.Pipe.Engine
         public static List<ThIfcSpace> GetStandardSpaces(List<BlockReference> blocks)
         {
             var FloorSpaces = new List<ThIfcSpace>();
-
+            var Floor_Spaces = new List<ThIfcSpace>();
+            var tags = "";
             foreach (BlockReference block in blocks)
             {
                 var blockBounds = new List<BlockReference>();
@@ -322,12 +326,32 @@ namespace ThMEPWSS.Pipe.Engine
                 blockString.Add(BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号"));
                 if (blockBounds.Count > 0)
                 {
-                    FloorSpaces.Add(new ThIfcSpace { Boundary = GetBoundaryCurves(blockBounds)[0], Tags = blockString });
+                    if (tags == "")
+                    {
+                        string[] patterns = ThStructureUtils.OriginalFromXref(blockString[0]).ToUpper().Split('-').Reverse().ToArray();
+                        tags = patterns[0];
+                        FloorSpaces.Add(new ThIfcSpace { Boundary = GetBoundaryCurves(blockBounds)[0], Tags = blockString });
+                    }
+                    else
+                    {
+                        string[] patterns = ThStructureUtils.OriginalFromXref(blockString[0]).ToUpper().Split('-').Reverse().ToArray();
+                        if(int.Parse(patterns[0])> int.Parse(tags))
+                        {
+                            FloorSpaces.Add(new ThIfcSpace { Boundary = GetBoundaryCurves(blockBounds)[0], Tags = blockString });
+                        }
+                    }
                 }
             }
-
-            return FloorSpaces;
-        }
+            if (FloorSpaces.Count > 1)
+            {
+                Floor_Spaces.Add(FloorSpaces[FloorSpaces.Count-1]);
+            }
+            else
+            {
+                Floor_Spaces.Add(FloorSpaces[0]);
+            }
+            return Floor_Spaces;
+        }       
         public static List<ThIfcSpace> GetNonStandardSpaces(List<BlockReference> blocks)
         {
             var FloorSpaces = new List<ThIfcSpace>();

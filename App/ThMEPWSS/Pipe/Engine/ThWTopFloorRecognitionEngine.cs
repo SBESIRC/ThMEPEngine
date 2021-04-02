@@ -26,6 +26,7 @@ namespace ThMEPWSS.Pipe.Engine
         public List<ThWFloorDrain> floorDrains { get; set; }
         public List<ThWClosestool> closets { get; set; }
         public Dictionary<Point3d,string> NonStandardBaseCircles { get; set; }
+        public Dictionary<Point3d, string> StandardBaseCircles { get; set; }
         public ThWTopFloorRecognitionEngine()
         {
             Rooms = new List<ThWTopFloorRoom>();
@@ -41,6 +42,7 @@ namespace ThMEPWSS.Pipe.Engine
                 var compositebalconyroom = Getcompositeroom(database, GetBoundaryVertices(StandardSpaces), thisSpaces).Item2;
                 var divisionLines = GetLines(blockCollection, thisSpaces);
                 NonStandardBaseCircles= GetCirclePoints(blockCollection);
+                StandardBaseCircles = GetStandardCirclePoints(blockCollection);
                 Rooms = ThTopFloorRoomService.Build(StandardSpaces, basepoint, compositeroom, compositebalconyroom, divisionLines);        
             }
         }
@@ -97,6 +99,29 @@ namespace ThMEPWSS.Pipe.Engine
             foreach (BlockReference block in blocks)
             {
                 if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("非标层"))
+                {
+                    var name = BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号");
+                    var s = new DBObjectCollection();
+                    block.Explode(s);
+                    List<Circle> circle = new List<Circle>();
+                    foreach (var s1 in s)
+                    {
+                        if (s1.GetType().Name.Contains("Circle"))
+                        {
+                            Circle baseCircle = s1 as Circle;
+                            points.Add(baseCircle.Center, name);
+                        }
+                    }
+                }
+            }
+            return points;
+        }
+        public static Dictionary<Point3d, string> GetStandardCirclePoints(List<BlockReference> blocks)
+        {
+            var points = new Dictionary<Point3d, string>();
+            foreach (BlockReference block in blocks)
+            {
+                if (BlockTools.GetDynBlockValue(block.Id, "楼层类型").Contains("标准层"))
                 {
                     var name = BlockTools.GetAttributeInBlockReference(block.Id, "楼层编号");
                     var s = new DBObjectCollection();

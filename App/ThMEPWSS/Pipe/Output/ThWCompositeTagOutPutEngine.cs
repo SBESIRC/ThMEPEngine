@@ -58,20 +58,7 @@ namespace ThMEPWSS.Pipe.Output
                 { "大屋面", parameters1.roofEntity},
                 { "小屋面", parameters2.roofDeviceEntity},
                 { $"标准层{FloorEngines.TopFloors[0].Space.Tags[0]}", parameters0.standardEntity },
-            };
-            if (FloorEngines.NormalFloors.Count > 0)//复制所有管井到标准层
-            {
-                for (int i = 0; i < FloorEngines.NormalFloors.Count; i++)
-                {
-                    var normalEntity = new List<Entity>();
-                    var offset = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(FloorEngines.NormalFloors[0].BaseCircles[i + 1].Boundary.GetCenter()));
-                    foreach (var ent in parameters0.normalCopys)
-                    {
-                        normalEntity.Add(ent.GetTransformedCopy(offset));
-                    }
-                    storeys.Add($"标准层{FloorEngines.NormalFloors[i].Space.Tags[0]}", normalEntity);              
-                }
-            }
+            };       
             var nums = FloorEngines.NonStandardBaseCircles.Keys.ToList();
             if (nums.Count > 0)
             {
@@ -84,6 +71,23 @@ namespace ThMEPWSS.Pipe.Output
                         normalEntity.Add(ent.GetTransformedCopy(offset));
                     }
                     storeys.Add( $"非标层{FloorEngines.NonStandardBaseCircles[nums[i]]}", normalEntity);                
+                }
+            }
+            var standardNums = FloorEngines.StandardBaseCircles.Keys.ToList();
+            if (standardNums.Count > 0)
+            {
+                for (int i = 0; i < standardNums.Count; i++)
+                {
+                    var normalEntity = new List<Entity>();
+                    if (parameters0.baseCenter2[0].DistanceTo(standardNums[i])>1)
+                    {
+                        var offset = Matrix3d.Displacement(parameters0.baseCenter2[0].GetVectorTo(standardNums[i]));
+                        foreach (var ent in parameters0.normalCopys)
+                        {
+                            normalEntity.Add(ent.GetTransformedCopy(offset));
+                        }
+                        storeys.Add($"标准层{FloorEngines.StandardBaseCircles[standardNums[i]]}", normalEntity);
+                    }
                 }
             }
             foreach (var item in storeys)
