@@ -549,9 +549,16 @@ namespace ThMEPWSS.Pipe.Tools
 
         {
             Point3d tag = Point3d.Origin;
-            if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7 * scaleFactor, Pipeindex[i + 2], scaleFactor)).Count > 0)
+            if (i + 2 < Pipeindex.Count)
             {
-                tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i], scaleFactor, originPoint[i/3]);
+                if (obstacle.SelectCrossingPolygon(GetBoundary(175 * 7 * scaleFactor, Pipeindex[i + 2], scaleFactor)).Count > 0)
+                {
+                    tag = GetRadialFontPoint(Pipeindex[i], obstacle, Pipeindex[i], scaleFactor, originPoint[i / 3]);
+                }
+                else
+                {
+                    tag = Pipeindex[i];
+                }
             }
             else
             {
