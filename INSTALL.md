@@ -1,9 +1,10 @@
 # How to get started
-Install the [psake](https://www.powershellgallery.com/packages/psake/4.9.0) and  [VSSetup](https://www.powershellgallery.com/packages/VSSetup/2.2.16) PowerShell Modules
+Install the these packages from [powershellgallery](https://www.powershellgallery.com/)
 
 ````PowerShell
 Install-Module -Name psake
 Install-Module -Name VSSetup
+Install-Module -Name Carbon
 ````
 
 # Script
