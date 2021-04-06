@@ -52,6 +52,7 @@ namespace ThMEPHVAC.CAD
             string outerductinfo,
             string tee_info,
             string elevation_info,
+            bool is_type2,
             DBObjectCollection bypass_line,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph
@@ -94,7 +95,7 @@ namespace ThMEPHVAC.CAD
             SetInOutHoses(fanmodel.FanScenario);
             bool isAxial = fanmodel.Model.IsAXIALModel();
             SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line);
-            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line);
+            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, is_type2);
         }
 
         public void RunInletDrawEngine(ThDbModelFan fanmodel)
@@ -150,7 +151,8 @@ namespace ThMEPHVAC.CAD
                 TeeWidth = tee_info.Split('x').First().NullToDouble();
                 TeeHeight = tee_info.Split('x').Last().NullToDouble();
             }
-            Elevation = Double.Parse(elevation_info);
+            if (!string.IsNullOrEmpty(elevation_info))
+                Elevation = Double.Parse(elevation_info);
         }
 
         private ThIfcDuctSegmentParameters create_duct_param(Point3d tar_srt_pos,
@@ -256,7 +258,8 @@ namespace ThMEPHVAC.CAD
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = InletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct, null);
+                // 输入管道暂不涉及管道描述信息的修改，最后一个参数为false
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct, null, false);
                 if (isUpOrDownOpening)
                 {
                     ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * InletOpening.Height, ductgraphedge.TargetShrink);
@@ -272,7 +275,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetOutletDucts(string scenario, bool isaxial, DBObjectCollection bypass_line)
+        private void SetOutletDucts(string scenario, bool isaxial, DBObjectCollection bypass_line, bool is_type2)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
             bool isUpOrDownOpening = FanInOutType.Contains("上出") || FanInOutType.Contains("下出");
@@ -293,7 +296,6 @@ namespace ThMEPHVAC.CAD
                     BigEndWidth = reducingBigEndWidth,
                     SmallEndWidth = reducingSmallEndWidth
                 };
-                //var reducing = ductFittingFactoryService.CreateReducing(ductReducingParameters);
                 ThIfcDuctReducing reducing = new ThIfcDuctReducing(new ThIfcDuctReducingParameters());
                 //若风机出口宽度比管道宽度小，即风机出口对应变径的小端
                 if (OutletOpening.Width < OutletDuctWidth)
@@ -308,7 +310,6 @@ namespace ThMEPHVAC.CAD
                     }
 
                     double rotationangle = OutletOpening.NormalAngle * Math.PI / 180;
-                    //reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                     reducing.Matrix = Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()));
                 }
@@ -325,7 +326,6 @@ namespace ThMEPHVAC.CAD
                     }
 
                     double rotationangle = OutletOpening.NormalAngle * Math.PI / 180 - Math.PI;
-                    //reducing.Matrix = Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
                     reducing.Matrix = Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(OutletOpening.OpingBasePoint.GetAsVector()));
@@ -365,7 +365,10 @@ namespace ThMEPHVAC.CAD
                 if (is_bypass)
                 {
                     text_enable = true;
-                    s_evel = a.ToString();
+                    if (a > 0)
+                        s_evel = "+" + a.ToString();
+                    else
+                        s_evel = a.ToString();
                 }
                 else
                 {
@@ -375,12 +378,21 @@ namespace ThMEPHVAC.CAD
                         s_evel = Elevation.ToString();
                     }
                 }
+                bool is_modify = false;
+                if (bypass_line == null)
+                {
+                    is_modify = true;
+                }
+                else
+                {
+                    if (is_type2 && is_bypass)
+                    {
+                        is_modify = true;
+                    }
+                }
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening,
+                                                                              text_enable, s_evel, is_modify);
 
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, 
-                                                                              rotateangle, 
-                                                                              isUpOrDownOpening, 
-                                                                              text_enable,
-                                                                              s_evel);
                 if (isUpOrDownOpening)
                 {
                     ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * OutletOpening.Height, ductgraphedge.TargetShrink);
@@ -562,16 +574,12 @@ namespace ThMEPHVAC.CAD
                             if (t == null)
                                 return;
                             t.TextString = str[0];
-                            t.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(-2000, 0, 0)));
+                            t.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(-1000, 0, 0)));
                             acadDatabase.ModelSpace.Add(t);
                             Segment.InformationText.TextString = str[1];
-                            Segment.InformationText.TransformBy(Segment.Matrix);
+                            Segment.InformationText.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(1000, 0, 0)));
                             acadDatabase.ModelSpace.Add(Segment.InformationText);
                         }
-
-                        //Segment.InformationText.TransformBy(Segment.Matrix);
-
-                        
                         Segment.InformationText.SetDatabaseDefaults();
                     }
                 }

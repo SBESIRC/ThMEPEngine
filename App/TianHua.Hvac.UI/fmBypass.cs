@@ -75,37 +75,41 @@ namespace TianHua.Hvac.UI
         private void fmBypass_Load(object sender, EventArgs e)
         {
             listBox1.SelectedIndex = 0;
-            label1.Visible = false;
-            label2.Visible = false;
-            textBox2.Visible = false;
-            textBox3.Visible = false;
             textBox1.Text = "8";
             textBox2.Text = "100";
             textBox3.Text = "100";
+            RadType1.Checked = true;
+            RadType2.Checked = false;
+            splitContainer2.Panel1Collapsed = false;
+            splitContainer2.Panel2Collapsed = true;
         }
 
         private void RadType1_CheckedChanged(object sender, EventArgs e)
         {
-            textBox1.Visible = true;
-            listBox1.Visible = true;
-            textBox2.Visible = false;
-            textBox3.Visible = false;
-            label1.Visible = false;
-            label2.Visible = false;
-            label3.Visible = true;
-            label4.Visible = true;
+            if (RadType1.Checked)
+            {
+                splitContainer2.Panel1Collapsed = false;
+                splitContainer2.Panel2Collapsed = true;
+            }
+            else
+            {
+                splitContainer2.Panel1Collapsed = true;
+                splitContainer2.Panel2Collapsed = false;
+            }
         }
 
         private void RadType2_CheckedChanged(object sender, EventArgs e)
         {
-            textBox1.Visible = false;
-            listBox1.Visible = false;
-            textBox2.Visible = true;
-            textBox3.Visible = true;
-            label1.Visible = true;
-            label2.Visible = true;
-            label3.Visible = false;
-            label4.Visible = false;
+            if (RadType1.Checked)
+            {
+                splitContainer2.Panel1Collapsed = false;
+                splitContainer2.Panel2Collapsed = true;
+            }
+            else
+            {
+                splitContainer2.Panel1Collapsed = true;
+                splitContainer2.Panel2Collapsed = false;
+            }
         }
 
         private void textBox2_TextChanged(object sender, EventArgs e)

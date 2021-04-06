@@ -30,15 +30,17 @@ namespace TianHua.Hvac.UI
         {
             
         }
-        private ObjectIdCollection get_from_prompt(string prompt)
+        private ObjectIdCollection get_from_prompt(string prompt, bool only_able)
         {
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
                 AllowDuplicates = false,
                 MessageForAdding = prompt,
                 RejectObjectsOnLockedLayers = true,
+                SingleOnly = only_able
             };
             var result = Active.Editor.GetSelection(options);
+            
             if (result.Status == PromptStatus.OK)
             {
                 return result.Value.GetObjectIds().ToObjectIdCollection();
@@ -69,7 +71,7 @@ namespace TianHua.Hvac.UI
 
         private DBObjectCollection get_fan_and_centerline(ref ObjectId fan_id)
         {
-            var objIds = get_from_prompt("请选择风机和中心线");
+            var objIds = get_from_prompt("请选择风机和中心线", false);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
             var tmp = new DBObjectCollection();
@@ -82,7 +84,7 @@ namespace TianHua.Hvac.UI
 
         private DBObjectCollection get_bypass()
         {
-            var objIds = get_from_prompt("请选择旁通管");
+            var objIds = get_from_prompt("请选择旁通管", true);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
             Curve c = objIds[0].GetDBObject() as Curve;
@@ -123,7 +125,7 @@ namespace TianHua.Hvac.UI
         private DBObjectCollection get_walls()
         {
             var wallobjects = new DBObjectCollection();
-            var objIds = get_from_prompt("请选择内侧墙线");
+            var objIds = get_from_prompt("请选择内侧墙线", false);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
             foreach (ObjectId oid in objIds)
@@ -203,6 +205,7 @@ namespace TianHua.Hvac.UI
             return io_anay_res;
         }
 
+        // is_type2也是是否要修改管道描述信息的标志
         private void IODuctHoleAnalysis(ThDbModelFan Model,
                                         double angle,
                                         string innerDuctSize,
@@ -210,6 +213,7 @@ namespace TianHua.Hvac.UI
                                         string tee_size,
                                         bool is_type2,
                                         ref int wall_num,
+                                        string elevation,
                                         DBObjectCollection bypass_line,
                                         ThFanInletOutletAnalysisEngine io_anay_res)
         {
@@ -221,7 +225,8 @@ namespace TianHua.Hvac.UI
                                                 innerDuctSize,
                                                 outerDuctSize,
                                                 tee_size,
-                                                "3",
+                                                elevation,
+                                                is_type2,
                                                 bypass_line, 
                                                 io_anay_res.InletCenterLineGraph,
                                                 io_anay_res.OutletCenterLineGraph);
@@ -305,6 +310,7 @@ namespace TianHua.Hvac.UI
                 string innerDuctSize = string.Empty;
                 string outerDuctSize = string.Empty;
                 string airVloume = string.Empty;
+                string elevation = string.Empty;
                 using (var dlg = create_duct_diag(DbFanModel))
                 {
                     if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
@@ -312,6 +318,7 @@ namespace TianHua.Hvac.UI
                         innerDuctSize = dlg.SelectedInnerDuctSize;
                         outerDuctSize = dlg.SelectedOuterDuctSize;
                         airVloume = dlg.AirVolume;
+                        elevation = "3";
                     }
                 }
                 if (string.IsNullOrEmpty(innerDuctSize) || string.IsNullOrEmpty(outerDuctSize))
@@ -343,7 +350,7 @@ namespace TianHua.Hvac.UI
                         Point3d valve_pos = DbFanModel.FanInletBasePoint + new Vector3d(45, -475, 0);
                         ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
                         int wall_num = 0;
-                        IODuctHoleAnalysis(DbFanModel, 0, innerDuctSize, outerDuctSize, tee_width, false, ref wall_num, null, io_anay_res);
+                        IODuctHoleAnalysis(DbFanModel, 0, innerDuctSize, outerDuctSize, tee_width, false, ref wall_num, null, null, io_anay_res);
                         if (wall_num != 0)
                         {
                             vt.RunVTeeDrawEngine(DbFanModel, line_type);
@@ -378,7 +385,6 @@ namespace TianHua.Hvac.UI
                         double OShrinkm = is_type2 ? bra_width * 0.5 + 100 : (bra_width + valve_width) * 0.5 + 50;
                         if (io_anay_res.HasInletTee())
                         {
-                            // Swap Ishrink & ObShrink
                             ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph,
                                                          OShrinkb,
                                                          OShrinkm,
@@ -392,7 +398,7 @@ namespace TianHua.Hvac.UI
                                                          OShrinkm);
                         }
                         int wall_num = 0;
-                        IODuctHoleAnalysis(DbTeeModel, angle, innerDuctSize, outerDuctSize, tee_width, is_type2, ref wall_num, bypass_line, io_anay_res);
+                        IODuctHoleAnalysis(DbTeeModel, angle, innerDuctSize, outerDuctSize, tee_width, is_type2, ref wall_num, elevation, bypass_line, io_anay_res);
                         if (wall_num != 0)
                             ThServiceTee.InsertElectricValve(valve_pos, bra_width, Math.PI);
                     }
@@ -401,7 +407,7 @@ namespace TianHua.Hvac.UI
                 {
                     ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
                     int wall_num = 0;
-                    IODuctHoleAnalysis(DbFanModel, 0, innerDuctSize, outerDuctSize, null, false, ref wall_num, null, io_anay_res);
+                    IODuctHoleAnalysis(DbFanModel, 0, innerDuctSize, outerDuctSize, null, false, ref wall_num, null, null, io_anay_res);
                 }
             }
         }
