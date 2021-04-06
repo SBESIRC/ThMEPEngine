@@ -184,5 +184,22 @@ namespace ThMEPEngineCore.CAD
                 return false;
             }
         }
+
+        /// <summary>
+        /// 是否为栏杆
+        /// </summary>
+        public bool IsRailing
+        {
+            get
+            {
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_RAILING
+                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_RAILING;
+                }
+                return false;
+            }
+        }
     }
 }
