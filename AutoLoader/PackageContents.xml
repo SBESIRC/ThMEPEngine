@@ -93,6 +93,7 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXCX" Global="THDXCX" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
