@@ -152,6 +152,24 @@ namespace ThCADCore.NTS
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
 
+        public DBObjectCollection SelectCrossingPolygon(MPolygon mPolygon)
+        {
+            /*
+             * 线获取MPolygon外圈内所有的物体
+             * 减去洞内包括的物体
+             */
+            var loops = mPolygon.Loops();
+            var objs = SelectCrossingPolygon(loops[0]);
+            for (int i = 1; i < loops.Count; i++)
+            {
+                foreach (DBObject innerObj in SelectWindowPolygon(loops[i]))
+                {
+                    objs.Remove(innerObj);
+                }
+            }
+            return objs;
+        }
+
         public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
         {
             var pline = new Polyline()

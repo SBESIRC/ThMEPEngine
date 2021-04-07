@@ -21,6 +21,8 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using CLI;
+using ThMEPEngineCore.BuildRoom.Interface;
+using ThMEPEngineCore.BuildRoom.Service;
 
 namespace ThMEPEngineCore
 {
@@ -494,6 +496,62 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THExtractRoomOutline", CommandFlags.Modal)]
+        public void THExtractRoomOutline()
+        {            
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (IRoomBuilder roomBuilder = new ThRoomOutlineBuilderEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择外框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                IRoomBuildData roomData = new ThBuildRoomDataService() { /*SelfBuildData = true*/ };
+                roomData.Build(acadDatabase.Database, frame.Vertices());
+                roomBuilder.Build(roomData);
+
+                var objIds = new ObjectIdList();
+                roomBuilder.Outlines.ForEach(o =>
+                {
+                    o.ColorIndex = 5;
+                    o.SetDatabaseDefaults();
+                    objIds.Add(acadDatabase.ModelSpace.Add(o));                    
+                });
+                if(objIds.Count>0)
+                {
+                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
+                }
+
+                bool doMark = true;
+                do
+                {
+                   var ppr = Active.Editor.GetPoint("\n选择坐标点：");
+                    if (ppr.Status == PromptStatus.OK)
+                    {
+                        var rooms = roomBuilder.FindRooms(ppr.Value);
+                        rooms.ForEach(o =>
+                        {
+                            var clone = o.Clone() as Entity;
+                            clone.ColorIndex = 6;
+                            clone.SetDatabaseDefaults();
+                            acadDatabase.ModelSpace.Add(clone);
+                        });
+                        if(rooms.Count==0)
+                        {
+                            Active.Editor.WriteMessage("\n此处找不到房间");
+                        }
+                    }
+                    else
+                    {
+                        doMark = false;
+                    }
+                } while (doMark);
+            }
+        }
+        
         [CommandMethod("TIANHUACAD", "THExtractSlab", CommandFlags.Modal)]
         public void THExtractSlab()
         {
