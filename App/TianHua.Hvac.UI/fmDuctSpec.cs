@@ -12,12 +12,12 @@ namespace TianHua.Hvac.UI
         public string SelectedInnerDuctSize { get; set; }
         public string SelectedOuterDuctSize { get; set; }
         public string AirVolume { get; set; }
-        DuctSpecModel m_DuctSpecModel { get; set; }
+        public string Elevation { get; set; }
+        public DuctSpecModel Model { get; set; }
         public fmDuctSpec()
         {
             InitializeComponent();
         }
-
 
         private void fmDuctSpec_Load(object sender, EventArgs e)
         {
@@ -26,7 +26,7 @@ namespace TianHua.Hvac.UI
 
         public void InitForm(DuctSpecModel _DuctSpecModel)
         {
-            m_DuctSpecModel = _DuctSpecModel;
+            Model = _DuctSpecModel;
 
             TxtAirVolume.Text = FuncStr.NullToStr(_DuctSpecModel.AirVolume);
 
@@ -107,6 +107,7 @@ namespace TianHua.Hvac.UI
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
+            Elevation = TxtHeight.Text;
             AirVolume = TxtAirVolume.Text;
         }
 
@@ -170,26 +171,26 @@ namespace TianHua.Hvac.UI
 
             var _AirSpeed = FuncStr.NullToStr(TxtAirSpeed.Text);
 
-            if (FuncStr.NullToDouble(TxtAirSpeed.Text) > m_DuctSpecModel.MaxAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MaxAirSpeed); _AirSpeed = FuncStr.NullToStr(m_DuctSpecModel.MaxAirSpeed); }
+            if (FuncStr.NullToDouble(TxtAirSpeed.Text) > Model.MaxAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(Model.MaxAirSpeed); _AirSpeed = FuncStr.NullToStr(Model.MaxAirSpeed); }
 
-            if (FuncStr.NullToDouble(TxtAirSpeed.Text) < m_DuctSpecModel.MinAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); _AirSpeed = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); }
+            if (FuncStr.NullToDouble(TxtAirSpeed.Text) < Model.MinAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(Model.MinAirSpeed); _AirSpeed = FuncStr.NullToStr(Model.MinAirSpeed); }
 
             //if (FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
 
             ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed));
 
-            m_DuctSpecModel.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
-            m_DuctSpecModel.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
-            m_DuctSpecModel.OuterTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendOuterDuctSize;
-            m_DuctSpecModel.InnerTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendInnerDuctSize;
+            Model.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            Model.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            Model.OuterTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendOuterDuctSize;
+            Model.InnerTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendInnerDuctSize;
 
-            ListBoxOuterTube.DataSource = m_DuctSpecModel.ListOuterTube;
+            ListBoxOuterTube.DataSource = Model.ListOuterTube;
 
-            ListBoxInnerTube.DataSource = m_DuctSpecModel.ListInnerTube;
+            ListBoxInnerTube.DataSource = Model.ListInnerTube;
 
-            ListBoxOuterTube.SelectedItem = m_DuctSpecModel.OuterTube;
+            ListBoxOuterTube.SelectedItem = Model.OuterTube;
 
-            ListBoxInnerTube.SelectedItem = m_DuctSpecModel.InnerTube;
+            ListBoxInnerTube.SelectedItem = Model.InnerTube;
         }
 
         private void TxtOuterTube1_EditValueChanged(object sender, EventArgs e)

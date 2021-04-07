@@ -318,7 +318,7 @@ namespace TianHua.Hvac.UI
                         innerDuctSize = dlg.SelectedInnerDuctSize;
                         outerDuctSize = dlg.SelectedOuterDuctSize;
                         airVloume = dlg.AirVolume;
-                        elevation = "3";
+                        elevation = dlg.Elevation;
                     }
                 }
                 if (string.IsNullOrEmpty(innerDuctSize) || string.IsNullOrEmpty(outerDuctSize))
