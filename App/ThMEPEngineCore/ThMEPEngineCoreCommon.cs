@@ -36,6 +36,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_CATEGORY_WINDOW = "窗";
         public static string BUILDELEMENT_CATEGORY_FLOOR = "楼板";
         public static string BUILDELEMENT_CATEGORY_RAILING = "栏杆";
+        public static string BUILDELEMENT_CATEGORY_LINEFOOT = "线脚";
 
         // 梁标注
         public static string BEAM_GEOMETRY_SIZE = "Beam_Geometry_Size";

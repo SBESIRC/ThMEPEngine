@@ -537,5 +537,27 @@ namespace ThMEPEngineCore
                 });
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THExtractLineFoot", CommandFlags.Modal)]
+        public void THExtractLineFoot()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var lineFootRecognitionEngine = new ThLineFootRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                lineFootRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                lineFootRecognitionEngine.Elements.ForEach(o =>
+                {
+                    var curve = o.Outline as Curve;
+                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                });
+            }
+        }
     }
 }

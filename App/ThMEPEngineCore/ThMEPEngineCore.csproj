@@ -87,6 +87,8 @@
     <Compile Include="Engine\ThBuildingElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThCurtainWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThLineFootExtractionVisitor.cs" />
+    <Compile Include="Engine\ThLineFootRecognitionEngine.cs" />
     <Compile Include="Engine\ThRailingExtractionVisitor.cs" />
     <Compile Include="Engine\ThRailingRecognitionEngine.cs" />
     <Compile Include="Engine\ThRoomBuilderEngine.cs" />
@@ -95,9 +97,11 @@
     <Compile Include="Engine\ThSpatialElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThSpatialElementExtractor.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
+    <Compile Include="Model\ThIfcLineFoot.cs" />
     <Compile Include="Model\ThIfcRailing.cs" />
     <Compile Include="Model\ThIfcTextNote.cs" />
     <Compile Include="Service\ThContourRelationQueryService.cs" />
+    <Compile Include="Service\ThLineFootLayerManager.cs" />
     <Compile Include="Service\ThRailingLayerManager.cs" />
     <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />
     <Compile Include="Service\ThRoomSpatialPredicateService.cs" />
