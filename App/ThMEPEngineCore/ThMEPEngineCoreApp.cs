@@ -516,126 +516,47 @@ namespace ThMEPEngineCore
             }
         }
 
-
-        [CommandMethod("TIANHUACAD", "THDXCX", CommandFlags.Modal)]
-        public void THDXCX()
+        [CommandMethod("TIANHUACAD", "THExtractRailing", CommandFlags.Modal)]
+        public void THExtractRailing()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var extractEngine = new ThExtractGeometryEngine())
+            using (var railingRecognitionEngine = new ThRailingRecognitionEngine())
             {
-                var per = Active.Editor.GetEntity("\n选择一个框线");
-                var pts = new Point3dCollection();
-                if (per.Status == PromptStatus.OK)
-                {
-                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
-                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
-                    pts = newFrame.VerticesEx(100.0);
-                }
-                else
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                //输入冲洗点位参数
-                var washPara = GetWashParameter();
-
-                var extractors = new List<ThExtractorBase>()
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                railingRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                railingRecognitionEngine.Elements.ForEach(o =>
                 {
-                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
-                    //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=true,NameLayer="空间名称",ColorIndex=1},
-                    new ThColumnExtractor{UseDb3ColumnEngine=false,ColorIndex=2},
-                    new ThShearWallExtractor{ColorIndex=3},
-                    new ThDrainageFacilityExtractor{ColorIndex=4},
-                };
-
-                extractEngine.Accept(extractors);
-                extractEngine.Extract(acadDatabase.Database, pts);
-                extractEngine.OutputGeo(Active.Document.Name);
-                var fullPath = Active.Document.Name+".Info.geojson";
-
-                var washData = new ThWashGeoData();
-                washData.ReadFromFile(fullPath);
-                var washPoint = new ThWashPointLayoutEngine();
-                double[] points = washPoint.Layout(washData, washPara);
-                var coords = GetPoints(points);
-                BuildCircleHatch(coords);
+                    var curve = o.Outline as Curve;
+                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                });
             }
         }
 
-        private void BuildCircleHatch(List<Point3d> pts, double radius = 500.0)
+        [CommandMethod("TIANHUACAD", "THExtractLineFoot", CommandFlags.Modal)]
+        public void THExtractLineFoot()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var lineFootRecognitionEngine = new ThLineFootRecognitionEngine())
             {
-                foreach (var pt in pts)
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
                 {
-                    var circle1 = new Circle(pt, Vector3d.ZAxis, radius + 100);
-                    circle1.ColorIndex = 3;
-                    circle1.SetDatabaseDefaults();
-                    acadDatabase.ModelSpace.Add(circle1);
-
-                    var circle = new Circle(pt, Vector3d.ZAxis, radius);
-                    circle.ColorIndex = 3;
-                    circle.SetDatabaseDefaults();
-                    ObjectIdCollection ObjIds = new ObjectIdCollection();
-                    ObjIds.Add(acadDatabase.ModelSpace.Add(circle));
-
-                    Hatch oHatch = new Hatch();
-
-                    Vector3d normal = new Vector3d(0.0, 0.0, 1.0);
-
-                    oHatch.Normal = normal;
-
-                    oHatch.Elevation = 0.0;
-
-                    oHatch.PatternScale = 2.0;
-
-                    oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ZIGZAG");
-
-                    oHatch.ColorIndex = 1;
-
-
-                    acadDatabase.ModelSpace.Add(oHatch);
-                    //this works ok  
-                    oHatch.Associative = true;
-                    oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
-                    oHatch.EvaluateHatch(true);
+                    return;
                 }
-            }
-        }
 
-        private static List<Point3d> GetPoints(double[] coords)
-        {
-            var results = new List<Point3d>();
-            for (int i = 0; i < coords.Length; i += 2)
-            {
-                results.Add(new Point3d(coords[i], coords[i + 1], 0));
-            }
-            return results;
-        }
-
-        private ThWashParam GetWashParameter()
-        {
-            var param = new ThWashParam();
-            param.R = GetValue("\n输入保护半径");
-            param.protect_arch = GetValue("\n输入protect_arch[true(非0)/false(0)]") == 0 ? false : true;
-            param.protect_park = GetValue("\n输入protect_park[true(非0)/false(0)]") == 0 ? false : true;
-            param.protect_other = GetValue("\n输入protect_other[true(非0)/false(0)]") == 0 ? false : true;
-            param.extend_arch = GetValue("\n输入extend_arch[true(非0)/false(0)]") == 0 ? false : true;
-            param.extend_park = GetValue("\n输入extend_park[true(非0)/false(0)]") == 0 ? false : true;
-            return param;
-        }
-        private int GetValue(string message)
-        {
-            var pdo = new PromptIntegerOptions(message);
-            var protectRadiusPdr = Active.Editor.GetInteger(pdo);
-            if (protectRadiusPdr.Status == PromptStatus.OK)
-            {
-                return protectRadiusPdr.Value;
-            }
-            else
-            {
-                return 0;
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                lineFootRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
+                lineFootRecognitionEngine.Elements.ForEach(o =>
+                {
+                    var curve = o.Outline as Curve;
+                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                });
             }
         }
     }

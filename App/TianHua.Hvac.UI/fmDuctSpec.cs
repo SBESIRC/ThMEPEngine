@@ -79,7 +79,7 @@ namespace TianHua.Hvac.UI
                 layoutControlItem18.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
 
-                this.Size = new Size(170, 400);
+                this.Size = new Size(170, 460);
             }
             else
             {
@@ -101,7 +101,7 @@ namespace TianHua.Hvac.UI
                 layoutControlItem18.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
 
-                this.Size = new Size(170, 335);
+                this.Size = new Size(170, 390);
             }
         }
 
@@ -176,7 +176,7 @@ namespace TianHua.Hvac.UI
 
             //if (FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
 
-            ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed)  );
+            ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed));
 
             m_DuctSpecModel.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
             m_DuctSpecModel.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
@@ -232,6 +232,12 @@ namespace TianHua.Hvac.UI
         private void TxtAirSpeed_ParseEditValue(object sender, DevExpress.XtraEditors.Controls.ConvertEditValueEventArgs e)
         {
 
+        }
+
+        private void TxtHeight_EditValueChanged(object sender, EventArgs e)
+        {
+            if (TxtHeight.Text == string.Empty || FuncStr.NullToDouble(TxtHeight.Text) == 0) { return; }
+            TxtHeight.Text = FuncStr.NullToDouble(TxtHeight.Text).ToString("#.00");
         }
     }
 }
