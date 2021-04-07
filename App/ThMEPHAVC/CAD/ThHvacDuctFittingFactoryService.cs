@@ -54,7 +54,8 @@ namespace ThMEPHVAC.CAD
                                                   double ductangle, 
                                                   bool isupordownopening, 
                                                   bool islongestduct,
-                                                  string elevation, 
+                                                  string elevation,
+                                                  string textSize,
                                                   bool modify_text)
         {
             return new ThIfcDuctSegment(parameters)
@@ -62,7 +63,7 @@ namespace ThMEPHVAC.CAD
                 Centerline = CreateDuctSegmentCenterLine(parameters),
                 FlangeLine = CreateDuctFlangeGeometries(parameters, isupordownopening),
                 Representation = CreateDuctSegmentGeometries(parameters),
-                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct, elevation, modify_text)
+                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct, elevation, textSize, modify_text)
             };
         }
 
@@ -70,6 +71,7 @@ namespace ThMEPHVAC.CAD
                                              double ductangle, 
                                              bool islongestduct, 
                                              string elevation,
+                                             string textSize,
                                              bool modify_text)
         {
             if (!islongestduct)
@@ -91,11 +93,18 @@ namespace ThMEPHVAC.CAD
                         str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
 
                 }
-                
+                double h = 450;
+                if (textSize != null)
+                { 
+                    if (textSize == "1:100")
+                        h = 300;
+                    else if (textSize == "1:50")
+                        h = 150;
+                }
                 DBText infortext = new DBText()
                 {
                     TextString = str,
-                    Height = 450,
+                    Height = h,
                     WidthFactor = 0.7,
                     Color = Color.FromColorIndex(ColorMethod.ByLayer, (int)ColorIndex.BYLAYER),
                     HorizontalMode = TextHorizontalMode.TextLeft,

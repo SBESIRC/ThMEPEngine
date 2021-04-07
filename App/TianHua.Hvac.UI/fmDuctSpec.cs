@@ -13,6 +13,7 @@ namespace TianHua.Hvac.UI
         public string SelectedOuterDuctSize { get; set; }
         public string AirVolume { get; set; }
         public string Elevation { get; set; }
+        public string TextSize { get; set; }
         public DuctSpecModel Model { get; set; }
         public fmDuctSpec()
         {
@@ -109,6 +110,7 @@ namespace TianHua.Hvac.UI
         {
             Elevation = TxtHeight.Text;
             AirVolume = TxtAirVolume.Text;
+            TextSize = ComBoxDrawingRatio.Text;
         }
 
         private void ListBoxOuterTube_SelectedValueChanged(object sender, EventArgs e)

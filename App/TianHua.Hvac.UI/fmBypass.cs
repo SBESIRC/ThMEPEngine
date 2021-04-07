@@ -130,12 +130,12 @@ namespace TianHua.Hvac.UI
             if (!string.IsNullOrEmpty(textBox2.Text) &&
                 !string.IsNullOrEmpty(textBox3.Text))
             {
-                label2.Text = "计算风速    " +
-                          (Double.Parse(textBox2.Text) *
-                           Double.Parse(textBox3.Text)).ToString() +
-                           " m/s";
+                double air_speed = Double.Parse(air_vloume) / 3600 *
+                                   Double.Parse(textBox2.Text) *
+                                   Double.Parse(textBox3.Text) / 1000000;
+                label2.Text = "计算风速    " + air_speed.ToString("0.00") + " m/s";
                 TeeWidth = textBox2.Text + "x" + textBox3.Text;
-            } 
+            }
         }
 
         private void RBType4_CheckedChanged(object sender, EventArgs e)

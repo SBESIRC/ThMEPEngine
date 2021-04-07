@@ -52,6 +52,7 @@ namespace ThMEPHVAC.CAD
             string outerductinfo,
             string tee_info,
             string elevation_info,
+            string ductsize_info,
             bool is_type2,
             DBObjectCollection bypass_line,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
@@ -94,33 +95,33 @@ namespace ThMEPHVAC.CAD
             SetOutletElbows(bypass_line);
             SetInOutHoses(fanmodel.FanScenario);
             bool isAxial = fanmodel.Model.IsAXIALModel();
-            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line);
-            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, is_type2);
+            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line, ductsize_info);
+            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, is_type2, ductsize_info);
         }
 
-        public void RunInletDrawEngine(ThDbModelFan fanmodel)
+        public void RunInletDrawEngine(ThDbModelFan fanmodel, string textSize)
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
             string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(modelLayer);
             string ducttextlayer = ThDuctUtils.DuctTextLayerName(modelLayer);
-            DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer, ductLayer, ducttextlayer);
-            DrawDuctInDWG(InletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
-            DrawDuctInDWG(InletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
+            DrawDuctInDWG(InletDuctSegments, ductLayer, centerLinerLayer, ductLayer, ducttextlayer, textSize);
+            DrawDuctInDWG(InletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer, textSize);
+            DrawDuctInDWG(InletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer, textSize);
             DrawHoseInDWG(InletDuctHoses, modelLayer);
         }
 
-        public void RunOutletDrawEngine(ThDbModelFan fanmodel)
+        public void RunOutletDrawEngine(ThDbModelFan fanmodel, string textSize)
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
             string centerLinerLayer = ThDuctUtils.DuctCenterLineLayerName(modelLayer);
             string ducttextlayer = ThDuctUtils.DuctTextLayerName(modelLayer);
-            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, ductLayer, ducttextlayer);
-            DrawDuctInDWG(OutletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
-            DrawDuctInDWG(OutletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer);
+            DrawDuctInDWG(OutletDuctSegments, ductLayer, centerLinerLayer, ductLayer, ducttextlayer, textSize);
+            DrawDuctInDWG(OutletDuctReducings, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer, textSize);
+            DrawDuctInDWG(OutletDuctElbows, ductLayer, centerLinerLayer, flangeLinerLayer, ducttextlayer, textSize);
             DrawHoseInDWG(OutletDuctHoses, modelLayer);
         }
 
@@ -174,7 +175,7 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        private void SetInletDucts(string scenario,bool isaxial, DBObjectCollection bypass_line)
+        private void SetInletDucts(string scenario,bool isaxial, DBObjectCollection bypass_line, string textSize)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -259,7 +260,8 @@ namespace ThMEPHVAC.CAD
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = InletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
                 // 输入管道暂不涉及管道描述信息的修改，最后一个参数为false
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, islongestduct, null, false);
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, 
+                                                                              islongestduct, null, textSize, false);
                 if (isUpOrDownOpening)
                 {
                     ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * InletOpening.Height, ductgraphedge.TargetShrink);
@@ -275,7 +277,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetOutletDucts(string scenario, bool isaxial, DBObjectCollection bypass_line, bool is_type2)
+        private void SetOutletDucts(string scenario, bool isaxial, DBObjectCollection bypass_line, bool is_type2, string textSize)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
             bool isUpOrDownOpening = FanInOutType.Contains("上出") || FanInOutType.Contains("下出");
@@ -391,7 +393,7 @@ namespace ThMEPHVAC.CAD
                     }
                 }
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening,
-                                                                              text_enable, s_evel, is_modify);
+                                                                              text_enable, s_evel, textSize, is_modify);
 
                 if (isUpOrDownOpening)
                 {
@@ -514,7 +516,8 @@ namespace ThMEPHVAC.CAD
             return hose;
         }
 
-        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, string ductlayer, string centerlinelayer, string flangelayer, string textlayer)
+        private void DrawDuctInDWG(List<ThIfcDistributionElement> DuctSegments, 
+                                   string ductlayer, string centerlinelayer, string flangelayer, string textlayer, string textSize)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -568,16 +571,25 @@ namespace ThMEPHVAC.CAD
                         Segment.InformationText.TextStyleId = textstyleId;
                         string s = Segment.InformationText.TextString;
                         string[] str = s.Split(' ');
+                        double dis = 1000;
+                        if (textSize != null)
+                        {
+                            if (textSize == "1:100")
+                                dis = 650;
+                            else if (textSize == "1:50")
+                                dis = 350;
+                        }
+
                         if (str.Count() == 2)
                         {
                             DBText t = Segment.InformationText.Clone() as DBText;
                             if (t == null)
                                 return;
                             t.TextString = str[0];
-                            t.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(-1000, 0, 0)));
+                            t.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(-dis, 0, 0)));
                             acadDatabase.ModelSpace.Add(t);
                             Segment.InformationText.TextString = str[1];
-                            Segment.InformationText.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(1000, 0, 0)));
+                            Segment.InformationText.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(dis, 0, 0)));
                             acadDatabase.ModelSpace.Add(Segment.InformationText);
                         }
                         Segment.InformationText.SetDatabaseDefaults();
