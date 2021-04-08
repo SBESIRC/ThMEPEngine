@@ -1,28 +1,29 @@
-﻿using System;
+﻿using CLI;
+using System;
+using AcHelper;
+using DotNetARX;
+using Linq2Acad;
 using System.IO;
 using System.Linq;
-using AcHelper;
-using Linq2Acad;
-using DotNetARX;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Newtonsoft.Json;
 using Dreambuild.AutoCAD;
-using ThMEPEngineCore.IO.GeoJSON;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPEngineCore.Algorithm;
 using System.Collections.Generic;
+using ThMEPEngineCore.IO.GeoJSON;
 using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.DatabaseServices;
-using CLI;
-using ThMEPEngineCore.BuildRoom.Interface;
 using ThMEPEngineCore.BuildRoom.Service;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.BuildRoom.Interface;
 
 namespace ThMEPEngineCore
 {
@@ -509,46 +510,20 @@ namespace ThMEPEngineCore
                 }
 
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                IRoomBuildData roomData = new ThBuildRoomDataService() { /*SelfBuildData = true*/ };
+                IRoomBuildData roomData = new ThBuildRoomDataService() { SelfBuildData = false};
                 roomData.Build(acadDatabase.Database, frame.Vertices());
                 roomBuilder.Build(roomData);
 
-                var objIds = new ObjectIdList();
+                // Print
+                ThLayerTool.CreateLayer("AD-AREA-OUTL", Color.FromColorIndex(ColorMethod.ByAci,31));
                 roomBuilder.Outlines.ForEach(o =>
                 {
-                    o.ColorIndex = 5;
+                    // AD-AREA-OUTL
+                    o.ColorIndex = 31;
+                    o.Layer = "AD-AREA-OUTL";
                     o.SetDatabaseDefaults();
-                    objIds.Add(acadDatabase.ModelSpace.Add(o));                    
+                    acadDatabase.ModelSpace.Add(o);                    
                 });
-                if(objIds.Count>0)
-                {
-                    GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
-                }
-
-                bool doMark = true;
-                do
-                {
-                   var ppr = Active.Editor.GetPoint("\n选择坐标点：");
-                    if (ppr.Status == PromptStatus.OK)
-                    {
-                        var rooms = roomBuilder.FindRooms(ppr.Value);
-                        rooms.ForEach(o =>
-                        {
-                            var clone = o.Clone() as Entity;
-                            clone.ColorIndex = 6;
-                            clone.SetDatabaseDefaults();
-                            acadDatabase.ModelSpace.Add(clone);
-                        });
-                        if(rooms.Count==0)
-                        {
-                            Active.Editor.WriteMessage("\n此处找不到房间");
-                        }
-                    }
-                    else
-                    {
-                        doMark = false;
-                    }
-                } while (doMark);
             }
         }
         
