@@ -5,44 +5,26 @@ using Linq2Acad;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Interface;
-using ThMEPEngineCore.BuildRoom.Service;
-using NFox.Cad;
-using System.Linq;
-using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThWallExtractor :ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
+    public class ThArchitectureWallExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Entity> Walls { get; private set; }
-        public ThWallExtractor()
+        public ThArchitectureWallExtractor()
         {
             Walls = new List<Entity>();
-            Category = "Wall";
+            Category = "ArchitectureWall";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractWallService()
+            using (var engine=new ThArchitectureWallRecognitionEngine())
             {
-                WallLayer = "墙",
-            };
-            instance.Extract(database, pts);
-
-            IBuffer buffer = new ThNTSBufferService();
-            var outlines = new List<Entity>();
-            double offsetDis = 5.0;
-            instance.Walls.ForEach(o =>
-            {
-                outlines.Add(buffer.Buffer(o, -offsetDis));
-            });
-
-            IBuildArea buildArea = new ThNTSBuildAreaService();
-            var objs = buildArea.BuildArea(outlines.ToCollection());
-
-            Walls = objs.Cast<Entity>().Select(o=> buffer.Buffer(o, offsetDis)).ToList();
-            Walls = Walls.Where(o => o != null).ToList();
+                engine.Recognize(database, pts);
+                engine.Elements.ForEach(o=>Walls.Add(o.Outline));
+            }
         }
 
         public List<ThGeometry> BuildGeometries()

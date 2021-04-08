@@ -297,6 +297,40 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THExtractAreaCenterLineTestData", CommandFlags.Modal)]
+        public void THExtractAreaCenterLineTestData()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                else
+                {
+                    return;
+                }
+
+                var extractors = new List<ThExtractorBase>()
+                {
+                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
+                    //通过停车区域的Space来制造阻挡物
+                    new ThSpaceExtractor{ IsBuildObstacle=false,NameLayer="AD-NAME-ROOM",ColorIndex=1},                    
+                    new ThWallExtractor{ColorIndex=2},
+                    new ThCenterLineExtractor{ColorIndex=3},
+                };
+
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+            }
+        }
 #endif
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]

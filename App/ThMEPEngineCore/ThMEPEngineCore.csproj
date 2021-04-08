@@ -386,6 +386,7 @@
     <Compile Include="Temp\ThExtractSpaceRecognitionEngine.cs" />
     <Compile Include="Temp\ThLaneLineExtractor.cs" />
     <Compile Include="Temp\ThParkingStallExtractor.cs" />
+    <Compile Include="Temp\ThArchitectureWallExtractor.cs" />
     <Compile Include="Temp\ThSpaceExtractor.cs" />
     <Compile Include="Temp\ThShearWallExtractor.cs" />
     <Compile Include="Temp\ThWallExtractor.cs" />
