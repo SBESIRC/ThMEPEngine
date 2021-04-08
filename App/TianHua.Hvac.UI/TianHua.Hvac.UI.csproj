@@ -56,6 +56,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Command\THHvacFjfCmd.cs" />
+    <Compile Include="Command\ThHvacDuctPortsCmd.cs" />
     <Compile Include="fmBypass.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -148,5 +150,6 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\licenses.licx" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
