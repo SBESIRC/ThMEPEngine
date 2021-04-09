@@ -18,6 +18,7 @@ namespace ThMEPWSS.Pipe.Engine
                 HandleBlockReference(elements,blkref, matrix);
             }
         }     
+
         public override void DoXClip(List<ThRawIfcDistributionElementData> elements, BlockReference blockReference, Matrix3d matrix)
         {
             var xclip = blockReference.XClipInfo();
@@ -26,6 +27,11 @@ namespace ThMEPWSS.Pipe.Engine
                 xclip.TransformBy(matrix);
                 elements.RemoveAll(o => !IsContain(xclip, o.Geometry));
             }
+        }
+
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
         }
 
         public override bool IsDistributionElement(Entity entity)

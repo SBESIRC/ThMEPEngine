@@ -29,6 +29,11 @@ namespace ThMEPWSS.Pipe.Engine
             }
         }
 
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
+        }
+
         public override bool IsDistributionElement(Entity entity)
         {
             if (entity is BlockReference blkref)

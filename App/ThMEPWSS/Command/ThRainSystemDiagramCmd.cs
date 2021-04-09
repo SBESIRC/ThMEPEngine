@@ -27,6 +27,7 @@ using System.Diagnostics;
 
 namespace ThMEPWSS.Command
 {
+  using ThMEPWSS.Assistant;
   using ThMEPWSS.JsonExtensionsNs;
   //雨水排水系统图
   class ThRainSystemDiagramCmd : IAcadCommand, IDisposable
@@ -107,13 +108,13 @@ namespace ThMEPWSS.Command
 
         var bastPt = rst.Value;
 
-        //storeysRecEngine.Elements
-        diagram.InitCacheData(acadDatabase);
+        diagram.InitCacheData(acadDatabase, points);
         diagram.InitStoreys(storeysRecEngine.Elements);
-        diagram.InitVerticalPipeSystems(acadDatabase.Database, points);
+        diagram.InitVerticalPipeSystems(points);
 
         diagram.Draw(bastPt);
+        DrawUtils.Draw();
       }
     }
   }
-}
+} 
