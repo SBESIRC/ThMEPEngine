@@ -72,6 +72,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -85,6 +86,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -99,6 +101,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -112,6 +115,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
