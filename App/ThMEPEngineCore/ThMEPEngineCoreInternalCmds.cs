@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.SplitMPolygon.Service;
 
 namespace ThMEPEngineCore
 {
@@ -118,6 +119,41 @@ namespace ThMEPEngineCore
                 {
                     acadDatabase.ModelSpace.Add(obj);
                     obj.SetDatabaseDefaults();
+                }
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThSplitMPolygon", CommandFlags.Modal)]
+        public void ThSplitMPolygon()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("请选择Shell");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var shell = acadDatabase.Element<Polyline>(result.ObjectId);
+
+                Active.Editor.WriteMessage("\n请选择洞");
+                var result1 = Active.Editor.GetSelection();
+                if (result1.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var holes = new List<Polyline>();
+                foreach (var obj in result1.Value.GetObjectIds())
+                {
+                    holes.Add(acadDatabase.Element<Polyline>(obj));
+                }
+
+                var iSplitMpolygon = new ThSplitMPolygonService();
+                var areas = iSplitMpolygon.Split(shell, holes);
+                foreach (Entity obj in areas)
+                {
+                    obj.ColorIndex = 1;
+                    obj.SetDatabaseDefaults();
+                    acadDatabase.ModelSpace.Add(obj);
                 }
             }
         }

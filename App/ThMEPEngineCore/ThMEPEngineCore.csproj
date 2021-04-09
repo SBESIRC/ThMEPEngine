@@ -359,6 +359,9 @@
     <Compile Include="Service\ThWellsLayerManager.cs" />
     <Compile Include="Service\ThWindowDbExtension.cs" />
     <Compile Include="Service\ThWindowLayerManager.cs" />
+    <Compile Include="SplitMPolygon\Interface\ISplitMPolygon.cs" />
+    <Compile Include="SplitMPolygon\Model\ThRectangle.cs" />
+    <Compile Include="SplitMPolygon\Service\ThSplitMPolygonService.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
     <Compile Include="Temp\IExtract.cs" />
     <Compile Include="Temp\IGroup.cs" />
