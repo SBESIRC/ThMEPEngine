@@ -34,13 +34,13 @@ namespace ThMEPHVAC.Model
             H = height;
         }
 
-        public void RunVTeeDrawEngine(ThDbModelFan fanmodel, string linetype)
+        public void RunVTeeDrawEngine(ThDbModelFan fanmodel, string linetype, double angle)
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
             List<ThIfcDistributionElement> OutletVTeeSeg = new List<ThIfcDistributionElement>();
-            SetVTee(fanmodel.FanInletBasePoint.GetAsVector(), OutletVTeeSeg);
+            SetVTee(fanmodel.FanInletBasePoint.GetAsVector(), OutletVTeeSeg, angle);
             DrawVTeeDWG(OutletVTeeSeg, ductLayer, flangeLinerLayer, linetype);
         }
         public ThIfcDistributionElement CreateVTeeBlock()
@@ -123,11 +123,11 @@ namespace ThMEPHVAC.Model
             return new DBObjectCollection() { frame, closeL1, closeL2, w1, w2,
                                              cframe, ccloseL1, ccloseL2, cw1, cw2 };
         }
-        private void SetVTee(Vector3d disVec, List<ThIfcDistributionElement> OutletVTeeSeg)
+        private void SetVTee(Vector3d disVec, List<ThIfcDistributionElement> OutletVTeeSeg, double angle)
         {
             var ductSegment = CreateVTeeBlock();
-            ductSegment.Matrix = Matrix3d.Displacement(disVec + new Vector3d(0, -350, 0)) *
-                                 Matrix3d.Rotation(Math.PI / 2, Vector3d.ZAxis, new Point3d(0, 0, 0));
+            ductSegment.Matrix = Matrix3d.Displacement(disVec) *
+                                 Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
             OutletVTeeSeg.Add(ductSegment);
         }
         private ObjectId CreateLayer(string name)

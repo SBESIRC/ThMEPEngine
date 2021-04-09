@@ -1,13 +1,13 @@
-﻿using System;
-using Linq2Acad;
-using System.Linq;
-using AcHelper;
+﻿using AcHelper;
 using AcHelper.Commands;
-using System.Windows.Forms;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.EditorInput;
+using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHAVC.CAD;
@@ -75,15 +75,23 @@ namespace TianHua.Hvac.UI.Command
                         string line_type = (tee_pattern == "RBType4") ?
                             ThHvacCommon.CONTINUES_LINETYPE :
                             ThHvacCommon.DASH_LINETYPE;
-                        ThVTee vt = new ThVTee(600, 800, 20);
-                        Point3d valve_pos = DbFanModel.FanInletBasePoint + new Vector3d(45, -475, 0);
+                        double vt_width = 800;
+                        ThVTee vt = new ThVTee(600, vt_width, 20);
+                        double fan_angle = DbFanModel.FanOutlet.Angle;
+                        Point3d valve_pos = DbFanModel.FanInletBasePoint;
                         ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
+                        if (io_anay_res == null)
+                            return;
                         int wall_num = 0;
-                        IODuctHoleAnalysis(DbFanModel, 0, DuctSize, tee_width, false, ref wall_num, null, textSize, null, io_anay_res);
+                        IODuctHoleAnalysis(DbFanModel, DuctSize, tee_width, false, ref wall_num, null, textSize, null, io_anay_res);
                         if (wall_num != 0)
                         {
-                            vt.RunVTeeDrawEngine(DbFanModel, line_type);
-                            ThServiceTee.InsertElectricValve(valve_pos, 800, Math.PI);
+                            double angle = fan_angle * Math.PI / 180;
+                            vt.RunVTeeDrawEngine(DbFanModel, line_type, angle);
+                            Vector3d fan_cp_vec = (DbFanModel.FanOutletBasePoint.GetAsVector() -
+                                                   DbFanModel.FanInletBasePoint.GetAsVector()) * 0.5 +
+                                                   DbFanModel.FanInletBasePoint.GetAsVector();
+                            ThServiceTee.InsertElectricValve(fan_cp_vec, vt_width, angle + 1.5 * Math.PI, false);
                         }
                     }
                     else
@@ -95,18 +103,17 @@ namespace TianHua.Hvac.UI.Command
                             return;
                         bypass_line.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
 
-                        List<Line> bypass_lines = ThLaneLineSimplifier.RemoveDangles(lineobjects, 5);
-                        double valve_oft = is_type2 ? -3000 : 3000;
-                        double angle = is_type2 ? -Math.PI / 2 : Math.PI / 2;
-                        Point3d valve_pos = get_valve_pos(bypass_line, valve_oft);
+                        List<Line> tmp = ThLaneLineSimplifier.RemoveDangles(lineobjects, 5);
+                        
 
                         lineobjects.Clear();
-                        bypass_lines.ForEachDbObject(o => lineobjects.Add(o));
+                        tmp.ForEachDbObject(o => lineobjects.Add(o));
 
                         // 根据添加的旁通重新得到model
                         ThDbModelFan DbTeeModel = new ThDbModelFan(fan_id, lineobjects);
                         ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbTeeModel);
-
+                        if (io_anay_res == null)
+                            return;
                         double valve_width = Double.Parse(outerDuctSize.Split('x').First());
                         double bra_width = Double.Parse(tee_width.Split('x').First());
                         double IShrink = is_type2 ? bra_width + 50 : bra_width + 50;
@@ -118,23 +125,56 @@ namespace TianHua.Hvac.UI.Command
                         }
                         if (io_anay_res.HasOutletTee())
                         {
-                            ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkb, OShrinkm);
+                            //根据旁通角度分
+                            Line l = bypass_line[0] as Line;
+                            Point3d p = io_anay_res.OutletTeeCPPositions[0];
+                            Point3d detect_p = p.Equals(l.StartPoint) ? l.EndPoint : l.StartPoint;
+                            if (!is_type2)
+                            {
+                                if (detect_p.Y > p.Y)
+                                {
+                                    // 旁通向上
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkb, OShrinkm);
+                                }
+                                else
+                                {
+                                    // 旁通向下
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkm, OShrinkb);
+                                }
+                            }
+                            else
+                            {
+                                if (detect_p.Y > p.Y)
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkm, OShrinkb);
+                                else
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkb, OShrinkm);
+                            }
+                            
                         }
+                        double valve_oft = is_type2 ? -4000 : 3000;
                         int wall_num = 0;
-                        IODuctHoleAnalysis(DbTeeModel, angle, DuctSize, tee_width, is_type2, ref wall_num, elevation, textSize, bypass_line, io_anay_res);
+                        IODuctHoleAnalysis(DbTeeModel, DuctSize, tee_width, is_type2, ref wall_num, elevation, textSize, bypass_line, io_anay_res);
                         if (wall_num != 0)
-                            ThServiceTee.InsertElectricValve(valve_pos, bra_width, Math.PI);
+                        {
+                            Line l = bypass_line[0] as Line;
+                            Point3d p = io_anay_res.OutletTeeCPPositions[0];
+                            Point3d detect_p = p.Equals(l.StartPoint) ? l.EndPoint : l.StartPoint;
+                            Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()).GetNormal();
+                            Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
+                            Vector3d dis_vec = tmp_vec * 2000 + p.GetAsVector();
+                            double ang = (2 * Math.PI - r_vec.Angle);
+                            ThServiceTee.InsertElectricValve(dis_vec, bra_width, r_vec.Angle + Math.PI * 0.5, false);
+                        }
                     }
                 }
                 else
                 {
                     ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
                     int wall_num = 0;
-                    IODuctHoleAnalysis(DbFanModel, 0, DuctSize, null, false, ref wall_num, null, null, null, io_anay_res);
+                    IODuctHoleAnalysis(DbFanModel, DuctSize, null, false, ref wall_num, null, null, null, io_anay_res);
                 }
             }
         }
-
         private ObjectIdCollection get_from_prompt(string prompt, bool only_able)
         {
             PromptSelectionOptions options = new PromptSelectionOptions()
@@ -312,7 +352,6 @@ namespace TianHua.Hvac.UI.Command
 
         // is_type2也是是否要修改管道描述信息的标志
         private void IODuctHoleAnalysis(ThDbModelFan Model,
-                                        double angle,
                                         string DuctSize,
                                         string tee_size,
                                         bool is_type2,
@@ -354,6 +393,7 @@ namespace TianHua.Hvac.UI.Command
             {
                 if (io_anay_res.HasInletTee())
                 {
+                    int i = 0;
                     double IDuctWidth = io_draw_eng.InletDuctWidth;
                     double x = IDuctWidth / 2;
                     double y = x + 100;
@@ -362,6 +402,7 @@ namespace TianHua.Hvac.UI.Command
                     {
                         ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, IDuctWidth, IDuctWidth);
                         Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector() + new Vector3d(0, -2 * y, 0)) *
+                                       Matrix3d.Rotation(io_anay_res.OCPAngle[i++], Vector3d.ZAxis, Point3d.Origin) *
                                        Matrix3d.Mirroring(new Line3d(new Point3d(x, y, 0), new Point3d(-x, y, 0)));
                         e.RunTeeDrawEngine(Model, mat);
                     }
@@ -377,20 +418,22 @@ namespace TianHua.Hvac.UI.Command
             {
                 if (io_anay_res.HasOutletTee())
                 {
+                    int i = 0;
                     double ODuctWidth = io_draw_eng.OutletDuctWidth;
                     io_draw_eng.RunOutletDrawEngine(Model, textSize);
                     foreach (Point3d TeeCp in io_anay_res.OutletTeeCPPositions)
                     {
                         ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, ODuctWidth, ODuctWidth);
                         Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector());
+                        double angle = io_anay_res.OCPAngle[i++];
                         if (is_type2)
                         {
-                            mat = mat * Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                            mat = mat * Matrix3d.Rotation(-(1.5 * Math.PI - angle), Vector3d.ZAxis, Point3d.Origin);
                         }
                         else
                         {
-                            mat = mat * Matrix3d.Mirroring(new Line3d(new Point3d(0, -1, 0), new Point3d(0, 1, 0))) *
-                                        Matrix3d.Rotation(angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+                            mat = mat * Matrix3d.Mirroring(new Line3d(new Point3d(0, -1, 0), Point3d.Origin)) *
+                                        Matrix3d.Rotation(1.5 * Math.PI - angle, Vector3d.ZAxis, Point3d.Origin);
                         }
                         e.RunTeeDrawEngine(Model, mat);
                     }

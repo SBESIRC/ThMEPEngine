@@ -360,7 +360,8 @@ namespace ThMEPHVAC.CAD
                                                         bypass_line,
                                                         out is_bypass);
 
-                Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
+                Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, 
+                                                   ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 bool text_enable = false;
                 ++i;
@@ -436,7 +437,8 @@ namespace ThMEPHVAC.CAD
                         PipeOpenWidth = width
                     };
                     var elbow = ductFittingFactoryService.CreateElbow(elbowParameters);
-                    elbow.Matrix = Matrix3d.Displacement(edge.Target.Position.GetAsVector()) * Matrix3d.Rotation(bisectoroftwoedge.Angle - elbow.Parameters.BisectorAngle, Vector3d.ZAxis, elbow.Parameters.CornerPoint);
+                    elbow.Matrix = Matrix3d.Displacement(edge.Target.Position.GetAsVector()) * 
+                                   Matrix3d.Rotation(bisectoroftwoedge.Angle - elbow.Parameters.BisectorAngle, Vector3d.ZAxis, elbow.Parameters.CornerPoint);
                     InletDuctElbows.Add(elbow);
 
                     outedge.SourceShrink = elbow.Parameters.SingleLength;
@@ -579,17 +581,16 @@ namespace ThMEPHVAC.CAD
                             else if (textSize == "1:50")
                                 dis = 350;
                         }
-
                         if (str.Count() == 2)
                         {
                             DBText t = Segment.InformationText.Clone() as DBText;
                             if (t == null)
                                 return;
                             t.TextString = str[0];
-                            t.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(-dis, 0, 0)));
+                            t.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(t);
                             Segment.InformationText.TextString = str[1];
-                            Segment.InformationText.TransformBy(Segment.Matrix * Matrix3d.Displacement(new Vector3d(dis, 0, 0)));
+                            Segment.InformationText.TransformBy(Segment.Matrix);
                             acadDatabase.ModelSpace.Add(Segment.InformationText);
                         }
                         Segment.InformationText.SetDatabaseDefaults();

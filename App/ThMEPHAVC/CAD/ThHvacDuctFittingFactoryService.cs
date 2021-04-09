@@ -87,10 +87,11 @@ namespace ThMEPHVAC.CAD
                 }
                 else
                 {
-                    if (modify_text)
-                        str = $"(h{elevation}m) {parameters.Width}x{parameters.Height}";
-                    else
-                        str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
+                    str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
+                    //if (modify_text)
+                    //    str = $"(h{elevation}m) {parameters.Width}x{parameters.Height}";
+                    //else
+                    //    str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
 
                 }
                 double h = 450;

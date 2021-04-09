@@ -49,41 +49,14 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        public static ObjectId InsertElectricValve( Point3d DisVec,
+        public static ObjectId InsertElectricValve( Vector3d fan_cp_vec,
                                                     double valvewidth,
-                                                    double rotationangle)
+                                                    double angle, 
+                                                    bool hasTee)
         {
-            var e = CreateElectricValve(DisVec, valvewidth, rotationangle);
-            return SetElectricValve(e);
-        }
-        private static ObjectId SetElectricValve(ThValve ValveModel)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var blockName = ValveModel.ValveBlockName;
-                var layerName = ValveModel.ValveBlockLayer;
-                Active.Database.ImportLayer(layerName);
-                Active.Database.ImportValve(blockName);
-                var objId = Active.Database.InsertValve(blockName, layerName);
-                objId.SetValveWidth(ValveModel.Width, ValveModel.WidthPropertyName);
-                objId.SetValveModel(ValveModel.ValveVisibility);
-
-                var blockRef = acadDatabase.Element<BlockReference>(objId, true);
-                blockRef.TransformBy(ValveModel.Marix);
-
-                return objId;
-            }
-        }
-        private static ThValve CreateElectricValve( Point3d DisVec,
-                                                    double valvewidth,
-                                                    double rotationangle)
-        {
-            return new ThValve()
-            {
+            var e = new ThValve() {
                 Length = 200,
                 Width = valvewidth,
-                RotationAngle = rotationangle,
-                ValvePosition = DisVec,
                 ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
                 ValveBlockLayer = "H-DAPP-EDAMP",
                 ValveVisibility = ThDuctUtils.ElectricValveModelName(),
@@ -91,6 +64,27 @@ namespace ThMEPHVAC.Model
                 LengthPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_HEIGHT,
                 VisibilityPropertyName = ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_VALVE_VISIBILITY,
             };
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var blockName = e.ValveBlockName;
+                var layerName = e.ValveBlockLayer;
+                Active.Database.ImportLayer(layerName);
+                Active.Database.ImportValve(blockName);
+                var objId = Active.Database.InsertValve(blockName, layerName);
+                objId.SetValveWidth(e.Width, e.WidthPropertyName);
+                objId.SetValveModel(e.ValveVisibility);
+
+                var blockRef = acadDatabase.Element<BlockReference>(objId, true);
+                Matrix3d mat = Matrix3d.Displacement(fan_cp_vec) *
+                               Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
+                if (!hasTee)
+                {
+                    mat *= Matrix3d.Displacement(new Vector3d(-valvewidth / 2, 125, 0));
+                }
+
+                blockRef.TransformBy(mat);
+                return objId;
+            }
         }
     }
 }

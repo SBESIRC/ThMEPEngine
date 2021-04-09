@@ -12,6 +12,7 @@ namespace ThMEPHVAC.Model
 {
     public class ThTee
     {
+        public double Angle { get; set; }
         // 中心点
         public Point3d CP { get; set; }
         // 支路管道直径

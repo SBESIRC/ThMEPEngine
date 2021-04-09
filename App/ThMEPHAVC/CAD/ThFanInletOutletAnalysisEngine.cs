@@ -32,8 +32,9 @@ namespace ThMEPHAVC.CAD
         public List<Point3d> InletAcuteAnglePositions { get; set; }
         public List<Point3d> OutletAcuteAnglePositions { get; set; }
         public List<Point3d> InletTeeCPPositions { get; set; }
+        public List<double> ICPAngle { get; set; }
         public List<Point3d> OutletTeeCPPositions { get; set; }
-        
+        public List<double> OCPAngle { get; set; }
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
         {
             FanModel = fanmodel;
@@ -43,11 +44,12 @@ namespace ThMEPHAVC.CAD
             OutletAcuteAnglePositions = new List<Point3d>();
             InletTeeCPPositions = new List<Point3d>();
             OutletTeeCPPositions = new List<Point3d>();
+            ICPAngle = new List<double>();
+            OCPAngle = new List<double>();
             InletCenterLineGraph = CreateLineGraph(fanmodel.FanInletBasePoint, ref tempinletfirstedge);
             InletStartEdge = tempinletfirstedge;
             OutletCenterLineGraph = CreateLineGraph(fanmodel.FanOutletBasePoint, ref tempoutletfirstedge);
             OutletStartEdge = tempoutletfirstedge;
-
         }
 
         private AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> CreateLineGraph(Point3d basepoint, ref ThDuctEdge<ThDuctVertex> startedge)
@@ -60,7 +62,6 @@ namespace ThMEPHAVC.CAD
             }
             return inletgraphengine.Graph;
         }
-
         public void InletAnalysis()
         {
             //进口处无连线
@@ -95,6 +96,9 @@ namespace ThMEPHAVC.CAD
                     }
                     else if (InletCenterLineGraph.OutDegree(edge.Target) == 2)
                     {
+                        Vector2d vec = new Vector2d(edge.Source.Position.X - edge.Target.Position.X,
+                                                    edge.Source.Position.Y - edge.Target.Position.Y);
+                        OCPAngle.Add(Math.PI - vec.Angle);
                         InletTeeCPPositions.Add(edge.Target.Position);
                     }
                 }
@@ -175,6 +179,9 @@ namespace ThMEPHAVC.CAD
                     }
                     else if (OutletCenterLineGraph.OutDegree(edge.Target) == 2)
                     {
+                        Vector2d vec = new Vector2d(edge.Source.Position.X - edge.Target.Position.X, 
+                                                    edge.Source.Position.Y - edge.Target.Position.Y);
+                        OCPAngle.Add(vec.Angle);
                         OutletTeeCPPositions.Add(edge.Target.Position);
                     }
                 }

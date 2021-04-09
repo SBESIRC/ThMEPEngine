@@ -16,7 +16,10 @@ namespace TianHua.Hvac.UI.Command
 
         public void Execute()
         {
-            get_centerline();
+            DBObjectCollection lineobjs = get_centerline();
+            if (lineobjs.Count == 0)
+                return;
+
         }
 
         private ObjectIdCollection get_from_prompt(string prompt, bool only_able)
