@@ -697,7 +697,7 @@ namespace ThMEPWSS.DebugNs
         }
         public static void FocusMainWindow()
         {
-            Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
+            //Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
         }
         public static void Print(string str, params object[] objs)
         {
