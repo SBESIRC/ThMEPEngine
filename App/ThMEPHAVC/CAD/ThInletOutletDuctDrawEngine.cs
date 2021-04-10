@@ -47,6 +47,7 @@ namespace ThMEPHVAC.CAD
         public ThDuctEdge<ThDuctVertex> FirstInletEdge { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         public ThDuctEdge<ThDuctVertex> FirstOutletEdge { get; set; }
+        private List<Vector2d> TextVec { get; set; }
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel, 
             string innerductinfo, 
             string outerductinfo,
@@ -90,6 +91,7 @@ namespace ThMEPHVAC.CAD
             OutletDuctElbows = new List<ThIfcDistributionElement>();
             InletDuctHoses = new List<ThIfcDistributionElement>();
             OutletDuctHoses = new List<ThIfcDistributionElement>();
+            TextVec = new List<Vector2d>();
 
             SetInletElbows(bypass_line);
             SetOutletElbows(bypass_line);
@@ -259,9 +261,11 @@ namespace ThMEPHVAC.CAD
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
                 double rotateangle = edgevector.Angle;
                 bool islongestduct = InletCenterLineGraph.Edges.Max(e => e.EdgeLength) == ductgraphedge.EdgeLength;
-                // 输入管道暂不涉及管道描述信息的修改，最后一个参数为false
-                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening, 
-                                                                              islongestduct, null, textSize, false);
+                var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening,
+                                                                              islongestduct, null, textSize);
+                // 在In中认为最长的线需要被标注
+                if (islongestduct)
+                    TextVec.Add(edgevector.GetNormal());
                 if (isUpOrDownOpening)
                 {
                     ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * InletOpening.Height, ductgraphedge.TargetShrink);
@@ -281,7 +285,6 @@ namespace ThMEPHVAC.CAD
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
             bool isUpOrDownOpening = FanInOutType.Contains("上出") || FanInOutType.Contains("下出");
-
             if(!isUpOrDownOpening && OutletOpening.Width != OutletDuctWidth)
             {
                 if (OutletCenterLineGraph.Edges.Count() == 0)
@@ -381,20 +384,11 @@ namespace ThMEPHVAC.CAD
                         s_evel = Elevation.ToString();
                     }
                 }
-                bool is_modify = false;
-                if (bypass_line == null)
-                {
-                    is_modify = true;
-                }
-                else
-                {
-                    if (is_type2 && is_bypass)
-                    {
-                        is_modify = true;
-                    }
-                }
+                // 在Out中认为最长的线及旁通需要被标注
+                if (text_enable)
+                    TextVec.Add(edgevector.GetNormal());
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle, isUpOrDownOpening,
-                                                                              text_enable, s_evel, textSize, is_modify);
+                                                                              text_enable, s_evel, textSize);
 
                 if (isUpOrDownOpening)
                 {
@@ -573,26 +567,30 @@ namespace ThMEPHVAC.CAD
                         Segment.InformationText.TextStyleId = textstyleId;
                         string s = Segment.InformationText.TextString;
                         string[] str = s.Split(' ');
-                        double dis = 1000;
+                        if (str.Length != 2)
+                            continue;
+                        double dis = 2000;
                         if (textSize != null)
                         {
                             if (textSize == "1:100")
-                                dis = 650;
+                                dis = 1300;
                             else if (textSize == "1:50")
-                                dis = 350;
+                                dis = 700;
                         }
-                        if (str.Count() == 2)
-                        {
-                            DBText t = Segment.InformationText.Clone() as DBText;
-                            if (t == null)
-                                return;
-                            t.TextString = str[0];
-                            t.TransformBy(Segment.Matrix);
-                            acadDatabase.ModelSpace.Add(t);
-                            Segment.InformationText.TextString = str[1];
-                            Segment.InformationText.TransformBy(Segment.Matrix);
-                            acadDatabase.ModelSpace.Add(Segment.InformationText);
-                        }
+                        DBText t = Segment.InformationText.Clone() as DBText;
+                        if (t == null)
+                            return;
+                        t.TextString = str[0];
+                        t.TransformBy(Segment.Matrix);
+                        acadDatabase.ModelSpace.Add(t);
+                        Segment.InformationText.TextString = str[1];
+                        Vector2d v = TextVec[0];
+                        TextVec.RemoveAt(0);
+                        double factor = v.X < 0 ? -1: 1;
+                        Matrix3d dis_mat = Matrix3d.Displacement(new Vector3d(v.X, v.Y, 0) * factor * dis);
+                        Segment.InformationText.TransformBy(dis_mat * Segment.Matrix);
+                        acadDatabase.ModelSpace.Add(Segment.InformationText);
+
                         Segment.InformationText.SetDatabaseDefaults();
                     }
                 }

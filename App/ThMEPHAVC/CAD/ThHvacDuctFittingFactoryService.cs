@@ -55,15 +55,14 @@ namespace ThMEPHVAC.CAD
                                                   bool isupordownopening, 
                                                   bool islongestduct,
                                                   string elevation,
-                                                  string textSize,
-                                                  bool modify_text)
+                                                  string textSize)
         {
             return new ThIfcDuctSegment(parameters)
             {
                 Centerline = CreateDuctSegmentCenterLine(parameters),
                 FlangeLine = CreateDuctFlangeGeometries(parameters, isupordownopening),
                 Representation = CreateDuctSegmentGeometries(parameters),
-                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct, elevation, textSize, modify_text)
+                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct, elevation, textSize)
             };
         }
 
@@ -71,8 +70,7 @@ namespace ThMEPHVAC.CAD
                                              double ductangle, 
                                              bool islongestduct, 
                                              string elevation,
-                                             string textSize,
-                                             bool modify_text)
+                                             string textSize)
         {
             if (!islongestduct)
             {
@@ -88,10 +86,6 @@ namespace ThMEPHVAC.CAD
                 else
                 {
                     str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
-                    //if (modify_text)
-                    //    str = $"(h{elevation}m) {parameters.Width}x{parameters.Height}";
-                    //else
-                    //    str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
 
                 }
                 double h = 450;

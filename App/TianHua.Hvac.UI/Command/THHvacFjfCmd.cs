@@ -126,7 +126,7 @@ namespace TianHua.Hvac.UI.Command
                         }
                         if (io_anay_res.HasOutletTee())
                         {
-                            
+
                             //根据旁通角度分
                             if (tee_pattern == "RBType3")
                             {
@@ -148,16 +148,20 @@ namespace TianHua.Hvac.UI.Command
                                 else
                                     ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s2, s3);
                             }
-                            
+
                         }
                         int wall_num = 0;
                         bool is_type2 = tee_pattern == "RBType2";
                         IODuctHoleAnalysis(DbTeeModel, DuctSize, tee_width, is_type2, ref wall_num, elevation, textSize, bypass_line, io_anay_res);
                         if (wall_num != 0)
                         {
-                            Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()).GetNormal();
+                            //将阀插入在距outTee Cp 2000的位置
+                            //Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()).GetNormal();
+                            //Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
+                            //Vector3d dis_vec = tmp_vec * 2000 + p.GetAsVector();
+                            Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()) * 0.5;
                             Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
-                            Vector3d dis_vec = tmp_vec * 2000 + p.GetAsVector();
+                            Vector3d dis_vec = tmp_vec + p.GetAsVector();
                             double ang = (2 * Math.PI - r_vec.Angle);
                             ThServiceTee.InsertElectricValve(dis_vec, bra_width, r_vec.Angle + Math.PI * 0.5, false);
                         }
@@ -303,36 +307,6 @@ namespace TianHua.Hvac.UI.Command
             return fm;
         }
 
-        private Point3d get_valve_pos(DBObjectCollection bypass_lines,
-                                      double oft)
-        {
-            Line bl = bypass_lines[0] as Line;
-            double min_y = (bl.EndPoint.Y < bl.StartPoint.Y) ? bl.EndPoint.Y : bl.StartPoint.Y;
-            Point3d valve_pos = bl.StartPoint;
-            if (oft > 0)
-            {
-                // 找到y值最低的点
-                foreach (Line l in bypass_lines)
-                {
-                    if (l.EndPoint.X == l.StartPoint.X)
-                    {
-                        double y = l.EndPoint.Y < l.StartPoint.Y ? l.EndPoint.Y : l.StartPoint.Y;
-                        if (y < min_y)
-                        {
-                            min_y = y;
-                            valve_pos = new Point3d(l.EndPoint.X, y, 0);
-                        }
-                    }
-                }
-            }
-            else
-            {
-                valve_pos = (bl.EndPoint.Y > bl.StartPoint.Y) ? bl.EndPoint : bl.StartPoint;
-            }
-
-            return valve_pos + new Vector3d(0, oft, 0);
-        }
-
         private ThFanInletOutletAnalysisEngine IOAnalysis(ThDbModelFan Model)
         {
             ThFanInletOutletAnalysisEngine io_anay_res = new ThFanInletOutletAnalysisEngine(Model);
@@ -396,8 +370,8 @@ namespace TianHua.Hvac.UI.Command
                     {
                         ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, IDuctWidth, IDuctWidth);
 
-                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector()) * 
-                                       Matrix3d.Rotation(io_anay_res.ICPAngle[i++]-0.5*Math.PI, Vector3d.ZAxis, Point3d.Origin) * 
+                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector()) *
+                                       Matrix3d.Rotation(io_anay_res.ICPAngle[i++] - 0.5 * Math.PI, Vector3d.ZAxis, Point3d.Origin) *
                                        Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
                         e.RunTeeDrawEngine(Model, mat);
                     }
