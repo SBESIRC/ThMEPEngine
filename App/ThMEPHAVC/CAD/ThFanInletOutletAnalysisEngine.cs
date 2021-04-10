@@ -98,7 +98,7 @@ namespace ThMEPHAVC.CAD
                     {
                         Vector2d vec = new Vector2d(edge.Source.Position.X - edge.Target.Position.X,
                                                     edge.Source.Position.Y - edge.Target.Position.Y);
-                        OCPAngle.Add(Math.PI - vec.Angle);
+                        ICPAngle.Add(vec.Angle);
                         InletTeeCPPositions.Add(edge.Target.Position);
                     }
                 }

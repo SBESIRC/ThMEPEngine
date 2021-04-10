@@ -97,15 +97,13 @@ namespace TianHua.Hvac.UI.Command
                     else
                     {
                         // 添加旁通并添加到原Model中
-                        bool is_type2 = tee_pattern == "RBType2";
-                        DBObjectCollection bypass_line = get_bypass();
+                        Line bypass = new Line();
+                        DBObjectCollection bypass_line = get_bypass(ref bypass);
                         if (bypass_line.Count == 0)
                             return;
+
                         bypass_line.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
-
                         List<Line> tmp = ThLaneLineSimplifier.RemoveDangles(lineobjects, 5);
-                        
-
                         lineobjects.Clear();
                         tmp.ForEachDbObject(o => lineobjects.Add(o));
 
@@ -114,51 +112,49 @@ namespace TianHua.Hvac.UI.Command
                         ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbTeeModel);
                         if (io_anay_res == null)
                             return;
+                        // 此支路一定存在旁通(不会访问越界)
+                        Point3d p = io_anay_res.OutletTeeCPPositions[0];
+                        Point3d detect_p = p.Equals(bypass.StartPoint) ? bypass.EndPoint : bypass.StartPoint;
                         double valve_width = Double.Parse(outerDuctSize.Split('x').First());
                         double bra_width = Double.Parse(tee_width.Split('x').First());
-                        double IShrink = is_type2 ? bra_width + 50 : bra_width + 50;
-                        double OShrinkb = is_type2 ? (bra_width + valve_width) * 0.5 + 50 : bra_width * 0.5 + 100;
-                        double OShrinkm = is_type2 ? bra_width * 0.5 + 100 : (bra_width + valve_width) * 0.5 + 50;
+                        double s1 = bra_width + 50;
+                        double s2 = (bra_width + valve_width) * 0.5 + 50;
+                        double s3 = bra_width * 0.5 + 100;
                         if (io_anay_res.HasInletTee())
                         {
-                            ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph, OShrinkb, OShrinkm, IShrink);
+                            ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph, s3, s2, s1);
                         }
                         if (io_anay_res.HasOutletTee())
                         {
+                            
                             //根据旁通角度分
-                            Line l = bypass_line[0] as Line;
-                            Point3d p = io_anay_res.OutletTeeCPPositions[0];
-                            Point3d detect_p = p.Equals(l.StartPoint) ? l.EndPoint : l.StartPoint;
-                            if (!is_type2)
+                            if (tee_pattern == "RBType3")
                             {
-                                if (detect_p.Y > p.Y)
+                                if (detect_p.X < p.X)
                                 {
                                     // 旁通向上
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkb, OShrinkm);
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s2, s3);
                                 }
                                 else
                                 {
                                     // 旁通向下
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkm, OShrinkb);
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s3, s2);
                                 }
                             }
                             else
                             {
                                 if (detect_p.Y > p.Y)
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkm, OShrinkb);
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s3, s2);
                                 else
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, IShrink, OShrinkb, OShrinkm);
+                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s2, s3);
                             }
                             
                         }
-                        double valve_oft = is_type2 ? -4000 : 3000;
                         int wall_num = 0;
+                        bool is_type2 = tee_pattern == "RBType2";
                         IODuctHoleAnalysis(DbTeeModel, DuctSize, tee_width, is_type2, ref wall_num, elevation, textSize, bypass_line, io_anay_res);
                         if (wall_num != 0)
                         {
-                            Line l = bypass_line[0] as Line;
-                            Point3d p = io_anay_res.OutletTeeCPPositions[0];
-                            Point3d detect_p = p.Equals(l.StartPoint) ? l.EndPoint : l.StartPoint;
                             Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()).GetNormal();
                             Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
                             Vector3d dis_vec = tmp_vec * 2000 + p.GetAsVector();
@@ -227,7 +223,7 @@ namespace TianHua.Hvac.UI.Command
             return center_lines;
         }
 
-        private DBObjectCollection get_bypass()
+        private DBObjectCollection get_bypass(ref Line tee_line)
         {
             var objIds = get_from_prompt("请选择旁通管", true);
             if (objIds.Count == 0)
@@ -238,28 +234,28 @@ namespace TianHua.Hvac.UI.Command
             List<Line> lines = ThLaneLineSimplifier.RemoveDangles(tmp, 100);
             if (lines.Count == 2)
             {
-                foreach (Line l in lines)
-                {
-                    Point3d sp = l.StartPoint;
-                    Point3d ep = l.EndPoint;
-                    if (sp.X == ep.X)
-                    {
-                        if (sp.Y < ep.Y)
-                        {
-                            Point3d intP = new Point3d(sp.X, sp.Y + 3000, 0);
-                            lines.Add(new Line(sp, intP + new Vector3d(0, -10, 0)));
-                            lines.Add(new Line(intP + new Vector3d(0, 10, 0), ep));
-                        }
-                        else
-                        {
-                            Point3d intP = new Point3d(sp.X, ep.Y + 3000, 0);
-                            lines.Add(new Line(ep, intP + new Vector3d(0, -10, 0)));
-                            lines.Add(new Line(intP + new Vector3d(0, 10, 0), sp));
-                        }
-                        lines.Remove(l);
-                        break;
-                    }
-                }
+                // 给较长的线段上插点
+                Line l = lines[0].Length > lines[1].Length ? lines[0] : lines[1];
+                tee_line = l;
+                lines.Remove(l);
+                Point3d lp = l.StartPoint.Y > l.EndPoint.Y ? l.EndPoint : l.StartPoint;
+                Point3d up = l.StartPoint.Y > l.EndPoint.Y ? l.StartPoint : l.EndPoint;
+                Vector2d v1 = new Vector2d(lp.X, lp.Y);
+                Vector2d v2 = new Vector2d(up.X, up.Y);
+                Vector2d v = (v2 - v1) * 0.5;
+                double len = 10;
+                double angle = v.Angle > 0.5 * Math.PI ? (v.Angle - 0.5 * Math.PI) : v.Angle;
+                double s_val = Math.Sin(angle);
+                double c_val = Math.Cos(angle);
+                v += v1;
+                Point3d p = new Point3d(v.X, v.Y, 0) + new Vector3d(-len * s_val, len * c_val, 0);
+                lines.Add(new Line(up, new Point3d(p.X, p.Y, 0)));
+                p = new Point3d(v.X, v.Y, 0) + new Vector3d(len * s_val, -len * c_val, 0);
+                lines.Add(new Line(new Point3d(p.X, p.Y, 0), lp));
+            }
+            else if (lines.Count == 1)
+            {
+                tee_line = lines[0];
             }
             tmp.Clear();
             lines.ForEachDbObject(o => tmp.Add(o));
@@ -395,15 +391,14 @@ namespace TianHua.Hvac.UI.Command
                 {
                     int i = 0;
                     double IDuctWidth = io_draw_eng.InletDuctWidth;
-                    double x = IDuctWidth / 2;
-                    double y = x + 100;
                     io_draw_eng.RunInletDrawEngine(Model, textSize);
                     foreach (Point3d TeeCp in io_anay_res.InletTeeCPPositions)
                     {
                         ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, IDuctWidth, IDuctWidth);
-                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector() + new Vector3d(0, -2 * y, 0)) *
-                                       Matrix3d.Rotation(io_anay_res.OCPAngle[i++], Vector3d.ZAxis, Point3d.Origin) *
-                                       Matrix3d.Mirroring(new Line3d(new Point3d(x, y, 0), new Point3d(-x, y, 0)));
+
+                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector()) * 
+                                       Matrix3d.Rotation(io_anay_res.ICPAngle[i++]-0.5*Math.PI, Vector3d.ZAxis, Point3d.Origin) * 
+                                       Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
                         e.RunTeeDrawEngine(Model, mat);
                     }
                 }
@@ -428,12 +423,12 @@ namespace TianHua.Hvac.UI.Command
                         double angle = io_anay_res.OCPAngle[i++];
                         if (is_type2)
                         {
-                            mat = mat * Matrix3d.Rotation(-(1.5 * Math.PI - angle), Vector3d.ZAxis, Point3d.Origin);
+                            mat *= Matrix3d.Rotation(-(1.5 * Math.PI - angle), Vector3d.ZAxis, Point3d.Origin);
                         }
                         else
                         {
-                            mat = mat * Matrix3d.Mirroring(new Line3d(new Point3d(0, -1, 0), Point3d.Origin)) *
-                                        Matrix3d.Rotation(1.5 * Math.PI - angle, Vector3d.ZAxis, Point3d.Origin);
+                            mat *= Matrix3d.Mirroring(new Line3d(new Point3d(0, -1, 0), Point3d.Origin)) *
+                                   Matrix3d.Rotation(1.5 * Math.PI - angle, Vector3d.ZAxis, Point3d.Origin);
                         }
                         e.RunTeeDrawEngine(Model, mat);
                     }
