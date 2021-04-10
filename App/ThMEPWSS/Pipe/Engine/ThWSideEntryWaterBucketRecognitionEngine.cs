@@ -1,11 +1,9 @@
 ﻿using System.Linq;
 using NFox.Cad;
-using ThCADExtension;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
-using ThMEPEngineCore.Service;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Engine
@@ -14,10 +12,7 @@ namespace ThMEPWSS.Pipe.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThWSideEntryWaterBucketExtractionVisitor()
-            {
-                LayerFilter = ThSideEntryWaterBucketLayerManager.XrefLayers(database),
-            };
+            var visitor = new ThWSideEntryWaterBucketExtractionVisitor();
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);

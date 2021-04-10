@@ -7,7 +7,7 @@ namespace ThMEPEngineCore.Engine
 {
     public abstract class ThDistributionElementExtractionVisitor
     {
-        public List<string> LayerFilter { get; set; }
+        public HashSet<string> LayerFilter { get; set; }
         public List<ThRawIfcDistributionElementData> Results { get; protected set; }
 
         public ThDistributionElementExtractionVisitor()
@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.Engine
         }
         public virtual bool CheckLayerValid(Entity curve)
         {
-            return LayerFilter.Where(o => string.Compare(curve.Layer, o, true) == 0).Any();
+            return LayerFilter.Contains(curve.Layer);
         }
         public virtual bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {

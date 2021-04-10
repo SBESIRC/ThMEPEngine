@@ -17,7 +17,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             var visitor = new ThWDeviceExtractionVisitor()
             {
-                LayerFilter = ThDeviceLayerManager.XrefLayers(database),
+                LayerFilter = new System.Collections.Generic.HashSet<string>(ThDeviceLayerManager.XrefLayers(database)),
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);

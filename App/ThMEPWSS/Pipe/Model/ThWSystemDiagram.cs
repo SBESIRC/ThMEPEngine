@@ -8,7 +8,10 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using ThMEPWSS.Assistant;
 using ThMEPWSS.Uitl.DebugNs;
+using ThMEPWSS.Uitl.ExtensionsNs;
+using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 
 namespace ThMEPWSS.Pipe.Model
 {
@@ -49,7 +52,7 @@ namespace ThMEPWSS.Pipe.Model
         protected string StyleName { get; set; } = string.Empty;
         protected ThWSDDrawableElement()
         {
-
+            LayerName = ThWPipeCommon.W_RAIN_EQPM;
         }
         virtual public void Draw(Point3d basePt, Matrix3d mat)
         {
@@ -71,7 +74,20 @@ namespace ThMEPWSS.Pipe.Model
         /// 标注
         /// </summary>
         public string Label { get; set; } = string.Empty;
-        public string ND { get; set; } = string.Empty;
+
+        private string _nd = string.Empty;
+        public string ND
+        {
+            get
+            {
+                return _nd;
+            }
+            set
+            {
+                if (value != null)
+                    _nd = value;
+            }
+        }
 
         public VerticalPipeType PipeType { get; set; }
 
@@ -92,14 +108,17 @@ namespace ThMEPWSS.Pipe.Model
 
         override public void Draw(Point3d basePt)
         {
-            NoDraw.Text("ThWSDTranslatorPipe", 100, basePt).AddToCurrentSpace();
+            
+            DrawUtils.DrawCircleLazy(basePt, 200);
             switch (TranslatorType)
             {
                 case TranslatorTypeEnum.None:
                     break;
                 case TranslatorTypeEnum.Long: //长转管
+                    DrawUtils.DrawTextLazy("Long Translator Pipe", 100, basePt);
                     break;
                 case TranslatorTypeEnum.Short: //乙字湾
+                    DrawUtils.DrawTextLazy("Short Translator Pipe", 100, basePt);
                     break;
                 default:
                     break;
@@ -115,6 +134,9 @@ namespace ThMEPWSS.Pipe.Model
     }
     public class ThWSDStorey : ThWSDDrawableElement, IEquatable<ThWSDStorey>
     {
+        public ThWSDStorey HigerStorey { get; set; } = null;
+        public ThWSDStorey LowerStorey { get; set; } = null;
+
         //such as 1F, 2F.... RF+1, RF+2
         public string Label { get; set; } = string.Empty;
         public string Elevation { get; set; } = string.Empty;
@@ -122,17 +144,29 @@ namespace ThMEPWSS.Pipe.Model
         public double Length = 5000; //mm
         public double HorizontalSpan = 5500;//mm
 
-        const double TEXT_HEIGHT = 350;
-        const double INDEX_TEXT_OFFSET_X = 2000;
-        const double INDEX_TEXT_OFFSET_Y = 130;
-        const double LINE_LENGTH = 100000;
-        const double RF_OFFSET_Y = 500;
+        public const double TEXT_HEIGHT = 350;
+        public const double INDEX_TEXT_OFFSET_X = 2000;
+        public const double INDEX_TEXT_OFFSET_Y = 130;
+        public double LINE_LENGTH = 100000;
+        public const double RF_OFFSET_Y = 500;
 
         public Point3d StoreyBasePoint;
         public List<ThWSDWaterBucket> Buckets { get; set; } = new List<ThWSDWaterBucket>();
         public List<ThWSDPipe> VerticalPipes { get; set; } = new List<ThWSDPipe>();
 
         public Point3dCollection Range { get; set; }
+
+        public ObjectId ObjectID { get; set; }
+
+        public BlockReference BlockRef { get; set; }
+        public Point3d Position
+        {
+            get
+            {
+                return BlockRef.Position;
+            }
+        }
+
         public ThWSDStorey()
         {
             LayerName = "W-NOTE";
@@ -145,9 +179,13 @@ namespace ThMEPWSS.Pipe.Model
         /// <param name="len"></param>
         override public void Draw(Point3d basePt)
         {
-            DebugTool.DrawLine(StoreyBasePoint, basePt);
             using (var adb = AcadDatabase.Active())
             {
+                adb.ModelSpace.Add(new Line(StoreyBasePoint, basePt)
+                {
+                    Layer = LayerName,
+                });
+
                 //draw horizontal line
                 adb.ModelSpace.Add(new Line(new Point3d(basePt.X, basePt.Y, 0), new Point3d(basePt.X + LINE_LENGTH, basePt.Y, 0))
                 {
@@ -197,33 +235,35 @@ namespace ThMEPWSS.Pipe.Model
         public string Label { get; set; } = string.Empty;
         public string ND { get; set; } = string.Empty;
         public WaterBucketEnum Type { get; set; }
-
         public Point3dCollection Range { get; set; }
+        public ThWSDStorey Storey { get; set; }
         private string BlockName { get; set; } = string.Empty;
 
         public ThWSDWaterBucket()
         {
-            BlockName = ThWPipeCommon.W_RAIN_EQPM;
+            LayerName = ThWPipeCommon.W_RAIN_EQPM;
         }
 
-        public void Draw(Point3d basePt, double len = 5000)
+        override public void Draw(Point3d basePt)
         {
             if (Type.Equals(WaterBucketEnum.Gravity))
             {
-                BlockName = "侧排雨水斗系统";
+                BlockName = "屋面雨水斗";
             }
             else if (Type.Equals(WaterBucketEnum.Side))
             {
-                BlockName = "屋面雨水斗";
+                BlockName = "侧排雨水斗系统";
             }
             else
                 return;
-
+            if (Storey.Label == "RF")
+            {
+                basePt = basePt.OffsetY(ThWSDStorey.RF_OFFSET_Y);
+            }
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 //draw entity
                 acadDatabase.ModelSpace.ObjectId.InsertBlockReference(LayerName, BlockName, basePt, new Scale3d(1), 0);
-
                 //todo: draw Label
             }
         }
@@ -267,7 +307,7 @@ namespace ThMEPWSS.Pipe.Model
         }
         public override void Draw(Point3d basePt)
         {
-            NoDraw.Text("ThWSDDrain", 100, basePt).AddToCurrentSpace();
+            DrawUtils.DrawTextLazy("ThWSDDrain", 100, basePt);
         }
     }
 
@@ -293,7 +333,7 @@ namespace ThMEPWSS.Pipe.Model
         }
         public override void Draw(Point3d basePt)
         {
-            NoDraw.Text("ThWSDCondensePipe", 100, basePt).AddToCurrentSpace();
+            DrawUtils.DrawTextLazy("ThWSDCondensePipe", 100, basePt);
         }
     }
 
@@ -313,7 +353,8 @@ namespace ThMEPWSS.Pipe.Model
         }
         public override void Draw(Point3d basePt)
         {
-            NoDraw.Text("ThWSDTranslatorPipe", 100, basePt).AddToCurrentSpace();
+            DrawUtils.DrawTextLazy("ThWSDCheckPoint", 100, basePt);
+            DrawUtils.DrawRectLazyFromLeftButtom(basePt, 200, 100);
         }
     }
 

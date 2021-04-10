@@ -1,4 +1,5 @@
-﻿using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
@@ -59,7 +60,7 @@ namespace ThMEPWSS.Pipe.Model
 
       for (int i = 0; i < this.PipeRuns.Count; ++i)
       {
-        if (PipeRuns[i] != other.PipeRuns[i])
+        if (!PipeRuns[i].Equals(other.PipeRuns[i]))
           return false;
       }
 
@@ -86,24 +87,36 @@ namespace ThMEPWSS.Pipe.Model
 
     override public void Draw(Point3d basePt)
     {
-      WaterBucket?.Draw(basePt);
-      foreach (var r in PipeRuns)
+      if (WaterBucket != null)
       {
+        var waterBucketStorey = WaterBucket.Storey;
+        if (waterBucketStorey != null)
+        {
+          //Dbg.PrintLine(waterBucketStorey.Label);
+          var waterBucketBasePt = new Point2d(basePt.X, waterBucketStorey.StoreyBasePoint.Y).ToPoint3d();
+          WaterBucket?.Draw(waterBucketBasePt);
+        }
+      }
+      for (int i = 0; i < PipeRuns.Count; i++)
+      {
+        ThWRainPipeRun r = PipeRuns[i];
         //draw piperun
-        //r.Draw(basePt);
-        if(r.TranslatorPipe.PipeType.Equals(TranslatorTypeEnum.None))
+        r.Draw(basePt.OffsetY(i * ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
+        if (r.TranslatorPipe.PipeType.Equals(TranslatorTypeEnum.None))
         {
 
         }
 
       }
-      NoDraw.Text("ThWRoofRainPipeSystem", 100, basePt).AddToCurrentSpace();
+      //new Circle() { Center = basePt, ColorIndex = 3, Radius = 200, Thickness = 5, }.AddToCurrentSpace();
+      //NoDraw.Text("ThWRoofRainPipeSystem: " + VerticalPipeId, 100, basePt.OffsetY(-1000)).AddToCurrentSpace();
       //todo: draw other device
     }
 
     public override int GetHashCode()
     {
-      return base.GetHashCode() ^ WaterBucket.GetHashCode() ^ OutputType.GetHashCode();
+        var hashCode = base.GetHashCode() ^ WaterBucket.GetHashCode() ^ OutputType.GetHashCode();
+        return hashCode;
     }
 
     public bool Equals(ThWRoofRainPipeSystem other)
