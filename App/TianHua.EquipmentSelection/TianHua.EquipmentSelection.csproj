@@ -33,7 +33,6 @@
   <ItemGroup>
     <Compile Include="Entity\ExhaustCalcModel.cs" />
     <Compile Include="Entity\ExhaustSpaceInfo.cs" />
-    <Compile Include="Entity\FanDataModelBitmap.cs" />
     <Compile Include="Entity\FanDataModelNumber.cs" />
     <Compile Include="Entity\FanSelectionState.cs" />
     <Compile Include="Entity\FireFrontModel.cs" />
