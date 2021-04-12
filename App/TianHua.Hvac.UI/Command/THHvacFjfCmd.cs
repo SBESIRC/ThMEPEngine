@@ -97,12 +97,12 @@ namespace TianHua.Hvac.UI.Command
                     else
                     {
                         // 添加旁通并添加到原Model中
-                        Line bypass = new Line();
-                        DBObjectCollection bypass_line = get_bypass(ref bypass);
-                        if (bypass_line.Count == 0)
+                        bool is_type3 = tee_pattern == "RBType3";
+                        DBObjectCollection bypass_lines = get_bypass(is_type3);
+                        if (bypass_lines.Count == 0)
                             return;
 
-                        bypass_line.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
+                        bypass_lines.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
                         List<Line> tmp = ThLaneLineSimplifier.RemoveDangles(lineobjects, 5);
                         lineobjects.Clear();
                         tmp.ForEachDbObject(o => lineobjects.Add(o));
@@ -112,58 +112,51 @@ namespace TianHua.Hvac.UI.Command
                         ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbTeeModel);
                         if (io_anay_res == null)
                             return;
-                        // 此支路一定存在旁通(不会访问越界)
-                        Point3d p = io_anay_res.OutletTeeCPPositions[0];
-                        Point3d detect_p = p.Equals(bypass.StartPoint) ? bypass.EndPoint : bypass.StartPoint;
                         double valve_width = Double.Parse(outerDuctSize.Split('x').First());
                         double bra_width = Double.Parse(tee_width.Split('x').First());
                         double s1 = bra_width + 50;
                         double s2 = (bra_width + valve_width) * 0.5 + 50;
                         double s3 = bra_width * 0.5 + 100;
+                        Point3d bypass_start = Point3d.Origin;
+                        Point3d bypass_end = Point3d.Origin;
+                        double bypass_len = 0;
                         if (io_anay_res.HasInletTee())
                         {
-                            ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph, s3, s2, s1);
+                            get_out_bypass(bypass_lines,
+                                           io_anay_res.InletTeeCPPositions[0],
+                                           ref bypass_start,
+                                           ref bypass_end,
+                                           ref bypass_len,
+                                           tee_pattern);
+                            ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
                         }
                         if (io_anay_res.HasOutletTee())
                         {
-
-                            //根据旁通角度分
-                            if (tee_pattern == "RBType3")
-                            {
-                                if (detect_p.X < p.X)
-                                {
-                                    // 旁通向上
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s2, s3);
-                                }
-                                else
-                                {
-                                    // 旁通向下
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s3, s2);
-                                }
-                            }
-                            else
-                            {
-                                if (detect_p.Y > p.Y)
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s3, s2);
-                                else
-                                    ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s2, s3);
-                            }
-
+                            get_out_bypass(bypass_lines,
+                                           io_anay_res.OutletTeeCPPositions[0],
+                                           ref bypass_start,
+                                           ref bypass_end,
+                                           ref bypass_len,
+                                           tee_pattern);
+                            ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
                         }
                         int wall_num = 0;
                         bool is_type2 = tee_pattern == "RBType2";
-                        IODuctHoleAnalysis(DbTeeModel, DuctSize, tee_width, is_type2, ref wall_num, elevation, textSize, bypass_line, io_anay_res);
-                        if (wall_num != 0)
+                        IODuctHoleAnalysis(DbTeeModel, DuctSize, tee_width, is_type2, ref wall_num, elevation, textSize, bypass_lines, io_anay_res);
+                        if (wall_num == 0)
+                            return;
+                        if (io_anay_res.HasInletTee() || io_anay_res.HasOutletTee())
                         {
                             //将阀插入在距outTee Cp 2000的位置
                             //Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()).GetNormal();
                             //Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
                             //Vector3d dis_vec = tmp_vec * 2000 + p.GetAsVector();
-                            Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()) * 0.5;
+                            Vector3d tmp_vec = (bypass_end.GetAsVector() - bypass_start.GetAsVector()) * 0.5;
                             Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
-                            Vector3d dis_vec = tmp_vec + p.GetAsVector();
+                            Vector3d dis_vec = tmp_vec + bypass_start.GetAsVector();
                             double ang = (2 * Math.PI - r_vec.Angle);
-                            ThServiceTee.InsertElectricValve(dis_vec, bra_width, r_vec.Angle + Math.PI * 0.5, false);
+                            bool has_dul_tee = io_anay_res.HasInletTee() && io_anay_res.HasOutletTee();
+                            ThServiceTee.InsertElectricValve(dis_vec, bra_width, r_vec.Angle + Math.PI * 0.5, has_dul_tee);
                         }
                     }
                 }
@@ -172,6 +165,107 @@ namespace TianHua.Hvac.UI.Command
                     ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
                     int wall_num = 0;
                     IODuctHoleAnalysis(DbFanModel, DuctSize, null, false, ref wall_num, null, null, null, io_anay_res);
+                }
+            }
+        }
+
+        private void get_out_bypass(DBObjectCollection bypass_lines, 
+                                    Point3d tee_cp, 
+                                    ref Point3d bypass_start,
+                                    ref Point3d bypass_end,
+                                    ref double bypass_len,
+                                    string type)
+        {
+            if (bypass_lines.Count == 2)
+            {
+                Line l1 = bypass_lines[0] as Line;
+                Line l2 = bypass_lines[1] as Line;
+                if (type == "RBType1")
+                {
+                    bypass_start = tee_cp;
+                    if (tee_cp.IsEqualTo(l1.StartPoint))
+                    {
+                        bypass_end = l1.EndPoint;
+                        bypass_len = l1.Length;
+                    }
+                    else if (tee_cp.IsEqualTo(l1.EndPoint))
+                    {
+                        bypass_end = l1.StartPoint;
+                        bypass_len = l1.Length;
+                    }
+                    else if (tee_cp.IsEqualTo(l2.StartPoint))
+                    {
+                        bypass_end = l2.EndPoint;
+                        bypass_len = l2.Length;
+                    }
+                    else if (tee_cp.IsEqualTo(l2.EndPoint))
+                    {
+                        bypass_end = l2.StartPoint;
+                        bypass_len = l2.Length;
+                    }
+                }
+                else if (type == "RBType2")
+                {
+
+                    if (tee_cp.IsEqualTo(l1.StartPoint))
+                    {
+                        // l2是out_bypass
+                        bypass_start = l1.EndPoint;
+                        if (bypass_start.IsEqualTo(l2.StartPoint))
+                            bypass_end = l2.EndPoint;
+                        else
+                            bypass_end = l2.StartPoint;
+                        bypass_len = l2.Length;
+                    }
+                    else if (tee_cp.IsEqualTo(l1.EndPoint))
+                    {
+                        // l2是out_bypass
+                        bypass_start = l1.StartPoint;
+                        if (bypass_start.IsEqualTo(l2.StartPoint))
+                            bypass_end = l2.EndPoint;
+                        else
+                            bypass_end = l2.StartPoint;
+                        bypass_len = l2.Length;
+                    }
+                    else if (tee_cp.IsEqualTo(l2.StartPoint))
+                    {
+                        // l1是out_bypass
+                        bypass_start = l2.EndPoint;
+                        if (bypass_start.IsEqualTo(l1.StartPoint))
+                            bypass_end = l1.EndPoint;
+                        else
+                            bypass_end = l1.StartPoint;
+                        bypass_len = l1.Length;
+                    }
+                    else if (tee_cp.IsEqualTo(l2.EndPoint))
+                    {
+                        // l1是out_bypass
+                        bypass_start = l2.StartPoint;
+                        if (bypass_start.IsEqualTo(l1.StartPoint))
+                            bypass_end = l1.EndPoint;
+                        else
+                            bypass_end = l1.StartPoint;
+                        bypass_len = l1.Length;
+                    }
+                }
+            }
+            if (type == "RBType3" && bypass_lines.Count == 3)
+            {
+                Line l1 = bypass_lines[1] as Line;
+                Line l2 = bypass_lines[2] as Line;
+                bypass_start = tee_cp;
+                if (tee_cp.DistanceTo(l1.StartPoint) < 1 ||
+                          tee_cp.DistanceTo(l1.EndPoint) < 1)
+                {
+                    Point3d p = tee_cp.IsEqualTo(l1.StartPoint) ? l1.EndPoint : l1.StartPoint;
+                    bypass_end = p.DistanceTo(l2.StartPoint) < 50 ? l2.EndPoint : l2.StartPoint;
+                    bypass_len = l1.Length;
+                }
+                else
+                {
+                    Point3d p = tee_cp.IsEqualTo(l2.StartPoint) ? l2.EndPoint : l2.StartPoint;
+                    bypass_end = p.DistanceTo(l1.StartPoint) < 50 ? l1.EndPoint : l1.StartPoint;
+                    bypass_len = l2.Length;
                 }
             }
         }
@@ -227,7 +321,7 @@ namespace TianHua.Hvac.UI.Command
             return center_lines;
         }
 
-        private DBObjectCollection get_bypass(ref Line tee_line)
+        private DBObjectCollection get_bypass(bool is_type3)
         {
             var objIds = get_from_prompt("请选择旁通管", true);
             if (objIds.Count == 0)
@@ -236,11 +330,10 @@ namespace TianHua.Hvac.UI.Command
             DBObjectCollection tmp = new DBObjectCollection();
             tmp.Add(c);
             List<Line> lines = ThLaneLineSimplifier.RemoveDangles(tmp, 100);
-            if (lines.Count == 2)
+            if (is_type3 && lines.Count == 2)
             {
                 // 给较长的线段上插点
                 Line l = lines[0].Length > lines[1].Length ? lines[0] : lines[1];
-                tee_line = l;
                 lines.Remove(l);
                 Point3d lp = l.StartPoint.Y > l.EndPoint.Y ? l.EndPoint : l.StartPoint;
                 Point3d up = l.StartPoint.Y > l.EndPoint.Y ? l.StartPoint : l.EndPoint;
@@ -256,10 +349,6 @@ namespace TianHua.Hvac.UI.Command
                 lines.Add(new Line(up, new Point3d(p.X, p.Y, 0)));
                 p = new Point3d(v.X, v.Y, 0) + new Vector3d(len * s_val, -len * c_val, 0);
                 lines.Add(new Line(new Point3d(p.X, p.Y, 0), lp));
-            }
-            else if (lines.Count == 1)
-            {
-                tee_line = lines[0];
             }
             tmp.Clear();
             lines.ForEachDbObject(o => tmp.Add(o));
@@ -320,7 +409,6 @@ namespace TianHua.Hvac.UI.Command
             return io_anay_res;
         }
 
-        // is_type2也是是否要修改管道描述信息的标志
         private void IODuctHoleAnalysis(ThDbModelFan Model,
                                         string DuctSize,
                                         string tee_size,

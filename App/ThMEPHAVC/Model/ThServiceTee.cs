@@ -35,7 +35,8 @@ namespace ThMEPHVAC.Model
         public static void TeeFineTuneDuct(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> LineGraph,
                                            double IShrink,
                                            double Shrinkb,
-                                           double Shrinkm)
+                                           double Shrinkm,
+                                           DBObjectCollection bypass_lines)
         {
             foreach (var edge in LineGraph.Edges)
             {
@@ -43,9 +44,19 @@ namespace ThMEPHVAC.Model
                 {
                     var out1 = LineGraph.OutEdges(edge.Target).First();
                     var out2 = LineGraph.OutEdges(edge.Target).Last();
-                    edge.TargetShrink = IShrink;
-                    out1.SourceShrink = Shrinkb;
-                    out2.SourceShrink = Shrinkm;
+                    if (is_bypass(out1.Source.Position, out1.Target.Position, bypass_lines))
+                    {
+                        edge.TargetShrink = IShrink;
+                        out1.SourceShrink = Shrinkb;
+                        out2.SourceShrink = Shrinkm;
+                    }
+                    else
+                    {
+                        edge.TargetShrink = IShrink;
+                        out1.SourceShrink = Shrinkm;
+                        out2.SourceShrink = Shrinkb;
+                    }
+                    break;
                 }
             }
         }
@@ -77,10 +88,11 @@ namespace ThMEPHVAC.Model
                 var blockRef = acadDatabase.Element<BlockReference>(objId, true);
                 Matrix3d mat = Matrix3d.Displacement(fan_cp_vec) *
                                Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
-                if (!hasTee)
-                {
-                    mat *= Matrix3d.Displacement(new Vector3d(-valvewidth / 2, 125, 0));
-                }
+                mat *= Matrix3d.Displacement(new Vector3d(-valvewidth / 2, 125, 0));
+                //if (hasTee)
+                //{
+                //    mat *= Matrix3d.Displacement(new Vector3d(-valvewidth / 2, 125, 0));
+                //}
 
                 blockRef.TransformBy(mat);
                 return objId;

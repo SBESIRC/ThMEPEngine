@@ -28,6 +28,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\ThDuctPortsAnalysis.cs" />
     <Compile Include="Model\ThServiceTee.cs" />
     <Compile Include="Model\ThTee.cs" />
     <Compile Include="Model\ThVTee.cs" />
