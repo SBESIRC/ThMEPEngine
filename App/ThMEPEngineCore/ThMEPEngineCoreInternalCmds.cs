@@ -276,14 +276,14 @@ namespace ThMEPEngineCore
         {
             var param = new ThWashParam();
             param.R = GetValue("\n输入保护半径");
-            param.protect_arch = GetValue("\n输入protect_arch[true(非0)/false(0)]") == 0 ? false : true;
-            param.protect_park = GetValue("\n输入protect_park[true(非0)/false(0)]") == 0 ? false : true;
-            param.protect_other = GetValue("\n输入protect_other[true(非0)/false(0)]") == 0 ? false : true;
-            param.extend_arch = GetValue("\n输入extend_arch[true(非0)/false(0)]") == 0 ? false : true;
-            param.extend_park = GetValue("\n输入extend_park[true(非0)/false(0)]") == 0 ? false : true;
+            param.protect_arch = GetValue("\n是否保护建筑空间[true(1)/false(0)] <true>",1) == 0 ? false : true;
+            param.protect_park = GetValue("\n是否保护停车空间[true(1)/false(0)] <true>",1) == 0 ? false : true;
+            param.protect_other = GetValue("\n是否保护不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
+            param.extend_arch = GetValue("\n建筑空间是否能保护停车空间和不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
+            param.extend_park = GetValue("\n停车空间是否能保护到不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
             return param;
         }
-        private int GetValue(string message)
+        private int GetValue(string message,int init=0)
         {
             var pdo = new PromptIntegerOptions(message);
             var protectRadiusPdr = Active.Editor.GetInteger(pdo);
@@ -293,7 +293,7 @@ namespace ThMEPEngineCore
             }
             else
             {
-                return 0;
+                return init;
             }
         }
 
