@@ -16,13 +16,20 @@ namespace TianHua.Hvac.UI.Command
 
         public void Execute()
         {
-            DBObjectCollection lineobjs = get_centerline();
-            if (lineobjs.Count == 0)
+            DBObjectCollection center_lines = get_lines_from_prompt("请选择中心线", false);
+            if (center_lines.Count == 0)
+                return;
+            DBObjectCollection start_line = get_lines_from_prompt("请选择起始线", true);
+            if (start_line.Count == 0)
+                return;
+            center_lines.Remove(start_line[0]);
+            //只有一根线不做处理
+            if (center_lines.Count == 0)
                 return;
 
         }
 
-        private ObjectIdCollection get_from_prompt(string prompt, bool only_able)
+        private DBObjectCollection get_lines_from_prompt(string prompt, bool only_able)
         {
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
@@ -35,24 +42,19 @@ namespace TianHua.Hvac.UI.Command
 
             if (result.Status == PromptStatus.OK)
             {
-                return result.Value.GetObjectIds().ToObjectIdCollection();
+                var objIds = result.Value.GetObjectIds().ToObjectIdCollection();
+                if (objIds.Count == 0)
+                    return new DBObjectCollection();
+                var tmp = new DBObjectCollection();
+                var lines = new DBObjectCollection();
+                ThLaneLineSimplifier.RemoveDangles(tmp, 100.0).ForEach(l => lines.Add(l));
+                return lines;
             }
             else
             {
-                return new ObjectIdCollection();
+                return new DBObjectCollection();
             }
         }
 
-        private DBObjectCollection get_centerline()
-        {
-            var objIds = get_from_prompt("请选择中心线", false);
-            if (objIds.Count == 0)
-                return new DBObjectCollection();
-            var tmp = new DBObjectCollection();
-            var center_lines = new DBObjectCollection();
-
-            ThLaneLineSimplifier.RemoveDangles(tmp, 100.0).ForEach(l => center_lines.Add(l));
-            return center_lines;
-        }
     }
 }
