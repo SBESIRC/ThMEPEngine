@@ -115,6 +115,7 @@
     <Compile Include="Interface\ISpatialIndex.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
     <Compile Include="Model\ThIfcLineFoot.cs" />
+    <Compile Include="Model\ThIfcOpening.cs" />
     <Compile Include="Model\ThIfcRailing.cs" />
     <Compile Include="Model\ThIfcTextNote.cs" />
     <Compile Include="BuildRoom\Service\ThBuildRoomDataService.cs" />
