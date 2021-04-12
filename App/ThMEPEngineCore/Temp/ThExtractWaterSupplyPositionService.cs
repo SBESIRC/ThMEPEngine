@@ -12,11 +12,9 @@ namespace ThMEPEngineCore.Temp
     public class ThExtractWaterSupplyPositionService : ThExtractService
     {
         public List<Curve> WaterSupplyPositions { get; set; }
-        public string WaterSupplyPositionLayer { get; set; }
         public ThExtractWaterSupplyPositionService()
         {
             WaterSupplyPositions = new List<Curve>();
-            WaterSupplyPositionLayer = "给水点位";
         }
 
         public override void Extract(Database db,Point3dCollection pts)
@@ -25,7 +23,7 @@ namespace ThMEPEngineCore.Temp
             {
                 WaterSupplyPositions = acadDatabase.ModelSpace
                     .OfType<Curve>()
-                    .Where(o => IsWaterSupplyPositionLayer(o.Layer))
+                    .Where(o => IsElementLayer(o.Layer))
                     .Select(o=>o.Clone() as Curve)
                     .ToList();
                 for(int i=0;i< WaterSupplyPositions.Count;i++)
@@ -44,9 +42,9 @@ namespace ThMEPEngineCore.Temp
             }
         }        
 
-        private bool IsWaterSupplyPositionLayer(string layerName)
+        public override bool IsElementLayer(string layer)
         {
-            return layerName == WaterSupplyPositionLayer;
+            return layer == ElementLayer;
         }
     }
 }

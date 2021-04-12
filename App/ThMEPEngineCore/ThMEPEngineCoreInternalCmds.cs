@@ -301,7 +301,7 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THExtractAreaCenterLineTestData", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THACLD", CommandFlags.Modal)]
         public void THExtractAreaCenterLineTestData()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -331,6 +331,41 @@ namespace ThMEPEngineCore
 
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThFHCR", CommandFlags.Modal)]
+        public void ThFHCR()
+        {
+            //消火栓保护半径
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                // ,ShearWall, 门洞，门扇,柱
+                var extractors = new List<ThExtractorBase>()
+                {
+                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
+                    //通过停车区域的Space来制造阻挡物
+                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1,ElementLayer = "AD-AREA-OUTL"}, // Space
+                    new ThArchitectureWallExtractor {ColorIndex=2 },  // ArchitectureWall
+                    new ThShearWallExtractor{ColorIndex=3},  // ShearWall
+                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=4}, // Column
+                    new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
+                    new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
+                    new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
+                };
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+
                 extractEngine.OutputGeo(Active.Document.Name);
                 extractEngine.Print(acadDatabase.Database);
             }

@@ -16,11 +16,15 @@ namespace ThMEPEngineCore.Temp
         {
             ConnectPorts = new Dictionary<Polyline, string>();
             Category = "ConnectPort";
+            ElementLayer = "连通";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractConnectPortsService();
+            var instance = new ThExtractConnectPortService()
+            {
+                ElementLayer= this.ElementLayer,
+            };
             instance.Extract(database, pts);
             ConnectPorts = instance.ConnectPorts;
         }

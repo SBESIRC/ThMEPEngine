@@ -16,12 +16,16 @@ namespace ThMEPEngineCore.Temp
         public ThWaterSupplyStartExtractor()
         {
             Category = "给水起点";
+            ElementLayer = "给水起点";
             WaterSupplyStarts = new List<Curve>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractWaterSupplyStartService();
+            var instance = new ThExtractWaterSupplyStartService()
+            {
+                ElementLayer= this.ElementLayer,
+            };
             instance.Extract(database, pts);
             WaterSupplyStarts = instance.WaterSupplyStarts;
         }

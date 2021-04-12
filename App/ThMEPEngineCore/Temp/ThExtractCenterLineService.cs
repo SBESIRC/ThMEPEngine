@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using NFox.Cad;
 using Linq2Acad;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
@@ -13,7 +11,6 @@ namespace ThMEPEngineCore.Temp
     public class ThExtractCenterLineService : ThExtractService
     {
         public List<Curve> CenterLines { get; set; }
-        public string CenterLineLayer { get; set; }
 
         public ThExtractCenterLineService()
         {
@@ -27,7 +24,7 @@ namespace ThMEPEngineCore.Temp
                 {
                     if (ent is Polyline polyline)
                     {
-                        if (IsCenterLineLayer(polyline.Layer))
+                        if (IsElementLayer(polyline.Layer))
                         {
                             var newPolyline = polyline.Clone() as Polyline;
                             CenterLines.Add(newPolyline);
@@ -35,7 +32,7 @@ namespace ThMEPEngineCore.Temp
                     }
                     else if(ent is Line line)
                     {
-                        if (IsCenterLineLayer(line.Layer))
+                        if (IsElementLayer(line.Layer))
                         {
                             var newLine = line.Clone() as Line;
                             CenterLines.Add(newLine);
@@ -51,10 +48,9 @@ namespace ThMEPEngineCore.Temp
             }
         }
 
-       
-        private bool IsCenterLineLayer(string layerName)
+        public override bool IsElementLayer(string layer)
         {
-            return layerName == CenterLineLayer;
+            return layer == ElementLayer;
         }
     }
 }

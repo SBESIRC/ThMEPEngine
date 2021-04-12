@@ -16,11 +16,15 @@ namespace ThMEPEngineCore.Temp
         {
             Doors = new List<Polyline>();
             Category = "Door";
+            ElementLayer = "门";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractDoorService();
+            var instance = new ThExtractDoorService()
+            {
+                ElementLayer= this.ElementLayer,
+            };
             instance.Extract(database, pts);
             Doors = instance.Doors;
         }
@@ -35,6 +39,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
+
             return geos;
         }
 

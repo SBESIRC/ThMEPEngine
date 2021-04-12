@@ -25,10 +25,9 @@ namespace ThMEPEngineCore.Temp
                 {
                     if (ent is Polyline polyline)
                     {
-                        if (IsDoorLayer(polyline.Layer))
+                        if (IsElementLayer(polyline.Layer))
                         {
-                            var newPolyline = polyline.Clone() as Polyline;
-                            Doors.Add(newPolyline);
+                            Doors.Add(polyline.Clone() as Polyline);
                         }
                     }
                 }
@@ -69,9 +68,9 @@ namespace ThMEPEngineCore.Temp
             return results;
         }
 
-        private bool IsDoorLayer(string layerName)
+        public override bool IsElementLayer(string layer)
         {
-            return layerName == "门";
+            return layer == ElementLayer;
         }
     }
 }

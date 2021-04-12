@@ -11,11 +11,9 @@ namespace ThMEPEngineCore.Temp
     public class ThExtractDrainageFacilityService:ThExtractService
     {
         public List<Curve> Facilities { get; set; }
-        public string FacilityLayer { get; set; }
         public ThExtractDrainageFacilityService()
         {
-            Facilities = new List<Curve>();
-            FacilityLayer = "排水设施";
+            Facilities = new List<Curve>();            
         }
         public override void Extract(Database db,Point3dCollection pts)
         {
@@ -25,7 +23,7 @@ namespace ThMEPEngineCore.Temp
                 {
                     if (ent is Polyline polyline)
                     {
-                        if (IsDrainageFacilityLayer(polyline.Layer))
+                        if (IsElementLayer(polyline.Layer))
                         {
                             var newPolyline = polyline.Clone() as Polyline;
                             Facilities.Add(newPolyline);
@@ -33,7 +31,7 @@ namespace ThMEPEngineCore.Temp
                     }
                     else if(ent is Line line)
                     {
-                        if (IsDrainageFacilityLayer(line.Layer))
+                        if (IsElementLayer(line.Layer))
                         {
                             var newLine = line.Clone() as Line;
                             Facilities.Add(newLine);
@@ -41,7 +39,7 @@ namespace ThMEPEngineCore.Temp
                     }
                     else if(ent is Circle circle)
                     {
-                        if (IsDrainageFacilityLayer(circle.Layer))
+                        if (IsElementLayer(circle.Layer))
                         {
                             var newCircle = circle.Clone() as Circle;
                             Facilities.Add(newCircle);
@@ -57,9 +55,9 @@ namespace ThMEPEngineCore.Temp
             }
         }        
 
-        private bool IsDrainageFacilityLayer(string layerName)
+        public override bool IsElementLayer(string layer)
         {
-            return layerName == FacilityLayer;
+            return layer == ElementLayer;
         }
     }
 }

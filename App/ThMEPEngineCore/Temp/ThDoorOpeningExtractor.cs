@@ -1,59 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
-using Linq2Acad;
 using DotNetARX;
+using Linq2Acad;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThCenterLineExtractor :ThExtractorBase, IExtract,IPrint,IBuildGeometry,IGroup
+    public class ThDoorOpeningExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry,IGroup
     {
-        public List<Curve> CenterLines { get; private set; }
-        public ThCenterLineExtractor()
+        public List<Polyline> Openings { get; private set; }
+
+        public ThDoorOpeningExtractor()
         {
-            CenterLines = new List<Curve>();
-            Category = "中心线";
-            ElementLayer = "中心线示意";
+            Openings = new List<Polyline>();
+            Category = "DoorOpening";
+            ElementLayer = "门";
         }
+
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractCenterLineService()
+            var instance = new ThExtractDoorOpeningService()
             {
-                ElementLayer = this.ElementLayer,
+                ElementLayer= this.ElementLayer,
             };
             instance.Extract(database, pts);
-            CenterLines = instance.CenterLines;
+            Openings = instance.Openings;
         }
 
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            CenterLines.ForEach(o =>
+            Openings.ForEach(o =>
             {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
+
             return geos;
         }
 
         public void Print(Database database)
         {
-            using (var db=AcadDatabase.Use(database))
+            using (var db =AcadDatabase.Use(database))
             {
-                var centerLineIds = new ObjectIdList();
-                CenterLines.ForEach(o =>
+                var doorIds = new ObjectIdList();
+                Openings.ForEach(o =>
                 {
                     o.ColorIndex = ColorIndex;
                     o.SetDatabaseDefaults();
-                    centerLineIds.Add(db.ModelSpace.Add(o));
+                    doorIds.Add(db.ModelSpace.Add(o));                    
                 });
-                if (centerLineIds.Count > 0)
+                if (doorIds.Count > 0)
                 {
-                    GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), centerLineIds);
+                    GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), doorIds);
                 }
             }
         }

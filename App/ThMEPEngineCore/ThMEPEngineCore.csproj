@@ -365,14 +365,16 @@
     <Compile Include="Temp\ThCenterLineExtractor.cs" />
     <Compile Include="Temp\ThColumnExtractor.cs" />
     <Compile Include="Temp\ThConnectPortExtractor.cs" />
+    <Compile Include="Temp\ThDoorOpeningExtractor.cs" />
     <Compile Include="Temp\ThDoorExtractor.cs" />
     <Compile Include="Temp\ThDrainageFacilityExtractor.cs" />
     <Compile Include="Temp\ThEquipmentExtractor.cs" />
+    <Compile Include="Temp\ThExtractDoorOpeningService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyPositionService.cs" />
     <Compile Include="Temp\ThExtractToiletGroupService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyStartService.cs" />
     <Compile Include="Temp\ThExtractColumnService.cs" />
-    <Compile Include="Temp\ThExtractConnectPortsService.cs" />
+    <Compile Include="Temp\ThExtractConnectPortService.cs" />
     <Compile Include="Temp\ThExtractCenterLineService.cs" />
     <Compile Include="Temp\ThExtractorBase.cs" />
     <Compile Include="Temp\ThExtractWallService.cs" />

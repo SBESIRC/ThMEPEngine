@@ -1,22 +1,21 @@
-﻿using System;
+﻿using NFox.Cad;
+using Linq2Acad;
 using System.Linq;
 using System.Collections.Generic;
-using NFox.Cad;
-using Linq2Acad;
 using ThCADCore.NTS;
-using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThExtractWallService : ThExtractService
+    public class ThExtractDoorOpeningService : ThExtractService
     {
-        public List<Polyline> Walls { get; set; }
-        public ThExtractWallService()
+        public List<Polyline> Openings { get; set; }
+        public ThExtractDoorOpeningService()
         {
-            Walls = new List<Polyline>();
+            Openings = new List<Polyline>();
         }
+
         public override void Extract(Database db, Point3dCollection pts)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
@@ -27,17 +26,16 @@ namespace ThMEPEngineCore.Temp
                     {
                         if (IsElementLayer(polyline.Layer))
                         {
-                            var newPolyline = polyline.Clone() as Polyline;
-                            Walls.Add(newPolyline);
+                            Openings.Add(polyline.Clone() as Polyline);
                         }
                     }
                 }
-                if(pts.Count>=3)
+                if (pts.Count >= 3)
                 {
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Walls.ToCollection());
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Openings.ToCollection());
                     var objs = spatialIndex.SelectCrossingPolygon(pts);
-                    Walls = objs.Cast<Polyline>().ToList();
-                }                
+                    Openings = objs.Cast<Polyline>().ToList();
+                }
             }
         }
 

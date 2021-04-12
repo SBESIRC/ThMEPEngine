@@ -319,6 +319,12 @@ namespace ThMEPEngineCore.CAD
             }
             return false;
         }
+        /// <summary>
+        /// 点在实体内部,不在边界
+        /// </summary>
+        /// <param name="ent"></param>
+        /// <param name="pt"></param>
+        /// <returns></returns>
         public static bool IsContains(this Entity ent, Point3d pt)
         {
             if (ent is Polyline polyline)
@@ -332,27 +338,60 @@ namespace ThMEPEngineCore.CAD
             }
             else if (ent is Circle circle)
             {
-                return pt.DistanceTo(circle.Center) <= circle.Radius;
+                return pt.DistanceTo(circle.Center) < circle.Radius;
             }
             else
             {
                 throw new NotSupportedException();
             }
         }
-        public static bool IsContains(this Entity ent, Entity innerLoop)
+        /// <summary>
+        /// A包括B，A的边界和B的边界可能有重复
+        /// </summary>
+        /// <param name="A">Polygon A</param>
+        /// <param name="B">Polygon B</param>
+        /// <returns></returns>
+        public static bool IsContains(this Entity A, Entity B)
         {
-            if(ent is Polyline first)
+            if(A is Polyline firstPoly)
             {
-                return Contains(first, innerLoop);
+                return Contains(firstPoly, B);
             }
-            else if(ent is MPolygon mPolygon)
+            else if(A is MPolygon mPolygon)
             {
-                return Contains(mPolygon, innerLoop);
+                return Contains(mPolygon, B);
             }
             else
             {
                 return false;
             }          
+        }
+        /// <summary>
+        /// A完全包含B（B没有任何一个点在A的边界上，都在A的里面）
+        /// </summary>
+        /// <param name="first">A</param>
+        /// <param name="second">B</param>
+        /// <returns></returns>
+        public static bool IsFullContains(this Entity first, Entity second)
+        {
+            //first完全包含second
+            //second所有的点在A的内部，且没有任何一个点在A的边界上
+            var firstPolygon = first.ToNTSPolygon();
+            var secondPolygon = second.ToNTSPolygon();
+            if (firstPolygon == null || secondPolygon == null)
+            {
+                return false;
+            }
+            var relateMatrix = new ThCADCoreNTSRelate(firstPolygon, secondPolygon);
+            if (relateMatrix.IsContains || relateMatrix.IsCovers)
+            {
+                var vertices = second.EntityVertices();
+                return vertices.Cast<Point3d>().Where(o => firstPolygon.OnBoundary(o)).Count() == 0;
+            }
+            else
+            {
+                return false;
+            }
         }
         private static bool Contains(Polyline firstPoly,Entity entity)
         {

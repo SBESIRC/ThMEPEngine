@@ -52,8 +52,15 @@ namespace ThMEPEngineCore.Temp
         }
         private List<Entity> BuildAreas(List<Entity> spaces)
         {
-            var objs = spaces.ToCollection().BuildArea();
-            return objs.Cast<Entity>().ToList();
+            if(spaces.Count==0)
+            {
+                return new List<Entity>();
+            }
+            else
+            {
+                var objs = spaces.ToCollection().BuildArea();
+                return objs.Cast<Entity>().ToList();
+            }
         }
 
         private void BuildTextContainers()

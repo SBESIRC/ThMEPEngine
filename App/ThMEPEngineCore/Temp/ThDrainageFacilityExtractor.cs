@@ -15,10 +15,14 @@ namespace ThMEPEngineCore.Temp
         {
             DrainageFacilities = new List<Curve>();
             Category = "DrainageFacility";
+            ElementLayer = "排水设施";
         }
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractDrainageFacilityService();
+            var instance = new ThExtractDrainageFacilityService()
+            {
+                ElementLayer = this.ElementLayer,
+            };
             instance.Extract(database, pts);
             DrainageFacilities = instance.Facilities;
         }

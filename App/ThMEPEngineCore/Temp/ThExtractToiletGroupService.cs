@@ -11,11 +11,9 @@ namespace ThMEPEngineCore.Temp
     public class ThExtractToiletGroupService : ThExtractService
     {
         public List<Polyline> ToiletGroups { get; set; }
-        public string ToiletGroupLayer { get; set; }
         public ThExtractToiletGroupService()
         {
             ToiletGroups = new List<Polyline>();
-            ToiletGroupLayer = "卫生间分组";
         }
 
         public override void Extract(Database db,Point3dCollection pts)
@@ -24,7 +22,7 @@ namespace ThMEPEngineCore.Temp
             {
                 ToiletGroups = acadDatabase.ModelSpace
                     .OfType<Polyline>()
-                    .Where(o => IsToiletGroupLayer(o.Layer))
+                    .Where(o => IsElementLayer(o.Layer))
                     .Select(o=>o.Clone() as Polyline)
                     .ToList();
                 if(pts.Count>=3)
@@ -34,11 +32,11 @@ namespace ThMEPEngineCore.Temp
                     ToiletGroups = objs.Cast<Polyline>().ToList();
                 }
             }
-        }        
+        }      
 
-        private bool IsToiletGroupLayer(string layerName)
+        public override bool IsElementLayer(string layer)
         {
-            return layerName == ToiletGroupLayer;
+            return layer == ElementLayer;
         }
     }
 }
