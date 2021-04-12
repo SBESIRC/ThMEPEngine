@@ -1,16 +1,20 @@
-﻿using CLI;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+
+
+#if ACAD2016
+using CLI;
+using ThCADExtension;
+using ThMEPEngineCore.Temp;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+#endif
 
 namespace ThMEPEngineCore
 {
