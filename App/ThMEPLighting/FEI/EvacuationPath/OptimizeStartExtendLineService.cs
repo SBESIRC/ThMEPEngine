@@ -6,12 +6,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPLighting.FEI.Service;
 
 namespace ThMEPLighting.FEI.EvacuationPath
 {
     public static class OptimizeStartExtendLineService
     {
-        public static Polyline CreateMapFrame(Line lane, Point3d startPt, double expandLength)
+        public static Polyline CreateMapFrame(Line lane, Point3d startPt, List<Polyline> holes, double expandLength)
         {
             Vector3d xDir = (lane.EndPoint - lane.StartPoint).GetNormal();
             Vector3d zDir = Vector3d.ZAxis;
@@ -28,10 +29,33 @@ namespace ThMEPLighting.FEI.EvacuationPath
             Point3d transPt = startPt.TransformBy(matrix);
 
             List<Point3d> pts = new List<Point3d>() { transPt, cloneLine.StartPoint, cloneLine.EndPoint };
-            var polyline = GetBoungdingBox(pts).Buffer(expandLength)[0] as Polyline;
-            polyline.TransformBy(matrix.Inverse());
+            var polyline = GetBoungdingBox(pts);
+            var intersectHoles = SelectService.SelelctCrossing(holes, polyline);
+            foreach (var iHoles in intersectHoles)
+            {
+                pts.AddRange(GetAllPolylinePts(iHoles));
+            }
 
-            return polyline;
+            var resPolyline = GetBoungdingBox(pts).Buffer(expandLength)[0] as Polyline;
+            resPolyline.TransformBy(matrix.Inverse());
+
+            return resPolyline;
+        }
+
+        /// <summary>
+        /// 获取polyline所有点
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private static List<Point3d> GetAllPolylinePts(Polyline polyline)
+        {
+            List<Point3d> allPts = new List<Point3d>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                allPts.Add(polyline.GetPoint3dAt(i));
+            }
+
+            return allPts;
         }
 
         /// <summary>

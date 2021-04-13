@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.Model;
 using ThMEPLighting.FEI.Service;
 
@@ -14,7 +15,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
     {
         double blockDistance = 600;
         double mergeAngle = Math.PI / 6;
-        public List<Polyline> CreateExtendLines(List<List<Line>> xLanes, List<List<Line>> yLanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
+        public List<ExtendLineModel> CreateExtendLines(List<List<Line>> xLanes, List<List<Line>> yLanes, List<BlockReference> enterBlocks, Polyline frame, List<Polyline> holes)
         {
             List<Line> allLanes = new List<Line>(xLanes.SelectMany(x => x.Select(y => y)));
             allLanes.AddRange(yLanes.SelectMany(x => x.Select(y => y)));
@@ -48,13 +49,15 @@ namespace ThMEPLighting.FEI.EvacuationPath
                     blockPt = new Point3d((mergeLine.line.EndPoint.X + mergeLine.line.StartPoint.X) / 2, (mergeLine.line.EndPoint.Y + mergeLine.line.StartPoint.Y) / 2, 0);
                 }
 
+                //获取最近的车道线信息
+                var closetLane = GetClosetLane(allLanes, blockPt, frame);
+
                 //起点到主车道延伸线
-                var startExtendLines = startExtendLineService.CreateStartLines(frame, allLanes, blockPt, holes);
+                var startExtendLines = startExtendLineService.CreateStartLines(frame, closetLane, blockPt, holes);
 
                 if (startExtendLines.Count > 0)
                 {
                     //创建主车道延伸线
-                    var closetLane = GeUtils.GetClosetLane(allLanes, blockPt);
                     var dir = (closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal();
                     var startPt = startExtendLines.First().line.EndPoint;
                     var extendDir = (closetLane.Value - blockPt).GetNormal();
@@ -70,7 +73,11 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 }
             }
 
-            return resLines.Select(x => x.line).ToList();
+            //合并延伸线（删除多余延伸线并尽量均匀）
+            MergeExtendLineService mergeExtendLineService = new MergeExtendLineService();
+            resLines = mergeExtendLineService.MergeLines(xLanes, yLanes, resLines);
+
+            return resLines;
         }
 
         /// <summary>
@@ -136,6 +143,29 @@ namespace ThMEPLighting.FEI.EvacuationPath
             }
 
             return extendLine;
+        }
+
+        /// <summary>
+        /// 获取最近的线信息
+        /// </summary>
+        /// <param name="lanes"></param>
+        /// <param name="startPt"></param>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private KeyValuePair<Line, Point3d> GetClosetLane(List<Line> lanes, Point3d startPt, Polyline polyline)
+        {
+            var closeInfo = GeUtils.GetClosetLane(lanes, startPt);
+            Line checkLine = new Line(startPt, closeInfo.Value);
+            if (!CheckService.CheckIntersectWithFrame(checkLine, polyline))
+            {
+                return closeInfo;
+            }
+
+            BFSPathPlaner pathPlaner = new BFSPathPlaner(400);
+            var closetLine = pathPlaner.FindingClosetLine(startPt, lanes, polyline);
+            var closetPt = closetLine.GetClosestPointTo(startPt, false);
+
+            return new KeyValuePair<Line, Point3d>(closetLine, closetPt);
         }
     }
 }

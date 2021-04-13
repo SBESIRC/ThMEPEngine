@@ -58,11 +58,14 @@
     <Compile Include="FEI\AStarAlgorithm\MinHeap.cs" />
     <Compile Include="FEI\AStarAlgorithm\AStarModel\Point.cs" />
     <Compile Include="FEI\AStarAlgorithm\AStarModel\RoutePlanData.cs" />
-    <Compile Include="FEI\EvacuationPath\CreateMainEvacuationPath.cs" />
+    <Compile Include="FEI\BFSAlgorithm\BFSNode.cs" />
+    <Compile Include="FEI\BFSAlgorithm\BFSPathPlaner.cs" />
     <Compile Include="FEI\EvacuationPath\CreateMainLanesService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateStartExtendLineService.cs" />
     <Compile Include="FEI\EvacuationPath\ExtendLinesService.cs" />
+    <Compile Include="FEI\EvacuationPath\MergeExtendLineService.cs" />
     <Compile Include="FEI\EvacuationPath\OptimizeStartExtendLineService.cs" />
+    <Compile Include="FEI\Model\ExtendLineTreeModel.cs" />
     <Compile Include="FEI\Service\GetPrimitivesService.cs" />
     <Compile Include="FEI\LayoutFEIService.cs" />
     <Compile Include="FEI\Model\ExtendLineModel.cs" />

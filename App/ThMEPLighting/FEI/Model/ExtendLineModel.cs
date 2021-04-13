@@ -31,23 +31,13 @@ namespace ThMEPLighting.FEI.Model
         MergeStartLine,
 
         /// <summary>
-        /// 没有遇到洞口处于两端生成的延伸线
+        /// 没有遇到洞口生成的延伸线
         /// </summary>
         firstLevel,
 
         /// <summary>
-        /// 没有遇到洞口处于中间生成的延伸线
+        /// 遇到洞口生成的延伸线
         /// </summary>
-        secondLevel,    
-
-        /// <summary>
-        /// 遇到洞口时处于两端偏移生成的延伸线
-        /// </summary>
-        thirdLevel,
-
-        /// <summary>
-        /// 遇到洞口时处于中间偏移生成的延伸线
-        /// </summary>
-        LowestLevel,  
+        secondLevel
     }
 }

@@ -11,6 +11,7 @@ using ThMEPLighting.FEI.Service;
 using ThMEPLighting.FEI.Model;
 using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 using ThCADCore.NTS;
+using ThMEPLighting.FEI.BFSAlgorithm;
 
 namespace ThMEPLighting.FEI.EvacuationPath
 {
@@ -18,15 +19,12 @@ namespace ThMEPLighting.FEI.EvacuationPath
     {
         double distance = 400;
 
-        public List<ExtendLineModel> CreateStartLines(Polyline polyline, List<Line> lanes, Point3d blockPt, List<Polyline> holes)
+        public List<ExtendLineModel> CreateStartLines(Polyline polyline, KeyValuePair<Line, Point3d> closetLane, Point3d blockPt, List<Polyline> holes)
         {
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
 
             //寻找起点
             var startPt = CreateDistancePoint(polyline, blockPt);
-
-            //找到最近的车道线
-            var closetLane = GeUtils.GetClosetLane(lanes, startPt);
 
             //创建延伸线
             //----简单的一条延伸线且不穿洞
@@ -52,12 +50,13 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <returns></returns>
         public ExtendLineModel CreateSymbolExtendLine(Polyline frame, KeyValuePair<Line, Point3d> closetLane, Point3d startPt, List<Polyline> holes)
         {
-            Vector3d dir = Vector3d.ZAxis.CrossProduct((closetLane.Value - startPt).GetNormal());
-            if ((closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.1, 0.1)))
+            var closetPt = closetLane.Key.GetClosestPointTo(startPt, false);
+            Vector3d dir = Vector3d.ZAxis.CrossProduct((closetPt - startPt).GetNormal());
+            if ((closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.001, 0.001)))
             {
                 Polyline line = new Polyline();
                 line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);
-                line.AddVertexAt(1, closetLane.Value.ToPoint2D(), 0, 0, 0); 
+                line.AddVertexAt(1, closetPt.ToPoint2D(), 0, 0, 0); 
                 if (!SelectService.LineIntersctBySelect(holes, line, 200) && !CheckService.CheckIntersectWithFrame(line, frame))
                 {
                     ExtendLineModel extendLine = new ExtendLineModel();
@@ -84,7 +83,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
             //计算逃生路径(用A*算法)
             //----构建寻路地图框线
-            var mapFrame = OptimizeStartExtendLineService.CreateMapFrame(closetLane, startPt, 1000);
+            var mapFrame = OptimizeStartExtendLineService.CreateMapFrame(closetLane, startPt, holes, 1000);
             mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderByDescending(x => x.Area).First();
 
             //----创建终点信息

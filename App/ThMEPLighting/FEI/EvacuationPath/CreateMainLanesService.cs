@@ -39,7 +39,8 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="startNum"></param>
         /// <param name="isFirst"></param>
         /// <returns></returns>
-        private List<ExtendLineModel> ExtendLine(Polyline frame, Point3d pt, Vector3d extendDir, List<List<Line>> lanes, List<Polyline> holes, int startNum, List<Line> preLines)
+        private List<ExtendLineModel> ExtendLine(Polyline frame, Point3d pt, Vector3d extendDir, List<List<Line>> lanes,
+            List<Polyline> holes, int startNum, List<Line> preLines, Priority priority = Priority.firstLevel)
         {
             Point3d spt = pt;
             List<Line> preLanes = preLines;
@@ -79,7 +80,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                                 var ajustPt = AjustStartPoint(preLanes, mPt, lineVerticalDir);
                                 if (ajustPt != null)
                                 {
-                                    resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, i, preLanes));
+                                    resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, i, preLanes, Priority.secondLevel));
                                 }
                             }
 
@@ -89,8 +90,9 @@ namespace ThMEPLighting.FEI.EvacuationPath
                         if (!spt.IsEqualTo(intersectPts[0], new Tolerance(1, 1)))
                         {
                             extendLine.line = polyline;
-                            extendLine.priority = Priority.secondLevel;
+                            extendLine.priority = priority;
                             extendLine.endLane = lanes[i];
+                            extendLine.startLane = preLanes;
                             resLines.Add(extendLine);
                             spt = intersectPts[0];
                         }
@@ -120,6 +122,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                                     extendLine.line = polyline;
                                     extendLine.priority = Priority.secondLevel;
                                     extendLine.endLane = lanes[i];
+                                    extendLine.startLane = preLanes;
                                     resLines.Add(extendLine);
                                     spt = newLine.EndPoint;
                                     preLanes = lanes[i];
@@ -193,10 +196,13 @@ namespace ThMEPLighting.FEI.EvacuationPath
             while (sP.X < transEP.X)
             {
                 var extendPt = sP.TransformBy(matrix.Inverse());
-                var closePt = otherLines.Select(x => x.GetClosestPointTo(extendPt, false)).OrderBy(x => x.DistanceTo(extendPt)).FirstOrDefault();
-                if (closePt != null)
+                var closeInfo = otherLines.ToDictionary(x => x, y => y.GetClosestPointTo(extendPt, false))
+                    .OrderBy(x => x.Value.DistanceTo(extendPt))
+                    .First();
+                var oLineDir = Vector3d.ZAxis.CrossProduct((closeInfo.Key.EndPoint - closeInfo.Key.StartPoint).GetNormal());
+                if (oLineDir.IsParallelTo((closeInfo.Value - extendPt).GetNormal(), new Tolerance(0.001, 0.001)))
                 {
-                    var extendLine = new Line(extendPt, closePt);
+                    var extendLine = new Line(extendPt, closeInfo.Value);
                     if (!CheckService.CheckIntersectWithFrame(extendLine, frame) &&
                         !CheckService.CheckIntersectWithHols(extendLine, holes, out List<Polyline> interHoles))
                     {
