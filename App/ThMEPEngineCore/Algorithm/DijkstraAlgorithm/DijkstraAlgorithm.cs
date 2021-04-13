@@ -1,12 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
+﻿using System.Linq;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPElectrical.ConnectPipe.Dijkstra
+namespace ThMEPEngineCore.Algorithm.DijkstraAlgorithm
 {
     public class DijkstraAlgorithm
     {
@@ -108,7 +105,7 @@ namespace ThMEPElectrical.ConnectPipe.Dijkstra
         }
     }
 
-    public class Node 
+    public class Node
     {
         /// <summary>
         /// 当前节点

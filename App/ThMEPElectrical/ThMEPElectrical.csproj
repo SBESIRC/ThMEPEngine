@@ -87,7 +87,6 @@
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
-    <Compile Include="ConnectPipe\Dijkstra\DijkstraAlgorithm.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
     <Compile Include="ConnectPipe\Service\BlockUtils.cs" />
