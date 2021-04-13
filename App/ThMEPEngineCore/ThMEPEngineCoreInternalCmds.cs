@@ -5,6 +5,8 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using System;
+using DotNetARX;
 
 
 #if ACAD2016
@@ -368,7 +370,68 @@ namespace ThMEPEngineCore
 
                 extractEngine.OutputGeo(Active.Document.Name);
                 extractEngine.Print(acadDatabase.Database);
+
+                var parseService = new ThFireHydrantResultParseService();
+                parseService.Parse(@"E:\ZheDa\FireHydrantCover\GeoJsonTest\t2.result.txt");
+
+                var colorIndexes = new List<int>();
+                foreach(var data in parseService.Results)
+                {
+                    if(data.IsValid())
+                    {
+                        ObjectIdList objIds = new ObjectIdList();
+                        GetColorIndex(colorIndexes);
+                        var colorIndex = colorIndexes[colorIndexes.Count - 1];
+                        Circle circle = new Circle(data.Position,Vector3d.ZAxis,0.5);
+                        circle.ColorIndex = colorIndex;
+                        circle.SetDatabaseDefaults();
+                        objIds.Add(acadDatabase.ModelSpace.Add(circle));
+                        var outerPoly = new Polyline();
+                        for(int i =0;i<data.OuterPoints.Count;i++)
+                        {
+                            var pt = data.OuterPoints[i];
+                            outerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
+                        }
+                        outerPoly.ColorIndex = colorIndex;
+                        outerPoly.SetDatabaseDefaults();
+                        objIds.Add(acadDatabase.ModelSpace.Add(outerPoly));
+
+                        if (data.InnerPoints.Count>=3)
+                        {
+                            var innerPoly = new Polyline();
+                            for (int i = 0; i < data.InnerPoints.Count; i++)
+                            {
+                                var pt = data.InnerPoints[i];
+                                innerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
+                            }
+                            innerPoly.ColorIndex = colorIndex;
+                            innerPoly.SetDatabaseDefaults();
+                            objIds.Add(acadDatabase.ModelSpace.Add(innerPoly));
+                        }
+
+                        if(objIds.Count>0)
+                        {
+                            GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
+                        }
+                    }
+                }
             }
+        }
+        private void GetColorIndex(List<int> colorIndexes)
+        {
+            Random r = new Random();
+            while (true)
+            {
+               int colorIndex = r.Next(0, 255);
+               if(colorIndex!=2)
+                {
+                   if(colorIndexes.IndexOf(colorIndex)<0)
+                    {
+                        colorIndexes.Add(colorIndex);
+                        break;
+                    }
+                }
+            }           
         }
 #endif
 
