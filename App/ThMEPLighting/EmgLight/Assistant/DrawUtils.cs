@@ -11,7 +11,7 @@ namespace ThMEPLighting.EmgLight.Assistant
 {
     public class DrawUtils
     {
-        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, Color color =null, LineWeight lineWeight = LineWeight.LineWeight025)
         {
             var objectIds = new List<ObjectId>();
             if (curves == null || curves.Count == 0)
@@ -19,6 +19,11 @@ namespace ThMEPLighting.EmgLight.Assistant
 
             using (var db = AcadDatabase.Active())
             {
+                if (color == null)
+                {
+                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
+                }
+
                 CreateLayer(LayerName,color);
                 foreach (var curve in curves)
                 {
@@ -44,6 +49,11 @@ namespace ThMEPLighting.EmgLight.Assistant
 
             using (var db = AcadDatabase.Active())
             {
+                if (color == null)
+                {
+                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
+                }
+
 
                 CreateLayer(LayerName,color);
 
@@ -64,6 +74,10 @@ namespace ThMEPLighting.EmgLight.Assistant
 
             using (var db = AcadDatabase.Active())
             {
+                if (color == null)
+                {
+                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
+                }
 
                 CreateLayer(LayerName,color);
 
@@ -84,7 +98,10 @@ namespace ThMEPLighting.EmgLight.Assistant
 
             using (var db = AcadDatabase.Active())
             {
-
+                if (color == null)
+                {
+                    color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
+                }
                 CreateLayer(LayerName,color);
 
                 DBText text = new DBText();

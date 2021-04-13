@@ -60,12 +60,6 @@ namespace ThMEPLighting.EmgLight
 
                 var layoutServer = StructFilterService.getStructSeg();
 
-                var b = false;
-                if (b == true)
-                {
-                    continue;
-                }
-
                 StructFilterService.FilterStruct(layoutServer, frame);
 
                 if (layoutServer.UsefulColumns[0].Count == 0 && layoutServer.UsefulColumns[1].Count == 0 &&
