@@ -1,14 +1,12 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using QuickGraph;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using QuickGraph;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHAVC.CAD
 {
@@ -62,7 +60,7 @@ namespace ThMEPHAVC.CAD
             }
             return inletgraphengine.Graph;
         }
-        public void InletAnalysis()
+        public void InletAnalysis(DBObjectCollection bypass_lines)
         {
             //进口处无连线
             if (InletCenterLineGraph.Edges.Count() == 0)
@@ -96,8 +94,13 @@ namespace ThMEPHAVC.CAD
                     }
                     else if (InletCenterLineGraph.OutDegree(edge.Target) == 2)
                     {
-                        Vector2d vec = new Vector2d(edge.Source.Position.X - edge.Target.Position.X,
-                                                    edge.Source.Position.Y - edge.Target.Position.Y);
+                        var p1 = InletCenterLineGraph.OutEdges(edge.Target).First().Target;
+                        var p2 = InletCenterLineGraph.OutEdges(edge.Target).First().Source;
+                        var v = ThServiceTee.is_bypass(p1.Position, p2.Position, bypass_lines) ?
+                                InletCenterLineGraph.OutEdges(edge.Target).First() :
+                                InletCenterLineGraph.OutEdges(edge.Target).Last();
+                        Vector2d vec = new Vector2d(v.Source.Position.X - v.Target.Position.X,
+                                                    v.Source.Position.Y - v.Target.Position.Y);
                         ICPAngle.Add(vec.Angle);
                         InletTeeCPPositions.Add(edge.Target.Position);
                     }
@@ -144,7 +147,7 @@ namespace ThMEPHAVC.CAD
             }
         }
 
-        public void OutletAnalysis()
+        public void OutletAnalysis(DBObjectCollection bypass_lines)
         {
             //出口处无连线
             if (OutletCenterLineGraph.Edges.Count() == 0)
@@ -179,8 +182,13 @@ namespace ThMEPHAVC.CAD
                     }
                     else if (OutletCenterLineGraph.OutDegree(edge.Target) == 2)
                     {
-                        Vector2d vec = new Vector2d(edge.Source.Position.X - edge.Target.Position.X, 
-                                                    edge.Source.Position.Y - edge.Target.Position.Y);
+                        var p1 = OutletCenterLineGraph.OutEdges(edge.Target).First().Target;
+                        var p2 = OutletCenterLineGraph.OutEdges(edge.Target).First().Source;
+                        var v = ThServiceTee.is_bypass(p1.Position, p2.Position, bypass_lines) ?
+                                OutletCenterLineGraph.OutEdges(edge.Target).First() :
+                                OutletCenterLineGraph.OutEdges(edge.Target).Last();
+                        Vector2d vec = new Vector2d(v.Source.Position.X - v.Target.Position.X,
+                                                    v.Source.Position.Y - v.Target.Position.Y);
                         OCPAngle.Add(vec.Angle);
                         OutletTeeCPPositions.Add(edge.Target.Position);
                     }

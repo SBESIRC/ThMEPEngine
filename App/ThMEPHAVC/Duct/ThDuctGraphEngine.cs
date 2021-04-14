@@ -79,7 +79,7 @@ namespace ThMEPHVAC.Duct
         private void DoBuildGraph(Point3d searchpoint, Line currentline)
         {
             var poly = new Polyline();
-            poly.CreatePolygon(searchpoint.ToPoint2D(), 4, 10);
+            poly.CreatePolygon(searchpoint.ToPoint2D(), 4, 6);
 
             //执行循环探测
             var results = SpatialIndex.SelectCrossingPolygon(poly);

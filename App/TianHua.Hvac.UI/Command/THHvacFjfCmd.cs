@@ -4,15 +4,18 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Forms;
 using ThMEPEngineCore.LaneLine;
+using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHAVC.CAD;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
+using ThCADExtension;
 using TianHua.FanSelection.Function;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
@@ -79,7 +82,7 @@ namespace TianHua.Hvac.UI.Command
                         ThVTee vt = new ThVTee(600, vt_width, 20);
                         double fan_angle = DbFanModel.FanOutlet.Angle;
                         Point3d valve_pos = DbFanModel.FanInletBasePoint;
-                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
+                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel, null);
                         if (io_anay_res == null)
                             return;
                         int wall_num = 0;
@@ -101,15 +104,17 @@ namespace TianHua.Hvac.UI.Command
                         DBObjectCollection bypass_lines = get_bypass(is_type3);
                         if (bypass_lines.Count == 0)
                             return;
-
                         bypass_lines.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
-                        List<Line> tmp = ThLaneLineSimplifier.RemoveDangles(lineobjects, 5);
-                        lineobjects.Clear();
-                        tmp.ForEachDbObject(o => lineobjects.Add(o));
+
+                        // 将风管在旁通处打断
+                        ThLaneLineEngine.extend_distance = 0.0;
+                        var results = ThLaneLineEngine.Explode(lineobjects);
+                        results = ThLaneLineEngine.Noding(results);
+                        results = ThLaneLineEngine.CleanZeroCurves(results);
 
                         // 根据添加的旁通重新得到model
-                        ThDbModelFan DbTeeModel = new ThDbModelFan(fan_id, lineobjects);
-                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbTeeModel);
+                        ThDbModelFan DbTeeModel = new ThDbModelFan(fan_id, results);
+                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbTeeModel, bypass_lines);
                         if (io_anay_res == null)
                             return;
                         double valve_width = Double.Parse(outerDuctSize.Split('x').First());
@@ -122,12 +127,12 @@ namespace TianHua.Hvac.UI.Command
                         double bypass_len = 0;
                         if (io_anay_res.HasInletTee())
                         {
-                            get_out_bypass(bypass_lines,
-                                           io_anay_res.InletTeeCPPositions[0],
-                                           ref bypass_start,
-                                           ref bypass_end,
-                                           ref bypass_len,
-                                           tee_pattern);
+                            //get_out_bypass(bypass_lines,
+                            //               io_anay_res.InletTeeCPPositions[0],
+                            //               ref bypass_start,
+                            //               ref bypass_end,
+                            //               ref bypass_len,
+                            //               tee_pattern);
                             ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
                         }
                         if (io_anay_res.HasOutletTee())
@@ -154,15 +159,15 @@ namespace TianHua.Hvac.UI.Command
                             Vector3d tmp_vec = (bypass_end.GetAsVector() - bypass_start.GetAsVector()) * 0.5;
                             Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
                             Vector3d dis_vec = tmp_vec + bypass_start.GetAsVector();
-                            double ang = (2 * Math.PI - r_vec.Angle);
+                            double ang = (1.5 * Math.PI - r_vec.Angle);
                             bool has_dul_tee = io_anay_res.HasInletTee() && io_anay_res.HasOutletTee();
-                            ThServiceTee.InsertElectricValve(dis_vec, bra_width, r_vec.Angle + Math.PI * 0.5, has_dul_tee);
+                            ThServiceTee.InsertElectricValve(dis_vec, bra_width, ang, has_dul_tee);
                         }
                     }
                 }
                 else
                 {
-                    ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel);
+                    ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel, null);
                     int wall_num = 0;
                     IODuctHoleAnalysis(DbFanModel, DuctSize, null, false, ref wall_num, null, null, null, io_anay_res);
                 }
@@ -206,7 +211,6 @@ namespace TianHua.Hvac.UI.Command
                 }
                 else if (type == "RBType2")
                 {
-
                     if (tee_cp.IsEqualTo(l1.StartPoint))
                     {
                         // l2是out_bypass
@@ -249,24 +253,38 @@ namespace TianHua.Hvac.UI.Command
                     }
                 }
             }
-            if (type == "RBType3" && bypass_lines.Count == 3)
+            if (type == "RBType3" && bypass_lines.Count > 2)
             {
-                Line l1 = bypass_lines[1] as Line;
-                Line l2 = bypass_lines[2] as Line;
-                bypass_start = tee_cp;
-                if (tee_cp.DistanceTo(l1.StartPoint) < 1 ||
-                          tee_cp.DistanceTo(l1.EndPoint) < 1)
+                Line l1 = bypass_lines[bypass_lines.Count - 2] as Line;
+                Line l2 = bypass_lines[bypass_lines.Count - 1] as Line;
+                double tor = 20;
+                if (l1.StartPoint.DistanceTo(l2.StartPoint) < tor)
                 {
-                    Point3d p = tee_cp.IsEqualTo(l1.StartPoint) ? l1.EndPoint : l1.StartPoint;
-                    bypass_end = p.DistanceTo(l2.StartPoint) < 50 ? l2.EndPoint : l2.StartPoint;
-                    bypass_len = l1.Length;
+                    bypass_start = l1.EndPoint;
+                    bypass_end = l2.EndPoint;
                 }
-                else
+                else if (l1.StartPoint.DistanceTo(l2.EndPoint) < tor)
                 {
-                    Point3d p = tee_cp.IsEqualTo(l2.StartPoint) ? l2.EndPoint : l2.StartPoint;
-                    bypass_end = p.DistanceTo(l1.StartPoint) < 50 ? l1.EndPoint : l1.StartPoint;
-                    bypass_len = l2.Length;
+                    bypass_start = l1.EndPoint;
+                    bypass_end = l2.StartPoint;
                 }
+                else if (l1.EndPoint.DistanceTo(l2.StartPoint) < tor)
+                {
+                    bypass_start = l1.StartPoint;
+                    bypass_end = l2.EndPoint;
+                }
+                else if (l1.EndPoint.DistanceTo(l2.EndPoint) < tor)
+                {
+                    bypass_start = l1.StartPoint;
+                    bypass_end = l2.StartPoint;
+                }
+                if (bypass_start.Y < bypass_end.Y)
+                {
+                    bypass_start = new Point3d(bypass_end.X, bypass_end.Y, 0);
+                    bypass_end = new Point3d(bypass_start.X, bypass_start.Y, 0);
+                }
+                
+                bypass_len = l1.Length;
             }
         }
         private ObjectIdCollection get_from_prompt(string prompt, bool only_able)
@@ -313,12 +331,10 @@ namespace TianHua.Hvac.UI.Command
             var objIds = get_from_prompt("请选择风机和中心线", false);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
-            var tmp = new DBObjectCollection();
             var center_lines = new DBObjectCollection();
-
-            fan_id = classify_fan(objIds, tmp);
-            ThLaneLineSimplifier.RemoveDangles(tmp, 100.0).ForEach(l => center_lines.Add(l));
-            return center_lines;
+            fan_id = classify_fan(objIds, center_lines);
+            var service = new ThLaneLineCleanService();
+            return ThLaneLineEngine.Explode(service.Clean(center_lines));
         }
 
         private DBObjectCollection get_bypass(bool is_type3)
@@ -326,34 +342,32 @@ namespace TianHua.Hvac.UI.Command
             var objIds = get_from_prompt("请选择旁通管", true);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
+            // 暂时只支持选择一个旁通
             Curve c = objIds[0].GetDBObject() as Curve;
-            DBObjectCollection tmp = new DBObjectCollection();
-            tmp.Add(c);
-            List<Line> lines = ThLaneLineSimplifier.RemoveDangles(tmp, 100);
-            if (is_type3 && lines.Count == 2)
+
+            DBObjectCollection center_lines = new DBObjectCollection { c };
+            List<Line> lines = ThLaneLineEngine.Explode(center_lines).Cast<Line>().ToList();
+            // 给较长的线段上插点
+            if (is_type3 && lines.Count > 0)
             {
-                // 给较长的线段上插点
-                Line l = lines[0].Length > lines[1].Length ? lines[0] : lines[1];
+                Line l = lines[0];
+                foreach (Line line in lines)
+                    if (line.Length > l.Length)
+                        l = line;
                 lines.Remove(l);
                 Point3d lp = l.StartPoint.Y > l.EndPoint.Y ? l.EndPoint : l.StartPoint;
                 Point3d up = l.StartPoint.Y > l.EndPoint.Y ? l.StartPoint : l.EndPoint;
                 Vector2d v1 = new Vector2d(lp.X, lp.Y);
                 Vector2d v2 = new Vector2d(up.X, up.Y);
                 Vector2d v = (v2 - v1) * 0.5;
-                double len = 10;
-                double angle = v.Angle > 0.5 * Math.PI ? (v.Angle - 0.5 * Math.PI) : v.Angle;
-                double s_val = Math.Sin(angle);
-                double c_val = Math.Cos(angle);
-                v += v1;
-                Point3d p = new Point3d(v.X, v.Y, 0) + new Vector3d(-len * s_val, len * c_val, 0);
-                lines.Add(new Line(up, new Point3d(p.X, p.Y, 0)));
-                p = new Point3d(v.X, v.Y, 0) + new Vector3d(len * s_val, -len * c_val, 0);
-                lines.Add(new Line(new Point3d(p.X, p.Y, 0), lp));
+                Vector2d v_nor = v.GetNormal();
+                double len = 5;
+                Vector2d vt = v1 + v + len * v_nor;
+                lines.Add(new Line(new Point3d(vt.X, vt.Y, 0), up));
+                vt = v1 + v - len * v_nor;
+                lines.Add(new Line(lp, new Point3d(vt.X, vt.Y, 0)));
             }
-            tmp.Clear();
-            lines.ForEachDbObject(o => tmp.Add(o));
-
-            return tmp;
+            return lines.Select(o => o.ExtendLine(1.0)).ToCollection();
         }
 
         private DBObjectCollection get_walls()
@@ -370,9 +384,7 @@ namespace TianHua.Hvac.UI.Command
                     wallobjects.Add(curveobj);
                 }
             }
-            var wall_lines = new DBObjectCollection();
-            ThLaneLineSimplifier.RemoveDangles(wallobjects, 100.0).ForEach(l => wall_lines.Add(l));
-            return wall_lines;
+            return ThLaneLineEngine.Explode(wallobjects);
         }
 
         private fmDuctSpec create_duct_diag(ThDbModelFan DbFanModel)
@@ -396,11 +408,11 @@ namespace TianHua.Hvac.UI.Command
             return fm;
         }
 
-        private ThFanInletOutletAnalysisEngine IOAnalysis(ThDbModelFan Model)
+        private ThFanInletOutletAnalysisEngine IOAnalysis(ThDbModelFan Model, DBObjectCollection bypass_lines)
         {
             ThFanInletOutletAnalysisEngine io_anay_res = new ThFanInletOutletAnalysisEngine(Model);
-            io_anay_res.InletAnalysis();
-            io_anay_res.OutletAnalysis();
+            io_anay_res.InletAnalysis(bypass_lines);
+            io_anay_res.OutletAnalysis(bypass_lines);
             if (io_anay_res.InletAnalysisResult != AnalysisResultType.OK &&
                 io_anay_res.OutletAnalysisResult != AnalysisResultType.OK)
             {
@@ -410,18 +422,18 @@ namespace TianHua.Hvac.UI.Command
         }
 
         private void IODuctHoleAnalysis(ThDbModelFan Model,
-                                        string DuctSize,
+                                        string duct_size,
                                         string tee_size,
                                         bool is_type2,
                                         ref int wall_num,
                                         string elevation,
-                                        string textSize,
+                                        string text_size,
                                         DBObjectCollection bypass_line,
                                         ThFanInletOutletAnalysisEngine io_anay_res)
         {
             if (bypass_line != null && bypass_line.Count == 0)
                 return;
-            string[] str = DuctSize.Split(' ');
+            string[] str = duct_size.Split(' ');
             string innerDuctSize = str[0];
             string outerDuctSize = str[1];
             ThInletOutletDuctDrawEngine io_draw_eng =
@@ -430,7 +442,7 @@ namespace TianHua.Hvac.UI.Command
                                                 outerDuctSize,
                                                 tee_size,
                                                 elevation,
-                                                textSize,
+                                                text_size,
                                                 is_type2,
                                                 bypass_line,
                                                 io_anay_res.InletCenterLineGraph,
@@ -453,20 +465,26 @@ namespace TianHua.Hvac.UI.Command
                 {
                     int i = 0;
                     double IDuctWidth = io_draw_eng.InletDuctWidth;
-                    io_draw_eng.RunInletDrawEngine(Model, textSize);
+                    io_draw_eng.RunInletDrawEngine(Model, text_size);
                     foreach (Point3d TeeCp in io_anay_res.InletTeeCPPositions)
                     {
                         ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, IDuctWidth, IDuctWidth);
-
-                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector()) *
-                                       Matrix3d.Rotation(io_anay_res.ICPAngle[i++] - 0.5 * Math.PI, Vector3d.ZAxis, Point3d.Origin) *
-                                       Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector());
+                        if (bypass_line.Count == 5)
+                        {
+                            mat *= Matrix3d.Rotation(Math.PI + io_anay_res.ICPAngle[i++], Vector3d.ZAxis, Point3d.Origin);
+                        }
+                        if (bypass_line.Count == 3)
+                        {
+                            mat *= Matrix3d.Rotation(io_anay_res.ICPAngle[i++], Vector3d.ZAxis, Point3d.Origin) *
+                                   Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                        }
                         e.RunTeeDrawEngine(Model, mat);
                     }
                 }
                 else
                 {
-                    io_draw_eng.RunInletDrawEngine(Model, textSize);
+                    io_draw_eng.RunInletDrawEngine(Model, text_size);
                 }
                 holesAndValvesEngine.RunInletValvesInsertEngine();
             }
@@ -477,7 +495,7 @@ namespace TianHua.Hvac.UI.Command
                 {
                     int i = 0;
                     double ODuctWidth = io_draw_eng.OutletDuctWidth;
-                    io_draw_eng.RunOutletDrawEngine(Model, textSize);
+                    io_draw_eng.RunOutletDrawEngine(Model, text_size);
                     foreach (Point3d TeeCp in io_anay_res.OutletTeeCPPositions)
                     {
                         ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, ODuctWidth, ODuctWidth);
@@ -489,15 +507,22 @@ namespace TianHua.Hvac.UI.Command
                         }
                         else
                         {
-                            mat *= Matrix3d.Mirroring(new Line3d(new Point3d(0, -1, 0), Point3d.Origin)) *
-                                   Matrix3d.Rotation(1.5 * Math.PI - angle, Vector3d.ZAxis, Point3d.Origin);
+                            if (bypass_line.Count == 5)
+                            {
+                                mat *= Matrix3d.Rotation(Math.PI + angle, Vector3d.ZAxis, Point3d.Origin);
+                            }
+                            if (bypass_line.Count == 3)
+                            {
+                                mat *= Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin) *
+                                       Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                            }
                         }
                         e.RunTeeDrawEngine(Model, mat);
                     }
                 }
                 else
                 {
-                    io_draw_eng.RunOutletDrawEngine(Model, textSize);
+                    io_draw_eng.RunOutletDrawEngine(Model, text_size);
                 }
                 holesAndValvesEngine.RunOutletValvesInsertEngine();
                 wall_num = wall_lines.Count;

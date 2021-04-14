@@ -19,12 +19,13 @@ namespace ThMEPHVAC.Model
         {
             if (bypass_lines == null)
                 return false;
+            Tolerance t = new Tolerance(1.5, 1.5);
             foreach (Line l in bypass_lines)
             {
-                if ((l.StartPoint.IsEqualTo(tar_srt_pos) &&
-                    l.EndPoint.IsEqualTo(tar_end_pos)) ||
-                    (l.StartPoint.IsEqualTo(tar_end_pos) &&
-                    l.EndPoint.IsEqualTo(tar_srt_pos)))
+                if ((l.StartPoint.IsEqualTo(tar_srt_pos, t) &&
+                    l.EndPoint.IsEqualTo(tar_end_pos, t)) ||
+                    (l.StartPoint.IsEqualTo(tar_end_pos, t) &&
+                    l.EndPoint.IsEqualTo(tar_srt_pos, t)))
                 {
                     return true;
                 }
