@@ -53,12 +53,14 @@ namespace ThMEPElectrical.Command
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
                     var lines = LoadLaneLines(acadDatabase.Database, frame);
-                    lines = CleanLaneLines(lines);
-                    lines.Cast<Curve>().ForEach(o =>
+                    if (lines.Count > 0)
                     {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
-                    });
+                        CleanLaneLines(lines).Cast<Curve>().ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
+                        });
+                    }
                 }
             }
         }
