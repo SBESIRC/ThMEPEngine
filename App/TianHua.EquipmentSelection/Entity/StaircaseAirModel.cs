@@ -86,17 +86,6 @@ namespace TianHua.FanSelection.Model
         /// N2
         /// </summary>
         public double N2 { get; set; }
-        //public double N2
-        //{
-        //    get
-        //    {
-        //        int ValidFloorCount = FrontRoomDoors2.Count(f => f.Value.Any(d => d.Count_Door_Q * d.Crack_Door_Q * d.Height_Door_Q * d.Width_Door_Q != 0));
-        //        double n2 = (Count_Floor - StairN1) * FrontRoomDoors2.Sum(
-        //            f => f.Value.Where(
-        //                d => d.Count_Door_Q * d.Crack_Door_Q * d.Height_Door_Q * d.Width_Door_Q != 0).Sum(d => d.Count_Door_Q));
-        //        return n2 > 0 ? n2 / ValidFloorCount : 0;
-        //    }
-        //}
 
         /// <summary>
         /// 送风阀漏风面积和
@@ -164,12 +153,6 @@ namespace TianHua.FanSelection.Model
         /// 空间业态
         /// </summary>
         public SpaceState Type_Area { get; set; }
-
-        /// <summary>
-        /// 前室门
-        /// </summary>
-        //public Dictionary<string, List<ThEvacuationDoor>> FrontRoomDoors2 { get; set; }
-
 
         /// <summary>
         /// 系统楼层数

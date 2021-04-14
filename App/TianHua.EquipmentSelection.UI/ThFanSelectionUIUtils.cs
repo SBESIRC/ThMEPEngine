@@ -7,16 +7,6 @@ namespace TianHua.FanSelection.UI
 {
     public class ThFanSelectionUIUtils
     {
-        public static string DefaultModelExportPath()
-        {
-            return Path.Combine(Active.DocumentDirectory, Active.DocumentName);
-        }
-
-        public static string DefaultModelExportCatalogPath()
-        {
-            return Path.Combine(DefaultModelExportPath(), ThFanSelectionUICommon.MODEL_EXPORTCATALOG);
-        }
-
         private static ExcelPackage CreateExcelPackage(string path)
         {
             // If you use EPPlus in a noncommercial context

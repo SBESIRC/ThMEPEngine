@@ -205,18 +205,11 @@ namespace TianHua.FanSelection.UI.IO
         /// <param name="jsonPath">输出文件路径</param>
         public void SaveToFile(string _FilePath, Encoding _Encoding)
         {
-            //-- 保存文件
-            using (FileStream _File = new FileStream(_FilePath, FileMode.Create, FileAccess.Write))
-            {
-                using (TextWriter _Writer = new StreamWriter(_File, _Encoding))
-                    _Writer.Write(m_Context);
-            }
+            SaveToFile(_FilePath, _Encoding, m_Context);
         }
-
 
         public void SaveToFile(string _FilePath, Encoding _Encoding, string _Json)
         {
-            //-- 保存文件
             using (FileStream _File = new FileStream(_FilePath, FileMode.Create, FileAccess.Write))
             {
                 using (TextWriter _Writer = new StreamWriter(_File, _Encoding))

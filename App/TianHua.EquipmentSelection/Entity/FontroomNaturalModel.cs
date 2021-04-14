@@ -142,11 +142,6 @@ namespace TianHua.FanSelection.Model
         public int Count_Floor { get; set; }
 
         /// <summary>
-        /// 前室门
-        /// </summary>
-        //public Dictionary<string, List<ThEvacuationDoor>> FrontRoomDoors2 { get; set; }
-
-        /// <summary>
         /// 楼梯间
         /// </summary>
         public Dictionary<string, List<ThEvacuationDoor>> StairCaseDoors2 { get; set; }

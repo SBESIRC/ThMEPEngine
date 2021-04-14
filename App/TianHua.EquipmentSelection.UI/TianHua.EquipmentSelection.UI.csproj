@@ -88,12 +88,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\BlockCustomCommandMapper.cs" />
+    <Compile Include="CAD\ThFanModelDbDataSource.cs" />
     <Compile Include="CAD\ThFanModelObjectOverrule.cs" />
     <Compile Include="CAD\ThFanModelOverruleManager.cs" />
     <Compile Include="CAD\ThFanSelectionAppIdleHandler.cs" />
+    <Compile Include="CAD\ThFanSelectionDatabaseEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbDeepCloneHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbEraseHandler.cs" />
-    <Compile Include="CAD\ThFanSelectionDbSaveHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDocumentEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbUndoHandler.cs" />
     <Compile Include="CAD\ThFanSelectionEngine.cs" />
