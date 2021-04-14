@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 var isolate = IsIsolate(Spaces, o);
                 geometry.Properties.Add(IsolatePropertyName, isolate);
-                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner, o));
+                geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });

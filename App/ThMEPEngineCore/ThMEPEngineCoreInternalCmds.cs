@@ -433,6 +433,48 @@ namespace ThMEPEngineCore
                 }
             }           
         }
+        [CommandMethod("TIANHUACAD", "ThWSDI", CommandFlags.Modal)]
+        public void ThWSDI()
+        {
+            //Water Supply Detail Drawing (给排水大样图)
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+
+                var extractors = new List<ThExtractorBase>()
+                {
+                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
+                    //通过停车区域的Space来制造阻挡物
+                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
+                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
+                    new ThWaterSupplyPositionExtractor{ColorIndex=3},
+                    new ThWaterSupplyStartExtractor{ColorIndex=4},
+                    new ThToiletGroupExtractor { ColorIndex=5},
+                };
+
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+
+                var toiletGroupDic = new Dictionary<Entity, string>();
+                foreach(var item in (extractors[4] as ThToiletGroupExtractor).ToiletGroupId)
+                {
+                    toiletGroupDic.Add(item.Key, item.Value);
+                }
+
+                extractEngine.Group(toiletGroupDic);
+
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+            }
+        }
 #endif
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
