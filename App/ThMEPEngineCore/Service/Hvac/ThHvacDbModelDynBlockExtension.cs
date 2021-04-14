@@ -113,6 +113,22 @@ namespace ThMEPEngineCore.Service.Hvac
                     dynamicProperties.SetValue(property, properties.GetValue(property));
                 }
             }
+
+            // 翻转状态
+            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1) 
+                && properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1))
+            {
+                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1, 
+                    ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE_NONE);
+                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1, 
+                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1));
+            }
+            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2)
+                && properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2))
+            {
+                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2,
+                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2));
+            }
         }
     }
 }
