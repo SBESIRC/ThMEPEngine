@@ -21,9 +21,23 @@ namespace ThMEPEngineCore.LaneLine
             {
                 var objs = spatialIndex.SelectFence(o);
                 objs.Remove(o);
+                objs = FilterParallelLines(objs, o);
                 return !IsProperIntersects(objs, o);
             });
             return curves.Cast<Line>().Union(extendedLines).ToCollection();
+        }
+
+        private static DBObjectCollection FilterParallelLines(DBObjectCollection lines, Line line)
+        {
+            var results = new DBObjectCollection();
+            foreach (Line objLine in lines)
+            {
+                if (!objLine.LineDirection().IsParallelTo(line.LineDirection()))
+                {
+                    results.Add(objLine);
+                }
+            }
+            return results;
         }
 
         private static bool IsProperIntersects(DBObjectCollection lines, Line line)
