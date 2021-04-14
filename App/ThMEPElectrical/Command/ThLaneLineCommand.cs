@@ -80,7 +80,7 @@ namespace ThMEPElectrical.Command
             using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
                 var nFrame = ThMEPFrameService.NormalizeEx(frame);
-                if (nFrame.Area > 0)
+                if (nFrame.Area > 1)
                 {
                     // 提取车道中心线
                     var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
@@ -89,9 +89,12 @@ namespace ThMEPElectrical.Command
                     // 车道中心线处理
                     var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
                     var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
-
                     // 框线相交处打断
                     return ThCADCoreNTSGeometryClipper.Clip(nFrame, lines.ToCollection());
+                }   
+                else
+                {
+                    Active.Editor.WriteLine("\n选择的框线有问题，请检查是否有自交、不相连等情况。");
                 }
                 return new DBObjectCollection();
             }
