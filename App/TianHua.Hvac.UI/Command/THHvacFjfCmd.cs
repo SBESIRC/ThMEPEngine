@@ -25,14 +25,6 @@ namespace TianHua.Hvac.UI.Command
     public class THHvacFjfCmd : IAcadCommand, IDisposable
     {
         private Tolerance Tor;
-        private struct SizeParam
-        {
-            public string duct_size;
-            public string tee_size;
-            public string elevation;
-            public string text_size;
-            public string tee_pattern;
-        }
         public void Dispose()
         {
             //
@@ -96,11 +88,11 @@ namespace TianHua.Hvac.UI.Command
                         int wall_num = 0;
                         SizeParam info = new SizeParam
                         {
-                            duct_size = DuctSize,
-                            elevation = elevation,
-                            tee_size = tee_width,
-                            text_size = textSize,
-                            tee_pattern = tee_pattern
+                            tee_info = tee_width,
+                            duct_info = textSize,
+                            ductsize_info = DuctSize,
+                            tee_pattern = tee_pattern,
+                            elevation_info = elevation,
                         };
                         IODuctHoleAnalysis(DbFanModel, ref wall_num, info, null, null, io_anay_res);
                         if (wall_num != 0)
@@ -163,11 +155,11 @@ namespace TianHua.Hvac.UI.Command
                         int wall_num = 0;
                         SizeParam info = new SizeParam
                         {
-                            duct_size = DuctSize,
-                            elevation = elevation,
-                            tee_size = tee_width,
-                            text_size = textSize,
-                            tee_pattern = tee_pattern
+                            tee_info = tee_width,
+                            duct_info = textSize,
+                            ductsize_info = DuctSize,
+                            tee_pattern = tee_pattern,
+                            elevation_info = elevation,
                         };
                         IODuctHoleAnalysis(DbTeeModel, ref wall_num, info, max_bypass, bypass_lines, io_anay_res);
                         if (wall_num == 0)
@@ -219,7 +211,6 @@ namespace TianHua.Hvac.UI.Command
                                 }
                             }
                             ThServiceTee.Insert_electric_valve(dis_vec, bra_width, angle);
-                            //elevation tee_width;
                         }
                     }
                 }
@@ -229,7 +220,7 @@ namespace TianHua.Hvac.UI.Command
                     int wall_num = 0;
                     SizeParam info = new SizeParam
                     {
-                        duct_size = DuctSize
+                        ductsize_info = DuctSize
                     };
                     IODuctHoleAnalysis(DbFanModel, ref wall_num, info, null, null, io_anay_res);
                 }
@@ -384,20 +375,14 @@ namespace TianHua.Hvac.UI.Command
                                         DBObjectCollection bypass_line,
                                         ThFanInletOutletAnalysisEngine io_anay_res)
         {
-            string tee_size = pst_param.tee_size;
-            string duct_size = pst_param.duct_size;
-            string elevation = pst_param.elevation;
-            string text_size = pst_param.text_size;
+            string text_size = pst_param.duct_info;
             string tee_pattern = pst_param.tee_pattern;
 
             if (bypass_line != null && bypass_line.Count == 0)
                 return;
-            string[] str = duct_size.Split(' ');
-            string innerDuctSize = str[0];
-            string outerDuctSize = str[1];
 
             ThInletOutletDuctDrawEngine io_draw_eng =
-                new ThInletOutletDuctDrawEngine(Model, innerDuctSize, outerDuctSize, tee_size, elevation, text_size,
+                new ThInletOutletDuctDrawEngine(Model, pst_param,
                                                 selected_bypass, bypass_line,
                                                 io_anay_res.InletCenterLineGraph,
                                                 io_anay_res.OutletCenterLineGraph);

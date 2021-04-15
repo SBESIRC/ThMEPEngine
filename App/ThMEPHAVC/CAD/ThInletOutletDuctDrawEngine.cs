@@ -22,6 +22,15 @@ namespace ThMEPHVAC.CAD
         public double Height { get; set; }
         public double NormalAngle { get; set; }
         public Point3d OpingBasePoint { get; set; }
+
+    }
+    public struct SizeParam
+    {
+        public string tee_info;
+        public string duct_info;
+        public string tee_pattern;
+        public string ductsize_info;
+        public string elevation_info;        
     }
     public class ThInletOutletDuctDrawEngine
     {
@@ -47,17 +56,21 @@ namespace ThMEPHVAC.CAD
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         private List<Vector2d> TextVec { get; set; }
         private bool bypass_once {get; set;}
-        public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel, 
-            string innerduct_info, 
-            string outerduct_info,
-            string tee_info,
-            string elevation_info,
-            string ductsize_info,
+        public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel,
+            SizeParam in_param,
             Line selected_bypass,
             DBObjectCollection bypass_line,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
         {
+            string[] str = in_param.ductsize_info.Split(' ');
+
+            string innerduct_info = str[0];
+            string outerduct_info = str[1];
+            string tee_info = in_param.tee_info;
+            string elevation_info = in_param.elevation_info;
+            string ductsize_info = in_param.duct_info;
+            string tee_pattern = in_param.tee_pattern;
             InletOpening = new FanOpeningInfo()
             {
                 Width = fanmodel.FanInlet.Width,
@@ -96,8 +109,11 @@ namespace ThMEPHVAC.CAD
             SetOutletElbows(bypass_line);
             SetInOutHoses(fanmodel.FanScenario);
             bool isAxial = fanmodel.Model.IsAXIALModel();
-            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line, ductsize_info, selected_bypass.Length);
-            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, ductsize_info, selected_bypass.Length);
+            double len = (selected_bypass == null) ? 0: selected_bypass.Length;
+            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line, ductsize_info, len, tee_pattern == "RBType3");
+            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, ductsize_info, len, tee_pattern == "RBType3");
+
+
         }
 
         public void RunInletDrawEngine(ThDbModelFan fanmodel, string textSize)
@@ -173,7 +189,7 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        private void SetInletDucts(string scenario,bool isaxial, DBObjectCollection bypass_line, string textSize, double text_bypass_len)
+        private void SetInletDucts(string scenario,bool isaxial, DBObjectCollection bypass_line, string textSize, double text_bypass_len, bool is_type3)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
 
@@ -278,7 +294,7 @@ namespace ThMEPHVAC.CAD
                 if (text_enable)
                     TextVec.Add(edgevector.GetNormal());
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle,
-                                                                              text_enable, s_evel, textSize, is_bypass);
+                                                                              text_enable, s_evel, textSize, is_bypass && is_type3);
                 
                 if (isUpOrDownOpening)
                 {
@@ -295,7 +311,7 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetOutletDucts(string scenario, bool isaxial, DBObjectCollection bypass_line, string textSize, double text_bypass_len)
+        private void SetOutletDucts(string scenario, bool isaxial, DBObjectCollection bypass_line, string textSize, double text_bypass_len, bool is_type3)
         {
             var ductFittingFactoryService = new ThHvacDuctFittingFactoryService();
             bool isUpOrDownOpening = FanInOutType.Contains("上出") || FanInOutType.Contains("下出");
@@ -399,7 +415,7 @@ namespace ThMEPHVAC.CAD
                 if (text_enable)
                     TextVec.Add(edgevector.GetNormal());
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle,
-                                                                              text_enable, s_evel, textSize, is_bypass);
+                                                                              text_enable, s_evel, textSize, is_bypass && is_type3);
 
                 if (isUpOrDownOpening)
                 {
