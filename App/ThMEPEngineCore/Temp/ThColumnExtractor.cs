@@ -13,17 +13,19 @@ namespace ThMEPEngineCore.Temp
     public class ThColumnExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Polyline> Columns { get; private set; }
+        private List<ThTempSpace> Spaces { get; set; }
         public bool UseDb3ColumnEngine { get; set; }
         public ThColumnExtractor()
         {
             Columns = new List<Polyline>();
             Category = "Column";
             UseDb3ColumnEngine = false;
+            ElementLayer = "柱";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            if(UseDb3ColumnEngine)
+            if (UseDb3ColumnEngine)
             {
                 var columnEngine = new ThColumnRecognitionEngine();
                 columnEngine.Recognize(database, pts);
@@ -31,7 +33,10 @@ namespace ThMEPEngineCore.Temp
             }
             else
             {
-                var instance = new ThExtractColumnService();
+                var instance = new ThExtractColumnService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
                 instance.Extract(database, pts);
                 Columns = instance.Columns;
             }
@@ -44,7 +49,9 @@ namespace ThMEPEngineCore.Temp
             {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner, o));
+                var isolate = IsIsolate(Spaces, o);
+                geometry.Properties.Add(IsolatePropertyName, isolate);
+                geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
@@ -67,6 +74,11 @@ namespace ThMEPEngineCore.Temp
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), columnIds);
                 }
             }
+        }
+
+        public void SetSpaces(List<ThTempSpace> spaces)
+        {
+            Spaces = spaces;
         }
 
         public void Group(Dictionary<Entity, string> groupId)

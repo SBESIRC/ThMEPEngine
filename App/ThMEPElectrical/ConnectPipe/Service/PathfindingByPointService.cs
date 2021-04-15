@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPElectrical.ConnectPipe.Dijkstra;
+using ThMEPEngineCore.Algorithm.DijkstraAlgorithm;
 
 namespace ThMEPElectrical.ConnectPipe.Service
 {

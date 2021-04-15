@@ -17,11 +17,15 @@ namespace ThMEPEngineCore.Temp
             ToiletGroups = new List<Polyline>();
             ToiletGroupId = new Dictionary<Polyline, string>();
             Category = "卫生间分组";
+            ElementLayer = "卫生间分组";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractToiletGroupService();
+            var instance = new ThExtractToiletGroupService()
+            {
+                ElementLayer= this.ElementLayer,
+            };
             instance.Extract(database, pts);
             ToiletGroups = instance.ToiletGroups;
 

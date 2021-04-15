@@ -11,24 +11,34 @@ namespace ThMEPLighting.FEI.Service
 {
     public static class SelectService
     {
-        public static List<Polyline> SelelctCrossing(List<Polyline> holes, Polyline polyline)
+        public static List<Polyline> SelelctCrossing(List<Polyline> polylines, Polyline polyline)
         {
-            var objs = holes.ToCollection();
+            var objs = polylines.ToCollection();
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var resHoles = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
-
+            
             return resHoles;
+        }
+
+        public static List<Line> SelelctCrossing(List<Line> lines, Polyline polyline)
+        {
+            var objs = lines.ToCollection();
+            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            var res = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Line>().ToList();
+
+            return res;
         }
 
         /// <summary>
         /// 用nts的selectCrossing计算是否相交
         /// </summary>
         /// <returns></returns>
-        public static bool LineIntersctBySelect(List<Polyline> holes, Polyline line, double bufferWidth)
+        public static bool LineIntersctBySelect(List<Polyline> polylines, Polyline line, double bufferWidth)
         {
-            foreach (Polyline polyline in line.Buffer(bufferWidth))
+            DBObjectCollection dBObject = new DBObjectCollection() { line };
+            foreach (Polyline polyline in dBObject.Buffer(bufferWidth))
             {
-                if (SelelctCrossing(holes, polyline).Count > 0)
+                if (SelelctCrossing(polylines, polyline).Count > 0)
                 {
                     return true;
                 }

@@ -228,7 +228,6 @@
             this.barBtnNew.Name = "barBtnNew";
             this.barBtnNew.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
             this.barBtnNew.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
-            this.barBtnNew.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.barBtnNew_ItemClick);
             // 
             // BarBtnOpen
             // 
@@ -239,7 +238,6 @@
             this.BarBtnOpen.Name = "BarBtnOpen";
             this.BarBtnOpen.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
             this.BarBtnOpen.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
-            this.BarBtnOpen.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.BarBtnOpen_ItemClick);
             // 
             // BarBtnSave
             // 
@@ -250,7 +248,6 @@
             this.BarBtnSave.Name = "BarBtnSave";
             this.BarBtnSave.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
             this.BarBtnSave.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
-            this.BarBtnSave.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.BarBtnSave_ItemClick);
             // 
             // BarBtnSaveAs
             // 
@@ -261,7 +258,6 @@
             this.BarBtnSaveAs.Name = "BarBtnSaveAs";
             this.BarBtnSaveAs.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
             this.BarBtnSaveAs.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
-            this.BarBtnSaveAs.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.BarBtnSaveAs_ItemClick);
             // 
             // BarBtnExportFanPara
             // 

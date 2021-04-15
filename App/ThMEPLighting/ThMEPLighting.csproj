@@ -24,6 +24,21 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EmgLightConnect\ConnectEmgLightEngine.cs" />
+    <Compile Include="EmgLightConnect\ConnectService\connectSingleSideBlkService.cs" />
+    <Compile Include="EmgLightConnect\ConnectService\connectSingleSideInGroupService.cs" />
+    <Compile Include="EmgLightConnect\ConnectService\returnValueCalculation.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawService.cs" />
+    <Compile Include="EmgLightConnect\EmgConnectCommon.cs" />
+    <Compile Include="EmgLightConnect\Model\ThLaneSideEdgeNode.cs" />
+    <Compile Include="EmgLightConnect\Model\ThSingleSideBlocks.cs" />
+    <Compile Include="EmgLightConnect\Service\ConnectSingleSideService.cs" />
+    <Compile Include="EmgLightConnect\Service\GetBlockService.cs" />
+    <Compile Include="EmgLightConnect\Service\graphService.cs" />
+    <Compile Include="EmgLightConnect\Service\findOptimalGroupService.cs" />
+    <Compile Include="EmgLightConnect\Service\SingleSideBlockService.cs" />
+    <Compile Include="EmgLightConnect\Service\orderSingleSideLaneService.cs" />
+    <Compile Include="EmgLightConnect\Service\MergeSideService.cs" />
     <Compile Include="EmgLight\Assistant\DrawUtils.cs" />
     <Compile Include="EmgLight\EmgLightCommon.cs" />
     <Compile Include="EmgLight\LayoutEmgLightEngine.cs" />
@@ -58,11 +73,15 @@
     <Compile Include="FEI\AStarAlgorithm\MinHeap.cs" />
     <Compile Include="FEI\AStarAlgorithm\AStarModel\Point.cs" />
     <Compile Include="FEI\AStarAlgorithm\AStarModel\RoutePlanData.cs" />
-    <Compile Include="FEI\EvacuationPath\CreateMainEvacuationPath.cs" />
+    <Compile Include="FEI\BFSAlgorithm\BFSNode.cs" />
+    <Compile Include="FEI\BFSAlgorithm\BFSPathPlaner.cs" />
+    <Compile Include="FEI\EvacuationPath\ConnectIsolatedLaneService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateMainLanesService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateStartExtendLineService.cs" />
     <Compile Include="FEI\EvacuationPath\ExtendLinesService.cs" />
+    <Compile Include="FEI\EvacuationPath\MergeExtendLineService.cs" />
     <Compile Include="FEI\EvacuationPath\OptimizeStartExtendLineService.cs" />
+    <Compile Include="FEI\Model\ExtendLineTreeModel.cs" />
     <Compile Include="FEI\Service\GetPrimitivesService.cs" />
     <Compile Include="FEI\LayoutFEIService.cs" />
     <Compile Include="FEI\Model\ExtendLineModel.cs" />
@@ -222,7 +241,6 @@
     <Compile Include="ThMEPLightingCommon.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="EmgLightConnect\" />
     <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>

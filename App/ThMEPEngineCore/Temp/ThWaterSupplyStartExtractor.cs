@@ -16,12 +16,16 @@ namespace ThMEPEngineCore.Temp
         public ThWaterSupplyStartExtractor()
         {
             Category = "给水起点";
+            ElementLayer = "给水起点";
             WaterSupplyStarts = new List<Curve>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractWaterSupplyStartService();
+            var instance = new ThExtractWaterSupplyStartService()
+            {
+                ElementLayer= this.ElementLayer,
+            };
             instance.Extract(database, pts);
             WaterSupplyStarts = instance.WaterSupplyStarts;
         }
@@ -33,7 +37,7 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner, o));
+                geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
                 if (o is Polyline polyline && polyline.IsRectangle())
                 {
                     var centerPt = ThGeometryTool.GetMidPt(polyline.GetPoint3dAt(0), polyline.GetPoint3dAt(2));

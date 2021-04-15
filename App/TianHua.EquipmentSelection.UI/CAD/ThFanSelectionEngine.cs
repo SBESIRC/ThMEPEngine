@@ -179,6 +179,71 @@ namespace TianHua.FanSelection.UI.CAD
             }
         }
 
+        public static void ResetModelRotateState(FanDataModel dataModel)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取原模型对象
+                var identifier = dataModel.ID;
+                var models = acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => o.ObjectId.IsModel(identifier))
+                    .ToList();
+
+                // 更新模型
+                foreach (var model in models)
+                {
+                    model.UpgradeOpen();
+                    model.ObjectId.SetModelRotateState((short)0);
+                    model.DowngradeOpen();
+                }
+            }
+        }
+
+        public static void SetModelRotateState(FanDataModel dataModel, Dictionary<ObjectId, short> states)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取原模型对象
+                var identifier = dataModel.ID;
+                var models = acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => o.ObjectId.IsModel(identifier))
+                    .ToList();
+
+                // 更新模型
+                foreach (var model in models)
+                {
+                    model.UpgradeOpen();
+                    model.ObjectId.SetModelRotateState(states[model.ObjectId]);
+                    model.DowngradeOpen();
+                }
+            }
+        }
+
+        public static Dictionary<ObjectId, short> GetModelRotateState(FanDataModel dataModel)
+        {
+            var states = new Dictionary<ObjectId, short>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取原模型对象
+                var identifier = dataModel.ID;
+                var models = acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .Where(o => o.ObjectId.IsModel(identifier))
+                    .ToList();
+
+                // 获取数据
+                foreach (var model in models)
+                {
+                    states.Add(model.ObjectId, model.ObjectId.GetModelRotateState());
+                }
+
+                // 返回数据
+                return states;
+            }
+        }
+
         public static void EditModelsInplace(FanDataModel dataModel)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())

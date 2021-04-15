@@ -1,16 +1,22 @@
-﻿using CLI;
-using AcHelper;
+﻿using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
-using ThCADExtension;
-using ThMEPEngineCore.Temp;
 using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Algorithm;
 using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using System;
+using DotNetARX;
+
+
+#if ACAD2016
+using CLI;
+using ThCADExtension;
+using ThMEPEngineCore.Temp;
+using ThMEPEngineCore.Algorithm;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+#endif
 
 namespace ThMEPEngineCore
 {
@@ -276,14 +282,14 @@ namespace ThMEPEngineCore
         {
             var param = new ThWashParam();
             param.R = GetValue("\n输入保护半径");
-            param.protect_arch = GetValue("\n输入protect_arch[true(非0)/false(0)]") == 0 ? false : true;
-            param.protect_park = GetValue("\n输入protect_park[true(非0)/false(0)]") == 0 ? false : true;
-            param.protect_other = GetValue("\n输入protect_other[true(非0)/false(0)]") == 0 ? false : true;
-            param.extend_arch = GetValue("\n输入extend_arch[true(非0)/false(0)]") == 0 ? false : true;
-            param.extend_park = GetValue("\n输入extend_park[true(非0)/false(0)]") == 0 ? false : true;
+            param.protect_arch = GetValue("\n是否保护建筑空间[true(1)/false(0)] <true>",1) == 0 ? false : true;
+            param.protect_park = GetValue("\n是否保护停车空间[true(1)/false(0)] <true>",1) == 0 ? false : true;
+            param.protect_other = GetValue("\n是否保护不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
+            param.extend_arch = GetValue("\n建筑空间是否能保护停车空间和不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
+            param.extend_park = GetValue("\n停车空间是否能保护到不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
             return param;
         }
-        private int GetValue(string message)
+        private int GetValue(string message,int init=0)
         {
             var pdo = new PromptIntegerOptions(message);
             var protectRadiusPdr = Active.Editor.GetInteger(pdo);
@@ -293,11 +299,11 @@ namespace ThMEPEngineCore
             }
             else
             {
-                return 0;
+                return init;
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THExtractAreaCenterLineTestData", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THACLD", CommandFlags.Modal)]
         public void THExtractAreaCenterLineTestData()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -327,6 +333,144 @@ namespace ThMEPEngineCore
 
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+            }
+        }
+        [CommandMethod("TIANHUACAD", "ThFHCR", CommandFlags.Modal)]
+        public void ThFHCR()
+        {
+            //消火栓保护半径
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                // ,ShearWall, 门洞，门扇,柱
+                var extractors = new List<ThExtractorBase>()
+                {
+                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
+                    //通过停车区域的Space来制造阻挡物
+                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1,ElementLayer = "AD-AREA-OUTL"}, // Space
+                    new ThArchitectureWallExtractor {ColorIndex=2 },  // ArchitectureWall
+                    new ThShearWallExtractor{ColorIndex=3},  // ShearWall
+                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=4}, // Column
+                    new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
+                    new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
+                    new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
+                };
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+
+                var parseService = new ThFireHydrantResultParseService();
+                parseService.Parse(@"E:\ZheDa\FireHydrantCover\GeoJsonTest\t2.result.txt");
+
+                var colorIndexes = new List<int>();
+                foreach(var data in parseService.Results)
+                {
+                    if(data.IsValid())
+                    {
+                        ObjectIdList objIds = new ObjectIdList();
+                        GetColorIndex(colorIndexes);
+                        var colorIndex = colorIndexes[colorIndexes.Count - 1];
+                        Circle circle = new Circle(data.Position,Vector3d.ZAxis,0.5);
+                        circle.ColorIndex = colorIndex;
+                        circle.SetDatabaseDefaults();
+                        objIds.Add(acadDatabase.ModelSpace.Add(circle));
+                        var outerPoly = new Polyline();
+                        for(int i =0;i<data.OuterPoints.Count;i++)
+                        {
+                            var pt = data.OuterPoints[i];
+                            outerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
+                        }
+                        outerPoly.ColorIndex = colorIndex;
+                        outerPoly.SetDatabaseDefaults();
+                        objIds.Add(acadDatabase.ModelSpace.Add(outerPoly));
+
+                        if (data.InnerPoints.Count>=3)
+                        {
+                            var innerPoly = new Polyline();
+                            for (int i = 0; i < data.InnerPoints.Count; i++)
+                            {
+                                var pt = data.InnerPoints[i];
+                                innerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
+                            }
+                            innerPoly.ColorIndex = colorIndex;
+                            innerPoly.SetDatabaseDefaults();
+                            objIds.Add(acadDatabase.ModelSpace.Add(innerPoly));
+                        }
+
+                        if(objIds.Count>0)
+                        {
+                            GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
+                        }
+                    }
+                }
+            }
+        }
+        private void GetColorIndex(List<int> colorIndexes)
+        {
+            Random r = new Random();
+            while (true)
+            {
+               int colorIndex = r.Next(0, 255);
+               if(colorIndex!=2)
+                {
+                   if(colorIndexes.IndexOf(colorIndex)<0)
+                    {
+                        colorIndexes.Add(colorIndex);
+                        break;
+                    }
+                }
+            }           
+        }
+        [CommandMethod("TIANHUACAD", "ThWSDI", CommandFlags.Modal)]
+        public void ThWSDI()
+        {
+            //Water Supply Detail Drawing (给排水大样图)
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+
+                var extractors = new List<ThExtractorBase>()
+                {
+                    //包括Space<隔油池、水泵房、垃圾房、停车区域>,
+                    //通过停车区域的Space来制造阻挡物
+                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
+                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
+                    new ThWaterSupplyPositionExtractor{ColorIndex=3},
+                    new ThWaterSupplyStartExtractor{ColorIndex=4},
+                    new ThToiletGroupExtractor { ColorIndex=5},
+                };
+
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+
+                var toiletGroupDic = new Dictionary<Entity, string>();
+                foreach(var item in (extractors[4] as ThToiletGroupExtractor).ToiletGroupId)
+                {
+                    toiletGroupDic.Add(item.Key, item.Value);
+                }
+
+                extractEngine.Group(toiletGroupDic);
+
                 extractEngine.OutputGeo(Active.Document.Name);
                 extractEngine.Print(acadDatabase.Database);
             }

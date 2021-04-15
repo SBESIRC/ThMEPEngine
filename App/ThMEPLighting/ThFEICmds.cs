@@ -15,6 +15,7 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.FEI;
 using ThMEPLighting.FEI.AStarAlgorithm;
 using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
+using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.EvacuationPath;
 
 namespace ThMEPLighting
@@ -68,6 +69,10 @@ namespace ThMEPLighting
 
                     //获取车道线信息
                     var xLanes = primitivesService.GetLanes(pline.Key, out List<List<Line>> yLines);
+                    if (xLanes.Count == 0 && yLines.Count == 0)
+                    {
+                        continue;
+                    }
 
                     //获取墙柱信息
                     primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
@@ -83,11 +88,11 @@ namespace ThMEPLighting
                     //规划路径
                     ExtendLinesService extendLines = new ExtendLinesService();
                     var paths = extendLines.CreateExtendLines(xLanes, yLines, enterBlcok, pline.Key, holes);
-                    paths.ForEach(x => originTransformer.Reset(x));
+                    paths.ForEach(x => originTransformer.Reset(x.line));
 
                     foreach (var item in paths)
                     {
-                        acdb.ModelSpace.Add(item);
+                        acdb.ModelSpace.Add(item.line);
                     }
                 }
             }
@@ -160,6 +165,83 @@ namespace ThMEPLighting
                     aStarRoute.SetObstacle(pline.Value);
                     var res = aStarRoute.Plan(sp);
                     acdb.ModelSpace.Add(res);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "thtestBfs", CommandFlags.Modal)]
+        public void testBfs()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                //获取外包框
+                List<Curve> frameLst = new List<Curve>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame.Clone() as Polyline);
+                }
+
+                PromptSelectionOptions sOptions = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择起点和终点",
+                    RejectObjectsOnLockedLayers = true,
+                    SingleOnly = true,
+                };
+                // 获取起点
+                var sResult = Active.Editor.GetSelection(sOptions);
+                if (sResult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var sp = (acdb.Element<Circle>(sResult.Value.GetObjectIds().First()) as Circle).Center;
+                // 获取终点
+                PromptSelectionOptions eOptions = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择起点和终点",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var eResult = Active.Editor.GetSelection(eOptions);
+                if (eResult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                //获取外包框
+                List<Line> lineLst = new List<Line>();
+                foreach (ObjectId obj in eResult.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Line>(obj);
+                    lineLst.Add(frame.Clone() as Line);
+                }
+
+                var plines = HandleFrame(frameLst);
+                var holeInfo = CalHoles(plines);
+                foreach (var pline in holeInfo)
+                {
+                    //BFS寻路
+                    BFSPathPlaner pathPlaner = new BFSPathPlaner(400);
+                    var closetLine = pathPlaner.FindingClosetLine(sp, lineLst, pline.Key);
+                    acdb.ModelSpace.Add(closetLine);
                 }
             }
         }

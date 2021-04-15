@@ -12,15 +12,19 @@ namespace ThMEPEngineCore.Temp
     {
         public string Category { get; set; }
         public short ColorIndex { get; set; }
+        public string ElementLayer { get; set; }
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
+        protected string GroupIdPropertyName = "GroupId";
         protected string CodePropertyName = "Code";
         protected string NamePropertyName = "Name";
         protected string CategoryPropertyName = "Category";
-        protected string GroupOwnerPropertyName = "GroupId";
+        protected string AreaOwnerPropertyName = "AreaId";
+        protected string IsolatePropertyName = "Isolated";
         public ThExtractorBase()
         {
             Category = "";
+            ElementLayer = "";
             GroupOwner = new Dictionary<Entity, List<string>>();
         }
         protected string ToString(Polyline poly)
@@ -57,6 +61,18 @@ namespace ThMEPEngineCore.Temp
             var groups = groupId.Select(g => g.Key).ToList().Where(g => g.IsContains(curve)).ToList();
             groups.ForEach(g => ids.Add(groupId[g]));
             return ids;
+        }     
+        
+        protected bool IsIsolate(List<ThTempSpace> spaces , Entity o)
+        {
+            foreach(var space in spaces)
+            {
+                if(space.Outline.IsFullContains(o))
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

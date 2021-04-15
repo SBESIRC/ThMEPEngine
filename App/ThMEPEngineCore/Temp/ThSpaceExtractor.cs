@@ -23,10 +23,6 @@ namespace ThMEPEngineCore.Temp
         /// </summary>
         public bool IsBuildObstacle { get; set; }
         /// <summary>
-        /// 空间轮廓图层名
-        /// </summary>
-        public string SpaceLayer { get; set; }
-        /// <summary>
         /// 空间标识名称
         /// </summary>
         public string NameLayer { get; set; }
@@ -41,7 +37,7 @@ namespace ThMEPEngineCore.Temp
             Obstacles = new Dictionary<Entity, List<Polyline>>();
             IsBuildObstacle = false;
             Category = "Space";
-            SpaceLayer = "AD-AREA-OUTL";
+            ElementLayer = "AD-AREA-OUTL";
             NameLayer = "AD-NAME-ROOM";
             ObstacleColorIndex = 211;
             ObstacleCategory = "Obstacle";
@@ -52,7 +48,7 @@ namespace ThMEPEngineCore.Temp
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var spaceEngine = new ThExtractSpaceRecognitionEngine())
             {
-                spaceEngine.SpaceLayer = SpaceLayer;
+                spaceEngine.SpaceLayer = ElementLayer;
                 spaceEngine.NameLayer = NameLayer;
 
                 spaceEngine.Recognize(database, pts);
@@ -89,7 +85,7 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName, string.Join(";", o.Tags.ToArray()));
-                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner,o.Outline));
+                geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner,o.Outline));
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });
@@ -163,7 +159,7 @@ namespace ThMEPEngineCore.Temp
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            Spaces.ForEach(o => GroupOwner.Add(o.Boundary, FindCurveGroupIds(groupId, o.Boundary)));
+            Spaces.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
         }
     }
 }

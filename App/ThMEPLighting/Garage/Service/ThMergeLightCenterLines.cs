@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
 using System.Linq;
+using NFox.Cad;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -30,7 +31,12 @@ namespace ThMEPLighting.Garage.Service
             var laneLine = new ParkingLinesService();
             laneLine.parkingLineTolerance = mergeRange;
             //目前会将传入的线延长2mm
-            mainLines = laneLine.CreateNodedParkingLines(Border, CenterLines, out auxiliaryLines);
+
+            var cleanService = new ThLaneLineCleanService();
+            var objs = cleanService.Clean(CenterLines.ToCollection());
+            var handleLines = objs.Cast<Line>().Where(o => o.Length > 2).ToList();
+
+            mainLines = laneLine.CreateNodedParkingLines(Border, handleLines, out auxiliaryLines);
             mainLines.ForEach(o =>
             {
                 if (o.Count == 1)

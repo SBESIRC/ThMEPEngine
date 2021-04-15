@@ -11,11 +11,9 @@ namespace ThMEPEngineCore.Temp
     public class ThExtractColumnService:ThExtractService
     {
         public List<Polyline> Columns { get; set; }
-        public string ColumnLayer { get; set; }
         public ThExtractColumnService()
         {
             Columns = new List<Polyline>();
-            ColumnLayer = "柱";
         }
 
         public override void Extract(Database db,Point3dCollection pts)
@@ -24,7 +22,7 @@ namespace ThMEPEngineCore.Temp
             {
                 Columns=acadDatabase.ModelSpace
                     .OfType<Polyline>()
-                    .Where(o => IsColumnLayer(o.Layer))
+                    .Where(o => IsElementLayer(o.Layer))
                     .Select(o=>o.Clone() as Polyline)
                     .ToList();
                 if(pts.Count>=3)
@@ -36,9 +34,9 @@ namespace ThMEPEngineCore.Temp
             }
         }        
 
-        private bool IsColumnLayer(string layerName)
+        public override bool IsElementLayer(string layer)
         {
-            return layerName == ColumnLayer;
+            return layer == ElementLayer;
         }
     }
 }

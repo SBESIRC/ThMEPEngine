@@ -20,9 +20,6 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
-    <Reference Include="ManagedLibrary.v16">
-      <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
-    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web.Extensions" />
@@ -33,6 +30,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThMEPPolyDecomposer.cs" />
     <Compile Include="Algorithm\ThMEPTriangulationService.cs" />
@@ -115,6 +113,7 @@
     <Compile Include="Interface\ISpatialIndex.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
     <Compile Include="Model\ThIfcLineFoot.cs" />
+    <Compile Include="Model\ThIfcOpening.cs" />
     <Compile Include="Model\ThIfcRailing.cs" />
     <Compile Include="Model\ThIfcTextNote.cs" />
     <Compile Include="BuildRoom\Service\ThBuildRoomDataService.cs" />
@@ -362,19 +361,23 @@
     <Compile Include="Temp\IBuildGeometry.cs" />
     <Compile Include="Temp\IExtract.cs" />
     <Compile Include="Temp\IGroup.cs" />
+    <Compile Include="Temp\IParse.cs" />
     <Compile Include="Temp\IPrint.cs" />
+    <Compile Include="Temp\IRead.cs" />
     <Compile Include="Temp\ThArrangeObstacleService.cs" />
     <Compile Include="Temp\ThCenterLineExtractor.cs" />
     <Compile Include="Temp\ThColumnExtractor.cs" />
     <Compile Include="Temp\ThConnectPortExtractor.cs" />
+    <Compile Include="Temp\ThDoorOpeningExtractor.cs" />
     <Compile Include="Temp\ThDoorExtractor.cs" />
     <Compile Include="Temp\ThDrainageFacilityExtractor.cs" />
     <Compile Include="Temp\ThEquipmentExtractor.cs" />
+    <Compile Include="Temp\ThExtractDoorOpeningService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyPositionService.cs" />
     <Compile Include="Temp\ThExtractToiletGroupService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyStartService.cs" />
     <Compile Include="Temp\ThExtractColumnService.cs" />
-    <Compile Include="Temp\ThExtractConnectPortsService.cs" />
+    <Compile Include="Temp\ThExtractConnectPortService.cs" />
     <Compile Include="Temp\ThExtractCenterLineService.cs" />
     <Compile Include="Temp\ThExtractorBase.cs" />
     <Compile Include="Temp\ThExtractWallService.cs" />
@@ -387,6 +390,7 @@
     <Compile Include="Temp\ThLaneLineExtractor.cs" />
     <Compile Include="Temp\ThParkingStallExtractor.cs" />
     <Compile Include="Temp\ThArchitectureWallExtractor.cs" />
+    <Compile Include="Temp\ThFireHydrantResultParseService.cs" />
     <Compile Include="Temp\ThSpaceExtractor.cs" />
     <Compile Include="Temp\ThShearWallExtractor.cs" />
     <Compile Include="Temp\ThWallExtractor.cs" />
@@ -418,6 +422,7 @@
       <Name>ThCADExtension</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>
@@ -447,6 +452,9 @@
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
         </Reference>
+        <Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
+        </Reference>
       </ItemGroup>
     </When>
     <When Condition="$(DefineConstants.Contains('ACAD2018'))">
@@ -462,11 +470,5 @@
       </ItemGroup>
     </When>
   </Choose>
-  <ItemGroup>
-    <PackageReference Include="Xbim.Essentials" Version="5.1.297" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="IO\DWG\" />
-  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

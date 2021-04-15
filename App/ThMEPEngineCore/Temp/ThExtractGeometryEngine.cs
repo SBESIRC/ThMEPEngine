@@ -50,6 +50,31 @@ namespace ThMEPEngineCore.Temp
             // 输出GeoJson文件
             var fileInfo = new FileInfo(activeDocName);
             var path = fileInfo.Directory.FullName;
+
+            var spaceExtractors = Extrators.Where(o=>o is ThSpaceExtractor);
+            if(spaceExtractors.Count()>0)
+            {
+                var spaceExtractor = spaceExtractors.First() as ThSpaceExtractor;
+                foreach(ThExtractorBase extracotr in Extrators)
+                {
+                    if(extracotr is ThColumnExtractor columnExtractor)
+                    {
+                        columnExtractor.SetSpaces(spaceExtractor.Spaces);
+                    }
+                    else if(extracotr is ThArchitectureWallExtractor archWallExtractor)
+                    {
+                        archWallExtractor.SetSpaces(spaceExtractor.Spaces);
+                    }
+                    else if(extracotr is ThShearWallExtractor shearWallExtractor)
+                    {
+                        shearWallExtractor.SetSpaces(spaceExtractor.Spaces);
+                    }
+                    else if(extracotr is ThWallExtractor wallExtractor)
+                    {
+                        wallExtractor.SetSpaces(spaceExtractor.Spaces);
+                    }
+                }
+            }
             var geos = BuildGeometries();
             ThGeoOutput.Output(geos, path, fileInfo.Name);
         }

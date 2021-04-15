@@ -13,7 +13,6 @@ namespace ThMEPEngineCore.Temp
     public class ThExtractWallService : ThExtractService
     {
         public List<Polyline> Walls { get; set; }
-        public string WallLayer  { get; set; }
         public ThExtractWallService()
         {
             Walls = new List<Polyline>();
@@ -26,7 +25,7 @@ namespace ThMEPEngineCore.Temp
                 {
                     if (ent is Polyline polyline)
                     {
-                        if (IsWallLayer(polyline.Layer))
+                        if (IsElementLayer(polyline.Layer))
                         {
                             var newPolyline = polyline.Clone() as Polyline;
                             Walls.Add(newPolyline);
@@ -42,10 +41,9 @@ namespace ThMEPEngineCore.Temp
             }
         }
 
-       
-        private bool IsWallLayer(string layerName)
+        public override bool IsElementLayer(string layer)
         {
-            return layerName == WallLayer;
+            return layer == ElementLayer;
         }
     }
 }

@@ -51,7 +51,8 @@ namespace ThMEPLighting.FEI.AStarAlgorithm
 
             if (!map.ContainsPt(map.startPt))
             {
-                throw new Exception("StartPoint or Destination not in the current map!");
+                return null;
+                //throw new Exception("StartPoint or Destination not in the current map!");
             }
 
             RoutePlanData routePlanData = new RoutePlanData(map);

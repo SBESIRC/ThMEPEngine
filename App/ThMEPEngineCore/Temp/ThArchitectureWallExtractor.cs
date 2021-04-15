@@ -12,6 +12,7 @@ namespace ThMEPEngineCore.Temp
     public class ThArchitectureWallExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Entity> Walls { get; private set; }
+        private List<ThTempSpace> Spaces { get; set; }
         public ThArchitectureWallExtractor()
         {
             Walls = new List<Entity>();
@@ -34,6 +35,8 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
+                var isolated = IsIsolate(Spaces, o);
+                geometry.Properties.Add(IsolatePropertyName, isolated);
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
@@ -57,7 +60,10 @@ namespace ThMEPEngineCore.Temp
                 }
             }
         }
-
+        public void SetSpaces(List<ThTempSpace> spaces)
+        {
+            Spaces = spaces;
+        }
         public void Group(Dictionary<Entity, string> groupId)
         {
             throw new NotImplementedException();

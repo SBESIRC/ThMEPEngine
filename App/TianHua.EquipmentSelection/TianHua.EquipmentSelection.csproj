@@ -33,7 +33,6 @@
   <ItemGroup>
     <Compile Include="Entity\ExhaustCalcModel.cs" />
     <Compile Include="Entity\ExhaustSpaceInfo.cs" />
-    <Compile Include="Entity\FanDataModelBitmap.cs" />
     <Compile Include="Entity\FanDataModelNumber.cs" />
     <Compile Include="Entity\FanSelectionState.cs" />
     <Compile Include="Entity\FireFrontModel.cs" />
@@ -71,6 +70,7 @@
     <Compile Include="Function\FanParametersExtension.cs" />
     <Compile Include="Function\HeatReleaseInfoLoader.cs" />
     <Compile Include="Function\ThModelLoader.cs" />
+    <Compile Include="Messaging\ThModelBeginSaveMessage.cs" />
     <Compile Include="Messaging\ThModelCopyMessage.cs" />
     <Compile Include="Messaging\ThModelDeleteMessage.cs" />
     <Compile Include="Messaging\ThModelMessageArgs.cs" />

@@ -15,12 +15,13 @@ namespace ThMEPEngineCore.Temp
         {
             CenterLines = new List<Curve>();
             Category = "中心线";
+            ElementLayer = "中心线示意";
         }
         public void Extract(Database database, Point3dCollection pts)
         {
             var instance = new ThExtractCenterLineService()
             {
-                CenterLineLayer = "中心线示意",
+                ElementLayer = this.ElementLayer,
             };
             instance.Extract(database, pts);
             CenterLines = instance.CenterLines;

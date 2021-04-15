@@ -53,12 +53,15 @@ namespace ThMEPElectrical.Command
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
                     var lines = LoadLaneLines(acadDatabase.Database, frame);
-                    lines = CleanLaneLines(lines);
-                    lines.Cast<Curve>().ForEach(o =>
+                    if (lines.Count > 0)
                     {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
-                    });
+                        CleanLaneLines(lines).Cast<Curve>().ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.ColorIndex = (int)ColorIndex.BYLAYER;
+                            o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
+                        });
+                    }
                 }
             }
         }
@@ -78,7 +81,7 @@ namespace ThMEPElectrical.Command
             using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
                 var nFrame = ThMEPFrameService.NormalizeEx(frame);
-                if (nFrame.Area > 0)
+                if (nFrame.Area > 1)
                 {
                     // 提取车道中心线
                     var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
@@ -87,9 +90,12 @@ namespace ThMEPElectrical.Command
                     // 车道中心线处理
                     var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
                     var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
-
                     // 框线相交处打断
                     return ThCADCoreNTSGeometryClipper.Clip(nFrame, lines.ToCollection());
+                }   
+                else
+                {
+                    Active.Editor.WriteLine("\n选择的框线有问题，请检查是否有自交、不相连等情况。");
                 }
                 return new DBObjectCollection();
             }

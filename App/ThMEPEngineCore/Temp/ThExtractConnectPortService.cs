@@ -9,10 +9,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThExtractConnectPortsService : ThExtractService
+    public class ThExtractConnectPortService : ThExtractService
     {
         public Dictionary<Polyline, string> ConnectPorts { get; private set; }
-        public ThExtractConnectPortsService()
+        public ThExtractConnectPortService()
         {
             ConnectPorts = new Dictionary<Polyline, string>();
         }
@@ -24,7 +24,7 @@ namespace ThMEPEngineCore.Temp
                 var texts = new List<Entity>();
                 foreach (var ent in acadDatabase.ModelSpace)
                 {
-                    if (IsConnectPortLayer(ent.Layer))
+                    if (IsElementLayer(ent.Layer))
                     {
                         if (ent is Polyline polyline)
                         {
@@ -79,9 +79,10 @@ namespace ThMEPEngineCore.Temp
             string pattern = @"^[\d]+\s{0,}[A-Z]{1,}[\d]+";
             return Regex.IsMatch(content, pattern);
         }
-        private bool IsConnectPortLayer(string layerName)
+
+        public override bool IsElementLayer(string layer)
         {
-            return layerName.ToUpper() == "连通";
+            return layer.ToUpper() == ElementLayer;
         }
     }
 }

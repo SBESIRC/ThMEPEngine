@@ -1,15 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.IO;
 using System.Linq;
-using System.Text;
+using System.Data;
+using System.Drawing;
 using System.Windows.Forms;
+using System.ComponentModel;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using AcHelper;
 using Linq2Acad;
-using System.Drawing;
 using ThCADExtension;
 using AcHelper.Commands;
 using TianHua.Publics.BaseCode;
@@ -20,12 +19,13 @@ using DevExpress.XtraEditors;
 using DevExpress.XtraTreeList;
 using DevExpress.XtraTreeList.Nodes;
 using TianHua.FanSelection.UI.IO;
+using TianHua.FanSelection.UI.CAD;
 using TianHua.FanSelection.Messaging;
 using ThMEPEngineCore.Service.Hvac;
 
 namespace TianHua.FanSelection.UI
 {
-    public partial class fmFanSelection : DevExpress.XtraEditors.XtraForm, IFanSelection
+    public partial class fmFanSelection : XtraForm, IFanSelection
     {
 
         public PresentersFanSelection m_Presenter;
@@ -45,10 +45,6 @@ namespace TianHua.FanSelection.UI
         public List<int> m_ListMotorTempo { get; set; }
 
         public List<string> m_ListMountType { get; set; }
-
-        public List<FanDesignDataModel> m_ListFanDesign { get; set; }
-
-        public FanDesignDataModel m_FanDesign { get; set; }
 
         public DataManager m_DataMgr = new DataManager();
 
@@ -72,11 +68,11 @@ namespace TianHua.FanSelection.UI
             }
         }
 
-        public Action<ThModelSaveMessage> OnModelSaveHandler
+        public Action<ThModelBeginSaveMessage> OnModelBeginSaveHandler
         {
             get
             {
-                return OnModelSaved;
+                return OnModelBeginSave;
             }
         }
 
@@ -200,18 +196,11 @@ namespace TianHua.FanSelection.UI
             TreeList.DataSource = m_ListFan;
             this.TreeList.ExpandAll();
 
-            InitFanDesign();
-
             //TreeList.Columns["SortID"].SortIndex = 0;
             //TreeList.Columns["SortID"].SortMode = DevExpress.XtraGrid.ColumnSortMode.Value;
             //TreeList.Columns["SortID"].SortOrder = SortOrder.Descending;
 
             InitData();
-        }
-
-        private void InitFanDesign()
-        {
-            m_ListFanDesign = new List<FanDesignDataModel>();
         }
 
         public void InitData()
@@ -242,28 +231,27 @@ namespace TianHua.FanSelection.UI
             var _JsonAxialFanParametersDouble = ReadTxt(Path.Combine(ThCADCommon.SupportPath(), ThFanSelectionCommon.AXIAL_Parameters_Double));
             m_ListAxialFanParametersDouble = FuncJson.Deserialize<List<AxialFanParameters>>(_JsonAxialFanParametersDouble);
 
-            if (File.Exists(ThFanSelectionUIUtils.DefaultModelExportCatalogPath()))
+            // 从图纸NOD中读取风机模型
+            var dataSource = new ThFanModelDbDataSource();
+            dataSource.Load(Active.Database);
+            if (dataSource.Models.Count > 0)
             {
-                var _JsonmFanDesign = ReadTxt(ThFanSelectionUIUtils.DefaultModelExportCatalogPath());
-                m_ListFanDesign = FuncJson.Deserialize<List<FanDesignDataModel>>(_JsonmFanDesign);
-                if (m_ListFanDesign != null && m_ListFanDesign.Count > 0)
+                m_ListFan = dataSource.Models.OrderBy(p => p.SortID).ToList();
+            }else {
+                // 若当前图纸NOD中没有风机模型，继续从json文件中读取
+                var _JsonFile = Path.ChangeExtension(Active.DocumentFullPath, ".json");
+                if (File.Exists(_JsonFile))
                 {
-                    m_FanDesign = m_ListFanDesign.First();
-
-                    if (m_FanDesign != null)
-                    {
-                        var _JsonListFan = ReadTxt(FuncStr.NullToStr(ThFanSelectionUIUtils.DefaultModelExportPath()) + ".json");
-                        m_ListFan = FuncJson.Deserialize<List<FanDataModel>>(_JsonListFan);
-
-                        if (m_ListFan != null && m_ListFan.Count > 0)
-                            m_ListFan = m_ListFan.OrderBy(p => p.SortID).ToList();
-                        TreeList.DataSource = m_ListFan;
-                        this.TreeList.ExpandAll();
-                        this.Text = "风机选型 - " + m_FanDesign.Name;
-                    }
-
+                    var _JsonListFan = ReadTxt(_JsonFile);
+                    m_ListFan = FuncJson.Deserialize<List<FanDataModel>>(_JsonListFan);
                 }
             }
+            this.TreeList.DataSource = m_ListFan;
+            this.TreeList.ExpandAll();
+
+            // 用当前图纸名更新标题
+            string _Filename = Path.GetFileName(FuncStr.NullToStr(Active.DocumentName));
+            this.Text = "风机选型 - " + Path.GetFileNameWithoutExtension(_Filename);
         }
 
 
@@ -398,7 +386,7 @@ namespace TianHua.FanSelection.UI
 
 
                     _Fan.ExhaustModel = _fmAirVolumeCalc.Model.ExhaustModel;
-       
+
                     _Fan.AirCalcFactor = _fmAirVolumeCalc.Model.AirCalcFactor;
                     _Fan.AirCalcValue = _fmAirVolumeCalc.Model.AirCalcValue;
 
@@ -1801,94 +1789,8 @@ namespace TianHua.FanSelection.UI
 
         }
 
-        private void BarBtnOpen_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            fmDesignData _fmDesignData = new fmDesignData();
-            _fmDesignData.InitForm(m_ListFanDesign, "打开", ThFanSelectionUIUtils.DefaultModelExportPath(), m_FanDesign);
-            if (_fmDesignData.ShowDialog() == DialogResult.OK)
-            {
-                if (_fmDesignData.m_FanDesign != null && FuncStr.NullToStr(_fmDesignData.m_FanDesign.Path) != string.Empty && FuncStr.NullToStr(_fmDesignData.m_FanDesign.Name) != string.Empty)
-                {
-                    m_FanDesign = _fmDesignData.m_FanDesign;
-                    m_ListFanDesign = _fmDesignData.m_ListFanDesign;
-                    var _JsonListFan = ReadTxt(m_FanDesign.Path);
-
-                    m_ListFan = FuncJson.Deserialize<List<FanDataModel>>(_JsonListFan);
-
-                    if (m_ListFan != null && m_ListFan.Count > 0)
-                        m_ListFan = m_ListFan.OrderBy(p => p.SortID).ToList();
-                    TreeList.DataSource = m_ListFan;
-                    this.TreeList.ExpandAll();
-                    this.Text = "风机选型 - " + _fmDesignData.m_FanDesign.Name;
-                }
-            }
-        }
-
-        private void BarBtnSave_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            if (m_ListFan == null || m_ListFan.Count == 0) { return; }
-            TreeList.PostEditor();
-            if (m_FanDesign == null || FuncStr.NullToStr(m_FanDesign.Name) == string.Empty)
-            {
-                fmDesignData _fmDesignData = new fmDesignData();
-                _fmDesignData.InitForm(m_ListFanDesign, "保存", ThFanSelectionUIUtils.DefaultModelExportPath(), m_FanDesign);
-                if (_fmDesignData.ShowDialog() == DialogResult.OK)
-                {
-                    if (_fmDesignData.m_FanDesign != null && FuncStr.NullToStr(_fmDesignData.m_FanDesign.Path) != string.Empty && FuncStr.NullToStr(_fmDesignData.m_FanDesign.Name) != string.Empty)
-                    {
-                        var _Json = FuncJson.Serialize(m_ListFan);
-                        JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(_fmDesignData.m_FanDesign.Path), Encoding.UTF8, _Json);
-                        m_FanDesign = _fmDesignData.m_FanDesign;
-                        m_ListFanDesign = _fmDesignData.m_ListFanDesign;
-                        this.Text = "风机选型 - " + _fmDesignData.m_FanDesign.Name;
-                    }
-                }
-            }
-            else
-            {
-                if (m_FanDesign.Path == string.Empty) { return; }
-                m_FanDesign.LastOperationDate = DateTime.Now;
-                var _JsonFanDesign = FuncJson.Serialize(m_ListFanDesign);
-                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportCatalogPath(), Encoding.UTF8, _JsonFanDesign);
-
-                var _JsonFan = FuncJson.Serialize(m_ListFan);
-                JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
-            }
-        }
-
-        private void BarBtnSaveAs_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            if (m_ListFan == null || m_ListFan.Count == 0) { return; }
-            TreeList.PostEditor();
-            var _TemFanDesign = m_FanDesign;
-            m_FanDesign = null;
-            if (m_FanDesign == null || FuncStr.NullToStr(m_FanDesign.Name) == string.Empty)
-            {
-                fmDesignData _fmDesignData = new fmDesignData();
-                _fmDesignData.InitForm(m_ListFanDesign, "另存", ThFanSelectionUIUtils.DefaultModelExportPath(), m_FanDesign);
-                if (_fmDesignData.ShowDialog() == DialogResult.OK)
-                {
-                    if (_fmDesignData.m_FanDesign != null && FuncStr.NullToStr(_fmDesignData.m_FanDesign.Path) != string.Empty && FuncStr.NullToStr(_fmDesignData.m_FanDesign.Name) != string.Empty)
-                    {
-                        var _Json = FuncJson.Serialize(m_ListFan);
-                        JsonExporter.Instance.SaveToFile(FuncStr.NullToStr(_fmDesignData.m_FanDesign.Path), Encoding.UTF8, _Json);
-                        m_FanDesign = _fmDesignData.m_FanDesign;
-                        this.Text = "风机选型 - " + _fmDesignData.m_FanDesign.Name;
-                    }
-                }
-                else
-                {
-                    m_FanDesign = _TemFanDesign;
-                }
-            }
-
-
-        }
-
         private void BarBtnExportFanPara_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-
-
             fmSceneScreening _fmSceneScreening = new fmSceneScreening();
 
             _fmSceneScreening.Init(m_ListSceneScreening);
@@ -2325,47 +2227,6 @@ namespace TianHua.FanSelection.UI
             SetFanModel();
         }
 
-        private void barBtnNew_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            if (m_ListFan == null || m_ListFan.Count == 0)
-            {
-                this.Text = "风机选型";
-                m_FanDesign = null;
-                NewFanList();
-                return;
-            }
-            var _List = m_ListFan.FindAll(p => p.FanModelName != string.Empty && p.FanModelName != "无此风机");
-            if (_List == null || _List.Count == 0)
-            {
-                this.Text = "风机选型";
-                m_FanDesign = null;
-                NewFanList();
-                return;
-            }
-            var _Result = XtraMessageBox.Show(" 否保存当前版本？ ", "提示", MessageBoxButtons.YesNoCancel);
-            if (_Result == DialogResult.Yes)
-            {
-                BarBtnSave.PerformClick();
-                NewFanList();
-                this.Text = "风机选型";
-                m_FanDesign = null;
-            }
-            else if (_Result == DialogResult.No)
-            {
-                NewFanList();
-                this.Text = "风机选型";
-                m_FanDesign = null;
-            }
-        }
-
-        private void NewFanList()
-        {
-            m_ListFan = new List<FanDataModel>();
-            TreeList.DataSource = m_ListFan;
-            this.TreeList.ExpandAll();
-            ComBoxScene_SelectedValueChanged(null, null);
-        }
-
         private void PicInsertMap_Click(object sender, EventArgs e)
         {
             var _FocusedColumn = TreeList.FocusedColumn;
@@ -2446,7 +2307,7 @@ namespace TianHua.FanSelection.UI
             string _ErrorStr = string.Empty;
             if (_FocusedColumn.FieldName == "InstallSpace")
             {
-                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr(e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario  && !p.IsErased);
+                _List = m_ListFan.FindAll(p => p.InstallSpace == FuncStr.NullToStr(e.Value) && p.InstallFloor == _Fan.InstallFloor && p.ID != _Fan.ID && p.Scenario == _Fan.Scenario && !p.IsErased);
             }
 
             if (_FocusedColumn.FieldName == "InstallFloor")
@@ -2744,54 +2605,21 @@ namespace TianHua.FanSelection.UI
             this.TreeList.ExpandAll();
         }
 
-        private void OnModelSaved(ThModelSaveMessage message)
+        private void OnModelBeginSave(ThModelBeginSaveMessage message)
         {
-
             if (m_ListFan == null || m_ListFan.Count == 0 || FuncStr.NullToStr(message.Data.FileName) == string.Empty) { return; }
             TreeList.PostEditor();
 
-            var _Path = ThFanSelectionUIUtils.DefaultModelExportCatalogPath();
-
-            if (m_FanDesign == null || FuncStr.NullToStr(m_FanDesign.Name) == string.Empty)
+            // 保存到图纸NOD中
+            var dataSource = new ThFanModelDbDataSource()
             {
-                string _Filename = System.IO.Path.GetFileName(FuncStr.NullToStr(message.Data.FileName));
+                Models = m_ListFan,
+            };
+            dataSource.Save(Active.Database);
 
-                m_FanDesign = new FanDesignDataModel();
-                m_FanDesign.ID = Guid.NewGuid().ToString();
-                m_FanDesign.CreateDate = DateTime.Now;
-                m_FanDesign.LastOperationDate = DateTime.Now;
-                m_FanDesign.Name = _Filename.Replace(".dwg", "");
-                m_FanDesign.Status = "0";
-                // m_FanDesign.Path = ThFanSelectionUIUtils.DefaultModelExportPath() + "\\" + FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
-                m_FanDesign.Path = FuncStr.NullToStr(_Filename).Replace(".dwg", ".json");
-                if (m_ListFanDesign == null) m_ListFanDesign = new List<FanDesignDataModel>();
-                m_ListFanDesign.Add(m_FanDesign);
-
-                if (!Directory.Exists(ThFanSelectionUIUtils.DefaultModelExportPath()))
-                {
-                    Directory.CreateDirectory(ThFanSelectionUIUtils.DefaultModelExportPath());
-                }
-
-                var _JsonFanDesign = FuncJson.Serialize(m_ListFanDesign);
-                JsonExporter.Instance.SaveToFile(_Path, Encoding.UTF8, _JsonFanDesign);
-
-                var _Json = FuncJson.Serialize(m_ListFan);
-                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportPath().Replace(FuncStr.NullToStr(m_FanDesign.Name), "") + FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _Json);
-
-
-                this.Text = "风机选型 - " + m_FanDesign.Name;
-
-            }
-            else
-            {
-                if (m_FanDesign.Path == string.Empty) { return; }
-                m_FanDesign.LastOperationDate = DateTime.Now;
-                var _JsonFanDesign = FuncJson.Serialize(m_ListFanDesign);
-                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportCatalogPath(), Encoding.UTF8, _JsonFanDesign);
-
-                var _JsonFan = FuncJson.Serialize(m_ListFan);
-                JsonExporter.Instance.SaveToFile(ThFanSelectionUIUtils.DefaultModelExportPath().Replace(FuncStr.NullToStr(m_FanDesign.Name), "") + FuncStr.NullToStr(m_FanDesign.Path), Encoding.UTF8, _JsonFan);
-            }
+            // 用当前图纸名更新标题
+            string _Filename = Path.GetFileName(FuncStr.NullToStr(message.Data.FileName));
+            this.Text = "风机选型 - " + Path.GetFileNameWithoutExtension(_Filename);
         }
 
         private void CheckSysAverage_CheckedChanged(object sender, EventArgs e)

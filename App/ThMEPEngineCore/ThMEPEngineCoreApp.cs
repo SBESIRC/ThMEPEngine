@@ -1,5 +1,4 @@
-﻿using CLI;
-using System;
+﻿using System;
 using AcHelper;
 using DotNetARX;
 using Linq2Acad;
@@ -167,7 +166,7 @@ namespace ThMEPEngineCore
                         clone.ColorIndex = 6;
                         clone.SetDatabaseDefaults();
                         acadDatabase.ModelSpace.Add(clone);
-                    }                
+                    }
                 });
             }
         }
@@ -347,14 +346,14 @@ namespace ThMEPEngineCore
             dbText.SetDatabaseDefaults(Active.Database);
             dbText.TextString = message;
             dbText.Position = ThGeometryTool.GetMidPt(thIfcBeam.StartPoint, thIfcBeam.EndPoint);
-            Vector3d dir=Vector3d.XAxis.CrossProduct(thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint));
-            if(dir.Z>=0)
+            Vector3d dir = Vector3d.XAxis.CrossProduct(thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint));
+            if (dir.Z >= 0)
             {
                 dbText.Rotation = thIfcBeam.StartPoint.GetVectorTo(thIfcBeam.EndPoint).GetAngleTo(Vector3d.XAxis);
             }
             else
             {
-                dbText.Rotation = thIfcBeam.EndPoint.GetVectorTo(thIfcBeam.StartPoint).GetAngleTo(Vector3d.XAxis)+Math.PI;
+                dbText.Rotation = thIfcBeam.EndPoint.GetVectorTo(thIfcBeam.StartPoint).GetAngleTo(Vector3d.XAxis) + Math.PI;
             }
             dbText.Layer = "0";
             dbText.Height = 200;
@@ -385,10 +384,10 @@ namespace ThMEPEngineCore
                     o.Properties.ForEach(p => geometry.Properties.Add(p.Key, p.Value));
                     geos.Add(geometry);
                 });
-                if(objIds.Count>0)
+                if (objIds.Count > 0)
                 {
                     GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
-                }               
+                }
 
                 // 输出GeoJson文件
                 var path = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
@@ -409,11 +408,11 @@ namespace ThMEPEngineCore
         public void ThExtractGeo()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var extractEngine =new ThExtractGeometryEngine())
+            using (var extractEngine = new ThExtractGeometryEngine())
             {
                 var per = Active.Editor.GetEntity("\n选择一个框线");
                 var pts = new Point3dCollection();
-                if(per.Status==PromptStatus.OK)
+                if (per.Status == PromptStatus.OK)
                 {
                     var frame = acadDatabase.Element<Polyline>(per.ObjectId);
                     var newFrame = ThMEPFrameService.NormalizeEx(frame);
@@ -453,7 +452,7 @@ namespace ThMEPEngineCore
                 extractEngine.Print(acadDatabase.Database);
             }
         }
-        
+
         [CommandMethod("TIANHUACAD", "THExtractDoor", CommandFlags.Modal)]
         public void THExtractDoor()
         {
@@ -499,7 +498,7 @@ namespace ThMEPEngineCore
 
         [CommandMethod("TIANHUACAD", "THExtractRoomOutline", CommandFlags.Modal)]
         public void THExtractRoomOutline()
-        {            
+        {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (IRoomBuilder roomBuilder = new ThRoomOutlineBuilderEngine())
             {
@@ -510,23 +509,23 @@ namespace ThMEPEngineCore
                 }
 
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                IRoomBuildData roomData = new ThBuildRoomDataService() { SelfBuildData = false};
+                IRoomBuildData roomData = new ThBuildRoomDataService() { SelfBuildData = false };
                 roomData.Build(acadDatabase.Database, frame.Vertices());
                 roomBuilder.Build(roomData);
 
                 // Print
-                ThLayerTool.CreateLayer("AD-AREA-OUTL", Color.FromColorIndex(ColorMethod.ByAci,31));
+                ThLayerTool.CreateLayer("AD-AREA-OUTL", Color.FromColorIndex(ColorMethod.ByAci, 31));
                 roomBuilder.Outlines.ForEach(o =>
                 {
                     // AD-AREA-OUTL
                     o.ColorIndex = 31;
                     o.Layer = "AD-AREA-OUTL";
                     o.SetDatabaseDefaults();
-                    acadDatabase.ModelSpace.Add(o);                    
+                    acadDatabase.ModelSpace.Add(o);
                 });
             }
         }
-        
+
         [CommandMethod("TIANHUACAD", "THExtractSlab", CommandFlags.Modal)]
         public void THExtractSlab()
         {
