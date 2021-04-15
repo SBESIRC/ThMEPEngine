@@ -58,6 +58,7 @@ namespace ThMEPElectrical.Command
                         CleanLaneLines(lines).Cast<Curve>().ForEach(o =>
                         {
                             acadDatabase.ModelSpace.Add(o);
+                            o.ColorIndex = 256;
                             o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
                         });
                     }
