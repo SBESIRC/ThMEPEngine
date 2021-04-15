@@ -60,6 +60,7 @@
     <Compile Include="FEI\AStarAlgorithm\AStarModel\RoutePlanData.cs" />
     <Compile Include="FEI\BFSAlgorithm\BFSNode.cs" />
     <Compile Include="FEI\BFSAlgorithm\BFSPathPlaner.cs" />
+    <Compile Include="FEI\EvacuationPath\ConnectIsolatedLaneService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateMainLanesService.cs" />
     <Compile Include="FEI\EvacuationPath\CreateStartExtendLineService.cs" />
     <Compile Include="FEI\EvacuationPath\ExtendLinesService.cs" />
@@ -226,6 +227,7 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="EmgLightConnect\" />
+    <Folder Include="FEI\PrintEntity\" />
     <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>
