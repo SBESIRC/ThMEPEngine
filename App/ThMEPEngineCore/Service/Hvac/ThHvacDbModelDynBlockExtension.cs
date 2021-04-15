@@ -90,6 +90,30 @@ namespace ThMEPEngineCore.Service.Hvac
             return new Point3d(position_x, position_y, 0);
         }
 
+        public static short GetModelRotateState(this ObjectId obj)
+        {
+            var dynamicProperties = obj.GetDynProperties();
+            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1))
+            {
+                return (short)dynamicProperties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1);
+            }else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static void SetModelRotateState(this ObjectId obj, short state)
+        {
+            var dynamicProperties = obj.GetDynProperties();
+            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1))
+            {
+                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1, state);
+            }else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public static void SetModelCustomPropertiesFrom(this ObjectId obj, DynamicBlockReferencePropertyCollection properties)
         {
             // 注意修改设置动态属性的顺序
@@ -112,22 +136,6 @@ namespace ThMEPEngineCore.Service.Hvac
                 {
                     dynamicProperties.SetValue(property, properties.GetValue(property));
                 }
-            }
-
-            // 翻转状态
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1) 
-                && properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1, 
-                    ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE_NONE);
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1, 
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE1));
-            }
-            if (dynamicProperties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2)
-                && properties.Contains(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2))
-            {
-                dynamicProperties.SetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2,
-                    properties.GetValue(ThHvacCommon.BLOCK_DYNAMIC_PROPERTY_ROTATE2));
             }
         }
     }

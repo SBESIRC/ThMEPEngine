@@ -92,7 +92,12 @@ namespace TianHua.FanSelection.UI.CAD
                     var attributes = new Dictionary<string, string>(blockReference.Attributes);
                     if (_FanDataModel.IsAttributeModified(attributes))
                     {
-                        ThFanSelectionEngine.ModifyModels(_FanDataModel);
+                        // Workaround:
+                        //  若“服务区域”发生变化，我们需要通过调整“翻转状态1”使其文字对齐
+                        using (var ov = new ThModelRoateStateOverride(_FanDataModel))
+                        {
+                            ThFanSelectionEngine.ModifyModels(_FanDataModel);
+                        }
                     }
 
                     // 导航到图块

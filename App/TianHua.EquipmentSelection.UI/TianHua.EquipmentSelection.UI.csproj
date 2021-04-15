@@ -98,6 +98,7 @@
     <Compile Include="CAD\ThFanSelectionDocumentEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbUndoHandler.cs" />
     <Compile Include="CAD\ThFanSelectionEngine.cs" />
+    <Compile Include="CAD\ThModelRoateStateOverride.cs" />
     <Compile Include="CAD\ThModelSystemInsertCommand.cs" />
     <Compile Include="CAD\ThModelCommand.cs" />
     <Compile Include="CAD\ThModelSystemCopyCommand.cs" />
