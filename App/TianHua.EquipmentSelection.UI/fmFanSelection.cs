@@ -239,9 +239,10 @@ namespace TianHua.FanSelection.UI
                 m_ListFan = dataSource.Models.OrderBy(p => p.SortID).ToList();
             }else {
                 // 若当前图纸NOD中没有风机模型，继续从json文件中读取
-                var _JsonListFan = Path.ChangeExtension(Active.DocumentFullPath, ".json");
-                if (File.Exists(_JsonListFan))
+                var _JsonFile = Path.ChangeExtension(Active.DocumentFullPath, ".json");
+                if (File.Exists(_JsonFile))
                 {
+                    var _JsonListFan = ReadTxt(_JsonFile);
                     m_ListFan = FuncJson.Deserialize<List<FanDataModel>>(_JsonListFan);
                 }
             }
