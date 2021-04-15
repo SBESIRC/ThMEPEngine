@@ -239,11 +239,6 @@
     <Compile Include="ThMEPLightingCommon.cs" />
   </ItemGroup>
   <ItemGroup>
-<<<<<<< HEAD
-    <Folder Include="EmgLightConnect\" />
-    <Folder Include="FEI\PrintEntity\" />
-=======
->>>>>>> 3bc5281dde929ba0876a98a1124e7ec93c74a040
     <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>
