@@ -34,14 +34,6 @@ namespace ThMEPLighting.EmgLight
         public static string LayerStruct = "l7Struct";
         public static string LayerStructLayout = "l8StructLayout";
 
-        public static string Layer = string.Format ("{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12}", 
-                                                        LayerExtendPoly, LayerFrame, LayerSeparatePoly,
-                                                        LayerLaneHead, LayerLane, LayerGetStruct,
-                                                        LayerStructSeg, LayerParallelStruct, LayerNotIntersectStruct,
-                                                        LayerOverlap, LayerSeparate, LayerStruct, LayerStructLayout
-                                                   );
-
-
         public enum ThStructType : int
         {
             column = 0,

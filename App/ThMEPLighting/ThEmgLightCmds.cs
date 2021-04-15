@@ -1,16 +1,20 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using AcHelper;
 using Linq2Acad;
 using ThCADExtension;
 using Autodesk.AutoCAD.Colors;
-using Autodesk.AutoCAD.Runtime;
-using System.Collections.Generic;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.EmgLight.Assistant;
+using ThMEPLighting.EmgLightConnect;
+using ThMEPLighting.EmgLightConnect.Service;
 
 namespace ThMEPLighting
 {
@@ -64,18 +68,15 @@ namespace ThMEPLighting
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
 
-                    //清除layer,has bug if change the coordiantes of dwg
-                    var block = RemoveBlockService.ExtractClearEmergencyLight(transformer);
-                    bufferFrame.ClearEmergencyLight(block);
-
-                    RemoveBlockService.ClearDrawing();
+                    //清除layer
+                    var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
+                    RemoveBlockService.ClearEmergencyLight(block);
 
                     var b = false;
                     if (b == true)
                     {
                         continue;
                     }
-
 
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
@@ -94,6 +95,128 @@ namespace ThMEPLighting
                     InsertLightService.InsertSprayBlock(layoutInfo);
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THYJZMLX", CommandFlags.Modal)]
+        public void ThEmgLightConnect()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                    SingleOnly = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                //获取ALE起点
+                
+                PromptSelectionOptions sOptions = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择ALE",
+                    RejectObjectsOnLockedLayers = true,
+                    SingleOnly = true,
+                };
+                dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(BlockReference )).DxfName,
+                };
+
+                filter = ThSelectionFilterTool.Build(dxfNames);
+
+                var sResult = Active.Editor.GetSelection(sOptions,filter);
+                if (sResult.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var ALEOri = (acdb.Element<BlockReference >(sResult.Value.GetObjectIds().First()) as BlockReference);
+                
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    //获取外包框
+                    var frame = acdb.Element<Polyline>(obj);
+                    var frameClone = frame.WashClone() as Polyline;
+                    var centerPt = frameClone.StartPoint;
+
+                    if (centerPt.X < 10E7)
+                    {
+                        centerPt = new Point3d();
+                    }
+
+
+                    //处理外包框
+                    var transformer = new ThMEPOriginTransformer(centerPt);
+                    transformer.Transform(frameClone);
+                    var nFrame = ThMEPFrameService.NormalizeEx(frameClone);
+                    if (nFrame.Area < 1)
+                    {
+                        continue;
+                    }
+
+                    //为了获取卡在外包框的建筑元素，这里做了一个Buffer处理
+                    var bufferFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
+                    var shrinkFrame = ThMEPFrameService.Buffer(nFrame, -EmgLightCommon.BufferFrame);
+                    //DrawUtils.ShowGeometry(bufferFrame, EmgLightCommon.LayerFrame, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight035);
+                    //DrawUtils.ShowGeometry(shrinkFrame, EmgLightCommon.LayerFrame, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight035);
+
+                    //如果没有layer 创建layer
+                    DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
+
+                    //清除连线。待补
+
+                    //
+
+                    //取块
+                    var getBlockS = new GetBlockService();
+                    getBlockS.getBlocksData(bufferFrame, transformer);
+
+                    var blockList = new Dictionary<EmgConnectCommon.BlockType, List<BlockReference>>();
+                    getBlockS.getBlockList(blockList);
+
+                    BlockReference ALE = ALEOri.Clone() as BlockReference;
+                    transformer.Transform(ALE);
+                    blockList.Add(EmgConnectCommon.BlockType.ale, new List<BlockReference> { ALE });
+
+                    var b = false;
+                    if (b == true)
+                    {
+                        continue;
+                    }
+
+                    //获取车道线
+                    var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
+
+                    ConnectEmgLightEngine ConnectEngine = new ConnectEmgLightEngine();
+                    ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame);
+
+                }
+            }
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "CleanDebugLayer", CommandFlags.Modal)]
+        public void ThCleanDebugLayer()
+        {
+            // 调试按钮关闭且图层不是保护半径有效图层
+            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
+            if (debugSwitch)
+            {
+                RemoveBlockService.ClearDrawing();
+            }
+
         }
     }
 }

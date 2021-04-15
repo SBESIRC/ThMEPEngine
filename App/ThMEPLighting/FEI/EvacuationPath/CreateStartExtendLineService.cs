@@ -11,15 +11,14 @@ using ThMEPLighting.FEI.Service;
 using ThMEPLighting.FEI.Model;
 using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 using ThCADCore.NTS;
-using ThMEPLighting.FEI.BFSAlgorithm;
 
 namespace ThMEPLighting.FEI.EvacuationPath
 {
-    public class CreateStartExtendLineService
+    public class CreateExtendLineWithAStarService
     {
         double distance = 400;
 
-        public List<ExtendLineModel> CreateStartLines(Polyline polyline, KeyValuePair<Line, Point3d> closetLane, Point3d blockPt, List<Polyline> holes)
+        public List<ExtendLineModel> CreateStartLines(Polyline polyline, Line closetLane, Point3d blockPt, List<Polyline> holes)
         {
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
 
@@ -36,7 +35,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
             else
             {
                 //----用a*算法计算路径躲洞
-                resLines.AddRange(GetPathByAStar(polyline, closetLane.Key, startPt, holes));
+                resLines.AddRange(GetPathByAStar(polyline, closetLane, startPt, holes));
             }
 
             return resLines;
@@ -48,11 +47,11 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="closetLane"></param>
         /// <param name="startPt"></param>
         /// <returns></returns>
-        public ExtendLineModel CreateSymbolExtendLine(Polyline frame, KeyValuePair<Line, Point3d> closetLane, Point3d startPt, List<Polyline> holes)
+        private ExtendLineModel CreateSymbolExtendLine(Polyline frame, Line closetLane, Point3d startPt, List<Polyline> holes)
         {
-            var closetPt = closetLane.Key.GetClosestPointTo(startPt, false);
+            var closetPt = closetLane.GetClosestPointTo(startPt, false);
             Vector3d dir = Vector3d.ZAxis.CrossProduct((closetPt - startPt).GetNormal());
-            if ((closetLane.Key.EndPoint - closetLane.Key.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.001, 0.001)))
+            if ((closetLane.EndPoint - closetLane.StartPoint).GetNormal().IsParallelTo(dir, new Tolerance(0.001, 0.001)))
             {
                 Polyline line = new Polyline();
                 line.AddVertexAt(0, startPt.ToPoint2D(), 0, 0, 0);

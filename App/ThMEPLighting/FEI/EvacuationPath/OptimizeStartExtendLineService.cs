@@ -15,74 +15,16 @@ namespace ThMEPLighting.FEI.EvacuationPath
         public static Polyline CreateMapFrame(Line lane, Point3d startPt, List<Polyline> holes, double expandLength)
         {
             Vector3d xDir = (lane.EndPoint - lane.StartPoint).GetNormal();
-            Vector3d zDir = Vector3d.ZAxis;
-            Vector3d yDir = zDir.CrossProduct(xDir);
-            Matrix3d matrix = new Matrix3d(new double[] {
-                xDir.X, xDir.Y, xDir.Z, 0,
-                yDir.X, yDir.Y, yDir.Z, 0,
-                zDir.X, zDir.Y, zDir.Z, 0,
-                0.0, 0.0, 0.0, 1.0
-            });
-
-            Line cloneLine = lane.Clone() as Line;
-            cloneLine.TransformBy(matrix);
-            Point3d transPt = startPt.TransformBy(matrix);
-
-            List<Point3d> pts = new List<Point3d>() { transPt, cloneLine.StartPoint, cloneLine.EndPoint };
-            var polyline = GetBoungdingBox(pts);
+            List<Point3d> pts = new List<Point3d>() { startPt, lane.StartPoint, lane.EndPoint };
+            var polyline = GeUtils.GetBoungdingBox(pts, xDir);
             var intersectHoles = SelectService.SelelctCrossing(holes, polyline);
             foreach (var iHoles in intersectHoles)
             {
-                pts.AddRange(GetAllPolylinePts(iHoles));
+                pts.AddRange(GeUtils.GetAllPolylinePts(iHoles));
             }
-
-            var resPolyline = GetBoungdingBox(pts).Buffer(expandLength)[0] as Polyline;
-            resPolyline.TransformBy(matrix.Inverse());
+            var resPolyline = GeUtils.GetBoungdingBox(pts, xDir).Buffer(expandLength)[0] as Polyline;
 
             return resPolyline;
-        }
-
-        /// <summary>
-        /// 获取polyline所有点
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        private static List<Point3d> GetAllPolylinePts(Polyline polyline)
-        {
-            List<Point3d> allPts = new List<Point3d>();
-            for (int i = 0; i < polyline.NumberOfVertices; i++)
-            {
-                allPts.Add(polyline.GetPoint3dAt(i));
-            }
-
-            return allPts;
-        }
-
-        /// <summary>
-        /// 获取boundingbox
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        private static Polyline GetBoungdingBox(List<Point3d> points)
-        {
-            points = points.OrderBy(x => x.X).ToList();
-            double minX = points.First().X;
-            double maxX = points.Last().X;
-            points = points.OrderBy(x => x.Y).ToList();
-            double minY = points.First().Y;
-            double maxY = points.Last().Y;
-
-            Point2d pt1 = new Point2d(minX, minY);
-            Point2d pt2 = new Point2d(minX, maxY);
-            Point2d pt3 = new Point2d(maxX, maxY);
-            Point2d pt4 = new Point2d(maxX, minY);
-            Polyline polyline = new Polyline() { Closed = true };
-            polyline.AddVertexAt(0, pt1, 0, 0, 0);
-            polyline.AddVertexAt(1, pt2, 0, 0, 0);
-            polyline.AddVertexAt(2, pt3, 0, 0, 0);
-            polyline.AddVertexAt(3, pt4, 0, 0, 0);
-
-            return polyline;
         }
     }
 }

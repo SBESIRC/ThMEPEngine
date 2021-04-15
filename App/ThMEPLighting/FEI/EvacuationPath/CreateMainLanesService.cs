@@ -4,7 +4,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using ThMEPEngineCore.LaneLine;
+using ThCADCore.NTS;
 using ThMEPLighting.FEI.Model;
 using ThMEPLighting.FEI.Service;
 
@@ -20,13 +20,11 @@ namespace ThMEPLighting.FEI.EvacuationPath
             //排序车道线
             lanes = lanes.OrderBy(x =>
             {
-                var closetPt = x.First().GetClosestPointTo(pt, true);
-                return pt.DistanceTo(closetPt);
+                var closetPtInfo = x.Select(y => y.GetClosestPointTo(pt, false).DistanceTo(pt));
+                return closetPtInfo.OrderBy(y => y).First();
             }).ToList();
 
-            var extendLines = ExtendLine(frame, pt, extendDir, lanes, holes, 0, null);
-
-            return extendLines;
+            return ExtendLine(frame, pt, extendDir, lanes, holes, 0, null);
         }
 
         /// <summary>
@@ -39,10 +37,9 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="startNum"></param>
         /// <param name="isFirst"></param>
         /// <returns></returns>
-        private List<ExtendLineModel> ExtendLine(Polyline frame, Point3d pt, Vector3d extendDir, List<List<Line>> lanes,
+        private List<ExtendLineModel> ExtendLine(Polyline frame, Point3d spt, Vector3d extendDir, List<List<Line>> lanes,
             List<Polyline> holes, int startNum, List<Line> preLines, Priority priority = Priority.firstLevel)
         {
-            Point3d spt = pt;
             List<Line> preLanes = preLines;
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
             for (int i = startNum; i < lanes.Count; i++)
@@ -57,13 +54,16 @@ namespace ThMEPLighting.FEI.EvacuationPath
                         lineVerticalDir = -lineVerticalDir;
                     }
 
-                    Ray ray = new Ray();
-                    ray.BasePoint = spt;
-                    ray.UnitDir = lineVerticalDir;
-                    Point3dCollection intersectPts = new Point3dCollection();
-                    ray.IntersectWith(line, Intersect.OnBothOperands, intersectPts, (IntPtr)0, (IntPtr)0);
-                    if (intersectPts.Count > 0)
+                    if (GeUtils.GetIntersectPtByDir(spt, lineVerticalDir, line, out Point3dCollection intersectPts))
                     {
+                        if (preLanes == null || preLanes.Count <= 0)
+                        {
+                            if (!intersectPts[0].IsEqualTo(spt, new Tolerance(1, 1)))
+                            {
+                                continue;
+                            }
+                        }
+
                         Polyline polyline = new Polyline();
                         polyline.AddVertexAt(0, spt.ToPoint2D(), 0, 0, 0);
                         polyline.AddVertexAt(0, intersectPts[0].ToPoint2D(), 0, 0, 0);
@@ -74,20 +74,23 @@ namespace ThMEPLighting.FEI.EvacuationPath
                         //判断是否穿洞口
                         if (CheckService.CheckIntersectWithHols(polyline, holes, out List<Polyline> intersectHoles))
                         {
-                            var movePts = MoveStartPoint(spt, lineVerticalDir, intersectHoles);
-                            foreach (var mPt in movePts)
+                            Polyline interHoleBox = GetAllIntersectHoles(intersectHoles, holes, frame, polyline);
+                            if (interHoleBox != null)
                             {
-                                var ajustPt = AjustStartPoint(preLanes, mPt, lineVerticalDir);
-                                if (ajustPt != null)
+                                var movePts = MoveStartPoint(spt, lineVerticalDir, interHoleBox);
+                                foreach (var mPt in movePts)
                                 {
-                                    resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, i, preLanes, Priority.secondLevel));
+                                    var ajustPt = AjustStartPoint(preLanes, mPt, lineVerticalDir);
+                                    if (ajustPt != null)
+                                    {
+                                        resLines.AddRange(ExtendLine(frame, ajustPt.Value, extendDir, lanes, holes, i, preLanes, Priority.secondLevel));
+                                    }
                                 }
                             }
 
                             return resLines;
                         }
-                        //未穿洞
-                        if (!spt.IsEqualTo(intersectPts[0], new Tolerance(1, 1)))
+                        if (!intersectPts[0].IsEqualTo(spt, new Tolerance(1, 1)))
                         {
                             extendLine.line = polyline;
                             extendLine.priority = priority;
@@ -107,26 +110,18 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 {
                     if (preLanes != null)
                     {
-                        if (CheckIntersectWithFrame(frame, preLanes, lanes[i], extendDir, spt, out Line overlapLine))
+                        if (CheckIntersectWithFrame(preLanes, lanes[i], extendDir, spt, out Line overlapLine))
                         {
-                            var newLine = CreateExtendLineAvoidFrame(overlapLine, lanes[i], spt, frame, holes);
+                            var newLine = CreateExtendLineAvoidFrame(overlapLine, lanes[i], preLanes, spt, frame, holes);
                             if (newLine != null)
                             {
-                                var dir = (newLine.EndPoint - newLine.StartPoint).GetNormal();
-                                var ajustPt = AjustStartPoint(preLanes, newLine.StartPoint, dir);
-                                if (ajustPt != null)
-                                {
-                                    Polyline polyline = new Polyline();
-                                    polyline.AddVertexAt(0, ajustPt.Value.ToPoint2D(), 0, 0, 0);
-                                    polyline.AddVertexAt(0, newLine.EndPoint.ToPoint2D(), 0, 0, 0);
-                                    extendLine.line = polyline;
-                                    extendLine.priority = Priority.secondLevel;
-                                    extendLine.endLane = lanes[i];
-                                    extendLine.startLane = preLanes;
-                                    resLines.Add(extendLine);
-                                    spt = newLine.EndPoint;
-                                    preLanes = lanes[i];
-                                }
+                                extendLine.line = newLine;
+                                extendLine.priority = Priority.secondLevel;
+                                extendLine.endLane = lanes[i];
+                                extendLine.startLane = preLanes;
+                                resLines.Add(extendLine);
+                                spt = newLine.EndPoint;
+                                preLanes = lanes[i];
                             }
                         }
                     }
@@ -144,7 +139,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="otherLines"></param>
         /// <param name="sPt"></param>
         /// <returns></returns>
-        private bool CheckIntersectWithFrame(Polyline frame, List<Line> lines, List<Line> otherLines, Vector3d extendDir, Point3d sPt, out Line overlapLine)
+        private bool CheckIntersectWithFrame(List<Line> lines, List<Line> otherLines, Vector3d extendDir, Point3d sPt, out Line overlapLine)
         {
             overlapLine = GeUtils.LineOverlap(lines, otherLines);
             if (overlapLine == null || overlapLine.Length < lapDistance)
@@ -161,7 +156,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 return false;
             }
 
-            return CheckService.CheckIntersectWithFrame(extendLine, frame);
+            return true;
         }
 
         /// <summary>
@@ -173,7 +168,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="frame"></param>
         /// <param name="holes"></param>
         /// <returns></returns>
-        private Line CreateExtendLineAvoidFrame(Line line, List<Line> otherLines, Point3d sPt, Polyline frame, List<Polyline> holes)
+        private Polyline CreateExtendLineAvoidFrame(Line line, List<Line> otherLines, List<Line> preLanes, Point3d sPt, Polyline frame, List<Polyline> holes)
         {
             var startPt = line.StartPoint.DistanceTo(sPt) < line.EndPoint.DistanceTo(sPt) ? line.StartPoint : line.EndPoint;
             var endPt = line.StartPoint.DistanceTo(sPt) > line.EndPoint.DistanceTo(sPt) ? line.StartPoint : line.EndPoint;
@@ -206,7 +201,16 @@ namespace ThMEPLighting.FEI.EvacuationPath
                     if (!CheckService.CheckIntersectWithFrame(extendLine, frame) &&
                         !CheckService.CheckIntersectWithHols(extendLine, holes, out List<Polyline> interHoles))
                     {
-                        return extendLine;
+                        var dir = (extendLine.EndPoint - extendLine.StartPoint).GetNormal();
+                        var ajustPt = AjustStartPoint(preLanes, extendLine.StartPoint, dir);
+                        if (ajustPt != null)
+                        {
+                            Polyline polyline = new Polyline();
+                            polyline.AddVertexAt(0, ajustPt.Value.ToPoint2D(), 0, 0, 0);
+                            polyline.AddVertexAt(0, extendLine.EndPoint.ToPoint2D(), 0, 0, 0);
+
+                            return polyline;
+                        }
                     }
                 }
 
@@ -223,7 +227,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <param name="dir"></param>
         /// <param name="holes"></param>
         /// <returns></returns>
-        private List<Point3d> MoveStartPoint(Point3d spt, Vector3d dir, List<Polyline> holes)
+        private List<Point3d> MoveStartPoint(Point3d spt, Vector3d dir, Polyline hole)
         {
             var zDir = Vector3d.ZAxis;
             var xDir = zDir.CrossProduct(dir);
@@ -235,17 +239,9 @@ namespace ThMEPLighting.FEI.EvacuationPath
                     0.0, 0.0, 0.0, 1.0
             });
 
-            var allPts = holes.SelectMany(x =>
-            {
-                var pts = new List<Point3d>();
-                for (int i = 0; i < x.NumberOfVertices; i++)
-                {
-                    pts.Add(x.GetPoint3dAt(i).TransformBy(matrix.Inverse()));
-                }
-                return pts;
-            }).OrderBy(x => x.X).ToList();
+            var allPts = GeUtils.GetAllPolylinePts(hole).Select(x => x.TransformBy(matrix)).OrderBy(x => x.X).ToList(); 
 
-            var transPt = spt.TransformBy(matrix.Inverse());
+            var transPt = spt.TransformBy(matrix);
             var moveDir = xDir;
             var leftMoveLength = Math.Abs(allPts.Last().X - transPt.X) + moveDistance;
             var rightMoveLength = Math.Abs(allPts.First().X - transPt.X) + moveDistance;
@@ -271,28 +267,61 @@ namespace ThMEPLighting.FEI.EvacuationPath
         /// <returns></returns>
         private Point3d? AjustStartPoint(List<Line> lane, Point3d spt, Vector3d dir)
         {
-            Ray ray = new Ray();
+            if (lane == null)
+            {
+                return spt;
+            }
+
             Point3dCollection intersectPts = new Point3dCollection();
             foreach (var line in lane)
             {
-                ray.BasePoint = spt - dir * 50;
-                ray.UnitDir = dir;
-                ray.IntersectWith(line, Intersect.OnBothOperands, intersectPts, (IntPtr)0, (IntPtr)0);
-                if (intersectPts.Count > 0)
+                if (GeUtils.GetIntersectPtByDir(spt - dir * 50, dir, line, out intersectPts))
                 {
                     return intersectPts[0];
                 }
 
-                ray.BasePoint = spt + dir * 50;
-                ray.UnitDir = -dir;
-                ray.IntersectWith(line, Intersect.OnBothOperands, intersectPts, (IntPtr)0, (IntPtr)0);
-                if (intersectPts.Count > 0)
+                if (GeUtils.GetIntersectPtByDir(spt + dir * 50, -dir, line, out intersectPts))
                 {
                     return intersectPts[0];
                 }
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// 计算所有穿越障碍物
+        /// </summary>
+        /// <param name="intersectHoles"></param>
+        /// <param name="allHoles"></param>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        private Polyline GetAllIntersectHoles(List<Polyline> intersectHoles, List<Polyline> allHoles, Polyline frame, Polyline polyline)
+        {
+            List<Polyline> checkHoles = allHoles.Except(intersectHoles).ToList();
+            var allPts = intersectHoles.SelectMany(x => GeUtils.GetAllPolylinePts(x)).ToList();
+            allPts.AddRange(GeUtils.GetAllPolylinePts(polyline));
+
+            Vector3d xDir = (polyline.EndPoint - polyline.StartPoint).GetNormal();
+            var boungdingBox = GeUtils.GetBoungdingBox(allPts, xDir);
+            var bufferBox = boungdingBox.Buffer(moveDistance)[0] as Polyline;
+
+            if (CheckService.CheckIntersectWithFrame(polyline, frame))
+            {
+                return null;
+            }
+
+            var interHoles = SelectService.SelelctCrossing(checkHoles, boungdingBox);
+            if (interHoles.Count > 0)
+            {
+                interHoles.AddRange(intersectHoles);
+                return GetAllIntersectHoles(interHoles, checkHoles, frame, polyline);
+            }
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                db.ModelSpace.Add(boungdingBox);
+            }
+            return boungdingBox;
         }
     }
 }

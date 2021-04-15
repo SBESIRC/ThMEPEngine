@@ -23,9 +23,9 @@ namespace TianHua.FanSelection
 
         List<string> m_ListMountType { get; set; }
 
-        List<FanDesignDataModel> m_ListFanDesign { get; set; }
+        //List<FanDesignDataModel> m_ListFanDesign { get; set; }
 
-        FanDesignDataModel m_FanDesign { get; set; }
+        //FanDesignDataModel m_FanDesign { get; set; }
 
         Action<ThModelCopyMessage> OnModelCopiedHandler { get; }
         Action<ThModelDeleteMessage> OnModelDeletedHandler { get; }

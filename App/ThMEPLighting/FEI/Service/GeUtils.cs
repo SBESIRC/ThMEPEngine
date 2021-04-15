@@ -89,5 +89,76 @@ namespace ThMEPLighting.FEI.Service
                 return new Line(new Point3d(minLineX, y, 0).TransformBy(matrix.Inverse()), new Point3d(maxOtherLineX, y, 0).TransformBy(matrix.Inverse()));
             }
         }
+
+        /// <summary>
+        /// 找到一个点从特定方向到线上是否有交点
+        /// </summary>
+        /// <param name="pt"></param>
+        /// <param name="dir"></param>
+        /// <param name="line"></param>
+        public static bool GetIntersectPtByDir(Point3d pt, Vector3d dir, Line line, out Point3dCollection intersectPts)
+        {
+            intersectPts = new Point3dCollection();
+            Ray ray = new Ray();
+            ray.BasePoint = pt;
+            ray.UnitDir = dir;
+            ray.IntersectWith(line, Intersect.OnBothOperands, intersectPts, (IntPtr)0, (IntPtr)0);
+
+            return intersectPts.Count > 0;
+        }
+
+        /// <summary>
+        /// 获取boundingbox
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static Polyline GetBoungdingBox(List<Point3d> points, Vector3d xDir)
+        {
+            Vector3d zDir = Vector3d.ZAxis;
+            Vector3d yDir = zDir.CrossProduct(xDir);
+            Matrix3d matrix = new Matrix3d(new double[] {
+                xDir.X, xDir.Y, xDir.Z, 0,
+                yDir.X, yDir.Y, yDir.Z, 0,
+                zDir.X, zDir.Y, zDir.Z, 0,
+                0.0, 0.0, 0.0, 1.0
+            });
+            points = points.Select(x => x.TransformBy(matrix.Inverse())).ToList();
+
+            points = points.OrderBy(x => x.X).ToList();
+            double minX = points.First().X;
+            double maxX = points.Last().X;
+            points = points.OrderBy(x => x.Y).ToList();
+            double minY = points.First().Y;
+            double maxY = points.Last().Y;
+
+            Point2d pt1 = new Point2d(minX, minY);
+            Point2d pt2 = new Point2d(minX, maxY);
+            Point2d pt3 = new Point2d(maxX, maxY);
+            Point2d pt4 = new Point2d(maxX, minY);
+            Polyline polyline = new Polyline() { Closed = true };
+            polyline.AddVertexAt(0, pt1, 0, 0, 0);
+            polyline.AddVertexAt(1, pt2, 0, 0, 0);
+            polyline.AddVertexAt(2, pt3, 0, 0, 0);
+            polyline.AddVertexAt(3, pt4, 0, 0, 0);
+            polyline.TransformBy(matrix);
+
+            return polyline;
+        }
+
+        /// <summary>
+        /// 获取polyline所有点
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static List<Point3d> GetAllPolylinePts(Polyline polyline)
+        {
+            List<Point3d> allPts = new List<Point3d>();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                allPts.Add(polyline.GetPoint3dAt(i));
+            }
+
+            return allPts;
+        }
     }
 }

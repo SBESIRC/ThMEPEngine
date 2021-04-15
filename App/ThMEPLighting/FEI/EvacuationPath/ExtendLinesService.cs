@@ -29,7 +29,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
             }
 
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
-            CreateStartExtendLineService startExtendLineService = new CreateStartExtendLineService();
+            CreateExtendLineWithAStarService startExtendLineService = new CreateExtendLineWithAStarService();
             CreateMainLanesService createMainLanes = new CreateMainLanesService();
             while (enterBlocks.Count > 0)
             {
@@ -53,7 +53,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 var closetLane = GetClosetLane(allLanes, blockPt, frame);
 
                 //起点到主车道延伸线
-                var startExtendLines = startExtendLineService.CreateStartLines(frame, closetLane, blockPt, holes);
+                var startExtendLines = startExtendLineService.CreateStartLines(frame, closetLane.Key, blockPt, holes);
 
                 if (startExtendLines.Count > 0)
                 {
@@ -76,6 +76,12 @@ namespace ThMEPLighting.FEI.EvacuationPath
             //合并延伸线（删除多余延伸线并尽量均匀）
             MergeExtendLineService mergeExtendLineService = new MergeExtendLineService();
             resLines = mergeExtendLineService.MergeLines(xLanes, yLanes, resLines);
+
+            //连接孤立车道线
+            List<List<Line>> allLineLanes = new List<List<Line>>(xLanes);
+            allLineLanes.AddRange(yLanes);
+            ConnectIsolatedLaneService connectIsolatedLane = new ConnectIsolatedLaneService();
+            resLines.AddRange(connectIsolatedLane.ConnectIsolatedLane(resLines, allLineLanes, frame, holes));
 
             return resLines;
         }
@@ -158,7 +164,12 @@ namespace ThMEPLighting.FEI.EvacuationPath
             Line checkLine = new Line(startPt, closeInfo.Value);
             if (!CheckService.CheckIntersectWithFrame(checkLine, polyline))
             {
-                return closeInfo;
+                var checkDir = (closeInfo.Value - startPt).GetNormal();
+                var lineDir = Vector3d.ZAxis.CrossProduct((closeInfo.Key.EndPoint - closeInfo.Key.StartPoint).GetNormal());
+                if (checkDir.IsEqualTo(lineDir, new Tolerance(0.001, 0.001)))
+                {
+                    return closeInfo;
+                }
             }
 
             BFSPathPlaner pathPlaner = new BFSPathPlaner(400);

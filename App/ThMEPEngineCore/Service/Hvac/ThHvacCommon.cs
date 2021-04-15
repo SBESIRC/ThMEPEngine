@@ -116,6 +116,7 @@
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_WIDTH = "宽度";
         public const string BLOCK_DYNAMIC_PROPERTY_VALVE_LENGTH = "长度";
         public const string BLOCK_DYNAMIC_PROPERTY_TEXT_HEIGHT = "字高";
+        public const string BLOCK_DYNAMIC_PROPERTY_ROTATE_NONE = "未翻转";
 
         //阀块可见性属性值
         public const string BLOCK_VALVE_VISIBILITY_FIRE_280 = "280度防火阀（反馈）FDH";

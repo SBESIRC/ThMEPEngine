@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Linq;
 using TianHua.FanSelection.Messaging;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
@@ -9,8 +8,6 @@ namespace TianHua.FanSelection.UI.CAD
     public class ThFanSelectionDocumentEventHandler : IDisposable
     {
         private Document Document { get; set; }
-
-        private ThFanSelectionDbSaveHandler DbSaveHandler { get; set; }
 
         private ThFanSelectionDbUndoHandler DbUndoHandler { get; set; }
 
@@ -55,17 +52,6 @@ namespace TianHua.FanSelection.UI.CAD
                 DbUndoHandler = new ThFanSelectionDbUndoHandler(Database);
                 DbEraseHandler = new ThFanSelectionDbEraseHandler(Database);
             }
-            else if (e.GlobalCommandName == "QSAVE")
-            {
-                // QSAVE: 
-                //  Saves drawing with current filename.
-                // SAVEAS:               
-                //  Saves drawing as new name, continues in new name.
-                // SAVE:                    
-                //  Saves drawing as new name, continues in old name. (Command line only)
-                // 暂时只支持QSAVE
-                DbSaveHandler = new ThFanSelectionDbSaveHandler(Database);
-            }
             else if (e.GlobalCommandName == "ERASE")
             {
                 DbEraseHandler = new ThFanSelectionDbEraseHandler(Database);
@@ -95,10 +81,6 @@ namespace TianHua.FanSelection.UI.CAD
                 // 所以这里同时触发UNDO/REDO + ERASE事件
                 SendUndoMessage();
                 SendEraseMessage();
-            }
-            else if (e.GlobalCommandName == "QSAVE")
-            {
-                SendSaveMessage();
             }
             else if (e.GlobalCommandName == "ERASE")
             {
@@ -135,11 +117,6 @@ namespace TianHua.FanSelection.UI.CAD
 
         private void ResetDbHandlers()
         {
-            if (DbSaveHandler != null)
-            {
-                DbSaveHandler.Dispose();
-                DbSaveHandler = null;
-            }
             if (DbUndoHandler != null)
             {
                 DbUndoHandler.Dispose();
@@ -155,14 +132,6 @@ namespace TianHua.FanSelection.UI.CAD
                 DbDeepCloneHandler.Dispose();
                 DbDeepCloneHandler = null;
             }
-        }
-
-        public void SendSaveMessage()
-        {
-            ThModelSaveMessage.SendWith(new ThModelSaveMessageArgs()
-            {
-                FileName = DbSaveHandler.FileName,
-            });
         }
 
         public void SendUndoMessage()

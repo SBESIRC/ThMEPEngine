@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName, string.Join(";", o.Tags.ToArray()));
-                geometry.Properties.Add(GroupOwnerPropertyName, BuildString(GroupOwner,o.Outline));
+                geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner,o.Outline));
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });
@@ -159,7 +159,7 @@ namespace ThMEPEngineCore.Temp
 
         public void Group(Dictionary<Entity, string> groupId)
         {
-            Spaces.ForEach(o => GroupOwner.Add(o.Boundary, FindCurveGroupIds(groupId, o.Boundary)));
+            Spaces.ForEach(o => GroupOwner.Add(o.Outline, FindCurveGroupIds(groupId, o.Outline)));
         }
     }
 }

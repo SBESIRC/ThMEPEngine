@@ -4,7 +4,6 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
-using ThMEPLighting.EmgLight;
 
 namespace ThMEPLighting.EmgLight.Service
 {

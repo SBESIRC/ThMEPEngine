@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using AcHelper;
 using NFox.Cad;
+using DotNetARX;
 using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.LaneLine;
@@ -17,10 +20,9 @@ using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.Common;
 
 
-
 namespace ThMEPLighting.EmgLight.Service
 {
-    class GetSourceDataService
+    public static class GetSourceDataService
     {
         public static List<List<Line>> BuildLanes(Polyline shrinkFrame, Polyline bufferFrame, AcadDatabase acdb, ThMEPOriginTransformer transformer)
         {
@@ -93,7 +95,10 @@ namespace ThMEPLighting.EmgLight.Service
         {
             var ColumnExtractEngine = new ThColumnExtractionEngine();
             ColumnExtractEngine.Extract(acdb.Database);
+            DrawUtils.ShowGeometry(ColumnExtractEngine.Results.Select(x => x.Geometry as Polyline).ToList(), "l0clolmn");
             ColumnExtractEngine.Results.ForEach(x => transformer.Transform(x.Geometry));
+            DrawUtils.ShowGeometry(ColumnExtractEngine.Results.Select(x => x.Geometry as Polyline).ToList(), "l0clolmn");
+
             var ColumnEngine = new ThColumnRecognitionEngine();
             ColumnEngine.Recognize(ColumnExtractEngine.Results, transBufferFrame.Vertices());
 
@@ -136,6 +141,73 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        /// <summary>
+        /// dictionary: key: original, value: transfered
+        /// </summary>
+        /// <param name="transformer"></param>
+        /// <param name="LayerName"></param>
+        /// <param name="BlockName"></param>
+        /// <param name="bufferFrame"></param>
+        /// <returns></returns>
+        public static Dictionary<BlockReference, BlockReference> ExtractBlock(Polyline bufferFrame, string LayerName, string BlockName,ThMEPOriginTransformer transformer)
+        {
+            var emgLight = new Dictionary<BlockReference, BlockReference>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                acadDatabase.Database.UnFrozenLayer(LayerName);
+                acadDatabase.Database.UnLockLayer(LayerName);
+                acadDatabase.Database.UnOffLayer(LayerName);
 
+                var items = acadDatabase.ModelSpace
+                .OfType<BlockReference>()
+                .Where(o => o.Layer == LayerName);
+
+                foreach (BlockReference block in items)
+                {
+                    if (block.Name == BlockName)
+                    {
+                        var blockTrans = block.Clone() as BlockReference;
+                        transformer.Transform(blockTrans);
+                        emgLight.Add(block,blockTrans);
+                    }
+                }
+
+                emgLight= emgLight.Where(o => bufferFrame.Contains(o.Value.Position)).ToDictionary (x=>x.Key, x=>x.Value );
+
+            }
+
+            return emgLight;
+        }
+
+        public static Dictionary<BlockReference, BlockReference> ExtractBlock(Polyline bufferFrame, string BlockName, ThMEPOriginTransformer transformer)
+        {
+            var emgLight = new Dictionary<BlockReference, BlockReference>();
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+              //  acadDatabase.Database.UnFrozenLayer(LayerName);
+               // acadDatabase.Database.UnLockLayer(LayerName);
+               // acadDatabase.Database.UnOffLayer(LayerName);
+               
+
+                //有超多bug，不能用
+                var items = acadDatabase.ModelSpace
+                .OfType<Entity>();
+
+                foreach (BlockReference block in items)
+                {
+                    if (block.Name == BlockName)
+                    {
+                        var blockTrans = block.Clone() as BlockReference;
+                        transformer.Transform(blockTrans);
+                        emgLight.Add(block, blockTrans);
+                    }
+                }
+
+                emgLight = emgLight.Where(o => bufferFrame.Contains(o.Value.Position)).ToDictionary(x => x.Key, x => x.Value);
+
+            }
+
+            return emgLight;
+        }
     }
 }

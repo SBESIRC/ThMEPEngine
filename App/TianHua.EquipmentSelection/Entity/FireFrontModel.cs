@@ -102,11 +102,6 @@ namespace TianHua.FanSelection.Model
         /// </summary>
         public int Count_Floor { get; set; }
 
-        /// <summary>
-        /// 前室门(楼层1，楼层2，楼层3)
-        /// </summary>
-        //public Dictionary<string, List<ThEvacuationDoor>> FrontRoomDoors2 { get; set; }
-
         public List<ThResult> Result { get; set; }
         /// <summary>
         /// 送风阀截面长

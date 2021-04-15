@@ -19,6 +19,7 @@ namespace TianHua.FanSelection.UI
         private static bool _runCustomCommand = false;
         private static ObjectId _selectedEntId = ObjectId.Null;
         private static CustomCommandMappers _customCommands = null;
+        private static ThFanSelectionDatabaseEventHandler databaseEventHandler = null; 
         private static ThFanSelectionDocumentEventHandler documentEventHandler = null;
 
         public void Initialize()
@@ -28,6 +29,7 @@ namespace TianHua.FanSelection.UI
             if (Active.Document != null)
             {
                 SubscribeToDocumentEvents(Active.Document);
+                SubscribeToDatabaseEvents(Active.Document.Database);
             }
         }
 
@@ -190,6 +192,16 @@ namespace TianHua.FanSelection.UI
             documentEventHandler.Dispose();
         }
 
+        private static void SubscribeToDatabaseEvents(Database database)
+        {
+            databaseEventHandler = new ThFanSelectionDatabaseEventHandler(database);
+        }
+
+        private static void UnsubscribeToDatabaseEvents(Database database)
+        {
+            databaseEventHandler.Dispose();
+        }
+
         private static void DocumentManager_DocumentActivated(object sender, DocumentCollectionEventArgs e)
         {
             if (e.Document != null)
@@ -220,6 +232,8 @@ namespace TianHua.FanSelection.UI
             {
                 // 订阅Document事件
                 SubscribeToDocumentEvents(e.Document);
+                // 订阅Database事件
+                SubscribeToDatabaseEvents(e.Document.Database);
             }
         }
 
@@ -231,6 +245,8 @@ namespace TianHua.FanSelection.UI
 
                 // 取消订阅Docuemnt事件
                 UnSubscribeToDocumentEvents(e.Document);
+                // 取消订阅Database事件
+                UnsubscribeToDatabaseEvents(e.Document.Database);
             }
         }
 
