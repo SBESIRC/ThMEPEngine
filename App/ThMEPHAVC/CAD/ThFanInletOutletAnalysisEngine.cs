@@ -17,9 +17,15 @@ namespace ThMEPHAVC.CAD
         Wrong_Empty = 2,
         Wrong_NotVertical = 3
     }
+    public struct TeeInfo
+    {
+        public Vector3d dir { get; set; }   //根据dir判断是否翻转
+        public Vector2d angle { get; set; }
+        public Point3d position { get; set; }
+
+    }
     public class ThFanInletOutletAnalysisEngine
     {
-        //public FanAnalysisModel FanModel { get; set; }
         ThDbModelFan FanModel { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> InletCenterLineGraph { get; set; }
         public ThDuctEdge<ThDuctVertex> InletStartEdge { get; set; }
@@ -29,10 +35,8 @@ namespace ThMEPHAVC.CAD
         public AnalysisResultType OutletAnalysisResult { get; set; }
         public List<Point3d> InletAcuteAnglePositions { get; set; }
         public List<Point3d> OutletAcuteAnglePositions { get; set; }
-        public List<Point3d> InletTeeCPPositions { get; set; }
-        public List<double> ICPAngle { get; set; }
-        public List<Point3d> OutletTeeCPPositions { get; set; }
-        public List<double> OCPAngle { get; set; }
+        public List<TeeInfo> InTeesInfo { get; set; }
+        public List<TeeInfo> OutTeesInfo { get; set; }
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
         {
             FanModel = fanmodel;
@@ -40,10 +44,8 @@ namespace ThMEPHAVC.CAD
             ThDuctEdge<ThDuctVertex> tempoutletfirstedge = null;
             InletAcuteAnglePositions = new List<Point3d>();
             OutletAcuteAnglePositions = new List<Point3d>();
-            InletTeeCPPositions = new List<Point3d>();
-            OutletTeeCPPositions = new List<Point3d>();
-            ICPAngle = new List<double>();
-            OCPAngle = new List<double>();
+            InTeesInfo = new List<TeeInfo>();
+            OutTeesInfo = new List<TeeInfo>();
             InletCenterLineGraph = CreateLineGraph(fanmodel.FanInletBasePoint, ref tempinletfirstedge);
             InletStartEdge = tempinletfirstedge;
             OutletCenterLineGraph = CreateLineGraph(fanmodel.FanOutletBasePoint, ref tempoutletfirstedge);
@@ -96,13 +98,16 @@ namespace ThMEPHAVC.CAD
                     {
                         var p1 = InletCenterLineGraph.OutEdges(edge.Target).First().Target;
                         var p2 = InletCenterLineGraph.OutEdges(edge.Target).First().Source;
-                        var v = ThServiceTee.is_bypass(p1.Position, p2.Position, bypass_lines) ?
-                                InletCenterLineGraph.OutEdges(edge.Target).First() :
+                        var v = ThServiceTee.Is_bypass(p1.Position, p2.Position, bypass_lines) ?
+                                InletCenterLineGraph.OutEdges(edge.Target).First():
                                 InletCenterLineGraph.OutEdges(edge.Target).Last();
                         Vector2d vec = new Vector2d(v.Source.Position.X - v.Target.Position.X,
                                                     v.Source.Position.Y - v.Target.Position.Y);
-                        ICPAngle.Add(vec.Angle);
-                        InletTeeCPPositions.Add(edge.Target.Position);
+                        Vector3d v1 = new Vector3d(vec.X, vec.Y, 0);
+                        Vector3d v2 = new Vector3d(edge.Target.Position.X - edge.Source.Position.X,
+                                                   edge.Target.Position.Y - edge.Source.Position.Y, 0);
+                        Vector3d dir = v1.GetNormal().CrossProduct(v2.GetNormal());
+                        InTeesInfo.Add(new TeeInfo { dir = dir, angle = vec, position = edge.Target.Position });
                     }
                 }
                 if (InletAcuteAnglePositions.Count != 0)
@@ -184,13 +189,16 @@ namespace ThMEPHAVC.CAD
                     {
                         var p1 = OutletCenterLineGraph.OutEdges(edge.Target).First().Target;
                         var p2 = OutletCenterLineGraph.OutEdges(edge.Target).First().Source;
-                        var v = ThServiceTee.is_bypass(p1.Position, p2.Position, bypass_lines) ?
+                        var v = ThServiceTee.Is_bypass(p1.Position, p2.Position, bypass_lines) ?
                                 OutletCenterLineGraph.OutEdges(edge.Target).First() :
                                 OutletCenterLineGraph.OutEdges(edge.Target).Last();
-                        Vector2d vec = new Vector2d(v.Source.Position.X - v.Target.Position.X,
-                                                    v.Source.Position.Y - v.Target.Position.Y);
-                        OCPAngle.Add(vec.Angle);
-                        OutletTeeCPPositions.Add(edge.Target.Position);
+                        Vector2d vec = new Vector2d(v.Target.Position.X - v.Source.Position.X,
+                                                    v.Target.Position.Y - v.Source.Position.Y);
+                        Vector3d v1 = new Vector3d(vec.X, vec.Y, 0);
+                        Vector3d v2 = new Vector3d(edge.Target.Position.X - edge.Source.Position.X, 
+                                                   edge.Target.Position.Y - edge.Source.Position.Y, 0);
+                        Vector3d dir = v1.GetNormal().CrossProduct(v2.GetNormal());
+                        OutTeesInfo.Add(new TeeInfo { dir = dir, angle = vec, position = edge.Target.Position });
                     }
                 }
                 if (OutletAcuteAnglePositions.Count != 0)
@@ -235,13 +243,16 @@ namespace ThMEPHAVC.CAD
                 }
             }
         }
+
+
+
         public bool HasInletTee()
         {
-            return (InletTeeCPPositions.Count == 0) ? false : true;
+            return (InTeesInfo.Count == 0) ? false : true;
         }
         public bool HasOutletTee()
         {
-            return (OutletTeeCPPositions.Count == 0) ? false : true;
+            return (OutTeesInfo.Count == 0) ? false : true;
         }
         private bool ApproximateEqualTo(double valuea, double valueb, double tolerance)
         {

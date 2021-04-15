@@ -21,8 +21,18 @@ using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI.Command
 {
+    
     public class THHvacFjfCmd : IAcadCommand, IDisposable
     {
+        private Tolerance Tor;
+        private struct SizeParam
+        {
+            public string duct_size;
+            public string tee_size;
+            public string elevation;
+            public string text_size;
+            public string tee_pattern;
+        }
         public void Dispose()
         {
             //
@@ -30,10 +40,11 @@ namespace TianHua.Hvac.UI.Command
 
         public void Execute()
         {
+            Tor = new Tolerance(1.5, 1.5);
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ObjectId fan_id = ObjectId.Null;
-                DBObjectCollection lineobjects = get_fan_and_centerline(ref fan_id);
+                DBObjectCollection lineobjects = Get_fan_and_centerline(ref fan_id);
                 if (fan_id.IsNull || lineobjects.Count == 0)
                     return;
                 ThDbModelFan DbFanModel = new ThDbModelFan(fan_id, lineobjects);
@@ -42,7 +53,7 @@ namespace TianHua.Hvac.UI.Command
                 string airVloume = string.Empty;
                 string elevation = string.Empty;
                 string textSize = string.Empty;
-                using (var dlg = create_duct_diag(DbFanModel))
+                using (var dlg = Create_duct_diag(DbFanModel))
                 {
                     if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
                     {
@@ -72,36 +83,41 @@ namespace TianHua.Hvac.UI.Command
                         else
                             return;
                     }
-
                     if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
                     {
-                        string line_type = (tee_pattern == "RBType4") ?
-                            ThHvacCommon.CONTINUES_LINETYPE :
-                            ThHvacCommon.DASH_LINETYPE;
+                        string line_type = (tee_pattern == "RBType4") ? ThHvacCommon.CONTINUES_LINETYPE : ThHvacCommon.DASH_LINETYPE;
                         double vt_width = 800;
                         ThVTee vt = new ThVTee(600, vt_width, 20);
                         double fan_angle = DbFanModel.FanOutlet.Angle;
                         Point3d valve_pos = DbFanModel.FanInletBasePoint;
-                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel, null);
+                        ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbFanModel, null);
                         if (io_anay_res == null)
                             return;
                         int wall_num = 0;
-                        IODuctHoleAnalysis(DbFanModel, DuctSize, tee_width, false, ref wall_num, null, textSize, null, io_anay_res);
+                        SizeParam info = new SizeParam
+                        {
+                            duct_size = DuctSize,
+                            elevation = elevation,
+                            tee_size = tee_width,
+                            text_size = textSize,
+                            tee_pattern = tee_pattern
+                        };
+                        IODuctHoleAnalysis(DbFanModel, ref wall_num, info, null, null, io_anay_res);
                         if (wall_num != 0)
                         {
                             double angle = fan_angle * Math.PI / 180;
-                            vt.RunVTeeDrawEngine(DbFanModel, line_type, angle);
                             Vector3d fan_cp_vec = (DbFanModel.FanOutletBasePoint.GetAsVector() -
                                                    DbFanModel.FanInletBasePoint.GetAsVector()) * 0.5 +
                                                    DbFanModel.FanInletBasePoint.GetAsVector();
-                            ThServiceTee.InsertElectricValve(fan_cp_vec, vt_width, angle + 1.5 * Math.PI, false);
+                            vt.RunVTeeDrawEngine(DbFanModel, line_type, angle, fan_cp_vec);
+                            
+                            ThServiceTee.Insert_electric_valve(fan_cp_vec, vt_width, angle + 1.5 * Math.PI);
                         }
                     }
                     else
                     {
                         // 添加旁通并添加到原Model中
-                        bool is_type3 = tee_pattern == "RBType3";
-                        DBObjectCollection bypass_lines = get_bypass(is_type3);
+                        DBObjectCollection bypass_lines = Get_bypass(tee_pattern, out Line max_bypass, out Line last_bypass);
                         if (bypass_lines.Count == 0)
                             return;
                         bypass_lines.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
@@ -114,7 +130,7 @@ namespace TianHua.Hvac.UI.Command
 
                         // 根据添加的旁通重新得到model
                         ThDbModelFan DbTeeModel = new ThDbModelFan(fan_id, results);
-                        ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbTeeModel, bypass_lines);
+                        ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbTeeModel, bypass_lines);
                         if (io_anay_res == null)
                             return;
                         double valve_width = Double.Parse(outerDuctSize.Split('x').First());
@@ -122,172 +138,104 @@ namespace TianHua.Hvac.UI.Command
                         double s1 = bra_width + 50;
                         double s2 = (bra_width + valve_width) * 0.5 + 50;
                         double s3 = bra_width * 0.5 + 100;
-                        Point3d bypass_start = Point3d.Origin;
-                        Point3d bypass_end = Point3d.Origin;
-                        double bypass_len = 0;
-                        if (io_anay_res.HasInletTee())
+                        if (tee_pattern == "RBType3")
                         {
-                            //get_out_bypass(bypass_lines,
-                            //               io_anay_res.InletTeeCPPositions[0],
-                            //               ref bypass_start,
-                            //               ref bypass_end,
-                            //               ref bypass_len,
-                            //               tee_pattern);
-                            ThServiceTee.TeeFineTuneDuct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
+                            if (io_anay_res.HasInletTee())
+                                ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
+                            if (io_anay_res.HasOutletTee())
+                                ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);                            
                         }
-                        if (io_anay_res.HasOutletTee())
+                        if (tee_pattern == "RBType1")
                         {
-                            get_out_bypass(bypass_lines,
-                                           io_anay_res.OutletTeeCPPositions[0],
-                                           ref bypass_start,
-                                           ref bypass_end,
-                                           ref bypass_len,
-                                           tee_pattern);
-                            ThServiceTee.TeeFineTuneDuct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
+                            if (io_anay_res.HasInletTee())
+                                ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
+                            if (io_anay_res.HasOutletTee())
+                                ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
+                        }
+                        if (tee_pattern == "RBType2")
+                        {
+                            if (io_anay_res.HasInletTee())
+                                ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
+                            if (io_anay_res.HasOutletTee())
+                                ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
+                            max_bypass = last_bypass;
                         }
                         int wall_num = 0;
-                        bool is_type2 = tee_pattern == "RBType2";
-                        IODuctHoleAnalysis(DbTeeModel, DuctSize, tee_width, is_type2, ref wall_num, elevation, textSize, bypass_lines, io_anay_res);
+                        SizeParam info = new SizeParam
+                        {
+                            duct_size = DuctSize,
+                            elevation = elevation,
+                            tee_size = tee_width,
+                            text_size = textSize,
+                            tee_pattern = tee_pattern
+                        };
+                        IODuctHoleAnalysis(DbTeeModel, ref wall_num, info, max_bypass, bypass_lines, io_anay_res);
                         if (wall_num == 0)
                             return;
                         if (io_anay_res.HasInletTee() || io_anay_res.HasOutletTee())
                         {
-                            //将阀插入在距outTee Cp 2000的位置
-                            //Vector3d tmp_vec = (detect_p.GetAsVector() - p.GetAsVector()).GetNormal();
-                            //Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
-                            //Vector3d dis_vec = tmp_vec * 2000 + p.GetAsVector();
-                            Vector3d tmp_vec = (bypass_end.GetAsVector() - bypass_start.GetAsVector()) * 0.5;
-                            Vector2d r_vec = new Vector2d(tmp_vec.X, tmp_vec.Y);
-                            Vector3d dis_vec = tmp_vec + bypass_start.GetAsVector();
-                            double ang = (1.5 * Math.PI - r_vec.Angle);
-                            bool has_dul_tee = io_anay_res.HasInletTee() && io_anay_res.HasOutletTee();
-                            ThServiceTee.InsertElectricValve(dis_vec, bra_width, ang, has_dul_tee);
+                            Point3d bypass_start = max_bypass.StartPoint;
+                            Point3d bypass_end = max_bypass.EndPoint;
+                            Vector3d bypass_vec = (bypass_end.GetAsVector() - bypass_start.GetAsVector());
+                            Vector3d dis_vec = bypass_start.GetAsVector() + bypass_vec * 0.5;
+                            
+                            double angle = 0;
+                            if (tee_pattern == "RBType3")
+                            {
+                                if (io_anay_res.HasInletTee())
+                                {
+                                    angle = io_anay_res.InTeesInfo[0].angle.Angle + Math.PI * 0.5;
+                                }
+                                if (io_anay_res.HasOutletTee())
+                                {
+                                    angle = io_anay_res.OutTeesInfo[0].angle.Angle - Math.PI * 0.5;
+                                }
+                                Vector3d v = new Vector3d(io_anay_res.OutTeesInfo[0].angle.X,
+                                                          io_anay_res.OutTeesInfo[0].angle.Y, 0);
+                                angle += Math.PI;
+                                if (Math.Abs(v.GetNormal().DotProduct(bypass_vec.GetNormal())) < 0.1)
+                                    angle -= Math.PI;
+                            }
+                            else if (tee_pattern == "RBType1")
+                            {
+                                if (io_anay_res.HasInletTee())
+                                {
+                                    angle = io_anay_res.InTeesInfo[0].angle.Angle;
+                                }
+                                if (io_anay_res.HasOutletTee())
+                                {
+                                    angle = io_anay_res.OutTeesInfo[0].angle.Angle + Math.PI * 0.5;
+                                }
+                            }
+                            else if (tee_pattern == "RBType2")
+                            {
+                                if (io_anay_res.HasInletTee())
+                                {
+                                    angle = io_anay_res.InTeesInfo[0].angle.Angle + Math.PI * 0.5;
+                                }
+                                if (io_anay_res.HasOutletTee())
+                                {
+                                    angle = io_anay_res.OutTeesInfo[0].angle.Angle;
+                                }
+                            }
+                            ThServiceTee.Insert_electric_valve(dis_vec, bra_width, angle);
+                            //elevation tee_width;
                         }
                     }
                 }
                 else
                 {
-                    ThFanInletOutletAnalysisEngine io_anay_res = IOAnalysis(DbFanModel, null);
+                    ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbFanModel, null);
                     int wall_num = 0;
-                    IODuctHoleAnalysis(DbFanModel, DuctSize, null, false, ref wall_num, null, null, null, io_anay_res);
+                    SizeParam info = new SizeParam
+                    {
+                        duct_size = DuctSize
+                    };
+                    IODuctHoleAnalysis(DbFanModel, ref wall_num, info, null, null, io_anay_res);
                 }
             }
         }
-
-        private void get_out_bypass(DBObjectCollection bypass_lines, 
-                                    Point3d tee_cp, 
-                                    ref Point3d bypass_start,
-                                    ref Point3d bypass_end,
-                                    ref double bypass_len,
-                                    string type)
-        {
-            if (bypass_lines.Count == 2)
-            {
-                Line l1 = bypass_lines[0] as Line;
-                Line l2 = bypass_lines[1] as Line;
-                if (type == "RBType1")
-                {
-                    bypass_start = tee_cp;
-                    if (tee_cp.IsEqualTo(l1.StartPoint))
-                    {
-                        bypass_end = l1.EndPoint;
-                        bypass_len = l1.Length;
-                    }
-                    else if (tee_cp.IsEqualTo(l1.EndPoint))
-                    {
-                        bypass_end = l1.StartPoint;
-                        bypass_len = l1.Length;
-                    }
-                    else if (tee_cp.IsEqualTo(l2.StartPoint))
-                    {
-                        bypass_end = l2.EndPoint;
-                        bypass_len = l2.Length;
-                    }
-                    else if (tee_cp.IsEqualTo(l2.EndPoint))
-                    {
-                        bypass_end = l2.StartPoint;
-                        bypass_len = l2.Length;
-                    }
-                }
-                else if (type == "RBType2")
-                {
-                    if (tee_cp.IsEqualTo(l1.StartPoint))
-                    {
-                        // l2是out_bypass
-                        bypass_start = l1.EndPoint;
-                        if (bypass_start.IsEqualTo(l2.StartPoint))
-                            bypass_end = l2.EndPoint;
-                        else
-                            bypass_end = l2.StartPoint;
-                        bypass_len = l2.Length;
-                    }
-                    else if (tee_cp.IsEqualTo(l1.EndPoint))
-                    {
-                        // l2是out_bypass
-                        bypass_start = l1.StartPoint;
-                        if (bypass_start.IsEqualTo(l2.StartPoint))
-                            bypass_end = l2.EndPoint;
-                        else
-                            bypass_end = l2.StartPoint;
-                        bypass_len = l2.Length;
-                    }
-                    else if (tee_cp.IsEqualTo(l2.StartPoint))
-                    {
-                        // l1是out_bypass
-                        bypass_start = l2.EndPoint;
-                        if (bypass_start.IsEqualTo(l1.StartPoint))
-                            bypass_end = l1.EndPoint;
-                        else
-                            bypass_end = l1.StartPoint;
-                        bypass_len = l1.Length;
-                    }
-                    else if (tee_cp.IsEqualTo(l2.EndPoint))
-                    {
-                        // l1是out_bypass
-                        bypass_start = l2.StartPoint;
-                        if (bypass_start.IsEqualTo(l1.StartPoint))
-                            bypass_end = l1.EndPoint;
-                        else
-                            bypass_end = l1.StartPoint;
-                        bypass_len = l1.Length;
-                    }
-                }
-            }
-            if (type == "RBType3" && bypass_lines.Count > 2)
-            {
-                Line l1 = bypass_lines[bypass_lines.Count - 2] as Line;
-                Line l2 = bypass_lines[bypass_lines.Count - 1] as Line;
-                double tor = 20;
-                if (l1.StartPoint.DistanceTo(l2.StartPoint) < tor)
-                {
-                    bypass_start = l1.EndPoint;
-                    bypass_end = l2.EndPoint;
-                }
-                else if (l1.StartPoint.DistanceTo(l2.EndPoint) < tor)
-                {
-                    bypass_start = l1.EndPoint;
-                    bypass_end = l2.StartPoint;
-                }
-                else if (l1.EndPoint.DistanceTo(l2.StartPoint) < tor)
-                {
-                    bypass_start = l1.StartPoint;
-                    bypass_end = l2.EndPoint;
-                }
-                else if (l1.EndPoint.DistanceTo(l2.EndPoint) < tor)
-                {
-                    bypass_start = l1.StartPoint;
-                    bypass_end = l2.StartPoint;
-                }
-                if (bypass_start.Y < bypass_end.Y)
-                {
-                    bypass_start = new Point3d(bypass_end.X, bypass_end.Y, 0);
-                    bypass_end = new Point3d(bypass_start.X, bypass_start.Y, 0);
-                }
-                
-                bypass_len = l1.Length;
-            }
-        }
-        private ObjectIdCollection get_from_prompt(string prompt, bool only_able)
+        private ObjectIdCollection Get_from_prompt(string prompt, bool only_able)
         {
             PromptSelectionOptions options = new PromptSelectionOptions()
             {
@@ -307,7 +255,7 @@ namespace TianHua.Hvac.UI.Command
                 return new ObjectIdCollection();
             }
         }
-        private ObjectId classify_fan(ObjectIdCollection selections,
+        private ObjectId Classify_fan(ObjectIdCollection selections,
                                       DBObjectCollection center_lines)
         {
             ObjectId fan_id = ObjectId.Null;
@@ -326,34 +274,41 @@ namespace TianHua.Hvac.UI.Command
             return fan_id;
         }
 
-        private DBObjectCollection get_fan_and_centerline(ref ObjectId fan_id)
+        private DBObjectCollection Get_fan_and_centerline(ref ObjectId fan_id)
         {
-            var objIds = get_from_prompt("请选择风机和中心线", false);
+            var objIds = Get_from_prompt("请选择风机和中心线", false);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
             var center_lines = new DBObjectCollection();
-            fan_id = classify_fan(objIds, center_lines);
+            fan_id = Classify_fan(objIds, center_lines);
             var service = new ThLaneLineCleanService();
             return ThLaneLineEngine.Explode(service.Clean(center_lines));
         }
 
-        private DBObjectCollection get_bypass(bool is_type3)
+        private DBObjectCollection Get_bypass(string tee_pattern, out Line max_bypass, out Line last_bypass)
         {
-            var objIds = get_from_prompt("请选择旁通管", true);
+            //l 是需要插入旁通文本的线
+            var objIds = Get_from_prompt("请选择旁通管", true);
             if (objIds.Count == 0)
+            {
+                max_bypass = new Line();
+                last_bypass = new Line();
                 return new DBObjectCollection();
+            }
             // 暂时只支持选择一个旁通
             Curve c = objIds[0].GetDBObject() as Curve;
 
             DBObjectCollection center_lines = new DBObjectCollection { c };
             List<Line> lines = ThLaneLineEngine.Explode(center_lines).Cast<Line>().ToList();
+            Line l = lines[0];
+            foreach (Line line in lines)
+                if (line.Length > l.Length)
+                    l = line;
+            max_bypass = l;
+            last_bypass = lines[lines.Count - 1];
             // 给较长的线段上插点
-            if (is_type3 && lines.Count > 0)
+            if (tee_pattern == "RBType3" && lines.Count > 0)
             {
-                Line l = lines[0];
-                foreach (Line line in lines)
-                    if (line.Length > l.Length)
-                        l = line;
                 lines.Remove(l);
                 Point3d lp = l.StartPoint.Y > l.EndPoint.Y ? l.EndPoint : l.StartPoint;
                 Point3d up = l.StartPoint.Y > l.EndPoint.Y ? l.StartPoint : l.EndPoint;
@@ -367,13 +322,14 @@ namespace TianHua.Hvac.UI.Command
                 vt = v1 + v - len * v_nor;
                 lines.Add(new Line(lp, new Point3d(vt.X, vt.Y, 0)));
             }
+            
             return lines.Select(o => o.ExtendLine(1.0)).ToCollection();
         }
 
-        private DBObjectCollection get_walls()
+        private DBObjectCollection Get_walls()
         {
             var wallobjects = new DBObjectCollection();
-            var objIds = get_from_prompt("请选择内侧墙线", false);
+            var objIds = Get_from_prompt("请选择内侧墙线", false);
             if (objIds.Count == 0)
                 return new DBObjectCollection();
             foreach (ObjectId oid in objIds)
@@ -387,7 +343,7 @@ namespace TianHua.Hvac.UI.Command
             return ThLaneLineEngine.Explode(wallobjects);
         }
 
-        private fmDuctSpec create_duct_diag(ThDbModelFan DbFanModel)
+        private fmDuctSpec Create_duct_diag(ThDbModelFan DbFanModel)
         {
             var air_volume = DbFanModel.LowFanVolume == 0 ? DbFanModel.FanVolume : DbFanModel.LowFanVolume;
             ThDuctParameter duct_param = new ThDuctParameter(air_volume, ThFanSelectionUtils.GetDefaultAirSpeed(DbFanModel.FanScenario));
@@ -408,7 +364,7 @@ namespace TianHua.Hvac.UI.Command
             return fm;
         }
 
-        private ThFanInletOutletAnalysisEngine IOAnalysis(ThDbModelFan Model, DBObjectCollection bypass_lines)
+        private ThFanInletOutletAnalysisEngine Io_analysis(ThDbModelFan Model, DBObjectCollection bypass_lines)
         {
             ThFanInletOutletAnalysisEngine io_anay_res = new ThFanInletOutletAnalysisEngine(Model);
             io_anay_res.InletAnalysis(bypass_lines);
@@ -422,63 +378,62 @@ namespace TianHua.Hvac.UI.Command
         }
 
         private void IODuctHoleAnalysis(ThDbModelFan Model,
-                                        string duct_size,
-                                        string tee_size,
-                                        bool is_type2,
                                         ref int wall_num,
-                                        string elevation,
-                                        string text_size,
+                                        SizeParam pst_param,
+                                        Line selected_bypass,
                                         DBObjectCollection bypass_line,
                                         ThFanInletOutletAnalysisEngine io_anay_res)
         {
+            string tee_size = pst_param.tee_size;
+            string duct_size = pst_param.duct_size;
+            string elevation = pst_param.elevation;
+            string text_size = pst_param.text_size;
+            string tee_pattern = pst_param.tee_pattern;
+
             if (bypass_line != null && bypass_line.Count == 0)
                 return;
             string[] str = duct_size.Split(' ');
             string innerDuctSize = str[0];
             string outerDuctSize = str[1];
+
             ThInletOutletDuctDrawEngine io_draw_eng =
-                new ThInletOutletDuctDrawEngine(Model,
-                                                innerDuctSize,
-                                                outerDuctSize,
-                                                tee_size,
-                                                elevation,
-                                                text_size,
-                                                is_type2,
-                                                bypass_line,
+                new ThInletOutletDuctDrawEngine(Model, innerDuctSize, outerDuctSize, tee_size, elevation, text_size,
+                                                selected_bypass, bypass_line,
                                                 io_anay_res.InletCenterLineGraph,
                                                 io_anay_res.OutletCenterLineGraph);
-            var wall_lines = get_walls();
+            var wall_lines = Get_walls();
             if (wall_lines.Count == 0)
                 return;
             ThHolesAndValvesEngine holesAndValvesEngine =
-                new ThHolesAndValvesEngine(Model,
-                                           wall_lines,
-                                           bypass_line,
-                                           io_draw_eng.InletDuctWidth,
-                                           io_draw_eng.OutletDuctWidth,
-                                           io_draw_eng.TeeWidth,
-                                           io_anay_res.InletCenterLineGraph,
-                                           io_anay_res.OutletCenterLineGraph);
+                new ThHolesAndValvesEngine(Model, wall_lines, bypass_line, io_draw_eng, io_anay_res.InletCenterLineGraph, io_anay_res.OutletCenterLineGraph);
             if (io_anay_res.InletAnalysisResult == AnalysisResultType.OK)
             {
                 if (io_anay_res.HasInletTee())
                 {
-                    int i = 0;
                     double IDuctWidth = io_draw_eng.InletDuctWidth;
                     io_draw_eng.RunInletDrawEngine(Model, text_size);
-                    foreach (Point3d TeeCp in io_anay_res.InletTeeCPPositions)
+                    foreach (TeeInfo tee_info in io_anay_res.InTeesInfo)
                     {
-                        ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, IDuctWidth, IDuctWidth);
-                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector());
-                        if (bypass_line.Count == 5)
-                        {
-                            mat *= Matrix3d.Rotation(Math.PI + io_anay_res.ICPAngle[i++], Vector3d.ZAxis, Point3d.Origin);
+                        Vector3d dir = tee_info.dir;
+                        Point3d tee_cp = tee_info.position;
+                        Matrix3d mat = Matrix3d.Displacement(tee_cp.GetAsVector());
+                        if (tee_pattern == "RBType3")
+                        { 
+                            if (bypass_line.Count == 3)
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle, Vector3d.ZAxis, Point3d.Origin);
+                            else if (bypass_line.Count == 5)
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI, Vector3d.ZAxis, Point3d.Origin);
                         }
-                        if (bypass_line.Count == 3)
+                        if (tee_pattern == "RBType1")
                         {
-                            mat *= Matrix3d.Rotation(io_anay_res.ICPAngle[i++], Vector3d.ZAxis, Point3d.Origin) *
-                                   Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                            if (dir.Z < 0)
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle, Vector3d.ZAxis, Point3d.Origin);
+                            else
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI, Vector3d.ZAxis, Point3d.Origin);
                         }
+                        if (dir.Z < 0)
+                            mat *= Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                        ThTee e = new ThTee(tee_cp, io_draw_eng.TeeWidth, IDuctWidth, IDuctWidth);
                         e.RunTeeDrawEngine(Model, mat);
                     }
                 }
@@ -493,30 +448,37 @@ namespace TianHua.Hvac.UI.Command
             {
                 if (io_anay_res.HasOutletTee())
                 {
-                    int i = 0;
                     double ODuctWidth = io_draw_eng.OutletDuctWidth;
                     io_draw_eng.RunOutletDrawEngine(Model, text_size);
-                    foreach (Point3d TeeCp in io_anay_res.OutletTeeCPPositions)
+                    foreach (TeeInfo tee_info in io_anay_res.OutTeesInfo)
                     {
-                        ThTee e = new ThTee(TeeCp, io_draw_eng.TeeWidth, ODuctWidth, ODuctWidth);
-                        Matrix3d mat = Matrix3d.Displacement(TeeCp.GetAsVector());
-                        double angle = io_anay_res.OCPAngle[i++];
-                        if (is_type2)
+                        Vector3d dir = tee_info.dir;
+                        Point3d tee_cp = tee_info.position;
+                        Matrix3d mat = Matrix3d.Displacement(tee_cp.GetAsVector());
+                        if (tee_pattern == "RBType3")
                         {
-                            mat *= Matrix3d.Rotation(-(1.5 * Math.PI - angle), Vector3d.ZAxis, Point3d.Origin);
-                        }
-                        else
-                        {
-                            if (bypass_line.Count == 5)
-                            {
-                                mat *= Matrix3d.Rotation(Math.PI + angle, Vector3d.ZAxis, Point3d.Origin);
-                            }
                             if (bypass_line.Count == 3)
-                            {
-                                mat *= Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin) *
-                                       Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
-                            }
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                            else if (bypass_line.Count == 5)
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle, Vector3d.ZAxis, Point3d.Origin);
                         }
+                        if (tee_pattern == "RBType1")
+                        {
+                            if (dir.Z > 0)
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle, Vector3d.ZAxis, Point3d.Origin);
+                            else
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                        }
+                        if (tee_pattern == "RBType2")
+                        {
+                            if (dir.Z > 0)
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle, Vector3d.ZAxis, Point3d.Origin);
+                            else
+                                mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI, Vector3d.ZAxis, Point3d.Origin);
+                        }
+                        if (dir.Z < 0)
+                            mat *= Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                        ThTee e = new ThTee(tee_cp, io_draw_eng.TeeWidth, ODuctWidth, ODuctWidth);
                         e.RunTeeDrawEngine(Model, mat);
                     }
                 }

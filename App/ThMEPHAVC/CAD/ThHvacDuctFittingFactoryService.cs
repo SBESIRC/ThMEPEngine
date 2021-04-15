@@ -52,15 +52,15 @@ namespace ThMEPHVAC.CAD
 
         public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, 
                                                   double ductangle, 
-                                                  bool isupordownopening, 
                                                   bool islongestduct,
                                                   string elevation,
-                                                  string textSize)
+                                                  string textSize,
+                                                  bool is_bypass)
         {
             return new ThIfcDuctSegment(parameters)
             {
                 Centerline = CreateDuctSegmentCenterLine(parameters),
-                FlangeLine = CreateDuctFlangeGeometries(parameters, isupordownopening),
+                FlangeLine = CreateDuctFlangeGeometries(parameters, is_bypass),
                 Representation = CreateDuctSegmentGeometries(parameters),
                 InformationText = CreateDuctInformation(parameters, ductangle, islongestduct, elevation, textSize)
             };
@@ -605,7 +605,7 @@ namespace ThMEPHVAC.CAD
                 new Line(new Point3d(-parameters.Length / 2.0,0,0),new Point3d(parameters.Length / 2.0,0,0)),
             };
         }
-        private DBObjectCollection CreateDuctFlangeGeometries(ThIfcDuctSegmentParameters parameters, bool isupordownopening)
+        private DBObjectCollection CreateDuctFlangeGeometries(ThIfcDuctSegmentParameters parameters, bool is_bypass)
         {
             Line leftflange = new Line()
             {
@@ -618,13 +618,13 @@ namespace ThMEPHVAC.CAD
                 StartPoint = new Point3d(parameters.Length / 2.0, 0.5 * parameters.Width, 0),
                 EndPoint = new Point3d(parameters.Length / 2.0, -0.5 * parameters.Width, 0),
             };
-            //if (isupordownopening)
-            //{
-            //    return new DBObjectCollection()
-            //    {
-            //        rightflange,
-            //    };
-            //}
+            if (is_bypass)
+            {
+                return new DBObjectCollection()
+                {
+                    leftflange,
+                };
+            }
             return new DBObjectCollection()
             {
                 rightflange,

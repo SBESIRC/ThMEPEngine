@@ -34,13 +34,13 @@ namespace ThMEPHVAC.Model
             H = height;
         }
 
-        public void RunVTeeDrawEngine(ThDbModelFan fanmodel, string linetype, double angle)
+        public void RunVTeeDrawEngine(ThDbModelFan fanmodel, string linetype, double angle, Vector3d dis_vec)
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             string flangeLinerLayer = ThDuctUtils.FlangeLayerName(modelLayer);
             List<ThIfcDistributionElement> OutletVTeeSeg = new List<ThIfcDistributionElement>();
-            SetVTee(fanmodel.FanInletBasePoint.GetAsVector(), OutletVTeeSeg, angle);
+            SetVTee(dis_vec, OutletVTeeSeg, angle);
             DrawVTeeDWG(OutletVTeeSeg, ductLayer, flangeLinerLayer, linetype);
         }
         public ThIfcDistributionElement CreateVTeeBlock()

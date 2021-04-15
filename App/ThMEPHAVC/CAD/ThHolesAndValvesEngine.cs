@@ -17,12 +17,13 @@ namespace ThMEPHVAC.CAD
         public ThHolesAndValvesEngine(ThDbModelFan fanmodel,
             DBObjectCollection wallobjects,
             DBObjectCollection bypassobjects,
-            double inletductwidth,
-            double outletductwidth,
-            double teewidth,
+            ThInletOutletDuctDrawEngine io_draw_eng,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
         {
+            double teewidth = io_draw_eng.TeeWidth;
+            double inletductwidth = io_draw_eng.InletDuctWidth;
+            double outletductwidth = io_draw_eng.OutletDuctWidth;
             InletValveGroups = GetValveGroup(fanmodel, wallobjects, bypassobjects, inletductwidth, teewidth, ValveGroupPosionType.Inlet, inletcenterlinegraph);
             OutletValveGroups = GetValveGroup(fanmodel, wallobjects, bypassobjects, outletductwidth, teewidth, ValveGroupPosionType.Outlet, outletcenterlinegraph);
 
@@ -91,7 +92,7 @@ namespace ThMEPHVAC.CAD
             {
                 var centerline = new Line(centeredge.Source.Position, centeredge.Target.Position);
                 var centerlinevector = new Vector2d(centeredge.Target.Position.X - centeredge.Source.Position.X, centeredge.Target.Position.Y - centeredge.Source.Position.Y);
-                bool IsBypass = ThServiceTee.is_bypass(centeredge.Source.Position, centeredge.Target.Position, bypassobjects);
+                bool IsBypass = ThServiceTee.Is_bypass(centeredge.Source.Position, centeredge.Target.Position, bypassobjects);
                 double width = IsBypass ? teewidth : ductwidth;
                 foreach (var wallline in walllines)
                 {

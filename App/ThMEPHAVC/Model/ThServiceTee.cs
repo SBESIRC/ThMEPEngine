@@ -3,7 +3,6 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using QuickGraph;
-using System.Collections.Generic;
 using System.Linq;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
@@ -13,11 +12,11 @@ namespace ThMEPHVAC.Model
 {
     public class ThServiceTee
     {
-        internal static bool is_bypass(Point3d tar_srt_pos,
+        internal static bool Is_bypass(Point3d tar_srt_pos,
                                        Point3d tar_end_pos,
                                        DBObjectCollection bypass_lines)
         {
-            if (bypass_lines == null)
+            if (bypass_lines == null || bypass_lines.Count == 0)
                 return false;
             Tolerance t = new Tolerance(1.5, 1.5);
             foreach (Line l in bypass_lines)
@@ -27,13 +26,13 @@ namespace ThMEPHVAC.Model
                     (l.StartPoint.IsEqualTo(tar_end_pos, t) &&
                     l.EndPoint.IsEqualTo(tar_srt_pos, t)))
                 {
+
                     return true;
                 }
             }
             return false;
         }
-
-        public static void TeeFineTuneDuct(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> LineGraph,
+        public static void Fine_tee_duct(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> LineGraph,
                                            double IShrink,
                                            double Shrinkb,
                                            double Shrinkm,
@@ -45,7 +44,7 @@ namespace ThMEPHVAC.Model
                 {
                     var out1 = LineGraph.OutEdges(edge.Target).First();
                     var out2 = LineGraph.OutEdges(edge.Target).Last();
-                    if (is_bypass(out1.Source.Position, out1.Target.Position, bypass_lines))
+                    if (Is_bypass(out1.Source.Position, out1.Target.Position, bypass_lines))
                     {
                         edge.TargetShrink = IShrink;
                         out1.SourceShrink = Shrinkb;
@@ -61,12 +60,23 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        public static ObjectId InsertElectricValve( Vector3d fan_cp_vec,
-                                                    double valvewidth,
-                                                    double angle, 
-                                                    bool hasTee)
+
+        private static object CreateDuctTextStyle()
         {
-            var e = new ThValve() {
+            throw new System.NotImplementedException();
+        }
+
+        private static object CreateLayer(string textlayer)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public static ObjectId Insert_electric_valve(Vector3d fan_cp_vec,
+                                                    double valvewidth,
+                                                    double angle)
+        {
+            var e = new ThValve()
+            {
                 Length = 200,
                 Width = valvewidth,
                 ValveBlockName = ThHvacCommon.AIRVALVE_BLOCK_NAME,
@@ -90,10 +100,6 @@ namespace ThMEPHVAC.Model
                 Matrix3d mat = Matrix3d.Displacement(fan_cp_vec) *
                                Matrix3d.Rotation(angle, Vector3d.ZAxis, Point3d.Origin);
                 mat *= Matrix3d.Displacement(new Vector3d(-valvewidth / 2, 125, 0));
-                //if (hasTee)
-                //{
-                //    mat *= Matrix3d.Displacement(new Vector3d(-valvewidth / 2, 125, 0));
-                //}
 
                 blockRef.TransformBy(mat);
                 return objId;
