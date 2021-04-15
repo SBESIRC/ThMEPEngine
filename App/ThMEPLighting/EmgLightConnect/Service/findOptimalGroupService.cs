@@ -35,11 +35,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                     foreach (int laneSideIndex in part)
                     {
-                        //var laneSide = sideDict[laneSideIndex];
-                        //!!!!!!
-                        //var laneSideBlocks = singleSideBlocks.Where(y => laneSide.Contains(y.laneSide[0])).ToList();
-                        //var blockCount = laneSideBlocks.Select(x => x.Count).Sum();
-
+                        
                         var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
                         var blockCount = laneSideBlocks.Count;
 
@@ -47,7 +43,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         {
                             blockSum = blockSum + blockCount;
                             partPath.Add(laneSideIndex);
-                            //partPathBlocks.AddRange(laneSideBlocks);
                             partPathBlocks.Add(laneSideBlocks);
 
                         }
@@ -59,7 +54,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                             groupPath.Add(partPath);
 
                             partPathBlocks = new List<ThSingleSideBlocks>();
-                            //partPathBlocks.AddRange(laneSideBlocks);
                             partPathBlocks.Add(laneSideBlocks);
                             groupPathBlocks.Add(partPathBlocks);
                         }
@@ -81,45 +75,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
             return bReturn;
         }
-
-        //private static bool distanceInTol(List<ThSingleSideBlocks> partPathBlocks, List<ThSingleSideBlocks> laneSideBlocks)
-        //{
-        //    var bReturn = false;
-
-
-        //    var partPathBlocksPoints = partPathBlocks.SelectMany(x => x.mainGroup).ToList();
-        //    var laneSideBlocksPoints = laneSideBlocks.SelectMany(x => x.mainGroup).ToList();
-
-        //    if (partPathBlocksPoints.Count == 0)
-        //    {
-        //        bReturn = true;
-        //    }
-        //    if (laneSideBlocksPoints.Count == 0)
-        //    {
-        //        bReturn = true;
-        //    }
-
-        //    foreach (var pointInGroup in partPathBlocksPoints)
-        //    {
-        //        if (bReturn == true)
-        //        {
-        //            break;
-        //        }
-        //        foreach (var pointInNextLane in laneSideBlocksPoints)
-        //        {
-        //            double dist = pointInNextLane.DistanceTo(pointInGroup);
-        //            if (dist <= EmgConnectCommon.TolGroupDistance)
-        //            {
-        //                bReturn = true;
-        //                break;
-        //            }
-        //        }
-
-        //    }
-
-
-        //    return bReturn;
-        //}
 
         private static bool distanceInTol(List<ThSingleSideBlocks> partPathBlocks, ThSingleSideBlocks laneSideBlocks)
         {
@@ -147,7 +102,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 foreach (var pointInNextLane in laneSideBlocksPoints)
                 {
                     double dist = pointInNextLane.DistanceTo(pointInGroup);
-                    if (dist <= EmgConnectCommon.TolGroupDistance)
+                    if (dist <= EmgConnectCommon.TolSaperateGroupMaxDistance)
                     {
                         bReturn = true;
                         break;
@@ -159,64 +114,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             return bReturn;
         }
-
-        //public static List<List<List<ThSingleSideBlocks>>> findOptimalGroup(List<List<List<int>>> allGroupPath, Dictionary<int, List<(Line, int)>> sideDict, List<ThSingleSideBlocks> singleSideBlocks)
-        //{
-        //    List<List<int>> OptimalGroup = new List<List<int>>();
-        //    List<List<List<ThSingleSideBlocks>>> OptimalGroupBlocks = new List<List<List<ThSingleSideBlocks>>>();
-
-        //    Dictionary<List<List<int>>, double> Variance = new Dictionary<List<List<int>>, double>();
-        //    double minVariance = -1;
-
-        //    foreach (var path in allGroupPath)
-        //    {
-        //        List<int> pathCount = new List<int>();
-
-        //        foreach (var part in path)
-        //        {
-
-        //            var groupCount = 0;
-
-        //            foreach (int laneSideIndex in part)
-        //            {
-        //                //var laneSide = sideDict[laneSideIndex];
-        //                //var laneSideBlocks = singleSideBlocks.Where(y => laneSide.Contains(y.laneSide[0])).ToList();
-        //                //var blockCount = laneSideBlocks.Select(x => x.Count).Sum();
-
-        //                var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
-        //                var blockCount = laneSideBlocks.Count;
-
-        //                groupCount = groupCount + blockCount;
-        //            }
-        //            pathCount.Add(groupCount);
-        //        }
-        //        double groupVariance = GetVariance(pathCount);
-
-        //        if (groupVariance < minVariance || minVariance == -1)
-        //        {
-        //            minVariance = groupVariance;
-        //            OptimalGroup = path;
-        //        }
-        //    }
-
-        //    foreach (var path in OptimalGroup)
-        //    {
-        //        var pathBlocks = new List<List<ThSingleSideBlocks>>();
-        //        foreach (int laneSideIndex in path)
-        //        {
-        //            //var laneSide = sideDict[laneSideIndex];
-        //            //var laneSideBlocks = singleSideBlocks.Where(y => laneSide.Contains(y.laneSide[0])).ToList();
-        //            //!!!
-        //            var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).ToList();
-
-        //            pathBlocks.Add(laneSideBlocks);
-        //        }
-        //        OptimalGroupBlocks.Add(pathBlocks);
-        //    }
-
-
-        //    return OptimalGroupBlocks;
-        //}
 
         public static List<List<ThSingleSideBlocks>> findOptimalGroup(List<List<List<int>>> allGroupPath, List<ThSingleSideBlocks> singleSideBlocks)
         {
@@ -237,10 +134,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                     foreach (int laneSideIndex in part)
                     {
-                        //var laneSide = sideDict[laneSideIndex];
-                        //var laneSideBlocks = singleSideBlocks.Where(y => laneSide.Contains(y.laneSide[0])).ToList();
-                        //var blockCount = laneSideBlocks.Select(x => x.Count).Sum();
-
                         var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
                         var blockCount = laneSideBlocks.Count;
 
@@ -262,9 +155,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var pathBlocks = new List<ThSingleSideBlocks>();
                 foreach (int laneSideIndex in path)
                 {
-                    //var laneSide = sideDict[laneSideIndex];
-                    //var laneSideBlocks = singleSideBlocks.Where(y => laneSide.Contains(y.laneSide[0])).ToList();
-                    //!!!
                     var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
 
                     pathBlocks.Add(laneSideBlocks);
@@ -272,13 +162,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 OptimalGroupBlocks.Add(pathBlocks);
             }
 
-
             return OptimalGroupBlocks;
         }
 
         private static double GetVariance(List<int> distX)
         {
-
             double avg = 0;
             double variance = 0;
 
@@ -288,13 +176,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 variance += Math.Pow(distX[i] - avg, 2);
             }
-
             variance = Math.Sqrt(variance / distX.Count);
 
-
             return variance;
-
         }
-
     }
 }

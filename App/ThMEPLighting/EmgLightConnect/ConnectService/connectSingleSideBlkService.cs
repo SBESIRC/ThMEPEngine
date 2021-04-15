@@ -24,6 +24,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 if (side.Count > 0)
                 {
                     regroupMainSec(side);
+
                     side.orderReMainBlk();
 
                     for (int j = 1; j < side.reMainBlk.Count; j++)
@@ -34,7 +35,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
         }
 
-        public static void connectSecToMain(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        public static void connectSecToMainNotUse(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
             List<Point3d> tempMain = null;
             var allMain = sigleSideGroup.SelectMany(x => x.reMainBlk).ToList();
@@ -60,7 +61,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                     for (int r = 0; r < closeMainBlk.Count; r++)
                     {
-                        if (side.blkConnectNo(closeMainBlk[r].Key) < EmgConnectCommon.TolMaxConnect)
+                        if (side.blkConnectNo(closeMainBlk[r].Key) < EmgConnectCommon.TolBlkMaxConnect)
                         {
                             mainBlk = closeMainBlk[r].Key;
                             break;
@@ -84,8 +85,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 yTransValue = allBlkDict.Where(x => side.mainBlk.Contains(x.Key)).Select(x => x.Value.Y).ToList();
 
-                var YminTemp = yTransValue.Min() - EmgConnectCommon.TolPtOnSameLineYRange;
-                var YmaxTemp = yTransValue.Max() + EmgConnectCommon.TolPtOnSameLineYRange;
+                var YminTemp = yTransValue.Min() - EmgConnectCommon.TolRegroupMainYRange;
+                var YmaxTemp = yTransValue.Max() + EmgConnectCommon.TolRegroupMainYRange;
 
                 double Ymin = 0;
                 double YMax = 0;
@@ -120,7 +121,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 if (ySecMean != 20000)
                 {
-                    regroupMain = allBlkDict.Where(x => Math.Abs(Math.Abs(x.Value.Y) - Math.Abs(ySecMean)) < EmgConnectCommon.TolPtOnSameLineYRange).Select(x => x.Key).ToList();
+                    regroupMain = allBlkDict.Where(x => Math.Abs(Math.Abs(x.Value.Y) - Math.Abs(ySecMean)) < EmgConnectCommon.TolRegroupMainYRange).Select(x => x.Key).ToList();
                 }
 
 
@@ -133,77 +134,92 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        public static void connecSecToMain3(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        public static void connecSecToMain(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup, Polyline frame)
         {
-            var allMain = sigleSideGroup.SelectMany(x => x.reMainBlk).ToList();
+            //var allMain = sigleSideGroup.SelectMany(x => x.reMainBlk).ToList();
 
             //debug 没有main 只有sec的情况处理不了
             foreach (var side in sigleSideGroup)
             {
+                if (side.reMainBlk.Count > 0)
+                {
 
 
-                findGroupMainSec(side);
+                    var regroupSecBlk = side.getTotalBlock().Where(x => side.reMainBlk.Contains(x) == false).ToList();
 
 
+                    side.setReSecBlk(regroupSecBlk);
 
+                    //regroupMainSec(side);
 
-
-
-
+                    //findGroupMainSec(side, ALE);
+                    findGroupMainSec(side, ALE, frame);
+                }
             }
         }
 
-        private static void findGroupMainSec(ThSingleSideBlocks side)
+        private static void findGroupMainSecNotUse(ThSingleSideBlocks side, BlockReference ALE, Polyline frame)
         {
+            side.orderReSecBlk();
+
+            var dir = (side.laneSide.Last().Item1.EndPoint - side.laneSide.First().Item1.StartPoint).GetNormal();
+            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
+            var mainConnectMatrix = Matrix3d.Displacement(side.reMainBlk.First().GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+
+            var transSecPt = side.reSecBlk.ToDictionary(x => x, x => x.TransformBy(mainConnectMatrix.Inverse()));
+            var transMainPt = side.reMainBlk.ToDictionary(x => x, x => x.TransformBy(mainConnectMatrix.Inverse()));
+
+
             //所有散点到所有主点的距离
-            List<(int, int, double)> distM = new List<(int, int, double)>();
-            for (int j = 0; j < side.reSecBlk.Count; j++)
-            {
-                for (int i = 0; i < side.reMainBlk.Count; i++)
-                {
-                    var dist = side.reSecBlk[j].DistanceTo(side.reMainBlk[i]);
-                    distM.Add((i, j, dist));
-                }
-            }
+            var distM = returnValueCalculation.getDistMatrix(side.reMainBlk, side.reSecBlk);
 
             bool[] visit = new bool[side.reSecBlk.Count];
             visit.ForEach(x => x = false);
+
             for (int j = 0; j < side.reSecBlk.Count; j++)
             {
                 if (visit[j] == false)
                 {
-                    //找最近的主块，加入图
-                    var mainI = distM.Where(x => x.Item2 == j).OrderBy(x => x.Item3).First().Item1;
-                    var ptList = new List<Point3d>();
-                    ptList.Add(side.reMainBlk[mainI]);
 
-                    //找到散点到这个主块最小的散点list,加入图
-                    var secPtIndexList = findCloseSecPtList(distM, mainI, visit);
-                    ptList.AddRange(side.reSecBlk.Where(x => secPtIndexList.Contains(side.reSecBlk.IndexOf(x))).ToList());
+                    var ptList = new List<Point3d>();
+                    ptList.Add(side.reSecBlk[j]);
+
+                    //找最近的/回头量小的主块，加入图
+                    var mainI = getRootMainBlk(j, distM, side, ALE, ptList);
+
+                    //找到同边散点到这个主块最小的散点list,加入图
+                    var secPtIndexList = findCloseSecPtList(distM, mainI);
+                    ptList.AddRange(side.reSecBlk.Where(x => secPtIndexList.Contains(side.reSecBlk.IndexOf(x)) &&
+                                                             visit[side.reSecBlk.IndexOf(x)] == false &&
+                                                             transSecPt[x].Y * transSecPt[side.reSecBlk[j]].Y >= 0
+                                                        ).ToList());
+
 
                     //找到散点的中心,最大最小xy长方形中点
                     var cenPt = findSecPtCenter(ptList);
 
-                    //以中心画半径r 10000 的圆找散点，加入图
-                    if (cenPt != Point3d.Origin)
+                    //以中心画半径r 5500 的圆找散点，加入图
+                    side.reSecBlk.Where(x => x.DistanceTo(cenPt) < 10000 &&
+                                            visit[side.reSecBlk.IndexOf(x)] == false &&
+                                            transSecPt[x].Y * transSecPt[side.reSecBlk[j]].Y >= 0
+                                        ).ForEach(x => ptList.Add(x));
+
+                    ptList = ptList.Distinct().ToList();
+
+                    //主点和散点找最小生成树
+                    buildMST(ptList, side, frame, out var parent);
+
+                    for (int i = 0; i < ptList.Count; i++)
                     {
-                        side.reSecBlk.Where(x => x.DistanceTo(cenPt) < 8000 && visit[side.reSecBlk.IndexOf(x)] == false).ForEach(x => ptList.Add(x));
-                        ptList = ptList.Distinct().ToList();
-
-                        //主点和散点找最小生成树
-                        buildMST(ptList, side, out var parent);
-
-                        for (int i = 0; i < ptList.Count; i++)
+                        if (parent[i] >= 0)
                         {
-                            if (parent[i] >= 0)
-                            {
-                                side.connectPt(ptList[i], ptList[parent[i]]);
-                            }
+                            side.connectPt(ptList[i], ptList[parent[i]]);
                         }
-
-                        //visit里面mark散点已经遍历过
-                        ptList.Where(x => side.reSecBlk.Contains(x)).ForEach(x => visit[side.reSecBlk.IndexOf(x)] = true);
                     }
+
+                    //visit里面mark散点已经遍历过
+                    ptList.Where(x => side.reSecBlk.Contains(x)).ForEach(x => visit[side.reSecBlk.IndexOf(x)] = true);
+
                     //下一个没遍历过的散点
                 }
 
@@ -211,24 +227,161 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static List<int> findCloseSecPtList(List<(int, int, double)> distM, int mainI, bool[] visit)
+        private static void findGroupMainSec(ThSingleSideBlocks side, BlockReference ALE, Polyline frame)
+        {
+            side.orderReSecBlk();
+
+            var dir = (side.laneSide.Last().Item1.EndPoint - side.laneSide.First().Item1.StartPoint).GetNormal();
+            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
+            var mainConnectMatrix = Matrix3d.Displacement(side.reMainBlk.First().GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+
+            var transSecPt = side.reSecBlk.ToDictionary(x => x, x => x.TransformBy(mainConnectMatrix.Inverse()));
+            var transMainPt = side.reMainBlk.ToDictionary(x => x, x => x.TransformBy(mainConnectMatrix.Inverse()));
+
+
+            //所有散点到所有主点的距离
+            var distM = returnValueCalculation.getDistMatrix(side.reMainBlk, side.reSecBlk);
+
+            bool[] visit = new bool[side.reSecBlk.Count];
+            visit.ForEach(x => x = false);
+
+            for (int j = 0; j < side.reSecBlk.Count; j++)
+            {
+                if (visit[j] == false)
+                {
+
+                    var ptList = new List<Point3d>();
+                    ptList.Add(side.reSecBlk[j]);
+
+                    //找最近的/回头量小的主块，加入图
+                    var mainI = getRootMainBlk(j, distM, side, ALE, ptList);
+
+                    //找到同边散点到这个主块最小的散点list,加入图
+                    var secPtIndexList = findCloseSecPtList(distM, mainI);
+                    //ptList.AddRange(side.reSecBlk.Where(x => secPtIndexList.Contains(side.reSecBlk.IndexOf(x)) &&
+                    //                                         visit[side.reSecBlk.IndexOf(x)] == false &&
+                    //                                         transSecPt[x].Y * transSecPt[side.reSecBlk[j]].Y >= 0
+                    //                                    ).ToList());
+
+                    ptList.AddRange(side.reSecBlk.Where(x => secPtIndexList.Contains(side.reSecBlk.IndexOf(x)) &&
+                                                            visit[side.reSecBlk.IndexOf(x)] == false
+                                                       ).ToList());
+
+
+                    //找到散点的中心,最大最小xy长方形中点
+                    var cenPt = findSecPtCenter(ptList);
+
+                    //找到散点的中心前后主点间的点
+                    var secPtList = findSecBetweenMain(cenPt.TransformBy(mainConnectMatrix.Inverse()), transMainPt, transSecPt);
+                    if (secPtList.Count > 0)
+                    {
+                        //ptList.AddRange(secPtList.Where(x => visit[side.reSecBlk.IndexOf(x)] == false &&
+                        //                                      transSecPt[x].Y * transSecPt[side.reSecBlk[j]].Y >= 0 &&
+                        //                                      x.DistanceTo(side.reMainBlk[mainI]) < 10000
+                        //                                 ).ToList());
+
+                        ptList.AddRange(secPtList.Where(x => visit[side.reSecBlk.IndexOf(x)] == false &&
+                                                             x.DistanceTo(side.reMainBlk[mainI]) < EmgConnectCommon.TolConnectSecPtRange
+                                                        ).ToList());
+                    }
+                    ptList = ptList.Distinct().ToList();
+
+                    //主点和散点找最小生成树
+                    buildMST(ptList, side, frame, out var parent);
+
+                    for (int i = 0; i < ptList.Count; i++)
+                    {
+                        if (parent[i] >= 0)
+                        {
+                            side.connectPt(ptList[i], ptList[parent[i]]);
+                        }
+                    }
+
+                    //visit里面mark散点已经遍历过
+                    ptList.Where(x => side.reSecBlk.Contains(x)).ForEach(x => visit[side.reSecBlk.IndexOf(x)] = true);
+
+                    //下一个没遍历过的散点
+                }
+
+            }
+
+        }
+
+        private static List<Point3d> findSecBetweenMain(Point3d transCenPt, Dictionary<Point3d, Point3d> transMainPt, Dictionary<Point3d, Point3d> transSecPt)
+        {
+            var xMin = double.MaxValue;
+            var xMax = double.MaxValue;
+            var leftMain = new Point3d();
+            var rightMain = new Point3d();
+            var secList = new List<Point3d>();
+
+            foreach (var transMain in transMainPt)
+            {
+                if (transMain.Value.X <= transCenPt.X && (transCenPt.X - transMain.Value.X) <= xMin)
+                {
+                    xMin = transCenPt.X - transMain.Value.X;
+                    leftMain = transMain.Key;
+                }
+                if (transMain.Value.X >= transCenPt.X && (transMain.Value.X - transCenPt.X) <= xMax)
+                {
+                    xMax = transMain.Value.X - transCenPt.X;
+                    rightMain = transMain.Key;
+                }
+            }
+
+            if (leftMain != Point3d.Origin && rightMain != Point3d.Origin)
+            {
+                var dist = Math.Abs(transMainPt[rightMain].X - transMainPt[leftMain].X) / 5;
+                xMin = transMainPt[leftMain].X - dist;
+                xMax = transMainPt[rightMain].X + dist;
+
+                secList = transSecPt.Where(x => xMin <= x.Value.X && x.Value.X <= xMax).Select(x => x.Key).ToList();
+
+            }
+
+
+            return secList;
+
+
+        }
+
+        private static int getRootMainBlk(int secIndex, List<(int, int, double)> distM, ThSingleSideBlocks side, BlockReference ALE, List<Point3d> ptList)
+        {
+
+            var mainList = side.reMainBlk;
+            Point3d secPt = side.reSecBlk[secIndex];
+
+            var mainDist = distM.Where(x => x.Item2 == secIndex).ToList();
+
+            Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInSide(ALE, mainList, secPt);//key:blockListIndex value:returnValue
+
+            var mainPt = returnValueCalculation.findOptimalConnectionInSide(returnValueDict, mainDist, mainList, secPt, side);
+
+            ptList.Add(mainPt);
+
+            var mainI = side.reMainBlk.IndexOf(mainPt);
+
+            return mainI;
+
+
+        }
+
+        private static List<int> findCloseSecPtList(List<(int, int, double)> distM, int mainI)
         {
             List<int> secPtIndexList = new List<int>();
             int secCount = distM.Select(x => x.Item2).Max();
 
             for (int j = 0; j <= secCount; j++)
             {
-                if (visit[j] == false)
+
+                var minMainIndex = distM.Where(x => x.Item2 == j).OrderBy(x => x.Item3).FirstOrDefault().Item1;
+
+                if (minMainIndex == mainI)
                 {
-                    var minMainIndex = distM.Where(x => x.Item2 == j).OrderBy(x => x.Item3).FirstOrDefault().Item1;
-
-                    if (minMainIndex == mainI)
-                    {
-                        secPtIndexList.Add(j);
-                    }
+                    secPtIndexList.Add(j);
                 }
-
             }
+
             return secPtIndexList;
         }
 
@@ -249,7 +402,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return cenPt;
         }
 
-        private static void buildMST(List<Point3d> ptList, ThSingleSideBlocks side, out int[] parent)
+        private static void buildMST(List<Point3d> ptList, ThSingleSideBlocks side, Polyline frame, out int[] parent)
         {
 
             double[,] graph = new double[ptList.Count, ptList.Count];
@@ -258,110 +411,42 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 for (int j = i; j < ptList.Count; j++)
                 {
+                    // if (i == j || intersectWithFrame(ptList[i], ptList[j], frame))
                     if (i == j)
                     {
                         graph[i, j] = 0;
                     }
-                    var dist = ptList[i].DistanceTo(ptList[j]);
-                    graph[i, j] = dist;
-                    graph[j, i] = dist;
+                    else if (intersectWithFrame(ptList[i], ptList[j], frame))
+                    {
+                        var dist = ptList[i].DistanceTo(ptList[j]) + EmgConnectCommon.TolConnectSecPrimAddValue;
+                        graph[i, j] = dist;
+                        graph[j, i] = dist;
+                    }
+                    else
+                    {
+                        var dist = ptList[i].DistanceTo(ptList[j]);
+                        graph[i, j] = dist;
+                        graph[j, i] = dist;
+                    }
                 }
             }
             int[] connectNo = new int[ptList.Count];
             ptList.ForEach(x => connectNo[ptList.IndexOf(x)] = side.blkConnectNo(x));
 
-            Prim2(graph, ptList.Count, connectNo, out parent);
-            //Prim(graph, ptList.Count, out parent);
+            Prim(graph, ptList.Count, connectNo, out parent);
 
         }
 
-        //public static void connectSecToMain2(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
-        //{
-        //    //var side = sigleSideGroup[2];
-
-        //    var side = sigleSideGroup[6];
-
-        //    var ptList = new List<Point3d>();
-        //    //ptList.Add(side.mainBlk[5]);
-        //    ptList.Add(side.mainBlk[0]);
-
-        //    side.secBlk.Where(x => x.DistanceTo(side.mainBlk[0]) < 21000).ForEach(x => ptList.Add(x));
-
-        //    double[,] graph = new double[ptList.Count, ptList.Count];
-
-        //    for (int i = 0; i < ptList.Count; i++)
-        //    {
-        //        for (int j = i; j < ptList.Count; j++)
-        //        {
-        //            if (i == j)
-        //            {
-        //                graph[i, j] = 0;
-        //            }
-        //            var dist = ptList[i].DistanceTo(ptList[j]);
-        //            graph[i, j] = dist;
-        //            graph[j, i] = dist;
-
-
-        //        }
-        //    }
-
-        //    Prim(graph, ptList.Count, out var parent);
-
-        //    for (int i = 0; i < ptList.Count; i++)
-        //    {
-        //        if (parent[i] >= 0)
-        //        {
-        //            side.connectPt(ptList[i], ptList[parent[i]]);
-        //        }
-        //    }
-        //}
-
-        private static void Prim(double[,] graph, int verticesCount, out int[] parent)
+        private static bool intersectWithFrame(Point3d pt1, Point3d pt2, Polyline frame)
         {
-            parent = new int[verticesCount];
-            double[] key = new double[verticesCount];
-            bool[] mstSet = new bool[verticesCount];
-
-            for (int i = 0; i < verticesCount; ++i)
+            bool bIntersect = false;
+            Line l = new Line(pt1, pt2);
+            var intersectPt = frame.Intersect(l, Intersect.OnBothOperands);
+            if (intersectPt.Count > 0)
             {
-                key[i] = int.MaxValue;
-                mstSet[i] = false;
+                bIntersect = true;
             }
-
-            key[0] = 0;
-            parent[0] = -1;
-
-            for (int count = 0; count < verticesCount - 1; ++count)
-            {
-                int u = MinKey(key, mstSet, verticesCount);
-                mstSet[u] = true;
-
-                for (int v = 0; v < verticesCount; ++v)
-                {
-                    if (Convert.ToBoolean(graph[u, v]) && mstSet[v] == false && graph[u, v] < key[v])
-                    {
-                        parent[v] = u;
-                        key[v] = graph[u, v];
-                    }
-                }
-            }
-        }
-
-        private static int MinKey(double[] key, bool[] set, int verticesCount)
-        {
-            double min = int.MaxValue;
-            int minIndex = 0;
-
-            for (int v = 0; v < verticesCount; ++v)
-            {
-                if (set[v] == false && key[v] < min)
-                {
-                    min = key[v];
-                    minIndex = v;
-                }
-            }
-
-            return minIndex;
+            return bIntersect;
         }
 
         /// <summary>
@@ -371,7 +456,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         /// <param name="verticesCount"></param>
         /// <param name="connectNo"></param>
         /// <param name="parent"></param>
-        private static void Prim2(double[,] graph, int verticesCount, int[] connectNo, out int[] parent)
+        private static void Prim(double[,] graph, int verticesCount, int[] connectNo, out int[] parent)
         {
             parent = new int[verticesCount];
             bool[] mstSet = new bool[verticesCount];
@@ -396,8 +481,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     {
                         for (int u = 0; u < verticesCount; u++)
                         {
-                            if (mstSet[u] == true && Convert.ToBoolean(graph[u, v]) && graph[u, v] < min && 
-                                connectNo[v] < EmgConnectCommon.TolMaxConnect && connectNo[u] < EmgConnectCommon.TolMaxConnect)
+                            if (mstSet[u] == true && Convert.ToBoolean(graph[u, v]) && graph[u, v] < min &&
+                                connectNo[v] < EmgConnectCommon.TolBlkMaxConnect && connectNo[u] < EmgConnectCommon.TolBlkMaxConnect)
                             {
                                 min = graph[u, v];
                                 minIndex = v;
@@ -406,46 +491,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         }
                     }
                 }
-                if (minIndex!=-1 && minParent != -1)
+                if (minIndex != -1 && minParent != -1)
                 {
                     mstSet[minIndex] = true;
                     parent[minIndex] = minParent;
                     connectNo[minIndex] = connectNo[minIndex] + 1;
                     connectNo[minParent] = connectNo[minParent] + 1;
                 }
-              
-
-
-
             }
-
         }
-
-        private static int MinKey2(double[,] graph, bool[] set, int[] connectNo, int verticesCount)
-        {
-            double min = int.MaxValue;
-            int minIndex = -1;
-            int minParent = -1;
-
-            for (int v = 0; v < verticesCount; v++)
-            {
-                for (int u = 0; u < verticesCount; u++)
-                {
-                    if (set[u] == false && graph[u, v] < min && connectNo[v] < EmgConnectCommon.TolMaxConnect && connectNo[u] < EmgConnectCommon.TolMaxConnect)
-                    {
-                        min = graph[u, v];
-                        minIndex = v;
-                        minParent = u;
-                    }
-                }
-            }
-
-
-            return minIndex;
-        }
-
-
     }
-
-
 }

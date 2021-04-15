@@ -9,20 +9,22 @@ namespace ThMEPLighting.EmgLightConnect
     public class EmgConnectCommon
     {
 
-        public static int TolLane = 6000;
-        public static int TolLaneHead = 400;
-        public static int TolGroupEmgLight = 400;
-        public static int TolLaneEndOnFrame = 200;
-        public static int TolGroupDistance = 20000;
-        public static int TolReturnValueAs0 = 6000;
-        public static int TolMaxLigthNo = 25;
-        public static int TolReturn = 5000;
-        public static int TolMinReturnValueRange = 500;
+        public static int TolGroupBlkLane = 6000;
+        public static int TolGroupBlkLaneHead = 400;
+        public static int TolGroupEmgLightEvac = 400;
+        public static int TolOrderSideLanePtOnFrame = 200;
+        public static int TolSaperateGroupMaxDistance = 20000;
+        public static int TolReturnValueDistCheck = 5000;
+        public static int TolReturnValueMinRange = 500;
         public static int TolTooClosePt = 800;
-        public static double TolPtOnSameLineYRange = 1000;
-        public static int TolReturnRange = 4500;
-        public static int TolMaxConnect = 4;
+        public static double TolRegroupMainYRange = 1000;
+        public static int TolReturnRangeInGroup = 4500;
+        public static int TolReturnRangeInSide = 1000;
+        public static int TolBlkMaxConnect = 4;
+        public static int TolMaxLigthNo = 25;
         public static int TolMaxReturnValue = 10000;
+        public static int TolConnectSecPtRange = 12000;
+        public static int TolConnectSecPrimAddValue = 10000;
 
 
 

@@ -122,7 +122,7 @@ namespace ThMEPLighting
                 }
 
                 //获取ALE起点
-                
+
                 PromptSelectionOptions sOptions = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
@@ -137,13 +137,13 @@ namespace ThMEPLighting
 
                 filter = ThSelectionFilterTool.Build(dxfNames);
 
-                var sResult = Active.Editor.GetSelection(sOptions,filter);
+                var sResult = Active.Editor.GetSelection(sOptions, filter);
                 if (sResult.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                var ALEOri = (acdb.Element<BlockReference >(sResult.Value.GetObjectIds().First()) as BlockReference);
-                
+                var ALEOri = (acdb.Element<BlockReference>(sResult.Value.GetObjectIds().First()) as BlockReference);
+
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     //获取外包框
@@ -189,6 +189,8 @@ namespace ThMEPLighting
                     BlockReference ALE = ALEOri.Clone() as BlockReference;
                     transformer.Transform(ALE);
                     blockList.Add(EmgConnectCommon.BlockType.ale, new List<BlockReference> { ALE });
+
+                    GetBlockService.projectToXY(ref blockList);
 
                     var b = false;
                     if (b == true)

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
@@ -70,6 +71,16 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             //blockList.Add(EmgConnectCommon.BlockType.ale, ALE.Select(x => x.Value).ToList());
 
+        }
+
+        public static void projectToXY(ref Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockList)
+        {
+            var typeList = blockList.Select(x => x.Key).ToList();
+            foreach (var type in typeList)
+            {
+                blockList[type].ForEach(x => x.Position  = new Point3d (x.Position .X ,x.Position .Y ,0));
+                
+            }
         }
 
 

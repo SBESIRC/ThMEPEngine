@@ -54,32 +54,29 @@ namespace ThMEPLighting.EmgLightConnect
             MergeSideService.mergeSide(orderedAllLaneSideList, out var sideDict);
             MergeSideService.mergeSigleSideBlocks(sideDict, singleSideBlocks);
 
-            //singleSideBlocks.ForEach(x => x.orderLane());
-            //singleSideBlocks.ForEach(x => x.orderBlk(x.mainBlk));
-
-            //车道道路成图分析可能的路径
+            //车道道路成图
             graphService.createOutterGraph(orderedAllLaneSideList[0], sideDict, singleSideBlocks, out var sideGraph);
             graphService.createInnerGraph(orderedAllLaneSideList, sideDict, sideGraph);
 
             MergeSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
 
+
             //连线
             var ALE = blockSourceList[EmgConnectCommon.BlockType.ale].First();
             connectSingleSideBlkService.connectMainToMain(singleSideBlocks);
-            //connectSingleSideBlkService.connectSecToMain(ALE, singleSideBlocks);
-            //connectSingleSideBlkService.connectSecToMain2(ALE, singleSideBlocks);
-            connectSingleSideBlkService.connecSecToMain3(ALE, singleSideBlocks);
+            MergeSideService.relocateSecBlockSide(singleSideBlocks);
+            connectSingleSideBlkService.connecSecToMain(ALE, singleSideBlocks, frame);
 
             ////////debug 打图，要删
             ConnectSingleSideService.forDebugSingleSideBlocks2(singleSideBlocks);
 
-            bool b = true;
+            bool b = false;
             if (b == true)
             {
                 return;
             }
 
-            //找出所有图可能的连通性
+            //找出图所有的可能路径
             var allPath = graphService.SeachGraph(sideGraph);
 
             //找分组方式
@@ -94,13 +91,14 @@ namespace ThMEPLighting.EmgLightConnect
 
             ////组内连线
             var connectList = connectSingleSideInGroupService.connectAllSingleSide(ALE, OptimalGroupBlocks);
-         
+
+            ////
+            
+
+
+
             ////////debug 打图，要删
             ConnectSingleSideService.forDebugConnectLine(connectList);
-
-
-
-
 
         }
 

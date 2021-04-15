@@ -363,7 +363,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
 
             var ptListOnFrame = ptList.ToDictionary(x => x, x => frame.GetClosestPointTo(x, false));
-            ptListOnFrame = ptListOnFrame.Where(x => x.Value.DistanceTo(x.Key) <= EmgConnectCommon.TolLaneEndOnFrame).ToDictionary(x => x.Key, x => x.Value);
+            ptListOnFrame = ptListOnFrame.Where(x => x.Value.DistanceTo(x.Key) <= EmgConnectCommon.TolOrderSideLanePtOnFrame).ToDictionary(x => x.Key, x => x.Value);
 
             for (var i = 0; i < frame.NumberOfVertices - 1; i++)
             {

@@ -26,7 +26,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             for (int i = 0; i < LaneList.Count; i++)
             {
 
-                var blockByLane = separateBlocksByLine(LaneList[i], lightPt, EmgConnectCommon.TolLane);
+                var blockByLane = separateBlocksByLine(LaneList[i], lightPt, EmgConnectCommon.TolGroupBlkLane);
 
                 var displacementValue = getLaneDisplacement(LaneList[i], blockByLane[0]);
                 if (displacementValue != 0)

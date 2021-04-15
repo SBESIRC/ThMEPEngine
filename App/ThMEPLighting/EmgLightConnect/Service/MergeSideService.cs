@@ -145,7 +145,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 if (targetSide != null)
                 {
-                   
+
                     //createAddMainBlkLink(side, targetSide);
 
                     if (mergeDict.ContainsKey(targetSide.laneSideNo))
@@ -176,26 +176,17 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        //private static void createAddMainBlkLink(ThSingleSideBlocks side, ThSingleSideBlocks targetSide)
-        //{
-        //    var targetPt = targetSide.mainBlock.OrderBy(dist => dist.DistanceTo(side.mainBlock[0])).First();
-        //    var line = new Line(side.mainBlock[0], targetPt);
-        //    side.addMainBlkLine.Add(line);
-        //}
-
         private static void mergeToSide(ThSingleSideBlocks side, ThSingleSideBlocks targetSide, List<ThSingleSideBlocks> singleSideBlocks)
         {
             targetSide.addMainBlock.AddRange(side.mainBlk);
             targetSide.addMainBlock.AddRange(side.addMainBlock);
             targetSide.secBlk.AddRange(side.secBlk);
-            //targetSide.addMainBlkLine.AddRange(side.addMainBlkLine);
             side.groupBlock.ToList().ForEach(x => targetSide.groupBlock.Add(x.Key, x.Value));
 
             side.mainBlk.Clear();
             side.addMainBlock.Clear();
             side.secBlk.Clear();
             side.groupBlock.Clear();
-            //side.addMainBlkLine.Clear();
 
         }
 
@@ -556,17 +547,17 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static void findClosedSide(ThSingleSideBlocks side, ThSingleSideBlocks targetS, ThSingleSideBlocks tartgetE, ref ThSingleSideBlocks target)
         {
-            double minDistS = EmgConnectCommon.TolGroupDistance;
-            double minDistE = EmgConnectCommon.TolGroupDistance;
+            double minDistS = EmgConnectCommon.TolSaperateGroupMaxDistance;
+            double minDistE = EmgConnectCommon.TolSaperateGroupMaxDistance;
 
             minDistS = targetS.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
             minDistE = tartgetE.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
 
-            if (minDistS <= minDistE && minDistS < EmgConnectCommon.TolGroupDistance)
+            if (minDistS <= minDistE && minDistS < EmgConnectCommon.TolSaperateGroupMaxDistance)
             {
                 target = targetS;
             }
-            else if (minDistE < minDistS && minDistE < EmgConnectCommon.TolGroupDistance)
+            else if (minDistE < minDistS && minDistE < EmgConnectCommon.TolSaperateGroupMaxDistance)
             {
                 target = tartgetE;
             }
@@ -574,6 +565,33 @@ namespace ThMEPLighting.EmgLightConnect.Service
             if (target == null)
             {
                 target = targetS;
+            }
+        }
+
+        public static void relocateSecBlockSide(List<ThSingleSideBlocks> singleSideBlocks)
+        {
+
+            var allTotalMainBlk = singleSideBlocks.SelectMany(x => x.getAllMainAndReMain()).ToList();
+
+            for (int i = 0; i < singleSideBlocks.Count; i++)
+            {
+                var sideMainBlk = singleSideBlocks[i].getAllMainAndReMain();
+
+                for (int j = singleSideBlocks[i].secBlk.Count-1; j>=0 ; j--)
+                {
+                    var secPt = singleSideBlocks[i].secBlk[j];
+                    var sideNearest = sideMainBlk.Select(x => x.DistanceTo(secPt)).Min();
+                    var allNearest = allTotalMainBlk.Select(x => x.DistanceTo(secPt)).Min();
+
+                    if (sideNearest/ allNearest >3 )
+                    {
+                        var newMainBlk = allTotalMainBlk.Where(x => x.DistanceTo(secPt) == allNearest).FirstOrDefault ();
+                        var newSide = singleSideBlocks.Where(x => x.getTotalBlock().Contains(newMainBlk)).First();
+                        newSide.secBlk.Add(secPt);
+                        singleSideBlocks[i].secBlk.Remove(secPt);
+                
+                    }
+                }
             }
         }
     }

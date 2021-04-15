@@ -21,6 +21,7 @@ namespace ThMEPLighting.EmgLightConnect.Model
         private List<Point3d> m_reSecBlk;
 
         private Matrix3d m_matrix;
+
         private List<(Point3d, Point3d)> m_ptConnect;
 
         #region properties
@@ -127,16 +128,10 @@ namespace ThMEPLighting.EmgLightConnect.Model
             this.m_reSecBlk = new List<Point3d>();
         }
 
-        //public void setSecondaryBlock(List<Point3d> secBlock)
-        //{
-        //    m_secBlk = secBlock;
-        //}
-        
         public void setGroupGroup(Dictionary<Point3d, Point3d> groupBlock)
         {
             m_groupBlk = groupBlock;
         }
-
 
         public List<Point3d> getTotalMainBlock()
         {
@@ -228,6 +223,11 @@ namespace ThMEPLighting.EmgLightConnect.Model
             m_reMainBlk = m_reMainBlk.OrderBy(x => x.TransformBy(Matrix.Inverse()).X).ToList();
         }
 
+        public void orderReSecBlk()
+        {
+            m_reSecBlk = m_reSecBlk.OrderBy(x => x.TransformBy(Matrix.Inverse()).X).ToList();
+        }
+
         public void setReMainBlk(List<Point3d> regroupMain)
         {
             m_reMainBlk = regroupMain;
@@ -238,7 +238,6 @@ namespace ThMEPLighting.EmgLightConnect.Model
             m_reSecBlk = regroupSec;
         }
 
-        
         public int blkConnectNo(Point3d pt)
         {
             var tol = new Tolerance(1, 1);
@@ -280,8 +279,7 @@ namespace ThMEPLighting.EmgLightConnect.Model
             }
         }
 
-
-        private  List<Point3d> getAllMainAndReMain()
+        public  List<Point3d> getAllMainAndReMain()
         {
             var returnList = new List<Point3d>();
             returnList.AddRange(this.reMainBlk);

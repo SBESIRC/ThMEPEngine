@@ -29,7 +29,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             foreach (var emgPt in emgLightList)
             {
-                var evac = evacList.Where(e => e.Position.DistanceTo(emgPt.Position) <= EmgConnectCommon.TolGroupEmgLight).ToList();
+                var evac = evacList.Where(e => e.Position.DistanceTo(emgPt.Position) <= EmgConnectCommon.TolGroupEmgLightEvac).ToList();
 
                 if (evac.Count > 0)
                 {
@@ -66,8 +66,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 for (var j = 0; j < mergedOrderedLane[i].Count; j++)
                 {
 
-                    var mainBlockGroup = separateMainBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.mainBlock], EmgConnectCommon.TolLane, EmgConnectCommon.TolLaneHead);
-                    var secBlockGroup = separateSecBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.secBlock], EmgConnectCommon.TolLane, EmgConnectCommon.TolLaneHead);
+                    var mainBlockGroup = separateMainBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.mainBlock], EmgConnectCommon.TolGroupBlkLane, EmgConnectCommon.TolGroupBlkLaneHead);
+                    var secBlockGroup = separateSecBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.secBlock], EmgConnectCommon.TolGroupBlkLane, EmgConnectCommon.TolGroupBlkLaneHead);
 
                     var groupLeft = new ThSingleSideBlocks(mainBlockGroup[0], new List<(Line, int)> { (mergedOrderedLane[i][j], 0) });
                     var groupRight = new ThSingleSideBlocks(mainBlockGroup[1], new List<(Line, int)> { (mergedOrderedLane[i][j], 1) });
@@ -118,9 +118,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 foreach (var block in pair.Value)
                 {
-                    //var closePoint = singleSideBlocks.SelectMany(x => x.mainBlk).OrderBy(y => y.DistanceTo(block.Position)).FirstOrDefault();
-                    //var group = singleSideBlocks.Where(x => x.mainBlk.Contains(closePoint)).FirstOrDefault();
-                    var closePoint = singleSideBlocks.SelectMany(x => x.getTotalBlock() ).OrderBy(y => y.DistanceTo(block.Position)).FirstOrDefault();
+                    var closePoint = singleSideBlocks.SelectMany(x => x.getTotalBlock()).OrderBy(y => y.DistanceTo(block.Position)).FirstOrDefault();
                     var group = singleSideBlocks.Where(x => x.getTotalBlock().Contains(closePoint)).FirstOrDefault();
 
                     group.secBlk.Add(block.Position);
@@ -187,7 +185,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
         {
 
             var linePoly = GeomUtils.ExpandLine(lane, tolLeftRight, tolUpDown, 0, tolUpDown);
-            //ThMEPLighting.EmgLight.Assistant.DrawUtils.ShowGeometry(linePoly, "l0SepPoly");
 
             var leftPolyline = blocks.Where(y =>
             {
@@ -198,7 +195,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
 
             linePoly = GeomUtils.ExpandLine(lane, 0, tolUpDown, tolLeftRight, tolUpDown);
-            //ThMEPLighting.EmgLight.Assistant.DrawUtils.ShowGeometry(linePoly, "l0SepPoly");
             var rightPolyline = blocks.Where(y =>
             {
                 var bContain = linePoly.Contains(y.Position);
@@ -222,15 +218,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             blockDict[EmgConnectCommon.BlockGroupType.secBlock].AddRange(evacCeiling);
             blockDict[EmgConnectCommon.BlockGroupType.secBlock].AddRange(enter);
         }
-
-        //public static void addMainBlockList(Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict)
-        //{
-        //    var emg = blockSourceList[EmgConnectCommon.BlockType.emgLight];
-        //    var evac = blockSourceList[EmgConnectCommon.BlockType.evac];
-
-        //    blockDict.Add(EmgConnectCommon.BlockGroupType.mainBlock, emg);
-        //    blockDict[EmgConnectCommon.BlockGroupType.mainBlock].AddRange(evac);
-        //}
 
         public static void addMainGroupBlockList(Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict, out Dictionary<Point3d, Point3d> groupBlock)
         {

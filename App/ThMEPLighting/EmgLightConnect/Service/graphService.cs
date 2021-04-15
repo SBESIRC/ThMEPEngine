@@ -91,7 +91,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var firstRingItem = firstRingBlocks.SelectMany(each => each.mainBlk).ToList();
             var secRingItem = secondRingBlocks.SelectMany(each => each.mainBlk).ToList();
 
-            double minDist = EmgConnectCommon.TolGroupDistance;
+            double minDist = EmgConnectCommon.TolSaperateGroupMaxDistance;
             (Point3d, Point3d) ringBlock = (new Point3d(), new Point3d());
             var closeSide = (-1, -1);
 
@@ -120,7 +120,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
             }
 
-
             return closeSide;
 
         }
@@ -134,8 +133,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             return index;
         }
-
-
 
         public static void createInnerGraph(Dictionary<int, List<List<(Line, int)>>> orderedAllLaneSideList, Dictionary<int, List<(Line, int)>> sideDict, ThLaneSideGraph sideGraph)
         {
@@ -338,7 +335,5 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
             return indexL;
         }
-
-
     }
 }
