@@ -66,6 +66,9 @@ namespace TianHua.FanSelection.UI.CAD
                 }
             }
         }
+
+        #region Binary Serialization
+        // https://forums.autodesk.com/t5/net/binary-serialization-to-xrecord/td-p/5601969
         private byte[] SerializeBinary(FanDataModel model)
         {
             var json = FuncJson.Serialize(model);
@@ -140,5 +143,6 @@ namespace TianHua.FanSelection.UI.CAD
         {
             return buff.AsArray().SelectMany(o => (byte[])o.Value).ToArray();
         }
+        #endregion
     }
 }
