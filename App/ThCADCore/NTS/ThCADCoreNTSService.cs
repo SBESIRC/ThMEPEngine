@@ -1,4 +1,5 @@
-﻿using NetTopologySuite;
+﻿using System;
+using NetTopologySuite;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Prepared;
 
@@ -59,7 +60,7 @@ namespace ThCADCore.NTS
             }
         }
 
-        private PrecisionModel precisionModel;
+        private Lazy<PrecisionModel> precisionModel;
         public PrecisionModel PrecisionModel
         {
             get
@@ -68,9 +69,9 @@ namespace ThCADCore.NTS
                 {
                     if (precisionModel == null)
                     {
-                        precisionModel = NtsGeometryServices.Instance.CreatePrecisionModel(PrecisionModels.Fixed);
+                        precisionModel = PrecisionModel.Fixed;
                     }
-                    return precisionModel;
+                    return precisionModel.Value;
                 }
                 else
                 {

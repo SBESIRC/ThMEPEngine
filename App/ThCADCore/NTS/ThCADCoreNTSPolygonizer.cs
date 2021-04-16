@@ -1,5 +1,6 @@
 ﻿using System;
 using NFox.Cad;
+using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
@@ -18,7 +19,7 @@ namespace ThCADCore.NTS
             using (var si = new ThCADCoreNTSSpatialIndex(curves))
             {
                 var polygonizer = new Polygonizer();
-                polygonizer.Add(UnaryUnionOp.Union(si.Geometries.Keys));
+                polygonizer.Add(si.Geometries.Values.Select(o => o).ToCollection().ToNTSNodedLineStrings());
                 return polygonizer.GetPolygons();
             }
         }
