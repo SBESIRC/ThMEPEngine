@@ -317,10 +317,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                 interHoles.AddRange(intersectHoles);
                 return GetAllIntersectHoles(interHoles, checkHoles, frame, polyline);
             }
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                db.ModelSpace.Add(boungdingBox);
-            }
+            
             return boungdingBox;
         }
     }

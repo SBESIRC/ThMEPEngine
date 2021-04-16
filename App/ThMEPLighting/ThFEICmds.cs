@@ -17,6 +17,7 @@ using ThMEPLighting.FEI.AStarAlgorithm;
 using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.EvacuationPath;
+using ThMEPLighting.FEI.PrintEntity;
 
 namespace ThMEPLighting
 {
@@ -88,12 +89,12 @@ namespace ThMEPLighting
                     //规划路径
                     ExtendLinesService extendLines = new ExtendLinesService();
                     var paths = extendLines.CreateExtendLines(xLanes, yLines, enterBlcok, pline.Key, holes);
-                    paths.ForEach(x => originTransformer.Reset(x.line));
 
-                    foreach (var item in paths)
-                    {
-                        acdb.ModelSpace.Add(item.line);
-                    }
+                    //打印路径
+                    PrintService printService = new PrintService();
+                    var allLanes = xLanes.SelectMany(x => x.Select(y => y)).ToList();
+                    allLanes.AddRange(yLines.SelectMany(x => x.Select(y => y)));
+                    printService.PrintPath(paths, allLanes, originTransformer);
                 }
             }
         }

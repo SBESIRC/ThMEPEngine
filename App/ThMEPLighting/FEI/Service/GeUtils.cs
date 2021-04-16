@@ -5,6 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.FEI.Service
 {
@@ -159,6 +161,84 @@ namespace ThMEPLighting.FEI.Service
             }
 
             return allPts;
+        }
+
+        /// <summary>
+        /// 将线noded打断
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public static List<Line> GetNodedLines(List<Line> lines)
+        {
+            lines = lines.Select(y =>
+            {
+                var dir = (y.EndPoint - y.StartPoint).GetNormal();
+                return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
+            }).ToList();
+            var objs = new DBObjectCollection();
+            lines.ForEach(x => objs.Add(x));
+            var nodeGeo = objs.ToNTSNodedLineStrings();
+            var handleLines = new List<Line>();
+            if (nodeGeo != null)
+            {
+                handleLines = nodeGeo.ToDbObjects()
+                .SelectMany(x =>
+                {
+                    DBObjectCollection entitySet = new DBObjectCollection();
+                    (x as Polyline).Explode(entitySet);
+                    return entitySet.Cast<Line>().ToList();
+                })
+                .Where(x => x.Length > 3)
+                .ToList();
+            }
+
+            return handleLines;
+        }
+
+        /// <summary>
+        /// 判断一根线是否和一堆线中有线有重合部分
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="lines"></param>
+        /// <returns></returns>
+        public static bool IsHasOverlapInList(Line line, List<Line> lines, double tol)
+        {
+            foreach (var checkLine in lines)
+            {
+                if (line.IsOverlapByTol(checkLine, tol))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// 判断两根线是否有共线
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="otherLine"></param>
+        /// <param name="tol"></param>
+        /// <returns></returns>
+        public static bool IsOverlapByTol(this Line line, Line otherLine, double tol)
+        {
+            if (line.Length < tol || otherLine.Length < tol)
+            {
+                return false;
+            }
+
+            Vector3d dir = (line.EndPoint - line.StartPoint).GetNormal();
+            Vector3d otherDir = (otherLine.EndPoint - otherLine.StartPoint).GetNormal();
+            if (!dir.IsEqualTo(otherDir, new Tolerance(0.0001, 0.0001)))
+            {
+                return false;
+            }
+
+            Line newLine = new Line(line.StartPoint + dir * tol, line.EndPoint - dir * tol);
+            Polyline poly = newLine.Buffer(tol);
+
+            return poly.IsIntersects(otherLine);
         }
     }
 }
