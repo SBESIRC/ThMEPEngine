@@ -66,8 +66,8 @@ namespace ThMEPHVAC.CAD
         {
             string[] str = in_param.ductsize_info.Split(' ');
 
-            string innerduct_info = str[0];
-            string outerduct_info = str[1];
+            string innerduct_info = str[1];
+            string outerduct_info = str[0];
             string tee_info = in_param.tee_info;
             string elevation_info = in_param.elevation_info;
             string ductsize_info = in_param.duct_info;
@@ -177,11 +177,13 @@ namespace ThMEPHVAC.CAD
         private ThIfcDuctSegmentParameters Create_duct_param(Point3d tar_srt_pos,
                                                              Point3d tar_end_pos,
                                                              double edge_len,
+                                                             double duct_width,
+                                                             double duct_height,
                                                              DBObjectCollection bypass_lines)
         {
             bool is_bypass = ThServiceTee.Is_bypass(tar_srt_pos, tar_end_pos, bypass_lines);
-            double Width = is_bypass ? TeeWidth : InletDuctWidth;
-            double Height = is_bypass ? TeeHeight : InletDuctHeight;
+            double Width = is_bypass ? TeeWidth : duct_width;
+            double Height = is_bypass ? TeeHeight : duct_height;
             return new ThIfcDuctSegmentParameters
             {
                 Width = Width,
@@ -268,6 +270,8 @@ namespace ThMEPHVAC.CAD
                 var DuctParameters = Create_duct_param( ductgraphedge.Source.Position,
                                                         ductgraphedge.Target.Position,
                                                         ductgraphedge.EdgeLength,
+                                                        InletDuctWidth,
+                                                        InletDuctHeight,
                                                         bypass_line);
 
                 Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
@@ -392,6 +396,8 @@ namespace ThMEPHVAC.CAD
                 var DuctParameters = Create_duct_param( ductgraphedge.Source.Position,
                                                         ductgraphedge.Target.Position,
                                                         ductgraphedge.EdgeLength,
+                                                        OutletDuctWidth,
+                                                        OutletDuctHeight,
                                                         bypass_line);
 
                 Vector2d edgevector = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);

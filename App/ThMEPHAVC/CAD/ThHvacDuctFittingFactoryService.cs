@@ -85,10 +85,11 @@ namespace ThMEPHVAC.CAD
                 }
                 else
                 {
-                    if (Double.Parse(elevation) > 0)
-                        str = $"{parameters.Width}x{parameters.Height} (h+{elevation}m)";
+                    double num = Double.Parse(elevation);
+                    if (num > 0)
+                        str = $"{parameters.Width}x{parameters.Height} (h+" + num.ToString("0.00") + "m)";
                     else
-                        str = $"{parameters.Width}x{parameters.Height} (h{elevation}m)";
+                        str = $"{parameters.Width}x{parameters.Height} (h"+ num.ToString("0.00") + "m)";
 
                 }
                 double h = 450;

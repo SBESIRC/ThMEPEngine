@@ -128,37 +128,25 @@ namespace TianHua.Hvac.UI.Command
                         ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbTeeModel, bypass_lines);
                         if (io_anay_res == null)
                             return;
-                        double valve_width = Double.Parse(outerDuctSize.Split('x').First());
+                        
                         double bra_width = Double.Parse(tee_width.Split('x').First());
                         double s1 = bra_width + 50;
-                        double s2 = (bra_width + valve_width) * 0.5 + 50;
                         double s3 = bra_width * 0.5 + 100;
-
                         Line bypass_duct = max_bypass;
-                        if (tee_pattern == "RBType3")
+                        if (io_anay_res.HasInletTee())
                         {
-                            if (io_anay_res.HasInletTee())
-                                ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
-                            if (io_anay_res.HasOutletTee())
-                                ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
-
+                            double valve_width = Double.Parse(outerDuctSize.Split('x').First());
+                            double s2 = (bra_width + valve_width) * 0.5 + 50;
+                            ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
                         }
-                        if (tee_pattern == "RBType1")
+                        if (io_anay_res.HasOutletTee())
                         {
-                            if (io_anay_res.HasInletTee())
-                                ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
-                            if (io_anay_res.HasOutletTee())
-                                ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
-
+                            double valve_width = Double.Parse(innerDuctSize.Split('x').First());
+                            double s2 = (bra_width + valve_width) * 0.5 + 50;
+                            ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
                         }
                         if (tee_pattern == "RBType2")
-                        {
-                            if (io_anay_res.HasInletTee())
-                                ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
-                            if (io_anay_res.HasOutletTee())
-                                ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
                             bypass_duct = last_bypass;
-                        }
 
                         int wall_num = 0;
                         IODuctHoleAnalysis(DbTeeModel, ref wall_num, info, max_bypass, bypass_lines, io_anay_res);
