@@ -255,7 +255,7 @@ namespace TianHua.Hvac.UI
             this.splitContainer2.Panel2.Controls.Add(this.textBox3);
             this.splitContainer2.Panel2.Controls.Add(this.label1);
             this.splitContainer2.Size = new System.Drawing.Size(180, 113);
-            this.splitContainer2.SplitterDistance = 106;
+            this.splitContainer2.SplitterDistance = 84;
             this.splitContainer2.TabIndex = 0;
             // 
             // label3
@@ -280,6 +280,7 @@ namespace TianHua.Hvac.UI
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(100, 21);
             this.textBox1.TabIndex = 9;
+            this.textBox1.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
             // 
             // listBox1
             // 
@@ -293,6 +294,7 @@ namespace TianHua.Hvac.UI
             this.listBox1.Name = "listBox1";
             this.listBox1.Size = new System.Drawing.Size(165, 56);
             this.listBox1.TabIndex = 12;
+            this.listBox1.SelectedIndexChanged += new System.EventHandler(this.listBox1_SelectedIndexChanged);
             // 
             // label2
             // 

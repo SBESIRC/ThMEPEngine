@@ -55,6 +55,7 @@ namespace ThMEPHVAC.CAD
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> InletCenterLineGraph { get; set; }
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         private List<Vector2d> TextVec { get; set; }
+        public Vector3d valve_dis_vec { get; set; }
         private bool bypass_once {get; set;}
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel,
             SizeParam in_param,
@@ -241,7 +242,6 @@ namespace ThMEPHVAC.CAD
                     }
 
                     double rotationangle = InletOpening.NormalAngle * Math.PI / 180 - Math.PI;
-                    //reducing.Matrix = Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)) * Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
                     reducing.Matrix = Matrix3d.Displacement(new Vector3d(-reducing.Parameters.ReducingLength, 0, 0));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0)));
                     reducing.Matrix = reducing.Matrix.PreMultiplyBy(Matrix3d.Displacement(InletOpening.OpingBasePoint.GetAsVector()));
@@ -400,6 +400,7 @@ namespace ThMEPHVAC.CAD
                 if (Math.Abs(max_len - ductgraphedge.EdgeLength) < 1.5)
                 {
                     text_enable = true;
+                    s_evel = Elevation.ToString();
                 }
                 bool is_bypass = false;
                 if (Math.Abs(text_bypass_len - ductgraphedge.EdgeLength) < 5 || Math.Abs(half_len - ductgraphedge.EdgeLength) < 5)
@@ -409,9 +410,10 @@ namespace ThMEPHVAC.CAD
                     {
                         text_enable = true;
                         bypass_once = false;
+                        s_evel = num.ToString();
                     }
                 }
-                s_evel = num.ToString();
+                
                 if (text_enable)
                     TextVec.Add(edgevector.GetNormal());
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle,

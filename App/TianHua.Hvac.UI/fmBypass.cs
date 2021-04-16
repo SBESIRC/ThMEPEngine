@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using ThMEPHVAC.CAD;
+using ThMEPHVAC.Model;
 
 namespace TianHua.Hvac.UI
 {
@@ -16,13 +11,17 @@ namespace TianHua.Hvac.UI
         public string TeeWidth { get; set; }
         public string OValveWidth { get; set; }
         public string tee_pattern { get; set; }
-        private string air_vloume { get;}
+        private double air_vloume { get; set; }
+        public DuctSpecModel fan_model { get; set; }
         public fmBypass(string airVloume)
         {
             InitializeComponent();
-            air_vloume = airVloume;
+            air_vloume = Double.Parse(airVloume) / 2;
         }
-
+        public void InitForm(DuctSpecModel _DuctSpecModel)
+        {
+            fan_model = _DuctSpecModel;
+        }
         private void Rad_Properties_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -117,9 +116,9 @@ namespace TianHua.Hvac.UI
             if (!string.IsNullOrEmpty(textBox2.Text) &&
                 !string.IsNullOrEmpty(textBox3.Text))
             {
-                double air_speed = Double.Parse(air_vloume) / 3600 * 
-                                   Double.Parse(textBox2.Text) * 
-                                   Double.Parse(textBox3.Text) / 1000000;
+                double air_speed = air_vloume / 3600 / 
+                                  (Double.Parse(textBox2.Text) *
+                                   Double.Parse(textBox3.Text) / 1000000);
                 label2.Text = "计算风速    " + air_speed.ToString("0.00") + " m/s";
                 TeeWidth = textBox2.Text + "x" + textBox3.Text;
             }
@@ -130,9 +129,9 @@ namespace TianHua.Hvac.UI
             if (!string.IsNullOrEmpty(textBox2.Text) &&
                 !string.IsNullOrEmpty(textBox3.Text))
             {
-                double air_speed = Double.Parse(air_vloume) / 3600 *
-                                   Double.Parse(textBox2.Text) *
-                                   Double.Parse(textBox3.Text) / 1000000;
+                double air_speed = air_vloume / 3600 /
+                                  (Double.Parse(textBox2.Text) *
+                                   Double.Parse(textBox3.Text) / 1000000);
                 label2.Text = "计算风速    " + air_speed.ToString("0.00") + " m/s";
                 TeeWidth = textBox2.Text + "x" + textBox3.Text;
             }
@@ -166,6 +165,27 @@ namespace TianHua.Hvac.UI
             {
                 e.Handled = true;
             }
+        }
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox1_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(textBox1.Text))
+                return;
+            double air_speed = Double.Parse(textBox1.Text);
+            if (air_speed > fan_model.MaxAirSpeed)
+                air_speed = fan_model.MaxAirSpeed;
+            if (air_speed < fan_model.MinAirSpeed)
+                air_speed = fan_model.MinAirSpeed;
+
+            ThDuctParameter Duct = new ThDuctParameter(air_vloume, air_speed);
+            listBox1.Items.Clear();
+            listBox1.Items.Add(Duct.DuctSizeInfor.RecommendInnerDuctSize);
+            listBox1.SelectedItem = Duct.DuctSizeInfor.RecommendInnerDuctSize;
         }
     }
 }
