@@ -40,7 +40,7 @@ namespace ThCADCore.NTS
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
             // https://lin-ear-th-inking.blogspot.com/2007/11/fast-polygon-merging-in-jts-using.html
-            return curves.ToNTSMultiPolygon().Union();
+            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon());
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
