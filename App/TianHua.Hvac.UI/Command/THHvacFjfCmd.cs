@@ -24,15 +24,39 @@ namespace TianHua.Hvac.UI.Command
 
     public class THHvacFjfCmd : IAcadCommand, IDisposable
     {
-        private Tolerance Tor;
         public void Dispose()
         {
             //
         }
+        
 
+        private void Draw_VT_Prepare(Duct_InParam info, 
+                                     ThDbModelFan DbFanModel, 
+                                     out double vt_width,
+                                     out double angle,
+                                     out string line_type,
+                                     out Vector3d dis_vec)
+        {
+            string[] s = info.tee_info.Split('x');
+            if (s.Length == 0)
+            {
+                vt_width = 0;
+                angle = 0;
+                line_type = string.Empty;
+                dis_vec = new Vector3d();
+                return ;
+            }
+            vt_width = Double.Parse(s[0]);
+            Vector3d dir_vec = (DbFanModel.FanOutletBasePoint.GetAsVector() -
+                                DbFanModel.FanInletBasePoint.GetAsVector()) * 0.5;
+            dis_vec = dir_vec + DbFanModel.FanInletBasePoint.GetAsVector();
+            Vector2d v = new Vector2d(dir_vec.X, dir_vec.Y);
+            angle = v.Angle;
+            line_type = (info.tee_pattern == "RBType4") ? ThHvacCommon.CONTINUES_LINETYPE : ThHvacCommon.DASH_LINETYPE;
+
+        }
         public void Execute()
         {
-            Tor = new Tolerance(1.5, 1.5);
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 ObjectId fan_id = ObjectId.Null;
@@ -40,74 +64,32 @@ namespace TianHua.Hvac.UI.Command
                 if (fan_id.IsNull || lineobjects.Count == 0)
                     return;
                 ThDbModelFan DbFanModel = new ThDbModelFan(fan_id, lineobjects);
-                string innerDuctSize = string.Empty;
-                string outerDuctSize = string.Empty;
-                string airVloume = string.Empty;
-                string elevation = string.Empty;
-                string textSize = string.Empty;
-                using (var dlg = Create_duct_diag(DbFanModel))
-                {
-                    if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
-                    {
-                        innerDuctSize = dlg.SelectedInnerDuctSize;
-                        outerDuctSize = dlg.SelectedOuterDuctSize;
-                        airVloume = dlg.AirVolume;
-                        elevation = dlg.Elevation;
-                        textSize = dlg.TextSize;
-                    }
-                }
-                if (string.IsNullOrEmpty(innerDuctSize) || string.IsNullOrEmpty(outerDuctSize))
-                {
+
+                Duct_InParam info = Get_duct_info(DbFanModel, out string air_volume);
+                if (string.IsNullOrEmpty(air_volume))
                     return;
-                }
-                string DuctSize = innerDuctSize + " " + outerDuctSize;
                 if (DbFanModel.FanScenario == "消防加压送风")
                 {
-                    string tee_width = string.Empty;
-                    string tee_pattern = string.Empty;
-                    using (var dlg = Create_bypass_diag(DbFanModel, airVloume))
-                    {
-                        if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
-                        {
-                            tee_width = dlg.TeeWidth;
-                            tee_pattern = dlg.tee_pattern;
-                        }
-                        else
-                            return;
-                    }
-                    SizeParam info = new SizeParam
-                    {
-                        tee_info = tee_width,
-                        duct_info = textSize,
-                        ductsize_info = DuctSize,
-                        tee_pattern = tee_pattern,
-                        elevation_info = elevation,
-                    };
+                    Get_bypass_info(DbFanModel, air_volume, ref info);
+                    if (string.IsNullOrEmpty(info.tee_pattern))
+                        return;
+                    string tee_pattern = info.tee_pattern;
                     if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
                     {
-                        string line_type = (tee_pattern == "RBType4") ? ThHvacCommon.CONTINUES_LINETYPE : ThHvacCommon.DASH_LINETYPE;
-                        string[] s = info.tee_info.Split('x');
-                        if (s.Length == 0)
-                            return;
-                        double vt_width = Double.Parse(s[0]);
-                        ThVTee vt = new ThVTee(600, vt_width, 20);
-                        double fan_angle = DbFanModel.FanOutlet.Angle;
-                        Point3d valve_pos = DbFanModel.FanInletBasePoint;
                         ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbFanModel, null);
                         if (io_anay_res == null)
                             return;
-                        int wall_num = 0;
-                        IODuctHoleAnalysis(DbFanModel, ref wall_num, info, null, null, io_anay_res);
-                        if (wall_num != 0)
-                        {
-                            double angle = fan_angle * Math.PI / 180;
-                            Vector3d fan_cp_vec = (DbFanModel.FanOutletBasePoint.GetAsVector() -
-                                                   DbFanModel.FanInletBasePoint.GetAsVector()) * 0.5 +
-                                                   DbFanModel.FanInletBasePoint.GetAsVector();
-                            vt.RunVTeeDrawEngine(DbFanModel, line_type, angle, fan_cp_vec);
+                        var wall_lines = Get_walls();
+                        if (wall_lines.Count == 0)
+                            return;
+                        IODuctHoleAnalysis(DbFanModel, info, null, wall_lines, null, io_anay_res);
 
-                            ThServiceTee.Insert_electric_valve(fan_cp_vec, vt_width, angle + 1.5 * Math.PI);
-                        }
+                        Draw_VT_Prepare(info, DbFanModel, out double vt_width, out double angle, out string line_type, out Vector3d dis_vec);
+                        if (string.IsNullOrEmpty(line_type))
+                            return;
+                        ThVTee vt = new ThVTee(600, vt_width, 20);
+                        vt.RunVTeeDrawEngine(DbFanModel, line_type, angle, dis_vec);
+                        ThServiceTee.Insert_electric_valve(dis_vec, vt_width, angle + 1.5 * Math.PI);
                     }
                     else
                     {
@@ -115,44 +97,41 @@ namespace TianHua.Hvac.UI.Command
                         DBObjectCollection bypass_lines = Get_bypass(tee_pattern, out Line max_bypass, out Line last_bypass);
                         if (bypass_lines.Count == 0)
                             return;
-                        bypass_lines.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
-
-                        // 将风管在旁通处打断
-                        ThLaneLineEngine.extend_distance = 0.0;
-                        var results = ThLaneLineEngine.Explode(lineobjects);
-                        results = ThLaneLineEngine.Noding(results);
-                        results = ThLaneLineEngine.CleanZeroCurves(results);
+                        DBObjectCollection scatter_lines = Rebuild_graph(bypass_lines, lineobjects);
+                        if (scatter_lines.Count == 0)
+                            return;
 
                         // 根据添加的旁通重新得到model
-                        ThDbModelFan DbTeeModel = new ThDbModelFan(fan_id, results);
+                        ThDbModelFan DbTeeModel = new ThDbModelFan(fan_id, scatter_lines);
                         ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbTeeModel, bypass_lines);
                         if (io_anay_res == null)
                             return;
                         
-                        double bra_width = Double.Parse(tee_width.Split('x').First());
+                        double bra_width = Double.Parse(info.tee_info.Split('x').First());
                         double s1 = bra_width + 50;
                         double s3 = bra_width * 0.5 + 100;
                         Line bypass_duct = max_bypass;
                         if (io_anay_res.HasInletTee())
                         {
-                            double valve_width = Double.Parse(outerDuctSize.Split('x').First());
+                            double valve_width = Double.Parse(info.in_duct_info.Split('x').First());
                             double s2 = (bra_width + valve_width) * 0.5 + 50;
                             ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
                         }
                         if (io_anay_res.HasOutletTee())
                         {
-                            double valve_width = Double.Parse(innerDuctSize.Split('x').First());
+                            double valve_width = Double.Parse(info.out_duct_info.Split('x').First());
                             double s2 = (bra_width + valve_width) * 0.5 + 50;
                             ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
                         }
                         if (tee_pattern == "RBType2")
                             bypass_duct = last_bypass;
 
-                        int wall_num = 0;
-                        IODuctHoleAnalysis(DbTeeModel, ref wall_num, info, max_bypass, bypass_lines, io_anay_res);
-                        Shrink_bypass(ref bypass_duct, io_anay_res);
-                        if (wall_num == 0)
+                        var wall_lines = Get_walls();
+                        if (wall_lines.Count == 0)
                             return;
+
+                        IODuctHoleAnalysis(DbTeeModel, info, max_bypass, wall_lines, bypass_lines, io_anay_res);
+                        Shrink_bypass(ref bypass_duct, io_anay_res);
                         if (io_anay_res.HasInletTee() || io_anay_res.HasOutletTee())
                         {
                             Point3d bypass_start = bypass_duct.StartPoint;
@@ -206,14 +185,53 @@ namespace TianHua.Hvac.UI.Command
                 else
                 {
                     ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbFanModel, null);
-                    int wall_num = 0;
-                    SizeParam info = new SizeParam
-                    {
-                        ductsize_info = DuctSize
-                    };
-                    IODuctHoleAnalysis(DbFanModel, ref wall_num, info, null, null, io_anay_res);
+                    IODuctHoleAnalysis(DbFanModel, info, null, null, null, io_anay_res);
                 }
             }
+        }
+        private Duct_InParam Get_duct_info(ThDbModelFan DbFanModel, out string air_volume)
+        {
+            air_volume = string.Empty;
+            Duct_InParam info = new Duct_InParam();
+            using (var dlg = Create_duct_diag(DbFanModel))
+            {
+                if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                {
+                    info.in_duct_info = dlg.SelectedInnerDuctSize;
+                    info.out_duct_info = dlg.SelectedOuterDuctSize;
+                    air_volume = dlg.AirVolume;
+                    info.elevation_info = dlg.Elevation;
+                    info.text_size_info = dlg.TextSize;
+                }
+            }
+            return info;
+        }
+        private void Get_bypass_info(ThDbModelFan DbFanModel, string air_volume, ref Duct_InParam info)
+        {
+            using (var dlg = Create_bypass_diag(DbFanModel, air_volume))
+            {
+                if (AcadApp.ShowModalDialog(dlg) == DialogResult.OK)
+                {
+                    info.tee_info = dlg.TeeWidth;
+                    info.tee_pattern = dlg.tee_pattern;
+                }
+                else
+                    return;
+            }
+        }
+
+        private DBObjectCollection Rebuild_graph(DBObjectCollection bypass_lines,
+                                                 DBObjectCollection lineobjects)
+        {
+            if (bypass_lines.Count == 0)
+                return new DBObjectCollection();
+            bypass_lines.Cast<DBObject>().ForEachDbObject(o => lineobjects.Add(o));
+
+            // 将风管在旁通处打断
+            ThLaneLineEngine.extend_distance = 0.0;
+            var results = ThLaneLineEngine.Explode(lineobjects);
+            results = ThLaneLineEngine.Noding(results);
+            return ThLaneLineEngine.CleanZeroCurves(results);
         }
 
         private void Shrink_bypass(ref Line bypass, ThFanInletOutletAnalysisEngine graph)
@@ -436,16 +454,16 @@ namespace TianHua.Hvac.UI.Command
         }
 
         private void IODuctHoleAnalysis(ThDbModelFan Model,
-                                        ref int wall_num,
-                                        SizeParam pst_param,
+                                        Duct_InParam pst_param,
                                         Line selected_bypass,
+                                        DBObjectCollection wall_lines,
                                         DBObjectCollection bypass_line,
                                         ThFanInletOutletAnalysisEngine io_anay_res)
         {
-            string text_size = pst_param.duct_info;
             string tee_pattern = pst_param.tee_pattern;
+            string text_size = pst_param.text_size_info;
 
-            if (bypass_line != null && bypass_line.Count == 0)
+            if ((bypass_line != null && bypass_line.Count == 0) || (wall_lines == null))
                 return;
 
             ThInletOutletDuctDrawEngine io_draw_eng =
@@ -453,9 +471,7 @@ namespace TianHua.Hvac.UI.Command
                                                 selected_bypass, bypass_line,
                                                 io_anay_res.InletCenterLineGraph,
                                                 io_anay_res.OutletCenterLineGraph);
-            var wall_lines = Get_walls();
-            if (wall_lines.Count == 0)
-                return;
+            
             ThHolesAndValvesEngine holesAndValvesEngine =
                 new ThHolesAndValvesEngine(Model, wall_lines, bypass_line, io_draw_eng, io_anay_res.InletCenterLineGraph, io_anay_res.OutletCenterLineGraph);
             if (io_anay_res.InletAnalysisResult == AnalysisResultType.OK)
@@ -539,7 +555,7 @@ namespace TianHua.Hvac.UI.Command
                     io_draw_eng.RunOutletDrawEngine(Model, text_size);
                 }
                 holesAndValvesEngine.RunOutletValvesInsertEngine();
-                wall_num = wall_lines.Count;
+                
             }
         }
     }

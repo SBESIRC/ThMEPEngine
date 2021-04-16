@@ -24,13 +24,14 @@ namespace ThMEPHVAC.CAD
         public Point3d OpingBasePoint { get; set; }
 
     }
-    public struct SizeParam
+    public struct Duct_InParam
     {
         public string tee_info;
-        public string duct_info;
         public string tee_pattern;
-        public string ductsize_info;
-        public string elevation_info;        
+        public string in_duct_info;
+        public string out_duct_info;
+        public string text_size_info;
+        public string elevation_info;
     }
     public class ThInletOutletDuctDrawEngine
     {
@@ -58,20 +59,19 @@ namespace ThMEPHVAC.CAD
         public Vector3d valve_dis_vec { get; set; }
         private bool bypass_once {get; set;}
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel,
-            SizeParam in_param,
+            Duct_InParam in_param,
             Line selected_bypass,
             DBObjectCollection bypass_line,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
         {
-            string[] str = in_param.ductsize_info.Split(' ');
-
-            string innerduct_info = str[1];
-            string outerduct_info = str[0];
             string tee_info = in_param.tee_info;
-            string elevation_info = in_param.elevation_info;
-            string ductsize_info = in_param.duct_info;
             string tee_pattern = in_param.tee_pattern;
+            string innerduct_info = in_param.in_duct_info;
+            string outerduct_info = in_param.out_duct_info;
+            string elevation_info = in_param.elevation_info;
+            string text_size_info = in_param.text_size_info;
+            
             InletOpening = new FanOpeningInfo()
             {
                 Width = fanmodel.FanInlet.Width,
@@ -111,8 +111,8 @@ namespace ThMEPHVAC.CAD
             SetInOutHoses(fanmodel.FanScenario);
             bool isAxial = fanmodel.Model.IsAXIALModel();
             double len = (selected_bypass == null) ? 0: selected_bypass.Length;
-            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line, ductsize_info, len, tee_pattern == "RBType3");
-            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, ductsize_info, len, tee_pattern == "RBType3");
+            SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line, text_size_info, len, tee_pattern == "RBType3");
+            SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, text_size_info, len, tee_pattern == "RBType3");
 
 
         }
