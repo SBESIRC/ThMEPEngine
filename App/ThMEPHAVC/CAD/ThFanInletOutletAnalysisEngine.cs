@@ -8,7 +8,7 @@ using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
 using ThMEPHVAC.Model;
 
-namespace ThMEPHAVC.CAD
+namespace ThMEPHVAC.CAD
 {
     public enum AnalysisResultType
     {
