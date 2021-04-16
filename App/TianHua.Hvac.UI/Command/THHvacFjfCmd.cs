@@ -1,27 +1,28 @@
-﻿using AcHelper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Windows.Forms;
+using AcHelper;
+using NFox.Cad;
+using Linq2Acad;
+using ThCADCore.NTS;
+using ThCADExtension;
 using AcHelper.Commands;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
-using Linq2Acad;
-using NFox.Cad;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Windows.Forms;
 using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHAVC.CAD;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Model;
-using ThCADExtension;
 using TianHua.FanSelection.Function;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Hvac.UI.Command
 {
-    
+
     public class THHvacFjfCmd : IAcadCommand, IDisposable
     {
         private Tolerance Tor;
@@ -86,7 +87,7 @@ namespace TianHua.Hvac.UI.Command
                     if (tee_pattern == "RBType4" || tee_pattern == "RBType5")
                     {
                         string line_type = (tee_pattern == "RBType4") ? ThHvacCommon.CONTINUES_LINETYPE : ThHvacCommon.DASH_LINETYPE;
-                        string []s = info.tee_info.Split('x');
+                        string[] s = info.tee_info.Split('x');
                         if (s.Length == 0)
                             return;
                         double vt_width = Double.Parse(s[0]);
@@ -105,7 +106,7 @@ namespace TianHua.Hvac.UI.Command
                                                    DbFanModel.FanInletBasePoint.GetAsVector()) * 0.5 +
                                                    DbFanModel.FanInletBasePoint.GetAsVector();
                             vt.RunVTeeDrawEngine(DbFanModel, line_type, angle, fan_cp_vec);
-                            
+
                             ThServiceTee.Insert_electric_valve(fan_cp_vec, vt_width, angle + 1.5 * Math.PI);
                         }
                     }
@@ -141,7 +142,7 @@ namespace TianHua.Hvac.UI.Command
                                 ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
                             if (io_anay_res.HasOutletTee())
                                 ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
-                            
+
                         }
                         if (tee_pattern == "RBType1")
                         {
@@ -149,7 +150,7 @@ namespace TianHua.Hvac.UI.Command
                                 ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s1, bypass_lines);
                             if (io_anay_res.HasOutletTee())
                                 ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
-                            
+
                         }
                         if (tee_pattern == "RBType2")
                         {
@@ -159,7 +160,7 @@ namespace TianHua.Hvac.UI.Command
                                 ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
                             bypass_duct = last_bypass;
                         }
-                        
+
                         int wall_num = 0;
                         IODuctHoleAnalysis(DbTeeModel, ref wall_num, info, max_bypass, bypass_lines, io_anay_res);
                         Shrink_bypass(ref bypass_duct, io_anay_res);
@@ -171,7 +172,7 @@ namespace TianHua.Hvac.UI.Command
                             Point3d bypass_end = bypass_duct.EndPoint;
                             Vector3d bypass_vec = (bypass_end.GetAsVector() - bypass_start.GetAsVector());
                             Vector3d dis_vec = bypass_start.GetAsVector() + bypass_vec * 0.5;
-                            
+
                             double angle = 0;
                             if (tee_pattern == "RBType3")
                             {
@@ -233,7 +234,7 @@ namespace TianHua.Hvac.UI.Command
             double tor = 1.5;
             double len1 = bypass.Length;
             double len2 = len1 * 0.5;
-            
+
             if (graph.HasOutletTee())
             {
                 foreach (var l in graph.OutletCenterLineGraph.Edges)
@@ -322,9 +323,16 @@ namespace TianHua.Hvac.UI.Command
             return ThLaneLineEngine.Explode(service.Clean(center_lines));
         }
 
+        private DBObjectCollection Pre_proc_bypass(ObjectIdCollection bypass)
+        {
+            var service = new ThLaneLineCleanService();
+            var results = service.Clean(bypass.Cast<ObjectId>().Select(o => o.GetDBObject()).ToCollection());
+            return results.LineMerge();
+        }
+
         private DBObjectCollection Get_bypass(string tee_pattern, out Line max_bypass, out Line last_bypass)
         {
-            //l 是需要插入旁通文本的线
+            // 暂时只支持选取一根连通的旁通线
             var objIds = Get_from_prompt("请选择旁通管", false);
             if (objIds.Count == 0)
             {
@@ -332,10 +340,14 @@ namespace TianHua.Hvac.UI.Command
                 last_bypass = new Line();
                 return new DBObjectCollection();
             }
-            // 暂时只支持选择一个旁通
-            Curve c = objIds[0].GetDBObject() as Curve;
+            DBObjectCollection center_lines = Pre_proc_bypass(objIds);
+            if (center_lines.Count != 1)
+            {
+                max_bypass = new Line();
+                last_bypass = new Line();
+                return new DBObjectCollection();
+            }
 
-            DBObjectCollection center_lines = new DBObjectCollection { c };
             List<Line> lines = ThLaneLineEngine.Explode(center_lines).Cast<Line>().ToList();
             Line l = lines[0];
             foreach (Line line in lines)
@@ -359,7 +371,7 @@ namespace TianHua.Hvac.UI.Command
                 vt = v1 + v - len * v_nor;
                 lines.Add(new Line(lp, new Point3d(vt.X, vt.Y, 0)));
             }
-            
+
             return lines.Select(o => o.ExtendLine(1.0)).ToCollection();
         }
 
@@ -471,7 +483,7 @@ namespace TianHua.Hvac.UI.Command
                         Point3d tee_cp = tee_info.position;
                         Matrix3d mat = Matrix3d.Displacement(tee_cp.GetAsVector());
                         if (tee_pattern == "RBType3")
-                        { 
+                        {
                             if (bypass_line.Count == 3)
                                 mat *= Matrix3d.Rotation(tee_info.angle.Angle, Vector3d.ZAxis, Point3d.Origin);
                             else if (bypass_line.Count == 5)
