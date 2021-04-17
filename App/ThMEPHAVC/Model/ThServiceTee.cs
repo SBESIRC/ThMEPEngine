@@ -18,7 +18,7 @@ namespace ThMEPHVAC.Model
         {
             if (bypass_lines == null || bypass_lines.Count == 0)
                 return false;
-            Tolerance t = new Tolerance(1.5, 1.5);
+            Tolerance t = new Tolerance(2.5, 2.5);
             foreach (Line l in bypass_lines)
             {
                 if ((l.StartPoint.IsEqualTo(tar_srt_pos, t) &&
