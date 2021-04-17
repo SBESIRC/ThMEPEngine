@@ -38,8 +38,12 @@ namespace ThMEPHVAC.CAD
         public List<Point3d> OutletAcuteAnglePositions { get; set; }
         public List<TeeInfo> InTeesInfo { get; set; }
         public List<TeeInfo> OutTeesInfo { get; set; }
+        public Line LastBypass { get; set; }
+        public Line MaxBypass { get; set; } // 用于第一种类型的插管方向
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
         {
+            MaxBypass = new Line();
+            LastBypass = new Line();
             FanModel = fanmodel;
             ThDuctEdge<ThDuctVertex> tempinletfirstedge = null;
             ThDuctEdge<ThDuctVertex> tempoutletfirstedge = null;
@@ -90,6 +94,7 @@ namespace ThMEPHVAC.CAD
                         TeeInfo info = Create_draw_tee_param(bypass_lines, edge, InletCenterLineGraph);
                         InTeesInfo.Add(info);
                     }
+                    Get_bypass_info(edge, bypass_lines);
                 }
                 if (InletAcuteAnglePositions.Count != 0)
                 {
@@ -171,6 +176,7 @@ namespace ThMEPHVAC.CAD
                         TeeInfo info = Create_draw_tee_param(bypass_lines, edge, OutletCenterLineGraph);
                         OutTeesInfo.Add(info);
                     }
+                    Get_bypass_info(edge, bypass_lines);
                 }
                 if (OutletAcuteAnglePositions.Count != 0)
                 {
@@ -214,6 +220,23 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
+
+        private void Get_bypass_info(ThDuctEdge<ThDuctVertex> edge, DBObjectCollection bypass_lines)
+        {
+            Point3d src = edge.Source.Position;
+            Point3d dst = edge.Target.Position;
+            if (ThServiceTee.Is_bypass(src, dst, bypass_lines))
+            {
+                LastBypass.EndPoint = dst;
+                LastBypass.StartPoint = src;
+                if (LastBypass.Length > MaxBypass.Length)
+                {
+                    MaxBypass.EndPoint = dst;
+                    MaxBypass.StartPoint = src;
+                }
+            }
+        }
+
         private TeeInfo Create_draw_tee_param(DBObjectCollection bypass_lines,
                                               ThDuctEdge<ThDuctVertex> edge,
                                               AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> line_graph)
@@ -238,7 +261,6 @@ namespace ThMEPHVAC.CAD
             Vector3d dir = v1.GetNormal().CrossProduct(v2.GetNormal());
             Vector2d branch_dir = new Vector2d(v1.X, v1.Y);
             bool collinear = Math.Abs(dir.Z) < 1e-9;
-
             return new TeeInfo { special = collinear, dir = dir, angle = branch_dir, position = edge.Target.Position };
         }
 

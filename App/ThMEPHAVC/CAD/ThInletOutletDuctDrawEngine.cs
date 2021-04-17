@@ -60,7 +60,7 @@ namespace ThMEPHVAC.CAD
         private bool bypass_once {get; set;}
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel,
             Duct_InParam in_param,
-            Line selected_bypass,
+            double selected_bypass_len,
             DBObjectCollection bypass_line,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> inletcenterlinegraph,
             AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> outletcenterlinegraph)
@@ -110,11 +110,9 @@ namespace ThMEPHVAC.CAD
             SetOutletElbows(bypass_line);
             SetInOutHoses(fanmodel.FanScenario);
             bool isAxial = fanmodel.Model.IsAXIALModel();
-            double len = (selected_bypass == null) ? 0: selected_bypass.Length;
+            double len = selected_bypass_len;
             SetInletDucts(fanmodel.FanScenario, isAxial, bypass_line, text_size_info, len, tee_pattern == "RBType3");
             SetOutletDucts(fanmodel.FanScenario, isAxial, bypass_line, text_size_info, len, tee_pattern == "RBType3");
-
-
         }
 
         public void RunInletDrawEngine(ThDbModelFan fanmodel, string textSize)

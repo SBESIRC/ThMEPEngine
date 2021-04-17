@@ -56,7 +56,7 @@ namespace TianHua.Hvac.UI.Command
                         var wall_lines = Get_walls();
                         if (wall_lines.Count == 0)
                             return;
-                        IODuctHoleAnalysis(DbFanModel, info, null, wall_lines, null, io_anay_res);
+                        IODuctHoleAnalysis(DbFanModel, info, 0, wall_lines, null, io_anay_res);
 
                         Draw_VT_Prepare(info, DbFanModel, out double vt_width, out double angle, out string line_type, out Vector3d dis_vec);
                         if (string.IsNullOrEmpty(line_type))
@@ -68,7 +68,7 @@ namespace TianHua.Hvac.UI.Command
                     else
                     {
                         // 添加旁通并添加到原Model中
-                        DBObjectCollection bypass_lines = Get_bypass(tee_pattern, out Line max_bypass, out Line last_bypass);
+                        DBObjectCollection bypass_lines = Get_bypass(tee_pattern, out Line max_bypass);
                         if (bypass_lines.Count == 0)
                             return;
                         DBObjectCollection scatter_lines = Rebuild_graph(bypass_lines, lineobjects);
@@ -83,7 +83,7 @@ namespace TianHua.Hvac.UI.Command
 
                         double bra_width = Double.Parse(info.tee_info.Split('x').First());
                         
-                        Line bypass_duct = max_bypass;
+                        
                         if (io_anay_res.HasInletTee())
                         {
                             Adjust_duct_shrink(true, bra_width, info.in_duct_info, io_anay_res.InTeesInfo, bypass_lines, io_anay_res);
@@ -92,61 +92,33 @@ namespace TianHua.Hvac.UI.Command
                         {
                             Adjust_duct_shrink(false, bra_width, info.out_duct_info, io_anay_res.OutTeesInfo, bypass_lines, io_anay_res);   
                         }
+                        Line bypass_duct = max_bypass;
                         if (tee_pattern == "RBType2")
-                            bypass_duct = last_bypass;
+                            bypass_duct = io_anay_res.LastBypass;
 
                         var wall_lines = Get_walls();
                         if (wall_lines.Count == 0)
                             return;
 
-                        IODuctHoleAnalysis(DbTeeModel, info, max_bypass, wall_lines, bypass_lines, io_anay_res);
+                        IODuctHoleAnalysis(DbTeeModel, info, max_bypass.Length, wall_lines, bypass_lines, io_anay_res);
                         Shrink_bypass(ref bypass_duct, io_anay_res);
                         if (io_anay_res.HasInletTee() || io_anay_res.HasOutletTee())
                         {
+                            if (tee_pattern == "RBType2" || tee_pattern == "RBType3")
+                            {
+                                bypass_duct = io_anay_res.LastBypass;
+                            }
+                            else if (tee_pattern == "RBType1")
+                            {
+                                bypass_duct = io_anay_res.MaxBypass;
+                            }
                             Point3d bypass_start = bypass_duct.StartPoint;
                             Point3d bypass_end = bypass_duct.EndPoint;
                             Vector3d bypass_vec = (bypass_end.GetAsVector() - bypass_start.GetAsVector());
                             Vector3d dis_vec = bypass_start.GetAsVector() + bypass_vec * 0.5;
 
-                            double angle = 0;
-                            if (tee_pattern == "RBType3")
-                            {
-                                if (io_anay_res.HasInletTee())
-                                {
-                                    angle = io_anay_res.InTeesInfo[0].angle.Angle + Math.PI * 0.5;
-                                }
-                                if (io_anay_res.HasOutletTee())
-                                {
-                                    angle = io_anay_res.OutTeesInfo[0].angle.Angle - Math.PI * 0.5;
-                                }
-                                Vector3d v = new Vector3d(io_anay_res.OutTeesInfo[0].angle.X,
-                                                          io_anay_res.OutTeesInfo[0].angle.Y, 0);
-                                angle += Math.PI;
-                                if (Math.Abs(v.GetNormal().DotProduct(bypass_vec.GetNormal())) < 0.1)
-                                    angle -= Math.PI;
-                            }
-                            else if (tee_pattern == "RBType1")
-                            {
-                                if (io_anay_res.HasInletTee())
-                                {
-                                    angle = io_anay_res.InTeesInfo[0].angle.Angle;
-                                }
-                                if (io_anay_res.HasOutletTee())
-                                {
-                                    angle = io_anay_res.OutTeesInfo[0].angle.Angle + Math.PI * 0.5;
-                                }
-                            }
-                            else if (tee_pattern == "RBType2")
-                            {
-                                if (io_anay_res.HasInletTee())
-                                {
-                                    angle = io_anay_res.InTeesInfo[0].angle.Angle + Math.PI * 0.5;
-                                }
-                                if (io_anay_res.HasOutletTee())
-                                {
-                                    angle = io_anay_res.OutTeesInfo[0].angle.Angle;
-                                }
-                            }
+                            Vector2d elev_dir = new Vector2d(bypass_vec.X, bypass_vec.Y);
+                            double angle = elev_dir.Angle + Math.PI * 1.5;
                             ThServiceTee.Insert_electric_valve(dis_vec, bra_width, angle);
                         }
                     }
@@ -154,7 +126,7 @@ namespace TianHua.Hvac.UI.Command
                 else
                 {
                     ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbFanModel, null);
-                    IODuctHoleAnalysis(DbFanModel, info, null, null, null, io_anay_res);
+                    IODuctHoleAnalysis(DbFanModel, info, 0, null, null, io_anay_res);
                 }
             }
         }
@@ -371,21 +343,19 @@ namespace TianHua.Hvac.UI.Command
             return results.LineMerge();
         }
 
-        private DBObjectCollection Get_bypass(string tee_pattern, out Line max_bypass, out Line last_bypass)
+        private DBObjectCollection Get_bypass(string tee_pattern, out Line max_bypass)
         {
             // 暂时只支持选取一根连通的旁通线
             var objIds = Get_from_prompt("请选择旁通管", false);
             if (objIds.Count == 0)
             {
                 max_bypass = new Line();
-                last_bypass = new Line();
                 return new DBObjectCollection();
             }
             DBObjectCollection center_lines = Pre_proc_bypass(objIds);
             if (center_lines.Count != 1)
             {
                 max_bypass = new Line();
-                last_bypass = new Line();
                 return new DBObjectCollection();
             }
 
@@ -395,7 +365,6 @@ namespace TianHua.Hvac.UI.Command
                 if (line.Length > l.Length)
                     l = line;
             max_bypass = l;
-            last_bypass = lines[lines.Count - 1];
             // 给较长的线段上插点
             if (tee_pattern == "RBType3" && lines.Count > 0)
             {
@@ -491,7 +460,7 @@ namespace TianHua.Hvac.UI.Command
 
         private void IODuctHoleAnalysis(ThDbModelFan Model,
                                         Duct_InParam pst_param,
-                                        Line selected_bypass,
+                                        double selected_bypass_len,
                                         DBObjectCollection wall_lines,
                                         DBObjectCollection bypass_line,
                                         ThFanInletOutletAnalysisEngine io_anay_res)
@@ -503,7 +472,7 @@ namespace TianHua.Hvac.UI.Command
 
             ThInletOutletDuctDrawEngine io_draw_eng =
                 new ThInletOutletDuctDrawEngine(Model, pst_param,
-                                                selected_bypass, bypass_line,
+                                                selected_bypass_len, bypass_line,
                                                 io_anay_res.InletCenterLineGraph,
                                                 io_anay_res.OutletCenterLineGraph);
             
