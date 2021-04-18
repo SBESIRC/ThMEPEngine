@@ -58,12 +58,12 @@ namespace TianHua.Hvac.UI.Command
                             return;
                         IODuctHoleAnalysis(DbFanModel, info, 0, wall_lines, null, io_anay_res);
 
-                        Draw_VT_Prepare(info, DbFanModel, out double vt_width, out double angle, out string line_type, out Vector3d dis_vec);
+                        Draw_VT_Prepare(info, DbFanModel, out double vt_width, out string line_type, out Vector2d rot_vec, out Vector3d dis_vec);
                         if (string.IsNullOrEmpty(line_type))
                             return;
                         ThVTee vt = new ThVTee(600, vt_width, 20);
-                        vt.RunVTeeDrawEngine(DbFanModel, line_type, angle, dis_vec);
-                        ThServiceTee.Insert_electric_valve(dis_vec, vt_width, angle + 1.5 * Math.PI);
+                        vt.RunVTeeDrawEngine(DbFanModel, info, line_type, rot_vec, dis_vec);
+                        ThServiceTee.Insert_electric_valve(dis_vec, vt_width, rot_vec.Angle + 1.5 * Math.PI);
                     }
                     else
                     {
@@ -134,16 +134,16 @@ namespace TianHua.Hvac.UI.Command
         private void Draw_VT_Prepare(Duct_InParam info,
                                      ThDbModelFan DbFanModel,
                                      out double vt_width,
-                                     out double angle,
                                      out string line_type,
+                                     out Vector2d rot_vec,
                                      out Vector3d dis_vec)
         {
             string[] s = info.tee_info.Split('x');
             if (s.Length == 0)
             {
                 vt_width = 0;
-                angle = 0;
                 line_type = string.Empty;
+                rot_vec = new Vector2d();
                 dis_vec = new Vector3d();
                 return;
             }
@@ -151,8 +151,7 @@ namespace TianHua.Hvac.UI.Command
             Vector3d dir_vec = (DbFanModel.FanOutletBasePoint.GetAsVector() -
                                 DbFanModel.FanInletBasePoint.GetAsVector()) * 0.5;
             dis_vec = dir_vec + DbFanModel.FanInletBasePoint.GetAsVector();
-            Vector2d v = new Vector2d(dir_vec.X, dir_vec.Y);
-            angle = v.Angle;
+            rot_vec = new Vector2d(dir_vec.X, dir_vec.Y);
             line_type = (info.tee_pattern == "RBType4") ? ThHvacCommon.CONTINUES_LINETYPE : ThHvacCommon.DASH_LINETYPE;
         }
 
