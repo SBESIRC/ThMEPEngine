@@ -104,7 +104,7 @@ namespace TianHua.Hvac.UI.Command
                         Shrink_bypass(ref bypass_duct, io_anay_res);
                         if (io_anay_res.HasInletTee() || io_anay_res.HasOutletTee())
                         {
-                            if (tee_pattern == "RBType2" || tee_pattern == "RBType3")
+                            if (tee_pattern == "RBType2")
                             {
                                 bypass_duct = io_anay_res.LastBypass;
                             }
@@ -112,6 +112,8 @@ namespace TianHua.Hvac.UI.Command
                             {
                                 bypass_duct = io_anay_res.MaxBypass;
                             }
+                            else
+                                bypass_duct = max_bypass;
                             Point3d bypass_start = bypass_duct.StartPoint;
                             Point3d bypass_end = bypass_duct.EndPoint;
                             Vector3d bypass_vec = (bypass_end.GetAsVector() - bypass_start.GetAsVector());
