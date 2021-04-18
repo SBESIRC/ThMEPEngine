@@ -68,7 +68,11 @@ namespace ThMEPHVAC.Duct
             }
             else
             {
-                source = Graph.Vertices.Where(v => v.Position.IsEqualTo(sourcepoint, new Tolerance(1.5, 1.5))).First();
+                var tmp = Graph.Vertices.Where(v => v.Position.IsEqualTo(sourcepoint, new Tolerance(5, 5)));
+                if (tmp.IsNull())
+                    return source;
+                else
+                    source = tmp.First();
             }
             Graph.AddVertex(target);
             Graph.AddEdge(new ThDuctEdge<ThDuctVertex>(source, target));

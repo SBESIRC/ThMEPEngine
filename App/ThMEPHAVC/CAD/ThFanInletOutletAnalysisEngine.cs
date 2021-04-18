@@ -17,11 +17,17 @@ namespace ThMEPHVAC.CAD
         Wrong_Empty = 2,
         Wrong_NotVertical = 3
     }
+    public enum TeeType
+    {
+        COLLINEAR_WITH_OUTER = 0,
+        COLLINEAR_WITH_INNER = 1,
+        VERTICAL_WITH_OTHERS = 2
+    }
     public struct TeeInfo
     {
-        public bool special { get; set; }    // 旁通管和出风管共线 
-        public Vector3d dir { get; set; }   // 根据dir判断是否翻转
+        public Vector3d dir { get; set; }    // 根据dir判断是否翻转
         public Vector2d angle { get; set; }
+        public TeeType tee_type { get; set; } // 旁通管与进出风管的关系
         public Point3d position { get; set; }
 
     }
@@ -258,10 +264,22 @@ namespace ThMEPHVAC.CAD
             }
             Vector3d v1 = branch.Target.Position.GetAsVector() - branch.Source.Position.GetAsVector();
             Vector3d v2 = outter.Target.Position.GetAsVector() - outter.Source.Position.GetAsVector();
-            Vector3d dir = v1.GetNormal().CrossProduct(v2.GetNormal());
+            Vector3d v3 = edge.Target.Position.GetAsVector() - edge.Source.Position.GetAsVector();
+            Vector3d u1_vec = v1.GetNormal();
+            Vector3d u2_vec = v2.GetNormal();
+            Vector3d u3_vec = v3.GetNormal();
+            Vector3d dir = u1_vec.CrossProduct(u2_vec);
             Vector2d branch_dir = new Vector2d(v1.X, v1.Y);
-            bool collinear = Math.Abs(dir.Z) < 1e-9;
-            return new TeeInfo { special = collinear, dir = dir, angle = branch_dir, position = edge.Target.Position };
+            TeeType type;
+            double tor = 1e-3;
+            if (Math.Abs(u1_vec.DotProduct(u2_vec)) < tor && Math.Abs(u1_vec.DotProduct(u3_vec)) < tor)
+                type = TeeType.VERTICAL_WITH_OTHERS;
+            else if (Math.Abs(dir.Z) < tor)
+                type = TeeType.COLLINEAR_WITH_OUTER;
+            else
+                type = TeeType.COLLINEAR_WITH_INNER;
+
+            return new TeeInfo { tee_type = type, dir = dir, angle = branch_dir, position = edge.Target.Position };
         }
 
         private AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> CreateLineGraph(Point3d basepoint, ref ThDuctEdge<ThDuctVertex> startedge)

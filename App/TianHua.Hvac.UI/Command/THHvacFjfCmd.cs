@@ -170,19 +170,30 @@ namespace TianHua.Hvac.UI.Command
                 double s1;
                 double s2;
                 double s3;
-                if (tee_info.special)
+                if (tee_info.tee_type == TeeType.COLLINEAR_WITH_OUTER)
                 {
+                    s1 = valve_width + 50;
                     s2 = valve_width * 0.5 + 100;
-                    s3 = valve_width + 50;
                     if (is_in)
-                    {
-                        s1 = valve_width + 50;
-                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s2, s3, bypass_lines);
+                    {   
+                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s2, s1, bypass_lines);
                     }
                     else
                     {
-                        s1 = (bra_width + valve_width) * 0.5 + 50;
-                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s3, s2, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s1, bypass_lines);
+                    }
+                }
+                else if (tee_info.tee_type == TeeType.COLLINEAR_WITH_INNER)
+                {
+                    s1 = valve_width + 50;
+                    s2 = valve_width * 0.5 + 100;
+                    if (is_in)
+                    {
+                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s2, s1, bypass_lines);
+                    }
+                    else
+                    {
+                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s1, bypass_lines);
                     }
                 }
                 else
@@ -509,22 +520,27 @@ namespace TianHua.Hvac.UI.Command
                 Point3d tee_cp = tee_info.position;
                 Matrix3d mat = Matrix3d.Displacement(tee_cp.GetAsVector());
                 ThTee e;
-                if (tee_info.special)
+                if (tee_info.tee_type == TeeType.COLLINEAR_WITH_INNER)
                 {
                     if (is_in)
-                    {
+                        mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
+                    else
                         mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
                                Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
-                        e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
-                    }
-                    else
-                    {
-                        mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
-                               Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
-                        e = new ThTee(tee_cp, duct_width, tee_width, duct_width);
-                    }
+                    e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
+                    e.RunTeeDrawEngine(Model, mat);
                 }
-                else
+                else if (tee_info.tee_type == TeeType.COLLINEAR_WITH_OUTER)
+                {
+                    if (is_in)
+                        mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
+                               Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                    else
+                        mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
+                    e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
+                    e.RunTeeDrawEngine(Model, mat);
+                }
+                else if (tee_info.tee_type == TeeType.VERTICAL_WITH_OTHERS)
                 {
                     if (dir.Z < 0)
                         mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI, Vector3d.ZAxis, Point3d.Origin) *
@@ -532,8 +548,12 @@ namespace TianHua.Hvac.UI.Command
                     else
                         mat *= Matrix3d.Rotation(tee_info.angle.Angle, Vector3d.ZAxis, Point3d.Origin);
                     e = new ThTee(tee_cp, tee_width, duct_width, duct_width);
+                    e.RunTeeDrawEngine(Model, mat);
                 }
-                e.RunTeeDrawEngine(Model, mat);
+                else
+                {
+                    throw new NotImplementedException();
+                }
             }
         }
     }
