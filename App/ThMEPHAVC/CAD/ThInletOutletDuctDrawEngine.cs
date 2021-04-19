@@ -260,29 +260,30 @@ namespace ThMEPHVAC.CAD
                 }
             }
             double num = (Elevation * 1000 + InletDuctHeight - TeeHeight) / 1000;
-            List<double> lens = Exclude_bypass(InletCenterLineGraph, bypass_line);
-            double max_len = lens.Max();
+            Line max_line = Max_line_exclude_bypass(InletCenterLineGraph, bypass_line);
             double half_len = text_bypass_len * 0.5;
             foreach (var ductgraphedge in InletCenterLineGraph.Edges)
             {
-                var DuctParameters = Create_duct_param( ductgraphedge.Source.Position,
-                                                        ductgraphedge.Target.Position,
-                                                        ductgraphedge.EdgeLength,
+                bool text_enable = false;
+                Point3d srt_p = ductgraphedge.Source.Position;
+                Point3d end_p = ductgraphedge.Target.Position;
+                double edge_len = ductgraphedge.EdgeLength;
+                Line cur_line = new Line(srt_p, end_p);
+                var DuctParameters = Create_duct_param( srt_p, end_p, edge_len,
                                                         InletDuctWidth,
                                                         InletDuctHeight,
                                                         bypass_line);
 
-                Vector2d edgevector = new Vector2d(ductgraphedge.Target.Position.X - ductgraphedge.Source.Position.X, ductgraphedge.Target.Position.Y - ductgraphedge.Source.Position.Y);
+                Vector2d edgevector = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);
                 double rotateangle = edgevector.Angle;
-                bool text_enable = false;
                 string s_evel = string.Empty;
-                if (Math.Abs(max_len - ductgraphedge.EdgeLength) < 1.5)
+                if (ThServiceTee.Is_same_line(max_line, cur_line))
                 {
                     text_enable = true;
                     s_evel = null;
                 }
                 bool is_bypass = false;
-                if (Math.Abs(text_bypass_len - ductgraphedge.EdgeLength) < 5 || Math.Abs(half_len - ductgraphedge.EdgeLength) < 5)
+                if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
                 {
                     is_bypass = true;
                     if (bypass_once)
@@ -298,15 +299,7 @@ namespace ThMEPHVAC.CAD
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle,
                                                                               text_enable, s_evel, textSize, is_bypass && is_type3);
                 ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
-                //if (isUpOrDownOpening)
-                //{
-                //    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * InletOpening.Height, ductgraphedge.TargetShrink);
-                //}
-                //else
-                //{
-                //    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
-                //}
-                Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
+                Point3d centerpoint = new Point3d(0.5 * (srt_p.X + end_p.X), 0.5 * (srt_p.Y + end_p.Y), 0);
                 ductSegment.Matrix = Matrix3d.Displacement(centerpoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
 
                 InletDuctSegments.Add(ductSegment);
@@ -383,31 +376,27 @@ namespace ThMEPHVAC.CAD
             }
             string s_evel = string.Empty;
             double num = (Elevation * 1000 + InletDuctHeight - TeeHeight) / 1000;
-            List<double> lens = Exclude_bypass(OutletCenterLineGraph, bypass_line);
-            double max_len = lens.Max();
+            Line max_line = Max_line_exclude_bypass(OutletCenterLineGraph, bypass_line);
             double half_len = text_bypass_len * 0.5;
             foreach (var ductgraphedge in OutletCenterLineGraph.Edges)
             {
                 bool text_enable = false;
                 Point3d srt_p = ductgraphedge.Source.Position;
                 Point3d end_p = ductgraphedge.Target.Position;
-                var DuctParameters = Create_duct_param( ductgraphedge.Source.Position,
-                                                        ductgraphedge.Target.Position,
-                                                        ductgraphedge.EdgeLength,
-                                                        OutletDuctWidth,
-                                                        OutletDuctHeight,
-                                                        bypass_line);
+                double edge_len = ductgraphedge.EdgeLength;
+                Line cur_line = new Line(srt_p, end_p);
+                var DuctParameters = Create_duct_param( srt_p, end_p, edge_len, OutletDuctWidth, OutletDuctHeight, bypass_line);
 
-                Vector2d edgevector = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);
-                double rotateangle = edgevector.Angle;
+                
                 // 给最长的非旁通线添加标注
-                if (Math.Abs(max_len - ductgraphedge.EdgeLength) < 1.5)
+                if (ThServiceTee.Is_same_line(max_line, cur_line))
                 {
                     text_enable = true;
                     s_evel = Elevation.ToString();
                 }
+
                 bool is_bypass = false;
-                if (Math.Abs(text_bypass_len - ductgraphedge.EdgeLength) < 5 || Math.Abs(half_len - ductgraphedge.EdgeLength) < 5)
+                if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
                 {
                     is_bypass = true;
                     if (bypass_once)
@@ -417,39 +406,39 @@ namespace ThMEPHVAC.CAD
                         s_evel = num.ToString();
                     }
                 }
-                
+                Vector2d edgevector = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);
+                double rotateangle = edgevector.Angle;
                 if (text_enable)
                     TextVec.Add(edgevector.GetNormal());
                 var ductSegment = ductFittingFactoryService.CreateDuctSegment(DuctParameters, rotateangle,
                                                                               text_enable, s_evel, textSize, is_bypass && is_type3);
 
                 ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
-                //if (isUpOrDownOpening)
-                //{
-                //    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink - 100 - 0.5 * OutletOpening.Height, ductgraphedge.TargetShrink);
-                //}
-                //else
-                //{
-                //    ductFittingFactoryService.DuctSegmentHandle(ductSegment, ductgraphedge.SourceShrink, ductgraphedge.TargetShrink);
-                //}
-
-                Point3d centerpoint = new Point3d(0.5 * (ductgraphedge.Source.Position.X + ductgraphedge.Target.Position.X), 0.5 * (ductgraphedge.Source.Position.Y + ductgraphedge.Target.Position.Y), 0);
+                Point3d centerpoint = new Point3d(0.5 * (srt_p.X + end_p.X), 0.5 * (srt_p.Y + end_p.Y), 0);
                 ductSegment.Matrix = Matrix3d.Displacement(centerpoint.GetAsVector()) * Matrix3d.Rotation(rotateangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
                 OutletDuctSegments.Add(ductSegment);
             }
         }
 
-        private List<double> Exclude_bypass(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> graph, DBObjectCollection bypass_line)
+        private Line Max_line_exclude_bypass(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> graph, DBObjectCollection bypass_line)
         {
-            List<double> lens = new List<double>();
+            double max_len = 0;
+            Line max_line = new Line();
             foreach (var ductgraphedge in graph.Edges)
             {
                 Point3d srt_p = ductgraphedge.Source.Position;
                 Point3d end_p = ductgraphedge.Target.Position;
                 if (!ThServiceTee.Is_bypass(srt_p, end_p, bypass_line))
-                    lens.Add(ductgraphedge.EdgeLength);
+                {
+                    Line l = new Line(srt_p, end_p);
+                    if (l.Length > max_len)
+                    {
+                        max_len = l.Length;
+                        max_line = l;
+                    }
+                }
             }
-            return lens;
+            return max_line;
         }
 
         private void SetInletElbows(DBObjectCollection bypass_lines)

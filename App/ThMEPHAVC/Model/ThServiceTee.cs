@@ -19,18 +19,23 @@ namespace ThMEPHVAC.Model
             if (bypass_lines == null || bypass_lines.Count == 0)
                 return false;
             Tolerance t = new Tolerance(5, 5);
+            Line dect_line = new Line(tar_srt_pos, tar_end_pos);
             foreach (Line l in bypass_lines)
             {
-                if ((l.StartPoint.IsEqualTo(tar_srt_pos, t) &&
-                    l.EndPoint.IsEqualTo(tar_end_pos, t)) ||
-                    (l.StartPoint.IsEqualTo(tar_end_pos, t) &&
-                    l.EndPoint.IsEqualTo(tar_srt_pos, t)))
+                if (Is_same_line(dect_line, l))
                 {
 
                     return true;
                 }
             }
             return false;
+        }
+
+        public static bool Is_same_line(Line l1, Line l2)
+        {
+            Tolerance t = new Tolerance(5, 5);
+            return (l1.StartPoint.IsEqualTo(l2.StartPoint, t) && l1.EndPoint.IsEqualTo(l2.EndPoint, t)) ||
+                    (l1.StartPoint.IsEqualTo(l2.EndPoint, t) && l1.EndPoint.IsEqualTo(l2.StartPoint, t));
         }
         public static void Fine_tee_duct(AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> LineGraph,
                                            double IShrink,

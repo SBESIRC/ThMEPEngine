@@ -45,7 +45,7 @@ namespace ThMEPHVAC.Model
 
             List<ThIfcDistributionElement> vtee_seg = Create_vt_duct(rot_vec.Angle, dis_vec, info);
             DrawVTeeDWG(vtee_seg, duct_layer, flange_layer, line_type);
-            Insert_text_info(info, text_layer, info.text_size_info, rot_vec, dis_vec);
+            Insert_text_info(info, text_layer, rot_vec, dis_vec);
         }
         public ThIfcDistributionElement CreateVTeeBlock(Duct_InParam info)
         {
@@ -235,7 +235,7 @@ namespace ThMEPHVAC.Model
                 }
             }
         }
-        private void Insert_text_info(Duct_InParam info, string text_layer, string text_size, Vector2d rot_vec, Vector3d dis_vec)
+        private void Insert_text_info(Duct_InParam info, string text_layer, Vector2d rot_vec, Vector3d dis_vec)
         {
             DBText text_info = Create_vt_info(info);
             if (text_info.IsNull())
@@ -247,8 +247,6 @@ namespace ThMEPHVAC.Model
             Get_text_oft_vec(info.text_size_info, duct_width, rot_vec, out Vector2d oft_v_vec, out Vector2d oft_h_vec, ref ro_angle);
 
             Set_text_info(text_layer, ref text_info, out DBText duct_size_info);
-
-
 
             Matrix3d mat = Matrix3d.Displacement(new Vector3d(dis_vec.X + oft_v_vec.X, dis_vec.Y + oft_v_vec.Y, 0)) *
                            Matrix3d.Rotation(ro_angle, Vector3d.ZAxis, new Point3d(0, 0, 0));
