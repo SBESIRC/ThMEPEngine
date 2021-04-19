@@ -44,11 +44,21 @@ namespace ThCADCore.NTS
         {
             if (inverted)
             {
-                return OverlayNGRobust.Overlay(other, Clipper, SpatialFunction.Difference);
+                var geos = OverlayNGRobust.Overlay(other, Clipper, SpatialFunction.Difference);
+                if(geos.IsEmpty)
+                {
+                    geos = OverlayNGRobust.OverlaySR(other, Clipper, SpatialFunction.Difference);
+                }
+                return geos;
             }
             else
             {
-                return OverlayNGRobust.Overlay(Clipper, other, SpatialFunction.Intersection);
+                var geos= OverlayNGRobust.Overlay(Clipper, other, SpatialFunction.Intersection);
+                if(geos.IsEmpty)
+                {
+                    geos = OverlayNGRobust.OverlaySR(Clipper, other, SpatialFunction.Intersection);
+                }
+                return geos;                
             }
         }
     }
