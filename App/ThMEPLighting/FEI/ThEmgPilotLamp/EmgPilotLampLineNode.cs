@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm.DijkstraAlgorithm;
 using ThMEPLighting.Common;
 
 namespace ThMEPLighting.FEI.ThEmgPilotLamp

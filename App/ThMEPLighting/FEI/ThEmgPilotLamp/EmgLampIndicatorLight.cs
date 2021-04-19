@@ -184,6 +184,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             _targetInfo.assistLines.ForEach(x => objs.Add(x));
             List<Curve> curves = ThMEPLineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI*15 / 180.0).Cast<Curve>().ToList();
             var lineGrapheNodes = InitAllLineNode(curves.Cast<Line>().ToList());
+            lineGrapheNodes = lineGrapheNodes.OrderByDescending(c => c.line.Length).ToList();
             foreach (var lineInfo in lineGrapheNodes)
             {
                 Point3d sp = lineInfo.line.StartPoint;
@@ -200,7 +201,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     continue;
                 if (lineInfo.line.Length < 5000)
                     continue;
-                foreach (var node in lineInfo.nodeDirections) 
+                foreach (var node in lineInfo.nodeDirections.OrderByDescending(c=>c.inDirection.Count)) 
                 {
                     if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(node.nodePointInLine) < 1000))
                         continue;
@@ -208,19 +209,21 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     lineAngle = lineAngle % Math.PI;
                     if (lineAngle > Math.PI * 15 / 180 && lineAngle < Math.PI * 165 / 180)
                         continue;
-                    bool isAdd = CheckAddHosting(node, lineInfo.layoutLineSide, out bool isTwoSide);
+                    Point3d createPoint;
+                    bool isAdd = CheckAddHosting(node, lineInfo.layoutLineSide, out bool isTwoSide,out createPoint);
                     if (!isAdd)
                         continue;
-                    var light = new LightLayout(node.nodePointInLine, node.nodePointInLine, null,lineInfo.layoutLineSide,node.outDirection,lineInfo.layoutLineSide , node.graphNode,true);
+                    var light = new LightLayout(node.nodePointInLine, createPoint, null,lineInfo.layoutLineSide,node.outDirection,lineInfo.layoutLineSide , node.graphNode,true);
                     light.isTwoSide = isTwoSide;
                     _ligthLayouts.Add(light);
                 }
             }
         }
-        private bool CheckAddHosting(NodeDirection nodeDirection,Vector3d sideLineDir,out bool isTwoSide) 
+        private bool CheckAddHosting(NodeDirection nodeDirection,Vector3d sideLineDir,out bool isTwoSide,out Point3d createPoint) 
         {
             isTwoSide = false;
             bool isAdd = false;
+            createPoint = new Point3d();
             if (nodeDirection == null || nodeDirection.inDirection.Count < 1)
                 return false;
             var addDirs = new List<Vector3d>();
@@ -243,6 +246,9 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     addDirs.Add(dir);
             }
             isTwoSide = addDirs.Count > 1;
+            createPoint = nodeDirection.nodePointInLine;
+            if (isTwoSide)
+                createPoint = nodeDirection.nodePointInLine - nodeDirection.outDirection.MultiplyBy(800);
             return isAdd;
         }
         private void CheckAndRemove(double inAngle, double distance,bool isTwoNormal=true)
@@ -269,19 +275,21 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         continue;
                     if (delLights.Any(c => c.pointInOutSide.IsEqualTo(light.pointInOutSide, new Tolerance(1, 1))))
                         continue;
-                    Vector3d hostToCheckDir = (light.pointInOutSide - checkLight.pointInOutSide).GetNormal();
+                    var test = checkLight.pointInOutSide - light.pointInOutSide;
+                    Vector3d hostToCheckDir = (checkLight.pointInOutSide - light.pointInOutSide).GetNormal();
                     var dot = dir.DotProduct(hostToCheckDir);
                     double angle = dir.GetAngleTo(hostToCheckDir, _normal);
                     angle = angle % Math.PI;
-                    if (dot > 0)
+                    if (angle < inAngle || angle > (Math.PI - inAngle))
                     {
-                        if (angle < inAngle)
+                        if (dot > 0)
+                        {
                             delLights.Add(checkLight);
-                    }
-                    else if(isTwoNormal)
-                    {
-                        if (angle > (Math.PI - inAngle))
+                        }
+                        else if (isTwoNormal)
+                        {
                             delLights.Add(checkLight);
+                        }
                     }
                 }
             }
@@ -310,39 +318,53 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             while (true)
             {
                 pts.Clear();
-                if (startPt.DistanceTo(lineInfo.line.EndPoint) < 500)
+                if (startPt.DistanceTo(lineInfo.line.EndPoint) < 500 || startPt.DistanceTo(sp)>lineLength+10)
                     break;
                 pts.Add(startPt);
                 pts.Add(endPoint);
+                Line tempLine = new Line(startPt, endPoint);
+                //pts = LineSplitToLayoutPoint(tempLine, 5);
+                GetSideWallColumns(tempLine, sideDir, 6000,inColumns,inWalls, out List<Polyline> newInWalls, out List<Polyline> newInColumns);
 
-                GetSideWallColumns(lineInfo.line, sideDir, 6000,inColumns,inWalls, out List<Polyline> newInWalls, out List<Polyline> newInColumns);
-
-                var temp = toStructure.GetLayoutStructPt(pts, newInColumns, newInWalls, lineInfo.lineDir);
+                var temp = toStructure.GetLayoutStructPt(pts, newInColumns, newInWalls /*new List<Polyline>()*/, lineInfo.lineDir);
                 if (null != temp && temp.Count > 0)
                 {
                     temp =temp.OrderBy(c => c.Key.DistanceTo(sp)).ToDictionary(x=>x.Key,x=>x.Value);
+                    double maxDis = double.MinValue;
+                    bool isAdd = true;
+                    double lastDist = hisPoint.Count>0? hisPoint.Last().DistanceTo(sp):-1000;
                     foreach (var item in temp)
                     {
-                        if (pointDirs.Any(c => c.Key.DistanceTo(item.Key) < 10))
-                            continue;
                         double dis = (item.Key - sp).DotProduct(sideDir);
+                        if (item.Key.DistanceTo(sp) < lastDist + 200)
+                            continue;
                         Point3d pointInLine = item.Key - sideDir.MultiplyBy(dis);
-                        if (hisPoint.Any(c => c.DistanceTo(pointInLine) < 500))
+                        dis = pointInLine.DistanceTo(startPt);
+                        if (dis > 10 && dis < _lightSpace+20 && dis > maxDis)
+                            maxDis = dis;
+                        if (pointDirs.Any(c => c.Key.DistanceTo(item.Key) < 1000))
                             continue;
                         
                         hisPoint.Add(pointInLine);
-                        endPoint = pointInLine+lineInfo.lineDir.MultiplyBy(100);
-                        if ((pointInLine.DistanceTo(sp) + pointInLine.DistanceTo(lineInfo.line.EndPoint)) > lineLength+10)
+                        endPoint = pointInLine + lineInfo.lineDir.MultiplyBy(100);
+                        if ((pointInLine.DistanceTo(sp) + pointInLine.DistanceTo(lineInfo.line.EndPoint)) > lineLength + 10)
                             continue;
-                        endPoint = pointInLine;
-                        pointDirs.Add(item.Key, item.Value);
-                        break;
+                        if (isAdd)
+                        {
+                            pointDirs.Add(item.Key, item.Value);
+                            isAdd = false;
+                        }
+                        isAdd = false;
                     }
+                    if (maxDis < 100)
+                        endPoint = startPt + lineInfo.lineDir.MultiplyBy(1000);
+                    else
+                        endPoint = startPt + lineInfo.lineDir.MultiplyBy(maxDis);
                 }
                 startPt = endPoint;
                 endPoint = startPt + lineInfo.lineDir.MultiplyBy(_lightSpace);
-                if (endPoint.DistanceTo(sp) >= lineLength)
-                    endPoint = lineInfo.line.EndPoint;
+                if (endPoint.DistanceTo(sp) >= lineLength -100)
+                    endPoint = lineInfo.line.EndPoint-lineInfo.lineDir.MultiplyBy(100);
             }
             if (null == pointDirs || pointDirs.Count < 1)
                 return;
@@ -722,6 +744,20 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             Point3d sp = line.StartPoint;
             Point3d point = sp ;
             while (point.DistanceTo(sp)<= line.Length)
+            {
+                breakPts.Add(point);
+                point = point + dir.MultiplyBy(step);
+            }
+            return breakPts;
+        }
+        List<Point3d> LineSplitToLayoutPoint(Line line,int count)
+        {
+            Vector3d dir = (line.EndPoint - line.StartPoint).GetNormal();
+            double step = line.Length / count;
+            List<Point3d> breakPts = new List<Point3d>();
+            Point3d sp = line.StartPoint;
+            Point3d point = sp;
+            while (point.DistanceTo(sp) <= line.Length)
             {
                 breakPts.Add(point);
                 point = point + dir.MultiplyBy(step);

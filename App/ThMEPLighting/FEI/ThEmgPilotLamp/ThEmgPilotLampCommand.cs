@@ -93,7 +93,23 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     //获取墙柱信息
                     primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
 
+                    //List<Line> lines = new List<Line>();
+                    //foreach (var polyline in columns) 
+                    //{
+                        
+                    //    for (int i = 0; i < polyline.NumberOfVertices; i++)
+                    //    {
+                    //        lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
+                    //    }
+                    //}
+                    //foreach (var line in lines) 
+                    //{
+                    //    //Line line2 = new Line(tempPt, tempEp);
+                    //    originTransformer.Reset(line);
+                    //    acdb.ModelSpace.Add(line);
+                    //}
 
+                    //return;
                     //根据这些线信息进行计算布置的点信息
                     IndicatorLight indicator = new IndicatorLight();
                     assitLines.ForEach(c => indicator.assistLines.Add(c));
@@ -131,6 +147,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         Point3d ep = sp + item.direction.MultiplyBy(10);
                         var createPt = item.pointInOutSide;
                         originTransformer.Reset(ref createPt);
+                        //PointToView(acdb, originTransformer, item.pointInOutSide);
                         Vector3d createDir = item.directionSide.CrossProduct(Vector3d.ZAxis);
                         if (createDir.DotProduct(item.direction) < 0)
                             createDir = createDir.Negate();

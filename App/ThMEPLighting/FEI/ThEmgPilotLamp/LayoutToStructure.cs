@@ -12,7 +12,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
     class LayoutToStructure
     {
-        readonly double minWidth = 250;
+        readonly double minWidth = 500;
 
         /// <summary>
         /// 计算布置点和方向
@@ -25,6 +25,37 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         public Dictionary<Point3d, Vector3d> GetLayoutStructPt(List<Point3d> layoutPts, List<Polyline> columns, List<Polyline> walls, Vector3d dir)
         {
             Dictionary<Point3d, Vector3d> ptDic = new Dictionary<Point3d, Vector3d>();
+            if (layoutPts == null || layoutPts.Count < 1)
+                return null;
+            Point3d sp = layoutPts.First();
+            Point3d ep = layoutPts.Last();
+            double length = layoutPts.First().DistanceTo(layoutPts.Last());
+            List<Polyline> wallsInPoints = new List<Polyline>();
+            List<Polyline> columnsInPoints = new List<Polyline>();
+
+            //foreach (var item in columns)
+            //{
+            //    var cl = GetColumnLayoutPoint(item.Key, pt, dir);
+            //    if (null == cl)
+            //        continue;
+            //    var vect = (cl.Value.Item1 - sp);
+            //    var dot = vect.DotProduct(dir);
+            //    if (dot > length || dot < nextDis)
+            //        continue;
+            //}
+            //foreach (var item in wall)
+            //{
+            //    var cl = GetColumnLayoutPoint(item.Key, pt, dir);
+            //    if (null == cl)
+            //        continue;
+            //    var vect = (cl.Value.Item1 - sp);
+            //    var dot = vect.DotProduct(dir);
+            //    if (dot > length)
+            //        continue;
+            //}
+
+
+
             foreach (var pt in layoutPts)
             {
                 var column = columns.Distinct().ToDictionary(x => x, y => y.Distance(pt)).OrderBy(x => x.Value).ToList();
@@ -33,7 +64,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 {
                     return null;
                 }
-
                 (Point3d, Vector3d)? layoutInfo = null;
                 if (wall.Count <= 0 || (column.Count > 0 && column.First().Value < wall.First().Value))
                 {
@@ -89,7 +119,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 layoutPt = layoutPt - moveDir * (minWidth - ePt.DistanceTo(layoutPt));
             }
-
+            //layoutPt = ePt;
             //计算排布方向
             var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
             var compareDir = (pt - layoutPt).GetNormal();
@@ -129,7 +159,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 layoutDir = -layoutDir;
             }
-
+            //layoutPt = sPt;
             return (layoutPt, layoutDir);
         }
 
@@ -145,11 +175,12 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var closetPt = polyline.GetClosestPointTo(pt, false);
             layoutPt = closetPt;
             List<Line> lines = new List<Line>();
+            //多段线有可以合并的线，这里如果没有合并，如果有些是多段线
+            polyline = polyline.DPSimplify(1);
             for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
                 lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
             }
-
             Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
             var layoutLine = lines.Where(x => x.ToCurve3d().IsOn(closetPt, new Tolerance(1, 1)))
                 .Where(x =>
