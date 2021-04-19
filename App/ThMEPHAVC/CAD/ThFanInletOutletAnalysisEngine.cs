@@ -19,9 +19,10 @@ namespace ThMEPHVAC.CAD
     }
     public enum TeeType
     {
-        COLLINEAR_WITH_OUTER = 0,
-        COLLINEAR_WITH_INNER = 1,
-        VERTICAL_WITH_OTHERS = 2
+        TEE_COLLINEAR_WITH_INNER = 0,
+        TEE_VERTICAL_WITH_OTHERS = 1,
+        TEE_ON_THE_LEFT_OF_INNER = 2,
+        TEE_ON_THE_RIGHT_OF_INNER = 3
     }
     public struct TeeInfo
     {
@@ -247,38 +248,55 @@ namespace ThMEPHVAC.CAD
                                               ThDuctEdge<ThDuctVertex> edge,
                                               AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> line_graph)
         {
-            ThDuctEdge<ThDuctVertex> branch;
+            ThDuctEdge<ThDuctVertex> bypass;
             ThDuctEdge<ThDuctVertex> outter;
+            Point3d tee_cp = edge.Target.Position;
             var p1 = line_graph.OutEdges(edge.Target).First().Target;
             var p2 = line_graph.OutEdges(edge.Target).First().Source;
-
+            Tolerance tor = new Tolerance(1.5, 1.5);
             if (ThServiceTee.Is_bypass(p1.Position, p2.Position, bypass_lines))
             {
-                branch = line_graph.OutEdges(edge.Target).First();
+                bypass = line_graph.OutEdges(edge.Target).First();
                 outter = line_graph.OutEdges(edge.Target).Last();
             }
             else
             {
-                branch = line_graph.OutEdges(edge.Target).Last();
+                bypass = line_graph.OutEdges(edge.Target).Last();
                 outter = line_graph.OutEdges(edge.Target).First();
             }
-            Vector3d v1 = branch.Target.Position.GetAsVector() - branch.Source.Position.GetAsVector();
-            Vector3d v2 = outter.Target.Position.GetAsVector() - outter.Source.Position.GetAsVector();
-            Vector3d v3 = edge.Target.Position.GetAsVector() - edge.Source.Position.GetAsVector();
-            Vector3d u1_vec = v1.GetNormal();
-            Vector3d u2_vec = v2.GetNormal();
-            Vector3d u3_vec = v3.GetNormal();
-            Vector3d dir = u1_vec.CrossProduct(u2_vec);
+            Point3d bypass_tar = bypass.Target.Position;
+            if (bypass.Target.Position.IsEqualTo(tee_cp, tor))
+                bypass_tar = bypass.Source.Position;
+            Point3d outter_tar = outter.Target.Position;
+            if (bypass.Target.Position.IsEqualTo(tee_cp, tor))
+                outter_tar = outter.Source.Position;
+
+            Vector3d v1 = bypass_tar.GetAsVector() - tee_cp.GetAsVector();
+            Vector3d v2 = outter_tar.GetAsVector() - tee_cp.GetAsVector();
+            Vector3d v3 = tee_cp.GetAsVector() - edge.Source.Position.GetAsVector();
+            Vector3d u_bypass_vec = v1.GetNormal();
+            Vector3d u_outter_vec = v2.GetNormal();
+            Vector3d u_inner_vec = v3.GetNormal();
+            Vector3d dir = u_bypass_vec.CrossProduct(u_outter_vec);
             Vector2d branch_dir = new Vector2d(v1.X, v1.Y);
             TeeType type;
-            double tor = 1e-3;
-            if (Math.Abs(u1_vec.DotProduct(u2_vec)) < tor && Math.Abs(u1_vec.DotProduct(u3_vec)) < tor)
-                type = TeeType.VERTICAL_WITH_OTHERS;
-            else if (Math.Abs(dir.Z) < tor)
-                type = TeeType.COLLINEAR_WITH_OUTER;
+            double zero_tor = 1e-3;
+            Vector3d in_bypass_dir = u_inner_vec.CrossProduct(u_bypass_vec);
+            if (Math.Abs(u_inner_vec.DotProduct(u_outter_vec)) < zero_tor &&
+                Math.Abs(u_inner_vec.DotProduct(u_bypass_vec)) < zero_tor)
+            {
+                if (in_bypass_dir.Z > 0)
+                    type = TeeType.TEE_ON_THE_LEFT_OF_INNER;
+                else
+                    type = TeeType.TEE_ON_THE_RIGHT_OF_INNER;
+            }
             else
-                type = TeeType.COLLINEAR_WITH_INNER;
-
+            {
+                if (Math.Abs(u_inner_vec.DotProduct(u_bypass_vec)) < zero_tor)
+                    type = TeeType.TEE_VERTICAL_WITH_OTHERS;
+                else
+                    type = TeeType.TEE_COLLINEAR_WITH_INNER;
+            }
             return new TeeInfo { tee_type = type, dir = dir, angle = branch_dir, position = edge.Target.Position };
         }
 
