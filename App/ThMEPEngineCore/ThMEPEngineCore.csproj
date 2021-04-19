@@ -111,6 +111,7 @@
     <Compile Include="Interface\IPolygonize.cs" />
     <Compile Include="Interface\ISimilarityMeasure.cs" />
     <Compile Include="Interface\ISpatialIndex.cs" />
+    <Compile Include="IO\ThWtkOutput.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
     <Compile Include="Model\ThIfcLineFoot.cs" />
     <Compile Include="Model\ThIfcOpening.cs" />
