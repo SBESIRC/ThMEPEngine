@@ -72,16 +72,16 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     //Ⅲ类线  计算或调整后的辅助疏散路径线 图层：辅助疏散路径
                     GetPrimitivesService primitivesService = new GetPrimitivesService(originTransformer);
                     //获取疏散路径(Ⅰ类线)
-                    var exitLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.FEI_EXIT_LINENAME);
+                    var exitLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYHOISTING_LAYERNAME);
                     if ((exitLines == null || exitLines.Count < 1))
                     {
                         //没有疏散路径，不进行处理
                         continue;
                     }
                     //获取车道线信息（Ⅱ类线）
-                    var mainLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.FEI_EXIT_MAIN_NAME);
+                    var mainLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
                     //获取次要疏散路径（Ⅲ类线）
-                    var assitLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.FEI_EXIT_ASSIST_NAME);
+                    var assitLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME);
                     //获取出口块信息
                     var enterBlcok = primitivesService.GetEvacuationExitBlock(pline.Key);
                     List<Curve> laneLines = new List<Curve>();
