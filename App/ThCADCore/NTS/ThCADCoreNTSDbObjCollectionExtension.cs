@@ -5,8 +5,10 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Geometries.Utilities;
+using NetTopologySuite.Operation.OverlayNG;
+using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Overlay;
 using NTSDimension = NetTopologySuite.Geometries.Dimension;
 
 namespace ThCADCore.NTS
@@ -40,14 +42,15 @@ namespace ThCADCore.NTS
             // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
             var mLineString = ToMultiLineString(curves);
             Geometry nodedLineStrings = ThCADCoreNTSService.Instance.GeometryFactory.CreateEmpty(NTSDimension.Curve);
-            mLineString.Geometries.ForEach(o => nodedLineStrings = nodedLineStrings.Union(o));
+            mLineString.Geometries.ForEach(o => 
+            nodedLineStrings = OverlayNGRobust.Overlay(nodedLineStrings,o, SpatialFunction.Union));
             return nodedLineStrings;
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
             // https://lin-ear-th-inking.blogspot.com/2007/11/fast-polygon-merging-in-jts-using.html
-            return curves.ToNTSMultiPolygon().Union();
+            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon());
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)

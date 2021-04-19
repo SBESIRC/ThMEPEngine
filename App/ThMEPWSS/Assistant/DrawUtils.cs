@@ -14,6 +14,8 @@ using ThMEPWSS.CADExtensionsNs;
 using ThMEPWSS.Uitl;
 using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Geom;
+using Autodesk.AutoCAD.Internal;
+using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.Assistant
 {
@@ -34,13 +36,139 @@ namespace ThMEPWSS.Assistant
             if (DrawingQueue.Count == 0) return;
             using (var adb = AcadDatabase.Active())
             {
-                while (DrawingQueue.Count > 0)
-                {
-                    DrawingQueue.Dequeue()(adb);
-                }
+                Draw(adb);
             }
         }
-        public static Polyline DrawBoundaryLazy(Entity[] ents, double thickness = 2)
+
+        public static void Draw(AcadDatabase adb)
+        {
+            while (DrawingQueue.Count > 0)
+            {
+                DrawingQueue.Dequeue()(adb);
+            }
+        }
+
+        public static void DrawLazy(Entity ent)
+        {
+            DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(ent));
+        }
+        public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle)
+        {
+            ObjectId blockRefId;//存储要插入的块参照的Id
+            Database db = spaceId.Database;//获取数据库对象
+            //以读的方式打开块表
+            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+            //如果没有blockName表示的块，则程序返回
+            if (!bt.Has(blockName)) return ObjectId.Null;
+            //以写的方式打开空间（模型空间或图纸空间）
+            BlockTableRecord space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
+            //创建一个块参照并设置插入点
+            BlockReference br = new BlockReference(position, bt[blockName]);
+            br.ScaleFactors = scale;//设置块参照的缩放比例
+            if (layer != null) br.Layer = layer;//设置块参照的层名
+            br.Rotation = rotateAngle;//设置块参照的旋转角度
+            ObjectId btrId = bt[blockName];//获取块表记录的Id
+            //打开块表记录
+            BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
+            //添加可缩放性支持
+            if (record.Annotative == AnnotativeStates.True)
+            {
+                ObjectContextCollection contextCollection = db.ObjectContextManager.GetContextCollection("ACDB_ANNOTATIONSCALES");
+                ObjectContexts.AddContext(br, contextCollection.GetContext("1:1"));
+            }
+            blockRefId = space.AppendEntity(br);//在空间中加入创建的块参照
+            db.TransactionManager.AddNewlyCreatedDBObject(br, true);//通知事务处理加入创建的块参照
+            space.DowngradeOpen();//为了安全，将块表状态改为读
+            return blockRefId;//返回添加的块参照的Id
+        }
+        public static void DrawBlockReference(string blkName, Point3d basePt)
+        {
+            DrawingQueue.Enqueue(adb => InsertBlockReference(adb.ModelSpace.ObjectId, null, blkName, basePt, new Scale3d(1), 0));
+        }
+        public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
+        {
+            Database db = spaceId.Database;//获取数据库对象
+            //以读的方式打开块表
+            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+            //如果没有blockName表示的块，则程序返回
+            if (!bt.Has(blockName)) return ObjectId.Null;
+            //以写的方式打开空间（模型空间或图纸空间）
+            BlockTableRecord space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
+            ObjectId btrId = bt[blockName];//获取块表记录的Id
+            //打开块表记录
+            BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
+            //创建一个块参照并设置插入点
+            BlockReference br = new BlockReference(position, bt[blockName]);
+            br.ScaleFactors = scale;//设置块参照的缩放比例
+            if (layer != null) br.Layer = layer;//设置块参照的层名
+            br.Rotation = rotateAngle;//设置块参照的旋转角度
+            space.AppendEntity(br);//为了安全，将块表状态改为读 
+            //判断块表记录是否包含属性定义
+            if (record.HasAttributeDefinitions)
+            {
+                //若包含属性定义，则遍历属性定义
+                foreach (ObjectId id in record)
+                {
+                    //检查是否是属性定义
+                    AttributeDefinition attDef = id.GetObject(OpenMode.ForRead) as AttributeDefinition;
+                    if (attDef != null)
+                    {
+                        //创建一个新的属性对象
+                        AttributeReference attribute = new AttributeReference();
+                        //从属性定义获得属性对象的对象特性
+                        attribute.SetAttributeFromBlock(attDef, br.BlockTransform);
+                        //设置属性对象的其它特性
+                        attribute.Position = attDef.Position.TransformBy(br.BlockTransform);
+                        attribute.Rotation = attDef.Rotation;
+                        attribute.AdjustAlignment(db);
+                        //判断是否包含指定的属性名称
+                        if (attNameValues.ContainsKey(attDef.Tag.ToUpper()))
+                        {
+                            //设置属性值
+                            attribute.TextString = attNameValues[attDef.Tag.ToUpper()].ToString();
+                        }
+                        //向块参照添加属性对象
+                        br.AttributeCollection.AppendAttribute(attribute);
+                        db.TransactionManager.AddNewlyCreatedDBObject(attribute, true);
+                    }
+                }
+            }
+            db.TransactionManager.AddNewlyCreatedDBObject(br, true);
+            return br.ObjectId;//返回添加的块参照的Id
+        }
+        public static void DrawBlockReference(string blkName, Point3d basePt, Action<BlockReference> cb = null, Dictionary<string, string> props = null, string layer = null, double scale = 1, double rotateDegree = 0)
+        {
+            DrawingQueue.Enqueue(adb =>
+            {
+                var id = InsertBlockReference(adb.ModelSpace.ObjectId, layer, blkName, basePt, new Scale3d(scale), GeoAlgorithm.AngleFromDegree(rotateDegree), props);
+                if (cb != null)
+                {
+                    var br = adb.Element<BlockReference>(id);
+                    cb(br);
+                }
+            });
+        }
+        public static void DrawBlockReference(string blkName, Point3d basePt, Action<BlockReference> cb)
+        {
+            DrawingQueue.Enqueue(adb =>
+            {
+                var id = InsertBlockReference(adb.ModelSpace.ObjectId, null, blkName, basePt, new Scale3d(1), 0);
+                if (cb != null)
+                {
+                    var br = adb.Element<BlockReference>(id);
+                    cb(br);
+                }
+            });
+        }
+        public static void DrawBlockReference(string blkName, Point3d basePt, string layerName)
+        {
+            DrawingQueue.Enqueue(adb => adb.ModelSpace.ObjectId.InsertBlockReference(layerName, blkName, basePt, new Scale3d(1), 0));
+        }
+        public static Polyline DrawBoundaryLazy(params Entity[] ents)
+        {
+            return DrawBoundaryLazy(ents, 2);
+        }
+        public static Polyline DrawBoundaryLazy(Entity[] ents, double thickness)
         {
             if (ents.Length == 0) return null;
             var lst = ents.Select(e => GeoAlgorithm.GetBoundaryRect(e)).ToList();
@@ -116,6 +244,20 @@ namespace ThMEPWSS.Assistant
             });
             return circle;
         }
+        public static List<Line> DrawLinesLazy(IList<Point3d> pts)
+        {
+            var ret = new List<Line>();
+            for (int i = 0; i < pts.Count - 1; i++)
+            {
+                var line = DrawLineLazy(pts[i], pts[i + 1]);
+                ret.Add(line);
+            }
+            return ret;
+        }
+        public static Line DrawLineLazy(double x1, double y1, double x2, double y2)
+        {
+            return DrawLineLazy(new Point3d(x1, y1, 0), new Point3d(x2, y2, 0));
+        }
         public static Line DrawLineLazy(Point3d start, Point3d end)
         {
             var line = new Line() { StartPoint = start, EndPoint = end };
@@ -124,6 +266,16 @@ namespace ThMEPWSS.Assistant
                 adb.ModelSpace.Add(line);
             });
             return line;
+        }
+
+        public static Line DrawTextUnderlineLazy(DBText t, double extH, double extV)
+        {
+            var r = GeoAlgorithm.GetBoundaryRect(t);
+            return DrawLineLazy(r.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r.RightButtom.OffsetXY(extH, -extV).ToPoint3d());
+        }
+        public static DBText DrawTextLazy(string text, Point3d position)
+        {
+            return DrawTextLazy(text, 100, position);
         }
         public static DBText DrawTextLazy(string text, double height, Point3d position)
         {

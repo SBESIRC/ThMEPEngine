@@ -373,6 +373,8 @@
     <Compile Include="Temp\ThDrainageFacilityExtractor.cs" />
     <Compile Include="Temp\ThEquipmentExtractor.cs" />
     <Compile Include="Temp\ThExtractDoorOpeningService.cs" />
+    <Compile Include="Temp\ThExtractHydrantService.cs" />
+    <Compile Include="Temp\ThExtractExtinguisherService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyPositionService.cs" />
     <Compile Include="Temp\ThExtractToiletGroupService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyStartService.cs" />

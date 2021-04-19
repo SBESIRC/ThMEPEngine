@@ -28,11 +28,12 @@ namespace ThCADCore.NTS
 
         public CoordinateSequence toCoordinateSequence(CoordinateSequenceFactory csfac)
         {
-            CoordinateSequence cs = csfac.Create(size(), 3);
+            CoordinateSequence cs = csfac.Create(size(), Ordinates.XYZ);
             for (int i = 0; i <= curr; i++)
             {
                 cs.SetOrdinate(i, 0, ordinates[i * 2]);
                 cs.SetOrdinate(i, 1, ordinates[i * 2 + 1]);
+                cs.SetOrdinate(i, 2, 0);
             }
 
             return cs;

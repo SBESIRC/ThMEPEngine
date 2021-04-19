@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Linq2Acad;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
@@ -11,33 +10,45 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThEquipmentExtractor :ThExtractorBase,IExtract,IPrint, IBuildGeometry,IGroup
     {
-        public Dictionary<string, List<Polyline>> Equipments { get; private set; }
+        private List<DBPoint> Extinguishers { get; set; }
+        private List<DBPoint> Hydrants { get; set; }
         public ThEquipmentExtractor()
         {
-            Equipments = new Dictionary<string, List<Polyline>>();
-            Category= "Equipment";
+            Extinguishers = new List<DBPoint>();
+            Hydrants = new List<DBPoint>();
+            Category = "Equipment";
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            var instance = new ThExtractEquipmentService();
-            instance.Extract(database, pts);
-            Equipments = instance.Equipments;
+            var extinguisherService = new ThExtractExtinguisherService();
+            extinguisherService.Extract(database, pts);
+            Extinguishers = extinguisherService.Extinguishers;
+
+            var hydrantService = new ThExtractHydrantService();
+            hydrantService.Extract(database, pts);
+            Hydrants = hydrantService.Hydrants;
         }
 
         public List<ThGeometry> BuildGeometries()
         {
             var geos = new List<ThGeometry>();
-            Equipments.ForEach(e =>
+            Extinguishers.ForEach(e =>
             {
-                e.Value.ForEach(v =>
-                {
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add(CategoryPropertyName, Category);
-                    geometry.Properties.Add(NamePropertyName, e.Key);
-                    geometry.Boundary = v;
-                    geos.Add(geometry);
-                });
+                var geometry = new ThGeometry();
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Properties.Add(NamePropertyName, "灭火器");
+                geometry.Boundary = e;
+                geos.Add(geometry);
+            });
+
+            Hydrants.ForEach(e =>
+            {
+                var geometry = new ThGeometry();
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Properties.Add(NamePropertyName, "消火栓");
+                geometry.Boundary = e;
+                geos.Add(geometry);
             });
             return geos;
         }
@@ -47,15 +58,22 @@ namespace ThMEPEngineCore.Temp
             using (var db =AcadDatabase.Use(database))
             {
                 var equipIds = new ObjectIdList();
-                Equipments.ForEach(e =>
+                Extinguishers.ForEach(e =>
                 {
-                    e.Value.ForEach(v =>
-                    {
-                        v.ColorIndex = ColorIndex;
-                        v.SetDatabaseDefaults();
-                        equipIds.Add(db.ModelSpace.Add(v));
-                    });
+                    var circle = new Circle(e.Position,Vector3d.ZAxis,5.0);
+                    circle.ColorIndex = ColorIndex;
+                    circle.SetDatabaseDefaults();
+                    equipIds.Add(db.ModelSpace.Add(circle));
                 });
+
+                Hydrants.ForEach(e =>
+                {
+                    var circle = new Circle(e.Position, Vector3d.ZAxis, 5.0);
+                    circle.ColorIndex = ColorIndex;
+                    circle.SetDatabaseDefaults();
+                    equipIds.Add(db.ModelSpace.Add(circle));
+                });
+
                 if (equipIds.Count > 0)
                 {
                     GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), equipIds);

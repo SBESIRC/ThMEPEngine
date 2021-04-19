@@ -27,94 +27,97 @@ using System.Diagnostics;
 
 namespace ThMEPWSS.Command
 {
-  using ThMEPWSS.Assistant;
-  using ThMEPWSS.JsonExtensionsNs;
-  //雨水排水系统图
-  class ThRainSystemDiagramCmd : IAcadCommand, IDisposable
-  {
-    public void Dispose()
+    using ThMEPWSS.Assistant;
+    using ThMEPWSS.JsonExtensionsNs;
+    //雨水排水系统图
+    class ThRainSystemDiagramCmd : IAcadCommand, IDisposable
     {
-    }
-    //test
-    public static string CollectSelectionTest()
-    {
-      var rg = SelectPoints();
-      var basePtOptions = new PromptPointOptions("\n选择图纸基点");
-      var rst = Active.Editor.GetPoint(basePtOptions);
-      return $"[{(rg.Item1.ToJson())},{(rg.Item2.ToJson())},{(rst.Value.ToJson())}]";
-    }
-    private static Tuple<Point3d, Point3d> SelectPoints()
-    {
-      var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
-      Point3d leftDownPt = Point3d.Origin;
-      if (ptLeftRes.Status == PromptStatus.OK)
-      {
-        leftDownPt = ptLeftRes.Value;
-      }
-      else
-      {
-        return Tuple.Create(leftDownPt, leftDownPt);
-      }
-
-      var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
-      if (ptRightRes.Status == PromptStatus.OK)
-      {
-        return Tuple.Create(leftDownPt, ptRightRes.Value);
-      }
-      else
-      {
-        return Tuple.Create(leftDownPt, leftDownPt);
-      }
-    }
-
-    public void Execute()
-    {
-      using (var acadDatabase = AcadDatabase.Active())
-      {
-        //todo: process
-
-        //1. In the result of selected area, get storeys information, such as lable, bouding box of each storey
-
-        //2. In the result of selected area, get all rain pipes, condense pipes, floor drains, water buckets and their lables
-
-        //3. due to bounding box of each storey, put related rain pipes, condense pipes, floor drains, water bucket into certain storey
-
-        //4. build relationships in a certain storey
-
-        //5. create system diagram due to above data
-        var diagram = new ThWRainSystemDiagram();
-
-        //todo: extract storeys
-        var storeysRecEngine = new ThWStoreysRecognitionEngine();
-
-
-        var input = SelectPoints();
-        var points = new Point3dCollection();
-        points.Add(input.Item1);
-        points.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
-        points.Add(input.Item2);
-        points.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-
-        storeysRecEngine.Recognize(acadDatabase.Database, points);
-
-
-        var basePtOptions = new PromptPointOptions("\n选择图纸基点");
-
-        var rst = Active.Editor.GetPoint(basePtOptions);
-        if (rst.Status != PromptStatus.OK)
+        public void Dispose()
         {
-          return;
+        }
+        //test
+        public static string CollectSelectionTest()
+        {
+            var rg = SelectPoints();
+            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
+            var rst = Active.Editor.GetPoint(basePtOptions);
+            return $"[{(rg.Item1.ToJson())},{(rg.Item2.ToJson())},{(rst.Value.ToJson())}]";
+        }
+        private static Tuple<Point3d, Point3d> SelectPoints()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
+            Point3d leftDownPt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                leftDownPt = ptLeftRes.Value;
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
+            if (ptRightRes.Status == PromptStatus.OK)
+            {
+                return Tuple.Create(leftDownPt, ptRightRes.Value);
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
         }
 
-        var bastPt = rst.Value;
+        public void Execute()
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            {
+                //todo: process
 
-        diagram.InitCacheData(acadDatabase, points);
-        diagram.InitStoreys(storeysRecEngine.Elements);
-        diagram.InitVerticalPipeSystems(points);
+                //1. In the result of selected area, get storeys information, such as lable, bouding box of each storey
 
-        diagram.Draw(bastPt);
-        DrawUtils.Draw();
-      }
+                //2. In the result of selected area, get all rain pipes, condense pipes, floor drains, water buckets and their lables
+
+                //3. due to bounding box of each storey, put related rain pipes, condense pipes, floor drains, water bucket into certain storey
+
+                //4. build relationships in a certain storey
+
+                //5. create system diagram due to above data
+                var diagram = new ThWRainSystemDiagram();
+
+                //todo: extract storeys
+                var storeysRecEngine = new ThWStoreysRecognitionEngine();
+
+
+                var input = SelectPoints();
+                var points = new Point3dCollection();
+                points.Add(input.Item1);
+                points.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
+                points.Add(input.Item2);
+                points.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
+
+                storeysRecEngine.Recognize(acadDatabase.Database, points);
+
+
+                var basePtOptions = new PromptPointOptions("\n选择图纸基点");
+
+                var rst = Active.Editor.GetPoint(basePtOptions);
+                if (rst.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var bastPt = rst.Value;
+
+                diagram.CollectData(acadDatabase, points);
+                diagram.InitStoreys(storeysRecEngine.Elements);
+                diagram.InitVerticalPipeSystems(points);
+
+                diagram.Draw(bastPt);
+                DrLazy.Default.DrawLazy();
+                DrawUtils.Draw(acadDatabase);
+
+            }
+        }
     }
-  }
-} 
+}

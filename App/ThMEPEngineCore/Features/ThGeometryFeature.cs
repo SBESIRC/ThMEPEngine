@@ -1,10 +1,9 @@
 ﻿using System;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
 using NetTopologySuite.Features;
-using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
 using NetTopologySuite.Geometries;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Features
 {
@@ -16,7 +15,7 @@ namespace ThMEPEngineCore.Features
             {
                 if (geometry.Boundary is Polyline polyline)
                 {
-                    if(polyline.Closed)
+                    if (polyline.Closed)
                     {
                         var geo = polyline.ToNTSPolygon();
                         var attributesTable = new AttributesTable(geometry.Properties);
@@ -45,7 +44,7 @@ namespace ThMEPEngineCore.Features
                     var feature = new Feature(geo, attributesTable);
                     return feature;
                 }
-                else if(geometry.Boundary is MPolygon mPolygon)
+                else if (geometry.Boundary is MPolygon mPolygon)
                 {
                     var geo = mPolygon.ToNTSPolygon();
                     var attributesTable = new AttributesTable(geometry.Properties);

@@ -2,6 +2,8 @@
 using System.Linq;
 using Dreambuild.AutoCAD;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
 
@@ -35,39 +37,19 @@ namespace ThCADCore.NTS
 
         public DBObjectCollection Clip(DBObjectCollection curves, bool inverted = false)
         {
-            //return Clip(curves.ToMultiLineString(), inverted).ToDbCollection();
-            //转ToMultiLineString，再Intersection，出现问题
-            //错误提示“found non-noded intersection between LineString *** adn LineString ***”
-            //暂时先一根根裁剪来解决问题
-            return inverted ? Difference(curves) : Intersection(curves);
-        }
-
-        private DBObjectCollection Intersection(DBObjectCollection curves)
-        {
-            
-            var results = new DBObjectCollection();
-            foreach (Curve curve in curves)
-            {
-                var geo = Clipper.Intersection(curve.ToNTSGeometry());
-                geo.ToDbCollection().Cast<Curve>().ForEach(o => results.Add(o));
-            }
-            return results;
-        }
-
-        private DBObjectCollection Difference(DBObjectCollection curves)
-        {
-            var results = new DBObjectCollection();
-            foreach (Curve curve in curves)
-            {
-                var geo = curve.ToNTSGeometry().Difference(Clipper);
-                geo.ToDbCollection().Cast<Curve>().ForEach(o => results.Add(o));
-            }
-            return results;
+            return Clip(curves.ToMultiLineString(), inverted).ToDbCollection();
         }
 
         private Geometry Clip(Geometry other, bool inverted = false)
         {
-            return inverted ? other.Difference(Clipper) : Clipper.Intersection(other);
+            if (inverted)
+            {
+                return OverlayNGRobust.Overlay(other, Clipper, SpatialFunction.Difference);
+            }
+            else
+            {
+                return OverlayNGRobust.Overlay(Clipper, other, SpatialFunction.Intersection);
+            }
         }
     }
 }
