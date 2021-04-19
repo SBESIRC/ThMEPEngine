@@ -175,7 +175,7 @@ namespace TianHua.Hvac.UI.Command
                     if (is_in)
                         ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s3, s2, bypass_lines);
                     else
-                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s2, s3, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1 + 65, s2, s3, bypass_lines);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_ON_THE_LEFT_OF_INNER)
                 {
@@ -531,7 +531,8 @@ namespace TianHua.Hvac.UI.Command
                         mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
                                Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
                     else
-                        mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
+                        mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
+                               Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
                     e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
                     e.RunTeeDrawEngine(Model, mat);
                 }
