@@ -17,6 +17,7 @@ using ThMEPLighting.FEI;
 using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.EvacuationPath;
 using ThMEPLighting.FEI.PrintEntity;
+using ThMEPLighting.FEI.ThEmgPilotLamp;
 
 namespace ThMEPLighting
 {
@@ -96,6 +97,13 @@ namespace ThMEPLighting
                     printService.PrintPath(paths, allLanes, originTransformer);
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THMEGL", CommandFlags.Modal)]
+        public void ThMEGL()
+        {
+            var lampLight = new ThEmgPilotLampCommand();
+            lampLight.Execute();
         }
 
         [CommandMethod("TIANHUACAD", "thtestAS", CommandFlags.Modal)]

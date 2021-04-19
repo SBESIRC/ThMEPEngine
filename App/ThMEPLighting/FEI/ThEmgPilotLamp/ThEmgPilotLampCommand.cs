@@ -80,36 +80,23 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     }
                     //获取车道线信息（Ⅱ类线）
                     var mainLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
-                    //获取次要疏散路径（Ⅲ类线）
+
+                    //获取次要疏散路径（Ⅲ类线-壁装）
                     var assitLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME);
+                    //获取次要疏散路径（Ⅲ类线-壁装）
+                    var assitHostLines = primitivesService.GetMainEvacuate(pline.Key, ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME);
+
                     //获取出口块信息
                     var enterBlcok = primitivesService.GetEvacuationExitBlock(pline.Key);
                     List<Curve> laneLines = new List<Curve>();
                     mainLines.ForEach(c => laneLines.Add(c));
                     assitLines.ForEach(c => laneLines.Add(c));
-
+                    assitHostLines.ForEach(c => laneLines.Add(c));
                     EmgPilotLampLineNode lampLineNode = new EmgPilotLampLineNode(laneLines, exitLines, enterBlcok);
 
                     //获取墙柱信息
                     primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
 
-                    //List<Line> lines = new List<Line>();
-                    //foreach (var polyline in columns) 
-                    //{
-                        
-                    //    for (int i = 0; i < polyline.NumberOfVertices; i++)
-                    //    {
-                    //        lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
-                    //    }
-                    //}
-                    //foreach (var line in lines) 
-                    //{
-                    //    //Line line2 = new Line(tempPt, tempEp);
-                    //    originTransformer.Reset(line);
-                    //    acdb.ModelSpace.Add(line);
-                    //}
-
-                    //return;
                     //根据这些线信息进行计算布置的点信息
                     IndicatorLight indicator = new IndicatorLight();
                     assitLines.ForEach(c => indicator.assistLines.Add(c));
@@ -118,27 +105,9 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     indicator.allNodes.AddRange(lampLineNode.allNodes);
                     indicator.allNodeRoutes.AddRange(lampLineNode.cacheNodeRoutes);
                     mainLines.ForEach(c => indicator.mainLines.Add(c));
-                    EmgLampIndicatorLight emgLampIndicator = new EmgLampIndicatorLight(columns, walls, indicator);
+                    assitHostLines.ForEach(c => indicator.assistHostLines.Add(c));
+                    EmgLampIndicatorLight emgLampIndicator = new EmgLampIndicatorLight(pline.Key,columns, walls, indicator);
                     var res = emgLampIndicator.CalcLayout();
-                    //foreach (var item in emgLampIndicator.testPoints)
-                    //{
-                    //    PointToView(acdb, originTransformer, item);
-                    //}
-                    //foreach (var item in emgLampIndicator.testNodes)
-                    //{
-                    //    if (null == item.nodeDirections || item.nodeDirections.Count < 1)
-                    //        continue;
-                        
-                    //    foreach (var node in item.nodeDirections)
-                    //    {
-                    //        PointToView(acdb, originTransformer, node.nodePointInLine);
-                    //        if (node == null || node.inDirection == null || node.inDirection.Count < 1)
-                    //            continue;
-                    //        //PointToView(acdb, originTransformer, item.p);
-                    //        foreach (var dir in node.inDirection)
-                    //            SPointArrow(acdb, originTransformer, node.graphNode.nodePoint, dir);
-                    //    }
-                    //}
                     foreach (var item in res)
                     {
                         if (item == null)
@@ -164,13 +133,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             {
                                 blockName = ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_SINGLESIDE;
                             }
-                            //switch (item.endType) 
-                            //{
-                            //    case 140://壁装 E/N
-                            //    case 141://吊装 E/N
-                            //        break;
-
-                            //}
                         }
                         else 
                         {

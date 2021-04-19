@@ -54,7 +54,6 @@ namespace ThMEPLighting
         //public const string AUXILIARY_EVACUATIONPATH_BYHOISTING_LINETYPE = "预估辅助疏散路径-吊装";      //预估辅助疏散路径-吊装
         //public const string AUXILIARY_EVACUATIONPATH_BYWALL_LINETYPE = "预估辅助疏散路径-壁装";      //预估辅助疏散路径-壁装
 
-
         //疏散方向标志灯
         public const string PILOTLAMP_WALL_ONEWAY_SINGLESIDE = "E-BFEL200";         //疏散方向指示灯，壁装-> 单向 ->单面指示
         public const string PILOTLAMP_HOST_ONEWAY_SINGLESIDE = "E-BFEL201";         //疏散方向指示灯，吊装-> 单向 ->单面指示

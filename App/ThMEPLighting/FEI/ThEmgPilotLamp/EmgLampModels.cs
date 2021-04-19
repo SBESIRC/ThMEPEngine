@@ -176,9 +176,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// </summary>
         public List<Curve> mainLines { get; set; }
         /// <summary>
-        /// 辅助疏散路径（Ⅲ类线）
+        /// 辅助疏散路径（Ⅲ类线,壁装）
         /// </summary>
         public List<Curve> assistLines { get; set; }
+        /// <summary>
+        /// 辅助疏散路径（Ⅲ类线,吊装）
+        /// </summary>
+        public List<Curve> assistHostLines { get; set; }
         /// <summary>
         /// 所有构造的节点
         /// </summary>
@@ -207,6 +211,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             allLines = new List<Curve>();
             allNodes = new List<GraphNode>();
             allNodeRoutes = new List<GraphRoute>();
+            assistHostLines = new List<Curve>();
         }
     }
     /// <summary>
