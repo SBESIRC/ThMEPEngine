@@ -10,6 +10,21 @@ using ThMEPWSS.Uitl;
 
 namespace ThMEPWSS.JsonExtensionsNs
 {
+    public static class LinqExtensions
+    {
+        public static void AddRange<T>(this HashSet<T> source,IEnumerable<T> items)
+        {
+            foreach (var item in items)
+            {
+                source.Add(item);
+            }
+        }
+        public static KeyValuePair<K,V> ToKV<K,V>(this Tuple<K,V> t)
+        {
+            return new KeyValuePair<K, V>(t.Item1, t.Item2);
+        }
+
+    }
     public static class JsonExtensions
     {
         public static string ToJson(this ThWGRect rect)
@@ -21,6 +36,12 @@ namespace ThMEPWSS.JsonExtensionsNs
         {
             var jo = JsonConvert.DeserializeObject<JObject>(json);
             return new Point3d(jo["x"].ToObject<double>(), jo["y"].ToObject<double>(), jo["z"].ToObject<double>());
+        }
+        public static string ToJson(this Point2d p) => $"{{x:{p.X},y:{p.Y}}}";
+        public static Point2d JsonToPoint2d(this string json)
+        {
+            var jo = JsonConvert.DeserializeObject<JObject>(json);
+            return new Point2d(jo["x"].ToObject<double>(), jo["y"].ToObject<double>());
         }
         public static ThWGRect JsonToThWGRect(this string json)
         {
@@ -101,7 +122,12 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return ret;
         }
-
+        public static Point3dCollection ToPoint3dCollection(this Polyline pl)
+        {
+            var r = new Point3dCollection();
+            for (int i = 0; i < pl.NumberOfVertices; i++) r.Add(pl.GetPoint3dAt(i));
+            return r;
+        }
         public static DBObjectCollection ExplodeToDBObjectCollection(this Entity ent)
         {
             var entitySet = new DBObjectCollection();

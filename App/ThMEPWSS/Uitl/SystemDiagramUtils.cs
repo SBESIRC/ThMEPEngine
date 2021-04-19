@@ -24,6 +24,16 @@ namespace ThMEPWSS.Uitl
     {
         public static class PointExtensions
         {
+            public static Point3d Rotate(this Point3d point, double radius, double degree)
+            {
+                var phi = GeoAlgorithm.AngleFromDegree(degree);
+                return point.OffsetXY(radius * Math.Cos(phi), radius * Math.Sin(phi));
+            }
+            public static Point2d Rotate(this Point2d point, double radius, double degree)
+            {
+                var phi = GeoAlgorithm.AngleFromDegree(degree);
+                return point.OffsetXY(radius * Math.Cos(phi), radius * Math.Sin(phi));
+            }
             public static Point3d OffsetX(this Point3d point, double delta)
             {
                 return new Point3d(point.X + delta, point.Y, point.Z);
@@ -43,6 +53,26 @@ namespace ThMEPWSS.Uitl
             public static Point3d ReplaceY(this Point3d point, double y)
             {
                 return new Point3d(point.X, y, point.Z);
+            }
+            public static Point2d OffsetX(this Point2d point, double delta)
+            {
+                return new Point2d(point.X + delta, point.Y);
+            }
+            public static Point2d OffsetY(this Point2d point, double delta)
+            {
+                return new Point2d(point.X, point.Y + delta);
+            }
+            public static Point2d OffsetXY(this Point2d point, double deltaX, double deltaY)
+            {
+                return new Point2d(point.X + deltaX, point.Y + deltaY);
+            }
+            public static Point2d ReplaceX(this Point2d point, double x)
+            {
+                return new Point2d(x, point.Y);
+            }
+            public static Point2d ReplaceY(this Point2d point, double y)
+            {
+                return new Point2d(point.X, y);
             }
         }
     }
@@ -225,7 +255,9 @@ namespace ThMEPWSS.Uitl
         public double MaxX { get => Math.Max(x1, x2); }
         public double MaxY { get => Math.Max(y1, y2); }
         public Point2d LeftTop => new Point2d(MinX, MaxY);
+        public Point2d LeftButtom => new Point2d(MinX, MinY);
         public Point2d RightButtom => new Point2d(MaxX, MinY);
+        public Point2d RightTop => new Point2d(MaxX, MaxY);
         public Point2d Center => new Point2d(CenterX, CenterY);
         public ThWGRect(double x1, double y1, double x2, double y2)
         {
@@ -237,9 +269,13 @@ namespace ThMEPWSS.Uitl
         public ThWGRect(Point2d leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
         {
         }
-        public ThWGRect(Point2d leftTop, Point2d rightButtom) : this(leftTop.X, leftTop.Y, rightButtom.X, rightButtom.Y)
+        public ThWGRect(Point3d p1, Point3d p2) : this(p1.ToPoint2d(), p2.ToPoint2d())
         {
         }
+        public ThWGRect(Point2d p1, Point2d p2) : this(p1.X, p1.Y, p2.X, p2.Y)
+        {
+        }
+        public double Radius => Math.Sqrt(Math.Pow(Width / 2, 2) + Math.Pow(Height / 2, 2));
         public double Width => MaxX - MinX;
         public double Height => MaxY - MinY;
         public double CenterX => (MinX + MaxX) / 2;
@@ -257,6 +293,14 @@ namespace ThMEPWSS.Uitl
             {
                 return Math.Min(Width, Height) / 2;
             }
+        }
+        public Polyline CreatePolygon(int num)
+        {
+            return PolylineTools.CreatePolygon(Center, num, Radius);
+        }
+        public Point3dCollection ToPoint3dCollection()
+        {
+            return new Point3dCollection() { new Point3d(MinX, MinY, 0), new Point3d(MinX, MaxY, 0), new Point3d(MaxX, MaxY, 0), new Point3d(MaxX, MinY, 0) };
         }
         public ThWGRect Expand(double thickness)
         {
@@ -509,6 +553,19 @@ namespace ThMEPWSS.Uitl
 
     public static class GeoAlgorithm
     {
+        public static ThWGLineSegment ToGLineSegment(this Line line)
+        {
+            return new ThWGLineSegment(line.StartPoint.ToPoint2D(), line.EndPoint.ToPoint2D());
+        }
+        public static Point2d[] GetPoint2ds(this Polyline pline)
+        {
+            var rt = new Point2d[pline.NumberOfVertices];
+            for (int i = 0; i < rt.Length; i++)
+            {
+                rt[i] = pline.GetPoint2dAt(i);
+            }
+            return rt;
+        }
         public static double GetMinConnectionDistance(ThWGLineSegment seg1, ThWGLineSegment seg2)
         {
             var p1 = seg1.Point1;
@@ -690,7 +747,11 @@ namespace ThMEPWSS.Uitl
         {
             return ((GeoAlgorithm.Distance(pt1, pt2) < tollerance) || (GeoAlgorithm.Distance(pt1, pt4) < tollerance) || (GeoAlgorithm.Distance(pt3, pt2) < tollerance) || (GeoAlgorithm.Distance(pt3, pt4) < tollerance));
         }
-
+        public static Tuple<double, double> GetXY(double radius, double degree)
+        {
+            var phi = AngleFromDegree(degree);
+            return new Tuple<double, double>(radius * Math.Cos(phi), radius * Math.Sin(phi));
+        }
         public static double AngleToDegree(double angle)
         {
             return angle * 180 / Math.PI;

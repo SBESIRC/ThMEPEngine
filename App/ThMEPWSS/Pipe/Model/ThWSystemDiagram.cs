@@ -8,10 +8,13 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using Linq2Acad;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Uitl.DebugNs;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
+using DU = ThMEPWSS.Assistant.DrawUtils;
 
 namespace ThMEPWSS.Pipe.Model
 {
@@ -108,7 +111,7 @@ namespace ThMEPWSS.Pipe.Model
 
         override public void Draw(Point3d basePt)
         {
-            
+
             DrawUtils.DrawCircleLazy(basePt, 200);
             switch (TranslatorType)
             {
@@ -134,31 +137,30 @@ namespace ThMEPWSS.Pipe.Model
     }
     public class ThWSDStorey : ThWSDDrawableElement, IEquatable<ThWSDStorey>
     {
+        [JsonIgnore]
         public ThWSDStorey HigerStorey { get; set; } = null;
+        [JsonIgnore]
         public ThWSDStorey LowerStorey { get; set; } = null;
 
         //such as 1F, 2F.... RF+1, RF+2
         public string Label { get; set; } = string.Empty;
         public string Elevation { get; set; } = string.Empty;
         public StoreyType StoreyType;
-        public double Length = 5000; //mm
-        public double HorizontalSpan = 5500;//mm
-
         public const double TEXT_HEIGHT = 350;
         public const double INDEX_TEXT_OFFSET_X = 2000;
         public const double INDEX_TEXT_OFFSET_Y = 130;
-        public double LINE_LENGTH = 100000;
         public const double RF_OFFSET_Y = 500;
-
-        public Point3d StoreyBasePoint;
+        
+        
         public List<ThWSDWaterBucket> Buckets { get; set; } = new List<ThWSDWaterBucket>();
         public List<ThWSDPipe> VerticalPipes { get; set; } = new List<ThWSDPipe>();
-
+        [JsonIgnore]
         public Point3dCollection Range { get; set; }
-
+        [JsonIgnore]
         public ObjectId ObjectID { get; set; }
-
+        [JsonIgnore]
         public BlockReference BlockRef { get; set; }
+        [JsonIgnore]
         public Point3d Position
         {
             get
@@ -166,59 +168,23 @@ namespace ThMEPWSS.Pipe.Model
                 return BlockRef.Position;
             }
         }
-
-        public ThWSDStorey()
+        public void Draw(StoreyDrawingContext ctx)
         {
-            LayerName = "W-NOTE";
-        }
-        /// <summary>
-        /// Draw horizental line by length,
-        /// Also, draw other neccessary information
-        /// </summary>
-        /// <param name="basePt"></param>
-        /// <param name="len"></param>
-        override public void Draw(Point3d basePt)
-        {
-            using (var adb = AcadDatabase.Active())
+            var basePt = ctx.BasePoint;
+            var lineLen = ctx.StoreyLineLength;
+            var layer = "W-NOTE";
             {
-                adb.ModelSpace.Add(new Line(StoreyBasePoint, basePt)
-                {
-                    Layer = LayerName,
-                });
-
-                //draw horizontal line
-                adb.ModelSpace.Add(new Line(new Point3d(basePt.X, basePt.Y, 0), new Point3d(basePt.X + LINE_LENGTH, basePt.Y, 0))
-                {
-                    Layer = LayerName,
-                });
-                adb.ModelSpace.Add(new Line(new Point3d(basePt.X + StoreyBasePoint.X, basePt.Y + StoreyBasePoint.Y, 0), new Point3d(basePt.X + StoreyBasePoint.X + LINE_LENGTH, basePt.Y + StoreyBasePoint.Y, 0))
-                {
-                    Layer = LayerName,
-                });
-                //draw Index
-                adb.ModelSpace.Add(new DBText()
-                {
-                    Layer = LayerName,
-                    Position = new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + INDEX_TEXT_OFFSET_Y, 0),
-                    //TextStyleName = "TH-STYLE3",
-                    TextString = Label,
-                    Height = TEXT_HEIGHT,
-                });
-                //draw other information
-                if (Label == "RF")
-                {
-                    adb.ModelSpace.Add(new Line(new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y, 0), new Point3d(basePt.X + LINE_LENGTH, basePt.Y + RF_OFFSET_Y, 0))
-                    {
-                        Layer = LayerName,
-                    });
-                    adb.ModelSpace.Add(new DBText()
-                    {
-                        Layer = LayerName,
-                        Position = new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y + INDEX_TEXT_OFFSET_Y, 0),
-                        TextString = "建筑完成面",
-                        Height = TEXT_HEIGHT,
-                    });
-                }
+                var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
+                line.Layer = layer;
+                var dbt = DU.DrawTextLazy(Label, TEXT_HEIGHT, new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + INDEX_TEXT_OFFSET_Y, 0));
+                dbt.Layer = layer;
+            }
+            if (Label == "RF")
+            {
+                var line = DU.DrawLineLazy(new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + RF_OFFSET_Y, 0));
+                line.Layer = layer;
+                var dbt = DU.DrawTextLazy("建筑完成面", TEXT_HEIGHT, new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y + INDEX_TEXT_OFFSET_Y, 0));
+                dbt.Layer = layer;
             }
         }
         public override int GetHashCode()
@@ -235,36 +201,32 @@ namespace ThMEPWSS.Pipe.Model
         public string Label { get; set; } = string.Empty;
         public string ND { get; set; } = string.Empty;
         public WaterBucketEnum Type { get; set; }
-        public Point3dCollection Range { get; set; }
         public ThWSDStorey Storey { get; set; }
-        private string BlockName { get; set; } = string.Empty;
 
         public ThWSDWaterBucket()
         {
-            LayerName = ThWPipeCommon.W_RAIN_EQPM;
+            //LayerName = ThWPipeCommon.W_RAIN_EQPM;
         }
 
-        override public void Draw(Point3d basePt)
+        public void Draw(WaterBucketDrawingContext ctx)
         {
-            if (Type.Equals(WaterBucketEnum.Gravity))
-            {
-                BlockName = "屋面雨水斗";
-            }
-            else if (Type.Equals(WaterBucketEnum.Side))
-            {
-                BlockName = "侧排雨水斗系统";
-            }
-            else
-                return;
+            var basePt = ctx.BasePoint;
             if (Storey.Label == "RF")
             {
                 basePt = basePt.OffsetY(ThWSDStorey.RF_OFFSET_Y);
             }
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            switch (Type)
             {
-                //draw entity
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference(LayerName, BlockName, basePt, new Scale3d(1), 0);
-                //todo: draw Label
+                case WaterBucketEnum.Gravity:
+                    Dr.DrawGravityWaterBucket(basePt);
+                    Dr.DrawGravityWaterBucketLabel(basePt);
+                    break;
+                case WaterBucketEnum.Side:
+                    Dr.DrawSideWaterBucket(basePt);
+                    Dr.DrawSideWaterBucketLabel(basePt);
+                    break;
+                default:
+                    break;
             }
         }
 
@@ -353,8 +315,11 @@ namespace ThMEPWSS.Pipe.Model
         }
         public override void Draw(Point3d basePt)
         {
-            DrawUtils.DrawTextLazy("ThWSDCheckPoint", 100, basePt);
-            DrawUtils.DrawRectLazyFromLeftButtom(basePt, 200, 100);
+            if (HasCheckPoint)
+            {
+                DrawUtils.DrawTextLazy("ThWSDCheckPoint", 100, basePt);
+                DrawUtils.DrawRectLazyFromLeftButtom(basePt, 200, 100);
+            }
         }
     }
 
@@ -363,6 +328,11 @@ namespace ThMEPWSS.Pipe.Model
         public string Label { get; set; } = string.Empty;
         public string BlockName { get; set; } = string.Empty;
         public string ND { get; set; } = string.Empty;
+
+        /// <summary>
+        /// 是否有套管
+        /// </summary>
+        public bool HasDrivePipe { get; set; } = false;
 
         public ThWSDOutputType()
         {
@@ -379,12 +349,12 @@ namespace ThMEPWSS.Pipe.Model
 
         public override int GetHashCode()
         {
-            return ND.GetHashCode() ^ OutputType.GetHashCode();
+            return ND.GetHashCode() ^ OutputType.GetHashCode() ^ HasDrivePipe.GetHashCode();
         }
 
         public bool Equals(ThWSDOutputType other)
         {
-            return ND.Equals(other.ND) && OutputType.Equals(other.OutputType);
+            return ND.Equals(other.ND) && OutputType.Equals(other.OutputType) && HasDrivePipe.Equals(other.HasDrivePipe);
         }
     }
 
