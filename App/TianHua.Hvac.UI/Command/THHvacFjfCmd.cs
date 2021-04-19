@@ -63,7 +63,9 @@ namespace TianHua.Hvac.UI.Command
                             return;
                         ThVTee vt = new ThVTee(600, vt_width, 20);
                         vt.RunVTeeDrawEngine(DbFanModel, info, line_type, rot_vec, dis_vec);
-                        ThServiceTee.Insert_electric_valve(dis_vec, vt_width, rot_vec.Angle + 1.5 * Math.PI);
+                        ThServiceTee service = new ThServiceTee();
+                        service.Run_insert_text_info(DbFanModel, info, rot_vec, dis_vec);
+                        service.Insert_electric_valve(dis_vec, vt_width, rot_vec.Angle + 1.5 * Math.PI);
                     }
                     else
                     {
@@ -82,16 +84,10 @@ namespace TianHua.Hvac.UI.Command
                             return;
 
                         double bra_width = Double.Parse(info.tee_info.Split('x').First());
-                        
-                        
                         if (io_anay_res.HasInletTee())
-                        {
                             Adjust_duct_shrink(true, bra_width, info.in_duct_info, io_anay_res.InTeesInfo, bypass_lines, io_anay_res);
-                        }
                         if (io_anay_res.HasOutletTee())
-                        {
-                            Adjust_duct_shrink(false, bra_width, info.out_duct_info, io_anay_res.OutTeesInfo, bypass_lines, io_anay_res);   
-                        }
+                            Adjust_duct_shrink(false, bra_width, info.out_duct_info, io_anay_res.OutTeesInfo, bypass_lines, io_anay_res);
                         Line bypass_duct = max_bypass;
                         if (tee_pattern == "RBType2")
                             bypass_duct = io_anay_res.LastBypass;
@@ -105,13 +101,9 @@ namespace TianHua.Hvac.UI.Command
                         if (io_anay_res.HasInletTee() || io_anay_res.HasOutletTee())
                         {
                             if (tee_pattern == "RBType2")
-                            {
                                 bypass_duct = io_anay_res.LastBypass;
-                            }
                             else if (tee_pattern == "RBType1")
-                            {
                                 bypass_duct = io_anay_res.MaxBypass;
-                            }
                             else
                                 bypass_duct = max_bypass;
                             Point3d bypass_start = bypass_duct.StartPoint;
@@ -121,7 +113,11 @@ namespace TianHua.Hvac.UI.Command
 
                             Vector2d elev_dir = new Vector2d(bypass_vec.X, bypass_vec.Y);
                             double angle = elev_dir.Angle + Math.PI * 1.5;
-                            ThServiceTee.Insert_electric_valve(dis_vec, bra_width, angle);
+                            ThServiceTee service = new ThServiceTee();
+                            service.Run_insert_text_info(DbTeeModel, info, 
+                                                         new Vector2d(bypass_vec.X, bypass_vec.Y),
+                                                         dis_vec);
+                            service.Insert_electric_valve(dis_vec, bra_width, angle);
                         }
                     }
                 }

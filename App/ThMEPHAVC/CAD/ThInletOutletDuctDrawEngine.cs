@@ -57,7 +57,6 @@ namespace ThMEPHVAC.CAD
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         private List<Vector2d> TextVec { get; set; }
         public Vector3d valve_dis_vec { get; set; }
-        private bool bypass_once {get; set;}
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel,
             Duct_InParam in_param,
             double selected_bypass_len,
@@ -104,7 +103,6 @@ namespace ThMEPHVAC.CAD
             InletDuctHoses = new List<ThIfcDistributionElement>();
             OutletDuctHoses = new List<ThIfcDistributionElement>();
             TextVec = new List<Vector2d>();
-            bypass_once = true;
 
             SetInletElbows(bypass_line);
             SetOutletElbows(bypass_line);
@@ -269,10 +267,7 @@ namespace ThMEPHVAC.CAD
                 Point3d end_p = ductgraphedge.Target.Position;
                 double edge_len = ductgraphedge.EdgeLength;
                 Line cur_line = new Line(srt_p, end_p);
-                var DuctParameters = Create_duct_param( srt_p, end_p, edge_len,
-                                                        InletDuctWidth,
-                                                        InletDuctHeight,
-                                                        bypass_line);
+                var DuctParameters = Create_duct_param( srt_p, end_p, edge_len, InletDuctWidth, InletDuctHeight, bypass_line);
 
                 Vector2d edgevector = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);
                 double rotateangle = edgevector.Angle;
@@ -286,12 +281,6 @@ namespace ThMEPHVAC.CAD
                 if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
                 {
                     is_bypass = true;
-                    if (bypass_once)
-                    {
-                        text_enable = true;
-                        s_evel = num.ToString();
-                        bypass_once = false;
-                    }
                 }
                 // 给最长的非旁通线添加标注
                 if (text_enable)
@@ -399,12 +388,6 @@ namespace ThMEPHVAC.CAD
                 if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
                 {
                     is_bypass = true;
-                    if (bypass_once)
-                    {
-                        text_enable = true;
-                        bypass_once = false;
-                        s_evel = num.ToString();
-                    }
                 }
                 Vector2d edgevector = new Vector2d(end_p.X - srt_p.X, end_p.Y - srt_p.Y);
                 double rotateangle = edgevector.Angle;
