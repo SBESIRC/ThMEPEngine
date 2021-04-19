@@ -8,6 +8,8 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Geometries.Utilities;
 using NetTopologySuite.Operation.OverlayNG;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Overlay;
+using NTSDimension = NetTopologySuite.Geometries.Dimension;
 
 namespace ThCADCore.NTS
 {
@@ -34,7 +36,15 @@ namespace ThCADCore.NTS
 
         public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
         {
-            return OverlayNGRobust.Union(ToMultiLineString(curves));
+            // UnaryUnionOp.Union()有Robust issue
+            // 会抛出"non-noded intersection" TopologyException
+            // 为了规避这个问题，这里使用Geometry.Union()
+            // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
+            var mLineString = ToMultiLineString(curves);
+            Geometry nodedLineStrings = ThCADCoreNTSService.Instance.GeometryFactory.CreateEmpty(NTSDimension.Curve);
+            mLineString.Geometries.ForEach(o => 
+            nodedLineStrings = OverlayNGRobust.Overlay(nodedLineStrings,o, SpatialFunction.Union));
+            return nodedLineStrings;
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
