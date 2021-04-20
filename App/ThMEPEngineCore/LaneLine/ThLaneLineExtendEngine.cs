@@ -30,10 +30,8 @@ namespace ThMEPEngineCore.LaneLine
 
         private static bool IsProperIntersects(DBObjectCollection lines, Line line)
         {
-            var geometry = OverlayNGRobust.Overlay(
-                lines.ToMultiLineString(), 
-                line.ToNTSGeometry(), 
-                SpatialFunction.Intersection);
+            // 计算交点
+            var geometry = lines.Intersection(line);
             // 判断是否存在多个交点（但是要排查共线的情况）
             if (geometry is MultiPoint points)
             {

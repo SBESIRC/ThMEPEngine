@@ -5,11 +5,10 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Geometries.Utilities;
-using NetTopologySuite.Operation.OverlayNG;
-using Autodesk.AutoCAD.DatabaseServices;
 using NetTopologySuite.Operation.Overlay;
-using NTSDimension = NetTopologySuite.Geometries.Dimension;
+using NetTopologySuite.Operation.OverlayNG;
+using NetTopologySuite.Geometries.Utilities;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -36,26 +35,25 @@ namespace ThCADCore.NTS
 
         public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
         {
-            // UnaryUnionOp.Union()有Robust issue
-            // 会抛出"non-noded intersection" TopologyException
-            // 为了规避这个问题，这里使用Geometry.Union()
-            // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
-            var mLineString = ToMultiLineString(curves);
-            Geometry nodedLineStrings = ThCADCoreNTSService.Instance.GeometryFactory.CreateEmpty(NTSDimension.Curve);
-            mLineString.Geometries.ForEach(o => 
-            nodedLineStrings = OverlayNGRobust.Overlay(nodedLineStrings,o, SpatialFunction.Union));
-            return nodedLineStrings;
+            return OverlayNGRobust.Union(curves.ToMultiLineString());
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
-            // https://lin-ear-th-inking.blogspot.com/2007/11/fast-polygon-merging-in-jts-using.html
             return OverlayNGRobust.Union(curves.ToNTSMultiPolygon());
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
         {
             return curves.UnionGeometries().ToDbCollection();
+        }
+
+        public static Geometry Intersection(this DBObjectCollection curves, Curve curve)
+        {
+            return OverlayNGRobust.Overlay(
+                curves.ToMultiLineString(),
+                curve.ToNTSGeometry(),
+                SpatialFunction.Intersection);
         }
 
         public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
