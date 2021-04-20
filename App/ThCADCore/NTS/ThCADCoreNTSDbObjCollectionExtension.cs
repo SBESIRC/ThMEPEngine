@@ -35,7 +35,13 @@ namespace ThCADCore.NTS
 
         public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
         {
-            return OverlayNGRobust.Union(curves.ToMultiLineString());
+            // UnaryUnionOp.Union()有Robust issue
+            // 会抛出"non-noded intersection" TopologyException
+            // OverlayNGRobust.Union()在某些情况下仍然会抛出TopologyException
+            // 为了规避这个问题，这里使用Geometry.Union()
+            // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
+            Geometry lineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
+            return OverlayNGRobust.Overlay(ToMultiLineString(curves), lineString, SpatialFunction.Union);
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
