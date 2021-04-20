@@ -23,6 +23,8 @@ using Autodesk.AutoCAD.EditorInput;
 using ThMEPEngineCore.BuildRoom.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.BuildRoom.Interface;
+using NFox.Cad;
+using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPEngineCore
 {
@@ -609,11 +611,22 @@ namespace ThMEPEngineCore
                 if (nFrame.Area > 1)
                 {
                     var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
-                    laneLineEngine.Recognize(acadDatabase.Database, bFrame.Vertices());
-                    laneLineEngine.Spaces.Select(o => o.Boundary).ForEach(o =>
+                    laneLineEngine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                    var lines = laneLineEngine.Spaces.Select(o => o.Boundary).ToCollection();
+                    var centerPt = nFrame.GetCentroidPoint();
+                    var transformer = new ThMEPOriginTransformer(centerPt);
+                    transformer.Transform(lines);
+                    transformer.Transform(nFrame);
+
+                    var curves = ThLaneLineSimplifier.Simplify(lines, 1500);
+                    lines = ThCADCoreNTSGeometryClipper.Clip(nFrame, curves.ToCollection());
+                    transformer.Reset(lines);
+
+                    lines.Cast<Curve>().ForEach(o =>
                     {
-                        acadDatabase.ModelSpace.Add(o);
+                        o.ColorIndex = 2;
                         o.SetDatabaseDefaults();
+                        acadDatabase.ModelSpace.Add(o);                        
                     });
                 }
             }
