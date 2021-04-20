@@ -52,16 +52,32 @@ namespace ThMEPElectrical.Command
                 foreach (var frameId in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
-                    var lines = LoadLaneLines(acadDatabase.Database, frame);
-                    if (lines.Count > 0)
+                    var nFrame = ThMEPFrameService.NormalizeEx(frame);
+                    if (nFrame.Area <= 1.0)
                     {
-                        CleanLaneLines(lines).Cast<Curve>().ForEach(o =>
-                        {
-                            acadDatabase.ModelSpace.Add(o);
-                            o.ColorIndex = (int)ColorIndex.BYLAYER;
-                            o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
-                        });
+                        continue;
                     }
+
+                    var lines = LoadLaneLines(acadDatabase.Database, nFrame);
+                    if (lines.Count == 0)
+                    {
+                        continue;
+                    }
+
+                    // 
+                    var centerPt = nFrame.GetCentroidPoint();
+                    var transformer = new ThMEPOriginTransformer(centerPt);
+                    transformer.Transform(lines);
+                    transformer.Transform(nFrame);
+                    lines = CleanLaneLines(ClipLaneLines(lines, nFrame));
+                    transformer.Reset(lines);
+
+                    lines.Cast<Curve>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.ColorIndex = (int)ColorIndex.BYLAYER;
+                        o.Layer = ThMEPCommon.LANELINE_LAYER_NAME;
+                    });
                 }
             }
         }
@@ -76,28 +92,19 @@ namespace ThMEPElectrical.Command
             return service.Clean(curves);
         }
 
+        private DBObjectCollection ClipLaneLines(DBObjectCollection curves, Polyline frame)
+        {
+            var lines = ThLaneLineSimplifier.Simplify(curves, 1500);
+            return ThCADCoreNTSGeometryClipper.Clip(frame, lines.ToCollection());
+        }
+
         private DBObjectCollection LoadLaneLines(Database database, Polyline frame)
         {
             using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
             {
-                var nFrame = ThMEPFrameService.NormalizeEx(frame);
-                if (nFrame.Area > 1)
-                {
-                    // 提取车道中心线
-                    var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
-                    laneLineEngine.Recognize(database, bFrame.Vertices());
-
-                    // 车道中心线处理
-                    var curves = laneLineEngine.Spaces.Select(o => o.Boundary).ToList();
-                    var lines = ThLaneLineSimplifier.Simplify(curves.ToCollection(), 1500);
-                    // 框线相交处打断
-                    return ThCADCoreNTSGeometryClipper.Clip(nFrame, lines.ToCollection());
-                }   
-                else
-                {
-                    Active.Editor.WriteLine("\n选择的框线有问题，请检查是否有自交、不相连等情况。");
-                }
-                return new DBObjectCollection();
+                var bFrame = ThMEPFrameService.Buffer(frame, 100000.0);
+                laneLineEngine.Recognize(database, bFrame.Vertices());
+                return laneLineEngine.Spaces.Select(o => o.Boundary).ToCollection();
             }
         }
     }
