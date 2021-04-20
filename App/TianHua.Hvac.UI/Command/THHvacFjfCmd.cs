@@ -56,7 +56,7 @@ namespace TianHua.Hvac.UI.Command
                         var wall_lines = Get_walls();
                         if (wall_lines.Count == 0)
                             return;
-                        IODuctHoleAnalysis(DbFanModel, info, 0, wall_lines, null, io_anay_res);
+                        IO_duct_hole_analysis(DbFanModel, info, 0, wall_lines, null, io_anay_res);
 
                         Draw_VT_Prepare(info, DbFanModel, out double vt_width, out string line_type, out Vector2d rot_vec, out Vector3d dis_vec);
                         if (string.IsNullOrEmpty(line_type))
@@ -96,7 +96,7 @@ namespace TianHua.Hvac.UI.Command
                         if (wall_lines.Count == 0)
                             return;
 
-                        IODuctHoleAnalysis(DbTeeModel, info, max_bypass.Length, wall_lines, bypass_lines, io_anay_res);
+                        IO_duct_hole_analysis(DbTeeModel, info, max_bypass.Length, wall_lines, bypass_lines, io_anay_res);
                         Shrink_bypass(ref bypass_duct, io_anay_res);
                         if (io_anay_res.HasInletTee() || io_anay_res.HasOutletTee())
                         {
@@ -124,7 +124,7 @@ namespace TianHua.Hvac.UI.Command
                 else
                 {
                     ThFanInletOutletAnalysisEngine io_anay_res = Io_analysis(DbFanModel, null);
-                    IODuctHoleAnalysis(DbFanModel, info, 0, null, null, io_anay_res);
+                    IO_duct_hole_analysis(DbFanModel, info, 0, null, null, io_anay_res);
                 }
             }
         }
@@ -240,7 +240,7 @@ namespace TianHua.Hvac.UI.Command
 
             // 将风管在旁通处打断
             ThLaneLineEngine.extend_distance = 0.0;
-            var results = ThLaneLineEngine.Explode(lineobjects);
+            var results =ThLaneLineEngine.Explode(lineobjects);
             results = ThLaneLineEngine.Noding(results);
             return ThLaneLineEngine.CleanZeroCurves(results);
         }
@@ -385,7 +385,7 @@ namespace TianHua.Hvac.UI.Command
                 lines.Add(new Line(lp, new Point3d(vt.X, vt.Y, 0)));
             }
 
-            return lines.Select(o => o.ExtendLine(1.0)).ToCollection();
+            return lines.Select(o => o.ExtendLine(2.0)).ToCollection();
         }
 
         private DBObjectCollection Get_walls()
@@ -461,7 +461,7 @@ namespace TianHua.Hvac.UI.Command
             return io_anay_res;
         }
 
-        private void IODuctHoleAnalysis(ThDbModelFan Model,
+        private void IO_duct_hole_analysis(ThDbModelFan Model,
                                         Duct_InParam pst_param,
                                         double selected_bypass_len,
                                         DBObjectCollection wall_lines,
