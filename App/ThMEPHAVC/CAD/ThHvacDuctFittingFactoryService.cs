@@ -49,7 +49,23 @@ namespace ThMEPHVAC.CAD
                 Representation = CreateCrossGeometries(parameters)
             };
         }
+        public DBObjectCollection Create_inner_duct(string text_size)
+        {
+            string[] s = text_size.Split('x');
+            if (s.Length != 2)
+                return new DBObjectCollection();
+            double hw = Double.Parse(s[0]) * 0.5;
+            double hh = Double.Parse(s[1]) * 0.5;
 
+            Point3d dL = new Point3d(-hw, -hh, 0);
+            Point3d uL = new Point3d(-hw, hh, 0);
+            Point3d dR = new Point3d(hw, -hh, 0);
+            Point3d uR = new Point3d(hw, hh, 0);
+            var points = new Point3dCollection() { uR, dR, dL, uL };
+            var frame = new Polyline() { Closed = true };
+            frame.CreatePolyline(points);
+            return new DBObjectCollection() { frame };
+        }
         public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, 
                                                   double ductangle, 
                                                   bool islongestduct,
@@ -177,7 +193,6 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-
         private double GetReducingLength(ThIfcDuctReducingParameters parameters)
         {
             double reducinglength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(20 * Math.PI / 180);

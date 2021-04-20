@@ -139,6 +139,38 @@ namespace ThMEPHVAC.CAD
             DrawHoseInDWG(OutletDuctHoses, modelLayer);
         }
 
+        public void Proc_inner_duct(string block_layer, Point3d base_point, bool enable, Vector2d dir_vec, string text_size)
+        {
+            if (!enable)
+                return;
+            string modelLayer = block_layer;
+            string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
+            var Create_service = new ThHvacDuctFittingFactoryService();
+            var geo = Create_service.Create_inner_duct(text_size);
+            Matrix3d mat = Matrix3d.Displacement(base_point.GetAsVector()) *
+                           Matrix3d.Rotation(dir_vec.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
+            Draw_inner_duct(geo, mat, ductLayer);
+        }
+
+        private void Draw_inner_duct(DBObjectCollection segment, Matrix3d mat, string duct_layer)
+        {
+            using (AcadDatabase data_base = AcadDatabase.Active())
+            {
+                var linetypeId = ByLayerLineTypeId();
+                var layerId = CreateLayer(duct_layer);
+
+                foreach (Curve c in segment)
+                {
+                    c.ColorIndex = 256;
+                    c.LayerId = layerId;
+                    c.LinetypeId = linetypeId;
+                    c.TransformBy(mat);
+                    data_base.ModelSpace.Add(c);
+                    c.SetDatabaseDefaults();
+                }
+            }
+        }
+
         private void SetInletOutletSize(string scenario, 
                                         string innerromeductinfo, 
                                         string outerromeductinfo,
@@ -257,7 +289,6 @@ namespace ThMEPHVAC.CAD
                     InletCenterLineGraph.OutEdges(firstvertex).FirstOrDefault().SourceShrink = reducing.Parameters.ReducingLength + ThDuctUtils.GetHoseLength(scenario);
                 }
             }
-            double num = (Elevation * 1000 + InletDuctHeight - TeeHeight) / 1000;
             Line max_line = Max_line_exclude_bypass(InletCenterLineGraph, bypass_line);
             double half_len = text_bypass_len * 0.5;
             foreach (var ductgraphedge in InletCenterLineGraph.Edges)
@@ -364,7 +395,6 @@ namespace ThMEPHVAC.CAD
 
             }
             string s_evel = string.Empty;
-            double num = (Elevation * 1000 + InletDuctHeight - TeeHeight) / 1000;
             Line max_line = Max_line_exclude_bypass(OutletCenterLineGraph, bypass_line);
             double half_len = text_bypass_len * 0.5;
             foreach (var ductgraphedge in OutletCenterLineGraph.Edges)
