@@ -50,11 +50,11 @@ namespace ThMEPLighting.Garage.Service
                 var results = new ObjectIdList();
                 //先将Buffer后的边线提交到Database
                 RegionBorder.CableTrayCenters.ForEach(o => o.Layer = RacewayParameter.CenterLineParameter.Layer);
-                RegionBorder.CableTrayCenters.ForEach(o => o.ColorIndex = 256);
+                RegionBorder.CableTrayCenters.ForEach(o => o.ColorIndex = (int)ColorIndex.BYLAYER);
                 RegionBorder.CableTrayCenters.ForEach(o => results.Add(acadDb.ModelSpace.Add(o)));
 
                 RegionBorder.CableTraySides.ForEach(o => o.Layer = RacewayParameter.SideLineParameter.Layer);
-                RegionBorder.CableTraySides.ForEach(o => o.ColorIndex = 256);
+                RegionBorder.CableTraySides.ForEach(o => o.ColorIndex = (int)ColorIndex.BYLAYER);
                 RegionBorder.CableTraySides.ForEach(o => results.Add(acadDb.ModelSpace.Add(o)));
 
                 RegionBorder.CableTrayGroups.ForEach(o =>
@@ -98,7 +98,7 @@ namespace ThMEPLighting.Garage.Service
                             code.HorizontalMode = TextHorizontalMode.TextCenter;
                             code.VerticalMode = TextVerticalMode.TextVerticalMid;
                             code.AlignmentPoint = code.Position;
-                            code.ColorIndex = 256;
+                            code.ColorIndex = (int)ColorIndex.BYLAYER;
                             code.Layer = RacewayParameter.NumberTextParameter.Layer;
                             code.TextStyleId = acadDatabase.TextStyles.Element(ArrangeParameter.LightNumberTextStyle).Id;
                             code.SetDatabaseDefaults(acadDatabase.Database);
