@@ -15,6 +15,7 @@
             <ComponentGroupRef Id="ProductComponentsAppCoreWin64" />
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />
+            <ComponentGroupRef Id="ProductComponentsAppSystem" />
             <ComponentGroupRef Id="ProductComponentsAppCGAL" />
             <ComponentGroupRef Id="ProductComponentsWSSWin64" />
             <ComponentGroupRef Id="ProductComponentsHVACWin64" />
