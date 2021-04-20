@@ -38,6 +38,9 @@ namespace ThCADCore.NTS
 
         public static Polyline GetMinimumRectangle(this Polyline polyline)
         {
+            // GetMinimumRectangle()对于非常远的坐标（WCS下，>10E10)处理的不好
+            // Workaround就是将位于非常远的图元临时移动到WCS原点附近，参与运算
+            // 运算结束后将运算结果再按相同的偏移从WCS原点附近移动到其原始位置
             var geom = polyline.ToNTSLineString();
             var rectangle = MinimumDiameter.GetMinimumRectangle(geom);
             if (rectangle is Polygon polygon)

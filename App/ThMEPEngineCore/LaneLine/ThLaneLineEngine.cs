@@ -127,13 +127,12 @@ namespace ThMEPEngineCore.LaneLine
             return line.ExtendLine(xOffset).Buffer(yOffset);
         }
 
-        protected static Line CenterLine(Geometry geometry)
+        protected static Line CenterLine(DBObjectCollection objs)
         {
-            var rectangle = MinimumDiameter.GetMinimumRectangle(geometry) as Polygon;
-            var shell = rectangle.Shell.ToDbPolyline();
+            var obb = objs.GetMinimumRectangle();
             return new Line(
-                shell.GetPoint3dAt(0) + 0.5 * (shell.GetPoint3dAt(1) - shell.GetPoint3dAt(0)),
-                shell.GetPoint3dAt(2) + 0.5 * (shell.GetPoint3dAt(3) - shell.GetPoint3dAt(2)));
+                obb.GetPoint3dAt(0) + 0.5 * (obb.GetPoint3dAt(1) - obb.GetPoint3dAt(0)),
+                obb.GetPoint3dAt(2) + 0.5 * (obb.GetPoint3dAt(3) - obb.GetPoint3dAt(2)));
         }
 
         protected static bool IsParallel(Line line1, Line line2)
