@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService
 {
-    public class ToLineCostGetter : ICostGetter
+    public class ToPointCostGetter : ICostGetter
     {
         public int GetGCost(AStarNode currentNode, CompassDirections moveDirection)
         {
@@ -24,10 +25,10 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService
             return 0;
         }
 
-        public int GetHCost(Point cell, EndModel endInfo)
+        public int GetHCost(Point cell, AStarEntity entity)
         {
-            int costH = endInfo.mapEndLine.GetDistancePoint(cell) * 10;    //计算H值
-            return costH;
+            Point endPoint = (Point)entity;
+            return (Math.Abs(cell.X - endPoint.X) + Math.Abs(cell.Y - endPoint.Y)) * 10;
         }
     }
 }

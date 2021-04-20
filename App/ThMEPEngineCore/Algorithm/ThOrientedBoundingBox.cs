@@ -8,13 +8,13 @@ using System.Threading.Tasks;
 
 namespace ThMEPWSS.Utils
 {
-    public static class OrientedBoundingBox
+    public static class ThOrientedBoundingBox
     {
         /// <summary>
         /// Calculates the minimum bounding box.
         /// </summary>
         /// <param name="points">Bounding Box.</param>
-        public static Polyline Calculate(Polyline polyline)
+        public static Polyline CalObb(this Polyline polyline)
         {
             List<Point2d> points = new List<Point2d>();
             for (int i = 0; i < polyline.NumberOfVertices; i++)

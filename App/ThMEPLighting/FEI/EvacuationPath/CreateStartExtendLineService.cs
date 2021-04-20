@@ -5,12 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPLighting.FEI.AStarAlgorithm;
 using Linq2Acad;
 using ThMEPLighting.FEI.Service;
 using ThMEPLighting.FEI.Model;
-using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 
 namespace ThMEPLighting.FEI.EvacuationPath
 {
@@ -82,17 +81,12 @@ namespace ThMEPLighting.FEI.EvacuationPath
             List<ExtendLineModel> resLines = new List<ExtendLineModel>();
             //计算逃生路径(用A*算法)
             //----构建寻路地图框线
-            var mapFrame = OptimizeStartExtendLineService.CreateMapFrame(closetLane, startPt, holes, 1000);
+            var mapFrame = OptimizeStartExtendLineService.CreateMapFrame(closetLane, startPt, holes, 2500);
             mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderByDescending(x => x.Area).First();
-
-            //----创建终点信息
-            EndModel endModel = new EndModel();
-            endModel.endLine = closetLane;
-            endModel.type = EndInfoType.line;
 
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
-            AStarRoutePlanner aStarRoute = new AStarRoutePlanner(mapFrame, dir, endModel, 400, 250, 250);
+            AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(mapFrame, dir, closetLane, 400, 250, 250);
 
             //----设置障碍物
             var resHoles = SelectService.SelelctCrossing(holes, mapFrame);

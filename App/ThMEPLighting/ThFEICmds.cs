@@ -12,9 +12,8 @@ using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 using ThMEPLighting.FEI;
-using ThMEPLighting.FEI.AStarAlgorithm;
-using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.EvacuationPath;
 using ThMEPLighting.FEI.PrintEntity;
@@ -156,13 +155,8 @@ namespace ThMEPLighting
                 var holeInfo = CalHoles(plines);
                 foreach (var pline in holeInfo)
                 {
-                    //创建终点信息
-                    EndModel endInfo = new EndModel();
-                    endInfo.type = EndInfoType.point;
-                    endInfo.endPoint = ep;
-
                     //A*寻路
-                    AStarRoutePlanner aStarRoute = new AStarRoutePlanner(pline.Key, Vector3d.XAxis, endInfo);
+                    AStarRoutePlanner<Point3d> aStarRoute = new AStarRoutePlanner<Point3d>(pline.Key, Vector3d.XAxis, ep);
                     aStarRoute.SetObstacle(pline.Value);
                     var res = aStarRoute.Plan(sp);
                     acdb.ModelSpace.Add(res);
@@ -305,16 +299,93 @@ namespace ThMEPLighting
                 var holeInfo = CalHoles(plines);
                 foreach (var pline in holeInfo)
                 {
-                    //创建终点信息
-                    EndModel endInfo = new EndModel();
-                    endInfo.type = EndInfoType.line;
-                    endInfo.endLine = ep;
-
                     //A*寻路
-                    AStarRoutePlanner aStarRoute = new AStarRoutePlanner(pline.Key, (ep.EndPoint - ep.StartPoint).GetNormal(), endInfo);
+                    AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(pline.Key, (ep.EndPoint - ep.StartPoint).GetNormal(), ep);
                     aStarRoute.SetObstacle(pline.Value);
                     var res = aStarRoute.Plan(sp);
                     acdb.ModelSpace.Add(res);
+                }
+            }
+        }
+
+
+        [CommandMethod("TIANHUACAD", "THTESTDIVMERGE", CommandFlags.Modal)]
+        public void THTESTDivMerge()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                //获取外包框
+                List<Polyline> frameLst = new List<Polyline>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame.Clone() as Polyline);
+                }
+
+                ThRegionDivisionService thRegionDivision = new ThRegionDivisionService();
+                var resPolys = thRegionDivision.DivisionRegion(frameLst.First());
+                resPolys = thRegionDivision.MergePolygon(resPolys);
+                foreach (var item in resPolys)
+                {
+                    acdb.ModelSpace.Add(item);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THTESTDIV", CommandFlags.Modal)]
+        public void THTESTDiv()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                //获取外包框
+                List<Polyline> frameLst = new List<Polyline>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame.Clone() as Polyline);
+                }
+
+                ThRegionDivisionService thRegionDivision = new ThRegionDivisionService();
+                var resPolys = thRegionDivision.DivisionRegion(frameLst.First());
+                foreach (var item in resPolys)
+                {
+                    acdb.ModelSpace.Add(item);
                 }
             }
         }

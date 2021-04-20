@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPLighting.FEI.AStarAlgorithm.AStarModel;
 
-namespace ThMEPLighting.FEI.AStarAlgorithm.CostGetterService
+namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService
 {
     public class ToPointCostGetter : ICostGetter
     {

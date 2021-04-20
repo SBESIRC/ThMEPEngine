@@ -1,12 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ThMEPLighting.FEI.AStarAlgorithm
+namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel
 {
-    public class AStarLine 
+    public class AStarLine : AStarEntity
     {
         /// <summary>
         /// 线起点

@@ -142,10 +142,11 @@ namespace ThMEPLighting.FEI.PrintEntity
         /// <returns></returns>
         private Polyline CreateEndEntity(Point3d pt)
         {
-            Point3d p1 = pt - Vector3d.XAxis + Vector3d.YAxis;
-            Point3d p2 = pt - Vector3d.XAxis - Vector3d.YAxis;
-            Point3d p3 = pt + Vector3d.XAxis - Vector3d.YAxis;
-            Point3d p4 = pt + Vector3d.XAxis + Vector3d.YAxis;
+            double tolValue = 2;
+            Point3d p1 = pt - Vector3d.XAxis * tolValue + Vector3d.YAxis * tolValue;
+            Point3d p2 = pt - Vector3d.XAxis * tolValue - Vector3d.YAxis * tolValue;
+            Point3d p3 = pt + Vector3d.XAxis * tolValue - Vector3d.YAxis * tolValue;
+            Point3d p4 = pt + Vector3d.XAxis * tolValue + Vector3d.YAxis * tolValue;
             Polyline polyline = new Polyline() { Closed = true };
             polyline.AddVertexAt(0, p1.ToPoint2D(), 0, 0, 0);
             polyline.AddVertexAt(1, p2.ToPoint2D(), 0, 0, 0);

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPEngineCore.Algorithm.AStarAlgorithm.AStarModel;
 
 namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService
 {
@@ -24,9 +25,9 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm.CostGetterService
             return 0;
         }
 
-        public int GetHCost(Point cell, EndModel endInfo)
+        public int GetHCost(Point cell, AStarEntity endLine)
         {
-            int costH = endInfo.mapEndLine.GetDistancePoint(cell) * 10;    //计算H值
+            int costH = ((AStarLine)endLine).GetDistancePoint(cell) * 10;    //计算H值
             return costH;
         }
     }

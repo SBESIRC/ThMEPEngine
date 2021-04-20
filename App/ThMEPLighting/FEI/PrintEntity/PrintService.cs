@@ -34,11 +34,9 @@ namespace ThMEPLighting.FEI.PrintEntity
                 acadDatabase.Database.ImportLayer(ThMEPLightingCommon.MAIN_EVACUATIONPATH_BYWALL_LAYERNAME);
                 acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYHOISTING_LAYERNAME);
                 acadDatabase.Database.ImportLayer(ThMEPLightingCommon.AUXILIARY_EVACUATIONPATH_BYWALL_LAYERNAME);
-                //acadDatabase.Database.ImportLinetype(ThMEPLightingCommon.ConnectPipeLineType);
 
                 var path = SetPathInfo(pathModel.line);
                 path.ColorIndex = 256;
-                //pipe.Linetype = ThMEPCommon.ConnectPipeLineType;
                 if (pathModel.evaPathType == PathType.MainPath)
                 {
                     if (pathModel.setUpType == SetUpType.ByHoisting)

@@ -202,7 +202,6 @@
     <Compile Include="ThMEPWSSApp.cs" />
     <Compile Include="ThWSSCommon.cs" />
     <Compile Include="Uitl\GeoUtils.cs" />
-    <Compile Include="Uitl\OrientedBoundingBox.cs" />
     <Compile Include="Uitl\SystemDiagramUtils.cs" />
     <Compile Include="Uitl\ThWTangentService.cs" />
     <Compile Include="Uitl\ThWStandardService.cs" />

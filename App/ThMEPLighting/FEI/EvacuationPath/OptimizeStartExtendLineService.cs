@@ -16,7 +16,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
         {
             Vector3d xDir = (lane.EndPoint - lane.StartPoint).GetNormal();
             List<Point3d> pts = new List<Point3d>() { startPt, lane.StartPoint, lane.EndPoint };
-            var polyline = GeUtils.GetBoungdingBox(pts, xDir);
+            var polyline = GeUtils.GetBoungdingBox(pts, xDir).Buffer(expandLength)[0] as Polyline;
             var intersectHoles = SelectService.SelelctCrossing(holes, polyline);
             foreach (var iHoles in intersectHoles)
             {

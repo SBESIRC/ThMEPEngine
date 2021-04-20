@@ -39,6 +39,13 @@ namespace ThCADCore.NTS
             return locateRes == Location.Interior || locateRes == Location.Boundary;
         }
 
+        public static bool OnBoundary(this AcPolygon polygon, Point3d pt)
+        {
+            var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());
+            var locateRes = locator.Locate(pt.ToNTSCoordinate());
+            return locateRes == Location.Boundary;
+        }
+
         public static bool OnBoundary(this Polygon polygon, Point3d pt)
         {
             var locator = new SimplePointInAreaLocator(polygon);
