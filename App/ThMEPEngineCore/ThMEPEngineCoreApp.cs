@@ -591,5 +591,32 @@ namespace ThMEPEngineCore
                 });
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THExtractLaneline", CommandFlags.Modal)]
+        public void THExtractLaneline()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (ThLaneLineRecognitionEngine laneLineEngine = new ThLaneLineRecognitionEngine())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var nFrame = ThMEPFrameService.NormalizeEx(frame);
+                if (nFrame.Area > 1)
+                {
+                    var bFrame = ThMEPFrameService.Buffer(nFrame, 100000.0);
+                    laneLineEngine.Recognize(acadDatabase.Database, bFrame.Vertices());
+                    laneLineEngine.Spaces.Select(o => o.Boundary).ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
+            }
+        }
     }
 }
