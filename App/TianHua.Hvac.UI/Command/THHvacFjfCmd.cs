@@ -384,7 +384,7 @@ namespace TianHua.Hvac.UI.Command
                 Vector2d v2 = new Vector2d(up.X, up.Y);
                 Vector2d v = (v2 - v1) * 0.5;
                 Vector2d v_nor = v.GetNormal();
-                double len = 5;
+                double len = 6;
                 Vector2d vt = v1 + v + len * v_nor;
                 lines.Add(new Line(new Point3d(vt.X, vt.Y, 0), up));
                 vt = v1 + v - len * v_nor;
