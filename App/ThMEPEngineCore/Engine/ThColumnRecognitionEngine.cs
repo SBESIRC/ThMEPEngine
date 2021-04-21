@@ -57,7 +57,7 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs.Cast<Curve>().ToList();
             }
-            curves.ToCollection().UnionPolygons().Cast<Curve>()
+            Preprocess(curves.ToCollection()).UnionPolygons().Cast<Curve>()
                 .ForEach(o =>
                 {
                     if (o is Polyline polyline && polyline.Area > 0.0)
