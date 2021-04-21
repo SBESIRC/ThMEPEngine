@@ -175,16 +175,16 @@ namespace TianHua.Hvac.UI.Command
                 if (tee_info.tee_type == TeeType.TEE_ON_THE_RIGHT_OF_INNER)
                 {
                     if (is_in)
-                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s3, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s3, s2, bypass_lines);
                     else
-                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s3, s2, s3, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s3, s2, bypass_lines);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_ON_THE_LEFT_OF_INNER)
                 {
                     if (is_in)
-                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s3, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s3, s2, bypass_lines);
                     else
-                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s3, s2, s3, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s3, s2, bypass_lines);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_COLLINEAR_WITH_INNER)
                 {
@@ -476,9 +476,6 @@ namespace TianHua.Hvac.UI.Command
         {
             string text_size = pst_param.text_size_info;
 
-            //if ((bypass_line != null && bypass_line.Count == 0) || (wall_lines == null))
-            //    return;
-
             ThInletOutletDuctDrawEngine io_draw_eng =
                 new ThInletOutletDuctDrawEngine(Model, pst_param,
                                                 selected_bypass_len, bypass_line,
@@ -539,22 +536,15 @@ namespace TianHua.Hvac.UI.Command
                 }
                 else if (tee_info.tee_type == TeeType.TEE_ON_THE_LEFT_OF_INNER)
                 {
-                    if (is_in)
-                        mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
-                               Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
-                    else
-                        mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
-                               Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
-                    e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
+                    mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
+                    e = new ThTee(tee_cp, duct_width, tee_width, duct_width);
                     e.RunTeeDrawEngine(Model, mat);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_ON_THE_RIGHT_OF_INNER)
                 {
-                    if (is_in)
-                        mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
-                    else
-                        mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
-                    e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
+                    mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
+                           Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                    e = new ThTee(tee_cp, duct_width, tee_width, duct_width);
                     e.RunTeeDrawEngine(Model, mat);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_VERTICAL_WITH_OTHERS)
