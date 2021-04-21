@@ -1,9 +1,11 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using QuickGraph;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using ThCADCore.NTS;
 using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
 using ThMEPHVAC.Model;
@@ -47,7 +49,10 @@ namespace ThMEPHVAC.CAD
         public List<TeeInfo> OutTeesInfo { get; set; }
         public Line LastBypass { get; set; }
         public Line MaxBypass { get; set; } // 用于第一种类型的插管方向
-        public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel)
+        public Vector2d Inner_fan_dir_vec { get; set; }
+        public bool Have_in_inner_fan;
+        public bool Have_out_inner_fan;
+        public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel, Duct_InParam info)
         {
             MaxBypass = new Line();
             LastBypass = new Line();
@@ -58,12 +63,100 @@ namespace ThMEPHVAC.CAD
             OutletAcuteAnglePositions = new List<Point3d>();
             InTeesInfo = new List<TeeInfo>();
             OutTeesInfo = new List<TeeInfo>();
-            InletCenterLineGraph = CreateLineGraph(fanmodel.FanInletBasePoint, ref tempinletfirstedge);
+            Inner_fan_dir_vec = new Vector2d(0, 0);
+            Have_in_inner_fan = false;
+            Have_out_inner_fan = false;
+
+            Point3d in_search_point = Point3d.Origin;
+            Point3d out_search_point = Point3d.Origin;
+            Update_search_point(fanmodel, info, ref in_search_point, ref out_search_point);
+
+            InletCenterLineGraph = CreateLineGraph(in_search_point, ref tempinletfirstedge);
             InletStartEdge = tempinletfirstedge;
-            OutletCenterLineGraph = CreateLineGraph(fanmodel.FanOutletBasePoint, ref tempoutletfirstedge);
+            OutletCenterLineGraph = CreateLineGraph(out_search_point, ref tempoutletfirstedge);
             OutletStartEdge = tempoutletfirstedge;
         }
-        
+
+        private void Update_search_point(ThDbModelFan fanmodel, Duct_InParam info, ref Point3d in_search_point, ref Point3d out_search_point)
+        {
+            in_search_point = fanmodel.FanInletBasePoint;
+            out_search_point = fanmodel.FanOutletBasePoint;
+            
+            update_proc("上进", info, ref in_search_point, fanmodel.InAndOutLines);
+            update_proc("下进", info, ref in_search_point, fanmodel.InAndOutLines);
+            update_proc("上出", info, ref out_search_point, fanmodel.InAndOutLines);
+            update_proc("下出", info, ref out_search_point, fanmodel.InAndOutLines);
+        }
+
+        private void update_proc(string special_name, Duct_InParam info, ref Point3d search_point, DBObjectCollection liens)
+        {
+            if (FanModel.IntakeForm.Contains(special_name))
+            {
+                double shrink_dis = Get_shrink_dis(info, false);
+                if (shrink_dis < 0)
+                    return;
+                Line start_line = Get_start_line(search_point, liens);
+                if (start_line.Length == 0)
+                    return;
+                Line new_line = Shrink_start_line(start_line, ref search_point, shrink_dis);
+                Exclude_first_line(liens, new_line, start_line);
+                if (special_name.Contains("进"))
+                    Have_in_inner_fan = true;
+                else if (special_name.Contains("出"))
+                    Have_out_inner_fan = true;
+            }
+        }
+
+        private double Get_shrink_dis(Duct_InParam info, bool is_in)
+        {
+            string duct_size = is_in ? info.in_duct_info : info.out_duct_info;
+            string[] str = duct_size.Split('x');
+            if (str.Length != 2)
+                return -1;
+            return Double.Parse(str[1]) * 0.5;
+        }
+
+        private Line Get_start_line(Point3d point, DBObjectCollection lines)
+        {
+            var SpatialIndex = new ThCADCoreNTSSpatialIndex(lines);
+            var poly = new Polyline();
+            poly.CreatePolygon(point.ToPoint2D(), 4, 10);
+            var results = SpatialIndex.SelectCrossingPolygon(poly);
+            if (results.Count != 1)
+            {
+                return new Line();
+            }
+            return results[0] as Line;
+        }
+
+        private Line Shrink_start_line(Line line, ref Point3d start_point, double dis)
+        {
+            Point2d sp = line.StartPoint.ToPoint2D();
+            Point2d ep = line.EndPoint.ToPoint2D();
+            Point2d new_sp;
+            Point2d new_ep;
+
+            if (Math.Abs(sp.X - start_point.X) < 1.5 && Math.Abs(sp.Y - start_point.Y) < 1.5)
+            {
+                new_sp = sp;
+                new_ep = ep;
+            }
+            else
+            {
+                new_sp = ep;
+                new_ep = sp;
+            }
+            Vector2d dir_vec = new_ep.GetAsVector() - new_sp.GetAsVector();
+            Inner_fan_dir_vec = dir_vec.GetNormal();
+            Vector2d vec = Inner_fan_dir_vec * dis + new_sp.GetAsVector();
+            start_point = new Point3d(vec.X, vec.Y, 0);
+            return new Line(start_point, new Point3d(new_ep.X, new_ep.Y, 0));
+        }
+        private void Exclude_first_line(DBObjectCollection lines, Line new_line, Line exclude_line)
+        {
+            lines.Remove(exclude_line);
+            lines.Add(new_line);
+        }
         public void InletAnalysis(DBObjectCollection bypass_lines)
         {
             //进口处无连线
