@@ -6,6 +6,7 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Polygonize;
 using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.OverlayNG;
 
 namespace ThCADCore.NTS
 {
@@ -33,7 +34,7 @@ namespace ThCADCore.NTS
             // These are "strongly invalid", and will trigger a TopologyException during overlay.
             // http://lin-ear-th-inking.blogspot.com/2020/06/jts-overlayng-tolerant-topology.html
             var polygonizer = new Polygonizer();
-            polygonizer.Add(UnaryUnionOp.Union(geometry));
+            polygonizer.Add(OverlayNGRobust.Union(geometry));
             return polygonizer.GetPolygons();
         }
 
