@@ -52,7 +52,7 @@ namespace ThMEPElectrical.Command
                 foreach (var frameId in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(frameId);
-                    var nFrame = ThMEPFrameService.NormalizeEx(frame);
+                    var nFrame = ThMEPFrameService.Normalize(frame);
                     if (nFrame.Area <= 1.0)
                     {
                         continue;
