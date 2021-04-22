@@ -65,15 +65,15 @@ namespace ThMEPHVAC.Model
             }
         }
 
-        public void Run_insert_text_info(ThDbModelFan fanmodel, Duct_InParam info, Vector2d rot_vec, Vector3d dis_vec)
+        public void Run_insert_text_info(ThDbModelFan fanmodel, Duct_InParam info, Vector2d rot_vec, Vector3d dis_vec, bool is_vt, bool is_in)
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string text_layer = ThDuctUtils.DuctTextLayerName(modelLayer);
-            Insert_bypass_text_info(info, text_layer, rot_vec, dis_vec);
+            Insert_bypass_text_info(info, text_layer, rot_vec, dis_vec, is_vt, is_in);
         }
-        private void Insert_bypass_text_info(Duct_InParam info, string text_layer, Vector2d rot_vec, Vector3d dis_vec)
+        private void Insert_bypass_text_info(Duct_InParam info, string text_layer, Vector2d rot_vec, Vector3d dis_vec, bool is_vt, bool is_in)
         {
-            DBText text_info = Create_tee_info(info);
+            DBText text_info = Create_tee_info(info, is_vt, is_in);
             if (text_info.IsNull())
                 return;
             double duct_width = Get_duct_width(info.in_duct_info);
@@ -98,19 +98,31 @@ namespace ThMEPHVAC.Model
                 text_info.SetDatabaseDefaults();
             }
         }
-        private DBText Create_tee_info(Duct_InParam info)
+        private DBText Create_tee_info(Duct_InParam info, bool is_vt, bool is_in)
         {
             string str;
+            string tee_info = info.tee_info;
             string text_size = info.text_size_info;
             string elevation = info.elevation_info;
-            string tee_info = info.tee_info;
-            if (string.IsNullOrEmpty(elevation))
+            
+            if (is_vt)
             {
                 str = $"{tee_info} (h+X.XXm)";
             }
             else
             {
-                double num = Double.Parse(elevation);
+                string duct_info = is_in ? info.in_duct_info : info.out_duct_info;
+                double evel = Double.Parse(elevation);
+                string[] s = tee_info.Split('x');
+                if (s.Length != 2)
+                    return new DBText();
+                double tee_height = Double.Parse(s[1]);
+                s = duct_info.Split('x');
+                if (s.Length != 2)
+                    return new DBText();
+                double duct_height = Double.Parse(s[1]);
+
+                double num = (evel * 1000 + duct_height - tee_height) / 1000;
                 if (num > 0)
                     str = $"{tee_info} (h+" + num.ToString("0.00") + "m)";
                 else
