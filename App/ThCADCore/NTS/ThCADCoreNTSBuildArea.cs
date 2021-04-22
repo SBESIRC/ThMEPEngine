@@ -64,7 +64,6 @@ namespace ThCADCore.NTS
             catch (Exception)
             {
                 polys = geometry.Buffer(0.01).Polygonize();
-                //polys = polys.Select(x => x.Buffer(-1)).ToList();
             }
             
             if (polys.Count == 0)
