@@ -30,7 +30,8 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
         private List<Point> ReduceInflectionPoint(List<Point> inflectionPoints, bool[][] obstacles)
         {
             List<Point> path = new List<Point>();
-            while (inflectionPoints.Count > 3)
+            Point lastPt = inflectionPoints.Last();
+            while (inflectionPoints.Count >= 3)
             {
                 var firPt = inflectionPoints.First();
                 inflectionPoints.Remove(firPt);
@@ -55,6 +56,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
                 }
             }
 
+            inflectionPoints.Add(lastPt);
             foreach (var pt in inflectionPoints)
             {
                 path.Add(pt);

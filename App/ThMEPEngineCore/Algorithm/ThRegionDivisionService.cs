@@ -7,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
-using ThMEPWSS.Utils;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -143,7 +142,7 @@ namespace ThMEPEngineCore.Algorithm
         }
 
         /// <summary>
-        /// 得到polyline上所有的线
+        /// 计算polyline最长边方向
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
@@ -224,7 +223,7 @@ namespace ThMEPEngineCore.Algorithm
         /// </summary>
         /// <param name="bLines"></param>
         /// <returns></returns>
-        public List<Polyline> GetMinPolygon(List<Line> bLines)
+        private List<Polyline> GetMinPolygon(List<Line> bLines)
         {
             DBObjectCollection dBObject = new DBObjectCollection();
             foreach (var bLine in bLines)

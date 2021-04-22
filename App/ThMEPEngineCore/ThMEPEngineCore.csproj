@@ -49,6 +49,7 @@
     <Compile Include="Algorithm\AStarAlgorithm\MapService\ToPointMapHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MinHeap.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
+    <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThMEPPolyDecomposer.cs" />

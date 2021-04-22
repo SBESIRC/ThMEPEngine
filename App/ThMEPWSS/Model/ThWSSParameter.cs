@@ -35,7 +35,7 @@ namespace ThMEPWSS.Model
 
     public enum BlindAreaType
     {
-        Rectangle = 0,          //矩形
+        //Rectangle = 0,          //矩形
         SmallCircle = 1000,        //圆形-低
         MedianCircle = 500,       //圆形-中
         BigCircle = 200,          //圆形-高
@@ -54,7 +54,7 @@ namespace ThMEPWSS.Model
         //是否考虑梁
         public bool ConsiderBeam = true;
         //盲区表达方式
-        public BlindAreaType blindAreaType = BlindAreaType.Rectangle;
+        public BlindAreaType blindAreaType = BlindAreaType.MedianCircle;
         //喷头间距
         public double distance = 3400;
 
@@ -112,7 +112,7 @@ namespace ThMEPWSS.Model
         }
 
         public ThWSSParameter(LayoutSpace space = LayoutSpace.OtherSpace, HazardLevel level = HazardLevel.ThirdLevel, LayoutRange range = LayoutRange.StandardRange,
-            LayoutType type = LayoutType.UpSpray, bool hasBeam = true, BlindAreaType blindArea = BlindAreaType.Rectangle)
+            LayoutType type = LayoutType.UpSpray, bool hasBeam = true, BlindAreaType blindArea = BlindAreaType.MedianCircle)
         {
             applicationSite = space;
             hazardLevel = level;
