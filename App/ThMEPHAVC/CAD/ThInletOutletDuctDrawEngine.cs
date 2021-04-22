@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Hvac;
-using ThMEPHVAC.IO;
 using ThMEPHVAC.Duct;
 using TianHua.Publics.BaseCode;
 using ThMEPEngineCore.Service.Hvac;
@@ -32,6 +31,7 @@ namespace ThMEPHVAC.CAD
         public string out_duct_info;
         public string text_size_info;
         public string elevation_info;
+        public bool is_io_reverse;
     }
     public class ThInletOutletDuctDrawEngine
     {
@@ -57,6 +57,7 @@ namespace ThMEPHVAC.CAD
         public AdjacencyGraph<ThDuctVertex, ThDuctEdge<ThDuctVertex>> OutletCenterLineGraph { get; set; }
         private List<Vector2d> TextVec { get; set; }
         public Vector3d valve_dis_vec { get; set; }
+        private bool is_io_reverse { get; set; }
         public ThInletOutletDuctDrawEngine(ThDbModelFan fanmodel,
             Duct_InParam in_param,
             double selected_bypass_len,
@@ -88,8 +89,10 @@ namespace ThMEPHVAC.CAD
             InletCenterLineGraph = inletcenterlinegraph;
             OutletCenterLineGraph = outletcenterlinegraph;
             FanInOutType = fanmodel.IntakeForm;
-            SetInletOutletSize(fanmodel.FanScenario,
-                               innerduct_info,
+
+            is_io_reverse = in_param.is_io_reverse;
+
+            SetInletOutletSize(innerduct_info,
                                outerduct_info,
                                tee_info,
                                elevation_info);
@@ -139,11 +142,24 @@ namespace ThMEPHVAC.CAD
             DrawHoseInDWG(OutletDuctHoses, modelLayer);
         }
 
-        public void Proc_inner_duct(string block_layer, Point3d base_point, bool enable, Vector2d dir_vec, string text_size)
+        public void Proc_inner_duct(ThDbModelFan Model, bool enable, Vector2d dir_vec, Duct_InParam pst_param, bool is_in)
         {
             if (!enable)
                 return;
-            string modelLayer = block_layer;
+            Point3d base_point = Point3d.Origin;
+            string text_size;
+            if (is_in)
+            {
+                text_size = pst_param.in_duct_info;
+                base_point = Model.FanInletBasePoint;
+            }
+            else
+            {
+                text_size = pst_param.out_duct_info;
+                base_point = Model.FanOutletBasePoint;
+            }
+            
+            string modelLayer = Model.Data.BlockLayer;
             string ductLayer = ThDuctUtils.DuctLayerName(modelLayer);
             var Create_service = new ThHvacDuctFittingFactoryService();
             var geo = Create_service.Create_inner_duct(text_size);
@@ -171,15 +187,12 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        private void SetInletOutletSize(string scenario, 
-                                        string innerromeductinfo, 
+        private void SetInletOutletSize(string innerromeductinfo, 
                                         string outerromeductinfo,
                                         string tee_info,
                                         string elevation_info)
         {
-            var jsonReader = new ThDuctInOutMappingJsonReader();
-            var innerRomDuctPosition = jsonReader.Mappings.First(d=>d.WorkingScenario == scenario).InnerRoomDuctType;
-            if (innerRomDuctPosition == "进风段")
+            if (!is_io_reverse)
             {
                 InletDuctWidth = innerromeductinfo.Split('x').First().NullToDouble();
                 InletDuctHeight = innerromeductinfo.Split('x').Last().NullToDouble();

@@ -65,15 +65,15 @@ namespace ThMEPHVAC.Model
             }
         }
 
-        public void Run_insert_text_info(ThDbModelFan fanmodel, Duct_InParam info, Vector2d rot_vec, Vector3d dis_vec, bool is_vt, bool is_in)
+        public void Run_insert_text_info(ThDbModelFan fanmodel, Duct_InParam info, Vector2d rot_vec, Vector3d dis_vec, bool is_vt)
         {
             string modelLayer = fanmodel.Data.BlockLayer;
             string text_layer = ThDuctUtils.DuctTextLayerName(modelLayer);
-            Insert_bypass_text_info(info, text_layer, rot_vec, dis_vec, is_vt, is_in);
+            Insert_bypass_text_info(info, text_layer, rot_vec, dis_vec, is_vt);
         }
-        private void Insert_bypass_text_info(Duct_InParam info, string text_layer, Vector2d rot_vec, Vector3d dis_vec, bool is_vt, bool is_in)
+        private void Insert_bypass_text_info(Duct_InParam info, string text_layer, Vector2d rot_vec, Vector3d dis_vec, bool is_vt)
         {
-            DBText text_info = Create_tee_info(info, is_vt, is_in);
+            DBText text_info = Create_tee_info(info, is_vt);
             if (text_info.IsNull())
                 return;
             double duct_width = Get_duct_width(info.in_duct_info);
@@ -98,7 +98,7 @@ namespace ThMEPHVAC.Model
                 text_info.SetDatabaseDefaults();
             }
         }
-        private DBText Create_tee_info(Duct_InParam info, bool is_vt, bool is_in)
+        private DBText Create_tee_info(Duct_InParam info, bool is_vt)
         {
             string str;
             string tee_info = info.tee_info;
@@ -111,7 +111,7 @@ namespace ThMEPHVAC.Model
             }
             else
             {
-                string duct_info = is_in ? info.in_duct_info : info.out_duct_info;
+                string duct_info = info.out_duct_info;
                 double evel = Double.Parse(elevation);
                 string[] s = tee_info.Split('x');
                 if (s.Length != 2)

@@ -15,6 +15,7 @@ using ThMEPEngineCore.LaneLine;
 using ThMEPEngineCore.Service;
 using ThMEPEngineCore.Service.Hvac;
 using ThMEPHVAC.CAD;
+using ThMEPHVAC.IO;
 using ThMEPHVAC.Model;
 using TianHua.FanSelection.Function;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
@@ -42,6 +43,8 @@ namespace TianHua.Hvac.UI.Command
                 Duct_InParam info = Get_duct_info(DbFanModel, out string air_volume);
                 if (string.IsNullOrEmpty(air_volume))
                     return;
+                Get_reverse_info(DbFanModel.FanScenario, info);
+
                 if (DbFanModel.FanScenario == "消防加压送风")
                 {
                     Get_bypass_info(DbFanModel, air_volume, ref info);
@@ -64,7 +67,7 @@ namespace TianHua.Hvac.UI.Command
                         ThVTee vt = new ThVTee(600, vt_width, 20);
                         vt.RunVTeeDrawEngine(DbFanModel, info, line_type, rot_vec, dis_vec);
                         ThServiceTee service = new ThServiceTee();
-                        service.Run_insert_text_info(DbFanModel, info, rot_vec, dis_vec, true, false);
+                        service.Run_insert_text_info(DbFanModel, info, rot_vec, dis_vec, true);
                         service.Insert_electric_valve(dis_vec, vt_width, rot_vec.Angle + 1.5 * Math.PI);
                     }
                     else
@@ -114,12 +117,7 @@ namespace TianHua.Hvac.UI.Command
                             Vector2d elev_dir = new Vector2d(bypass_vec.X, bypass_vec.Y);
                             double angle = elev_dir.Angle + Math.PI * 1.5;
                             ThServiceTee service = new ThServiceTee();
-                            if (io_anay_res.HasInletTee() && io_anay_res.HasOutletTee())
-                                service.Run_insert_text_info(DbTeeModel, info, new Vector2d(bypass_vec.X, bypass_vec.Y), dis_vec, false, false);
-                            else if (io_anay_res.HasInletTee())
-                                service.Run_insert_text_info(DbTeeModel, info, new Vector2d(bypass_vec.X, bypass_vec.Y), dis_vec, false, true);
-                            else if (io_anay_res.HasOutletTee())
-                                service.Run_insert_text_info(DbTeeModel, info, new Vector2d(bypass_vec.X, bypass_vec.Y), dis_vec, false, false);
+                            service.Run_insert_text_info(DbTeeModel, info, new Vector2d(bypass_vec.X, bypass_vec.Y), dis_vec, false);
                             service.Insert_electric_valve(dis_vec, bra_width, angle);
                         }
                     }
@@ -133,6 +131,12 @@ namespace TianHua.Hvac.UI.Command
                     IO_duct_hole_analysis(DbFanModel, info, 0, wall_lines, null, io_anay_res);
                 }
             }
+        }
+        private void Get_reverse_info(string scenario, Duct_InParam info)
+        {
+            var jsonReader = new ThDuctInOutMappingJsonReader();
+            var innerRomDuctPosition = jsonReader.Mappings.First(d => d.WorkingScenario == scenario).InnerRoomDuctType;
+            info.is_io_reverse = innerRomDuctPosition != "进风段";
         }
 
         private void Draw_VT_Prepare(Duct_InParam info,
@@ -175,16 +179,16 @@ namespace TianHua.Hvac.UI.Command
                 if (tee_info.tee_type == TeeType.TEE_ON_THE_RIGHT_OF_INNER)
                 {
                     if (is_in)
-                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s3, s2, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s3, bypass_lines);
                     else
-                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s3, s2, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s3, s2, s3, bypass_lines);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_ON_THE_LEFT_OF_INNER)
                 {
                     if (is_in)
-                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s1, s3, s2, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.InletCenterLineGraph, s3, s2, s3, bypass_lines);
                     else
-                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s1, s3, s2, bypass_lines);
+                        ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s3, s2, s3, bypass_lines);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_COLLINEAR_WITH_INNER)
                 {
@@ -203,7 +207,7 @@ namespace TianHua.Hvac.UI.Command
                     else
                         ThServiceTee.Fine_tee_duct(io_anay_res.OutletCenterLineGraph, s3, s1, s2, bypass_lines);
                 }
-                
+
             }
         }
         private Duct_InParam Get_duct_info(ThDbModelFan DbFanModel, out string air_volume)
@@ -246,7 +250,7 @@ namespace TianHua.Hvac.UI.Command
 
             // 将风管在旁通处打断
             ThLaneLineEngine.extend_distance = 0.0;
-            var results =ThLaneLineEngine.Explode(lineobjects);
+            var results = ThLaneLineEngine.Explode(lineobjects);
             results = ThLaneLineEngine.Noding(results);
             return ThLaneLineEngine.CleanZeroCurves(results);
         }
@@ -481,7 +485,7 @@ namespace TianHua.Hvac.UI.Command
                                                 selected_bypass_len, bypass_line,
                                                 io_anay_res.InletCenterLineGraph,
                                                 io_anay_res.OutletCenterLineGraph);
-            
+
             ThHolesAndValvesEngine holesAndValvesEngine =
                 new ThHolesAndValvesEngine(Model, wall_lines, bypass_line, io_draw_eng, io_anay_res.InletCenterLineGraph, io_anay_res.OutletCenterLineGraph);
             if (io_anay_res.InletAnalysisResult == AnalysisResultType.OK)
@@ -489,11 +493,7 @@ namespace TianHua.Hvac.UI.Command
                 io_draw_eng.RunInletDrawEngine(Model, text_size);
                 if (io_anay_res.HasInletTee())
                     Draw_tee(true, io_draw_eng.TeeWidth, io_draw_eng.InletDuctWidth, Model, io_anay_res.InTeesInfo);
-                io_draw_eng.Proc_inner_duct(Model.Data.BlockLayer, 
-                                            Model.FanInletBasePoint, 
-                                            io_anay_res.Have_in_inner_fan,
-                                            io_anay_res.Inner_fan_dir_vec,
-                                            pst_param.in_duct_info);
+                io_draw_eng.Proc_inner_duct(Model, io_anay_res.Have_in_inner_fan, io_anay_res.Inner_fan_dir_vec, pst_param,  true);
                 holesAndValvesEngine.RunInletValvesInsertEngine();
             }
 
@@ -502,13 +502,9 @@ namespace TianHua.Hvac.UI.Command
                 io_draw_eng.RunOutletDrawEngine(Model, text_size);
                 if (io_anay_res.HasOutletTee())
                     Draw_tee(false, io_draw_eng.TeeWidth, io_draw_eng.OutletDuctWidth, Model, io_anay_res.OutTeesInfo);
-                io_draw_eng.Proc_inner_duct(Model.Data.BlockLayer,
-                                            Model.FanOutletBasePoint,
-                                            io_anay_res.Have_out_inner_fan,
-                                            io_anay_res.Inner_fan_dir_vec,
-                                            pst_param.out_duct_info);
+                io_draw_eng.Proc_inner_duct(Model, io_anay_res.Have_out_inner_fan, io_anay_res.Inner_fan_dir_vec, pst_param, false);
                 holesAndValvesEngine.RunOutletValvesInsertEngine();
-                
+
             }
         }
 
@@ -536,15 +532,15 @@ namespace TianHua.Hvac.UI.Command
                 }
                 else if (tee_info.tee_type == TeeType.TEE_ON_THE_LEFT_OF_INNER)
                 {
-                    mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
-                    e = new ThTee(tee_cp, duct_width, tee_width, duct_width);
+                    mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
+                           Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
+                    e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
                     e.RunTeeDrawEngine(Model, mat);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_ON_THE_RIGHT_OF_INNER)
                 {
-                    mat *= Matrix3d.Rotation(tee_info.angle.Angle + Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin) *
-                           Matrix3d.Mirroring(new Line3d(Point3d.Origin, Vector3d.YAxis));
-                    e = new ThTee(tee_cp, duct_width, tee_width, duct_width);
+                    mat *= Matrix3d.Rotation(tee_info.angle.Angle - Math.PI * 0.5, Vector3d.ZAxis, Point3d.Origin);
+                    e = new ThTee(tee_cp, duct_width, duct_width, tee_width);
                     e.RunTeeDrawEngine(Model, mat);
                 }
                 else if (tee_info.tee_type == TeeType.TEE_VERTICAL_WITH_OTHERS)

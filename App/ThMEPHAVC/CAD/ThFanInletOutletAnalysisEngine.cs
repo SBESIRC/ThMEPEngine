@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
-using ThMEPHVAC.CAD;
 using ThMEPHVAC.Duct;
 using ThMEPHVAC.Model;
 
@@ -52,6 +51,7 @@ namespace ThMEPHVAC.CAD
         public Vector2d Inner_fan_dir_vec { get; set; }
         public bool Have_in_inner_fan;
         public bool Have_out_inner_fan;
+
         public ThFanInletOutletAnalysisEngine(ThDbModelFan fanmodel, Duct_InParam info)
         {
             MaxBypass = new Line();
@@ -81,7 +81,7 @@ namespace ThMEPHVAC.CAD
         {
             in_search_point = fanmodel.FanInletBasePoint;
             out_search_point = fanmodel.FanOutletBasePoint;
-            
+
             update_proc("上进", info, ref in_search_point, fanmodel.InAndOutLines);
             update_proc("下进", info, ref in_search_point, fanmodel.InAndOutLines);
             update_proc("上出", info, ref out_search_point, fanmodel.InAndOutLines);
@@ -92,7 +92,18 @@ namespace ThMEPHVAC.CAD
         {
             if (FanModel.IntakeForm.Contains(special_name))
             {
-                double shrink_dis = Get_shrink_dis(info, false);
+                double shrink_dis = 0;
+                if (special_name.Contains("进"))
+                {
+                    Have_in_inner_fan = true;
+                    shrink_dis = Get_shrink_dis(info, true);
+                }
+                else if (special_name.Contains("出"))
+                {
+                    Have_out_inner_fan = true;
+                    shrink_dis = Get_shrink_dis(info, false);
+                }
+                
                 if (shrink_dis < 0)
                     return;
                 Line start_line = Get_start_line(search_point, liens);
@@ -100,10 +111,6 @@ namespace ThMEPHVAC.CAD
                     return;
                 Line new_line = Shrink_start_line(start_line, ref search_point, shrink_dis);
                 Exclude_first_line(liens, new_line, start_line);
-                if (special_name.Contains("进"))
-                    Have_in_inner_fan = true;
-                else if (special_name.Contains("出"))
-                    Have_out_inner_fan = true;
             }
         }
 
