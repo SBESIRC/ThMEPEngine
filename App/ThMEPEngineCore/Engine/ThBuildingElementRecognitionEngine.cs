@@ -6,6 +6,7 @@ using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -49,6 +50,26 @@ namespace ThMEPEngineCore.Engine
             var objs = Geometries.Cast<DBObject>();
             var siObjs = spatialIndex.Geometries.Values;
             Elements = Elements.Where(o => siObjs.Contains(o.Outline)).ToList();
+        }
+        public DBObjectCollection Preprocess(DBObjectCollection curves)
+        {
+            var results = new DBObjectCollection();
+            curves.Cast<Entity>().ForEach(e =>
+            {
+                if (e is Polyline polyline)
+                {
+                    var objs = polyline.MakeValid().Cast<Polyline>();
+                    if(objs.Count()>0)
+                    {
+                        results.Add(objs.OrderByDescending(o => o.Area).First());
+                    }
+                }
+                else
+                {
+                    results.Add(e);
+                }
+            });
+            return results;
         }
     }
 }
