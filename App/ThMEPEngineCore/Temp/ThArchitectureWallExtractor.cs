@@ -33,12 +33,15 @@ namespace ThMEPEngineCore.Temp
             var geos = new List<ThGeometry>();
             Walls.ForEach(o =>
             {
-                var geometry = new ThGeometry();
-                geometry.Properties.Add(CategoryPropertyName, Category);
                 var isolated = IsIsolate(Spaces, o);
-                geometry.Properties.Add(IsolatePropertyName, isolated);
-                geometry.Boundary = o;
-                geos.Add(geometry);
+                if(isolated)
+                {
+                    var geometry = new ThGeometry();
+                    geometry.Properties.Add(CategoryPropertyName, Category);
+                    geometry.Properties.Add(IsolatePropertyName, isolated);
+                    geometry.Boundary = o;
+                    geos.Add(geometry);
+                }
             });
             return geos;
         }
