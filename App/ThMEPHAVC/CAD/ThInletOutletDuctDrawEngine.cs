@@ -309,7 +309,8 @@ namespace ThMEPHVAC.CAD
                     s_evel = null;
                 }
                 bool is_bypass = false;
-                if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
+                //if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
+                if (ThServiceTee.Is_bypass(srt_p, end_p, bypass_line))
                 {
                     is_bypass = true;
                 }
@@ -415,7 +416,8 @@ namespace ThMEPHVAC.CAD
                 }
 
                 bool is_bypass = false;
-                if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
+                if (ThServiceTee.Is_bypass(srt_p, end_p, bypass_line))
+                //if (Math.Abs(text_bypass_len - edge_len) < 5 || Math.Abs(half_len - edge_len) < 5)
                 {
                     is_bypass = true;
                 }
