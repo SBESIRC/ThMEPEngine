@@ -73,8 +73,6 @@ namespace TianHua.Plumbing.UI
         private void fmSprinklerLayout_Load(object sender, EventArgs e)
         {
             RidApplications_SelectedIndexChanged(null, null);
-
-     
         }
 
         private void BtnLayout_Click(object sender, EventArgs e)
@@ -247,7 +245,7 @@ namespace TianHua.Plumbing.UI
         {
             if (ComBoxDeadZone.Text == "矩形")
             {
-                ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.Rectangle;
+                //ThWSSUIService.Instance.Parameter.blindAreaType = ThMEPWSS.Model.BlindAreaType.Rectangle;
             }
             else if (ComBoxDeadZone.Text == "圆形-低精度")
             {

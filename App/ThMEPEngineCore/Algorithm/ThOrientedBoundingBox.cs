@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ThMEPWSS.Utils
+namespace ThMEPEngineCore.Algorithm
 {
     public static class ThOrientedBoundingBox
     {

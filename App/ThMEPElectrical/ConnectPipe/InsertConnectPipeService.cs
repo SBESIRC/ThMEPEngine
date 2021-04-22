@@ -26,6 +26,7 @@ namespace ThMEPElectrical.ConnectPipe
                         var pipe = new Line(poly.GetPoint3dAt(i), poly.GetPoint3dAt(i + 1));
                         pipe.Linetype = ThMEPCommon.ConnectPipeLineType;
                         pipe.Layer = ThMEPCommon.ConnectPipeLayerName;
+                        pipe.ColorIndex = 256;
                         acadDatabase.ModelSpace.Add(pipe);
                     }
                 }
