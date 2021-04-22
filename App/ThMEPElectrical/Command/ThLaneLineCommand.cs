@@ -69,7 +69,12 @@ namespace ThMEPElectrical.Command
                     var transformer = new ThMEPOriginTransformer(centerPt);
                     transformer.Transform(lines);
                     transformer.Transform(nFrame);
-                    lines = CleanLaneLines(ClipLaneLines(lines, nFrame));
+                    lines = ClipLaneLines(lines, nFrame);
+                    if (lines.Count == 0)
+                    {
+                        continue;
+                    }
+                    lines = CleanLaneLines(lines);
                     transformer.Reset(lines);
 
                     lines.Cast<Curve>().ForEach(o =>
