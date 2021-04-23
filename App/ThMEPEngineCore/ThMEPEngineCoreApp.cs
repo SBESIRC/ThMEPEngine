@@ -45,20 +45,26 @@ namespace ThMEPEngineCore
         public void ThExtractColumn()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var columnRecognitionEngine = new ThColumnRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
-
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                columnRecognitionEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                columnRecognitionEngine.Elements.ForEach(o =>
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var engine = new ThColumnExtractionEngine();
+                engine.Extract(acadDatabase.Database);
+                var results = new DBObjectCollection();
+                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
                 {
-                    var curve = o.Outline as Curve;
-                    acadDatabase.ModelSpace.Add(curve.WashClone());
+                    results.Add(filterObj as Entity);
+                }
+                results.Cast<Entity>().ForEach(o =>
+                {
+                    o.SetDatabaseDefaults(acadDatabase.Database);
+                    acadDatabase.ModelSpace.Add(o);
                 });
             }
         }
@@ -97,27 +103,26 @@ namespace ThMEPEngineCore
         public void THExtractShearWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var shearWallEngine = new ThShearWallRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
-
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                shearWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                shearWallEngine.Elements.ForEach(o =>
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var engine = new ThShearWallExtractionEngine();
+                engine.Extract(acadDatabase.Database);
+                var results = new DBObjectCollection();
+                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
                 {
-                    if (o.Outline is Curve curve)
-                    {
-                        acadDatabase.ModelSpace.Add(curve.WashClone());
-                    }
-                    else if (o.Outline is MPolygon mPolygon)
-                    {
-                        mPolygon.SetDatabaseDefaults(Active.Database);
-                        acadDatabase.ModelSpace.Add(mPolygon);
-                    }
+                    results.Add(filterObj as Entity);
+                }
+                results.Cast<Entity>().ForEach(o =>
+                {
+                    o.SetDatabaseDefaults(acadDatabase.Database);
+                    acadDatabase.ModelSpace.Add(o);
                 });
             }
         }
@@ -125,7 +130,6 @@ namespace ThMEPEngineCore
         public void THExtractArchWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -133,17 +137,19 @@ namespace ThMEPEngineCore
                     return;
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                archWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                archWallEngine.Elements.ForEach(o =>
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var engine = new ThArchitectureWallExtractionEngine();
+                engine.Extract(acadDatabase.Database);
+                var results = new DBObjectCollection();
+                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
                 {
-                    if (o.Outline is Curve curve)
-                    {
-                        acadDatabase.ModelSpace.Add(curve.WashClone());
-                    }
-                    else if (o.Outline is MPolygon mPolygon)
-                    {
-                        acadDatabase.ModelSpace.Add(mPolygon);
-                    }
+                    results.Add(filterObj as Entity);
+                }
+                results.Cast<Entity>().ForEach(o =>
+                {
+                    o.SetDatabaseDefaults(acadDatabase.Database);
+                    acadDatabase.ModelSpace.Add(o);
                 });
             }
         }
@@ -151,7 +157,6 @@ namespace ThMEPEngineCore
         public void THExtractCurtainWall()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var curtainWallEngine = new ThCurtainWallRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -159,16 +164,19 @@ namespace ThMEPEngineCore
                     return;
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                curtainWallEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                curtainWallEngine.Elements.ForEach(o =>
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var engine = new ThCurtainWallExtractionEngine();
+                engine.Extract(acadDatabase.Database);
+                var results = new DBObjectCollection();
+                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
                 {
-                    if (o.Outline is Curve curve)
-                    {
-                        var clone = curve.WashClone();
-                        clone.ColorIndex = 6;
-                        clone.SetDatabaseDefaults();
-                        acadDatabase.ModelSpace.Add(clone);
-                    }
+                    results.Add(filterObj as Entity);
+                }
+                results.Cast<Entity>().ForEach(o =>
+                {
+                    o.SetDatabaseDefaults();
+                    acadDatabase.ModelSpace.Add(o);
                 });
             }
         }
