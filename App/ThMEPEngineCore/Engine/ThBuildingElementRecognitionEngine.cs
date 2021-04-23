@@ -51,7 +51,7 @@ namespace ThMEPEngineCore.Engine
             var siObjs = spatialIndex.Geometries.Values;
             Elements = Elements.Where(o => siObjs.Contains(o.Outline)).ToList();
         }
-        public DBObjectCollection Preprocess(DBObjectCollection curves)
+        protected DBObjectCollection Preprocess(DBObjectCollection curves)
         {
             var results = new DBObjectCollection();
             curves.Cast<Entity>().ForEach(e =>

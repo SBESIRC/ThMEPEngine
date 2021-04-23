@@ -50,7 +50,7 @@ namespace ThMEPEngineCore.Engine
             {
                 curves = objs;
             }
-            curves = curves.Cast<Polyline>().SelectMany(x => x.MakeValid().Cast<Polyline>()).ToCollection();
+            curves = ThArchitectureWallSimplifier.MakeValid(curves);
             if (curves.Count > 0)
             {
                 var results = ThArchitectureWallSimplifier.Normalize(curves);

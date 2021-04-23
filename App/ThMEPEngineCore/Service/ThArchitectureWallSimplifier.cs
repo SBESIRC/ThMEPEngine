@@ -24,6 +24,20 @@ namespace ThMEPEngineCore.Service
             return objs;
         }
 
+        public static DBObjectCollection MakeValid(DBObjectCollection walls)
+        {
+            var objs = new DBObjectCollection();
+            walls.Cast<AcPolygon>().ForEach(o =>
+            {
+                var results = o.MakeValid().Cast<AcPolygon>();
+                if (results.Any())
+                {
+                    objs.Add(results.OrderByDescending(p => p.Area).First());
+                }
+            });
+            return objs;
+        }
+
         public static DBObjectCollection Normalize(DBObjectCollection walls)
         {
             var objs = new DBObjectCollection();
