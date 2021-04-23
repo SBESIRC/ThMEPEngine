@@ -99,7 +99,7 @@ namespace ThMEPLighting
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THMEGL", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
         public void ThMEGL()
         {
             var lampLight = new ThEmgPilotLampCommand();

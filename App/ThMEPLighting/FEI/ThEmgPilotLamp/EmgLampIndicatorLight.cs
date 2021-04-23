@@ -21,10 +21,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private List<LightLayout> _ligthLayouts;
         private Vector3d _normal = Vector3d.ZAxis;
         private Polyline _maxPolyline;
-        public List<Point3d> testPoints;
-        public List<LineGraphNode> _lineGraphNodes;
-        private double _lightSpace = 10000;
-        private double _lightOffset = 800;
+        private double _lightSpace = 10000;//灯具最大间距
+        private double _lightOffset = 800;//单方向灯具偏移距离
+        public List<LineGraphNode> _wallGraphNodes;//壁装的在线的那一侧
+        private List<GraphNode> _hostLightNodes;
         public EmgLampIndicatorLight(Polyline outPolyline,List<Polyline> columns, List<Polyline> walls, IndicatorLight indicator)
         {
             _maxPolyline = outPolyline;
@@ -32,8 +32,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             _targetColums = new List<Polyline>();
             _targetWalls = new List<Polyline>();
             _ligthLayouts = new List<LightLayout>();
-            testPoints = new List<Point3d>();
-            _lineGraphNodes = new List<LineGraphNode>();
+            _wallGraphNodes = new List<LineGraphNode>();
+            _hostLightNodes = new List<GraphNode>();
             if (null != columns && columns.Count > 0)
             {
                 foreach (var item in columns)
@@ -57,31 +57,255 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         public List<LightLayout> CalcLayout()
         {
             _ligthLayouts.Clear();
-            testPoints.Clear();
+            _wallGraphNodes.Clear();
+            _hostLightNodes.Clear();
+
+            //主要，辅助疏散路径（壁装）上的点的信息获取判断
+            CalcMainLayout();
+
             //主要线到出口处使用吊装
             CalcExitLayout();
 
-            //主要，辅助疏散路径上的点的信息获取判断
-            CalaMainLayout();
+            //拐角处的吊装判断
+            CalcMainCornerHost();
+
+            RemoveCornerHost();
+
+            //辅助疏散路径（吊装计算）
+            CalcAssitHostLayout();
 
             //对结果进行检查移除多余的节点
-            CheckAndRemove(Math.PI*30/180, _lightSpace, false);
+            CheckAndRemove(Math.PI*30/180, _lightSpace, true);
             return _ligthLayouts;
         }
+
+
         /// <summary>
-        /// 出口连接主要疏散路径的的连接线的灯连接
+        /// 主要疏散路径 - 壁装  辅助疏散路径 - 壁装 指示灯布置计算
+        /// </summary>
+        private void CalcMainLayout()
+        {
+            //对线进行合并，这里要考虑连续拐弯的情况，整个一个线上的排布一线的同一侧
+            var objs = new DBObjectCollection();
+            _targetInfo.mainLines.ForEach(x => objs.Add(x));
+            _targetInfo.assistLines.ForEach(x => objs.Add(x));
+            List<Curve> curves = ThMEPLineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI * 15 / 180.0).Cast<Curve>().ToList();
+            _wallGraphNodes = InitAllLineNode(curves.Cast<Line>().ToList());
+            _wallGraphNodes = _wallGraphNodes.OrderByDescending(c => c.line.Length).ToList();
+            foreach (var lineInfo in _wallGraphNodes)
+            {
+                Point3d sp = lineInfo.line.StartPoint;
+                var sideDir = lineInfo.layoutLineSide;
+                var lineLength = lineInfo.line.Length;
+                if (lineInfo.line.Length < 3000)
+                    continue;
+                //根据线获取获取排布侧的墙柱
+                Polyline pLine = GetSideWallColumns(lineInfo.line, sideDir, 6000, _targetColums, _targetWalls, out List<Polyline> inWalls, out List<Polyline> inColumns);
+
+                GetLightLayoutPlanA(lineInfo, inWalls, inColumns);
+            }
+        }
+        /// <summary>
+        /// 主要疏散路径 - 吊装 指示灯布置计算
         /// </summary>
         private void CalcExitLayout()
         {
             //主疏散路径，一般是车道中线到出口的最后一段路线，这里用吊装指示.这里吊灯使用双面
             var objs = new DBObjectCollection();
             _targetInfo.exitLines.ForEach(x => objs.Add(x));
-            List<Curve> exitLines =ThMEPLineExtension.ExplodeCurves(objs);
+            List<Curve> exitLines = ThMEPLineExtension.ExplodeCurves(objs);
 
+            var lineAllNodes = GetHostLineNodes(exitLines, out Dictionary<Line, List<NodeDirection>> lineTwoExits, out List<Line> noNodeLines);
+            _hostLightNodes.AddRange(lineAllNodes.Select(c => c.graphNode));
+            List<GraphNode> hisNodes = new List<GraphNode>();
+            ///      双向疏散灯
+            /// E  -----+--------E
+            ///         |
+            ///         |
+            ///         |
+            if (lineTwoExits != null && lineTwoExits.Count > 0)
+            {
+                //通往两侧的疏散口，中间疏散点加入吊装双向指示灯
+                foreach (var item in lineTwoExits)
+                {
+                    if (item.Value == null || item.Value.Count < 1)
+                        continue;
+                    Vector3d exitDir = (item.Key.EndPoint - item.Key.StartPoint).GetNormal();
+                    var leftDir = exitDir.RotateBy(Math.PI / 2, _normal).GetNormal();
+                    foreach (var node in item.Value)
+                    {
+                        if (null == node || node.graphNode.isExit)
+                            continue;
+                        if (hisNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
+                            continue;
+                        if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(node.graphNode.nodePoint) < 1000))
+                            continue;
+                        var light = new LightLayout(node.graphNode.nodePoint, node.graphNode.nodePoint, null, leftDir, exitDir, leftDir, node.graphNode, true);
+                        light.isTwoExitDir = true;
+                        _ligthLayouts.Add(light);
+                        hisNodes.Add(node.graphNode);
+                    }
+                }
+            }
+            //优先从距离出口最远的点进行开始排布
+            LineNodeToHostLight(exitLines, lineAllNodes, ref hisNodes, false);
+            //检查是否有第一个指示灯
+            //所在点在壁装指示灯上的都属于第一个指示灯
+            if (_ligthLayouts == null || _ligthLayouts.Count < 1)
+                return;
+            foreach (var light in _ligthLayouts) 
+            {
+                if (null == light || !light.isHoisting || light.isCheckDelete)
+                    continue;
+                bool inWallLightLine = false;
+                foreach (var lineNode in _wallGraphNodes) 
+                {
+                    if (inWallLightLine)
+                        break;
+                    if (lineNode == null || lineNode.nodeDirections == null || lineNode.nodeDirections.Count < 1)
+                        continue;
+                    inWallLightLine = lineNode.nodeDirections.Any(c => c.graphNode.nodePoint.DistanceTo(light.linePoint) < 500);
+                }
+                light.isCheckDelete = inWallLightLine;
+            }
+        }
+
+        /// <summary>
+        /// 计算主要疏散路径，壁装拐角处的吊装判断和生成
+        /// </summary>
+        private void CalcMainCornerHost()
+        {
+            if (null == _wallGraphNodes || _wallGraphNodes.Count < 1)
+                return;
+            ///获取需要布置的点，并记录线排布在那一侧
+            var nodeSideDirs = new Dictionary<NodeDirection,Vector3d>();
+            foreach (var lineNodes in _wallGraphNodes) 
+            {
+                if (null == lineNodes.nodeDirections || lineNodes.nodeDirections.Count < 1)
+                    continue;
+                if (lineNodes.line.Length < 5000)
+                    continue;
+                foreach (var item in lineNodes.nodeDirections) 
+                {
+                    if (item.inDirection == null || item.inDirection.Count < 1)
+                        continue;
+                    var dot = item.outDirection.DotProduct(lineNodes.lineDir);
+                    if (Math.Abs(dot) < 0.3)
+                        continue;
+                    if (nodeSideDirs.Any(c => c.Key.graphNode.nodePoint.IsEqualTo(item.graphNode.nodePoint)))
+                        continue;
+                    nodeSideDirs.Add(item, lineNodes.layoutLineSide);
+                }
+            }
+            nodeSideDirs = nodeSideDirs.OrderBy(c => c.Key.distanceToExit).ToDictionary(c => c.Key, c => c.Value);
+            foreach (var item in nodeSideDirs) 
+            {
+                if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(item.Key.nodePointInLine) < 1000))
+                    continue;
+                Point3d createPoint;
+                bool isAdd = CheckAddHosting(item.Key, item.Value, out bool isTwoSide, out createPoint);
+                if (!isAdd)
+                    continue;
+                var moveVect = GetHostMoveVector(item.Key.graphNode);
+                createPoint = item.Key.graphNode.nodePoint + moveVect;
+                if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(createPoint) < 1500))
+                    continue;
+                var light = new LightLayout(item.Key.nodePointInLine, createPoint, null,item.Value,item.Key.outDirection,item.Value,item.Key.graphNode, true);
+                light.isTwoSide = isTwoSide;
+                _ligthLayouts.Add(light);
+            }
+        }
+
+        private void RemoveCornerHost() 
+        {
+            //拐角处如果是线路上的第一个拐点，如果该处有吊灯，需要删除
+            //获取主疏散路径上的节点，并获取每个节点到相应出口的距离，
+            //按照距离排序后，按照最远的节点进行遍历，如果已经生成相应的吊灯，则需要删除
+            if (null == _targetInfo || _targetInfo.mainLines == null || _targetInfo.mainLines.Count < 1)
+                return;
+            var objs = new DBObjectCollection();
+            _targetInfo.mainLines.ForEach(x => objs.Add(x));
+            List<Curve> mainLines = ThMEPLineExtension.ExplodeCurves(objs);
+            if (null == mainLines || mainLines.Count < 1)
+                return;
+            var allLineNodes = GetHostLineNodes(mainLines, out Dictionary<Line, List<NodeDirection>> lineTwoExits, out List<Line> noNodeLines);
+            if (allLineNodes == null || allLineNodes.Count < 1)
+                return;
+            allLineNodes = allLineNodes.OrderByDescending(c => c.distanceToExit).ToList();
+            List<GraphNode> hisNodes = new List<GraphNode>();
+            List<GraphNode> delNodeLight = new List<GraphNode>();
+            foreach (var node in allLineNodes)
+            {
+                if (hisNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint)))
+                    continue;
+                hisNodes.Add(node.graphNode);
+                if (_hostLightNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
+                    continue;
+                List<GraphRoute> routes = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes, node.graphNode, true);
+                if (null == routes || routes.Count < 1)
+                    continue;
+                var route = routes.First();
+                while (route != null && route.nextRoute != null)
+                {
+                    if (hisNodes.Any(c => c.nodePoint.IsEqualTo(route.node.nodePoint)))
+                    {
+                        route = route.nextRoute;
+                        continue;
+                    }
+                    hisNodes.Add(route.node);
+                    if (_hostLightNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
+                    {
+                        route = route.nextRoute;
+                        continue;
+                    }
+                    //判断该点是否有灯
+                    var light = _ligthLayouts.Where(c => c.isHoisting && c.nearNode != null && c.nearNode.nodePoint.IsEqualTo(route.node.nodePoint, new Tolerance(1, 1))).FirstOrDefault();
+                    if (light != null && route.node.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1)))
+                    {
+                        //是第一个灯，删除
+                        delNodeLight.Add(node.graphNode);
+                    }
+                }
+            }
+
+           _ligthLayouts = _ligthLayouts.Where(
+               c => !c.isHoisting 
+               || (c.isHoisting 
+               && c.nearNode != null 
+               && !delNodeLight.Any(x => x.nodePoint.IsEqualTo(c.nearNode.nodePoint)))
+               ).ToList();
+        }
+        /// <summary>
+        /// 辅助疏散路径 - 吊装指示灯布置计算
+        /// </summary>
+        private void CalcAssitHostLayout()
+        {
+            var objs = new DBObjectCollection();
+            _targetInfo.assistHostLines.ForEach(x => objs.Add(x));
+            List<Curve> assistHost = ThMEPLineExtension.ExplodeCurves(objs);
+            if (null == assistHost || assistHost.Count < 1)
+                return;
+            //获取这些线上的节点，优先排布距离出口处距离远的节点
+            var lineAllNodes = GetHostLineNodes(assistHost, out Dictionary<Line, List<NodeDirection>> lineTwoExits, out List<Line> noNodeLines);
+            List<GraphNode> hisNodes = new List<GraphNode>();
+            LineNodeToHostLight(assistHost, lineAllNodes, ref hisNodes, true);
+        }
+
+        
+        /// <summary>
+        /// 吊装线上的节点信息获取
+        /// </summary>
+        /// <param name="hostCurves"></param>
+        /// <param name="lineTwoExits"></param>
+        /// <param name="noNodeLines"></param>
+        /// <returns></returns>
+        private List<NodeDirection> GetHostLineNodes(List<Curve> hostCurves,out Dictionary<Line, List<NodeDirection>> lineTwoExits,out List<Line> noNodeLines) 
+        {
             //获取这些线上的节点，优先排布距离出口处距离远的节点
             var lineAllNodes = new List<NodeDirection>();
-            var lineTwoExits = new Dictionary<Line,List<NodeDirection>>();
-            foreach (var line in exitLines)
+            lineTwoExits = new Dictionary<Line, List<NodeDirection>>();
+            noNodeLines = new List<Line>();
+            foreach (var line in hostCurves)
             {
                 var liNodes = new List<NodeDirection>();
                 Point3d sp = line.StartPoint;
@@ -103,142 +327,90 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             exitCount += 1;
                         if (lineAllNodes.Any(c => c.graphNode.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
                             continue;
-                        List<GraphRoute> routes = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes,node.graphNode, true);
+                        List<GraphRoute> routes = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes, node.graphNode, true);
                         if (null == routes || routes.Count < 1)
                             continue;
                         var route = routes.First();
-                        //应为考虑精度，会将线附近的其它点获取到，这里需要将不符合要求的点过滤掉
+                        //因为考虑精度，会将线附近的其它点获取到，这里需要将不符合要求的点过滤掉
                         var exitDir = (route.nextRoute.node.nodePoint - route.node.nodePoint).GetNormal();
                         double angle = exitDir.GetAngleTo(dir);
                         angle %= Math.PI;
                         if (angle > Math.PI / 18 && angle < (Math.PI - Math.PI / 18))
                             continue;
-
-                        var newRoute = new NodeDirection(node.nodePointInLine, null, GraphUtils.GetRouteDisToEnd(route), node.outDirection, node.graphNode);
-                        newRoute.inDirection.AddRange(node.inDirection);
-                        liNodes.Add(newRoute);
-                        lineAllNodes.Add(newRoute);
+                        var nodeInfo = new NodeDirection(node.nodePointInLine, null, GraphUtils.GetRouteDisToEnd(route), node.outDirection, node.graphNode);
+                        nodeInfo.inDirection.AddRange(node.inDirection);
+                        liNodes.Add(nodeInfo);
+                        lineAllNodes.Add(nodeInfo);
                     }
                 }
-                if (exitCount > 1 && liNodes.Count>0)
+                if (liNodes == null || liNodes.Count < 1)
+                    noNodeLines.Add(line as Line);
+                if (exitCount > 1 && liNodes.Count > 0)
                     lineTwoExits.Add(line as Line, liNodes);
             }
-            List<GraphNode> hisNodes = new List<GraphNode>();
-            
-            ///      双向疏散灯
-            /// E  -----+--------E
-            ///         |
-            ///         |
-            ///         |
-            if (lineTwoExits != null && lineTwoExits.Count > 0) 
-            {
-                //通往两侧的疏散口，中间疏散点加入吊装双向指示灯
-                foreach (var item in lineTwoExits) 
-                {
-                    if (item.Value == null || item.Value.Count < 1)
-                        continue;
-                    Vector3d exitDir = (item.Key.EndPoint - item.Key.StartPoint).GetNormal();
-                    var leftDir = exitDir.RotateBy(Math.PI / 2, _normal).GetNormal();
-                    foreach (var node in item.Value) 
-                    {
-                        if (null == node || node.graphNode.isExit)
-                            continue;
-                        if (hisNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
-                            continue;
-                        if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(node.graphNode.nodePoint)<1000))
-                            continue;
-                        var light = new LightLayout(node.graphNode.nodePoint, node.graphNode.nodePoint, null, leftDir, exitDir, leftDir, node.graphNode, true);
-                        light.isTwoExitDir = true;
-                        _ligthLayouts.Add(light);
-                        hisNodes.Add(node.graphNode);
-                    }
-                }
-            }
-            //优先从距离出口最远的点进行开始排布
+            return lineAllNodes;
+        }
+
+        /// <summary>
+        /// 吊装节点信息，在相应的位置布置相应的灯具
+        /// </summary>
+        /// <param name="hostLines"></param>
+        /// <param name="lineAllNodes"></param>
+        /// <param name="hisNodes"></param>
+        /// <param name="unHostLineExit"></param>
+        private void LineNodeToHostLight(List<Curve> hostLines,List<NodeDirection> lineAllNodes,ref List<GraphNode> hisNodes,bool unHostLineExit) 
+        {
             lineAllNodes = lineAllNodes.OrderByDescending(c => c.distanceToExit).ToList();
             List<Point3d> notCreatePoints = new List<Point3d>();
-            foreach (var node in lineAllNodes) 
+            foreach (var node in lineAllNodes)
             {
                 if (hisNodes.Any(c => c.nodePoint.IsEqualTo(node.graphNode.nodePoint, new Tolerance(1, 1))))
                     continue;
-                var route = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes,node.graphNode, true).FirstOrDefault();
+                var route = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes, node.graphNode, true).FirstOrDefault();
+                bool isFirst = true;
                 if (null == route)
                     continue;
                 Line pLine = null;
-                while (route.nextRoute != null) 
+                Point3d? pPoint = null;
+                while (route != null && route.nextRoute != null)
                 {
                     if (hisNodes.Any(c => c.nodePoint.IsEqualTo(route.node.nodePoint, new Tolerance(1, 1))))
                         break;
                     hisNodes.Add(route.node);
-                    
                     //获取线,出口方向
-                    Line line = new Line(route.node.nodePoint, route.nextRoute.node.nodePoint);
-                    bool isExitLine =false;
-                    Point3d nodePoint = route.node.nodePoint;
-                    Vector3d exitDir = line.LineDirection();
-                    Line testLine = new Line(nodePoint, nodePoint + exitDir.MultiplyBy(100));
-                    foreach (var item in exitLines) 
+                    var sNode = route.node;
+                    var eNode = route.nextRoute.node;
+                    var dir = (eNode.nodePoint - sNode.nodePoint).GetNormal();
+                    bool isExitLine = hostLines.Any(c => c != null && ThGeometryTool.IsOverlapEx(c.StartPoint, c.EndPoint, sNode.nodePoint, eNode.nodePoint));
+                    if (!isExitLine)
                     {
-                        if (isExitLine)
-                            break;
-                        isExitLine = ThGeometryTool.IsCollinearEx(item.StartPoint, item.EndPoint,line.StartPoint, line.EndPoint);
+                        while (route.nextRoute != null)
+                        {
+                            eNode = route.node;
+                            var nextDir = (route.nextRoute.node.nodePoint - route.node.nodePoint).GetNormal();
+                            if (!nextDir.IsParallelToEx(dir))
+                                break;
+                            route = route.nextRoute;
+                        }
                     }
-                    LineAddHostLight(line, pLine, route, isExitLine,ref notCreatePoints);
-
+                    else
+                        route = route.nextRoute;
+                    Line line = new Line(sNode.nodePoint, eNode.nodePoint);
+                    isExitLine = hostLines.Any(c => c != null && ThGeometryTool.IsOverlapEx(c.StartPoint, c.EndPoint, line.StartPoint, line.EndPoint));
+                    if (unHostLineExit && !isExitLine)
+                        break;
+                    LineAddHostLight(line, pLine, pPoint, sNode, route, isExitLine, isFirst, ref notCreatePoints);
                     pLine = null;
                     if (isExitLine && route.nextRoute != null)
-                        pLine = new Line(route.node.nodePoint, route.nextRoute.node.nodePoint);
-
-                    route = route.nextRoute;
+                        pLine = new Line(sNode.nodePoint, eNode.nodePoint);
+                    if (isExitLine)
+                        pPoint = sNode.nodePoint;
+                    isFirst = false;
                 }
             }
         }
-        #region
-        private void CalaMainLayout()
-        {
-            //对线进行合并，这里要考虑连续拐弯的情况，整个一个线上的排布一线的同一侧
-            var objs = new DBObjectCollection();
-            _targetInfo.mainLines.ForEach(x => objs.Add(x));
-            _targetInfo.assistLines.ForEach(x => objs.Add(x));
-            List<Curve> curves = ThMEPLineExtension.LineSimplifier(objs, 500, 20.0, 2.0, Math.PI*15 / 180.0).Cast<Curve>().ToList();
-            var lineGrapheNodes = InitAllLineNode(curves.Cast<Line>().ToList());
-            lineGrapheNodes = lineGrapheNodes.OrderByDescending(c => c.line.Length).ToList();
-            foreach (var lineInfo in lineGrapheNodes)
-            {
-                Point3d sp = lineInfo.line.StartPoint;
-                var sideDir = lineInfo.layoutLineSide;
-                var lineLength = lineInfo.line.Length;
-                if (lineInfo.line.Length < 3000)
-                    continue;
-                //根据线获取获取排布侧的墙柱
-                Polyline pLine = GetSideWallColumns(lineInfo.line, sideDir, 6000,_targetColums,_targetWalls, out List<Polyline> inWalls, out List<Polyline> inColumns);
+        
 
-                GetLightLayoutPlanA(lineInfo,inWalls,inColumns) ;
-                //continue;
-                if (null == lineInfo.nodeDirections || lineInfo.nodeDirections.Count < 1)
-                    continue;
-                if (lineInfo.line.Length < 5000)
-                    continue;
-                foreach (var node in lineInfo.nodeDirections.OrderByDescending(c=>c.inDirection.Count)) 
-                {
-                    if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(node.nodePointInLine) < 1000))
-                        continue;
-                    var lineAngle = node.outDirection.GetAngleTo(lineInfo.lineDir);
-                    lineAngle = lineAngle % Math.PI;
-                    if (lineAngle > Math.PI * 15 / 180 && lineAngle < Math.PI * 165 / 180)
-                        continue;
-                    Point3d createPoint;
-                    bool isAdd = CheckAddHosting(node, lineInfo.layoutLineSide, out bool isTwoSide,out createPoint);
-                    if (!isAdd)
-                        continue;
-                    var light = new LightLayout(node.nodePointInLine, createPoint, null,lineInfo.layoutLineSide,node.outDirection,lineInfo.layoutLineSide , node.graphNode,true);
-                    if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(createPoint) < 1500))
-                        continue;
-                    light.isTwoSide = isTwoSide;
-                    _ligthLayouts.Add(light);
-                }
-            }
-        }
         /// <summary>
         /// 非主要路径的节点处的吊装指示灯判断，并获取相应的生成点
         /// </summary>
@@ -279,6 +451,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 createPoint = nodeDirection.nodePointInLine - sideLineDir.MultiplyBy(800);
             return isAdd;
         }
+        /// <summary>
+        /// 根据吊灯去移除相应范围，一定夹角内的壁灯
+        /// 指示方向和吊灯指示方向不平行的移除
+        /// </summary>
+        /// <param name="inAngle"></param>
+        /// <param name="distance"></param>
+        /// <param name="isTwoNormal"></param>
         private void CheckAndRemove(double inAngle, double distance,bool isTwoNormal=true)
         {
             //根据吊装点位将多余的壁装点位删除
@@ -294,17 +473,25 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     wallLights.Add(light);
             }
             var delLights = new List<LightLayout>();
+            var angleCos = Math.Abs(Math.Cos(inAngle));
             foreach (var light in hostingLights) 
             {
                 Vector3d dir = light.direction;
+                if (null == light || !light.isCheckDelete)
+                    continue;
                 foreach (var checkLight in wallLights) 
                 {
                     if (light.pointInOutSide.DistanceTo(checkLight.pointInOutSide) > distance)
                         continue;
                     if (delLights.Any(c => c.pointInOutSide.IsEqualTo(light.pointInOutSide, new Tolerance(1, 1))))
                         continue;
+                    //同方向的指示灯不需要删除
+                    var checkDir = checkLight.direction;
+                    var dot = checkDir.DotProduct(dir);
+                    if (Math.Abs(dot) > angleCos)
+                        continue;
                     Vector3d hostToCheckDir = (checkLight.pointInOutSide - light.pointInOutSide).GetNormal();
-                    var dot = dir.DotProduct(hostToCheckDir);
+                    dot = dir.DotProduct(hostToCheckDir);
                     double angle = dir.GetAngleTo(hostToCheckDir, _normal);
                     angle = angle % Math.PI;
                     if (angle < inAngle || angle > (Math.PI - inAngle))
@@ -335,13 +522,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             Point3d sp = lineInfo.line.StartPoint;
             var sideDir = lineInfo.layoutLineSide;
             var lineLength = lineInfo.line.Length;
-            testPoints.AddRange(LineSplitToLayoutPoint(lineInfo.line));
             LayoutToStructure toStructure = new LayoutToStructure();
             var startPt = sp;
             var endPoint = startPt + lineInfo.lineDir.MultiplyBy(_lightSpace);
             var pts = new List<Point3d>();
             var pointDirs = new Dictionary<Point3d, Vector3d>();
-            List<Point3d> hisPoint = new List<Point3d>();
+            //以线的起点开始，最大间隔10米找可以布置的墙或柱，
+            //首先获取起点的对应的排布点，后续递归去找相应的点
             while (true)
             {
                 pts.Clear();
@@ -350,50 +537,38 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 pts.Add(startPt);
                 pts.Add(endPoint);
                 Line tempLine = new Line(startPt, endPoint);
+                //获取该段线可以相交到的墙或柱
                 GetSideWallColumns(tempLine, sideDir, 6000,inColumns,inWalls, out List<Polyline> newInWalls, out List<Polyline> newInColumns);
                 var temp = toStructure.GetLayoutStructPt(pts, newInColumns, newInWalls, lineInfo.lineDir);
                 if (null != temp && temp.Count > 0)
                 {
                     temp =temp.OrderBy(c => c.Key.DistanceTo(sp)).ToDictionary(x=>x.Key,x=>x.Value);
                     double maxDis = double.MinValue;
+                    //获取相应的下一个开始排布的点位
                     bool isAdd = true;
                     foreach (var item in temp)
                     {
                         double dis = (item.Key - sp).DotProduct(sideDir);
-                        var light = PointToExitDirection(lineInfo, item.Key, item.Value);
-                        var iscorrect= LightIsCorrect(item.Key, light.direction, light.directionSide);
-                        if (iscorrect) 
-                        {
-                            maxDis = 1000;
-                            break;
-                        }
                         Point3d pointInLine = item.Key - sideDir.MultiplyBy(dis);
                         dis = pointInLine.DistanceTo(startPt);
-                        if (dis > 10 && dis < _lightSpace+20 && dis > maxDis)
+                        if (dis > 10 && dis < _lightSpace+10 && dis > maxDis)
                             maxDis = dis;
                         if (pointDirs.Any(c => c.Key.DistanceTo(item.Key) < 1000))
                             continue;
-                        
-                        hisPoint.Add(pointInLine);
-                        endPoint = pointInLine + lineInfo.lineDir.MultiplyBy(100);
                         if ((pointInLine.DistanceTo(sp) + pointInLine.DistanceTo(lineInfo.line.EndPoint)) > lineLength + 10)
                             continue;
-                        if (isAdd)
+                        if (isAdd) 
                         {
                             pointDirs.Add(item.Key, item.Value);
                             isAdd = false;
                         }
-                        isAdd = false;
                     }
-                    if (maxDis < 100)
-                        endPoint = startPt + lineInfo.lineDir.MultiplyBy(1000);
-                    else
-                        endPoint = startPt + lineInfo.lineDir.MultiplyBy(maxDis);
+                    endPoint = startPt + lineInfo.lineDir.MultiplyBy(maxDis < 100?1000:maxDis);
                 }
                 startPt = endPoint;
                 endPoint = startPt + lineInfo.lineDir.MultiplyBy(_lightSpace);
                 if (endPoint.DistanceTo(sp) >= lineLength -100)
-                    endPoint = lineInfo.line.EndPoint-lineInfo.lineDir.MultiplyBy(100);
+                    endPoint = lineInfo.line.EndPoint;
             }
             if (null == pointDirs || pointDirs.Count < 1)
                 return;
@@ -407,67 +582,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 _ligthLayouts.Add(light);
             }
         }
-        private void GetLightLayoutPlanB(LineGraphNode lineInfo, List<Polyline> inWalls, List<Polyline> inColumns) 
-        {
-            Point3d sp = lineInfo.line.StartPoint;
-            var sideDir = lineInfo.layoutLineSide;
-            var lineLength = lineInfo.line.Length;
-            if ((null == inWalls || inWalls.Count < 1) && (null == inColumns || inColumns.Count < 1))
-            {
-                //相交处无梁，无柱使用吊装
-            }
-            else
-            {
-                //1.疏散指示灯具间距≤10m（可通过面板配置10/15m）
-                //2.转弯/丁字路口/十字路口处，应优先保障人员在转弯/路口处可以看到下一段路的疏散指示灯（下一段路的疏散指示灯应装在车道线外侧），
-                //  如不能满足时，需要在转弯处加装吊装的疏散指示灯
-                var columnLights = GetLineColumnLayoutPoints(lineInfo, inColumns);
-                if (null == columnLights)
-                    columnLights = new List<LightLayout>();
-                //这跟线上没有柱子
-                columnLights = columnLights.OrderBy(c => c.disToHostLineSp).ToList();
-                columnLights = columnLights.Where(c => c.disToHostLineSp > 100 && c.disToHostLineSp < (lineLength - 10)).ToList();
-                if (columnLights.Count < 1)
-                {
-                    //没有柱子
-
-                }
-                else
-                {
-                    //判断最近的柱子是否满足
-                    Point3d origin = sp;
-                    LightLayout lightLayout = null;
-                    while (columnLights.Count > 0)
-                    {
-                        var light = columnLights.FirstOrDefault();
-                        double nearDis = light.linePoint.DistanceTo(origin);
-                        if (nearDis >= _lightSpace)
-                        {
-                            if (null == lightLayout)
-                            {
-                                //点不符合要求,进一步找墙判断是否有墙可以放置
-                                origin = light.linePoint;
-                                lightLayout = null;
-                            }
-                            else
-                            {
-                                _ligthLayouts.Add(lightLayout);
-                                origin = lightLayout.linePoint;
-                                lightLayout = light;
-                            }
-                        }
-                        else
-                        {
-                            //该点符合要求
-                            lightLayout = light;
-                        }
-                        columnLights.Remove(light);
-                    }
-                    if (null != lightLayout)
-                        _ligthLayouts.Add(lightLayout);
-                }
-            }
-        }
+        /// <summary>
+        /// 初始化线的节点信息
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <returns></returns>
         List<LineGraphNode> InitAllLineNode(List<Line> lines) 
         {
             var lineGrapheNode = new List<LineGraphNode>();
@@ -539,7 +658,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// </summary>
         /// <param name="line"></param>
         /// <returns></returns>
-        List<LineGraphNode> GetLineNodes(Line line)
+        List<LineGraphNode> GetLineNodes(Line line,double maxDis=2300)
         {
             var LineGrapheNode = new List<LineGraphNode>();
             //step1 获取每一根线上的节点
@@ -553,7 +672,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     continue;
                 var temp = (node.nodePoint - sp);
                 double dis = temp.DotProduct(leftDir);
-                if (Math.Abs(dis) > 2300)
+                if (Math.Abs(dis) > maxDis)
                     continue;
                 Point3d pointInLine = node.nodePoint - leftDir.MultiplyBy(dis);
                 if (pointInLine.DistanceTo(sp) + pointInLine.DistanceTo(line.EndPoint) > line.Length + 10)
@@ -571,7 +690,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             LineGrapheNode.Add(lineGraphe);
             return LineGrapheNode;
         }
-
+        /// <summary>
+        /// 获取某个线上的经过节点的其它节点
+        /// </summary>
+        /// <param name="line"></param>
+        /// <param name="node"></param>
+        /// <param name="otherNodeDirs"></param>
+        /// <returns></returns>
         List<GraphNode> GetOtherNode(Line line,GraphNode node,List<LineGraphNode> otherNodeDirs) 
         {
             List<GraphNode> otherNodes = new List<GraphNode>();
@@ -608,33 +733,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             return otherNodes;
         }
 
-        List<LightLayout> GetLineColumnLayoutPoints(LineGraphNode lineInfo, List<Polyline> columns)
-        {
-            var resLayout = new List<LightLayout>();
-            if (null == lineInfo || columns == null || columns.Count < 1)
-                return resLayout;
-            Point3d sp = lineInfo.line.StartPoint;
-            var sideDir = lineInfo.layoutLineSide;
-            LayoutToStructure toStructure = new LayoutToStructure();
-            foreach (var column in columns)
-            {
-                //柱子为闭合回路，点会多一个
-                var allPts = column.GetPoints().ToList();
-                allPts.Remove(allPts.First());
-                var sumX = allPts.Sum(c => c.X);
-                var sumY = allPts.Sum(c => c.Y);
-                Point3d centerPt = new Point3d(sumX / allPts.Count, sumY / allPts.Count, 0);
-                //获取线上的投影点
-                var temp = (centerPt - sp);
-                var tempDis = temp.DotProduct(sideDir);
-                var prjPt = centerPt - sideDir.MultiplyBy(tempDis);
-                var pointDir = toStructure.GetColumnLayoutPoint(column, prjPt, lineInfo.lineDir);
-                var light = PointToExitDirection(lineInfo, pointDir.Value.Item1, pointDir.Value.Item2);
-                if(null != light)
-                    resLayout.Add(light);
-            }
-            return resLayout;
-        }
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="lineInfo"></param>
+        /// <param name="point"></param>
+        /// <param name="createSideDir"></param>
+        /// <returns></returns>
         LightLayout PointToExitDirection(LineGraphNode lineInfo,Point3d point,Vector3d createSideDir) 
         {
             var sp = lineInfo.line.StartPoint;
@@ -671,28 +776,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             if (null != endNode)
                 lightLayout.endType = endNode.nodeType;
             return lightLayout;
-        }
-        
-        /// <summary>
-        /// 获取不经过某些路径的路径
-        /// </summary>
-        /// <param name="routes"></param>
-        /// <param name="targetLines"></param>
-        /// <returns></returns>
-        List<GraphRoute> GetGrapNotThroughLines(List<GraphRoute> routes, List<Line> targetLines)
-        {
-            List<GraphRoute> resRoutes = new List<GraphRoute>();
-            if (null == routes || null == targetLines)
-                return resRoutes;
-            foreach (var route in routes)
-            {
-                if (null == route)
-                    continue;
-                if (GraphUtils.RouteThroughLines(route, targetLines))
-                    continue;
-                resRoutes.Add(route);
-            }
-            return resRoutes;
         }
         
         
@@ -762,38 +845,15 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             polyline.Closed = true;
             return polyline;
         }
-        
-        //这个是针对墙柱线上的
-        List<Point3d> LineSplitToLayoutPoint(Line line)
-        {
-            Vector3d dir = (line.EndPoint - line.StartPoint).GetNormal();
-            int count = (int)Math.Ceiling(line.Length / _lightSpace);
-            double step = line.Length / count;
-            List<Point3d> breakPts = new List<Point3d>();
-            Point3d sp = line.StartPoint;
-            Point3d point = sp ;
-            while (point.DistanceTo(sp)<= line.Length)
-            {
-                breakPts.Add(point);
-                point = point + dir.MultiplyBy(step);
-            }
-            return breakPts;
-        }
-        List<Point3d> LineSplitToLayoutPoint(Line line,int count)
-        {
-            Vector3d dir = (line.EndPoint - line.StartPoint).GetNormal();
-            double step = line.Length / count;
-            List<Point3d> breakPts = new List<Point3d>();
-            Point3d sp = line.StartPoint;
-            Point3d point = sp;
-            while (point.DistanceTo(sp) <= line.Length)
-            {
-                breakPts.Add(point);
-                point = point + dir.MultiplyBy(step);
-            }
-            return breakPts;
-        }
-        #endregion
+
+        /// <summary>
+        /// 判断生生成的灯是否符合要求，如果被边框穿过，不符合要求
+        /// （有些框线穿过边框，但需要保留）
+        /// </summary>
+        /// <param name="createPoint"></param>
+        /// <param name="arrowDir"></param>
+        /// <param name="outDir"></param>
+        /// <returns></returns>
         bool LightIsCorrect(Point3d createPoint,Vector3d arrowDir,Vector3d outDir) 
         {
             List<Line> lines = new List<Line>();
@@ -833,58 +893,52 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
             return isIntersection;
         }
-        void LineAddHostLight(Line line,Line pLine,GraphRoute route, bool isExtLine,ref List<Point3d> notCreatePoints) 
+        void LineAddHostLight(Line line,Line pLine,Point3d? pPoint,GraphNode sNode,GraphRoute endRoute, bool isExtLine,bool isLightFirst,ref List<Point3d> notCreatePoints) 
         {
-            Point3d nodePoint = route.node.nodePoint;
+            Point3d nodePoint = line.StartPoint;
             Vector3d exitDir = line.LineDirection();
 
-            bool nextIsExit = route.nextRoute.node.isExit;
+            bool nextIsExit = endRoute.node.isExit;
             var leftDir = exitDir.RotateBy(Math.PI / 2, _normal).GetNormal();
             bool isTwoSide = true;
             var createPoint = nodePoint + exitDir.MultiplyBy(_lightOffset);
-            var nextRoute = route.nextRoute;
-            Vector3d pDir = new Vector3d();
-            if (null != pLine)
-                pDir = (pLine.EndPoint - pLine.StartPoint).GetNormal();
+            var nextRoute = endRoute.nextRoute;
             //长度太小，不进行排布
             if (line.Length < 500)
                 return;
             bool isAdd = false;
-            if (line.Length < 3000)
+            Vector3d pDir = new Vector3d();
+            if (pPoint.HasValue) 
+                pDir = (nodePoint - pPoint.Value).GetNormal();
+                
+            if (line.Length < 1500)
             {
                 if (pLine == null)
                     isAdd = true;
                 else
                 {
                     createPoint = nodePoint;
-                    if (nextRoute.nextRoute != null)
+                    if (nextRoute != null)
                     {
-                        if (line.Length >= 1000)
+                        exitDir = (nextRoute.node.nodePoint - endRoute.node.nodePoint).GetNormal();
+                        var dot = pDir.DotProduct(exitDir);
+                        if (dot < 0)
                         {
-                            exitDir = (nextRoute.nextRoute.node.nodePoint - nextRoute.node.nodePoint).GetNormal();
-                            var dot = pDir.DotProduct(exitDir);
-                            if (dot < 0)
-                            {
-                                exitDir = (line.EndPoint - line.StartPoint).GetNormal();
-                                if(null != pLine)
-                                    createPoint = createPoint + pDir.MultiplyBy(800);
-                            }
-                            else if (!isExtLine)
-                                notCreatePoints.Add(nodePoint);
-                            else
-                                notCreatePoints.Add(nextRoute.node.nodePoint);
-                            leftDir = exitDir.RotateBy(Math.PI / 2, _normal).GetNormal();
-                            isAdd = true;
+                            exitDir = (line.EndPoint - line.StartPoint).GetNormal();
+                            if (null != pLine)
+                                createPoint = createPoint + pDir.MultiplyBy(800);
                         }
+                        else if (!isExtLine)
+                            notCreatePoints.Add(nodePoint);
                         else
-                        {
-                            if (!isExtLine)
-                                notCreatePoints.Add(nodePoint);
-                        }
+                            notCreatePoints.Add(endRoute.node.nodePoint);
+                        
+                        leftDir = exitDir.RotateBy(Math.PI / 2, _normal).GetNormal();
+                        isAdd = true;
                     }
                     else
                     {
-                        if (line.Length > 1500 && pLine.Length > 5000)
+                        if (line.Length > 1000 && pLine.Length > 5000)
                             isAdd = true;
                     }
                 }
@@ -917,23 +971,90 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 //线长度比较长这里使用循环去添加布置点位
                 int count = (int)Math.Ceiling(line.Length / _lightSpace);
                 double step = line.Length / count;
-                while (createPoint.DistanceTo(nodePoint) <= line.Length)
+                bool isFirst = true;
+                while (createPoint.DistanceTo(nodePoint) <= line.Length-1000)
                 {
-                    var light1 = new LightLayout(createPoint, createPoint, null, leftDir, exitDir, leftDir, route.node, true);
+                    if (isFirst) 
+                    {
+                        var moveVect = GetHostMoveVector(sNode);
+                        if (null != moveVect && !moveVect.IsZeroLength())
+                        {
+                            var dot = moveVect.DotProduct(exitDir);
+                            if (dot < 0)
+                                createPoint = nodePoint - exitDir.MultiplyBy(800);
+                            else
+                                createPoint = nodePoint + exitDir.MultiplyBy(800);
+                        }
+                    }
+                    var light1 = new LightLayout(nodePoint, createPoint, null, leftDir, exitDir, leftDir, sNode, true);
+                    light1.isCheckDelete = isFirst && isLightFirst;
                     light1.isTwoSide = isTwoSide;
                     _ligthLayouts.Add(light1);
                     createPoint = createPoint + exitDir.MultiplyBy(step);
+                    if (isFirst)
+                        createPoint = nodePoint + exitDir.MultiplyBy(step);
+                    isFirst = false;
                 }
             }
             if (!isAdd)
                 return;
             if (notCreatePoints.Any(c => c.DistanceTo(createPoint) < 900))
                 return;
-            if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(createPoint) < 1000))
+
+            var moveVect1 = GetHostMoveVector(sNode);
+            if (null != moveVect1 && !moveVect1.IsZeroLength())
+            {
+                var moveDir = exitDir;
+                if (null != pLine)
+                {
+                    moveDir = pDir;
+                }
+                var dot = moveVect1.DotProduct(moveDir);
+                if (dot < 0)
+                    createPoint = nodePoint - moveDir.MultiplyBy(800);
+                else
+                    createPoint = nodePoint + moveDir.MultiplyBy(800);
+            }
+            if (_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(createPoint) < 1500))
                 return;
-            var light = new LightLayout(createPoint, createPoint, null, leftDir, exitDir, leftDir, route.node, true);
+            var light = new LightLayout(nodePoint, createPoint, null, leftDir, exitDir, leftDir, sNode, true);
+            light.isCheckDelete = isLightFirst;
             light.isTwoSide = isTwoSide;
             _ligthLayouts.Add(light);
+        }
+
+
+        Vector3d GetHostMoveVector(GraphNode node) 
+        {
+            //获取所在的壁装线信息
+            var moveDirs = new List<Vector3d>();
+            foreach (var item in _wallGraphNodes) 
+            {
+                if (item == null || item.nodeDirections == null || item.nodeDirections.Count<1)
+                    continue;
+                bool nodeInLine = item.nodeDirections.Any(c => c.graphNode.nodePoint.IsEqualTo(node.nodePoint, new Tolerance(1, 1)));
+                if (!nodeInLine)
+                    continue;
+                bool isAdd = true;
+                foreach (var dir in moveDirs)
+                {
+                    if (null == dir || dir.IsZeroLength())
+                        continue;
+                    double angle = dir.GetAngleTo(item.layoutLineSide);
+                    angle %= Math.PI;
+                    if (angle < Math.PI / 4)
+                        isAdd = false;
+                    
+                }
+                if(isAdd)
+                    moveDirs.Add(item.layoutLineSide);
+            }
+            Vector3d moveVect = new Vector3d(0,0,0);
+            foreach (var dir in moveDirs) 
+            {
+                moveVect += dir.MultiplyBy(800);
+            }
+            return moveVect;
         }
     }
    

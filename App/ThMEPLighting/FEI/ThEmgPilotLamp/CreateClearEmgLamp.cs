@@ -31,7 +31,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_SINGLESIDE,
                 ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_DOUBLESIDE
             };
-        public static ObjectId CreatePilotLamp(this Database database, Point3d pt, Vector3d layoutDir,string blockName, Dictionary<string, string> attNameValues) 
+        public static ObjectId CreatePilotLamp(this Database database, Point3d pt, Vector3d layoutDir,string blockName,bool isHosting, Dictionary<string, string> attNameValues) 
         {
             double rotateAngle = Vector3d.XAxis.GetAngleTo(layoutDir);
             //控制旋转角度
@@ -42,13 +42,25 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
+                
+                var id = acadDatabase.ModelSpace.ObjectId.InsertBlockReference(
                     ThMEPLightingCommon.EmgLightLayerName,
                     blockName,
                     pt,
                     new Scale3d(scaleNum),
                     rotateAngle,
                     attNameValues);
+                if (null != id && isHosting)
+                {
+                    rotateAngle = rotateAngle % Math.PI;
+                    if (rotateAngle > Math.PI / 2) 
+                    {
+                        Point3d point1 = pt;
+                        Point3d point2 = pt + layoutDir.MultiplyBy(100);
+                        id = id.Mirror(point1, point2, true);
+                    }
+                }
+                return id;
             }
         }
 

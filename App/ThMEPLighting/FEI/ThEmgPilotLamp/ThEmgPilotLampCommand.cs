@@ -92,12 +92,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     mainLines.ForEach(c => laneLines.Add(c));
                     assitLines.ForEach(c => laneLines.Add(c));
                     assitHostLines.ForEach(c => laneLines.Add(c));
+                    //step1 根据线，出口信息计算，所有拐点到最近出口的位置
                     EmgPilotLampLineNode lampLineNode = new EmgPilotLampLineNode(laneLines, exitLines, enterBlcok);
 
                     //获取墙柱信息
                     primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
 
-                    //根据这些线信息进行计算布置的点信息
+                    //根据这些线信息，拐点到出口的数据进行计算布置的点信息
                     IndicatorLight indicator = new IndicatorLight();
                     assitLines.ForEach(c => indicator.assistLines.Add(c));
                     exitLines.ForEach(c => indicator.exitLines.Add(c));
@@ -107,6 +108,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     mainLines.ForEach(c => indicator.mainLines.Add(c));
                     assitHostLines.ForEach(c => indicator.assistHostLines.Add(c));
                     EmgLampIndicatorLight emgLampIndicator = new EmgLampIndicatorLight(pline.Key,columns, walls, indicator);
+
+                    //根据计算出的灯具信息，在相应的位置放置相应的灯具
                     var res = emgLampIndicator.CalcLayout();
                     foreach (var item in res)
                     {
@@ -124,7 +127,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         if (item.isHoisting)
                         {
                             //吊装
-
                             if (item.isTwoSide)
                             {
                                 blockName = ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_DOUBLESIDE;
@@ -148,10 +150,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                                     blockName = ThMEPLightingCommon.PILOTLAMP_WALL_ONEWAY_SINGLESIDE;
                                     break;
                             }
-
-                           
                         }
-                        CreateClearEmgLamp.CreatePilotLamp(acdb.Database, createPt, createDir, blockName, new Dictionary<string, string>());
+                        CreateClearEmgLamp.CreatePilotLamp(acdb.Database, createPt, createDir, blockName,item.isHoisting, new Dictionary<string, string>());
                     }
                 }
             }

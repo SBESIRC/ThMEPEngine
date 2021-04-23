@@ -61,6 +61,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// </summary>
         public bool isTwoExitDir { get; set; }
         /// <summary>
+        /// 壁装时该节点是否需要检查删除
+        /// </summary>
+        public bool isCheckDelete { get; set; }
+        /// <summary>
         /// 疏散指示灯放置信息
         /// </summary>
         /// <param name="point">所在线上的点</param>
