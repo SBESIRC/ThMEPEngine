@@ -72,7 +72,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
-                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -86,7 +86,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
-                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -101,7 +101,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
-                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -115,7 +115,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
-                <Command Local="ThExtractBeamConnect" Global="THExtractRoomOutline" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
