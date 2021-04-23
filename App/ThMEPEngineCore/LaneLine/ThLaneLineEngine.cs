@@ -85,7 +85,7 @@ namespace ThMEPEngineCore.LaneLine
             var lines = spatialIndex.Geometries.Values.Cast<Line>();
             lines.ForEach(o =>
             {
-                var buffer = ExpandBy(o, extend_distance, collinear_gap_distance);
+                var buffer = Expand(o, extend_distance, collinear_gap_distance);
                 var objs = spatialIndex.SelectCrossingPolygon(buffer);
                 if (objs.Count > 1)
                 {
@@ -122,25 +122,17 @@ namespace ThMEPEngineCore.LaneLine
             return results;
         }
 
-        protected static Polyline ExpandBy(Line line, double xOffset, double yOffset)
+        protected static Polyline Expand(Line line, double xOffset, double yOffset)
         {
-            var direction = line.LineDirection();
-            var centerline = new Line(line.EndPoint + direction * xOffset, line.StartPoint - direction * xOffset);
-            return Buffer(centerline, yOffset);
+            return line.ExtendLine(xOffset).Buffer(yOffset);
         }
 
-        protected static Polyline Buffer(Line line, double distance)
-        { 
-            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
-        }
-
-        protected static Line CenterLine(Geometry geometry)
+        protected static Line CenterLine(DBObjectCollection objs)
         {
-            var rectangle = MinimumDiameter.GetMinimumRectangle(geometry) as Polygon;
-            var shell = rectangle.Shell.ToDbPolyline();
+            var obb = objs.GetMinimumRectangle();
             return new Line(
-                shell.GetPoint3dAt(0) + 0.5 * (shell.GetPoint3dAt(1) - shell.GetPoint3dAt(0)),
-                shell.GetPoint3dAt(2) + 0.5 * (shell.GetPoint3dAt(3) - shell.GetPoint3dAt(2)));
+                obb.GetPoint3dAt(0) + 0.5 * (obb.GetPoint3dAt(1) - obb.GetPoint3dAt(0)),
+                obb.GetPoint3dAt(2) + 0.5 * (obb.GetPoint3dAt(3) - obb.GetPoint3dAt(2)));
         }
 
         protected static bool IsParallel(Line line1, Line line2)

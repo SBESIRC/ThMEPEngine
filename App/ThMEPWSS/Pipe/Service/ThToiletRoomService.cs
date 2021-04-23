@@ -1,11 +1,10 @@
 ﻿using System.Linq;
-using System.Collections.Generic;
 using ThCADCore.NTS;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
-using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -13,20 +12,20 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWToiletRoom> ToiletContainers { get; set; }
         private List<ThIfcSpace> Spaces { get; set; }
-        private List<ThIfcClosestool> Closestools { get; set; }
-        private List<ThIfcFloorDrain> FloorDrains { get; set; }
-        private List<ThIfcCondensePipe> CondensePipes { get; set; }
-        private List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        private List<ThWClosestool> Closestools { get; set; }
+        private List<ThWFloorDrain> FloorDrains { get; set; }
+        private List<ThWCondensePipe> CondensePipes { get; set; }
+        private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         private ThCADCoreNTSSpatialIndex SpaceSpatialIndex { get; set; }
         private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
-        private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }    
+        private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
 
         private ThToiletRoomService(
             List<ThIfcSpace> spaces,
-            List<ThIfcClosestool> closestools,
-            List<ThIfcFloorDrain> floorDrains,
-            List<ThIfcCondensePipe> condensePipes,
-            List<ThIfcRoofRainPipe> roofRainPipes)
+            List<ThWClosestool> closestools,
+            List<ThWFloorDrain> floorDrains,
+            List<ThWCondensePipe> condensePipes,
+            List<ThWRoofRainPipe> roofRainPipes)
         {
             Spaces = spaces;
             Closestools = closestools;
@@ -37,15 +36,15 @@ namespace ThMEPWSS.Pipe.Service
             BuildSpatialIndex();
         }
         public static List<ThWToiletRoom> Build(List<ThIfcSpace> spaces,
-            List<ThIfcClosestool> closestools,
-            List<ThIfcFloorDrain> floorDrains,
-            List<ThIfcCondensePipe> condensePipes,
-            List<ThIfcRoofRainPipe> roofRainPipes)
+            List<ThWClosestool> closestools,
+            List<ThWFloorDrain> floorDrains,
+            List<ThWCondensePipe> condensePipes,
+            List<ThWRoofRainPipe> roofRainPipes)
         {
-            var toiletContainerService = new ThToiletRoomService(spaces, closestools, floorDrains, condensePipes, roofRainPipes);          
+            var toiletContainerService = new ThToiletRoomService(spaces, closestools, floorDrains, condensePipes, roofRainPipes);
             toiletContainerService.Build();
-            return toiletContainerService.ToiletContainers;            
-        }      
+            return toiletContainerService.ToiletContainers;
+        }
         private void Build()
         {
             //找主体空间 空间框线包含“卫生间”
@@ -58,7 +57,7 @@ namespace ThMEPWSS.Pipe.Service
         private ThWToiletRoom CreateToiletContainer(ThIfcSpace toiletSpace)
         {
             ThWToiletRoom thToiletContainer = new ThWToiletRoom();
-            thToiletContainer.Toilet = toiletSpace;
+            thToiletContainer.Space = toiletSpace;
             var toiletDrainwellService = ThToiletDrainwellService.Find(Spaces, toiletSpace, SpaceSpatialIndex);
             thToiletContainer.DrainageWells = toiletDrainwellService.Drainwells;
 
@@ -67,7 +66,31 @@ namespace ThMEPWSS.Pipe.Service
 
             var toiletFloordrainService = ThToiletFloorDrainService.Find(FloorDrains, toiletSpace, FloorDrainSpatialIndex);
             thToiletContainer.FloorDrains = toiletFloordrainService.FloorDrains;
-           
+            if(!(toiletFloordrainService.FloorDrains.Count>0))//加一层过滤，后期可合并到里层
+            {
+                foreach(var FloorDrain in FloorDrains)
+                {
+                    BlockReference block = FloorDrain.Outline as BlockReference;
+                   Polyline boundary= toiletSpace.Boundary as Polyline;
+                    if (block.Position.DistanceTo(boundary.GetCenter())< ThWPipeCommon.MAX_TOILET_TO_FLOORDRAIN_DISTANCE1)
+                    {
+                        thToiletContainer.FloorDrains.Add(FloorDrain);
+                        break;
+                    }
+                }
+            }
+            else
+            {
+                foreach (var FloorDrain in FloorDrains)
+                {
+                    BlockReference block = FloorDrain.Outline as BlockReference;
+                    Polyline boundary = toiletSpace.Boundary as Polyline;
+                    if (block.Position.DistanceTo(boundary.GetCenter()) < ThWPipeCommon.MAX_TOILET_TO_FLOORDRAIN_DISTANCE2)
+                    {
+                        thToiletContainer.FloorDrains.Add(FloorDrain);
+                    }
+                }
+            }
             thToiletContainer.CondensePipes = FindCondensePipes(CondensePipes, toiletSpace);
             thToiletContainer.RoofRainPipes = FindRoofRainPipes(RoofRainPipes, toiletSpace);
             return thToiletContainer;
@@ -82,13 +105,13 @@ namespace ThMEPWSS.Pipe.Service
             Spaces.ForEach(o => spaceObjs.Add(o.Boundary));
             SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(spaceObjs);
         }
-        private static List<ThIfcCondensePipe> FindCondensePipes(List<ThIfcCondensePipe> pipes, ThIfcSpace space)
+        private static List<ThWCondensePipe> FindCondensePipes(List<ThWCondensePipe> pipes, ThIfcSpace space)
         {
-           var condensePipes = new List<ThIfcCondensePipe>();
-           foreach(var pipe in pipes)
+            var condensePipes = new List<ThWCondensePipe>();
+            foreach (var pipe in pipes)
             {
                 Polyline s = pipe.Outline as Polyline;
-                if (s.GetCenter().DistanceTo(space.Boundary.GetCenter())< ThWPipeCommon.MAX_TOILET_TO_CONDENSEPIPE_DISTANCE)
+                if (s.GetCenter().DistanceTo(space.Boundary.GetCenter()) < ThWPipeCommon.MAX_TOILET_TO_CONDENSEPIPE_DISTANCE)
                 {
                     condensePipes.Add(pipe);
                 }
@@ -96,9 +119,9 @@ namespace ThMEPWSS.Pipe.Service
             }
             return condensePipes;
         }
-        private static List<ThIfcRoofRainPipe> FindRoofRainPipes(List<ThIfcRoofRainPipe> pipes, ThIfcSpace space)
+        private static List<ThWRoofRainPipe> FindRoofRainPipes(List<ThWRoofRainPipe> pipes, ThIfcSpace space)
         {
-            var roofRainPipes = new List<ThIfcRoofRainPipe>(); 
+            var roofRainPipes = new List<ThWRoofRainPipe>();
             foreach (var pipe in pipes)
             {
                 Polyline s = pipe.Outline as Polyline;

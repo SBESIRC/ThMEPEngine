@@ -1,0 +1,6 @@
+[submodule "Core"]
+	path = Core
+	url = https://github.com/shichongdong/ThMEP.Core.git
+[submodule "doc"]
+	path = doc
+	url = https://github.com/shichongdong/ThMEP.Documentation.git

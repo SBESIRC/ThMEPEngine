@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using QuickGraph;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using ThCADCore.NTS;
 
 namespace ThMEPHVAC.Duct
@@ -69,7 +68,15 @@ namespace ThMEPHVAC.Duct
             }
             else
             {
-                source = Graph.Vertices.Where(v => v.Position.IsEqualTo(sourcepoint,new Tolerance(0.1,0.1))).First();
+                var tmp = Graph.Vertices.Where(v => v.Position.IsEqualTo(sourcepoint, new Tolerance(5, 5)));
+                if (tmp.Any())
+                {
+                    source = tmp.First();
+                }
+                else
+                {
+                    return source;
+                }
             }
             Graph.AddVertex(target);
             Graph.AddEdge(new ThDuctEdge<ThDuctVertex>(source, target));
@@ -80,7 +87,7 @@ namespace ThMEPHVAC.Duct
         private void DoBuildGraph(Point3d searchpoint, Line currentline)
         {
             var poly = new Polyline();
-            poly.CreatePolygon(searchpoint.ToPoint2D(), 4, 10);
+            poly.CreatePolygon(searchpoint.ToPoint2D(), 4, 6);
 
             //执行循环探测
             var results = SpatialIndex.SelectCrossingPolygon(poly);
@@ -100,7 +107,6 @@ namespace ThMEPHVAC.Duct
         public void BuildGraph(DBObjectCollection lines, Point3d searchpoint)
         {
             SpatialIndex = new ThCADCoreNTSSpatialIndex(lines);
-
             //首先单独处理起始段,探测点为用户指定的起点，第一轮探测
             var poly = new Polyline();
             poly.CreatePolygon(searchpoint.ToPoint2D(), 4, 10);

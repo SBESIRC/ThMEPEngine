@@ -1,21 +1,21 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using ThCADCore.NTS;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThRoofFloorGravityWaterBucketService
     {
         private ThIfcSpace Space { get; set; }
-        private List<ThIfcGravityWaterBucket> Buckets { get; set; }
+        private List<ThWGravityWaterBucket> Buckets { get; set; }
         private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
         private ThRoofFloorGravityWaterBucketService(
             ThIfcSpace space,
-            List<ThIfcGravityWaterBucket> buckets)
+            List<ThWGravityWaterBucket> buckets)
         {
             Space = space;
             Buckets = buckets;
@@ -23,14 +23,14 @@ namespace ThMEPWSS.Pipe.Service
             Buckets.ForEach(o => objs.Add(o.Outline));
             SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
         }
-        public static List<ThIfcGravityWaterBucket> Find(
+        public static List<ThWGravityWaterBucket> Find(
           ThIfcSpace space,
-          List<ThIfcGravityWaterBucket> buckets)
+          List<ThWGravityWaterBucket> buckets)
         {
             var service = new ThRoofFloorGravityWaterBucketService(space, buckets);
             return service.Find();
         }
-        private List<ThIfcGravityWaterBucket> Find()
+        private List<ThWGravityWaterBucket> Find()
         {
             var roofFloorBoundary = Space.Boundary as Polyline;
             var crossObjs = SpatialIndex.SelectCrossingPolygon(roofFloorBoundary);

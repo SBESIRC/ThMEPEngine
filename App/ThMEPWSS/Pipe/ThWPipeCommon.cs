@@ -11,9 +11,25 @@
         /// </summary>
         public const double MAX_BALCONYWASHINGFLOORDRAIN_TO_RAINPIPE = 1700;
         /// <summary>
+        /// 相邻设备平台最近距离
+        /// </summary>
+        public const double MAX_DEVICE_TO_DEVICE = 1700;
+        /// <summary>
+        /// 相邻设备平台距阳台最远距离
+        /// </summary>
+        public const double MAX_DEVICE_TO_BALCONY = 4000;
+        /// <summary>
         /// 雨水管到地漏最大距离（阳台区域）
         /// </summary>
         public const double MAX_RAINPIPE_TO_BALCONYFLOORDRAIN = 2000;
+        /// <summary>
+        /// 新增场景新增排水管到洗衣机地漏最小距离（阳台区域）
+        /// </summary>
+        public const double MIN_DOWNSPOUT_TO_BALCONYFLOORDRAIN = 450;
+        /// <summary>
+        /// 冷凝管管到洗衣机最大距离（阳台区域）
+        /// </summary>
+        public const double MAX_CONDENSEPIPE_TO_WASHMACHINE = 2000;
         /// <summary>
         /// 洗衣机到台盆最大距离（阳台区域）
         /// </summary>
@@ -22,6 +38,10 @@
         /// 洗衣机地漏到排水管最大距离（阳台区域）
         /// </summary>
         public const double MAX_DOWNSPOUT_TO_BALCONYWASHINGFLOORDRAIN = 800;
+        /// <summary>
+        /// 新增场景洗衣机到雨水管最大距离（卫生间区域）
+        /// </summary>
+        public const double MAX__RAINPIPE_TO_WASHMACHINE = 550;
         /// <summary>
         /// 立管半径
         /// </summary>
@@ -99,17 +119,33 @@
         /// </summary>
         public const double MAX_TOILET_TO_KITCHEN_DISTANCE = 3500;
         /// <summary>
+        /// 特殊场景卫生间到厨房最大距离，应对新增距离远的情况
+        /// </summary>
+        public const double MAX_TOILET_TO_KITCHEN_DISTANCE1 = 5500;
+        /// <summary>
         /// 厨房到雨水管最大距离
         /// </summary>
         public const double MAX_KITCHEN_TO_RAINPIPE_DISTANCE = 5500;
         /// <summary>
+        /// 阳台到雨水管最大距离
+        /// </summary>
+        public const double MAX_BALCONY_TO_RAINPIPE_DISTANCE = 2000;
+        /// <summary>
         /// 卫生间到冷凝管最大距离
         /// </summary>
-        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 2600;
+        public const double MAX_TOILET_TO_CONDENSEPIPE_DISTANCE = 3000;
         /// <summary>
         /// 卫生间到地漏最大距离
         /// </summary>
         public const double MAX_TOILET_TO_FLOORDRAIN_DISTANCE = 2200;
+        /// <summary>
+        /// 新增特殊场景卫生间到地漏最大距离
+        /// </summary>
+        public const double MAX_TOILET_TO_FLOORDRAIN_DISTANCE2 = 2650;
+        /// <summary>
+        /// 新增特殊场景卫生间到地漏最大距离
+        /// </summary>
+        public const double MAX_TOILET_TO_FLOORDRAIN_DISTANCE1 = 4500;
         /// <summary>
         /// 阳台到设备平台最大距离
         /// </summary>
@@ -153,11 +189,11 @@
         /// <summary>
         /// 水管标注
         /// </summary>
-        public const string W_DRAI_NOTE = "W-DRAI-NOTE";
+        public static string W_DRAI_NOTE = "W-DRAI-NOTE";
         /// <summary>
         /// 雨水管立管
         /// </summary>
-        public const string W_RAIN_EQPM = "W-RAIN-EQPM";
+        public static string W_RAIN_EQPM = "W-RAIN-EQPM";
         /// <summary>
         /// 污水管立管
         /// </summary>
@@ -179,7 +215,17 @@
         /// 地漏
         /// </summary>
         public const string W_DRAI_FLDR = "W-DRAI-FLDR";
-        
 
+        /// <summary>
+        /// 楼层
+        /// </summary>
+        public const string STOREY_BLOCK_NAME = "楼层框定";
+        public const string STOREY_DYNAMIC_PROPERTY_TYPE = "楼层类型";
+        public const string STOREY_ATTRIBUTE_VALUE_NUMBER = "楼层编号";
+        public const string STOREY_DYNAMIC_PROPERTY_VALUE_ROOF_FLOOR = "大屋面";
+        public const string STOREY_DYNAMIC_PROPERTY_VALUE_TOP_ROOF_FLOOR = "小屋面";
+        public const string STOREY_DYNAMIC_PROPERTY_VALUE_STANDARD_FLOOR = "标准层";
+        public const string STOREY_DYNAMIC_PROPERTY_VALUE_NON_STANDARD_FLOOR = "非标准层";
+        public const string STOREY_DYNAMIC_PROPERTY_VALUE_NOT_STANDARD_FLOOR = "非标层";
     }
 }

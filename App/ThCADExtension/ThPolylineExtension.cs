@@ -10,6 +10,11 @@ namespace ThCADExtension
 {
     public static class ThPolylineExtension
     {
+        /// <summary>
+        /// 多段线顶点集合（不支持圆弧段）
+        /// </summary>
+        /// <param name="pLine"></param>
+        /// <returns></returns>
         public static Point3dCollection Vertices(this Polyline pLine)
         {
             //https://keanw.com/2007/04/iterating_throu.html
@@ -21,7 +26,7 @@ namespace ThCADExtension
             }
 
             // 对于处于“闭合”状态的多段线，要保证其首尾点一致
-            if (pLine.Closed && !vertices[0].Equals(vertices[vertices.Count - 1]))
+            if (pLine.Closed && !vertices[0].IsEqualTo(vertices[vertices.Count - 1]))
             {
                 vertices.Add(vertices[0]);
             }
@@ -29,15 +34,28 @@ namespace ThCADExtension
             return vertices;
         }
 
+        /// <summary>
+        /// 多段线顶点集合（支持圆弧段）
+        /// </summary>
+        /// <param name="poly"></param>
+        /// <param name="chord"></param>
+        /// <returns></returns>
+        public static Point3dCollection VerticesEx(this Polyline poly, double length)
+        {
+            if (poly.HasBulges)
+            {
+                return poly.TessellatePolylineWithArc(length).Vertices();
+            }
+            else
+            {
+                return poly.Vertices();
+            }
+        }
+
         public static double[] Coordinates2D(this Polyline pLine)
         {
             var vertices = (Point3dList)pLine.Vertices();
             return vertices.Select(o => o.ToPoint2d().ToArray()).SelectMany(o => o).ToArray();
-        }
-
-        public static double[] Coordinates2D(this Polyline[] pLines)
-        {
-            return pLines.Select(o => o.Coordinates2D()).SelectMany(o => o).ToArray();
         }
 
         public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
@@ -79,12 +97,7 @@ namespace ThCADExtension
             Point3d pt3 = extents.MaxPoint;
             Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
             Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
-            return CreateRectangle(pt1,pt2,pt3,pt4);
-        }
-
-        public static Vector3d LineDirection(this Line line)
-        {
-            return line.StartPoint.GetVectorTo(line.EndPoint).GetNormal();
+            return CreateRectangle(pt1, pt2, pt3, pt4);
         }
 
         /// <summary>
@@ -211,7 +224,7 @@ namespace ThCADExtension
 
         public static Polyline Tessellate(this Circle circle, double length)
         {
-            if (length >= 2*Math.PI*circle.Radius)
+            if (length >= 2 * Math.PI * circle.Radius)
             {
                 return circle.ToTriangle();
             }
@@ -220,7 +233,7 @@ namespace ThCADExtension
                 Plane plane = new Plane(circle.Center, circle.Normal);
                 Matrix3d planeToWorld = Matrix3d.PlaneToWorld(plane);
                 Arc firstArc = new Arc(Point3d.Origin, circle.Radius, 0.0, Math.PI);
-                Arc secondArc = new Arc(Point3d.Origin, circle.Radius, Math.PI, Math.PI*2.0);
+                Arc secondArc = new Arc(Point3d.Origin, circle.Radius, Math.PI, Math.PI * 2.0);
                 firstArc.TransformBy(planeToWorld);
                 secondArc.TransformBy(planeToWorld);
                 Polyline firstPolyline = firstArc.TessellateArcWithArc(length);

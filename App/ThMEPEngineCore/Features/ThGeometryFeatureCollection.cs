@@ -1,9 +1,6 @@
-﻿using System.Linq;
-using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
+﻿using System.Collections.Generic;
 using NetTopologySuite.Features;
-using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Features
 {

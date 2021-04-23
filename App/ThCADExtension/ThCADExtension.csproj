@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
@@ -43,13 +43,15 @@
     <Compile Include="ThCircleExtension.cs" />
     <Compile Include="ThCUITools.cs" />
     <Compile Include="ThCurveExtension.cs" />
-    <Compile Include="ThDBObjectCollectionExtension.cs" />
+    <Compile Include="ThCurveCollectionExtension.cs" />
     <Compile Include="ThDisposableSet.cs" />
     <Compile Include="ThEditorExtension.cs" />
     <Compile Include="ThEntTool.cs" />
     <Compile Include="ThGeExtension.cs" />
     <Compile Include="ThHatchTool.cs" />
+    <Compile Include="ThBlockImageTool.cs" />
     <Compile Include="ThLayerTool.cs" />
+    <Compile Include="ThLineExtension.cs" />
     <Compile Include="ThLinqExtension.cs" />
     <Compile Include="ThMatrix3dExtension.cs" />
     <Compile Include="ThMPolygonTool.cs" />

@@ -2,21 +2,25 @@
 using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Linq2Acad;
+using NFox.Cad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Broadcast.Service
 {
     public class PrintBlindAreaService
     {
-        public void PrintBlindArea(List<Point3d> layoutPts, KeyValuePair<Polyline, List<Polyline>> polyInfo, double protectRange)
+        public void PrintBlindArea(List<Point3d> layoutPts, KeyValuePair<Polyline, List<Polyline>> polyInfo, double protectRange, ThMEPOriginTransformer originTransformer)
         {
             var blindAreas = CalProtectBlindArea(layoutPts, polyInfo, protectRange);
-            InsertBlindArea(blindAreas);
+            var objs = blindAreas.ToCollection();
+            originTransformer.Reset(objs);
+            InsertBlindArea(objs.Cast<Polyline>().ToList());
         }
 
         /// <summary>

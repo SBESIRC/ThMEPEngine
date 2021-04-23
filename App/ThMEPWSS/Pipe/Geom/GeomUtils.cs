@@ -1,10 +1,7 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 
@@ -14,9 +11,13 @@ namespace ThMEPWSS.Pipe.Geom
     {
         public static bool PtInLoop(Polyline polyline, Point3d pt)
         {
-            if (polyline.Closed == false)
-                return false;
-            return polyline.IndexedContains(pt);
+            if (polyline != null)
+            {
+                if (polyline.Closed == false)
+                    return false;
+                return polyline.IndexedContains(pt);
+            }
+            return false;
         }
 
         public static bool Point3dIsEqualPoint3d(Point3d ptFirst, Point3d ptSecond, double tolerance = 1e-6)

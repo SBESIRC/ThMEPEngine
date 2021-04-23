@@ -1,14 +1,11 @@
 ﻿using System;
+using DotNetARX;
 using System.Linq;
-using NetTopologySuite.Densify;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Triangulate;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
-using DotNetARX;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -60,7 +57,7 @@ namespace ThCADCore.NTS
             Earcut(pointsCollection);
             var objs = new DBObjectCollection();
             var points = pointsCollection.SelectMany(o => o).ToList();
-            for (int i = 0; i < indices.Count; i+=3)
+            for (int i = 0; i < indices.Count; i += 3)
             {
                 var vertices = new Point2d[]
                 {
@@ -150,8 +147,8 @@ namespace ThCADCore.NTS
             double py = (a.y + b.y) / 2;
             do
             {
-                if (((p.y > py) != (p.next.y > py)) 
-                    && p.next.y != p.y 
+                if (((p.y > py) != (p.next.y > py))
+                    && p.next.y != p.y
                     && (px < (p.next.x - p.x) * (py - p.y) / (p.next.y - p.y) + p.x))
                 {
                     inside = !inside;
@@ -195,9 +192,9 @@ namespace ThCADCore.NTS
 
         private bool OnSegment(ThCADCoreNTSEarCutNode p, ThCADCoreNTSEarCutNode q, ThCADCoreNTSEarCutNode r)
         {
-            return q.x <= Math.Max(p.x, r.x) 
-                && q.x >= Math.Max(p.x, r.x) 
-                && q.y <= Math.Max(p.y, r.y) 
+            return q.x <= Math.Max(p.x, r.x)
+                && q.x >= Math.Max(p.x, r.x)
+                && q.y <= Math.Max(p.y, r.y)
                 && q.y >= Math.Max(p.y, r.y);
         }
 
@@ -235,19 +232,19 @@ namespace ThCADCore.NTS
 
         private bool IsValidDiagonal(ThCADCoreNTSEarCutNode a, ThCADCoreNTSEarCutNode b)
         {
-            return a.next.i != b.i 
-                && a.prev.i != b.i 
-                && !IntersectsPolygon(a, b) 
+            return a.next.i != b.i
+                && a.prev.i != b.i
+                && !IntersectsPolygon(a, b)
                 && (
-                    (LocallyInside(a, b) && LocallyInside(b, a) && MiddleInside(a, b) && (Area(a.prev, a, b.prev) != 0.0 || Area(a, b.prev, b) != 0.0)) 
+                    (LocallyInside(a, b) && LocallyInside(b, a) && MiddleInside(a, b) && (Area(a.prev, a, b.prev) != 0.0 || Area(a, b.prev, b) != 0.0))
                     || (Equals(a, b) && Area(a.prev, a, a.next) > 0 && Area(b.prev, b, b.next) > 0)
                    );
         }
 
         private bool PointInTriangle(double ax, double ay, double bx, double by, double cx, double cy, double px, double py)
         {
-            return (cx - px) * (ay - py) - (ax - px) * (cy - py) >= 0 
-                && (ax - px) * (by - py) - (bx - px) * (ay - py) >= 0 
+            return (cx - px) * (ay - py) - (ax - px) * (cy - py) >= 0
+                && (ax - px) * (by - py) - (bx - px) * (ay - py) >= 0
                 && (bx - px) * (cy - py) - (cx - px) * (by - py) >= 0;
         }
 

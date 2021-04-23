@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Linq;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
+using ThCADCore.NTS;
 using ThCADExtension;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Algorithm.Locate;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -31,6 +34,12 @@ namespace ThMEPEngineCore.CAD
         {
             double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
             return (angle < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE) || ((180.0 - angle) < ThMEPEngineCoreCommon.LOOSE_PARALLEL_ANGLE);
+        }
+        public static bool IsParallelToEx(this Line first, Line second)
+        {
+            var firstVec = first.LineDirection();
+            var secondVec = second.LineDirection();
+            return firstVec.IsParallelToEx(secondVec);
         }
         public static bool IsCollinearEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp, double tolerance = 1.0)
@@ -187,6 +196,17 @@ namespace ThMEPEngineCore.CAD
             firstNew.IntersectWith(secondNew, intersectType, pts, IntPtr.Zero, IntPtr.Zero);
             return pts;
         }
+        public static Tuple<Point3d, Point3d> GetCollinearMaxPts(this List<Line> lines)
+        {
+            //传入的线要共线
+            var pts = new List<Point3d>();
+            lines.ForEach(o =>
+            {
+                pts.Add(o.StartPoint);
+                pts.Add(o.EndPoint);
+            });
+            return GetCollinearMaxPts(pts);
+        }
         public static Tuple<Point3d,Point3d> GetCollinearMaxPts(this List<Point3d> pts)
         {
             if (pts.Count == 0)
@@ -298,6 +318,110 @@ namespace ThMEPEngineCore.CAD
                 return ang >= arc.StartAngle && ang <= arc.EndAngle;
             }
             return false;
+        }
+        /// <summary>
+        /// 点在实体内部,不在边界
+        /// </summary>
+        /// <param name="ent"></param>
+        /// <param name="pt"></param>
+        /// <returns></returns>
+        public static bool IsContains(this Entity ent, Point3d pt)
+        {
+            if (ent is Polyline polyline)
+            {
+                return polyline.Closed ? polyline.Contains(pt) : false;
+            }
+            else if (ent is MPolygon mPolygon)
+            {
+                var locator = new SimplePointInAreaLocator(mPolygon.ToNTSPolygon());
+                return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
+            }
+            else if (ent is Circle circle)
+            {
+                return pt.DistanceTo(circle.Center) < circle.Radius;
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+        /// <summary>
+        /// A包括B，A的边界和B的边界可能有重复
+        /// </summary>
+        /// <param name="A">Polygon A</param>
+        /// <param name="B">Polygon B</param>
+        /// <returns></returns>
+        public static bool IsContains(this Entity A, Entity B)
+        {
+            if(A is Polyline firstPoly)
+            {
+                return Contains(firstPoly, B);
+            }
+            else if(A is MPolygon mPolygon)
+            {
+                return Contains(mPolygon, B);
+            }
+            else
+            {
+                return false;
+            }          
+        }
+        /// <summary>
+        /// A完全包含B（B没有任何一个点在A的边界上，都在A的里面）
+        /// </summary>
+        /// <param name="first">A</param>
+        /// <param name="second">B</param>
+        /// <returns></returns>
+        public static bool IsFullContains(this Entity first, Entity second)
+        {
+            //first完全包含second
+            //second所有的点在A的内部，且没有任何一个点在A的边界上
+            var firstPolygon = first.ToNTSPolygon();
+            var secondPolygon = second.ToNTSPolygon();
+            if (firstPolygon == null || secondPolygon == null)
+            {
+                return false;
+            }
+            var relateMatrix = new ThCADCoreNTSRelate(firstPolygon, secondPolygon);
+            if (relateMatrix.IsContains || relateMatrix.IsCovers)
+            {
+                var vertices = second.EntityVertices();
+                return vertices.Cast<Point3d>().Where(o => firstPolygon.OnBoundary(o)).Count() == 0;
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private static bool Contains(Polyline firstPoly,Entity entity)
+        {
+            if(entity is Polyline secondPoly)
+            {
+                return firstPoly.Contains(secondPoly);
+            }
+            else if(entity is MPolygon mPolygon)
+            {
+                return firstPoly.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
+            }
+            else
+            {
+                return false;
+            }
+        }
+        private static bool Contains(MPolygon firstPolygon, Entity entity)
+        {
+            if (entity is Polyline secondPoly)
+            {
+                return firstPolygon.ToNTSPolygon().Contains(secondPoly.ToNTSPolygon());
+            }
+            else if (entity is MPolygon mPolygon)
+            {
+                return firstPolygon.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

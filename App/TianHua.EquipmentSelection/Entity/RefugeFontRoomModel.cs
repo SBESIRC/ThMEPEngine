@@ -58,10 +58,6 @@ namespace TianHua.FanSelection.Model
                 return Math.Round(OverAk * V * 3600);
             }
         }
-        /// <summary>
-        /// 前室门
-        /// </summary>
-        //public Dictionary<string, List<ThEvacuationDoor>> FrontRoomDoors2 { get; set; }
 
         /// <summary>
         /// 前室门宽

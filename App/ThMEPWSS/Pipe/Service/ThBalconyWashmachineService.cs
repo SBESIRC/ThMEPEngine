@@ -4,18 +4,18 @@ using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThBalconyWashMachineService
     {
-        public List<ThIfcWashMachine> Washmachines { get; private set; }
-        private List<ThIfcWashMachine> WashmachineList { get; set; }
+        public List<ThWWashingMachine> Washmachines { get; private set; }
+        private List<ThWWashingMachine> WashmachineList { get; set; }
         private ThIfcSpace BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex WashmachineSpatialIndex { get; set; }
         private ThBalconyWashMachineService(
-           List<ThIfcWashMachine> washmachineList,
+           List<ThWWashingMachine> washmachineList,
            ThIfcSpace balconySpace,
            ThCADCoreNTSSpatialIndex washmachineSpatialIndex)
         {
@@ -30,7 +30,7 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
         public static ThBalconyWashMachineService Find(
-         List<ThIfcWashMachine> washmachineList,
+         List<ThWWashingMachine> washmachineList,
          ThIfcSpace balconySpace,
          ThCADCoreNTSSpatialIndex washmachineSpatialIndex = null)
         {

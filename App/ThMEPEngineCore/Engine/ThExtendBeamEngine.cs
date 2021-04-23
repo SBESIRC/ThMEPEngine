@@ -1,14 +1,13 @@
 ﻿using System.Linq;
 using ThCADCore.NTS;
-using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using ThMEPEngineCore.Diagnostics;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThExtendBeamEngine : ThBuildingElementPreprocessEngine
+    public class ThExtendBeamEngine : ThBeamPreprocessEngine
     {
         private ThBeamLinkExtension LinkExtension { get; set; }
 

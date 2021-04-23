@@ -1,9 +1,7 @@
 ﻿using NFox.Cad;
 using System.Linq;
-using NetTopologySuite.Simplify;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -39,6 +37,20 @@ namespace ThCADCore.NTS
             var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());
             var locateRes = locator.Locate(pt.ToNTSCoordinate());
             return locateRes == Location.Interior || locateRes == Location.Boundary;
+        }
+
+        public static bool OnBoundary(this AcPolygon polygon, Point3d pt)
+        {
+            var locator = new SimplePointInAreaLocator(polygon.ToNTSPolygon());
+            var locateRes = locator.Locate(pt.ToNTSCoordinate());
+            return locateRes == Location.Boundary;
+        }
+
+        public static bool OnBoundary(this Polygon polygon, Point3d pt)
+        {
+            var locator = new SimplePointInAreaLocator(polygon);
+            var locateRes = locator.Locate(pt.ToNTSCoordinate());
+            return locateRes == Location.Boundary;
         }
 
         public static bool IndexedContains(this AcPolygon polygon, Point3d pt)

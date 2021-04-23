@@ -5,8 +5,8 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -37,6 +37,16 @@ namespace ThMEPEngineCore.Engine
                     Spaces = Spaces.Where(o => filterObjs.Contains(o.Boundary)).ToList();
                 }
             }
+        }
+
+        public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

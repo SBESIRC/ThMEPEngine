@@ -1,64 +1,47 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Model
 {
     public class ThWToiletPipeParameters
     {
-        public List<double> Diameter { get; set; }
-        public List<string> Identifier { get; set; }
-        public int Number { get; set; }
+        public List<Tuple<string, double>> Identifier { get; set; }     
         public ThWToiletPipeParameters(bool separation_water, bool caisson, int floor)
         {
-            Identifier = new List<string>();
+            Identifier = new List<Tuple<string, double>>();
             if (!separation_water)
             {
                 if (!caisson)
-                {
-                    Number = 2;
-                    Identifier.Add(string.Format("通气TLx1"));
-                    Identifier.Add(string.Format("污废PLx1"));
+                {              
+                    Identifier.Add(Tuple.Create(string.Format("通气TLx1"), ThTagParametersService.ToiletTpipe));
+                    Identifier.Add(Tuple.Create(string.Format("污废PLx1"), ThTagParametersService.ToiletWpipe));
                 }
                 else
-                {
-                    Number = 3;
-                    Identifier.Add(string.Format("沉箱DLx1"));
-                    Identifier.Add(string.Format("通气TLx1"));
-                    Identifier.Add(string.Format("污废PLx1"));
+                {      
+                    Identifier.Add(Tuple.Create(string.Format("沉箱DLx1"), ThTagParametersService.KaTFpipe));
+                    Identifier.Add(Tuple.Create(string.Format("通气TLx1"), ThTagParametersService.ToiletTpipe));
+                    Identifier.Add(Tuple.Create(string.Format("污废PLx1"),ThTagParametersService.ToiletWpipe));
                 }
             }
             else
             {
                 if (!caisson)
-                {
-                    Number = 3;
-                    Identifier.Add(string.Format("污水WLx1"));
-                    Identifier.Add(string.Format("通气TLx1"));
-                    Identifier.Add(string.Format("水FLx1"));
+                {                   
+                    Identifier.Add(Tuple.Create(string.Format("污水WLx1"), ThTagParametersService.ToiletWpipe));
+                    Identifier.Add(Tuple.Create(string.Format("通气TLx1"), ThTagParametersService.ToiletTpipe));
+                    Identifier.Add(Tuple.Create(string.Format("水FLx1"), ThTagParametersService.KaTFpipe));
 
                 }
                 else
-                {
-                    Number = 4;
-                    Identifier.Add(string.Format("沉箱DLx1"));
-                    Identifier.Add(string.Format("污水WLx1"));
-                    Identifier.Add(string.Format("通气TLx1"));
-                    Identifier.Add(string.Format("水FLx1"));
+                {                   
+                    Identifier.Add(Tuple.Create(string.Format("沉箱DLx1"), ThTagParametersService.KaTFpipe));
+                    Identifier.Add(Tuple.Create(string.Format("污水WLx1"), ThTagParametersService.ToiletWpipe));
+                    Identifier.Add(Tuple.Create(string.Format("通气TLx1"), ThTagParametersService.ToiletTpipe));
+                    Identifier.Add(Tuple.Create(string.Format("水FLx1"), ThTagParametersService.KaTFpipe));
                 }
             }
-            Diameter = new List<double>();
-            for (int i = 0; i < Number; i++)
-            {
-                if (floor >= 150)
-                {
-                    Diameter.Add(100.00);//原要求为150
-                }
-                else
-                {
-                    Diameter.Add(100.00);
-                }
-            }
-            Diameter[Number - 2] = 100;
         }
     }
 

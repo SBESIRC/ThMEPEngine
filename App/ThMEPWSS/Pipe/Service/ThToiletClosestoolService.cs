@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
-using System.Collections.Generic;
 using ThCADCore.NTS;
-using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -14,17 +13,17 @@ namespace ThMEPWSS.Pipe.Service
         /// <summary>
         /// 找到的坐便器
         /// </summary>
-        public List<ThIfcClosestool> Closestools { get; private set; }
-        private List<ThIfcClosestool> ClosestoolList { get; set; }
+        public List<ThWClosestool> Closestools { get; private set; }
+        private List<ThWClosestool> ClosestoolList { get; set; }
         private ThIfcSpace ToiletSpace { get; set; }
         private ThCADCoreNTSSpatialIndex ClosestoolSpatialIndex { get; set; }
         private ThToiletClosestoolService(
-            List<ThIfcClosestool> closestoolList, 
-            ThIfcSpace toiletSpace, 
+            List<ThWClosestool> closestoolList,
+            ThIfcSpace toiletSpace,
             ThCADCoreNTSSpatialIndex closestoolSpatialIndex)
         {
             ClosestoolList = closestoolList;
-            Closestools = new List<ThIfcClosestool>();
+            Closestools = new List<ThWClosestool>();
             ToiletSpace = toiletSpace;
             ClosestoolSpatialIndex = closestoolSpatialIndex;
             if (ClosestoolSpatialIndex == null)
@@ -42,8 +41,8 @@ namespace ThMEPWSS.Pipe.Service
         /// <param name="closestoolSpatialIndex">卫生间索引空间</param>
         /// <returns></returns>
         public static ThToiletClosestoolService Find(
-            List<ThIfcClosestool> closestoolList, 
-            ThIfcSpace toiletSpace, 
+            List<ThWClosestool> closestoolList,
+            ThIfcSpace toiletSpace,
             ThCADCoreNTSSpatialIndex closestoolSpatialIndex = null)
         {
             var instance = new ThToiletClosestoolService(closestoolList, toiletSpace, closestoolSpatialIndex);
@@ -53,7 +52,7 @@ namespace ThMEPWSS.Pipe.Service
         private void Find()
         {
             var tolitBoundary = ToiletSpace.Boundary as Polyline;
-            var crossObjs = ClosestoolSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
+            var crossObjs = ClosestoolSpatialIndex.SelectCrossingPolygon(tolitBoundary);
             var crossClosestools = ClosestoolList.Where(o => crossObjs.Contains(o.Outline));
             Closestools = crossClosestools.Where(o =>
             {
@@ -61,7 +60,7 @@ namespace ThMEPWSS.Pipe.Service
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-20.0).ToDbCollection();
                 return tolitBoundary.Contains(bufferObjs[0] as Curve);
             }).ToList();
-            
-        }        
+
+        }
     }
 }

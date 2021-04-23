@@ -1,15 +1,10 @@
 ﻿using System.Collections.Generic;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 
 namespace ThMEPWSS.Pipe.Model
 {
     public class ThWToiletRoom : ThWRoom
     {
-        /// <summary>
-        /// 卫生间空间
-        /// </summary>
-        public ThIfcSpace Toilet { get; set; }
         /// <summary>
         /// 排水管井
         /// </summary>
@@ -17,24 +12,23 @@ namespace ThMEPWSS.Pipe.Model
         /// <summary>
         /// 坐便器
         /// </summary>
-        public List<ThIfcClosestool> Closestools { get; set; }
+        public List<ThWClosestool> Closestools { get; set; }
         /// <summary>
         /// 地漏
         /// </summary>
-        public List<ThIfcFloorDrain> FloorDrains { get; set; }
+        public List<ThWFloorDrain> FloorDrains { get; set; }
         /// <summary>
         /// 冷凝管
         /// </summary>
-        public List<ThIfcCondensePipe> CondensePipes { get; set; }
-        public List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
+        public List<ThWCondensePipe> CondensePipes { get; set; }
+        public List<ThWRoofRainPipe> RoofRainPipes { get; set; }
         public ThWToiletRoom()
         {
-            Toilet = null;
-            Closestools = new List<ThIfcClosestool>();
+            Closestools = new List<ThWClosestool>();
             DrainageWells = new List<ThIfcSpace>();
-            FloorDrains = new List<ThIfcFloorDrain>();
-            CondensePipes= new List<ThIfcCondensePipe>();
-            RoofRainPipes = new List<ThIfcRoofRainPipe>();
+            FloorDrains = new List<ThWFloorDrain>();
+            CondensePipes = new List<ThWCondensePipe>();
+            RoofRainPipes = new List<ThWRoofRainPipe>();
         }
     }
 }

@@ -1,14 +1,14 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Buffer;
+using NetTopologySuite.Operation.Linemerge;
 using Autodesk.AutoCAD.DatabaseServices;
 using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
-using NetTopologySuite.Operation.Linemerge;
-using NFox.Cad;
 
 namespace ThCADCore.NTS
 {
@@ -28,6 +28,11 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
+        public static Polyline Buffer(this Line line, double distance)
+        {
+            return line.ToNTSLineString().Buffer(distance, EndCapStyle.Flat).ToDbObjects()[0] as Polyline;
+        }
+
         public static DBObjectCollection BufferPL(this Polyline polyline, double distance)
         {
             var buffer = new BufferOp(polyline.ToNTSLineString(), new BufferParameters()
@@ -38,25 +43,23 @@ namespace ThCADCore.NTS
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
-        public static DBObjectCollection Buffer(this DBObjectCollection objs, double distance,
-            EndCapStyle endCapStyle = EndCapStyle.Flat)
+        public static DBObjectCollection Buffer(this DBObjectCollection objs, double distance)
         {
             var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
             {
                 JoinStyle = NTSJoinStyle.Mitre,
-                EndCapStyle = endCapStyle,
+                EndCapStyle = EndCapStyle.Flat,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
 
-        public static DBObjectCollection SingleSidedBuffer(this DBObjectCollection objs, double distance,
-            EndCapStyle endCapStyle = EndCapStyle.Flat)
+        public static DBObjectCollection SingleSidedBuffer(this DBObjectCollection objs, double distance)
         {
             var buffer = new BufferOp(objs.ToMultiLineString(), new BufferParameters()
             {
                 IsSingleSided = true,
                 JoinStyle = NTSJoinStyle.Mitre,
-                EndCapStyle = endCapStyle,
+                EndCapStyle = EndCapStyle.Flat,
             });
             return buffer.GetResultGeometry(distance).ToDbCollection();
         }
@@ -77,14 +80,14 @@ namespace ThCADCore.NTS
         {
             var poylgons = new DBObjectCollection();
             var builder = new ThCADCoreNTSBuildArea();
-            Geometry geometry = builder.Build(objs.Explode().ToMultiLineString());
+            Geometry geometry = builder.Build(objs.ExplodeCurves().ToMultiLineString());
             if (geometry is Polygon polygon)
             {
                 poylgons.Add(polygon.ToDbEntity());
             }
             else if (geometry is MultiPolygon mPolygons)
             {
-                mPolygons.Geometries.Cast<Polygon>().ForEach(o =>
+                mPolygons.Geometries.Cast<Polygon>().Where(o=>o.Area>1.0).ForEach(o =>
                 {
                     poylgons.Add(o.ToDbEntity());
                 });

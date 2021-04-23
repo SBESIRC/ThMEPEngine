@@ -5,6 +5,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
+using System;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
@@ -131,68 +132,69 @@ namespace ThMEPEngineCore.Algorithm
 
         public static DBObjectCollection EarCut(AcPolygon shell, AcPolygon[] holes)
         {
-            var indices = new List<int>();
-            var points = new List<double>();
-            points.AddRange(shell.Coordinates2D());
-            holes.ForEach(o =>
-            {
-                indices.Add(points.Count / 2 - 1);
-                points.AddRange(o.Coordinates2D());
-            });
-            var shellCoords = new List<Coordinate>();
-            shellCoords.AddRange(shell.Vertices().ToNTSCoordinates());
-            holes.ForEach(o =>
-            {
-                shellCoords.AddRange(o.Vertices().ToNTSCoordinates());
-            });
+            throw new NotImplementedException();
+            //var indices = new List<int>();
+            //var points = new List<double>();
+            //points.AddRange(shell.Coordinates2D());
+            //holes.ForEach(o =>
+            //{
+            //    indices.Add(points.Count / 2 - 1);
+            //    points.AddRange(o.Coordinates2D());
+            //});
+            //var shellCoords = new List<Coordinate>();
+            //shellCoords.AddRange(shell.Vertices().ToNTSCoordinates());
+            //holes.ForEach(o =>
+            //{
+            //    shellCoords.AddRange(o.Vertices().ToNTSCoordinates());
+            //});
 
-            // EarCut:
-            //  https://github.com/mapbox/earcut.hpp
-            var objs = new DBObjectCollection();
-            var triangles = new List<Triangle>();
-            var builder = new ThEarCutTriangulationBuilder();
-            var results = builder.EarCut(points.ToArray(), points.Count / 2, indices.ToArray(), indices.Count);
-            for (int i = 0; i < results.Count(); i += 3)
-            {
-                triangles.Add(new Triangle(results[i], results[i+1], results[i+2]));
-            }
+            //// EarCut:
+            ////  https://github.com/mapbox/earcut.hpp
+            //var objs = new DBObjectCollection();
+            //var triangles = new List<Triangle>();
+            //var builder = new ThEarCutTriangulationBuilder();
+            //var results = builder.EarCut(points.ToArray(), points.Count / 2, indices.ToArray(), indices.Count);
+            //for (int i = 0; i < results.Count(); i += 3)
+            //{
+            //    triangles.Add(new Triangle(results[i], results[i+1], results[i+2]));
+            //}
 
-            // Refinement:
-            //  https://github.com/metsfan/jts_earclipper
-            //  http://lin-ear-th-inking.blogspot.com/2011/04/polygon-triangulation-via-ear-clipping.html
-            EdgeFlipper ef = new EdgeFlipper(shellCoords.ToArray());
-            bool changed;
-            do
-            {
-                changed = false;
-                for (int i = 0; i < triangles.Count() - 1 && !changed; i++)
-                {
-                    Triangle ear0 = triangles[i];
-                    for (int j = i + 1; j < triangles.Count() && !changed; j++)
-                    {
-                        Triangle ear1 = triangles[j];
-                        int[] sharedVertices = ear0.getSharedVertices(ear1);
-                        if (sharedVertices != null && sharedVertices.Length == 2)
-                        {
-                            if (ef.flip(ear0, ear1, sharedVertices))
-                            {
-                                changed = true;
-                            }
-                        }
-                    }
-                }
-            } while (changed);
+            //// Refinement:
+            ////  https://github.com/metsfan/jts_earclipper
+            ////  http://lin-ear-th-inking.blogspot.com/2011/04/polygon-triangulation-via-ear-clipping.html
+            //EdgeFlipper ef = new EdgeFlipper(shellCoords.ToArray());
+            //bool changed;
+            //do
+            //{
+            //    changed = false;
+            //    for (int i = 0; i < triangles.Count() - 1 && !changed; i++)
+            //    {
+            //        Triangle ear0 = triangles[i];
+            //        for (int j = i + 1; j < triangles.Count() && !changed; j++)
+            //        {
+            //            Triangle ear1 = triangles[j];
+            //            int[] sharedVertices = ear0.getSharedVertices(ear1);
+            //            if (sharedVertices != null && sharedVertices.Length == 2)
+            //            {
+            //                if (ef.flip(ear0, ear1, sharedVertices))
+            //                {
+            //                    changed = true;
+            //                }
+            //            }
+            //        }
+            //    }
+            //} while (changed);
 
-            // Convert to Polyline
-            for (int i = 0; i < triangles.Count(); i++)
-            {
-                var triangle = ThPolylineExtension.CreateTriangle(
-                    new Point2d(points[2 * triangles[i].vertices[0]], points[2 * triangles[i].vertices[0] + 1]),
-                    new Point2d(points[2 * triangles[i].vertices[1]],points[2 * triangles[i].vertices[1] + 1]),
-                    new Point2d(points[2 * triangles[i].vertices[2]], points[2 * triangles[i].vertices[2] + 1]));
-                objs.Add(triangle);
-            }
-            return objs;
+            //// Convert to Polyline
+            //for (int i = 0; i < triangles.Count(); i++)
+            //{
+            //    var triangle = ThPolylineExtension.CreateTriangle(
+            //        new Point2d(points[2 * triangles[i].vertices[0]], points[2 * triangles[i].vertices[0] + 1]),
+            //        new Point2d(points[2 * triangles[i].vertices[1]],points[2 * triangles[i].vertices[1] + 1]),
+            //        new Point2d(points[2 * triangles[i].vertices[2]], points[2 * triangles[i].vertices[2] + 1]));
+            //    objs.Add(triangle);
+            //}
+            //return objs;
         }
     }
 }

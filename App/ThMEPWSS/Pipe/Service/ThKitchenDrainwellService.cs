@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThKitchenDrainwellService: ThDrainwellService
     {
-        private ThIfcSpace KitchenSpace;      
+        private ThIfcSpace KitchenSpace;
         public ThKitchenDrainwellService():base()
         {
             Pypes = new List<ThIfcSpace>();
@@ -33,7 +34,7 @@ namespace ThMEPWSS.Pipe.Service
         private void Find()
         {
             bool goToFindNeibourDrainwell = false;
-            var noTagSubSpaces = KitchenSpace.SubSpaces.Where(o => o.Tags.Count == 0).ToList();
+            var noTagSubSpaces = SpacePredicateService.Contains(KitchenSpace).Where(o => o.Tags.Count == 0).ToList();
             if (noTagSubSpaces.Count == 0)
             {
                 goToFindNeibourDrainwell = true;
@@ -61,7 +62,14 @@ namespace ThMEPWSS.Pipe.Service
             }
             if(goToFindNeibourDrainwell)
             {
-                Drainwells.AddRange(FindDrainwells());
+                if(FindNeighbourDrainwell(KitchenSpace, ThWPipeCommon.KITCHEN_BUFFER_DISTANCE).Count>0)
+                {
+                    Drainwells.AddRange(FindNeighbourDrainwell(KitchenSpace, ThWPipeCommon.KITCHEN_BUFFER_DISTANCE));
+                }
+                else
+                {
+                    Drainwells.AddRange(FindDrainwells());
+                }          
             }
         }
         private List<ThIfcSpace> FindDrainwells()
@@ -89,7 +97,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             else if (neibourToilets.Count == 1)
             {
-                var noTagSubSpaces = neibourToilets[0].SubSpaces.Where(o => o.Tags.Count == 0).ToList();
+                var noTagSubSpaces = SpacePredicateService.Contains(neibourToilets[0]).Where(o => o.Tags.Count == 0).ToList();
                 if (noTagSubSpaces.Count > 1)
                 {
                     //表示相邻卫生有多个没有Tag的空间(无效,继续查找)
@@ -118,7 +126,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             else if (neibourBalconies.Count == 1)
             {
-                var noTagSubSpaces = neibourBalconies[0].SubSpaces.Where(o => o.Tags.Count == 0).ToList();
+                var noTagSubSpaces = SpacePredicateService.Contains(neibourBalconies[0]).Where(o => o.Tags.Count == 0).ToList();
                 if (noTagSubSpaces.Count > 1)
                 {
                     //表示相邻卫生有多个没有Tag的空间(无效,继续查找)
@@ -139,6 +147,23 @@ namespace ThMEPWSS.Pipe.Service
         private double GetSpaceArea(ThIfcSpace thIfcSpace)
         {
             return thIfcSpace.Boundary.Area / (1000 * 1000);//mm单位
+        }
+        private List<ThIfcSpace> FindNeighbourDrainwell(ThIfcSpace space, double bufferDis)
+        {
+            //空间轮廓往外括500
+            var bufferObjs = ThCADCoreNTSOperation.Buffer(space.Boundary as Polyline, bufferDis);
+            if (bufferObjs.Count == 0)
+            {
+                return new List<ThIfcSpace>();
+            }
+            var crossObjs = SpaceSpatialIndex.SelectCrossingPolygon(bufferObjs[0] as Polyline);
+            //获取偏移后，能框选到的空间
+            var crossSpaces = Spaces.Where(o => crossObjs.Contains(o.Boundary));
+            //找到含有阳台的空间
+            var balconies = crossSpaces.Where(m => (m.Tags.Count==0&& IsValidSpaceArea(m))).ToList();
+            //找到含有排水管井的阳台空间          
+            //
+            return balconies;
         }
     }
 }

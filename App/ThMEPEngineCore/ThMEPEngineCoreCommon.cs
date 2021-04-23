@@ -24,14 +24,19 @@ namespace ThMEPEngineCore
         // 图层
         public static string BUILDELEMENT_LAYER_WALL = "AE-WALL";
         public static string BUILDELEMENT_LAYER_WINDOW = "AE-WIND";
-        public static string BUILDELEMENT_LAYER_CURTAIN_WALL = "AE-FNSH";
-
+        public static string BUILDELEMENT_LAYER_CURTAIN_WALL = "AE-WIND";
+        public static string BUILDELEMENT_LAYER_FLOOR = "AE-FLOR";
+        public static string BUILDELEMENT_LAYER_RAILING = "AE-HDWR";
         // 分类
         public static string BUILDELEMENT_CATEGORY_WALL = "墙";
         public static string BUILDELEMENT_CATEGORY_S_BEAM = "结构梁";
         public static string BUILDELEMENT_CATEGORY_S_WALL = "结构墙";
         public static string BUILDELEMENT_CATEGORY_S_COLUMN = "结构柱";
         public static string BUILDELEMENT_CATEGORY_DOOR = "门";
+        public static string BUILDELEMENT_CATEGORY_WINDOW = "窗";
+        public static string BUILDELEMENT_CATEGORY_FLOOR = "楼板";
+        public static string BUILDELEMENT_CATEGORY_RAILING = "栏杆";
+        public static string BUILDELEMENT_CATEGORY_LINEFOOT = "线脚";
 
         // 梁标注
         public static string BEAM_GEOMETRY_SIZE = "Beam_Geometry_Size";
@@ -105,5 +110,12 @@ namespace ThMEPEngineCore
         /// 柱子偏移距离（解决NTS精度）
         /// </summary>
         public const double ColumnBufferDistance = 2.5;
+
+        /// <summary>
+        /// 门垛与邻居的间隔
+        /// </summary>
+        public const double DoorStoneInterval=5.0;
+        public const double DoorMaximumThick = 300;
+        public const double DoorMinimumThick = 50;
     }
 }

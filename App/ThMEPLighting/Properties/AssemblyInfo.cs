@@ -39,3 +39,4 @@ using System.Runtime.InteropServices;
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPLightingApp))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThEmgLightCmds))]
 [assembly: CommandClass(typeof(ThMEPLighting.ThMEPGarageLightingCmds))]
+[assembly: CommandClass(typeof(ThMEPLighting.ThFEICmds))]

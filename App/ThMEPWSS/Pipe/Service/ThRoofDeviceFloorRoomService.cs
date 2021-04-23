@@ -1,8 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
-using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
@@ -10,17 +7,17 @@ namespace ThMEPWSS.Pipe.Service
     public class ThRoofDeviceFloorRoomService
     {
         private List<ThIfcSpace> Spaces { get; set; }
-        private List<ThIfcRoofRainPipe> RoofRainPipes { get; set; }
-        private List<ThIfcGravityWaterBucket> GravityWaterBuckets { get; set; }
-        private List<ThIfcSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
-        public List<ThWRoofDeviceFloorRoom> Rooms { get; private set; }
+        private List<ThWRoofRainPipe> RoofRainPipes { get; set; }
+        private List<ThWGravityWaterBucket> GravityWaterBuckets { get; set; }
+        private List<ThWSideEntryWaterBucket> SideEntryWaterBuckets { get; set; }
+        public List<ThWRoofTopFloorRoom> Rooms { get; private set; }
         private List<ThIfcSpace> BaseCircles { get; set; }
 
         private ThRoofDeviceFloorRoomService(
             List<ThIfcSpace> spaces,
-            List<ThIfcGravityWaterBucket> gravityWaterBuckets,
-            List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets,
-            List<ThIfcRoofRainPipe> roofRainPipes,
+            List<ThWGravityWaterBucket> gravityWaterBuckets,
+            List<ThWSideEntryWaterBucket> sideEntryWaterBuckets,
+            List<ThWRoofRainPipe> roofRainPipes,
             List<ThIfcSpace> baseCircles)
         {
             Spaces = spaces;
@@ -28,13 +25,13 @@ namespace ThMEPWSS.Pipe.Service
             GravityWaterBuckets = gravityWaterBuckets;
             SideEntryWaterBuckets = sideEntryWaterBuckets;
             BaseCircles = baseCircles;
-            Rooms = new List<ThWRoofDeviceFloorRoom>();
+            Rooms = new List<ThWRoofTopFloorRoom>();
         }
-        public static List<ThWRoofDeviceFloorRoom> Build(
+        public static List<ThWRoofTopFloorRoom> Build(
             List<ThIfcSpace> spaces, 
-            List<ThIfcGravityWaterBucket> gravityWaterBuckets, 
-            List<ThIfcSideEntryWaterBucket> sideEntryWaterBuckets, 
-            List<ThIfcRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
+            List<ThWGravityWaterBucket> gravityWaterBuckets, 
+            List<ThWSideEntryWaterBucket> sideEntryWaterBuckets, 
+            List<ThWRoofRainPipe> roofRainPipes, List<ThIfcSpace> baseCircles)
         {
             var roofDeviceFloorContainerService = new ThRoofDeviceFloorRoomService(
                 spaces, gravityWaterBuckets, sideEntryWaterBuckets, roofRainPipes, baseCircles);          
@@ -44,26 +41,23 @@ namespace ThMEPWSS.Pipe.Service
         private void Build()
         {
             //找主体空间 空间框线包含“顶层设备空间”
-            var roofDeviceFloorSpaces = GetRoofDeviceFloorSpaces();
+            var roofDeviceFloorSpaces = Spaces;
             roofDeviceFloorSpaces.ForEach(o =>
             {
                 Rooms.Add(CreateRoofDeviceFloorContainer(o));
             });
         }
-        private ThWRoofDeviceFloorRoom CreateRoofDeviceFloorContainer(ThIfcSpace roofDeviceFloorSpace)
+        private ThWRoofTopFloorRoom CreateRoofDeviceFloorContainer(ThIfcSpace roofDeviceFloorSpace)
         {
-            return new ThWRoofDeviceFloorRoom()
+            return new ThWRoofTopFloorRoom()
             {
-                RoofDeviceFloor = roofDeviceFloorSpace,
+                Space = roofDeviceFloorSpace,
                 RoofRainPipes = ThRoofDeviceFloorRoofRainPipeService.Find(roofDeviceFloorSpace, RoofRainPipes),
                 GravityWaterBuckets = ThRoofDeviceFloorGravityWaterBucketService.Find(roofDeviceFloorSpace, GravityWaterBuckets),
                 SideEntryWaterBuckets = ThRoofDeviceFloorSideEntryWaterBucketService.Find(roofDeviceFloorSpace, SideEntryWaterBuckets),
-                BaseCircles = ThRoofFloorBaseCircleService.Find(roofDeviceFloorSpace, BaseCircles),
+                BaseCircles =BaseCircles,
             };
         }
-        private List<ThIfcSpace> GetRoofDeviceFloorSpaces()
-        {
-            return Spaces.Where(m => m.Tags.Where(n => n.Contains("RFS")).Any()).ToList();
-        }
+       
     }
 }

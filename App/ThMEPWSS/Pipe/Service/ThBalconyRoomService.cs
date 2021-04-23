@@ -1,11 +1,9 @@
-﻿using System;
-using System.Linq;
-using ThCADCore.NTS;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPWSS.Pipe.Model;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
+using Dreambuild.AutoCAD;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -13,16 +11,16 @@ namespace ThMEPWSS.Pipe.Service
     {
         public List<ThWBalconyRoom> BalconyRooms { get; private set; }
         private List<ThIfcSpace> Spaces { get; set; }
-        private List<ThIfcFloorDrain> FloorDrains { get; set; }
-        private List<ThIfcWashMachine> Washmachines { get; set; }
-        private List<ThIfcRainPipe> RainPipes { get; set; }
-        private List<ThIfcBasin> Basintools { get; set; }
+        private List<ThWFloorDrain> FloorDrains { get; set; }
+        private List<ThWWashingMachine> Washmachines { get; set; }
+        private List<ThWRainPipe> RainPipes { get; set; }
+        private List<ThWBasin> Basintools { get; set; }
         private ThBalconyRoomService(
             List<ThIfcSpace> spaces,
-            List<ThIfcWashMachine> washmachines,
-            List<ThIfcFloorDrain> floorDrains,
-            List<ThIfcRainPipe> rainPipes,
-            List<ThIfcBasin> basintools)
+            List<ThWWashingMachine> washmachines,
+            List<ThWFloorDrain> floorDrains,
+            List<ThWRainPipe> rainPipes,
+            List<ThWBasin> basintools)
         {
             Spaces = spaces;
             RainPipes = rainPipes;
@@ -31,11 +29,11 @@ namespace ThMEPWSS.Pipe.Service
             Washmachines = washmachines;
         }
         public static List<ThWBalconyRoom> Build(
-            List<ThIfcSpace> spaces, 
-            List<ThIfcWashMachine> washmachines,
-            List<ThIfcFloorDrain> floorDrains, 
-            List<ThIfcRainPipe> rainPipes, 
-            List<ThIfcBasin> basintools)
+            List<ThIfcSpace> spaces,
+            List<ThWWashingMachine> washmachines,
+            List<ThWFloorDrain> floorDrains,
+            List<ThWRainPipe> rainPipes,
+            List<ThWBasin> basintools)
         {
             var service = new ThBalconyRoomService(spaces, washmachines, floorDrains, rainPipes, basintools);
             service.Build();
@@ -49,8 +47,8 @@ namespace ThMEPWSS.Pipe.Service
         private ThWBalconyRoom CreateBalconyRooms(ThIfcSpace balconySpace)
         {
             ThWBalconyRoom thBalconyRoom = new ThWBalconyRoom();
-            thBalconyRoom.Balcony = balconySpace;
-      
+            thBalconyRoom.Space = balconySpace;
+
             var BalconyWashmachineService = ThBalconyWashMachineService.Find(Washmachines, balconySpace);
             thBalconyRoom.Washmachines = BalconyWashmachineService.Washmachines;
 
@@ -59,10 +57,28 @@ namespace ThMEPWSS.Pipe.Service
 
             var BalconyRainPipeService = ThBalconyRainPipeService.Find(RainPipes, balconySpace);
             thBalconyRoom.RainPipes = BalconyRainPipeService.RainPipes;
+            if (BalconyRainPipeService.RainPipes.Count == 0)
+            {
+                thBalconyRoom.RainPipes = FindRainPipes(RainPipes, balconySpace);
+            }
             var BalconyBasintoolsService = ThBalconyBasintoolService.Find(Basintools, balconySpace);
             thBalconyRoom.BasinTools = BalconyBasintoolsService.Basintools;
 
             return thBalconyRoom;
+        }
+        private static List<ThWRainPipe> FindRainPipes(List<ThWRainPipe> pipes, ThIfcSpace space)
+        {
+            var rainPipes = new List<ThWRainPipe>();
+            foreach (var pipe in pipes)
+            {
+                Polyline s = pipe.Outline as Polyline;
+                if (s.GetCenter().DistanceTo(space.Boundary.GetCenter()) < ThWPipeCommon.MAX_BALCONY_TO_RAINPIPE_DISTANCE)
+                {
+                    rainPipes.Add(pipe);
+                }
+
+            }
+            return rainPipes;
         }
         private List<ThIfcSpace> BalconySpaces()
         {

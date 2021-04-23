@@ -1,9 +1,8 @@
 ﻿using System;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
-
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -76,19 +75,24 @@ namespace ThMEPWSS.Pipe.Engine
                 }
                 if (pipe7.Count > 0)
                 {
-                    foreach (Point3d pipe in pipe7[i])
+                    if (i < pipe7.Count)
                     {
-                        column.Add(pipe);
+                        foreach (Point3d pipe in pipe7[i])
+                        {
+                            column.Add(pipe);
+                        }
                     }
                 }
                 if (pipe8.Count > 0)
                 {
-                    foreach (Point3d pipe in pipe8[i])
+                    if (i < pipe8.Count)
                     {
-                        column.Add(pipe);
+                        foreach (Point3d pipe in pipe8[i])
+                        {
+                            column.Add(pipe);
+                        }
                     }
                 }
-
                 result.Add(Getorder(column));//区间组合
             }
             return result;

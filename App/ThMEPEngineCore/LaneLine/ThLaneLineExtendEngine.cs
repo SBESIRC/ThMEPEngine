@@ -6,6 +6,8 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Index.KdTree;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.LaneLine
@@ -28,7 +30,8 @@ namespace ThMEPEngineCore.LaneLine
 
         private static bool IsProperIntersects(DBObjectCollection lines, Line line)
         {
-            var geometry = lines.ToMultiLineString().Intersection(line.ToNTSGeometry());
+            // 计算交点
+            var geometry = lines.Intersection(line);
             // 判断是否存在多个交点（但是要排查共线的情况）
             if (geometry is MultiPoint points)
             {

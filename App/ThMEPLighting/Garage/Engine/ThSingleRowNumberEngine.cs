@@ -1,20 +1,21 @@
-﻿using System.Linq;
-using ThMEPLighting.Common;
+﻿using System;
+using System.Linq;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
-using Autodesk.AutoCAD.DatabaseServices;
-using System;
 
 namespace ThMEPLighting.Garage.Engine
 {
     /// <summary>
     /// 单排编号
     /// </summary>
-    public class ThSingleRowNumberEngine : ThBuildNumberEngine
+    public class ThSingleRowNumberEngine : ThBuildNumberEngine, IDisposable
     {
         public List<ThLightEdge> DxLightEdges { get; set; }
+        public ThQueryLightBlockService QueryLightBlockService { get; set; }
         public ThSingleRowNumberEngine(
             List<Point3d> ports,
             List<ThLightEdge> lightEdges,
@@ -23,11 +24,7 @@ namespace ThMEPLighting.Garage.Engine
         {
             DxLightEdges = new List<ThLightEdge>();
         }
-        public ThSingleRowNumberEngine(
-            List<Point3d> ports,
-            List<ThLightEdge> lightEdges,
-            ThLightArrangeParameter arrangeParameter,
-            Point3d start) : base(ports, lightEdges, arrangeParameter, start)
+        public void Dispose()
         {
         }
         public override void Build()
@@ -52,7 +49,7 @@ namespace ThMEPLighting.Garage.Engine
                 var centerStart = LaneServer.getMergedOrderedLane(centerEdges);
                 centerEdges.ForEach(o => o.IsTraversed = false);
                 lightGraph = ThLightGraphService.Build(centerEdges, centerStart);
-                ThSingleRowDistributeService.Distribute(lightGraph, ArrangeParameter);
+                ThSingleRowDistributeService.Distribute(lightGraph, ArrangeParameter, QueryLightBlockService);
                 UpdateLoopNumber(lightGraph);
                 ThSingleRowNumberService.Number(lightGraph, ArrangeParameter);
                 lightGraph.Links.ForEach(o => DxLightEdges.AddRange(o.Path));

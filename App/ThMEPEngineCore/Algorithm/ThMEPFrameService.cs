@@ -3,6 +3,7 @@ using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
@@ -13,6 +14,7 @@ namespace ThMEPEngineCore.Algorithm
 {
     public class ThMEPFrameService
     {
+        private static double OFFSET_DISTANCE = 30.0;
         private ThBeamConnectRecogitionEngine BeamConnectEngine { get; set; }
         public ThMEPFrameService(ThBeamConnectRecogitionEngine thBeamConnectRecogition)
         {
@@ -25,8 +27,28 @@ namespace ThMEPEngineCore.Algorithm
             var clone = frame.WashClone() as Polyline;
             clone.Closed = true;
 
+            // 剔除尖状物
+            clone = RemoveSpikes(clone);
+
             // 处理各种“Invalid Polygon“的情况
             return clone.MakeValid().Cast<Polyline>().OrderByDescending(o => o.Area).First();
+        }
+
+        private static Polyline RemoveSpikes(Polyline poly)
+        {
+            var objs = new DBObjectCollection();
+            poly.Buffer(-OFFSET_DISTANCE)
+                .Cast<Polyline>()
+                .ForEach(o => {
+                    o.Buffer(OFFSET_DISTANCE)
+                    .Cast<Polyline>()
+                    .ForEach(e => objs.Add(e));
+                });
+            if (objs.Count > 0)
+            {
+                return objs.Cast<Polyline>().OrderByDescending(o => o.Area).First();
+            }
+            return poly;
         }
 
         public static Polyline NormalizeEx(Polyline frame)

@@ -122,6 +122,24 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "车位灯图块.dwg");
         }
 
+        // 楼层框定图块
+        public static string StoreyFrameDwgPath()
+        {
+            return Path.Combine(SupportPath(), "楼层定义工具.dwg");
+        }
+
+        // 给排水专业图纸
+        public static string WSSDwgPath()
+        {
+            return Path.Combine(SupportPath(), "地上给排水平面图.dwg");
+        }
+
+        // 电气照明疏散指示灯图块
+        public static string LightingFEIDwgPath()
+        {
+            return Path.Combine(SupportPath(), "疏散指示灯图块.dwg");
+        }
+
         // ToolPalette 路径
         public static string ToolPalettePath()
         {

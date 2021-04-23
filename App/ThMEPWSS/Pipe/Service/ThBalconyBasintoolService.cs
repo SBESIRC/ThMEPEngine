@@ -4,18 +4,18 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThBalconyBasintoolService
     {
-        public List<ThIfcBasin> Basintools { get; private set; }
-        private List<ThIfcBasin> BasintoolList { get; set; }
+        public List<ThWBasin> Basintools { get; private set; }
+        private List<ThWBasin> BasintoolList { get; set; }
         private ThIfcSpace BalconySpace { get; set; }
         private ThCADCoreNTSSpatialIndex BasintoolSpatialIndex { get; set; }
         private ThBalconyBasintoolService(
-            List<ThIfcBasin> basintoolList,
+            List<ThWBasin> basintoolList,
             ThIfcSpace balconySpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex)
         {
@@ -37,7 +37,7 @@ namespace ThMEPWSS.Pipe.Service
         /// <param name="basintoolSpatialIndex">厨房索引空间</param>
         /// <returns></returns>
         public static ThBalconyBasintoolService Find(
-            List<ThIfcBasin> basintoolList,
+            List<ThWBasin> basintoolList,
             ThIfcSpace balconySpace,
             ThCADCoreNTSSpatialIndex basintoolSpatialIndex = null)
         {

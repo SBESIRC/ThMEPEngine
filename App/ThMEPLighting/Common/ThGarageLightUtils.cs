@@ -1,18 +1,14 @@
 ﻿using System;
-using AcHelper;
-using DotNetARX;
-using Linq2Acad;
 using System.Linq;
+using System.Text;
+using System.Collections.Generic;
+using System.Text.RegularExpressions;
+using Linq2Acad;
 using ThCADCore.NTS;
 using ThCADExtension;
-using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
-using Autodesk.AutoCAD.Runtime;
 using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
-using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-using GeometryExtensions;
 
 namespace ThMEPLighting.Common
 {
@@ -22,20 +18,6 @@ namespace ThMEPLighting.Common
         {
             var dir = (line.EndPoint - line.StartPoint).GetNormal();
             return new Line(line.StartPoint - dir * length, line.EndPoint + dir * length);
-        }
-        public static Line ExtendLineToPoint(this Line line, Point3d pt)
-        {
-            bool isStart = pt.DistanceTo(line.StartPoint) < pt.DistanceTo(line.EndPoint) ? true : false;
-            Line resLine;
-            if (isStart)
-            {
-                resLine = new Line(pt, line.EndPoint);
-            }
-            else
-            {
-                resLine = new Line(line.StartPoint, pt);
-            }
-            return resLine;
         }
         /// <summary>
         /// Poly只能有线段构成
@@ -66,128 +48,12 @@ namespace ThMEPLighting.Common
             newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
 
             return newPoly;
-        }
-        /// <summary>
-        /// Poly只能有线段构成
-        /// </summary>
-        /// <param name="poly"></param>
-        /// <param name="length"></param>
-        /// <returns></returns>
-        public static Polyline ExtendPolylineToPoint(this Polyline poly, Point3d pt)
+        }        
+        public static DBObjectCollection SpatialFilter(this Polyline border, DBObjectCollection dbObjs)
         {
-            bool isStart = pt.DistanceTo(poly.StartPoint) < pt.DistanceTo(poly.EndPoint) ? true : false;
-            var startExendPt = poly.StartPoint;
-            var endExendPt = poly.EndPoint;
-            if (isStart)
-            {
-                startExendPt = pt;
-            }
-            else
-            {
-                endExendPt = pt;
-            }
-
-            Polyline newPoly = new Polyline();
-            newPoly.AddVertexAt(0, startExendPt.ToPoint2D(), 0, 0, 0);
-            for (int i = 1; i < poly.NumberOfVertices - 1; i++)
-            {
-                newPoly.AddVertexAt(i, poly.GetPoint3dAt(i).ToPoint2D(), 0, 0, 0);
-            }
-            newPoly.AddVertexAt(poly.NumberOfVertices - 1, endExendPt.ToPoint2D(), 0, 0, 0);
-
-            return newPoly;
-        }
-        public static ObjectId AddLineType(Database db, string linetypeName)
-        {
-            using(AcadDatabase acadDatabase= AcadDatabase.Use(db))
-            {
-                var lt = acadDatabase.Element<LinetypeTable>(db.LinetypeTableId);
-                if(!lt.Has(linetypeName))
-                {
-                    lt.UpgradeOpen();
-                    var ltr = new LinetypeTableRecord();
-                    ltr.Name = linetypeName;
-                    lt.Add(ltr);
-                    lt.DowngradeOpen();
-                }
-                return lt[linetypeName];
-            }
-        }
-        public static ObjectId LoadLineType(Database db, string linetypeName)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(db))
-            {
-                var lt = acadDatabase.Element<LinetypeTable>(db.LinetypeTableId);
-                if (!lt.Has(linetypeName))
-                {
-                    db.LoadLineTypeFile(linetypeName,"acad.lin");
-                }
-                return lt[linetypeName];
-            }
-        }
-        public static ObjectId AddLayer(Database db, string layer)
-        {
-            using (AcadDatabase acadDatabase= AcadDatabase.Use(db))
-            {
-                var lt = acadDatabase.Element<LayerTable>(db.LayerTableId);
-                if(!lt.Has(layer))
-                {
-                    lt.UpgradeOpen();
-                    var ltr = new LayerTableRecord();
-                    ltr.Name = layer;
-                    lt.Add(ltr);
-                    lt.DowngradeOpen();
-                }
-                return lt[layer];
-            }
-        }
-        public static List<Entity> GetRegionCurves(this Polyline regionBorder, List<string> layers,List<Type> types)
-        {
-            List<Entity> ents = new List<Entity>();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                int count = types.Count;
-                List<string> starts =new List<string>();
-                types.ForEach(o => starts.Add(RXClass.GetClass(o).DxfName));
-                List<TypedValue> tvs = new List<TypedValue>();
-                if (starts.Count > 0)
-                {
-                    tvs.Add(new TypedValue((int)DxfCode.Start, string.Join(",", starts)));
-                }
-                if (layers.Count>0)
-                {
-                    tvs.Add(new TypedValue((int)DxfCode.LayerName, string.Join(",", layers)));
-                }
-                var pts = regionBorder.Vertices();
-                SelectionFilter sf = new SelectionFilter(tvs.ToArray());
-                var psr = Active.Editor.SelectAll(sf);
-                if (psr.Status == PromptStatus.OK)
-                {
-                    var dbObjs = new DBObjectCollection();
-                    psr.Value.GetObjectIds().ForEach(o => dbObjs.Add(acdb.Element<Entity>(o)));
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    spatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ForEach(o=>ents.Add(o));
-                }
-                return ents;
-            }
-        }
-        public static List<Entity> GetEntities(this Polyline regionBorder,TypedValueList tvs)
-        {
-            List<Entity> ents = new List<Entity>();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var pts = regionBorder.Vertices();
-                SelectionFilter sf = new SelectionFilter(tvs.ToArray());
-                var psr = Active.Editor.SelectAll(sf);
-                if (psr.Status == PromptStatus.OK)
-                {
-                    var dbObjs = new DBObjectCollection();
-                    psr.Value.GetObjectIds().ForEach(o => dbObjs.Add(acdb.Element<Entity>(o)));
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                    spatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ForEach(o => ents.Add(o));
-                }
-                return ents;
-            }
+            var pts = border.Vertices();
+            var spatialIndex = new ThCADCoreNTSSpatialIndexEx(dbObjs);
+            return spatialIndex.SelectCrossingPolygon(pts);
         }
         public static ThCADCoreNTSSpatialIndex BuildSpatialIndex(List<Line> lines)
         {
@@ -403,7 +269,93 @@ namespace ThMEPLighting.Common
             {
                 return true;
             }
-            return false;
+            return false;   
+        }
+        public static Line NormalizeLaneLine(Line line, double tolerance = 1.0)
+        {
+            var newLine = new Line(line.StartPoint, line.EndPoint);
+            if (Math.Abs(line.StartPoint.Y - line.EndPoint.Y) <= tolerance)
+            {
+                //近似沿X轴
+                if (line.StartPoint.X < line.EndPoint.X)
+                {
+                    newLine = new Line(line.StartPoint, line.EndPoint);
+                }
+                else
+                {
+                    newLine = new Line(line.EndPoint, line.StartPoint);
+                }
+            }
+            else if(Math.Abs(line.StartPoint.X - line.EndPoint.X) <= tolerance)
+            {
+                //此线是近似沿Y轴
+                if (line.StartPoint.Y < line.EndPoint.Y)
+                {
+                    newLine = new Line(line.StartPoint, line.EndPoint);
+                }
+                else
+                {
+                    newLine = new Line(line.EndPoint, line.StartPoint);
+                }
+            }
+            else
+            {
+                newLine = newLine.Normalize();
+            }
+            return newLine;
+        }
+
+        public static bool IsLightNumber(string text)
+        {
+            var sb = new StringBuilder();
+            sb.Append('^');
+            var str = ThGarageLightCommon.LightNumberPrefix;
+            for (int i=0;i< str.Length;i++)
+            {
+                sb.Append('[');
+                sb.Append(str[i]);
+                sb.Append(']');
+            }
+            sb.Append(@"\d+$");
+            return Regex.IsMatch(text, sb.ToString());
+        }
+        public static bool IsGarageLight(Entity e)
+        {
+            return (e is BlockReference) && (e.Layer == "E-LITE-LITE");
+        }
+        public static bool IsLightCableCarrierCenterline(Entity e)
+        {
+            return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.DxCenterLineLayerName);
+        }
+
+        public static bool IsNonLightCableCarrierCenterline(Entity e)
+        {
+            return (e is Line || e is Polyline) && (e.Layer == ThGarageLightCommon.FdxCenterLineLayerName);
+        }
+        public static List<Line> FilterDistributedEdges(List<Line> edges,List<Line> dxLines)
+        {
+            var results = new List<Line>();
+            var spatialIndex = BuildSpatialIndex(edges);
+            foreach (Line line in dxLines)
+            {
+                var shortenLine = line.ExtendLine(-5.0);
+                var dxVec = shortenLine.StartPoint.GetVectorTo(shortenLine.EndPoint);
+                var rec = ThDrawTool.ToRectangle(shortenLine.StartPoint, shortenLine.EndPoint, 1.0);
+                var objs = spatialIndex.SelectCrossingPolygon(rec);
+                foreach(Line edge in objs)
+                {
+                    var edgeVec = edge.StartPoint.GetVectorTo(edge.EndPoint);
+                    if (ThGeometryTool.IsParallelToEx(dxVec, edgeVec) && 
+                        HasCommon(shortenLine, edge))
+                    {
+                        if(results.IndexOf(edge)<0)
+                        {
+                            results.Add(edge);
+                        }
+                    }
+                }
+            }
+            return results;
         }
     }
 }

@@ -1,36 +1,38 @@
 ﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
 using ThMEPLighting.Garage.Model;
+using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPLighting.Garage.Service
 {
     public class ThBuildDoubleRowPosService
     {
-        /// <summary>
-        /// 共线且相连
-        /// </summary>
         private List<ThLightEdge> Edges { get; set; }
         private List<Tuple<Point3d, Point3d>> SplitPts { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
+        private ThQueryLightBlockService QueryLightBlockService { get; set; }
         private ThBuildDoubleRowPosService(
             List<ThLightEdge> edges,
             List<Tuple<Point3d, Point3d>> splitPts,
-            ThLightArrangeParameter arrangeParameter)
+            ThLightArrangeParameter arrangeParameter,
+            ThQueryLightBlockService queryLightBlockService)
         {
             Edges = edges;
             SplitPts = splitPts;
             ArrangeParameter = arrangeParameter;
+            QueryLightBlockService = queryLightBlockService;
         }
         public static void Build(
             List<ThLightEdge> edges,
             List<Tuple<Point3d, Point3d>> splitPts,
-            ThLightArrangeParameter arrangeParameter)
+            ThLightArrangeParameter arrangeParameter,
+            ThQueryLightBlockService queryLightBlockService)
         {
-            var instance = new ThBuildDoubleRowPosService(edges, splitPts, arrangeParameter);
+            var instance = new ThBuildDoubleRowPosService(edges, splitPts, arrangeParameter, queryLightBlockService);
             instance.Build();
         }
         private void Build()
@@ -61,13 +63,10 @@ namespace ThMEPLighting.Garage.Service
         }
         private void BuildByExtractFromCad(ThLineSplitParameter splitParameter)
         {
-            if(ArrangeParameter.LightBlockQueryService==null)
-            {
-                return;
-            }
             var line = new Line(splitParameter.LineSp, splitParameter.LineEp);
-            var installPoints = ArrangeParameter.LightBlockQueryService.Query(line);
-            DistributePoints(installPoints);
+            var points = QueryLightBlockService.Query(line);
+            points=points.OrderBy(o => o.DistanceTo(splitParameter.LineSp)).ToList();
+            DistributePoints(points);
         }
         private void DistributePoints(List<Point3d> installPoints)
         {

@@ -66,19 +66,25 @@ namespace TianHua.FanSelection.UI
                 }
             }
 
-            if (m_Fan.Scenario == "厨房排油烟")
-            {
-                m_Fan.EndReservedAirPressure = 100;
-                if (this.gridBand10 != null)
-                    this.gridBand10.Caption = "末端预留风压\r\n0-200Pa";
 
-            }
-            else
+            if (m_Fan.EndReservedAirPressure == 0)
             {
-                m_Fan.EndReservedAirPressure = 0;
-                if (this.gridBand10 != null)
-                    this.gridBand10.Caption = "末端预留风压\r\n0-100Pa";
+                if (m_Fan.Scenario == "厨房排油烟")
+                {
+                    m_Fan.EndReservedAirPressure = 100;
+                    if (this.gridBand10 != null)
+                        this.gridBand10.Caption = "末端预留风压\r\n0-200Pa";
+
+                }
+                else
+                {
+                    m_Fan.EndReservedAirPressure = 0;
+                    if (this.gridBand10 != null)
+                        this.gridBand10.Caption = "末端预留风压\r\n0-100Pa";
+                }
             }
+
+        
 
             m_ListFan = new List<FanDataModel>();
             m_ListFan.Add(m_Fan);

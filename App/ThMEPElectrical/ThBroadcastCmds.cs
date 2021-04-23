@@ -63,10 +63,16 @@ namespace ThMEPElectrical
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acdb.Element<Polyline>(obj);
-                    var plFrame = ThMEPFrameService.Normalize(frame);
-                    frameLst.Add(plFrame);
-                    
+                    frameLst.Add(frame.Clone() as Polyline);
                 }
+
+                var pt = frameLst.First().StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                frameLst = frameLst.Select(x =>
+                {
+                    originTransformer.Transform(x);
+                    return ThMEPFrameService.Normalize(x as Polyline) as Curve;
+                }).ToList();
 
                 //处理外包框线
                 var plines = HandleFrame(frameLst);
@@ -75,12 +81,12 @@ namespace ThMEPElectrical
                 {
                     var plFrame = plInfo.Key;
                     //删除原有构建
-                    plFrame.ClearBroadCast();
-                    plFrame.ClearBlindArea();
-                    plFrame.ClearPipeLines();
+                    plFrame.ClearBroadCast(originTransformer);
+                    plFrame.ClearBlindArea(originTransformer);
+                    plFrame.ClearPipeLines(originTransformer);
 
                     //获取车道线
-                    var lanes = GetLanes(plFrame, acdb);
+                    var lanes = GetLanes(plFrame, acdb, originTransformer);
                     if (lanes.Count <= 0)
                     {
                         continue;
@@ -93,7 +99,7 @@ namespace ThMEPElectrical
                    
                     //获取构建信息
                     var bufferFrame = plFrame.Buffer(bufferLength)[0] as Polyline;
-                    GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    GetStructureInfo(acdb, bufferFrame, out List<Polyline> columns, out List<Polyline> walls, originTransformer);
 
                     //主车道布置信息
                     LayoutWithParkingLineService layoutService = new LayoutWithParkingLineService();
@@ -106,17 +112,24 @@ namespace ThMEPElectrical
                     //计算广播盲区
                     var layoutPts = resLayoutInfo.SelectMany(x => x.Value.Keys).ToList();
                     PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
-                    blindAreaService.PrintBlindArea(layoutPts, plInfo, BlindAreaRadius);
+                    blindAreaService.PrintBlindArea(layoutPts, plInfo, BlindAreaRadius, originTransformer);
 
                     //放置广播
-                    var broadcasts = InsertBroadcastService.InsertSprayBlock(resLayoutInfo);
+                    var broadcasts = InsertBroadcastService.InsertSprayBlock(resLayoutInfo, originTransformer);
 
                     //车道广播连管
+                    var transBroadcasts = broadcasts.Select(x => {
+                        var transBlock = x.Clone() as BlockReference;
+                        originTransformer.Transform(transBlock);
+                        return transBlock;
+                    }).ToList();
                     ConnetPipeService connetPipeService = new ConnetPipeService();
-                    var resPolys = connetPipeService.ConnetPipe(plInfo, handleLines, broadcasts);
+                    var resPolys = connetPipeService.ConnetPipe(plInfo, handleLines, transBroadcasts);
+                    var polyObjs = resPolys.ToCollection();
+                    originTransformer.Reset(polyObjs);
 
                     //创建连管线
-                    InsertConnectPipeService.InsertConnectPipe(resPolys);
+                    InsertConnectPipeService.InsertConnectPipe(polyObjs.Cast<Polyline>().ToList());
                 }
             }
         }
@@ -151,23 +164,31 @@ namespace ThMEPElectrical
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(obj);
-                    var plFrame = ThMEPFrameService.Normalize(frame);
-                    frameLst.Add(plFrame);
+                    frameLst.Add(frame.Clone() as Polyline);
                 }
+
+                var pt = frameLst.First().StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                frameLst = frameLst.Select(x =>
+                {
+                    originTransformer.Transform(x);
+                    return ThMEPFrameService.Normalize(x as Polyline) as Curve;
+                }).ToList();
+
                 var plines = HandleFrame(frameLst);
                 var holeInfo = CalHoles(plines);
                 foreach (var plInfo in holeInfo)
                 {
                     var pline = plInfo.Key;
                     //删除原有盲区
-                    pline.ClearBlindArea();
+                    pline.ClearBlindArea(originTransformer);
 
                     //获取广播布置点
-                    var pts = GetLayoutBroadcastPoints(acadDatabase, pline);
+                    var pts = GetLayoutBroadcastPoints(acadDatabase, pline, originTransformer);
 
                     //打印盲区
                     PrintBlindAreaService blindAreaService = new PrintBlindAreaService();
-                    blindAreaService.PrintBlindArea(pts, plInfo, BlindAreaRadius);
+                    blindAreaService.PrintBlindArea(pts, plInfo, BlindAreaRadius, originTransformer);
                 }
             }
         }
@@ -202,21 +223,29 @@ namespace ThMEPElectrical
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     var frame = acadDatabase.Element<Polyline>(obj);
-                    var plFrame = ThMEPFrameService.Normalize(frame);
-                    frameLst.Add(plFrame);
+                    frameLst.Add(frame.Clone() as Polyline);
                 }
+
+                var pt = frameLst.First().StartPoint;
+                ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
+                frameLst = frameLst.Select(x =>
+                {
+                    originTransformer.Transform(x);
+                    return ThMEPFrameService.Normalize(x as Polyline) as Curve;
+                }).ToList();
+
                 var plines = HandleFrame(frameLst);
                 var holeInfo = CalHoles(plines);
                 foreach (var pline in holeInfo)
                 {
                     //删除原有连接线
-                    pline.Key.ClearPipeLines();
+                    pline.Key.ClearPipeLines(originTransformer);
 
                     //获取广播图块
-                    var broadcast = GetBroadcastBlocks(pline.Key);
+                    var broadcast = GetBroadcastBlocks(pline.Key, originTransformer);
 
                     //获取车道线
-                    var lanes = GetLanes(pline.Key, acadDatabase);
+                    var lanes = GetLanes(pline.Key, acadDatabase, originTransformer);
 
                     //处理车道线
                     var handleLines = ThMEPLineExtension.LineSimplifier(lanes.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
@@ -224,94 +253,14 @@ namespace ThMEPElectrical
                     //车道广播连管
                     ConnetPipeService connetPipeService = new ConnetPipeService();
                     var resPolys = connetPipeService.ConnetPipe(pline, handleLines, broadcast);
+                    var polyObjs = resPolys.ToCollection();
+                    originTransformer.Reset(polyObjs);
 
                     //创建连管线
-                    InsertConnectPipeService.InsertConnectPipe(resPolys);
+                    InsertConnectPipeService.InsertConnectPipe(polyObjs.Cast<Polyline>().ToList());
                 }
             }
         }
-
-        #region test
-        [CommandMethod("TIANHUACAD", "PlTest", CommandFlags.Modal)]
-        public void PlTest()
-        {
-            List<Entity> entities = new List<Entity>();
-            Database db = Application.DocumentManager.MdiActiveDocument.Database;
-            Editor ed = Application.DocumentManager.MdiActiveDocument.Editor;
-            var entSelected = ed.SelectAll();
-            if (entSelected.Status != PromptStatus.OK) return;
-            using (Transaction trans = db.TransactionManager.StartTransaction())
-            {
-                foreach (var id in entSelected.Value.GetObjectIds())
-                {
-                    Entity  entity = (Entity)trans.GetObject(id, OpenMode.ForRead);
-                    if (entity is BlockReference block)
-                    {
-                        entities.AddRange(GetEntity(block, trans));
-                    }
-                    else
-                    {
-                        entities.Add(entity);
-                    }
-                }
-                trans.Commit();
-            }
-
-            //List<EntityInfo> entityInfos = new List<EntityInfo>();
-            //foreach (var item in entities)
-            //{
-            //    EntityInfo entityInfo = new EntityInfo();
-            //    entityInfo.cad_type = item.GetType().Name;
-            //    entityInfo.id = (double)item.ObjectId.OldIdPtr;
-            //    try
-            //    {
-            //        entityInfo.entity_layoutName = item.BlockName;
-            //    }
-            //    catch (System.Exception)
-            //    {
-            //    }
-            //    entityInfo.entity_layersName = item.Layer;
-            //    entityInfo.entity_geomExtents = new List<Point3d>();
-            //    try
-            //    {
-            //        entityInfo.entity_geomExtents.Add(item.GeometricExtents.MinPoint);
-            //        entityInfo.entity_geomExtents.Add(item.GeometricExtents.MaxPoint);
-            //    }
-            //    catch (System.Exception)
-            //    {
-            //    }
-            //    entityInfos.Add(entityInfo);
-            //}
-
-            //string str = JsonConvert.SerializeObject(entityInfos);
-            //using (FileStream fs = new FileStream("C://Users//tangyongjing//Desktop//json.txt", FileMode.OpenOrCreate))
-            //{
-            //    StreamWriter sw = new StreamWriter(fs);
-            //    sw.Write(str);
-            //    sw.Close();
-            //}
-        }
-
-        private List<Entity> GetEntity(BlockReference blockReference, Transaction acadDatabase)
-        {
-            List<Entity> entities = new List<Entity>();
-            DBObjectCollection obj = new DBObjectCollection();
-            blockReference.Explode(obj);
-            foreach (Entity rBlock in obj)
-            {
-                if (rBlock is BlockReference bblock)
-                {
-                    entities.AddRange(GetEntity(bblock, acadDatabase));
-                }
-                else
-                {
-                    entities.Add(rBlock);
-                }
-            }
-
-            return entities;    
-        }
-        #endregion
 
         /// <summary>
         /// 处理外包框线
@@ -360,15 +309,18 @@ namespace ThMEPElectrical
         /// 获取车道线
         /// </summary>
         /// <param name="polyline"></param>
-        public List<Curve> GetLanes(Polyline polyline, AcadDatabase acdb)
+        public List<Curve> GetLanes(Polyline polyline, AcadDatabase acdb, ThMEPOriginTransformer originTransformer)
         {
             var objs = new DBObjectCollection();
             var laneLines = acdb.ModelSpace
                 .OfType<Curve>()
                 .Where(o => o.Layer == ThMEPCommon.LANELINE_LAYER_NAME);
-            laneLines.ForEach(x => objs.Add(x));
+            laneLines.ForEach(x => { 
+                var transCurve = x.Clone() as Curve;
+                originTransformer.Transform(transCurve); 
+                objs.Add(transCurve); 
+            });
 
-            //var bufferPoly = polyline.Buffer(1)[0] as Polyline;
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
 
@@ -383,34 +335,50 @@ namespace ThMEPElectrical
         /// <param name="columns"></param>
         /// <param name="beams"></param>
         /// <param name="walls"></param>
-        private void GetStructureInfo(AcadDatabase acdb, Polyline polyline, out List<Polyline> columns, out List<Polyline> walls)
+        private void GetStructureInfo(AcadDatabase acdb, Polyline polyline, out List<Polyline> columns, out List<Polyline> walls, ThMEPOriginTransformer originTransformer)
         {
-            //结构构建
-            var allStructure = ThBeamConnectRecogitionEngine.ExecutePreprocess(acdb.Database, polyline.Vertices());
-            //获取柱
-            columns = allStructure.ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            var ColumnExtractEngine = new ThColumnExtractionEngine();
+            ColumnExtractEngine.Extract(acdb.Database);
+            ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+            var ColumnEngine = new ThColumnRecognitionEngine();
+            ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
+
+            // 启动墙识别引擎
+            var ShearWallExtractEngine = new ThShearWallExtractionEngine();
+            ShearWallExtractEngine.Extract(acdb.Database);
+            ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+            var ShearWallEngine = new ThShearWallRecognitionEngine();
+            ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
+
+            var archWallExtractEngine = new ThArchitectureWallExtractionEngine();
+            archWallExtractEngine.Extract(acdb.Database);
+            archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+            var archWallEngine = new ThArchitectureWallRecognitionEngine();
+            archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
+
+            ////获取柱
+            columns = new List<Polyline>();
+            columns = ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             var objs = new DBObjectCollection();
             columns.ForEach(x => objs.Add(x));
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
             //获取剪力墙
-            walls = allStructure.ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+            walls = new List<Polyline>();
+            walls = ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             objs = new DBObjectCollection();
             walls.ForEach(x => objs.Add(x));
             thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
 
-            //建筑构建
-            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+            //获取建筑墙
+            foreach (var o in archWallEngine.Elements)
             {
-                //建筑墙
-                archWallEngine.Recognize(acdb.Database, polyline.Vertices());
-                var arcWall = archWallEngine.Elements.Select(x => x.Outline).Where(x => x is Polyline).Cast<Polyline>().ToList();
-                objs = new DBObjectCollection();
-                arcWall.ForEach(x => objs.Add(x));
-                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-                walls.AddRange(thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList());
+                if (o.Outline is Polyline wall)
+                {
+                    walls.Add(wall);
+                }
             }
         }
 
@@ -419,7 +387,7 @@ namespace ThMEPElectrical
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        private List<BlockReference> GetBroadcastBlocks(Polyline polyline)
+        private List<BlockReference> GetBroadcastBlocks(Polyline polyline, ThMEPOriginTransformer originTransformer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -443,7 +411,10 @@ namespace ThMEPElectrical
                     {
                         foreach (ObjectId obj in allBraodcasts.Value.GetObjectIds())
                         {
-                            braodcasts.Add(acdb.Element<BlockReference>(obj));
+                            var broadcast = acdb.Element<BlockReference>(obj);
+                            var transBlock = broadcast.Clone() as BlockReference;
+                            originTransformer.Transform(transBlock);
+                            braodcasts.Add(transBlock);
                         }
                     }
                 }
@@ -458,7 +429,7 @@ namespace ThMEPElectrical
         /// <param name="acdb"></param>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        private List<Point3d> GetLayoutBroadcastPoints(AcadDatabase acdb, Polyline polyline)
+        private List<Point3d> GetLayoutBroadcastPoints(AcadDatabase acdb, Polyline polyline, ThMEPOriginTransformer originTransformer)
         {
             //获取广播
             var dxfNames = new string[]
@@ -474,13 +445,15 @@ namespace ThMEPElectrical
             {
                 foreach (ObjectId obj in allBraodcasts.Value.GetObjectIds())
                 {
-                    braodcasts.Add(acdb.Element<BlockReference>(obj));
+                    var transBlock = acdb.Element<BlockReference>(obj).Clone() as BlockReference;
+                    originTransformer.Transform(transBlock);
+                    braodcasts.Add(transBlock);
                 }
             }
             var objs = new DBObjectCollection();
             braodcasts.Where(o => polyline.Contains(o.Position)).ForEachDbObject(o => objs.Add(o));
 
-            return braodcasts.Select(o => o.Position).ToList();
+            return objs.Cast<BlockReference>().Select(o => o.Position).ToList();
         }
     }
 

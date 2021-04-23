@@ -46,7 +46,7 @@ namespace ThMEPWSS.Pipe.Engine
                     break;
                 }
             }
-            if(num1==0)
+            if(num1==0&& condensepipes.Count>0)
             {
                 condensepipe = condensepipes[0];
             }

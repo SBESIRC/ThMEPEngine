@@ -36,9 +36,30 @@ namespace ThMEPLighting.ParkingStall.Model
         }
     }
 
+    public class LightBlockConnectPointInfo
+    {
+        public Point3d MidPoint;
+        public Point3d FirstEndPoint;
+        public Point3d SecondEndPoint;
+
+        public LightBlockConnectPointInfo(Point3d midPoint, Point3d firstEndPoint, Point3d secondEndPoint)
+        {
+            MidPoint = midPoint;
+            FirstEndPoint = firstEndPoint;
+            SecondEndPoint = secondEndPoint;
+        }
+    }
+
     public class LightPlaceInfo
     {
         public Point3d Position;
+        public Point3d PtOnLanePoly;
+
+        public double LengthFromStart = 0;
+
+        public ObjectId InsertBlockId = ObjectId.Null;
+        public LightBlockConnectPointInfo LightBlockConnectInfo = null;
+
         public Line LongDirLength;
         public Line ShortDirLength;
 

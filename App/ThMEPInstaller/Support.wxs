@@ -21,6 +21,9 @@
 			<Component Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" Guid="{4484A7C6-7202-4B4D-9180-89684485FEA4}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Block_LaneLineLight" Source="$(var.AutoloaderContentsPath)\Support\车道灯图块.dwg" KeyPath="yes" />
 			</Component>
+			<Component Id="CMP_Autoloader_PackageContents_Support_Block_Storey" Guid="{7B5FBC48-972A-49D4-9748-41B9F1AC19F7}" Win64="yes">
+				<File Id="FILE_Autoloader_PackageContents_Support_Block_Storey" Source="$(var.AutoloaderContentsPath)\Support\楼层定义工具.dwg" KeyPath="yes" />
+			</Component>
 			<Component Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" Guid="{8EF2BF90-0220-4317-9722-5BDF61C8FE28}" Win64="yes">
 				<File Id="FILE_Autoloader_PackageContents_Support_Block_EmergencyLight" Source="$(var.AutoloaderContentsPath)\Support\地库应急照明图块.dwg" KeyPath="yes" />
 			</Component>
@@ -94,8 +97,9 @@
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Pipe" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Storey" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
-			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />
+			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />			
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_EmergencyLight" />
 			<ComponentRef Id="CMP_Autoloader_PackageContents_Support_DesignData_FanCalc" />

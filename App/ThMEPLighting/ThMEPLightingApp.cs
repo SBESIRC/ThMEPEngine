@@ -8,15 +8,15 @@ namespace ThMEPLighting
     {
         public void Initialize()
         {
-            //throw new System.NotImplementedException();
+            //
         }
 
         public void Terminate()
         {
-            //throw new System.NotImplementedException();
+            //
         }
 
-        [CommandMethod("TIANHUACAD", "THParkProfile", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THPARKPROFILE", CommandFlags.Modal)]
         public void THParkProfile()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -86,13 +86,23 @@ namespace ThMEPLighting
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THLaneConnect", CommandFlags.Modal)]
-        public void THLaneConnect()
+        [CommandMethod("TIANHUACAD", "THSideLaneConnect", CommandFlags.Modal)]
+        public void THSideLaneConnect()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var packageManager = new CommandManager();
-                packageManager.LaneConnect();
+                packageManager.SideLaneConnect();
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THLaneConnect", CommandFlags.Modal)]
+        public void LaneConnect()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var packageManager = new CommandManager();
+                packageManager.THLaneConnect();
             }
         }
     }

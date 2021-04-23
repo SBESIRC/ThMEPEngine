@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using ThMEPHAVC.CAD;
-using ThMEPHVAC;
 using ThMEPHVAC.CAD;
+using ThMEPHVAC.Model;
 using TianHua.Publics.BaseCode;
 
 namespace TianHua.Hvac.UI
@@ -18,13 +11,14 @@ namespace TianHua.Hvac.UI
     {
         public string SelectedInnerDuctSize { get; set; }
         public string SelectedOuterDuctSize { get; set; }
-
-        DuctSpecModel m_DuctSpecModel { get; set; }
+        public string AirVolume { get; set; }
+        public string Elevation { get; set; }
+        public string TextSize { get; set; }
+        public DuctSpecModel Model { get; set; }
         public fmDuctSpec()
         {
             InitializeComponent();
         }
-
 
         private void fmDuctSpec_Load(object sender, EventArgs e)
         {
@@ -33,7 +27,7 @@ namespace TianHua.Hvac.UI
 
         public void InitForm(DuctSpecModel _DuctSpecModel)
         {
-            m_DuctSpecModel = _DuctSpecModel;
+            Model = _DuctSpecModel;
 
             TxtAirVolume.Text = FuncStr.NullToStr(_DuctSpecModel.AirVolume);
 
@@ -47,22 +41,20 @@ namespace TianHua.Hvac.UI
 
             ListBoxInnerTube.SelectedItem = _DuctSpecModel.InnerTube;
 
-            if (_DuctSpecModel.InnerAnalysisType != AnalysisResultType.OK)
-            {
-                ListBoxInnerTube.Enabled = false;
-                TxtInnerTube1.Enabled = false;
-                TxtInnerTube2.Enabled = false;
+            //if (_DuctSpecModel.InnerAnalysisType != AnalysisResultType.OK)
+            //{
+            //    ListBoxInnerTube.Enabled = false;
+            //    TxtInnerTube1.Enabled = false;
+            //    TxtInnerTube2.Enabled = false;
 
-            }
+            //}
 
-            if (_DuctSpecModel.OuterAnalysisType != AnalysisResultType.OK)
-            {
-                ListBoxOuterTube.Enabled = false;
-                TxtOuterTube1.Enabled = false;
-                TxtOuterTube2.Enabled = false;
-            }
-
-
+            //if (_DuctSpecModel.OuterAnalysisType != AnalysisResultType.OK)
+            //{
+            //    ListBoxOuterTube.Enabled = false;
+            //    TxtOuterTube1.Enabled = false;
+            //    TxtOuterTube2.Enabled = false;
+            //}
         }
 
         private void Rad_SelectedIndexChanged(object sender, EventArgs e)
@@ -88,7 +80,7 @@ namespace TianHua.Hvac.UI
                 layoutControlItem18.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
 
-                this.Size = new Size(170, 400);
+                this.Size = new Size(170, 460);
             }
             else
             {
@@ -110,14 +102,15 @@ namespace TianHua.Hvac.UI
                 layoutControlItem18.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
                 layoutControlItem19.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
 
-                this.Size = new Size(170, 335);
+                this.Size = new Size(170, 390);
             }
         }
 
         private void BtnOK_Click(object sender, EventArgs e)
         {
-
-
+            Elevation = TxtHeight.Text;
+            AirVolume = TxtAirVolume.Text;
+            TextSize = ComBoxDrawingRatio.Text;
         }
 
         private void ListBoxOuterTube_SelectedValueChanged(object sender, EventArgs e)
@@ -180,30 +173,26 @@ namespace TianHua.Hvac.UI
 
             var _AirSpeed = FuncStr.NullToStr(TxtAirSpeed.Text);
 
-            if (FuncStr.NullToDouble(TxtAirSpeed.Text) > m_DuctSpecModel.MaxAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MaxAirSpeed); _AirSpeed = FuncStr.NullToStr(m_DuctSpecModel.MaxAirSpeed); }
+            if (FuncStr.NullToDouble(TxtAirSpeed.Text) > Model.MaxAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(Model.MaxAirSpeed); _AirSpeed = FuncStr.NullToStr(Model.MaxAirSpeed); }
 
-            if (FuncStr.NullToDouble(TxtAirSpeed.Text) < m_DuctSpecModel.MinAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); _AirSpeed = FuncStr.NullToStr(m_DuctSpecModel.MinAirSpeed); }
-
+            if (FuncStr.NullToDouble(TxtAirSpeed.Text) < Model.MinAirSpeed) { TxtAirSpeed.Text = FuncStr.NullToStr(Model.MinAirSpeed); _AirSpeed = FuncStr.NullToStr(Model.MinAirSpeed); }
 
             //if (FuncStr.NullToDouble(TxtAirSpeed.Text) == 0) { return; }
 
-            ThDuctSelectionEngine _ThDuctSelectionEngine = new ThDuctSelectionEngine(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed)  );
+            ThDuctParameter _ThDuctSelectionEngine = new ThDuctParameter(FuncStr.NullToDouble(TxtAirVolume.Text), FuncStr.NullToDouble(_AirSpeed));
 
+            Model.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            Model.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
+            Model.OuterTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendOuterDuctSize;
+            Model.InnerTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendInnerDuctSize;
 
-            m_DuctSpecModel.ListOuterTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
-            m_DuctSpecModel.ListInnerTube = new List<string>(_ThDuctSelectionEngine.DuctSizeInfor.DefaultDuctsSizeString);
-            m_DuctSpecModel.OuterTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendOuterDuctSize;
-            m_DuctSpecModel.InnerTube = _ThDuctSelectionEngine.DuctSizeInfor.RecommendInnerDuctSize;
+            ListBoxOuterTube.DataSource = Model.ListOuterTube;
 
-            ListBoxOuterTube.DataSource = m_DuctSpecModel.ListOuterTube;
+            ListBoxInnerTube.DataSource = Model.ListInnerTube;
 
-            ListBoxInnerTube.DataSource = m_DuctSpecModel.ListInnerTube;
+            ListBoxOuterTube.SelectedItem = Model.OuterTube;
 
-            ListBoxOuterTube.SelectedItem = m_DuctSpecModel.OuterTube;
-
-            ListBoxInnerTube.SelectedItem = m_DuctSpecModel.InnerTube;
-
-
+            ListBoxInnerTube.SelectedItem = Model.InnerTube;
         }
 
         private void TxtOuterTube1_EditValueChanged(object sender, EventArgs e)
@@ -243,15 +232,15 @@ namespace TianHua.Hvac.UI
             LabAirSpeedInner.Text = string.Format("计算风速 {0} m/s", _AirSpeed.ToString("0.#"));
         }
 
-
-
-
-
-
-
         private void TxtAirSpeed_ParseEditValue(object sender, DevExpress.XtraEditors.Controls.ConvertEditValueEventArgs e)
         {
 
+        }
+
+        private void TxtHeight_EditValueChanged(object sender, EventArgs e)
+        {
+            if (TxtHeight.Text == string.Empty || FuncStr.NullToDouble(TxtHeight.Text) == 0) { return; }
+            TxtHeight.Text = FuncStr.NullToDouble(TxtHeight.Text).ToString("#.00");
         }
     }
 }

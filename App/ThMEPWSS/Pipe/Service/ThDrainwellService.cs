@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -13,11 +14,13 @@ namespace ThMEPWSS.Pipe.Service
         public List<ThIfcSpace> Pypes { get; set; }
         protected List<ThIfcSpace> Spaces { get; set; }
         protected ThCADCoreNTSSpatialIndex SpaceSpatialIndex;
+        protected ThSpaceSpatialPredicateService SpacePredicateService { get; set; }
         protected ThDrainwellService()
         {
             Spaces = new List<ThIfcSpace>();
             Drainwells = new List<ThIfcSpace>();
             Pypes= new List<ThIfcSpace>();
+            SpacePredicateService = new ThSpaceSpatialPredicateService(Spaces);
         }
         protected ThDrainwellService(List<ThIfcSpace> spaces, 
             ThCADCoreNTSSpatialIndex spaceSpatialIndex=null)
@@ -32,6 +35,7 @@ namespace ThMEPWSS.Pipe.Service
                 Spaces.ForEach(o => dbObjs.Add(o.Boundary));
                 SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
+            SpacePredicateService = new ThSpaceSpatialPredicateService(Spaces);
         }
         /// <summary>
         /// 找到空间相邻的且含有排水管井的阳台
@@ -45,14 +49,15 @@ namespace ThMEPWSS.Pipe.Service
             if (bufferObjs.Count == 0)
             {
                 return new List<ThIfcSpace>();
-            }
+            }           
+
             var crossObjs = SpaceSpatialIndex.SelectCrossingPolygon(bufferObjs[0] as Polyline);
             //获取偏移后，能框选到的空间
             var crossSpaces = Spaces.Where(o => crossObjs.Contains(o.Boundary));
             //找到含有阳台的空间
             var balconies = crossSpaces.Where(m => m.Tags.Where(n => n.Contains("阳台")).Any());
             //找到含有排水管井的阳台空间
-            var incluedrainwellBalconies = balconies.Where(m => m.SubSpaces.Where(n => n.Tags.Count == 0).Any()).ToList();
+            var incluedrainwellBalconies = balconies.Where(m => SpacePredicateService.Contains(m).Where(n => n.Tags.Count == 0).Any()).ToList();
             //
             return incluedrainwellBalconies;
         }
@@ -75,7 +80,7 @@ namespace ThMEPWSS.Pipe.Service
             //找到含有卫生间的空间
             var toilets = crossSpaces.Where(m => m.Tags.Where(n => n.Contains("卫生间")).Any());
             //找到含有排水管井的阳台空间
-            var incluedrainwellToilets = toilets.Where(m => m.SubSpaces.Where(n => n.Tags.Count == 0).Any()).ToList();
+            var incluedrainwellToilets = toilets.Where(m => SpacePredicateService.Contains(m).Where(n => n.Tags.Count == 0).Any()).ToList();
             //
             return incluedrainwellToilets;
         }

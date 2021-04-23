@@ -1,57 +1,74 @@
-﻿using System;
+﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
+using Linq2Acad;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Runtime;
-using Autodesk.AutoCAD.EditorInput;
-using Linq2Acad;
-using DotNetARX;
-using NFox.Cad;
+using System.Text.RegularExpressions;
 using ThCADCore.NTS;
+
 
 namespace ThMEPLighting.EmgLight.Service
 {
     public static class RemoveBlockService
     {
-        public static void ClearEmergencyLight(this Polyline polyline)
+        public static void ClearDrawing()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            Regex rx = new Regex(@"l[0-9]+");
+           
+            using (var db = AcadDatabase.Active())
             {
-                acadDatabase.Database.UnFrozenLayer(ThMEPLightingCommon.EmgLightLayerName);
-                acadDatabase.Database.UnLockLayer(ThMEPLightingCommon.EmgLightLayerName);
-                acadDatabase.Database.UnOffLayer(ThMEPLightingCommon.EmgLightLayerName);
-
-                //获取应急照明
-                var dxfNames = new string[]
+                foreach (var layer in db.Layers)
                 {
-                    RXClass.GetClass(typeof(BlockReference)).DxfName,
-                };
-                var filterlist = OpFilter.Bulid(o =>
-                o.Dxf((int)DxfCode.LayerName) == ThMEPLightingCommon.EmgLightLayerName &
-                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
-                var emgLight = new List<BlockReference>();
-                var allEmgLight = Active.Editor.SelectAll(filterlist);
-                if (allEmgLight.Status == PromptStatus.OK)
-                {
-                    using (AcadDatabase acdb = AcadDatabase.Active())
+                    
+                    if (rx.IsMatch(layer.Name))
                     {
-                        foreach (ObjectId obj in allEmgLight.Value.GetObjectIds())
-                        {
-                            emgLight.Add(acdb.Element<BlockReference>(obj));
-                        }
+                        ClearDrawing(layer.Name);
                     }
-                }
-                var objs = new DBObjectCollection();
-                emgLight.Where(o => polyline.Contains(o.Position)).ForEachDbObject(o => objs.Add(o));
-                foreach (Entity spray in objs)
-                {
-                    spray.UpgradeOpen();
-                    spray.Erase();
                 }
             }
         }
 
+        private static void ClearDrawing(string layerName)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                LayerTable lt = (LayerTable)acadDatabase.Database.LayerTableId.GetObject(OpenMode.ForRead);
+                if (lt.Has(layerName))
+                {
+                    acadDatabase.Database.UnFrozenLayer(layerName);
+                    acadDatabase.Database.UnLockLayer(layerName);
+                    acadDatabase.Database.UnOffLayer(layerName);
+
+                    var items = acadDatabase.ModelSpace
+                        .OfType<Entity>()
+                        .Where(o => o.Layer == layerName);
+
+                    foreach (var line in items)
+                    {
+                        line.UpgradeOpen();
+                        line.Erase();
+                    }
+
+                    acadDatabase.Database.DeleteLayer(layerName);
+                }
+            }
+        }
+
+        public static void ClearEmergencyLight( Dictionary<BlockReference, BlockReference> emgLight)
+        {
+            var objs = new DBObjectCollection();
+            emgLight.Select(x => x.Key).ForEachDbObject(o => objs.Add(o));
+            foreach (BlockReference  spray in objs)
+            {
+                spray.UpgradeOpen();
+                spray.Erase();
+            }
+        }
 
     }
+
+
+
 }

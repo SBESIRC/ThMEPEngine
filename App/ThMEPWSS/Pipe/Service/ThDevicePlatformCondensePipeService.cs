@@ -4,18 +4,18 @@ using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public  class ThDevicePlatformCondensePipeService
     {
-        public List<ThIfcCondensePipe> CondensePipes { get; private set; }
-        private List<ThIfcCondensePipe> CondensePipeList { get; set; }
+        public List<ThWCondensePipe> CondensePipes { get; private set; }
+        private List<ThWCondensePipe> CondensePipeList { get; set; }
         private ThIfcSpace DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex CondensePipeSpatialIndex { get; set; }
         private ThDevicePlatformCondensePipeService(
-            List<ThIfcCondensePipe> condensePipeList,
+            List<ThWCondensePipe> condensePipeList,
             ThIfcSpace devicePlatformSpace,
             ThCADCoreNTSSpatialIndex condensePipeSpatialIndex)
         {
@@ -30,7 +30,7 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
         public static ThDevicePlatformCondensePipeService Find(
-            List<ThIfcCondensePipe> condensePipeList,
+            List<ThWCondensePipe> condensePipeList,
             ThIfcSpace devicePlatformSpace,
             ThCADCoreNTSSpatialIndex condensePipeSpatialIndex = null)
         {

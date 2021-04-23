@@ -4,6 +4,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using System.Collections.Generic;
 using ThCADExtension;
 using System.Linq;
+using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
 
@@ -62,52 +63,28 @@ namespace ThMEPEngineCore.CAD
         }
         public static Polyline ToOutline(Point3d startPt,Point3d endPt, double width)
         {
-            Vector3d vec = startPt.GetVectorTo(endPt).GetNormal();
-            Vector3d perpendVec = vec.GetPerpendicularVector();
-            startPt = startPt - vec.MultiplyBy(1.0);
-            endPt = endPt + vec.MultiplyBy(1.0);
-            Point3d pt1 = startPt + perpendVec.MultiplyBy(width + 1.0);
-            Point3d pt2 = endPt + perpendVec.MultiplyBy(width + 1.0);
-            Point3d pt3 = endPt - perpendVec.MultiplyBy(width + 1.0);
-            Point3d pt4 = startPt - perpendVec.MultiplyBy(width + 1.0);
-            Polyline outline = new Polyline
-            {
-                Closed = true
-            };
-            outline.AddVertexAt(0, new Point2d(pt1.X, pt1.Y), 0, 0, 0);
-            outline.AddVertexAt(1, new Point2d(pt2.X, pt2.Y), 0, 0, 0);
-            outline.AddVertexAt(2, new Point2d(pt3.X, pt3.Y), 0, 0, 0);
-            outline.AddVertexAt(3, new Point2d(pt4.X, pt4.Y), 0, 0, 0);
-            return outline;
+            var line = new Line(startPt, endPt);
+            return line.ExtendLine(1.0).Buffer(width / 2.0);
         }
         public static Polyline ToRectangle(Point3d startPt, Point3d endPt, double width)
         {
-            Vector3d vec = startPt.GetVectorTo(endPt).GetNormal();
-            Vector3d perpendVec = vec.GetPerpendicularVector();
-            Point3d pt1 = startPt + perpendVec.MultiplyBy(width / 2.0);
-            Point3d pt2 = endPt + perpendVec.MultiplyBy(width / 2.0);
-            Point3d pt3 = endPt - perpendVec.MultiplyBy(width / 2.0);
-            Point3d pt4 = startPt - perpendVec.MultiplyBy(width / 2.0);
-            Polyline outline = new Polyline
-            {
-                Closed = true
-            };
-            outline.AddVertexAt(0, new Point2d(pt1.X, pt1.Y), 0, 0, 0);
-            outline.AddVertexAt(1, new Point2d(pt2.X, pt2.Y), 0, 0, 0);
-            outline.AddVertexAt(2, new Point2d(pt3.X, pt3.Y), 0, 0, 0);
-            outline.AddVertexAt(3, new Point2d(pt4.X, pt4.Y), 0, 0, 0);
-            return outline;
+            var line = new Line(startPt, endPt);
+            return line.Buffer(width / 2.0);
         }
         public static Polyline CreateSquare(this Point3d pt, double edgeLength)
+        {
+            return pt.CreateRectangle(edgeLength, edgeLength);
+        }
+        public static Polyline CreateRectangle(this Point3d pt, double length,double width)
         {
             Polyline polyline = new Polyline
             {
                 Closed = true
             };
-            polyline.AddVertexAt(0, new Point2d(pt.X + edgeLength / 2.0, pt.Y + edgeLength / 2.0), 0, 0, 0);
-            polyline.AddVertexAt(1, new Point2d(pt.X - edgeLength / 2.0, pt.Y + edgeLength / 2.0), 0, 0, 0);
-            polyline.AddVertexAt(2, new Point2d(pt.X - edgeLength / 2.0, pt.Y - edgeLength / 2.0), 0, 0, 0);
-            polyline.AddVertexAt(3, new Point2d(pt.X + edgeLength / 2.0, pt.Y - edgeLength / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(0, new Point2d(pt.X + length / 2.0, pt.Y + width / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(1, new Point2d(pt.X - length / 2.0, pt.Y + width / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(2, new Point2d(pt.X - length / 2.0, pt.Y - width / 2.0), 0, 0, 0);
+            polyline.AddVertexAt(3, new Point2d(pt.X + length / 2.0, pt.Y - width / 2.0), 0, 0, 0);
             return polyline;
         }
         public static List<Line> GetLines(this DBObjectCollection objs,double length=10.0)
@@ -154,6 +131,37 @@ namespace ThMEPEngineCore.CAD
             foreach (var segment in polylineSegments)
             {
                 results.Add(new Line(segment.StartPoint.ToPoint3d(), segment.EndPoint.ToPoint3d()));
+            }
+            return results;
+        }
+        public static List<Line> ExplodeLines(this Polyline polyline,double arcLength=5.0)
+        {
+            var results = new List<Line>();
+            var objs = new DBObjectCollection();
+            polyline.Explode(objs);
+            foreach (Curve curve in objs)
+            {
+                if(curve.GetLength()==0.0)
+                {
+                    continue;
+                }
+                if (curve is Line line)
+                {
+                    results.Add(line.WashClone() as Line);
+                }
+                else if(curve is Arc arc)
+                {
+                   var arcPoly = arc.TessellateArcWithArc(arcLength);
+                    results.AddRange(ExplodeLines(arcPoly, arcLength));
+                }
+                else if (curve is Polyline subPoly)
+                {
+                    results.AddRange(ExplodeLines(subPoly, arcLength));
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }
             return results;
         }

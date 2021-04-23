@@ -67,8 +67,12 @@ namespace ThMEPLighting.Garage.Service
             var firstSecondParis = new List<Tuple<Line, Line>>();
             branchOriginFirstLines.ForEach(o =>
             {
-                var second = WireOffsetDataService.FindSecondByFirst(o);
-                firstSecondParis.Add(Tuple.Create(o, second));
+                var seconds = WireOffsetDataService.FindSecondByFirst(o);
+                if (seconds.Count > 0)
+                {
+                    var result = seconds.GetCollinearMaxPts();
+                    firstSecondParis.Add(Tuple.Create(o, new Line(result.Item1,result.Item2)));
+                }
             });
 
             //获取分支点在此直段上的交点
@@ -203,24 +207,15 @@ namespace ThMEPLighting.Garage.Service
             var secondInters = ThGeometryTool.IntersectPts(main, branchSecond, Intersect.ExtendBoth);
             if(firstInters.Count > 0 && secondInters.Count > 0)
             {
-                var firstClosePt = firstInters[0].DistanceTo(branchFirst.StartPoint) <
-                    firstInters[0].DistanceTo(branchFirst.EndPoint) ? branchFirst.StartPoint : branchFirst.EndPoint;
-                var secondClosePt = secondInters[0].DistanceTo(branchSecond.StartPoint) <
-                    secondInters[0].DistanceTo(branchSecond.EndPoint) ? branchSecond.StartPoint : branchSecond.EndPoint;
-
-                if(firstClosePt.DistanceTo(firstInters[0])<=(ArrangeParameter.Interval+1) &&
-                    secondClosePt.DistanceTo(secondInters[0]) <= (ArrangeParameter.Interval + 1))
-                {
-                    bool isPtOn = ThGeometryTool.IsPointOnLine(StartPt, EndPt, firstInters[0], 1.0) ||
+                bool isPtOn = ThGeometryTool.IsPointOnLine(StartPt, EndPt, firstInters[0], 1.0) ||
                  ThGeometryTool.IsPointOnLine(StartPt, EndPt, secondInters[0], 1.0);
-                    if (isPtOn && CheckDisValid(main, branchFirst, firstInters[0].DistanceTo(secondInters[0])))
-                    {
-                        return true;
-                    }
-                    else
-                    {
-                        return false;
-                    }
+                if (isPtOn && CheckDisValid(main, branchFirst, firstInters[0].DistanceTo(secondInters[0])))
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
                 }
             }
             return false;

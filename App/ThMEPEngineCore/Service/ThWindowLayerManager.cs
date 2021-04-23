@@ -7,7 +7,7 @@ namespace ThMEPEngineCore.Service
 {
    public class ThWindowLayerManager
     {
-        public static List<string> XrefLayers(Database database)
+        public static List<string> CurveXrefLayers(Database database)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {

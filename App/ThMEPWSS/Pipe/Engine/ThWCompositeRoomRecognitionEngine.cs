@@ -1,50 +1,57 @@
-﻿using Linq2Acad;
-using ThMEPWSS.Pipe.Model;
-using Autodesk.AutoCAD.Geometry;
-using System.Collections.Generic;
+﻿using System;
+using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
+using ThMEPWSS.Pipe.Model;
+using ThMEPWSS.Pipe.Service;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine
+    public class ThWCompositeRoomRecognitionEngine : ThWRoomRecognitionEngine, IDisposable
     {
         public List<ThWCompositeRoom> Rooms { get; set; }
-
         public List<ThWCompositeBalconyRoom> FloorDrainRooms { get; set; }
+        public List<ThWRainPipe> rainPipes { get; set; }
+        public List<ThWRoofRainPipe> roofRainPipes { get; set; }
+        public List<ThWCondensePipe> condensePipes { get; set; }
+        public List<ThWWashingMachine> washmachines { get; set; }
+        public List<ThWBasin> basinTools { get; set; }
+        public List<ThWFloorDrain> floorDrains { get; set; }
+        public List<ThWClosestool> closets { get; set; }
+
         public ThWCompositeRoomRecognitionEngine()
         {
             Rooms = new List<ThWCompositeRoom>();
             FloorDrainRooms= new List<ThWCompositeBalconyRoom>();
         }
-        public override void Recognize(Database database, Point3dCollection pts)
+
+        public void Dispose()
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                var kichenEngine = new ThWKitchenRoomRecognitionEngine();
-                kichenEngine.Recognize(database, pts);
-                var toiletEngine = new ThWToiletRoomRecognitionEngine()
-                {
-                    Spaces = kichenEngine.Spaces
-                };
-                toiletEngine.Recognize(database, pts);
-                GeneratePairInfo(kichenEngine.Rooms, toiletEngine.Rooms);
-                var balconyEngine = new ThWBalconyRoomRecognitionEngine()
-                {
-                    Spaces = toiletEngine.Spaces
-                };
-                balconyEngine.Recognize(database, pts);
-                var devicePlatformEngine = new ThWDevicePlatformRoomRecognitionEngine()
-                {
-                    Spaces = balconyEngine.Spaces
-                };
-                devicePlatformEngine.Recognize(database, pts);
-                GenerateBalconyPairInfo(balconyEngine.Rooms, devicePlatformEngine.Rooms);
-            }
+            //
         }
 
+        public override void Recognize(Database database, Point3dCollection pts)
+        {
+            var kitchenRooms = ThKitchenRoomService.Build(Spaces, basinTools, 
+                rainPipes, roofRainPipes, condensePipes, floorDrains);
+
+            var toiletRooms = ThToiletRoomService.Build(Spaces, closets, 
+                floorDrains, condensePipes, roofRainPipes);
+
+            GeneratePairInfo(kitchenRooms, toiletRooms);
+
+            var balconyRooms = ThBalconyRoomService.Build(Spaces, washmachines, 
+                floorDrains, rainPipes, basinTools);
+
+            var devicePlatforms = ThDevicePlatformRoomService.Build(Spaces, 
+                floorDrains, rainPipes, condensePipes, roofRainPipes);
+
+            GenerateBalconyPairInfo(balconyRooms, devicePlatforms);
+        } 
         /// <summary>
         /// 根据厨房间， 卫生间 生成复合房间信息
         /// </summary>
@@ -52,16 +59,33 @@ namespace ThMEPWSS.Pipe.Engine
         /// <param name="toiletRooms"></param>
         private void GeneratePairInfo(List<ThWKitchenRoom> kitchenRooms, List<ThWToiletRoom> toiletRooms)
         {
+            var toilets = new List<ThWToiletRoom>();
             foreach (var kitchen in kitchenRooms)
             {
                 if (toiletRooms.Count > 0)
                 {
+                    int s = 0;
                     foreach (var toilet in toiletRooms)
                     {
                         if (IsPair(kitchen, toilet))
                         {
                             Rooms.Add(new ThWCompositeRoom(kitchen, toilet));
+                            s = 1;
+                            toilets.Add(toilet);
                             break;
+                        }
+                       
+                    }
+                    if (s == 0)
+                    {
+                        foreach (var toilet in toiletRooms)
+                        {
+                            if (IsDistancedPair(kitchen, toilet))
+                            {
+                                Rooms.Add(new ThWCompositeRoom(kitchen, toilet));
+                                toilets.Add(toilet);
+                                break;
+                            }
                         }
                     }
                 }
@@ -73,27 +97,41 @@ namespace ThMEPWSS.Pipe.Engine
             foreach (var toilet in toiletRooms)
             {
                 int s = 0;
-                foreach (var kitchen in kitchenRooms)
+                
+                foreach (var kitchen in toilets)
                 {
-                    if (IsPair(kitchen, toilet))
+                    if (IsReversePair(kitchen, toilet))
                     {
                         s = 1;
                         break;
-                    }
+                    }               
                 }
                 if(s==0)
-                {                 
-                    Rooms.Add(new ThWCompositeRoom(new ThWKitchenRoom(), toilet));
+                {                        
+                        Rooms.Add(new ThWCompositeRoom(new ThWKitchenRoom(), toilet));                                   
                 }
             }
         }
-
         private bool IsPair(ThWKitchenRoom kitchen, ThWToiletRoom toilet)
         {
-            var toiletboundary = toilet.Toilet.Boundary as Polyline;
-            var kitchenboundary = kitchen.Kitchen.Boundary as Polyline;
+            var toiletboundary = toilet.Space.Boundary as Polyline;
+            var kitchenboundary = kitchen.Space.Boundary as Polyline;
             double distance = kitchenboundary.GetCenter().DistanceTo(toiletboundary.GetCenter());
             return distance < ThWPipeCommon.MAX_TOILET_TO_KITCHEN_DISTANCE;
+        }
+        private bool IsReversePair(ThWToiletRoom kitchen, ThWToiletRoom toilet)
+        {
+            var toiletboundary = toilet.Space.Boundary as Polyline;
+            var kitchenboundary = kitchen.Space.Boundary as Polyline;
+            double distance = kitchenboundary.GetCenter().DistanceTo(toiletboundary.GetCenter());
+            return distance < 1;
+        }
+        private bool IsDistancedPair(ThWKitchenRoom kitchen, ThWToiletRoom toilet)
+        {
+            var toiletboundary = toilet.Space.Boundary as Polyline;
+            var kitchenboundary = kitchen.Space.Boundary as Polyline;
+            double distance = kitchenboundary.GetCenter().DistanceTo(toiletboundary.GetCenter());
+            return distance < ThWPipeCommon.MAX_TOILET_TO_KITCHEN_DISTANCE1;
         }
         /// <summary>
         /// 根据生活阳台， 设备平台 生成包含阳台地漏房间信息
@@ -108,18 +146,48 @@ namespace ThMEPWSS.Pipe.Engine
                 if (balconyRooms[i].FloorDrains.Count > 1 && balconyRooms[i].Washmachines.Count>0)
                 {
                     var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
-                    foreach (var devicePlatformRoom in devicePlatformRooms)
+                    if (devicePlatformRooms.Count > 0)
                     {
-
-                        if (IsBalconyPair(balconyRooms[i], devicePlatformRoom))
+                        foreach (var devicePlatformRoom in devicePlatformRooms)
                         {
-                            devicePlatformIncludingRoom.Add(devicePlatformRoom);
+
+                            if (devicePlatformRoom!=null&&IsBalconyPair(balconyRooms[i], devicePlatformRoom))
+                            {
+                                devicePlatformIncludingRoom.Add(devicePlatformRoom);
+                            }
                         }
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
                     }
-                    FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    else
+                    {
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    }
+
                 } 
+                else if(balconyRooms[i].FloorDrains.Count==1)
+                {
+                    var devicePlatformIncludingRoom = new List<ThWDevicePlatformRoom>();
+                    if (devicePlatformRooms.Count > 0)
+                    {
+                        foreach (var devicePlatformRoom in devicePlatformRooms)
+                        {
+
+                            if (devicePlatformRoom != null && IsBalconyPair(balconyRooms[i], devicePlatformRoom))
+                            {
+                                devicePlatformIncludingRoom.Add(devicePlatformRoom);
+                            }
+                        }
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    }
+                    else
+                    {
+                        FloorDrainRooms.Add(new ThWCompositeBalconyRoom(balconyRooms[i], devicePlatformIncludingRoom));
+                    }
+                }
+
                 else
                 {
+
                     balconyroom1.Add(balconyRooms[i]);
                 }
             }
@@ -129,8 +197,8 @@ namespace ThMEPWSS.Pipe.Engine
                 for (int j = i + 1; j < balconyroom1.Count; j++)
                 {
                     
-                    var s = balconyroom1[i].Balcony.Boundary as Polyline;
-                    var s1 = balconyroom1[j].Balcony.Boundary as Polyline;
+                    var s = balconyroom1[i].Space.Boundary as Polyline;
+                    var s1 = balconyroom1[j].Space.Boundary as Polyline;
                     if (s.GetCenter().DistanceTo(s1.GetCenter()) < ThWPipeCommon.MAX_BALCONY_TO_BALCONY_DISTANCE)
                     {
                         num = 1;
@@ -162,21 +230,16 @@ namespace ThMEPWSS.Pipe.Engine
                 }
             }
         }
-
         private bool IsBalconyPair(ThWBalconyRoom balconyRoom, ThWDevicePlatformRoom devicePlatformRoom)
         {
-            var balconyRoomboundary = balconyRoom.Balcony.Boundary as Polyline;       
-            foreach (var deviceplatform in devicePlatformRoom.DevicePlatforms)
+            var balconyRoomboundary = balconyRoom.Space.Boundary as Polyline;
+            var devicePlatformRoomboundary = devicePlatformRoom.Space.Boundary as Polyline;
+            var distance = (devicePlatformRoomboundary.GetCenter().DistanceTo(balconyRoomboundary.GetCenter()));
+            if (distance<ThWPipeCommon.MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE&&(Math.Abs(devicePlatformRoomboundary.GetCenter().Y- balconyRoomboundary.GetCenter().Y)<2000))
             {
-                var devicePlatformRoomboundary = deviceplatform.Boundary as Polyline;
-
-                var distance=(devicePlatformRoomboundary.GetCenter().DistanceTo(balconyRoomboundary.GetCenter()));
-                if(distance>=ThWPipeCommon.MAX_BALCONY_TO_DEVICEPLATFORM_DISTANCE)
-                {
-                    return false;
-                }
-            }        
-            return true;
+                return true;
+            }      
+            return false;
         }
         private static ThWBalconyRoom CreateNewBalcony(ThWBalconyRoom balcony1, ThWBalconyRoom balcony2)
         {
@@ -192,14 +255,14 @@ namespace ThMEPWSS.Pipe.Engine
             balcony.RainPipes = balcony1.RainPipes.Count>0? balcony1.RainPipes:balcony2.RainPipes;
             balcony.Washmachines = balcony1.Washmachines.Count > 0 ? balcony1.Washmachines : balcony2.Washmachines;
             balcony.BasinTools = balcony1.BasinTools.Count > 0 ? balcony1.BasinTools : balcony2.BasinTools;
-            balcony.Balcony = new ThMEPEngineCore.Model.ThIfcSpace();
-            balcony.Balcony.Boundary = CreateNewBoundary(balcony1, balcony2);
+            balcony.Space = new ThMEPEngineCore.Model.ThIfcSpace();
+            balcony.Space.Boundary = CreateNewBoundary(balcony1, balcony2);
             return balcony;
         }
         private static Polyline CreateNewBoundary(ThWBalconyRoom balcony1, ThWBalconyRoom balcony2)
         {
-            var boundary1 = balcony1.Balcony.Boundary as Polyline;
-            var boundary2 = balcony2.Balcony.Boundary as Polyline;
+            var boundary1 = balcony1.Space.Boundary as Polyline;
+            var boundary2 = balcony2.Space.Boundary as Polyline;
             var vertice1 = boundary1.Vertices();
             var vertice2 = boundary2.Vertices();
             var vertices= new List<Point3d>();
@@ -228,8 +291,8 @@ namespace ThMEPWSS.Pipe.Engine
             {
                 foreach(var room in deviceRoom)
                 {
-                    var boundary = room.DevicePlatforms[0].Boundary as Polyline;
-                    var boundary1 = balconyRoom.Balcony.Boundary as Polyline;
+                    var boundary = room.Space.Boundary as Polyline;
+                    var boundary1 = balconyRoom.Space.Boundary as Polyline;
                     if (boundary.GetCenter().X< boundary1.GetCenter().X)
                     {
                         deviceLeftRooms.Add(room);
@@ -250,8 +313,8 @@ namespace ThMEPWSS.Pipe.Engine
             ThWDevicePlatformRoom trueRoom = null;
             for(int i=0;i< deviceRoom.Count;i++)
             {
-                var boundary = deviceRoom[i].DevicePlatforms[0].Boundary as Polyline;
-                var boundary1 = balconyRoom.Balcony.Boundary as Polyline;
+                var boundary = deviceRoom[i].Space.Boundary as Polyline;
+                var boundary1 = balconyRoom.Space.Boundary as Polyline;
                 if (boundary.GetCenter().DistanceTo(boundary1.GetCenter())< dis)
                 {
                     dis = boundary.GetCenter().DistanceTo(boundary1.GetCenter());

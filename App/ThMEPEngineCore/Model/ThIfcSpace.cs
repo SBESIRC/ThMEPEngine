@@ -12,6 +12,7 @@ namespace ThMEPEngineCore.Model
         public ThIfcSpace()
         {
             SubSpaces = new List<ThIfcSpace>();
+            Uuid = Guid.NewGuid().ToString();
         }
     }
 }

@@ -5,9 +5,10 @@ using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.DatabaseServices;
+using NetTopologySuite.Operation.Overlay;
+using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Geometries.Utilities;
-using NTSDimension = NetTopologySuite.Geometries.Dimension;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -36,18 +37,16 @@ namespace ThCADCore.NTS
         {
             // UnaryUnionOp.Union()有Robust issue
             // 会抛出"non-noded intersection" TopologyException
+            // OverlayNGRobust.Union()在某些情况下仍然会抛出TopologyException
             // 为了规避这个问题，这里使用Geometry.Union()
             // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
-            var mLineString = ToMultiLineString(curves);
-            Geometry nodedLineStrings = ThCADCoreNTSService.Instance.GeometryFactory.CreateEmpty(NTSDimension.Curve);
-            mLineString.Geometries.ForEach(o => nodedLineStrings = nodedLineStrings.Union(o));
-            return nodedLineStrings;
+            Geometry lineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
+            return OverlayNGRobust.Overlay(ToMultiLineString(curves), lineString, SpatialFunction.Union);
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
-            // https://lin-ear-th-inking.blogspot.com/2007/11/fast-polygon-merging-in-jts-using.html
-            return curves.ToNTSMultiPolygon().Union();
+            return OverlayNGRobust.Union(curves.ToNTSMultiPolygon());
         }
 
         public static DBObjectCollection UnionPolygons(this DBObjectCollection curves)
@@ -55,8 +54,19 @@ namespace ThCADCore.NTS
             return curves.UnionGeometries().ToDbCollection();
         }
 
+        public static Geometry Intersection(this DBObjectCollection curves, Curve curve)
+        {
+            return OverlayNGRobust.Overlay(
+                curves.ToMultiLineString(),
+                curve.ToNTSGeometry(),
+                SpatialFunction.Intersection);
+        }
+
         public static Polyline GetMinimumRectangle(this DBObjectCollection curves)
         {
+            // GetMinimumRectangle()对于非常远的坐标（WCS下，>10E10)处理的不好
+            // Workaround就是将位于非常远的图元临时移动到WCS原点附近，参与运算
+            // 运算结束后将运算结果再按相同的偏移从WCS原点附近移动到其原始位置
             var geometry = curves.Combine();
             var rectangle = MinimumDiameter.GetMinimumRectangle(geometry);
             if (rectangle is Polygon polygon)

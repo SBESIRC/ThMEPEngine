@@ -18,7 +18,7 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
-  <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="DevExpress.Charts.v17.2.Core, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
@@ -60,6 +60,24 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="fmFDParam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmFDParam.Designer.cs">
+      <DependentUpon>fmFDParam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fmFDUse.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmFDUse.Designer.cs">
+      <DependentUpon>fmFDUse.cs</DependentUpon>
+    </Compile>
+    <Compile Include="fmFloorDrain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="fmFloorDrain.Designer.cs">
+      <DependentUpon>fmFloorDrain.cs</DependentUpon>
+    </Compile>
     <Compile Include="fmSprinklerLayout.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -77,6 +95,15 @@
     </Compile>
     <Compile Include="PlumbingUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="fmFDParam.resx">
+      <DependentUpon>fmFDParam.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fmFDUse.resx">
+      <DependentUpon>fmFDUse.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="fmFloorDrain.resx">
+      <DependentUpon>fmFloorDrain.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="fmSprinklerLayout.resx">
       <DependentUpon>fmSprinklerLayout.cs</DependentUpon>
     </EmbeddedResource>
@@ -180,6 +207,10 @@
     <ProjectReference Include="..\ThMEPWSS\ThMEPWSS.csproj">
       <Project>{B9BB0F36-DFA2-446A-A676-049304C38FD9}</Project>
       <Name>ThMEPWSS</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\TianHua.EquipmentSelection\TianHua.EquipmentSelection.csproj">
+      <Project>{6FADC5FA-F54F-4742-BACD-9F1F855E8210}</Project>
+      <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

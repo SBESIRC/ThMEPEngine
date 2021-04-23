@@ -11,7 +11,6 @@ namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWKitchenPipeEngine : IDisposable
     {
-        public ThWPipeZone Zone { get; set; }
         public List<ThWKitchenPipe> Pipes { get; set; }
         public ThWKitchenPipeParameters Parameters { get; set; }
         public ThWKitchenPipeEngine()
@@ -210,9 +209,15 @@ namespace ThMEPWSS.Pipe.Engine
             Line line1 = new Line(evaluate, evaluate_1);
             Line line2 = new Line(evaluate_2, evaluate_3);
             Line line3 = new Line(evaluate_4, evaluate_5);
-            pype.IntersectWith(line1, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
-            pype.IntersectWith(line2, Intersect.ExtendArgument, pts1, (IntPtr)0, (IntPtr)0);
-            pype.IntersectWith(line3, Intersect.ExtendArgument, pts2, (IntPtr)0, (IntPtr)0);
+            if (pype != null)
+            {
+                if (pype.Vertices().Count > 0)
+                {
+                    pype.IntersectWith(line1, Intersect.ExtendArgument, pts, (IntPtr)0, (IntPtr)0);
+                    pype.IntersectWith(line2, Intersect.ExtendArgument, pts1, (IntPtr)0, (IntPtr)0);
+                    pype.IntersectWith(line3, Intersect.ExtendArgument, pts2, (IntPtr)0, (IntPtr)0);
+                }
+            }
             if (pts.Count > 0)
             {
                 if ((pts.Count > 0) || (pts1.Count > 0))

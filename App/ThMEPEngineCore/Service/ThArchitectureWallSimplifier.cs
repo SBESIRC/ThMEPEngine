@@ -24,19 +24,33 @@ namespace ThMEPEngineCore.Service
             return objs;
         }
 
+        public static DBObjectCollection MakeValid(DBObjectCollection walls)
+        {
+            var objs = new DBObjectCollection();
+            walls.Cast<AcPolygon>().ForEach(o =>
+            {
+                var results = o.MakeValid().Cast<AcPolygon>();
+                if (results.Any())
+                {
+                    objs.Add(results.OrderByDescending(p => p.Area).First());
+                }
+            });
+            return objs;
+        }
+
         public static DBObjectCollection Normalize(DBObjectCollection walls)
         {
             var objs = new DBObjectCollection();
             foreach(AcPolygon wall in walls)
             {
-                wall.GetOffsetCurves(OFFSET_DISTANCE)
+                wall.Buffer(-OFFSET_DISTANCE)
                     .Cast<AcPolygon>()
                     .ForEach(o =>
                     {
-                        o.GetOffsetCurves(-OFFSET_DISTANCE)
+                        o.Buffer(OFFSET_DISTANCE)
                         .Cast<AcPolygon>()
                         .ForEach(e => objs.Add(e));
-                    });
+                    });                
             }
             return objs;
         }

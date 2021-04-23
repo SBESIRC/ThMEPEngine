@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Linq;
-using System.Collections.Generic;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
-using ThMEPEngineCore.Model.Segment;
-using ThMEPEngineCore.Engine;
+using System.Linq;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
-using ThMEPEngineCore.BeamInfo.Business;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThSnapBeamEngine : ThBuildingElementPreprocessEngine
+    public class ThSnapBeamEngine : ThBeamPreprocessEngine
     {
         private ThBeamConnectRecogitionEngine BeamConnectRecogitionEngine { get; set; }
         private ThBeamLinkExtension ThBeamLinkEx;
@@ -29,7 +25,7 @@ namespace ThMEPEngineCore.Engine
         }
         public void Snap()
         {
-            SnapToComponent();            
+            SnapToComponent();
             SnapToBeam();
         }
 
@@ -38,9 +34,9 @@ namespace ThMEPEngineCore.Engine
             adds = new List<ThIfcBeam>();
             removes = new List<ThIfcBeam>();
             BeamConnectRecogitionEngine.BeamEngine.Elements.ForEach(o => SnapToComponent(o as ThIfcBeam));
-            if(adds.Count>0)
+            if (adds.Count > 0)
             {
-                BeamConnectRecogitionEngine.BeamEngine.Elements.RemoveAll(o => removes.Contains(o));                
+                BeamConnectRecogitionEngine.BeamEngine.Elements.RemoveAll(o => removes.Contains(o));
                 BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(adds);
                 BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
             }
@@ -50,20 +46,20 @@ namespace ThMEPEngineCore.Engine
             adds = new List<ThIfcBeam>();
             removes = new List<ThIfcBeam>();
             BeamConnectRecogitionEngine.BeamEngine.Elements.ForEach(o => SnapToBeam(o as ThIfcBeam));
-            if(adds.Count > 0)
+            if (adds.Count > 0)
             {
                 BeamConnectRecogitionEngine.BeamEngine.Elements.RemoveAll(o => removes.Contains(o));
-                BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(adds);                
+                BeamConnectRecogitionEngine.BeamEngine.Elements.AddRange(adds);
                 BeamConnectRecogitionEngine.SyncBeamSpatialIndex();
             }
         }
         private void SnapToComponent(ThIfcBeam thifcBeam)
         {
-            if(thifcBeam is ThIfcLineBeam thIfcLineBeam)
+            if (thifcBeam is ThIfcLineBeam thIfcLineBeam)
             {
                 SnapToComponent(thIfcLineBeam);
             }
-            else if(thifcBeam is ThIfcArcBeam thIfcArcBeam)
+            else if (thifcBeam is ThIfcArcBeam thIfcArcBeam)
             {
                 SnapToComponent(thIfcArcBeam);
             }
@@ -88,11 +84,11 @@ namespace ThMEPEngineCore.Engine
             }
         }
         private void SnapToComponent(ThIfcLineBeam thIfcLineBeam)
-        {            
+        {
             ThBeamLink thBeamLink = new ThBeamLink();
             thBeamLink.Beams.Add(thIfcLineBeam);
             thBeamLink.Start = GetPortLinkObjs(thIfcLineBeam, thIfcLineBeam.StartPoint);
-            thBeamLink.End= GetPortLinkObjs(thIfcLineBeam, thIfcLineBeam.EndPoint);
+            thBeamLink.End = GetPortLinkObjs(thIfcLineBeam, thIfcLineBeam.EndPoint);
             var instance = ThBeamLinkSnapService.Snap(thBeamLink);
             adds.AddRange(instance.Adds);
             removes.AddRange(instance.Removes);
@@ -115,7 +111,7 @@ namespace ThMEPEngineCore.Engine
         {
             throw new NotSupportedException();
         }
-        private List<ThIfcBuildingElement> GetPortLinkObjs(ThIfcBeam thIfcBeam,Point3d portPt)
+        private List<ThIfcBuildingElement> GetPortLinkObjs(ThIfcBeam thIfcBeam, Point3d portPt)
         {
             List<ThIfcBuildingElement> results = new List<ThIfcBuildingElement>();
             var linkBeams = GetPortLinkCollinearBeams(thIfcBeam, portPt);
@@ -124,7 +120,7 @@ namespace ThMEPEngineCore.Engine
                 var linkComponents = ThBeamLinkEx.QueryPortLinkElements(thIfcBeam,
                 portPt, ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
                 linkComponents.ForEach(o => results.Add(o));
-            }            
+            }
             return results;
         }
         private List<ThIfcBuildingElement> GetPortUnParallelBeams(ThIfcBeam thIfcBeam, Point3d portPt)
@@ -135,7 +131,7 @@ namespace ThMEPEngineCore.Engine
             {
                 var linkComponents = ThBeamLinkEx.QueryPortLinkElements(thIfcBeam,
                 portPt, ThMEPEngineCoreCommon.BeamComponentConnectionTolerance);
-                if(linkComponents.Count>0)
+                if (linkComponents.Count > 0)
                 {
                     return results;
                 }
@@ -146,11 +142,11 @@ namespace ThMEPEngineCore.Engine
         }
         private List<ThIfcBeam> GetPortLinkCollinearBeams(ThIfcBeam thIfcBeam, Point3d portPt)
         {
-            if(thIfcBeam is ThIfcLineBeam lineBeam)
+            if (thIfcBeam is ThIfcLineBeam lineBeam)
             {
                 return GetPortLinkCollinearBeams(lineBeam, portPt);
             }
-            else if(thIfcBeam is ThIfcArcBeam arcBeam)
+            else if (thIfcBeam is ThIfcArcBeam arcBeam)
             {
                 return GetPortLinkCollinearBeams(arcBeam, portPt);
             }
@@ -163,9 +159,9 @@ namespace ThMEPEngineCore.Engine
         {
             var linkBeams = ThBeamLinkEx.QueryPortLinkBeams(thIfcLineBeam,
                    portPt, 0.5, ThMEPEngineCoreCommon.BeamIntervalMinimumTolerance);
-            return linkBeams.Where(o=>
+            return linkBeams.Where(o =>
             {
-                if(o is ThIfcLineBeam lineBeam) 
+                if (o is ThIfcLineBeam lineBeam)
                 {
                     return ThStructureBeamUtils.IsLooseCollinear(thIfcLineBeam, lineBeam);
                 }
@@ -202,12 +198,12 @@ namespace ThMEPEngineCore.Engine
             return linkBeams.Where(o =>
             {
                 if (o is ThIfcLineBeam lineBeam)
-                {                    
+                {
                     return ThStructureBeamUtils.IsSpacedTType(thIfcLineBeam, lineBeam);
                 }
                 else
                 {
-                    return ThStructureBeamUtils.IsSpacedTType(thIfcLineBeam,o as ThIfcArcBeam);
+                    return ThStructureBeamUtils.IsSpacedTType(thIfcLineBeam, o as ThIfcArcBeam);
                 }
             }).ToList();
         }

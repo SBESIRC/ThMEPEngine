@@ -48,9 +48,11 @@ namespace ThMEPEngineCore.LaneLine
             }
 
             parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>()
-                .Select(y => {
+                .Select(y =>
+                {
                     var dir = (y.EndPoint - y.StartPoint).GetNormal();
-                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1); }))
+                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
+                }))
                 .ToList();
             var objs = new DBObjectCollection();
             parkingLines.ForEach(x => objs.Add(x));
@@ -68,8 +70,63 @@ namespace ThMEPEngineCore.LaneLine
                 .Where(x => x.Length > 2)
                 .ToList();
             }
-            
+
             var pLines = ClassifyParkingLines(handleLines);
+            //总长度更长的分为主车道
+            var xPLines = pLines[0];
+            var yPLines = pLines[1];
+            if (xPLines.Sum(x => x.Length) < yPLines.Sum(x => x.Length))
+            {
+                xPLines = pLines[1];
+                yPLines = pLines[0];
+            }
+
+            var resLines = HandleLinesByDirection(xPLines);
+            otherPLins = HandleLinesByDirection(yPLines);
+
+            return resLines;
+        }
+
+        /// <summary>
+        /// 将车道线分成主车道线和副车道线(z型车道分为一条车道。tips：疏散指示灯在用)
+        /// </summary>
+        /// <param name="roomPoly"></param>
+        /// <param name="parkingLines"></param>
+        /// <param name="otherPLins"></param>
+        /// <returns></returns>
+        public List<List<Line>> CreateNodedPLineToPolyByConnect(Polyline roomPoly, List<Line> parkingLines, out List<List<Line>> otherPLins)
+        {
+            otherPLins = new List<List<Line>>();
+            if (parkingLines.Count <= 0)
+            {
+                return new List<List<Line>>();
+            }
+
+            parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>()
+                .Select(y =>
+                {
+                    var dir = (y.EndPoint - y.StartPoint).GetNormal();
+                    return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
+                }))
+                .ToList();
+            var objs = new DBObjectCollection();
+            parkingLines.ForEach(x => objs.Add(x));
+            var nodeGeo = objs.ToNTSNodedLineStrings();
+            var handleLines = new List<Line>();
+            if (nodeGeo != null)
+            {
+                handleLines = nodeGeo.ToDbObjects()
+                .SelectMany(x =>
+                {
+                    DBObjectCollection entitySet = new DBObjectCollection();
+                    (x as Polyline).Explode(entitySet);
+                    return entitySet.Cast<Line>().ToList();
+                })
+                .Where(x => x.Length > 2)
+                .ToList();
+            }
+
+            var pLines = ClassifyParkingLinesByConnect(handleLines);
             //总长度更长的分为主车道
             var xPLines = pLines[0];
             var yPLines = pLines[1];
@@ -111,6 +168,61 @@ namespace ThMEPEngineCore.LaneLine
                     xPLines.Add(pLine);
                 }
             }
+
+            return new List<List<Line>>() { xPLines, yPLines };
+        }
+
+        /// <summary>
+        /// 根据x方向和y方向分类车位线（处理z字车道）
+        /// </summary>
+        /// <param name="parkingLines"></param>
+        /// <returns></returns>
+        public List<List<Line>> ClassifyParkingLinesByConnect(List<Line> parkingLines)
+        {
+            var pLines = ClassifyParkingLines(parkingLines);
+            List<Line> xPLines = pLines[0];
+            List<Line> yPLines = pLines[1];
+
+            List<Line> xResLines = new List<Line>();
+            foreach (var line in xPLines)
+            {
+                if (xPLines.Where(x => line.StartPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1))).Count() <= 1 &&
+                    xPLines.Where(x => line.StartPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1))).Count() <= 1)
+                {
+                    if (yPLines.Where(x => line.StartPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1))).Count() == 1 &&
+                    yPLines.Where(x => line.StartPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1))).Count() == 1)
+                    {
+                        xResLines.Add(line);
+                    }
+                }
+            }
+
+            List<Line> yResLines = new List<Line>();
+            foreach (var line in yPLines)
+            {
+                if (yPLines.Where(x => line.StartPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1))).Count() <= 1 &&
+                    yPLines.Where(x => line.StartPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1))).Count() <= 1)
+                {
+                    if (xPLines.Where(x => line.StartPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.StartPoint, new Tolerance(1, 1))).Count() == 1 &&
+                    xPLines.Where(x => line.StartPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1)) ||
+                    line.EndPoint.IsEqualTo(x.EndPoint, new Tolerance(1, 1))).Count() == 1)
+                    {
+                        yResLines.Add(line);
+                    }
+                }
+            }
+
+            xPLines = xPLines.Except(xResLines).ToList();
+            yPLines = yPLines.Except(yResLines).ToList();
+            yPLines.AddRange(xResLines);
+            xPLines.AddRange(yResLines);
 
             return new List<List<Line>>() { xPLines, yPLines };
         }
@@ -254,7 +366,7 @@ namespace ThMEPEngineCore.LaneLine
             List<Point3d> oneNodePts = new List<Point3d>();
             foreach (var pt in allPts)
             {
-                if (allPts.Where(x=>x.IsEqualTo(pt, new Tolerance(1, 1))).Count() <= 1)
+                if (allPts.Where(x => x.IsEqualTo(pt, new Tolerance(1, 1))).Count() <= 1)
                 {
                     oneNodePts.Add(pt);
                 }
@@ -264,7 +376,7 @@ namespace ThMEPEngineCore.LaneLine
                 oneNodePts = allPts;
             }
             sPt = oneNodePts.OrderBy(x => x.X).First().TransformBy(matrix.Inverse());
-            ePt = oneNodePts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse()); 
+            ePt = oneNodePts.OrderByDescending(x => x.X).First().TransformBy(matrix.Inverse());
 
             var handleLines = new List<Line>(lines);
             Point3d comparePt = sPt;

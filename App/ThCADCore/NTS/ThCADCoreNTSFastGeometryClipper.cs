@@ -1,10 +1,9 @@
-﻿using NetTopologySuite.Geometries;
-using NetTopologySuite.Precision;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using NetTopologySuite.Geometries;
+using NetTopologySuite.Precision;
+using NetTopologySuite.Geometries.Implementation;
 
 namespace ThCADCore.NTS
 {
@@ -111,9 +110,12 @@ namespace ThCADCore.NTS
             }
 
             // clip for good
-            if (g is LineString lineString) {
+            if (g is LineString lineString)
+            {
                 return clipLineString(lineString);
-            } else if (g is Polygon polygon) {
+            }
+            else if (g is Polygon polygon)
+            {
                 if (ensureValid)
                 {
                     GeometryFactory gf = polygon.Factory;
@@ -124,9 +126,12 @@ namespace ThCADCore.NTS
                 {
                     return clipPolygon(polygon);
                 }
-            } else if (g is GeometryCollection collection) {
+            }
+            else if (g is GeometryCollection collection)
+            {
                 return clipCollection(collection, ensureValid);
-            } else
+            }
+            else
             {
                 // still don't know how to clip this
                 return g;
@@ -355,7 +360,7 @@ namespace ThCADCore.NTS
             double INFINITY = Double.MaxValue;
 
             CoordinateSequence cs = ring.CoordinateSequence;
-            
+
             //tag
             var outTidal = new List<double>();
 
@@ -551,16 +556,19 @@ namespace ThCADCore.NTS
                 }
             }
 
-            if (outTidal.Count < 3) {
+            if (outTidal.Count < 3)
+            {
                 return null;
             }
 
             if (outTidal[0] != outTidal[outTidal.Count - 2]
-                    || outTidal[1] != outTidal[outTidal.Count - 1]) 
+                    || outTidal[1] != outTidal[outTidal.Count - 1])
             {
                 outTidal.Add(outTidal[0]);
                 outTidal.Add(outTidal[1]);
-            } else if (outTidal.Count == 3) {
+            }
+            else if (outTidal.Count == 3)
+            {
                 return null;
             }
 
@@ -570,7 +578,7 @@ namespace ThCADCore.NTS
         /** Builds a linear ring representing the clipping area */
         public LinearRing buildBoundsString(GeometryFactory gf)
         {
-            CoordinateSequence cs = gf.CoordinateSequenceFactory.Create(5, 2);
+            CoordinateSequence cs = gf.CoordinateSequenceFactory.Create(5, Ordinates.XY); ;
 
             cs.SetOrdinate(0, 0, xmin);
             cs.SetOrdinate(0, 1, ymin);
@@ -609,11 +617,11 @@ namespace ThCADCore.NTS
                 if (gc is MultiPoint)
                 {
                     result = result.Where(o => o is Point).ToList();
-                } 
-                else if (gc is MultiLineString) 
+                }
+                else if (gc is MultiLineString)
                 {
                     result = result.Where(o => o is LineString).ToList();
-                } 
+                }
                 else if (gc is MultiPolygon)
                 {
                     result = result.Where(o => o is Polygon).ToList();
@@ -637,11 +645,11 @@ namespace ThCADCore.NTS
                 else if (gc is MultiLineString)
                 {
                     return gc.Factory.CreateMultiLineString((LineString[])result.ToArray());
-                } 
+                }
                 else if (gc is MultiPolygon)
                 {
                     return gc.Factory.CreateMultiPolygon((Polygon[])result.ToArray());
-                } 
+                }
                 else
                 {
                     return gc.Factory.CreateGeometryCollection(result.ToArray());
@@ -666,14 +674,14 @@ namespace ThCADCore.NTS
                 else
                 {
                     i++;
-                }   
+                }
             }
         }
 
         private Coordinate[] ToCoordinates(List<double> ordinates)
         {
             var coordinates = new List<Coordinate>();
-            for(int i = 0; i < ordinates.Count; i+=2)
+            for (int i = 0; i < ordinates.Count; i += 2)
             {
                 coordinates.Add(new Coordinate(ordinates[i], ordinates[i + 1]));
             }
@@ -800,7 +808,7 @@ namespace ThCADCore.NTS
                 if (cs0.GetOrdinate(0, 0) == cs1.GetOrdinate(cs1.Count - 1, 0)
                         && cs0.GetOrdinate(0, 1) == cs1.GetOrdinate(cs1.Count - 1, 1))
                 {
-                    var cs = csf.Create(cs0.Count + cs1.Count - 1, 2);
+                    var cs = csf.Create(cs0.Count + cs1.Count - 1, Ordinates.XY);
                     for (int i = 0; i < cs1.Count; i++)
                     {
                         cs.SetOrdinate(i, 0, cs1.GetOrdinate(i, 0));

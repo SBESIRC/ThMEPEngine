@@ -1,12 +1,9 @@
 ﻿using System.Linq;
-using Dreambuild.AutoCAD;
 using ThMEPLighting.Common;
+using ThMEPLighting.Garage.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPLighting.Garage.Model;
-using ThMEPLighting.Garage.Engine;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -17,29 +14,18 @@ namespace ThMEPLighting.Garage.Service
     /// </summary>
     public class ThWireOffsetDataService
     {
-        private double coincideTolerance { get; set; }
         /// <summary>
         /// 灯线中心线按灯槽间距Offset对应的数据
         /// </summary>
-        public List<ThWireOffsetData> WireOffsetDatas { get; private set; }
+        public Dictionary<Line, List<Line>> FirstPairs { get; private set; }
         /// <summary>
         /// 1号线所有分割线的索引
         /// </summary>
         public ThQueryLineService FirstQueryInstance { get; private set; }
-        private ThWireOffsetDataService(List<ThWireOffsetData> wireOffsetDatas)
+        public ThWireOffsetDataService(Dictionary<Line,List<Line>> firstPairs)
         {
-            WireOffsetDatas = wireOffsetDatas;
-            coincideTolerance = ThGarageLightCommon.LineCoincideTolerance;
-        }
-        public static ThWireOffsetDataService Create(List<ThWireOffsetData> wireOffsetDatas)
-        {
-            var instance = new ThWireOffsetDataService(wireOffsetDatas);
-            instance.Create();
-            return instance;
-        }
-        private void Create()
-        {
-            var firstLines = WireOffsetDatas.Select(o => o.First).ToList();
+            FirstPairs = firstPairs;
+            var firstLines = firstPairs.Select(o => o.Key).ToList();
             FirstQueryInstance = ThQueryLineService.Create(firstLines);
         }
         /// <summary>
@@ -47,10 +33,16 @@ namespace ThMEPLighting.Garage.Service
         /// </summary>
         /// <param name="center"></param>
         /// <returns></returns>
-        public Line FindSecondByFirst(Line first)
+        public List<Line> FindSecondByFirst(Line first)
         {
-            var results = WireOffsetDatas.Where(o => o.First.IsCoincide(first, coincideTolerance));
-            return results.Count() > 0 ? results.First().Second : new Line();
+           if(FirstPairs.ContainsKey(first))
+            {
+                return FirstPairs[first];
+            }
+           else
+            {
+                return new List<Line>();
+            }
         }
         public Line FindFirstByPt(Point3d pt)
         {

@@ -11,8 +11,7 @@ using System.Collections.Generic;
 namespace ThMEPWSS.Pipe.Engine
 {
     public class ThWToiletPipeEngine : IDisposable
-    {
-        public ThWPipeZone Zone { get; set; }
+    { 
         public List<ThWToiletPipe> Pipes { get; set; }
         public ThWToiletPipeParameters Parameters { get; set; }
         
@@ -28,22 +27,23 @@ namespace ThMEPWSS.Pipe.Engine
             return new ThWToiletPipe()
             {
                 Center = center,
-                Identifier = Parameters.Identifier[index],
+                Identifier = Parameters.Identifier[index].Item1,
                 Matrix = Matrix3d.Displacement(center.GetAsVector()),
                 Representation = new DBObjectCollection()
                 {
-                    new Circle(Point3d.Origin, Vector3d.ZAxis, Parameters.Diameter[index] / 2.0),
+                    new Circle(Point3d.Origin, Vector3d.ZAxis, Parameters.Identifier[index].Item2 / 2.0),
                 },
             };
         }
 
         public void Run(Polyline outline, Polyline well, Polyline closestool)
-        {                          
+        {
+            int d = index_d(outline, well);
             if (GeomUtils.PtInLoop(outline, well.GetCenter()))
             {
                 Vector3d dir = Direction(outline, well);
-                var pt = FindInsideVertex(index_a(outline, well), well);
-                for (int i = 0; i < Parameters.Number; i++)
+                var pt = FindInsideVertex(index_a(outline, well), d,well);
+                for (int i = 0; i < Parameters.Identifier.Count; i++)
                 {
                     Pipes.Add(Create((pt + i * dir * ThWPipeCommon.TOILET_WELLS_INTERVAL),i));
                 }
@@ -68,13 +68,27 @@ namespace ThMEPWSS.Pipe.Engine
                 }            
             }
             return a;
-        }  
-    
-        private Point3d FindInsideVertex(int a,Polyline outline)
-        {                
+        }
+        private int index_d(Polyline boundary, Polyline outline)
+        {       //寻找管井关键边  
             var vertices = outline.Vertices();
-            int b = Getminnum(a, outline);
-            int c = Getmaxnum(a, outline);        
+            double dst = double.MaxValue;
+            int a = 0;
+            for (int i = 0; i < vertices.Count; i++)
+            {
+                if (dst > vertices[i].DistanceTo(boundary.GetCenter()))
+                {
+                    dst = vertices[i].DistanceTo(boundary.GetCenter());
+                    a = i;
+                }
+            }
+            return a;
+        }
+        private Point3d FindInsideVertex(int a,int d,Polyline outline)
+        {                
+            var vertices = outline.Vertices();  
+            int b = Getnum(a,d, outline)[0];
+            int c = Getnum(a,d, outline)[1];        
             return vertices[a]+100*(vertices[a].GetVectorTo(vertices[b]).GetNormal()+ vertices[a].GetVectorTo(vertices[c]).GetNormal());            
         }
         private Vector3d Direction_1(int a, int b,int c ,int d,Polyline boundary,Polyline outline,Polyline urinal,double sum)
@@ -166,8 +180,9 @@ namespace ThMEPWSS.Pipe.Engine
         {   
             var vertices = outline.Vertices();
             int a = index_a(boundary, outline);
-            int b = Getminnum(a, outline);
-            int c= Getmaxnum(a, outline);
+            int d = index_d(boundary, outline);
+            int b = Getnum(a,d, outline)[0];
+            int c= Getnum(a, d,outline)[1];
             if(vertices[a].DistanceTo(vertices[b])> vertices[a].DistanceTo(vertices[c]))
             {
                 return vertices[a].GetVectorTo(vertices[b]).GetNormal();
@@ -177,39 +192,18 @@ namespace ThMEPWSS.Pipe.Engine
                 return vertices[a].GetVectorTo(vertices[c]).GetNormal();
             }
         }
-        private int Getminnum(int a, Polyline outline)
-        {
+        private List<int> Getnum(int a, int d,Polyline outline)
+        {          
+            var item = new List<int>();
             var vertices = outline.Vertices();
-            int b = 0;
-            if(a>0)
+            for(int i=0;i< vertices.Count;i++)
             {
-                b = a - 1;
-            }
-            else
-            {//有的Polyline起始点与终点重合
-                if (vertices[0].Equals(vertices[outline.Vertices().Count - 1]))
+                if((vertices[i].DistanceTo(vertices[a])>1)&&(vertices[i].DistanceTo(vertices[d]) > 1))
                 {
-                    b = outline.Vertices().Count - 2;
-                }
-                else
-                {
-                    b = outline.Vertices().Count - 1;
+                    item.Add(i);
                 }
             }
-            return b;
-        }
-        private int Getmaxnum(int a, Polyline outline)
-        {
-            int c = 0;
-            if (a < outline.Vertices().Count - 1)
-            {
-                c = a +1;
-            }
-            else
-            {
-                c = 0;
-            }
-            return c;
+            return item;
         }
         private List<ThWToiletPipe> FindOutsideVertex(Polyline outline, Polyline well)
         {
@@ -254,7 +248,7 @@ namespace ThMEPWSS.Pipe.Engine
                     dir = vertices[2].GetVectorTo(vertices[1]).GetNormal();
                 }
             }
-            for (int i = 0; i < Parameters.Number; i++)
+            for (int i = 0; i < Parameters.Identifier.Count; i++)
             {
                 pipes.Add(Create((pt + i * dir * ThWPipeCommon.TOILET_WELLS_INTERVAL),i));
             }

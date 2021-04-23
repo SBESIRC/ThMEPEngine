@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.Geometry;
 using NetTopologySuite.Algorithm;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADCore.NTS
 {

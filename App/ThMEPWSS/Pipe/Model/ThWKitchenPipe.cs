@@ -1,4 +1,5 @@
 ﻿using Autodesk.AutoCAD.Geometry;
+
 namespace ThMEPWSS.Pipe.Model
 {
     public class ThWKitchenPipeParameters
@@ -12,6 +13,9 @@ namespace ThMEPWSS.Pipe.Model
         }    
     }
 
+    /// <summary>
+    /// 厨房水管
+    /// </summary>
     public class ThWKitchenPipe : ThWPipe
     {
         public Point3d Center { get; set; }

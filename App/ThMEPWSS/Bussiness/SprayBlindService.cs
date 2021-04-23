@@ -73,11 +73,11 @@ namespace ThMEPWSS.Bussiness
             {
                 //保护类型
                 var sprayRadii = spray.Radii as Polyline;
-                if (!(ThWSSUIService.Instance.Parameter.blindAreaType == BlindAreaType.Rectangle))
-                {
-                    sprayRadii = spray.ArcRadii.ToNTSPolygon().ToDbPolylines()[0];
-                }
-                
+                //if (!(ThWSSUIService.Instance.Parameter.blindAreaType == BlindAreaType.Rectangle))
+                //{
+                    
+                //}
+                sprayRadii = spray.ArcRadii.ToNTSPolygon().ToDbPolylines()[0];
                 var intersectPolys = holes.Where(x => sprayRadii.Intersects(x)).ToList();
 
                 //计算真实的保护区域

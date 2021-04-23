@@ -109,7 +109,7 @@ namespace TianHua.FanSelection.Function
                 throw new ArgumentException();
             }
 
-            // 风机功能
+            // 风机功能（服务区域）
             if (attributes.ContainsKey(ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_USAGE))
             {
                 if (attributes[ThFanSelectionCommon.BLOCK_ATTRIBUTE_FAN_USAGE] != model.Name)

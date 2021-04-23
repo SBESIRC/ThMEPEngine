@@ -23,6 +23,7 @@
   <ItemGroup>
     <Compile Include="AcsSystem.wxs" />
     <Compile Include="AppCore.wxs" />
+    <Compile Include="CGAL.wxs" />
     <Compile Include="DevExpress.wxs" />
     <Compile Include="Electrical.wxs" />
     <Compile Include="External.wxs" />
@@ -32,6 +33,7 @@
     <Compile Include="Product.wxs" />
     <Compile Include="Resources.wxs" />
     <Compile Include="Support.wxs" />
+    <Compile Include="System.wxs" />
     <Compile Include="WSS.wxs" />
   </ItemGroup>
   <ItemGroup>

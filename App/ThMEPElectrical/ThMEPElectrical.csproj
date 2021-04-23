@@ -14,7 +14,7 @@
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
   </PropertyGroup>
-  <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -87,7 +87,6 @@
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
-    <Compile Include="ConnectPipe\Dijkstra\DijkstraAlgorithm.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
     <Compile Include="ConnectPipe\Service\BlockUtils.cs" />
@@ -183,14 +182,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup />
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Owin">
-      <Version>4.0.1</Version>
-    </PackageReference>
-    <PackageReference Include="Owin">
-      <Version>1.0.0</Version>
-    </PackageReference>
-  </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

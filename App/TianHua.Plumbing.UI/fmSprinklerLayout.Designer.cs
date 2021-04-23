@@ -185,14 +185,13 @@
             // 
             // ComBoxDeadZone
             // 
-            this.ComBoxDeadZone.EditValue = "矩形";
+            this.ComBoxDeadZone.EditValue = "圆形-中精度";
             this.ComBoxDeadZone.Location = new System.Drawing.Point(10, 258);
             this.ComBoxDeadZone.Name = "ComBoxDeadZone";
             this.ComBoxDeadZone.Properties.AllowFocused = false;
             this.ComBoxDeadZone.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
             new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
             this.ComBoxDeadZone.Properties.Items.AddRange(new object[] {
-            "矩形",
             "圆形-低精度",
             "圆形-中精度",
             "圆形-高精度"});

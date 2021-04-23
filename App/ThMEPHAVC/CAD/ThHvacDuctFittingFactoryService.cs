@@ -42,14 +42,6 @@ namespace ThMEPHVAC.CAD
             };
         }
 
-        public ThIfcDuctTee CreateTee(ThIfcDuctTeeParameters parameters)
-        {
-            return new ThIfcDuctTee(parameters)
-            {
-                Representation = CreateTeeGeometries(parameters)
-            };
-        }
-
         public ThIfcDuctCross CreateCross(ThIfcDuctCrossParameters parameters)
         {
             return new ThIfcDuctCross(parameters)
@@ -57,19 +49,44 @@ namespace ThMEPHVAC.CAD
                 Representation = CreateCrossGeometries(parameters)
             };
         }
+        public DBObjectCollection Create_inner_duct(string text_size)
+        {
+            string[] s = text_size.Split('x');
+            if (s.Length != 2)
+                return new DBObjectCollection();
+            double hw = Double.Parse(s[0]) * 0.5;
+            double hh = Double.Parse(s[1]) * 0.5;
 
-        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, double ductangle, bool isupordownopening, bool islongestduct)
+            Point3d dL = new Point3d(-hw, -hh, 0);
+            Point3d uL = new Point3d(-hw, hh, 0);
+            Point3d dR = new Point3d(hw, -hh, 0);
+            Point3d uR = new Point3d(hw, hh, 0);
+            var points = new Point3dCollection() { uR, dR, dL, uL };
+            var frame = new Polyline() { Closed = true };
+            frame.CreatePolyline(points);
+            return new DBObjectCollection() { frame };
+        }
+        public ThIfcDuctSegment CreateDuctSegment(ThIfcDuctSegmentParameters parameters, 
+                                                  double ductangle, 
+                                                  bool islongestduct,
+                                                  string elevation,
+                                                  string textSize,
+                                                  bool is_bypass)
         {
             return new ThIfcDuctSegment(parameters)
             {
                 Centerline = CreateDuctSegmentCenterLine(parameters),
-                FlangeLine = CreateDuctFlangeGeometries(parameters, isupordownopening),
+                FlangeLine = CreateDuctFlangeGeometries(parameters, is_bypass),
                 Representation = CreateDuctSegmentGeometries(parameters),
-                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct),
+                InformationText = CreateDuctInformation(parameters, ductangle, islongestduct, elevation, textSize)
             };
         }
 
-        private DBText CreateDuctInformation(ThIfcDuctSegmentParameters parameters, double ductangle, bool islongestduct)
+        private DBText CreateDuctInformation(ThIfcDuctSegmentParameters parameters, 
+                                             double ductangle, 
+                                             bool islongestduct, 
+                                             string elevation,
+                                             string textSize)
         {
             if (!islongestduct)
             {
@@ -77,10 +94,32 @@ namespace ThMEPHVAC.CAD
             }
             else
             {
+                string str;
+                if (string.IsNullOrEmpty(elevation))
+                {
+                    str = $"{parameters.Width}x{parameters.Height} (h+X.XXm)";
+                }
+                else
+                {
+                    double num = Double.Parse(elevation);
+                    if (num > 0)
+                        str = $"{parameters.Width}x{parameters.Height} (h+" + num.ToString("0.00") + "m)";
+                    else
+                        str = $"{parameters.Width}x{parameters.Height} (h"+ num.ToString("0.00") + "m)";
+
+                }
+                double h = 450;
+                if (textSize != null)
+                { 
+                    if (textSize == "1:100")
+                        h = 300;
+                    else if (textSize == "1:50")
+                        h = 150;
+                }
                 DBText infortext = new DBText()
                 {
-                    TextString = $"{parameters.Width}x{parameters.Height}（h+X.XXm）",
-                    Height = 450,
+                    TextString = str,
+                    Height = h,
                     WidthFactor = 0.7,
                     Color = Color.FromColorIndex(ColorMethod.ByLayer, (int)ColorIndex.BYLAYER),
                     HorizontalMode = TextHorizontalMode.TextLeft,
@@ -94,18 +133,8 @@ namespace ThMEPHVAC.CAD
             }
         }
 
-        public ThIfcDuctSegment CreateVerticalDuctSegment(ThIfcDuctSegmentParameters parameters)
-        {
-            return new ThIfcDuctSegment(parameters)
-            {
-                Representation = CreateVerticalDuctGeometries(parameters)
-            };
-        }
-
         public void DuctSegmentHandle(ThIfcDuctSegment ductsegment, double sourcecutdistance, double targetcutdistance)
         {
-            List<string> a = new List<string>();
-
             //处理水平线
             foreach (Line line in ductsegment.Representation)
             {
@@ -164,7 +193,6 @@ namespace ThMEPHVAC.CAD
                 }
             }
         }
-
         private double GetReducingLength(ThIfcDuctReducingParameters parameters)
         {
             double reducinglength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(20 * Math.PI / 180);
@@ -225,8 +253,6 @@ namespace ThMEPHVAC.CAD
                 EndPoint = smallendline.StartPoint + new Vector3d(0,-45,0),
             };
 
-
-
             //创建两侧侧壁轮廓线
             double reducinglength = 0.5 * (parameters.BigEndWidth - parameters.SmallEndWidth) / Math.Tan(20 * Math.PI / 180);
             Line leftsideline = new Line();
@@ -248,7 +274,6 @@ namespace ThMEPHVAC.CAD
                 StartPoint = bigendline.EndPoint + new Vector3d(0, 45, 0),
                 EndPoint = bigendline.StartPoint + new Vector3d(0, -45, 0),
             };
-
 
             var reducinglines = new DBObjectCollection() { leftsideline, rightsideline };
             switch (jointype)
@@ -413,114 +438,6 @@ namespace ThMEPHVAC.CAD
                 innerendextendline,
                 outerstartextendline,
                 innerstartextendline,
-            };
-        }
-
-        private DBObjectCollection CreateTeeGeometries(ThIfcDuctTeeParameters parameters)
-        {
-            //创建支路端线
-            Line branchEndLine = new Line()
-            {
-                StartPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter)+50, 0.5*parameters.BranchDiameter, 0),
-                EndPoint = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter + parameters.BranchDiameter) +50, -0.5*parameters.BranchDiameter, 0),
-            };
-
-            //创建主路小端端线
-            Line mainSmallEndLine = new Line()
-            {
-                StartPoint = parameters.CenterPoint + new Vector3d(0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
-                EndPoint = parameters.CenterPoint + new Vector3d(-0.5*parameters.MainSmallDiameter, 0.5 * parameters.BranchDiameter + 100,0),
-            };
-
-            //创建主路大端端线
-            Line mainBigEndLine = new Line()
-            {
-                StartPoint = parameters.CenterPoint + new Vector3d(0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
-                EndPoint = parameters.CenterPoint + new Vector3d(-0.5 * parameters.MainBigDiameter, -parameters.BranchDiameter - 50, 0),
-            };
-
-            //创建支路50mm直管段
-            Line branchUpStraightLine = new Line()
-            {
-                StartPoint = branchEndLine.StartPoint,
-                EndPoint = branchEndLine.StartPoint + new Vector3d(-50,0,0),
-            };
-            Line branchBelowStraightLine = new Line()
-            {
-                StartPoint = branchEndLine.EndPoint,
-                EndPoint = branchEndLine.EndPoint + new Vector3d(-50, 0, 0),
-            };
-
-            //创建支路下侧圆弧过渡段
-            Point3d circleCenter = parameters.CenterPoint + new Vector3d(0.5*(parameters.MainBigDiameter+parameters.BranchDiameter), -parameters.BranchDiameter, 0);
-            Arc branchInnerArc = new Arc(circleCenter, 0.5 * parameters.BranchDiameter, 0.5 * Math.PI, Math.PI);
-
-            //创建支路上侧圆弧过渡段
-            //首先创建主路上端小管道的内侧线作为辅助线以便于后续计算圆弧交点
-            Ray branchAuxiliaryRay = new Ray()
-            {
-                BasePoint = mainSmallEndLine.StartPoint,
-                SecondPoint = mainSmallEndLine.StartPoint + new Vector3d(0, -5000, 0)
-            };
-            Circle branchAuxiliaryCircle = new Circle()
-            {
-                Center = circleCenter,
-                Radius = 1.5*parameters.BranchDiameter
-            };
-            Point3dCollection Intersectpoints = new Point3dCollection();
-            IntPtr ptr = new IntPtr();
-            branchAuxiliaryRay.IntersectWith(branchAuxiliaryCircle, Intersect.OnBothOperands, Intersectpoints, ptr, ptr);
-            Arc branchOuterArc = new Arc();
-            if (Intersectpoints.Count != 0)
-            {
-                Point3d Intersectpointinarc = Intersectpoints[0];
-                foreach (Point3d point in Intersectpoints)
-                {
-                    if (point.Y > Intersectpointinarc.Y)
-                    {
-                        Intersectpointinarc = point;
-                    }
-                }
-                branchOuterArc.CreateArcSCE(branchUpStraightLine.EndPoint, circleCenter, Intersectpointinarc);
-            }
-
-            //创建主路外侧管线
-            Line outerStraightLine = new Line()
-            {
-                StartPoint = mainBigEndLine.EndPoint,
-                EndPoint = mainBigEndLine.EndPoint + new Vector3d(0,50,0),
-            };
-            Line outerObliqueLine = new Line()
-            {
-                StartPoint = outerStraightLine.EndPoint,
-                EndPoint = mainSmallEndLine.EndPoint,
-            };
-
-            //创建主路内侧管线
-            Line innerUpLine = new Line()
-            {
-                StartPoint = mainSmallEndLine.StartPoint,
-                EndPoint = branchOuterArc.EndPoint,
-            };
-            Line innerBelowLine = new Line()
-            {
-                StartPoint = mainBigEndLine.StartPoint,
-                EndPoint = branchInnerArc.EndPoint,
-            };
-
-            return new DBObjectCollection()
-            {
-                branchEndLine,
-                mainSmallEndLine,
-                mainBigEndLine,
-                branchUpStraightLine,
-                branchBelowStraightLine,
-                branchInnerArc,
-                branchOuterArc,
-                outerStraightLine,
-                outerObliqueLine,
-                innerUpLine,
-                innerBelowLine
             };
         }
 
@@ -707,7 +624,7 @@ namespace ThMEPHVAC.CAD
                 new Line(new Point3d(-parameters.Length / 2.0,0,0),new Point3d(parameters.Length / 2.0,0,0)),
             };
         }
-        private DBObjectCollection CreateDuctFlangeGeometries(ThIfcDuctSegmentParameters parameters, bool isupordownopening)
+        private DBObjectCollection CreateDuctFlangeGeometries(ThIfcDuctSegmentParameters parameters, bool is_bypass)
         {
             Line leftflange = new Line()
             {
@@ -720,13 +637,13 @@ namespace ThMEPHVAC.CAD
                 StartPoint = new Point3d(parameters.Length / 2.0, 0.5 * parameters.Width, 0),
                 EndPoint = new Point3d(parameters.Length / 2.0, -0.5 * parameters.Width, 0),
             };
-            //if (isupordownopening)
-            //{
-            //    return new DBObjectCollection()
-            //    {
-            //        rightflange,
-            //    };
-            //}
+            if (is_bypass)
+            {
+                return new DBObjectCollection()
+                {
+                    leftflange,
+                };
+            }
             return new DBObjectCollection()
             {
                 rightflange,

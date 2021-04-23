@@ -1,32 +1,26 @@
-﻿using AcHelper;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.EditorInput;
-using Autodesk.AutoCAD.Geometry;
+﻿using System;
+using NFox.Cad;
 using DotNetARX;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Service;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThSpaceRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThSpaceRecognitionEngine : ThSpatialElementRecognitionEngine
     {
-        public List<ThIfcSpace> Spaces { get; set; }
         private List<DBText> SpaceNames { get; set; }
         private List<Curve> SpaceBoundaries { get; set; }
         private Dictionary<DBText, List<Curve>> TextContainer { get; set; }
         private Dictionary<Curve, List<Curve>> AreaContainer { get; set; }
-        private Dictionary<Curve, ThIfcSpace> SpaceIndex { get; set; } //用几何对象快速查找ThIfcSpace对象
-        private ThCADCoreNTSSpatialIndex SpaceSpatialIndex;
+        private Dictionary<Curve, ThIfcSpace> SpaceIndex { get; set; }
         public ThSpaceRecognitionEngine()
         {
             Spaces = new List<ThIfcSpace>();
@@ -40,12 +34,9 @@ namespace ThMEPEngineCore.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                //Load Data
                 SpaceNames = RecognizeSpaceNameText(database, polygon);
-                var count=SpaceNames.Where(o => o.TextString.Contains("RFS")).Count();
                 SpaceBoundaries = RecognizeSpaceBoundary(database, polygon);
-                //BuildSpaceSpatialIndex();
-                //Build Container
+                DuplicateRemove(SpaceBoundaries);
                 BuildTextContainers();
                 BuildAreaContainers();
                 CreateSpaceBoundaries();
@@ -53,52 +44,36 @@ namespace ThMEPEngineCore.Engine
                 BuildNestedSpace();
             }
         }
-        private void BuildSpaceSpatialIndex()
+        private void DuplicateRemove(List<Curve> curves)
         {
-            DBObjectCollection dbObjs = new DBObjectCollection();
-            SpaceBoundaries.ForEach(o => dbObjs.Add(o));
-            SpaceSpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-        }
-        public void Print(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            if(curves.Count>0)
             {
-                SpaceNames.ForEach(o => acadDatabase.ModelSpace.Add(o));
-                SpaceBoundaries.ForEach(o => acadDatabase.ModelSpace.Add(o));
-                Spaces.ForEach(m=>
-                {
-                    Point3d cenpt = ThGeometryTool.GetMidPt(
-                        m.Boundary.GeometricExtents.MinPoint,
-                        m.Boundary.GeometricExtents.MaxPoint);
-                    var totalIds = new ObjectIdList();
-                    totalIds.Add(m.Boundary.ObjectId);
-                    m.SubSpaces.ForEach(n => totalIds.Add(n.Boundary.ObjectId));
-                    m.Tags.ForEach(n=>totalIds.Add(acadDatabase.ModelSpace.Add(CreateText(cenpt,n))));
-                    var groupName = Guid.NewGuid().ToString();
-                    GroupTools.CreateGroup(database, groupName, totalIds);
-                });
-            }  
-        }
-        private DBText CreateText(Point3d pt,string text,double height=200.0)
-        {
-            DBText dbText = new DBText();
-            dbText.SetDatabaseDefaults(Active.Database);
-            dbText.TextString = text;
-            dbText.Position = pt;
-            dbText.Height = height;
-            return dbText;
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(curves.ToCollection());
+                SpaceBoundaries = spatialIndex.SelectAll().Cast<Curve>().ToList();
+            }
         }
         private void BuildTextContainers()
         {
             this.TextContainer = new Dictionary<DBText, List<Curve>>();
             SpaceNames.ForEach(m =>
             {
-                Polyline textBoundary = ThGeometryTool.TextOBB(m);
-                Point3d textCenterPt = ThGeometryTool.GetMidPt(
-                    textBoundary.GetPoint3dAt(0), textBoundary.GetPoint3dAt(2));                
-                var containers = SelectTextIntersectPolygon(SpaceBoundaries, textBoundary);
-                containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
-                this.TextContainer.Add(m, containers);
+                try
+                {
+                    if (m.GeometricExtents != null)
+                    {
+                        Polyline textBoundary = ThGeometryTool.TextOBB(m);
+                        Point3d textCenterPt = ThGeometryTool.GetMidPt(
+                            textBoundary.GetPoint3dAt(0),
+                            textBoundary.GetPoint3dAt(2));
+                        var containers = SelectTextIntersectPolygon(SpaceBoundaries, textBoundary);
+                        containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
+                        this.TextContainer.Add(m, containers);
+                    }
+                }
+                catch
+                {
+                    //throw new ArgumentNullException();
+                }
             });
         }
         private void BuildAreaContainers()
@@ -106,26 +81,26 @@ namespace ThMEPEngineCore.Engine
             this.AreaContainer = new Dictionary<Curve, List<Curve>>();
             SpaceBoundaries.ForEach(m =>
             {
-                if(m is Polyline polyline)
+                if (m is Polyline polyline)
                 {
                     var containers = SelectPolylineContainers(SpaceBoundaries, polyline);
                     containers.Remove(m);
-                    this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
+                    this.AreaContainer.Add(m, containers.Where(o=>(o.Area-m.Area)>10).OrderBy(o => o.Area).ToList());
                 }
-                else if(m is Circle circle)//新加的
+                else if (m is Circle circle)
                 {
                     Polyline polyline1 = circle.Tessellate(50);
                     var containers = SelectPolylineContainers(SpaceBoundaries, polyline1);
                     containers.Remove(m);
-                    this.AreaContainer.Add(m, containers.OrderBy(o => o.Area).ToList());
+                    this.AreaContainer.Add(m, containers.Where(o => (o.Area - m.Area) > 10).OrderBy(o => o.Area).ToList());
                 }
                 else
                 {
                     this.AreaContainer.Add(m, new List<Curve>());
                 }
             });
-        }        
-        private List<DBText> RecognizeSpaceNameText(Database database,Point3dCollection polygon)
+        }
+        private List<DBText> RecognizeSpaceNameText(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var spaceNameDbExtension = new ThSpaceNameRecognition(database))
@@ -160,7 +135,7 @@ namespace ThMEPEngineCore.Engine
             using (var spaceBoundaryDbExtension = new ThSpaceBoundaryRecognition(database))
             {
                 spaceBoundaryDbExtension.BuildElementCurves();
-                List<Curve> curves = new List<Curve>();             
+                List<Curve> curves = new List<Curve>();
                 if (polygon.Count > 0)
                 {
                     DBObjectCollection dbObjs = new DBObjectCollection();
@@ -190,25 +165,32 @@ namespace ThMEPEngineCore.Engine
         }
         private void SpaceMatchText()
         {
-            DBObjectCollection dbObjs = new DBObjectCollection();           
+            DBObjectCollection dbObjs = new DBObjectCollection();
             Dictionary<Curve, List<string>> dict = new Dictionary<Curve, List<string>>();
             SpaceNames.ForEach(o =>
             {
-                var curves = TextContainer[o];
-                if (curves.Count > 0)
+                try
                 {
-                    var belonged = curves.Cast<Polyline>().OrderBy(k => k.Area).First();
-                    if(!dict.ContainsKey(belonged))
+                    var curves = TextContainer[o];
+                    if (curves.Count > 0)
                     {
-                        dict.Add(belonged, new List<string> { o.TextString });
-                    }
-                    else
-                    {
-                        if(dict[belonged].IndexOf(o.TextString)<0)
+                        var belonged = curves.Cast<Polyline>().OrderBy(k => k.Area).First();
+                        if (!dict.ContainsKey(belonged))
                         {
-                            dict[belonged].Add(o.TextString);
+                            dict.Add(belonged, new List<string> { o.TextString });
+                        }
+                        else
+                        {
+                            if (dict[belonged].IndexOf(o.TextString) < 0)
+                            {
+                                dict[belonged].Add(o.TextString);
+                            }
                         }
                     }
+                }
+                catch
+                {
+
                 }
             });
             Spaces.ForEach(o =>
@@ -222,22 +204,21 @@ namespace ThMEPEngineCore.Engine
         private void BuildNestedSpace()
         {
             Spaces = Spaces.OrderBy(o => o.Boundary.Area).ToList();
-            Spaces.ForEach(o => BuildNestedSpace(o));            
+            Spaces.ForEach(o => BuildNestedSpace(o));
         }
         private void BuildNestedSpace(ThIfcSpace thIfcSpace)
         {
             var objs = AreaContainer[thIfcSpace.Boundary];
-            if (objs.Count==0)
+            if (objs.Count == 0)
             {
                 return;
             }
-            double smallestArea=objs.First().Area;
-            foreach(var parentObj in objs.Where(o => o.Area == smallestArea).ToList())
+            foreach (var parentObj in objs)
             {
-                if(SpaceIndex.ContainsKey(parentObj))
+                if (SpaceIndex.ContainsKey(parentObj))
                 {
                     var parent = SpaceIndex[parentObj];
-                    if(parent.SubSpaces.IndexOf(thIfcSpace)<0)
+                    if (parent.SubSpaces.IndexOf(thIfcSpace) < 0)
                     {
                         parent.SubSpaces.Add(thIfcSpace);
                     }
@@ -250,7 +231,7 @@ namespace ThMEPEngineCore.Engine
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        private List<Curve> SelectTextIntersectPolygon(List<Curve> curves , Polyline textOBB)
+        private List<Curve> SelectTextIntersectPolygon(List<Curve> curves, Polyline textOBB)
         {
             return curves.Where(o =>
             {
@@ -273,7 +254,15 @@ namespace ThMEPEngineCore.Engine
         /// <returns></returns>
         private List<Curve> SelectPolylineContainers(List<Curve> curves, Polyline son)
         {
-            var bufferObjs = son.Buffer(-5.0);
+            //return curves.Where(o =>
+            //{
+            //    if (o is Polyline parent)
+            //    {
+            //        return IsCovers(parent, son);
+            //    }
+            //    return false;
+            //}).ToList();
+            var bufferObjs = son.Buffer(-15.0);
             return curves.Where(o =>
             {
                 if (o is Polyline parent)
@@ -290,6 +279,46 @@ namespace ThMEPEngineCore.Engine
                 }
                 return false;
             }).ToList();
+        }
+
+        private bool IsCovers(Polyline parent,Polyline son,double tolerance=10.0)
+        {            
+            if(parent.Equals(son))
+            {
+                return true;
+            }
+            else
+            {
+                bool result = false;
+                var relation = new ThCADCoreNTSRelate(parent, son);
+                result = relation.IsCovers;
+                if (!result)
+                {
+                    var pts = son.VerticesEx(50.0);
+                    foreach (Point3d pt in pts)
+                    {
+                        if (!parent.Contains(pt))
+                        {
+                            var closePt = parent.GetClosestPointTo(pt, false);
+                            if (closePt.DistanceTo(pt) > tolerance)
+                            {
+                                return false;
+                            }
+                        }
+                    }
+                }
+                return result;
+            }
+        }
+
+        public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
         }
     }
 }

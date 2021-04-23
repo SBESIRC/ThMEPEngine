@@ -4,35 +4,35 @@ using System.Collections.Generic;
 using ThCADCore.NTS;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
 using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Geom;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThToiletFloorDrainService
-    {        
-        private List<ThIfcFloorDrain> FloorDrainList { get; set; }
+    {
+        private List<ThWFloorDrain> FloorDrainList { get; set; }
         private ThIfcSpace ToiletSpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         /// <summary>
         /// 找到的坐便器
         /// 目前只支持查找一个
         /// </summary>
-        public List<ThIfcFloorDrain> FloorDrains
-        { 
+        public List<ThWFloorDrain> FloorDrains
+        {
             get;
-            set; 
-        } 
+            set;
+        }
         private ThToiletFloorDrainService(
-            List<ThIfcFloorDrain> floordrainList, 
-            ThIfcSpace toiletSpace, 
+            List<ThWFloorDrain> floordrainList,
+            ThIfcSpace toiletSpace,
             ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
             FloorDrainList = floordrainList;
             ToiletSpace = toiletSpace;
             FloorDrainSpatialIndex = floordrainSpatialIndex;
-            FloorDrains = new List<ThIfcFloorDrain>();
+            FloorDrains = new List<ThWFloorDrain>();
             if (FloorDrainSpatialIndex == null)
             {
                 DBObjectCollection dbObjs = new DBObjectCollection();
@@ -41,8 +41,8 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
         public static ThToiletFloorDrainService Find(
-            List<ThIfcFloorDrain> floordrains, 
-            ThIfcSpace toiletSpace, 
+            List<ThWFloorDrain> floordrains,
+            ThIfcSpace toiletSpace,
             ThCADCoreNTSSpatialIndex floordrainSpatialIndex = null)
         {
             var instance = new ThToiletFloorDrainService(floordrains, toiletSpace, floordrainSpatialIndex);
@@ -51,9 +51,9 @@ namespace ThMEPWSS.Pipe.Service
         }
         private void Find()
         {
-            var drains = new List<ThIfcFloorDrain>();
+            var drains = new List<ThWFloorDrain>();
             var tolitBoundary = ToiletSpace.Boundary as Polyline;
-            var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(tolitBoundary);            
+            var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(tolitBoundary);
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
 
             drains = crossFloordrains.Where(o =>
@@ -61,8 +61,8 @@ namespace ThMEPWSS.Pipe.Service
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
                 return tolitBoundary.Contains(bufferObjs[0] as Curve);
-            }).ToList(); 
-            foreach(var drain in drains)
+            }).ToList();
+            foreach (var drain in drains)
             {
                 FloorDrains.Add(drain);
             }
@@ -73,7 +73,7 @@ namespace ThMEPWSS.Pipe.Service
                     FloorDrains.Add(drain);
                 }
             }
-        }     
+        }
     }
 }
 

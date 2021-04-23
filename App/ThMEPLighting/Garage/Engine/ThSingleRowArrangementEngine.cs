@@ -1,11 +1,10 @@
-﻿using DotNetARX;
-using Linq2Acad;
-using ThMEPLighting.Common;
-using Autodesk.AutoCAD.Geometry;
+﻿using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPLighting.Common;
 using ThMEPLighting.Garage.Model;
 using ThMEPLighting.Garage.Service;
-using Autodesk.AutoCAD.DatabaseServices;
+using NFox.Cad;
 
 namespace ThMEPLighting.Garage.Engine
 {
@@ -19,50 +18,39 @@ namespace ThMEPLighting.Garage.Engine
         }
         public override void Arrange(List<ThRegionBorder> regionBorders)
         {
-            regionBorders.ForEach(o =>
-            {
-                var collectIds = Arrange(o);
-                //ThEliminateService.Eliminate(RacewayParameter, o.RegionBorder, collectIds,ArrangeParameter.Width);
-            });
+            regionBorders.ForEach(o => Arrange(o));
         }
-        private ObjectIdList Arrange(ThRegionBorder regionBorder)
+        private void Arrange(ThRegionBorder regionBorder)
         {
-            var collectIds = new ObjectIdList(); 
-            //对传入的线进行清洗    
-            using (AcadDatabase acadDatabase=AcadDatabase.Active())  
+            // 预处理
+            Preprocess(regionBorder);
+
+            // 根据桥架中心线建立线槽
+            var ports = new List<Point3d>();
+            var cableCenterLines = new List<Line>();
+            cableCenterLines.AddRange(DxLines);
+            cableCenterLines.AddRange(FdxLines);
+            using (var buildRacywayEngine = new ThBuildRacewayEngineEx(cableCenterLines, ArrangeParameter.Width))
             {
-                //预处理
-                Preprocess(regionBorder);
-
-                //桥架中心线，建立线槽
-                var cableCenterLines = new List<Line>();
-                cableCenterLines.AddRange(DxLines);
-                cableCenterLines.AddRange(FdxLines);
-                var ports = new List<Point3d>();
-                using (var buildRacywayEngine = new ThBuildRacewayEngine(cableCenterLines, ArrangeParameter.Width))
-                {
-                    //创建线槽
-                    buildRacywayEngine.Build();
-                    //成组
-                    var cableTrayIds = buildRacywayEngine.CreateGroup(RacewayParameter);
-                    collectIds.AddRange(cableTrayIds);
-
-                    //获取参数
-                    ports = buildRacywayEngine.GetPorts();
-                }
-                //电灯编号
-                var lightEdges = new List<ThLightEdge>();
-                DxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o)));
-                //FdxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o) { IsDX = false }));                
-                using (var buildNumberEngine = new ThSingleRowNumberEngine(
-                     ports, lightEdges, ArrangeParameter))
-                {
-                    buildNumberEngine.Build();                    
-                    var numberBlocks = Print(buildNumberEngine.DxLightEdges);
-                    collectIds.AddRange(numberBlocks);
-                }                
+                buildRacywayEngine.Build();
+                ports = buildRacywayEngine.GetPorts();
+                //电缆桥架的边线和中线及配对的结果返回给->regionBorder
+                //便于后期打印
+                regionBorder.CableTrayCenters = buildRacywayEngine.SplitCenters;
+                regionBorder.CableTraySides = buildRacywayEngine.SplitSides;
+                regionBorder.CableTrayGroups = buildRacywayEngine.CenterWithSides;
+                regionBorder.CableTrayPorts = buildRacywayEngine.CenterWithPorts;
             }
-            return collectIds;
+
+            // 创建灯和编号
+            var lightEdges = new List<ThLightEdge>();
+            DxLines.ForEach(o => lightEdges.Add(new ThLightEdge(o)));
+            using (var buildNumberEngine = new ThSingleRowNumberEngine(ports, lightEdges, ArrangeParameter))
+            {                
+                buildNumberEngine.Build();
+                //将创建的灯边返回给->regionBorder
+                regionBorder.LightEdges = buildNumberEngine.DxLightEdges;
+            }
         }    
     }
 }

@@ -32,7 +32,7 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
-  <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="Accessibility" />
     <Reference Include="DevExpress.BonusSkins.v17.2, Version=17.2.5.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
@@ -88,15 +88,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CAD\BlockCustomCommandMapper.cs" />
+    <Compile Include="CAD\ThFanModelDbDataSource.cs" />
     <Compile Include="CAD\ThFanModelObjectOverrule.cs" />
     <Compile Include="CAD\ThFanModelOverruleManager.cs" />
     <Compile Include="CAD\ThFanSelectionAppIdleHandler.cs" />
+    <Compile Include="CAD\ThFanSelectionDatabaseEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbDeepCloneHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbEraseHandler.cs" />
-    <Compile Include="CAD\ThFanSelectionDbSaveHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDocumentEventHandler.cs" />
     <Compile Include="CAD\ThFanSelectionDbUndoHandler.cs" />
     <Compile Include="CAD\ThFanSelectionEngine.cs" />
+    <Compile Include="CAD\ThModelRoateStateOverride.cs" />
     <Compile Include="CAD\ThModelSystemInsertCommand.cs" />
     <Compile Include="CAD\ThModelCommand.cs" />
     <Compile Include="CAD\ThModelSystemCopyCommand.cs" />
@@ -508,7 +510,7 @@
     <PackageReference Include="EPPlus" Version="5.4.0" />
     <PackageReference Include="ExcelDataReader" Version="3.6.0" />
     <PackageReference Include="ExcelDataReader.DataSet" Version="3.6.0" />
-    <PackageReference Include="NetTopologySuite" Version="2.1.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.2.0" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="EmptyLicensesLicx" Version="2.0.2">

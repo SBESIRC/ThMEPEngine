@@ -8,14 +8,14 @@ using DotNetARX;
 
 namespace ThMEPWSS.Pipe.Engine
 {
-    public  class ThWArchitectureElevationRecognitionEngine : ThBuildingElementRecognitionEngine
+    public  class ThWArchitectureElevationRecognitionEngine
     {
-        public List<DBText> DbTexts;
+        public List<DBText> DbTexts { get; set; }
         public ThWArchitectureElevationRecognitionEngine()
         {
             DbTexts = new List<DBText>();
         }             
-        public override void Recognize(Database database, Point3dCollection polygon)
+        public void Recognize(Database database, Point3dCollection polygon)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var spaceNameDbExtension = new ThArchitectureElevationRecognition(database))

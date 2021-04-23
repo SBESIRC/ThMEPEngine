@@ -12,5 +12,6 @@
         public static readonly string LaneLineLightBlockName = "E-BL001-1";
         public static readonly string ThGarageLightAppName = "ThGarageLight";
         public static readonly double ThShortLightLineLength = 5.0;
+        public static readonly double LaneMergeRange = 301; //经验值,后期再定
     }
 }

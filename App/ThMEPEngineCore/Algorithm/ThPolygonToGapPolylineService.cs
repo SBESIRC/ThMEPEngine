@@ -129,17 +129,20 @@ namespace ThMEPEngineCore.Algorithm
             });
             lines.ForEach(o =>o.Dispose());
             var mergelines = ThLineMerger.Merge(extendLines);
-            DBObjectCollection dbObjs = new DBObjectCollection();
-            mergelines.ForEach(o => dbObjs.Add(o));
-            var unionObjs = dbObjs.Polygonize();
             List<Polyline> polygonPolyines = new List<Polyline>();
-            unionObjs.ForEach(o =>
+            if (mergelines.Count>0)
             {
-                if (o is Polygon polygon)
+                DBObjectCollection dbObjs = new DBObjectCollection();
+                mergelines.ForEach(o => dbObjs.Add(o));
+                var unionObjs = dbObjs.Polygonize();                
+                unionObjs.ForEach(o =>
                 {
-                    polygonPolyines.Add(polygon.Shell.ToDbPolyline());
-                }
-            });
+                    if (o is Polygon polygon)
+                    {
+                        polygonPolyines.Add(polygon.Shell.ToDbPolyline());
+                    }
+                });
+            }
             return polygonPolyines.Count > 0 ? polygonPolyines.OrderByDescending(o => o.Area).First() : null; 
         }
         private Vector3d? LineExtendVector(Polyline self,Point3d pt,Vector3d ptOnLineVec)

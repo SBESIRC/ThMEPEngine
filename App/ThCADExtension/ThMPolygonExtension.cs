@@ -1,10 +1,8 @@
-﻿using System;
-using DotNetARX;
-using GeometryExtensions;
+﻿using System.Linq;
+using System.Collections.Generic;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using System.Linq;
 
 namespace ThCADExtension
 {
@@ -29,6 +27,25 @@ namespace ThCADExtension
                 pts.Cast<Point3d>().ForEach(o => vertices.Add(o));
             }
             return vertices;
+        }
+        public static List<Polyline> Loops(this MPolygon mPolygon)
+        {
+            var loops = new List<Polyline>();
+            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
+            {
+                MPolygonLoop mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
+                Polyline polyline = new Polyline()
+                {
+                    Closed = true
+                };
+                for (int j = 0; j < mPolygonLoop.Count; j++)
+                {
+                    var bulgeVertex = mPolygonLoop[j];
+                    polyline.AddVertexAt(j, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
+                }
+                loops.Add(polyline);
+            }
+            return loops;
         }
     }
 }

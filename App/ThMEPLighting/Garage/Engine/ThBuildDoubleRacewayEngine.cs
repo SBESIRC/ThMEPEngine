@@ -225,11 +225,11 @@ namespace ThMEPLighting.Garage.Engine
                     ports.ForEach(p => p.Linetype = "Bylayer");
                     ports.ForEach(p => objIds.Add(acadDatabase.ModelSpace.Add(p)));                   
                     DrawObjIs.AddRange(objIds);
-                    var lineValueList = new TypedValueList
-                    {
-                        { (int)DxfCode.ExtendedDataAsciiString, "CableTray"},
-                    };
-                    objIds.ForEach(l=> XDataTools.AddXData(l, ThGarageLightCommon.ThGarageLightAppName, lineValueList));
+                    //var lineValueList = new TypedValueList
+                    //{
+                    //    { (int)DxfCode.ExtendedDataAsciiString, "CableTray"},
+                    //};
+                    //objIds.ForEach(l=> XDataTools.AddXData(l, ThGarageLightCommon.ThGarageLightAppName, lineValueList));
                     var groupName = Guid.NewGuid().ToString();
                     GroupTools.CreateGroup(acadDatabase.Database, groupName, objIds);
                 }); 
@@ -291,14 +291,7 @@ namespace ThMEPLighting.Garage.Engine
             foreach (Curve obj in objs)
             {
                 bufferCollection.Add(new DBObjectCollection() { obj }.Buffer(Width / 2.0)[0]);
-            }
-            using (AcadDatabase db=AcadDatabase.Active())
-            {
-                foreach (Entity item in bufferCollection)
-                {
-                    //db.ModelSpace.Add(item);
-                }
-            }
+            }            
             return bufferCollection;
         }
         private void BuildCableTray(List<Line> cableTrayLines,List<Line> centerLines, List<Line> portsLines)

@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -71,6 +71,7 @@
     <Compile Include="Function\FanParametersExtension.cs" />
     <Compile Include="Function\HeatReleaseInfoLoader.cs" />
     <Compile Include="Function\ThModelLoader.cs" />
+    <Compile Include="Messaging\ThModelBeginSaveMessage.cs" />
     <Compile Include="Messaging\ThModelCopyMessage.cs" />
     <Compile Include="Messaging\ThModelDeleteMessage.cs" />
     <Compile Include="Messaging\ThModelMessageArgs.cs" />
@@ -143,7 +144,7 @@
   <ItemGroup>
     <PackageReference Include="EPPlus" Version="5.4.0" />
     <PackageReference Include="Catel.Core" Version="5.12.10" />
-    <PackageReference Include="NetTopologySuite" Version="2.1.0" />
+    <PackageReference Include="NetTopologySuite" Version="2.2.0" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

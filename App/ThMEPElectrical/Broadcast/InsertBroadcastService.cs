@@ -7,6 +7,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADExtension;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Broadcast
 {
@@ -28,7 +29,7 @@ namespace ThMEPElectrical.Broadcast
             }
         }
 
-        public static List<BlockReference> InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo)
+        public static List<BlockReference> InsertSprayBlock(Dictionary<List<Line>, Dictionary<Point3d, Vector3d>> insertPtInfo, ThMEPOriginTransformer originTransformer)
         {
             List<BlockReference> broadcasts = new List<BlockReference>();
             using (var db = AcadDatabase.Active())
@@ -38,7 +39,9 @@ namespace ThMEPElectrical.Broadcast
                 {
                     foreach (var ptInfo in ptDic.Value)
                     {
-                        var id = db.Database.InsertModel(ptInfo.Key + ptInfo.Value * scaleNum * 1.5, -ptInfo.Value, new Dictionary<string, string>(){
+                        var intsertPt = ptInfo.Key;
+                        originTransformer.Reset(ref intsertPt);
+                        var id = db.Database.InsertModel(intsertPt + ptInfo.Value * scaleNum * 1.5, -ptInfo.Value, new Dictionary<string, string>(){
                             { "F","W" },
                         });
                         broadcasts.Add(db.Element<BlockReference>(id));

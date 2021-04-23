@@ -237,35 +237,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThOverlayUnion", CommandFlags.Modal)]
-        public void ThOverlayUnion()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-
-
-                var geometrys = objs.ToNTSLineStrings();
-
-                var overlapUnion = OverlapUnion.Union(geometrys.First(), geometrys.Last());
-                foreach (Entity obj in overlapUnion.ToDbCollection())
-                {
-                    obj.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThPolygonIntersect", CommandFlags.Modal)]
         public void ThPolygonIntersect()
         {
@@ -685,9 +656,9 @@ namespace ThCADCore.Test
                     return;
                 }
 
-                var line = acadDatabase.Element<Line>(result.ObjectId);
+                var poly = acadDatabase.Element<Polyline>(result.ObjectId);
                 var circle = acadDatabase.Element<Circle>(result2.ObjectId);
-                var closestPt = line.GetClosestPointTo(circle.Center, true);
+                var closestPt = poly.GetClosestPointTo(circle.Center, true);
 
                 var verticalLine = new Line(closestPt, circle.Center);
 

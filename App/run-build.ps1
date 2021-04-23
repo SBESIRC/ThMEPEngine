@@ -8,10 +8,32 @@ Task Release.Build {
 Task Debug.Build {
     $script:buildType = "Debug"
 }
+function Get-LatestMsbuildLocation
+{
+  Param 
+  (
+    [bool] $allowPreviewVersions = $false
+  )
+    if ($allowPreviewVersions) {
+      $latestVsInstallationInfo = Get-VSSetupInstance -All -Prerelease | Sort-Object -Property InstallationVersion -Descending | Select-Object -First 1
+    } else {
+      $latestVsInstallationInfo = Get-VSSetupInstance -All | Sort-Object -Property InstallationVersion -Descending | Select-Object -First 1
+    }
+    Write-Host "Latest version installed is $($latestVsInstallationInfo.InstallationVersion)"
+    if ($latestVsInstallationInfo.InstallationVersion -like "15.*") {
+      $msbuildLocation = "$($latestVsInstallationInfo.InstallationPath)\MSBuild\15.0\Bin\msbuild.exe"
+    
+      Write-Host "Located msbuild for Visual Studio 2017 in $msbuildLocation"
+    } else {
+      $msbuildLocation = "$($latestVsInstallationInfo.InstallationPath)\MSBuild\Current\Bin\msbuild.exe"
+      Write-Host "Located msbuild in $msbuildLocation"
+    }
+
+    return $msbuildLocation
+}
 
 Task Requires.MSBuild {
-    # Visual Studio 2019 Community
-    $script:msbuildExe = resolve-path "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\Current\Bin\MSBuild.exe"
+    $script:msbuildExe = Get-LatestMsbuildLocation
 
     if ($msbuildExe -eq $null)
     {

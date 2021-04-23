@@ -56,12 +56,39 @@ namespace ThCADExtension
         }
 
         public static Solid ToSolid(this Polyline polyline)
+        {            
+            if(polyline.NumberOfVertices == 3)
+            {
+                return new Solid(
+                    polyline.GetPoint3dAt(0),
+                    polyline.GetPoint3dAt(1),
+                    polyline.GetPoint3dAt(2));
+            }
+            else if(polyline.NumberOfVertices == 4)
+            {
+                return new Solid(
+                    polyline.GetPoint3dAt(0),
+                    polyline.GetPoint3dAt(1),
+                    polyline.GetPoint3dAt(3),
+                    polyline.GetPoint3dAt(2));
+            }
+            else if (polyline.NumberOfVertices == 5)
+            {
+                return new Solid(
+                    polyline.GetPoint3dAt(0),
+                    polyline.GetPoint3dAt(1),
+                    polyline.GetPoint3dAt(3),
+                    polyline.GetPoint3dAt(2));
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
+        public static Solid WashClone(this Solid solid)
         {
-            return new Solid(
-                polyline.GetPoint3dAt(0),
-                polyline.GetPoint3dAt(1),
-                polyline.GetPoint3dAt(3),
-                polyline.GetPoint3dAt(2));
+            return solid.ToPolyline().ToSolid();
         }
     }
 }

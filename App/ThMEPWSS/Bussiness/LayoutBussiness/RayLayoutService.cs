@@ -82,12 +82,6 @@ namespace ThMEPWSS.Bussiness.LayoutBussiness
                 //打印布置网格线
                 InsertSprayLinesService.InsertSprayLines(sprayLines);
             }
-            //else
-            //{
-            //    //计算喷淋点
-            //    GenerateSpraysPointService spraysPointService = new GenerateSpraysPointService();
-            //    sprays = spraysPointService.GenerateSprays(sprayLines);
-            //}
 
             return sprays;
         }

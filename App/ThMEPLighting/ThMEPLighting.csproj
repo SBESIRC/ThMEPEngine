@@ -13,7 +13,7 @@
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
   </PropertyGroup>
-  <Import Project="..\TIANHUA.CSharp.General.net472.targets" />
+  <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -24,29 +24,79 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CAD\BlockInsertDBExtension.cs" />
+    <Compile Include="EmgLightConnect\ConnectEmgLightEngine.cs" />
+    <Compile Include="EmgLightConnect\ConnectService\connectSingleSideBlkService.cs" />
+    <Compile Include="EmgLightConnect\ConnectService\connectSingleSideInGroupService.cs" />
+    <Compile Include="EmgLightConnect\ConnectService\returnValueCalculation.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawEmgPipeService.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawMainSideBlkService.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawSecBlkService.cs" />
+    <Compile Include="EmgLightConnect\EmgConnectCommon.cs" />
+    <Compile Include="EmgLightConnect\Model\ThBlock.cs" />
+    <Compile Include="EmgLightConnect\Model\ThLaneSideEdgeNode.cs" />
+    <Compile Include="EmgLightConnect\Model\ThSingleSideBlocks.cs" />
+    <Compile Include="EmgLightConnect\Service\ConnectSingleSideService.cs" />
+    <Compile Include="EmgLightConnect\Service\GetBlockService.cs" />
+    <Compile Include="EmgLightConnect\Service\graphService.cs" />
+    <Compile Include="EmgLightConnect\Service\findOptimalGroupService.cs" />
+    <Compile Include="EmgLightConnect\Service\SingleSideBlockService.cs" />
+    <Compile Include="EmgLightConnect\Service\orderSingleSideLaneService.cs" />
+    <Compile Include="EmgLightConnect\Service\MergeSideService.cs" />
     <Compile Include="EmgLight\Assistant\DrawUtils.cs" />
     <Compile Include="EmgLight\EmgLightCommon.cs" />
     <Compile Include="EmgLight\LayoutEmgLightEngine.cs" />
-    <Compile Include="EmgLight\Model\StructModel.cs" />
+    <Compile Include="EmgLight\Model\ThLane.cs" />
+    <Compile Include="EmgLight\Model\ThStruct.cs" />
+    <Compile Include="EmgLight\Service\FindUniformSideService.cs" />
+    <Compile Include="EmgLight\Service\GetSourceDataService.cs" />
     <Compile Include="EmgLight\Service\InsertLightService.cs" />
     <Compile Include="Common\LaneServer.cs" />
+    <Compile Include="EmgLight\Service\LayoutNonUniformSideService.cs" />
+    <Compile Include="EmgLight\Service\LayoutUniformSideService.cs" />
     <Compile Include="EmgLight\Service\RemoveBlockService.cs" />
-    <Compile Include="EmgLight\Service\LayoutEmgLightService.cs" />
-    <Compile Include="EmgLight\Service\StructureServiceLight.cs" />
-    <Compile Include="EmgLight\Service\StructUtils.cs" />
+    <Compile Include="EmgLight\Service\LayoutService.cs" />
+    <Compile Include="EmgLight\Service\StructFilterService.cs" />
+    <Compile Include="EmgLight\Service\StructureService.cs" />
+    <Compile Include="EmgLight\Service\GeomUtils.cs" />
+    <Compile Include="FEI\BFSAlgorithm\BFSNode.cs" />
+    <Compile Include="FEI\BFSAlgorithm\BFSPathPlaner.cs" />
+    <Compile Include="FEI\EvacuationPath\ConnectIsolatedLaneService.cs" />
+    <Compile Include="FEI\EvacuationPath\CreateMainLanesService.cs" />
+    <Compile Include="FEI\EvacuationPath\CreateStartExtendLineService.cs" />
+    <Compile Include="FEI\EvacuationPath\ExtendLinesService.cs" />
+    <Compile Include="FEI\EvacuationPath\MergeExtendLineService.cs" />
+    <Compile Include="FEI\EvacuationPath\OptimizeStartExtendLineService.cs" />
+    <Compile Include="FEI\Model\EvacuationPathModel.cs" />
+    <Compile Include="FEI\Model\ExtendLineTreeModel.cs" />
+    <Compile Include="FEI\PrintEntity\CalEvacuationPathTypeService.cs" />
+    <Compile Include="FEI\PrintEntity\PrintService.cs" />
+    <Compile Include="FEI\Service\GetPrimitivesService.cs" />
+    <Compile Include="FEI\LayoutFEIService.cs" />
+    <Compile Include="FEI\Model\ExtendLineModel.cs" />
+    <Compile Include="FEI\Service\CheckService.cs" />
+    <Compile Include="FEI\Service\GeUtils.cs" />
+    <Compile Include="FEI\Service\SelectService.cs" />
+    <Compile Include="Garage\Engine\ThDoubleRowLoopArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThSingleRowLoopArrangementEngine.cs" />
+    <Compile Include="Garage\Engine\ThLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThBuildDoubleRacewayEngine.cs" />
+    <Compile Include="Garage\Engine\ThBuildRacewayEngineEx.cs" />
     <Compile Include="Garage\Engine\ThBuildRacewayEngine.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThInnerOuterCirclesEngine.cs" />
     <Compile Include="Garage\Engine\ThLaneLineGraphEngine.cs" />
-    <Compile Include="Garage\Engine\ThLightLinePreprocessEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowNumberEngine.cs" />
     <Compile Include="Garage\Engine\ThSplitLineEngine.cs" />
     <Compile Include="Garage\Engine\ThSumNumberEngine.cs" />
+    <Compile Include="Garage\Service\ThFindCenterLinePortsService.cs" />
+    <Compile Include="Garage\Service\ThSeparateLightEdgeService.cs" />
+    <Compile Include="Garage\Service\ThBuildFirstSecondPairService.cs" />
+    <Compile Include="Garage\ThGarageInteractionUtils.cs" />
     <Compile Include="Garage\Model\ThEdge.cs" />
     <Compile Include="Garage\Model\ThEntityParameter.cs" />
     <Compile Include="Garage\Model\ThFindSideLinesParameter.cs" />
@@ -66,12 +116,15 @@
     <Compile Include="Garage\Service\ThBuildDoubleRowPosService.cs" />
     <Compile Include="Garage\Service\ThBuildSingleRowPosService.cs" />
     <Compile Include="Garage\Service\ThCableTrayCutService.cs" />
+    <Compile Include="Garage\Service\ThCreateLightToDatabaseService.cs" />
     <Compile Include="Garage\Service\ThDistributeLightService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeExService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowDistributeService.cs" />
     <Compile Include="Garage\Service\ThDoubleRowNumberService.cs" />
     <Compile Include="Garage\Service\ThDrawPolylineJigger.cs" />
+    <Compile Include="Garage\Service\ThEliminateNumberTextService.cs" />
     <Compile Include="Garage\Service\ThEliminateService.cs" />
+    <Compile Include="Garage\Service\ThCollectCutLinesService.cs" />
     <Compile Include="Garage\Service\ThExtendFdxLinesService.cs" />
     <Compile Include="Garage\Service\ThExtendService.cs" />
     <Compile Include="Garage\Service\ThFilterLinkService.cs" />
@@ -79,6 +132,7 @@
     <Compile Include="Garage\Service\ThFilterElbowCenterLineService.cs" />
     <Compile Include="Garage\Service\ThFindFirstEdgePortsService.cs" />
     <Compile Include="Garage\Service\ThFindFirstLinesService.cs" />
+    <Compile Include="Garage\Service\ThFindLightBlockNumberService.cs" />
     <Compile Include="Garage\Service\ThFindLinkService.cs" />
     <Compile Include="Garage\Service\ThFindCenterPairLinesService.cs" />
     <Compile Include="Garage\Service\ThFindLongestPathService.cs" />
@@ -88,6 +142,7 @@
     <Compile Include="Common\ThLightGraphService.cs" />
     <Compile Include="Garage\Service\ThLineNodeService.cs" />
     <Compile Include="Garage\Service\ThMergeLightCenterLines.cs" />
+    <Compile Include="Garage\Service\ThPreprocessLineService.cs" />
     <Compile Include="Garage\Service\ThPrintService.cs" />
     <Compile Include="Garage\Service\ThQueryLightBlockService.cs" />
     <Compile Include="Garage\Service\ThFilterTTypeCenterLineService.cs" />
@@ -125,6 +180,8 @@
     <Compile Include="ParkingStall\Model\NearParksPolylineNode.cs" />
     <Compile Include="ParkingStall\Model\ParkGroupInfo.cs" />
     <Compile Include="ParkingStall\Model\ParkingGroup.cs" />
+    <Compile Include="ParkingStall\Model\PipeLighterInfo.cs" />
+    <Compile Include="ParkingStall\Model\PipeLighterPolylInfo.cs" />
     <Compile Include="ParkingStall\Model\PointEdgeInfo.cs" />
     <Compile Include="ParkingStall\Model\PolygonInfo.cs" />
     <Compile Include="ParkingStall\ParkingStallCommon.cs" />
@@ -154,19 +211,26 @@
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingNearGroup.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupAlgorithm\ParkingPolyTrans.cs" />
     <Compile Include="ParkingStall\Worker\ParkingGroup\ParkingGroupGenerator.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\Viewer\LightConnectViewer.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\SideLaneConnect\DivideSideLightCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\LaneGroupInfo\LaneGroupReader.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\SideLaneConnect\LaneSideLightCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\PipeConnector\SideLaneConnect\LightConnector.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\ParkingGroupPlaceLightGenerator.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GenerateParkGroupProfile.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\GroupLightViewer.cs" />
     <Compile Include="ParkingStall\Worker\PlaceLight\PlaceLightAlgorithm\ParkLightAngleCalculator.cs" />
+    <Compile Include="ParkingStall\Worker\RegionLaneConnect\RegionLaneConnector.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThEmgLightCmds.cs" />
+    <Compile Include="ThFEICmds.cs" />
     <Compile Include="ThMEPLightingService.cs" />
     <Compile Include="ThMEPGarageLightingCmds.cs" />
     <Compile Include="ThMEPLightingApp.cs" />
     <Compile Include="ThMEPLightingCommon.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="ParkingStall\Worker\PipeConnector\" />
+    <Folder Include="ParkingStall\Worker\RegionLaneConnect\Algorithm\" />
     <Folder Include="ParkingStall\Worker\SplitRegion\" />
   </ItemGroup>
   <ItemGroup>

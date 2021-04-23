@@ -13,7 +13,7 @@ namespace ThMEPEngineCore.Service
         public List<Entity> Windows { get; set; }
         public ThWindowDbExtension(Database db) : base(db)
         {
-            LayerFilter = ThWindowLayerManager.XrefLayers(db);
+            LayerFilter = ThWindowLayerManager.CurveXrefLayers(db);
             Windows = new List<Entity>();
         }
         public void Dispose()

@@ -4,27 +4,26 @@ using ThCADCore.NTS;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
-using ThMEPEngineCore.Model.Plumbing;
-using ThMEPWSS.Assistant;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
 {
     public class ThDevicePlatformFloorDrainService
     {
-        public List<ThIfcFloorDrain> FloorDrains { get; private set; }
-        private List<ThIfcFloorDrain> FloorDrainList { get; set; }
+        public List<ThWFloorDrain> FloorDrains { get; private set; }
+        private List<ThWFloorDrain> FloorDrainList { get; set; }
         private ThIfcSpace DevicePlatformSpace { get; set; }
         private ThCADCoreNTSSpatialIndex FloorDrainSpatialIndex { get; set; }
         /// <summary>
-        
+
         private ThDevicePlatformFloorDrainService(
-          List<ThIfcFloorDrain> floordrainList,
+          List<ThWFloorDrain> floordrainList,
           ThIfcSpace devicePlatformSpace,
           ThCADCoreNTSSpatialIndex floordrainSpatialIndex)
         {
             FloorDrainList = floordrainList;
             DevicePlatformSpace = devicePlatformSpace;
-            FloorDrainSpatialIndex = floordrainSpatialIndex;         
+            FloorDrainSpatialIndex = floordrainSpatialIndex;
             if (FloorDrainSpatialIndex == null)
             {
                 DBObjectCollection dbObjs = new DBObjectCollection();
@@ -33,7 +32,7 @@ namespace ThMEPWSS.Pipe.Service
             }
         }
         public static ThDevicePlatformFloorDrainService Find(
-         List<ThIfcFloorDrain> floordrains,
+         List<ThWFloorDrain> floordrains,
          ThIfcSpace devicePlatformSpace,
          ThCADCoreNTSSpatialIndex floordrainSpatialIndex = null)
         {
@@ -45,7 +44,7 @@ namespace ThMEPWSS.Pipe.Service
         {
             // to do curve 封闭逻辑放到模型那边统一预处理，这边只是暂时处理
             var devicePlatformBoundary = DevicePlatformSpace.Boundary.Clone() as Polyline;
-            devicePlatformBoundary.Closed = true;                   
+            devicePlatformBoundary.Closed = true;
             var crossObjs = FloorDrainSpatialIndex.SelectCrossingPolygon(devicePlatformBoundary);
             var crossFloordrains = FloorDrainList.Where(o => crossObjs.Contains(o.Outline));
             FloorDrains = crossFloordrains.Where(o =>
@@ -53,8 +52,8 @@ namespace ThMEPWSS.Pipe.Service
                 var block = o.Outline as BlockReference;
                 var bufferObjs = block.GeometricExtents.ToNTSPolygon().Buffer(-10.0).ToDbCollection();
                 return devicePlatformBoundary.Contains(bufferObjs[0] as Curve);
-            }).ToList();                    
-        }     
+            }).ToList();
+        }
     }
 }
 

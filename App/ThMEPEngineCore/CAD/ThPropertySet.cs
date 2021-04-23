@@ -9,6 +9,7 @@ namespace ThMEPEngineCore.CAD
         public Dictionary<string, string> Properties { get; set; }
         public ThPropertySet()
         {
+            Section = string.Empty;
             Properties = new Dictionary<string, string>();
         }
         public static ThPropertySet CreateWithHyperlink(string hyperlink)
@@ -38,6 +39,25 @@ namespace ThMEPEngineCore.CAD
             return propertySet;
         }
 
+        public static ThPropertySet CreateWithHyperlink2(string hyperlink)
+        {
+            var propertySet = new ThPropertySet();
+
+            // 按分割符“__”分割属性
+            var properties = Regex.Split(hyperlink, "__");
+            foreach (var property in properties)
+            {
+                var keyValue = Regex.Split(property, "：");
+                if (ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTIES.Contains(keyValue[0]))
+                {
+                    propertySet.Properties.Add(keyValue[0], keyValue[1]);
+                }
+            }
+
+            // 返回属性集
+            return propertySet;
+        }
+
         /// <summary>
         /// 是否为建筑墙
         /// </summary>
@@ -45,8 +65,13 @@ namespace ThMEPEngineCore.CAD
         {
             get
             {
-                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_WALL
-                    && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_WALL
+                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+                }
+                return false;
             }
         }
 
@@ -57,8 +82,13 @@ namespace ThMEPEngineCore.CAD
         {
             get
             {
-                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_WALL
-                    && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_CURTAIN_WALL;
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_WALL
+                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_CURTAIN_WALL;
+                }
+                return false;
             }
         }
 
@@ -81,8 +111,13 @@ namespace ThMEPEngineCore.CAD
         {
             get
             {
-                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
                     && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+                }
+                return false;
             }
         }
 
@@ -93,8 +128,13 @@ namespace ThMEPEngineCore.CAD
         {
             get
             {
-                return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_S_COLUMN
                     && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WALL;
+                }
+                return false;
             }
         }
         /// <summary>
@@ -108,10 +148,74 @@ namespace ThMEPEngineCore.CAD
                 {
                     return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_DOOR;
                 }
-                else
+                return false;
+            }
+        }
+        /// <summary>
+        /// 是否为窗户
+        /// </summary>
+        public bool IsWindow
+        {
+            get
+            {
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
                 {
-                    return false;
-                }                
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_WINDOW
+                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_WINDOW;
+                }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 是否为楼板
+        /// </summary>
+        public bool IsSlab
+        {
+            get
+            {
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_FLOOR
+                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_FLOOR;
+                }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 是否为栏杆
+        /// </summary>
+        public bool IsRailing
+        {
+            get
+            {
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_RAILING
+                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_RAILING;
+                }
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// 是否为线脚
+        /// </summary>
+        public bool IsLineFoot
+        {
+            get
+            {
+                if (Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY)
+                    && Properties.ContainsKey(ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER))
+                {
+                    return Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_CATEGORY] == ThMEPEngineCoreCommon.BUILDELEMENT_CATEGORY_LINEFOOT
+                        && Properties[ThMEPEngineCoreCommon.BUILDELEMENT_PROPERTY_LAYER] == ThMEPEngineCoreCommon.BUILDELEMENT_LAYER_FLOOR;
+                }
+                return false;
             }
         }
     }

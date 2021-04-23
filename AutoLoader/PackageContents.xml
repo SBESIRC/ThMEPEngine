@@ -72,6 +72,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -85,6 +86,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -93,11 +95,13 @@
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
         <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPEngineCore.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP core" AppName="ThMEPEngineCore" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
+                <Command Local="THDXCX" Global="THDXCX" />
                 <Command Local="ThBuffer" Global="ThBuffer" />
                 <Command Local="THExtractBeam" Global="THExtractBeam" />
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -111,6 +115,7 @@
                 <Command Local="THExtractColumn" Global="THExtractColumn" />
                 <Command Local="THExtractShearWall" Global="THExtractShearWall" />
                 <Command Local="ThExtractBeamConnect" Global="ThExtractBeamConnect" />
+                <Command Local="THExtractRoomOutline" Global="THExtractRoomOutline" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -193,6 +198,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -207,6 +213,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -221,6 +228,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -235,6 +243,7 @@
                 <Command Local="THCDZMBZ" Global="THCDZMBZ" />
                 <Command Local="THCDBH" Global="THCDBH" />
                 <Command Local="THCDTJ" Global="THCDTJ" />
+                <Command Local="THPARKPROFILE" Global="THPARKPROFILE" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -247,6 +256,12 @@
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
                 <Command Local="THPLCD" Global="THPLCD" />
+                <Command Local="THLGBZ" Global="THLGBZ" />
+                <Command Local="THLGYY" Global="THLGYY" />
+                <Command Local="THLGLC" Global="THLGLC" />
+                <Command Local="THKJTQ" Global="THKJTQ" />
+                <Command Local="THKJHZ" Global="THKJHZ" />
+                <Command Local="THKJMC" Global="THTQKJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -259,6 +274,12 @@
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
                 <Command Local="THPLCD" Global="THPLCD" />
+                <Command Local="THLGBZ" Global="THLGBZ" />
+                <Command Local="THLGYY" Global="THLGYY" />
+                <Command Local="THLGLC" Global="THLGLC" />
+                <Command Local="THKJTQ" Global="THKJTQ" />
+                <Command Local="THKJHZ" Global="THKJHZ" />
+                <Command Local="THKJMC" Global="THTQKJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -271,6 +292,12 @@
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
                 <Command Local="THPLCD" Global="THPLCD" />
+                <Command Local="THLGBZ" Global="THLGBZ" />
+                <Command Local="THLGYY" Global="THLGYY" />
+                <Command Local="THLGLC" Global="THLGLC" />
+                <Command Local="THKJTQ" Global="THKJTQ" />
+                <Command Local="THKJHZ" Global="THKJHZ" />
+                <Command Local="THKJMC" Global="THTQKJ" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -283,6 +310,48 @@
                 <Command Local="THPLMQ" Global="THPLMQ" />
                 <Command Local="THPLKQ" Global="THPLKQ" />
                 <Command Local="THPLCD" Global="THPLCD" />
+                <Command Local="THLGBZ" Global="THLGBZ" />
+                <Command Local="THLGYY" Global="THLGYY" />
+                <Command Local="THLGLC" Global="THLGLC" />
+                <Command Local="THKJTQ" Global="THKJTQ" />
+                <Command Local="THKJHZ" Global="THKJHZ" />
+                <Command Local="THKJMC" Global="THTQKJ" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPHVAC, 2012 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
+        <ComponentEntry ModuleName="./Contents/Win64/2012/ThMEPHVAC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP HVAC" AppName="ThMEPHVAC" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJJC" Global="THFJJC" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPHVAC, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/ThMEPHVAC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP HVAC" AppName="ThMEPHVAC" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJJC" Global="THFJJC" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPHVAC, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/ThMEPHVAC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP HVAC" AppName="ThMEPHVAC" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJJC" Global="THFJJC" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, ThMEPHVAC, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/ThMEPHVAC.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for MEP HVAC" AppName="ThMEPHVAC" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THFJJC" Global="THFJJC" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -332,6 +401,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
+                <Command Local="THPYS" Global="THPYS" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -341,6 +411,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
+                <Command Local="THPYS" Global="THPYS" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -350,6 +421,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
+                <Command Local="THPYS" Global="THPYS" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -359,6 +431,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
+                <Command Local="THPYS" Global="THPYS" />
             </Commands>
         </ComponentEntry>
     </Components>

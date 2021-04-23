@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ThMEPHVAC.Entity;
+using ThMEPHVAC.Model;
 
 namespace ThMEPHVAC.Duct
 {

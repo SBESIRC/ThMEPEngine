@@ -4,7 +4,6 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Pipe.Geom;
 using Dreambuild.AutoCAD;
-using ThMEPWSS.Assistant;
 
 namespace ThMEPWSS.Pipe.Engine
 {
@@ -213,10 +212,10 @@ namespace ThMEPWSS.Pipe.Engine
                 basinline = bbasinline,
                 floordrains = bfloordrain,
             };
-            if (Farfromwashmachine(washingmachine, device, device_other))
+            if (Farfromwashmachine(washingmachine, device, device_other, bbasinline))
             {
                
-                if (CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe))
+                if (CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe, bbasinline))
                 {
 
                     ThWBalconyFloordrainEngine.Run(parameters1);
@@ -229,7 +228,7 @@ namespace ThMEPWSS.Pipe.Engine
             }
             else
             {
-                if (CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe))
+                if (CondensepipeIsRoofPipe(washingmachine, roofrainpipe, condensepipe, bbasinline))
                 {
                     ThWBalconyFloordrainEngine.Run(parameters3);
                 }
@@ -237,10 +236,13 @@ namespace ThMEPWSS.Pipe.Engine
                 {
                     ThWBalconyFloordrainEngine.Run(parameters2);
                 }
-            }         
-            ThWDeviceFloordrainEngine.Run(rainpipe_Device, device, condensepipes, devicefloordrain, roofrainpipe);
-            Rainpipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Rainpipe_tofloordrain);
-            Condensepipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Condensepipe_tofloordrain);
+            }
+            if (device != null)
+            {
+                ThWDeviceFloordrainEngine.Run(rainpipe_Device, device, condensepipes, devicefloordrain, roofrainpipe);
+                Rainpipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Rainpipe_tofloordrain);
+                Condensepipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Condensepipe_tofloordrain);
+            }
             if (device_other != null)
             {
                 ThWDeviceFloordrainEngine.Run(rainpipe_Device_other, device_other, condensepipes, devicefloordrain, roofrainpipe);
@@ -248,27 +250,49 @@ namespace ThMEPWSS.Pipe.Engine
                 Condensepipe_tofloordrains.Add(ThWDeviceFloordrainEngine.Condensepipe_tofloordrain);
             }
         }
-        private bool Farfromwashmachine(BlockReference washingmachine, Polyline device, Polyline device_other)
-        { 
-            if(device_other!=null&&washingmachine.Position.DistanceTo(device.GetCenter())> washingmachine.Position.DistanceTo(device_other.GetCenter()))
+        private bool Farfromwashmachine(BlockReference washingmachine, Polyline device, Polyline device_other,BlockReference bbasinline)
+        {
+            if (washingmachine != null)
             {
-                return true;
+                if (device_other != null && washingmachine.Position.DistanceTo(device.GetCenter()) > washingmachine.Position.DistanceTo(device_other.GetCenter()))
+                {
+                    return true;
+                }
             }
-        else
+            else 
             {
-                return false;
+                if (bbasinline != null)
+                {
+                    if (device_other != null && bbasinline.Position.DistanceTo(device.GetCenter()) > bbasinline.Position.DistanceTo(device_other.GetCenter()))
+                    {
+                        return true;
+                    }
+                }
             }
+                   
+                return false;            
         }
-        private bool CondensepipeIsRoofPipe(BlockReference washingmachine, Polyline roofrainpipe, Polyline condensepipe)
-        {          
-            if ((roofrainpipe!=null&& (washingmachine.Position.DistanceTo(roofrainpipe.GetCenter())<800))||( condensepipe==null))
+        private bool CondensepipeIsRoofPipe(BlockReference washingmachine, Polyline roofrainpipe, Polyline condensepipe, BlockReference bbasinline)
+        {
+            if (washingmachine != null)
             {
-                return true;
+                if ((roofrainpipe != null && (washingmachine.Position.DistanceTo(roofrainpipe.GetCenter()) < 800)) || (condensepipe == null))
+                {
+                    return true;
+                }
             }
             else
-            {
-                return false;
+            { 
+                if(bbasinline!=null)
+                {
+                    if ((roofrainpipe != null && (bbasinline.Position.DistanceTo(roofrainpipe.GetCenter()) < 800)) || (condensepipe == null))
+                    {
+                        return true;
+                    }
+                }
+                
             }
+            return false;
         }
     }
 }

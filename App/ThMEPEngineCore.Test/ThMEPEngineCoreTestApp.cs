@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using AcHelper;
 using Linq2Acad;
 using ThCADCore.NTS;
@@ -16,6 +17,7 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
+using System.Text.RegularExpressions;
 
 namespace ThMEPEngineCore.Test
 {
@@ -297,6 +299,69 @@ namespace ThMEPEngineCore.Test
                     acadDatabase.ModelSpace.Add(obj);
                 }
             }
+        }
+
+        [CommandMethod("TIANHUACAD", "THPrintCircle", CommandFlags.Modal)]
+        public void THPrintCircle()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var pts = GetPoints(@"E:\ZheDa\WashingPtLayout\GeoJsonTest\8.result.txt");
+                double radius = 500.0;
+                foreach (var pt in pts)
+                {
+                    var circle1 = new Circle(pt, Vector3d.ZAxis, radius + 100);
+                    circle1.ColorIndex = 3;
+                    circle1.SetDatabaseDefaults();
+                    acadDatabase.ModelSpace.Add(circle1);
+
+                    var circle = new Circle(pt, Vector3d.ZAxis, radius);
+                    circle.ColorIndex = 3;
+                    circle.SetDatabaseDefaults();
+                    ObjectIdCollection ObjIds = new ObjectIdCollection();
+                    ObjIds.Add(acadDatabase.ModelSpace.Add(circle));
+
+                    Hatch oHatch = new Hatch();
+
+                    Vector3d normal = new Vector3d(0.0, 0.0, 1.0);
+
+                    oHatch.Normal = normal;
+
+                    oHatch.Elevation = 0.0;
+
+                    oHatch.PatternScale = 2.0;
+
+                    oHatch.SetHatchPattern(HatchPatternType.PreDefined, "ZIGZAG");
+
+                    oHatch.ColorIndex = 1;
+
+
+                    acadDatabase.ModelSpace.Add(oHatch);
+                    //this works ok  
+                    oHatch.Associative = true;
+                    oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
+                    oHatch.EvaluateHatch(true);
+                }
+            }
+        }
+        private static List<Point3d> GetPoints(string fileName)
+        {
+            var results = new List<Point3d>();
+            using (StreamReader sr = new StreamReader(fileName))
+            {
+                string line = "";
+                while ((line = sr.ReadLine()) != null)
+                {                    
+                    List<double> values = new List<double>();
+                    Regex reg = new Regex(@"\d+[.]?\d+");
+                    foreach(Match item in reg.Matches(line))
+                    {
+                        values.Add(Convert.ToDouble(item.Value));
+                    }
+                    results.Add(new Point3d(values[0], values[1], 0.0));
+                }
+            }
+            return results;
         }
     }
 }

@@ -20,44 +20,44 @@ namespace ThMEPLighting.Garage.Service
         private ThLightGraphService LightGraph { get; set; }
         private ThLightArrangeParameter ArrangeParameter { get; set; }
         private ThWireOffsetDataService WireOffsetDataService { get; set; }
-        private List<ThLightEdge> graphEdges { get; set; }
+        private ThQueryLightBlockService QueryLightBlockService { get; set; }
 
-        /// <summary>
-        /// 1号边已布点的边
-        /// </summary>
-        private List<ThLightEdge> FirstLightEdges { get; set; }
+        private List<ThLightEdge> Edges { get; set; }
+        private List<ThLightEdge> DistributedEdges { get; set; }
         
         private ThDoubleRowDistributeService(
             ThLightGraphService lightGraph, 
             ThLightArrangeParameter arrangeParameter,
-
-            ThWireOffsetDataService wireOffsetDataService)
+            ThWireOffsetDataService wireOffsetDataService,
+            ThQueryLightBlockService queryLightBlockService)
         {
             LightGraph = lightGraph;
             ArrangeParameter = arrangeParameter;
             WireOffsetDataService = wireOffsetDataService;
-            FirstLightEdges = new List<ThLightEdge>();
-            graphEdges = new List<ThLightEdge>();
+            QueryLightBlockService = queryLightBlockService;
         }
         public static List<ThLightEdge> Distribute(
             ThLightGraphService lightGraph,
             ThLightArrangeParameter arrangeParameter,
-            ThWireOffsetDataService wireOffsetDataService)
+            ThWireOffsetDataService wireOffsetDataService,
+            ThQueryLightBlockService queryLightBlockService)
         {
             var instance = new ThDoubleRowDistributeService(
-                lightGraph, arrangeParameter, wireOffsetDataService);
+                lightGraph, arrangeParameter, wireOffsetDataService, queryLightBlockService);
             instance.Distribute();
-            return instance.FirstLightEdges;
+            return instance.DistributedEdges;
         }
         private void Distribute()
         {
+            Edges = new List<ThLightEdge>();
             LightGraph.Links.ForEach(o =>
             {
-                o.Path.ForEach(p => graphEdges.Add(p));
+                o.Path.ForEach(p => Edges.Add(p));
             });
-            LightGraph.Links.ForEach(o=>BuildEdgePoints(o));
+            DistributedEdges = new List<ThLightEdge>();
+            LightGraph.Links.ForEach(o=> BuildDistributedEdges(o));
         }
-        private void BuildEdgePoints(ThLinkPath singleLinkPath)
+        private void BuildDistributedEdges(ThLinkPath singleLinkPath)
         {
             var basePt = singleLinkPath.Start;
             for (int i = 0; i < singleLinkPath.Path.Count; i++)
@@ -68,7 +68,7 @@ namespace ThMEPLighting.Garage.Service
                     //如果是非灯线的边，在其中点创建一个灯，用于传递起始灯编号
                     var midPt = ThGeometryTool.GetMidPt(currentEdge.Edge.StartPoint, currentEdge.Edge.EndPoint);
                     currentEdge.LightNodes.Add(new ThLightNode() { Position = midPt });
-                    FirstLightEdges.Add(currentEdge);
+                    DistributedEdges.Add(currentEdge);
                     continue;
                 }
                 var edges = new List<ThLightEdge> { currentEdge };
@@ -93,12 +93,12 @@ namespace ThMEPLighting.Garage.Service
                 //建造路线上的灯(计算或从图纸获取)
                 var maxPts = edges.GetMaxPts();
                 //分析在线路上无需布灯的区域，返回可以布点的区域
-                var distributeInstance = new ThDoubleRowDistributeExService(maxPts, ArrangeParameter, graphEdges, FirstLightEdges,WireOffsetDataService);
+                var distributeInstance = new ThDoubleRowDistributeExService(maxPts, ArrangeParameter, Edges, DistributedEdges, WireOffsetDataService);
                 var splitPts= distributeInstance.Distribute();
                 splitPts = RepairDir(splitPts, basePt);
                 basePt = basePt.DistanceTo(maxPts.Item2)> basePt.DistanceTo(maxPts.Item1)?maxPts.Item2:maxPts.Item1;
-                ThBuildDoubleRowPosService.Build(edges, splitPts,ArrangeParameter);
-                FirstLightEdges.AddRange(edges);
+                ThBuildDoubleRowPosService.Build(edges, splitPts,ArrangeParameter, QueryLightBlockService);
+                DistributedEdges.AddRange(edges);
             }
         }
         private List<Tuple<Point3d,Point3d>> RepairDir(List<Tuple<Point3d, Point3d>> splitPts,Point3d startPt)

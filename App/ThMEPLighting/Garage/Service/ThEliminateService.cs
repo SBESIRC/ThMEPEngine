@@ -91,7 +91,7 @@ namespace ThMEPLighting.Garage.Service
                 tvs.Add(new TypedValue((int)DxfCode.Start, RXClass.GetClass(typeof(BlockReference)).DxfName));
                 tvs.Add(new TypedValue((int)DxfCode.LayerName, RacewayParameter.LaneLineBlockParameter.Layer));
                 tvs.Add(new TypedValue((int)DxfCode.BlockName, ThGarageLightCommon.LaneLineLightBlockName));
-                tvs.Add(new TypedValue((int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName));
+                //tvs.Add(new TypedValue((int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName));
                 var pts = FireRegion.Vertices();
                 var sf = new SelectionFilter(tvs.ToArray());
                 var psr = Active.Editor.SelectAll(sf);
@@ -116,7 +116,7 @@ namespace ThMEPLighting.Garage.Service
                 List<TypedValue> tvs = new List<TypedValue>();
                 tvs.Add(new TypedValue((int)DxfCode.Start, RXClass.GetClass(typeof(Line)).DxfName));
                 tvs.Add(new TypedValue((int)DxfCode.LayerName, string.Join(",",layers)));
-                tvs.Add(new TypedValue((int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName));
+                //tvs.Add(new TypedValue((int)DxfCode.ExtendedDataRegAppName, ThGarageLightCommon.ThGarageLightAppName));
                 var pts = FireRegion.Vertices();
                 var sf = new SelectionFilter(tvs.ToArray());
                 var psr = Active.Editor.SelectAll(sf);
@@ -141,25 +141,25 @@ namespace ThMEPLighting.Garage.Service
             var textSpatialIndex = new ThCADCoreNTSSpatialIndex(textObjs);
             brs.ForEach(o =>
             {
-                var tvs = XDataTools.GetXData(o.ObjectId, ThGarageLightCommon.ThGarageLightAppName);
-                double blkAng = (double)tvs[3].Value;
-                blkAng = ThGarageLightUtils.LightNumberAngle(blkAng / Math.PI * 180.0);
-                blkAng = blkAng / 180.0 * Math.PI;
-                var mt = Matrix3d.Rotation(blkAng + Math.PI / 2.0, Vector3d.ZAxis, o.Position);
-                var dir = Vector3d.XAxis.TransformBy(mt);
-                var firstPt = o.Position + dir.MultiplyBy(Width / 2.0 + 100.0+ textHeight/2.0);
-                var secondPt = o.Position - dir.MultiplyBy(Width / 2.0 + 100.0 + textHeight / 2.0);
-                var outline = ThDrawTool.ToOutline(firstPt, secondPt, 1.0);
-                var closeTexts = textSpatialIndex
-                .SelectCrossingPolygon(outline)
-                .Cast<DBText>()
-                .Where(d=>!IsContains(CollectIds,d.ObjectId))
-                .Where(d => !texts.Contains(d))
-                .OrderBy(d => d.Position.DistanceTo(o.Position));
-                if (closeTexts.Count()>0)
-                {
-                   texts.Add(closeTexts.First());
-                }                
+                //var tvs = XDataTools.GetXData(o.ObjectId, ThGarageLightCommon.ThGarageLightAppName);
+                //double blkAng = (double)tvs[3].Value;
+                //blkAng = ThGarageLightUtils.LightNumberAngle(blkAng / Math.PI * 180.0);
+                //blkAng = blkAng / 180.0 * Math.PI;
+                //var mt = Matrix3d.Rotation(blkAng + Math.PI / 2.0, Vector3d.ZAxis, o.Position);
+                //var dir = Vector3d.XAxis.TransformBy(mt);
+                //var firstPt = o.Position + dir.MultiplyBy(Width / 2.0 + 100.0+ textHeight/2.0);
+                //var secondPt = o.Position - dir.MultiplyBy(Width / 2.0 + 100.0 + textHeight / 2.0);
+                //var outline = ThDrawTool.ToOutline(firstPt, secondPt, 1.0);
+                //var closeTexts = textSpatialIndex
+                //.SelectCrossingPolygon(outline)
+                //.Cast<DBText>()
+                //.Where(d=>!IsContains(CollectIds,d.ObjectId))
+                //.Where(d => !texts.Contains(d))
+                //.OrderBy(d => d.Position.DistanceTo(o.Position));
+                //if (closeTexts.Count()>0)
+                //{
+                //   texts.Add(closeTexts.First());
+                //}                
             });
             return texts;
         }

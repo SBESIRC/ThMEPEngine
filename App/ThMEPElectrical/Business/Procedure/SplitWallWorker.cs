@@ -1,11 +1,9 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using ThCADCore.NTS;
 using ThMEPElectrical.Geometry;
+using ThMEPEngineCore.Algorithm;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPElectrical.Business.Procedure
 {
@@ -54,26 +52,26 @@ namespace ThMEPElectrical.Business.Procedure
             if (polys.Count == 0)
                 return;
 
-            // 非闭合数据处理
-            using (var ov = new ThCADCoreNTSFixedPrecision())
-            {
-                foreach (var poly in polys)
-                {
-                    var polygonCurves = new List<Curve>();
-                    polygonCurves.Add(poly);
-                    polygonCurves.AddRange(m_unClosedCurves);
-                    var objs = GeomUtils.Curves2DBCollection(polygonCurves);
-                    var obLst = objs.Polygons();
-                    var resPolys = new List<Polyline>();
-                    for (int i = 0; i < obLst.Count; i++)
-                    {
-                        if (obLst[i] is Polyline resPoly)
-                            resPolys.Add(resPoly);
-                    }
+            // 清洗外框线（MakeValid)
+            var frames = polys.Select(o => ThMEPFrameService.Normalize(o));
 
-                    var predicateCurves = GeomUtils.CalculateCanBufferPolys(resPolys, ThMEPCommon.WallProfileShrinkDistance);
-                    m_polys.AddRange(predicateCurves);
+            // 非闭合数据处理
+            foreach (var poly in frames)
+            {
+                var polygonCurves = new List<Curve>();
+                polygonCurves.Add(poly);
+                polygonCurves.AddRange(m_unClosedCurves);
+                var objs = GeomUtils.Curves2DBCollection(polygonCurves);
+                var obLst = objs.Polygons();
+                var resPolys = new List<Polyline>();
+                for (int i = 0; i < obLst.Count; i++)
+                {
+                    if (obLst[i] is Polyline resPoly)
+                        resPolys.Add(resPoly);
                 }
+
+                var predicateCurves = GeomUtils.CalculateCanBufferPolys(resPolys, ThMEPCommon.WallProfileShrinkDistance);
+                m_polys.AddRange(predicateCurves);
             }
         }
     }

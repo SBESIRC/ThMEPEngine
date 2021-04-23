@@ -119,6 +119,14 @@ We use AutoLoader for deployment, for detail information, check these links:
 
 [Github Bootcamp](https://help.github.com/en#dotcom)
 
+# Git submodule
+
+[Git submodules](https://www.atlassian.com/git/tutorials/git-submodule)
+
+[Git Submodule Tutorial](https://git.wiki.kernel.org/index.php/GitSubmoduleTutorial)
+
+[GIT: SUBMODULES VS. SUBTREES](https://andrey.nering.com.br/2016/git-submodules-vs-subtrees/)
+
 # Training
 
 [AutoCAD .NET Training](https://github.com/ADN-DevTech/AutoCADDotnetTrainingMaterial)

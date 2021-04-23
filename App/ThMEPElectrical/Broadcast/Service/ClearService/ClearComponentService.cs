@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPElectrical.Broadcast.Service.ClearService
 {
@@ -18,7 +19,7 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
         /// 删除广播图块
         /// </summary>
         /// <param name="polyline"></param>
-        public static void ClearBroadCast(this Polyline polyline)
+        public static void ClearBroadCast(this Polyline polyline, ThMEPOriginTransformer originTransformer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -47,7 +48,12 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
                     }
                 }
                 var objs = new DBObjectCollection();
-                braodcasts.Where(o => polyline.Contains(o.Position)).ForEachDbObject(o => objs.Add(o));
+                braodcasts.Where(o =>
+                {
+                    var transBlock = o.Clone() as BlockReference;
+                    originTransformer.Transform(transBlock);
+                    return polyline.Contains(transBlock.Position); 
+                }).ForEachDbObject(o => objs.Add(o));
                 foreach (Entity spray in objs)
                 {
                     spray.UpgradeOpen();
@@ -61,7 +67,7 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
         /// 删除盲区信息
         /// </summary>
         /// <param name="polyline"></param>
-        public static void ClearBlindArea(this Polyline polyline)
+        public static void ClearBlindArea(this Polyline polyline, ThMEPOriginTransformer originTransformer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -75,11 +81,22 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
                     .OfType<Polyline>()
                     .Where(o => o.Layer == ThMEPCommon.BlindAreaLayer);
                 blindLines.ForEachDbObject(x => objs.Add(x));
+                var transDic = objs.Cast<Polyline>().ToDictionary(
+                    x =>
+                    {
+                        var transArea = x.Clone() as Polyline;
+                        originTransformer.Transform(transArea);
+                        return transArea;
+                    },
+                    y => y
+                );
+                var transObjs = transDic.Keys.ToList().ToCollection();
 
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(transObjs);
                 var bLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(bufferPoly).Cast<Polyline>().ToList();
-                foreach (var line in bLines)
+                foreach (var transLine in bLines)
                 {
+                    var line = transDic[transLine];
                     line.UpgradeOpen();
                     line.Erase();
                 }
@@ -90,7 +107,7 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
         /// 删除喷淋布置线
         /// </summary>
         /// <param name="polyline"></param>
-        public static void ClearPipeLines(this Polyline polyline)
+        public static void ClearPipeLines(this Polyline polyline, ThMEPOriginTransformer originTransformer)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -106,12 +123,22 @@ namespace ThMEPElectrical.Broadcast.Service.ClearService
                     objs.Add(line);
                 }
 
+                var transDic = objs.Cast<Line>().ToDictionary(
+                    x =>
+                    {
+                        var transLine = x.Clone() as Line;
+                        originTransformer.Transform(transLine);
+                        return transLine;
+                    },
+                    y => y
+                );
+                var transObjs = transDic.Keys.ToList().ToCollection();
                 var bufferPoly = polyline.Buffer(1)[0] as Polyline;
-                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(transObjs);
                 var pipes = thCADCoreNTSSpatialIndex.SelectWindowPolygon(bufferPoly).Cast<Line>().ToList();
-
-                foreach (var sLine in pipes)
+                foreach (var transLine in pipes)
                 {
+                    var sLine = transDic[transLine];
                     sLine.UpgradeOpen();
                     sLine.Erase();
                 }

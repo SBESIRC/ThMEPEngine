@@ -1,10 +1,6 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Linq2Acad;
-using System;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
@@ -28,7 +24,7 @@ namespace ThMEPEngineCore.Service
         protected bool CheckCurveValid(Curve curve)
         {
             return (curve is Line) || (curve is Arc) || (curve is Polyline);
-        }        
+        }
         protected bool IsBuildElementBlock(BlockTableRecord blockTableRecord)
         {
             // 暂时不支持动态块，外部参照，覆盖
@@ -58,11 +54,6 @@ namespace ThMEPEngineCore.Service
         protected virtual bool IsBuildElement(Entity entity)
         {
             return entity.ObjectId.IsValid;
-        }
-        protected bool IsModel(BlockReference blockReference)
-        {
-            //
-            return false;
         }
     }
 }
