@@ -7,20 +7,17 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Algorithm;
-using ThMEPLighting.EmgLightConnect.Service;
-using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLightConnect.Model;
-using ThMEPLighting.EmgLight.Service;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class connectSingleSideBlkService
     {
-        public static void connectMainToMain(List<ThSingleSideBlocks> sigleSideGroup)
+        public static void connectMainToMain(List<ThSingleSideBlocks> singleSideBlocks)
         {
-            for (int i = 0; i < sigleSideGroup.Count; i++)
+            for (int i = 0; i < singleSideBlocks.Count; i++)
             {
-                var side = sigleSideGroup[i];
+                var side = singleSideBlocks[i];
                 if (side.Count > 0)
                 {
                     regroupMainSec(side);
@@ -31,44 +28,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     {
                         side.connectPt(side.reMainBlk[j - 1], side.reMainBlk[j]);
                     }
-                }
-            }
-        }
-
-        public static void connectSecToMainNotUse(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
-        {
-            List<Point3d> tempMain = null;
-            var allMain = sigleSideGroup.SelectMany(x => x.reMainBlk).ToList();
-
-            for (int i = 0; i < sigleSideGroup.Count; i++)
-            {
-                var side = sigleSideGroup[i];
-
-                for (int j = 0; j < side.reSecBlk.Count; j++)
-                {
-                    Point3d mainBlk = new Point3d();
-
-                    if (side.reMainBlk.Count > 0)
-                    {
-                        tempMain = side.reMainBlk;
-                    }
-                    else
-                    {
-                        tempMain = allMain;
-                    }
-
-                    var closeMainBlk = tempMain.ToDictionary(x => x, x => x.DistanceTo(side.reSecBlk[j])).OrderBy(x => x.Value).ToList();
-
-                    for (int r = 0; r < closeMainBlk.Count; r++)
-                    {
-                        if (side.blkConnectNo(closeMainBlk[r].Key) < EmgConnectCommon.TolBlkMaxConnect)
-                        {
-                            mainBlk = closeMainBlk[r].Key;
-                            break;
-                        }
-                    }
-                    side.connectPt(side.reSecBlk[j], mainBlk);
-
                 }
             }
         }
@@ -134,97 +93,20 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        public static void connecSecToMain(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup, Polyline frame)
+        public static void connecSecToMain(BlockReference ALE, List<ThSingleSideBlocks> singleSideBlocks, Polyline frame)
         {
-            //var allMain = sigleSideGroup.SelectMany(x => x.reMainBlk).ToList();
-
+           
             //debug 没有main 只有sec的情况处理不了
-            foreach (var side in sigleSideGroup)
+            foreach (var side in singleSideBlocks)
             {
                 if (side.reMainBlk.Count > 0)
                 {
-
-
                     var regroupSecBlk = side.getTotalBlock().Where(x => side.reMainBlk.Contains(x) == false).ToList();
-
-
                     side.setReSecBlk(regroupSecBlk);
 
-                    //regroupMainSec(side);
-
-                    //findGroupMainSec(side, ALE);
                     findGroupMainSec(side, ALE, frame);
                 }
             }
-        }
-
-        private static void findGroupMainSecNotUse(ThSingleSideBlocks side, BlockReference ALE, Polyline frame)
-        {
-            side.orderReSecBlk();
-
-            var dir = (side.laneSide.Last().Item1.EndPoint - side.laneSide.First().Item1.StartPoint).GetNormal();
-            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
-            var mainConnectMatrix = Matrix3d.Displacement(side.reMainBlk.First().GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
-
-            var transSecPt = side.reSecBlk.ToDictionary(x => x, x => x.TransformBy(mainConnectMatrix.Inverse()));
-            var transMainPt = side.reMainBlk.ToDictionary(x => x, x => x.TransformBy(mainConnectMatrix.Inverse()));
-
-
-            //所有散点到所有主点的距离
-            var distM = returnValueCalculation.getDistMatrix(side.reMainBlk, side.reSecBlk);
-
-            bool[] visit = new bool[side.reSecBlk.Count];
-            visit.ForEach(x => x = false);
-
-            for (int j = 0; j < side.reSecBlk.Count; j++)
-            {
-                if (visit[j] == false)
-                {
-
-                    var ptList = new List<Point3d>();
-                    ptList.Add(side.reSecBlk[j]);
-
-                    //找最近的/回头量小的主块，加入图
-                    var mainI = getRootMainBlk(j, distM, side, ALE, ptList);
-
-                    //找到同边散点到这个主块最小的散点list,加入图
-                    var secPtIndexList = findCloseSecPtList(distM, mainI);
-                    ptList.AddRange(side.reSecBlk.Where(x => secPtIndexList.Contains(side.reSecBlk.IndexOf(x)) &&
-                                                             visit[side.reSecBlk.IndexOf(x)] == false &&
-                                                             transSecPt[x].Y * transSecPt[side.reSecBlk[j]].Y >= 0
-                                                        ).ToList());
-
-
-                    //找到散点的中心,最大最小xy长方形中点
-                    var cenPt = findSecPtCenter(ptList);
-
-                    //以中心画半径r 5500 的圆找散点，加入图
-                    side.reSecBlk.Where(x => x.DistanceTo(cenPt) < 10000 &&
-                                            visit[side.reSecBlk.IndexOf(x)] == false &&
-                                            transSecPt[x].Y * transSecPt[side.reSecBlk[j]].Y >= 0
-                                        ).ForEach(x => ptList.Add(x));
-
-                    ptList = ptList.Distinct().ToList();
-
-                    //主点和散点找最小生成树
-                    buildMST(ptList, side, frame, out var parent);
-
-                    for (int i = 0; i < ptList.Count; i++)
-                    {
-                        if (parent[i] >= 0)
-                        {
-                            side.connectPt(ptList[i], ptList[parent[i]]);
-                        }
-                    }
-
-                    //visit里面mark散点已经遍历过
-                    ptList.Where(x => side.reSecBlk.Contains(x)).ForEach(x => visit[side.reSecBlk.IndexOf(x)] = true);
-
-                    //下一个没遍历过的散点
-                }
-
-            }
-
         }
 
         private static void findGroupMainSec(ThSingleSideBlocks side, BlockReference ALE, Polyline frame)
@@ -418,6 +300,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     }
                     else if (intersectWithFrame(ptList[i], ptList[j], frame))
                     {
+                        //如果穿框线，则加点权重。让prim尽量不选穿框线的走法。但是不能直接设置不连通。否则有些case找不到连接方法
                         var dist = ptList[i].DistanceTo(ptList[j]) + EmgConnectCommon.TolConnectSecPrimAddValue;
                         graph[i, j] = dist;
                         graph[j, i] = dist;
@@ -450,7 +333,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         }
 
         /// <summary>
-        /// prim变体，所有都联通所以找最短的就好了。
+        /// prim变体，需要控制连接点数。
         /// </summary>
         /// <param name="graph"></param>
         /// <param name="verticesCount"></param>

@@ -122,7 +122,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return connectList;
         }
 
-
         private static bool overConnect(Point3d pt, List<ThSingleSideBlocks> sideList)
         {
             var bOver = false;

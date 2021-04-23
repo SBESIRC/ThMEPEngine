@@ -97,7 +97,7 @@ namespace ThCADExtension
             Point3d pt3 = extents.MaxPoint;
             Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
             Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
-            return CreateRectangle(pt1,pt2,pt3,pt4);
+            return CreateRectangle(pt1, pt2, pt3, pt4);
         }
 
         /// <summary>
@@ -224,7 +224,7 @@ namespace ThCADExtension
 
         public static Polyline Tessellate(this Circle circle, double length)
         {
-            if (length >= 2*Math.PI*circle.Radius)
+            if (length >= 2 * Math.PI * circle.Radius)
             {
                 return circle.ToTriangle();
             }
@@ -233,7 +233,7 @@ namespace ThCADExtension
                 Plane plane = new Plane(circle.Center, circle.Normal);
                 Matrix3d planeToWorld = Matrix3d.PlaneToWorld(plane);
                 Arc firstArc = new Arc(Point3d.Origin, circle.Radius, 0.0, Math.PI);
-                Arc secondArc = new Arc(Point3d.Origin, circle.Radius, Math.PI, Math.PI*2.0);
+                Arc secondArc = new Arc(Point3d.Origin, circle.Radius, Math.PI, Math.PI * 2.0);
                 firstArc.TransformBy(planeToWorld);
                 secondArc.TransformBy(planeToWorld);
                 Polyline firstPolyline = firstArc.TessellateArcWithArc(length);

@@ -29,8 +29,11 @@
     <Compile Include="EmgLightConnect\ConnectService\connectSingleSideBlkService.cs" />
     <Compile Include="EmgLightConnect\ConnectService\connectSingleSideInGroupService.cs" />
     <Compile Include="EmgLightConnect\ConnectService\returnValueCalculation.cs" />
-    <Compile Include="EmgLightConnect\drawLineService\drawService.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawEmgPipeService.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawMainSideBlkService.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawSecBlkService.cs" />
     <Compile Include="EmgLightConnect\EmgConnectCommon.cs" />
+    <Compile Include="EmgLightConnect\Model\ThBlock.cs" />
     <Compile Include="EmgLightConnect\Model\ThLaneSideEdgeNode.cs" />
     <Compile Include="EmgLightConnect\Model\ThSingleSideBlocks.cs" />
     <Compile Include="EmgLightConnect\Service\ConnectSingleSideService.cs" />

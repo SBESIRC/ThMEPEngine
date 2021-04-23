@@ -13,154 +13,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class ConnectSingleSideService
     {
-
-        /// <summary>
-        /// not useful now, just save it
-        /// </summary>
-        /// <param name=""></param>
-        public static void moveLane(List<List<Line>> mergedOrderedLane, List<BlockReference> lightPt)
-        {
-
-            var LaneList = LaneToPolyline(mergedOrderedLane);
-
-            for (int i = 0; i < LaneList.Count; i++)
-            {
-
-                var blockByLane = separateBlocksByLine(LaneList[i], lightPt, EmgConnectCommon.TolGroupBlkLane);
-
-                var displacementValue = getLaneDisplacement(LaneList[i], blockByLane[0]);
-                if (displacementValue != 0)
-                {
-                    //GetOffsetCurves 负值：左 正值：右
-                    var movedline = LaneList[i].GetOffsetCurves(-displacementValue)[0] as Polyline;
-                    DrawUtils.ShowGeometry(movedline, EmgConnectCommon.LayerMovedLane, Color.FromColorIndex(ColorMethod.ByColor, 10));
-                }
-
-                displacementValue = getLaneDisplacement(LaneList[i], blockByLane[1]);
-                if (displacementValue != 0)
-                {
-                    var movedline = LaneList[i].GetOffsetCurves(displacementValue)[0] as Polyline;
-                    DrawUtils.ShowGeometry(movedline, EmgConnectCommon.LayerMovedLane, Color.FromColorIndex(ColorMethod.ByColor, 50));
-                }
-            }
-        }
-
-        private static List<Polyline> LaneToPolyline(List<List<Line>> mergedOrderedLane)
-        {
-
-            var lanePolyList = new List<Polyline>();
-
-            for (var i = 0; i < mergedOrderedLane.Count; i++)
-            {
-                var lanePoly = new Polyline();
-                lanePoly.AddVertexAt(0, mergedOrderedLane[i][0].StartPoint.ToPoint2D(), 0, 0, 0);
-                foreach (var Lane in mergedOrderedLane[i])
-                {
-                    lanePoly.AddVertexAt(lanePoly.NumberOfVertices, Lane.EndPoint.ToPoint2D(), 0, 0, 0);
-                }
-                lanePolyList.Add(lanePoly);
-            }
-
-            return lanePolyList;
-
-        }
-
-        private static double getLaneDisplacement(Polyline lanes, List<Point3d> blocks)
-        {
-            var displacementList = blocks.Select(x => lanes.GetDistToPoint(x, false)).ToList();
-
-            var distance = displacementList
-             .OrderBy(x => x)
-             .GroupBy(x => Math.Floor(x / 10))
-             .OrderByDescending(x => x.Count())
-             .First()
-             .ToList()
-             .First();
-
-            return distance;
-        }
-
-        private static List<List<Point3d>> separateBlocksByLine(Polyline lane, List<BlockReference> blocks, double tol)
-        {
-            //SingleSidedBuffer 正值：左 负值：右
-            var linePoly = new DBObjectCollection() { lane }.SingleSidedBuffer(tol).Cast<Polyline>().First();
-            DrawUtils.ShowGeometry(linePoly, EmgConnectCommon.LayerLaneSape, Color.FromColorIndex(ColorMethod.ByColor, 130));
-            var leftPolyline = blocks.Where(y =>
-            {
-                var bContain = linePoly.Contains(y.Position);
-                var prjPt = lane.GetClosestPointTo(y.Position, false);
-                var compareDir = (prjPt - y.Position).GetNormal();
-                var bAngle = Math.Abs(compareDir.DotProduct(getDirectionBlock(y))) / (compareDir.Length * getDirectionBlock(y).Length) > Math.Abs(Math.Cos(30 * Math.PI / 180));
-                return bContain && bAngle;
-
-            }).Select(x => x.Position).ToList();
-
-
-            linePoly = new DBObjectCollection() { lane }.SingleSidedBuffer(-tol).Cast<Polyline>().First();
-            DrawUtils.ShowGeometry(linePoly, EmgConnectCommon.LayerLaneSape, Color.FromColorIndex(ColorMethod.ByColor, 220));
-            var rightPolyline = blocks.Where(y =>
-            {
-                var bContain = linePoly.Contains(y.Position);
-                var prjPt = lane.GetClosestPointTo(y.Position, false);
-                var compareDir = (prjPt - y.Position).GetNormal();
-                var bAngle = Math.Abs(compareDir.DotProduct(getDirectionBlock(y))) / (compareDir.Length * getDirectionBlock(y).Length) > Math.Abs(Math.Cos(30 * Math.PI / 180));
-                return bContain && bAngle;
-
-            }).Select(x => x.Position).ToList();
-
-
-            var usefulStruct = new List<List<Point3d>>() { leftPolyline, rightPolyline };
-
-            return usefulStruct;
-        }
-
-        private static Vector3d getDirectionBlock(BlockReference block)
-        {
-            //may has bug, make sure the UCS coordinate is coorect. may be changed to use blockReference matrix(????
-            var dir = Vector3d.YAxis.RotateBy(block.Rotation, Vector3d.ZAxis).GetNormal();
-
-            return dir;
-        }
-
-        public static void forDebugSingleSideBlocks(List<ThSingleSideBlocks> blockGroup)
-        {
-            var listMain = new List<Polyline>();
-            var listSec = new List<Polyline>();
-            var listAddM = new List<Line>();
-            var allMain = blockGroup.SelectMany(x => x.getTotalMainBlock()).ToList(); //所有主块
-
-            foreach (var side in blockGroup)
-            {
-                var mainLine = new Polyline();
-                if (side.mainBlk.Count > 0)
-                {
-                    side.mainBlk.ForEach(x => mainLine.AddVertexAt(mainLine.NumberOfVertices, x.ToPoint2D(), 0, 0, 0));
-
-                    if (side.mainBlk.Count == 1)
-                    {
-                        side.mainBlk.ForEach(x => mainLine.AddVertexAt(mainLine.NumberOfVertices, new Point2d(x.ToPoint2D().X + 2000, x.ToPoint2D().Y), 0, 0, 0));
-                    }
-                }
-
-
-                var secLine = createSecLink(side, allMain);
-                var addMainLine = createAddMainLink(side);
-
-                side.groupBlock.ForEach(x => DrawUtils.ShowGeometry(x.Value, EmgConnectCommon.LayerGroupConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 130)));
-
-                listMain.Add(mainLine);
-                listSec.AddRange(secLine);
-                //listAddM.AddRange(side.addMainBlkLine);
-                listAddM.AddRange(addMainLine);
-            }
-
-            DrawUtils.ShowGeometry(listMain, EmgConnectCommon.LayerGroupConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 130));
-            DrawUtils.ShowGeometry(listSec, EmgConnectCommon.LayerGroupConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 130));
-            DrawUtils.ShowGeometry(listAddM, EmgConnectCommon.LayerGroupConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 130));
-
-        }
-
-        public static void forDebugSingleSideBlocks2(List<ThSingleSideBlocks> sides)
+        public static void forDebugSingleSideBlocks(List<ThSingleSideBlocks> sides)
         {
             var connectMainLine = new List<Line>();
             var connectSecLine = new List<Line>();
@@ -180,8 +33,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                    });
                });
 
-            DrawUtils.ShowGeometry(connectMainLine, EmgConnectCommon.LayerGroupConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 130));
-            DrawUtils.ShowGeometry(connectSecLine, EmgConnectCommon.LayerGroupConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 70));
+            DrawUtils.ShowGeometry(connectMainLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 130));
+            DrawUtils.ShowGeometry(connectSecLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 70));
 
         }
 
@@ -264,18 +117,18 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     line.secBlk.ForEach(x => mLine.AddVertexAt(mLine.NumberOfVertices, x.ToPoint2D(), 0, 0, 0));
                     line.addMainBlock.ForEach(x => mLine.AddVertexAt(mLine.NumberOfVertices, x.ToPoint2D(), 0, 0, 0));
 
-                    line.groupBlock.ForEach(x => DrawUtils.ShowGeometry(x.Value, EmgConnectCommon.LayerSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130)));
+                    line.groupBlock.ForEach(x => DrawUtils.ShowGeometry(x.Value, EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130)));
 
 
                     count = count + line.Count;
                 }
                 groupLine.Add(mLine);
 
-                DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight030);
+                DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight030);
 
             }
 
-            DrawUtils.ShowGeometry(groupLine, EmgConnectCommon.LayerSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130));
+            DrawUtils.ShowGeometry(groupLine, EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130));
 
         }
 
@@ -288,7 +141,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             }
 
-            DrawUtils.ShowGeometry(connectLine, EmgConnectCommon.LayerGroupConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 30));
+            DrawUtils.ShowGeometry(connectLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 30));
 
 
         }

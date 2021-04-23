@@ -25,18 +25,19 @@ namespace ThMEPLighting.EmgLightConnect
         public static int TolMaxReturnValue = 10000;
         public static int TolConnectSecPtRange = 12000;
         public static int TolConnectSecPrimAddValue = 10000;
+        //public static int TolOffsetWithFrame = 50;
 
-
-
-        public static string LayerMovedLane = "l0movedLane";
-        public static string LayerLaneSape = "l0LaneSape";
         public static string LayerBlockCenter = "l0BlockCenter";
-        public static string LayerSingleSideGroup = "l0SingleSideGroup";
-        public static string LayerGroupConnectLine = "l0GroupConnectLine";
+        public static string LayerMovedLane = "l1MovedLane";
+        public static string LayerBlkOutline = "l1BlkOutline";
+        public static string LayerConnectLine = "l2ConnectLine";
+        public static string LayerConnectLineFinal = "l2ConnectLineFinal";
+        public static string LayerOptimalSingleSideGroup = "l3SingleSideGroup";
 
-        public enum BlockType 
+
+        public enum BlockType
         {
-            emgLight = 0 ,
+            emgLight = 0,
             evac = 1,
             exit = 2,
             evacCeiling = 3,
@@ -47,8 +48,8 @@ namespace ThMEPLighting.EmgLightConnect
         public enum BlockGroupType
         {
             mainBlock = 0,
-            secBlock =1,
-           
+            secBlock = 1,
+
         }
 
     }

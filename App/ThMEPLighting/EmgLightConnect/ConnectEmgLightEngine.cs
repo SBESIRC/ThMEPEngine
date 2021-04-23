@@ -27,6 +27,7 @@ namespace ThMEPLighting.EmgLightConnect
             ////单侧车道灯
             //block块分主副组。主：应急灯和疏散灯。 副：出口灯其他块
             var blockDict = new Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>>();
+            var blkSource = blockSourceList.SelectMany(x => x.Value).ToList();
 
             SingleSideBlockService.addMainGroupBlockList(blockSourceList, ref blockDict, out var emgEvacGroup);
             SingleSideBlockService.addSecBlockList(blockSourceList, ref blockDict);
@@ -61,14 +62,18 @@ namespace ThMEPLighting.EmgLightConnect
             MergeSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
 
 
-            //连线
+            //连线数据
             var ALE = blockSourceList[EmgConnectCommon.BlockType.ale].First();
             connectSingleSideBlkService.connectMainToMain(singleSideBlocks);
             MergeSideService.relocateSecBlockSide(singleSideBlocks);
             connectSingleSideBlkService.connecSecToMain(ALE, singleSideBlocks, frame);
 
+            //连线
+            drawMainSideBlkService.drawMainToMain(singleSideBlocks, blkSource, frame,out var blkList);
+            drawSecBlkService.drawSecToMain (singleSideBlocks, blkSource, frame,  blkList);
+
             ////////debug 打图，要删
-            ConnectSingleSideService.forDebugSingleSideBlocks2(singleSideBlocks);
+            ConnectSingleSideService.forDebugSingleSideBlocks(singleSideBlocks);
 
             bool b = false;
             if (b == true)
@@ -91,11 +96,8 @@ namespace ThMEPLighting.EmgLightConnect
 
             ////组内连线
             var connectList = connectSingleSideInGroupService.connectAllSingleSide(ALE, OptimalGroupBlocks);
-
             ////
-            
-
-
+            drawSecBlkService.drawGroupToGroup(connectList, blkSource, frame, blkList);
 
             ////////debug 打图，要删
             ConnectSingleSideService.forDebugConnectLine(connectList);

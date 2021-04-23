@@ -1,16 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using ThCADCore.NTS;
-using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using Dreambuild.AutoCAD;
-using ThMEPEngineCore.Algorithm;
-using ThMEPLighting.EmgLightConnect.Service;
-using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLightConnect.Model;
-using ThMEPLighting.EmgLight.Service;
+
 
 
 namespace ThMEPLighting.EmgLightConnect.Service
@@ -72,7 +66,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static List<ThSingleSideBlocks> orderSignleSide(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        private static List<ThSingleSideBlocks> orderSignleSideNoUse(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
             var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
 
@@ -84,9 +78,41 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     sideDistDict.Add(side, dist);
                 }
             }
+
             var orderSingleSide = sideDistDict.OrderBy(x => x.Value).Select(x => x.Key).ToList();
 
             return orderSingleSide;
         }
+
+        /// <summary>
+        /// debug:用最小生成树排序
+        /// </summary>
+        /// <param name="ALE"></param>
+        /// <param name="sigleSideGroup"></param>
+        /// <returns></returns>
+        private static List<ThSingleSideBlocks> orderSignleSide(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        {
+            var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
+
+            foreach (var side in sigleSideGroup)
+            {
+                //if (side.getTotalMainBlock().Count > 0)
+                //{
+                //    var dist = side.getTotalMainBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+                //    sideDistDict.Add(side, dist);
+                //}
+                if (side.getTotalBlock().Count > 0)
+                {
+                    var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+                    sideDistDict.Add(side, dist);
+                }
+
+            }
+
+            var orderSingleSide = sideDistDict.OrderBy(x => x.Value).Select(x => x.Key).ToList();
+
+            return orderSingleSide;
+        }
+
     }
 }

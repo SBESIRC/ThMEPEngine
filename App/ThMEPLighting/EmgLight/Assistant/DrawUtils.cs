@@ -229,6 +229,14 @@ namespace ThMEPLighting.EmgLight.Assistant
             curves.Add(geom);
             DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
         }
+
+        public static void ShowGeometry(Line geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        {
+            var curves = new List<Entity>();
+            curves.Add(geom);
+            DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
+        }
+
         public static void ShowGeometry(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
         {
             DrawUtils.DrawProfileDebug(pt, LayerName, color, lineWeight);
