@@ -24,6 +24,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="NTS\IO\ThCADCoreNTSGeometryWriter.cs" />
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonReader.cs" />
     <Compile Include="NTS\IO\ThCADCoreNTSDbGeoJsonWriter.cs" />
     <Compile Include="NTS\ThCADCoreNTSBuildArea.cs" />
