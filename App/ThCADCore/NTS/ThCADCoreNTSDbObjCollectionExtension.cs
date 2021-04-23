@@ -44,6 +44,12 @@ namespace ThCADCore.NTS
             return OverlayNGRobust.Overlay(ToMultiLineString(curves), lineString, SpatialFunction.Union);
         }
 
+        public static Geometry ToNTSNodedLineStrings(this Geometry geometry)
+        {
+            Geometry lineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
+            return OverlayNGRobust.Overlay(geometry, lineString, SpatialFunction.Union);
+        }
+
         public static Geometry UnionGeometries(this DBObjectCollection curves)
         {
             return OverlayNGRobust.Union(curves.ToNTSMultiPolygon());

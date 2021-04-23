@@ -56,16 +56,7 @@ namespace ThCADCore.NTS
     {
         public Geometry Build(Geometry geometry)
         {
-            ICollection<Geometry> polys = null;
-            try
-            {
-                polys = geometry.Polygonize();
-            }
-            catch (Exception)
-            {
-                polys = geometry.Buffer(0.01).Polygonize();
-            }
-            
+            var polys = geometry.Polygonize();
             if (polys.Count == 0)
             {
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection();
