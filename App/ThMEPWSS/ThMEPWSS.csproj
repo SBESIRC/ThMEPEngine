@@ -32,6 +32,8 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
+    <Compile Include="Assistant\FengNTSTest.cs" />
+    <Compile Include="Assistant\ThWRainSystemDiagramTest.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
     <Compile Include="Bussiness\AvoidBeamService.cs" />
     <Compile Include="Bussiness\BoundaryProtectBussiness\BoundaryProtestService.cs" />

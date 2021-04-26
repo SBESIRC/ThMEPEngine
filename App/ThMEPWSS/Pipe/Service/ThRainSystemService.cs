@@ -12,6 +12,7 @@ using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using ThMEPWSS.CADExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
+using DU = ThMEPWSS.Assistant.DrawUtils;
 
 namespace ThMEPWSS.Pipe.Service
 {
@@ -21,8 +22,12 @@ namespace ThMEPWSS.Pipe.Service
     using Autodesk.AutoCAD.Runtime;
     using DotNetARX;
     using Dreambuild.AutoCAD;
+    using NetTopologySuite.Geometries;
+    using NetTopologySuite.Index.Strtree;
     using System.Diagnostics;
+    using System.Text.RegularExpressions;
     using ThMEPWSS.Assistant;
+    using ThMEPWSS.DebugNs;
     using ThMEPWSS.JsonExtensionsNs;
     using ThMEPWSS.Pipe.Engine;
     using ThMEPWSS.Pipe.Model;
@@ -652,6 +657,97 @@ namespace ThMEPWSS.Pipe.Service
         public Dictionary<K, List<V>>.KeyCollection Keys => dict.Keys;
         public Dictionary<K, List<V>>.ValueCollection Values => dict.Values;
     }
+    public class ThGravityService
+    {
+        public AcadDatabase adb;
+        public Point3dCollection CurrentSelectionExtent { get; private set; }
+        private List<Entity> _Gravities = null;
+        private List<Entity> Gravities
+        {
+            get
+            {
+                if (_Gravities == null)
+                {
+                    var gravityBucketEngine = new ThWGravityWaterBucketRecognitionEngine();
+                    gravityBucketEngine.Recognize(adb.Database, CurrentSelectionExtent);
+                    _Gravities = gravityBucketEngine.Elements.Select(g => g.Outline).ToList();
+                }
+                return _Gravities;
+            }
+        }
+        public Func<Point3dCollection, List<Entity>> GetGravityWaterBuckets;
+        private ThCADCoreNTSSpatialIndex AllGravityWaterBucketSpatialIndex
+        {
+            get
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Gravities.ToCollection());
+                return spatialIndex;
+            }
+        }
+
+        private List<Entity> _Sides = null;
+        private List<Entity> Sides
+        {
+            get
+            {
+                if (_Sides == null)
+                {
+                    var sidebucketEngine = new ThWSideEntryWaterBucketRecognitionEngine();
+                    sidebucketEngine.Recognize(adb.Database, CurrentSelectionExtent);
+                    _Sides = sidebucketEngine.Elements.Select(e => e.Outline).ToList();
+
+                }
+
+                return _Sides;
+            }
+        }
+
+        private ThCADCoreNTSSpatialIndex AllSideWaterBucketSpatialIndex
+        {
+            get
+            {
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(Sides.ToCollection());
+                return spatialIndex;
+            }
+        }
+
+        private List<Extents3d> AllSideWaterBucketExtents
+        {
+            get
+            {
+                return Sides.Select(g => g.GeometricExtents).ToList();
+            }
+        }
+
+        public void Init(Point3dCollection baseRange)
+        {
+            CurrentSelectionExtent = baseRange;
+        }
+        public List<Extents3d> GetRelatedGravityWaterBucket(Point3dCollection range)
+        {
+            var rst = new List<Extents3d>();
+            var selected = AllGravityWaterBucketSpatialIndex.SelectCrossingPolygon(range);
+            foreach (Entity e in selected)
+            {
+                rst.Add(e.GeometricExtents);
+            }
+            return rst;
+        }
+
+        public Pipe.Model.WaterBucketEnum GetRelatedSideWaterBucket(Point3d centerOfPipe)
+        {
+            foreach (var e in AllSideWaterBucketExtents)
+            {
+                if (e.IsPointIn(centerOfPipe))
+                {
+                    return WaterBucketEnum.Side;
+                }
+            }
+            return Pipe.Model.WaterBucketEnum.None;
+        }
+
+    }
+
     public class ThRainSystemService
     {
 
@@ -695,69 +791,19 @@ namespace ThMEPWSS.Pipe.Service
         public Dictionary<Entity, Entity> WRainLinesMapping = new Dictionary<Entity, Entity>();
         public Dictionary<Entity, Entity> ConnectToRainPortSymbolToLongConverterLineDict = new Dictionary<Entity, Entity>();
         public Dictionary<Entity, DBText> ConnectToRainPortSymbolToConnectToRainDrainDBTextDict = new Dictionary<Entity, DBText>();
-        public Point3dCollection CurrentSelectionExtent { get; set; }
+        public List<Entity> CondensePipes = new List<Entity>();
         private ThCADCoreNTSSpatialIndex DbTextSpatialIndex;
 
-        private List<Entity> _Gravities =null;
-        private List<Entity> Gravities
-        {
-            get
-            {
-                if(_Gravities == null)
-                {
-                    var gravityBucketEngine = new ThWGravityWaterBucketRecognitionEngine();
-                    gravityBucketEngine.Recognize(adb.Database, CurrentSelectionExtent);
-                    _Gravities = gravityBucketEngine.Elements.Select(g => g.Outline).ToList();
-                }
-
-                return _Gravities;
-            }
-        }
-
-        private ThCADCoreNTSSpatialIndex AllGravityWaterBucketSpatialIndex
-        {
-            get
-            {
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Gravities.ToCollection());
-                return spatialIndex;
-            }
-        }
-
-        private List<Entity> _Sides = null;
-        private List<Entity> Sides
-        {
-            get
-            {
-                if (_Sides == null)
-                {
-                    var sidebucketEngine = new ThWSideEntryWaterBucketRecognitionEngine();
-                    sidebucketEngine.Recognize(adb.Database, CurrentSelectionExtent);
-                    _Sides = sidebucketEngine.Elements.Select(e=>e.Outline).ToList();
-
-                }
-
-                return _Sides;
-            }
-        }
-
-        private ThCADCoreNTSSpatialIndex AllSideWaterBucketSpatialIndex
-        {
-            get
-            {
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(Sides.ToCollection());
-                return spatialIndex;
-            }
-        }
-
-        private List<Extents3d> AllSideWaterBucketExtents
-        {
-            get
-            {
-                return Sides.Select(g => g.GeometricExtents).ToList();
-            }
-        }
-
         bool inited;
+        public bool HasBrokenCondensePipe(Point3dCollection range, string id)
+        {
+            return FiltByRect(range, brokenCondensePipes.Where(kv => kv.Value == id).Select(kv => kv.Key)).Any();
+        }
+        HashSet<Entity> wrappingEnts = new HashSet<Entity>();
+        public bool HasDrivePipe(Entity e)
+        {
+            return wrappingEnts.Contains(e);
+        }
         /// <summary>
         /// 
         /// </summary>
@@ -775,39 +821,57 @@ namespace ThMEPWSS.Pipe.Service
         public bool HasLongConverters(Entity ent)
         {
             return LongConverterPipes.Contains(ent);//pipe only!
-            return WRainLinesToVerticalPipes.Any(kv => kv.Key == ent || kv.Value == ent);
+            //return WRainLinesToVerticalPipes.Any(kv => kv.Key == ent || kv.Value == ent);
         }
-        public RainOutputTypeEnum GetOutputType(Point3dCollection pts, string pipeId)
+        public RainOutputTypeEnum GetOutputType(Point3dCollection pts, string pipeId, out bool hasDrivePipe)
         {
-            var rt = _GetOutputType(pts, pipeId);
+            var rt = _GetOutputType(pts, pipeId, out hasDrivePipe);
             return rt;
         }
-        public Dictionary<Point3dCollection, List<Entity>> RangeToPipesDict = new Dictionary<Point3dCollection, List<Entity>>();
+        Dictionary<Point3dCollection, List<Entity>> RangeToPipesDict = new Dictionary<Point3dCollection, List<Entity>>();
         public TranslatorTypeEnum GetTranslatorType(Point3dCollection range, string verticalPipeID)
         {
+            if (HasGravityLabelConnected(range, verticalPipeID)) return TranslatorTypeEnum.None;
             var ret = _GetTranslatorType(range, verticalPipeID);
             //Dbg.PrintLine("_GetTranslatorType " + verticalPipeID + " " + ret);
             return ret;
 
-            var rect = range.ToRect();
-            return GetTranslatorType(verticalPipeID, rect);
+            //var rect = range.ToRect();
+            //return GetTranslatorType(verticalPipeID, rect);
         }
-
+        private bool HasGravityConverters(Entity pipe)
+        {
+            foreach (var g in LongConverterLineToWaterBucketsGroups)
+            {
+                if (g.Count < 3) continue;
+                if (!g.Any(e => WaterBuckets.Contains(e))) continue;
+                if (g.Contains(pipe)) return true;
+            }
+            return false;
+        }
         private TranslatorTypeEnum _GetTranslatorType(Point3dCollection range, string verticalPipeID)
         {
-            if (!RangeToPipesDict.TryGetValue(range, out List<Entity> pipes))
-            {
-                pipes = GetVerticalPipes(range);
-                RangeToPipesDict[range] = pipes;
-            }
-            var pipe = GetVerticalPipe(pipes, verticalPipeID);
+            List<Entity> pipes = GetVerticalPipes(range);
+            var pipe = _GetVerticalPipe(pipes, verticalPipeID);
             if (pipe == null) return TranslatorTypeEnum.None;
             if (HasShortConverters(pipe)) return TranslatorTypeEnum.Short;
             if (HasLongConverters(pipe)) return TranslatorTypeEnum.Long;
+            if (HasGravityConverters(pipe)) return TranslatorTypeEnum.Gravity;
+
             return TranslatorTypeEnum.None;
         }
 
-        public Entity GetVerticalPipe(List<Entity> pipes, string id)
+        public List<Entity> GetVerticalPipes(Point3dCollection range)
+        {
+            if (!RangeToPipesDict.TryGetValue(range, out List<Entity> pipes))
+            {
+                pipes = _GetVerticalPipes(range);
+                RangeToPipesDict[range] = pipes;
+            }
+            return pipes;
+        }
+
+        private Entity _GetVerticalPipe(List<Entity> pipes, string id)
         {
             return pipes.FirstOrDefault(p =>
             {
@@ -815,132 +879,159 @@ namespace ThMEPWSS.Pipe.Service
             });
         }
         ThCADCoreNTSSpatialIndex _verticalPipesSpatialIndex;
-        public List<Entity> GetVerticalPipes(Point3dCollection pts)
+        private List<Entity> _GetVerticalPipes(Point3dCollection pts)
         {
             _verticalPipesSpatialIndex ??= BuildSpatialIndex(VerticalPipes);
             return _verticalPipesSpatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
         }
-        private RainOutputTypeEnum _GetOutputType(Point3dCollection pts, string pipeId)
+        private RainOutputTypeEnum _GetOutputType(Point3dCollection pts, string pipeId, out bool hasDrivePipe)
         {
-            if (IsRainPort(pipeId)) return RainOutputTypeEnum.RainPort;
-            if (IsWaterWell(pipeId)) return RainOutputTypeEnum.WaterWell;
-            return RainOutputTypeEnum.None;
-            var range = pts.ToRect();
-            if (pts.Count >= 3)
+            if (IsRainPort(pipeId))
             {
-                var rst = VerticalPipeToLabelDict.Keys.ToList();
-                var spacialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(rst.ToCollection());
-                rst = spacialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
-
-                var pipe = VerticalPipeToLabelDict.FirstOrDefault(kv => kv.Value == pipeId && range.ContainsRect(BoundaryDict[kv.Key])).Key;
-                Dbg.PrintLine(pipeId + " " + 123);
-                if (pipe != null)
-                {
-                    {
-                        Dbg.PrintLine(pipeId + " " + 456);
-                        Entity targetCvt = null;
-                        LongConverterToPipesDict.ForEach((cvt, pipes) =>
-                        {
-                            if (targetCvt == null && pipes.Contains(pipe)) targetCvt = cvt;
-                        });
-                        Dbg.PrintLine(pipeId + " " + 789);
-                        if (targetCvt != null)
-                        {
-                            Dbg.PrintLine("find targetCvt " + pipeId);
-                            {
-                                var sym = ConnectToRainPortSymbolToLongConverterLineDict.FirstOrDefault(kv => kv.Value == targetCvt).Key;
-                                if (sym != null) return RainOutputTypeEnum.RainPort;
-                            }
-                            {
-                                var ok = GeoAlgorithm.TryConvertToLineSegment(targetCvt, out ThWGLineSegment lineSeg);
-                                if (ok)
-                                {
-                                    foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
-                                    {
-                                        foreach (var rainDrains in WaterWells)
-                                        {
-                                            var bd = BoundaryDict[rainDrains];
-                                            if (bd.ContainsPoint(pt)) return RainOutputTypeEnum.WaterWell;
-                                        }
-                                    }
-                                    double minDis = double.MaxValue;
-                                    foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
-                                    {
-                                        foreach (var waterwell in WaterWells)
-                                        {
-                                            var dis = GeoAlgorithm.Distance(pt, BoundaryDict[waterwell].Center);
-                                            if (minDis > dis) minDis = dis;
-                                            if (dis <= 1000)
-                                            {
-                                                return RainOutputTypeEnum.WaterWell;
-                                            }
-                                        }
-                                    }
-                                    return RainOutputTypeEnum.DrainageDitch;
-                                }
-                            }
-                        }
-                    }
-                    {
-                        var db = adb.Database;
-                        foreach (var item in ShortConverters)
-                        {
-                            Entity targetPipe = null;
-                            if (item.Item1 == pipe) targetPipe = item.Item2;
-                            else if (item.Item2 == pipe) targetPipe = item.Item1;
-                            if (targetPipe != null)
-                            {
-                                Entity targetCvt = null;
-                                foreach (var line in VerticalPipeLines)
-                                {
-                                    if (GeoAlgorithm.IsRectCross(BoundaryDict[line], BoundaryDict[targetPipe]))
-                                    {
-                                        targetCvt = line;
-                                        break;
-                                    }
-                                }
-                                if (targetCvt != null)
-                                {
-                                    {
-                                        var sym = ConnectToRainPortSymbolToLongConverterLineDict.FirstOrDefault(kv => kv.Value == targetCvt).Key;
-                                        if (sym != null) return RainOutputTypeEnum.RainPort;
-                                    }
-                                    {
-                                        var ok = GeoAlgorithm.TryConvertToLineSegment(targetCvt, out ThWGLineSegment lineSeg);
-                                        if (ok)
-                                        {
-                                            foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
-                                            {
-                                                foreach (var rainDrains in WaterWells)
-                                                {
-                                                    var bd = BoundaryDict[rainDrains];
-                                                    if (bd.ContainsPoint(pt)) return RainOutputTypeEnum.WaterWell;
-                                                }
-                                            }
-                                            double minDis = double.MaxValue;
-                                            foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
-                                            {
-                                                foreach (var waterwell in WaterWells)
-                                                {
-                                                    var dis = GeoAlgorithm.Distance(pt, BoundaryDict[waterwell].Center);
-                                                    if (minDis > dis) minDis = dis;
-                                                    if (dis <= 1000)
-                                                    {
-                                                        return RainOutputTypeEnum.WaterWell;
-                                                    }
-                                                }
-                                            }
-                                            return RainOutputTypeEnum.DrainageDitch;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                hasDrivePipe = false;
+                return RainOutputTypeEnum.RainPort;
             }
-            return RainOutputTypeEnum.None;
+            if (IsWaterWell(pipeId))
+            {
+                hasDrivePipe = HasOutputDrivePipeForWaterWell(pts, pipeId);
+                return RainOutputTypeEnum.WaterWell;
+            }
+            {
+                hasDrivePipe = false;
+                return RainOutputTypeEnum.None;
+            }
+            //var range = pts.ToRect();
+            //if (pts.Count >= 3)
+            //{
+            //    var rst = VerticalPipeToLabelDict.Keys.ToList();
+            //    var spacialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(rst.ToCollection());
+            //    rst = spacialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
+
+            //    var pipe = VerticalPipeToLabelDict.FirstOrDefault(kv => kv.Value == pipeId && range.ContainsRect(BoundaryDict[kv.Key])).Key;
+            //    Dbg.PrintLine(pipeId + " " + 123);
+            //    if (pipe != null)
+            //    {
+            //        {
+            //            Dbg.PrintLine(pipeId + " " + 456);
+            //            Entity targetCvt = null;
+            //            LongConverterToPipesDict.ForEach((cvt, pipes) =>
+            //            {
+            //                if (targetCvt == null && pipes.Contains(pipe)) targetCvt = cvt;
+            //            });
+            //            Dbg.PrintLine(pipeId + " " + 789);
+            //            if (targetCvt != null)
+            //            {
+            //                Dbg.PrintLine("find targetCvt " + pipeId);
+            //                {
+            //                    var sym = ConnectToRainPortSymbolToLongConverterLineDict.FirstOrDefault(kv => kv.Value == targetCvt).Key;
+            //                    if (sym != null) return RainOutputTypeEnum.RainPort;
+            //                }
+            //                {
+            //                    var ok = GeoAlgorithm.TryConvertToLineSegment(targetCvt, out ThWGLineSegment lineSeg);
+            //                    if (ok)
+            //                    {
+            //                        foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
+            //                        {
+            //                            foreach (var rainDrains in WaterWells)
+            //                            {
+            //                                var bd = BoundaryDict[rainDrains];
+            //                                if (bd.ContainsPoint(pt)) return RainOutputTypeEnum.WaterWell;
+            //                            }
+            //                        }
+            //                        double minDis = double.MaxValue;
+            //                        foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
+            //                        {
+            //                            foreach (var waterwell in WaterWells)
+            //                            {
+            //                                var dis = GeoAlgorithm.Distance(pt, BoundaryDict[waterwell].Center);
+            //                                if (minDis > dis) minDis = dis;
+            //                                if (dis <= 1000)
+            //                                {
+            //                                    return RainOutputTypeEnum.WaterWell;
+            //                                }
+            //                            }
+            //                        }
+            //                        return RainOutputTypeEnum.DrainageDitch;
+            //                    }
+            //                }
+            //            }
+            //        }
+            //        {
+            //            var db = adb.Database;
+            //            foreach (var item in ShortConverters)
+            //            {
+            //                Entity targetPipe = null;
+            //                if (item.Item1 == pipe) targetPipe = item.Item2;
+            //                else if (item.Item2 == pipe) targetPipe = item.Item1;
+            //                if (targetPipe != null)
+            //                {
+            //                    Entity targetCvt = null;
+            //                    foreach (var line in VerticalPipeLines)
+            //                    {
+            //                        if (GeoAlgorithm.IsRectCross(BoundaryDict[line], BoundaryDict[targetPipe]))
+            //                        {
+            //                            targetCvt = line;
+            //                            break;
+            //                        }
+            //                    }
+            //                    if (targetCvt != null)
+            //                    {
+            //                        {
+            //                            var sym = ConnectToRainPortSymbolToLongConverterLineDict.FirstOrDefault(kv => kv.Value == targetCvt).Key;
+            //                            if (sym != null) return RainOutputTypeEnum.RainPort;
+            //                        }
+            //                        {
+            //                            var ok = GeoAlgorithm.TryConvertToLineSegment(targetCvt, out ThWGLineSegment lineSeg);
+            //                            if (ok)
+            //                            {
+            //                                foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
+            //                                {
+            //                                    foreach (var rainDrains in WaterWells)
+            //                                    {
+            //                                        var bd = BoundaryDict[rainDrains];
+            //                                        if (bd.ContainsPoint(pt)) return RainOutputTypeEnum.WaterWell;
+            //                                    }
+            //                                }
+            //                                double minDis = double.MaxValue;
+            //                                foreach (var pt in new Point2d[] { lineSeg.Point1, lineSeg.Point2 })
+            //                                {
+            //                                    foreach (var waterwell in WaterWells)
+            //                                    {
+            //                                        var dis = GeoAlgorithm.Distance(pt, BoundaryDict[waterwell].Center);
+            //                                        if (minDis > dis) minDis = dis;
+            //                                        if (dis <= 1000)
+            //                                        {
+            //                                            return RainOutputTypeEnum.WaterWell;
+            //                                        }
+            //                                    }
+            //                                }
+            //                                return RainOutputTypeEnum.DrainageDitch;
+            //                            }
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
+            //return RainOutputTypeEnum.None;
         }
+        Dictionary<Point3dCollection, List<Entity>> WrappingPipesRangeDict = new Dictionary<Point3dCollection, List<Entity>>();
+        public List<Entity> GetWrappingPipes(Point3dCollection range)
+        {
+            if (!WrappingPipesRangeDict.TryGetValue(range, out List<Entity> ret))
+            {
+                ret = FiltEntityByRange(range.ToRect(), WrappingPipes).ToList();
+                WrappingPipesRangeDict[range] = ret;
+            }
+            return ret;
+        }
+        public bool HasOutputDrivePipeForWaterWell(Point3dCollection range, string pipeId)
+        {
+            //return WaterWells.Where(e => GetLabel(e) == pipeId).Any(e => wrappingEnts.Contains(e));
+            return GetWrappingPipes(range).Any(e => GetLabel(e) == pipeId);
+        }
+
         public static bool IsIntersects(Polyline p1, Polyline p2)
         {
             return new ThCADCore.NTS.ThCADCoreNTSRelate(p1.MinimumBoundingBox(), p2.MinimumBoundingBox()).IsIntersects;
@@ -968,6 +1059,7 @@ namespace ThMEPWSS.Pipe.Service
             polyline.AddVertexAt(0, p4.ToPoint2D(), 0, 0, 0);
             return polyline;
         }
+        public ThGravityService thGravityService;
         public void InitCache()
         {
             if (inited) return;
@@ -984,7 +1076,112 @@ namespace ThMEPWSS.Pipe.Service
             CollectConnectToRainPortDBTexts();
             CollectConnectToRainPortSymbols();
             CollectWRainLines();
+
+            CollectCondensePipes();
+            CollectFloorDrains();
             inited = true;
+        }
+
+        public List<Entity> FloorDrains = new List<Entity>();
+        public void CollectFloorDrains()
+        {
+            const string NAME = "地漏平面";
+            FloorDrains.AddRange(adb.ModelSpace.OfType<BlockReference>()
+             .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
+             .Where(x => x.ToDataItem().EffectiveName == NAME));
+            foreach (var e in FloorDrains)
+            {
+                BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
+            }
+        }
+        Dictionary<Point3dCollection, List<Entity>> RangeToWRainLinesDict = new Dictionary<Point3dCollection, List<Entity>>();
+        public List<Entity> GetWRainLines(Point3dCollection range)
+        {
+            if (!RangeToWRainLinesDict.TryGetValue(range, out List<Entity> ents))
+            {
+                ents = _GetWRainLines(range);
+                RangeToWRainLinesDict[range] = ents;
+            }
+            return ents;
+        }
+        ThCADCoreNTSSpatialIndex _WRainLinessSpatialIndex;
+        private List<Entity> _GetWRainLines(Point3dCollection pts)
+        {
+            _WRainLinessSpatialIndex ??= ThRainSystemService.BuildSpatialIndex(WRainLines);
+            return _WRainLinessSpatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
+        }
+        Dictionary<Point3dCollection, List<Entity>> RangeToCondensePipesDict = new Dictionary<Point3dCollection, List<Entity>>();
+        public List<Entity> GetCondensePipes(Point3dCollection range)
+        {
+            if (!RangeToCondensePipesDict.TryGetValue(range, out List<Entity> ents))
+            {
+                ents = _GetCondensePipes(range);
+                RangeToCondensePipesDict[range] = ents;
+            }
+            return ents;
+        }
+        ThCADCoreNTSSpatialIndex _CondensePipesSpatialIndex;
+        private List<Entity> _GetCondensePipes(Point3dCollection pts)
+        {
+            _CondensePipesSpatialIndex ??= ThRainSystemService.BuildSpatialIndex(CondensePipes);
+            return _CondensePipesSpatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
+        }
+        Dictionary<Point3dCollection, List<Entity>> RangeToFloorDrainsDict = new Dictionary<Point3dCollection, List<Entity>>();
+        public List<Entity> GetFloorDrains(Point3dCollection range)
+        {
+            if (!RangeToFloorDrainsDict.TryGetValue(range, out List<Entity> ents))
+            {
+                ents = _GetFloorDrains(range);
+                RangeToFloorDrainsDict[range] = ents;
+            }
+            return ents;
+        }
+        ThCADCoreNTSSpatialIndex _FloorDrainsSpatialIndex;
+        private List<Entity> _GetFloorDrains(Point3dCollection pts)
+        {
+            _FloorDrainsSpatialIndex ??= ThRainSystemService.BuildSpatialIndex(FloorDrains);
+            return _FloorDrainsSpatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
+        }
+        public void CollectCondensePipes()
+        {
+            CondensePipes.AddRange(adb.ModelSpace.OfType<Circle>().Where(e => e.Layer == "W-RAIN-EQPM"));
+            foreach (var e in CondensePipes)
+            {
+                BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
+            }
+        }
+        Dictionary<Point3dCollection, List<Entity>> RangeToLongConverterLinesDict = new Dictionary<Point3dCollection, List<Entity>>();
+        public List<Entity> GetLongConverterLines(Point3dCollection range)
+        {
+            if (!RangeToLongConverterLinesDict.TryGetValue(range, out List<Entity> ents))
+            {
+                ents = _GetLongConverterLines(range);
+                RangeToLongConverterLinesDict[range] = ents;
+            }
+            return ents;
+        }
+        ThCADCoreNTSSpatialIndex _LongConverterLinesSpatialIndex;
+        private List<Entity> _GetLongConverterLines(Point3dCollection pts)
+        {
+            _LongConverterLinesSpatialIndex ??= ThRainSystemService.BuildSpatialIndex(LongConverterLines);
+            return _LongConverterLinesSpatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
+        }
+        Dictionary<Point3dCollection, List<Entity>> RangeToLWaterWellsDict = new Dictionary<Point3dCollection, List<Entity>>();
+        public List<Entity> GetWaterWells(Point3dCollection range)
+        {
+            if (!RangeToLWaterWellsDict.TryGetValue(range, out List<Entity> ents))
+            {
+                ents = _GetWaterWells(range);
+                RangeToLWaterWellsDict[range] = ents;
+            }
+            return ents;
+        }
+
+        ThCADCoreNTSSpatialIndex _WaterWellSpatialIndex;
+        private List<Entity> _GetWaterWells(Point3dCollection pts)
+        {
+            _WaterWellSpatialIndex ??= ThRainSystemService.BuildSpatialIndex(WaterWells);
+            return _WaterWellSpatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
         }
         public void CollectWRainLines()
         {
@@ -996,27 +1193,11 @@ namespace ThMEPWSS.Pipe.Service
                     var line = new Line() { StartPoint = seg.Point1.ToPoint3d(), EndPoint = seg.Point2.ToPoint3d() };
                     WRainLines.Add(line);
                     WRainLinesMapping[e] = line;
+                    BoundaryDict[line] = new ThWGRect(seg.Point1, seg.Point2);
                 }
             }
         }
-        public void BuildRelationDict()
-        {
-            return;
-            BuildConnectToRainDrainSymbolToLongConverterLineDict();
-            BuildConnectToRainDrainSymbolToConnectToRainDrainDBTextDict();
-        }
-        public void BuildConnectToRainDrainSymbolToLongConverterLineDict()
-        {
-            foreach (var ent in ConnectToRainPortSymbols)
-            {
-                var r = BoundaryDict[ent];
-                foreach (var e in LongConverterLines.Where(e => GeoAlgorithm.IsRectCross(BoundaryDict[e], r)))
-                {
-                    ConnectToRainPortSymbolToLongConverterLineDict[ent] = e;
-                    break;
-                }
-            }
-        }
+
         public static Func<Polyline, List<Entity>> BuildSpatialIndexLazy(IList<Entity> ents)
         {
             var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(ents.ToCollection());
@@ -1092,30 +1273,111 @@ namespace ThMEPWSS.Pipe.Service
             CollectVerticalPipesData();
             FindShortConverters();
             LabelEnts();
-            BuildRelationDict();
-            initOutputTypeGetter();
+            //PatchForSomeCase();
+            FindOutBrokenCondensePipes();
         }
-        void initOutputTypeGetter()
+        public List<KeyValuePair<Entity, Entity>> LongConverterLineToWaterBuckets = new List<KeyValuePair<Entity, Entity>>();
+        public List<List<Entity>> LongConverterLineToWaterBucketsGroups;
+        public void CollectData(Point3dCollection range)
         {
-            return;
+            CollectData();
+            InitThGravityService(range);
+            CollectLongConverterLineToWaterBucketsData();
+        }
+
+        private void CollectLongConverterLineToWaterBucketsData()
+        {
             var sv = this;
-            var lines = sv.WRainLines;
-            var wells = sv.WaterWells;
-            var mps1 = lines.Select(e => new KeyValuePair<Entity, Polyline>(e, (e as Line)?.Buffer(10))).ToList();
-            var mps2 = wells.Select(e => new KeyValuePair<Entity, Polyline>(e, sv.CreatePolygon(e, expand: 50))).ToList();
-            var bfs = mps1.Select(kv => kv.Value).ToList();
-            var pls = mps2.Select(kv => kv.Value).ToList();
-            var si = ThRainSystemService.BuildSpatialIndex(bfs.Where(e => e != null).ToList());
-            var dict = new Dictionary<Entity, Entity>();
-            foreach (var pl in pls)
+            var pairs = new List<KeyValuePair<Entity, Entity>>();
+            var groups = new List<List<Entity>>();
+            var totalList = new List<Entity>();
+            totalList.AddRange(sv.LongConverterLines);
+            totalList.AddRange(sv.WaterBuckets);
+            totalList.AddRange(sv.VerticalPipes);
+            ThRainSystemService.MakePairs(GetLongConverterLinesGroup(), pairs);
+            LongConverterLineToWaterBuckets.AddRange(sv.EnumerateEntities(sv.LongConverterLines, sv.WaterBuckets, 10));
+            pairs.AddRange(LongConverterLineToWaterBuckets);
+            pairs.AddRange(sv.EnumerateEntities(sv.LongConverterLines, sv.VerticalPipeList, 10));
+            ThRainSystemService.GroupByBFS(groups, totalList, pairs);
+            LongConverterLineToWaterBucketsGroups = groups;
+        }
+
+        public List<Entity> WaterBuckets;
+        private void InitThGravityService(Point3dCollection range)
+        {
+            thGravityService = new ThGravityService() { adb = adb };
+            thGravityService.Init(range);
+            var WaterBuckets = thGravityService.GetRelatedGravityWaterBucket(range);
+            var pls = new List<Entity>();
+            foreach (var ext in WaterBuckets)
             {
-                foreach (var bf in si.SelectCrossingPolygon(pl).Cast<Polyline>().ToList())
+                var r = ThWGRect.Create(ext);
+                var pl = EntityFactory.CreatePolyline(r.ToPoint3dCollection());
+                pls.Add(pl);
+                BoundaryDict[pl] = r;
+            }
+            this.WaterBuckets = pls;
+            var si = new NTSSpatialIndex1(pls.ToCollection());
+            thGravityService.GetGravityWaterBuckets = rg => si.SelectCrossingPolygon(rg).Cast<Entity>().ToList();
+        }
+
+        List<KeyValuePair<Entity, string>> brokenCondensePipes = new List<KeyValuePair<Entity, string>>();
+        void FindOutBrokenCondensePipes()
+        {
+            var sv = this;
+            var cps1 = new HashSet<Entity>();
+            var cps2 = new HashSet<Entity>();
+            foreach (var e in sv.CondensePipes)
+            {
+                var lb = sv.GetLabel(e);
+                if (lb != null)
                 {
-                    var line = mps1.First(kv => kv.Value == bf).Key;
-                    var well = mps2.First(kv => kv.Value == pl).Key;
-                    dict[line] = well;
+                    cps1.Add(e);
+                }
+                else
+                {
+                    cps2.Add(e);
                 }
             }
+            foreach (var e in cps2)
+            {
+                var bd = sv.BoundaryDict[e];
+                Entity ee = null;
+                double dis = double.MaxValue;
+                foreach (var c in cps1)
+                {
+                    var d = GeoAlgorithm.Distance(sv.BoundaryDict[c].Center, bd.Center);
+                    if (d < dis)
+                    {
+                        dis = d;
+                        ee = c;
+                    }
+                }
+                if (ee != null && dis < 500)
+                {
+                    var lb = sv.GetLabel(ee);
+                    brokenCondensePipes.Add(new KeyValuePair<Entity, string>(e, lb));
+                    sv.SetLabel(e, lb);
+                }
+            }
+            //var sv = this;
+            //var lines = sv.WRainLines;
+            //var wells = sv.WaterWells;
+            //var mps1 = lines.Select(e => new KeyValuePair<Entity, Polyline>(e, (e as Line)?.Buffer(10))).ToList();
+            //var mps2 = wells.Select(e => new KeyValuePair<Entity, Polyline>(e, sv.CreatePolygon(e, expand: 50))).ToList();
+            //var bfs = mps1.Select(kv => kv.Value).ToList();
+            //var pls = mps2.Select(kv => kv.Value).ToList();
+            //var si = ThRainSystemService.BuildSpatialIndex(bfs.Where(e => e != null).ToList());
+            //var dict = new Dictionary<Entity, Entity>();
+            //foreach (var pl in pls)
+            //{
+            //    foreach (var bf in si.SelectCrossingPolygon(pl).Cast<Polyline>().ToList())
+            //    {
+            //        var line = mps1.First(kv => kv.Value == bf).Key;
+            //        var well = mps2.First(kv => kv.Value == pl).Key;
+            //        dict[line] = well;
+            //    }
+            //}
         }
         public void CollectLongConverterLines()
         {
@@ -1135,36 +1397,76 @@ namespace ThMEPWSS.Pipe.Service
         }
         public void CollectWrappingPipes()
         {
-            WrappingPipes.AddRange(adb.ModelSpace.OfType<BlockReference>().Where(e => e.Layer == "W-BUSH"));
+            var blockNameOfVerticalPipe = "套管";
+            WrappingPipes.AddRange(adb.ModelSpace.OfType<BlockReference>()
+             .Where(x => x.Layer == "W-BUSH")
+             .Where(x => x.ToDataItem().EffectiveName == blockNameOfVerticalPipe));
             foreach (var e in WrappingPipes)
             {
                 if (!BoundaryDict.ContainsKey(e)) BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
             }
         }
-        public List<Extents3d> GetRelatedGravityWaterBucket(Point3dCollection range)
-        {
-            var rst = new List<Extents3d>();
-            var selected = AllGravityWaterBucketSpatialIndex.SelectCrossingPolygon(range);
+        //void PatchForSomeCase()
+        //{
+        //    var re = new Regex(@"接(\d+)楼屋面雨水斗");
+        //    foreach (var e in VerticalPipes)
+        //    {
+        //        if (VerticalPipeToLabelDict.TryGetValue(e, out string lb))
+        //        {
+        //            var m = re.Match(lb);
+        //            if (m.Success)
+        //            {
+        //                var targetFloor = m.Groups[1].Value;
 
-            foreach (Entity e in selected)
+        //            }
+        //        }
+        //    }
+        //}
+        Dictionary<KeyValuePair<object, object>, object> cacheDict = new Dictionary<KeyValuePair<object, object>, object>();
+        List<T> FiltEntsByRect<T>(Point3dCollection range, IList<T> ents) where T : Entity
+        {
+            var kv = new KeyValuePair<object, object>(range, ents);
+            if (!cacheDict.TryGetValue(kv, out object obj))
             {
-                rst.Add(e.GeometricExtents);
+                var ret = FiltByRect(range, ents).Cast<T>().ToList();
+                cacheDict[kv] = ret;
+                return ret;
             }
-
-            return rst;
+            return (List<T>)obj;
         }
-
-        public Pipe.Model.WaterBucketEnum GetRelatedSideWaterBucket(Point3d centerOfPipe)
+        public bool HasGravityLabelConnected(Point3dCollection range, string pipeId)
         {
-            foreach (var e in AllSideWaterBucketExtents)
+            //get long translator of pipeId
+            //get connected pipe's label
+            //match by regex
+            //if macth, return true, else return false
+            var re = new Regex(@"接(\d+F)屋面雨水斗");
+            var e1 = FiltEntsByRect(range, VerticalPipes).FirstOrDefault(e => GetLabel(e) == pipeId);
+            if (e1 == null) return false;
+            var ents = FiltEntsByRect(range, VerticalPipes).Where(e => re.IsMatch(GetLabel(e) ?? "")).ToList();
+            if (ents.Count == 0) return false;
+            var gs = GetLongConverterGroup();
+            foreach (var g in gs)
             {
-                if (e.IsPointIn(centerOfPipe))
+                if (g.Count <= 1) continue;
+                if (!g.Contains(e1)) continue;
+                foreach (var e3 in g)
                 {
-                    return WaterBucketEnum.Side;
+                    if (ents.Contains(e3)) return true;
                 }
             }
 
-            return Pipe.Model.WaterBucketEnum.None;
+            ////get e
+            //if (VerticalPipeToLabelDict.TryGetValue(e, out string lb))
+            //{
+            //    var m = re.Match(pipei);
+            //    if (m.Success)
+            //    {
+            //        var targetFloor = m.Groups[1].Value;
+
+            //    }
+            //}
+            return false;
         }
 
         public List<string> GetCondenseVerticalPipeNotes(Point3dCollection pts)
@@ -1236,16 +1538,30 @@ namespace ThMEPWSS.Pipe.Service
                 }
             }
         }
-
+        public IEnumerable<Entity> FiltByRect(Point3dCollection range, IEnumerable<Entity> ents)
+        {
+            var rg = range.ToRect();
+            foreach (var e in ents)
+            {
+                if (BoundaryDict.TryGetValue(e, out ThWGRect r))
+                {
+                    if (rg.ContainsRect(r))
+                    {
+                        yield return e;
+                    }
+                }
+            }
+        }
         public bool GetCenterOfVerticalPipe(Point3dCollection range, string verticalPipeID, ref Point3d outPt)
         {
+            var rg = range.ToRect();
             foreach (var pipe in VerticalPipes)
             {
                 VerticalPipeToLabelDict.TryGetValue(pipe, out string id);
                 if (id == verticalPipeID)
                 {
                     var bd = BoundaryDict[pipe];
-                    if (range.ToRect().ContainsRect(bd))
+                    if (rg.ContainsRect(bd))
                     {
                         outPt = bd.Center.ToPoint3d();
                         return true;
@@ -1258,7 +1574,8 @@ namespace ThMEPWSS.Pipe.Service
         public ThWSDOutputType GetPipeOutputType(Point3dCollection range, string verticalPipeID)
         {
             ThWSDOutputType outputType = new ThWSDOutputType();
-            outputType.OutputType = GetOutputType(range, verticalPipeID);
+            outputType.OutputType = GetOutputType(range, verticalPipeID, out bool hasDrivePipe);
+            outputType.HasDrivePipe = hasDrivePipe;
             return outputType;
         }
 
@@ -1463,12 +1780,109 @@ namespace ThMEPWSS.Pipe.Service
         }
         public void LabelEnts()
         {
-            LabelWRainLinesAndPipes();
+            LabelWRainLinesAndVerticalPipes();
+            LabelCondensePipes();
+            LabelFloorDrains();
+            LabelWrappingPipes();
             LabelWaterPorts();
             LabelRainPortSymbols();
             LabelRainPortLinesAndTexts();
             LabelWaterWells();
+            LabelFloorDrainsWrappingPipe();
+            LabelWaterWellsWrappingPipe();
         }
+        public List<List<Entity>> LabelFloorDrainsWrappingPipe()
+        {
+            var sv = this;
+            var pairs = new List<KeyValuePair<Entity, Entity>>();
+            var groups = new List<List<Entity>>();
+            var totalList = new List<Entity>();
+            totalList.AddRange(sv.WRainLines);
+            totalList.AddRange(sv.FloorDrains);
+            ThRainSystemService.MakePairs(GetWRainLinesGroup(), pairs);
+            pairs.AddRange(WRainLinesToFloorDrains);
+            pairs.AddRange(WRainLinesToWrappingPipes);
+            ThRainSystemService.GroupByBFS(groups, totalList, pairs);
+            var lines = new HashSet<Entity>(sv.WRainLines);
+            var fds = new HashSet<Entity>(sv.FloorDrains);
+            var wps = new HashSet<Entity>(sv.WrappingPipes);
+            foreach (var g in groups)
+            {
+                if (g.Count < 3) continue;
+                if (!g.Any(e => lines.Contains(e)) || !g.Any(e => fds.Contains(e)) || !g.Any(e => wps.Contains(e))) continue;
+                wrappingEnts.AddRange(g.Where(e => fds.Contains(e)));
+            }
+            return groups;
+        }
+        public List<List<Entity>> LabelWaterWellsWrappingPipe()
+        {
+            var sv = this;
+            var pairs = new List<KeyValuePair<Entity, Entity>>();
+            var groups = new List<List<Entity>>();
+            var totalList = new List<Entity>();
+            totalList.AddRange(sv.WRainLines);
+            totalList.AddRange(sv.WaterWells);
+            ThRainSystemService.MakePairs(GetWRainLinesGroup(), pairs);
+            pairs.AddRange(WRainLinesToWaterWells);
+            pairs.AddRange(WRainLinesToWrappingPipes);
+            ThRainSystemService.GroupByBFS(groups, totalList, pairs);
+            var lines = new HashSet<Entity>(sv.WRainLines);
+            var wells = new HashSet<Entity>(sv.WaterWells);
+            var wps = new HashSet<Entity>(sv.WrappingPipes);
+            foreach (var g in groups)
+            {
+                if (g.Count < 3) continue;
+                if (!g.Any(e => lines.Contains(e)) || !g.Any(e => wells.Contains(e)) || !g.Any(e => wps.Contains(e))) continue;
+                wrappingEnts.AddRange(g.Where(e => wells.Contains(e)));
+            }
+            return groups;
+        }
+
+
+        public List<KeyValuePair<Entity, Entity>> WRainLinesToFloorDrains = new List<KeyValuePair<Entity, Entity>>();
+        public List<KeyValuePair<Entity, Entity>> WRainLinesToWaterWells = new List<KeyValuePair<Entity, Entity>>();
+        public List<List<Entity>> LabelFloorDrains()
+        {
+            var sv = this;
+            var pairs = new List<KeyValuePair<Entity, Entity>>();
+            var groups = new List<List<Entity>>();
+            var totalList = new List<Entity>();
+            totalList.AddRange(sv.WRainLines);
+            totalList.AddRange(sv.FloorDrains);
+            ThRainSystemService.MakePairs(GetWRainLinesGroup(), pairs);
+            WRainLinesToFloorDrains.AddRange(sv.EnumerateEntities(sv.WRainLines, sv.FloorDrains, 1));
+            pairs.AddRange(WRainLinesToFloorDrains);
+            ThRainSystemService.GroupByBFS(groups, totalList, pairs);
+            foreach (var g in groups)
+            {
+                if (g.Count == 1) continue;
+                string lb = null;
+                foreach (var e in g)
+                {
+                    if (sv.WRainLines.Contains(e))
+                    {
+                        if (sv.VerticalPipeToLabelDict.TryGetValue(e, out lb))
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (lb != null)
+                {
+                    foreach (var e in g)
+                    {
+                        {
+                            if (!sv.VerticalPipeToLabelDict.ContainsKey(e))
+                            {
+                                sv.VerticalPipeToLabelDict[e] = lb;
+                            }
+                        }
+                    }
+                }
+            }
+            return groups;
+        }
+
         HashSet<string> waterWellLabels = new HashSet<string>();
         public void LabelWaterWells()
         {
@@ -1478,7 +1892,8 @@ namespace ThMEPWSS.Pipe.Service
             var totalList = new List<Entity>();
             totalList.AddRange(sv.WRainLines);
             totalList.AddRange(sv.WaterWells);
-            pairs.AddRange(sv.EnumerateEntities(sv.WRainLines, sv.WaterWells, 10));
+            WRainLinesToWaterWells.AddRange(sv.EnumerateEntities(sv.WRainLines, sv.WaterWells, 10));
+            pairs.AddRange(WRainLinesToWaterWells);
             ThRainSystemService.GroupByBFS(groups, totalList, pairs);
             sv.LabelGroups(groups);
 
@@ -1503,6 +1918,20 @@ namespace ThMEPWSS.Pipe.Service
             }
 
         }
+        public bool SetLabel(Entity e, string lb, bool force = false)
+        {
+            if (force)
+            {
+                VerticalPipeToLabelDict[e] = lb;
+                return true;
+            }
+            if (GetLabel(e) == null)
+            {
+                VerticalPipeToLabelDict[e] = lb;
+                return true;
+            }
+            return false;
+        }
         public string GetLabel(Entity e)
         {
             VerticalPipeToLabelDict.TryGetValue(e, out string lb); return lb;
@@ -1512,6 +1941,7 @@ namespace ThMEPWSS.Pipe.Service
             foreach (var e in ents) if (VerticalPipeToLabelDict.TryGetValue(e, out string lb)) return lb;
             return null;
         }
+        public List<List<Entity>> RainPortsGroups = new List<List<Entity>>();
         public void LabelWaterPorts()
         {
             var sv = this;
@@ -1526,6 +1956,7 @@ namespace ThMEPWSS.Pipe.Service
             pairs.AddRange(sv.EnumerateEntities(sv.VerticalPipeLines, sv.ConnectToRainPortSymbols, 10));
             ThRainSystemService.GroupByBFS(groups, totalList, pairs);
             var enumerateEnts = sv.EnumerateEntities(sv.WRainLines);
+            RainPortsGroups = groups;
             foreach (var g in groups)
             {
                 string lb = null;
@@ -1555,8 +1986,110 @@ namespace ThMEPWSS.Pipe.Service
                 }
             }
         }
+        List<List<Entity>> LongConverterGroups;
+        public List<List<Entity>> GetLongConverterGroup()
+        {
+            if (LongConverterGroups == null)
+            {
+                var sv = this;
+                var pairs = new List<KeyValuePair<Entity, Entity>>();
+                var groups = new List<List<Entity>>();
+                var totalList = new List<Entity>();
+                totalList.AddRange(sv.LongConverterLines);
+                totalList.AddRange(sv.VerticalPipes);
+                ThRainSystemService.MakePairs(GetLongConverterLinesGroup(), pairs);
+                pairs.AddRange(sv.EnumerateEntities(sv.LongConverterLines, sv.VerticalPipes.Cast<Entity>().ToList(), 1));
+                ThRainSystemService.GroupByBFS(groups, totalList, pairs);
+                LongConverterGroups = groups;
+            }
+            return LongConverterGroups;
+        }
         public List<KeyValuePair<Entity, Entity>> WRainLinesToVerticalPipes = new List<KeyValuePair<Entity, Entity>>();
-        public void LabelWRainLinesAndPipes()
+        public List<KeyValuePair<Entity, Entity>> WRainLinesToCondensePipes = new List<KeyValuePair<Entity, Entity>>();
+        public List<List<Entity>> LabelCondensePipes()
+        {
+            var sv = this;
+            var pairs = new List<KeyValuePair<Entity, Entity>>();
+            var groups = new List<List<Entity>>();
+            var totalList = new List<Entity>();
+            totalList.AddRange(sv.WRainLines);
+            totalList.AddRange(sv.CondensePipes);
+            ThRainSystemService.MakePairs(GetWRainLinesGroup(), pairs);
+            WRainLinesToCondensePipes.AddRange(sv.EnumerateEntities(sv.WRainLines, sv.CondensePipes, 1));
+            pairs.AddRange(WRainLinesToCondensePipes);
+            ThRainSystemService.GroupByBFS(groups, totalList, pairs);
+            foreach (var g in groups)
+            {
+                if (g.Count == 1) continue;
+                string lb = null;
+                foreach (var e in g)
+                {
+                    if (sv.WRainLines.Contains(e))
+                    {
+                        if (sv.VerticalPipeToLabelDict.TryGetValue(e, out lb))
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (lb != null)
+                {
+                    foreach (var e in g)
+                    {
+                        {
+                            if (!sv.VerticalPipeToLabelDict.ContainsKey(e))
+                            {
+                                sv.VerticalPipeToLabelDict[e] = lb;
+                            }
+                        }
+                    }
+                }
+            }
+            return groups;
+        }
+        public List<KeyValuePair<Entity, Entity>> WRainLinesToWrappingPipes = new List<KeyValuePair<Entity, Entity>>();
+        public List<List<Entity>> LabelWrappingPipes()
+        {
+            var sv = this;
+            var pairs = new List<KeyValuePair<Entity, Entity>>();
+            var groups = new List<List<Entity>>();
+            var totalList = new List<Entity>();
+            totalList.AddRange(sv.WRainLines);
+            totalList.AddRange(sv.WrappingPipes);
+            ThRainSystemService.MakePairs(GetWRainLinesGroup(), pairs);
+            WRainLinesToWrappingPipes.AddRange(sv.EnumerateEntities(sv.WRainLines, sv.WrappingPipes.Cast<Entity>().ToList(), 1));
+            pairs.AddRange(WRainLinesToWrappingPipes);
+            ThRainSystemService.GroupByBFS(groups, totalList, pairs);
+            foreach (var g in groups)
+            {
+                if (g.Count == 1) continue;
+                string lb = null;
+                foreach (var e in g)
+                {
+                    if (sv.WRainLines.Contains(e))
+                    {
+                        if (sv.VerticalPipeToLabelDict.TryGetValue(e, out lb))
+                        {
+                            break;
+                        }
+                    }
+                }
+                if (lb != null)
+                {
+                    foreach (var e in g)
+                    {
+                        {
+                            if (!sv.VerticalPipeToLabelDict.ContainsKey(e))
+                            {
+                                sv.VerticalPipeToLabelDict[e] = lb;
+                            }
+                        }
+                    }
+                }
+            }
+            return groups;
+        }
+        public void LabelWRainLinesAndVerticalPipes()
         {
             //var sv = new ThRainSystemService() { adb = adb };
             //sv.InitCache();
@@ -1612,7 +2145,12 @@ namespace ThMEPWSS.Pipe.Service
             WRainLinesGroup ??= ThRainSystemService.GroupLines(WRainLines);
             return WRainLinesGroup;
         }
-
+        List<List<Entity>> LongConverterLinesGroup;
+        private List<List<Entity>> GetLongConverterLinesGroup()
+        {
+            LongConverterLinesGroup ??= ThRainSystemService.GroupLines(LongConverterLines);
+            return LongConverterLinesGroup;
+        }
         public List<Entity> VerticalPipeList => VerticalPipes.Cast<Entity>().ToList();
         public Func<List<Entity>, double, IEnumerable<KeyValuePair<Entity, Entity>>> EnumerateEntities(List<Entity> lines)
         {
@@ -1694,7 +2232,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public IEnumerable<KeyValuePair<Entity, Entity>> EnumerateEntities(List<Entity> lines, List<Entity> wells, double expand)
         {
-            var mps1 = lines.Select(e => new KeyValuePair<Entity, Polyline>(e, (e as Line)?.Buffer(10))).ToList();
+            var mps1 = lines.Select(e => new KeyValuePair<Entity, Polyline>(e, (TryConvertToLine(e))?.Buffer(10))).ToList();
             var mps2 = wells.Select(e => new KeyValuePair<Entity, Polyline>(e, this.CreatePolygon(e, expand: expand))).ToList();
             var bfs = mps1.Select(kv => kv.Value).ToList();
             var pls = mps2.Select(kv => kv.Value).ToList();
@@ -1737,10 +2275,22 @@ namespace ThMEPWSS.Pipe.Service
             GroupLines(lines, linesGroup);
             return linesGroup;
         }
+        static Line TryConvertToLine(Entity e)
+        {
+            var r = e as Line;
+            if (r != null) return r;
+            if (e.GetType().ToString() == "Autodesk.AutoCAD.DatabaseServices.ImpCurve")
+            {
+                GeoAlgorithm.TryConvertToLineSegment(e, out ThWGLineSegment seg);
+                return new Line() { StartPoint = seg.Point1.ToPoint3d(), EndPoint = seg.Point2.ToPoint3d() };
+            }
+            return r;
+        }
+
         public static void GroupLines(List<Entity> lines, List<List<Entity>> linesGroup)
         {
             var pairs = new List<KeyValuePair<int, int>>();
-            var bfs = lines.Select(e => (e as Line)?.Buffer(10)).ToList();
+            var bfs = lines.Select(e => (TryConvertToLine(e))?.Buffer(10)).ToList();
             var si = ThRainSystemService.BuildSpatialIndex(bfs.Where(e => e != null).ToList());
             for (int i = 0; i < bfs.Count; i++)
             {
