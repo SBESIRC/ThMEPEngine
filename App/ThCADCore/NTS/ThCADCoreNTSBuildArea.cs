@@ -3,8 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
-using NetTopologySuite.Operation.Polygonize;
-using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -52,11 +50,15 @@ namespace ThCADCore.NTS
         }
     }
 
+    /// <summary>
+    /// Ported from GEOS:
+    /// https://github.com/libgeos/geos/blob/main/src/operation/polygonize/BuildArea.cpp
+    /// </summary>
     public class ThCADCoreNTSBuildArea
     {
-        public Geometry Build(Geometry geometry)
+        public Geometry Build(MultiLineString lineStrings)
         {
-            var polys = geometry.Polygonize();
+            var polys = lineStrings.Polygonize();
             if (polys.Count == 0)
             {
                 return ThCADCoreNTSService.Instance.GeometryFactory.CreateGeometryCollection();

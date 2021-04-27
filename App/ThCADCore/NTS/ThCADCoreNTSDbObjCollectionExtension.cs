@@ -44,10 +44,12 @@ namespace ThCADCore.NTS
             return OverlayNGRobust.Overlay(ToMultiLineString(curves), lineString, SpatialFunction.Union);
         }
 
-        public static Geometry ToNTSNodedLineStrings(this Geometry geometry)
+        public static Geometry ToNTSNodedLineStrings(this MultiLineString linestrings)
         {
+            // https://postgis.net/docs/ST_UnaryUnion.html
+            // use unary union to node and dissolve a collection of linestrings
             Geometry lineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
-            return OverlayNGRobust.Overlay(geometry, lineString, SpatialFunction.Union);
+            return OverlayNGRobust.Overlay(linestrings, lineString, SpatialFunction.Union);
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
@@ -87,7 +89,7 @@ namespace ThCADCore.NTS
 
         public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
         {
-            var geometries = curves.Cast<Curve>().Select(o => o.ToNTSGeometry());
+            var geometries = curves.Cast<Curve>().Select(o => o.ToNTSLineString());
             var lineStrings = geometries.Where(o => o is LineString).Cast<LineString>();
             return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
         }

@@ -25,10 +25,10 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static ICollection<Geometry> Polygonize(this Geometry geometry)
+        public static ICollection<Geometry> Polygonize(this MultiLineString lineStrings)
         {
             var polygonizer = new Polygonizer();
-            polygonizer.Add(geometry.ToNTSNodedLineStrings());
+            polygonizer.Add(lineStrings.ToNTSNodedLineStrings());
             return polygonizer.GetPolygons();
         }
 

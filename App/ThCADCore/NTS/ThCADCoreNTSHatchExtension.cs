@@ -1,4 +1,5 @@
 ﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
@@ -12,10 +13,7 @@ namespace ThCADCore.NTS
     {
         private static Geometry ToNTSGeometry(this Hatch hatch)
         {
-            var polygons = new List<Polygon>();
-            hatch.Boundaries().ForEach(o => polygons.Add(o.ToNTSPolygon()));
-            ThCADCoreNTSBuildArea buildArea = new ThCADCoreNTSBuildArea();
-            return buildArea.Build(ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray()));
+            return hatch.Boundaries().ToCollection().BuildAreaGeometry();
         }
 
         private static MultiPolygon ToNTSMultiPolygon(this Hatch hatch)
