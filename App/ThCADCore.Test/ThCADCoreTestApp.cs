@@ -277,60 +277,6 @@ namespace ThCADCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThSnapIfNeededOverlayOp", CommandFlags.Modal)]
-        public void ThOverlay()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-                var geometrys = objs.ToNTSLineStrings();
-
-                var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Union);
-                foreach (Entity obj in snapGeometry.ToDbCollection())
-                {
-                    obj.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
-        }
-
-        [CommandMethod("TIANHUACAD", "ThSnapIntersection", CommandFlags.Modal)]
-        public void ThSnapIfNeededIntersection()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetSelection();
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                var objs = new DBObjectCollection();
-                foreach (var obj in result.Value.GetObjectIds())
-                {
-                    objs.Add(acadDatabase.Element<Entity>(obj));
-                }
-                var geometrys = objs.ToNTSLineStrings();
-                // 求交点
-                var snapGeometry = SnapIfNeededOverlayOp.Overlay(geometrys.First(), geometrys.Last(), SpatialFunction.Intersection);
-                foreach (Entity obj in snapGeometry.ToDbCollection())
-                {
-                    obj.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(obj);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "ThSnapDifference", CommandFlags.Modal)]
         public void ThThDifference()
         {

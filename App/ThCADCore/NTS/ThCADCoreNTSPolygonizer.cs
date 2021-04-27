@@ -6,7 +6,6 @@ using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Union;
 using NetTopologySuite.Operation.Polygonize;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Operation.OverlayNG;
 
 namespace ThCADCore.NTS
 {
