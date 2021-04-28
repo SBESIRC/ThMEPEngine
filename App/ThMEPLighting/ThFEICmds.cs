@@ -356,6 +356,7 @@ namespace ThMEPLighting
                 }
 
                 ThRegionDivisionService thRegionDivision = new ThRegionDivisionService();
+                //thRegionDivision.tol = 0.01;
                 var resPolys = thRegionDivision.DivisionRegion(frameLst.First());
                 resPolys = thRegionDivision.MergePolygon(resPolys);
                 foreach (var item in resPolys)

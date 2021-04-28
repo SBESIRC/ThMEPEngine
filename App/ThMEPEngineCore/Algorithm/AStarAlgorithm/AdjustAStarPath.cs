@@ -12,7 +12,7 @@ namespace ThMEPEngineCore.Algorithm.AStarAlgorithm
     {
         public List<Point> AdjustPath(List<Point> path, bool[][] obstacles)
         {
-            if (path == null || path.Count <= 0)
+            if (path == null || path.Count <= 1)
             {
                 return path;
             }
