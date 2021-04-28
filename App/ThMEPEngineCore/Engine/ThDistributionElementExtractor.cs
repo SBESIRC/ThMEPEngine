@@ -49,6 +49,7 @@ namespace ThMEPEngineCore.Engine
                 var results = new List<ThRawIfcDistributionElementData>();
                 if (visitor.IsBuildElementBlockReference(blockReference))
                 {
+                    visitor.DoExtract(results, blockReference, Matrix3d.Identity);
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (visitor.IsBuildElementBlock(blockTableRecord))
                     {
