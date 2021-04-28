@@ -85,7 +85,7 @@ namespace ThMEPLighting.ParkingStall.Worker.LightAdjustor
             {
                 foreach (var pairInfo in m_lightCacheMap)
                 {
-                    if (GeomUtils.Point3dIsEqualPoint3d(intersectPoly.GetCentroidPoint(), pairInfo.Key.GetCentroidPoint(), 10))
+                    if (intersectPoly.GetCentroidPoint().DistanceTo(pairInfo.Key.GetCentroidPoint()) <= 10.0)
                     {
                         lightPlaceInfos.Add(pairInfo.Value);
                         break;
