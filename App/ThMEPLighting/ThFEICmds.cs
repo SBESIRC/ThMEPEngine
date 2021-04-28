@@ -99,12 +99,19 @@ namespace ThMEPLighting
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
-        public void ThMEGL()
+        [CommandMethod("TIANHUACAD", "THSSZSDBZ", CommandFlags.Modal)]
+        public void ThMEGLBZ()
         {
-            var lampLight = new ThEmgPilotLampCommand();
+            var lampLight = new ThEmgPilotLampCommand(false);
             lampLight.Execute();
         }
+        [CommandMethod("TIANHUACAD", "THSSZSDDZ", CommandFlags.Modal)]
+        public void ThMEGLDZ()
+        {
+            var lampLight = new ThEmgPilotLampCommand(true);
+            lampLight.Execute();
+        }
+
 
         [CommandMethod("TIANHUACAD", "thtestAS", CommandFlags.Modal)]
         public void test()

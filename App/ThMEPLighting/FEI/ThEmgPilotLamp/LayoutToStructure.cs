@@ -33,28 +33,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             List<Polyline> wallsInPoints = new List<Polyline>();
             List<Polyline> columnsInPoints = new List<Polyline>();
 
-            //foreach (var item in columns)
-            //{
-            //    var cl = GetColumnLayoutPoint(item.Key, pt, dir);
-            //    if (null == cl)
-            //        continue;
-            //    var vect = (cl.Value.Item1 - sp);
-            //    var dot = vect.DotProduct(dir);
-            //    if (dot > length || dot < nextDis)
-            //        continue;
-            //}
-            //foreach (var item in wall)
-            //{
-            //    var cl = GetColumnLayoutPoint(item.Key, pt, dir);
-            //    if (null == cl)
-            //        continue;
-            //    var vect = (cl.Value.Item1 - sp);
-            //    var dot = vect.DotProduct(dir);
-            //    if (dot > length)
-            //        continue;
-            //}
-
-
 
             foreach (var pt in layoutPts)
             {
@@ -65,6 +43,21 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     return null;
                 }
                 (Point3d, Vector3d)? layoutInfo = null;
+                //优先找柱子
+                //if (column.Count > 0 || wall.Count<1)
+                //{
+                //    layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                //}
+                //else 
+                //{
+                //    layoutInfo = GetWallLayoutPoint(wall.First().Key, pt, dir);
+                //    if (layoutInfo == null && column.Count > 0)
+                //    {
+                //        layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                //    }
+                //}
+
+                //优先找近的
                 if (wall.Count <= 0 || (column.Count > 0 && column.First().Value < wall.First().Value))
                 {
                     layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
@@ -119,7 +112,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 layoutPt = layoutPt - moveDir * (minWidth - ePt.DistanceTo(layoutPt));
             }
-            //layoutPt = ePt;
             //计算排布方向
             var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
             var compareDir = (pt - layoutPt).GetNormal();
@@ -159,7 +151,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 layoutDir = -layoutDir;
             }
-            //layoutPt = sPt;
             return (layoutPt, layoutDir);
         }
 
@@ -176,7 +167,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             layoutPt = closetPt;
             List<Line> lines = new List<Line>();
             //多段线有可以合并的线，这里如果没有合并，如果有些是多段线
-            polyline = polyline.DPSimplify(1);
+            polyline = polyline.DPSimplify(2);
             for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
                 lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));

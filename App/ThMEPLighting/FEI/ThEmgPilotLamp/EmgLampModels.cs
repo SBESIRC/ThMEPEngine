@@ -129,27 +129,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             this.inDirection = new List<Vector3d>();
         }
     }
-    public class LineColumn
-    {
-        public Polyline column { get; }
-        public Point3d pointInLine { get; }
-        public Point3d centerPoint { get; }
-        public GraphRoute nearRoute { get; }
-        public Vector3d directionToExit { get; }
-        public bool isTwoDirection { get; set; }
-        public LineColumn(Polyline polyline, GraphRoute nodeRoute, Point3d linePoint, bool isTwoWay = false)
-        {
-            column = polyline;
-            pointInLine = linePoint;
-            nearRoute = nodeRoute;
-            directionToExit = (nodeRoute.node.nodePoint - linePoint).GetNormal();
-            isTwoDirection = isTwoWay;
-            var allPts = column.GetPoints().ToList();
-            var sumX = allPts.Sum(c => c.X);
-            var sumY = allPts.Sum(c => c.Y);
-            centerPoint = new Point3d(sumX / allPts.Count, sumY / allPts.Count, 0);
-        }
-    }
     /// <summary>
     /// 节点处的线的方向和实际疏散方向
     /// </summary>
@@ -158,7 +137,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         public Line line { get; }
         public Vector3d lineDir { get; }
         public Vector3d layoutLineSide { get; set; }
-        public List<LineColumn> lineColumus { get; }
         public List<NodeDirection> nodeDirections { get; }
         public LineGraphNode(Line li)
         {
@@ -166,7 +144,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             if (null != line)
                 lineDir = (line.EndPoint - line.StartPoint).GetNormal();
             this.nodeDirections = new List<NodeDirection>();
-            this.lineColumus = new List<LineColumn>();
         }
     }
     public class IndicatorLight

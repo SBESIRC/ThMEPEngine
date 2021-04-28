@@ -20,6 +20,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
     class ThEmgPilotLampCommand : IAcadCommand, IDisposable
     {
+        private bool _isHostFirst = false;
+        public ThEmgPilotLampCommand(bool isHost) 
+        {
+            this._isHostFirst = isHost;
+        }
         public void Dispose(){}
 
         public void Execute()
@@ -43,7 +48,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 {
                     return;
                 }
-
                 //获取外包框
                 List<Curve> frameLst = new List<Curve>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
@@ -51,7 +55,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     var frame = acdb.Element<Polyline>(obj);
                     frameLst.Add(frame.Clone() as Polyline);
                 }
-
                 var pt = frameLst.First().StartPoint;
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 frameLst = frameLst.Where(c=>c.Area>10).Select(x =>
@@ -110,7 +113,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     EmgLampIndicatorLight emgLampIndicator = new EmgLampIndicatorLight(pline.Key,columns, walls, indicator);
 
                     //根据计算出的灯具信息，在相应的位置放置相应的灯具
-                    var res = emgLampIndicator.CalcLayout();
+                    var res = emgLampIndicator.CalcLayout(this._isHostFirst);
                     foreach (var item in res)
                     {
                         if (item == null)
@@ -119,7 +122,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         Point3d ep = sp + item.direction.MultiplyBy(10);
                         var createPt = item.pointInOutSide;
                         originTransformer.Reset(ref createPt);
-                        //PointToView(acdb, originTransformer, item.pointInOutSide);
                         Vector3d createDir = item.directionSide.CrossProduct(Vector3d.ZAxis);
                         if (createDir.DotProduct(item.direction) < 0)
                             createDir = createDir.Negate();
