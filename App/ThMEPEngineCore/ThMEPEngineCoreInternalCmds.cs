@@ -475,6 +475,70 @@ namespace ThMEPEngineCore
                 extractEngine.Print(acadDatabase.Database);
             }
         }
+
+        [CommandMethod("TIANHUACAD", "ThRLP", CommandFlags.Modal)]
+        public void ThRLP()
+        {
+            //Roof thunder protection (屋顶防雷)
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                var levelMarkService = new ThExtractLevelMarkService()
+                {
+                    Types = new List<Type> { typeof(BlockReference) },
+                };
+                levelMarkService.Extract(acadDatabase.Database, pts);                
+
+                var extractors = new List<ThExtractorBase>()
+                {
+                    //包括墙、小屋面、大屋面、雨棚、管井(可能就是墙)
+                    new ThWallExtractor
+                    {
+                        ElementLayer="墙看线",
+                        Types=new List<Type>{ typeof(Hatch)},
+                        ColorIndex=1,
+                        BuildAreaSwitch=false,
+                        CheckIsolated=false,
+                        IEleQuery = levelMarkService
+                    },
+                    new ThRainshedExtractor
+                    {
+                        Types = new List<Type>{ typeof(Hatch) },
+                        ColorIndex=3,
+                        ElementLayer = "雨棚",
+                        IEleQuery = levelMarkService
+                    },
+                    new ThSmallRoofExtractor
+                    {
+                        Types = new List<Type>{ typeof(Hatch) },
+                        ColorIndex=4,
+                        ElementLayer = "屋面",
+                        IEleQuery = levelMarkService
+                    },
+                    new ThBigRoofExtractor
+                    {
+                        Types = new List<Type>{ typeof(Polyline) },
+                        ColorIndex=5,
+                        ElementLayer = "大屋面",
+                        IEleQuery = levelMarkService
+                    },
+                };
+
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+            }
+        }
 #endif
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]

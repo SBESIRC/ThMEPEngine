@@ -381,6 +381,7 @@
     <Compile Include="Service\ThWindowDbExtension.cs" />
     <Compile Include="Service\ThWindowLayerManager.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
+    <Compile Include="Temp\IElevationQuery.cs" />
     <Compile Include="Temp\IExtract.cs" />
     <Compile Include="Temp\IGroup.cs" />
     <Compile Include="Temp\IParse.cs" />
@@ -397,6 +398,10 @@
     <Compile Include="Temp\ThExtractDoorOpeningService.cs" />
     <Compile Include="Temp\ThExtractHydrantService.cs" />
     <Compile Include="Temp\ThExtractExtinguisherService.cs" />
+    <Compile Include="Temp\ThExtractLevelMarkService.cs" />
+    <Compile Include="Temp\ThExtractBigRoofService.cs" />
+    <Compile Include="Temp\ThExtractSmallRoofService.cs" />
+    <Compile Include="Temp\ThExtractRainshedService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyPositionService.cs" />
     <Compile Include="Temp\ThExtractToiletGroupService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyStartService.cs" />
@@ -415,8 +420,11 @@
     <Compile Include="Temp\ThParkingStallExtractor.cs" />
     <Compile Include="Temp\ThArchitectureWallExtractor.cs" />
     <Compile Include="Temp\ThFireHydrantResultParseService.cs" />
+    <Compile Include="Temp\ThBigRoofExtractor.cs" />
+    <Compile Include="Temp\ThSmallRoofExtractor.cs" />
     <Compile Include="Temp\ThSpaceExtractor.cs" />
     <Compile Include="Temp\ThShearWallExtractor.cs" />
+    <Compile Include="Temp\ThRainshedExtractor.cs" />
     <Compile Include="Temp\ThWallExtractor.cs" />
     <Compile Include="Temp\ThWaterSupplyPositionExtractor.cs" />
     <Compile Include="Temp\ThToiletGroupExtractor.cs" />
