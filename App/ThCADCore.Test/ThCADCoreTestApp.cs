@@ -15,6 +15,7 @@ using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.Overlay.Snap;
 using Autodesk.AutoCAD.Colors;
 using DotNetARX;
+using System;
 
 namespace ThCADCore.Test
 {
@@ -822,6 +823,90 @@ namespace ThCADCore.Test
                         acadDatabase.ModelSpace.Add(arc_Arc);
                     }
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "ThTestGetLine", CommandFlags.Modal)]
+        public void ThTestGetLine()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();//获取所有的选中项
+
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                foreach (var item in objs)
+                {
+                    if(item is Line line1)
+                    {
+                        line1.UpgradeOpen();
+                        line1.ColorIndex = 4;
+                        Point3d ptend = new Point3d(100, 0, 0);
+                        ObjectId id2 = line1.ObjectId.Copy(Point3d.Origin, ptend);
+                        id2.Rotate(ptend, Math.PI / 2);
+                        Line line2 = acadDatabase.Element<Line>(id2);
+                        //acadDatabase.ModelSpace.Add(line2);//在上面的ObjectId.Copy方法里已经执行了Add方法，所以不用重新Add，会报错
+                    }
+                    if (item is Polyline poly)
+                    {
+                        if (poly.IsCCW())
+                        {
+                            Active.Editor.WriteLine("It's oriented counter-clockwise.");
+                        }
+                        else
+                        {
+                            Active.Editor.WriteLine("It's oriented clockwise.");
+                        }
+                        //var polyline_Chord = poly.TessellatePolylineWithChord(100);
+                        //polyline_Chord.ColorIndex = 2;
+                        //acadDatabase.ModelSpace.Add(polyline_Chord);
+                        //var polyline_Arc = poly.TessellatePolylineWithArc(100);
+                        //polyline_Arc.ColorIndex = 1;
+                        //acadDatabase.ModelSpace.Add(polyline_Arc);
+                    }
+                    else if (item is Arc arc)
+                    {
+                        //var arc_Chord = arc.TessellateArcWithChord(100);
+                        //arc_Chord.ColorIndex = 2;
+                        //acadDatabase.ModelSpace.Add(arc_Chord);
+                        //var arc_Arc = arc.TessellateArcWithArc(100);
+                        //arc_Arc.ColorIndex = 1;
+                        //acadDatabase.ModelSpace.Add(arc_Arc);
+                    }
+                }
+
+                //新建一个线并放到CAD中
+                {
+                    Point3d test = Point3d.Origin;
+                    Point3d startPoint = new Point3d(0, 1000, 0);
+                    Point3d endPoint = new Point3d(100, 1000, 0);
+                    Line line = new Line(startPoint, endPoint);
+
+                    Point3d startPoint1 = new Point3d(1000, 0, 0);
+                    Point3d endPoint1 = new Point3d(100, 1000, 0);
+                    Line line1 = new Line(startPoint1, endPoint1);
+
+                    acadDatabase.ModelSpace.Add(line);
+                    acadDatabase.ModelSpace.Add(line1);
+                }
+
+
+                PromptEntityOptions option = new PromptEntityOptions("\n请选择一个多段线");
+                option.SetRejectMessage("你选择的类型不对");
+                option.AddAllowedClass(typeof(Polyline), true);
+                PromptEntityResult res = Active.Editor.GetEntity(option);
+                if (res.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                Autodesk.AutoCAD.ApplicationServices.Application.ShowAlertDialog("选择的对象" + res.ObjectId);
             }
         }
     }
