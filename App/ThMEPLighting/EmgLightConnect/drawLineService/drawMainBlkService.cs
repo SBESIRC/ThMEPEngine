@@ -14,9 +14,9 @@ using ThMEPLighting.EmgLightConnect.Model;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {
-    public class drawMainSideBlkService
+    public class drawMainBlkService
     {
-        public static void drawMainToMain(List<ThSingleSideBlocks> singleSideBlocks, List<BlockReference> blkSource, Polyline frame, out List<ThBlock> blkList)
+        public static List<Polyline> drawMainToMain(List<ThSingleSideBlocks> singleSideBlocks, List<BlockReference> blkSource, Polyline frame, out List<ThBlock> blkList, ref List<Polyline> linkLine)
         {
             var moveLanePolyList = new List<Polyline>();
 
@@ -29,15 +29,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 if (side.reMainBlk.Count > 1)
                 {
-                    //debug : 不穿框线
                     var movedline = moveLane(side, frame);
-
-                    //断线 or 延长
-                    Dictionary<Point3d, Point3d> reMainBlkOnLineDict = new Dictionary<Point3d, Point3d>(); //key:remainblk, value:blk project to movedline
-                    for (int i = 0; i < side.reMainBlk.Count; i++)
-                    {
-                        reMainBlkOnLineDict.Add(side.reMainBlk[i], movedline.GetClosestPointTo(side.reMainBlk[i], true));
-                    }
 
                     //生成小支管
                     //确定连接点
@@ -48,55 +40,21 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         var prevPt = side.reMainBlk[i - 1];
                         var pt = side.reMainBlk[i];
 
-                        var leftLineTemp = getMoveLinePart(reMainBlkOnLineDict[prevPt], reMainBlkOnLineDict[pt], movedline, out int prevPolyInx, out int ptPolyInx);
-                        var prevConnPt = drawEmgPipeService . getConnectPt(prevPt, leftLineTemp, blkList);
-                        var prevConnProjPt = leftLineTemp.GetClosestPointTo(prevConnPt, true);
-                        var bAddedPrevConn = tryDistByDegree(prevConnPt, prevConnProjPt, leftLineTemp, out var preAddedPt);
+                        var prevBlk = GetBlockService.getBlockByCenter(prevPt, blkList);
+                        var thisBlk = GetBlockService.getBlockByCenter(pt, blkList);
 
-                        var rightLineTemp = getMoveLinePart(reMainBlkOnLineDict[pt], reMainBlkOnLineDict[prevPt], movedline, out int ptPolyInx2, out int prevPolyInx2);
-                        var connPt = drawEmgPipeService.getConnectPt(pt, rightLineTemp, blkList);
-                        var connProjPt = rightLineTemp.GetClosestPointTo(connPt, true);
-                        var bAddedConn = tryDistByDegree(connPt, connProjPt, rightLineTemp, out var addedPt);
+                        var moveLanePoly = drawEmgPipeService.cutLane(prevPt, pt, prevBlk, thisBlk, movedline);
 
-                        //生成主polyline
-                        var moveLanePoly = new Polyline();
-                        moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, prevConnPt.ToPoint2d(), 0, 0, 0);
-
-                        if (bAddedPrevConn == true)
-                        {
-                            moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, preAddedPt.ToPoint2d(), 0, 0, 0);
-                        }
-
-                        if (prevPolyInx < ptPolyInx)
-                        {
-                            for (int j = prevPolyInx + 1; j < ptPolyInx + 1; j++)
-                            {
-                                moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint2dAt(j), 0, 0, 0);
-                            }
-                        }
-                        if (prevPolyInx > ptPolyInx)
-                        {
-                            for (int j = prevPolyInx; j > ptPolyInx; j--)
-                            {
-                                moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint2dAt(j), 0, 0, 0);
-                            }
-                        }
-                        if (bAddedConn == true)
-                        {
-
-                            moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, addedPt.ToPoint2d(), 0, 0, 0);
-                        }
-
-                        moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, connPt.ToPoint2d(), 0, 0, 0);
                         moveLanePolyList.Add(moveLanePoly);
+
                     }
 
                     DrawUtils.ShowGeometry(movedline, EmgConnectCommon.LayerMovedLane, Color.FromColorIndex(ColorMethod.ByColor, 50));
                 }
-
-                DrawUtils.ShowGeometry(moveLanePolyList, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 130));
-
             }
+
+            linkLine.AddRange(moveLanePolyList);
+            return moveLanePolyList;
         }
 
         private static Polyline moveLane(ThSingleSideBlocks side, Polyline frame)
@@ -130,14 +88,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             }
 
-            //外扩movedline保证点project 在moveline范围内
-            //if (movedline.NumberOfVertices > 0)
-            //{
-
-            //    movedline.ExtendPolyline(EmgConnectCommon.TolSaperateGroupMaxDistance);
-
-            //}
-
             return movedline;
         }
 
@@ -148,7 +98,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             prevPolyInx = -1;
             ptPolyInx = -1;
 
-            for (int i = 0; i < movedLine.NumberOfVertices - 1; i++)
+            for (int i = 0; i < movedLine.NumberOfVertices; i++)
             {
                 var lineTemp = movedLine.GetLineSegmentAt(i);
 
@@ -200,7 +150,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     adjacent = 0;
                     bEnd = true;
                 }
-                if (bEnd == false && seg.Length <= 500)
+                //if (bEnd == false && seg.Length <= 500 )
+                if (bEnd == false && seg.Length <= EmgConnectCommon.TolTooClosePt)
                 {
                     addPt = seg.StartPoint;
                     bAddPt = true;
@@ -263,7 +214,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     var overlapPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
                     double newOffsetTemp = 200000;
-                    for (int i = 0; i < overlapPoly.NumberOfVertices - 1; i++)
+                    for (int i = 0; i < overlapPoly.NumberOfVertices; i++)
                     {
                         var dist = lanePoly.GetDistToPoint(overlapPoly.GetPoint3dAt(i), false);
                         if (100 < dist && dist < newOffsetTemp)
@@ -271,6 +222,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                             newOffsetTemp = dist;
                         }
                     }
+                    newOffsetTemp = newOffsetTemp - EmgConnectCommon.TolLinkOffsetWithFrame;
+                    double newOffset = getLaneDisplacement(side.laneSide.Select(x => x.Item1).ToList(), side.reMainBlk, newOffsetTemp);
 
                     var dir = (movedlineTemp.StartPoint - lanePoly.StartPoint).GetNormal();
                     var angle = dir.GetAngleTo((lanePoly.GetPoint3dAt(1) - lanePoly.StartPoint).GetNormal(), Vector3d.ZAxis) * 180 / Math.PI;
@@ -284,7 +237,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         offSetDir = -1;
                     }
 
-                    double newOffset = getLaneDisplacement(side.laneSide.Select(x => x.Item1).ToList(), side.reMainBlk, newOffsetTemp);
                     moveLine = lanePoly.GetOffsetCurves(newOffset * offSetDir)[0] as Polyline;
                 }
             }
@@ -296,20 +248,31 @@ namespace ThMEPLighting.EmgLightConnect.Service
         private static double getLaneDisplacement(List<Line> lanes, List<Point3d> blocks, double maxOffset)
         {
             var displacementList = new List<double>();
+            double distance = 0;
+
 
             foreach (var blk in blocks)
             {
                 displacementList.Add(lanes.Select(x => x.GetDistToPoint(blk, false)).Min());
             }
 
-            var distance = displacementList
-                            .Where(x => x < maxOffset)
-                            .OrderBy(x => x)
-                            .GroupBy(x => Math.Floor(x / 10))
-                            .OrderByDescending(x => x.Count())
-                            .First()
-                            .ToList()
-                            .First();
+            var distanceListWithinOff = displacementList
+                            .Where(x => x < maxOffset);
+
+            if (distanceListWithinOff.Count() > 0)
+            {
+                distance = distanceListWithinOff
+                               .OrderBy(x => x)
+                               .GroupBy(x => Math.Floor(x / 10))
+                               .OrderByDescending(x => x.Count())
+                               .First()
+                               .ToList()
+                               .First();
+            }
+            else
+            {
+                distance = maxOffset;
+            }
 
             return distance;
         }
