@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPElectrical.CAD;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.FEI.Model;
 
 namespace ThMEPLighting.FEI.PrintEntity
@@ -19,6 +20,7 @@ namespace ThMEPLighting.FEI.PrintEntity
             CalEvacuationPathTypeService pathType = new CalEvacuationPathTypeService();
             var pathModels = pathType.CalPathType(extendLines, lanes);
 
+            pathModels = ConnectLine(pathModels);
             foreach (var path in pathModels)
             {
                 originTransformer.Reset(path.line);
@@ -63,6 +65,11 @@ namespace ThMEPLighting.FEI.PrintEntity
             }
         }
 
+        /// <summary>
+        /// 设置路径信息
+        /// </summary>
+        /// <param name="line"></param>
+        /// <returns></returns>
         private Polyline SetPathInfo(Line line)
         {
             Polyline polyline = new Polyline();
@@ -72,5 +79,85 @@ namespace ThMEPLighting.FEI.PrintEntity
             polyline.ConstantWidth = 200;
             return polyline;
         }
+
+        /// <summary>
+        /// 将连接并平行的线合成一根路径
+        /// </summary>
+        /// <param name="pathModels"></param>
+        /// <returns></returns>
+        private List<EvacuationPathModel> ConnectLine(List<EvacuationPathModel> pathModels)
+        {
+            List<EvacuationPathModel> resPaths = new List<EvacuationPathModel>();
+            while (pathModels.Count > 0)
+            {
+                var firLine = pathModels.First();
+                pathModels.Remove(firLine);
+
+                var parellelPaths = pathModels
+                    .Where(x=> x.evaPathType == firLine.evaPathType && x.setUpType == firLine.setUpType)
+                    .Where(x => (x.line.EndPoint - x.line.StartPoint).IsParallelTo(firLine.line.EndPoint - firLine.line.StartPoint, new Tolerance(0.001, 0.001)))
+                    .ToList();
+                if (parellelPaths.Count > 0)
+                {
+                    Point3d sPt = firLine.line.StartPoint;
+                    Point3d ePt = firLine.line.EndPoint;
+                    while (pathModels.Count > 0)
+                    {
+                        var sMLine = parellelPaths.FirstOrDefault(x => x.line.StartPoint.DistanceTo(sPt) < 3);
+                        if (sMLine != null)
+                        {
+                            parellelPaths.Remove(sMLine);
+                            pathModels.Remove(sMLine);
+                            sPt = sMLine.line.EndPoint;
+                            firLine.line = new Line(sPt, ePt);
+                        }
+
+                        var eMLine = parellelPaths.FirstOrDefault(x => x.line.EndPoint.DistanceTo(sPt) < 3);
+                        if (eMLine != null)
+                        {
+                            parellelPaths.Remove(eMLine);
+                            pathModels.Remove(eMLine);
+                            sPt = eMLine.line.StartPoint;
+                            firLine.line = new Line(sPt, ePt);
+                        }
+
+                        if (sMLine == null && eMLine == null)
+                        {
+                            break;
+                        }
+                    }
+
+                    while (pathModels.Count > 0)
+                    {
+                        var sMLine = parellelPaths.FirstOrDefault(x => x.line.StartPoint.DistanceTo(ePt) < 3);
+                        if (sMLine != null)
+                        {
+                            parellelPaths.Remove(sMLine);
+                            pathModels.Remove(sMLine);
+                            ePt = sMLine.line.EndPoint;
+                            firLine.line = new Line(sPt, ePt);
+                        }
+
+                        var eMLine = parellelPaths.FirstOrDefault(x => x.line.EndPoint.DistanceTo(ePt) < 3);
+                        if (eMLine != null)
+                        {
+                            parellelPaths.Remove(eMLine);
+                            pathModels.Remove(eMLine);
+                            ePt = eMLine.line.StartPoint;
+                            firLine.line = new Line(sPt, ePt);
+                        }
+
+                        if (sMLine == null && eMLine == null)
+                        {
+                            break;
+                        }
+                    }
+                }
+                resPaths.Add(firLine);
+            }
+
+            return resPaths;
+        }
     }
 }
+
