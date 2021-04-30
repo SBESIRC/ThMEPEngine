@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
 
 namespace ThMEPLighting.FEI.Service
@@ -213,32 +214,5 @@ namespace ThMEPLighting.FEI.Service
 
             return false;
         }
-
-        /// <summary>
-        /// 判断两根线是否有共线
-        /// </summary>
-        /// <param name="line"></param>
-        /// <param name="otherLine"></param>
-        /// <param name="tol"></param>
-        /// <returns></returns>
-        public static bool IsOverlapByTol(this Line line, Line otherLine, double tol)
-        {
-            if (line.Length < tol || otherLine.Length < tol)
-            {
-                return false;
-            }
-
-            Vector3d dir = (line.EndPoint - line.StartPoint).GetNormal();
-            Vector3d otherDir = (otherLine.EndPoint - otherLine.StartPoint).GetNormal();
-            if (!dir.IsEqualTo(otherDir, new Tolerance(0.0001, 0.0001)))
-            {
-                return false;
-            }
-
-            Line newLine = new Line(line.StartPoint + dir * tol, line.EndPoint - dir * tol);
-            Polyline poly = newLine.Buffer(tol);
-
-            return poly.IsIntersects(otherLine);
-        }
-    }
+    }   
 }

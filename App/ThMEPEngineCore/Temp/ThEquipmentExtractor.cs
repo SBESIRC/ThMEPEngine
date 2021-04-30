@@ -37,7 +37,7 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(NamePropertyName, "灭火器");
+                geometry.Properties.Add(NamePropertyName, "FireExtinguisher");
                 geometry.Boundary = e;
                 geos.Add(geometry);
             });
@@ -46,7 +46,7 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(NamePropertyName, "消火栓");
+                geometry.Properties.Add(NamePropertyName, "FireHydrant");
                 geometry.Boundary = e;
                 geos.Add(geometry);
             });

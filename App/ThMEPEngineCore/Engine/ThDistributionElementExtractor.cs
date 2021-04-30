@@ -1,4 +1,5 @@
 ﻿using Linq2Acad;
+using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
@@ -41,6 +42,34 @@ namespace ThMEPEngineCore.Engine
             }
         }
 
+        public void ExtractFromMS(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                acadDatabase.ModelSpace
+                    .OfType<BlockReference>()
+                    .ForEach(e =>
+                    {
+                        Visitors.ForEach(v =>
+                        {
+                            v.Results.AddRange(DoExtract(e, v));
+                        });
+                    });
+            }
+        }
+
+        private List<ThRawIfcDistributionElementData> DoExtract(
+            BlockReference e, ThDistributionElementExtractionVisitor visitor)
+        {
+            var results = new List<ThRawIfcDistributionElementData>();
+            if (visitor.CheckLayerValid(e) && visitor.IsDistributionElement(e))
+            {
+                visitor.DoExtract(results, e, Matrix3d.Identity);
+            }
+            return results;
+        }
+
+
         private List<ThRawIfcDistributionElementData> DoExtract(BlockReference blockReference, Matrix3d matrix, 
             ThDistributionElementExtractionVisitor visitor)
         {
@@ -48,7 +77,7 @@ namespace ThMEPEngineCore.Engine
             {
                 var results = new List<ThRawIfcDistributionElementData>();
                 if (visitor.IsBuildElementBlockReference(blockReference))
-                {
+                {                    
                     var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
                     if (visitor.IsBuildElementBlock(blockTableRecord))
                     {

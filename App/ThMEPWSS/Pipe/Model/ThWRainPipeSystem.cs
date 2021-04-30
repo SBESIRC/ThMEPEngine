@@ -8,15 +8,23 @@ using System.Text;
 using System.Threading.Tasks;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.JsonExtensionsNs;
+using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.DebugNs;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
+using DU = ThMEPWSS.Assistant.DrawUtils;
 
 namespace ThMEPWSS.Pipe.Model
 {
-
-    public class ThWRainPipeSystem : IThWDraw, IEquatable<ThWRainPipeSystem>
+    public class ThWRainPipeSystem : IThWDraw, IEquatable<ThWRainPipeSystem>, IComparable<ThWRainPipeSystem>
     {
+        /// <summary>
+        /// 雨水斗
+        /// </summary>
+        public ThWSDWaterBucket WaterBucket { get; set; } = new ThWSDWaterBucket();
+
+        public ThWSDOutputType OutputType { get; set; } = new ThWSDOutputType();
+
         public string VerticalPipeId { get; set; } = string.Empty;
 
         /// <summary>
@@ -28,9 +36,181 @@ namespace ThMEPWSS.Pipe.Model
             PipeRuns = new List<ThWRainPipeRun>();
         }
 
-        public void SortPipeRuns()
+        public void Draw(RainSystemDrawingContext ctx)
         {
-            //todo:
+            DrawWaterBucket(ctx);
+            DrawPipeRuns(ctx);
+        }
+
+        private void DrawPipeRuns(RainSystemDrawingContext ctx)
+        {
+            var basePoint = ctx.BasePoint;
+            var runs = PipeRuns.ToList();
+            runs.Reverse();
+            {
+                var maxY = double.MinValue;
+                for (int i = 0; i < runs.Count; i++)
+                {
+                    var r = runs[i];
+                    var s = r.Storey;
+                    if (s != null)
+                    {
+                        var j = ctx.WSDStoreys.IndexOf(s);
+                        var y = ctx.StoreyDrawingContexts[j].BasePoint.Y;
+                        if (y > maxY) maxY = y;
+                    }
+                }
+            }
+            var ctxs = new PipeRunDrawingContext[runs.Count];
+            for (int i = 0; i < runs.Count; i++)
+            {
+                var r = runs[i];
+                var s = r.Storey;
+                if (s != null)
+                {
+                    var j = ctx.WSDStoreys.IndexOf(s);
+                    var bsPt = new Point3d(basePoint.X, ctx.StoreyDrawingContexts[j].BasePoint.Y, 0);
+                    var c = new PipeRunDrawingContext();
+                    ctxs[i] = c;
+                    c.BasePoint = bsPt;
+                   
+                }
+            }
+
+            var pts = new List<Point3d>(4096);
+            {
+                if (ctx.WaterBucketPoint is Point3d pt) pts.Add(pt);
+            }
+
+            //for (int i = 0; i < runs.Count; i++)
+            //{
+            //    var r = runs[i];
+            //    var s = r.Storey;
+            //    if (s != null)
+            //    {
+            //        var c = ctxs[i];
+
+            //    }
+            //}
+
+            double sdx = 0;
+            for (int i = 0; i < runs.Count; i++)
+            {
+                var r = runs[i];
+                var s = r.Storey;
+                if (s != null)
+                {
+                    var c = ctxs[i];
+                    r.Draw(c);
+                    ThWRainPipeRun.CalcOffsets(r.TranslatorPipe.TranslatorType, c.YesDraw);
+                    var dx = c.YesDraw.GetCurX();
+                    c.BasePoint = c.BasePoint.OffsetX(sdx);
+                    if (c.TopPoint is Point3d pt) pts.Add(pt);
+                    if (false)
+                    {
+                        var rect = c.YesDraw.GetGRect(c.BasePoint, false);
+                        if (!rect.Equals(default)) DU.DrawRectLazy(rect);
+                    }
+
+                    //pts.AddRange(c.YesDraw.GetPoint3ds(c.BasePoint).Skip(1));
+
+                    {
+                        var basePt = c.BasePoint;
+                        var _pts = c.YesDraw.GetPoint3ds(basePt).Skip(1).ToList();
+                        if (_pts.Count > 0)
+                        {
+                            GeoAlgorithm.GetCornerCoodinate(_pts, out double minX, out double minY, out double maxX, out double maxY);
+                            if (maxY < basePoint.Y)
+                            {
+                                pts.Add(basePt);
+                            }
+                            pts.AddRange(_pts);
+                            if (s.Label == "1F")
+                            {
+                                pts.Add(basePt.ReplaceX(_pts.Last().X));
+                            }
+                        }
+                        else
+                        {
+                            pts.Add(basePt);
+                        }
+
+                    }
+
+                    sdx += dx;
+                }
+            }
+            if (OutputType.OutputType != RainOutputTypeEnum.None)
+            {
+                if (pts.Count > 0)
+                {
+                    var yd = new YesDraw();
+                    yd.GoY(-500);
+                    yd.OffsetXY(-200, -200);
+                    yd.OffsetX(-1600);
+                    var dx = yd.GetCurX();
+                    pts.AddRange(yd.GetPoint3ds(pts.Last()));
+                    sdx += dx;
+                }
+            }
+            if (pts.Any())
+            {
+                ctx.OutputBasePoint = pts.Last();
+            }
+            DrawPipeLinesLazy(pts);
+
+            //for (int i = 0; i < runs.Count; i++)
+            //{
+            //    var r = runs[i];
+            //    var s = r.Storey;
+            //    if (s != null)
+            //    {
+            //        var c = ctxs[i];
+
+            //    }
+            //}
+
+
+        }
+        private static void DrawPipeLinesLazy(List<Point3d> pts)
+        {
+            var lines = DU.DrawLinesLazy(YesDraw.FixLines(pts));
+            SetPipeRunLinesStyle(lines);
+
+            //var pl = EntityFactory.CreatePolyline(DrLazy.FixLines(pts));
+            //DU.DrawEntityLazy(pl);
+        }
+
+        public static void SetPipeRunLinesStyle(IList<Line> lines)
+        {
+            lines.ForEach(SetPipeRunLineStyle);
+        }
+
+        public static void SetPipeRunLineStyle(Line line)
+        {
+            line.Layer = "W-RAIN-PIPE";
+            line.ColorIndex = 256;
+        }
+
+        private void DrawWaterBucket(RainSystemDrawingContext ctx)
+        {
+            var basePt = ctx.BasePoint;
+            if (WaterBucket != null)
+            {
+                var waterBucketStorey = WaterBucket.Storey;
+                if (waterBucketStorey != null /*&& waterBucketStorey.Label.Contains("RF")*/)
+                {
+                    var j = ctx.WSDStoreys.IndexOf(waterBucketStorey);
+                    var bsPt = ctx.StoreyDrawingContexts[j].BasePoint;
+                    var pt = new Point3d(basePt.X, bsPt.Y, 0);
+                    var _ctx = new WaterBucketDrawingContext()
+                    {
+                        BasePoint = pt,
+                        RainSystemDrawingContext = ctx,
+                    };
+                    WaterBucket.Draw(_ctx);
+                }
+            }
         }
 
         virtual public void Draw(Point3d basePt, Matrix3d mat)
@@ -73,6 +253,43 @@ namespace ThMEPWSS.Pipe.Model
 
             return true;
         }
+
+        public int CompareTo(ThWRainPipeSystem other)
+        {
+            if (this.VerticalPipeId.Equals(other.VerticalPipeId))
+                return 0; //equal
+
+            var dThisId = GetNormalizedId(VerticalPipeId);
+            var dOtherId = GetNormalizedId(other.VerticalPipeId);
+
+            if (dThisId > dOtherId) return 1;
+
+            return -1;
+        }
+
+        private double GetNormalizedId(string id)
+        {
+            //var suffixes = new List<string>() {"a","b","c","d","e","f"};
+            var suffixToNumDic = new Dictionary<string, string>()
+            {
+                {"a","1"}, { "b", "2" }, { "c", "3" },
+                { "d", "4" }, { "e", "5" }, { "f", "6" }
+            };
+
+            var newIdString = id.Replace("Y1L", "").
+                Replace("Y2L", "").Replace("NL", "").
+                Replace("N1L", "").Replace("-", "").Replace("'", ".1");
+
+            foreach (var k in suffixToNumDic.Keys)
+            {
+                newIdString = newIdString.Replace(k, suffixToNumDic[k]);
+            }
+
+            if (!double.TryParse(newIdString, out double dId))
+                return 0;
+
+            return dId;
+        }
     }
 
     /// <summary>
@@ -80,97 +297,17 @@ namespace ThMEPWSS.Pipe.Model
     /// </summary>
     public class ThWRoofRainPipeSystem : ThWRainPipeSystem, IEquatable<ThWRoofRainPipeSystem>
     {
-        /// <summary>
-        /// 雨水斗
-        /// </summary>
-        public ThWSDWaterBucket WaterBucket { get; set; } = new ThWSDWaterBucket();
-
-        public ThWSDOutputType OutputType { get; set; } = new ThWSDOutputType();
-
         public ThWRoofRainPipeSystem()
         {
-
         }
-
-        public void Draw(RoofRainSystemDrawingContext ctx)
-        {
-            DrawWaterBucket(ctx);
-            DrawPipeRuns(ctx);
-            DrawUtils.DrawTextLazy(OutputType.OutputType.ToString(), 200, ctx.BasePoint);
-        }
-
-        private void DrawPipeRuns(RoofRainSystemDrawingContext ctx)
-        {
-            var basePt = ctx.BasePoint;
-            var runs = PipeRuns.ToList();
-            runs.Reverse();
-            {
-                //DrLazy.Default.BasePoint = basePt;
-                TranslatorLazyDrawer.Test();
-                var maxY = double.MinValue;
-                for (int i = 0; i < runs.Count; i++)
-                {
-                    var r = runs[i];
-                    var s = r.Storey;
-                    if (s != null)
-                    {
-                        var j = ctx.WSDStoreys.IndexOf(s);
-                        var y = ctx.StoreyDrawingContexts[j].BasePoint.Y;
-                        if (y > maxY) maxY = y;
-                    }
-                }
-                TranslatorLazyDrawer.DrawPipeLazy(default, default);
-                //DrLazy.Default.BasePoint = DrLazy.Default.BasePoint.ReplaceY(maxY);
-            }
-            //Dbg.ShowWhere(DrLazy.Default.BasePoint);
-            for (int i = 0; i < runs.Count; i++)
-            {
-                var r = runs[i];
-                var s = r.Storey;
-                if (s != null)
-                {
-                    var j = ctx.WSDStoreys.IndexOf(s);
-                    var bsPt = new Point3d(basePt.X, ctx.StoreyDrawingContexts[j].BasePoint.Y, 0);
-                    //Dbg.ShowXLabel(DrLazy.Default.BasePoint);
-                    r.Draw(bsPt);
-                    //Dbg.ShowXLabel(DrLazy.Default.BasePoint);
-                    //DrawUtils.DrawTextLazy(i.ToString(), bsPt);
-                }
-                //var pt = basePt.OffsetXY(0, i * ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
-            }
-            //DrLazy.Default.Break();
-            //Dbg.ShowWhere(DrLazy.Default.BasePoint);
-        }
-
-        private void DrawWaterBucket(RoofRainSystemDrawingContext ctx)
-        {
-            var basePt = ctx.BasePoint;
-            if (WaterBucket != null)
-            {
-                var waterBucketStorey = WaterBucket.Storey;
-                if (waterBucketStorey != null && waterBucketStorey.Label.Contains("RF"))
-                {
-                    var j = ctx.WSDStoreys.IndexOf(waterBucketStorey);
-                    var bsPt = ctx.StoreyDrawingContexts[j].BasePoint;
-                    var _ctx = new WaterBucketDrawingContext()
-                    {
-                        BasePoint = new Point3d(basePt.X, bsPt.Y, 0)
-                    };
-                    WaterBucket?.Draw(_ctx);
-                }
-            }
-        }
-
         public override int GetHashCode()
         {
             var hashCode = base.GetHashCode() ^ WaterBucket.GetHashCode() ^ OutputType.GetHashCode();
             return hashCode;
         }
-
         public bool Equals(ThWRoofRainPipeSystem other)
         {
             if (other == null) return false;
-
             return WaterBucket.Equals(other.WaterBucket) && OutputType.Equals(other.OutputType) && base.Equals(other);
         }
     }
@@ -180,48 +317,39 @@ namespace ThMEPWSS.Pipe.Model
     /// </summary>
     public class ThWBalconyRainPipeSystem : ThWRainPipeSystem, IEquatable<ThWBalconyRainPipeSystem>
     {
-        /// <summary>
-        /// 雨水斗
-        /// </summary>
-        public ThWSDWaterBucket WaterBucket { get; set; } = new ThWSDWaterBucket();
-
-        public ThWSDOutputType OutputType { get; set; } = new ThWSDOutputType();
-
         public ThWBalconyRainPipeSystem()
         {
-
         }
+        //override public void Draw(Point3d basePt)
+        //{
+        //    if (WaterBucket != null)
+        //    {
+        //        var waterBucketStorey = WaterBucket.Storey;
+        //        if (waterBucketStorey != null)
+        //        {
+        //            //Dbg.PrintLine(waterBucketStorey.Label);
+        //            if (false)
+        //            {
+        //                //var waterBucketBasePt = new Point2d(basePt.X, waterBucketStorey.StoreyBasePoint.Y).ToPoint3d();
+        //                //WaterBucket?.Draw(waterBucketBasePt);
+        //            }
+        //        }
+        //    }
+        //    for (int i = 0; i < PipeRuns.Count; i++)
+        //    {
+        //        ThWRainPipeRun r = PipeRuns[i];
+        //        //draw piperun
+        //        r.Draw(basePt.OffsetY(i * ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
+        //        if (r.TranslatorPipe.PipeType.Equals(TranslatorTypeEnum.None))
+        //        {
 
-        override public void Draw(Point3d basePt)
-        {
-            if (WaterBucket != null)
-            {
-                var waterBucketStorey = WaterBucket.Storey;
-                if (waterBucketStorey != null)
-                {
-                    //Dbg.PrintLine(waterBucketStorey.Label);
-                    if (false)
-                    {
-                        //var waterBucketBasePt = new Point2d(basePt.X, waterBucketStorey.StoreyBasePoint.Y).ToPoint3d();
-                        //WaterBucket?.Draw(waterBucketBasePt);
-                    }
-                }
-            }
-            for (int i = 0; i < PipeRuns.Count; i++)
-            {
-                ThWRainPipeRun r = PipeRuns[i];
-                //draw piperun
-                r.Draw(basePt.OffsetY(i * ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
-                if (r.TranslatorPipe.PipeType.Equals(TranslatorTypeEnum.None))
-                {
-
-                }
-            }
-            DrawUtils.DrawTextLazy(OutputType.OutputType.ToString(), 100, basePt);
-            //new Circle() { Center = basePt, ColorIndex = 3, Radius = 200, Thickness = 5, }.AddToCurrentSpace();
-            //NoDraw.Text("ThWRoofRainPipeSystem: " + VerticalPipeId, 100, basePt.OffsetY(-1000)).AddToCurrentSpace();
-            //todo: draw other device
-        }
+        //        }
+        //    }
+        //    DrawUtils.DrawTextLazy(OutputType.OutputType.ToString(), 100, basePt);
+        //    //new Circle() { Center = basePt, ColorIndex = 3, Radius = 200, Thickness = 5, }.AddToCurrentSpace();
+        //    //NoDraw.Text("ThWRoofRainPipeSystem: " + VerticalPipeId, 100, basePt.OffsetY(-1000)).AddToCurrentSpace();
+        //    //todo: draw other device
+        //}
 
         public override int GetHashCode()
         {
@@ -241,48 +369,39 @@ namespace ThMEPWSS.Pipe.Model
     /// </summary>
     public class ThWCondensePipeSystem : ThWRainPipeSystem, IEquatable<ThWCondensePipeSystem>
     {
-        /// <summary>
-        /// 雨水斗
-        /// </summary>
-        public ThWSDWaterBucket WaterBucket { get; set; } = new ThWSDWaterBucket();
-
-        public ThWSDOutputType OutputType { get; set; } = new ThWSDOutputType();
-
         public ThWCondensePipeSystem()
         {
-
         }
+        //override public void Draw(Point3d basePt)
+        //{
+        //    if (WaterBucket != null)
+        //    {
+        //        var waterBucketStorey = WaterBucket.Storey;
+        //        if (waterBucketStorey != null)
+        //        {
+        //            //Dbg.PrintLine(waterBucketStorey.Label);
+        //            if (false)
+        //            {
+        //                //var waterBucketBasePt = new Point2d(basePt.X, waterBucketStorey.StoreyBasePoint.Y).ToPoint3d();
+        //                //WaterBucket?.Draw(waterBucketBasePt);
+        //            }
+        //        }
+        //    }
+        //    for (int i = 0; i < PipeRuns.Count; i++)
+        //    {
+        //        ThWRainPipeRun r = PipeRuns[i];
+        //        //draw piperun
+        //        r.Draw(basePt.OffsetY(i * ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
+        //        if (r.TranslatorPipe.PipeType.Equals(TranslatorTypeEnum.None))
+        //        {
 
-        override public void Draw(Point3d basePt)
-        {
-            if (WaterBucket != null)
-            {
-                var waterBucketStorey = WaterBucket.Storey;
-                if (waterBucketStorey != null)
-                {
-                    //Dbg.PrintLine(waterBucketStorey.Label);
-                    if (false)
-                    {
-                        //var waterBucketBasePt = new Point2d(basePt.X, waterBucketStorey.StoreyBasePoint.Y).ToPoint3d();
-                        //WaterBucket?.Draw(waterBucketBasePt);
-                    }
-                }
-            }
-            for (int i = 0; i < PipeRuns.Count; i++)
-            {
-                ThWRainPipeRun r = PipeRuns[i];
-                //draw piperun
-                r.Draw(basePt.OffsetY(i * ThWRainSystemDiagram.VERTICAL_STOREY_SPAN));
-                if (r.TranslatorPipe.PipeType.Equals(TranslatorTypeEnum.None))
-                {
-
-                }
-            }
-            DrawUtils.DrawTextLazy(OutputType.OutputType.ToString(), 100, basePt);
-            //new Circle() { Center = basePt, ColorIndex = 3, Radius = 200, Thickness = 5, }.AddToCurrentSpace();
-            //NoDraw.Text("ThWRoofRainPipeSystem: " + VerticalPipeId, 100, basePt.OffsetY(-1000)).AddToCurrentSpace();
-            //todo: draw other device
-        }
+        //        }
+        //    }
+        //    DrawUtils.DrawTextLazy(OutputType.OutputType.ToString(), 100, basePt);
+        //    //new Circle() { Center = basePt, ColorIndex = 3, Radius = 200, Thickness = 5, }.AddToCurrentSpace();
+        //    //NoDraw.Text("ThWRoofRainPipeSystem: " + VerticalPipeId, 100, basePt.OffsetY(-1000)).AddToCurrentSpace();
+        //    //todo: draw other device
+        //}
 
         public override int GetHashCode()
         {

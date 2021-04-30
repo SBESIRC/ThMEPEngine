@@ -44,8 +44,7 @@ namespace ThMEPLighting.EmgLightConnect
                     DrawUtils.ShowGeometry(ba.Position, EmgConnectCommon.LayerBlockCenter, Color.FromColorIndex(ColorMethod.ByColor, 50), LineWeight.LineWeight035);
                 }
             }
-            ////////
-
+          
             ////分组
             //沿车道线成环分区
             orderSingleSideLaneService.orderOutterSingleSideLane(mergedOrderedLane, frame, out var pointList, out var notTravelledList, out var orderedOutterLaneSideList);
@@ -61,16 +60,11 @@ namespace ThMEPLighting.EmgLightConnect
 
             MergeSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
 
-
             //连线数据
             var ALE = blockSourceList[EmgConnectCommon.BlockType.ale].First();
             connectSingleSideBlkService.connectMainToMain(singleSideBlocks);
             MergeSideService.relocateSecBlockSide(singleSideBlocks);
             connectSingleSideBlkService.connecSecToMain(ALE, singleSideBlocks, frame);
-
-            //连线
-            drawMainSideBlkService.drawMainToMain(singleSideBlocks, blkSource, frame,out var blkList);
-            drawSecBlkService.drawSecToMain (singleSideBlocks, blkSource, frame,  blkList);
 
             ////////debug 打图，要删
             ConnectSingleSideService.forDebugSingleSideBlocks(singleSideBlocks);
@@ -96,11 +90,26 @@ namespace ThMEPLighting.EmgLightConnect
 
             ////组内连线
             var connectList = connectSingleSideInGroupService.connectAllSingleSide(ALE, OptimalGroupBlocks);
-            ////
-            drawSecBlkService.drawGroupToGroup(connectList, blkSource, frame, blkList);
 
             ////////debug 打图，要删
             ConnectSingleSideService.forDebugConnectLine(connectList);
+
+            //连线
+            List<Polyline> linkLine = new List<Polyline>();
+            var mainLink = drawMainBlkService.drawMainToMain(singleSideBlocks, blkSource, frame, out var blkList, ref linkLine);
+            var secLink = drawSecBlkService.drawSecToMain(singleSideBlocks, frame, blkList, ref linkLine);
+            var groupLink = drawSecBlkService.drawGroupToGroup(connectList, frame, blkList, ref linkLine);
+
+            DrawUtils.ShowGeometry(mainLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 130));
+            DrawUtils.ShowGeometry(secLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 70));
+            DrawUtils.ShowGeometry(groupLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 30));
+
+            var newLink = drawEmgPipeService.CorrectIntersectLink(linkLine, blkList);
+            DrawUtils.ShowGeometry(newLink, EmgConnectCommon.LayerFinalFinal, Color.FromColorIndex(ColorMethod.ByColor, 241));
+
+           
+            
+
 
         }
 

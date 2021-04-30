@@ -19,6 +19,27 @@ using ThMEPWSS.Uitl.ExtensionsNs;
 
 namespace ThMEPWSS.Assistant
 {
+    public class Cache<K, V>
+    {
+        Dictionary<K, V> d = new Dictionary<K, V>();
+        Func<K, V> f;
+        public Cache(Func<K, V> f)
+        {
+            this.f = f;
+        }
+        public V this[K k]
+        {
+            get
+            {
+                if (!d.TryGetValue(k, out V v))
+                {
+                    v = f(k);
+                    d[k] = v;
+                }
+                return v;
+            }
+        }
+    }
     public class DrawingTransaction : IDisposable
     {
         public void Dispose()
@@ -47,8 +68,15 @@ namespace ThMEPWSS.Assistant
                 DrawingQueue.Dequeue()(adb);
             }
         }
-
-        public static void DrawLazy(Entity ent)
+        public static void SetLayerAndColorIndex(string layer, int colorIndex, params Entity[] ents)
+        {
+            foreach (var ent in ents)
+            {
+                ent.Layer = layer;
+                ent.ColorIndex = colorIndex;
+            }
+        }
+        public static void DrawEntityLazy(Entity ent)
         {
             DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(ent));
         }
@@ -206,6 +234,10 @@ namespace ThMEPWSS.Assistant
         {
             return DrawRectLazy(leftButtom, new Point3d(leftButtom.X + width, leftButtom.Y - height, leftButtom.Z));
         }
+        public static Polyline DrawLineSegment(ThWGLineSegment seg)
+        {
+            return DrawRectLazy(new ThWGRect(seg.Point1, seg.Point2));
+        }
         public static Polyline DrawRectLazy(ThWGRect rect)
         {
             return DrawRectLazyFromLeftTop(new Point2d(rect.MinX, rect.MaxY).ToPoint3d(), rect.Width, rect.Height);
@@ -244,6 +276,10 @@ namespace ThMEPWSS.Assistant
             });
             return circle;
         }
+        public static List<Line> DrawLinesLazy(params Point3d[] pts)
+        {
+            return DrawLinesLazy((IList<Point3d>)pts);
+        }
         public static List<Line> DrawLinesLazy(IList<Point3d> pts)
         {
             var ret = new List<Line>();
@@ -266,6 +302,20 @@ namespace ThMEPWSS.Assistant
                 adb.ModelSpace.Add(line);
             });
             return line;
+        }
+        public static Line DrawTextAndLinesLazy(DBText t1, DBText t2, double extH, double extV)
+        {
+            var r1 = GeoAlgorithm.GetBoundaryRect(t1);
+            var r2 = GeoAlgorithm.GetBoundaryRect(t2);
+            var pts = new Point3d[]
+            {
+                r1.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r1.RightButtom.OffsetXY(extH, -extV).ToPoint3d(),
+                r2.LeftButtom.OffsetXY(-extH, -extV).ToPoint3d(), r2.RightButtom.OffsetXY(extH, -extV).ToPoint3d(),
+            };
+            var r = GeoAlgorithm.GetGRect(pts);
+            var pt1 = GeoAlgorithm.MidPoint(r.LeftTop, r.LeftButtom).ToPoint3d();
+            var pt2 = GeoAlgorithm.MidPoint(r.RightTop, r.RightButtom).ToPoint3d();
+            return DrawLineLazy(pt1, pt2);
         }
 
         public static Line DrawTextUnderlineLazy(DBText t, double extH, double extV)

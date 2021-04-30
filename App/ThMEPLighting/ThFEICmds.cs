@@ -17,6 +17,7 @@ using ThMEPLighting.FEI;
 using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.EvacuationPath;
 using ThMEPLighting.FEI.PrintEntity;
+using ThMEPLighting.FEI.ThEmgPilotLamp;
 
 namespace ThMEPLighting
 {
@@ -97,6 +98,20 @@ namespace ThMEPLighting
                 }
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THSSZSDBZ", CommandFlags.Modal)]
+        public void ThMEGLBZ()
+        {
+            var lampLight = new ThEmgPilotLampCommand(false);
+            lampLight.Execute();
+        }
+        [CommandMethod("TIANHUACAD", "THSSZSDDZ", CommandFlags.Modal)]
+        public void ThMEGLDZ()
+        {
+            var lampLight = new ThEmgPilotLampCommand(true);
+            lampLight.Execute();
+        }
+
 
         [CommandMethod("TIANHUACAD", "thtestAS", CommandFlags.Modal)]
         public void test()
@@ -341,6 +356,7 @@ namespace ThMEPLighting
                 }
 
                 ThRegionDivisionService thRegionDivision = new ThRegionDivisionService();
+                //thRegionDivision.tol = 0.01;
                 var resPolys = thRegionDivision.DivisionRegion(frameLst.First());
                 resPolys = thRegionDivision.MergePolygon(resPolys);
                 foreach (var item in resPolys)

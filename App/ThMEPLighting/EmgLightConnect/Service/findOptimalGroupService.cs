@@ -172,7 +172,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             avg = distX.Sum() / distX.Count;
 
-            for (int i = 0; i < distX.Count - 1; i++)
+            for (int i = 0; i < distX.Count ; i++)
             {
                 variance += Math.Pow(distX[i] - avg, 2);
             }
