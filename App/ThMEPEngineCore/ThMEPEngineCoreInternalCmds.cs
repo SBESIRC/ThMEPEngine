@@ -143,7 +143,7 @@ namespace ThMEPEngineCore
                 var shell = acadDatabase.Element<Polyline>(result.ObjectId);
 
                 // 指定多边形内的洞
-                var holes = new List<Polyline>();
+                var holes = new DBObjectCollection();
                 var options = new PromptSelectionOptions()
                 {
                     MessageForAdding = "\n请选择洞",
@@ -176,7 +176,7 @@ namespace ThMEPEngineCore
                 var objs = new DBObjectCollection();
                 if (result3.StringResult == "EC")
                 {
-                    objs = ThMEPPolygonPartitionService.EarCut(shell);
+                    objs = ThMEPPolygonPartitionService.EarCut(shell, holes);
                 }
                 else if (result3.StringResult == "OPT")
                 {
