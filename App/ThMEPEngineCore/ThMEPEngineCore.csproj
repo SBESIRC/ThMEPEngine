@@ -50,11 +50,10 @@
     <Compile Include="Algorithm\AStarAlgorithm\MinHeap.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
+    <Compile Include="Algorithm\ThMEPPolygonPartitionService.cs" />
     <Compile Include="Algorithm\ThMEPPolygonRepairService.cs" />
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
-    <Compile Include="Algorithm\ThMEPPolyDecomposer.cs" />
-    <Compile Include="Algorithm\ThMEPTriangulationService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
     <Compile Include="BuildRoom\Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />

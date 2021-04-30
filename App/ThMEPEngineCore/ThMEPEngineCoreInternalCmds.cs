@@ -129,22 +129,24 @@ namespace ThMEPEngineCore
         }
 
 #if ACAD2016
-        [CommandMethod("TIANHUACAD", "THTRIANGULATE", CommandFlags.Modal)]
-        public void ThTriangulate()
+        [CommandMethod("TIANHUACAD", "THPTRIANGULATE", CommandFlags.Modal)]
+        public void ThPTriangulate()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetEntity("请选择对象");
+                // 指定多边形
+                var result = Active.Editor.GetEntity("\n请选择多段线");
                 if (result.Status != PromptStatus.OK)
                 {
                     return;
                 }
                 var shell = acadDatabase.Element<Polyline>(result.ObjectId);
 
+                // 指定多边形内的洞
                 var holes = new List<Polyline>();
                 var options = new PromptSelectionOptions()
                 {
-                    MessageForAdding = "请选择洞",
+                    MessageForAdding = "\n请选择洞",
                 };
                 var result2 = Active.Editor.GetSelection(options);
                 if (result2.Status == PromptStatus.OK)
@@ -154,30 +156,40 @@ namespace ThMEPEngineCore
                         holes.Add(acadDatabase.Element<Polyline>(obj));
                     }
                 }
-                var triangles = ThMEPTriangulationService.EarCut(shell, holes.ToArray());
-                foreach (Polyline triangle in triangles)
-                {
-                    triangle.ColorIndex = 1;
-                    acadDatabase.ModelSpace.Add(triangle);
-                }
-            }
-        }
 
-        [CommandMethod("TIANHUACAD", "THPOLYDECOMPOSE", CommandFlags.Modal)]
-        public void ThPolyDecompose()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("请选择对象");
-                if (result.Status != PromptStatus.OK)
+                // 指定分割方式
+                var kOptions = new PromptKeywordOptions("\n请指定分割方式")
+                {
+                    AllowNone = true
+                };
+                kOptions.Keywords.Add("EC", "EC", "EC(E)");
+                kOptions.Keywords.Add("OPT", "OPT", "OPT(O)");
+                kOptions.Keywords.Add("MONO", "MONO", "MONO(M)");
+                kOptions.Keywords.Default = "EC";
+                var result3 = Active.Editor.GetKeywords(kOptions);
+                if (result3.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                var poly = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity e in ThMEPPolyDecomposer.Decompose(poly))
+
+                // 分割
+                var objs = new DBObjectCollection();
+                if (result3.StringResult == "EC")
                 {
-                    e.ColorIndex = 1;
+                    objs = ThMEPPolygonPartitionService.EarCut(shell);
+                }
+                else if (result3.StringResult == "OPT")
+                {
+                    throw new NotImplementedException();
+                }
+                else if (result3.StringResult == "MONO")
+                {
+                    throw new NotImplementedException();
+                }
+                foreach (Entity e in objs)
+                {
                     acadDatabase.ModelSpace.Add(e);
+                    e.SetDatabaseDefaults();
                 }
             }
         }
@@ -302,14 +314,14 @@ namespace ThMEPEngineCore
         {
             var param = new ThWashParam();
             param.R = GetValue("\n输入保护半径");
-            param.protect_arch = GetValue("\n是否保护建筑空间[true(1)/false(0)] <true>",1) == 0 ? false : true;
-            param.protect_park = GetValue("\n是否保护停车空间[true(1)/false(0)] <true>",1) == 0 ? false : true;
+            param.protect_arch = GetValue("\n是否保护建筑空间[true(1)/false(0)] <true>", 1) == 0 ? false : true;
+            param.protect_park = GetValue("\n是否保护停车空间[true(1)/false(0)] <true>", 1) == 0 ? false : true;
             param.protect_other = GetValue("\n是否保护不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
             param.extend_arch = GetValue("\n建筑空间是否能保护停车空间和不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
             param.extend_park = GetValue("\n停车空间是否能保护到不可布空间[true(1)/false(0)] <false>") == 0 ? false : true;
             return param;
         }
-        private int GetValue(string message,int init=0)
+        private int GetValue(string message, int init = 0)
         {
             var pdo = new PromptIntegerOptions(message);
             var protectRadiusPdr = Active.Editor.GetInteger(pdo);
@@ -346,7 +358,7 @@ namespace ThMEPEngineCore
                 {
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=false,NameLayer="AD-NAME-ROOM",ColorIndex=1},                    
+                    new ThSpaceExtractor{ IsBuildObstacle=false,NameLayer="AD-NAME-ROOM",ColorIndex=1},
                     new ThWallExtractor{ColorIndex=2},
                     new ThCenterLineExtractor{ColorIndex=3},
                 };
@@ -395,19 +407,19 @@ namespace ThMEPEngineCore
                 parseService.Parse(@"E:\ZheDa\FireHydrantCover\GeoJsonTest\t2.result.txt");
 
                 var colorIndexes = new List<int>();
-                foreach(var data in parseService.Results)
+                foreach (var data in parseService.Results)
                 {
-                    if(data.IsValid())
+                    if (data.IsValid())
                     {
                         ObjectIdList objIds = new ObjectIdList();
                         GetColorIndex(colorIndexes);
                         var colorIndex = colorIndexes[colorIndexes.Count - 1];
-                        Circle circle = new Circle(data.Position,Vector3d.ZAxis,0.5);
+                        Circle circle = new Circle(data.Position, Vector3d.ZAxis, 0.5);
                         circle.ColorIndex = colorIndex;
                         circle.SetDatabaseDefaults();
                         objIds.Add(acadDatabase.ModelSpace.Add(circle));
                         var outerPoly = new Polyline();
-                        for(int i =0;i<data.OuterPoints.Count;i++)
+                        for (int i = 0; i < data.OuterPoints.Count; i++)
                         {
                             var pt = data.OuterPoints[i];
                             outerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
@@ -416,7 +428,7 @@ namespace ThMEPEngineCore
                         outerPoly.SetDatabaseDefaults();
                         objIds.Add(acadDatabase.ModelSpace.Add(outerPoly));
 
-                        if (data.InnerPoints.Count>=3)
+                        if (data.InnerPoints.Count >= 3)
                         {
                             var innerPoly = new Polyline();
                             for (int i = 0; i < data.InnerPoints.Count; i++)
@@ -429,7 +441,7 @@ namespace ThMEPEngineCore
                             objIds.Add(acadDatabase.ModelSpace.Add(innerPoly));
                         }
 
-                        if(objIds.Count>0)
+                        if (objIds.Count > 0)
                         {
                             GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
                         }
@@ -442,16 +454,16 @@ namespace ThMEPEngineCore
             Random r = new Random();
             while (true)
             {
-               int colorIndex = r.Next(0, 255);
-               if(colorIndex!=2)
+                int colorIndex = r.Next(0, 255);
+                if (colorIndex != 2)
                 {
-                   if(colorIndexes.IndexOf(colorIndex)<0)
+                    if (colorIndexes.IndexOf(colorIndex) < 0)
                     {
                         colorIndexes.Add(colorIndex);
                         break;
                     }
                 }
-            }           
+            }
         }
         [CommandMethod("TIANHUACAD", "ThWSDI", CommandFlags.Modal)]
         public void ThWSDI()
@@ -484,7 +496,7 @@ namespace ThMEPEngineCore
                 extractEngine.Extract(acadDatabase.Database, pts);
 
                 var toiletGroupDic = new Dictionary<Entity, string>();
-                foreach(var item in (extractors[4] as ThToiletGroupExtractor).ToiletGroupId)
+                foreach (var item in (extractors[4] as ThToiletGroupExtractor).ToiletGroupId)
                 {
                     toiletGroupDic.Add(item.Key, item.Value);
                 }
@@ -515,7 +527,7 @@ namespace ThMEPEngineCore
                 {
                     Types = new List<Type> { typeof(BlockReference) },
                 };
-                levelMarkService.Extract(acadDatabase.Database, pts);                
+                levelMarkService.Extract(acadDatabase.Database, pts);
 
                 var extractors = new List<ThExtractorBase>()
                 {
