@@ -57,6 +57,7 @@ namespace ThMEPElectrical
                 {
                     return;
                 }
+
                 //获取外包框
                 List<Curve> frameLst = new List<Curve>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())

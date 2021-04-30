@@ -17,138 +17,11 @@ using ThMEPWSS.Pipe.Model;
 using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Service;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
-using DotNetARX;
 
 namespace ThMEPWSS.Uitl
 {
     namespace ExtensionsNs
     {
-
-        public class YesDraw
-        {
-            public static List<Point3d> FixLines(List<Point3d> pts)
-            {
-                if (pts.Count < 2) return pts;
-                var ret = new List<Point3d>(pts.Count);
-                Point3d p1 = pts[0], p2 = pts[1];
-                for (int i = 2; i < pts.Count; i++)
-                {
-                    var p3 = pts[i];
-                    var v1 = p2.ToPoint2D() - p1.ToPoint2D();
-                    var v2 = p3.ToPoint2D() - p2.ToPoint2D();
-                    if (
-                        (Math.Abs(GeoAlgorithm.AngleToDegree(v1.Angle) - GeoAlgorithm.AngleToDegree(v2.Angle)) < 1)
-                        ||
-                        (GeoAlgorithm.Distance(p1, p2) < 1)
-                        ||
-                        (GeoAlgorithm.Distance(p2, p3) < 1)
-                        )
-                    {
-                    }
-                    else
-                    {
-                        ret.Add(p1);
-                        p1 = p2;
-                    }
-                    p2 = p3;
-                }
-                ret.Add(p1);
-                ret.Add(p2);
-                return ret;
-            }
-            public struct Context
-            {
-                public double DeltaX;
-                public double DeltaY;
-            }
-            public List<Context> ctxs = new List<Context>();
-            double curX;
-            double curY;
-            double minX;
-            double minY;
-            double maxX;
-            double maxY;
-            public double GetDeltaX() => maxX - minX;
-            public double GetDeltaY() => maxY - minY;
-            public IEnumerable<Point3d> GetPoint3ds(Point3d basePt)
-            {
-                yield return basePt;
-                double sdx = 0, sdy = 0;
-                foreach (var ctx in ctxs)
-                {
-                    sdx += ctx.DeltaX;
-                    sdy += ctx.DeltaY;
-                    yield return new Point3d(basePt.X + sdx, basePt.Y + sdy, 0);
-                }
-            }
-            public void Rotate(double radius, double degree)
-            {
-                var phi = GeoAlgorithm.AngleFromDegree(degree);
-                var dx = radius * Math.Cos(phi); var dy = radius * Math.Sin(phi);
-                curX += dx; curY += dy;
-                ctxs.Add(new Context() { DeltaX = dx, DeltaY = dy });
-                fixData();
-            }
-            public void OffsetX(double delta)
-            {
-                curX += delta;
-                ctxs.Add(new Context() { DeltaX = delta });
-                fixData();
-            }
-            public void OffsetY(double delta)
-            {
-                curY += delta;
-                ctxs.Add(new Context() { DeltaY = delta });
-                fixData();
-            }
-            public void OffsetXY(double deltaX, double deltaY)
-            {
-                curX += deltaX; curY += deltaY;
-                ctxs.Add(new Context() { DeltaX = deltaX, DeltaY = deltaY });
-                fixData();
-            }
-            public void GoX(double x)
-            {
-                OffsetX(x - curX);
-            }
-            public void GoY(double y)
-            {
-                OffsetY(y - curY);
-            }
-            public void GoXY(double x, double y)
-            {
-                OffsetXY(x - curX, y - curY);
-            }
-            public Point3d GetFromRightTop(Point3d basePt)
-            {
-                var delX = maxX - minX;
-                var delY = maxY - minY;
-                return new Point3d(basePt.X - delX, basePt.Y - delY, 0);
-            }
-            public double GetCurX() => curX;
-            public double GetCurY() => curY;
-            public double GetOffsetX() => maxX - minX;
-            public double GetOffsetY() => maxY - minY;
-            public ThWGRect GetGRect(Point3d basePt, bool bsPtIncluded)
-            {
-                List<Point3d> pts = GetPoint3ds(basePt, bsPtIncluded);
-                return GeoAlgorithm.GetGRect(pts);
-            }
-            private List<Point3d> GetPoint3ds(Point3d basePt, bool bsPtIncluded)
-            {
-                var q = GetPoint3ds(basePt);
-                if (!bsPtIncluded) q = q.Skip(1);
-                var pts = q.ToList();
-                return pts;
-            }
-            void fixData()
-            {
-                if (minX > curX) minX = curX;
-                if (minY > curY) minY = curY;
-                if (maxX < curX) maxX = curX;
-                if (maxY < curY) maxY = curY;
-            }
-        }
         public static class PointExtensions
         {
             public static Point3d Rotate(this Point3d point, double radius, double degree)
@@ -393,20 +266,6 @@ namespace ThMEPWSS.Uitl
             this.x2 = Math.Max(x1, x2);
             this.y1 = Math.Max(y1, y2);
         }
-        public ThWGRect OffsetXY(double deltaX, double deltaY)
-        {
-            return new ThWGRect(this.MinX + deltaX, this.MinY + deltaY, this.MaxX + deltaX, this.MaxY + deltaY);
-        }
-        public static ThWGRect Create(Point3dCollection points)
-        {
-            var pts = points.Cast<Point3d>();
-            return new ThWGRect(pts.Select(x => x.X).Min(), pts.Select(x => x.Y).Min(), pts.Select(x => x.X).Max(), pts.Select(x => x.Y).Max());
-        }
-        public static ThWGRect Create(Extents3d ext)
-        {
-            return new ThWGRect(ext.MinPoint.X, ext.MinPoint.Y, ext.MaxPoint.X, ext.MaxPoint.Y);
-        }
-
         public ThWGRect(Point2d leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
         {
         }
@@ -437,7 +296,7 @@ namespace ThMEPWSS.Uitl
         }
         public Polyline CreatePolygon(int num)
         {
-            return Pipe.Service.PolylineTools.CreatePolygon(Center, num, Radius);
+            return PolylineTools.CreatePolygon(Center, num, Radius);
         }
         public Point3dCollection ToPoint3dCollection()
         {
@@ -691,124 +550,9 @@ namespace ThMEPWSS.Uitl
     }
 
 
-    public static class LinqAlgorithm
-    {
-        public static Action Once(Action f)
-        {
-            bool ok = false;
-            return new Action(() =>
-            {
-                if (!ok)
-                {
-                    f?.Invoke();
-                    ok = true;
-                }
-            });
-        }
-        public static T GetLast<T>(this IList<T> source,int n)
-        {
-            return source[source.Count - n];
-        }
-        public static T FirstOrDefault<T>(Func<T, bool> f, params T[] source)
-        {
-            return source.FirstOrDefault(f);
-        }
-        public static IEnumerable<KeyValuePair<T, T>> YieldPairs<T>(List<T> g)
-        {
-            for (int i = 0; i < g.Count; i++)
-            {
-                for (int j = i + 1; j < g.Count; j++)
-                {
-                    yield return new KeyValuePair<T, T>(g[i], g[j]);
-                }
-            }
-        }
-        public static IEnumerable<KeyValuePair<T, T>> YieldPairs<T>(List<T> l1, List<T> l2)
-        {
-            foreach (var m1 in l1)
-            {
-                foreach (var m2 in l2)
-                {
-                    yield return new KeyValuePair<T, T>(m1, m2);
-                }
-            }
-        }
-        public static IEnumerable<KeyValuePair<T, T>> YieldPairs<T>(List<List<T>> groups)
-        {
-            foreach (var g in groups)
-            {
-                for (int i = 0; i < g.Count; i++)
-                {
-                    for (int j = i + 1; j < g.Count; j++)
-                    {
-                        yield return new KeyValuePair<T, T>(g[i], g[j]);
-                    }
-                }
-            }
-        }
-    }
-    public static class EntityFactory
-    {
-        public static Polyline CreatePolyline(Point3dCollection pts)
-        {
-            var pl = new Polyline();
-            for (int i = 0; i < pts.Count; i++)
-            {
-                pl.AddVertexAt(i, new Point2d(pts[i].X, pts[i].Y), 0, 0, 0);
-            }
-            return pl;
-        }
-        public static Polyline CreatePolyline(IList<Point3d> pts)
-        {
-            var pl = new Polyline();
-            for (int i = 0; i < pts.Count; i++)
-            {
-                pl.AddVertexAt(i, new Point2d(pts[i].X, pts[i].Y), 0, 0, 0);
-            }
-            return pl;
-        }
-    }
+
     public static class GeoAlgorithm
     {
-        public static Point2d MidPoint(Point2d pt1, Point2d pt2)
-        {
-            Point2d midPoint = new Point2d((pt1.X + pt2.X) / 2.0,
-                                        (pt1.Y + pt2.Y) / 2.0);
-            return midPoint;
-        }
-        public static Point3d MidPoint(Point3d pt1, Point3d pt2)
-        {
-            Point3d midPoint = new Point3d((pt1.X + pt2.X) / 2.0,
-                                        (pt1.Y + pt2.Y) / 2.0,
-                                        (pt1.Z + pt2.Z) / 2.0);
-            return midPoint;
-        }
-        public static ThWGRect GetGRect(IList<Point3d> pts)
-        {
-            if (pts.Count == 0) return default;
-            GetCornerCoodinate(pts, out double minX, out double minY, out double maxX, out double maxY);
-            return new ThWGRect(minX, minY, maxX, maxY);
-        }
-        public static void GetCornerCoodinate(IList<Point3d> pts, out double minX, out double minY, out double maxX, out double maxY)
-        {
-            minX = pts.Select(pt => pt.X).Min();
-            minY = pts.Select(pt => pt.Y).Min();
-            maxX = pts.Select(pt => pt.X).Max();
-            maxY = pts.Select(pt => pt.Y).Max();
-        }
-        public static bool CanConnect(ThWGLineSegment seg1, ThWGLineSegment seg2, double dis)
-        {
-            return IsLineConnected(seg1, seg2, 5) || (seg1.IsHorizontalOrVertical(5) && seg2.IsHorizontalOrVertical(5) && IsOnSameLine(seg1, seg2, 5) && GetMinConnectionDistance(seg1, seg2) < dis);
-        }
-        public static Point3dCollection GetPoint3dCollection(Point3d pt1, Point3d pt2)
-        {
-            var points = new Point3dCollection();
-            points.Add(pt1);
-            points.Add(new Point3d(pt1.X, pt2.Y, 0));
-            points.Add(pt2);
-            points.Add(new Point3d(pt2.X, pt1.Y, 0));
-            return points;
-        }
         public static ThWGLineSegment ToGLineSegment(this Line line)
         {
             return new ThWGLineSegment(line.StartPoint.ToPoint2D(), line.EndPoint.ToPoint2D());

@@ -5,9 +5,6 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
-using ThCADExtension;
-using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight;
 using ThMEPLighting.EmgLight.Service;
@@ -144,15 +141,15 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         public static void getBlkList(List<ThSingleSideBlocks> SingleSide, List<BlockReference> blkSource, ref List<ThBlock> blkList)
         {
-            var blkSizeDict = GetBlockService.blkSizeDict();
             for (int i = 0; i < SingleSide.Count; i++)
             {
-                getSideBlkList(SingleSide[i], blkSource, blkSizeDict, ref blkList);
+                getSideBlkList(SingleSide[i], blkSource, ref blkList);
             }
         }
 
-        private static void getSideBlkList(ThSingleSideBlocks side, List<BlockReference> blkSource, Dictionary<string, List<Point3d>> blkSizeDict, ref List<ThBlock> blkList)
+        private static void getSideBlkList(ThSingleSideBlocks side, List<BlockReference> blkSource, ref List<ThBlock> blkList)
         {
+            var blkSizeDict = GetBlockService.blkSizeDict();
             Tolerance tol = new Tolerance(10, 10);
             var allBlockList = side.getTotalBlock();
 
@@ -162,6 +159,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 BlockReference groupBlk = null;
 
                 var blk = blkSource.Where(x => x.Position.IsEqualTo(pt, tol)).FirstOrDefault();
+                var ptList = blkSizeDict[blk.Name].Select(x => x).ToList();
+                var connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
 
                 if (side.groupBlock.ContainsKey(pt) == true)
                 {
@@ -169,28 +168,47 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     groupBlk = blkSource.Where(x => x.Position.IsEqualTo(groupPt, tol)).FirstOrDefault();
                 }
 
+                if (groupBlk != null)
+                {
+                    var ptListGroup = blkSizeDict[groupBlk.Name];
+                    var connectPtGroup = ptListGroup.Select(x => x.TransformBy(groupBlk.BlockTransform)).ToList();
+                    var bottomPt = connectPtGroup[1];
+
+                    var inx = connectPt.IndexOf(connectPt.OrderBy(x => x.DistanceTo(bottomPt)).First());
+
+                    var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
+                    ptList[inx] = ptNew;
+
+                    connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+                }
+
+
+                var blkOutline = new Polyline();
+
+                blkOutline.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
+                blkOutline.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
+                blkOutline.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
+                blkOutline.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
+                blkOutline.TransformBy(blk.BlockTransform);
+
+                blkOutline.Closed = true;
+
                 var blkModel = new ThBlock(blk);
-                blkModel.setBlkInfo(blkSizeDict, groupBlk);
+                blkModel.outline = blkOutline;
+                blkModel.leftConnPt = connectPt[0];
+                blkModel.bottomConnPt = connectPt[1];
+                blkModel.rightConnpt = connectPt[2];
+                blkModel.topConnPt = connectPt[3];
 
                 blkList.Add(blkModel);
             }
         }
 
-        public static ThBlock getBlockByCenter(Point3d pt, List<ThBlock> blkList)
+        public static ThBlock getBlock(Point3d pt, List<ThBlock> blkList)
         {
             ThBlock blk = null;
 
             blk = blkList.Where(x => x.blkCenPt.IsEqualTo(pt, new Tolerance(1, 1))).FirstOrDefault();
-
-            return blk;
-        }
-
-        public static ThBlock getBlockByConnect(Point3d pt, List<ThBlock> blkList)
-        {
-            ThBlock blk = null;
-            var tol = new Tolerance(1, 1);
-
-            blk = blkList.Where(x => x.outline.ToCurve3d().IsOn(pt, tol) || x.outline.Contains(pt)).FirstOrDefault();
 
             return blk;
         }

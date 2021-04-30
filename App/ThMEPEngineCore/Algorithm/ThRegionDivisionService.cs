@@ -131,12 +131,8 @@ namespace ThMEPEngineCore.Algorithm
             foreach (var pl in polylines)
             {
                 var plOBB = pl.CalObb();
-                using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-                {
-                    //db.ModelSpace.Add(plOBB);
-                }
                 var plDir = GetPolylineDir(plOBB);
-                if (plDir.IsParallelTo(polyDir, new Tolerance(tol, tol)) || plDir.IsParallelTo(otherDir, new Tolerance(tol, tol)))
+                if (plDir.IsEqualTo(polyDir, new Tolerance(tol, tol)) || plDir.IsEqualTo(otherDir, new Tolerance(tol, tol)))
                 {
                     resPolys.Add(pl);
                 }

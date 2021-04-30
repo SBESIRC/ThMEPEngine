@@ -30,7 +30,7 @@
     <Compile Include="EmgLightConnect\ConnectService\connectSingleSideInGroupService.cs" />
     <Compile Include="EmgLightConnect\ConnectService\returnValueCalculation.cs" />
     <Compile Include="EmgLightConnect\drawLineService\drawEmgPipeService.cs" />
-    <Compile Include="EmgLightConnect\drawLineService\drawMainBlkService.cs" />
+    <Compile Include="EmgLightConnect\drawLineService\drawMainSideBlkService.cs" />
     <Compile Include="EmgLightConnect\drawLineService\drawSecBlkService.cs" />
     <Compile Include="EmgLightConnect\EmgConnectCommon.cs" />
     <Compile Include="EmgLightConnect\Model\ThBlock.cs" />
@@ -77,13 +77,6 @@
     <Compile Include="FEI\Service\CheckService.cs" />
     <Compile Include="FEI\Service\GeUtils.cs" />
     <Compile Include="FEI\Service\SelectService.cs" />
-    <Compile Include="FEI\ThEmgPilotLamp\CreateClearEmgLamp.cs" />
-    <Compile Include="FEI\ThEmgPilotLamp\EmgLampIndicatorLight.cs" />
-    <Compile Include="FEI\ThEmgPilotLamp\EmgLampModels.cs" />
-    <Compile Include="FEI\ThEmgPilotLamp\EmgPilotLampLineNode.cs" />
-    <Compile Include="FEI\ThEmgPilotLamp\GraphUtils.cs" />
-    <Compile Include="FEI\ThEmgPilotLamp\LayoutToStructure.cs" />
-    <Compile Include="FEI\ThEmgPilotLamp\ThEmgPilotLampCommand.cs" />
     <Compile Include="Garage\Engine\ThDoubleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThSingleRowLoopArrangementEngine.cs" />
     <Compile Include="Garage\Engine\ThLoopArrangementEngine.cs" />

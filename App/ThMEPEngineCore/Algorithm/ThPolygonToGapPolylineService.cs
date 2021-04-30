@@ -55,24 +55,18 @@ namespace ThMEPEngineCore.Algorithm
             {
                 return shell;
             }
-            else if (shell.Area == 0.0 && holes.Count == 1)
+            else if(shell.Area==0.0 && holes.Count==1)
             {
                 return holes[0];
             }
-            else if (shell.Area > 0.0 && holes.Count == 1)
+            else if(shell.Area > 0.0 && holes.Count == 1)
             {
                 Polyline shellOutline = shell.ToNTSLineString().ToDbPolyline();
                 return BuildOutermostPolyline(shellOutline, holes[0].ToNTSLineString().ToDbPolyline());
             }
             else
             {
-                using (AcadDatabase db = AcadDatabase.Active())
-                {
-
-                    db.ModelSpace.Add(shell);
-                    holes.ForEach(o => db.ModelSpace.Add(o));
-                }
-                return new Polyline();
+                throw new NotSupportedException();
             }
         }
 

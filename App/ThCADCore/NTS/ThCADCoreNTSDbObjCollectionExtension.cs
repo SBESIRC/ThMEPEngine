@@ -1,6 +1,8 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
+using Dreambuild.AutoCAD;
+using System.Collections.Generic;
 using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Operation.Overlay;
@@ -14,28 +16,32 @@ namespace ThCADCore.NTS
     {
         public static MultiPolygon ToNTSMultiPolygon(this DBObjectCollection objs)
         {
-            var polygons = objs.Cast<Entity>().Select(o => o.ToNTSPolygon());
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(polygons.ToArray());
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiPolygon(objs.ToNTSPolygons().ToArray());
         }
 
-        public static MultiLineString ToMultiLineString(this DBObjectCollection objs)
+        public static List<Polygon> ToNTSPolygons(this DBObjectCollection curves)
         {
-            var lineStrings = objs.Cast<Curve>().Select(o => o.ToNTSLineString());
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
+            var polygons = new List<Polygon>();
+            curves.Cast<Entity>().ForEach(e => polygons.Add(e.ToNTSPolygon()));
+            return polygons;
         }
 
-        public static Geometry ToNTSNodedLineStrings(this MultiLineString linestrings)
+        public static List<Geometry> ToNTSLineStrings(this DBObjectCollection curves)
+        {
+            var geometries = new List<Geometry>();
+            curves.Cast<Entity>().ForEach(e => geometries.Add(e.ToNTSGeometry()));
+            return geometries;
+        }
+
+        public static Geometry ToNTSNodedLineStrings(this DBObjectCollection curves)
         {
             // UnaryUnionOp.Union()有Robust issue
             // 会抛出"non-noded intersection" TopologyException
-            // OverlayNGRobust.Union()在某些情况下仍然会抛出TopologyException (NTS 2.2.0)
+            // OverlayNGRobust.Union()在某些情况下仍然会抛出TopologyException
+            // 为了规避这个问题，这里使用Geometry.Union()
+            // https://gis.stackexchange.com/questions/50399/fixing-non-noded-intersection-problem-using-postgis
             Geometry lineString = ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString();
-            return OverlayNGRobust.Overlay(linestrings, lineString, SpatialFunction.Union);
-        }
-
-        public static Geometry ToNTSNodedLineStrings(this DBObjectCollection objs)
-        {
-            return objs.ToMultiLineString().ToNTSNodedLineStrings();
+            return OverlayNGRobust.Overlay(ToMultiLineString(curves), lineString, SpatialFunction.Union);
         }
 
         public static Geometry UnionGeometries(this DBObjectCollection curves)
@@ -73,14 +79,27 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static MultiLineString ToMultiLineString(this DBObjectCollection curves)
+        {
+            var geometries = curves.Cast<Curve>().Select(o => o.ToNTSGeometry());
+            var lineStrings = geometries.Where(o => o is LineString).Cast<LineString>();
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateMultiLineString(lineStrings.ToArray());
+        }
+
         public static Geometry Combine(this DBObjectCollection curves)
         {
-            return GeometryCombiner.Combine(curves.ToMultiLineString().Geometries);
+            var geometries = curves.ToNTSLineStrings();
+            return GeometryCombiner.Combine(geometries);
+        }
+
+        public static bool Covers(this DBObjectCollection curves, Line line)
+        {
+            return curves.ToMultiLineString().Covers(line.ToNTSGeometry());
         }
 
         public static DBObjectCollection ToDbCollection(this Geometry geometry, bool keepHoles = false)
         {
-            return geometry.ToDbObjects(keepHoles).ToCollection();
+            return geometry.ToDbObjects().ToCollection<DBObject>();
         }
     }
 }

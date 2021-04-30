@@ -23,10 +23,7 @@ namespace ThMEPWSS.JsonExtensionsNs
         {
             return new KeyValuePair<K, V>(t.Item1, t.Item2);
         }
-        public static ThWGRect ToThWGRect(this Extents3d extents3D)
-        {
-            return new ThWGRect(extents3D.MinPoint, extents3D.MaxPoint);
-        }
+
     }
     public static class JsonExtensions
     {

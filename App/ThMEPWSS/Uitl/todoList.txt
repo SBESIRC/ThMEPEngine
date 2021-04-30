@@ -1,4 +1,3 @@
-﻿To do list:
-1. water bucket, too slow
-2. drawing issues for roof pipe system
+﻿D:\DATA\Git\ThMEPEngine\App\ThMEPWSS\Pipe\Model\ThWRainSystemDiagram.cs
+water bucket, too slow
 

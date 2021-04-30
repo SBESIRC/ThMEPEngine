@@ -312,11 +312,6 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static LineString ToNTSLineString(this Circle circle)
-        {
-            return circle.ToNTSPolygon().Shell;
-        }
-
         public static Polygon ToNTSPolygon(this Circle circle, int numPoints)
         {
             // 获取圆的外接矩形

@@ -79,7 +79,8 @@ namespace ThCADCore.NTS
         public static DBObjectCollection BuildArea(this DBObjectCollection objs)
         {
             var poylgons = new DBObjectCollection();
-            Geometry geometry = objs.BuildAreaGeometry();
+            var builder = new ThCADCoreNTSBuildArea();
+            Geometry geometry = builder.Build(objs.ExplodeCurves().ToMultiLineString());
             if (geometry is Polygon polygon)
             {
                 poylgons.Add(polygon.ToDbEntity());
@@ -96,12 +97,6 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
             return poylgons;
-        }
-
-        public static Geometry BuildAreaGeometry(this DBObjectCollection objs)
-        {
-            var builder = new ThCADCoreNTSBuildArea();
-            return builder.Build(objs.ExplodeCurves().ToMultiLineString());
         }
     }
 }

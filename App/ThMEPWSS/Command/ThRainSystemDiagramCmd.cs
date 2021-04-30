@@ -69,8 +69,8 @@ namespace ThMEPWSS.Command
 
         public void Execute()
         {
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var acadDatabase = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             {
                 //todo: process
 
@@ -109,7 +109,7 @@ namespace ThMEPWSS.Command
 
                 var bastPt = rst.Value;
 
-                diagram.InitServices(acadDatabase, points);
+                diagram.CollectData(acadDatabase, points);
                 diagram.InitStoreys(storeysRecEngine.Elements);
                 diagram.InitVerticalPipeSystems(points);
 

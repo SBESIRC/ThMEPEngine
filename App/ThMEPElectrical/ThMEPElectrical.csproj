@@ -84,7 +84,6 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
-    <Compile Include="Command\ThAutoFireAlarmSystemCommand.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
@@ -151,9 +150,6 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
-    <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
-    <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
-    <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThBlockConvertCmds.cs" />
     <Compile Include="ThBroadcastCmds.cs" />
     <Compile Include="ThLaneLineCmds.cs" />

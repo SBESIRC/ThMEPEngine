@@ -56,10 +56,6 @@ namespace ThMEPEngineCore
         public static double LOOSE_COLINEAR_DISTANCE = 1.0;
         public static Tolerance GEOMETRY_TOLERANCE = new Tolerance(1.0, 1.0);
 
-        // Tolerance.Global.EqualPoint: 1E-10
-        // Tolerance.Global.EqualVector: 1E-12
-        public static Tolerance DEFAULT_THMAP_TOLERANCE = new Tolerance(1e-6, 1e-5);
-
         // 相似度公差
         public const double SIMILARITYMEASURETOLERANCE = 0.9;
         /// <summary>

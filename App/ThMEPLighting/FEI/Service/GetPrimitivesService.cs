@@ -116,30 +116,6 @@ namespace ThMEPLighting.FEI
                 }
             }
         }
-        /// <summary>
-        /// 获取区域内的主要疏散路径或辅助
-        /// </summary>
-        /// <param name="polyline"></param>
-        /// <returns></returns>
-        public List<Curve> GetMainEvacuate(Polyline polyline,string name) 
-        {
-            var objs = new DBObjectCollection();
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                var exitLines = acdb.ModelSpace
-                .OfType<Curve>()
-                .Where(x => x.Layer == name);
-                exitLines.ForEach(x =>
-                {
-                    var transCurve = x.Clone() as Curve;
-                    originTransformer.Transform(transCurve);
-                    objs.Add(transCurve);
-                });
-            }
-            ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
-            var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
-            return sprayLines;
-        }
 
         /// <summary>
         /// 获取出入口图块

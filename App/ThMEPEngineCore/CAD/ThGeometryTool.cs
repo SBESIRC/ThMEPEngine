@@ -91,15 +91,15 @@ namespace ThMEPEngineCore.CAD
             plane.Dispose();
             return pts;
         }
-        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt,double xyTolerance=0.0001,double zTolerance=0.001)
+        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt,double tolerance=0.0001)
         {
             Vector3d vec = lineSp.GetVectorTo(lineEp);
             Plane plane = new Plane(lineSp, vec);
             Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
             Point3d newPt=outerPt.TransformBy(wcsToUcs);
-            if(Math.Abs(newPt.X)<= xyTolerance && Math.Abs(newPt.Y) <= xyTolerance)
+            if(Math.Abs(newPt.X)<= tolerance && Math.Abs(newPt.Y) <= tolerance)
             {
-                if(newPt.Z>= -zTolerance && newPt.Z <= (lineSp.DistanceTo(lineEp)+ zTolerance))
+                if(newPt.Z>=0 && newPt.Z<= lineSp.DistanceTo(lineEp))
                 {
                     return true;
                 }

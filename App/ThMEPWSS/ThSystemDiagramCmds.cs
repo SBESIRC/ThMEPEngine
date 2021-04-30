@@ -8,8 +8,6 @@ using Linq2Acad;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.Pipe.Service;
 using ThCADCore.NTS;
-using DotNetARX;
-using System;
 
 namespace ThMEPWSS
 {
@@ -52,8 +50,8 @@ namespace ThMEPWSS
                 return;
             }
 
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var adb = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var tr = DrawUtils.DrawingTransaction)
             {
                 string targetLabel = rst.StringResult;
@@ -71,18 +69,6 @@ namespace ThMEPWSS
                             Dbg.ShowWhere(e);
                         }
                     }
-                }
-            }
-        }
-        [CommandMethod("TIANHUACAD", "TzTest", CommandFlags.Modal)]
-        public void TzTest()
-        {
-            using (var db = Linq2Acad.AcadDatabase.Active())
-            {
-                var rst = AcHelper.Active.Editor.GetEntity("\nSelect an entity");
-                if(rst.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-                {
-
                 }
             }
         }

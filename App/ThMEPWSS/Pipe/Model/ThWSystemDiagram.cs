@@ -22,8 +22,7 @@ namespace ThMEPWSS.Pipe.Model
     {
         None,
         Long, //转管
-        Short, //乙字湾
-        Gravity //重力雨水斗转换
+        Short //乙字湾
     }
 
     public enum WaterBucketEnum
@@ -82,8 +81,15 @@ namespace ThMEPWSS.Pipe.Model
         private string _nd = string.Empty;
         public string ND
         {
-            get => _nd;
-            set => _nd = value ?? string.Empty;
+            get
+            {
+                return _nd;
+            }
+            set
+            {
+                if (value != null)
+                    _nd = value;
+            }
         }
 
         public VerticalPipeType PipeType { get; set; }
@@ -131,6 +137,11 @@ namespace ThMEPWSS.Pipe.Model
     }
     public class ThWSDStorey : ThWSDDrawableElement, IEquatable<ThWSDStorey>
     {
+        [JsonIgnore]
+        public ThWSDStorey HigerStorey { get; set; } = null;
+        [JsonIgnore]
+        public ThWSDStorey LowerStorey { get; set; } = null;
+
         //such as 1F, 2F.... RF+1, RF+2
         public string Label { get; set; } = string.Empty;
         public string Elevation { get; set; } = string.Empty;
@@ -139,8 +150,8 @@ namespace ThMEPWSS.Pipe.Model
         public const double INDEX_TEXT_OFFSET_X = 2000;
         public const double INDEX_TEXT_OFFSET_Y = 130;
         public const double RF_OFFSET_Y = 500;
-
-
+        
+        
         public List<ThWSDWaterBucket> Buckets { get; set; } = new List<ThWSDWaterBucket>();
         public List<ThWSDPipe> VerticalPipes { get; set; } = new List<ThWSDPipe>();
         [JsonIgnore]
@@ -150,31 +161,30 @@ namespace ThMEPWSS.Pipe.Model
         [JsonIgnore]
         public BlockReference BlockRef { get; set; }
         [JsonIgnore]
-        public Point3d Position => BlockRef.Position;
-        static void SetStyle(params Entity[] ents)
+        public Point3d Position
         {
-            const string layer = "W-NOTE";
-            foreach (var e in ents)
+            get
             {
-                e.Layer = layer;
-                e.ColorIndex = 256;
+                return BlockRef.Position;
             }
         }
         public void Draw(StoreyDrawingContext ctx)
         {
             var basePt = ctx.BasePoint;
             var lineLen = ctx.StoreyLineLength;
-
+            var layer = "W-NOTE";
             {
                 var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
+                line.Layer = layer;
                 var dbt = DU.DrawTextLazy(Label, TEXT_HEIGHT, new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + INDEX_TEXT_OFFSET_Y, 0));
-                SetStyle(line, dbt);
+                dbt.Layer = layer;
             }
             if (Label == "RF")
             {
                 var line = DU.DrawLineLazy(new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + RF_OFFSET_Y, 0));
+                line.Layer = layer;
                 var dbt = DU.DrawTextLazy("建筑完成面", TEXT_HEIGHT, new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y + INDEX_TEXT_OFFSET_Y, 0));
-                SetStyle(line, dbt);
+                dbt.Layer = layer;
             }
         }
         public override int GetHashCode()
@@ -205,7 +215,6 @@ namespace ThMEPWSS.Pipe.Model
             {
                 basePt = basePt.OffsetY(ThWSDStorey.RF_OFFSET_Y);
             }
-            ctx.RainSystemDrawingContext.WaterBucketPoint = basePt;
             switch (Type)
             {
                 case WaterBucketEnum.Gravity:
@@ -231,44 +240,46 @@ namespace ThMEPWSS.Pipe.Model
             return Label.GetHashCode() ^ ND.GetHashCode() ^ Type.GetHashCode();
         }
     }
-    public class ThWSDFloorDrain : IEquatable<ThWSDFloorDrain>
+    public class ThWSDDrain : ThWSDDrawableElement, IEquatable<ThWSDDrain>
     {
         /// <summary>
         /// 地漏标注
         /// </summary>
         public string Label { get; set; } = string.Empty;
-        public string DN { get; set; } = string.Empty;
+        public string ND { get; set; } = string.Empty;
+        private string BlockName { get; set; } = string.Empty;
         /// <summary>
         /// 是否有套管
         /// </summary>
         public bool HasDrivePipe { get; set; }
 
-        public ThWSDFloorDrain()
+        public ThWSDDrain()
         {
+            BlockName = ThWPipeCommon.W_RAIN_EQPM;
         }
 
-        public bool Equals(ThWSDFloorDrain other)
+        public bool Equals(ThWSDDrain other)
         {
-            return this.Label.Equals(other.Label) && this.DN.Equals(other.DN);
+            return this.Label.Equals(other.Label) && this.ND.Equals(other.ND);
         }
 
         public override int GetHashCode()
         {
-            return this.Label.GetHashCode() ^ this.DN.GetHashCode();
+            return this.Label.GetHashCode() ^ this.ND.GetHashCode();
         }
-        public void Draw(Point3d basePt)
+        public override void Draw(Point3d basePt)
         {
-
+            DrawUtils.DrawTextLazy("ThWSDDrain", 100, basePt);
         }
     }
 
-    public class ThWSDCondensePipe : IEquatable<ThWSDCondensePipe>
+    public class ThWSDCondensePipe : ThWSDDrawableElement, IEquatable<ThWSDCondensePipe>
     {
         /// <summary>
         /// 标注
         /// </summary>
         public string Label { get; set; } = string.Empty;
-        public string DN { get; set; } = string.Empty;
+        public string ND { get; set; } = string.Empty;
         /// <summary>
         /// 是否有套管
         /// </summary>
@@ -276,15 +287,19 @@ namespace ThMEPWSS.Pipe.Model
 
         public override int GetHashCode()
         {
-            return this.Label.GetHashCode() ^ DN.GetHashCode() ^ HasDrivePipe.GetHashCode();
+            return this.Label.GetHashCode() ^ ND.GetHashCode() ^ HasDrivePipe.GetHashCode();
         }
         public bool Equals(ThWSDCondensePipe other)
         {
-            return this.Label.Equals(other.Label) && this.DN.Equals(other.DN) && this.HasDrivePipe.Equals(other.HasDrivePipe);
+            return this.Label.Equals(other.Label) && this.ND.Equals(other.ND) && this.HasDrivePipe.Equals(other.HasDrivePipe);
+        }
+        public override void Draw(Point3d basePt)
+        {
+            DrawUtils.DrawTextLazy("ThWSDCondensePipe", 100, basePt);
         }
     }
 
-    public class ThWSDCheckPoint : IEquatable<ThWSDCheckPoint>
+    public class ThWSDCheckPoint : ThWSDDrawableElement, IEquatable<ThWSDCheckPoint>
     {
         public bool HasCheckPoint { get; set; } = false;
         public string Label { get; set; } = string.Empty;
@@ -298,7 +313,7 @@ namespace ThMEPWSS.Pipe.Model
         {
             return this.Label.Equals(other.Label) && this.ND.Equals(other.ND);
         }
-        public void Draw(Point3d basePt)
+        public override void Draw(Point3d basePt)
         {
             if (HasCheckPoint)
             {
@@ -312,7 +327,7 @@ namespace ThMEPWSS.Pipe.Model
     {
         public string Label { get; set; } = string.Empty;
         public string BlockName { get; set; } = string.Empty;
-        public string DN { get; set; } = string.Empty;
+        public string ND { get; set; } = string.Empty;
 
         /// <summary>
         /// 是否有套管
@@ -334,12 +349,12 @@ namespace ThMEPWSS.Pipe.Model
 
         public override int GetHashCode()
         {
-            return DN.GetHashCode() ^ OutputType.GetHashCode() ^ HasDrivePipe.GetHashCode();
+            return ND.GetHashCode() ^ OutputType.GetHashCode() ^ HasDrivePipe.GetHashCode();
         }
 
         public bool Equals(ThWSDOutputType other)
         {
-            return DN.Equals(other.DN) && OutputType.Equals(other.OutputType) && HasDrivePipe.Equals(other.HasDrivePipe);
+            return ND.Equals(other.ND) && OutputType.Equals(other.OutputType) && HasDrivePipe.Equals(other.HasDrivePipe);
         }
     }
 
