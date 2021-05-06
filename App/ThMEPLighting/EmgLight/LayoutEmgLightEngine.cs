@@ -8,7 +8,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight.Service;
-using ThMEPLighting.EmgLight.Assistant;
+using ThMEPLighting.EmgLight.Common;
 using ThMEPLighting.EmgLight.Model;
 
 
@@ -98,6 +98,11 @@ namespace ThMEPLighting.EmgLight
             });
 
             layoutInfo = resetResult;
+        }
+
+        public void moveEmg(GetBlockService getBlockS, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutInfo)
+        {
+
         }
     }
 }

@@ -11,10 +11,12 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
 using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLight;
-using ThMEPLighting.EmgLight.Service;
 using ThMEPLighting.EmgLight.Assistant;
+using ThMEPLighting.EmgLight.Service;
+using ThMEPLighting.EmgLight.Common;
 using ThMEPLighting.EmgLightConnect;
 using ThMEPLighting.EmgLightConnect.Service;
+
 
 namespace ThMEPLighting
 {
@@ -68,9 +70,14 @@ namespace ThMEPLighting
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
 
+                    //取块
+                    var getBlockS = new GetBlockService();
+                    getBlockS.getBlocksData(bufferFrame, transformer);
+
                     //清除layer
-                    var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
-                    RemoveBlockService.ClearEmergencyLight(block);
+                    //var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
+                    //RemoveBlockService.ClearEmergencyLight(block);
+                    RemoveBlockService.ClearEmergencyLight(getBlockS.emgLight);
 
                     var b = false;
                     if (b == true)
@@ -87,6 +94,9 @@ namespace ThMEPLighting
                     //主车道布置信息
                     LayoutEmgLightEngine layoutEngine = new LayoutEmgLightEngine();
                     var layoutInfo = layoutEngine.LayoutLight(bufferFrame, mergedOrderedLane, columns, walls);
+
+                    //如果应急灯和疏散灯重合则移动应急灯
+                    layoutEngine.moveEmg(getBlockS, ref layoutInfo);
 
                     //换回布置
                     layoutEngine.ResetResult(ref layoutInfo, transformer);
@@ -183,12 +193,12 @@ namespace ThMEPLighting
                     var getBlockS = new GetBlockService();
                     getBlockS.getBlocksData(bufferFrame, transformer);
 
-                    var blockList = new Dictionary<EmgConnectCommon.BlockType, List<BlockReference>>();
+                    var blockList = new Dictionary<EmgBlkType.BlockType, List<BlockReference>>();
                     getBlockS.getBlockList(blockList);
 
                     BlockReference ALE = ALEOri.Clone() as BlockReference;
                     transformer.Transform(ALE);
-                    blockList.Add(EmgConnectCommon.BlockType.ale, new List<BlockReference> { ALE });
+                    blockList.Add(EmgBlkType.BlockType.ale, new List<BlockReference> { ALE });
 
                     GetBlockService.projectToXY(ref blockList);
 
@@ -201,7 +211,6 @@ namespace ThMEPLighting
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
 
-                    ConnectEmgLightEngine ConnectEngine = new ConnectEmgLightEngine();
                     ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame);
 
                 }

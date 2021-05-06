@@ -8,6 +8,7 @@ using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLight.Model;
+using ThMEPLighting.EmgLight.Common;
 
 
 namespace ThMEPLighting.EmgLight.Service

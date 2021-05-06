@@ -10,13 +10,13 @@ using ThMEPEngineCore.Algorithm;
 using ThMEPLighting.EmgLightConnect.Service;
 using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLightConnect.Model;
-using ThMEPLighting.EmgLight.Service;
+using ThMEPLighting.EmgLight.Common;
 
 namespace ThMEPLighting.EmgLightConnect
 {
     public class ConnectEmgLightEngine
     {
-        public static void ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockSourceList, Polyline frame)
+        public static void ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame)
         {
 
             //if (emgLightList.Count == 0 && evacList.Count == 0 && emgExitList.Count == 0)
@@ -44,7 +44,7 @@ namespace ThMEPLighting.EmgLightConnect
                     DrawUtils.ShowGeometry(ba.Position, EmgConnectCommon.LayerBlockCenter, Color.FromColorIndex(ColorMethod.ByColor, 50), LineWeight.LineWeight035);
                 }
             }
-          
+
             ////分组
             //沿车道线成环分区
             orderSingleSideLaneService.orderOutterSingleSideLane(mergedOrderedLane, frame, out var pointList, out var notTravelledList, out var orderedOutterLaneSideList);
@@ -54,6 +54,8 @@ namespace ThMEPLighting.EmgLightConnect
             MergeSideService.mergeSide(orderedAllLaneSideList, out var sideDict);
             MergeSideService.mergeSigleSideBlocks(sideDict, singleSideBlocks);
 
+            ConnectSingleSideService.forDebugLaneSideNo (singleSideBlocks);
+
             //车道道路成图
             graphService.createOutterGraph(orderedAllLaneSideList[0], sideDict, singleSideBlocks, out var sideGraph);
             graphService.createInnerGraph(orderedAllLaneSideList, sideDict, sideGraph);
@@ -61,7 +63,7 @@ namespace ThMEPLighting.EmgLightConnect
             MergeSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
 
             //连线数据
-            var ALE = blockSourceList[EmgConnectCommon.BlockType.ale].First();
+            var ALE = blockSourceList[EmgBlkType.BlockType.ale].First();
             connectSingleSideBlkService.connectMainToMain(singleSideBlocks);
             MergeSideService.relocateSecBlockSide(singleSideBlocks);
             connectSingleSideBlkService.connecSecToMain(ALE, singleSideBlocks, frame);
@@ -89,6 +91,7 @@ namespace ThMEPLighting.EmgLightConnect
             ////////
 
             ////组内连线
+            
             var connectList = connectSingleSideInGroupService.connectAllSingleSide(ALE, OptimalGroupBlocks);
 
             ////////debug 打图，要删
@@ -104,13 +107,11 @@ namespace ThMEPLighting.EmgLightConnect
             DrawUtils.ShowGeometry(secLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 70));
             DrawUtils.ShowGeometry(groupLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 30));
 
-            var newLink = drawEmgPipeService.CorrectIntersectLink(linkLine, blkList);
+            var newLink = drawCorrectLinkService.CorrectIntersectLink(linkLine, blkList);
             DrawUtils.ShowGeometry(newLink, EmgConnectCommon.LayerFinalFinal, Color.FromColorIndex(ColorMethod.ByColor, 241));
 
-           
-            
 
-
+           // return newLink;
         }
 
 

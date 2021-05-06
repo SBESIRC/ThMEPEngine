@@ -199,11 +199,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var thisLane = side.laneSide.Select(x => x.Item1).ToList();
 
             var toSideTemp = singleSideBlocks.Where(x => sideGraph.sideVertexNodeList[side.laneSideNo].firstEdge != null && x.laneSideNo == sideGraph.sideVertexNodeList[side.laneSideNo].firstEdge.nodeIndex).FirstOrDefault();
-            if (toSideTemp != null)
+            if (toSideTemp != null && toSideTemp.getTotalMainBlock().Count > 0)
             {
                 var toLane = toSideTemp.laneSide.Select(x => x.Item1).ToList();
                 var sameLane = toLane.Where(x => thisLane.Contains(x)); //不是同一条线的对面
-                if (sameLane.Count() == 0 && toSideTemp.getTotalMainBlock().Count > 0 && turnNotOver180(side, toSideTemp))
+                var minDist = toSideTemp.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
+
+                if (sameLane.Count() == 0  && turnNotOver180(side, toSideTemp) && minDist <= EmgConnectCommon.TolSaperateGroupMaxDistance)
                 {
                     toSide = toSideTemp;
                 }
@@ -211,11 +213,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             var fromNode = sideGraph.sideVertexNodeList.Where(x => x.firstEdge.nodeIndex == side.laneSideNo).FirstOrDefault();
             var fromSideTemp = singleSideBlocks.Where(x => fromNode != null && x.laneSideNo == sideGraph.sideVertexNodeList.IndexOf(fromNode)).FirstOrDefault();
-            if (fromSideTemp != null)
+            if (fromSideTemp != null && fromSideTemp.getTotalMainBlock().Count > 0)
             {
                 var fromLane = fromSideTemp.laneSide.Select(x => x.Item1).ToList();
                 var sameLane = fromLane.Where(x => thisLane.Contains(x));
-                if (sameLane.Count() == 0 && fromSideTemp.getTotalMainBlock().Count > 0 && turnNotOver180(side, fromSideTemp))
+                var minDist = fromSideTemp.getTotalMainBlock().Select(x => x.DistanceTo(side.mainBlk[0])).Min();
+
+                if (sameLane.Count() == 0  && turnNotOver180(side, fromSideTemp) && minDist <= EmgConnectCommon.TolSaperateGroupMaxDistance)
                 {
                     fromSide = fromSideTemp;
                 }
@@ -577,19 +581,19 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 var sideMainBlk = singleSideBlocks[i].getAllMainAndReMain();
 
-                for (int j = singleSideBlocks[i].secBlk.Count-1; j>=0 ; j--)
+                for (int j = singleSideBlocks[i].secBlk.Count - 1; j >= 0; j--)
                 {
                     var secPt = singleSideBlocks[i].secBlk[j];
                     var sideNearest = sideMainBlk.Select(x => x.DistanceTo(secPt)).Min();
                     var allNearest = allTotalMainBlk.Select(x => x.DistanceTo(secPt)).Min();
 
-                    if (sideNearest/ allNearest >3 )
+                    if (sideNearest / allNearest > 3)
                     {
-                        var newMainBlk = allTotalMainBlk.Where(x => x.DistanceTo(secPt) == allNearest).FirstOrDefault ();
+                        var newMainBlk = allTotalMainBlk.Where(x => x.DistanceTo(secPt) == allNearest).FirstOrDefault();
                         var newSide = singleSideBlocks.Where(x => x.getTotalBlock().Contains(newMainBlk)).First();
                         newSide.secBlk.Add(secPt);
                         singleSideBlocks[i].secBlk.Remove(secPt);
-                
+
                     }
                 }
             }

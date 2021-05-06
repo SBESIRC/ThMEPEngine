@@ -2,8 +2,10 @@
 using System.Linq;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.Colors;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.EmgLightConnect.Model;
+using ThMEPLighting.EmgLight.Assistant;
 
 
 
@@ -31,30 +33,44 @@ namespace ThMEPLighting.EmgLightConnect.Service
         private static List<(Point3d, Point3d)> connectSingleSide(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
             //var orderSigleSideGroup = orderSignleSidePrim(ALE, sigleSideGroup);
-            var orderSigleSideGroup = orderSignleSideOrigin(ALE, sigleSideGroup);
+            //var orderSigleSideGroup = orderSignleSideOrigin(ALE, sigleSideGroup);
+            //var orderSigleSideGroup = orderSignleSideLaneOrder(ALE, sigleSideGroup);
+            //var orderSigleSideGroup = orderSignleSideDistTypeC(ALE, sigleSideGroup);
+
+            var orderSigleSideGroup = orderSignleSideDistNew(ALE, sigleSideGroup);
+
 
             var blockList = new List<Point3d>();
-            //blockList.AddRange(getAllMainAndReMain(orderSigleSideGroup[0]));
+
+            for (int i = 0; i < orderSigleSideGroup.Count; i++)
+            {
+                var pts = orderSigleSideGroup[i].getTotalBlock();
+                for (int j = 0; j < pts.Count; j++)
+                {
+                    DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), "llable0blkNo", Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
+
+                }
+            }
+
+
             blockList.AddRange(orderSigleSideGroup[0].getTotalBlock());
 
             var connectList = new List<(Point3d, Point3d)>();
 
             for (int i = 1; i < orderSigleSideGroup.Count; i++)
             {
-
-                //var thisLaneBlock = getAllMainAndReMain(orderSigleSideGroup[i]);
                 var thisLaneBlock = orderSigleSideGroup[i].getTotalBlock();
 
                 Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
                 List<(int, int, double)> closedDists = returnValueCalculation.getDistMatrix(blockList, thisLaneBlock); //(blocklist index, focused side index, distance)
 
-                //for printing debug drawing info, save connection line in an additional list
                 var connectListTemp = returnValueCalculation.findOptimalConnectionInGroup(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
+                //var connectListTemp = returnValueCalculation.findOptimalConnectionInGroupFilter(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
 
                 if (connectListTemp.Count > 0)
                 {
                     connectList.AddRange(connectListTemp);
-                    orderSigleSideGroup[i].connectPt(connectList[0].Item1, connectList[0].Item2);
+                    orderSigleSideGroup[i].connectPt(connectListTemp[0].Item1, connectListTemp[0].Item2);
                 }
 
                 blockList.AddRange(thisLaneBlock);
@@ -72,7 +88,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             foreach (var side in sigleSideGroup)
             {
-                if (side.getTotalBlock().Count > 0)
+                if (side.Count > 0)
                 {
                     var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
                     sideDistDict.Add(side, dist);
@@ -80,6 +96,48 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
 
             var orderSingleSide = sideDistDict.OrderBy(x => x.Value).Select(x => x.Key).ToList();
+
+            return orderSingleSide;
+        }
+        
+        private static List<ThSingleSideBlocks> orderSignleSideDistNew(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        {
+            var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
+
+            foreach (var side in sigleSideGroup)
+            {
+                if (side.Count > 0)
+                {
+                    var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+                    sideDistDict.Add(side, dist);
+                }
+            }
+
+            var orderSingleSideTemp = sideDistDict.OrderBy(x => x.Value).ToList();
+
+            var notInSide = new List<ThSingleSideBlocks>();
+            var orderSingleSide = new List<ThSingleSideBlocks>();
+            orderSingleSide.Add(orderSingleSideTemp[0].Key);
+            int prevIdx = 0;
+            for (int i = 1; i < orderSingleSideTemp.Count; i++)
+            {
+                var prevBlk = orderSingleSideTemp[prevIdx].Key;
+                var thisBlk = orderSingleSideTemp[i].Key;
+
+                var dist = distanceInSide(prevBlk, thisBlk);
+                if (dist <= EmgConnectCommon.TolSaperateGroupMaxDistance)
+                {
+                    orderSingleSide.Add(thisBlk);
+                    prevIdx = i;
+                }
+                else
+                {
+                    notInSide.Add(thisBlk);
+                }
+
+            }
+
+            orderSingleSide.AddRange(notInSide);
 
             return orderSingleSide;
         }
@@ -95,7 +153,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
             foreach (var side in sigleSideGroup)
             {
-                if (side.getTotalBlock().Count > 0)
+                if (side.Count > 0)
                 {
                     var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
                     sideDistDict.Add(side, dist);
@@ -143,6 +201,50 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return orderSides;
         }
 
+        //车道线顺序排序
+        private static List<ThSingleSideBlocks> orderSignleSideLaneOrder(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        {
+            List<ThSingleSideBlocks> orderSides = new List<ThSingleSideBlocks>();
+
+            var laneOrderSide = sigleSideGroup.Where(x => x.Count > 0).ToList();
+
+            var distStart = laneOrderSide[0].getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+            var distEnd = laneOrderSide.Last().getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+
+            if (distStart <= distEnd)
+            {
+                orderSides = laneOrderSide;
+            }
+            else
+            {
+                for (int i = laneOrderSide.Count - 1; i >= 0; i--)
+                {
+                    orderSides.Add(laneOrderSide[i]);
+                }
+            }
+
+
+            return orderSides;
+        }
+
+        private static List<ThSingleSideBlocks> orderSignleSideDistTypeC(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        {
+            var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
+
+            foreach (var side in sigleSideGroup)
+            {
+                if (side.Count > 0)
+                {
+                    var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+                    sideDistDict.Add(side, dist);
+                }
+            }
+
+            var orderSingleSide = sideDistDict.OrderBy(x => x.Value).Select(x => x.Key).ToList();
+
+            return orderSingleSide;
+        }
+
         private static void orderInsert(Dictionary<int, int> orderP, List<int> par, List<ThSingleSideBlocks> sides, ref List<ThSingleSideBlocks> orderSides)
         {
             //var child = orderP.Where(x => x.Value == par).ToList();
@@ -170,7 +272,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 orderInsert(orderP, newPar, sides, ref orderSides);
             }
         }
-
 
         private static double distanceInSide(ThSingleSideBlocks sideA, ThSingleSideBlocks sideB)
         {

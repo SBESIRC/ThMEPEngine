@@ -5,22 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
-using NFox.Cad;
-using ThCADExtension;
-using ThCADCore.NTS;
 using ThMEPEngineCore.Algorithm;
-using ThMEPLighting.EmgLight;
-using ThMEPLighting.EmgLight.Service;
-using ThMEPLighting.EmgLightConnect.Model;
 
-
-
-namespace ThMEPLighting.EmgLightConnect.Service
+namespace ThMEPLighting.EmgLight.Common
 {
     public class GetBlockService
     {
-        Dictionary<BlockReference, BlockReference> emgLight = new Dictionary<BlockReference, BlockReference>();
-        Dictionary<BlockReference, BlockReference> evacR = new Dictionary<BlockReference, BlockReference>();
+        public Dictionary<BlockReference, BlockReference> emgLight = new Dictionary<BlockReference, BlockReference>();
+        public Dictionary<BlockReference, BlockReference> evacR = new Dictionary<BlockReference, BlockReference>();
         Dictionary<BlockReference, BlockReference> evacRL = new Dictionary<BlockReference, BlockReference>();
         Dictionary<BlockReference, BlockReference> exitE = new Dictionary<BlockReference, BlockReference>();
         Dictionary<BlockReference, BlockReference> exitS = new Dictionary<BlockReference, BlockReference>();
@@ -54,29 +46,29 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        public void getBlockList(Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockList)
+        public void getBlockList(Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockList)
         {
-            blockList.Add(EmgConnectCommon.BlockType.emgLight, emgLight.Select(x => x.Value).ToList());
-            blockList.Add(EmgConnectCommon.BlockType.evac, evacR.Select(x => x.Value).ToList());
-            blockList[EmgConnectCommon.BlockType.evac].AddRange(evacRL.Select(x => x.Value).ToList());
+            blockList.Add(EmgBlkType.BlockType.emgLight, emgLight.Select(x => x.Value).ToList());
+            blockList.Add(EmgBlkType.BlockType.evac, evacR.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.evac].AddRange(evacRL.Select(x => x.Value).ToList());
 
-            blockList.Add(EmgConnectCommon.BlockType.exit, exitE.Select(x => x.Value).ToList());
-            blockList[EmgConnectCommon.BlockType.exit].AddRange(exitS.Select(x => x.Value).ToList());
-            blockList[EmgConnectCommon.BlockType.exit].AddRange(exitECeiling.Select(x => x.Value).ToList());
-            blockList[EmgConnectCommon.BlockType.exit].AddRange(exitSCeiling.Select(x => x.Value).ToList());
+            blockList.Add(EmgBlkType.BlockType.exit, exitE.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.exit].AddRange(exitS.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.exit].AddRange(exitECeiling.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.exit].AddRange(exitSCeiling.Select(x => x.Value).ToList());
 
-            blockList.Add(EmgConnectCommon.BlockType.enter, enter.Select(x => x.Value).ToList());
-            blockList[EmgConnectCommon.BlockType.enter].AddRange(enterCeiling.Select(x => x.Value).ToList());
+            blockList.Add(EmgBlkType.BlockType.enter, enter.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.enter].AddRange(enterCeiling.Select(x => x.Value).ToList());
 
-            blockList.Add(EmgConnectCommon.BlockType.evacCeiling, evacCeiling.Select(x => x.Value).ToList());
-            blockList[EmgConnectCommon.BlockType.evacCeiling].AddRange(evacR2Ceiling.Select(x => x.Value).ToList());
-            blockList[EmgConnectCommon.BlockType.evacCeiling].AddRange(evacLR2Ceiling.Select(x => x.Value).ToList());
+            blockList.Add(EmgBlkType.BlockType.evacCeiling, evacCeiling.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.evacCeiling].AddRange(evacR2Ceiling.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.evacCeiling].AddRange(evacLR2Ceiling.Select(x => x.Value).ToList());
 
-            //blockList.Add(EmgConnectCommon.BlockType.ale, ALE.Select(x => x.Value).ToList());
+            //blockList.Add(EmgBlkType.BlockType.ale, ALE.Select(x => x.Value).ToList());
 
         }
 
-        public static void projectToXY(ref Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockList)
+        public static void projectToXY(ref Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockList)
         {
             var typeList = blockList.Select(x => x.Key).ToList();
             foreach (var type in typeList)
@@ -142,58 +134,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             blkConnectDict.Add(key, new List<Point3d> { leftPt, bottomPt, rightPt, topPt });
         }
 
-        public static void getBlkList(List<ThSingleSideBlocks> SingleSide, List<BlockReference> blkSource, ref List<ThBlock> blkList)
-        {
-            var blkSizeDict = GetBlockService.blkSizeDict();
-            for (int i = 0; i < SingleSide.Count; i++)
-            {
-                getSideBlkList(SingleSide[i], blkSource, blkSizeDict, ref blkList);
-            }
-        }
-
-        private static void getSideBlkList(ThSingleSideBlocks side, List<BlockReference> blkSource, Dictionary<string, List<Point3d>> blkSizeDict, ref List<ThBlock> blkList)
-        {
-            Tolerance tol = new Tolerance(10, 10);
-            var allBlockList = side.getTotalBlock();
-
-            for (int i = 0; i < allBlockList.Count; i++)
-            {
-                Point3d pt = allBlockList[i];
-                BlockReference groupBlk = null;
-
-                var blk = blkSource.Where(x => x.Position.IsEqualTo(pt, tol)).FirstOrDefault();
-
-                if (side.groupBlock.ContainsKey(pt) == true)
-                {
-                    var groupPt = side.groupBlock[pt];
-                    groupBlk = blkSource.Where(x => x.Position.IsEqualTo(groupPt, tol)).FirstOrDefault();
-                }
-
-                var blkModel = new ThBlock(blk);
-                blkModel.setBlkInfo(blkSizeDict, groupBlk);
-
-                blkList.Add(blkModel);
-            }
-        }
-
-        public static ThBlock getBlockByCenter(Point3d pt, List<ThBlock> blkList)
-        {
-            ThBlock blk = null;
-
-            blk = blkList.Where(x => x.blkCenPt.IsEqualTo(pt, new Tolerance(1, 1))).FirstOrDefault();
-
-            return blk;
-        }
-
-        public static ThBlock getBlockByConnect(Point3d pt, List<ThBlock> blkList)
-        {
-            ThBlock blk = null;
-            var tol = new Tolerance(1, 1);
-
-            blk = blkList.Where(x => x.outline.ToCurve3d().IsOn(pt, tol) || x.outline.Contains(pt)).FirstOrDefault();
-
-            return blk;
-        }
+     
 
     }
 }

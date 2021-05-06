@@ -21,7 +21,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var moveLanePolyList = new List<Polyline>();
 
             blkList = new List<ThBlock>();
-            GetBlockService.getBlkList(singleSideBlocks, blkSource, ref blkList);
+            BlockListService.getBlkList(singleSideBlocks, blkSource, ref blkList);
 
             for (int sideIndex = 0; sideIndex < singleSideBlocks.Count; sideIndex++)
             {
@@ -40,16 +40,15 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         var prevPt = side.reMainBlk[i - 1];
                         var pt = side.reMainBlk[i];
 
-                        var prevBlk = GetBlockService.getBlockByCenter(prevPt, blkList);
-                        var thisBlk = GetBlockService.getBlockByCenter(pt, blkList);
+                        var prevBlk = BlockListService.getBlockByCenter(prevPt, blkList);
+                        var thisBlk = BlockListService.getBlockByCenter(pt, blkList);
 
                         var moveLanePoly = drawEmgPipeService.cutLane(prevPt, pt, prevBlk, thisBlk, movedline);
 
                         moveLanePolyList.Add(moveLanePoly);
 
                     }
-
-                    DrawUtils.ShowGeometry(movedline, EmgConnectCommon.LayerMovedLane, Color.FromColorIndex(ColorMethod.ByColor, 50));
+                    //DrawUtils.ShowGeometry(movedline, EmgConnectCommon.LayerMovedLane, Color.FromColorIndex(ColorMethod.ByColor, 50));
                 }
             }
 
@@ -89,102 +88,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
 
             return movedline;
-        }
-
-        private static Line getMoveLinePart(Point3d PrevPtPrj, Point3d ptPrj, Polyline movedLine, out int prevPolyInx, out int ptPolyInx)
-        {
-            Line moveLinePart = new Line();
-            Tolerance tol = new Tolerance(1, 1);
-            prevPolyInx = -1;
-            ptPolyInx = -1;
-
-            for (int i = 0; i < movedLine.NumberOfVertices; i++)
-            {
-                var lineTemp = movedLine.GetLineSegmentAt(i);
-
-                if (lineTemp.IsOn(PrevPtPrj, tol))
-                {
-                    prevPolyInx = i;
-                }
-                if (lineTemp.IsOn(ptPrj, tol))
-                {
-                    ptPolyInx = i;
-                }
-
-                if (prevPolyInx != -1 && ptPolyInx != -1)
-                { break; }
-            }
-
-            moveLinePart.StartPoint = PrevPtPrj;
-
-            if (prevPolyInx < ptPolyInx)
-            {
-                moveLinePart.EndPoint = movedLine.GetPoint3dAt(prevPolyInx + 1);
-            }
-            if (prevPolyInx > ptPolyInx)
-            {
-                moveLinePart.EndPoint = movedLine.GetPoint3dAt(prevPolyInx);
-            }
-            if (prevPolyInx == ptPolyInx)
-            {
-                moveLinePart.EndPoint = ptPrj;
-            }
-
-            return moveLinePart;
-        }
-
-        private static bool tryDistByDegree(Point3d connPt, Point3d connPtProj, Line seg, out Point3d addPt)
-        {
-            var bAddPt = false;
-            double adjacent = -1;
-            bool bEnd = false;
-            addPt = new Point3d();
-
-            double opposite = (connPt - connPtProj).Length;
-            int degree = 30;
-
-            while (bEnd == false)
-            {
-                if (opposite <= 20)
-                {
-                    adjacent = 0;
-                    bEnd = true;
-                }
-                //if (bEnd == false && seg.Length <= 500 )
-                if (bEnd == false && seg.Length <= EmgConnectCommon.TolTooClosePt)
-                {
-                    addPt = seg.StartPoint;
-                    bAddPt = true;
-                    bEnd = true;
-                }
-
-                if (bEnd == false)
-                {
-                    adjacent = opposite / Math.Tan(degree * Math.PI / 180);
-
-                    if (adjacent < seg.Length / 5)
-                    {
-                        addPt = connPtProj + adjacent * (seg.EndPoint - seg.StartPoint).GetNormal();
-                        bAddPt = true;
-                        bEnd = true;
-                    }
-                }
-                if (bEnd == false)
-                {
-                    degree = degree + 5;
-                }
-
-                if (degree >= 80)
-                {
-                    degree = 90;
-                    addPt = seg.StartPoint;
-                    bAddPt = true;
-                    bEnd = true;
-                }
-            }
-
-            return bAddPt;
-
         }
 
         private static Polyline checkMoveLineIntersectOutFrame(Polyline movedlineTemp, Polyline lanePoly, Polyline frame, double offset, ThSingleSideBlocks side)

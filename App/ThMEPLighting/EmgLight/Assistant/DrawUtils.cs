@@ -90,7 +90,7 @@ namespace ThMEPLighting.EmgLight.Assistant
             return objectIds;
         }
 
-        private static List<ObjectId> DrawProfile(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfile(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight =1000)
         {
             var objectIds = new List<ObjectId>();
             if (pt == null)
@@ -108,7 +108,7 @@ namespace ThMEPLighting.EmgLight.Assistant
                 text.Position = pt;
                 text.TextString = s;
                 text.Rotation = 0;
-                text.Height = 1000;
+                text.Height = hight;
                 text.Color = color;
                 text.LineWeight = lineWeight;
                 text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLEP5");
@@ -201,14 +201,14 @@ namespace ThMEPLighting.EmgLight.Assistant
             return DrawProfile(pt, LayerName, color, lineWeight);
         }
 
-        private static List<ObjectId> DrawProfileDebug(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfileDebug(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025,double hight=1000)
         {
             // 调试按钮关闭且图层不是保护半径有效图层
             var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
             if (!debugSwitch)
                 return new List<ObjectId>();
 
-            return DrawProfile(pt, s, LayerName, color, lineWeight);
+            return DrawProfile(pt, s, LayerName, color, lineWeight,hight);
         }
 
         public static void ShowGeometry(List<Line> geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
@@ -241,9 +241,9 @@ namespace ThMEPLighting.EmgLight.Assistant
         {
             DrawUtils.DrawProfileDebug(pt, LayerName, color, lineWeight);
         }
-        public static void ShowGeometry(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        public static void ShowGeometry(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight = 1000)
         {
-            DrawUtils.DrawProfileDebug(pt, s, LayerName, color, lineWeight);
+            DrawUtils.DrawProfileDebug(pt, s, LayerName, color, lineWeight, hight);
         }
 
     }

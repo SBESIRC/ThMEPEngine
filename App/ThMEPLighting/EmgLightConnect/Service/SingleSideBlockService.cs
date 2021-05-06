@@ -7,7 +7,8 @@ using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
 using ThMEPLighting.EmgLightConnect.Model;
-using ThMEPLighting.EmgLight.Service;
+using ThMEPLighting.EmgLight.Common;
+
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {
@@ -208,20 +209,20 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return usefulStruct;
         }
 
-        public static void addSecBlockList(Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict)
+        public static void addSecBlockList(Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict)
         {
-            var exit = blockSourceList[EmgConnectCommon.BlockType.exit];
-            var evacCeiling = blockSourceList[EmgConnectCommon.BlockType.evacCeiling];
-            var enter = blockSourceList[EmgConnectCommon.BlockType.enter];
+            var exit = blockSourceList[EmgBlkType.BlockType.exit];
+            var evacCeiling = blockSourceList[EmgBlkType.BlockType.evacCeiling];
+            var enter = blockSourceList[EmgBlkType.BlockType.enter];
 
             blockDict.Add(EmgConnectCommon.BlockGroupType.secBlock, exit);
             blockDict[EmgConnectCommon.BlockGroupType.secBlock].AddRange(evacCeiling);
             blockDict[EmgConnectCommon.BlockGroupType.secBlock].AddRange(enter);
         }
 
-        public static void addMainGroupBlockList(Dictionary<EmgConnectCommon.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict, out Dictionary<Point3d, Point3d> groupBlock)
+        public static void addMainGroupBlockList(Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict, out Dictionary<Point3d, Point3d> groupBlock)
         {
-            GroupEmgLightEvac(blockSourceList[EmgConnectCommon.BlockType.emgLight], blockSourceList[EmgConnectCommon.BlockType.evac], out var mainPt, out groupBlock);
+            GroupEmgLightEvac(blockSourceList[EmgBlkType.BlockType.emgLight], blockSourceList[EmgBlkType.BlockType.evac], out var mainPt, out groupBlock);
             blockDict.Add(EmgConnectCommon.BlockGroupType.mainBlock, mainPt);
 
         }

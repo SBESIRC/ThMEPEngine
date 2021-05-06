@@ -11,9 +11,9 @@ namespace ThMEPLighting.EmgLightConnect
 
         public static int TolGroupBlkLane = 6000;
         public static int TolGroupBlkLaneHead = 400;
-        public static int TolGroupEmgLightEvac = 400;
+        public static int TolGroupEmgLightEvac = 600;
         public static int TolOrderSideLanePtOnFrame = 200;
-        public static int TolSaperateGroupMaxDistance = 20000;
+        public static int TolSaperateGroupMaxDistance = 15000;
         public static int TolReturnValueDistCheck = 5000;
         public static int TolReturnValueMinRange = 500;
         public static int TolTooClosePt = 800;
@@ -38,15 +38,7 @@ namespace ThMEPLighting.EmgLightConnect
         public static string LayerOptimalSingleSideGroup = "l3SingleSideGroup";
 
 
-        public enum BlockType
-        {
-            emgLight = 0,
-            evac = 1,
-            exit = 2,
-            evacCeiling = 3,
-            enter = 4,
-            ale = 5,
-        }
+        
 
         public enum BlockGroupType
         {

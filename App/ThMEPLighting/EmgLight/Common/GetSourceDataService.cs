@@ -20,7 +20,7 @@ using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.Common;
 
 
-namespace ThMEPLighting.EmgLight.Service
+namespace ThMEPLighting.EmgLight.Common
 {
     public static class GetSourceDataService
     {

@@ -78,6 +78,33 @@ namespace ThMEPLighting.EmgLightConnect.Service
             DrawUtils.ShowGeometry(connectLine, EmgConnectCommon.LayerConnectLine, Color.FromColorIndex(ColorMethod.ByColor, 30));
         }
 
+        public static void forDebugLaneSideNo(List<ThSingleSideBlocks> singleSideBlocks)
+        {
+            for (int i = 0; i < singleSideBlocks.Count; i++)
+            {
+                var side = singleSideBlocks[i];
+                var lanePoly = new Polyline();
+               
+
+                for (int j = 0; j < side.laneSide.Count; j++)
+                {
+                    lanePoly.AddVertexAt(lanePoly.NumberOfVertices, side.laneSide[j].Item1.StartPoint.ToPoint2d(), 0, 0, 0);
+
+                    if (j == side.laneSide.Count - 1)
+                    {
+                        lanePoly.AddVertexAt(lanePoly.NumberOfVertices, side.laneSide[j].Item1.EndPoint.ToPoint2d(), 0, 0, 0);
+                    }
+                }
+
+                var midPoint = lanePoly.GetPointAtDist (lanePoly.Length / 2);
+
+                var zDir = side.laneSide[0].Item2 == 0 ? 1 : -1;
+                var newPt = midPoint+ 100*(lanePoly.EndPoint - lanePoly.StartPoint).GetNormal().RotateBy(Math.PI / 2, Vector3d.ZAxis * zDir);
+
+                DrawUtils.ShowGeometry(newPt, string.Format("sideNo: {0}", singleSideBlocks[i].laneSideNo), "llable0laneSide", Color.FromColorIndex(ColorMethod.ByColor, 30), LineWeight.LineWeight025, 200);
+            }
+
+        }
     }
 
 }

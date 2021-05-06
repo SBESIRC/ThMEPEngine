@@ -28,7 +28,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     var ptL = side.ptLink[i];
 
-                    if (side.reSecBlk.Contains(ptL.Item1) || side.reSecBlk.Contains(ptL.Item2))
+                    if ((side.reSecBlk.Contains(ptL.Item1) && side.getTotalBlock().Contains(ptL.Item2)) || (side.reSecBlk.Contains(ptL.Item2) && side.getTotalBlock().Contains(ptL.Item1)))
                     {
                         var linkTemp = linkSecToMain(ptL, blkList, out var blkS, out var blkE);
                         var link = CorrectConflictFrame(frame, linkTemp, blkS, blkE);
@@ -57,8 +57,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static Polyline linkSecToMain((Point3d, Point3d) ptL, List<ThBlock> blkList, out ThBlock blkS, out ThBlock blkE)
         {
-            blkS = GetBlockService.getBlockByCenter(ptL.Item1, blkList);
-            blkE = GetBlockService.getBlockByCenter(ptL.Item2, blkList);
+            blkS = BlockListService.getBlockByCenter(ptL.Item1, blkList);
+            blkE = BlockListService.getBlockByCenter(ptL.Item2, blkList);
 
             Point3d ptS = new Point3d();
             Point3d ptE = new Point3d();
@@ -100,8 +100,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var holes = new List<Polyline>();
             var sDir = new Vector3d(1, 0, 0);
             sDir = sDir.TransformBy(blkS.blk.BlockTransform).GetNormal();
-            blkS.connInfo[linkTemp.StartPoint].Remove(linkTemp);
-            blkE.connInfo[linkTemp.EndPoint].Remove(linkTemp);
+            //blkS.connInfo[linkTemp.StartPoint].Remove(linkTemp);
+            //blkE.connInfo[linkTemp.EndPoint].Remove(linkTemp);
 
             var pts = linkTemp.Intersect(frame, Intersect.OnBothOperands);
             if (pts.Count > 0)
@@ -114,7 +114,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var res = aStarRoute.Plan(sPt);
 
                 var resCut = drawEmgPipeService.cutLane(sPt, ePt, blkS, blkE, res);
-                
+
                 link = resCut;
             }
 

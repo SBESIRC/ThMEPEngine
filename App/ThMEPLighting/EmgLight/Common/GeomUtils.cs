@@ -6,7 +6,7 @@ using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPLighting.EmgLight.Assistant;
 
-namespace ThMEPLighting.EmgLight.Service
+namespace ThMEPLighting.EmgLight.Common
 {
     class GeomUtils
     {

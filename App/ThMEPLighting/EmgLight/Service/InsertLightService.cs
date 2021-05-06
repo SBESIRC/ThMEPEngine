@@ -17,7 +17,7 @@ namespace ThMEPLighting.EmgLight.Service
                 foreach (var ptInfo in insertPtInfo)
                 {
 
-                    db.Database.InsertModel(ptInfo.Value.Item1 + ptInfo.Value.Item2 * EmgLightCommon .BlockScaleNum * 2.25, ptInfo.Value.Item2, new Dictionary<string, string>() { });
+                    db.Database.InsertModel(ptInfo.Value.Item1 + ptInfo.Value.Item2 * EmgLightCommon.BlockScaleNum * 2.25, ptInfo.Value.Item2, new Dictionary<string, string>() { });
 
                 }
             }
