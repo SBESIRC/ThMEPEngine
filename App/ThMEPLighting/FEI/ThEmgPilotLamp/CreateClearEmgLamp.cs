@@ -50,7 +50,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     new Scale3d(scaleNum),
                     rotateAngle,
                     attNameValues);
-                if (null != id && isHosting)
+                if (null != id && isHosting && id.IsValid)
                 {
                     rotateAngle = rotateAngle % Math.PI;
                     if (rotateAngle > Math.PI / 2) 
@@ -125,13 +125,16 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         public static void LoadBlockToDocument(this Database database) 
         {
             using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.ElectricalBroadcastDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingFEIDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 foreach (var item in lampBlockNames) 
                 {
                     if (item == null)
                         continue;
-                    currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(item), false);
+                    var block = blockDb.Blocks.ElementOrDefault(item);
+                    if (null == block)
+                        continue;
+                    currentDb.Blocks.Import(block, false);
                 }
             }
         }

@@ -105,13 +105,7 @@ namespace ThMEPLighting
         [CommandMethod("TIANHUACAD", "THSSZSDBZ", CommandFlags.Modal)]
         public void ThMEGLBZ()
         {
-            var lampLight = new ThEmgPilotLampCommand(false);
-            lampLight.Execute();
-        }
-        [CommandMethod("TIANHUACAD", "THSSZSDDZ", CommandFlags.Modal)]
-        public void ThMEGLDZ()
-        {
-            var lampLight = new ThEmgPilotLampCommand(true);
+            var lampLight = new ThEmgPilotLampCommand();
             lampLight.Execute();
         }
 

@@ -1,0 +1,25 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    
+    <SolidColorBrush x:Key="WindowTitleBackgroundColor" Color="#474747"/>
+    <SolidColorBrush x:Key="WindowTitleForegroundColor" Color="#969696"/>
+    <SolidColorBrush x:Key="DisableBackgroundColor" Color="#2c2c2c"/>
+    <SolidColorBrush x:Key="ForegroundColor" Color="#505050"/>
+    <SolidColorBrush x:Key="BackgroundColor" Color="White"/>
+    
+    <SolidColorBrush x:Key="ButtonBorderColor" Color="Gray"/>
+    <SolidColorBrush x:Key="ButtonBackgorudColor" Color="White"/>
+    <SolidColorBrush x:Key="ButtonForegroundColor" Color="Black"/>
+    <SolidColorBrush x:Key="ButtonMouseOverBackgroundColor" Color="Blue"/>
+    <SolidColorBrush x:Key="ButtonMouseOverForegroundColor" Color="White"/>
+    
+    <SolidColorBrush x:Key="TextBoxBorderColor" Color="Gray"/>
+    <SolidColorBrush x:Key="TextBoxBorderErrorColor" Color="Red"/>
+    <SolidColorBrush x:Key="TextBoxBackgroundColor" Color="Transparent"/>
+
+    <SolidColorBrush x:Key="CommonBorderColor" Color="Gray"/>
+
+    <SolidColorBrush x:Key="LableTextColor" Color="Black"/>
+    <SolidColorBrush x:Key="LableBackgroundColor" Color="Transparent"/>
+
+</ResourceDictionary>

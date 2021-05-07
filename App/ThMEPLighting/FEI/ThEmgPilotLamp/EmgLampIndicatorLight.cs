@@ -10,6 +10,7 @@ using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.CAD;
+using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
@@ -23,10 +24,17 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private Polyline _maxPolyline;
         private double _lightSpace = 10000;//灯具最大间距
         private double _lightOffset = 800;//单方向灯具偏移距离
+        private double _lightDeleteMaxSpace = 10000;
+        private double _lightDeleteMaxAngle = 30;
         public List<LineGraphNode> _wallGraphNodes;//壁装的在线的那一侧
         private List<GraphNode> _hostLightNodes;
         public EmgLampIndicatorLight(Polyline outPolyline,List<Polyline> columns, List<Polyline> walls, IndicatorLight indicator)
         {
+            this._lightSpace = ThEmgLightService.Instance.MaxLightSpace;
+            this._lightOffset = ThEmgLightService.Instance.HostLightMoveOffSet;
+            this._lightDeleteMaxSpace = ThEmgLightService.Instance.MaxDeleteDistance;
+            this._lightDeleteMaxAngle = ThEmgLightService.Instance.MaxDeleteAngle;
+
             _maxPolyline = outPolyline;
             _targetInfo = new IndicatorLight();
             _targetColums = new List<Polyline>();
@@ -75,7 +83,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             CalcAssitHostLayout();
 
             //对结果进行检查移除多余的节点
-            CheckAndRemove(Math.PI*30/180, _lightSpace, true);
+            CheckAndRemove(Math.PI* _lightDeleteMaxAngle / 180, _lightDeleteMaxSpace, true);
             return _ligthLayouts;
         }
 
@@ -1097,7 +1105,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     }
                     else
                     {
-                        if (line.Length > 1000 && pLine.Length > 5000)
+                        if (nextRoute!=null && line.Length > 1000 && pLine.Length > 5000)
                             isAdd = true;
                     }
                 }

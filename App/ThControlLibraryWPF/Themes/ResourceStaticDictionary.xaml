@@ -1,0 +1,48 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:ThControlLibraryWPF">
+    <ResourceDictionary.MergedDictionaries>
+        <ResourceDictionary Source="/ThControlLibraryWPF;component/Themes/GenericBaseColors.xaml"></ResourceDictionary>
+    </ResourceDictionary.MergedDictionaries>
+    <Style x:Key="ButtonFocusStyle">
+        <Setter Property="Control.Template">
+            <Setter.Value>
+                <ControlTemplate>
+                    <Rectangle Margin="-2" StrokeThickness="1" Stroke="Red" StrokeDashArray="1 2"/>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+    <!--输入框样式-->
+    <Style TargetType="{x:Type TextBox}">
+        <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorderColor}" />
+        <Setter Property="Background" Value="{StaticResource TextBoxBackgroundColor}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Validation.ErrorTemplate">
+            <Setter.Value>
+                <ControlTemplate>
+                    <StackPanel Orientation="Horizontal">
+                        <AdornedElementPlaceholder Name="customAdorner"></AdornedElementPlaceholder>
+                        <TextBox Text="{Binding ElementName=customAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}" Margin="10,0,0,0" BorderBrush="Red" Foreground="Red" VerticalContentAlignment="Center" />
+                    </StackPanel>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="Validation.HasError" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorderErrorColor}"></Setter>
+                <Setter Property="ToolTip" Value="{Binding RelativeSource={x:Static RelativeSource.Self}, Path=(Validation.Errors)[0].ErrorContent}"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
+    <!--图片按钮样式-->
+    <Style TargetType="{x:Type local:ImageButton}">
+        <Setter Property="BorderBrush" Value="{StaticResource ButtonBorderColor}"/>
+        <Setter Property="Background" Value="{StaticResource ButtonBackgorudColor}"/>
+        <Setter Property="DisabledBackground" Value="{StaticResource DisableBackgroundColor}"/>
+        <Setter Property="MouseOverBackground" Value="{StaticResource ButtonMouseOverBackgroundColor}" />
+        <Setter Property="MouseOverForeground" Value="{StaticResource ButtonMouseOverForegroundColor}"/>
+        <Setter Property="FocusVisualStyle" Value="{DynamicResource ButtonFocusStyle}"/>
+    </Style>
+</ResourceDictionary>

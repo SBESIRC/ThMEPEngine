@@ -58,11 +58,34 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 //}
 
                 //优先找近的
-                if (wall.Count <= 0 || (column.Count > 0 && column.First().Value < wall.First().Value))
+                //if (wall.Count <= 0 || (column.Count > 0 && column.First().Value < wall.First().Value))
+                //{
+                //    layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                //}
+                //else
+                //{
+                //    layoutInfo = GetWallLayoutPoint(wall.First().Key, pt, dir);
+                //    if (layoutInfo == null && column.Count > 0)
+                //    {
+                //        layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                //    }
+                //}
+                //优先找近的，如果近的是墙在判断两米内是否有柱子，如果有柱子，柱子优先
+                if (wall.Count > 0 && column.Count > 0)
+                {
+                    var dis = column.First().Value - wall.First().Value;
+                    if (Math.Abs(dis) < 2000)
+                        layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                    else if(column.First().Value < wall.First().Value)
+                        layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                    else
+                        layoutInfo = GetColumnLayoutPoint(wall.First().Key, pt, dir);
+                }
+                else if (wall.Count < 1)
                 {
                     layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
                 }
-                else
+                else 
                 {
                     layoutInfo = GetWallLayoutPoint(wall.First().Key, pt, dir);
                     if (layoutInfo == null && column.Count > 0)
@@ -70,7 +93,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
                     }
                 }
-
                 if (layoutInfo.HasValue)
                 {
                     if (!ptDic.Keys.Contains(layoutInfo.Value.Item1))

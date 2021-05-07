@@ -4,26 +4,24 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Runtime;
-using Dreambuild.AutoCAD;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADCore.NTS;
 using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
-using ThMEPLighting.FEI.EvacuationPath;
+using ThMEPLighting.ServiceModels;
 
 namespace ThMEPLighting.FEI.ThEmgPilotLamp
 {
     class ThEmgPilotLampCommand : IAcadCommand, IDisposable
     {
         private bool _isHostFirst = false;
-        public ThEmgPilotLampCommand(bool isHost) 
+        public ThEmgPilotLampCommand() 
         {
-            this._isHostFirst = isHost;
+            //这里根据用户选项
+            this._isHostFirst= ThEmgLightService.Instance.IsHostingLight;
         }
         public void Dispose(){}
 
@@ -132,10 +130,30 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             if (item.isTwoSide)
                             {
                                 blockName = ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_DOUBLESIDE;
+                                switch (item.endType)
+                                {
+                                    case 140://壁装 E/N
+                                    case 141://吊装 E/N
+                                        blockName = ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_DOUBLESIDE;
+                                        break;
+                                    default:
+                                        blockName = ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_DOUBLESIDE;
+                                        break;
+                                }
                             }
                             else 
                             {
                                 blockName = ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_SINGLESIDE;
+                                switch (item.endType)
+                                {
+                                    case 140://壁装 E/N
+                                    case 141://吊装 E/N
+                                        blockName = ThMEPLightingCommon.PILOTLAMP_HOST_TWOWAY_SINGLESIDE;
+                                        break;
+                                    default:
+                                        blockName = ThMEPLightingCommon.PILOTLAMP_HOST_ONEWAY_SINGLESIDE;
+                                        break;
+                                }
                             }
                         }
                         else 
@@ -153,6 +171,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                                     break;
                             }
                         }
+                        CreateClearEmgLamp.LoadBlockToDocument(acdb.Database);
                         CreateClearEmgLamp.CreatePilotLamp(acdb.Database, createPt, createDir, blockName,item.isHoisting, new Dictionary<string, string>());
                     }
                 }
