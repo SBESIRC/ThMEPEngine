@@ -17,7 +17,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class drawSecBlkService
     {
-        public static List<Polyline> drawSecToMain(List<ThSingleSideBlocks> singleSideBlocks, Polyline frame, List<ThBlock> blkList, ref List<Polyline> linkLine)
+        public static List<Polyline> drawSecToMain(List<ThSingleSideBlocks> singleSideBlocks, Polyline frame, List<ThBlock> blkList, ref List<Polyline> linkLine,List<Polyline > holes)
         {
             List<Polyline> connList = new List<Polyline>();
             for (int sideIndex = 0; sideIndex < singleSideBlocks.Count; sideIndex++)
@@ -31,7 +31,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     if ((side.reSecBlk.Contains(ptL.Item1) && side.getTotalBlock().Contains(ptL.Item2)) || (side.reSecBlk.Contains(ptL.Item2) && side.getTotalBlock().Contains(ptL.Item1)))
                     {
                         var linkTemp = linkSecToMain(ptL, blkList, out var blkS, out var blkE);
-                        var link = CorrectConflictFrame(frame, linkTemp, blkS, blkE);
+                        var link = CorrectConflictFrame(frame, linkTemp, blkS, blkE, holes);
                         connList.Add(link);
                     }
                 }
@@ -94,16 +94,18 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static Polyline CorrectConflictFrame(Polyline frame, Polyline linkTemp, ThBlock blkS, ThBlock blkE)
+        private static Polyline CorrectConflictFrame(Polyline frame, Polyline linkTemp, ThBlock blkS, ThBlock blkE,List<Polyline> holes)
         {
             Polyline link = linkTemp;
-            var holes = new List<Polyline>();
+            //var holes = new List<Polyline>();
             var sDir = new Vector3d(1, 0, 0);
             sDir = sDir.TransformBy(blkS.blk.BlockTransform).GetNormal();
             //blkS.connInfo[linkTemp.StartPoint].Remove(linkTemp);
             //blkE.connInfo[linkTemp.EndPoint].Remove(linkTemp);
 
             var pts = linkTemp.Intersect(frame, Intersect.OnBothOperands);
+            holes.ForEach(x => pts.AddRange(linkTemp.Intersect(x, Intersect.OnBothOperands)));
+
             if (pts.Count > 0)
             {
                 var sPt = blkS.blkCenPt;

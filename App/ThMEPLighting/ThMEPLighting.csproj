@@ -39,6 +39,7 @@
     <Compile Include="EmgLightConnect\Model\ThSingleSideBlocks.cs" />
     <Compile Include="EmgLightConnect\Service\BlockListService.cs" />
     <Compile Include="EmgLightConnect\Service\ConnectSingleSideService.cs" />
+    <Compile Include="EmgLightConnect\Service\frameAnalysisService.cs" />
     <Compile Include="EmgLight\Common\EmgBlkType.cs" />
     <Compile Include="EmgLight\Common\GetBlockService.cs" />
     <Compile Include="EmgLightConnect\Service\graphService.cs" />
