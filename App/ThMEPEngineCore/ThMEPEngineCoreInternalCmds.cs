@@ -174,7 +174,7 @@ namespace ThMEPEngineCore
                 var objs = new DBObjectCollection();
                 if (result3.StringResult == "HM")
                 {
-                    objs = ThMEPPolygonPartitionService.EarCut(shell, holes);
+                    objs = ThMEPPolygonPartitionService.HMPartition(shell, holes);
                 }
                 foreach (Entity e in objs)
                 {
