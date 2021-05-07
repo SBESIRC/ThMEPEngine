@@ -59,6 +59,7 @@
     <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
+    <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
@@ -97,6 +98,7 @@
     <Compile Include="Pipe\Model\ThWRainSystemDiagram.cs" />
     <Compile Include="Pipe\Model\ThWStoreys.cs" />
     <Compile Include="Pipe\Model\ThWSystemDiagram.cs" />
+    <Compile Include="Pipe\Model\ThWSystemDiagram.WaterSuply.cs" />
     <Compile Include="Pipe\Model\ThWWashingMachine.cs" />
     <Compile Include="Pipe\Model\ThWGravityWaterBucket.cs" />
     <Compile Include="Pipe\Model\ThWSideEntryWaterBucket.cs" />
