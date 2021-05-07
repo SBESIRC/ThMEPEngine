@@ -201,6 +201,7 @@
     <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.cs" />
     <Content Include="Uitl\todoList.txt" />
+    <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
     <Compile Include="Uitl\JsonExtensions.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
