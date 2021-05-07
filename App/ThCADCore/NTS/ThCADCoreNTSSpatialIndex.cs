@@ -170,6 +170,22 @@ namespace ThCADCore.NTS
             return objs;
         }
 
+        public DBObjectCollection SelectCrossingPolygon(Entity ent)
+        {
+            if (ent is Polyline poly)
+            {
+                return SelectCrossingPolygon(poly);
+            }
+            else if (ent is MPolygon mPolygon)
+            {
+                return SelectCrossingPolygon(mPolygon);
+            }
+            else
+            {
+                return new DBObjectCollection();
+            }
+        }
+
         public DBObjectCollection SelectCrossingPolygon(Point3dCollection polygon)
         {
             var pline = new Polyline()
