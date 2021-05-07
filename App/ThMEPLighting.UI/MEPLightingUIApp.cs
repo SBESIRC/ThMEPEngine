@@ -1,12 +1,6 @@
-﻿using AcHelper.Commands;
-using Autodesk.AutoCAD.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Autodesk.AutoCAD.Runtime;
 using ThMEPLighting.UI.UI;
-using AcadApp = Autodesk.AutoCAD.ApplicationServices.Core.Application;
+using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace ThMEPLighting.UI
 {
@@ -28,9 +22,9 @@ namespace ThMEPLighting.UI
         [CommandMethod("TIANHUACAD", "THSSZSD", CommandFlags.Modal)]
         public void THSSUI()
         {
-            if (null != uiSign && uiSign.IsLoaded) 
+            if (null != uiSign && uiSign.IsLoaded)
                 return;
-                
+
             uiSign = new uiEvaIndicatorSign();
             AcadApp.ShowModelessWindow(uiSign);
             //var isOk = AcadApp.ShowModalWindow(uiSign);
