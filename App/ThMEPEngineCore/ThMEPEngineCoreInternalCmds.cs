@@ -129,6 +129,62 @@ namespace ThMEPEngineCore
         }
 
 #if ACAD2016
+        [CommandMethod("TIANHUACAD", "THPPARTITION", CommandFlags.Modal)]
+        public void ThPPartition()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 指定多边形
+                var result = Active.Editor.GetEntity("\n请选择多段线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+                var shell = acadDatabase.Element<Polyline>(result.ObjectId);
+
+                // 指定多边形内的洞
+                var holes = new DBObjectCollection();
+                var options = new PromptSelectionOptions()
+                {
+                    MessageForAdding = "\n请选择洞",
+                };
+                var result2 = Active.Editor.GetSelection(options);
+                if (result2.Status == PromptStatus.OK)
+                {
+                    foreach (var obj in result2.Value.GetObjectIds())
+                    {
+                        holes.Add(acadDatabase.Element<Polyline>(obj));
+                    }
+                }
+
+                // 指定分割方式
+                var kOptions = new PromptKeywordOptions("\n请指定分割方式")
+                {
+                    AllowNone = true
+                };
+                kOptions.Keywords.Add("HM", "HM", "HM(H)");
+                kOptions.Keywords.Default = "HM";
+                var result3 = Active.Editor.GetKeywords(kOptions);
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                // 分割
+                var objs = new DBObjectCollection();
+                if (result3.StringResult == "HM")
+                {
+                    objs = ThMEPPolygonPartitionService.EarCut(shell, holes);
+                }
+                foreach (Entity e in objs)
+                {
+                    acadDatabase.ModelSpace.Add(e);
+                    e.SetDatabaseDefaults();
+                }
+            }
+        }
+
+
         [CommandMethod("TIANHUACAD", "THPTRIANGULATE", CommandFlags.Modal)]
         public void ThPTriangulate()
         {

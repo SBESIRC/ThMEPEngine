@@ -21,6 +21,16 @@ namespace ThMEPEngineCore.Algorithm
             return reader.Read(result).ToDbCollection();
         }
 
+        public static DBObjectCollection HMPartition(AcPolygon shell, DBObjectCollection holes)
+        {
+            var reader = new WKTReader();
+            var writer = new WKTWriter();
+            var wkb = writer.Write(ToNTSPolygon(shell, holes));
+            var repairer = new ThPolyPartitionMgd();
+            var result = repairer.HMPartition(wkb);
+            return reader.Read(result).ToDbCollection();
+        }
+
         private static Polygon ToNTSPolygon(AcPolygon shell, DBObjectCollection holes)
         {
             if (holes.Count == 0)
