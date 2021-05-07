@@ -16,7 +16,7 @@ using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPWSS
 {
-    public class ThSystemDiagramCmds
+    public partial class ThSystemDiagramCmds
     {
         [CommandMethod("TIANHUACAD", "THCRSD", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
