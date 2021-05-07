@@ -14,6 +14,8 @@ using System.ComponentModel;
 using System.Linq;
 using Autodesk.AutoCAD.EditorInput;
 using System.IO;
+using AcHelper;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS
 {
@@ -23,20 +25,30 @@ namespace ThMEPWSS
         /// Tian Hua Create water suply system diagram
         /// </summary>
         [CommandMethod("TIANHUACAD", "THCSSD", CommandFlags.Modal)]
+
         public void ThCreateWaterSuplySystemDiagram()
         {
-            try
+            using (var cmd = new ThWaterSuplySystemDiagramCmd())
             {
-                //using (var cmd = new ThRainSystemDiagramCmd())
-                //{
-                //    cmd.Execute();
-                //}
+                cmd.Execute();
             }
-            catch (System.Exception ex)
-            {
-                System.Windows.Forms.MessageBox.Show(ex.Message);
-            }
-
         }
+
+        //public void ThCreateWaterSuplySystemDiagram()
+        //{
+            
+        //    using (var db = Linq2Acad.AcadDatabase.Active())
+            
+        //    {
+        //        var storey = new Storey();
+        //        for (int i = 0; i < 32; i++)
+        //        {
+
+        //            storey.Draw(i);
+        //        }
+        //    }
+            
+
+        //}
     }
 }
