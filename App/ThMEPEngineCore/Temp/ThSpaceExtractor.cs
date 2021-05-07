@@ -27,9 +27,15 @@ namespace ThMEPEngineCore.Temp
         /// </summary>
         public string NameLayer { get; set; }
         /// <summary>
+        /// 空间公有/私有图层
+        /// </summary>
+        public string PrivacyLayer { get; set; }
+        /// <summary>
         /// 障碍物种类
         /// </summary>
         public string ObstacleCategory { get; set; }
+
+        private const string PrivacyPropertyName = "Privacy";
 
         public ThSpaceExtractor()
         {
@@ -41,6 +47,7 @@ namespace ThMEPEngineCore.Temp
             NameLayer = "AD-NAME-ROOM";
             ObstacleColorIndex = 211;
             ObstacleCategory = "Obstacle";
+            PrivacyLayer = "空间名称";
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -50,7 +57,7 @@ namespace ThMEPEngineCore.Temp
             {
                 spaceEngine.SpaceLayer = ElementLayer;
                 spaceEngine.NameLayer = NameLayer;
-
+                spaceEngine.PrivacyLayer = PrivacyLayer;
                 spaceEngine.Recognize(database, pts);
                 Spaces = spaceEngine.TempSpaces;               
                 if(IsBuildObstacle)
@@ -86,6 +93,17 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Properties.Add(NamePropertyName, string.Join(";", o.Tags.ToArray()));
                 geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner,o.Outline));
+                if(o.Privacy!=Privacy.Unknown)
+                {
+                    if(o.Privacy == Privacy.Private)
+                    {
+                        geometry.Properties.Add(PrivacyPropertyName, "Private");
+                    }
+                    else
+                    {
+                        geometry.Properties.Add(PrivacyPropertyName, "Public");
+                    }
+                }
                 geometry.Boundary = o.Outline;
                 geos.Add(geometry);
             });

@@ -384,15 +384,23 @@ namespace ThMEPEngineCore
                     var newFrame = ThMEPFrameService.NormalizeEx(frame);
                     pts = newFrame.VerticesEx(100.0);
                 }
+
+                //获取空间名称
+
                 // ,ShearWall, 门洞，门扇,柱
                 var extractors = new List<ThExtractorBase>()
                 {
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1,ElementLayer = "AD-AREA-OUTL"}, // Space
+                    new ThSpaceExtractor{ 
+                        IsBuildObstacle=false,
+                        ColorIndex=1,
+                        ElementLayer = "AD-AREA-OUTL",
+                        NameLayer = "AD-NAME-ROOM",
+                        PrivacyLayer ="空间名称"},
                     new ThArchitectureWallExtractor {ColorIndex=2 },  // ArchitectureWall
                     new ThShearWallExtractor{ColorIndex=3},  // ShearWall
-                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=4}, // Column
+                    new ThColumnExtractor{UseDb3ColumnEngine=false,ColorIndex=4}, // Column
                     new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
                     new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
                     new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
