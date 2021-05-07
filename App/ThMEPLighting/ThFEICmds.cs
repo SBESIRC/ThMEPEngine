@@ -17,6 +17,7 @@ using ThMEPLighting.FEI;
 using ThMEPLighting.FEI.BFSAlgorithm;
 using ThMEPLighting.FEI.EvacuationPath;
 using ThMEPLighting.FEI.PrintEntity;
+using ThMEPLighting.FEI.Service;
 using ThMEPLighting.FEI.ThEmgPilotLamp;
 
 namespace ThMEPLighting
@@ -66,8 +67,10 @@ namespace ThMEPLighting
                 var holeInfo = CalHoles(plines);
                 foreach (var pline in holeInfo)
                 {
-                    GetPrimitivesService primitivesService = new GetPrimitivesService(originTransformer);
+                    //清除原有构建
+                    ClearComponentService.ClearLines(pline.Key, originTransformer);
 
+                    GetPrimitivesService primitivesService = new GetPrimitivesService(originTransformer);
                     //获取车道线信息
                     var xLanes = primitivesService.GetLanes(pline.Key, out List<List<Line>> yLines);
                     if (xLanes.Count == 0 && yLines.Count == 0)

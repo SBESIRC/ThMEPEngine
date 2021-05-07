@@ -74,6 +74,7 @@
     <Compile Include="FEI\Model\ExtendLineTreeModel.cs" />
     <Compile Include="FEI\PrintEntity\CalEvacuationPathTypeService.cs" />
     <Compile Include="FEI\PrintEntity\PrintService.cs" />
+    <Compile Include="FEI\Service\ClearComponentService.cs" />
     <Compile Include="FEI\Service\GetPrimitivesService.cs" />
     <Compile Include="FEI\LayoutFEIService.cs" />
     <Compile Include="FEI\Model\ExtendLineModel.cs" />
