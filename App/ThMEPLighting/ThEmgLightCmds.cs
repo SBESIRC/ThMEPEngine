@@ -73,13 +73,14 @@ namespace ThMEPLighting
                     //取块
                     var getBlockS = new GetBlockService();
                     getBlockS.getBlocksData(bufferFrame, transformer);
+                   
 
                     //清除layer
                     //var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
                     //RemoveBlockService.ClearEmergencyLight(block);
                     RemoveBlockService.ClearEmergencyLight(getBlockS.emgLight);
-
-                    var b = false;
+                   
+                    var b = false ;
                     if (b == true)
                     {
                         continue;
@@ -102,7 +103,8 @@ namespace ThMEPLighting
                     layoutEngine.ResetResult(ref layoutInfo, transformer);
 
                     //布置构建
-                    InsertLightService.InsertSprayBlock(layoutInfo);
+                    double scale = LayoutEmgLightEngine.getScale(getBlockS);
+                    InsertLightService.InsertSprayBlock(layoutInfo, scale);
                 }
             }
         }
@@ -179,8 +181,6 @@ namespace ThMEPLighting
                     //为了获取卡在外包框的建筑元素，这里做了一个Buffer处理
                     var bufferFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
                     var shrinkFrame = ThMEPFrameService.Buffer(nFrame, -EmgLightCommon.BufferFrame);
-                    //DrawUtils.ShowGeometry(bufferFrame, EmgLightCommon.LayerFrame, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight035);
-                    //DrawUtils.ShowGeometry(shrinkFrame, EmgLightCommon.LayerFrame, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight035);
 
                     //如果没有layer 创建layer
                     DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
@@ -200,7 +200,7 @@ namespace ThMEPLighting
                     transformer.Transform(ALE);
                     blockList.Add(EmgBlkType.BlockType.ale, new List<BlockReference> { ALE });
 
-                    GetBlockService.projectToXY(ref blockList);
+                    //GetBlockService.projectToXY(ref blockList);
 
                     var b = false;
                     if (b == true)

@@ -13,7 +13,7 @@ namespace ThMEPLighting.EmgLight.Common
     {
         public Dictionary<BlockReference, BlockReference> emgLight = new Dictionary<BlockReference, BlockReference>();
         public Dictionary<BlockReference, BlockReference> evacR = new Dictionary<BlockReference, BlockReference>();
-        Dictionary<BlockReference, BlockReference> evacRL = new Dictionary<BlockReference, BlockReference>();
+        public Dictionary<BlockReference, BlockReference> evacRL = new Dictionary<BlockReference, BlockReference>();
         Dictionary<BlockReference, BlockReference> exitE = new Dictionary<BlockReference, BlockReference>();
         Dictionary<BlockReference, BlockReference> exitS = new Dictionary<BlockReference, BlockReference>();
         Dictionary<BlockReference, BlockReference> exitECeiling = new Dictionary<BlockReference, BlockReference>();
@@ -68,17 +68,17 @@ namespace ThMEPLighting.EmgLight.Common
 
         }
 
-        public static void projectToXY(ref Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockList)
-        {
-            var typeList = blockList.Select(x => x.Key).ToList();
-            foreach (var type in typeList)
-            {
-                blockList[type].ForEach(x => x.Position = new Point3d(x.Position.X, x.Position.Y, 0));
+        //public static void projectToXY(ref Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockList)
+        //{
+        //    var typeList = blockList.Select(x => x.Key).ToList();
+        //    foreach (var type in typeList)
+        //    {
+        //        blockList[type].ForEach(x => x.Position = new Point3d(x.Position.X, x.Position.Y, 0));
 
-            }
-        }
+        //    }
+        //}
 
-        public static Dictionary<string, List<Point3d>> blkSizeDict()
+        public static Dictionary<string, List<Point3d>> blkConnectDict()
         {
             //public static readonly string EmgLightBlockName = "E-BFEL810";      //消防应急灯图块名
             //public static readonly string EvacRBlockName = "E-BFEL200";     //疏散指示灯图块
@@ -134,7 +134,45 @@ namespace ThMEPLighting.EmgLight.Common
             blkConnectDict.Add(key, new List<Point3d> { leftPt, bottomPt, rightPt, topPt });
         }
 
-     
+        public static void getBlkOutLine(BlockReference blk, Dictionary<string, List<Point3d>> blkSizeDict,out Polyline blkOutline, out List<Point3d> connectPt, BlockReference groupBlk = null)
+        {
+            var ptList = blkSizeDict[blk.Name].Select(x => x).ToList();
+             connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+
+            if (groupBlk != null)
+            {
+                var ptListGroup = blkSizeDict[groupBlk.Name];
+                var connectPtGroup = ptListGroup.Select(x => x.TransformBy(groupBlk.BlockTransform)).ToList();
+                var bottomPt = connectPtGroup[1];
+
+                var inx = connectPt.IndexOf(connectPt.OrderBy(x => x.DistanceTo(bottomPt)).First());
+
+                var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
+                ptList[inx] = ptNew;
+
+                connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+            }
+
+             blkOutline = new Polyline();
+
+            blkOutline.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
+            blkOutline.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
+            blkOutline.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
+            blkOutline.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
+            blkOutline.TransformBy(blk.BlockTransform);
+            blkOutline.Closed = true;
+
+           
+        }
+
+        public static double getScale(BlockReference blk)
+        {
+            double scale = 100;
+
+            scale= blk.ScaleFactors.X;
+
+            return scale;
+        }
 
     }
 }

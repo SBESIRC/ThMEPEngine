@@ -13,22 +13,22 @@ namespace ThMEPLighting
         public static readonly short EmgLightLayerColor = 3;             //消防应急灯图层颜色
         public static readonly string EPowerLayerName = "E-POWR-EQPM";
 
-        public static readonly string EmgLightBlockName = "E-BFEL810";      //消防应急灯图块名
-        public static readonly string EvacRBlockName = "E-BFEL200";     //疏散指示灯图块
-        public static readonly string EvacLRBlockName = "E-BFEL210";     //疏散指示灯图块
+        public static readonly string EmgLightBlockName = "E-BFEL810";      //消防应急灯图块名,size:3
+        public static readonly string EvacRBlockName = "E-BFEL200";     //疏散指示灯图块,size:1
+        public static readonly string EvacLRBlockName = "E-BFEL210";     //疏散指示灯图块,size:1
 
-        public static readonly string ExitEBlockName = "E-BFEL100";           //紧急出口图块
-        public static readonly string ExitSBlockName = "E-BFEL102";           //紧急出口图块
+        public static readonly string ExitEBlockName = "E-BFEL100";           //紧急出口图块,size:1
+        public static readonly string ExitSBlockName = "E-BFEL102";           //紧急出口图块,size:1
 
-        public static readonly string ExitECeilingBlockName = "E-BFEL101";//紧急出口吊装
-        public static readonly string ExitSCeilingBlockName = "E-BFEL103";//紧急出口吊装
+        public static readonly string ExitECeilingBlockName = "E-BFEL101";//紧急出口吊装,size:2
+        public static readonly string ExitSCeilingBlockName = "E-BFEL103";//紧急出口吊装,size:2
 
-        public static readonly string EnterBlockName = "E-BFEL140";//出口/禁止
-        public static readonly string EnterCeilingBlockName = "E-BFEL141";//出口/禁止吊装
+        public static readonly string EnterBlockName = "E-BFEL140";//出口/禁止,size:1
+        public static readonly string EnterCeilingBlockName = "E-BFEL141";//出口/禁止吊装,size:2
 
-        public static readonly string EvacCeilingBlockName = "E-BFEL201";//疏散指示灯吊装
-        public static readonly string EvacR2LineCeilingBlockName = "E-BFEL201-1";//疏散指示灯吊装
-        public static readonly string EvacLR2LineCeilingBlockName = "E-BFEL211-1";//疏散指示灯吊装
+        public static readonly string EvacCeilingBlockName = "E-BFEL201";//疏散指示灯吊装,size:2
+        public static readonly string EvacR2LineCeilingBlockName = "E-BFEL201-1";//疏散指示灯吊装,size:2
+        public static readonly string EvacLR2LineCeilingBlockName = "E-BFEL211-1";//疏散指示灯吊装,size:2
 
         //public static readonly string ALBlockName = "E-BDB001";
         //public static readonly string ALEBlockName = "E-BDB003";

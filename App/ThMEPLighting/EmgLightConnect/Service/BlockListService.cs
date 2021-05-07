@@ -17,14 +17,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
     {
         public static void getBlkList(List<ThSingleSideBlocks> SingleSide, List<BlockReference> blkSource, ref List<ThBlock> blkList)
         {
-            var blkSizeDict = GetBlockService.blkSizeDict();
+            var blkConnectDict = GetBlockService.blkConnectDict();
             for (int i = 0; i < SingleSide.Count; i++)
             {
-                getSideBlkList(SingleSide[i], blkSource, blkSizeDict, ref blkList);
+                getSideBlkList(SingleSide[i], blkSource, blkConnectDict, ref blkList);
             }
         }
 
-        private static void getSideBlkList(ThSingleSideBlocks side, List<BlockReference> blkSource, Dictionary<string, List<Point3d>> blkSizeDict, ref List<ThBlock> blkList)
+        private static void getSideBlkList(ThSingleSideBlocks side, List<BlockReference> blkSource, Dictionary<string, List<Point3d>> blkConnectDict, ref List<ThBlock> blkList)
         {
             Tolerance tol = new Tolerance(10, 10);
             var allBlockList = side.getTotalBlock();
@@ -43,7 +43,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
 
                 var blkModel = new ThBlock(blk);
-                blkModel.setBlkInfo(blkSizeDict, groupBlk);
+                blkModel.setBlkInfo(blkConnectDict, groupBlk);
 
                 blkList.Add(blkModel);
             }

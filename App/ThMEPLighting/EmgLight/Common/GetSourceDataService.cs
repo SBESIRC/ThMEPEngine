@@ -168,6 +168,7 @@ namespace ThMEPLighting.EmgLight.Common
                     {
                         var blockTrans = block.Clone() as BlockReference;
                         transformer.Transform(blockTrans);
+                        blockTrans.Position = new Point3d(blockTrans.Position.X, blockTrans.Position.Y, 0);
                         emgLight.Add(block,blockTrans);
                     }
                 }

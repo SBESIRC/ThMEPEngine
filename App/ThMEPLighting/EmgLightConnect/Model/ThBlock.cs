@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThCADCore.NTS;
+using ThMEPLighting.EmgLight.Common;
 
 namespace ThMEPLighting.EmgLightConnect.Model
 {
@@ -74,31 +75,33 @@ namespace ThMEPLighting.EmgLightConnect.Model
 
         public void setBlkInfo(Dictionary<string, List<Point3d>> blkSizeDict, BlockReference groupBlk)
         {
-            var ptList = blkSizeDict[blk.Name].Select(x => x).ToList();
-            var connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+            //var ptList = blkSizeDict[blk.Name].Select(x => x).ToList();
+            //var connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
 
-            if (groupBlk != null)
-            {
-                var ptListGroup = blkSizeDict[groupBlk.Name];
-                var connectPtGroup = ptListGroup.Select(x => x.TransformBy(groupBlk.BlockTransform)).ToList();
-                var bottomPt = connectPtGroup[1];
+            //if (groupBlk != null)
+            //{
+            //    var ptListGroup = blkSizeDict[groupBlk.Name];
+            //    var connectPtGroup = ptListGroup.Select(x => x.TransformBy(groupBlk.BlockTransform)).ToList();
+            //    var bottomPt = connectPtGroup[1];
 
-                var inx = connectPt.IndexOf(connectPt.OrderBy(x => x.DistanceTo(bottomPt)).First());
+            //    var inx = connectPt.IndexOf(connectPt.OrderBy(x => x.DistanceTo(bottomPt)).First());
 
-                var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
-                ptList[inx] = ptNew;
+            //    var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
+            //    ptList[inx] = ptNew;
 
-                connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
-            }
+            //    connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+            //}
 
-            var blkOutline = new Polyline();
+            //var blkOutline = new Polyline();
 
-            blkOutline.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
-            blkOutline.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
-            blkOutline.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
-            blkOutline.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
-            blkOutline.TransformBy(blk.BlockTransform);
-            blkOutline.Closed = true;
+            //blkOutline.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
+            //blkOutline.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
+            //blkOutline.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
+            //blkOutline.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
+            //blkOutline.TransformBy(blk.BlockTransform);
+            //blkOutline.Closed = true;
+
+            GetBlockService.getBlkOutLine(blk, blkSizeDict, out var blkOutline, out var connectPt, groupBlk);
 
             outline = blkOutline;
             leftConnPt = connectPt[0];

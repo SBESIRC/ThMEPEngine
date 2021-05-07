@@ -103,6 +103,60 @@ namespace ThMEPLighting.EmgLight
         public void moveEmg(GetBlockService getBlockS, ref Dictionary<Polyline, (Point3d, Vector3d)> layoutInfo)
         {
 
+            Dictionary<BlockReference, BlockReference> evacBlk = new Dictionary<BlockReference, BlockReference>();
+            getBlockS.evacR.ForEach(x => evacBlk.Add(x.Key, x.Value));
+            getBlockS.evacRL.ForEach(x => evacBlk.Add(x.Key, x.Value));
+
+            if (evacBlk.Count > 0)
+            {
+                var blkConnectDict = GetBlockService.blkConnectDict();
+                var connectPt = blkConnectDict[ThMEPLightingCommon.EvacLRBlockName];
+
+
+                foreach (var evac in evacBlk)
+                {
+
+                    var closeEmgList = layoutInfo.Where(x => x.Value.Item1.DistanceTo(evac.Value.Position) <= 2000);
+
+                    if (closeEmgList.Count() > 0)
+                    {
+                        var connPtTop = connectPt[3].TransformBy(evac.Value.BlockTransform);
+                        var connPtBottom = connectPt[1].TransformBy(evac.Value.BlockTransform);
+
+                        var evacDir = (connPtTop - connPtBottom).GetNormal();
+                        var closeEmg = closeEmgList.OrderBy(x => x.Value.Item1.DistanceTo(evac.Value.Position)).First();
+                        var emgDir = closeEmg.Value.Item2.GetNormal();
+
+                        var CosAngle = evacDir.DotProduct(emgDir);
+
+                        //角度在20 以内
+                        if (Math.Abs(CosAngle) > Math.Cos(20 * Math.PI / 180))
+                        {
+
+                            if (CosAngle < 0)
+                            {
+                                layoutInfo[closeEmg.Key] = (connPtBottom, closeEmg.Value.Item2);
+                            }
+                            else
+                            {
+                                layoutInfo[closeEmg.Key] = (connPtTop, closeEmg.Value.Item2);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        public static double getScale(GetBlockService getBlockS)
+        {
+            double scale = -1;
+            if (getBlockS.evacR.Count > 0)
+            {
+                scale = getBlockS.evacR.First().Key.ScaleFactors.X;
+            }
+            scale = scale == -1 ? EmgLightCommon.BlockScaleNum : scale;
+
+            return scale;
         }
     }
 }
