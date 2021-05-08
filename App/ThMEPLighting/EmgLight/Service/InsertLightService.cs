@@ -3,7 +3,8 @@ using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThCADExtension;
+
+using ThMEPLighting.EmgLight.Common;
 
 namespace ThMEPLighting.EmgLight.Service
 {
@@ -13,7 +14,9 @@ namespace ThMEPLighting.EmgLight.Service
         {
             using (var db = AcadDatabase.Active())
             {
-                db.Database.ImportModel();
+                db.Database.ImportBlock(ThMEPLightingCommon.EmgLightBlockName);
+                db.Database.ImportLayer (ThMEPLightingCommon.EmgLightLayerName);
+
                 foreach (var ptInfo in insertPtInfo)
                 {
                     db.Database.InsertModel(ptInfo.Value.Item1 + ptInfo.Value.Item2 * scale * 2.25, ptInfo.Value.Item2, new Dictionary<string, string>() { }, scale);
@@ -37,14 +40,6 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
-        private static void ImportModel(this Database database)
-        {
-            using (AcadDatabase currentDb = AcadDatabase.Use(database))
-            using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.LightingEmgLightDwgPath(), DwgOpenMode.ReadOnly, false))
-            {
-                currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(ThMEPLightingCommon.EmgLightBlockName), false);
-                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(ThMEPLightingCommon.EmgLightLayerName), false);
-            }
-        }
+
     }
 }

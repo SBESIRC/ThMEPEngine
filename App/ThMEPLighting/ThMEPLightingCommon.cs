@@ -9,46 +9,50 @@ namespace ThMEPLighting
     public class ThMEPLightingCommon
     {
         //应急照明
-        public static readonly string EmgLightLayerName = "E-LITE-LITE";    //消防应急灯图层
-        public static readonly short EmgLightLayerColor = 3;             //消防应急灯图层颜色
-        public static readonly string EPowerLayerName = "E-POWR-EQPM";
+        public const string EmgLightLayerName = "E-LITE-LITE";    //消防应急灯图层
+        public const short EmgLightLayerColor = 3;             //消防应急灯图层颜色
+        public const string EPowerLayerName = "E-POWR-EQPM";
 
-        public static readonly string EmgLightBlockName = "E-BFEL810";      //消防应急灯图块名,size:3
-        public static readonly string EvacRBlockName = "E-BFEL200";     //疏散指示灯图块,size:1
-        public static readonly string EvacLRBlockName = "E-BFEL210";     //疏散指示灯图块,size:1
+        public const string EmgLightBlockName = "E-BFEL810";      //消防应急灯图块名,size:3
+        public const string EvacRBlockName = "E-BFEL200";     //疏散指示灯图块,size:1
+        public const string EvacLRBlockName = "E-BFEL210";     //疏散指示灯图块,size:1
 
-        public static readonly string ExitEBlockName = "E-BFEL100";           //紧急出口图块,size:1
-        public static readonly string ExitSBlockName = "E-BFEL102";           //紧急出口图块,size:1
+        public const string ExitEBlockName = "E-BFEL100";           //紧急出口图块,size:1
+        public const string ExitSBlockName = "E-BFEL102";           //紧急出口图块,size:1
 
-        public static readonly string ExitECeilingBlockName = "E-BFEL101";//紧急出口吊装,size:2
-        public static readonly string ExitSCeilingBlockName = "E-BFEL103";//紧急出口吊装,size:2
+        public const string ExitECeilingBlockName = "E-BFEL101";//紧急出口吊装,size:2
+        public const string ExitSCeilingBlockName = "E-BFEL103";//紧急出口吊装,size:2
 
-        public static readonly string EnterBlockName = "E-BFEL140";//出口/禁止,size:1
-        public static readonly string EnterCeilingBlockName = "E-BFEL141";//出口/禁止吊装,size:2
+        public const string EnterBlockName = "E-BFEL140";//出口/禁止,size:1
+        public const string EnterCeilingBlockName = "E-BFEL141";//出口/禁止吊装,size:2
 
-        public static readonly string EvacCeilingBlockName = "E-BFEL201";//疏散指示灯吊装,size:2
-        public static readonly string EvacR2LineCeilingBlockName = "E-BFEL201-1";//疏散指示灯吊装,size:2
-        public static readonly string EvacLR2LineCeilingBlockName = "E-BFEL211-1";//疏散指示灯吊装,size:2
+        public const string EvacCeilingBlockName = "E-BFEL201";//疏散指示灯吊装,size:2
+        public const string EvacR2LineCeilingBlockName = "E-BFEL201-1";//疏散指示灯吊装,size:2
+        public const string EvacLR2LineCeilingBlockName = "E-BFEL211-1";//疏散指示灯吊装,size:2
 
 
         //new
-        public static readonly string EnterNBlockName = "E-BFEL130";
-        public static readonly string EnterNCeilingBlockName = "E-BFEL131";
-        public static readonly string FloorBlockName = "E-BFEL110";
-        public static readonly string FloorCeilingBlockName = "E-BFEL111";
-        public static readonly string FloorEvacBlockName = "E-BFEL161";
-        public static readonly string FloorEvacCeilingBlockName = "E-BFEL161-1";
-        public static readonly string EvacUpCeilingBlockName = "E-BFEL221";
-        public static readonly string EvacPostBlockName = "E-BFEL223";
-        public static readonly string EvacSqBlockName = "E-BFEL240";
-        public static readonly string EvacSqDBlockName = "E-BFEL241";
-        public static readonly string EvacCirBlockName = "E-BFEL250";
-        public static readonly string EvacCirDBlockName = "E-BFEL251";
-        public static readonly string RefugeBlockName = "E-BFEL120";
-        public static readonly string RefugeCeilingBlockName = "E-BFEL121";
-        public static readonly string RefugeEBlockName = "E-BFEL122";
-        public static readonly string RefugeECeilingBlockName = "E-BFEL123";
-        public static readonly string EvacLRCeilingBlockName = "E-BFEL211";
+        public const string EnterNBlockName = "E-BFEL130";
+        public const string EnterNCeilingBlockName = "E-BFEL131";
+        public const string FloorBlockName = "E-BFEL110";
+        public const string FloorCeilingBlockName = "E-BFEL111";
+        public const string FloorEvacBlockName = "E-BFEL161";
+        public const string FloorEvacCeilingBlockName = "E-BFEL161-1";
+        public const string EvacUpCeilingBlockName = "E-BFEL221";
+        public const string EvacPostBlockName = "E-BFEL223";
+        public const string EvacSqBlockName = "E-BFEL240";
+        public const string EvacSqDBlockName = "E-BFEL241";
+        public const string EvacCirBlockName = "E-BFEL250";
+        public const string EvacCirDBlockName = "E-BFEL251";
+        public const string RefugeBlockName = "E-BFEL120";
+        public const string RefugeCeilingBlockName = "E-BFEL121";
+        public const string RefugeEBlockName = "E-BFEL122";
+        public const string RefugeECeilingBlockName = "E-BFEL123";
+        public const string EvacLRCeilingBlockName = "E-BFEL211";
+
+        public const string EmgLightConnectLayerName = "E-LITE-WIRE2";
+        public const string EmgLightConnectLineType = "HIDDEN";
+        public const short EmgLightConnectLayerColor = 4;
 
         //public static readonly string ALBlockName = "E-BDB001";
         //public static readonly string ALEBlockName = "E-BDB003";

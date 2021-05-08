@@ -40,6 +40,7 @@
     <Compile Include="EmgLightConnect\Service\BlockListService.cs" />
     <Compile Include="EmgLightConnect\Service\ConnectSingleSideService.cs" />
     <Compile Include="EmgLightConnect\Service\frameAnalysisService.cs" />
+    <Compile Include="EmgLightConnect\Service\InsertConnectLineService.cs" />
     <Compile Include="EmgLight\Common\EmgBlkType.cs" />
     <Compile Include="EmgLight\Common\GetBlockService.cs" />
     <Compile Include="EmgLightConnect\Service\graphService.cs" />
@@ -48,6 +49,7 @@
     <Compile Include="EmgLightConnect\Service\orderSingleSideLaneService.cs" />
     <Compile Include="EmgLightConnect\Service\MergeSideService.cs" />
     <Compile Include="EmgLight\Assistant\DrawUtils.cs" />
+    <Compile Include="EmgLight\Common\InsertService.cs" />
     <Compile Include="EmgLight\EmgLightCommon.cs" />
     <Compile Include="EmgLight\LayoutEmgLightEngine.cs" />
     <Compile Include="EmgLight\Model\ThLane.cs" />

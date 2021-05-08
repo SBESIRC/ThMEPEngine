@@ -155,14 +155,14 @@ namespace ThMEPLighting
 
                 //确定位移中心
                 var centerPt = ALEOri.Position;
-                if (centerPt.X < 10E7)
-                {
-                    centerPt = new Point3d();
-                }
+                //if (centerPt.X < 10E7)
+                //{
+                //    centerPt = new Point3d();
+                //}
                 var transformer = new ThMEPOriginTransformer(centerPt);
 
 
-             
+
                 var frameList = new List<Polyline>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
@@ -182,19 +182,19 @@ namespace ThMEPLighting
                 }
 
                 var frameListHoles = frameAnalysisService.analysisHoles(frameList);
-               
+
                 foreach (var nFrameHoles in frameListHoles)
                 {
 
                     var nFrame = nFrameHoles.Key;
-                    var nHoles = nFrameHoles.Value; 
+                    var nHoles = nFrameHoles.Value;
 
                     //为了获取卡在外包框的建筑元素，这里做了一个Buffer处理
                     var bufferFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
                     var shrinkFrame = ThMEPFrameService.Buffer(nFrame, -EmgLightCommon.BufferFrame);
 
                     //如果没有layer 创建layer
-                    DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightLayerColor), true);
+                    DrawUtils.CreateLayer(ThMEPLightingCommon.EmgLightConnectLayerName, Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightConnectLayerColor), true);
 
                     //清除连线。待补
 
@@ -214,13 +214,16 @@ namespace ThMEPLighting
                     transformer.Transform(ALE);
                     blockList.Add(EmgBlkType.BlockType.ale, new List<BlockReference> { ALE });
 
-                   
+
 
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
 
-                    ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame, nHoles);
+                    var connectLine = ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame, nHoles);
 
+                    ConnectEmgLightEngine.ResetResult(ref connectLine, transformer);
+
+                    InsertConnectLineService.InsertConnectLine(connectLine);
                 }
             }
         }

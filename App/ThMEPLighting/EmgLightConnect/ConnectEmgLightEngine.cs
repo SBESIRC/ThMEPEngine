@@ -16,7 +16,7 @@ namespace ThMEPLighting.EmgLightConnect
 {
     public class ConnectEmgLightEngine
     {
-        public static void ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame,List<Polyline> holes)
+        public static List<Polyline> ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame,List<Polyline> holes)
         {
 
             //if (emgLightList.Count == 0 && evacList.Count == 0 && emgExitList.Count == 0)
@@ -74,7 +74,7 @@ namespace ThMEPLighting.EmgLightConnect
             bool b = false;
             if (b == true)
             {
-                return;
+                return null;
             }
 
             //找出图所有的可能路径
@@ -111,10 +111,18 @@ namespace ThMEPLighting.EmgLightConnect
             DrawUtils.ShowGeometry(newLink, EmgConnectCommon.LayerFinalFinal, Color.FromColorIndex(ColorMethod.ByColor, 241));
 
 
-           // return newLink;
+            return newLink;
         }
 
+        public static void ResetResult(ref List <Polyline> newLink, ThMEPOriginTransformer transformer)
+        {
+            newLink.ForEach(x =>
+            {
+                transformer.Reset(x);
+                
+            });
 
+        }
 
 
     }
