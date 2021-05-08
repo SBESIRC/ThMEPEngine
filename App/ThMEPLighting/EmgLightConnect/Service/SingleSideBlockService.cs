@@ -28,24 +28,37 @@ namespace ThMEPLighting.EmgLightConnect.Service
             mainPt = new List<BlockReference>();
             groupPt = new Dictionary<Point3d, Point3d>();
 
-            foreach (var emgPt in emgLightList)
+            if (evacList.Count > 0 && emgLightList.Count > 0)
             {
-                var evac = evacList.Where(e => e.Position.DistanceTo(emgPt.Position) <= EmgConnectCommon.TolGroupEmgLightEvac).ToList();
 
-                if (evac.Count > 0)
+
+                double groupDist = -1;
+                double scaleEvac = evacList[0].ScaleFactors.X;
+                double scaleEmg = emgLightList[0].ScaleFactors.X;
+                groupDist = scaleEvac * 1.25 + scaleEmg * 2.25 + EmgConnectCommon.TolGroupEmgLightEvac;
+
+                //for debug
+                //groupDist = 400;
+
+                foreach (var emgPt in emgLightList)
                 {
-                    mainPt.Add(evac.First());
-                    groupPt.Add(evac.First().Position, emgPt.Position);
-                    evacList.Remove(evac.First());
+                    //bug:不要用固定值
+                    var evac = evacList.Where(e => e.Position.DistanceTo(emgPt.Position) <= groupDist).ToList();
+
+                    if (evac.Count > 0)
+                    {
+                        mainPt.Add(evac.First());
+                        groupPt.Add(evac.First().Position, emgPt.Position);
+                        evacList.Remove(evac.First());
+
+                    }
+                    else
+                    {
+                        mainPt.Add(emgPt);
+                    }
 
                 }
-                else
-                {
-                    mainPt.Add(emgPt);
-                }
-
             }
-
             mainPt.AddRange(evacList);
 
         }
@@ -211,13 +224,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         public static void addSecBlockList(Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict)
         {
-            var exit = blockSourceList[EmgBlkType.BlockType.exit];
-            var evacCeiling = blockSourceList[EmgBlkType.BlockType.evacCeiling];
-            var enter = blockSourceList[EmgBlkType.BlockType.enter];
-
-            blockDict.Add(EmgConnectCommon.BlockGroupType.secBlock, exit);
-            blockDict[EmgConnectCommon.BlockGroupType.secBlock].AddRange(evacCeiling);
-            blockDict[EmgConnectCommon.BlockGroupType.secBlock].AddRange(enter);
+            var otherSecBlk = blockSourceList[EmgBlkType.BlockType.otherSecBlk];
+            blockDict.Add(EmgConnectCommon.BlockGroupType.secBlock, otherSecBlk);
         }
 
         public static void addMainGroupBlockList(Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, ref Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockDict, out Dictionary<Point3d, Point3d> groupBlock)

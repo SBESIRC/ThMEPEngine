@@ -30,6 +30,26 @@ namespace ThMEPLighting
         public static readonly string EvacR2LineCeilingBlockName = "E-BFEL201-1";//疏散指示灯吊装,size:2
         public static readonly string EvacLR2LineCeilingBlockName = "E-BFEL211-1";//疏散指示灯吊装,size:2
 
+
+        //new
+        public static readonly string EnterNBlockName = "E-BFEL130";
+        public static readonly string EnterNCeilingBlockName = "E-BFEL131";
+        public static readonly string FloorBlockName = "E-BFEL110";
+        public static readonly string FloorCeilingBlockName = "E-BFEL111";
+        public static readonly string FloorEvacBlockName = "E-BFEL161";
+        public static readonly string FloorEvacCeilingBlockName = "E-BFEL161-1";
+        public static readonly string EvacUpCeilingBlockName = "E-BFEL221";
+        public static readonly string EvacPostBlockName = "E-BFEL223";
+        public static readonly string EvacSqBlockName = "E-BFEL240";
+        public static readonly string EvacSqDBlockName = "E-BFEL241";
+        public static readonly string EvacCirBlockName = "E-BFEL250";
+        public static readonly string EvacCirDBlockName = "E-BFEL251";
+        public static readonly string RefugeBlockName = "E-BFEL120";
+        public static readonly string RefugeCeilingBlockName = "E-BFEL121";
+        public static readonly string RefugeEBlockName = "E-BFEL122";
+        public static readonly string RefugeECeilingBlockName = "E-BFEL123";
+        public static readonly string EvacLRCeilingBlockName = "E-BFEL211";
+
         //public static readonly string ALBlockName = "E-BDB001";
         //public static readonly string ALEBlockName = "E-BDB003";
 
