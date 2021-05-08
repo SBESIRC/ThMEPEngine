@@ -10,6 +10,9 @@ using ThMEPWSS.Pipe.Service;
 using ThCADCore.NTS;
 using DotNetARX;
 using System;
+using System.ComponentModel;
+using System.Linq;
+using Autodesk.AutoCAD.EditorInput;
 
 namespace ThMEPWSS
 {
@@ -79,9 +82,27 @@ namespace ThMEPWSS
         {
             using (var db = Linq2Acad.AcadDatabase.Active())
             {
-                var rst = AcHelper.Active.Editor.GetEntity("\nSelect an entity");
+                var rst = AcHelper.Active.Editor.GetEntity("\nSelect a TianZheng entity");
                 if(rst.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
                 {
+                    var entity = db.Element<Entity>(rst.ObjectId);
+                    //todo: extract property
+                    var properties = TypeDescriptor.GetProperties(entity.AcadObject).Cast<PropertyDescriptor>().ToDictionary(prop => prop.Name);
+                    var DNPropName = "DNDiameter";
+                    if (properties.ContainsKey(DNPropName))
+                    {
+                        var DNPropObject = properties[DNPropName];
+                        var DNValue = DNPropObject.GetValue(entity.AcadObject);
+                        var DNString = DNValue.ToString();
+                    }
+
+                    //db.ModelSpace.OfType<DBText>().ToList();
+                    //TypedValue[] tvs = new TypedValue[1]
+                    //{
+                    //    new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(DBText)).DxfName)
+                    //};
+                    //SelectionFilter sf = new SelectionFilter(tvs);
+                    //AcHelper.Active.Editor.SelectAll(sf);
 
                 }
             }

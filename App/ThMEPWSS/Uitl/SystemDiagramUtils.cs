@@ -18,12 +18,121 @@ using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Service;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using DotNetARX;
+using System.Collections;
+using PolylineTools = ThMEPWSS.Pipe.Service.PolylineTools;
 
 namespace ThMEPWSS.Uitl
 {
+    public class SPoint
+    {
+        public double X;
+        public double Y;
+        public double Z;
+        public Point3d ToPoint3d()
+        {
+            return new Point3d(X, Y, Z);
+        }
+        public Point2d ToPoint2d()
+        {
+            return new Point2d(X, Y);
+        }
+    }
+    public class SCircle
+    {
+        public SPoint Center;
+        public double Radius;
+        public Circle ToCircle()
+        {
+            return new Circle() { Center = Center.ToPoint3d(), Radius = Radius };
+        }
+    }
+    public class SLine
+    {
+        public SPoint StartPoint;
+        public SPoint EndPoint;
+        public Line ToLine()
+        {
+            return new Line() { StartPoint = StartPoint.ToPoint3d(), EndPoint = EndPoint.ToPoint3d() };
+        }
+    }
+    public class SPolyline
+    {
+        public List<SPoint> Points;
+        public bool Closed;
+        public Polyline ToPolyline()
+        {
+            var pline = new Polyline();
+            for (int i = 0; i < Points.Count; i++)
+            {
+                pline.AddVertexAt(i, Points[i].ToPoint2d(), 0, 0, 0);
+            }
+            return pline;
+        }
+    }
+    public class SRect
+    {
+        public double MinX;
+        public double MinY;
+        public double MaxX;
+        public double MaxY;
+        public ThWGRect ToGRect()
+        {
+            return new ThWGRect(MinX, MinY, MaxX, MaxY);
+        }
+        public Point3dCollection ToPoint3dCollection()
+        {
+            return ToGRect().ToPoint3dCollection();
+        }
+        public Polyline ToPolyline()
+        {
+            return PolylineTools.CreatePolyline(ToPoint3dCollection().Cast<Point3d>().ToList());
+        }
+    }
     namespace ExtensionsNs
     {
-
+        public static class SGeoConverters
+        {
+            public static SPoint ToSPoint(this Point2d pt) => new SPoint() { X = pt.X, Y = pt.Y };
+            public static SPoint ToSPoint(this Point3d pt) => new SPoint() { X = pt.X, Y = pt.Y, Z = pt.Z };
+            public static SCircle ToSCircle(this Circle circle) => new SCircle() { Center = circle.Center.ToSPoint(), Radius = circle.Radius };
+            public static SRect ToSRect(this Point3dCollection pts)
+            {
+                GeoAlgorithm.GetCornerCoodinate(pts, out double minX, out double minY, out double maxX, out double maxY);
+                return new SRect() { MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY };
+            }
+            public static SRect ToSRect(this ThWGRect r) => new SRect() { MinX = r.MinX, MinY = r.MinY, MaxX = r.MaxX, MaxY = r.MaxY };
+            public static SLine ToSLine(this ThWGLineSegment seg) => new SLine() { StartPoint = seg.Point1.ToSPoint(), EndPoint = seg.Point2.ToSPoint() };
+        }
+        public class CircleDraw
+        {
+            public List<Vector2d> Vector2ds = new List<Vector2d>();
+            public IEnumerable<Line> GetLines(Point3d basePt)
+            {
+                foreach (var v in Vector2ds)
+                {
+                    var endPt = basePt + v.ToVector3d();
+                    yield return new Line() { StartPoint = basePt, EndPoint = endPt };
+                }
+            }
+            public void Rotate(double radius, double degree)
+            {
+                var phi = GeoAlgorithm.AngleFromDegree(degree);
+                var dx = radius * Math.Cos(phi); var dy = radius * Math.Sin(phi);
+                Vector2ds.Add(new Vector2d(dx, dy));
+            }
+            public void OffsetX(double delta)
+            {
+                Vector2ds.Add(new Vector2d(delta, 0));
+            }
+            public void OffsetY(double delta)
+            {
+                Vector2ds.Add(new Vector2d(0, delta));
+            }
+            public void OffsetXY(double deltaX, double deltaY)
+            {
+                Vector2ds.Add(new Vector2d(deltaX, deltaY));
+            }
+        }
         public class YesDraw
         {
             public static List<Point3d> FixLines(List<Point3d> pts)
@@ -370,7 +479,36 @@ namespace ThMEPWSS.Uitl
             }
         }
     }
-
+    public class ComparableCollection<T> : List<T>, IEquatable<ComparableCollection<T>>
+    {
+        public bool Equals(ComparableCollection<T> other)
+        {
+            if (this.Count != other.Count) return false;
+            for (int i = 0; i < this.Count; i++)
+            {
+                if (!Equals(this[i], other[i])) return false;
+            }
+            return true;
+        }
+    }
+    public class GuidDict : Dictionary<object, string>
+    {
+        public GuidDict() : base() { }
+        public GuidDict(int cap) : base(cap) { }
+        public string AddObj(object obj)
+        {
+            if (!this.TryGetValue(obj, out string ret))
+            {
+                ret = Guid.NewGuid().ToString("N");
+                this[obj] = ret;
+            }
+            return ret;
+        }
+        public void AddObjs(IEnumerable objs)
+        {
+            foreach (var o in objs) AddObj(o);
+        }
+    }
     public struct ThWGRect
     {
         double x1;
@@ -406,7 +544,10 @@ namespace ThMEPWSS.Uitl
         {
             return new ThWGRect(ext.MinPoint.X, ext.MinPoint.Y, ext.MaxPoint.X, ext.MaxPoint.Y);
         }
-
+        public static ThWGRect Create(Point3d pt, double ext)
+        {
+            return new ThWGRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
+        }
         public ThWGRect(Point2d leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
         {
         }
@@ -434,6 +575,16 @@ namespace ThMEPWSS.Uitl
             {
                 return Math.Min(Width, Height) / 2;
             }
+        }
+        public Polyline CreateRect()
+        {
+            var pline = new Polyline() { Closed = true };
+            var pts = new Point2dCollection() { new Point2d(MinX, MaxY), new Point2d(MaxX, MaxY), new Point2d(MaxX, MinY), new Point2d(MinX, MinY), };
+            for (int i = 0; i < pts.Count; i++)
+            {
+                pline.AddVertexAt(i, pts[i], 0, 0, 0);
+            }
+            return pline;
         }
         public Polyline CreatePolygon(int num)
         {
@@ -693,6 +844,23 @@ namespace ThMEPWSS.Uitl
 
     public static class LinqAlgorithm
     {
+        public static T GetAt<T>(this IList<T> source, int i)
+        {
+            if (i >= 0 && i < source.Count) return source[i];
+            return default;
+        }
+        public static bool EqualsDefault<T>(this T valueObj) where T : struct
+        {
+            return Equals(valueObj, default(T));
+        }
+        public static IEnumerable<T> YieldBefore<T>(this IEnumerable<T> souce, T item)
+        {
+            yield return item;
+            foreach (var m in souce)
+            {
+                yield return m;
+            }
+        }
         public static Action Once(Action f)
         {
             bool ok = false;
@@ -705,7 +873,12 @@ namespace ThMEPWSS.Uitl
                 }
             });
         }
-        public static T GetLast<T>(this IList<T> source,int n)
+        public static T GetLastOrDefault<T>(this IList<T> source, int n)
+        {
+            if (source.Count < n) return default;
+            return source[source.Count - n];
+        }
+        public static T GetLast<T>(this IList<T> source, int n)
         {
             return source[source.Count - n];
         }
@@ -713,7 +886,17 @@ namespace ThMEPWSS.Uitl
         {
             return source.FirstOrDefault(f);
         }
-        public static IEnumerable<KeyValuePair<T, T>> YieldPairs<T>(List<T> g)
+        public static IEnumerable<KeyValuePair<T, T>> YieldPairsByGroup<T>(IList<IList<T>> gs)
+        {
+            foreach (var g in gs)
+            {
+                foreach (var r in YieldPairs(g))
+                {
+                    yield return r;
+                }
+            }
+        }
+        public static IEnumerable<KeyValuePair<T, T>> YieldPairs<T>(IList<T> g)
         {
             for (int i = 0; i < g.Count; i++)
             {
@@ -723,7 +906,7 @@ namespace ThMEPWSS.Uitl
                 }
             }
         }
-        public static IEnumerable<KeyValuePair<T, T>> YieldPairs<T>(List<T> l1, List<T> l2)
+        public static IEnumerable<KeyValuePair<T, T>> YieldPairs<T>(IList<T> l1, IList<T> l2)
         {
             foreach (var m1 in l1)
             {
@@ -788,6 +971,13 @@ namespace ThMEPWSS.Uitl
             if (pts.Count == 0) return default;
             GetCornerCoodinate(pts, out double minX, out double minY, out double maxX, out double maxY);
             return new ThWGRect(minX, minY, maxX, maxY);
+        }
+        public static void GetCornerCoodinate(Point3dCollection pts, out double minX, out double minY, out double maxX, out double maxY)
+        {
+            minX = pts.Cast<Point3d>().Select(pt => pt.X).Min();
+            minY = pts.Cast<Point3d>().Select(pt => pt.Y).Min();
+            maxX = pts.Cast<Point3d>().Select(pt => pt.X).Max();
+            maxY = pts.Cast<Point3d>().Select(pt => pt.Y).Max();
         }
         public static void GetCornerCoodinate(IList<Point3d> pts, out double minX, out double minY, out double maxX, out double maxY)
         {

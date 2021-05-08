@@ -2,3 +2,24 @@
 1. water bucket, too slow
 2. drawing issues for roof pipe system
 
+1. 冷凝管的高低判断， 2。 散排的判断 
+2. 文字变图块 。 3. 组内做块  4. 通气立管
+
+图块导入，参考
+SetDatabaseDefaults
+
+地址
+"C:\Program Files\Autodesk\ApplicationPlugins\ThMEPPlugin.bundle\Contents\Support\地上给水排水平面图模板_20210125.dwg"
+
+ThAHMarkExtractionVisitor
+
+
+
+DrawBalconyCondensePipes
+
+参考
+NearestNeighbours
+
+文字转图块
+自动生成图块
+

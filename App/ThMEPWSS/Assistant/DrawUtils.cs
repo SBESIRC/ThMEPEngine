@@ -51,9 +51,32 @@ namespace ThMEPWSS.Assistant
     {
         public static DrawingTransaction DrawingTransaction => new DrawingTransaction();
         public static Queue<Action<AcadDatabase>> DrawingQueue { get; } = new Queue<Action<AcadDatabase>>(4096);
+        static readonly Dictionary<string, ObjectId> d = new Dictionary<string, ObjectId>();
+        public static ObjectId GetTextStyleId(string textStyleName)
+        {
+            if (!d.TryGetValue(textStyleName, out ObjectId id))
+            {
+                id = DbHelper.GetTextStyleId(textStyleName);
+                d[textStyleName] = id;
+            }
+            return id;
+        }
+        public static void SetTextStyle(DBText t, string textStyleName)
+        {
+            if (!t.ObjectId.IsValid) return;
+            var textStyleId = GetTextStyleId(textStyleName);
+            if (!textStyleId.IsValid) return;
+            t.TextStyleId = textStyleId;
+        }
+        public static void SetTextStyleLazy(DBText t, string textStyleName)
+        {
+            DrawingQueue.Enqueue(adb =>
+            {
+                SetTextStyle(t, textStyleName);
+            });
+        }
         public static void Draw()
         {
-            //Dbg.PrintLine("DrawUtils.Draw()");
             if (DrawingQueue.Count == 0) return;
             using (var adb = AcadDatabase.Active())
             {
@@ -75,6 +98,10 @@ namespace ThMEPWSS.Assistant
                 ent.Layer = layer;
                 ent.ColorIndex = colorIndex;
             }
+        }
+        public static void DrawEntitiesLazy<T>(IList<T> ents) where T : Entity
+        {
+            DrawingQueue.Enqueue(adb => ents.ForEach(ent => adb.ModelSpace.Add(ent)));
         }
         public static void DrawEntityLazy(Entity ent)
         {
@@ -111,7 +138,12 @@ namespace ThMEPWSS.Assistant
         }
         public static void DrawBlockReference(string blkName, Point3d basePt)
         {
-            DrawingQueue.Enqueue(adb => InsertBlockReference(adb.ModelSpace.ObjectId, null, blkName, basePt, new Scale3d(1), 0));
+            DrawingQueue.Enqueue(adb =>
+            {
+                var id = adb.ModelSpace.ObjectId;
+                if (!id.IsValid) return;
+                InsertBlockReference(id, null, blkName, basePt, new Scale3d(1), 0);
+            });
         }
         public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
         {
@@ -169,6 +201,7 @@ namespace ThMEPWSS.Assistant
             DrawingQueue.Enqueue(adb =>
             {
                 var id = InsertBlockReference(adb.ModelSpace.ObjectId, layer, blkName, basePt, new Scale3d(scale), GeoAlgorithm.AngleFromDegree(rotateDegree), props);
+                if (!id.IsValid) return;
                 if (cb != null)
                 {
                     var br = adb.Element<BlockReference>(id);
@@ -181,6 +214,7 @@ namespace ThMEPWSS.Assistant
             DrawingQueue.Enqueue(adb =>
             {
                 var id = InsertBlockReference(adb.ModelSpace.ObjectId, null, blkName, basePt, new Scale3d(1), 0);
+                if (!id.IsValid) return;
                 if (cb != null)
                 {
                     var br = adb.Element<BlockReference>(id);
@@ -190,7 +224,12 @@ namespace ThMEPWSS.Assistant
         }
         public static void DrawBlockReference(string blkName, Point3d basePt, string layerName)
         {
-            DrawingQueue.Enqueue(adb => adb.ModelSpace.ObjectId.InsertBlockReference(layerName, blkName, basePt, new Scale3d(1), 0));
+            DrawingQueue.Enqueue(adb =>
+            {
+                var id = adb.ModelSpace.ObjectId;
+                if (!id.IsValid) return;
+                id.InsertBlockReference(layerName, blkName, basePt, new Scale3d(1), 0);
+            });
         }
         public static Polyline DrawBoundaryLazy(params Entity[] ents)
         {
@@ -327,7 +366,7 @@ namespace ThMEPWSS.Assistant
         {
             return DrawTextLazy(text, 100, position);
         }
-        public static DBText DrawTextLazy(string text, double height, Point3d position)
+        public static DBText DrawTextLazy(string text, double height, Point3d position, Action<DBText> cb = null)
         {
             var dbText = new DBText
             {
@@ -338,6 +377,7 @@ namespace ThMEPWSS.Assistant
             DrawingQueue.Enqueue(adb =>
             {
                 adb.ModelSpace.Add(dbText);
+                cb?.Invoke(dbText);
             });
             return dbText;
         }
@@ -392,6 +432,19 @@ namespace ThMEPWSS.Assistant
                     layerRecord.IsPlottable = false;
                 }
             }
+        }
+    }
+    public static class ThBlock
+    {
+        public static bool IsSupportedBlock(BlockTableRecord blockTableRecord)
+        {
+            // 暂时不支持动态块，外部参照，覆盖
+            if (blockTableRecord.IsDynamicBlock) return false;
+            // 忽略图纸空间和匿名块
+            if (blockTableRecord.IsLayout || blockTableRecord.IsAnonymous) return false;
+            // 忽略不可“炸开”的块
+            if (!blockTableRecord.Explodable) return false;
+            return true;
         }
     }
 }
