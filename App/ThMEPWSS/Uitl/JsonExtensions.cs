@@ -12,14 +12,18 @@ namespace ThMEPWSS.JsonExtensionsNs
 {
     public static class LinqExtensions
     {
-        public static void AddRange<T>(this HashSet<T> source,IEnumerable<T> items)
+        public static string JoinWith(this IEnumerable<string> strs, string s)
+        {
+            return string.Join(s, strs);
+        }
+        public static void AddRange<T>(this HashSet<T> source, IEnumerable<T> items)
         {
             foreach (var item in items)
             {
                 source.Add(item);
             }
         }
-        public static KeyValuePair<K,V> ToKV<K,V>(this Tuple<K,V> t)
+        public static KeyValuePair<K, V> ToKV<K, V>(this Tuple<K, V> t)
         {
             return new KeyValuePair<K, V>(t.Item1, t.Item2);
         }
@@ -137,7 +141,28 @@ namespace ThMEPWSS.CADExtensionsNs
             ent.Explode(entitySet);
             return entitySet;
         }
-
+        public static DBObjectCollection ExplodeBlockRef(this BlockReference blk)
+        {
+            var entitySet = new DBObjectCollection();
+            void explode(Entity ent)
+            {
+                var obl = new DBObjectCollection();
+                ent.Explode(obl);
+                foreach (Entity e in obl)
+                {
+                    if (e is BlockReference br)
+                    {
+                        explode(br);
+                    }
+                    else
+                    {
+                        entitySet.Add(e);
+                    }
+                }
+            }
+            explode(blk);
+            return entitySet;
+        }
         public static List<DBObject> ToDBObjectList(this DBObjectCollection colle)
         {
             var list = new List<DBObject>();

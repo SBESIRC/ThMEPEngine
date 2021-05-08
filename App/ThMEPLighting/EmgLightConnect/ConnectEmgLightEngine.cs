@@ -16,7 +16,7 @@ namespace ThMEPLighting.EmgLightConnect
 {
     public class ConnectEmgLightEngine
     {
-        public static void ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame,List<Polyline> holes)
+        public static void ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame)
         {
 
             //if (emgLightList.Count == 0 && evacList.Count == 0 && emgExitList.Count == 0)
@@ -100,7 +100,7 @@ namespace ThMEPLighting.EmgLightConnect
             //连线
             List<Polyline> linkLine = new List<Polyline>();
             var mainLink = drawMainBlkService.drawMainToMain(singleSideBlocks, blkSource, frame, out var blkList, ref linkLine);
-            var secLink = drawSecBlkService.drawSecToMain(singleSideBlocks, frame, blkList, ref linkLine,holes);
+            var secLink = drawSecBlkService.drawSecToMain(singleSideBlocks, frame, blkList, ref linkLine);
             var groupLink = drawSecBlkService.drawGroupToGroup(connectList, frame, blkList, ref linkLine);
 
             DrawUtils.ShowGeometry(mainLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 130));

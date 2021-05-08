@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.JsonExtensionsNs;
@@ -44,6 +45,8 @@ namespace ThMEPWSS.Pipe.Model
 
         private void DrawPipeRuns(RainSystemDrawingContext ctx)
         {
+            var texts = ConvertLabelStrings(ctx).ToList();
+
             var basePoint = ctx.BasePoint;
             var runs = PipeRuns.ToList();
             runs.Reverse();
@@ -70,10 +73,9 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     var j = ctx.WSDStoreys.IndexOf(s);
                     var bsPt = new Point3d(basePoint.X, ctx.StoreyDrawingContexts[j].BasePoint.Y, 0);
-                    var c = new PipeRunDrawingContext();
+                    var c = new PipeRunDrawingContext() { ThWRainPipeRun = r };
                     ctxs[i] = c;
                     c.BasePoint = bsPt;
-                   
                 }
             }
 
@@ -82,16 +84,66 @@ namespace ThMEPWSS.Pipe.Model
                 if (ctx.WaterBucketPoint is Point3d pt) pts.Add(pt);
             }
 
-            //for (int i = 0; i < runs.Count; i++)
-            //{
-            //    var r = runs[i];
-            //    var s = r.Storey;
-            //    if (s != null)
-            //    {
-            //        var c = ctxs[i];
+            for (int i = 0; i < runs.Count; i++)
+            {
+                var r = runs[i];
+                var s = r.Storey;
+                if (s != null)
+                {
+                    var c = ctxs[i];
+                    if (s.Label == "3F")
+                    {
+                        DU.DrawingQueue.Enqueue(adb => Dr.DrawDNLabelRight(c.BasePoint, "DN100"));
+                    }
+                }
+            }
 
-            //    }
-            //}
+            {
+                var re = new Regex(@"(\d+)F");
+                var storeys = ctx.WSDStoreys.Where(s => re.IsMatch(s.Label)).ToList();
+                {
+                    var targetStorey = storeys.GetLastOrDefault(2);
+                    for (int i = 0; i < runs.Count; i++)
+                    {
+                        var r = runs[i];
+                        var s = r.Storey;
+                        if (s != null && s.Label == targetStorey?.Label)
+                        {
+                            var c = ctxs[i];
+                            DU.DrawingQueue.Enqueue(adb => Dr.DrawDNLabelRight(c.BasePoint, "DN100"));
+                        }
+                    }
+                }
+                {
+                    var targetStorey = storeys.GetLastOrDefault(3);
+                    if (targetStorey != null)
+                    {
+                        for (int i = 0; i < runs.Count; i++)
+                        {
+                            var r = runs[i];
+                            var s = r.Storey;
+                            if (s != null && s.Label == targetStorey?.Label)
+                            {
+                                var c = ctxs[i];
+                                //立管编号1 立管编号2
+                                if (texts.Count == 1)
+                                {
+                                    DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(c.BasePoint, texts[0], ""));
+                                }
+                                else if (texts.Count == 2)
+                                {
+                                    DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(c.BasePoint, texts[0], texts[1]));
+                                }
+                                else
+                                {
+                                    DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(c.BasePoint, texts.JoinWith(";"), ""));
+                                }
+
+                            }
+                        }
+                    }
+                }
+            }
 
             double sdx = 0;
             for (int i = 0; i < runs.Count; i++)
@@ -106,14 +158,37 @@ namespace ThMEPWSS.Pipe.Model
                     var dx = c.YesDraw.GetCurX();
                     c.BasePoint = c.BasePoint.OffsetX(sdx);
                     if (c.TopPoint is Point3d pt) pts.Add(pt);
-                    if (false)
-                    {
-                        var rect = c.YesDraw.GetGRect(c.BasePoint, false);
-                        if (!rect.Equals(default)) DU.DrawRectLazy(rect);
-                    }
 
                     //pts.AddRange(c.YesDraw.GetPoint3ds(c.BasePoint).Skip(1));
+                    {
+                        if (r.TranslatorPipe.TranslatorType == TranslatorTypeEnum.Long)
+                        {
+                            DU.DrawingQueue.Enqueue(adb =>
+                            {
+                                var pts = c.YesDraw.GetPoint3ds(c.BasePoint).ToList();
+                                if (pts.Count >= 4)
+                                {
+                                    var pt = pts[3];
+                                    Dr.DrawUnderBoardLabelAtRightButtom(pt.OffsetX(180));
+                                    Dr.DrawDNLabel(pt.OffsetX(180).OffsetXY(50, -50 - 250));
+                                }
+                            });
+                        }
+                        if (r.TranslatorPipe.TranslatorType == TranslatorTypeEnum.Gravity)
+                        {
+                            DU.DrawingQueue.Enqueue(adb =>
+                            {
+                                var pts = c.YesDraw.GetPoint3ds(c.BasePoint).ToList();
+                                if (pts.Count >= 4)
+                                {
+                                    var pt = pts[3];
+                                    Dr.DrawUnderBoardLabelAtLeftTop(pt.OffsetX(180));
+                                    Dr.DrawDNLabel(pt.OffsetX(180).OffsetXY(300, -50 - 250));
+                                }
+                            });
+                        }
 
+                    }
                     {
                         var basePt = c.BasePoint;
                         var _pts = c.YesDraw.GetPoint3ds(basePt).Skip(1).ToList();
@@ -134,7 +209,6 @@ namespace ThMEPWSS.Pipe.Model
                         {
                             pts.Add(basePt);
                         }
-
                     }
 
                     sdx += dx;
@@ -157,7 +231,107 @@ namespace ThMEPWSS.Pipe.Model
             {
                 ctx.OutputBasePoint = pts.Last();
             }
+            {
+                if (ctx.WaterBucketPoint is Point3d pt)
+                {
+                    pts = pts.Where(p => p.Y <= pt.Y).YieldBefore(pt).ToList();
+                }
+            }
+            if (OutputType.OutputType == RainOutputTypeEnum.None)
+            {
+                if (WaterBucket.Storey != null)
+                {
+                    var r = runs.Last();
+                    if (r != null)
+                    {
+                        if (runs.Count == 1)
+                        {
+                            var s = ctx.RainSystemDiagram.GetLowerStorey(r.Storey);
+                            if (s != null)
+                            {
+                                var x = pts.Last().X;
+                                var y = ctx.StoreyDrawingContexts[ctx.WSDStoreys.IndexOf(s)].BasePoint.Y;
+                                pts.Add(new Point3d(x, y + 200, 0));
+                            }
+                        }
+                        else
+                        {
+                            var storeys = runs.Select(x => ctx.RainSystemDiagram.GetStoreyIndex(x.Storey?.Label)).Where(x => x >= 0).OrderBy(x => x).Select(x => ctx.WSDStoreys[x]).ToList();
+                            if (storeys.Count > 0)
+                            {
+                                pts[pts.Count - 1] = pts[pts.Count - 1].ReplaceY(ctx.StoreyDrawingContexts[ctx.RainSystemDiagram.GetStoreyIndex(storeys.First().Label)].BasePoint.Y + 200);
+                            }
+
+                        }
+                    }
+                }
+                else
+                {
+
+                }
+            }
+            //只有阳台雨水立管（Y2）和冷凝水立管（NL）才需要通气
+            //todo:界面中的开关控制冷凝水立管是否通气
+            if (VerticalPipeId.StartsWith("Y2") || VerticalPipeId.StartsWith("NL"))
+            {
+                //。如果立管出现在RF层，则通气管伸到屋顶上（上人500 不上人2000），否则在本层设通气。
+                var r = runs.FirstOrDefault(r => r.Storey?.Label == "RF");
+                if (r != null)
+                {
+                    if (pts.Count > 0)
+                    {
+                        //var p = ctx.StoreyDrawingContexts[ctx.WSDStoreys.Count - 1].BasePoint;
+                        var p = ctx.StoreyDrawingContexts[ctx.WSDStoreys.IndexOf(ctx.RainSystemDiagram.GetStorey("RF"))].BasePoint;
+                        pts.Insert(0, pts.First().ReplaceY(p.Y).OffsetY(ThWSDStorey.TEXT_HEIGHT).OffsetY(500));
+                        {
+                            var cd = new CircleDraw();
+                            cd.Rotate(250, 180 + 45);
+                            cd.Rotate(250, -45);
+                            var lines = cd.GetLines(pts.First()).ToList();
+                            DU.DrawEntitiesLazy(lines);
+                            SetPipeRunLinesStyle(lines);
+                        }
+                    }
+                }
+                else
+                {
+                    r = runs.FirstOrDefault();
+                    if (r != null)
+                    {
+                        if (pts.Count > 0)
+                        {
+                            var s = r.Storey;
+                            var y = ctx.StoreyDrawingContexts[ctx.RainSystemDiagram.GetStoreyIndex(s.Label)].BasePoint.Y;
+                            if (y <= pts.First().Y) y = pts.First().Y;
+                            pts.Insert(0, pts.First().ReplaceY(y).OffsetY(500));
+                            {
+                                var cd = new CircleDraw();
+                                cd.Rotate(250, 180 + 45);
+                                cd.Rotate(250, -45);
+                                var lines = cd.GetLines(pts.First()).ToList();
+                                DU.DrawEntitiesLazy(lines);
+                                SetPipeRunLinesStyle(lines);
+                            }
+                        }
+                    }
+                }
+            }
             DrawPipeLinesLazy(pts);
+
+            //todo:组内做块
+            {
+                string f(ThWRainPipeRun r)
+                {
+                    var fds1 = r.FloorDrains.Where(x => x.HasDrivePipe).Select(x => "FloorDrain_HasDrivePipe").ToList();
+                    var fds2 = r.FloorDrains.Where(x => !x.HasDrivePipe).Select(x => "FloorDrain_NoDrivePipe").ToList();
+                    var cps1 = r.CondensePipes.Where(x => x.HasDrivePipe).Select(x => "CondensePipe_HasDrivePipe").ToList();
+                    var cps2 = r.CondensePipes.Where(x => !x.HasDrivePipe).Select(x => "CondensePipe_NoDrivePipe").ToList();
+                    var key = fds1.Concat(fds2).Concat(cps1).Concat(cps2).JoinWith(",");
+                    return key;
+                }
+                var gs = runs.GroupBy(r => f(r));
+            }
+
 
             //for (int i = 0; i < runs.Count; i++)
             //{
@@ -172,6 +346,48 @@ namespace ThMEPWSS.Pipe.Model
 
 
         }
+
+        private static IEnumerable<string> ConvertLabelStrings(RainSystemDrawingContext ctx)
+        {
+            var pipeIds = ctx.ThWRainPipeSystemGroup.Cast<ThWRainPipeSystem>().Select(p => p.VerticalPipeId).ToList();
+
+            var items = pipeIds.Select(id => LabelItem.Parse(id)).Where(m => m != null);
+            var gs = items.GroupBy(m => VTFac.Create(m.Prefix, m.D1, m.Suffix)).Select(l => l.OrderBy(x => x.D2).ToList());
+            foreach (var g in gs)
+            {
+                if (g.Count == 1)
+                {
+                    //Dbg.PrintLine(g.First().Label);
+                    yield return g.First().Label;
+                }
+                else if (g.Count > 2 && g.Count == g.Last().D2 - g.First().D2 + 1)
+                {
+                    var m = g.First();
+                    //Dbg.PrintLine($"{m.Prefix}{m.D1}-{g.First().D2}{m.Suffix}~{g.Last().D2}{m.Suffix}");
+                    yield return $"{m.Prefix}{m.D1}-{g.First().D2}{m.Suffix}~{g.Last().D2}{m.Suffix}";
+                }
+                else
+                {
+                    var sb = new StringBuilder();
+                    {
+                        var m = g.First();
+                        sb.Append($"{m.Prefix}{m.D1}-");
+                    }
+                    for (int i = 0; i < g.Count; i++)
+                    {
+                        var m = g[i];
+                        sb.Append($"{m.D2}{m.Suffix}");
+                        if (i != g.Count - 1)
+                        {
+                            sb.Append(",");
+                        }
+                    }
+                    //Dbg.PrintLine(sb.ToString());
+                    yield return sb.ToString();
+                }
+            }
+        }
+
         private static void DrawPipeLinesLazy(List<Point3d> pts)
         {
             var lines = DU.DrawLinesLazy(YesDraw.FixLines(pts));

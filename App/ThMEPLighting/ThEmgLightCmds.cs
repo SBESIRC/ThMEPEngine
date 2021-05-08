@@ -73,14 +73,14 @@ namespace ThMEPLighting
                     //取块
                     var getBlockS = new GetBlockService();
                     getBlockS.getBlocksData(bufferFrame, transformer);
-
+                   
 
                     //清除layer
                     //var block = GetSourceDataService.ExtractBlock(bufferFrame, ThMEPLightingCommon.EmgLightLayerName, ThMEPLightingCommon.EmgLightBlockName, transformer);
                     //RemoveBlockService.ClearEmergencyLight(block);
                     RemoveBlockService.ClearEmergencyLight(getBlockS.emgLight);
-
-                    var b = false;
+                   
+                    var b = false ;
                     if (b == true)
                     {
                         continue;
@@ -118,8 +118,9 @@ namespace ThMEPLighting
                 PromptSelectionOptions options = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
-                    MessageForAdding = "请选择布置区域框线",
+                    MessageForAdding = "选择区域",
                     RejectObjectsOnLockedLayers = true,
+                    SingleOnly = true,
                 };
                 var dxfNames = new string[]
                 {
@@ -133,11 +134,13 @@ namespace ThMEPLighting
                 }
 
                 //获取ALE起点
+
                 PromptSelectionOptions sOptions = new PromptSelectionOptions()
                 {
                     AllowDuplicates = false,
-                    MessageForAdding = "请选择配电箱",
+                    MessageForAdding = "选择ALE",
                     RejectObjectsOnLockedLayers = true,
+                    SingleOnly = true,
                 };
                 dxfNames = new string[]
                 {
@@ -153,41 +156,27 @@ namespace ThMEPLighting
                 }
                 var ALEOri = (acdb.Element<BlockReference>(sResult.Value.GetObjectIds().First()) as BlockReference);
 
-                //确定位移中心
-                var centerPt = ALEOri.Position;
-                if (centerPt.X < 10E7)
-                {
-                    centerPt = new Point3d();
-                }
-                var transformer = new ThMEPOriginTransformer(centerPt);
-
-
-             
-                var frameList = new List<Polyline>();
                 foreach (ObjectId obj in result.Value.GetObjectIds())
                 {
                     //获取外包框
                     var frame = acdb.Element<Polyline>(obj);
                     var frameClone = frame.WashClone() as Polyline;
+                    var centerPt = frameClone.StartPoint;
+
+                    if (centerPt.X < 10E7)
+                    {
+                        centerPt = new Point3d();
+                    }
+
 
                     //处理外包框
+                    var transformer = new ThMEPOriginTransformer(centerPt);
                     transformer.Transform(frameClone);
                     var nFrame = ThMEPFrameService.NormalizeEx(frameClone);
                     if (nFrame.Area < 1)
                     {
                         continue;
                     }
-
-                    frameList.Add(nFrame);
-                }
-
-                var frameListHoles = frameAnalysisService.analysisHoles(frameList);
-               
-                foreach (var nFrameHoles in frameListHoles)
-                {
-
-                    var nFrame = nFrameHoles.Key;
-                    var nHoles = nFrameHoles.Value; 
 
                     //为了获取卡在外包框的建筑元素，这里做了一个Buffer处理
                     var bufferFrame = ThMEPFrameService.Buffer(nFrame, EmgLightCommon.BufferFrame);
@@ -198,14 +187,11 @@ namespace ThMEPLighting
 
                     //清除连线。待补
 
-                    var b = false;
-                    if (b == true)
-                    {
-                        continue;
-                    }
+                    //
+
                     //取块
                     var getBlockS = new GetBlockService();
-                    getBlockS.getBlocksData(bufferFrame, transformer, nHoles);
+                    getBlockS.getBlocksData(bufferFrame, transformer);
 
                     var blockList = new Dictionary<EmgBlkType.BlockType, List<BlockReference>>();
                     getBlockS.getBlockList(blockList);
@@ -214,12 +200,18 @@ namespace ThMEPLighting
                     transformer.Transform(ALE);
                     blockList.Add(EmgBlkType.BlockType.ale, new List<BlockReference> { ALE });
 
-                   
+                    //GetBlockService.projectToXY(ref blockList);
+
+                    var b = false;
+                    if (b == true)
+                    {
+                        continue;
+                    }
 
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
 
-                    ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame, nHoles);
+                    ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame);
 
                 }
             }

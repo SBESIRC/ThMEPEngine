@@ -58,10 +58,7 @@
                 Dbg.FocusMainWindow();
                 var basePtOptions = new PromptPointOptions("\n选择图纸基点");
 
-
-                //const string KEY = "qrjq0v";
-                //const string KEY = "qrjq0w";
-                const string KEY = "qrjq0x";
+                const string KEY = FengKeys.ThWRainSystemDiagramData;
 
 
                 //var rst = Active.Editor.GetPoint(basePtOptions);
@@ -92,10 +89,7 @@
                 Dbg.FocusMainWindow();
                 var basePtOptions = new PromptPointOptions("\n选择图纸基点");
 
-
-                //const string KEY = "qrjq0v";
-                //const string KEY = "qrjq0w";
-                const string KEY = "qrjq0x";
+                const string KEY = FengKeys.ThWRainSystemDiagramData;
 
 
                 var rst = Active.Editor.GetPoint(basePtOptions);

@@ -129,62 +129,6 @@ namespace ThMEPEngineCore
         }
 
 #if ACAD2016
-        [CommandMethod("TIANHUACAD", "THPPARTITION", CommandFlags.Modal)]
-        public void ThPPartition()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                // 指定多边形
-                var result = Active.Editor.GetEntity("\n请选择多段线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var shell = acadDatabase.Element<Polyline>(result.ObjectId);
-
-                // 指定多边形内的洞
-                var holes = new DBObjectCollection();
-                var options = new PromptSelectionOptions()
-                {
-                    MessageForAdding = "\n请选择洞",
-                };
-                var result2 = Active.Editor.GetSelection(options);
-                if (result2.Status == PromptStatus.OK)
-                {
-                    foreach (var obj in result2.Value.GetObjectIds())
-                    {
-                        holes.Add(acadDatabase.Element<Polyline>(obj));
-                    }
-                }
-
-                // 指定分割方式
-                var kOptions = new PromptKeywordOptions("\n请指定分割方式")
-                {
-                    AllowNone = true
-                };
-                kOptions.Keywords.Add("HM", "HM", "HM(H)");
-                kOptions.Keywords.Default = "HM";
-                var result3 = Active.Editor.GetKeywords(kOptions);
-                if (result3.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                // 分割
-                var objs = new DBObjectCollection();
-                if (result3.StringResult == "HM")
-                {
-                    objs = ThMEPPolygonPartitionService.HMPartition(shell, holes);
-                }
-                foreach (Entity e in objs)
-                {
-                    acadDatabase.ModelSpace.Add(e);
-                    e.SetDatabaseDefaults();
-                }
-            }
-        }
-
-
         [CommandMethod("TIANHUACAD", "THPTRIANGULATE", CommandFlags.Modal)]
         public void ThPTriangulate()
         {
@@ -440,23 +384,15 @@ namespace ThMEPEngineCore
                     var newFrame = ThMEPFrameService.NormalizeEx(frame);
                     pts = newFrame.VerticesEx(100.0);
                 }
-
-                //获取空间名称
-
                 // ,ShearWall, 门洞，门扇,柱
                 var extractors = new List<ThExtractorBase>()
                 {
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ 
-                        IsBuildObstacle=false,
-                        ColorIndex=1,
-                        ElementLayer = "AD-AREA-OUTL",
-                        NameLayer = "AD-NAME-ROOM",
-                        PrivacyLayer ="空间名称"},
+                    new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1,ElementLayer = "AD-AREA-OUTL"}, // Space
                     new ThArchitectureWallExtractor {ColorIndex=2 },  // ArchitectureWall
                     new ThShearWallExtractor{ColorIndex=3},  // ShearWall
-                    new ThColumnExtractor{UseDb3ColumnEngine=false,ColorIndex=4}, // Column
+                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=4}, // Column
                     new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
                     new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
                     new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)

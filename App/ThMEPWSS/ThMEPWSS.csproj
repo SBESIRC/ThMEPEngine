@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
+    <Compile Include="Assistant\FengKeys.cs" />
     <Compile Include="Assistant\FengNTSTest.cs" />
     <Compile Include="Assistant\ThWRainSystemDiagramTest.cs" />
     <Compile Include="Bussiness\AvoidBeamByPointService.cs" />
@@ -58,6 +59,8 @@
     <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
+    <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
+    <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />

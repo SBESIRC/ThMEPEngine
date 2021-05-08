@@ -149,9 +149,9 @@ namespace ThMEPLighting.EmgLight.Common
         /// <param name="BlockName"></param>
         /// <param name="bufferFrame"></param>
         /// <returns></returns>
-        public static Dictionary<BlockReference, BlockReference> ExtractBlock(Polyline bufferFrame, string LayerName, string BlockName,ThMEPOriginTransformer transformer,List<Polyline> holes = null)
+        public static Dictionary<BlockReference, BlockReference> ExtractBlock(Polyline bufferFrame, string LayerName, string BlockName,ThMEPOriginTransformer transformer)
         {
-            var blk = new Dictionary<BlockReference, BlockReference>();
+            var emgLight = new Dictionary<BlockReference, BlockReference>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 acadDatabase.Database.UnFrozenLayer(LayerName);
@@ -169,25 +169,18 @@ namespace ThMEPLighting.EmgLight.Common
                         var blockTrans = block.Clone() as BlockReference;
                         transformer.Transform(blockTrans);
                         blockTrans.Position = new Point3d(blockTrans.Position.X, blockTrans.Position.Y, 0);
-                        blk.Add(block,blockTrans);
+                        emgLight.Add(block,blockTrans);
                     }
                 }
 
-                blk= blk.Where(o => bufferFrame.Contains(o.Value.Position)).ToDictionary (x=>x.Key, x=>x.Value );
+                emgLight= emgLight.Where(o => bufferFrame.Contains(o.Value.Position)).ToDictionary (x=>x.Key, x=>x.Value );
 
-                if (holes != null && holes.Count >0)
-                {
-                    foreach (var hole in holes)
-                    {
-                        blk = blk.Where(o => hole.Contains(o.Value.Position)==false).ToDictionary(x => x.Key, x => x.Value);
-                    }
-                }
             }
 
-            return blk;
+            return emgLight;
         }
 
-        public static Dictionary<BlockReference, BlockReference> ExtractBlockNoLayer(Polyline bufferFrame, string BlockName, ThMEPOriginTransformer transformer)
+        public static Dictionary<BlockReference, BlockReference> ExtractBlock(Polyline bufferFrame, string BlockName, ThMEPOriginTransformer transformer)
         {
             var emgLight = new Dictionary<BlockReference, BlockReference>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
