@@ -15,11 +15,14 @@
             <ComponentGroupRef Id="ProductComponentsAppCoreWin64" />
             <ComponentGroupRef Id="ProductComponentsAppExternal" />
             <ComponentGroupRef Id="ProductComponentsAppInternal" />
+            <ComponentGroupRef Id="ProductComponentsAppMvvmLight" />
             <ComponentGroupRef Id="ProductComponentsAppSystem" />
             <ComponentGroupRef Id="ProductComponentsAppCGAL" />
             <ComponentGroupRef Id="ProductComponentsWSSWin64" />
             <ComponentGroupRef Id="ProductComponentsHVACWin64" />
             <ComponentGroupRef Id="ProductComponentsDevExpress" />
+            <ComponentGroupRef Id="ProductComponentsWPF" />
+            <ComponentGroupRef Id="ProductComponentsLightingWin64" />
             <ComponentGroupRef Id="ProductComponentsElectricalWin64" />
             <ComponentGroupRef Id="ProductComponentsFanSelectionWin64" />
         </Feature>

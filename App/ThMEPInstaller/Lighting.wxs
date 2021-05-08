@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<?include Variable.wxi ?>
+	<Fragment>
+		<?if $(var.Configuration) = Debug ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+			<?define OutputPath_R18_Debug="bin\Debug" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPLighting_UI_Debug" Guid="{5F21949B-9A5C-4982-8AEC-D60489182F01}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPLighting_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_UI_Debug" Guid="{B64D1B38-6C20-4F85-B615-C703E3F64ED7}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPLighting_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Debug)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Debug="bin\Debug-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_UI_Debug" Guid="{0099F5A5-4719-4082-8866-2D61A4AD6934}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPLighting_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Debug)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_UI_Debug" Guid="{7F845AEE-B40E-4CDF-BEAB-FED337899AF0}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPLighting_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Debug)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<?elseif $(var.Configuration) = Release ?>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
+			<?define OutputPath_R18_Release="bin\Release" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPLighting_UI_Release" Guid="{66AD8695-0087-4FF0-B052-D875BA3A5D9C}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPLighting_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
+			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_UI_Release" Guid="{FE7BDB7E-FE81-4546-941B-69CFEDFAE3BF}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R19_MEPLighting_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R19_Release)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R20">
+			<?define OutputPath_R20_Release="bin\Release-NET45" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_UI_Release" Guid="{BCAC080E-6A5F-45C4-936D-0F1986BCD347}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R20_MEPLighting_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R20_Release)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R22">
+			<?define OutputPath_R22_Release="bin\Release-NET46" ?>
+			<Component Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_UI_Release" Guid="{35F94FBD-18C1-424B-9FDF-34F4A29454A3}" Win64="yes">
+				<File Id="FILE_Autoloader_Contents_App_Win64_R22_MEPLighting_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R22_Release)\ThMEPLighting.UI.dll" />
+			</Component>
+		</DirectoryRef>
+		<?endif?>
+	</Fragment>
+	<Fragment>
+		<ComponentGroup Id="ProductComponentsLightingWin64">
+			<?if $(var.Configuration) = Debug ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPLighting_UI_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_UI_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_UI_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_UI_Debug" />
+			<?elseif $(var.Configuration) = Release ?>
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPLighting_UI_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPLighting_UI_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPLighting_UI_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPLighting_UI_Release" />
+			<?endif?>
+		</ComponentGroup>
+	</Fragment>
+</Wix>
