@@ -79,23 +79,23 @@ namespace ThMEPWSS.Pipe.Model
         /// </summary>
         public string Label { get; set; } = string.Empty;
 
-        private string _dn = string.Empty;
-        public string DN
+        private string _nd = string.Empty;
+        public string ND
         {
-            get => _dn;
-            set => _dn = value ?? string.Empty;
+            get => _nd;
+            set => _nd = value ?? string.Empty;
         }
 
         public VerticalPipeType PipeType { get; set; }
 
         public override int GetHashCode()
         {
-            return /*Label.GetHashCode() ^*/ DN.GetHashCode() ^ PipeType.GetHashCode();
+            return /*Label.GetHashCode() ^*/ ND.GetHashCode() ^ PipeType.GetHashCode();
         }
 
         virtual public bool Equals(ThWSDPipe other)
         {
-            return /*this.Label.Equals(other.Label) &&*/ this.DN.Equals(other.DN) && this.PipeType.Equals(other.PipeType);
+            return /*this.Label.Equals(other.Label) &&*/ this.ND.Equals(other.ND) && this.PipeType.Equals(other.PipeType);
         }
     }
 
@@ -151,6 +151,15 @@ namespace ThMEPWSS.Pipe.Model
         public BlockReference BlockRef { get; set; }
         [JsonIgnore]
         public Point3d Position => BlockRef.Position;
+        static void SetStyle(params Entity[] ents)
+        {
+            const string layer = "W-NOTE";
+            foreach (var e in ents)
+            {
+                e.Layer = layer;
+                e.ColorIndex = 256;
+            }
+        }
         public void Draw(StoreyDrawingContext ctx)
         {
             var basePt = ctx.BasePoint;
@@ -159,13 +168,13 @@ namespace ThMEPWSS.Pipe.Model
             {
                 var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
                 var dbt = DU.DrawTextLazy(Label, TEXT_HEIGHT, new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + INDEX_TEXT_OFFSET_Y, 0));
-                Dr.SetLabelStylesForWNote(line, dbt);
+                SetStyle(line, dbt);
             }
             if (Label == "RF")
             {
                 var line = DU.DrawLineLazy(new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + RF_OFFSET_Y, 0));
                 var dbt = DU.DrawTextLazy("建筑完成面", TEXT_HEIGHT, new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + RF_OFFSET_Y + INDEX_TEXT_OFFSET_Y, 0));
-                Dr.SetLabelStylesForWNote(line, dbt);
+                SetStyle(line, dbt);
             }
         }
         public override int GetHashCode()
@@ -180,7 +189,7 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWSDWaterBucket : ThWSDDrawableElement, IEquatable<ThWSDWaterBucket>
     {
         public string Label { get; set; } = string.Empty;
-        public string DN { get; set; } = string.Empty;
+        public string ND { get; set; } = string.Empty;
         public WaterBucketEnum Type { get; set; }
         public ThWSDStorey Storey { get; set; }
 
@@ -200,19 +209,12 @@ namespace ThMEPWSS.Pipe.Model
             switch (Type)
             {
                 case WaterBucketEnum.Gravity:
-                    {
-                        Dr.DrawGravityWaterBucket(basePt);
-                        Dr.DrawGravityWaterBucketLabel(basePt.OffsetXY(0, 125), $"重力雨水斗{DN}");
-                    }
+                    Dr.DrawGravityWaterBucket(basePt);
+                    Dr.DrawGravityWaterBucketLabel(basePt);
                     break;
                 case WaterBucketEnum.Side:
-                    {
-                        var relativeYOffsetToStorey = -83;
-                        var pt = basePt.OffsetY(relativeYOffsetToStorey);
-                        ctx.RainSystemDrawingContext.WaterBucketPoint = pt;
-                        Dr.DrawSideWaterBucket(pt);
-                        Dr.DrawSideWaterBucketLabel(pt.OffsetXY(-215, 318), $"侧入式雨水斗{DN}");
-                    }
+                    Dr.DrawSideWaterBucket(basePt);
+                    Dr.DrawSideWaterBucketLabel(basePt);
                     break;
                 default:
                     break;
@@ -221,12 +223,12 @@ namespace ThMEPWSS.Pipe.Model
 
         public bool Equals(ThWSDWaterBucket other)
         {
-            return this.Label.Equals(other.Label) && this.DN.Equals(other.DN) && this.Type.Equals(other.Type);
+            return this.Label.Equals(other.Label) && this.ND.Equals(other.ND) && this.Type.Equals(other.Type);
         }
 
         public override int GetHashCode()
         {
-            return Label.GetHashCode() ^ DN.GetHashCode() ^ Type.GetHashCode();
+            return Label.GetHashCode() ^ ND.GetHashCode() ^ Type.GetHashCode();
         }
     }
     public class ThWSDFloorDrain : IEquatable<ThWSDFloorDrain>

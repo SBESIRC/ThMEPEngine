@@ -132,68 +132,6 @@ namespace ThMEPWSS.Pipe.Model
     }
     public static class Dr
     {
-
-        public static void DrawStarterPipeHeightLabel(Point3d basePt)
-        {
-            var text = "起端管底标高-0.65";
-            var height = 300;
-            var width = height * .7 * text.Length;
-            var yd = new YesDraw();
-            yd.OffsetXY(0, -700 - 500);
-            yd.OffsetX(-width);
-            var pts = yd.GetPoint3ds(basePt).ToList();
-            var lines = DU.DrawLinesLazy(pts);
-            Dr.SetLabelStylesForRainNote(lines.ToArray());
-            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
-            Dr.SetLabelStylesForRainNote(t);
-        }
-        public static void DrawRainPortLabel(Point3d basePt)
-        {
-            var text = "接至雨水口";
-            var height = 300;
-            var width = height * .8 * text.Length;
-            var yd = new YesDraw();
-            yd.OffsetXY(0, -700);
-            yd.OffsetX(-width);
-            var pts = yd.GetPoint3ds(basePt).ToList();
-            var lines = DU.DrawLinesLazy(pts);
-            Dr.SetLabelStylesForRainNote(lines.ToArray());
-            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(50, 50));
-            Dr.SetLabelStylesForRainNote(t);
-        }
-        public static void DrawUnderBoardLabelAtLeftTop(Point3d basePt)
-        {
-            var text = "贴底板敷设";
-            var height = 300;
-            var width = height * 0.8 * text.Length + 200;
-            var yd = new YesDraw();
-            //yd.Rotate(505, 90 + 45);
-            yd.OffsetXY(460, -830);
-            yd.OffsetX(width);
-            var pts = yd.GetPoint3ds(basePt).ToList();
-            var lines = DU.DrawLinesLazy(pts);
-            Dr.SetLabelStylesForRainNote(lines.ToArray());
-            var t = DU.DrawTextLazy(text, height, pts[1].OffsetXY(100, 50));
-            Dr.SetLabelStylesForRainNote(t);
-        }
-        public static void DrawUnderBoardLabelAtRightButtom(Point3d basePt)
-        {
-            var pl = ThMEPWSS.Pipe.Service.PolylineTools.CreatePolyline(new Point3d[] { basePt.OffsetXY(-75, -75), basePt.OffsetXY(75, 75) });
-            pl.ConstantWidth = 25;
-            DU.DrawEntityLazy(pl);
-            var text = "贴底板敷设";
-            var height = 300;
-            var width = height * 0.8 * text.Length + 200;
-            var yd = new YesDraw();
-            //yd.Rotate(505, 90 + 45);
-            yd.OffsetXY(-450, 830);
-            yd.OffsetX(-width);
-            var pts = yd.GetPoint3ds(basePt).ToList();
-            var lines = DU.DrawLinesLazy(pts);
-            Dr.SetLabelStylesForRainNote(lines.ToArray());
-            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
-            Dr.SetLabelStylesForRainNote(t);
-        }
         public static void DrawWrappingPipe(Point3d basePt)
         {
             DU.DrawBlockReference(blkName: "*U349", basePt: basePt.OffsetXY(-450, 0), cb: br => DU.SetLayerAndColorIndex("W-BUSH", 256, br));
@@ -223,95 +161,43 @@ namespace ThMEPWSS.Pipe.Model
 
         public static void DrawShortTranslatorLabel(Point3d basePt)
         {
-            var text = "DN100乙字弯";
-            var height = 300;
-            var width = height * .7 * text.Length + 10;
-            var yd = new YesDraw();
-            yd.OffsetXY(-800, 1000);
-            yd.OffsetX(-width);
-            basePt = basePt.OffsetXY(-67, 83);
-            var pts = yd.GetPoint3ds(basePt).ToList();
-            var lines = DU.DrawLinesLazy(pts);
-            SetLabelStylesForRainNote(lines.ToArray());
-            var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
-            SetLabelStylesForRainNote(t);
+            var txt = "DN100乙字弯";
+            DrawLabelLeft(basePt, txt);
         }
 
-        public static void DrawLabelLeft(Point3d basePt, string text)
+        public static void DrawLabelLeft(Point3d basePt, string txt)
         {
-            var height = 300;
-            {
-                var width = height * 0.8 * text.Length + 200;
-                var yd = new YesDraw();
-                yd.Rotate(505, 90 + 45);
-                yd.OffsetX(-width);
-                var pts = yd.GetPoint3ds(basePt).ToList();
-                var lines = DU.DrawLinesLazy(pts);
-                SetLabelStylesForRainNote(lines.ToArray());
-                var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
-                SetLabelStylesForRainNote(t);
-            }
-            return;
-
-            {
-                var t = DU.DrawTextLazy(text, height, basePt.OffsetXY(-2854, 954));
-                //t.TextStyleName = "TH-STYLE3";
-                //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
-                var line = DU.DrawTextUnderlineLazy(t, 10, 10);
-                SetLabelStylesForRainNote(t, line);
-                line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
-                SetLabelStylesForRainNote(line);
-            }
+            var h = 300;
+            var t = DU.DrawTextLazy(txt, h, basePt.OffsetXY(-2854, 954));
+            t.Layer = "W-RAIN-NOTE";
+            t.ColorIndex = 256;
+            //t.TextStyleName = "TH-STYLE3";
+            //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
+            //t.ObjectId.SetTextStyle("TH-STYLE3");
+            var line = DU.DrawTextUnderlineLazy(t, 10, 10);
+            line.Layer = "W-RAIN-NOTE";
+            line.ColorIndex = 256;
+            SetLabelStyles(t, line);
+            line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
+            line.Layer = "W-RAIN-NOTE";
+            line.ColorIndex = 256;
+            SetLabelStyles(line);
         }
         public static void DrawLabelRight(Point3d basePt, string txt)
         {
-            return;
             var h = 300;
             var t = DU.DrawTextLazy(txt, h, basePt.OffsetXY(2854, 954));
             var line = DU.DrawTextUnderlineLazy(t, 10, 10);
-            SetLabelStylesForRainNote(t, line);
+            SetLabelStyles(t, line);
             line = DU.DrawLineLazy(line.StartPoint, basePt.OffsetXY(60, -60));
-            SetLabelStylesForRainNote(line);
+            SetLabelStyles(line);
         }
-        public static void SetLabelStylesForRainNote(params Entity[] ents)
+        static void SetLabelStyles(params Entity[] ents)
         {
             foreach (var e in ents)
             {
                 e.Layer = "W-RAIN-NOTE";
                 e.ColorIndex = 256;
-                if (e is DBText t)
-                {
-                    t.WidthFactor = .7;
-                    DU.SetTextStyleLazy(t, "TH-STYLE3");
-                }
-            }
-        }
-        public static void SetLabelStylesForRainDims(params Entity[] ents)
-        {
-            foreach (var e in ents)
-            {
-                e.Layer = "W-RAIN-DIMS";
-                e.ColorIndex = 256;
-                if (e is DBText t)
-                {
-                    t.WidthFactor = 0.8;
-                    DU.SetTextStyleLazy(t, "TH-STYLE3");
-                }
-            }
-        }
-
-        public static void SetLabelStylesForWNote(params Entity[] ents)
-        {
-            foreach (var e in ents)
-            {
-                e.Layer = "W-NOTE";
-                e.ColorIndex = 256;
-                if (e is DBText t)
-                {
-                    t.WidthFactor = 0.7;
-                    t.Height = 350;
-                    DU.SetTextStyleLazy(t, "TH-STYLE3");
-                }
             }
         }
         public static void DrawLabelRight(Point3d basePt, string txt1, string txt2)
@@ -321,7 +207,7 @@ namespace ThMEPWSS.Pipe.Model
             var t2 = DU.DrawTextLazy(txt2, h, basePt.OffsetXY(2854, 954));
             var line = DU.DrawTextUnderlineLazy(t1, 10, 10);
             line = DU.DrawLineLazy(line.StartPoint, basePt.OffsetXY(60, -60));
-            SetLabelStylesForRainNote(line, t1, t2);
+            SetLabelStyles(line, t1, t2);
         }
         public static void DrawNormalLine(Point3d basePt)
         {
@@ -375,60 +261,41 @@ namespace ThMEPWSS.Pipe.Model
             var deltax = p.X - basePt.X;
             return deltax;
         }
-        public static void DrawSideWaterBucketLabel(Point3d basePt, string label = "侧入式雨水斗DN100")
+        public static void DrawSideWaterBucketLabel(Point3d basePt)
         {
-            DrawLabelForRainNote(basePt, label);
+            var h = 300;
+            var t = DU.DrawTextLazy("侧入式雨水斗DN100", h, basePt.OffsetXY(-4000, 954));
+            t.Layer = "W-RAIN-NOTE";
+            t.ColorIndex = 256;
+            //t.TextStyleName = "TH-STYLE3";
+            //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
+            //t.ObjectId.SetTextStyle("TH-STYLE3");
+            var line = DU.DrawTextUnderlineLazy(t, 10, 10);
+            line.Layer = "W-RAIN-NOTE";
+            line.ColorIndex = 256;
+            line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
+            line.Layer = "W-RAIN-NOTE";
+            line.ColorIndex = 256;
         }
-        public static void DrawPipeLabel(Point3d basePt, string text1, string text2)
-        {
-            var height = 350;
-            var width = Math.Max(height * 0.7 * text1.Length, height * 0.7 * text2.Length);
-            var yd = new YesDraw();
-            yd.Rotate(505, 45);
-            yd.OffsetX(width);
-            basePt = basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN * .2);
-            var pts = yd.GetPoint3ds(basePt).ToList();
-            var lines = DU.DrawLinesLazy(pts);
-            SetLabelStylesForRainNote(lines.ToArray());
-            var t1 = DU.DrawTextLazy(text1, height, pts[1].OffsetXY(100, 50));
-            var t2 = DU.DrawTextLazy(text2, height, pts[1].OffsetXY(100, -50 - height));
-            SetLabelStylesForRainNote(t1, t2);
-        }
-        private static void DrawLabelForRainNote(Point3d basePt, string text)
-        {
-            var height = 350;
-            {
-                var width = height * 0.7 * text.Length + 200;
-                var yd = new YesDraw();
-                yd.Rotate(505, 90 + 45);
-                yd.OffsetX(-width);
-                var pts = yd.GetPoint3ds(basePt).ToList();
-                var lines = DU.DrawLinesLazy(pts);
-                SetLabelStylesForRainNote(lines.ToArray());
-                var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(100, 50));
-                SetLabelStylesForRainNote(t);
-            }
-            return;
-
-            {
-                var t = DU.DrawTextLazy(text, height, basePt.OffsetXY(-4000, 954));
-                //t.TextStyleName = "TH-STYLE3";
-                //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
-                //t.Objectxxxxxxxxxxxxxx(t,,"TH-STYLE3");
-                var line = DU.DrawTextUnderlineLazy(t, 10, 10);
-                SetLabelStylesForRainNote(t, line);
-                line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
-                SetLabelStylesForRainNote(line);
-            }
-        }
-
         public static void DrawSideWaterBucket(Point3d basePt)
         {
             DU.DrawBlockReference("侧排雨水斗系统", basePt, layer: "W-RAIN-EQPM", cb: br => br.ColorIndex = 256);
         }
-        public static void DrawGravityWaterBucketLabel(Point3d basePt, string label = "重力雨水斗DN100")
+        public static void DrawGravityWaterBucketLabel(Point3d basePt)
         {
-            DrawLabelForRainNote(basePt, label);
+            var h = 300;
+            var t = DU.DrawTextLazy("重力雨水斗DN100", h, basePt.OffsetXY(-3500, 954));
+            t.Layer = "W-RAIN-NOTE";
+            t.ColorIndex = 256;
+            //t.TextStyleName = "TH-STYLE3";
+            //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
+            //t.ObjectId.SetTextStyle("TH-STYLE3");
+            var line = DU.DrawTextUnderlineLazy(t, 10, 10);
+            line.Layer = "W-RAIN-NOTE";
+            line.ColorIndex = 256;
+            line = DU.DrawLineLazy(line.EndPoint, basePt.OffsetXY(-60, 60));
+            line.Layer = "W-RAIN-NOTE";
+            line.ColorIndex = 256;
         }
 
         public static void DrawGravityWaterBucket(Point3d basePt)
@@ -468,32 +335,15 @@ namespace ThMEPWSS.Pipe.Model
             DU.DrawEntityLazy(dim);
         }
 
-        public static void DrawDNLabelRight(Point3d basePt, string lb = "DN100")
+        public static void DrawDNLabelRight(Point3d basePt)
         {
-            //var t = DU.DrawTextLazy(lb, 250, basePt);
-            //t.Rotate(basePt.OffsetX(100), GeoAlgorithm.AngleFromDegree(90));
-            //SetLabelStylesForRainDims(t);
-
-            basePt = basePt.OffsetXY(300, 200);
-            var t = DU.DrawTextLazy(lb, 250, basePt);
-            t.Rotate(basePt, GeoAlgorithm.AngleFromDegree(90));
-            SetLabelStylesForRainDims(t);
+            var t = DU.DrawTextLazy("DN100", 200, basePt);
+            t.Rotate(basePt.OffsetX(400), GeoAlgorithm.AngleFromDegree(90));
         }
-        public static void DrawDNLabel(Point3d basePt, string lb = "DN100")
+        public static void DrawDNLabelLeft(Point3d basePt)
         {
-            var t = DU.DrawTextLazy(lb, 250, basePt);
-            SetLabelStylesForRainDims(t);
-        }
-        public static void DrawDNLabelLeft(Point3d basePt, string lb = "DN100")
-        {
-            //var w = (250 * 0.8 * lb.Length);
-            //var offsetX = -250;
-            //var offsetY = (ThWRainSystemDiagram.VERTICAL_STOREY_SPAN - w) / 2;
-
-            basePt = basePt.OffsetXY(-300, 200);
-            var t = DU.DrawTextLazy(lb, 250, basePt);
-            t.Rotate(basePt, GeoAlgorithm.AngleFromDegree(90));
-            SetLabelStylesForRainDims(t);
+            var t = DU.DrawTextLazy("DN100", 200, basePt);
+            t.Rotate(basePt.OffsetX(-400), GeoAlgorithm.AngleFromDegree(90));
         }
     }
     public class PipeRunDrawingContext
@@ -501,7 +351,6 @@ namespace ThMEPWSS.Pipe.Model
         public Point3d BasePoint;
         public YesDraw YesDraw = new YesDraw();
         public Point3d? TopPoint;
-        public ThWRainPipeRun ThWRainPipeRun;
     }
     public class ThWRainPipeRun //: ThWPipeRun, IEquatable<ThWRainPipeRun>
     {
@@ -606,39 +455,6 @@ namespace ThMEPWSS.Pipe.Model
         {
             var basePt = GetBasePoint(ctx.BasePoint);
             var fds = FloorDrains.Where(fd => fd.HasDrivePipe).Concat(FloorDrains.Where(fd => !fd.HasDrivePipe)).ToList();
-            if (fds.Count == 1 || fds.Count == 2)
-            {
-                {
-                    var fd = fds[0];
-                    Dr.DrawFloorDrain(basePt.OffsetX(-1200 + 180));
-                    var yd = new YesDraw();
-                    yd.OffsetX(1200 - 100);
-                    yd.OffsetXY(100, -100);
-                    var pts = yd.GetPoint3ds(basePt.OffsetXY(-1200, -550)).ToList();
-                    var lines = DU.DrawLinesLazy(pts);
-                    ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
-                    if (fd.HasDrivePipe)
-                    {
-                        Dr.DrawWrappingPipe(basePt.OffsetY(-550));
-                    }
-                }
-                if (fds.Count == 2)
-                {
-                    var fd = fds[1];
-                    Dr.DrawFloorDrain(basePt.OffsetX(1200 + 180));
-                    var yd = new YesDraw();
-                    yd.OffsetX(-1200 + 100);
-                    yd.OffsetXY(-100, -100);
-                    var pts = yd.GetPoint3ds(basePt.OffsetXY(1200, -550)).ToList();
-                    var lines = DU.DrawLinesLazy(pts);
-                    ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
-                    if (fd.HasDrivePipe)
-                    {
-                        Dr.DrawWrappingPipe(basePt.OffsetXY(900, -550));
-                    }
-                }
-                return;
-            }
             for (int i = 0; i < fds.Count; i++)
             {
                 var fd = fds[i];
@@ -699,9 +515,7 @@ namespace ThMEPWSS.Pipe.Model
                             var lines = DU.DrawLinesLazy(YesDraw.FixLines(pts));
                             ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
                             Dr.DrawCondensePipe(pts.Last().OffsetXY(-100, 100));
-                            //todo:文字变图块
-                            var t = DU.DrawTextLazy(CondensePipes.First().DN, pts.GetLast(2).OffsetXY(100, 100));
-                            Dr.SetLabelStylesForRainDims(t);
+                            DU.DrawTextLazy(CondensePipes.First().DN, pts.GetLast(2).OffsetXY(100, 100));
                         }
 
                     }
@@ -709,10 +523,6 @@ namespace ThMEPWSS.Pipe.Model
                 else
                 {
                     var pt = basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN / 2);
-                    if (ctx.ThWRainPipeRun.CheckPoint.HasCheckPoint)
-                    {
-                        pt = pt.OffsetY(-600);
-                    }
                     for (int i = 0; i < CondensePipes.Count; i++)
                     {
                         var cp = CondensePipes[i];
@@ -733,34 +543,12 @@ namespace ThMEPWSS.Pipe.Model
                         ctx.TopPoint = topPt;
                         var lines = DU.DrawLinesLazy(p1, p2, p3);
                         ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
-                        var t = DU.DrawTextLazy(CondensePipes.First().DN, p1.OffsetY(-120).OffsetXY(80, 160));
-                        Dr.SetLabelStylesForRainDims(t);
+                        DU.DrawTextLazy(CondensePipes.First().DN, p1.OffsetY(-120));
                     }
                 }
             }
         }
-        public static void DrawBalconyCondensePipes()
-        {
-            //室内机的冷凝水（若存在）在系统图上都放在左侧。数量和高度需根据平面图的画法判断。高度存在两层。
-            //Case1:一个点位 高/低
-            //高：在外参中，冷凝水点2000范围内若存在Ah1或Ah2（可能多个），且Ah2距离最近（下文称为Ah2近）。若2000范围内不存在，则默认为高。
-            //低：Ah1近
-            //Case2:两个点位 同层 高/低
-            //两个点位连接到立管的直线没有发生中断，则这两个点位的高度视为相同。Ah2近则两个点位都高，Ah1近则两个点位都低。
-            //Case3:两个点位 不同高
-            //两个点位连接到立管上，其中一个发生了中断（至少30间距）则视为两个点不在一个高度上。风险是用户绘制的质量。
-            //室外机冷凝地漏也分高低两层。
-            //Type1:高层地漏
-            //平面图上绘制的不带穿墙套管的地漏认为是高层的室外机冷凝地漏。若此立管没有接雨水地漏则将此地漏置于左上角，否则置于右上角。
-            //Type2:低层地漏
-            //低层地漏并不表达在图纸上，需用逻辑判断。
-            //若一根立管负担了2个室内机冷凝水排水，且在UI上勾选了“空调板夹层地漏”，才要在系统图上增加一个地漏。
-            //综合复杂情况
-            //左侧自上而下 雨水地漏、2个高层室内机冷凝水点位
-            //右侧自上而下 室外机冷凝水高层地漏、室外机冷凝水低层地漏
-            //左侧自上而下 室外机冷凝水高层地漏、室内机冷凝水高层点位、室内机冷凝水低层点位
-            //右侧 室外机冷凝水低层地漏
-        }
+
         public static void CalcOffsets(TranslatorTypeEnum translatorType, YesDraw yd)
         {
             switch (translatorType)

@@ -41,13 +41,6 @@ namespace ThMEPWSS.DebugNs
     using System.IO;
     using Autodesk.AutoCAD.Runtime;
     using static StaticMethods;
-    using ThMEPWSS.Pipe;
-    using Newtonsoft.Json;
-    using System.Text.RegularExpressions;
-    using ThCADExtension;
-    using System.Collections;
-    using ThCADCore.NTS.IO;
-
     public class FengDbgTest
     {
         public static Dictionary<string, object> processContext;
@@ -76,11 +69,11 @@ namespace ThMEPWSS.DebugNs
                     ((Action<object>)ctx["clearBtns"])(ctx["currentPanel"]);
                     ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "initMethod", initMethod);
                     ((Action<object, string, Action>)ctx["addBtn"])(ctx["currentPanel"], "reloadMe", () =>
-                    {
-                        var asm = ((Func<string, Assembly>)ctx["loadAsm"])((string)ctx["asmDllFullPath"]);
-                        asm.GetType(typeof(FengDbgTest).FullName).GetField(nameof(processContext)).SetValue(null, processContext);
-                        initMethod();
-                    });
+            {
+                var asm = ((Func<string, Assembly>)ctx["loadAsm"])((string)ctx["asmDllFullPath"]);
+                asm.GetType(typeof(FengDbgTest).FullName).GetField(nameof(processContext)).SetValue(null, processContext);
+                initMethod();
+            });
                     var fs = (List<Action>)ctx["actions"];
                     var names = (List<string>)ctx["names"];
                     for (int i = 0; i < fs.Count; i++)
@@ -356,7 +349,7 @@ namespace ThMEPWSS.DebugNs
                 var lines = new Line[] {
 new Line() { StartPoint = r.LeftTop.ToPoint3d(), EndPoint = r.RightButtom.ToPoint3d()},
 new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoint3d() }
-};
+ };
                 foreach (var line in lines)
                 {
                     line.Thickness = 10;
@@ -478,10 +471,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             var basePt = rst.Value;
             return basePt;
         }
-        public static Point3dCollection SelectRange()
-        {
-            return SelectGRect().ToPoint3dCollection();
-        }
         public static ThWGRect SelectGRect()
         {
             var t = SelectRect();
@@ -518,30 +507,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             return Guid.NewGuid().ToString("N");
         }
     }
-    public class ThCADInput
-    {
-        public static bool QueryYesOrNo(string text, bool dft = false)
-        {
-            var separation_key = new PromptKeywordOptions(text);
-            separation_key.Keywords.Add("是", "Y", "是(Y)");
-            separation_key.Keywords.Add("否", "N", "否(N)");
-            separation_key.Keywords.Default = dft ? "是" : "否";
-            var result = Active.Editor.GetKeywords(separation_key);
-            if (result.Status != PromptStatus.OK) return false;
-            return result.StringResult == "是";
-        }
-        public static bool? QueryYesOrNoOrCanceled(string text, bool dft = false)
-        {
-            var separation_key = new PromptKeywordOptions(text);
-            separation_key.Keywords.Add("是", "Y", "是(Y)");
-            separation_key.Keywords.Add("否", "N", "否(N)");
-            separation_key.Keywords.Default = dft ? "是" : "否";
-            var result = Active.Editor.GetKeywords(separation_key);
-            if (result.Status != PromptStatus.OK) return null;
-            return result.StringResult == "是";
-        }
-    }
-
     public class ThDebugClass
     {
         public static Dictionary<string, object> ctx => ThDebugClass1.ctx;
@@ -554,699 +519,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 nameof(ThWRainPipeRun.Draw),
             };
         }
-        public static void NewAndShowLogWindow()
-        {
-            Dbg.NewLogWindow();
-            Dbg.ShowCurrentLogWindow();
-        }
-        public static void ExplodeTest4()
-        {
-            static IEnumerable<MText> Explode(Entity entity)
-            {
-                var colle = entity.ExplodeToDBObjectCollection();
-                foreach (var o in colle)
-                {
-                    if (o is MText t)
-                    {
-                        yield return t;
-                    }
-                    else if (o is Entity e && e.ObjectId.IsValid)
-                    {
-                        foreach (var r in Explode(e))
-                        {
-                            yield return r;
-                        }
-                    }
-                }
-            }
-
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            using (var _adb = AcadDatabase.Active())
-            {
-                Dbg.BuildAndSetCurrentLayer(_adb.Database);
-                void DoExtract(BlockReference blockReference, Matrix3d matrix)
-                {
-                    using var adb = AcadDatabase.Use(blockReference.Database);
-                    if (blockReference.BlockTableRecord.IsValid)
-                    {
-                        var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
-                        if (ThBlock.IsSupportedBlock(blockTableRecord))
-                        {
-                            foreach (var objId in blockTableRecord)
-                            {
-                                var dbObj = adb.Element<Entity>(objId);
-                                if (dbObj is BlockReference blk)
-                                {
-                                    if (blk.BlockTableRecord.IsNull)
-                                    {
-                                        continue;
-                                    }
-                                    if (blk.BlockTableRecord.IsValid)
-                                    {
-                                        //if (false)
-                                        //{
-                                        //  var blk2 = blk.GetTransformedCopy(matrix);
-                                        //  continue;
-                                        //}
-                                        {
-                                            if (Explode(blk).Any(t => t.Contents.ToLower().Contains("ah")))
-                                            {
-                                                var blk2 = blk.GetTransformedCopy(matrix);
-                                                adb.ModelSpace.Add(blk2);
-                                                Dbg.ShowWhere(blk2);
-                                                continue;
-                                            }
-                                        }
-                                        var mcs2wcs = blk.BlockTransform.PreMultiplyBy(matrix);
-                                        DoExtract(blk, mcs2wcs);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                foreach (var blockReference in _adb.ModelSpace.OfType<BlockReference>())
-                {
-                    DoExtract(blockReference, Matrix3d.Identity);
-                }
-            }
-        }
-        public static void ExplodeTest3()
-        {
-            static IEnumerable<DBText> Explode(Entity entity)
-            {
-                var colle = entity.ExplodeToDBObjectCollection();
-                foreach (var o in colle)
-                {
-                    if (o is DBText t)
-                    {
-                        yield return t;
-                    }
-                    else if (o is Entity e && e.ObjectId.IsValid)
-                    {
-                        foreach (var r in Explode(e))
-                        {
-                            yield return r;
-                        }
-                    }
-                }
-            }
-
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            using (var _adb = AcadDatabase.Active())
-            {
-                void DoExtract(BlockReference blockReference, Matrix3d matrix)
-                {
-                    using var adb = AcadDatabase.Use(blockReference.Database);
-                    if (blockReference.BlockTableRecord.IsValid)
-                    {
-                        var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
-                        if (ThBlock.IsSupportedBlock(blockTableRecord))
-                        {
-                            foreach (var objId in blockTableRecord)
-                            {
-                                var dbObj = adb.Element<Entity>(objId);
-                                if (dbObj is BlockReference blk)
-                                {
-                                    if (blk.BlockTableRecord.IsNull)
-                                    {
-                                        continue;
-                                    }
-                                    if (blk.BlockTableRecord.IsValid)
-                                    {
-                                        //if (false)
-                                        //{
-                                        //  var blk2 = blk.GetTransformedCopy(matrix);
-                                        //  continue;
-                                        //}
-                                        {
-                                            if (Explode(blk).Any(t => t.TextString.StartsWith("Ah1")))
-                                            {
-                                                var blk2 = blk.GetTransformedCopy(matrix);
-                                                adb.ModelSpace.Add(blk2);
-                                                Dbg.ShowWhere(blk2);
-                                                continue;
-                                            }
-                                        }
-                                        var mcs2wcs = blk.BlockTransform.PreMultiplyBy(matrix);
-                                        DoExtract(blk, mcs2wcs);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                foreach (var blockReference in _adb.ModelSpace.OfType<BlockReference>())
-                {
-                    DoExtract(blockReference, Matrix3d.Identity);
-                }
-            }
-        }
-
-        public static void ThAHMarkRecognitionEngineTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            using (var adb = AcadDatabase.Active())
-            {
-                using (var engine = new Engine.ThAHMarkRecognitionEngine())
-                {
-                    engine.Recognize(adb.Database, Dbg.SelectRange());
-                    var texts = engine.Texts;
-                    var res1 = engine.Texts.Where(o => o is DBText).Select(o => (o as DBText).TextString).ToList();
-                    var res2 = engine.Texts.Where(o => o is MText).Select(o => (o as MText).Text).ToList();
-                    //foreach (var e in res1)
-                    //{
-                    //    Dbg.ShowWhere(e);
-                    //}
-                    //Dbg.Print(res1.Count.ToString());
-                    //Dbg.PrintLine(res2.ToJson());
-                    //foreach (var e in engine.Texts.OfType<MText>())
-                    //{
-                    //    Dbg.ShowWhere(e);
-                    //}
-                    Dbg.PrintLine(res2.Distinct().ToJson());
-                    //foreach (var e in engine.Texts.OfType<MText>())
-                    //{
-                    //    DU.DrawBoundaryLazy(e);
-                    //}
-                }
-            }
-
-        }
-        public static void ExplodeTest2()
-        {
-            static DBObjectCollection Explode(Entity entity)
-            {
-                var entitySet = new DBObjectCollection();
-                void explode(Entity ent)
-                {
-                    var obl = new DBObjectCollection();
-                    ent.Explode(obl);
-                    foreach (Entity e in obl)
-                    {
-                        if (e is BlockReference br)
-                        {
-                            explode(br);
-                        }
-                        else
-                        {
-                            entitySet.Add(e);
-                        }
-                    }
-                }
-                explode(entity);
-                return entitySet;
-            }
-
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            using (var _adb = AcadDatabase.Active())
-            {
-                void DoExtract(BlockReference blockReference, Matrix3d matrix)
-                {
-                    using var adb = AcadDatabase.Use(blockReference.Database);
-                    if (blockReference.BlockTableRecord.IsValid)
-                    {
-                        var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
-                        if (ThBlock.IsSupportedBlock(blockTableRecord))
-                        {
-                            foreach (var objId in blockTableRecord)
-                            {
-                                var dbObj = adb.Element<Entity>(objId);
-                                if (dbObj is BlockReference blk)
-                                {
-                                    if (blk.BlockTableRecord.IsNull)
-                                    {
-                                        continue;
-                                    }
-                                    if (blk.BlockTableRecord.IsValid)
-                                    {
-                                        //if (false)
-                                        //{
-                                        //  var blk2 = blk.GetTransformedCopy(matrix);
-                                        //  continue;
-                                        //}
-                                        {
-                                            if (Explode(blk).OfType<DBText>().Any(t => t.TextString.StartsWith("Ah1")))
-                                            {
-                                                var blk2 = blk.GetTransformedCopy(matrix);
-                                                adb.ModelSpace.Add(blk2);
-                                                Dbg.ShowWhere(blk2);
-                                                continue;
-                                            }
-                                        }
-                                        var mcs2wcs = blk.BlockTransform.PreMultiplyBy(matrix);
-                                        DoExtract(blk, mcs2wcs);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                foreach (var blockReference in _adb.ModelSpace.OfType<BlockReference>())
-                {
-                    DoExtract(blockReference, Matrix3d.Identity);
-                }
-            }
-        }
-        public static void ExplodeTest21()
-        {
-            var l = new List<string>();
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (DrawUtils.DrawingTransaction)
-            using (var adb = AcadDatabase.Active())
-            {
-                //Dbg.PrintLine(Dbg.MdiActiveDocument.Name);//文件的绝对路径
-                //Dbg.PrintLine(adb.Database.Filename);//这是个临时文件
-                //Dbg.SetText(adb.ModelSpace.OfType<DBText>().Select(x => x.TextString));
-
-                var root = Dbg.MdiActiveDocument.Name;
-                foreach (var xref in adb.XRefs)
-                {
-                    //using (AcadDatabase xrefAdb = AcadDatabase.Open(xref.FilePath, DwgOpenMode.ReadOnly, false))
-                    //{
-
-                    //}
-                    //Dbg.PrintLine(xref.FilePath);//有相对路径有绝对路径，注意判断是否存在文件
-
-                    //找到对应文件了
-                    //Dbg.PrintLine(Path.GetFullPath(Path.Combine(root, "..", xref.FilePath)));
-                    //Dbg.PrintLine(File.Exists(Path.GetFullPath(Path.Combine(root,"..", xref.FilePath))));
-
-                    var file = Path.GetFullPath(Path.Combine(root, "..", xref.FilePath));
-                    if (File.Exists(file))
-                    {
-                        using (var xrefAdb = AcadDatabase.Open(file, DwgOpenMode.ReadOnly, false))
-                        {
-                            {
-                                //var q = xrefAdb.ModelSpace.OfType<DBText>().Select(x => x.TextString);
-                                //l.AddRange(q);
-                            }
-                            {
-                                //var q=xrefAdb.ModelSpace.OfType<BlockReference>().SelectMany(x => x.ExplodeToDBObjectCollection().OfType<DBText>().Select(y => y.TextString));
-                                var q = xrefAdb.ModelSpace.OfType<BlockReference>().SelectMany(x => x.ExplodeBlockRef().OfType<DBText>().Select(y => y.TextString));
-                                l.AddRange(q);
-                            }
-                        }
-                    }
-
-                }
-            }
-            if (l.Any(x => x?.Trim().ToLower() == "ah1"))
-            {
-                Dbg.PrintLine("found!");
-            }
-            File.WriteAllText("Y:\\test.txt", l.JoinWith("\n"));
-        }
-        public static void BlockReferenceTest_qso8b4()
-        {
-            var l = new List<string>();
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (DrawUtils.DrawingTransaction)
-            using (var _adb = AcadDatabase.Active())
-            {
-                void DoExtract(BlockReference blockReference, Matrix3d matrix)
-                {
-                    using var adb = AcadDatabase.Use(blockReference.Database);
-                    if (blockReference.BlockTableRecord.IsValid)
-                    {
-                        var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
-                        if (ThBlock.IsSupportedBlock(blockTableRecord))
-                        {
-                            foreach (var objId in blockTableRecord)
-                            {
-                                var dbObj = adb.Element<Entity>(objId);
-                                if (dbObj is BlockReference blk)
-                                {
-                                    if (blk.BlockTableRecord.IsNull)
-                                    {
-                                        continue;
-                                    }
-                                    if (blk.BlockTableRecord.IsValid)
-                                    {
-                                        l.Add(blk.GetEffectiveName());
-                                        var mcs2wcs = blk.BlockTransform.PreMultiplyBy(matrix);
-                                        DoExtract(blk, mcs2wcs);
-                                    }
-                                }
-                                else if (dbObj is DBText t)
-                                {
-                                    //l.Add(t.TextString);
-                                }
-
-                            }
-                        }
-                    }
-                }
-
-                foreach (var blockReference in _adb.ModelSpace.OfType<BlockReference>())
-                {
-                    DoExtract(blockReference, Matrix3d.Identity);
-                }
-
-                File.WriteAllText("Y:\\test.txt", l.JoinWith("\n"));
-            }
-        }
-        public static void BlockReferenceTest_qso7q7()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            using (var _adb = AcadDatabase.Active())
-            {
-                void DoExtract(BlockReference blockReference, Matrix3d matrix)
-                {
-                    using var adb = AcadDatabase.Use(blockReference.Database);
-                    if (blockReference.BlockTableRecord.IsValid)
-                    {
-                        var blockTableRecord = adb.Blocks.Element(blockReference.BlockTableRecord);
-                        if (ThBlock.IsSupportedBlock(blockTableRecord))
-                        {
-                            foreach (var objId in blockTableRecord)
-                            {
-                                var dbObj = adb.Element<Entity>(objId);
-                                if (dbObj is BlockReference blk)
-                                {
-                                    if (blk.BlockTableRecord.IsNull)
-                                    {
-                                        continue;
-                                    }
-                                    if (blk.BlockTableRecord.IsValid)
-                                    {
-                                        if (false)
-                                        {
-                                            var blk2 = blk.GetTransformedCopy(matrix);
-                                            continue;
-                                        }
-                                        var mcs2wcs = blk.BlockTransform.PreMultiplyBy(matrix);
-                                        DoExtract(blk, mcs2wcs);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
-                foreach (var blockReference in _adb.ModelSpace.OfType<BlockReference>())
-                {
-                    DoExtract(blockReference, Matrix3d.Identity);
-                }
-            }
-        }
-        public static void ThWStoreysRecognitionEngineTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                var storeysRecEngine = new ThWStoreysRecognitionEngine();
-                var range = Dbg.SelectRange();
-                storeysRecEngine.Recognize(db, range);
-                var els = storeysRecEngine.Elements;
-            }
-        }
-
-        static void print(string str)
-        {
-            Dbg.PrintLine(str);
-        }
-        public static void ThWGravityWaterBucketRecognitionEngineTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            //using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var gravityBucketEngine = new ThWGravityWaterBucketRecognitionEngine();
-                gravityBucketEngine.Recognize(adb.Database, Dbg.SelectRange());
-                foreach (ThWGravityWaterBucket el in gravityBucketEngine.Elements)
-                {
-                    var r = GeoAlgorithm.GetBoundaryRect(el.Outline.GeometricExtents.ToRectangle());
-                    Dbg.PrintLine(r.ToJson());
-                }
-            }
-        }
-        public static void ThWStoreysRecognitionEngineTest2()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var storeysRecEngine = new ThWStoreysRecognitionEngine();
-                var range = Dbg.SelectRange();
-                storeysRecEngine.Recognize(db, range);
-                foreach (ThWStoreys el in storeysRecEngine.Elements)
-                {
-                    var r = GeoAlgorithm.GetBoundaryRect(adb.Element<Entity>(el.ObjectId).GeometricExtents.ToRectangle());
-                    Dbg.PrintLine(r.ToJson());
-                }
-            }
-        }
-        static KeyValuePair<K, V> CreateKeyValuePair<K, V>(K k, V v) => new KeyValuePair<K, V>(k, v);
-        public static void LoadEntityTest_LineGrouping()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                const string KEY = FengKeys.ThRainSystemServiceContextData;
-                var c = LoadData<ThRainSystemService.Context>(KEY);
-                var pipes = c.VerticalPipes;
-                var d = c.BoundaryDict;
-                var lines = c.WRainLines;
-                var ld = c.WRainLinesDict;
-                var ld2 = ld.Select(kv => new KeyValuePair<string, Entity>(kv.Key, kv.Value.ToLine())).ToDictionary(kv => kv.Value, kv => kv.Key);
-                var lst = ThRainSystemService.GroupLines(ld2.Keys.Cast<Entity>().ToList());
-                var gs = lst.Select(l => l.Select(e => ld2[e]).ToList()).ToList();
-                SaveData(FengKeys.LinesGroupData, gs);
-            }
-        }
-        public static void SaveEntityTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                const string KEY = FengKeys.ThRainSystemServiceContextData;
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                SaveData(KEY, sv.GetCurrentContext());
-            }
-        }
-        public static void qsqesb()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                DU.DrawEntityLazy(Dbg.SelectPoint().Expand(100).ToThWGRect().CreateRect());
-            }
-        }
-        public static void ToGeoJSONTest()
-        {
-            //{
-            //    var j = ThCADCore.NTS.IO.ThCADCoreNTSGeometryWriter.ToGeoJSON(new Line().ToNTSGeometry());
-            //    Dbg.PrintText(j);
-            //}
-
-            //Dbg.FocusMainWindow();
-            //using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            //using (var adb = AcadDatabase.Active())
-            //using (var tr = DrawUtils.DrawingTransaction)
-            //{
-            //    var db = adb.Database;
-
-            //    var j = Dbg.SelectGRect().CreatePolygon(6).ToNTSGeometry().ToGeoJSON();
-            //    Dbg.PrintText(j);
-
-            //    var c = new Circle() { Center=Dbg.SelectPoint(),Radius=666};
-            //    var j = c.ToNTSGeometry().ToGeoJSON();
-            //    Dbg.PrintText(j);
-            //}
-        }
-        public static void xxx()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                ThCADCoreNTSService.Instance.ArcTessellationLength = 10;
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.CollectAhTexts(_GetTestPoints());
-                foreach (var ah in sv.AhTexts)
-                {
-                    DU.DrawBoundaryLazy(ah);
-                }
-                var si = ThRainSystemService.BuildSpatialIndex<Entity>(ThRainSystemService.CollectEnts().Add(sv.CondensePipes).Add(sv.AhTexts).Entities);
-                //foreach (Entity e in si.NearestNeighbours(Dbg.SelectGRect().CreateRect(), 3))
-                foreach (Entity e in si.NearestNeighbours(Dbg.SelectPoint().Expand(1).ToThWGRect().CreateRect(), 3))
-                {
-                    Dbg.ShowWhere(e);
-                }
-            }
-        }
-
-        private static Point3dCollection _GetTestPoints()
-        {
-            var pt1 = "{x:-84185.9559129075,y:1871639.15102121,z:0}".JsonToPoint3d();
-            var pt2 = "{x:282170.133176226,y:335611.579893751,z:0}".JsonToPoint3d();
-
-            var points = new Point3dCollection();
-            points.Add(pt1);
-            points.Add(new Point3d(pt1.X, pt2.Y, 0));
-            points.Add(pt2);
-            points.Add(new Point3d(pt2.X, pt1.Y, 0));
-            return points;
-        }
-
-        public static void qsq8o3()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-
-                if (false)
-                {
-                    var basePt = Dbg.SelectPoint();
-                    Dr.DrawRainPortLabel(basePt);
-                }
-                if (false)
-                {
-                    foreach (var e in adb.ModelSpace.OfType<Circle>().Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM).Where(x => x.Radius <= 200 && x.Radius >= 100))
-                    {
-                        Dbg.ShowWhere(e);
-                    }
-                }
-                //if (false)
-                {
-                    //var gravityBucketEngine = new ThWGravityWaterBucketRecognitionEngine();
-                    //gravityBucketEngine.Recognize(adb.Database, Dbg.SelectRange());
-                    //gravityBucketEngine.Elements
-                    var r = Dbg.SelectGRect();
-                    var pl = r.CreateRect();
-                    DU.DrawEntityLazy(pl);
-                }
-
-            }
-        }
-        public static void DeleteTestGeometries()
-        {
-            Dbg.DeleteTestGeometries();
-        }
-
-        public static void Invoke()
-        {
-            var rst = AcHelper.Active.Editor.GetString("\n输入method");
-            if (rst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-            {
-                return;
-            }
-            var name = rst.StringResult;
-            typeof(ThDebugClass).GetMethod(name).Invoke(null, null);
-        }
-        public static void TestThWRainSystemDiagram_Save()
-        {
-            ThWRainSystemDiagramTest.Test2();
-        }
-        public static void TestThWRainSystemDiagram_Load()
-        {
-            ThWRainSystemDiagramTest.Test1();
-        }
-        public static void RunThRainSystemDiagramCmd_NoRectSelection2()
-        {
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            {
-                Point3d pt1, pt2;
-                SelectAllStoreys(out pt1, out pt2);
-                NewMethod(adb, pt1, pt2);
-            }
-        }
-
-        public static void FiltOutWaterWellsTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.CollectData();
-                var rg = Dbg.SelectGRect().ToPoint3dCollection();
-                var wells = sv.GetWaterWells(rg);
-                foreach (var w in wells)
-                {
-                    Dbg.ShowWhere(w);
-                }
-            }
-        }
-        public static void GetTianZhengDNValueTest()
-        {
-            Dbg.FocusMainWindow();
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var rst = AcHelper.Active.Editor.GetEntity("\nSelect a TianZheng entity");
-                if (rst.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-                {
-                    var entity = adb.Element<Entity>(rst.ObjectId);
-                    //todo: extract property
-                    var properties = System.ComponentModel.TypeDescriptor.GetProperties(entity.AcadObject).Cast<System.ComponentModel.PropertyDescriptor>().ToDictionary(prop => prop.Name);
-                    var DNPropName = "DNDiameter";
-                    if (properties.ContainsKey(DNPropName))
-                    {
-                        var DNPropObject = properties[DNPropName];
-                        var DNValue = DNPropObject.GetValue(entity.AcadObject);
-                        var DNString = DNValue.ToString();
-                        Dbg.ShowString(new { DNValue, DNString }.ToJson());
-                    }
-                }
-            }
-        }
-        public static void GetConstantWidth()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var pl = Dbg.SelectEntity<Polyline>(adb);
-                Dbg.ShowString(pl.ConstantWidth.ToString());
-            }
-        }
-        public static void DrawPolylineWithConstantWidthTest()
+        public static void xx()
         {
             Dbg.FocusMainWindow();
             using (var adb = AcadDatabase.Active())
@@ -1255,38 +528,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             {
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
-
-                var pl = PolylineTools.CreatePolyline(new Point3d[] { Dbg.SelectPoint(), Dbg.SelectPoint() });
-                pl.ConstantWidth = 1000;
-                DU.DrawEntityLazy(pl);
-            }
-        }
-        public static void SetTextStyleDemo()
-        {
-            Dbg.FocusMainWindow();
-            using (var adb = AcadDatabase.Active())
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                Dr.DrawLabelRight(Dbg.SelectPoint(), "xx");
-
-                //var t = DU.DrawTextLazy("测试", 100, Dbg.SelectPoint());
-                var dbText = new DBText
-                {
-                    TextString = "测试",
-                    Position = Dbg.SelectPoint(),
-                    Height = 100,
-                };
-                var t = dbText;
-                t.Layer = "W-RAIN-NOTE";
-                t.ColorIndex = 256;
-                adb.ModelSpace.Add(t);
-                //t.TextStyleName = "TH-STYLE3";
-                //var tb = AcHelper.Collections.Tables.GetTextStyle("TH-STYLE3");
-                //Debugger.Break();
-                t.ObjectId.SetTextStyle("TH-STYLE3");
+                Dr.DrawLabelRight(Dbg.SelectPoint(), "天下事有难易乎？为之，则难者亦易矣；不为，则易者亦难矣！");
             }
         }
         public static void ExecuteFromCommandLineTest1()
@@ -1343,7 +585,11 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 Dbg.PrintLine(sys.WaterBucket.ToJson());
             }
         }
-
+        public static void NewAndShowLogWindow()
+        {
+            Dbg.NewLogWindow();
+            Dbg.ShowCurrentLogWindow();
+        }
         public static void FindLabel()
         {
             Dbg.FocusMainWindow();
@@ -1409,7 +655,28 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 }
             }
         }
-
+        public static void DeleteTestGeometries()
+        {
+            Dbg.DeleteTestGeometries();
+        }
+        public static void Invoke()
+        {
+            var rst = AcHelper.Active.Editor.GetString("\n输入method");
+            if (rst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+            {
+                return;
+            }
+            var name = rst.StringResult;
+            typeof(ThDebugClass).GetMethod(name).Invoke(null, null);
+        }
+        public static void TestThWRainSystemDiagram_Save()
+        {
+            ThWRainSystemDiagramTest.Test2();
+        }
+        public static void TestThWRainSystemDiagram_Load()
+        {
+            ThWRainSystemDiagramTest.Test1();
+        }
         public static void qs04s2()
         {
             Dbg.FocusMainWindow();
@@ -2569,15 +1836,15 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                     scale: 0.5,
                     props: new Dictionary<string, string>() { { "-", "666" } },
                     cb: br =>
-                    {
-                        br.Layer = "W-RAIN-EQPM";
-                        var arr = br.DynamicBlockReferencePropertyCollection;
-                        for (int i = 0; i < arr.Count; i++)
-                        {
-                            Dbg.PrintLine(arr[i].PropertyName);
-                        }
-                        //arr.SetValue("-", "666");
-                    });
+                   {
+                       br.Layer = "W-RAIN-EQPM";
+                       var arr = br.DynamicBlockReferencePropertyCollection;
+                       for (int i = 0; i < arr.Count; i++)
+                       {
+                           Dbg.PrintLine(arr[i].PropertyName);
+                       }
+                       //arr.SetValue("-", "666");
+                   });
             }
 
         }
@@ -2827,7 +2094,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
 
                 var sv = new ThRainSystemService() { adb = adb };
                 sv.InitCache();
-                sv.CollectVerticalPipesData();
+                sv.CollectVerticalPipeData2();
                 sv.FindShortConverters();
                 sv.LabelWRainLinesAndVerticalPipes();
                 sv.LabelWaterPorts();
@@ -2859,7 +2126,16 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             }
         }
 
-
+        public static void RunThRainSystemDiagramCmd_NoRectSelection2()
+        {
+            using (var adb = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            {
+                Point3d pt1, pt2;
+                SelectAllStoreys(out pt1, out pt2);
+                NewMethod(adb, pt1, pt2);
+            }
+        }
 
         private static void SelectAllStoreys(out Point3d pt1, out Point3d pt2)
         {
@@ -3829,7 +3105,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 sv.InitCache();
                 var lines = sv.WRainLines;
                 var groups = new List<List<Entity>>();
-                ThRainSystemService.GroupLines(lines, groups, 10);
+                ThRainSystemService.GroupLines(lines, groups);
                 foreach (var g in groups)
                 {
                     DU.DrawBoundaryLazy(g.ToArray());
@@ -3988,221 +3264,221 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 }
             }
         }
-        //public static void ThRainSystemServiceTest4_OK()
-        //{
-        //    Dbg.FocusMainWindow();
-        //    using (var adb = AcadDatabase.Active())
-        //    using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-        //    using (var tr = DrawUtils.DrawingTransaction)
-        //    {
-        //        var db = adb.Database;
-        //        Dbg.BuildAndSetCurrentLayer(db);
-        //        var sv = new ThRainSystemService() { adb = adb };
-        //        sv.InitCache();
-        //        sv.FindShortConverters();
-        //        var lines = sv.VerticalPipeLines;
-        //        var pipes = sv.VerticalPipes;
-        //        var shortConverters = sv.AllShortConverters.ToList();
-        //        var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
-        //        var linesGroup = new List<List<Entity>>();
-        //        var groups = new List<List<Entity>>();
-        //        var plDict = new Dictionary<Entity, Polyline>();
-        //        var lineToPipesDict = new ListDict<Entity>();
-        //        foreach (var e1 in sv.VerticalPipeDBTexts)
-        //        {
-        //            foreach (var e2 in sv.VerticalPipeLines)
-        //            {
-        //                if (e2 is Line line)
-        //                {
-        //                    var seg = line.ToGLineSegment();
-        //                    if (seg.IsHorizontal(10))
-        //                    {
-        //                        var c1 = sv.BoundaryDict[e1].Center;
-        //                        var c2 = sv.BoundaryDict[e2].Center;
-        //                        if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 150)
-        //                        {
-        //                            dbTxtToHLineDict[e1] = e2;
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        {
-        //            var pairs = new List<KeyValuePair<int, int>>();
-        //            //for (int i = 0; i < lines.Count; i++)
-        //            //{
-        //            //    for (int j = i + 1; j < lines.Count; j++)
-        //            //    {
-        //            //        var line1 = lines[i] as Line;
-        //            //        var line2 = lines[j] as Line;
-        //            //        if (line1 != null && line2 != null)
-        //            //        {
-        //            //            var pline1 = line1.Buffer(10);
-        //            //            var pline2 = line2.Buffer(10);
-        //            //            if (new ThCADCore.NTS.ThCADCoreNTSRelate(pline1, pline2).IsIntersects)
-        //            //            {
-        //            //                pairs.Add(new KeyValuePair<int, int>(i, j));
-        //            //            }
-        //            //        }
-        //            //    }
-        //            //}
-        //            var bfs = lines.Select(e => (e as Line)?.Buffer(10)).ToList();
-        //            var si = ThRainSystemService.BuildSpatialIndex(bfs.Where(e => e != null).ToList());
-        //            for (int i = 0; i < bfs.Count; i++)
-        //            {
-        //                Polyline bf = bfs[i];
-        //                if (bf != null)
-        //                {
-        //                    var lst = si.SelectCrossingPolygon(bf).Cast<Polyline>().Select(e => bfs.IndexOf(e)).Where(j => i < j).ToList();
-        //                    lst.ForEach(j => pairs.Add(new KeyValuePair<int, int>(i, j)));
-        //                }
-        //            }
+        public static void ThRainSystemServiceTest4_OK()
+        {
+            Dbg.FocusMainWindow();
+            using (var adb = AcadDatabase.Active())
+            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (var tr = DrawUtils.DrawingTransaction)
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+                var sv = new ThRainSystemService() { adb = adb };
+                sv.InitCache();
+                sv.FindShortConverters();
+                var lines = sv.VerticalPipeLines;
+                var pipes = sv.VerticalPipes;
+                var shortConverters = sv.AllShortConverters.ToList();
+                var dbTxtToHLineDict = new Dictionary<Entity, Entity>();
+                var linesGroup = new List<List<Entity>>();
+                var groups = new List<List<Entity>>();
+                var plDict = new Dictionary<Entity, Polyline>();
+                var lineToPipesDict = new ListDict<Entity>();
+                foreach (var e1 in sv.VerticalPipeDBTexts)
+                {
+                    foreach (var e2 in sv.VerticalPipeLines)
+                    {
+                        if (e2 is Line line)
+                        {
+                            var seg = line.ToGLineSegment();
+                            if (seg.IsHorizontal(10))
+                            {
+                                var c1 = sv.BoundaryDict[e1].Center;
+                                var c2 = sv.BoundaryDict[e2].Center;
+                                if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 150)
+                                {
+                                    dbTxtToHLineDict[e1] = e2;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                {
+                    var pairs = new List<KeyValuePair<int, int>>();
+                    //for (int i = 0; i < lines.Count; i++)
+                    //{
+                    //    for (int j = i + 1; j < lines.Count; j++)
+                    //    {
+                    //        var line1 = lines[i] as Line;
+                    //        var line2 = lines[j] as Line;
+                    //        if (line1 != null && line2 != null)
+                    //        {
+                    //            var pline1 = line1.Buffer(10);
+                    //            var pline2 = line2.Buffer(10);
+                    //            if (new ThCADCore.NTS.ThCADCoreNTSRelate(pline1, pline2).IsIntersects)
+                    //            {
+                    //                pairs.Add(new KeyValuePair<int, int>(i, j));
+                    //            }
+                    //        }
+                    //    }
+                    //}
+                    var bfs = lines.Select(e => (e as Line)?.Buffer(10)).ToList();
+                    var si = ThRainSystemService.BuildSpatialIndex(bfs.Where(e => e != null).ToList());
+                    for (int i = 0; i < bfs.Count; i++)
+                    {
+                        Polyline bf = bfs[i];
+                        if (bf != null)
+                        {
+                            var lst = si.SelectCrossingPolygon(bf).Cast<Polyline>().Select(e => bfs.IndexOf(e)).Where(j => i < j).ToList();
+                            lst.ForEach(j => pairs.Add(new KeyValuePair<int, int>(i, j)));
+                        }
+                    }
 
-        //            var dict = new ListDict<int>();
-        //            var h = new BFSHelper()
-        //            {
-        //                Pairs = pairs.ToArray(),
-        //                TotalCount = lines.Count,
-        //                Callback = (g, i) =>
-        //                {
-        //                    dict.Add(g.root, i);
-        //                },
-        //            };
-        //            h.BFS();
-        //            dict.ForEach((_i, l) =>
-        //            {
-        //                linesGroup.Add(l.Select(i => lines[i]).ToList());
-        //            });
-        //        }
-        //        foreach (var g in linesGroup)
-        //        {
-        //            //DU.DrawBoundaryLazy(g.ToArray());
-        //            //if (GeoAlgorithm.GetBoundaryRect(g.ToArray()).ToJson() == "[-1556.47474123369,398855.075333649,852.092909549596,401109.883025958]")
-        //            if (Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(g.ToArray()).MinX) == -1556)
-        //            {
-        //                foreach (var e in g)
-        //                {
-        //                    //DU.DrawBoundaryLazy(e);
-        //                    //Dbg.ShowWhere(e);
-        //                    if (e is Line line)
-        //                    {
-        //                        //var l=DU.DrawLineLazy(line.StartPoint, line.EndPoint);
-        //                        //l.ColorIndex = 5;
-        //                    }
-        //                }
-        //            }
-        //        }
-        //        //return;
-        //        {
-        //            var pls1 = new List<Polyline>();
-        //            var pls2 = new List<Polyline>();
-        //            foreach (var e in sv.VerticalPipes)
-        //            {
-        //                var bd = sv.BoundaryDict[e];
-        //                var pl = PolylineTools.CreatePolygon(bd.Center, 4, bd.Radius);
-        //                plDict[e] = pl;
-        //                pls1.Add(pl);
-        //            }
-        //            foreach (var e in sv.VerticalPipeLines)
-        //            {
-        //                var pl = (e as Line).Buffer(10);
-        //                plDict[e] = pl;
-        //                pls2.Add(pl);
-        //            }
-        //            //foreach (var e1 in sv.VerticalPipeLines)
-        //            //{
-        //            //    foreach (var e2 in sv.VerticalPipes)
-        //            //    {
-        //            //        if (new ThCADCore.NTS.ThCADCoreNTSRelate(plDict[e1], plDict[e2]).IsIntersects)
-        //            //        {
-        //            //            lineToPipesDict.Add(e1, e2);
-        //            //            //DU.DrawBoundaryLazy(e2);
-        //            //            //DU.DrawRectLazy(sv.BoundaryDict[e2]);
-        //            //        }
-        //            //    }
-        //            //}
-        //            var si = ThRainSystemService.BuildSpatialIndex(pls1);
-        //            foreach (var pl2 in pls2)
-        //            {
-        //                foreach (var pl1 in si.SelectCrossingPolygon(pl2).Cast<Polyline>().ToList())
-        //                {
-        //                    var pipe = sv.VerticalPipes[pls1.IndexOf(pl1)];
-        //                    var line = sv.VerticalPipeLines[pls2.IndexOf(pl2)];
-        //                    lineToPipesDict.Add(line, pipe);
-        //                }
-        //            }
-        //        }
-        //        //return;
-        //        {
-        //            var totalList = new List<Entity>();
-        //            totalList.AddRange(sv.VerticalPipeDBTexts);
-        //            totalList.AddRange(sv.VerticalPipes);
-        //            totalList.AddRange(sv.VerticalPipeLines);
-        //            var pairs = new List<KeyValuePair<Entity, Entity>>();
-        //            foreach (var kv in dbTxtToHLineDict) pairs.Add(kv);
-        //            //foreach (var kv in dbTxtToHLineDict)
-        //            //{
-        //            //    DU.DrawBoundaryLazy(new Entity[] { kv.Key, kv.Value });
-        //            //}
-        //            lineToPipesDict.ForEach((e, l) => { l.ForEach(o => pairs.Add(new KeyValuePair<Entity, Entity>(e, o))); });
-        //            //lineToPipesDict.ForEach((e, l) =>
-        //            //{
-        //            //    DU.DrawBoundaryLazy(e);
-        //            //    DU.DrawBoundaryLazy(l.ToArray());
-        //            //});
-        //            //return;
-        //            foreach (var g in linesGroup) for (int i = 1; i < g.Count; i++) pairs.Add(new KeyValuePair<Entity, Entity>(g[i - 1], g[i]));
-        //            var dict = new ListDict<Entity>();
-        //            var h = new BFSHelper2<Entity>()
-        //            {
-        //                Pairs = pairs.ToArray(),
-        //                Items = totalList.ToArray(),
-        //                Callback = (g, i) =>
-        //                {
-        //                    dict.Add(g.root, i);
-        //                },
-        //            };
-        //            h.BFS();
-        //            dict.ForEach((_start, ents) =>
-        //            {
-        //                groups.Add(ents);
-        //            });
-        //            foreach (var g in groups)
-        //            {
-        //                //DU.DrawBoundaryLazy(g.ToArray());
-        //                sv.SortBy2DSpacePosition(
-        //                    g.Where(e => sv.VerticalPipes.Contains(e)).ToList(),
-        //                    g.Where(e => sv.VerticalPipeDBTexts.Contains(e)).ToList(),
-        //                    out List<Entity> targetPipes,
-        //                    out List<Entity> targetTexts);
-        //                if (targetPipes.Count == targetTexts.Count && targetTexts.Count > 0)
-        //                {
-        //                    //Dbg.PrintLine(targetTexts.Select(o => (o as DBText)?.TextString).ToJson());
+                    var dict = new ListDict<int>();
+                    var h = new BFSHelper()
+                    {
+                        Pairs = pairs.ToArray(),
+                        TotalCount = lines.Count,
+                        Callback = (g, i) =>
+                        {
+                            dict.Add(g.root, i);
+                        },
+                    };
+                    h.BFS();
+                    dict.ForEach((_i, l) =>
+                    {
+                        linesGroup.Add(l.Select(i => lines[i]).ToList());
+                    });
+                }
+                foreach (var g in linesGroup)
+                {
+                    //DU.DrawBoundaryLazy(g.ToArray());
+                    //if (GeoAlgorithm.GetBoundaryRect(g.ToArray()).ToJson() == "[-1556.47474123369,398855.075333649,852.092909549596,401109.883025958]")
+                    if (Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(g.ToArray()).MinX) == -1556)
+                    {
+                        foreach (var e in g)
+                        {
+                            //DU.DrawBoundaryLazy(e);
+                            //Dbg.ShowWhere(e);
+                            if (e is Line line)
+                            {
+                                //var l=DU.DrawLineLazy(line.StartPoint, line.EndPoint);
+                                //l.ColorIndex = 5;
+                            }
+                        }
+                    }
+                }
+                //return;
+                {
+                    var pls1 = new List<Polyline>();
+                    var pls2 = new List<Polyline>();
+                    foreach (var e in sv.VerticalPipes)
+                    {
+                        var bd = sv.BoundaryDict[e];
+                        var pl = PolylineTools.CreatePolygon(bd.Center, 4, bd.Radius);
+                        plDict[e] = pl;
+                        pls1.Add(pl);
+                    }
+                    foreach (var e in sv.VerticalPipeLines)
+                    {
+                        var pl = (e as Line).Buffer(10);
+                        plDict[e] = pl;
+                        pls2.Add(pl);
+                    }
+                    //foreach (var e1 in sv.VerticalPipeLines)
+                    //{
+                    //    foreach (var e2 in sv.VerticalPipes)
+                    //    {
+                    //        if (new ThCADCore.NTS.ThCADCoreNTSRelate(plDict[e1], plDict[e2]).IsIntersects)
+                    //        {
+                    //            lineToPipesDict.Add(e1, e2);
+                    //            //DU.DrawBoundaryLazy(e2);
+                    //            //DU.DrawRectLazy(sv.BoundaryDict[e2]);
+                    //        }
+                    //    }
+                    //}
+                    var si = ThRainSystemService.BuildSpatialIndex(pls1);
+                    foreach (var pl2 in pls2)
+                    {
+                        foreach (var pl1 in si.SelectCrossingPolygon(pl2).Cast<Polyline>().ToList())
+                        {
+                            var pipe = sv.VerticalPipes[pls1.IndexOf(pl1)];
+                            var line = sv.VerticalPipeLines[pls2.IndexOf(pl2)];
+                            lineToPipesDict.Add(line, pipe);
+                        }
+                    }
+                }
+                //return;
+                {
+                    var totalList = new List<Entity>();
+                    totalList.AddRange(sv.VerticalPipeDBTexts);
+                    totalList.AddRange(sv.VerticalPipes);
+                    totalList.AddRange(sv.VerticalPipeLines);
+                    var pairs = new List<KeyValuePair<Entity, Entity>>();
+                    foreach (var kv in dbTxtToHLineDict) pairs.Add(kv);
+                    //foreach (var kv in dbTxtToHLineDict)
+                    //{
+                    //    DU.DrawBoundaryLazy(new Entity[] { kv.Key, kv.Value });
+                    //}
+                    lineToPipesDict.ForEach((e, l) => { l.ForEach(o => pairs.Add(new KeyValuePair<Entity, Entity>(e, o))); });
+                    //lineToPipesDict.ForEach((e, l) =>
+                    //{
+                    //    DU.DrawBoundaryLazy(e);
+                    //    DU.DrawBoundaryLazy(l.ToArray());
+                    //});
+                    //return;
+                    foreach (var g in linesGroup) for (int i = 1; i < g.Count; i++) pairs.Add(new KeyValuePair<Entity, Entity>(g[i - 1], g[i]));
+                    var dict = new ListDict<Entity>();
+                    var h = new BFSHelper2<Entity>()
+                    {
+                        Pairs = pairs.ToArray(),
+                        Items = totalList.ToArray(),
+                        Callback = (g, i) =>
+                        {
+                            dict.Add(g.root, i);
+                        },
+                    };
+                    h.BFS();
+                    dict.ForEach((_start, ents) =>
+                    {
+                        groups.Add(ents);
+                    });
+                    foreach (var g in groups)
+                    {
+                        //DU.DrawBoundaryLazy(g.ToArray());
+                        sv.SortBy2DSpacePosition(
+                            g.Where(e => sv.VerticalPipes.Contains(e)).ToList(),
+                            g.Where(e => sv.VerticalPipeDBTexts.Contains(e)).ToList(),
+                            out List<Entity> targetPipes,
+                            out List<Entity> targetTexts);
+                        if (targetPipes.Count == targetTexts.Count && targetTexts.Count > 0)
+                        {
+                            //Dbg.PrintLine(targetTexts.Select(o => (o as DBText)?.TextString).ToJson());
 
 
-        //                    for (int i = 0; i < targetPipes.Count; i++)
-        //                    {
-        //                        var pipe = targetPipes[i];
-        //                        var dbT = targetTexts[i] as DBText;
-        //                        var t = dbT.TextString;
-        //                        Dbg.PrintLine(t);
-        //                        Dbg.PrintLine("has short cvt:" + shortConverters.Contains(pipe));
-        //                        if (t == "Y1L1-2")
-        //                        {
-        //                            //Dbg.PrintLine(scvts.Contains(pipe));
-        //                            Dbg.ShowWhere(pipe);
-        //                        }
-        //                    }
-        //                }
-        //            }
+                            for (int i = 0; i < targetPipes.Count; i++)
+                            {
+                                var pipe = targetPipes[i];
+                                var dbT = targetTexts[i] as DBText;
+                                var t = dbT.TextString;
+                                Dbg.PrintLine(t);
+                                Dbg.PrintLine("has short cvt:" + shortConverters.Contains(pipe));
+                                if (t == "Y1L1-2")
+                                {
+                                    //Dbg.PrintLine(scvts.Contains(pipe));
+                                    Dbg.ShowWhere(pipe);
+                                }
+                            }
+                        }
+                    }
 
-        //        }
+                }
 
-        //    }
-        //    Dbg.FocusMainWindow();
+            }
+            Dbg.FocusMainWindow();
 
-        //}
+        }
         public static void SelectCrossingPolygonDemo(Point3dCollection pts, List<Entity> rst)
         {
             if (pts.Count >= 3)

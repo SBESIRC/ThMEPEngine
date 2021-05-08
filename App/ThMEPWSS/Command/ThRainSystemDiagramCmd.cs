@@ -21,6 +21,10 @@ using Newtonsoft.Json.Linq;
 using System.Windows.Forms;
 using System.Diagnostics;
 
+
+
+
+
 namespace ThMEPWSS.Command
 {
     using ThMEPWSS.Assistant;
@@ -51,7 +55,7 @@ namespace ThMEPWSS.Command
             {
                 return Tuple.Create(leftDownPt, leftDownPt);
             }
-            
+
             var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
             if (ptRightRes.Status == PromptStatus.OK)
             {
