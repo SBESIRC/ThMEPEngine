@@ -506,33 +506,38 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THExtractRoomOutline", CommandFlags.Modal)]
-        public void THExtractRoomOutline()
+        [CommandMethod("TIANHUACAD", "THPICKROOM", CommandFlags.Modal)]
+        public void ThPickRoom()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (IRoomBuilder roomBuilder = new ThRoomOutlineBuilderEngine())
             {
-                var result = Active.Editor.GetEntity("\n选择外框线");
-                if (result.Status != PromptStatus.OK)
+                var result1 = Active.Editor.GetEntity("\n选择框线");
+                if (result1.Status != PromptStatus.OK)
                 {
                     return;
                 }
 
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                IRoomBuildData roomData = new ThBuildRoomDataService() { SelfBuildData = false };
-                roomData.Build(acadDatabase.Database, frame.Vertices());
-                roomBuilder.Build(roomData);
-
-                // Print
-                ThLayerTool.CreateLayer("AD-AREA-OUTL", Color.FromColorIndex(ColorMethod.ByAci, 31));
-                roomBuilder.Outlines.ForEach(o =>
+                var result2 = Active.Editor.GetPoint("\n选取房间内一点");
+                if (result2.Status != PromptStatus.OK)
                 {
-                    // AD-AREA-OUTL
-                    o.ColorIndex = 31;
-                    o.Layer = "AD-AREA-OUTL";
-                    o.SetDatabaseDefaults();
-                    acadDatabase.ModelSpace.Add(o);
-                });
+                    return;
+                }
+
+                var data = new ThBuildRoomDataService();
+                var frame = acadDatabase.Element<Polyline>(result1.ObjectId);
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                data.Build(acadDatabase.Database, nFrame.Vertices());
+                roomBuilder.Build(data);
+                roomBuilder.Outlines
+                    .Where(r => r.IsContains(result2.Value))
+                    .ForEach(r =>
+                    {
+                        acadDatabase.ModelSpace.Add(r);
+                        r.SetDatabaseDefaults();
+                        r.Layer = "AD-AREA-OUTL";
+                        r.ColorIndex = (int)ColorIndex.BYLAYER;
+                    });
             }
         }
 
