@@ -52,8 +52,8 @@
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                             <ColumnDefinition Width="*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Margin="10,0,0,0" Height="16" Width="16" Stretch="UniformToFill" Source="{TemplateBinding Icon}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <TextBlock  Grid.Column="1" Text="{TemplateBinding Title}" Margin="5 0 0 0" FontFamily="微软雅黑,黑体" 
+                        <Image Grid.Column="0" Margin="10,0,0,0" Height="16" Width="16" Focusable="False" Stretch="UniformToFill" Source="{TemplateBinding Icon}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock  Grid.Column="1" Text="{TemplateBinding Title}" Margin="5 0 0 0" FontFamily="微软雅黑,黑体"  Focusable="False"
                                     FontSize="{TemplateBinding TitleFontSize}"
                                     FontWeight="{TemplateBinding TitleFontWeight}"
                                     Foreground="{TemplateBinding TitleForeground}" VerticalAlignment="Center"></TextBlock>

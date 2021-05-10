@@ -5,7 +5,7 @@
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="/ThControlLibraryWPF;component/Themes/GenericBaseColors.xaml"></ResourceDictionary>
     </ResourceDictionary.MergedDictionaries>
-    
+
     <!--输入框样式-->
     <Style TargetType="{x:Type TextBox}">
         <Setter Property="BorderBrush" Value="{StaticResource TextBoxBorderColor}" />
@@ -17,7 +17,8 @@
                 <ControlTemplate>
                     <StackPanel Orientation="Horizontal">
                         <AdornedElementPlaceholder Name="customAdorner"></AdornedElementPlaceholder>
-                        <TextBox Text="{Binding ElementName=customAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}" Margin="10,0,0,0" BorderBrush="Red" Foreground="Red" VerticalContentAlignment="Center" />
+                        <TextBox Text="{Binding ElementName=customAdorner, Path=AdornedElement.(Validation.Errors)[0].ErrorContent}" Margin="10,0,0,0" 
+                                 BorderBrush="{StaticResource TextBoxBorderErrorColor}" Foreground="{StaticResource TextBoxBorderErrorColor}" VerticalContentAlignment="Center" />
                     </StackPanel>
                 </ControlTemplate>
             </Setter.Value>
@@ -64,17 +65,30 @@
     <!--RadioButton默认样式-->
     <Style TargetType="RadioButton">
         <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
         <Style.Triggers>
             <Trigger Property="IsFocused" Value="True">
                 <Setter Property="BorderBrush" Value="{StaticResource RadioButtonFocusBorderColor}"/>
-                <Setter Property="BorderThickness" Value="2"/>
+                <Setter Property="BorderThickness" Value="1"/>
             </Trigger>
         </Style.Triggers>
     </Style>
 
+    <Style TargetType="CheckBox">
+        <Setter Property="FocusVisualStyle" Value="{x:Null}"/>
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsFocused" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource RadioButtonFocusBorderColor}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    
     <!--下拉选择的默认样式-->
     <Style TargetType="ComboBox">
         <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Setter Property="Focusable" Value="True"/>
         <Setter Property="FocusVisualStyle" Value="{x:Null}"></Setter>
         <Style.Triggers>
             <Trigger Property="IsFocused" Value="True">
@@ -82,5 +96,9 @@
                 <Setter Property="BorderThickness" Value="2"/>
             </Trigger>
         </Style.Triggers>
+    </Style>
+    
+    <Style TargetType="Border">
+        <Setter Property="BorderBrush" Value="{StaticResource CommonBorderColor}"/>
     </Style>
 </ResourceDictionary>
