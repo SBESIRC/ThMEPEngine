@@ -106,8 +106,8 @@ namespace TianHua.AutoCAD.ThCui
                     "IDI_THCAD_THGBMQ_LARGE",
                     RibbonButtonStyle.SmallWithText);
             }
-				
-			// 车道照明
+                
+            // 车道照明
             row.AddNewButton("车道照明",
             "天华车道照明",
             "THCDZM",
@@ -115,14 +115,32 @@ namespace TianHua.AutoCAD.ThCui
             "IDI_THCAD_THCDZM_SMALL",
             "IDI_THCAD_THCDZM_LARGE",
             RibbonButtonStyle.LargeWithText);
-				
-			// 车道应急照明
+
+            // 疏散指示灯
+            row.AddNewButton("地库\r\n疏散指示灯",
+            "天华疏散指示灯",
+            "THSSZSD",
+            "天华疏散指示灯",
+            "IDI_THCAD_THSSZSD_SMALL",
+            "IDI_THCAD_THSSZSD_LARGE",
+            RibbonButtonStyle.LargeWithText);
+
+            // 车道应急照明
             row.AddNewButton("车道应急照明",
             "天华车道应急照明",
             "THYJZM",
             "基于提取出的车道中心线，一键布置车道壁装应急照明点位",
             "IDI_THCAD_THYJZM_SMALL",
             "IDI_THCAD_THYJZM_LARGE",
+            RibbonButtonStyle.LargeWithText);
+
+            // 车道应急照明连线
+            row.AddNewButton("地库应急\r\n照明连线",
+            "天华车道应急照明连线",
+            "THYJZMLX",
+            "天华车道应急照明连线",
+            "IDI_THCAD_THYJZMLX_SMALL",
+            "IDI_THCAD_THYJZMLX_LARGE",
             RibbonButtonStyle.LargeWithText);
         }
         private static void CreateWSSPanel(RibbonTabSource tab)
