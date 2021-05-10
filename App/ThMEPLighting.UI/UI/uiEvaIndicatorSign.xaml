@@ -45,14 +45,14 @@
                     </Grid>
                 </RadioButton>
             </StackPanel>
-            <Border BorderThickness="0,0,0,1" Height="5" BorderBrush="#878787"  Focusable="False" ></Border>
+            <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
         </StackPanel>
         <StackPanel Grid.Row="1" Orientation="Vertical"  Focusable="False" Margin="0,5,0,10" >
             <Label Content="间距约束：" Margin="0,5,0,0" Focusable="False" ></Label>
             <Label Content="灯具标志面与疏散方向垂直时：" Margin="10,5,0,5"  Focusable="False" ></Label>
             <StackPanel Orientation="Horizontal"  Height="30" Margin="10,5,0,5" Focusable="False">
                 <Label Content="间距≤" VerticalContentAlignment="Center"  Focusable="False"></Label>
-                <ComboBox Width="130" Height="22" VerticalAlignment="Center" Focusable="True" VerticalContentAlignment="Center" TabIndex="4"
+                <ComboBox Width="130" Height="22" VerticalAlignment="Center" TabIndex="4"
                           SelectedItem="{Binding VerticalSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
                           ItemsSource="{Binding VerticalSpaceItems,Mode=OneWay,NotifyOnSourceUpdated=True}" />
                 <Label Content="m" VerticalContentAlignment="Bottom"  Focusable="False" ></Label>
@@ -60,20 +60,17 @@
             <Label Content="灯具标志面与疏散方向平行时：" Margin="10,0,0,0"  Focusable="False" ></Label>
             <StackPanel Orientation="Horizontal" Height="30" Margin="10,5,0,5"  Focusable="False">
                 <Label Content="间距≤" VerticalContentAlignment="Center"  Focusable="False"></Label>
-                <ComboBox Width="130" TabIndex="5" Height="22"   Focusable="True" VerticalContentAlignment="Center" FocusVisualStyle="{x:Null}"
+                <ComboBox Width="130" TabIndex="5" Height="22"   Focusable="True" 
                           SelectedItem="{Binding ParallelSelectItem,Mode=TwoWay,NotifyOnSourceUpdated=True,UpdateSourceTrigger=PropertyChanged}"
                           ItemsSource="{Binding ParallelSpaceItems,Mode=OneWay,NotifyOnSourceUpdated=True}">
                 </ComboBox>
                 <Label Content="m" VerticalContentAlignment="Bottom"  Focusable="False" />
             </StackPanel>
-            <Border BorderThickness="0,0,0,1" Height="5" BorderBrush="#878787"  Focusable="False" ></Border>
+            <Border BorderThickness="0,0,0,1" Height="5"  Focusable="False" ></Border>
             <Label Content="图层控制：" Margin="0,5,0,0" Focusable="False" ></Label>
-            <CheckBox Margin="5,5,0,0" Content="显示疏散路径" VerticalContentAlignment="Center"
-                      Focusable="True" TabIndex="6" Name="checkFEIHide" Checked="checkFEIHide_Checked" Unchecked="checkFEIHide_Unchecked"></CheckBox>
+            <CheckBox Margin="5,5,0,0" Content="显示疏散路径"  Focusable="True" TabIndex="6" Name="checkFEIHide" Checked="checkFEIHide_Checked" Unchecked="checkFEIHide_Unchecked"></CheckBox>
         </StackPanel>
-        <cus:ImageButton Grid.Row="2" IsTabStop="True" Focusable="True" TabIndex="0" Content="生成疏散路径" Background="White"
-                         x:Name="btnLayoutLaneLine" Height="24" Margin="0,5,0,0" Click="btnLayoutLaneLine_Click"  ImageTextLocation="TextOnly"></cus:ImageButton>
-        <cus:ImageButton Grid.Row="3" IsTabStop="True" Focusable="True" Background="White" TabIndex="1"  Content="布置灯具" x:Name="btnStartLayout" Height="24" Margin="0,10,0,10" Click="btnStartLayout_Click"  ImageTextLocation="TextOnly"></cus:ImageButton>
-    
+        <cus:ImageButton Grid.Row="2" IsTabStop="True" Focusable="True" TabIndex="0" Content="生成疏散路径" x:Name="btnLayoutLaneLine" Height="24" Margin="0,5,0,0" Click="btnLayoutLaneLine_Click"  ImageTextLocation="TextOnly"></cus:ImageButton>
+        <cus:ImageButton Grid.Row="3" IsTabStop="True" Focusable="True"  TabIndex="1"  Content="布置灯具" x:Name="btnStartLayout" Height="24" Margin="0,10,0,10" Click="btnStartLayout_Click"  ImageTextLocation="TextOnly"></cus:ImageButton>
     </Grid>
 </cus:ThCustomWindow>
