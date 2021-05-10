@@ -1101,7 +1101,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             notCreatePoints.Add(endRoute.node.nodePoint);
                         
                         leftDir = exitDir.RotateBy(Math.PI / 2, _normal).GetNormal();
-                        isAdd = true;
+                        if(pLine.Length>2500)
+                            isAdd = true;
                     }
                     else
                     {

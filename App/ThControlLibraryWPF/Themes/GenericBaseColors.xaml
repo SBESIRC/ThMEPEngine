@@ -22,4 +22,6 @@
     <SolidColorBrush x:Key="LableTextColor" Color="Black"/>
     <SolidColorBrush x:Key="LableBackgroundColor" Color="Transparent"/>
 
+    <SolidColorBrush x:Key="RadioButtonBorderColor" Color="Gray"/>
+    <SolidColorBrush x:Key="RadioButtonFocusBorderColor" Color="#0286EB"/>
 </ResourceDictionary>
