@@ -59,6 +59,7 @@
     <Compile Include="Command\ThSprinklerLayoutAreaCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
+    <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
@@ -66,6 +67,7 @@
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
     <Compile Include="Pipe\Engine\ThBlockSelectionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
+    <Compile Include="Pipe\Engine\ThWCleanToolsRecongnitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWGravityWaterBucketExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWRainPipeExtractionVisitor.cs" />
@@ -97,6 +99,7 @@
     <Compile Include="Pipe\Model\ThWRainSystemDiagram.cs" />
     <Compile Include="Pipe\Model\ThWStoreys.cs" />
     <Compile Include="Pipe\Model\ThWSystemDiagram.cs" />
+    <Compile Include="Pipe\Model\ThWSystemDiagram.WaterSuply.cs" />
     <Compile Include="Pipe\Model\ThWWashingMachine.cs" />
     <Compile Include="Pipe\Model\ThWGravityWaterBucket.cs" />
     <Compile Include="Pipe\Model\ThWSideEntryWaterBucket.cs" />
@@ -130,6 +133,7 @@
     <Compile Include="Pipe\Service\ThBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThBalconyWashMachineService.cs" />
     <Compile Include="Pipe\Service\ThBasintoolLayerManager.cs" />
+    <Compile Include="Pipe\Service\ThCleanToolsManager.cs" />
     <Compile Include="Pipe\Service\ThClosestoolLayerManager.cs" />
     <Compile Include="Pipe\Service\ThCondensePipeLayerManager.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformCondensePipeService.cs" />
@@ -201,6 +205,7 @@
     <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.cs" />
     <Content Include="Uitl\todoList.txt" />
+    <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
     <Compile Include="Uitl\JsonExtensions.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
