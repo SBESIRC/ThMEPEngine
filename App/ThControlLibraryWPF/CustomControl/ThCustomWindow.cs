@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using WinInterop = System.Windows.Interop;
 
-namespace ThControlLibraryWPF
+namespace ThControlLibraryWPF.CustomControl
 {
     public class ThCustomWindow : Window, INotifyPropertyChanged
     {
@@ -137,7 +137,7 @@ namespace ThControlLibraryWPF
         private void InitializeStyle()
         {
             _resource = new ResourceDictionary();
-            Uri uri = new Uri("ThControlLibraryWPF;component/WindowThemes/CustomStyleWindow.xaml", UriKind.Relative);
+            Uri uri = new Uri("ThControlLibraryWPF;component/CustomControlThemes/WindowThemes/CustomStyleWindow.xaml", UriKind.Relative);
             _resource.Source = uri;
             this.Style = _resource["CustomWindowStyle"] as Style;
         }

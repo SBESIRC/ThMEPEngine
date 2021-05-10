@@ -6,7 +6,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 
-namespace ThControlLibraryWPF
+namespace ThControlLibraryWPF.CustomControl
 {
     /// <summary>
     /// 按照步骤 1a 或 1b 操作，然后执行步骤 2 以在 XAML 文件中使用此自定义控件。
@@ -392,6 +392,8 @@ namespace ThControlLibraryWPF
             string res = "";
             try
             {
+                if (null == values || values.Length != 2 || values[0] == null)
+                    return res;
                 res = values[0].ToString();
                 Orientation textOrientation = (Orientation)values[1];
                 if (textOrientation == Orientation.Horizontal)

@@ -1,9 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
-                    xmlns:local ="clr-namespace:ThControlLibraryWPF">
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="../Themes/ResourceStaticDictionary.xaml"/>
-    </ResourceDictionary.MergedDictionaries>
+                    xmlns:local ="clr-namespace:ThControlLibraryWPF.CustomControl">
     <!-- 最大化按钮形状 -->
     <PathGeometry x:Key="pathMaximize">
         <PathGeometry.Figures>
@@ -52,8 +49,8 @@
                             <ColumnDefinition Width="Auto"></ColumnDefinition>
                             <ColumnDefinition Width="*"></ColumnDefinition>
                         </Grid.ColumnDefinitions>
-                        <Image Grid.Column="0" Margin="10,0,0,0" Height="16" Width="16" Stretch="UniformToFill" Source="{TemplateBinding Icon}" HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        <TextBlock  Grid.Column="1" Text="{TemplateBinding Title}" Margin="5 0 0 0" FontFamily="微软雅黑,黑体" 
+                        <Image Grid.Column="0" Margin="10,0,0,0" Height="16" Width="16" Focusable="False" Stretch="UniformToFill" Source="{TemplateBinding Icon}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        <TextBlock  Grid.Column="1" Text="{TemplateBinding Title}" Margin="5 0 0 0" FontFamily="微软雅黑,黑体"  Focusable="False"
                                     FontSize="{TemplateBinding TitleFontSize}"
                                     FontWeight="{TemplateBinding TitleFontWeight}"
                                     Foreground="{TemplateBinding TitleForeground}" VerticalAlignment="Center"></TextBlock>
@@ -113,28 +110,25 @@
 
     
     <!--窗体默认样式-->
+    <!--外面窗体眼样式中尽量不要带具体的颜色，这样如果后面需要不同的主题色，可以通过只修改颜色对应的xaml就行-->
     <!--样式覆盖顺序 就近原则  1、“行内”覆盖“嵌入”，“嵌入”覆盖“外部”  2、同级别遵循“就近”  -->
     <Style x:Key="CustomWindowStyle" TargetType="{x:Type local:ThCustomWindow}">
         <Setter Property="WindowStyle" Value="None"/>
         <Setter Property="AllowsTransparency" Value="True"/>
-        <Setter Property="TitleBackground" Value="{StaticResource WindowTitleBackgroundColor}"/>
+        <Setter Property="TitleBackground" Value="{DynamicResource WindowTitleBackgroundColor}"/>
         <Setter Property="TitleFontSize" Value="14"/>
         <Setter Property="FontSize" Value="12"/>
         <Setter Property="FontFamily" Value="FontFamily"/>
-        <Setter Property="Foreground" Value="{StaticResource ForegroundColor}"/>
+        <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}"/>
         <Setter Property="TitleFontWeight" Value="Black"/>
-        <Setter Property="TitleForeground" Value="{StaticResource WindowTitleForegroundColor}"/>
-        <Setter Property="Background" Value="{StaticResource BackgroundColor}"></Setter>
+        <Setter Property="TitleForeground" Value="{DynamicResource WindowTitleForegroundColor}"/>
+        <Setter Property="Background" Value="{DynamicResource BackgroundColor}"></Setter>
         <Setter Property="ResizeMode" Value="NoResize"/>
-        <Setter Property="Icon" Value="../Images/CADIcon.png"/>
-        <Setter Property="ShowInTaskbar" Value="False"></Setter>
+        <Setter Property="Icon" Value="../../Images/CADIcon.png"/>
+        <Setter Property="ShowInTaskbar" Value="False"/>
         <Setter Property="WindowChrome.WindowChrome">
             <Setter.Value>
-                <WindowChrome CornerRadius="0"
-                              CaptionHeight="30"
-                              GlassFrameThickness="0"
-                              UseAeroCaptionButtons="False"
-                              NonClientFrameEdges="None">
+                <WindowChrome CornerRadius="0" CaptionHeight="30" GlassFrameThickness="0" UseAeroCaptionButtons="False" NonClientFrameEdges="None">
                 </WindowChrome>
             </Setter.Value>
         </Setter>
@@ -144,5 +138,8 @@
                 <Setter Property="Template" Value="{StaticResource WindowTemplateKey}"/>
             </Trigger>
         </Style.Triggers>
+        <Style.Resources>
+            <ResourceDictionary Source="../../Themes/ResourceStaticDictionary.xaml"/>
+        </Style.Resources>
     </Style>
 </ResourceDictionary>
