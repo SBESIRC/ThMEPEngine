@@ -36,9 +36,9 @@ namespace ThMEPWSS
 
         //public void ThCreateWaterSuplySystemDiagram()
         //{
-            
+
         //    using (var db = Linq2Acad.AcadDatabase.Active())
-            
+
         //    {
         //        var storey = new Storey();
         //        for (int i = 0; i < 32; i++)
@@ -47,8 +47,25 @@ namespace ThMEPWSS
         //            storey.Draw(i);
         //        }
         //    }
-            
 
-        //}
+
+        /// <summary>
+        /// Test command to get clean tools
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "TestExractCleanTools", CommandFlags.Modal)]
+        public void TestExractCleanTools()
+        {
+            using (var db = Linq2Acad.AcadDatabase.Active())
+            using (var engine = new ThWCleanToolsRecongnitionEngine())
+            {
+                var per = AcHelper.Active.Editor.GetEntity("\n选择一个框");
+                if (per.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                {
+                    var frame = db.Element<Polyline>(per.ObjectId);
+                    engine.Recognize(db.Database, frame.Vertices());
+                    var cleanTools = engine.Elements.Select(e => e.Outline);
+                }
+            }
+        }
     }
 }

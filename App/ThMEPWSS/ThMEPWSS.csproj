@@ -67,6 +67,7 @@
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
     <Compile Include="Pipe\Engine\ThBlockSelectionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
+    <Compile Include="Pipe\Engine\ThWCleanToolsRecongnitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWGravityWaterBucketExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWRainPipeExtractionVisitor.cs" />
@@ -132,6 +133,7 @@
     <Compile Include="Pipe\Service\ThBalconyRoomService.cs" />
     <Compile Include="Pipe\Service\ThBalconyWashMachineService.cs" />
     <Compile Include="Pipe\Service\ThBasintoolLayerManager.cs" />
+    <Compile Include="Pipe\Service\ThCleanToolsManager.cs" />
     <Compile Include="Pipe\Service\ThClosestoolLayerManager.cs" />
     <Compile Include="Pipe\Service\ThCondensePipeLayerManager.cs" />
     <Compile Include="Pipe\Service\ThDevicePlatformCondensePipeService.cs" />
