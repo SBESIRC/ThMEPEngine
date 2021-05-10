@@ -1,12 +1,14 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:ThControlLibraryWPF">
+                    xmlns:local="clr-namespace:ThControlLibraryWPF.CustomControl"
+                    xmlns:localBase ="clr-namespace:ThControlLibraryWPF">
     <local:ImageTextLocationConverter x:Key="locationConverter"/>
     <local:ImageTextVisibilityConverter x:Key="textImageConverter"/>
-    <local:BackgroundMultiConverter x:Key="backgroundConverter"/>
-    <local:BackgrougImageMultiConverter x:Key="backImageConverter" />
-    <local:ForegroundMultiConverter  x:Key="foregroundConverter"/>
     <local:TextShowMultiConverter x:Key="textShowConverter"/>
+
+    <localBase:BackgroundMultiConverter x:Key="backgroundConverter"/>
+    <localBase:BackgrougImageMultiConverter x:Key="backImageConverter" />
+    <localBase:ForegroundMultiConverter  x:Key="foregroundConverter"/>
     <Style TargetType="{x:Type local:ImageButton}">
         <Setter Property="SnapsToDevicePixels" Value="true"/>
         <Setter Property="BorderThickness" Value="1"/>

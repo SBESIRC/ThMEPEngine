@@ -48,7 +48,7 @@
     <Reference Include="PresentationFramework" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="ButtonThemes\ImageButtonTheme.xaml">
+    <Page Include="CustomControlThemes\ButtonThemes\ImageButtonTheme.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -64,7 +64,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="WindowThemes\CustomStyleWindow.xaml">
+    <Page Include="CustomControlThemes\WindowThemes\CustomStyleWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -75,7 +75,7 @@
     <Compile Include="ControlUtils\FindControlUtil.cs" />
     <Compile Include="ControlUtils\NotifyPropertyChangedBase.cs" />
     <Compile Include="ControlUtils\UListItemData.cs" />
-    <Compile Include="ImageButton.cs" />
+    <Compile Include="CustomControl\ImageButton.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -89,7 +89,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="ThCustomWindow.cs" />
+    <Compile Include="CustomControl\ThCustomWindow.cs" />
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

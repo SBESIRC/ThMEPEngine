@@ -8,8 +8,8 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using ThControlLibraryWPF;
 using ThControlLibraryWPF.ControlUtils;
+using ThControlLibraryWPF.CustomControl;
 using ThMEPLighting.ServiceModels;
 using ThMEPLighting.UI.ViewModels;
 

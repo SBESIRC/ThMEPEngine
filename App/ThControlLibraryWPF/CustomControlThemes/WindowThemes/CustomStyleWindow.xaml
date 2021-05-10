@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"  
-                    xmlns:local ="clr-namespace:ThControlLibraryWPF">
+                    xmlns:local ="clr-namespace:ThControlLibraryWPF.CustomControl">
     <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="../Themes/ResourceStaticDictionary.xaml"/>
+        <ResourceDictionary Source="../../Themes/GenericBaseColors.xaml"/>
     </ResourceDictionary.MergedDictionaries>
     <!-- 最大化按钮形状 -->
     <PathGeometry x:Key="pathMaximize">
@@ -126,15 +126,11 @@
         <Setter Property="TitleForeground" Value="{StaticResource WindowTitleForegroundColor}"/>
         <Setter Property="Background" Value="{StaticResource BackgroundColor}"></Setter>
         <Setter Property="ResizeMode" Value="NoResize"/>
-        <Setter Property="Icon" Value="../Images/CADIcon.png"/>
+        <Setter Property="Icon" Value="../../Images/CADIcon.png"/>
         <Setter Property="ShowInTaskbar" Value="False"></Setter>
         <Setter Property="WindowChrome.WindowChrome">
             <Setter.Value>
-                <WindowChrome CornerRadius="0"
-                              CaptionHeight="30"
-                              GlassFrameThickness="0"
-                              UseAeroCaptionButtons="False"
-                              NonClientFrameEdges="None">
+                <WindowChrome CornerRadius="0" CaptionHeight="30" GlassFrameThickness="0" UseAeroCaptionButtons="False" NonClientFrameEdges="None">
                 </WindowChrome>
             </Setter.Value>
         </Setter>
@@ -144,5 +140,8 @@
                 <Setter Property="Template" Value="{StaticResource WindowTemplateKey}"/>
             </Trigger>
         </Style.Triggers>
+        <Style.Resources>
+            <ResourceDictionary Source="../../Themes/ResourceStaticDictionary.xaml"/>
+        </Style.Resources>
     </Style>
 </ResourceDictionary>
