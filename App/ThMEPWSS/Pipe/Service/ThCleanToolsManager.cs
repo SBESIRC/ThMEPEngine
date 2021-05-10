@@ -25,5 +25,9 @@ namespace ThMEPWSS.Pipe.Service
                 || name.ToLower().Contains("A-Toilet-9".ToLower())
                 || name.ToLower().Contains("A-Kitchen-9".ToLower());
         }
+        public static bool IsToilet5(string name)
+        {
+            return name.ToLower().Contains("A-Toilet-5".ToLower());
+        }
     }
 }

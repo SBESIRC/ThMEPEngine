@@ -64,6 +64,8 @@ namespace ThMEPWSS
                     var frame = db.Element<Polyline>(per.ObjectId);
                     engine.Recognize(db.Database, frame.Vertices());
                     var cleanTools = engine.Elements.Select(e => e.Outline);
+                    var allBlockNames = cleanTools.Select(ct => ct.BlockName);
+                    ThCleanToolsManager.IsToilet5(allBlockNames.First());
                 }
             }
         }

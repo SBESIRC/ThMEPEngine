@@ -130,7 +130,8 @@ namespace ThMEPWSS.Pipe.Model
         private double T = 24; //用水时数，24
 
         
-        public double PipeDiameterCompute(double PipeDiameter)
+        //public double PipeDiameterCompute(double PipeDiameter)
+        public double PipeDiameterCompute()
         {
             //计算各管段的流量
             double U0 = 100 * QL * m * Kh / (0.2 * Ng * T * 3600);
@@ -140,6 +141,16 @@ namespace ThMEPWSS.Pipe.Model
             double U = (1 + alphaC * Math.Pow((Ng - 1), 0.45)) / (Math.Sqrt(Ng));
 
             double qg = 0.2 * U * Ng;  //管段的设计秒流量
+
+
+            //管径列表
+            Dictionary<string, double> pipeDList = new Dictionary<string, double> 
+            { {"DN15",0.0157 },  {"DN20",0.0213 }, {"DN25",0.0273 },  {"DN32",0.0354 }, 
+              {"DN40",0.0413 },  {"DN50",0.0527 }, {"DN65",0.0681 },  {"DN80",0.0809 },
+              {"DN100",0.1063 }, {"DN125",0.131 }, {"DN150",0.1593 }, {"DN200",0.2071 } };
+
+
+            //double[] pipeDList = {0.0157, 0.0213, 0.0273, 0.0354, 0.0413, 0.0527, 0.0681, 0.0809, 0.1063, 0.131, 0.1593, 0.2071};
 
             double FlowRate = qg * 4 / (Math.PI * PipeDiameter * PipeDiameter * 1000);  // 不同管径下的流速
 
