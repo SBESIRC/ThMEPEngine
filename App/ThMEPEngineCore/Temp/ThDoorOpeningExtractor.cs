@@ -12,6 +12,8 @@ namespace ThMEPEngineCore.Temp
     {
         public List<Polyline> Openings { get; private set; }
 
+        private const string SwitchPropertyName = "Switch";
+
         public ThDoorOpeningExtractor()
         {
             Openings = new List<Polyline>();
@@ -36,6 +38,7 @@ namespace ThMEPEngineCore.Temp
             {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Properties.Add(SwitchPropertyName, "Open");
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });

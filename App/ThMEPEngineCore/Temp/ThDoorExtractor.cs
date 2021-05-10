@@ -10,8 +10,7 @@ namespace ThMEPEngineCore.Temp
 {
     public class ThDoorExtractor :ThExtractorBase , IExtract , IPrint, IBuildGeometry,IGroup
     {
-        public List<Polyline> Doors { get; private set; }
-        private const string SwitchPropertyName = "Switch";
+        public List<Polyline> Doors { get; private set; }        
 
         public ThDoorExtractor()
         {
@@ -36,8 +35,7 @@ namespace ThMEPEngineCore.Temp
             Doors.ForEach(o =>
             {                
                 var geometry = new ThGeometry();
-                geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(SwitchPropertyName, "Open");
+                geometry.Properties.Add(CategoryPropertyName, Category);                
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
