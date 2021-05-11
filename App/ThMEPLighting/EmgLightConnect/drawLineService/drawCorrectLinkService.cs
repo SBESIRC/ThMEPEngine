@@ -44,7 +44,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     .Where(x => x.Value.Count > 0)
                     .ToDictionary(x => x.Key, y => y.Value.First());
 
-                if (intersectPolys.Count > 0)
+                if (intersectPolys.Count ==1 )
                 {
                     var secPoly = new Polyline();
                     for (int i = 0; i < intersectPolys.Count; i++)

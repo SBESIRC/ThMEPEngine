@@ -32,6 +32,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static List<(Point3d, Point3d)> connectSingleSide(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
+            var connectList = new List<(Point3d, Point3d)>();
+
             //var orderSigleSideGroup = orderSignleSidePrim(ALE, sigleSideGroup);
             //var orderSigleSideGroup = orderSignleSideOrigin(ALE, sigleSideGroup);
             //var orderSigleSideGroup = orderSignleSideLaneOrder(ALE, sigleSideGroup);
@@ -39,44 +41,41 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             var orderSigleSideGroup = orderSignleSideDistNew(ALE, sigleSideGroup);
 
-
             var blockList = new List<Point3d>();
 
-            for (int i = 0; i < orderSigleSideGroup.Count; i++)
+            if (orderSigleSideGroup.Count > 0)
             {
-                var pts = orderSigleSideGroup[i].getTotalBlock();
-                for (int j = 0; j < pts.Count; j++)
+                for (int i = 0; i < orderSigleSideGroup.Count; i++)
                 {
-                    DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), "llable0blkNo", Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
+                    var pts = orderSigleSideGroup[i].getTotalBlock();
+                    for (int j = 0; j < pts.Count; j++)
+                    {
+                        DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), "l5blkNo", Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
+                    }
+                }
+
+                blockList.AddRange(orderSigleSideGroup[0].getTotalBlock());
+
+                for (int i = 1; i < orderSigleSideGroup.Count; i++)
+                {
+                    var thisLaneBlock = orderSigleSideGroup[i].getTotalBlock();
+
+                    Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
+                    List<(int, int, double)> closedDists = returnValueCalculation.getDistMatrix(blockList, thisLaneBlock); //(blocklist index, focused side index, distance)
+
+                    var connectListTemp = returnValueCalculation.findOptimalConnectionInGroup(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
+                    //var connectListTemp = returnValueCalculation.findOptimalConnectionInGroupFilter(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
+
+                    if (connectListTemp.Count > 0)
+                    {
+                        connectList.AddRange(connectListTemp);
+                        orderSigleSideGroup[i].connectPt(connectListTemp[0].Item1, connectListTemp[0].Item2);
+                    }
+
+                    blockList.AddRange(thisLaneBlock);
 
                 }
             }
-
-
-            blockList.AddRange(orderSigleSideGroup[0].getTotalBlock());
-
-            var connectList = new List<(Point3d, Point3d)>();
-
-            for (int i = 1; i < orderSigleSideGroup.Count; i++)
-            {
-                var thisLaneBlock = orderSigleSideGroup[i].getTotalBlock();
-
-                Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
-                List<(int, int, double)> closedDists = returnValueCalculation.getDistMatrix(blockList, thisLaneBlock); //(blocklist index, focused side index, distance)
-
-                var connectListTemp = returnValueCalculation.findOptimalConnectionInGroup(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
-                //var connectListTemp = returnValueCalculation.findOptimalConnectionInGroupFilter(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
-
-                if (connectListTemp.Count > 0)
-                {
-                    connectList.AddRange(connectListTemp);
-                    orderSigleSideGroup[i].connectPt(connectListTemp[0].Item1, connectListTemp[0].Item2);
-                }
-
-                blockList.AddRange(thisLaneBlock);
-
-            }
-
             return connectList;
 
 
@@ -99,9 +98,10 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             return orderSingleSide;
         }
-        
+
         private static List<ThSingleSideBlocks> orderSignleSideDistNew(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
+            var orderSingleSide = new List<ThSingleSideBlocks>();
             var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
 
             foreach (var side in sigleSideGroup)
@@ -113,31 +113,33 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
             }
 
-            var orderSingleSideTemp = sideDistDict.OrderBy(x => x.Value).ToList();
-
-            var notInSide = new List<ThSingleSideBlocks>();
-            var orderSingleSide = new List<ThSingleSideBlocks>();
-            orderSingleSide.Add(orderSingleSideTemp[0].Key);
-            int prevIdx = 0;
-            for (int i = 1; i < orderSingleSideTemp.Count; i++)
+            if (sideDistDict.Count > 0)
             {
-                var prevBlk = orderSingleSideTemp[prevIdx].Key;
-                var thisBlk = orderSingleSideTemp[i].Key;
+                var orderSingleSideTemp = sideDistDict.OrderBy(x => x.Value).ToList();
 
-                var dist = distanceInSide(prevBlk, thisBlk);
-                if (dist <= EmgConnectCommon.TolSaperateGroupMaxDistance)
-                {
-                    orderSingleSide.Add(thisBlk);
-                    prevIdx = i;
-                }
-                else
-                {
-                    notInSide.Add(thisBlk);
-                }
+                var notInSide = new List<ThSingleSideBlocks>();
 
+                orderSingleSide.Add(orderSingleSideTemp[0].Key);
+                int prevIdx = 0;
+                for (int i = 1; i < orderSingleSideTemp.Count; i++)
+                {
+                    var prevBlk = orderSingleSideTemp[prevIdx].Key;
+                    var thisBlk = orderSingleSideTemp[i].Key;
+
+                    var dist = distanceInSide(prevBlk, thisBlk);
+                    if (dist <= EmgConnectCommon.TolSaperateGroupMaxDistance)
+                    {
+                        orderSingleSide.Add(thisBlk);
+                        prevIdx = i;
+                    }
+                    else
+                    {
+                        notInSide.Add(thisBlk);
+                    }
+
+                }
+                orderSingleSide.AddRange(notInSide);
             }
-
-            orderSingleSide.AddRange(notInSide);
 
             return orderSingleSide;
         }

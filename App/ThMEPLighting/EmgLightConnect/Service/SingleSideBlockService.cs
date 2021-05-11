@@ -30,11 +30,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             if (evacList.Count > 0 && emgLightList.Count > 0)
             {
-
-
                 double groupDist = -1;
-                double scaleEvac = evacList[0].ScaleFactors.X;
-                double scaleEmg = emgLightList[0].ScaleFactors.X;
+                double scaleEvac = Math.Abs(evacList[0].ScaleFactors.X);
+                double scaleEmg = Math.Abs(emgLightList[0].ScaleFactors.X);
                 groupDist = scaleEvac * 1.25 + scaleEmg * 2.25 + EmgConnectCommon.TolGroupEmgLightEvac;
 
                 //for debug
@@ -42,17 +40,32 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 foreach (var emgPt in emgLightList)
                 {
-                    //bug:不要用固定值
-                    var evac = evacList.Where(e => e.Position.DistanceTo(emgPt.Position) <= groupDist).ToList();
+                    bool bGroup = false;
 
+                    var evac = evacList.Where(e => e.Position.DistanceTo(emgPt.Position) <= groupDist).ToList();
                     if (evac.Count > 0)
                     {
-                        mainPt.Add(evac.First());
-                        groupPt.Add(evac.First().Position, emgPt.Position);
-                        evacList.Remove(evac.First());
+                        //check direction
 
+                        var evacR = evac.First().Rotation;
+                        //var emgR = emgPt.Rotation;
+                        var evacEmgR = (emgPt.Position - evac.First().Position).GetNormal().GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis);
+
+                        var CosAngle = Math.Cos(evacR - evacEmgR);
+
+                        
+                        ////角度在20 以内
+                        if (Math.Abs(CosAngle) > Math.Cos(20 * Math.PI / 180))
+                        {
+
+                            mainPt.Add(evac.First());
+                            groupPt.Add(evac.First().Position, emgPt.Position);
+                            evacList.Remove(evac.First());
+                            bGroup = true;
+                        }
                     }
-                    else
+
+                    if (bGroup == false)
                     {
                         mainPt.Add(emgPt);
                     }
@@ -232,7 +245,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
         {
             GroupEmgLightEvac(blockSourceList[EmgBlkType.BlockType.emgLight], blockSourceList[EmgBlkType.BlockType.evac], out var mainPt, out groupBlock);
             blockDict.Add(EmgConnectCommon.BlockGroupType.mainBlock, mainPt);
-
         }
 
     }

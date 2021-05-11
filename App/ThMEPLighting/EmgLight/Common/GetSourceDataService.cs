@@ -149,8 +149,9 @@ namespace ThMEPLighting.EmgLight.Common
         /// <param name="BlockName"></param>
         /// <param name="bufferFrame"></param>
         /// <returns></returns>
-        public static Dictionary<BlockReference, BlockReference> ExtractBlock(Polyline bufferFrame, string LayerName, string BlockName,ThMEPOriginTransformer transformer,List<Polyline> holes = null)
+        public static Dictionary<BlockReference, BlockReference> ExtractBlock(Polyline bufferFrame, string LayerName, string BlockName, ThMEPOriginTransformer transformer, List<Polyline> holes = null)
         {
+            var tol = new Tolerance(1, 1);
             var blk = new Dictionary<BlockReference, BlockReference>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
@@ -167,19 +168,24 @@ namespace ThMEPLighting.EmgLight.Common
                     if (block.Name == BlockName)
                     {
                         var blockTrans = block.Clone() as BlockReference;
-                        transformer.Transform(blockTrans);
-                        blockTrans.Position = new Point3d(blockTrans.Position.X, blockTrans.Position.Y, 0);
-                        blk.Add(block,blockTrans);
+
+                       if (blk.Where(x => x.Key.Position.IsEqualTo(blockTrans.Position, tol)).Count() == 0)
+                        {
+                            transformer.Transform(blockTrans);
+                            blockTrans.Position = new Point3d(blockTrans.Position.X, blockTrans.Position.Y, 0);
+                            blk.Add(block, blockTrans);
+                        }
+
                     }
                 }
 
-                blk= blk.Where(o => bufferFrame.Contains(o.Value.Position)).ToDictionary (x=>x.Key, x=>x.Value );
+                blk = blk.Where(o => bufferFrame.Contains(o.Value.Position)).ToDictionary(x => x.Key, x => x.Value);
 
-                if (holes != null && holes.Count >0)
+                if (holes != null && holes.Count > 0)
                 {
                     foreach (var hole in holes)
                     {
-                        blk = blk.Where(o => hole.Contains(o.Value.Position)==false).ToDictionary(x => x.Key, x => x.Value);
+                        blk = blk.Where(o => hole.Contains(o.Value.Position) == false).ToDictionary(x => x.Key, x => x.Value);
                     }
                 }
             }
@@ -192,10 +198,10 @@ namespace ThMEPLighting.EmgLight.Common
             var emgLight = new Dictionary<BlockReference, BlockReference>();
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
-              //  acadDatabase.Database.UnFrozenLayer(LayerName);
-               // acadDatabase.Database.UnLockLayer(LayerName);
-               // acadDatabase.Database.UnOffLayer(LayerName);
-               
+                //  acadDatabase.Database.UnFrozenLayer(LayerName);
+                // acadDatabase.Database.UnLockLayer(LayerName);
+                // acadDatabase.Database.UnOffLayer(LayerName);
+
 
                 //有超多bug，不能用
                 var items = acadDatabase.ModelSpace

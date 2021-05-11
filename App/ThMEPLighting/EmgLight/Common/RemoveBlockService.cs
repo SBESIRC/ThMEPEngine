@@ -67,6 +67,12 @@ namespace ThMEPLighting.EmgLight.Service
             }
         }
 
+        public static void ClearEmgConnect()
+        {
+            var sLayerName = ThMEPLightingCommon.EmgLightConnectLayerName;
+            ClearDrawing(sLayerName);
+        }
+
     }
 
 

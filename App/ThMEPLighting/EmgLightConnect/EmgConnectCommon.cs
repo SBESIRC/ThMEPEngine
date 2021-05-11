@@ -11,7 +11,7 @@ namespace ThMEPLighting.EmgLightConnect
 
         public static int TolGroupBlkLane = 6000;
         public static int TolGroupBlkLaneHead = 400;
-       public static int TolGroupEmgLightEvac = 200;//边框*scale相加以后在外扩【200】的值，不是两点200以内
+        public static int TolGroupEmgLightEvac = 100;//边框*scale相加以后在外扩【200】的值，不是两点200以内
         public static int TolOrderSideLanePtOnFrame = 200;
         public static int TolSaperateGroupMaxDistance = 15000;
         public static int TolReturnValueDistCheck = 5000;
@@ -34,11 +34,8 @@ namespace ThMEPLighting.EmgLightConnect
         public static string LayerBlkOutline = "l1BlkOutline";
         public static string LayerConnectLine = "l4ConnectLine";
         public static string LayerConnectLineFinal = "l4ConnectLineFinal";
-        public static string LayerFinalFinal = "l4FinalFinal";
+        public static string LayerFinalFinal = "l4ConnectLineCorrectIntersectFinal";
         public static string LayerOptimalSingleSideGroup = "l3SingleSideGroup";
-
-
-        
 
         public enum BlockGroupType
         {

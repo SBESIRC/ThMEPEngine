@@ -111,7 +111,7 @@ namespace ThMEPLighting.EmgLight.Common
             blockList[EmgBlkType.BlockType.otherSecBlk].AddRange(exitSCeiling.Select(x => x.Value).ToList());
 
             //blockList.Add(EmgBlkType.BlockType.otherSecBlk, enter.Select(x => x.Value).ToList());
-            blockList[EmgBlkType.BlockType.otherSecBlk].AddRange( enter.Select(x => x.Value).ToList());
+            blockList[EmgBlkType.BlockType.otherSecBlk].AddRange(enter.Select(x => x.Value).ToList());
             blockList[EmgBlkType.BlockType.otherSecBlk].AddRange(enterCeiling.Select(x => x.Value).ToList());
 
             //blockList.Add(EmgBlkType.BlockType.otherSecBlk, evacCeiling.Select(x => x.Value).ToList());
@@ -215,10 +215,13 @@ namespace ThMEPLighting.EmgLight.Common
 
                 var inx = connectPt.IndexOf(connectPt.OrderBy(x => x.DistanceTo(bottomPt)).First());
 
-                var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
-                ptList[inx] = ptNew;
+                if (inx == 1 || inx == 3)
+                {
+                    var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
+                    ptList[inx] = ptNew;
 
-                connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+                    connectPt = ptList.Select(x => x.TransformBy(blk.BlockTransform)).ToList();
+                }
             }
 
             blkOutline = new Polyline();

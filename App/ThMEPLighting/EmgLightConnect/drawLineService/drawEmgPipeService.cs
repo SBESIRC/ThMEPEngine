@@ -57,24 +57,48 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return connPt;
         }
 
+        private static bool ptOnPolyline(Point3d pt, Polyline line)
+        {
+            bool bReturn = false;
+            Tolerance tol = new Tolerance(10, 10);
+
+            for (int i = 0; i < line.NumberOfVertices; i++)
+            {
+                var seg = new Line(line.GetPoint3dAt(i), line.GetPoint3dAt((i + 1) % line.NumberOfVertices));
+                if (seg.ToCurve3d().IsOn(pt, tol))
+                {
+                    bReturn = true;
+                    break;
+                }
+            }
+            return bReturn;
+        }
+
         public static Polyline cutLane(Point3d prevP, Point3d pt, ThBlock prevBlk, ThBlock thisBlk, Polyline movedline)
         {
+            var moveLanePoly = new Polyline();
             var prevProjP = movedline.GetClosestPointTo(prevP, true);
             var projP = movedline.GetClosestPointTo(pt, true);
-
 
             var leftLineTemp = getMoveLinePart(prevProjP, projP, movedline, out int prevPolyInx, out int ptPolyInx);
             var prevConnPt = drawEmgPipeService.getConnectPt(prevBlk, leftLineTemp);
             var prevConnProjPt = leftLineTemp.GetClosestPointTo(prevConnPt, true);
-            var bAddedPrevConn = tryDistByDegree(prevConnPt, prevConnProjPt, leftLineTemp, out var preAddedPt);
 
             var rightLineTemp = getMoveLinePart(projP, prevProjP, movedline, out int ptPolyInx2, out int prevPolyInx2);
             var connPt = drawEmgPipeService.getConnectPt(thisBlk, rightLineTemp);
             var connProjPt = rightLineTemp.GetClosestPointTo(connPt, true);
+
+
+            if (ptOnPolyline(prevConnPt, thisBlk.outline) == true)
+            {
+                moveLanePoly = null;
+                return moveLanePoly;
+            }
+
+            var bAddedPrevConn = tryDistByDegree(prevConnPt, prevConnProjPt, leftLineTemp, out var preAddedPt);
             var bAddedConn = tryDistByDegree(connPt, connProjPt, rightLineTemp, out var addedPt);
 
             //生成主polyline
-            var moveLanePoly = new Polyline();
             moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, prevConnPt.ToPoint2d(), 0, 0, 0);
 
             if (bAddedPrevConn == true)
@@ -104,8 +128,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, connPt.ToPoint2d(), 0, 0, 0);
 
-            prevBlk.connInfo[prevConnPt].Add(moveLanePoly);
-            thisBlk.connInfo[connPt].Add(moveLanePoly);
+            //prevBlk.connInfo[prevConnPt].Add(moveLanePoly);
+            //thisBlk.connInfo[connPt].Add(moveLanePoly);
 
             return moveLanePoly;
         }
@@ -206,6 +230,50 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
+        public static Point3d getPrjPt(List<Line> lineList, Point3d pt, out int extendDir)
+        {
+            var prjPt = new Point3d();
+            extendDir = -100;
+            var matrix = getLineListMatrix(lineList);
+            var lineListTrans = lineList.Select(x => new Line(x.StartPoint.TransformBy(matrix.Inverse()), x.EndPoint.TransformBy(matrix.Inverse()))).ToList();
+
+            var ptTrans = pt.TransformBy(matrix.Inverse());
+
+            if (ptTrans.X < lineListTrans.First().StartPoint.X)
+            {
+                prjPt = lineList.First().GetClosestPointTo(pt, true);
+                extendDir = -1;
+            }
+            else if (ptTrans.X > lineListTrans.Last().EndPoint.X)
+            {
+                prjPt = lineList.Last().GetClosestPointTo(pt, true);
+                extendDir = lineList.Count;
+            }
+            else
+            {
+                for (int i = 0; i < lineListTrans.Count; i++)
+                {
+                    if (lineListTrans[i].StartPoint.X <= ptTrans.X && ptTrans.X <= lineListTrans[i].EndPoint.X)
+                    {
+                        prjPt = lineList[i].GetClosestPointTo(pt, false);
+                        extendDir = i;
+                        break;
+                    }
+                }
+            }
+
+            return prjPt;
+        }
+
+        private static Matrix3d getLineListMatrix(List<Line> lineList)
+
+        {
+            var dir = (lineList.Last().EndPoint - lineList.First().StartPoint).GetNormal();
+
+            var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
+            var matrix = Matrix3d.Displacement(lineList.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
+            return matrix;
+        }
 
     }
 }

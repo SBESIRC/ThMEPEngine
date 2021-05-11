@@ -155,10 +155,10 @@ namespace ThMEPLighting
 
                 //确定位移中心
                 var centerPt = ALEOri.Position;
-                //if (centerPt.X < 10E7)
-                //{
-                //    centerPt = new Point3d();
-                //}
+                if (centerPt.X < 10E7)
+                {
+                    centerPt = new Point3d();
+                }
                 var transformer = new ThMEPOriginTransformer(centerPt);
 
 
@@ -237,6 +237,19 @@ namespace ThMEPLighting
             if (debugSwitch)
             {
                 RemoveBlockService.ClearDrawing();
+            }
+
+        }
+
+        [System.Diagnostics.Conditional("DEBUG")]
+        [CommandMethod("TIANHUACAD", "CleanDebugConnect", CommandFlags.Modal)]
+        public void ThCleanDebugConnectLayer()
+        {
+            // 调试按钮关闭且图层不是保护半径有效图层
+            var debugSwitch = (Convert.ToInt16(Autodesk.AutoCAD.ApplicationServices.Application.GetSystemVariable("USERR2")) == 1);
+            if (debugSwitch)
+            {
+                RemoveBlockService.ClearEmgConnect();
             }
 
         }

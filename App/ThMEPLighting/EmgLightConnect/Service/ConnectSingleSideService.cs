@@ -59,8 +59,10 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
                 groupLine.Add(mLine);
 
-                DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight030);
-
+                if (mLine.NumberOfVertices > 0)
+                {
+                    DrawUtils.ShowGeometry(mLine.StartPoint, count.ToString(), EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130), LineWeight.LineWeight030);
+                }
             }
 
             DrawUtils.ShowGeometry(groupLine, EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130));
@@ -84,7 +86,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 var side = singleSideBlocks[i];
                 var lanePoly = new Polyline();
-               
+
 
                 for (int j = 0; j < side.laneSide.Count; j++)
                 {
@@ -96,12 +98,12 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     }
                 }
 
-                var midPoint = lanePoly.GetPointAtDist (lanePoly.Length / 2);
+                var midPoint = lanePoly.GetPointAtDist(lanePoly.Length / 2);
 
                 var zDir = side.laneSide[0].Item2 == 0 ? 1 : -1;
-                var newPt = midPoint+ 100*(lanePoly.EndPoint - lanePoly.StartPoint).GetNormal().RotateBy(Math.PI / 2, Vector3d.ZAxis * zDir);
+                var newPt = midPoint + 100 * (lanePoly.EndPoint - lanePoly.StartPoint).GetNormal().RotateBy(Math.PI / 2, Vector3d.ZAxis * zDir);
 
-                DrawUtils.ShowGeometry(newPt, string.Format("sideNo: {0}", singleSideBlocks[i].laneSideNo), "llable0laneSide", Color.FromColorIndex(ColorMethod.ByColor, 30), LineWeight.LineWeight025, 200);
+                DrawUtils.ShowGeometry(newPt, string.Format("sideNo: {0}", singleSideBlocks[i].laneSideNo), "l5laneSide", Color.FromColorIndex(ColorMethod.ByColor, 30), LineWeight.LineWeight025, 200);
             }
 
         }

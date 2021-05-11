@@ -45,7 +45,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                         var moveLanePoly = drawEmgPipeService.cutLane(prevPt, pt, prevBlk, thisBlk, movedline);
 
-                        moveLanePolyList.Add(moveLanePoly);
+                        if (moveLanePoly!=null)
+                        {
+                            moveLanePolyList.Add(moveLanePoly);
+                        }
+                        
 
                     }
                     //DrawUtils.ShowGeometry(movedline, EmgConnectCommon.LayerMovedLane, Color.FromColorIndex(ColorMethod.ByColor, 50));
@@ -56,7 +60,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return moveLanePolyList;
         }
 
-        private static Polyline moveLane(ThSingleSideBlocks side, Polyline frame)
+        private static Polyline moveLaneNotUse(ThSingleSideBlocks side, Polyline frame)
         {
             //找平移量
             double offset = getLaneDisplacement(side.laneSide.Select(x => x.Item1).ToList(), side.reMainBlk, EmgConnectCommon.TolSaperateGroupMaxDistance);
@@ -90,13 +94,55 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return movedline;
         }
 
+        private static Polyline moveLane(ThSingleSideBlocks side, Polyline frame)
+        {
+            //找平移量
+            double offset = getLaneDisplacement(side.laneSide.Select(x => x.Item1).ToList(), side.reMainBlk, EmgConnectCommon.TolSaperateGroupMaxDistance);
+            Polyline movedline = null;
+         
+            var tempMoveLineList = new List<Line >();
+
+            //平移车道线
+            if (offset != 0)
+            {
+                for (int j = 0; j < side.laneSide.Count; j++)
+                {
+                    //GetOffsetCurves line 负值：右 正值：左  polyline 负值：左 正值： 右
+                    var offSetDir = side.laneSide[j].Item2 == 0 ? 1 : -1;
+                    var tempMoveLine = side.laneSide[j].Item1.GetOffsetCurves(offset * offSetDir)[0] as Line;
+
+                    tempMoveLineList.Add(tempMoveLine);
+                }
+
+                movedline = checkMoveLineIntersectOutFrame(tempMoveLineList, side.laneSide.Select(x => x.Item1).ToList(), frame, offset, side);
+            }
+
+            return movedline;
+        }
+
         private static Polyline checkMoveLineIntersectOutFrame(Polyline movedlineTemp, Polyline lanePoly, Polyline frame, double offset, ThSingleSideBlocks side)
         {
+            DrawUtils.ShowGeometry(lanePoly.GetClosestPointTo(side.reMainBlk.First(), false), "l0testtest2");
+            DrawUtils.ShowGeometry(lanePoly.GetClosestPointTo(side.reMainBlk.Last(), false), "l0testtest2", Color.FromColorIndex(ColorMethod.ByColor, 40));
+
+
+            DrawUtils.ShowGeometry(side.laneSide[0].Item1.GetClosestPointTo(side.reMainBlk.First(), true), "l0testtest2", Color.FromColorIndex(ColorMethod.ByColor, 220));
+
+
             lanePoly.SetPointAt(0, lanePoly.GetClosestPointTo(side.reMainBlk.First(), true).ToPoint2d());
             lanePoly.SetPointAt(lanePoly.NumberOfVertices - 1, lanePoly.GetClosestPointTo(side.reMainBlk.Last(), true).ToPoint2d());
 
+
+
+            DrawUtils.ShowGeometry(movedlineTemp.GetClosestPointTo(side.reMainBlk.First(), true), "l0testtest2");
+            DrawUtils.ShowGeometry(movedlineTemp.GetClosestPointTo(side.reMainBlk.Last(), true), "l0testtest2", Color.FromColorIndex(ColorMethod.ByColor, 40));
+
             movedlineTemp.SetPointAt(0, movedlineTemp.GetClosestPointTo(side.reMainBlk.First(), true).ToPoint2d());
             movedlineTemp.SetPointAt(movedlineTemp.NumberOfVertices - 1, movedlineTemp.GetClosestPointTo(side.reMainBlk.Last(), true).ToPoint2d());
+
+            DrawUtils.ShowGeometry(lanePoly, "l0testtest");
+            DrawUtils.ShowGeometry(movedlineTemp, "l0testtest");
+
 
             var moveLine = movedlineTemp.Clone() as Polyline;
 
@@ -106,8 +152,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 movelanePolygon.AddVertexAt(movelanePolygon.NumberOfVertices, movedlineTemp.GetPoint2dAt(i), 0, 0, 0);
             }
             movelanePolygon.Closed = true;
-
+            DrawUtils.ShowGeometry(movelanePolygon, "l0testtest");
             ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(movelanePolygon, frame);
+
             if (relation.IsOverlaps)
             {
                 var polyCollection = new DBObjectCollection() { frame };
@@ -148,6 +195,63 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
+
+        private static Polyline checkMoveLineIntersectOutFrame(List<Line> tempMoveLine, List<Line> lane, Polyline frame, double offset, ThSingleSideBlocks side)
+        {
+
+            var lanePoly = getCutLane(lane, side.reMainBlk.First(), side.reMainBlk.Last());
+            var moveLineTemp = getCutLane(tempMoveLine, side.reMainBlk.First(), side.reMainBlk.Last());
+            var moveLine = moveLineTemp.Clone() as Polyline;
+
+            var movelanePolygon = lanePoly.Clone() as Polyline;
+            for (int i = moveLineTemp.NumberOfVertices - 1; i >= 0; i--)
+            {
+                movelanePolygon.AddVertexAt(movelanePolygon.NumberOfVertices, moveLineTemp.GetPoint2dAt(i), 0, 0, 0);
+            }
+            movelanePolygon.Closed = true;
+            ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(movelanePolygon, frame);
+
+            if (relation.IsOverlaps)
+            {
+                var polyCollection = new DBObjectCollection() { frame };
+                var overlap = movelanePolygon.Intersection(polyCollection);
+
+                if (overlap.Count > 0)
+                {
+                    var overlapPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
+                    double newOffsetTemp = 200000;
+                    for (int i = 0; i < overlapPoly.NumberOfVertices; i++)
+                    {
+                        var dist = lanePoly.GetDistToPoint(overlapPoly.GetPoint3dAt(i), false);
+                        if (100 < dist && dist < newOffsetTemp)
+                        {
+                            newOffsetTemp = dist;
+                        }
+                    }
+                    newOffsetTemp = newOffsetTemp - EmgConnectCommon.TolLinkOffsetWithFrame;
+                    double newOffset = getLaneDisplacement(side.laneSide.Select(x => x.Item1).ToList(), side.reMainBlk, newOffsetTemp);
+
+                    var dir = (moveLineTemp.StartPoint - lanePoly.StartPoint).GetNormal();
+                    var angle = dir.GetAngleTo((lanePoly.GetPoint3dAt(1) - lanePoly.StartPoint).GetNormal(), Vector3d.ZAxis) * 180 / Math.PI;
+                    int offSetDir = 1;
+                    if (80 <= angle && angle <= 100)
+                    {
+                        offSetDir = 1;
+                    }
+                    else
+                    {
+                        offSetDir = -1;
+                    }
+
+                    moveLine = lanePoly.GetOffsetCurves(newOffset * offSetDir)[0] as Polyline;
+                }
+            }
+
+            return moveLine;
+
+        }
+
+
         private static double getLaneDisplacement(List<Line> lanes, List<Point3d> blocks, double maxOffset)
         {
             var displacementList = new List<double>();
@@ -180,5 +284,47 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return distance;
         }
 
+
+        public static Polyline getCutLane(List<Line> lineList, Point3d spt, Point3d ept)
+        {
+            bool bEnd = false;
+            Polyline lineP = new Polyline();
+
+            var sPtPrj = drawEmgPipeService.getPrjPt(lineList, spt, out var sPtEx);
+            var ePtPrj = drawEmgPipeService.getPrjPt(lineList, ept, out var ePtEx);
+
+            lineP.AddVertexAt(lineP.NumberOfVertices, sPtPrj.ToPoint2d(),0,0,0);
+         
+            if (ePtEx == -1 || sPtEx>= lineList.Count)
+            {
+                lineP.AddVertexAt(lineP.NumberOfVertices, ePtPrj.ToPoint2d(), 0, 0, 0);
+                bEnd = true;
+            }
+
+            if (bEnd == false && sPtEx == -1)
+            {
+                sPtEx = 0;
+                lineP.AddVertexAt(lineP.NumberOfVertices, lineList[0].StartPoint.ToPoint2d(), 0, 0, 0);
+            }
+
+            if (bEnd == false)
+            {
+                for (int i = sPtEx; i < ePtEx; i++)
+                {
+                    if (i < lineList.Count-1)
+                    {
+                        lineP.AddVertexAt(lineP.NumberOfVertices, lineList[i].EndPoint.ToPoint2d(), 0, 0, 0);
+                    }
+                }
+                if (ePtEx >= lineList.Count)
+                {
+                    lineP.AddVertexAt(lineP.NumberOfVertices, lineList[lineList.Count-1].EndPoint.ToPoint2d(), 0, 0, 0);
+                }
+                lineP.AddVertexAt(lineP.NumberOfVertices, ePtPrj.ToPoint2d(), 0, 0, 0);  
+            }
+
+            return lineP;
+
+        }
     }
 }

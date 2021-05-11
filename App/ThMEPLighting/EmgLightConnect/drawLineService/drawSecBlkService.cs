@@ -17,7 +17,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class drawSecBlkService
     {
-        public static List<Polyline> drawSecToMain(List<ThSingleSideBlocks> singleSideBlocks, Polyline frame, List<ThBlock> blkList, ref List<Polyline> linkLine,List<Polyline > holes)
+        public static List<Polyline> drawSecToMain(List<ThSingleSideBlocks> singleSideBlocks, Polyline frame, List<ThBlock> blkList, ref List<Polyline> linkLine, List<Polyline> holes)
         {
             List<Polyline> connList = new List<Polyline>();
             for (int sideIndex = 0; sideIndex < singleSideBlocks.Count; sideIndex++)
@@ -87,14 +87,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
             poly.AddVertexAt(poly.NumberOfVertices, ptE.ToPoint2d(), 0, 0, 0);
 
-            blkS.connInfo[ptS].Add(poly);
-            blkE.connInfo[ptE].Add(poly);
+            //blkS.connInfo[ptS].Add(poly);
+            //blkE.connInfo[ptE].Add(poly);
 
             return poly;
 
         }
 
-        private static Polyline CorrectConflictFrame(Polyline frame, Polyline linkTemp, ThBlock blkS, ThBlock blkE,List<Polyline> holes)
+        private static Polyline CorrectConflictFrame(Polyline frame, Polyline linkTemp, ThBlock blkS, ThBlock blkE, List<Polyline> holes)
         {
             Polyline link = linkTemp;
             //var holes = new List<Polyline>();
@@ -117,7 +117,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 var resCut = drawEmgPipeService.cutLane(sPt, ePt, blkS, blkE, res);
 
-                link = resCut;
+                if (resCut != null)
+                {
+                    link = resCut;
+                }
+
             }
 
 

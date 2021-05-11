@@ -15,7 +15,7 @@ namespace ThMEPLighting.EmgLight.Service
             using (var db = AcadDatabase.Active())
             {
                 db.Database.ImportBlock(ThMEPLightingCommon.EmgLightBlockName);
-                db.Database.ImportLayer (ThMEPLightingCommon.EmgLightLayerName);
+                db.Database.ImportLayer(ThMEPLightingCommon.EmgLightLayerName);
 
                 foreach (var ptInfo in insertPtInfo)
                 {

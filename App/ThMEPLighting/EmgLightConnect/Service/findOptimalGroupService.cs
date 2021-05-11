@@ -14,7 +14,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     class findOptimalGroupService
     {
-        public static List<List<List<int>>> findGroupPath(List<List<List<int>>> allPath,  List<ThSingleSideBlocks> singleSideBlocks)
+        public static List<List<List<int>>> findGroupPath(List<List<List<int>>> allPath, List<ThSingleSideBlocks> singleSideBlocks)
         {
             List<List<List<int>>> allGroupPath = new List<List<List<int>>>();
             //Dictionary<List<int>, List<List<int>>> calculatedGroupPath();
@@ -35,7 +35,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                     foreach (int laneSideIndex in part)
                     {
-                        
+
                         var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
                         var blockCount = laneSideBlocks.Count;
 
@@ -81,8 +81,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var bReturn = false;
 
 
-            var partPathBlocksPoints = partPathBlocks.SelectMany(x => x.getTotalMainBlock()).ToList();
-            var laneSideBlocksPoints = laneSideBlocks.getTotalMainBlock();
+            var partPathBlocksPoints = partPathBlocks.SelectMany(x => x.getTotalBlock()).ToList();
+            var laneSideBlocksPoints = laneSideBlocks.getTotalBlock();
 
             if (partPathBlocksPoints.Count == 0)
             {
@@ -152,14 +152,20 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             foreach (var path in OptimalGroup)
             {
-                var pathBlocks = new List<ThSingleSideBlocks>();
-                foreach (int laneSideIndex in path)
-                {
-                    var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
+                if (path.Count > 0)
 
-                    pathBlocks.Add(laneSideBlocks);
+                {
+
+
+                    var pathBlocks = new List<ThSingleSideBlocks>();
+                    foreach (int laneSideIndex in path)
+                    {
+                        var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
+
+                        pathBlocks.Add(laneSideBlocks);
+                    }
+                    OptimalGroupBlocks.Add(pathBlocks);
                 }
-                OptimalGroupBlocks.Add(pathBlocks);
             }
 
             return OptimalGroupBlocks;
@@ -172,7 +178,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             avg = distX.Sum() / distX.Count;
 
-            for (int i = 0; i < distX.Count ; i++)
+            for (int i = 0; i < distX.Count; i++)
             {
                 variance += Math.Pow(distX[i] - avg, 2);
             }
