@@ -31,12 +31,7 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            if (patterns[0] == "ROOM" && patterns[1] != "")
-            {
-                string[] subPatterns = ThStructureUtils.OriginalFromXref(patterns[1]).ToUpper().Split('$').Reverse().ToArray();
-                return subPatterns[0] == "DEFPOINTS";
-            }
-            return false;
+            return patterns[0] == "ROOM";
         }
     }
 }
