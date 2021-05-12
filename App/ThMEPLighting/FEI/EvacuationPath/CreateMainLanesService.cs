@@ -207,7 +207,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
                         {
                             Polyline polyline = new Polyline();
                             polyline.AddVertexAt(0, ajustPt.Value.ToPoint2D(), 0, 0, 0);
-                            polyline.AddVertexAt(0, extendLine.EndPoint.ToPoint2D(), 0, 0, 0);
+                            polyline.AddVertexAt(1, extendLine.EndPoint.ToPoint2D(), 0, 0, 0);
 
                             return polyline;
                         }
