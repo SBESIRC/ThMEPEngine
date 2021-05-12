@@ -176,9 +176,15 @@ namespace ThMEPWSS.Pipe.Engine
                     frameSpaces.Add(roofSpaces[0]);
                 }
 
-                // 获取房间空间
+                var boundaryEngine = new ThRoomRecognitionEngine();
+                boundaryEngine.RecognizeMS(acadDatabase.Database, pts);
+                var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
+                var markEngine = new ThRoomMarkRecognitionEngine();
+                markEngine.RecognizeMS(acadDatabase.Database, pts);
+                var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();
-                this.Spaces = builder.Build(database, pts).Select(o => new ThIfcSpace()
+                builder.Build(rooms, marks);
+                this.Spaces = rooms.Select(o => new ThIfcSpace()
                 {
                     Tags = o.Tags,
                     Boundary = o.Boundary,
