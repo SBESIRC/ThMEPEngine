@@ -3,15 +3,15 @@ using ThMEPEngineCore.Interface;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.BuildRoom.Service
+namespace ThMEPEngineCore.Service
 {
-    public class ThNTSSpatialIndexService : ISpatialIndex
+    public class ThNTSSpatialIndexExService : ISpatialIndex
     {
         private DBObjectCollection Objs { get; set; }
-        private ThCADCoreNTSSpatialIndex SpatialIndex { get; set; }
-        public ThNTSSpatialIndexService(DBObjectCollection objs)
+        private ThCADCoreNTSSpatialIndexEx SpatialIndex { get; set; }
+        public ThNTSSpatialIndexExService(DBObjectCollection objs)
         {
-            SpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+            SpatialIndex = new ThCADCoreNTSSpatialIndexEx(objs);
         }
         public void Dispose()
         {            
@@ -55,6 +55,11 @@ namespace ThMEPEngineCore.BuildRoom.Service
         public DBObjectCollection SelectWindowPolygon(Polyline polyline)
         {
             return SpatialIndex.SelectWindowPolygon(polyline);
-        } 
+        }
+
+        public DBObjectCollection SelectWindowPolygon(MPolygon mPolygon)
+        {
+            return SpatialIndex.SelectWindowPolygon(mPolygon);
+        }
     }
 }

@@ -6,7 +6,7 @@ using ThMEPEngineCore.Interface;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.BuildRoom.Service
+namespace ThMEPEngineCore.Service
 {
     public class ThNTSBufferService :IBuffer
     {

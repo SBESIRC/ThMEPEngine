@@ -2,7 +2,7 @@
 using ThMEPEngineCore.Interface;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPEngineCore.BuildRoom.Service
+namespace ThMEPEngineCore.Service
 {
     public class ThNTSSimilarityMeasureService : ISimilarityMeasure
     {

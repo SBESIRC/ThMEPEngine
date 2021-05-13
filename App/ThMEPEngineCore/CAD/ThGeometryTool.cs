@@ -425,5 +425,30 @@ namespace ThMEPEngineCore.CAD
                 return false;
             }
         }
+
+        public static double CalculatePublicSector(this Line first,Line second)
+        {
+            //计算两条平行线公共部分
+            if(first.LineDirection().IsParallelToEx(second.LineDirection()))
+            {
+                var plane = new Plane(first.StartPoint, first.LineDirection());
+                var mt = Matrix3d.WorldToPlane(plane);
+                var pt1 = second.StartPoint.TransformBy(mt);
+                var pt2 = second.EndPoint.TransformBy(mt);
+                var secondMinZ = Math.Min(pt1.Z, pt2.Z);
+                var secondMaxZ = Math.Max(pt1.Z, pt2.Z);
+                if(secondMaxZ<=0 || secondMinZ>= first.Length)
+                {
+                    return 0.0;
+                }
+                var bottom = Math.Max(0, secondMinZ);
+                var top = Math.Min(first.Length, secondMaxZ);
+                return top - bottom;
+            }
+            else
+            {
+                return 0.0;
+            }
+        }
     }
 }

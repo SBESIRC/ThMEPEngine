@@ -165,5 +165,33 @@ namespace ThMEPEngineCore.CAD
             }
             return results;
         }
+
+        /// <summary>
+        /// 对于比例块或GeometryExtents有问题的块会有异常
+        /// </summary>
+        /// <param name="br"></param>
+        /// <returns></returns>
+        public static DBObjectCollection Explode(BlockReference br)
+        {
+            var results = new DBObjectCollection();
+            var objs = new DBObjectCollection();
+            br.Explode(objs);
+            foreach (Entity ent in objs)
+            {
+                if (ent is BlockReference nestBr)
+                {
+                    var nestObjs = Explode(nestBr);
+                    foreach (Entity nestEnt in nestObjs)
+                    {
+                        results.Add(nestEnt);
+                    }
+                }
+                else
+                {
+                    results.Add(ent);
+                }
+            }
+            return results;
+        }
     }
 }

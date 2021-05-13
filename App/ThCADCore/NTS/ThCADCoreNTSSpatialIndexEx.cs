@@ -218,7 +218,39 @@ namespace ThCADCore.NTS
             return WindowFilter(Query(geometry.EnvelopeInternal),
                 ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geometry));
         }
+        public DBObjectCollection SelectWindowPolygon(MPolygon mPolygon)
+        {
+            /*
+             * 线获取MPolygon里面的物体
+             * 减去洞内包括的物体
+             */
+            var loops = mPolygon.Loops();
+            var objs = SelectWindowPolygon(loops[0]);
+            for (int i = 1; i < loops.Count; i++)
+            {
+                foreach (DBObject innerObj in SelectCrossingPolygon(loops[i]))
+                {
+                    objs.Remove(innerObj);
+                }
+            }
+            return objs;
+        }
 
+        public DBObjectCollection SelectWindowPolygon(Entity ent)
+        {
+            if (ent is Polyline poly)
+            {
+                return SelectWindowPolygon(poly);
+            }
+            else if (ent is MPolygon mPolygon)
+            {
+                return SelectWindowPolygon(mPolygon);
+            }
+            else
+            {
+                return new DBObjectCollection();
+            }
+        }
         /// <summary>
         /// Fence Selection
         /// </summary>

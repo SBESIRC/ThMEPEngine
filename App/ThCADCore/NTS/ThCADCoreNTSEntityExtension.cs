@@ -46,7 +46,8 @@ namespace ThCADCore.NTS
             }
             else
             {
-                throw new NotSupportedException();
+                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
+                //throw new NotSupportedException();
             }
         }
 
