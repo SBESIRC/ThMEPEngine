@@ -38,6 +38,7 @@
     using Autodesk.AutoCAD.Runtime;
     using static ThMEPWSS.DebugNs.StaticMethods;
     using ThCADExtension;
+    using ThMEPEngineCore.Engine;
 
     public class ThWRainSystemDiagramTest
     {
@@ -131,7 +132,7 @@
         }
         public static void InitDiagram(AcadDatabase adb, ThWRainSystemDiagram diagram, Point3d basePt, Point3dCollection range)
         {
-            var storeysRecEngine = new ThWStoreysRecognitionEngine();
+            var storeysRecEngine = new ThStoreysRecognitionEngine();
             storeysRecEngine.Recognize(adb.Database, range);
             diagram.InitServices(adb, range);
             diagram.InitStoreys(storeysRecEngine.Elements);

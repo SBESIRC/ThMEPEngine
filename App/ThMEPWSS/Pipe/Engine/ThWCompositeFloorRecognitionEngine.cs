@@ -150,7 +150,7 @@ namespace ThMEPWSS.Pipe.Engine
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var engine = new ThWStoreysRecognitionEngine();
+                var engine = new ThStoreysRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, pts);
                 if (engine.Elements.Count == 0)
                 {

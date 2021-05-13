@@ -83,7 +83,6 @@
     <Compile Include="Pipe\Engine\ThWCompositeFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeIndexEngine.cs" />
     <Compile Include="Pipe\Engine\ThWCompositeRoomRecognitionEngine.cs" />
-    <Compile Include="Pipe\Engine\ThWStoreysRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWTopFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofTopFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoofFloorRecognitionEngine.cs" />

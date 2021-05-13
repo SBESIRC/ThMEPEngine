@@ -23,6 +23,7 @@ using System.Diagnostics;
 
 namespace ThMEPWSS.Command
 {
+    using ThMEPEngineCore.Engine;
     using ThMEPWSS.Assistant;
     using ThMEPWSS.JsonExtensionsNs;
     //雨水排水系统图
@@ -82,7 +83,7 @@ namespace ThMEPWSS.Command
                 var diagram = new ThWRainSystemDiagram();
 
                 //todo: extract storeys
-                var storeysRecEngine = new ThWStoreysRecognitionEngine();
+                var storeysRecEngine = new ThStoreysRecognitionEngine();
 
 
                 var input = SelectPoints();

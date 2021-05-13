@@ -47,6 +47,7 @@ namespace ThMEPWSS.DebugNs
     using ThCADExtension;
     using System.Collections;
     using ThCADCore.NTS.IO;
+    using ThMEPEngineCore.Engine;
 
     public class FengDbgTest
     {
@@ -973,7 +974,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             using (var tr = DrawUtils.DrawingTransaction)
             {
                 var db = adb.Database;
-                var storeysRecEngine = new ThWStoreysRecognitionEngine();
+                var storeysRecEngine = new ThStoreysRecognitionEngine();
                 var range = Dbg.SelectRange();
                 storeysRecEngine.Recognize(db, range);
                 var els = storeysRecEngine.Elements;
@@ -1009,7 +1010,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             {
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
-                var storeysRecEngine = new ThWStoreysRecognitionEngine();
+                var storeysRecEngine = new ThStoreysRecognitionEngine();
                 var range = Dbg.SelectRange();
                 storeysRecEngine.Recognize(db, range);
                 foreach (ThWStoreys el in storeysRecEngine.Elements)
@@ -2097,7 +2098,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
 
         public static void DrawDiagram(AcadDatabase adb, ThWRainSystemDiagram diagram, Point3d basePt, Point3dCollection range)
         {
-            var storeysRecEngine = new ThWStoreysRecognitionEngine();
+            var storeysRecEngine = new ThStoreysRecognitionEngine();
             storeysRecEngine.Recognize(adb.Database, range);
             //diagram.CollectData(adb, range);
             //diagram.InitStoreys(storeysRecEngine.Elements);
@@ -2947,7 +2948,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 //var basePt = default(Point3d);
 
                 var diagram = new ThWRainSystemDiagram();
-                var storeysRecEngine = new ThWStoreysRecognitionEngine();
+                var storeysRecEngine = new ThStoreysRecognitionEngine();
                 storeysRecEngine.Recognize(adb.Database, points);
                 //var sw = new Stopwatch();
                 //sw.Start();
@@ -3053,7 +3054,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             var basePt = rst.Value;
 
             var diagram = new ThWRainSystemDiagram();
-            var storeysRecEngine = new ThWStoreysRecognitionEngine();
+            var storeysRecEngine = new ThStoreysRecognitionEngine();
             storeysRecEngine.Recognize(adb.Database, points);
             //var sw = new Stopwatch();
             //sw.Start();

@@ -6,8 +6,8 @@ using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.Service;
-using ThMEPWSS.Pipe.Engine;
 using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe.Service
@@ -60,7 +60,7 @@ namespace ThMEPWSS.Pipe.Service
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
-                var engine = new ThWStoreysRecognitionEngine();
+                var engine = new ThStoreysRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, new Point3dCollection());                           
                 engine.Elements.Cast<ThWStoreys>().ForEach(o =>
                 {
