@@ -29,7 +29,7 @@ namespace ThMEPLighting
             {
                 short colorIndex = 2;
                 var polyline = ThGarageInteractionUtils.PolylineJig(colorIndex);
-                if (polyline.Area == 0.0)
+                if (polyline.Length == 0.0)
                 {
                     return;
                 }                
@@ -46,7 +46,7 @@ namespace ThMEPLighting
             {
                 short colorIndex = 1;
                 var polyline = ThGarageInteractionUtils.PolylineJig(colorIndex);
-                if (polyline.Area == 0.0)
+                if (polyline.Length == 0.0)
                 {
                     return;
                 }                
