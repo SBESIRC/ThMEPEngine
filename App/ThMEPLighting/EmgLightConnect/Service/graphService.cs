@@ -88,8 +88,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         secondRingBlocks.AddRange(singleSideBlocks.Where(y => y.laneSide.Contains(x)).Distinct().ToList());
                     });
 
-            var firstRingItem = firstRingBlocks.SelectMany(each => each.mainBlk).ToList();
-            var secRingItem = secondRingBlocks.SelectMany(each => each.mainBlk).ToList();
+            var firstRingItem = firstRingBlocks.SelectMany(each => each.getTotalBlock ()).ToList();
+            var secRingItem = secondRingBlocks.SelectMany(each => each.getTotalBlock()).ToList();
 
             double minDist = EmgConnectCommon.TolSaperateGroupMaxDistance;
             (Point3d, Point3d) ringBlock = (new Point3d(), new Point3d());
@@ -112,8 +112,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 if (ringBlock.Item1 != Point3d.Origin && ringBlock.Item2 != Point3d.Origin)
                 {
-                    var firstRingIndex = singleSideBlocks.Where(x => x.mainBlk.Contains(ringBlock.Item1)).First().laneSideNo;
-                    var secRingIndex = singleSideBlocks.Where(x => x.mainBlk.Contains(ringBlock.Item2)).First().laneSideNo;
+                    var firstRingIndex = singleSideBlocks.Where(x => x.getTotalBlock().Contains(ringBlock.Item1)).First().laneSideNo;
+                    var secRingIndex = singleSideBlocks.Where(x => x.getTotalBlock().Contains(ringBlock.Item2)).First().laneSideNo;
 
                     closeSide = (firstRingIndex, secRingIndex);
 

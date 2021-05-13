@@ -79,7 +79,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var moveLanePoly = new Polyline();
             var prevProjP = movedline.GetClosestPointTo(prevP, true);
             var projP = movedline.GetClosestPointTo(pt, true);
-
+            
             var leftLineTemp = getMoveLinePart(prevProjP, projP, movedline, out int prevPolyInx, out int ptPolyInx);
             var prevConnPt = drawEmgPipeService.getConnectPt(prevBlk, leftLineTemp);
             var prevConnProjPt = leftLineTemp.GetClosestPointTo(prevConnPt, true);
@@ -95,6 +95,10 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 return moveLanePoly;
             }
 
+            //生成小支管
+            //确定连接点
+            //如果project 点在 图块obb（外扩一点点）内（线穿过图框）， 穿过框线边的点
+            //如果project 点在 图块obb 外 找最近的点
             var bAddedPrevConn = tryDistByDegree(prevConnPt, prevConnProjPt, leftLineTemp, out var preAddedPt);
             var bAddedConn = tryDistByDegree(connPt, connProjPt, rightLineTemp, out var addedPt);
 
@@ -194,6 +198,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     bEnd = true;
                 }
                 //if (bEnd == false && seg.Length <= 500 )
+
                 if (bEnd == false && seg.Length <= EmgConnectCommon.TolTooClosePt)
                 {
                     addPt = seg.StartPoint;
@@ -205,7 +210,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     adjacent = opposite / Math.Tan(degree * Math.PI / 180);
 
-                    if (adjacent < seg.Length / 5)
+                    if (adjacent < seg.Length / 5 && adjacent<= 600)
                     {
                         addPt = connPtProj + adjacent * (seg.EndPoint - seg.StartPoint).GetNormal();
                         bAddPt = true;

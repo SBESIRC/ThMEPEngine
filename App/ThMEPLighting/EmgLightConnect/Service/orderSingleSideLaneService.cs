@@ -48,14 +48,22 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
+        /// <summary>
+        /// 最多4层内环
+        /// </summary>
+        /// <param name="pointList"></param>
+        /// <param name="notTravelledList"></param>
+        /// <param name="orderedOutterLaneSideList"></param>
+        /// <param name="orderedInnerLaneSideList"></param>
         public static void orderInnerSigleSideLane(Dictionary<Point3d, List<Line>> pointList, List<(Line, int)> notTravelledList, List<List<(Line, int)>> orderedOutterLaneSideList, out Dictionary<int, List<List<(Line, int)>>> orderedInnerLaneSideList)
         {
             orderedInnerLaneSideList = new Dictionary<int, List<List<(Line, int)>>>();
             int dictIndex = 1;
             orderedInnerLaneSideList.Add(0, orderedOutterLaneSideList);
+            int count = 0;
 
             //处理内环/////////
-            while (notTravelledList.Count > 0)
+            while (notTravelledList.Count > 0 && count < 4)
             {
                 var insideRingFrame = notTravelledList.GroupBy(x => x.Item1).Where(x => x.Count() == 1).Select(x => x.FirstOrDefault()).ToList();
                 var inDiffRingDict = inDifferentRing(insideRingFrame, orderedInnerLaneSideList);
@@ -73,7 +81,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     }
 
                     var orderedLaneSideList = new List<List<(Line, int)>>();
-                    
+
                     while (insideRingList.Count > 0)
                     {
                         var startLine = insideRingList[0].Item1;
@@ -97,7 +105,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
 
                 removeTravelledLane(orderedInnerLaneSideList, notTravelledList);
-
+                count = count + 1;
             }
         }
 
@@ -146,8 +154,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             orderedLaneSide.ForEach(lane =>
                 {
-                    ptOnFrame.Remove(ptOnFrame.Where(pt => pt.IsEqualTo (lane.Item1.StartPoint,new Tolerance (1,1))).FirstOrDefault());
-                    ptOnFrame.Remove(ptOnFrame.Where(pt => pt.IsEqualTo(lane.Item1.EndPoint , new Tolerance(1, 1))).FirstOrDefault());
+                    ptOnFrame.Remove(ptOnFrame.Where(pt => pt.IsEqualTo(lane.Item1.StartPoint, new Tolerance(1, 1))).FirstOrDefault());
+                    ptOnFrame.Remove(ptOnFrame.Where(pt => pt.IsEqualTo(lane.Item1.EndPoint, new Tolerance(1, 1))).FirstOrDefault());
                 });
 
             if (ptOnFrame.Count > 0)
@@ -268,7 +276,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         private static bool isStartPoint(Point3d pt, Line line, out Vector3d lineVector)
         {
             bool isStartPoint = false;
-            if (line.StartPoint.IsEqualTo(pt,new Tolerance (1,1)) )
+            if (line.StartPoint.IsEqualTo(pt, new Tolerance(1, 1)))
             {
                 lineVector = line.EndPoint - line.StartPoint;
                 isStartPoint = true;
@@ -326,7 +334,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             foreach (var ptl in pointList)
             {
-                if (ptl.Key.IsEqualTo (pt,new Tolerance (1,1)))
+                if (ptl.Key.IsEqualTo(pt, new Tolerance(1, 1)))
                 {
                     ptKey = ptl;
                     bIn = true;

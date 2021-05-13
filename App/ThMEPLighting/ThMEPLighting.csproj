@@ -41,6 +41,8 @@
     <Compile Include="EmgLightConnect\Service\ConnectSingleSideService.cs" />
     <Compile Include="EmgLightConnect\Service\frameAnalysisService.cs" />
     <Compile Include="EmgLightConnect\Service\InsertConnectLineService.cs" />
+    <Compile Include="EmgLightConnect\Service\mergeOneMainBlkSideService.cs" />
+    <Compile Include="EmgLightConnect\Service\mergeOneSecBlkSideService.cs" />
     <Compile Include="EmgLight\Common\EmgBlkType.cs" />
     <Compile Include="EmgLight\Common\GetBlockService.cs" />
     <Compile Include="EmgLightConnect\Service\graphService.cs" />

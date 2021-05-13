@@ -13,7 +13,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class connectSingleSideBlkService
     {
-        public static void connectMainToMain(List<ThSingleSideBlocks> singleSideBlocks)
+        public static void regroupMainSec(List<ThSingleSideBlocks> singleSideBlocks)
         {
             for (int i = 0; i < singleSideBlocks.Count; i++)
             {
@@ -21,9 +21,18 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 if (side.Count > 0)
                 {
                     regroupMainSec(side);
-
                     side.orderReMainBlk();
+                }
+            }
+        }
 
+        public static void connectMainToMain(List<ThSingleSideBlocks> singleSideBlocks)
+        {
+            for (int i = 0; i < singleSideBlocks.Count; i++)
+            {
+                var side = singleSideBlocks[i];
+                if (side.Count > 0)
+                {
                     for (int j = 1; j < side.reMainBlk.Count; j++)
                     {
                         side.connectPt(side.reMainBlk[j - 1], side.reMainBlk[j]);
@@ -39,30 +48,38 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var allBlk = side.getTotalBlock();
 
             var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
+            var laneEndPt = side.laneSide.Last().Item1.EndPoint.TransformBy(side.Matrix.Inverse());
 
             if (side.mainBlk.Count > 0)
             {
-                yTransValue = allBlkDict.Where(x => side.mainBlk.Contains(x.Key)).Select(x => x.Value.Y).ToList();
-
-                var YminTemp = yTransValue.Min() - EmgConnectCommon.TolRegroupMainYRange;
-                var YmaxTemp = yTransValue.Max() + EmgConnectCommon.TolRegroupMainYRange;
+               // yTransValue = allBlkDict.Where(x => side.mainBlk.Contains(x.Key) && x.Value.X > 0 && x.Value.X <= laneEndPt.X).Select(x => Math.Abs(x.Value.Y)).ToList();
+                //var yDebugDict = allBlkDict.Where(x => side.mainBlk.Contains(x.Key) && x.Value.X > 0 && x.Value.X <= laneEndPt.X).ToDictionary(x => x.Key, x => Math.Abs(x.Value.Y));
+                yTransValue = allBlkDict.Where(x => side.mainBlk.Contains(x.Key) ).Select(x => Math.Abs(x.Value.Y)).ToList();
+                var yDebugDict = allBlkDict.Where(x => side.mainBlk.Contains(x.Key) ).ToDictionary(x => x.Key, x => Math.Abs(x.Value.Y));
 
                 double Ymin = 0;
                 double YMax = 0;
 
-                if (Math.Abs(YminTemp) > Math.Abs(YmaxTemp)) //有可能是负数
-                {
-                    YMax = Math.Abs(YminTemp);
-                    Ymin = Math.Abs(YmaxTemp);
-                }
-                else
-                {
-                    Ymin = Math.Abs(YminTemp);
-                    YMax = Math.Abs(YmaxTemp);
-                }
-                regroupMain = allBlkDict.Where(x => Ymin <= Math.Abs(x.Value.Y) && Math.Abs(x.Value.Y) <= YMax).Select(x => x.Key).ToList();
+                Ymin = yTransValue.Min() - EmgConnectCommon.TolRegroupMainYRange;
+                YMax = yTransValue.Max() + EmgConnectCommon.TolRegroupMainYRange;
 
-                regroupMain.AddRange(side.mainBlk);
+                if (yTransValue.Max() - yTransValue.Min() > 2000)
+                {
+                    double ySecMean = 20000;
+                    ySecMean = yTransValue
+                               .OrderBy(x => x)
+                               .GroupBy(x => Math.Floor(x / 10))
+                               .OrderByDescending(x => x.Count())
+                               .First()
+                               .ToList()
+                               .First();
+                    Ymin = ySecMean - EmgConnectCommon.TolRegroupMainYRange;
+                    YMax = ySecMean + EmgConnectCommon.TolRegroupMainYRange;
+                }
+
+                regroupMain = allBlkDict.Where(x => Ymin <= Math.Abs(x.Value.Y) && Math.Abs(x.Value.Y) <= YMax && x.Value.X > -EmgConnectCommon.TolRegroupMainYRange && x.Value.X <= laneEndPt.X + EmgConnectCommon.TolRegroupMainYRange).Select(x => x.Key).ToList();
+
+                //regroupMain.AddRange(side.mainBlk);
                 regroupMain = regroupMain.Distinct().ToList();
             }
             else if (side.secBlk.Count > 0)
@@ -78,7 +95,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                            .ToList()
                            .First();
 
-                if (ySecMean != 20000)
+                //if (ySecMean != 20000)
+                if (ySecMean != 20000 && Math.Abs(ySecMean) > 100) //不在车道线上的点
                 {
                     regroupMain = allBlkDict.Where(x => Math.Abs(Math.Abs(x.Value.Y) - Math.Abs(ySecMean)) < EmgConnectCommon.TolRegroupMainYRange).Select(x => x.Key).ToList();
                 }
@@ -95,7 +113,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         public static void connecSecToMain(BlockReference ALE, List<ThSingleSideBlocks> singleSideBlocks, Polyline frame)
         {
-           
+
             //debug 没有main 只有sec的情况处理不了
             foreach (var side in singleSideBlocks)
             {

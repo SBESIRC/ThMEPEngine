@@ -155,7 +155,7 @@ namespace ThMEPLighting
 
                 //确定位移中心
                 var centerPt = ALEOri.Position;
-                if (centerPt.X < 10E7)
+                if (Math.Abs(centerPt.X) < 10E7)
                 {
                     centerPt = new Point3d();
                 }
@@ -219,6 +219,10 @@ namespace ThMEPLighting
                     //获取车道线
                     var mergedOrderedLane = GetSourceDataService.BuildLanes(shrinkFrame, bufferFrame, acdb, transformer);
 
+                    if (mergedOrderedLane.Count == 0 || (blockList[EmgBlkType.BlockType.emgLight].Count == 0 && blockList[EmgBlkType.BlockType.evac].Count == 0 && blockList[EmgBlkType.BlockType.otherSecBlk].Count == 0))
+                    {
+                        return;
+                    }
                     var connectLine = ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame, nHoles);
 
                     ConnectEmgLightEngine.ResetResult(ref connectLine, transformer);

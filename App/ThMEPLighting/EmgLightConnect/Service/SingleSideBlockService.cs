@@ -47,13 +47,12 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     {
                         //check direction
 
-                        var evacR = evac.First().Rotation;
-                        //var emgR = emgPt.Rotation;
+                        var evacRA = evac.First().Rotation;
+                        var evacR = Vector3d.YAxis.RotateBy(evacRA, Vector3d.ZAxis).GetNormal().GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis);
                         var evacEmgR = (emgPt.Position - evac.First().Position).GetNormal().GetAngleTo(Vector3d.YAxis, Vector3d.ZAxis);
 
                         var CosAngle = Math.Cos(evacR - evacEmgR);
 
-                        
                         ////角度在20 以内
                         if (Math.Abs(CosAngle) > Math.Cos(20 * Math.PI / 180))
                         {

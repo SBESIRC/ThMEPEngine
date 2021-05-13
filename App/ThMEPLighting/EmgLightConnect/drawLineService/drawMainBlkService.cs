@@ -31,10 +31,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     var movedline = moveLane(side, frame);
 
-                    //生成小支管
-                    //确定连接点
-                    //如果project 点在 图块obb（外扩一点点）内（线穿过图框）， 穿过框线边的点
-                    //如果project 点在 图块obb 外 找最近的点
+                   
                     for (int i = 1; i < side.reMainBlk.Count; i++)
                     {
                         var prevPt = side.reMainBlk[i - 1];
@@ -209,9 +206,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 movelanePolygon.AddVertexAt(movelanePolygon.NumberOfVertices, moveLineTemp.GetPoint2dAt(i), 0, 0, 0);
             }
             movelanePolygon.Closed = true;
-            ThCADCoreNTSRelate relation = new ThCADCoreNTSRelate(movelanePolygon, frame);
+           
+            //DrawUtils.ShowGeometry(movelanePolygon, "l0test");
 
-            if (relation.IsOverlaps)
+            var pts =  moveLine.Intersect (frame, Intersect.OnBothOperands);
+            if (pts.Count >0)
             {
                 var polyCollection = new DBObjectCollection() { frame };
                 var overlap = movelanePolygon.Intersection(polyCollection);
@@ -219,6 +218,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 if (overlap.Count > 0)
                 {
                     var overlapPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
+
+                    //DrawUtils.ShowGeometry(overlapPoly, "l0test", Color.FromColorIndex(ColorMethod.ByColor,40));
+
                     double newOffsetTemp = 200000;
                     for (int i = 0; i < overlapPoly.NumberOfVertices; i++)
                     {

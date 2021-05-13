@@ -16,13 +16,9 @@ namespace ThMEPLighting.EmgLightConnect
 {
     public class ConnectEmgLightEngine
     {
-        public static List<Polyline> ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame,List<Polyline> holes)
+        public static List<Polyline> ConnectLight(List<List<Line>> mergedOrderedLane, Dictionary<EmgBlkType.BlockType, List<BlockReference>> blockSourceList, Polyline frame, List<Polyline> holes)
         {
 
-            //if (emgLightList.Count == 0 && evacList.Count == 0 && emgExitList.Count == 0)
-            //{
-            //    return;
-            //}
 
             ////单侧车道灯
             //block块分主副组。主：应急灯和疏散灯。 副：出口灯其他块
@@ -54,18 +50,22 @@ namespace ThMEPLighting.EmgLightConnect
             MergeSideService.mergeSide(orderedAllLaneSideList, out var sideDict);
             MergeSideService.mergeSigleSideBlocks(sideDict, singleSideBlocks);
 
-            ConnectSingleSideService.forDebugLaneSideNo (singleSideBlocks);
+            ConnectSingleSideService.forDebugLaneSideNo(singleSideBlocks);
 
             //车道道路成图
             graphService.createOutterGraph(orderedAllLaneSideList[0], sideDict, singleSideBlocks, out var sideGraph);
             graphService.createInnerGraph(orderedAllLaneSideList, sideDict, sideGraph);
 
-            MergeSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
+            mergeOneMainBlkSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
+            mergeOneSecBlkSideService.mergeOneSecBlockSide(singleSideBlocks);
 
             //连线数据
             var ALE = blockSourceList[EmgBlkType.BlockType.ale].First();
+           
+            connectSingleSideBlkService.regroupMainSec(singleSideBlocks);
             connectSingleSideBlkService.connectMainToMain(singleSideBlocks);
-            MergeSideService.relocateSecBlockSide(singleSideBlocks);
+            mergeOneSecBlkSideService.relocateSecBlockSide(singleSideBlocks);
+            //mergeOneSecBlkSideService.relocateSecBlockSideOri(singleSideBlocks);
             connectSingleSideBlkService.connecSecToMain(ALE, singleSideBlocks, frame);
 
             ////////debug 打图，要删
@@ -91,7 +91,6 @@ namespace ThMEPLighting.EmgLightConnect
             ////////
 
             ////组内连线
-            
             var connectList = connectSingleSideInGroupService.connectAllSingleSide(ALE, OptimalGroupBlocks);
 
             ////////debug 打图，要删
@@ -100,7 +99,7 @@ namespace ThMEPLighting.EmgLightConnect
             //连线
             List<Polyline> linkLine = new List<Polyline>();
             var mainLink = drawMainBlkService.drawMainToMain(singleSideBlocks, blkSource, frame, out var blkList, ref linkLine);
-            var secLink = drawSecBlkService.drawSecToMain(singleSideBlocks, frame, blkList, ref linkLine,holes);
+            var secLink = drawSecBlkService.drawSecToMain(singleSideBlocks, frame, blkList, ref linkLine, holes);
             var groupLink = drawSecBlkService.drawGroupToGroup(connectList, frame, blkList, ref linkLine);
 
             DrawUtils.ShowGeometry(mainLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 130));
@@ -114,12 +113,12 @@ namespace ThMEPLighting.EmgLightConnect
             return newLink;
         }
 
-        public static void ResetResult(ref List <Polyline> newLink, ThMEPOriginTransformer transformer)
+        public static void ResetResult(ref List<Polyline> newLink, ThMEPOriginTransformer transformer)
         {
             newLink.ForEach(x =>
             {
                 transformer.Reset(x);
-                
+
             });
 
         }
