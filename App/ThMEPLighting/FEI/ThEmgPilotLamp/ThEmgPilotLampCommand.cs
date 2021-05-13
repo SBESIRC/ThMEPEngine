@@ -97,7 +97,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     EmgPilotLampLineNode lampLineNode = new EmgPilotLampLineNode(laneLines, exitLines, enterBlcok);
 
                     //获取墙柱信息
-                    primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
+                    primitivesService.GetStructureInfo(pline.Key.Buffer(40)[0] as Polyline, out List<Polyline> columns, out List<Polyline> walls);
 
                     //根据这些线信息，拐点到出口的数据进行计算布置的点信息
                     IndicatorLight indicator = new IndicatorLight();
