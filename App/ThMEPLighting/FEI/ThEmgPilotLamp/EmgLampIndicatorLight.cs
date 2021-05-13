@@ -833,7 +833,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             break;
                         }
                     }
-                    endPoint = startPt + lineInfo.lineDir.MultiplyBy(maxDis < 100?1000:maxDis);
+                    endPoint = startPt + lineInfo.lineDir.MultiplyBy(maxDis < 2000?step:maxDis);
                 }
                 startPt = endPoint;
                 endPoint = startPt + lineInfo.lineDir.MultiplyBy(step);
@@ -1270,7 +1270,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 foreach (var item in lines) 
                 {
                     var dot= lineDir.DotProduct(item.LineDirection());
-                    if (Math.Abs(dot) < 0.3)
+                    if (Math.Abs(dot) < 0.5)
                         continue;
                     outDir = item.LineDirection().CrossProduct(normal).GetNormal();
                     if (dot < 0)
@@ -1294,10 +1294,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
                 //判断布置边是否符合要求
                 //将线外平移一定距离，判断是否可有其它相交
-                var newSp = targetLine.StartPoint + outDir.MultiplyBy(10);
-                var newEp = targetLine.EndPoint + outDir.MultiplyBy(10);
+                var newSp = targetLine.StartPoint + outDir.MultiplyBy(20);
+                var newEp = targetLine.EndPoint + outDir.MultiplyBy(20);
                 var newLine = new Line(newSp, newEp);
-                var targetPoly = LineToPolyline(newLine, outDir, 10);
+                var targetPoly = LineToPolyline(newLine, outDir, 20);
                 //如果穿外框线，不满足要去
                 //如果移动后还和墙相交也需要
                 var objs = new DBObjectCollection();
@@ -1430,8 +1430,12 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     createPoint = nodePoint;
                     if (nextRoute != null)
                     {
-                        exitDir = (nextRoute.node.nodePoint - endRoute.node.nodePoint).GetNormal();
+                        var dirVector = nextRoute.node.nodePoint - endRoute.node.nodePoint;
+                        exitDir = dirVector.GetNormal();
+
                         var dot = pDir.DotProduct(exitDir);
+                        if (dirVector.Length < 2500)
+                            exitDir = (line.EndPoint - line.StartPoint).GetNormal();
                         if (dot < 0)
                         {
                             exitDir = (line.EndPoint - line.StartPoint).GetNormal();
@@ -1612,6 +1616,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             currentRoute.nextRoute = InitRouteByPoints(nextPts, currentRoute);
             return currentRoute;
         }
+
+
     }
    
 }
