@@ -28,6 +28,9 @@
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="TianHua.Publics.BaseCode">
+      <HintPath>..\..\Externals\TianHua.Publics\TianHua.Publics.BaseCode.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Algorithm\AStarAlgorithm\AdjustAStarPath.cs" />
@@ -126,12 +129,15 @@
     <Compile Include="Engine\ThRoomOutlineBuilderEngine.cs" />
     <Compile Include="Engine\ThSpatialElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThSpatialElementExtractor.cs" />
+    <Compile Include="Engine\ThStoreysRecognitionEngine.cs" />
     <Compile Include="Interface\IBuffer.cs" />
     <Compile Include="Interface\IBuildArea.cs" />
     <Compile Include="Interface\IExplode.cs" />
     <Compile Include="Interface\IPolygonize.cs" />
     <Compile Include="Interface\ISimilarityMeasure.cs" />
     <Compile Include="Interface\ISpatialIndex.cs" />
+    <Compile Include="Model\Common\ThPipeCommon.cs" />
+    <Compile Include="Model\Common\ThStoreys.cs" />
     <Compile Include="Model\ThIfcAnnotation.cs" />
     <Compile Include="Model\ThIfcLineFoot.cs" />
     <Compile Include="Model\ThIfcOpening.cs" />
