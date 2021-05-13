@@ -44,6 +44,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// 出口类型
         /// </summary>
         public int endType { get; set; }
+        public bool canDelete { get; set; }
         /// <summary>
         /// 在线的那一侧
         /// </summary>
@@ -85,6 +86,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             this.directionSide = sideCreateDir;
             this.sideLineDir = lineSide;
             this.nearNode = node;
+            this.canDelete = true;
             this.isHoisting = hoisting;
             this.direction = exitDir;
         }

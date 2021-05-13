@@ -76,10 +76,16 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     var dis = column.First().Value - wall.First().Value;
                     if (Math.Abs(dis) < 2000)
                         layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
-                    else if(column.First().Value < wall.First().Value)
+                    else if (column.First().Value < wall.First().Value)
                         layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
                     else
-                        layoutInfo = GetColumnLayoutPoint(wall.First().Key, pt, dir);
+                    {
+                        layoutInfo = GetWallLayoutPoint(wall.First().Key, pt, dir);
+                        if (layoutInfo == null && column.Count > 0)
+                        {
+                            layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
+                        }
+                    }
                 }
                 else if (wall.Count < 1)
                 {
@@ -123,16 +129,17 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             Point3d sPt = layoutLine.StartPoint;
             Point3d ePt = layoutLine.EndPoint;
             Vector3d moveDir = (ePt - sPt).GetNormal();
-
+            if (layoutLine.Length < minWidth)
+                return null;
             //计算排布点
             var layoutPt = closetPt;
             if (sPt.DistanceTo(layoutPt) < minWidth)
             {
-                layoutPt = layoutPt + moveDir * (minWidth - sPt.DistanceTo(layoutPt));
+                layoutPt = layoutPt + moveDir * (minWidth/2 - sPt.DistanceTo(layoutPt));
             }
             if (ePt.DistanceTo(layoutPt) < minWidth)
             {
-                layoutPt = layoutPt - moveDir * (minWidth - ePt.DistanceTo(layoutPt));
+                layoutPt = layoutPt - moveDir * (minWidth/2 - ePt.DistanceTo(layoutPt));
             }
             //计算排布方向
             var layoutDir = Vector3d.ZAxis.CrossProduct((ePt - sPt).GetNormal());
