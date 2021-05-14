@@ -30,11 +30,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
             var objs = new DBObjectCollection();
             laneLines.ForEach(x => objs.Add(x));
-            _laneLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 1500, 2.0, 1500.0, Math.PI / 180.0).Cast<Curve>().ToList();
+            _laneLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 1500, 200.0, 1500, Math.PI / 180.0).Cast<Curve>().ToList();
 
             objs = new DBObjectCollection();
             exitLines.ForEach(x => objs.Add(x));
-            _exitLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 1500, 2.0, 1500.0, Math.PI / 180.0).Cast<Curve>().ToList();
+            _exitLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 1500, 200.0, 1500, Math.PI / 180.0).Cast<Curve>().ToList();
 
             _exitBlocks = exitBlocks;
 
@@ -113,7 +113,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 {
                     var node = new GraphNode();
                     node.nodePoint = sp;
-                    if (PointIsExit(sp, out int exitType,300))
+                    if (PointIsExit(sp, out int exitType,450))
                     {
                         node.isExit = true;
                         node.nodeType = exitType;
@@ -128,7 +128,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 {
                     var node = new GraphNode();
                     node.nodePoint = ep;
-                    if (PointIsExit(ep, out int exitType, 300))
+                    if (PointIsExit(ep, out int exitType, 450))
                     {
                         node.isExit = true;
                         node.nodeType = exitType;
@@ -196,7 +196,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (isExit)
                     break;
                 //遍历，获取一定距离内的出口块
-                var dis = item.Position.DistanceTo(pt);
+                var point3dZ0 = new Point3d(item.Position.X, item.Position.Y, 0);
+                var dis = point3dZ0.DistanceTo(pt);
                 if (dis > maxDis)
                     continue;
                 switch (item.Name)
