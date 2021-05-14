@@ -89,15 +89,28 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
                     //获取出口块信息
                     var enterBlcok = primitivesService.GetEvacuationExitBlock(pline.Key);
+                    //foreach (var item in enterBlcok)
+                    //{
+                    //    PointToView(acdb, originTransformer, item.Position);
+                    //    //item.Position
+                    //}
+                    //return;
                     List<Curve> laneLines = new List<Curve>();
                     mainLines.ForEach(c => laneLines.Add(c));
                     assitLines.ForEach(c => laneLines.Add(c));
                     assitHostLines.ForEach(c => laneLines.Add(c));
                     //step1 根据线，出口信息计算，所有拐点到最近出口的位置
                     EmgPilotLampLineNode lampLineNode = new EmgPilotLampLineNode(laneLines, exitLines, enterBlcok);
-
+                    //foreach (var item in lampLineNode.allNodes) 
+                    //{
+                    //    continue;
+                    //    if (item.isExit)
+                    //        continue;
+                    //    PointToView(acdb, originTransformer, item.nodePoint);
+                    //}
+                    //return;
                     //获取墙柱信息
-                    primitivesService.GetStructureInfo(pline.Key.Buffer(40)[0] as Polyline, out List<Polyline> columns, out List<Polyline> walls);
+                    primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
 
                     //根据这些线信息，拐点到出口的数据进行计算布置的点信息
                     IndicatorLight indicator = new IndicatorLight();
