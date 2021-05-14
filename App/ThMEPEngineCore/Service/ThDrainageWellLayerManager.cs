@@ -32,7 +32,8 @@ namespace ThMEPEngineCore.Service
             {
                 return false;
             }
-            return patterns[0] == "STRU" && patterns[1] == "DICH" && patterns[2] == "AE";
+            return (patterns[0] == "STRU" && patterns[1] == "DICH" && patterns[2] == "AE") ||
+                (patterns[0] == "ARCH" && patterns[1] == "DICH" && patterns[2] == "AE");
         }
     }
 }

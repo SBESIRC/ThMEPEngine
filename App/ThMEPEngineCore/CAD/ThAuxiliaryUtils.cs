@@ -94,7 +94,7 @@ namespace ThMEPEngineCore.CAD
         {
             //支持Line,Polyline,Arc,Circle
             var lines = new List<Line>();
-            foreach (Curve curve in curves)
+            foreach (Entity curve in curves)
             {
                 if (curve is Line line)
                 {
@@ -123,6 +123,12 @@ namespace ThMEPEngineCore.CAD
                     var entitySet = new DBObjectCollection();
                     polyline.Explode(entitySet);
                     lines.AddRange(ExplodeLines(entitySet));
+                }
+                else if(curve is Mline mLine)
+                {
+                    var mlines = new DBObjectCollection();
+                    mLine.Explode(mlines);
+                    lines.AddRange(lines.Cast<Line>());
                 }
                 else
                 {
