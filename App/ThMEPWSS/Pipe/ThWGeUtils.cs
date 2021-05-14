@@ -4,12 +4,15 @@ using System;
 using ThCADExtension;
 using System.Collections.Generic;
 using DotNetARX;
+using AcHelper;
+using Autodesk.AutoCAD.EditorInput;
+using Linq2Acad;
+using ThMEPWSS.Pipe.Model;
 
 namespace ThMEPWSS.Pipe
 {
     public class ThWGeUtils
     {
-
         public static bool Intersects(Polyline frame, Polyline poly1, Polyline poly2)
         {
             var pts = new Point3dCollection();
@@ -67,6 +70,97 @@ namespace ThMEPWSS.Pipe
             // 出结果
             var displacement = max_pointa.GetVectorTo(max_pointb);
             return poly1.GetTransformedCopy(Matrix3d.Displacement(displacement)) as Polyline;
+        }
+        public static Tuple<Point3d, Point3d> SelectPoints()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
+            Point3d leftDownPt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                leftDownPt = ptLeftRes.Value;
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
+            if (ptRightRes.Status == PromptStatus.OK)
+            {
+                return Tuple.Create(leftDownPt, ptRightRes.Value);
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+        }
+        public static Point3dCollection SelectRange()
+        {
+            var input = SelectPoints();
+            var range = new Point3dCollection();
+            range.Add(input.Item1);
+            range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
+            range.Add(input.Item2);
+            range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
+            return range;
+        }
+
+        //识别出input范围内，所有的集水井
+        public static List<Entity> GetWaterWellEntityList(Tuple<Point3d, Point3d> input, WaterWellIdentifyConfigInfo configInfo)
+        {
+            List<Entity> waterWellEntityList = new List<Entity>();
+
+            using (var database = AcadDatabase.Active())
+            {
+                var rst = Active.Editor.SelectCrossingWindow(input.Item1, input.Item2);
+
+                if (rst.Status != PromptStatus.OK)
+                    return waterWellEntityList;
+                //过滤不需要的元素
+                var object_ids = rst.Value.GetObjectIds();
+                foreach (ObjectId obj in object_ids)
+                {
+                    //通过白名单和黑名单过滤空间
+                    string identity = "集水井";
+                    foreach (string label in configInfo.BlackList)
+                    {
+                        if (identity.Contains(label))
+                        {
+                            continue;
+                        }
+                    }
+                    foreach (string label in configInfo.WhiteList)
+                    {
+                        if (identity.Contains(label))
+                        {
+                            //将该空间添加到list中
+                            break;
+                        }
+                    }
+                }
+            }
+            return waterWellEntityList;
+        }
+
+        public static List<Entity> GetEntityFromDatabase(Tuple<Point3d, Point3d> input,string mark)
+        {
+            List<Entity> entityList = new List<Entity>();
+
+            using (var database = AcadDatabase.Active())
+            {
+                var rst = Active.Editor.SelectCrossingWindow(input.Item1, input.Item2);
+                if (rst.Status != PromptStatus.OK)
+                    return entityList;
+
+                var object_ids = rst.Value.GetObjectIds();
+                foreach (ObjectId obj in object_ids)
+                {
+                    //if(图块名称与mark相同,取出来该图块)
+
+                }
+            }
+
+            return entityList;
         }
     }
 }

@@ -48,6 +48,9 @@
     <Compile Include="Bussiness\LayoutBussiness\RayLayoutService.cs" />
     <Compile Include="Bussiness\LayoutSprayByLineService.cs" />
     <Compile Include="Bussiness\SprayBlindService.cs" />
+    <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
+    <Compile Include="Command\ThCreateWaterWellPumpCmd.cs" />
+    <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceNameCmd.cs" />
@@ -90,6 +93,7 @@
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
+    <Compile Include="Pipe\Model\ThWaterWellPumpArrangement.cs" />
     <Compile Include="Pipe\Model\ThWPipeInterfaces.cs" />
     <Compile Include="Pipe\Model\ThWPipeRun.cs" />
     <Compile Include="Pipe\Model\ThWDevice.cs" />
@@ -207,6 +211,7 @@
     <Compile Include="ViewModel\DrainageViewModel.cs" />
     <Content Include="Uitl\todoList.txt" />
     <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
+    <Compile Include="ThWaterwellPumpCmds.cs" />
     <Compile Include="Uitl\JsonExtensions.cs" />
     <Compile Include="Uitl\ShadowIn2D\ShadowService.cs" />
     <Compile Include="Uitl\SprayLayoutDataUtils.cs" />
