@@ -27,7 +27,7 @@ namespace ThMEPEngineCore
 
                 // 从外参中提取房间
                 var frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                var engine = new ThRoomRecognitionEngine();
+                var engine = new ThWRoomRecognitionEngine();
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
 
                 // 输出房间

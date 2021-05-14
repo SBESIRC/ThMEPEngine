@@ -101,4 +101,39 @@
     <Style TargetType="Border">
         <Setter Property="BorderBrush" Value="{StaticResource CommonBorderColor}"/>
     </Style>
+
+    <Style TargetType="Label">
+        <Setter Property="VerticalContentAlignment" Value="Center"></Setter>
+    </Style>
+    
+    <Style TargetType="DataGridColumnHeader">
+        <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+        <Setter Property="Background" Value="#F2F2F2"></Setter>
+        <Setter Property="Foreground" Value="Black"></Setter>
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="#D5D5D5" />
+        <Setter Property="FontWeight" Value="Black"></Setter>
+        <Setter Property="Height" Value="30"></Setter>
+    </Style>
+    <Style TargetType="DataGridRow">
+        <Setter Property="VerticalContentAlignment" Value="Center"/>
+        <Style.Triggers>
+            <Trigger Property="IsSelected" Value="True">
+                <Setter Property="Background" Value="#176BD1"/>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="DataGridCell">
+        <Setter Property="HorizontalContentAlignment" Value="Center"></Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="DataGridCell">
+                    <Grid Background="Transparent" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+                        <ContentPresenter HorizontalAlignment="Stretch" VerticalAlignment="Center">
+                        </ContentPresenter>
+                    </Grid>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
 </ResourceDictionary>

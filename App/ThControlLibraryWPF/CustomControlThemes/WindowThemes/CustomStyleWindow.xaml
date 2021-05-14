@@ -112,13 +112,16 @@
     <!--窗体默认样式-->
     <!--外面窗体眼样式中尽量不要带具体的颜色，这样如果后面需要不同的主题色，可以通过只修改颜色对应的xaml就行-->
     <!--样式覆盖顺序 就近原则  1、“行内”覆盖“嵌入”，“嵌入”覆盖“外部”  2、同级别遵循“就近”  -->
+
+    <!--WPF字体模糊通病，这样设置可以使字体尽量清晰 SnapsToDevicePixels="True" FontFamily="SimSun" TextOptions.TextFormattingMode="Display"  
+    TextOptions.TextRenderingMode="ClearType" TextOptions.TextHintingMode="Fixed" UseLayoutRounding="True"-->
     <Style x:Key="CustomWindowStyle" TargetType="{x:Type local:ThCustomWindow}">
         <Setter Property="WindowStyle" Value="None"/>
         <Setter Property="AllowsTransparency" Value="True"/>
         <Setter Property="TitleBackground" Value="{DynamicResource WindowTitleBackgroundColor}"/>
         <Setter Property="TitleFontSize" Value="14"/>
         <Setter Property="FontSize" Value="12"/>
-        <Setter Property="FontFamily" Value="FontFamily"/>
+        <Setter Property="FontFamily" Value="SimSun"/>
         <Setter Property="Foreground" Value="{DynamicResource ForegroundColor}"/>
         <Setter Property="TitleFontWeight" Value="Black"/>
         <Setter Property="TitleForeground" Value="{DynamicResource WindowTitleForegroundColor}"/>
@@ -126,6 +129,11 @@
         <Setter Property="ResizeMode" Value="NoResize"/>
         <Setter Property="Icon" Value="../../Images/CADIcon.png"/>
         <Setter Property="ShowInTaskbar" Value="False"/>
+        <Setter Property="SnapsToDevicePixels" Value="True"/>
+        <Setter Property="TextOptions.TextFormattingMode" Value="Display"/>
+        <Setter Property="TextOptions.TextRenderingMode" Value="ClearType"/>
+        <Setter Property="TextOptions.TextHintingMode" Value="Fixed"></Setter>
+        <Setter Property="UseLayoutRounding" Value="True"/>
         <Setter Property="WindowChrome.WindowChrome">
             <Setter.Value>
                 <WindowChrome CornerRadius="0" CaptionHeight="30" GlassFrameThickness="0" UseAeroCaptionButtons="False" NonClientFrameEdges="None">

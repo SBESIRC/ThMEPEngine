@@ -176,7 +176,7 @@ namespace ThMEPWSS.Pipe.Engine
                     frameSpaces.Add(roofSpaces[0]);
                 }
 
-                var boundaryEngine = new ThRoomRecognitionEngine();
+                var boundaryEngine = new ThMEPEngineCore.Engine.ThWRoomRecognitionEngine();
                 boundaryEngine.RecognizeMS(acadDatabase.Database, pts);
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markEngine = new ThRoomMarkRecognitionEngine();

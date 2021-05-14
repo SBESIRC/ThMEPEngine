@@ -75,6 +75,11 @@ namespace ThMEPWSS.Pipe.Engine
 
     public class ThWCleanToolsRecongnitionEngine : ThDistributionElementRecognitionEngine
     {
+        public List<ThRawIfcDistributionElementData> Datas { get; set; }
+        public ThWCleanToolsRecongnitionEngine()
+        {
+            Datas = new List<ThRawIfcDistributionElementData>();
+        }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
             var engine = new ThDistributionElementExtractor();
@@ -90,8 +95,8 @@ namespace ThMEPWSS.Pipe.Engine
                 var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
-
-            Elements.AddRange(dbObjs.Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
+            Datas = cleanToolVisitor.Results.Where(o => dbObjs.Contains(o.Geometry)).ToList();
+            Elements.AddRange(Datas.Select(o=>o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
         }
     }
 }

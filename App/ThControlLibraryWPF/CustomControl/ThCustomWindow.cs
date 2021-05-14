@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using ThControlLibraryWPF.ControlUtils;
 using WinInterop = System.Windows.Interop;
 
 namespace ThControlLibraryWPF.CustomControl
@@ -130,6 +133,26 @@ namespace ThControlLibraryWPF.CustomControl
 
             // 解决最大化覆盖任务栏问题
             this.SourceInitialized += new EventHandler(win_SourceInitialized);
+        }
+        public bool CheckInputData()
+        {
+            //获取该页面中的Textbox进行验证是否有输入不正确的数据
+            var allTextBox = FindControlUtil.GetChildObjects<TextBox>(this, "").ToList();
+            List<string> errorMsgs = new List<string>();
+            foreach (var textBox in allTextBox)
+            {
+                var errors = Validation.GetErrors(textBox);
+                if (errors == null || errors.Count < 1)
+                    continue;
+                foreach (var error in errors)
+                {
+                    var errorStr = error.ErrorContent.ToString();
+                    if (string.IsNullOrEmpty(errorStr))
+                        continue;
+                    errorMsgs.Add(errorStr);
+                }
+            }
+            return errorMsgs.Count < 1;
         }
         /// <summary>
         /// 加载自定义窗体样式

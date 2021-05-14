@@ -488,7 +488,7 @@ namespace ThMEPEngineCore
         public void THExtractRoom()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var roomEngine = new ThRoomRecognitionEngine())
+            using (var roomEngine = new ThWRoomRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)

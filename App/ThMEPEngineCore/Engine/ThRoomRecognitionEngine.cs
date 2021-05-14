@@ -37,7 +37,7 @@ namespace ThMEPEngineCore.Engine
             Results.AddRange(visitor.Results);
         }
     }
-    public class ThRoomRecognitionEngine : ThSpatialElementRecognitionEngine
+    public class ThWRoomRecognitionEngine : ThSpatialElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {

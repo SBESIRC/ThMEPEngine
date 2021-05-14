@@ -10,7 +10,7 @@
     <SolidColorBrush x:Key="ButtonBorderColor" Color="Gray"/>
     <SolidColorBrush x:Key="ButtonBackgorudColor" Color="White"/>
     <SolidColorBrush x:Key="ButtonForegroundColor" Color="Black"/>
-    <SolidColorBrush x:Key="ButtonMouseOverBackgroundColor" Color="Blue"/>
+    <SolidColorBrush x:Key="ButtonMouseOverBackgroundColor" Color="#176BD1"/>
     <SolidColorBrush x:Key="ButtonMouseOverForegroundColor" Color="White"/>
     
     <SolidColorBrush x:Key="TextBoxBorderColor" Color="Gray"/>
@@ -19,7 +19,7 @@
 
     <SolidColorBrush x:Key="CommonBorderColor" Color="Gray"/>
 
-    <SolidColorBrush x:Key="LableTextColor" Color="Black"/>
+    <SolidColorBrush x:Key="LableTextColor" Color="#505050"/>
     <SolidColorBrush x:Key="LableBackgroundColor" Color="Transparent"/>
 
     <SolidColorBrush x:Key="RadioButtonBorderColor" Color="Gray"/>
