@@ -31,7 +31,8 @@ namespace ThMEPEngineCore.Service
             string[] patterns = rawName.ToUpper().Split('-').Reverse().ToArray();
             if (patterns.Count() == 3)
             {
-                return (patterns[0] == "CARS") && (patterns[1] == "EQPM") && (patterns[2] == "AE");
+                return ((patterns[0] == "CARS") && (patterns[1] == "EQPM") && (patterns[2] == "AE")) ||
+                    ((patterns[0] == "CAR") && (patterns[1] == "EQPM") && (patterns[2] == "AE"));
             }
             return false;
         }
