@@ -29,7 +29,7 @@ namespace ThMEPEngineCore.Engine
         {
             var visitor = new ThRoomExtractionVisitor()
             {
-                LayerFilter = ThSpaceBoundarLayerManager.CurveXrefLayers(database),
+                LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database),
             };
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
