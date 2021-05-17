@@ -228,7 +228,7 @@ namespace ThMEPLighting
 
                     ConnectEmgLightEngine.ResetResult(ref connectLine, transformer);
 
-                    //InsertConnectLineService.InsertConnectLine(connectLine);
+                    InsertConnectLineService.InsertConnectLine(connectLine);
                 }
             }
         }
