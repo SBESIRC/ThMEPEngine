@@ -253,6 +253,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         var routePts = _dijkstra.FindingMinPath(sNode.NodePt, eNode.NodePt);
                         if (null == routePts || routePts.Count < 2)
                             continue;
+                        if (routePts.LastOrDefault().DistanceTo(node.graphNode.nodePoint) > 10)
+                            continue;
                         routePts.Reverse();
                         var exitDir = (routePts[1] - routePts[0]).GetNormal();
                         var dot = exitDir.DotProduct(node.outDirection);
@@ -332,7 +334,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             nodeSideDirs = nodeSideDirs.OrderBy(c => c.Key.distanceToExit).ToDictionary(c => c.Key, c => c.Value);
             foreach (var item in nodeSideDirs) 
             {
-                if (_ligthLayouts.Any(c => c.linePoint.DistanceTo(item.Key.nodePointInLine) < 1000))
+                if (_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(item.Key.nodePointInLine) < 1000))
                     continue;
                 Point3d createPoint;
                 bool isAdd = CheckAddHosting(item.Key, item.Value, out bool isTwoSide, out createPoint);
@@ -572,6 +574,12 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             unLineDirNodes.Add(node);
                             continue;
                         }
+                        //var dot = exitDir.DotProduct(dir);
+                        //if (dot < 0.7) 
+                        //{
+                        //    unLineDirNodes.Add(node);
+                        //    continue;
+                        //}
                         var nodeInfo = new NodeDirection(node.nodePointInLine, null, GraphUtils.GetRouteDisToEnd(route), node.outDirection, node.graphNode);
                         nodeInfo.inDirection.AddRange(node.inDirection);
                         liNodes.Add(nodeInfo);
@@ -622,7 +630,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 var sNode = route.node;
                 var eNode = route.nextRoute.node;
                 var dir = (eNode.nodePoint - sNode.nodePoint).GetNormal();
-                bool isExitLine = hostLines.Any(c => c != null && ThGeometryTool.IsOverlapEx(c.StartPoint, c.EndPoint, sNode.nodePoint, eNode.nodePoint));
+                bool isExitLine = hostLines.Any(c => c != null && ThGeometryTool.IsOverlapEx(c.StartPoint, c.EndPoint, sNode.nodePoint+dir.MultiplyBy(10), eNode.nodePoint - dir.MultiplyBy(10)));
+
+                if (isFirst && !isExitLine)
+                    break;
                 if (!isExitLine)
                 {
                     route = route.nextRoute;
@@ -1167,7 +1178,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 Point3d pointInLine = node.nodePoint - leftDir.MultiplyBy(dis);
                 if (pointInLine.DistanceTo(sp) + pointInLine.DistanceTo(line.EndPoint) > line.Length + 10)
                     continue;
-                List<GraphRoute> routes = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes,node, true);
+                var tempNode = _targetInfo.allNodes.Where(c => c.nodePoint.DistanceTo(node.nodePoint) < 10).FirstOrDefault();
+                List<GraphRoute> routes = GraphUtils.GetGraphNodeRoutes(_targetInfo.allNodeRoutes, tempNode, true);
                 if (null == routes || routes.Count < 1)
                     continue;
                 GraphRoute nearRoute = routes.FirstOrDefault();
