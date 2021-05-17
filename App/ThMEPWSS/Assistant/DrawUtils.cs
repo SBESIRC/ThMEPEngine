@@ -78,9 +78,16 @@ namespace ThMEPWSS.Assistant
         public static void Draw()
         {
             if (DrawingQueue.Count == 0) return;
-            using (var adb = AcadDatabase.Active())
+            try
             {
-                Draw(adb);
+                using (var adb = AcadDatabase.Active())
+                {
+                    Draw(adb);
+                }
+            }
+            finally
+            {
+                if (DrawingQueue.Count > 0) DrawingQueue.Clear();
             }
         }
 
@@ -243,7 +250,9 @@ namespace ThMEPWSS.Assistant
             var miny = lst.Select(r => r.MinY).Min();
             var maxx = lst.Select(r => r.MaxX).Max();
             var maxy = lst.Select(r => r.MaxY).Max();
-            return DrawRectLazy(new ThWGRect(minx, miny, maxx, maxy));
+            var pl = DrawRectLazy(new GRect(minx, miny, maxx, maxy));
+            pl.ConstantWidth = thickness;
+            return pl;
         }
         public static void DrawBoundaryLazy(Entity e, double thickness = 2)
         {
@@ -251,19 +260,21 @@ namespace ThMEPWSS.Assistant
         }
         public static void DrawBoundary(Database db, Entity e, double thickness)
         {
-            if (e is BlockReference br)
-            {
-                var colle = br.ExplodeToDBObjectCollection();
-                ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, colle.OfType<Entity>().ToArray());
-                foreach (Entity ent in colle)
-                {
-                    ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, ent);
-                }
-            }
-            else
-            {
-                ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, e);
-            }
+            //if (e is BlockReference br)
+            //{
+            //    var colle = br.ExplodeToDBObjectCollection();
+            //    ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, colle.OfType<Entity>().ToArray());
+            //    foreach (Entity ent in colle)
+            //    {
+            //        ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, ent);
+            //    }
+            //}
+            //else
+            //{
+            //    ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, e);
+            //}
+
+            ThMEPWSS.Uitl.DebugNs.DebugTool.DrawBoundary(db, thickness, e);
         }
         public static Polyline DrawRectLazyFromLeftButtom(Point3d leftButtom, double width, double height)
         {
@@ -273,11 +284,11 @@ namespace ThMEPWSS.Assistant
         {
             return DrawRectLazy(leftButtom, new Point3d(leftButtom.X + width, leftButtom.Y - height, leftButtom.Z));
         }
-        public static Polyline DrawLineSegment(ThWGLineSegment seg)
+        public static Polyline DrawLineSegment(GLineSegment seg)
         {
-            return DrawRectLazy(new ThWGRect(seg.Point1, seg.Point2));
+            return DrawRectLazy(new GRect(seg.StartPoint, seg.EndPoint));
         }
-        public static Polyline DrawRectLazy(ThWGRect rect)
+        public static Polyline DrawRectLazy(GRect rect)
         {
             return DrawRectLazyFromLeftTop(new Point2d(rect.MinX, rect.MaxY).ToPoint3d(), rect.Width, rect.Height);
         }
@@ -297,7 +308,7 @@ namespace ThMEPWSS.Assistant
 
             return new Point3d(x, y, 0);
         }
-        public static Circle DrawCircleLazy(ThWGRect rect)
+        public static Circle DrawCircleLazy(GRect rect)
         {
             var p1 = new Point3d(rect.MinX, rect.MinY, 0);
             var p2 = new Point3d(rect.MaxX, rect.MaxY, 0);
@@ -314,6 +325,18 @@ namespace ThMEPWSS.Assistant
                 adb.ModelSpace.Add(circle);
             });
             return circle;
+        }
+        public static Polyline DrawPolyLineLazy(params Point3d[] pts)
+        {
+            var c = new Point2dCollection();
+            foreach (var pt in pts)
+            {
+                c.Add(pt.ToPoint2d());
+            }
+            var pl = new Polyline();
+            PolylineTools.CreatePolyline(pl, c);
+            DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(pl));
+            return pl;
         }
         public static List<Line> DrawLinesLazy(params Point3d[] pts)
         {

@@ -27,14 +27,14 @@ namespace ThMEPWSS.JsonExtensionsNs
         {
             return new KeyValuePair<K, V>(t.Item1, t.Item2);
         }
-        public static ThWGRect ToThWGRect(this Extents3d extents3D)
+        public static GRect ToGRect(this Extents3d extents3D)
         {
-            return new ThWGRect(extents3D.MinPoint, extents3D.MaxPoint);
+            return new GRect(extents3D.MinPoint, extents3D.MaxPoint);
         }
     }
     public static class JsonExtensions
     {
-        public static string ToJson(this ThWGRect rect)
+        public static string ToJson(this GRect rect)
         {
             return $"[{rect.MinX},{rect.MinY},{rect.MaxX},{rect.MaxY}]";
         }
@@ -50,10 +50,10 @@ namespace ThMEPWSS.JsonExtensionsNs
             var jo = JsonConvert.DeserializeObject<JObject>(json);
             return new Point2d(jo["x"].ToObject<double>(), jo["y"].ToObject<double>());
         }
-        public static ThWGRect JsonToThWGRect(this string json)
+        public static GRect JsonToGRect(this string json)
         {
             var ja = JsonConvert.DeserializeObject<JArray>(json);
-            return new ThWGRect(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>(), ja[3].ToObject<double>());
+            return new GRect(ja[0].ToObject<double>(), ja[1].ToObject<double>(), ja[2].ToObject<double>(), ja[3].ToObject<double>());
         }
         public static string ToJson(this object obj)
         {
@@ -78,7 +78,7 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return d;
         }
-        public static Point3dCollection ToPoint3dCollection(this ThWGRect rect)
+        public static Point3dCollection ToPoint3dCollection(this GRect rect)
         {
             return (new Tuple<Point3d, Point3d>(rect.LeftTop.ToPoint3d(), rect.RightButtom.ToPoint3d())).ToPoint3dCollection();
         }

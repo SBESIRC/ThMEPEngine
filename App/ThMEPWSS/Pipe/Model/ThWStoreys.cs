@@ -2,19 +2,18 @@
 using ThCADExtension;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using TianHua.FanSelection.Function;
 using ThMEPEngineCore.Model;
-
+using ThMEPEngineCore.Model.Common;
 namespace ThMEPWSS.Pipe.Model
 {
-    public enum StoreyType
-    {
-        Unknown,
-        LargeRoof,
-        SmallRoof,
-        StandardStorey,
-        NonStandardStorey,
-    }
+    //public enum StoreyType
+    //{
+    //    Unknown,
+    //    LargeRoof,
+    //    SmallRoof,
+    //    StandardStorey,
+    //    NonStandardStorey,
+    //}
     public class ThWStoreys : ThIfcSpatialStructureElement
     {
         public ObjectId ObjectId { get; }

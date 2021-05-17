@@ -15,6 +15,7 @@ using ThMEPWSS.Uitl.DebugNs;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using DU = ThMEPWSS.Assistant.DrawUtils;
+using ThMEPEngineCore.Model.Common;
 
 namespace ThMEPWSS.Pipe.Model
 {
@@ -180,7 +181,7 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWSDWaterBucket : ThWSDDrawableElement, IEquatable<ThWSDWaterBucket>
     {
         public string Label { get; set; } = string.Empty;
-        public string DN { get; set; } = string.Empty;
+        public string DN = "DN100";
         public WaterBucketEnum Type { get; set; }
         public ThWSDStorey Storey { get; set; }
 
@@ -271,7 +272,7 @@ namespace ThMEPWSS.Pipe.Model
         /// 是否有套管
         /// </summary>
         public bool HasDrivePipe { get; set; } = false;
-
+        public bool IsLow;
         public override int GetHashCode()
         {
             return this.Label.GetHashCode() ^ DN.GetHashCode() ^ HasDrivePipe.GetHashCode();

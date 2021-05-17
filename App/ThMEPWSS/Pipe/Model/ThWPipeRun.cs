@@ -150,6 +150,11 @@ namespace ThMEPWSS.Pipe.Model
         public static void DrawRainPortLabel(Point3d basePt)
         {
             var text = "接至雨水口";
+            DrawLabel(basePt, text);
+        }
+
+        public static void DrawLabel(Point3d basePt, string text)
+        {
             var height = 300;
             var width = height * .8 * text.Length;
             var yd = new YesDraw();
@@ -161,6 +166,7 @@ namespace ThMEPWSS.Pipe.Model
             var t = DU.DrawTextLazy(text, height, pts.Last().OffsetXY(50, 50));
             Dr.SetLabelStylesForRainNote(t);
         }
+
         public static void DrawUnderBoardLabelAtLeftTop(Point3d basePt)
         {
             var text = "贴底板敷设";
@@ -200,7 +206,15 @@ namespace ThMEPWSS.Pipe.Model
         }
         public static void DrawFloorDrain(Point3d basePt)
         {
-            DU.DrawBlockReference(blkName: "*U348", basePt: basePt.OffsetY(-390), scale: 2, cb: br => DU.SetLayerAndColorIndex(ThWPipeCommon.W_RAIN_EQPM, 256, br));
+            DU.DrawBlockReference(blkName: "地漏系统", basePt: basePt.OffsetY(-390), scale: 2, cb: br =>
+            {
+                DU.SetLayerAndColorIndex(ThWPipeCommon.W_RAIN_EQPM, 256, br);
+                if (br.IsDynamicBlock)
+                {
+                    br.ObjectId.SetDynBlockValue("可见性", "普通地漏无存水弯");
+                }
+            });
+            //DU.DrawBlockReference(blkName: "*U348", basePt: basePt.OffsetY(-390), scale: 2, cb: br => DU.SetLayerAndColorIndex(ThWPipeCommon.W_RAIN_EQPM, 256, br));
         }
         public static void DrawCondensePipe(Point3d basePt)
         {
@@ -536,6 +550,11 @@ namespace ThMEPWSS.Pipe.Model
         /// </summary>
         public ThWSDCheckPoint CheckPoint { get; set; } = new ThWSDCheckPoint();
 
+        /// <summary>
+        /// 冷凝管是否要画在偏下方
+        /// </summary>
+        public bool IsLow => CondensePipes.Select(cp => cp.IsLow).FirstOrDefault();
+
         public ThWRainPipeRun()
         {
         }
@@ -709,7 +728,7 @@ namespace ThMEPWSS.Pipe.Model
                 else
                 {
                     var pt = basePt.OffsetY(ThWRainSystemDiagram.VERTICAL_STOREY_SPAN / 2);
-                    if (ctx.ThWRainPipeRun.CheckPoint.HasCheckPoint)
+                    if (ctx.ThWRainPipeRun.CheckPoint.HasCheckPoint || ctx.ThWRainPipeRun.IsLow)
                     {
                         pt = pt.OffsetY(-600);
                     }

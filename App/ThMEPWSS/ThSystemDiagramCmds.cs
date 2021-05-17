@@ -95,15 +95,6 @@ namespace ThMEPWSS
                         var DNValue = DNPropObject.GetValue(entity.AcadObject);
                         var DNString = DNValue.ToString();
                     }
-
-                    //db.ModelSpace.OfType<DBText>().ToList();
-                    //TypedValue[] tvs = new TypedValue[1]
-                    //{
-                    //    new TypedValue((int)DxfCode.Start,RXClass.GetClass(typeof(DBText)).DxfName)
-                    //};
-                    //SelectionFilter sf = new SelectionFilter(tvs);
-                    //AcHelper.Active.Editor.SelectAll(sf);
-
                 }
             }
         }

@@ -75,9 +75,9 @@ namespace ThMEPWSS.Uitl
         public double MinY;
         public double MaxX;
         public double MaxY;
-        public ThWGRect ToGRect()
+        public GRect ToGRect()
         {
-            return new ThWGRect(MinX, MinY, MaxX, MaxY);
+            return new GRect(MinX, MinY, MaxX, MaxY);
         }
         public Point3dCollection ToPoint3dCollection()
         {
@@ -100,8 +100,8 @@ namespace ThMEPWSS.Uitl
                 GeoAlgorithm.GetCornerCoodinate(pts, out double minX, out double minY, out double maxX, out double maxY);
                 return new SRect() { MinX = minX, MaxX = maxX, MinY = minY, MaxY = maxY };
             }
-            public static SRect ToSRect(this ThWGRect r) => new SRect() { MinX = r.MinX, MinY = r.MinY, MaxX = r.MaxX, MaxY = r.MaxY };
-            public static SLine ToSLine(this ThWGLineSegment seg) => new SLine() { StartPoint = seg.Point1.ToSPoint(), EndPoint = seg.Point2.ToSPoint() };
+            public static SRect ToSRect(this GRect r) => new SRect() { MinX = r.MinX, MinY = r.MinY, MaxX = r.MaxX, MaxY = r.MaxY };
+            public static SLine ToSLine(this GLineSegment seg) => new SLine() { StartPoint = seg.StartPoint.ToSPoint(), EndPoint = seg.EndPoint.ToSPoint() };
         }
         public class CircleDraw
         {
@@ -238,7 +238,7 @@ namespace ThMEPWSS.Uitl
             public double GetCurY() => curY;
             public double GetOffsetX() => maxX - minX;
             public double GetOffsetY() => maxY - minY;
-            public ThWGRect GetGRect(Point3d basePt, bool bsPtIncluded)
+            public GRect GetGRect(Point3d basePt, bool bsPtIncluded)
             {
                 List<Point3d> pts = GetPoint3ds(basePt, bsPtIncluded);
                 return GeoAlgorithm.GetGRect(pts);
@@ -335,7 +335,7 @@ namespace ThMEPWSS.Uitl
                 var r = GeoAlgorithm.GetBoundaryRect(ents);
                 var pt1 = new Point2d(r.LeftTop.X, r.LeftTop.Y);
                 var pt2 = new Point2d(r.RightButtom.X, r.RightButtom.Y);
-                var rect = new ThWGRect(pt1, pt2);
+                var rect = new GRect(pt1, pt2);
                 DrawRect(db, rect, thickness);
             }
             public static void DrawCircle(Point3d center, double radius)
@@ -399,11 +399,11 @@ namespace ThMEPWSS.Uitl
                     return circle;
                 }
             }
-            public static void DrawRect(Database db, ThWGRect rect, double thickness)
+            public static void DrawRect(Database db, GRect rect, double thickness)
             {
                 DrawRect(db, rect.LeftTop, rect.RightButtom, thickness);
             }
-            public static void DrawRect(ThWGRect rect, double thickness)
+            public static void DrawRect(GRect rect, double thickness)
             {
                 DrawRect(db, rect.LeftTop, rect.RightButtom, thickness);
             }
@@ -509,8 +509,10 @@ namespace ThMEPWSS.Uitl
             foreach (var o in objs) AddObj(o);
         }
     }
-    public struct ThWGRect
+    public struct GRect
     {
+        public bool IsNull => Equals(this, default(GRect));
+        public bool IsValid => Width > 0 && Height > 0;
         double x1;
         double y1;
         double x2;
@@ -524,37 +526,37 @@ namespace ThMEPWSS.Uitl
         public Point2d RightButtom => new Point2d(MaxX, MinY);
         public Point2d RightTop => new Point2d(MaxX, MaxY);
         public Point2d Center => new Point2d(CenterX, CenterY);
-        public ThWGRect(double x1, double y1, double x2, double y2)
+        public GRect(double x1, double y1, double x2, double y2)
         {
             this.x1 = Math.Min(x1, x2);
             this.y2 = Math.Min(y1, y2);
             this.x2 = Math.Max(x1, x2);
             this.y1 = Math.Max(y1, y2);
         }
-        public ThWGRect OffsetXY(double deltaX, double deltaY)
+        public GRect OffsetXY(double deltaX, double deltaY)
         {
-            return new ThWGRect(this.MinX + deltaX, this.MinY + deltaY, this.MaxX + deltaX, this.MaxY + deltaY);
+            return new GRect(this.MinX + deltaX, this.MinY + deltaY, this.MaxX + deltaX, this.MaxY + deltaY);
         }
-        public static ThWGRect Create(Point3dCollection points)
+        public static GRect Create(Point3dCollection points)
         {
             var pts = points.Cast<Point3d>();
-            return new ThWGRect(pts.Select(x => x.X).Min(), pts.Select(x => x.Y).Min(), pts.Select(x => x.X).Max(), pts.Select(x => x.Y).Max());
+            return new GRect(pts.Select(x => x.X).Min(), pts.Select(x => x.Y).Min(), pts.Select(x => x.X).Max(), pts.Select(x => x.Y).Max());
         }
-        public static ThWGRect Create(Extents3d ext)
+        public static GRect Create(Extents3d ext)
         {
-            return new ThWGRect(ext.MinPoint.X, ext.MinPoint.Y, ext.MaxPoint.X, ext.MaxPoint.Y);
+            return new GRect(ext.MinPoint.X, ext.MinPoint.Y, ext.MaxPoint.X, ext.MaxPoint.Y);
         }
-        public static ThWGRect Create(Point3d pt, double ext)
+        public static GRect Create(Point3d pt, double ext)
         {
-            return new ThWGRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
+            return new GRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
         }
-        public ThWGRect(Point2d leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
-        {
-        }
-        public ThWGRect(Point3d p1, Point3d p2) : this(p1.ToPoint2d(), p2.ToPoint2d())
+        public GRect(Point2d leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
         {
         }
-        public ThWGRect(Point2d p1, Point2d p2) : this(p1.X, p1.Y, p2.X, p2.Y)
+        public GRect(Point3d p1, Point3d p2) : this(p1.ToPoint2d(), p2.ToPoint2d())
+        {
+        }
+        public GRect(Point2d p1, Point2d p2) : this(p1.X, p1.Y, p2.X, p2.Y)
         {
         }
         public double Radius => Math.Sqrt(Math.Pow(Width / 2, 2) + Math.Pow(Height / 2, 2));
@@ -576,6 +578,10 @@ namespace ThMEPWSS.Uitl
                 return Math.Min(Width, Height) / 2;
             }
         }
+        public Extents2d ToExtents2d()
+        {
+            return new Extents2d(MinX, MinY, MaxX, MaxY);
+        }
         public Polyline CreateRect()
         {
             var pline = new Polyline() { Closed = true };
@@ -594,29 +600,36 @@ namespace ThMEPWSS.Uitl
         {
             return new Point3dCollection() { new Point3d(MinX, MinY, 0), new Point3d(MinX, MaxY, 0), new Point3d(MaxX, MaxY, 0), new Point3d(MaxX, MinY, 0) };
         }
-        public ThWGRect Expand(double thickness)
+        public GRect Expand(double thickness)
         {
-            return new ThWGRect(this.MinX - thickness, this.MinY - thickness, this.MaxX + thickness, this.MaxY + thickness);
+            return new GRect(this.MinX - thickness, this.MinY - thickness, this.MaxX + thickness, this.MaxY + thickness);
         }
-        public bool ContainsRect(ThWGRect rect)
+        public bool ContainsRect(GRect rect)
         {
-            return (this.MinX - rect.MinX) * (this.MaxX - rect.MaxX) <= 0 && (this.MinY - rect.MinY) * (this.MaxY - rect.MaxY) < 0;
+            return rect.MinX > this.MinX && rect.MinY > this.MinY && rect.MaxX < this.MaxX && rect.MaxY < this.MaxY;
+            //return (this.MinX - rect.MinX) * (this.MaxX - rect.MaxX) <= 0 && (this.MinY - rect.MinY) * (this.MaxY - rect.MaxY) < 0;
         }
         public bool ContainsPoint(Point2d point)
         {
             return MinX <= point.X && point.X <= MaxX && MinY <= point.Y && point.Y <= MaxY;
         }
+
+        public bool EqualsTo(GRect other,double tollerance)
+        {
+            return Math.Abs(this.MinX - other.MinX) < tollerance && Math.Abs(this.MinY - other.MinY) < tollerance
+                && Math.Abs(this.MaxX - other.MaxX) < tollerance && Math.Abs(this.MaxY - other.MaxY) < tollerance;
+        }
     }
-    public struct ThWGLineSegment
+    public struct GLineSegment
     {
-        public ThWGLineSegment(double x1, double y1, double x2, double y2)
+        public GLineSegment(double x1, double y1, double x2, double y2)
         {
             X1 = x1;
             Y1 = y1;
             X2 = x2;
             Y2 = y2;
         }
-        public ThWGLineSegment(Point2d point1, Point2d point2) : this(point1.X, point1.Y, point2.X, point2.Y)
+        public GLineSegment(Point2d point1, Point2d point2) : this(point1.X, point1.Y, point2.X, point2.Y)
         {
         }
         public bool IsValid => !(X1 == X2 && Y1 == Y2);
@@ -624,14 +637,14 @@ namespace ThMEPWSS.Uitl
         public double Y1 { get; }
         public double X2 { get; }
         public double Y2 { get; }
-        public Point2d Point1 { get => new Point2d(X1, Y1); }
-        public Point2d Point2 { get => new Point2d(X2, Y2); }
-        public double Length => GeoAlgorithm.Distance(Point1, Point2);
+        public Point2d StartPoint { get => new Point2d(X1, Y1); }
+        public Point2d EndPoint { get => new Point2d(X2, Y2); }
+        public double Length => GeoAlgorithm.Distance(StartPoint, EndPoint);
         public double MinX => Math.Min(X1, X2);
         public double MaxX => Math.Max(X1, X2);
         public double MinY => Math.Min(Y1, Y2);
         public double MaxY => Math.Max(Y1, Y2);
-        public double AngleDegree => GeoAlgorithm.AngleToDegree((Point2 - Point1).Angle);
+        public double AngleDegree => GeoAlgorithm.AngleToDegree((EndPoint - StartPoint).Angle);
         public bool IsVertical(double tollerance)
         {
             return Math.Abs(AngleDegree - 90) < tollerance || Math.Abs(AngleDegree - 270) < tollerance;
@@ -641,15 +654,15 @@ namespace ThMEPWSS.Uitl
         {
             return Math.Abs(AngleDegree) < tollerance || Math.Abs(AngleDegree - 180) < tollerance;
         }
-        public ThWGLine Line
+        public GLine Line
         {
             get
             {
                 if (!IsValid) return default;
-                if (X1 == X2) return new ThWGLine(1, 0, -X1);
+                if (X1 == X2) return new GLine(1, 0, -X1);
                 var k = (Y1 - Y2) / (X1 - X2);
                 var b = Y1 - k * X1;
-                return new ThWGLine(k, b);
+                return new GLine(k, b);
             }
         }
         public bool IsPointOnMe(Point2d point, double tollerance)
@@ -665,23 +678,23 @@ namespace ThMEPWSS.Uitl
             {
                 return this.Line.GetDistance(point);
             }
-            return Math.Max(Point1.GetDistanceTo(point), Point2.GetDistanceTo(point));
+            return Math.Max(StartPoint.GetDistanceTo(point), EndPoint.GetDistanceTo(point));
         }
     }
-    public struct ThWGLine
+    public struct GLine
     {
         public double A;
         public double B;
         public double C;
         public bool IsNull => object.Equals(this, default);
         public bool IsValid => !IsNull;
-        public ThWGLine(double a, double b, double c)
+        public GLine(double a, double b, double c)
         {
             A = a;
             B = b;
             C = c;
         }
-        public ThWGLine(double k, double b) : this(k, -1, b)
+        public GLine(double k, double b) : this(k, -1, b)
         {
         }
         public double k => -A / B;
@@ -709,13 +722,13 @@ namespace ThMEPWSS.Uitl
         {
             return Math.Abs(k) < tollerance;
         }
-        public bool IsParallel(ThWGLine line2, double tollerance)
+        public bool IsParallel(GLine line2, double tollerance)
         {
             if (this.IsVertical(tollerance) && line2.IsVertical(tollerance)) return true;
             if (Math.Abs(this.k - line2.k) < tollerance) return true;
             return false;
         }
-        public Point2d GetCrossPoint(ThWGLine line2)
+        public Point2d GetCrossPoint(GLine line2)
         {
             var x = (line2.C / line2.B - this.C / this.B) / (this.A / this.B - line2.A / line2.B);
             var y = -this.A / this.B * x - this.C / this.B;
@@ -734,30 +747,30 @@ namespace ThMEPWSS.Uitl
             if (IsPointOnMe(point, double.Epsilon)) return point;
             return GetCrossPoint(_GetPedalLine(point));
         }
-        public ThWGLine GetPedalLine(Point2d point)
+        public GLine GetPedalLine(Point2d point)
         {
             if (IsPointOnMe(point, double.Epsilon)) return default;
             return _GetPedalLine(point);
         }
 
-        private ThWGLine _GetPedalLine(Point2d point)
+        private GLine _GetPedalLine(Point2d point)
         {
-            return new ThWGLine(B, -A, A * point.Y - B * point.X);
+            return new GLine(B, -A, A * point.Y - B * point.X);
         }
     }
-    public struct ThWGCircle
+    public struct GCircle
     {
         public double X;
         public double Y;
         public double radius;
 
-        public ThWGCircle(double x, double y, double radius)
+        public GCircle(double x, double y, double radius)
         {
             X = x;
             Y = y;
             this.radius = radius;
         }
-        public ThWGCircle(Point2d center, double radius) : this(center.X, center.Y, radius)
+        public GCircle(Point2d center, double radius) : this(center.X, center.Y, radius)
         {
         }
         public Point2d Center => new Point2d(X, Y);
@@ -774,7 +787,7 @@ namespace ThMEPWSS.Uitl
             return Math.Abs(GeoAlgorithm.Distance(point, Center) - radius) < tollerance;
         }
     }
-    public struct ThWGTriangle
+    public struct GTriangle
     {
         public double X1 { get; }
         public double Y1 { get; }
@@ -783,7 +796,7 @@ namespace ThMEPWSS.Uitl
         public double X3 { get; }
         public double Y3 { get; }
 
-        public ThWGTriangle(double x1, double y1, double x2, double y2, double x3, double y3)
+        public GTriangle(double x1, double y1, double x2, double y2, double x3, double y3)
         {
             X1 = x1;
             Y1 = y1;
@@ -795,9 +808,9 @@ namespace ThMEPWSS.Uitl
         public Point2d A => new Point2d(X1, Y1);
         public Point2d B => new Point2d(X2, Y2);
         public Point2d C => new Point2d(X2, Y3);
-        public ThWGLineSegment LineC => new ThWGLineSegment(A, B);
-        public ThWGLineSegment LineA => new ThWGLineSegment(B, C);
-        public ThWGLineSegment LineB => new ThWGLineSegment(C, A);
+        public GLineSegment LineC => new GLineSegment(A, B);
+        public GLineSegment LineA => new GLineSegment(B, C);
+        public GLineSegment LineB => new GLineSegment(C, A);
         public double c => LineC.Length;
         public double a => LineA.Length;
         public double b => LineB.Length;
@@ -966,11 +979,11 @@ namespace ThMEPWSS.Uitl
                                         (pt1.Z + pt2.Z) / 2.0);
             return midPoint;
         }
-        public static ThWGRect GetGRect(IList<Point3d> pts)
+        public static GRect GetGRect(IList<Point3d> pts)
         {
             if (pts.Count == 0) return default;
             GetCornerCoodinate(pts, out double minX, out double minY, out double maxX, out double maxY);
-            return new ThWGRect(minX, minY, maxX, maxY);
+            return new GRect(minX, minY, maxX, maxY);
         }
         public static void GetCornerCoodinate(Point3dCollection pts, out double minX, out double minY, out double maxX, out double maxY)
         {
@@ -986,7 +999,7 @@ namespace ThMEPWSS.Uitl
             maxX = pts.Select(pt => pt.X).Max();
             maxY = pts.Select(pt => pt.Y).Max();
         }
-        public static bool CanConnect(ThWGLineSegment seg1, ThWGLineSegment seg2, double dis)
+        public static bool CanConnect(GLineSegment seg1, GLineSegment seg2, double dis)
         {
             return IsLineConnected(seg1, seg2, 5) || (seg1.IsHorizontalOrVertical(5) && seg2.IsHorizontalOrVertical(5) && IsOnSameLine(seg1, seg2, 5) && GetMinConnectionDistance(seg1, seg2) < dis);
         }
@@ -999,9 +1012,9 @@ namespace ThMEPWSS.Uitl
             points.Add(new Point3d(pt2.X, pt1.Y, 0));
             return points;
         }
-        public static ThWGLineSegment ToGLineSegment(this Line line)
+        public static GLineSegment ToGLineSegment(this Line line)
         {
-            return new ThWGLineSegment(line.StartPoint.ToPoint2D(), line.EndPoint.ToPoint2D());
+            return new GLineSegment(line.StartPoint.ToPoint2D(), line.EndPoint.ToPoint2D());
         }
         public static Point2d[] GetPoint2ds(this Polyline pline)
         {
@@ -1012,19 +1025,19 @@ namespace ThMEPWSS.Uitl
             }
             return rt;
         }
-        public static double GetMinConnectionDistance(ThWGLineSegment seg1, ThWGLineSegment seg2)
+        public static double GetMinConnectionDistance(GLineSegment seg1, GLineSegment seg2)
         {
-            var p1 = seg1.Point1;
-            var p2 = seg1.Point2;
-            var p3 = seg2.Point1;
-            var p4 = seg2.Point2;
+            var p1 = seg1.StartPoint;
+            var p2 = seg1.EndPoint;
+            var p3 = seg2.StartPoint;
+            var p4 = seg2.EndPoint;
             var v1 = p3 - p1;
             var v2 = p4 - p1;
             var v3 = p3 - p2;
             var v4 = p4 - p2;
             return new Vector2d[] { v1, v2, v3, v4 }.Select(v => v.Length).Min();
         }
-        public static bool IsOnSameLine(ThWGLineSegment seg1, ThWGLineSegment seg2, double tollerance)
+        public static bool IsOnSameLine(GLineSegment seg1, GLineSegment seg2, double tollerance)
         {
             var distanceTollerance = 5;
             if (seg1.IsHorizontal(tollerance) && seg2.IsHorizontal(tollerance))
@@ -1046,10 +1059,10 @@ namespace ThMEPWSS.Uitl
             //Dbg.PrintLine(seg1.Line.k == double.NegativeInfinity);
             //Dbg.PrintLine(seg2.Line.k);
             //Dbg.PrintLine(seg2.Line.k == double.NegativeInfinity);
-            var p1 = seg1.Point1;
-            var p2 = seg1.Point2;
-            var p3 = seg2.Point1;
-            var p4 = seg2.Point2;
+            var p1 = seg1.StartPoint;
+            var p2 = seg1.EndPoint;
+            var p3 = seg2.StartPoint;
+            var p4 = seg2.EndPoint;
             bool ok;
             void Test(Vector2d v1, Vector2d v2)
             {
@@ -1074,7 +1087,7 @@ namespace ThMEPWSS.Uitl
             }
             return ok;
         }
-        public static void CollectLineSegments(IDictionary<Entity, List<ThWGLineSegment>> dict, Entity ent)
+        public static void CollectLineSegments(IDictionary<Entity, List<GLineSegment>> dict, Entity ent)
         {
             if (ent is Polyline pline)
             {
@@ -1082,13 +1095,13 @@ namespace ThMEPWSS.Uitl
             }
             else
             {
-                if (TryConvertToLineSegment(ent, out ThWGLineSegment seg))
+                if (TryConvertToLineSegment(ent, out GLineSegment seg))
                 {
-                    dict[ent] = new List<ThWGLineSegment>() { seg };
+                    dict[ent] = new List<GLineSegment>() { seg };
                 }
             }
         }
-        public static void CollectLineSegments(IList<ThWGLineSegment> list, Entity ent)
+        public static void CollectLineSegments(IList<GLineSegment> list, Entity ent)
         {
             if (ent is Polyline pline)
             {
@@ -1096,16 +1109,16 @@ namespace ThMEPWSS.Uitl
             }
             else
             {
-                if (TryConvertToLineSegment(ent, out ThWGLineSegment seg))
+                if (TryConvertToLineSegment(ent, out GLineSegment seg))
                 {
                     list.Add(seg);
                 }
             }
         }
-        public static List<ThWGLineSegment> GetLineSegments(this Polyline polyline)
+        public static List<GLineSegment> GetLineSegments(this Polyline polyline)
         {
             var n = polyline.NumberOfVertices;
-            var list = new List<ThWGLineSegment>();
+            var list = new List<GLineSegment>();
             if (n == 0 || n == 1) return list;
             Point2d pt1 = default, pt2 = default, first = polyline.GetPoint2dAt(0);
             for (int i = 0; i < n; i++)
@@ -1118,21 +1131,21 @@ namespace ThMEPWSS.Uitl
                 else
                 {
                     pt2 = pt;
-                    list.Add(new ThWGLineSegment(pt1, pt2));
+                    list.Add(new GLineSegment(pt1, pt2));
                     pt1 = pt2;
                 }
             }
             if (polyline.Closed && n > 2)
             {
-                list.Add(new ThWGLineSegment(pt2, first));
+                list.Add(new GLineSegment(pt2, first));
             }
             return list;
         }
-        public static bool TryConvertToLineSegment(Entity ent, out ThWGLineSegment lineSeg)
+        public static bool TryConvertToLineSegment(Entity ent, out GLineSegment lineSeg)
         {
             if (ent is Line line)
             {
-                lineSeg = new ThWGLineSegment(line.StartPoint.ToPoint2D(), line.EndPoint.ToPoint2D());
+                lineSeg = new GLineSegment(line.StartPoint.ToPoint2D(), line.EndPoint.ToPoint2D());
                 return true;
             }
             {
@@ -1160,7 +1173,7 @@ namespace ThMEPWSS.Uitl
                 }
                 var pt1 = (Point3d)p1.GetValue(ent);
                 var pt2 = (Point3d)p2.GetValue(ent);
-                lineSeg = new ThWGLineSegment(pt1.ToPoint2D(), pt2.ToPoint2D());
+                lineSeg = new GLineSegment(pt1.ToPoint2D(), pt2.ToPoint2D());
                 return true;
             }
         }
@@ -1181,9 +1194,9 @@ namespace ThMEPWSS.Uitl
             var pt4 = (Point3d)p4.GetValue(e2);
             return IsLineConnected(pt1, pt2, pt3, pt4, tollerance);
         }
-        public static bool IsLineConnected(ThWGLineSegment seg1, ThWGLineSegment seg2, double tollerance)
+        public static bool IsLineConnected(GLineSegment seg1, GLineSegment seg2, double tollerance)
         {
-            return IsLineConnected(seg1.Point1, seg2.Point1, seg1.Point2, seg2.Point2, tollerance);
+            return IsLineConnected(seg1.StartPoint, seg2.StartPoint, seg1.EndPoint, seg2.EndPoint, tollerance);
         }
         private static bool IsLineConnected(Point2d pt1, Point2d pt2, Point2d pt3, Point2d pt4, double tollerance)
         {
@@ -1226,7 +1239,7 @@ namespace ThMEPWSS.Uitl
         {
             return Distance(center, targetPoint) > radius;
         }
-        public static bool IsRectCross(ThWGRect r1, ThWGRect r2)
+        public static bool IsRectCross(GRect r1, GRect r2)
         {
             return IsRectCross(r1.MinX, r1.MinY, r1.MaxX, r1.MaxY, r2.MinX, r2.MinY, r2.MaxX, r2.MaxY);
         }
@@ -1234,19 +1247,19 @@ namespace ThMEPWSS.Uitl
         {
             return Math.Max(x1, x3) <= Math.Min(x2, x4) && Math.Max(y1, y3) <= Math.Min(y2, y4);
         }
-        public static ThWGRect ExpandRect(ThWGRect rect, double width)
+        public static GRect ExpandRect(GRect rect, double width)
         {
             var x1 = rect.LeftTop.X - width;
             var y1 = rect.LeftTop.Y + width;
             var x2 = rect.RightButtom.X + width;
             var y2 = rect.RightButtom.Y - width;
-            return new ThWGRect(new Point2d(Math.Min(x1, x2), Math.Max(y1, y2)),
+            return new GRect(new Point2d(Math.Min(x1, x2), Math.Max(y1, y2)),
               new Point2d(Math.Max(x1, x2), Math.Min(y1, y2)));
         }
-        public static ThWGRect GetBoundaryRect(params Entity[] ents)
+        public static GRect GetBoundaryRect(params Entity[] ents)
         {
             if (!SystemDiagramUtils.GetBoundaryRect(out double minX, out double minY, out double maxX, out double maxY, ents)) return default;
-            return new ThWGRect(minX, minY, maxX, maxY);
+            return new GRect(minX, minY, maxX, maxY);
         }
     }
     public class SystemDiagramUtils

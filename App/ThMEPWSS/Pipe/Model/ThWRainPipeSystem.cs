@@ -316,7 +316,24 @@ namespace ThMEPWSS.Pipe.Model
                     }
                 }
             }
-            DrawPipeLinesLazy(pts);
+            DU.DrawingQueue.Enqueue(adb =>
+            {
+                if (ctx.RainSystemDiagram.ScatteredOutputs.Contains(this))
+                {
+                    if (pts.Count > 0)
+                    {
+                        var i = pts.Count - 1;
+                        var pt = pts[i];
+                        pts.RemoveAt(i);
+                        pt = pt.OffsetY(150 + 120);
+                        pts.Add(pt.OffsetY(120));
+                        pts.Add(pt.OffsetX(-120));
+                        pts.Add(pt.OffsetX(-1500 + 120));
+                        pts.Add(pt.OffsetX(-1500).OffsetY(-120));
+                    }
+                }
+                DrawPipeLinesLazy(pts);
+            });
 
             //todo:组内做块
             {
@@ -364,19 +381,19 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     var m = g.First();
                     //Dbg.PrintLine($"{m.Prefix}{m.D1}-{g.First().D2}{m.Suffix}~{g.Last().D2}{m.Suffix}");
-                    yield return $"{m.Prefix}{m.D1}-{g.First().D2}{m.Suffix}~{g.Last().D2}{m.Suffix}";
+                    yield return $"{m.Prefix}{m.D1S}-{g.First().D2S}{m.Suffix}~{g.Last().D2S}{m.Suffix}";
                 }
                 else
                 {
                     var sb = new StringBuilder();
                     {
                         var m = g.First();
-                        sb.Append($"{m.Prefix}{m.D1}-");
+                        sb.Append($"{m.Prefix}{m.D1S}-");
                     }
                     for (int i = 0; i < g.Count; i++)
                     {
                         var m = g[i];
-                        sb.Append($"{m.D2}{m.Suffix}");
+                        sb.Append($"{m.D2S}{m.Suffix}");
                         if (i != g.Count - 1)
                         {
                             sb.Append(",");

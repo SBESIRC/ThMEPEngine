@@ -14,6 +14,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using ThCADExtension;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.Uitl;
@@ -76,7 +77,7 @@ namespace ThMEPWSS.Pipe.Model
                 int.TryParse(D2S, out int r); return r;
             }
         }
-        static readonly Regex re = new Regex(@"^(Y1L|Y2L|NL)(\d)\-(\d+)([a-zA-Z]*)$");
+        static readonly Regex re = new Regex(@"^(Y1L|Y2L|NL)(\w+)\-(\w+)([a-zA-Z]*)$");
         public static LabelItem Parse(string label)
         {
             if (label == null) return null;
@@ -145,6 +146,7 @@ namespace ThMEPWSS.Pipe.Model
         }
         public void InitServices(AcadDatabase acadDatabase, Point3dCollection range)
         {
+            ThMEPWSS.Pipe.Service.ThRainSystemService.ImportElementsFromStdDwg();
             thRainSystemService = new ThMEPWSS.Pipe.Service.ThRainSystemService
             {
                 adb = acadDatabase,
@@ -165,7 +167,7 @@ namespace ThMEPWSS.Pipe.Model
                 var LargeRoofVPTexts = new List<string>();
                 foreach (var s in storeys)
                 {
-                    if (s is ThWStoreys sobj)
+                    if (s is ThStoreys sobj)
                     {
                         var blk = adb.Element<BlockReference>(sobj.ObjectId);
                         var pts = blk.GeometricExtents.ToRectangle().Vertices();
@@ -324,7 +326,7 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     if (thRainSystemService.GetLabel(e) == r.MainRainPipe.Label)
                     {
-                        r.CondensePipes.Add(new ThWSDCondensePipe() { DN = "DN25" });
+                        r.CondensePipes.Add(new ThWSDCondensePipe() { DN = "DN25", IsLow = thRainSystemService.IsCondensePipeLow(e) });
                     }
                 }
             }
@@ -371,6 +373,7 @@ namespace ThMEPWSS.Pipe.Model
                 var rainPipeSystem = new ThWRoofRainPipeSystem() { VerticalPipeId = roofPipeNote };
                 var PipeRuns = new List<ThWRainPipeRun>();
                 thRainSystemService.VerticalPipeLabelToDNDict.TryGetValue(roofPipeNote, out string dn);
+                if (string.IsNullOrEmpty(dn)) dn = "DN100";
                 AddPipeRunsForRoof(roofPipeNote, rainPipeSystem, PipeRuns, dn);
                 SetCheckPoints(PipeRuns);
                 rainPipeSystem.PipeRuns = PipeRuns;
@@ -824,7 +827,6 @@ namespace ThMEPWSS.Pipe.Model
                 k++;
             }
         }
-
         private void DrawSystem<T>(Point3d basePt, List<StoreyDrawingContext> sdCtxs, int k, List<T> g) where T : ThWRainPipeSystem
         {
             var sys = g.First();
@@ -837,30 +839,13 @@ namespace ThMEPWSS.Pipe.Model
             DrawUtils.DrawTextLazy(sys.OutputType.OutputType.ToString(), 200, ctx.BasePoint.ReplaceX(ctx.OutputBasePoint.X));
             DrawOutputs(g, ctx);
         }
-        private static void DrawOutputs<T>(List<T> g, RainSystemDrawingContext ctx) where T : ThWRainPipeSystem
+        public HashSet<ThWRainPipeSystem> ScatteredOutputs = new HashSet<ThWRainPipeSystem>();
+        private void DrawOutputs<T>(List<T> g, RainSystemDrawingContext ctx) where T : ThWRainPipeSystem
         {
-            Point3d pt = ctx.BasePoint.ReplaceX(ctx.OutputBasePoint.X);
             var outputs = g.Select(p => p.OutputType).ToList();
             var pipeIds = g.Select(p => p.VerticalPipeId).ToList();
-            DrawTestData(pt, outputs, pipeIds);
-        }
-        public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
-        {
-            int i = 0, j = 0;
-            for (int k = 0; k < num; k++)
-            {
-                yield return new Point3d(basePoint.X + i * width, basePoint.Y - j * height, 0);
-                i++;
-                if (i >= maxCol)
-                {
-                    j++;
-                    i = 0;
-                }
-            }
-        }
-        private static void DrawTestData(Point3d basePt, List<ThWSDOutputType> outputs, List<string> pipeIds)
-        {
-            basePt = basePt.OffsetY(-700);
+            var _basePt = ctx.BasePoint.ReplaceX(ctx.OutputBasePoint.X);
+            var basePt = _basePt.OffsetY(-700);
             double y = basePt.Y;
             var em = GetBasePoints(basePt, 2, outputs.Count, 400, 400).GetEnumerator();
             for (int j = 0; j < outputs.Count; ++j)
@@ -869,7 +854,31 @@ namespace ThMEPWSS.Pipe.Model
                 var bsPt = em.Current;
                 y = bsPt.Y;
                 var output = outputs[j];
-                if (output.OutputType == RainOutputTypeEnum.None) continue;
+                if (output.OutputType == RainOutputTypeEnum.None)
+                {
+                    if (j == 0)
+                    {
+                        var sys = g[j];
+                        if (sys.PipeRuns.Count == 0) continue;
+                        var floor = (from r in sys.PipeRuns
+                                     where r.Storey != null
+                                     orderby ctx.RainSystemDiagram.GetStoreyIndex(r.Storey.Label)
+                                     select r.Storey.Label).First();
+                        if (floor == "1F")
+                        {
+                            Dr.DrawLabel(_basePt, "接至排水沟");
+                        }
+                        else
+                        {
+                            var pt = ctx.StoreyDrawingContexts[ctx.RainSystemDiagram.GetStoreyIndex(floor)].BasePoint.ReplaceX(_basePt.X);
+                            //Dbg.ShowWhere(pt);
+                            pt = pt.OffsetXY(-1500,150);
+                            Dr.DrawLabel(pt, "散排至" + floor);
+                            ScatteredOutputs.Add(sys);
+                        }
+                    }
+                    continue;
+                }
                 if (output.HasDrivePipe)
                 {
                     //DrawUtils.DrawTextLazy("HasDrivePipe", basePt.OffsetX(900));
@@ -879,6 +888,7 @@ namespace ThMEPWSS.Pipe.Model
                 switch (output.OutputType)
                 {
                     case RainOutputTypeEnum.None:
+
                         break;
                     case RainOutputTypeEnum.WaterWell:
                         //Dr.DrawWaterWell(pt.OffsetY(y));
@@ -908,9 +918,21 @@ namespace ThMEPWSS.Pipe.Model
                 DrawUtils.DrawTextLazy(pipeIds[j], 300, basePt.ReplaceY(y - 2000));
                 y -= 300;
             }
-
-
             //DrawUtils.DrawTextLazy(xx, 300, basePt.ReplaceY(y - 2000));
+        }
+        public static IEnumerable<Point3d> GetBasePoints(Point3d basePoint, int maxCol, int num, double width, double height)
+        {
+            int i = 0, j = 0;
+            for (int k = 0; k < num; k++)
+            {
+                yield return new Point3d(basePoint.X + i * width, basePoint.Y - j * height, 0);
+                i++;
+                if (i >= maxCol)
+                {
+                    j++;
+                    i = 0;
+                }
+            }
         }
     }
 }

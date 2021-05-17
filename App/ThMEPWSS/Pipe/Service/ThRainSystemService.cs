@@ -26,6 +26,7 @@ namespace ThMEPWSS.Pipe.Service
     using NetTopologySuite.Geometries;
     using NetTopologySuite.Index.Strtree;
     using System.Diagnostics;
+    using System.IO;
     using System.Text.RegularExpressions;
     using ThMEPWSS.Assistant;
     using ThMEPWSS.DebugNs;
@@ -778,12 +779,11 @@ namespace ThMEPWSS.Pipe.Service
         const string CONDENSE_PIPE_PREFIX = "NL";
 
         public AcadDatabase adb;
-        public Dictionary<Entity, ThWGRect> BoundaryDict = new Dictionary<Entity, ThWGRect>();
+        public Dictionary<Entity, GRect> BoundaryDict = new Dictionary<Entity, GRect>();
         public Dictionary<Entity, string> VerticalPipeDBTextDict = new Dictionary<Entity, string>();
         public List<Entity> VerticalPipeLines = new List<Entity>();
         public List<DBText> VerticalPipeDBTexts = new List<DBText>();
-        public List<BlockReference> VerticalPipes = new List<BlockReference>();
-        public List<Entity> VerticalFakePipes = new List<Entity>();
+        public List<Entity> VerticalPipes = new List<Entity>();
         public Dictionary<string, string> VerticalPipeLabelToDNDict = new Dictionary<string, string>();
         public Dictionary<Entity, string> VerticalPipeToLabelDict = new Dictionary<Entity, string>();
         public List<Tuple<Entity, Entity>> ShortConverters = new List<Tuple<Entity, Entity>>();
@@ -809,14 +809,32 @@ namespace ThMEPWSS.Pipe.Service
         {
             get
             {
-                foreach (var item in ShortConverters)
+                //IEnumerable<Entity> f()
+                //{
+                //    foreach (var item in ShortConverters)
+                //    {
+                //        yield return item.Item1;
+                //        yield return item.Item2;
+                //    }
+                //}
+                //return f().Where(x => VerticalPipeToLabelDict.ContainsKey(x));
+
+                IEnumerable<Entity> f()
                 {
-                    yield return item.Item1;
-                    yield return item.Item2;
+                    foreach (var item in ShortConverters)
+                    {
+                        yield return item.Item1;
+                        yield return item.Item2;
+                    }
                 }
+                return f().Distinct();
             }
         }
-
+        public bool IsCondensePipeLow(Entity cp)
+        {
+            cpIsLowDict.TryGetValue(cp, out bool r);
+            return r;
+        }
         bool inited;
         public class Context
         {
@@ -831,7 +849,7 @@ namespace ThMEPWSS.Pipe.Service
             d.AddObjs(VerticalPipes); foreach (var e in VerticalPipes) c.VerticalPipes.Add(d[e]);
             d.AddObjs(BoundaryDict.Keys); foreach (var kv in BoundaryDict) c.BoundaryDict[d[kv.Key]] = kv.Value.ToSRect();
             d.AddObjs(WRainLines);
-            foreach (var line in WRainLines) if (GeoAlgorithm.TryConvertToLineSegment(line, out ThWGLineSegment seg)) c.WRainLinesDict[d[line]] = seg.ToSLine();
+            foreach (var line in WRainLines) if (GeoAlgorithm.TryConvertToLineSegment(line, out GLineSegment seg)) c.WRainLinesDict[d[line]] = seg.ToSLine();
             return c;
         }
         public bool HasBrokenCondensePipe(Point3dCollection range, string id)
@@ -843,7 +861,10 @@ namespace ThMEPWSS.Pipe.Service
         {
             return wrappingEnts.Contains(e);
         }
-
+        public IEnumerable<Entity> EnumerateTianzhengElements()
+        {
+            return adb.ModelSpace.OfType<Entity>().Where(x => IsTianZhengElement(x.GetType()));
+        }
         public bool HasShortConverters(Entity ent)
         {
             //pipe only
@@ -852,7 +873,10 @@ namespace ThMEPWSS.Pipe.Service
         public bool HasLongConverters(Entity ent)
         {
             //pipe only!
-            return LongConverterPipes.Contains(ent);
+            //Dbg.ShowWhere(ent);
+            var ret = LongConverterPipes.Contains(ent) || LongPipes.Contains(ent);
+            //DU.DrawRectLazy(GeoAlgorithm.GetBoundaryRect(ent));
+            return ret;
             //pipe or nearby line
             //return WRainLinesToVerticalPipes.Any(kv => kv.Key == ent || kv.Value == ent);
         }
@@ -886,14 +910,124 @@ namespace ThMEPWSS.Pipe.Service
         {
             List<Entity> pipes = GetVerticalPipes(range);
             var pipe = _GetVerticalPipe(pipes, verticalPipeID);
-            if (pipe == null) return TranslatorTypeEnum.None;
-            if (HasShortConverters(pipe)) return TranslatorTypeEnum.Short;
-            if (HasLongConverters(pipe)) return TranslatorTypeEnum.Long;
-            if (HasGravityConverters(pipe)) return TranslatorTypeEnum.Gravity;
+            if (pipe != null)
+            {
+                if (HasShortConverters(pipe)) return TranslatorTypeEnum.Short;
+                if (HasLongConverters(pipe)) return TranslatorTypeEnum.Long;
+                if (HasGravityConverters(pipe)) return TranslatorTypeEnum.Gravity;
+            }
+          
+            foreach (var pp in _GetVerticalPipes(pipes, verticalPipeID))
+            {
+                //Dbg.ShowWhere(pp);
+                if (HasLongConverters(pp)) return TranslatorTypeEnum.Long;
+            }
+            if (hasLongConverter?.Invoke(range.ToRect(), verticalPipeID) ?? false)
+            {
+                return TranslatorTypeEnum.Long;
+            }
+          
 
             return TranslatorTypeEnum.None;
         }
-
+        public static void TempPatch(AcadDatabase adb, ThRainSystemService sv)
+        {
+            var txts = new List<Entity>();
+            foreach (var ent in sv.EnumerateTianzhengElements().ToList())
+            {
+                var lst = ent.ExplodeToDBObjectCollection().OfType<DBText>().ToList();
+                if (lst.Count == 1)
+                {
+                    var e = lst.First();
+                    txts.Add(e);
+                    //if (e.TextString == "Y1L1-2")
+                    //{
+                    //    Dbg.ShowWhere(e);
+                    //}
+                }
+            }
+            var pipes = new List<Entity>();
+            foreach (var ent in sv.EnumerateTianzhengElements().ToList())
+            {
+                if (ent.Layer == "W-RAIN-EQPM" || ent.Layer == "WP_KTN_LG")
+                {
+                    var lst = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
+                    if (lst.Count == 1)
+                    {
+                        var e = lst.First();
+                        pipes.Add(ent);
+                    }
+                    else
+                    {
+                        pipes.Add(ent);
+                        //Dbg.ShowWhere(ent);
+                    }
+                }
+            }
+            {
+                var ps = sv.VerticalPipeToLabelDict.Where(kv => !string.IsNullOrEmpty(kv.Value)).Select(kv => kv.Key).ToList();
+                pipes = pipes.Except(ps).ToList();
+            }
+            var lines = adb.ModelSpace.OfType<Line>().Where(x => x.Length > 0 && x.Layer == "W-RAIN-NOTE").Cast<Entity>().ToList();
+            var d = new Dictionary<Entity, GRect>();
+            foreach (var e in pipes.Concat(lines).Concat(txts).Distinct())
+            {
+                d[e] = GeoAlgorithm.GetBoundaryRect(e);
+            }
+            var gs = ThRainSystemService.GroupLines(lines);
+            foreach (var g in gs)
+            {
+                //DU.DrawBoundaryLazy(g.ToArray());
+                string lb = null;
+                foreach (Line e in g)
+                {
+                    var s = e.ToGLineSegment();
+                    if (s.IsHorizontal(10))
+                    {
+                        foreach (var t in txts)
+                        {
+                            var bd = d[t];
+                            if (bd.CenterY > d[e].Center.Y)
+                            {
+                                if (GeoAlgorithm.Distance(bd.Center, d[e].Center) < 500)
+                                {
+                                    lb = ((DBText)t).TextString;
+                                    //DU.DrawTextLazy(lb, bd.Center.ToPoint3d());
+                                    goto xx;
+                                }
+                            }
+                        }
+                    }
+                }
+            xx:
+                if (lb != null)
+                {
+                    var pts = new List<Point2d>(8);
+                    foreach (Line line in g)
+                    {
+                        var s = line.ToGLineSegment();
+                        pts.Add(s.StartPoint);
+                        pts.Add(s.EndPoint);
+                    }
+                    foreach (var p in pipes)
+                    {
+                        var bd = d[p];
+                        foreach (var pt in pts)
+                        {
+                            if (bd.ContainsPoint(pt))
+                            {
+                                //DU.DrawTextLazy(lb, bd.Center.ToPoint3d());
+                                if (!sv.VerticalPipeToLabelDict.ContainsKey(p))
+                                {
+                                    sv.VerticalPipeToLabelDict[p] = lb;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
         public List<Entity> GetVerticalPipes(Point3dCollection range)
         {
             if (!RangeToPipesDict.TryGetValue(range, out List<Entity> pipes))
@@ -903,7 +1037,13 @@ namespace ThMEPWSS.Pipe.Service
             }
             return pipes;
         }
-
+        private IEnumerable<Entity> _GetVerticalPipes(List<Entity> pipes, string id)
+        {
+            return pipes.Where(p =>
+            {
+                VerticalPipeToLabelDict.TryGetValue(p, out string lb); return lb == id;
+            });
+        }
         private Entity _GetVerticalPipe(List<Entity> pipes, string id)
         {
             return pipes.FirstOrDefault(p =>
@@ -1093,9 +1233,199 @@ namespace ThMEPWSS.Pipe.Service
             return polyline;
         }
         public ThGravityService thGravityService;
+        public static bool IsTianZhengElement(Type type)
+        {
+            return type.IsNotPublic && type.Name.StartsWith("Imp") && type.Namespace == "Autodesk.AutoCAD.DatabaseServices";
+        }
+        public List<Entity> TianZhengEntities = new List<Entity>();
+        public List<Entity> SingleTianzhengElements = new List<Entity>();
+        public void CollectTianZhengEntities()
+        {
+            TianZhengEntities.AddRange(adb.ModelSpace.OfType<Entity>().Where(x => IsTianZhengElement(x.GetType())));
+        }
+        public void ExplodeSingleTianZhengElements()
+        {
+            foreach (var e in TianZhengEntities)
+            {
+                var colle = e.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
+                if (colle.Count == 1)
+                {
+                    SingleTianzhengElements.Add(colle[0]);
+                }
+            }
+        }
+        public List<Entity> ExplodedEntities = new List<Entity>();
+        public List<Entity> vps = new List<Entity>();
+        public List<DBText> txts = new List<DBText>();
+        public void CollectExplodedEntities()
+        {
+            //void execute(int time, Entity e)
+            //{
+            //    if (e is BlockReference || IsTianZhengElement(e.GetType()))
+            //    {
+            //        if (time > 2) return;
+            //        var ents = e.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
+            //        foreach (var _e in ents)
+            //        {
+            //            execute(time + 1, _e);
+            //        }
+            //    }
+            //    ExplodedEntities.Add(e);
+            //}
+            //foreach (var ent in adb.ModelSpace.OfType<BlockReference>())
+            //{
+            //    var ents = ent.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
+            //    foreach (var e in ents)
+            //    {
+            //        execute(1, e);
+            //    }
+            //}
+            foreach (var br in adb.ModelSpace.OfType<BlockReference>())
+            {
+                //Dbg.ShowWhere(ent);
+                //var ents = ent.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
+                //foreach (var e in ents)
+                //{
+                //    ExplodedEntities.Add(e);
+                //}
+                var r = GeoAlgorithm.GetBoundaryRect(br);
+                if (r.Width > 10000 && r.Width < 60000)
+                {
+                    foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
+                    {
+                        //var r2 = GeoAlgorithm.GetBoundaryRect(e);
+                        //DU.DrawRectLazy(r2);
+                        //if (e is BlockReference br2)
+                        //{
+                        //    DU.DrawTextLazy(br2.Name, r2.RightTop.ToPoint3d());
+                        //}
+                        if (e is BlockReference br2)
+                        {
+                            if (br2.Name == "*U398")
+                            {
+                                vps.Add(br2);
+                            }
+                        }
+                        else if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                        {
+                            var lst = e.ExplodeToDBObjectCollection().OfType<DBText>().ToList();
+                            foreach (var t in lst)
+                            {
+                                txts.Add(t);
+                            }
+                        }
+                        //ExplodedEntities.Add(e);
+                    }
+                }
+            }
+
+            foreach (var br in adb.ModelSpace.OfType<BlockReference>())
+            {
+                var r = GeoAlgorithm.GetBoundaryRect(br);
+                if (r.Width > 1000 && r.Width < 60000)
+                {
+                    foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
+                    {
+                        if (e is DBText t && t.Layer == "W-RAIN-NOTE")
+                        {
+                            txts.Add(t);
+                        }
+                        else if (e is Circle c && e.Layer == "W-RAIN-EQPM")
+                        {
+                            vps.Add(e);
+                        }
+                    }
+                }
+            }
+
+            foreach (var br in adb.ModelSpace.OfType<BlockReference>().ToList())
+            {
+                var r = GeoAlgorithm.GetBoundaryRect(br);
+                if (r.Width > 10000 && r.Width < 100000)
+                {
+                    foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
+                    {
+                        if (e is Circle && e.Layer == "W-RAIN-EQPM")
+                        {
+                            vps.Add(e);
+                        }
+                        else if (e is DBText t)
+                        {
+                            txts.Add(t);
+                        }
+                    }
+                }
+            }
+
+            foreach (var br1 in adb.ModelSpace.OfType<BlockReference>().Where(e => e.Layer == "C-SHET-SHET"))
+            {
+                foreach (var br2 in br1.ExplodeToDBObjectCollection().OfType<BlockReference>())
+                {
+                    foreach (var e in br2.ExplodeToDBObjectCollection().Cast<Entity>())
+                    {
+                        if (e is DBText t)
+                        {
+                            txts.Add(t);
+                        }
+                        else if (e is Circle)
+                        {
+                            vps.Add(e);
+                        }
+                    }
+                }
+            }
+        }
+        public static void ImportElementsFromStdDwg()
+        {
+            //return;
+            var file = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板_20210125.dwg");
+            if (File.Exists(file))
+            {
+                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (AcadDatabase acadDatabase = AcadDatabase.Active())
+                using (AcadDatabase blockDb = AcadDatabase.Open(file, DwgOpenMode.ReadOnly, false))
+                {
+                    //acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("侧排雨水斗系统"));
+                    //acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("重力流雨水井编号"));
+                    //acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("$TwtSys$00000132"));
+                    ////acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("*U349"));//failed
+                    //acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("*U348"));
+                    //acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE1"), false);
+                    ////acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE2"), false);//failed
+                    //acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false);
+                    ////acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(""));
+
+
+                    var fs = new List<Action>();
+                    fs.Add(() => acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("侧排雨水斗系统")));
+                    fs.Add(() => acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("重力流雨水井编号")));
+                    fs.Add(() => acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("$TwtSys$00000132")));
+                    //fs.Add(() => acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("*U349")));
+                    //fs.Add(() => acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("*U348")));//FloorDrain
+                    fs.Add(() => acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault("地漏系统")));//FloorDrain
+
+                    fs.Add(() => acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE1"), false));
+                    //fs.Add(() => acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE2"), false));
+                    fs.Add(() => acadDatabase.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false));
+                    foreach (var f in fs)
+                    {
+                        try
+                        {
+                            f();
+                        }
+                        catch { }
+                    }
+                }
+            }
+        }
+        public List<Entity> SideWaterBuckets = new List<Entity>();
         public void InitCache()
         {
             if (inited) return;
+            CollectTianZhengEntities();
+            ExplodeSingleTianZhengElements();
+            CollectExplodedEntities();
+
             CollectVerticalPipeLines();
             CollectVerticalPipeDBTexts();
             CollectVerticalPipes();
@@ -1112,19 +1442,85 @@ namespace ThMEPWSS.Pipe.Service
 
             CollectCondensePipes();
             CollectFloorDrains();
+            CollectSideWaterBuckets();
             inited = true;
+        }
+        public void CollectSideWaterBuckets()
+        {
+            SideWaterBuckets.AddRange(EnumerateEntities<BlockReference>().Where(x => x.Name == "CYSD" || x.ToDataItem().EffectiveName == "CYSD"));
         }
 
         public List<Entity> FloorDrains = new List<Entity>();
         public void CollectFloorDrains()
         {
-            const string NAME = "地漏平面";
-            FloorDrains.AddRange(adb.ModelSpace.OfType<BlockReference>()
-             .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-             .Where(x => x.ToDataItem().EffectiveName == NAME));
+            IEnumerable<Entity> q;
+            {
+                //const string NAME = "地漏平面";
+                //q = adb.ModelSpace.OfType<BlockReference>()
+                //   .Where(e => e.ObjectId.IsValid)
+                //.Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
+                //.Where(x => x.ToDataItem().EffectiveName == NAME);
+                string strFloorDrain = "地漏";
+                q = adb.ModelSpace.OfType<BlockReference>()
+                   .Where(e => e.ObjectId.IsValid)
+                .Where(x =>
+                {
+                    if (x.IsDynamicBlock)
+                    {
+                        return x.ObjectId.GetDynBlockValue("可见性")?.Contains(strFloorDrain) ?? false;
+
+                    }
+                    else
+                    {
+                        return x.ToDataItem().EffectiveName.Contains(strFloorDrain);
+                    }
+                }
+                );
+            }
+            {
+                static bool IsFloorDrawin(BlockReference br)
+                {
+                    return br.Name == "*U400";
+                }
+                var lst = new List<Entity>();
+                foreach (var br in adb.ModelSpace.OfType<BlockReference>().ToList())
+                {
+                    var r = GeoAlgorithm.GetBoundaryRect(br);
+                    if (r.Width > 10000 && r.Width < 60000)
+                    {
+                        foreach (var e in br.ExplodeToDBObjectCollection().OfType<BlockReference>().ToList())
+                        {
+                            if (IsFloorDrawin(e))
+                            {
+                                lst.Add(e);
+                            }
+                        }
+                    }
+                }
+                foreach (var e in adb.ModelSpace.OfType<BlockReference>().ToList())
+                {
+                    if (IsFloorDrawin(e))
+                    {
+                        lst.Add(e);
+                    }
+                }
+                q = q.Concat(lst);
+            }
+            FloorDrains.AddRange(q.Distinct());
+            static GRect getRealBoundary(Entity ent)
+            {
+                var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
+                var et = ents.FirstOrDefault(e =>
+                {
+                    var m = Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(e).Width);
+                    return m == 120;
+                });
+                if (et != null) return GeoAlgorithm.GetBoundaryRect(et);
+                return GeoAlgorithm.GetBoundaryRect(ent);
+            }
             foreach (var e in FloorDrains)
             {
-                BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
+                BoundaryDict[e] = getRealBoundary(e);
             }
         }
         Dictionary<Point3dCollection, List<Entity>> RangeToWRainLinesDict = new Dictionary<Point3dCollection, List<Entity>>();
@@ -1221,12 +1617,12 @@ namespace ThMEPWSS.Pipe.Service
             WRainRealLines.AddRange(adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-PIPE"));
             foreach (var e in WRainRealLines)
             {
-                if (GeoAlgorithm.TryConvertToLineSegment(e, out ThWGLineSegment seg))
+                if (GeoAlgorithm.TryConvertToLineSegment(e, out GLineSegment seg))
                 {
-                    var line = new Line() { StartPoint = seg.Point1.ToPoint3d(), EndPoint = seg.Point2.ToPoint3d() };
+                    var line = new Line() { StartPoint = seg.StartPoint.ToPoint3d(), EndPoint = seg.EndPoint.ToPoint3d() };
                     WRainLines.Add(line);
                     WRainLinesMapping[e] = line;
-                    BoundaryDict[line] = new ThWGRect(seg.Point1, seg.Point2);
+                    BoundaryDict[line] = new GRect(seg.StartPoint, seg.EndPoint);
                 }
             }
         }
@@ -1243,13 +1639,13 @@ namespace ThMEPWSS.Pipe.Service
         public class EntitiesCollector
         {
             public List<Entity> Entities = new List<Entity>();
-            public EntitiesCollector Add<T>(IEnumerable<T> ents)where T : Entity
+            public EntitiesCollector Add<T>(IEnumerable<T> ents) where T : Entity
             {
                 Entities.AddRange(ents);
                 return this;
             }
         }
-        public static EntitiesCollector CollectEnts()=> new EntitiesCollector();
+        public static EntitiesCollector CollectEnts() => new EntitiesCollector();
         public static ThCADCoreNTSSpatialIndex BuildSpatialIndex<T>(IList<T> ents) where T : Entity
         {
             var si = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(ents.ToCollection());
@@ -1287,7 +1683,12 @@ namespace ThMEPWSS.Pipe.Service
         }
         public void CollectConnectToRainPortSymbols()
         {
-            ConnectToRainPortSymbols.AddRange(adb.ModelSpace.OfType<Spline>().Where(x => x.Layer == "W-RAIN-DIMS"));
+            IEnumerable<Entity> q = adb.ModelSpace.OfType<Spline>().Where(x => x.Layer == "W-RAIN-DIMS");
+            q = q.Concat(adb.ModelSpace.OfType<Entity>().Where(x => IsTianZhengElement(x.GetType())).Where(x =>
+            {
+                return x.ExplodeToDBObjectCollection().OfType<BlockReference>().Any(x => x.Name == "$TwtSys$00000132");
+            }));
+            ConnectToRainPortSymbols.AddRange(q.Distinct());
             foreach (var e in ConnectToRainPortSymbols)
             {
                 if (!BoundaryDict.ContainsKey(e)) BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
@@ -1321,14 +1722,231 @@ namespace ThMEPWSS.Pipe.Service
                 if (!BoundaryDict.ContainsKey(e)) BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
             }
         }
+        public void FixVPipes()
+        {
+            var d = new Dictionary<Entity, GRect>();
+            var ld = new Dictionary<Entity, string>();
+            var txts = new List<Entity>();
+            var lines = new List<Entity>();
+            var pipes = new List<Entity>();
+            foreach (var e in adb.ModelSpace.OfType<Circle>().Where(c => Convert.ToInt32(c.Radius) == 50).ToList())
+            {
+                //Dbg.ShowWhere(e);
+                pipes.Add(e);
+                d[e] = GeoAlgorithm.GetBoundaryRect(e);
+            }
+            foreach (var e in adb.ModelSpace.OfType<Entity>().Where(x => x.Layer == "W-RAIN-EQPM").Where(x => ThRainSystemService.IsTianZhengElement(x.GetType())))
+            {
+                //Dbg.ShowWhere(e);
+                pipes.Add(e);
+                d[e] = GeoAlgorithm.GetBoundaryRect(e);
+            }
+            foreach (var e in adb.ModelSpace.OfType<DBText>().ToList())
+            {
+                if (ThRainSystemService.IsWantedLabelText(e.TextString))
+                {
+                    //Dbg.ShowWhere(e);
+                    txts.Add(e);
+                    d[e] = GeoAlgorithm.GetBoundaryRect(e);
+                }
+            }
+
+            foreach (var e in adb.ModelSpace.OfType<Line>().Where(line => line.Length > 0).ToList())
+            {
+                //Dbg.ShowLine(e);
+                lines.Add(e);
+                d[e] = GeoAlgorithm.GetBoundaryRect(e);
+            }
+
+            var gs = ThRainSystemService.GroupLines(lines);
+            foreach (var g in gs)
+            {
+                //DU.DrawBoundaryLazy(g.ToArray());
+                void f()
+                {
+                    foreach (var line in g.OfType<Line>())
+                    {
+                        var seg = line.ToGLineSegment();
+                        if (seg.IsHorizontal(10))
+                        {
+                            foreach (var t in txts.OfType<DBText>())
+                            {
+                                var bd = d[t];
+                                var dt = bd.CenterY - seg.StartPoint.Y;
+                                if (dt > 0 && dt < 250)
+                                {
+                                    var x1 = Math.Min(seg.StartPoint.X, seg.EndPoint.X);
+                                    var x2 = Math.Max(seg.StartPoint.X, seg.EndPoint.X);
+                                    if (x1 < bd.CenterX && x2 > bd.CenterX)
+                                    {
+                                        var pts = g.OfType<Line>().SelectMany(line => new Point2d[] { line.StartPoint.ToPoint2d(), line.EndPoint.ToPoint2d() }).ToList();
+                                        foreach (var p in pipes)
+                                        {
+                                            foreach (var pt in pts)
+                                            {
+                                                if (d[p].ContainsPoint(pt))
+                                                {
+                                                    var lb = t.TextString;
+                                                    ld[p] = lb;
+                                                    return;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                f();
+            }
+            foreach (var pipe in pipes)
+            {
+                ld.TryGetValue(pipe, out string lb);
+                if (lb != null)
+                {
+                    //DU.DrawTextLazy(lb, d[pipe].Center.ToPoint3d());
+                    VerticalPipeToLabelDict[pipe] = lb;
+                }
+            }
+            foreach (var pipe in pipes)
+            {
+                if (!VerticalPipes.Contains(pipe)) VerticalPipes.Add(pipe);
+            }
+            foreach (var txt in txts.OfType<DBText>())
+            {
+                if (!VerticalPipeDBTexts.Contains(txt)) VerticalPipeDBTexts.Add(txt);
+            }
+            foreach (var line in lines)
+            {
+                if (!VerticalPipeLines.Contains(line)) VerticalPipeLines.Add(line);
+            }
+            foreach (var e in pipes.Concat(txts).Concat(lines))
+            {
+                BoundaryDict[e] = d[e];
+            }
+
+
+
+            var longPipes = new List<Entity>();
+            var lines2 = new List<Entity>();
+            string getLabel(Entity e)
+            {
+                ld.TryGetValue(e, out string v);
+                return v;
+            }
+            foreach (var line in adb.ModelSpace.OfType<Entity>().Where(x => x.Layer == "W-RAIN-PIPE").Where(x => ThRainSystemService.IsTianZhengElement(x.GetType())))
+            {
+                if (GeoAlgorithm.TryConvertToLineSegment(line, out GLineSegment seg))
+                {
+                    var pts = new Point2d[] { seg.StartPoint, seg.EndPoint };
+                    var ps = pipes.Where(pipe => pts.Any(pt => d[pipe].ContainsPoint(pt)));
+                    var pp1 = ps.FirstOrDefault(p => getLabel(p) != null);
+                    var pp2 = ps.FirstOrDefault(p => getLabel(p) == null);
+                    if (pp1 != null && pp2 != null)
+                    {
+                        longPipes.Add(pp1);
+                        longPipes.Add(pp2);
+                        if (!VerticalPipes.Contains(pp1)) VerticalPipes.Add(pp1);
+                        if (!VerticalPipes.Contains(pp2)) VerticalPipes.Add(pp2);
+                        VerticalPipeToLabelDict[pp2] = getLabel(pp1);
+                    }
+                }
+            }
+            foreach (var pp in longPipes)
+            {
+                //Dbg.ShowWhere(pp);
+                LongPipes.Add(pp);
+            }
+
+            IEnumerable<Entity> getLongPipes(GRect range)
+            {
+                foreach (var pp in longPipes)
+                {
+                    if (range.ContainsRect(d[pp]))
+                    {
+                        yield return pp;
+                    }
+                }
+            }
+            IEnumerable<Entity> getPipes(GRect range)
+            {
+                foreach (var pp in pipes)
+                {
+                    if (range.ContainsRect(d[pp]))
+                    {
+                        yield return pp;
+                    }
+                }
+            }
+            bool hasLongConverter(GRect range, string lb)
+            {
+                //Dbg.PrintLine(lb);
+                return getLongPipes(range).Any(pp => getLabel(pp) == lb);
+            }
+            GRect getVPipeBoundary(GRect range,string lb)
+            {
+                var pp=getPipes(range).FirstOrDefault(pp => getLabel(pp) == lb);
+                if (pp != null) return d[pp];
+                return default;
+            }
+            this.getVPipeBoundary = getVPipeBoundary;
+            getDbTexts = r =>
+            {
+                var ret= getPipes(r).Select(pp => GetLabel(pp)).Where(lb => lb != null).Distinct().ToList();
+                //Dbg.PrintLine(ret.ToJson());
+                return ret;
+            };
+            this.hasLongConverter = hasLongConverter;
+        }
+        Func<GRect, string, GRect> getVPipeBoundary;
+        Func<GRect, string, bool> hasLongConverter;
+        public List<Entity> LongPipes = new List<Entity>();
         public void CollectData()
         {
             InitCache();
             CollectVerticalPipesData();
+
             FindShortConverters();
             LabelEnts();
             //PatchForSomeCase();
             FindOutBrokenCondensePipes();
+            CalcCondensePipeIsLow();
+
+            TempPatch(adb, this);
+
+            FixVPipes();
+        }
+        Dictionary<Entity, bool> cpIsLowDict = new Dictionary<Entity, bool>();
+        public void CalcCondensePipeIsLow()
+        {
+            var sv = this;
+            var si = ThRainSystemService.BuildSpatialIndex(sv.AhTexts);
+            foreach (var cp in sv.CondensePipes)
+            {
+                var isLow = false;
+                var center = sv.BoundaryDict[cp].Center.ToPoint3d();
+                var r = center.Expand(1000).ToGRect();
+                var pl = r.CreateRect();
+                var ahs = si.SelectCrossingPolygon(pl).Cast<Entity>().ToList();
+                if (ahs.Count > 0)
+                {
+                    var si2 = ThRainSystemService.BuildSpatialIndex(ahs);
+                    var ah = si2.NearestNeighbours(center.Expand(.1).ToGRect().CreateRect(), 1).Cast<Entity>().FirstOrDefault();
+                    if (ah != null)
+                    {
+                        //Dbg.ShowWhere(ah);
+                        if (ah is MText mt)
+                        {
+                            if (mt.Contents.ToLower() == "ah1")
+                            {
+                                isLow = true;
+                            }
+                        }
+                    }
+                }
+                cpIsLowDict[cp] = isLow;
+            }
         }
         public List<KeyValuePair<Entity, Entity>> LongConverterLineToWaterBuckets = new List<KeyValuePair<Entity, Entity>>();
         public List<List<Entity>> LongConverterLineToWaterBucketsGroups;
@@ -1352,7 +1970,7 @@ namespace ThMEPWSS.Pipe.Service
             ThRainSystemService.MakePairs(GetLongConverterLinesGroup(), pairs);
             LongConverterLineToWaterBuckets.AddRange(sv.EnumerateEntities(sv.LongConverterLines, sv.WaterBuckets, 10));
             pairs.AddRange(LongConverterLineToWaterBuckets);
-            pairs.AddRange(sv.EnumerateEntities(sv.LongConverterLines, sv.VerticalPipeList, 10));
+            pairs.AddRange(sv.EnumerateEntities(sv.LongConverterLines, sv.VerticalPipes, 10));
             ThRainSystemService.GroupByBFS(groups, totalList, pairs);
             LongConverterLineToWaterBucketsGroups = groups;
         }
@@ -1366,7 +1984,7 @@ namespace ThMEPWSS.Pipe.Service
             var pls = new List<Entity>();
             foreach (var ext in WaterBuckets)
             {
-                var r = ThWGRect.Create(ext);
+                var r = GRect.Create(ext);
                 var pl = EntityFactory.CreatePolyline(r.ToPoint3dCollection());
                 pls.Add(pl);
                 BoundaryDict[pl] = r;
@@ -1553,10 +2171,32 @@ namespace ThMEPWSS.Pipe.Service
         }
         public List<string> GetDBText(Point3dCollection pts)
         {
+            return _CodeByFeng(pts);
+            //return _CodeByWang(pts);
+        }
+        private LS _CodeByFeng(Point3dCollection pts)
+        {
+            //return VerticalPipeDBTexts.OfType<DBText>().Select(e => e.TextString).ToList();
+            if (DbTextSpatialIndex == null)
+            {
+                DbTextSpatialIndex = new ThCADCore.NTS.ThCADCoreNTSSpatialIndex(VerticalPipeDBTexts.ToCollection());
+            }
+            var temps = DbTextSpatialIndex.SelectCrossingPolygon(pts).Cast<Entity>().ToList();
+            var texts = temps.OfType<DBText>().Select(e => e.TextString);
+            if (getDbTexts != null)
+            {
+                texts = texts.Concat(getDbTexts(pts.ToRect()));
+            }
+            return texts.Distinct().ToList();
+        }
+        Func<GRect, IEnumerable<string>> getDbTexts;
+        private LS _CodeByWang(Point3dCollection pts)
+        {
             var textEntities = GetDBTextEntities(pts);
-            var texts = textEntities.Select(e => (e as DBText).TextString);
+            var texts = textEntities.OfType<DBText>().Select(e => e.TextString);
             return texts.ToList();
         }
+
         public List<Entity> GetDBTextEntities(Point3dCollection pts)
         {
             if (DbTextSpatialIndex != null)
@@ -1581,6 +2221,8 @@ namespace ThMEPWSS.Pipe.Service
                         foreach (var id in psr.Value.GetObjectIds())
                             rst.Add(db.Element<Entity>(id));
                     }
+                    var lst2 = SingleTianzhengElements.OfType<DBText>().ToList();
+                    rst = rst.Union(lst2).ToList();
 
                     if (pts.Count >= 3)
                     {
@@ -1598,7 +2240,7 @@ namespace ThMEPWSS.Pipe.Service
             var rg = range.ToRect();
             foreach (var e in ents)
             {
-                if (BoundaryDict.TryGetValue(e, out ThWGRect r))
+                if (BoundaryDict.TryGetValue(e, out GRect r))
                 {
                     if (rg.ContainsRect(r))
                     {
@@ -1623,6 +2265,14 @@ namespace ThMEPWSS.Pipe.Service
                     }
                 }
             }
+            {
+                var bd = getVPipeBoundary(range.ToRect(), verticalPipeID);
+                if (bd.IsValid)
+                {
+                    outPt = bd.Center.ToPoint3d();
+                    return true;
+                }
+            }
             return false;
         }
 
@@ -1644,14 +2294,14 @@ namespace ThMEPWSS.Pipe.Service
 
 
 
-        public TranslatorTypeEnum GetTranslatorType(string verticalPipeID, ThWGRect rect)
+        public TranslatorTypeEnum GetTranslatorType(string verticalPipeID, GRect rect)
         {
             var ret = _GetTrans(verticalPipeID, rect);
             //Dbg.PrintLine("GetTranslatorType " + verticalPipeID + " " + ret);
             return ret;
         }
 
-        private TranslatorTypeEnum _GetTrans(string verticalPipeID, ThWGRect rect)
+        private TranslatorTypeEnum _GetTrans(string verticalPipeID, GRect rect)
         {
             var shortCvts = FiltEntityByRange(rect, ShortConverters.SelectMany(x => new Entity[] { x.Item1, x.Item2 })).ToList();
             foreach (var pipe in FiltEntityByRange(rect, VerticalPipeToLabelDict.Keys))
@@ -1667,11 +2317,11 @@ namespace ThMEPWSS.Pipe.Service
             return TranslatorTypeEnum.None;
         }
 
-        private IEnumerable<Entity> FiltEntityByRange(ThWGRect range, IEnumerable<Entity> ents)
+        private IEnumerable<Entity> FiltEntityByRange(GRect range, IEnumerable<Entity> ents)
         {
             foreach (var e in ents)
             {
-                if (BoundaryDict.TryGetValue(e, out ThWGRect r))
+                if (BoundaryDict.TryGetValue(e, out GRect r))
                 {
                     if (range.ContainsRect(r)) yield return e;
                 }
@@ -1756,11 +2406,12 @@ namespace ThMEPWSS.Pipe.Service
                 GroupByBFS(groups, totalList, pairs);
                 foreach (var g in groups)
                 {
+                    //DU.DrawBoundaryLazy(g.ToArray());
                     var targetPipes = SortBy2DSpacePosition(g.Where(e => this.VerticalPipes.Contains(e))).ToList();
                     var targetTexts = SortBy2DSpacePosition(g.Where(e => this.VerticalPipeDBTexts.Contains(e))).ToList();
                     if (targetPipes.Count == targetTexts.Count && targetTexts.Count > 0)
                     {
-                        setVisibilities(targetPipes.Cast<BlockReference>().ToList(), targetTexts.Cast<DBText>().ToList());
+                        setVisibilities(targetPipes, targetTexts);
                     }
                 }
                 return pairs;
@@ -1781,7 +2432,7 @@ namespace ThMEPWSS.Pipe.Service
                         {
                             var c1 = this.BoundaryDict[e1].Center;
                             var c2 = this.BoundaryDict[e2].Center;
-                            if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 150)
+                            if (c1.Y > c2.Y && GeoAlgorithm.Distance(c1, c2) < 500)
                             {
                                 yield return new KeyValuePair<Entity, Entity>(e1, e2);
                                 break;
@@ -2158,6 +2809,7 @@ namespace ThMEPWSS.Pipe.Service
             }
             return groups;
         }
+        public List<List<Entity>> LabelWRainLinesAndVerticalPipesGroups = new List<List<Entity>>();
         public void LabelWRainLinesAndVerticalPipes()
         {
             //var sv = new ThRainSystemService() { adb = adb };
@@ -2171,7 +2823,7 @@ namespace ThMEPWSS.Pipe.Service
             totalList.AddRange(sv.WRainLines);
             totalList.AddRange(sv.VerticalPipes);
             ThRainSystemService.MakePairs(GetWRainLinesGroup(), pairs);
-            WRainLinesToVerticalPipes.AddRange(sv.EnumerateEntities(sv.WRainLines, sv.VerticalPipeList, 100));
+            WRainLinesToVerticalPipes.AddRange(sv.EnumerateEntities(sv.WRainLines, sv.VerticalPipes, 100));
             pairs.AddRange(WRainLinesToVerticalPipes);
             ThRainSystemService.GroupByBFS(groups, totalList, pairs);
 
@@ -2202,10 +2854,27 @@ namespace ThMEPWSS.Pipe.Service
                         }
                     }
                 }
-                var pipes = g.Where(e => VerticalPipes.Contains(e)).ToList();
-                if (pipes.Count > 1) LongConverterPipes.AddRange(pipes);
+                var pipes = g.Where(e =>
+                {
+                    if (VerticalPipes.Contains(e))
+                    {
+                        if (sv.VerticalPipeToLabelDict.TryGetValue(e, out lb))
+                        {
+                            if (!string.IsNullOrWhiteSpace(lb)) return true;
+                        }
+                    }
+                    return false;
+                })
+                    .Where(e => BoundaryDict[e].IsValid)
+                    .ToList();
+                if (pipes.Count > 1)
+                {
+                    //DU.DrawBoundaryLazy(g.ToArray(), 100);
+                    //Dbg.ShowWhere(pipes.First());
+                    LongConverterPipes.AddRange(pipes);
+                }
             }
-
+            LabelWRainLinesAndVerticalPipesGroups = groups;
         }
         public HashSet<Entity> LongConverterPipes = new HashSet<Entity>();
         List<List<Entity>> WRainLinesGroup;
@@ -2235,7 +2904,7 @@ namespace ThMEPWSS.Pipe.Service
                     {
                         var line1 = lines[i];
                         var line2 = lines[j];
-                        if (GeoAlgorithm.TryConvertToLineSegment(line1, out ThWGLineSegment seg1) && GeoAlgorithm.TryConvertToLineSegment(line2, out ThWGLineSegment seg2))
+                        if (GeoAlgorithm.TryConvertToLineSegment(line1, out GLineSegment seg1) && GeoAlgorithm.TryConvertToLineSegment(line2, out GLineSegment seg2))
                         {
                             if (GeoAlgorithm.IsLineConnected(line1, line2))
                             {
@@ -2267,7 +2936,6 @@ namespace ThMEPWSS.Pipe.Service
             LongConverterLinesGroup ??= ThRainSystemService.GroupLines(LongConverterLines);
             return LongConverterLinesGroup;
         }
-        public List<Entity> VerticalPipeList => VerticalPipes.Cast<Entity>().ToList();
         public Func<List<Entity>, double, IEnumerable<KeyValuePair<Entity, Entity>>> EnumerateEntities(List<Entity> lines)
         {
             var mps1 = lines.Select(e => new KeyValuePair<Entity, Polyline>(e, (TryConvertToLine(e))?.Buffer(10))).ToList();
@@ -2307,7 +2975,12 @@ namespace ThMEPWSS.Pipe.Service
         }
         public bool IsRainPort(string pipeId)
         {
-            return VerticalPipeToLabelDict.Any(kv => kv.Value == pipeId && ConnectToRainPortDBTexts.Contains(kv.Key));
+            var ok = VerticalPipeToLabelDict.Any(kv => kv.Value == pipeId && ConnectToRainPortDBTexts.Contains(kv.Key));
+            if (!ok)
+            {
+                ok = VerticalPipeToLabelDict.Any(kv => kv.Value == pipeId && ConnectToRainPortSymbols.Contains(kv.Key));
+            }
+            return ok;
         }
         public bool IsWaterWell(string pipeId)
         {
@@ -2434,8 +3107,8 @@ namespace ThMEPWSS.Pipe.Service
             if (r != null) return r;
             if (e.GetType().ToString() == "Autodesk.AutoCAD.DatabaseServices.ImpCurve")
             {
-                GeoAlgorithm.TryConvertToLineSegment(e, out ThWGLineSegment seg);
-                return new Line() { StartPoint = seg.Point1.ToPoint3d(), EndPoint = seg.Point2.ToPoint3d() };
+                GeoAlgorithm.TryConvertToLineSegment(e, out GLineSegment seg);
+                return new Line() { StartPoint = seg.StartPoint.ToPoint3d(), EndPoint = seg.EndPoint.ToPoint3d() };
             }
             return r;
         }
@@ -2471,17 +3144,17 @@ namespace ThMEPWSS.Pipe.Service
             });
         }
 
-        private void setVisibilities(List<BlockReference> targetPipes, List<DBText> targetTexts)
+        private void setVisibilities(List<Entity> targetPipes, List<Entity> targetTexts)
         {
             var dnProp = "可见性1";
             for (int i = 0; i < targetPipes.Count; i++)
             {
                 var pipeEnt = targetPipes[i];
                 var dbText = targetTexts[i];
-                var label = dbText.TextString;
-                var dnText = pipeEnt.GetCustomPropertiyStrValue(dnProp);
+                var label = (dbText as DBText)?.TextString;
                 if (label != null)
                 {
+                    var dnText = (pipeEnt.ObjectId.IsValid ? pipeEnt.GetCustomPropertiyStrValue(dnProp) : null) ?? "DN100";
                     VerticalPipeLabelToDNDict[label] = dnText;
                     VerticalPipeToLabelDict[pipeEnt] = label;
                 }
@@ -2499,24 +3172,40 @@ namespace ThMEPWSS.Pipe.Service
 
         public void FindShortConverters()
         {
-
+            //foreach (var e in VerticalPipes)
+            //{
+            //    var pl=DU.DrawRectLazy(BoundaryDict[e]);
+            //    pl.ConstantWidth = 10;
+            //}
+            //return;
             var pipeBoundaries = (from pipe in VerticalPipes
                                   let boundary = BoundaryDict[pipe]
-                                  where !Equals(boundary, default(ThWGRect))
+                                  where !Equals(boundary, default(GRect))
                                   select new { pipe, boundary }).ToList();
+
+            var d = VerticalPipeToLabelDict;
             for (int i = 0; i < pipeBoundaries.Count; i++)
             {
                 for (int j = i + 1; j < pipeBoundaries.Count; j++)
                 {
                     var bd1 = pipeBoundaries[i].boundary;
                     var bd2 = pipeBoundaries[j].boundary;
-                    if (GeoAlgorithm.Distance(bd1.Center, bd2.Center) <= 5 + (bd1.Width + bd2.Width) / 2)
+                    if (!bd1.IsValid || !bd2.IsValid) continue;
+                    if (!bd1.EqualsTo(bd2, .5)) continue;
+                    //int c = 0;
+                    //if (d.ContainsKey(pipeBoundaries[i].pipe)) c++;
+                    //if (d.ContainsKey(pipeBoundaries[j].pipe)) c++;
+                    //if (c != 1) continue;
+                    var dis = GeoAlgorithm.Distance(bd1.Center, bd2.Center);
+                    var dis1 = (bd1.Width + bd2.Width) / 2;
+                    if (dis <= 5 + dis1 && dis >= dis1)
                     {
-                        ShortConverters.Add(new Tuple<Entity, Entity>(pipeBoundaries[i].pipe, pipeBoundaries[j].pipe));
+                        var pipe1 = pipeBoundaries[i].pipe;
+                        var pipe2 = pipeBoundaries[j].pipe;
+                        ShortConverters.Add(new Tuple<Entity, Entity>(pipe1, pipe2));
                     }
                 }
             }
-            var d = VerticalPipeToLabelDict;
             foreach (var item in ShortConverters)
             {
                 string v;
@@ -2524,30 +3213,119 @@ namespace ThMEPWSS.Pipe.Service
                 {
                     d[item.Item1] = v;
                 }
-                if (!d.TryGetValue(item.Item2, out v) && d.TryGetValue(item.Item1, out v))
+                else if (!d.TryGetValue(item.Item2, out v) && d.TryGetValue(item.Item1, out v))
                 {
                     d[item.Item2] = v;
                 }
             }
         }
+        IEnumerable<T> EnumerateEntities<T>() where T : Entity
+        {
+            return adb.ModelSpace.OfType<T>()
+                    .Concat(SingleTianzhengElements.OfType<T>())
+                    .Concat(ExplodedEntities.OfType<T>())
+                    .Where(e => e != null && e.ObjectId.IsValid)
+                    .Distinct();
+        }
         public void CollectVerticalPipes()
         {
-            var blockNameOfVerticalPipe = "带定位立管";
-            VerticalPipes.AddRange(adb.ModelSpace.OfType<BlockReference>()
-             .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
-             .Where(x => x.ToDataItem().EffectiveName == blockNameOfVerticalPipe));
-            ThWGRect getRealBoundaryForPipe(Entity ent)
+            var pipes = new List<Entity>();
             {
-                var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
-                var et = ents.FirstOrDefault(e => Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(e).Width) == 100);
-                if (et != null) return GeoAlgorithm.GetBoundaryRect(et);
-                return default;
+                var blockNameOfVerticalPipe = "带定位立管";
+                pipes.AddRange(adb.ModelSpace.OfType<BlockReference>()
+                 .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
+                 .Where(x => x.ObjectId.IsValid && x.ToDataItem().EffectiveName == blockNameOfVerticalPipe));
+                static GRect getRealBoundaryForPipe(Entity ent)
+                {
+                    var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
+                    var et = ents.FirstOrDefault(e => Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(e).Width) == 100);
+                    if (et != null) return GeoAlgorithm.GetBoundaryRect(et);
+                    return GeoAlgorithm.GetBoundaryRect(ent);
+                }
+                foreach (var e in pipes)
+                {
+                    BoundaryDict[e] = getRealBoundaryForPipe(e);
+                }
             }
-            foreach (var e in VerticalPipes)
             {
-                BoundaryDict[e] = getRealBoundaryForPipe(e);
+                var ents = adb.ModelSpace.OfType<Entity>()
+                    .Where(x => IsTianZhengElement(x.GetType()))
+                    .Where(x => x.Layer == "W-RAIN-EQPM")
+                    .Where(x => x.ExplodeToDBObjectCollection().OfType<Circle>().Count() == 1);
+                foreach (var e in ents)
+                {
+                    BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
+                }
+                pipes.AddRange(ents);
             }
-            VerticalFakePipes.AddRange(ConvertToPolylines(VerticalPipes.Cast<Entity>().ToList()));
+            {
+                var lst = adb.ModelSpace.OfType<Entity>()
+                    .Where(x => IsTianZhengElement(x.GetType()))
+                    .Where(x => x.Layer == "WP_KTN_LG").ToList();
+                foreach (var c in lst)
+                {
+                    if (!BoundaryDict.ContainsKey(c)) BoundaryDict[c] = GeoAlgorithm.GetBoundaryRect(c);
+                }
+                pipes.AddRange(lst);
+            }
+            {
+                var q = EnumerateEntities<Circle>()
+                    .Where(c => c.Radius >= 50 && c.Radius <= 200
+                    && (c.Layer.Contains("W-")
+                    && c.Layer.Contains("-EQPM")
+                    && c.Layer != "W-EQPM"
+                    && c.Layer != "W-WSUP-EQPM")
+                    );
+                var lst = q.ToList();
+                foreach (var c in lst)
+                {
+                    if (!BoundaryDict.ContainsKey(c)) BoundaryDict[c] = GeoAlgorithm.GetBoundaryRect(c);
+                }
+                pipes.AddRange(lst);
+            }
+            {
+                var q = EnumerateEntities<BlockReference>()
+                    //.Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
+                    .Where(x => x.Name == "*U398");
+                static GRect getRealBoundaryForPipe(Entity ent)
+                {
+                    var ents = ent.ExplodeToDBObjectCollection().OfType<Circle>().ToList();
+                    var et = ents.FirstOrDefault(e =>
+                    {
+                        var m = Convert.ToInt32(GeoAlgorithm.GetBoundaryRect(e).Width);
+                        return m == 110 || m == 88;
+                    });
+                    if (et != null) return GeoAlgorithm.GetBoundaryRect(et);
+                    return GeoAlgorithm.GetBoundaryRect(ent);
+                }
+                var lst = q.ToList();
+                lst.AddRange(vps.OfType<BlockReference>());
+                foreach (var e in lst)
+                {
+                    if (!BoundaryDict.ContainsKey(e)) BoundaryDict[e] = getRealBoundaryForPipe(e);
+                }
+                pipes.AddRange(lst);
+                pipes.AddRange(vps);
+            }
+            {
+                var q = EnumerateEntities<BlockReference>()
+                    .Where(x => x.Layer == ThWPipeCommon.W_RAIN_EQPM)
+                    .Where(x => x.Name == "$LIGUAN");
+                var lst = q.ToList();
+                foreach (var e in lst)
+                {
+                    if (!BoundaryDict.ContainsKey(e)) BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
+                }
+                pipes.AddRange(lst);
+            }
+            VerticalPipes.AddRange(pipes.Distinct());
+            foreach (var p in VerticalPipes)
+            {
+                if (!BoundaryDict.ContainsKey(p))
+                {
+                    BoundaryDict[p] = GeoAlgorithm.GetBoundaryRect(p);
+                }
+            }
         }
         //public void CollectVerticalPipes()
         //{
@@ -2574,11 +3352,82 @@ namespace ThMEPWSS.Pipe.Service
         //        BoundaryDict[e] = getRealBoundaryForPipe(e);
         //    }
         //}
+        public static bool IsWantedLabelText(string label)
+        {
+            if (label == null) return false;
+            return label.StartsWith("Y1L") || label.StartsWith("Y2L") || label.StartsWith("NL");
+        }
         public void CollectVerticalPipeDBTexts()
         {
-            VerticalPipeDBTexts.AddRange(adb.ModelSpace.OfType<DBText>()
-             .Where(x => x.Layer == ThWPipeCommon.W_RAIN_NOTE)
-             //.Where(x=>x.TextString.StartsWith("Y1L"))
+            var q = adb.ModelSpace.OfType<DBText>()
+             .Where(x => x.Layer == ThWPipeCommon.W_RAIN_NOTE);
+            {
+                var lst = new List<DBText>();
+                foreach (var e in adb.ModelSpace.OfType<Entity>().ToList())
+                {
+                    if (IsTianZhengElement(e.GetType()))
+                    {
+                        lst.AddRange(e.ExplodeToDBObjectCollection().OfType<DBText>());
+                    }
+                }
+                q = q.Concat(lst);
+            }
+            {
+                var lst = new List<DBText>();
+                foreach (var br in adb.ModelSpace.OfType<BlockReference>().ToList())
+                {
+                    var r = GeoAlgorithm.GetBoundaryRect(br);
+                    if (r.Width > 10000 && r.Width < 60000)
+                    {
+                        foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
+                        {
+
+                            if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                            {
+                                var lst3 = e.ExplodeToDBObjectCollection()
+                                    .OfType<Entity>()
+                                    .Where(x => ThRainSystemService.IsTianZhengElement(x.GetType()))
+                                    .SelectMany(x => x.ExplodeToDBObjectCollection().OfType<DBText>())
+                                    .ToList();
+                                lst.AddRange(lst3);
+                            }
+                        }
+                    }
+                }
+                q = q.Concat(lst);
+            }
+            {
+                var lst = new List<DBText>();
+                foreach (var e in adb.ModelSpace.OfType<Entity>().ToList())
+                {
+                    if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                    {
+                        var lst3 = e.ExplodeToDBObjectCollection()
+                            .OfType<Entity>()
+                            .Where(x => ThRainSystemService.IsTianZhengElement(x.GetType()))
+                            .SelectMany(x => x.ExplodeToDBObjectCollection().OfType<DBText>())
+                            .ToList();
+                        lst.AddRange(lst3);
+                    }
+                }
+                q = q.Concat(lst);
+            }
+            q = q.Concat(txts);
+            {
+                IEnumerable<DBText> f()
+                {
+                    foreach (var e in adb.ModelSpace.OfType<DBText>().ToList())
+                    {
+                        if (ThRainSystemService.IsWantedLabelText(e.TextString))
+                        {
+                            yield return e;
+                        }
+                    }
+                }
+                q = q.Concat(f());
+            }
+            VerticalPipeDBTexts.AddRange(
+                q.Distinct().Where(t => IsWantedLabelText(t.TextString))
              );
 
             foreach (var e in VerticalPipeDBTexts)
@@ -2590,9 +3439,58 @@ namespace ThMEPWSS.Pipe.Service
 
         public void CollectVerticalPipeLines()
         {
-            VerticalPipeLines.AddRange(adb.ModelSpace.OfType<Line>().Cast<Entity>()
-             .Union(adb.ModelSpace.OfType<Polyline>().Cast<Entity>())
-             .Where(x => x.Layer == ThWPipeCommon.W_RAIN_NOTE));
+            IEnumerable<Entity> q;
+            {
+                var lines = new List<Entity>();
+                foreach (var e in EnumerateEntities<Entity>())
+                {
+                    if (e is Line) lines.Add(e);
+                    else if (e is Polyline)
+                    {
+                        lines.AddRange(e.ExplodeToDBObjectCollection().OfType<Line>());
+                    }
+                }
+                lines = lines.Where(x => x.Layer == ThWPipeCommon.W_RAIN_NOTE).ToList();
+                q = lines;
+            }
+            {
+                var lst = new List<Line>();
+                foreach (var br in adb.ModelSpace.OfType<BlockReference>().ToList())
+                {
+                    var r = GeoAlgorithm.GetBoundaryRect(br);
+                    if (r.Width > 10000 && r.Width < 60000)
+                    {
+                        foreach (var e in br.ExplodeToDBObjectCollection().Cast<Entity>().ToList())
+                        {
+                            if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                            {
+                                var lst3 = e.ExplodeToDBObjectCollection()
+                                    .OfType<Line>()
+                                    .ToList();
+                                foreach (var t in lst3)
+                                {
+                                    lst.Add(t);
+                                }
+                            }
+                        }
+                    }
+                }
+                foreach (var e in adb.ModelSpace.OfType<Entity>().ToList())
+                {
+                    if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                    {
+                        var lst3 = e.ExplodeToDBObjectCollection()
+                            .OfType<Line>()
+                            .ToList();
+                        foreach (var t in lst3)
+                        {
+                            lst.Add(t);
+                        }
+                    }
+                }
+                q = q.Concat(lst);
+            }
+            VerticalPipeLines.AddRange(q.OfType<Line>().Where(x => x.Length > 0).Distinct());
             foreach (var e in VerticalPipeLines)
             {
                 BoundaryDict[e] = GeoAlgorithm.GetBoundaryRect(e);
@@ -2604,7 +3502,7 @@ namespace ThUtilExtensionsNs
 {
     public static class ThDataItemExtensions
     {
-        public static ThWGRect ToRect(this Point3dCollection colle)
+        public static GRect ToRect(this Point3dCollection colle)
         {
             if (colle.Count == 0) return default;
             var arr = colle.Cast<Point3d>().ToArray();
@@ -2612,7 +3510,7 @@ namespace ThUtilExtensionsNs
             var x2 = arr.Select(p => p.X).Max();
             var y1 = arr.Select(p => p.Y).Max();
             var y2 = arr.Select(p => p.Y).Min();
-            return new ThWGRect(x1, y1, x2, y2);
+            return new GRect(x1, y1, x2, y2);
         }
         public static ThBlockReferenceData ToDataItem(this Entity ent)
         {
@@ -2621,7 +3519,11 @@ namespace ThUtilExtensionsNs
         public static DBObjectCollection ExplodeToDBObjectCollection(this Entity ent)
         {
             var entitySet = new DBObjectCollection();
-            ent.Explode(entitySet);
+            try
+            {
+                ent.Explode(entitySet);
+            }
+            catch { }
             return entitySet;
         }
         public static DBObjectCollection ExplodeToDBObjectCollection(this IList<Entity> ents)
