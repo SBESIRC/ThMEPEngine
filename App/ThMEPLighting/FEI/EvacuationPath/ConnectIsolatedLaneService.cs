@@ -20,14 +20,15 @@ namespace ThMEPLighting.FEI.EvacuationPath
             List<ExtendLineModel> resExtendLines = new List<ExtendLineModel>();
 
             //寻找孤立车道线
-            List<Polyline> allExtendLines = extendLines.Where(x => x.priority != Priority.startExtendLine).Select(x => x.line).ToList();
             List<Polyline> checkConnectPoly = extendLines.Select(x => x.line).ToList();
             var isolatedLanes = FindIsolatedLane(checkConnectPoly, lanes, out List<List<Line>> otherLanes);
 
             while (isolatedLanes.Count > 0)
             {
                 //找到所有连接点
-                var allConnectPts = allExtendLines.SelectMany(x => new List<Point3d>() { x.StartPoint, x.EndPoint }).ToList();
+                var allConnectPts = extendLines.SelectMany(x => 
+                    x.priority == Priority.startExtendLine ? new List<Point3d>() { x.line.EndPoint } : new List<Point3d>() { x.line.StartPoint, x.line.EndPoint })
+                    .ToList();
                 allConnectPts.AddRange(otherLanes.SelectMany(x => x.SelectMany(y => new List<Point3d>() { y.StartPoint, y.EndPoint })));
                 if (allConnectPts.Count() <= 0)
                 {

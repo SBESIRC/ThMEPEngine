@@ -83,7 +83,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
             //----构建寻路地图框线
             var mapFrame = OptimizeStartExtendLineService.CreateMapFrame(closetLane, startPt, holes, 2500);
             mapFrame = mapFrame.Intersection(new DBObjectCollection() { polyline }).Cast<Polyline>().OrderByDescending(x => x.Area).First();
-
+            
             //----初始化寻路类
             var dir = (closetLane.EndPoint - closetLane.StartPoint).GetNormal();
             AStarRoutePlanner<Line> aStarRoute = new AStarRoutePlanner<Line>(mapFrame, dir, closetLane, 400, 250, 250);
