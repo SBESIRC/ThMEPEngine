@@ -163,6 +163,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     var routePts= _dijkstra.FindingMinPath(item.nodePoint,exit.nodePoint);
                     if (null == routePts || routePts.Count <2)
                         continue;
+                    if (routePts.LastOrDefault().DistanceTo(item.nodePoint) > 10)
+                        continue;
                     routePts.Reverse();
                     double thisDis = 0;
                     for (int i = 0; i < routePts.Count - 1; i++)
