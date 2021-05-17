@@ -60,7 +60,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     var thisLaneBlock = orderSigleSideGroup[i].getTotalBlock();
 
-                    Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
+                    Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup2(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
                     List<(int, int, double)> closedDists = returnValueCalculation.getDistMatrix(blockList, thisLaneBlock); //(blocklist index, focused side index, distance)
 
                     var connectListTemp = returnValueCalculation.findOptimalConnectionInGroup(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);

@@ -23,8 +23,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 //double bx = baseVector.X;
                 //double by = baseVector.Y;
 
-                double bx = Math.Abs(baseVector.X) <= 6000 ? 0 : baseVector.X;
-                double by = Math.Abs(baseVector.Y) <= 6000 ? 0 : baseVector.Y;
+                double bx = Math.Abs(baseVector.X) <= 4500 ? 0 : baseVector.X;
+                double by = Math.Abs(baseVector.Y) <= 4500 ? 0 : baseVector.Y;
 
                 var localReturnDict = new List<double>();
 
@@ -170,7 +170,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     connectList.Add((blockList[distClosedPair.Item1], thisLaneBlock[distClosedPair.Item2]));
                     bConn = true;
                 }
-                if (bConn == false && minHasReturnClosedPair.Item3 >= EmgConnectCommon.TolSaperateGroupMaxDistance)
+                if (bConn == false && minHasReturnClosedPair.Item3 >= 20000)
                 {
                     connectList.Add((blockList[distClosedPair.Item1], thisLaneBlock[distClosedPair.Item2]));
                     bConn = true;

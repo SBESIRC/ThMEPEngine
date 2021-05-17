@@ -41,13 +41,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return connList;
         }
 
-        public static List<Polyline> drawGroupToGroup(List<(Point3d, Point3d)> connPts, Polyline frame, List<ThBlock> blkList, ref List<Polyline> linkLine)
+        public static List<Polyline> drawGroupToGroup(List<(Point3d, Point3d)> connPts, Polyline frame, List<ThBlock> blkList, ref List<Polyline> linkLine, List<Polyline> holes)
         {
             List<Polyline> connList = new List<Polyline>();
 
             for (int i = 0; i < connPts.Count; i++)
             {
-                var link = linkSecToMain(connPts[i], blkList, out var blkS, out var blkE);
+                var linkTemp = linkSecToMain(connPts[i], blkList, out var blkS, out var blkE);
+                var link = CorrectConflictFrame(frame, linkTemp, blkS, blkE, holes);
                 connList.Add(link);
             }
 

@@ -223,11 +223,12 @@ namespace ThMEPLighting
                     {
                         return;
                     }
+
                     var connectLine = ConnectEmgLightEngine.ConnectLight(mergedOrderedLane, blockList, nFrame, nHoles);
 
                     ConnectEmgLightEngine.ResetResult(ref connectLine, transformer);
 
-                    InsertConnectLineService.InsertConnectLine(connectLine);
+                    //InsertConnectLineService.InsertConnectLine(connectLine);
                 }
             }
         }

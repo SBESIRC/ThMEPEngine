@@ -56,12 +56,11 @@ namespace ThMEPLighting.EmgLightConnect
             graphService.createOutterGraph(orderedAllLaneSideList[0], sideDict, singleSideBlocks, out var sideGraph);
             graphService.createInnerGraph(orderedAllLaneSideList, sideDict, sideGraph);
 
-            mergeOneMainBlkSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
+            //mergeOneMainBlkSideService.mergeOneBlockSide(singleSideBlocks, pointList, sideGraph);
             mergeOneSecBlkSideService.mergeOneSecBlockSide(singleSideBlocks);
 
             //连线数据
             var ALE = blockSourceList[EmgBlkType.BlockType.ale].First();
-           
             connectSingleSideBlkService.regroupMainSec(singleSideBlocks);
             connectSingleSideBlkService.connectMainToMain(singleSideBlocks);
             mergeOneSecBlkSideService.relocateSecBlockSide(singleSideBlocks);
@@ -100,7 +99,7 @@ namespace ThMEPLighting.EmgLightConnect
             List<Polyline> linkLine = new List<Polyline>();
             var mainLink = drawMainBlkService.drawMainToMain(singleSideBlocks, blkSource, frame, out var blkList, ref linkLine);
             var secLink = drawSecBlkService.drawSecToMain(singleSideBlocks, frame, blkList, ref linkLine, holes);
-            var groupLink = drawSecBlkService.drawGroupToGroup(connectList, frame, blkList, ref linkLine);
+            var groupLink = drawSecBlkService.drawGroupToGroup(connectList, frame, blkList, ref linkLine,holes);
 
             DrawUtils.ShowGeometry(mainLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 130));
             DrawUtils.ShowGeometry(secLink, EmgConnectCommon.LayerConnectLineFinal, Color.FromColorIndex(ColorMethod.ByColor, 70));
