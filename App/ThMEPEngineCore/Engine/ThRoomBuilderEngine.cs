@@ -2,11 +2,11 @@
 using System.Linq;
 using ThCADCore.NTS;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.CAD;
-using ThMEPEngineCore.Model;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -14,6 +14,30 @@ namespace ThMEPEngineCore.Engine
     {
         public void Dispose()
         {            
+        }
+
+        public void BuildMS(Database db,Point3dCollection pts)
+        {
+            // Room 和 Mark 来源于本地
+            var roomEngine = new ThWRoomRecognitionEngine();
+            roomEngine.RecognizeMS(db, pts);
+            var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
+            var markEngine = new ThRoomMarkRecognitionEngine();
+            markEngine.RecognizeMS(db, pts);
+            var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
+            Build(rooms, marks);
+        }
+
+        public void BuildXRef(Database db, Point3dCollection pts)
+        {
+            // Room 和 Mark 来源于外参
+            var roomEngine = new ThWRoomRecognitionEngine();
+            roomEngine.Recognize(db, pts);
+            var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
+            var markEngine = new ThRoomMarkRecognitionEngine();
+            markEngine.Recognize(db, pts);
+            var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
+            Build(rooms, marks);
         }
 
         public void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)
