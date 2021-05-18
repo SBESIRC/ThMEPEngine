@@ -45,6 +45,7 @@
     <Compile Include="ThCurveExtension.cs" />
     <Compile Include="ThCurveCollectionExtension.cs" />
     <Compile Include="ThDisposableSet.cs" />
+    <Compile Include="ThDynamicBlockUtils.cs" />
     <Compile Include="ThEditorExtension.cs" />
     <Compile Include="ThEntTool.cs" />
     <Compile Include="ThGeExtension.cs" />

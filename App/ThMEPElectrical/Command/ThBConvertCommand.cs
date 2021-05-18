@@ -162,12 +162,14 @@ namespace ThMEPElectrical.Command
                                             // 当配置表中可见性为空时，则按图块名转换
                                             transformedBlock = manager.TransformRule(blockReference.EffectiveName);
                                         }
-                                        else if (blockReference.CurrentVisibilityStateValue() == visibility)
+                                        else if (blockReference.CurrentVisibilityStateValue(
+                                            ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY) == visibility)
                                         {
                                             // 当配置表中可见性有字符时，则按块名和可见性的组合一对一转换
                                             transformedBlock = manager.TransformRule(
                                                 blockReference.EffectiveName,
-                                                blockReference.CurrentVisibilityStateValue());
+                                                blockReference.CurrentVisibilityStateValue(
+                                                    ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY));
                                         }
                                         else
                                         {
@@ -176,11 +178,13 @@ namespace ThMEPElectrical.Command
                                     }
                                     else if (Mode == ConvertMode.WEAKCURRENT)
                                     {
-                                        if (blockReference.CurrentVisibilityStateValue() == visibility)
+                                        if (blockReference.CurrentVisibilityStateValue(
+                                            ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY) == visibility)
                                         {
                                             transformedBlock = manager.TransformRule(
                                                 blockReference.EffectiveName,
-                                                blockReference.CurrentVisibilityStateValue());
+                                                blockReference.CurrentVisibilityStateValue(
+                                                    ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY));
                                         }
                                     }
                                     else
