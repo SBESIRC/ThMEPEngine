@@ -89,7 +89,24 @@ namespace ThCADExtension
                     curves.Add(newPoly);
                 }
             }
-            return curves;
+            return Clean(curves);
+        }
+
+        private static List<Curve> Clean(List<Curve> curves, double tesslateLength = 100.0)
+        {
+            var results = new List<Curve>();
+            curves.ForEach(o =>
+            {
+                if (o is Polyline polyline)
+                {
+                    results.Add(polyline.TessellatePolylineWithArc(tesslateLength));
+                }
+                else if (o is Circle circle)
+                {
+                    results.Add(circle.Tessellate(tesslateLength));
+                }
+            });
+            return results;
         }
     }
 }
