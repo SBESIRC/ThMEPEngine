@@ -13,6 +13,7 @@ namespace TianHua.AutoCAD.ThCui
                 CreateHVACPanel(tab);
                 CreateElectricPanel(tab);
                 CreateWSSPanel(tab);
+                CreateInventoryPanel(tab);
                 //CreateHelpPanel(tab);
                 //CreateSettingsPanel(tab);
                 //CreateCheckToolPanel(tab);
@@ -154,6 +155,20 @@ namespace TianHua.AutoCAD.ThCui
                 "自动为区域布置喷头，考虑墙、柱、梁的影响。附带接近真实的盲区检测功能。",
                 "IDI_THCAD_THPLPT_SMALL",
                 "IDI_THCAD_THPLPT_LARGE",
+                RibbonButtonStyle.LargeWithText);
+        }
+
+        private static void CreateInventoryPanel(RibbonTabSource tab)
+        {
+            var panel = tab.AddNewPanel("Inventory", "机电提资");
+            var row = panel.AddNewRibbonRow();
+
+            row.AddNewButton("风机基础",
+                "天华风机基础提资",
+                "THFJJC",
+                "天华风机基础提资",
+                "IDI_THCAD_THFJJC_SMALL",
+                "IDI_THCAD_THFJJC_LARGE",
                 RibbonButtonStyle.LargeWithText);
         }
         private static void CreateHelpPanel(RibbonTabSource tab)
