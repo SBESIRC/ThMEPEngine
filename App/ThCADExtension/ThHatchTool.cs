@@ -89,10 +89,16 @@ namespace ThCADExtension
                     curves.Add(newPoly);
                 }
             }
-            return Clean(curves);
+            return curves;
         }
 
-        private static List<Curve> Clean(List<Curve> curves, double tesslateLength = 100.0)
+        public static List<Curve> BoundariesEx(this Hatch hatch, double tolerance = 1e-4, double tesslateLength = 100.0)
+        {
+            var curves = hatch.Boundaries(tolerance);
+            return Clean(curves, tesslateLength);
+        }
+
+        private static List<Curve> Clean(List<Curve> curves, double tesslateLength)
         {
             var results = new List<Curve>();
             curves.ForEach(o =>

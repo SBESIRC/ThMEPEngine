@@ -13,7 +13,7 @@ namespace ThCADCore.NTS
     {
         private static Geometry ToNTSGeometry(this Hatch hatch)
         {
-            return hatch.Boundaries().ToCollection().BuildAreaGeometry();
+            return hatch.BoundariesEx().ToCollection().BuildAreaGeometry();
         }
 
         private static MultiPolygon ToNTSMultiPolygon(this Hatch hatch)
