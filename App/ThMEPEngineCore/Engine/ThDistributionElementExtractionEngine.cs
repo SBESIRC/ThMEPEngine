@@ -13,7 +13,12 @@ namespace ThMEPEngineCore.Engine
     public abstract class ThDistributionElementExtractionEngine
     {
         public List<ThRawIfcDistributionElementData> Results { get; protected set; }
+        public ThDistributionElementExtractionEngine()
+        {
+            Results = new List<ThRawIfcDistributionElementData>();
+        }
 
         public abstract void Extract(Database database);
+        public abstract void ExtractFromMS(Database database);
     }
 }

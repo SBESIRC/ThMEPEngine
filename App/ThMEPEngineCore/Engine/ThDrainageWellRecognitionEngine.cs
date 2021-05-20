@@ -77,6 +77,11 @@ namespace ThMEPEngineCore.Engine
             extractor.ExtractFromMS(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 
     public class ThDrainageWellBlockRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -114,6 +119,11 @@ namespace ThMEPEngineCore.Engine
                 ents = objs.Cast<Entity>().ToList();
             }
             ents.ForEach(o => Geos.Add(o));
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
         }
     }
 }

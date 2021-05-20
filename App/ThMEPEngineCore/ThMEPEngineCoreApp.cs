@@ -220,7 +220,7 @@ namespace ThMEPEngineCore
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
-                engine.Spaces.ForEach(o =>
+                engine.Elements.ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o.Boundary);
                 });

@@ -13,6 +13,7 @@ namespace ThMEPEngineCore.Engine
         public ThSpatialElementExtractionVisitor()
         {
             Results = new List<ThRawIfcSpatialElementData>();
+            LayerFilter = new List<string>();
         }
 
         public abstract void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj, Matrix3d matrix);
