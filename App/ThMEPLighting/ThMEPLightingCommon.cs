@@ -81,5 +81,11 @@ namespace ThMEPLighting
         public const string PILOTLAMP_WALL_TWOWAY_SINGLESIDE = "E-BFEL210";         //疏散方向指示灯，壁装->/<- 双向 ->单面指示
         public const string PILOTLAMP_HOST_TWOWAY_SINGLESIDE = "E-BFEL211";         //疏散方向指示灯，吊装->/<- 双向 ->单面指示
         public const string PILOTLAMP_HOST_TWOWAY_DOUBLESIDE = "E-BFEL211-1";     //疏散方向指示灯，吊装->/<- 双向 ->双面指示
+
+        //地上疏散指示灯
+        public const string ROOM_LAYER = "房间框线";                                //房间框线图层
+        public const string ROOM_TEXT_NAME_LAYER = "房间名称";                      //房间名称图层
+        public const string DOOR_LAYER = "门窗框线";                                //门框线图层
+        public const string CENTER_LINE_LAYER = "中心线";                           //中心线图层
     }
 }

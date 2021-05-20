@@ -34,5 +34,10 @@ namespace ThMEPWSS.Pipe.Engine
             }
             Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWRainPipe.Create(o.GeometricExtents.ToRectangle())));
         }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
