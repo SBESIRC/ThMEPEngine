@@ -18,6 +18,11 @@ namespace ThMEPWSS.Pipe.Engine
             extractor.Extract(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
     public class ThWGravityWaterBucketRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -32,6 +37,11 @@ namespace ThMEPWSS.Pipe.Engine
                 dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
             }
             Elements.AddRange(dbObjs.Cast<Entity>().Select(o => ThWGravityWaterBucket.Create(o)));
-        }  
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }

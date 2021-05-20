@@ -19,6 +19,11 @@ namespace ThMEPWSS.Pipe.Engine
             extractor.Extract(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new System.NotImplementedException();
+        }
     }
     public class ThWRainPipeRecognitionEngine : ThDistributionElementRecognitionEngine
     {             

@@ -28,6 +28,11 @@ namespace ThMEPWSS.Pipe.Engine
             extractor.Accept(Visitor);
             extractor.Extract(database);
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new NotImplementedException();
+        }
     }
     public class ThWCompositeRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -89,6 +94,11 @@ namespace ThMEPWSS.Pipe.Engine
                     results1.Where(o => ThSideEntryWaterBucketLayerManager.IsSideEntryWaterBucketBlockName(o.Data as string))
                  .ForEach(o => Elements.Add(ThWSideEntryWaterBucket.Create(o.Geometry)));
             }
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
         }
     }
     public class ThWCompositeFloorRecognitionEngine : ThWRoomRecognitionEngine, IDisposable

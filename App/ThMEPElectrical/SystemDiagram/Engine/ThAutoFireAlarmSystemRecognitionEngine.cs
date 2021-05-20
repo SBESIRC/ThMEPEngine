@@ -27,6 +27,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             extractor.Extract(database);
             Results = visitor.Results;
         }
+
+        public override void ExtractFromMS(Database database)
+        {
+            throw new NotImplementedException();
+        }
     }
     public class ThAutoFireAlarmSystemRecognitionEngine : ThDistributionElementRecognitionEngine
     {
@@ -45,6 +50,11 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
             // 通过获取的OriginData 分类
             Elements.AddRange(originDatas.Select(x => new ThIfcDistributionFlowElement() { Outline = x.Geometry }));
+        }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
         }
     }
 }

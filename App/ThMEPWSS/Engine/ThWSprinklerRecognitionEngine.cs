@@ -23,6 +23,11 @@ namespace ThMEPWSS.Engine
             }
         }
 
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new System.NotImplementedException();
+        }
+
         private bool IsSprinkler(Entity e)
         {
             // 同时支持天华喷淋图块和天正喷淋自定义实体
