@@ -101,7 +101,7 @@ namespace ThCADCore.NTS
         public static Geometry BuildAreaGeometry(this DBObjectCollection objs)
         {
             var builder = new ThCADCoreNTSBuildArea();
-            return builder.Build(objs.ExplodeCurves().ToMultiLineString());
+            return builder.Build(objs.ToMultiLineString());
         }
     }
 }
