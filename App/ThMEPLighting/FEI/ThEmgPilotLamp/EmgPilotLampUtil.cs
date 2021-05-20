@@ -46,9 +46,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <param name="sideDir"></param>
         /// <param name="sideDis"></param>
         /// <returns></returns>
-        public static Polyline LineToPolyline(Line line, Vector3d sideDir, double sideDis)
+        public static Polyline LineToPolyline(Line line, Vector3d sideDir, double sideDis,double expansion=0)
         {
             if (null == line)
+                return null;
+            if (expansion < -0.00001 && line.Length< Math.Abs(expansion*2))
                 return null;
             Point3d sp = line.StartPoint;
             Point3d ep = line.EndPoint;
@@ -56,6 +58,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             double dot = lineDir.DotProduct(sideDir);
             if (Math.Abs(dot) > 0.9)//扩展方向和线的夹角太小
                 return null;
+            sp = sp - lineDir.MultiplyBy(expansion);
+            ep = ep + lineDir.MultiplyBy(expansion);
             Point3d spNext = sp + sideDir.MultiplyBy(sideDis);
             Point3d epNext = ep + sideDir.MultiplyBy(sideDis);
 

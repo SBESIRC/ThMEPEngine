@@ -1408,7 +1408,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 var newSp = targetLine.StartPoint + outDir.MultiplyBy(20);
                 var newEp = targetLine.EndPoint + outDir.MultiplyBy(20);
                 var newLine = new Line(newSp, newEp);
-                var targetPoly = EmgPilotLampUtil.LineToPolyline(newLine, outDir, 20);
+                var targetPoly = EmgPilotLampUtil.LineToPolyline(newLine, outDir, 20,-10);
                 if (null == targetPoly)
                     continue;
                 //如果穿外框线，不满足要去
