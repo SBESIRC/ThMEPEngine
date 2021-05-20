@@ -22,7 +22,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <param name="walls"></param>
         /// <param name="dir"></param>
         /// <returns></returns>
-        public Dictionary<Point3d, Vector3d> GetLayoutStructPt(List<Point3d> layoutPts, List<Polyline> columns, List<Polyline> walls, Vector3d dir)
+        public Dictionary<Point3d, Vector3d> GetLayoutStructPt(List<Point3d> layoutPts, List<Polyline> columns, List<Polyline> walls, Vector3d dir,bool spCalc=true)
         {
             Dictionary<Point3d, Vector3d> ptDic = new Dictionary<Point3d, Vector3d>();
             if (layoutPts == null || layoutPts.Count < 1)
@@ -36,6 +36,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
             foreach (var pt in layoutPts)
             {
+                if (!spCalc && pt.DistanceTo(sp) < 10)
+                    continue;
                 var column = columns.Distinct().ToDictionary(x => x, y => y.Distance(pt)).OrderBy(x => x.Value).ToList();
                 var wall = walls.Distinct().ToDictionary(x => x, y => y.Distance(pt)).OrderBy(x => x.Value).ToList();
                 if (column.Count <= 0 && wall.Count <= 0)
@@ -50,7 +52,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     layoutInfo = GetColumnLayoutPoint(column.First().Key, pt, dir);
                     if (null != layoutInfo && layoutInfo.HasValue) 
                     {
-                        var prjPt = PointToLine(layoutInfo.Value.Item1, new Line(sp, ep));
+                        var prjPt = EmgPilotLampUtil.PointToLine(layoutInfo.Value.Item1, new Line(sp, ep));
                         if(length>3500 && ((prjPt.DistanceTo(sp) > 500 && prjPt.DistanceTo(sp) < 3500) || (prjPt.DistanceTo(pt) > length*2/3 && pt.DistanceTo(sp)> length * 2 / 3) 
                             || (prjPt.DistanceTo(pt)>3500 &&pt.DistanceTo(sp)<100)))
                             layoutInfo = null;
@@ -62,22 +64,57 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     if (wall.Count > 0)
                     {
                         (Point3d, Vector3d)? wallLayout = null;
-                        var wallValue = 0.0;
-                        var columnValue = 0.0;
+                        var wallDisToLine = double.MaxValue;
+                        var wallMinDis = double.MinValue;
+                        var wallMaxDis = double.MaxValue;
                         foreach (var item in wall) 
                         {
-                            wallLayout = GetWallLayoutPoint(item.Key, pt, dir, sp, length);
-                            if (wallLayout == null)
+                            var tempWall = GetWallLayoutPoint(item.Key, pt, dir, sp, length);
+                            if (tempWall == null)
                                 continue;
-                            var wallPrj = PointToLine(wallLayout.Value.Item1, new Line(sp, ep));
+                            var wallPrj = EmgPilotLampUtil.PointToLine(tempWall.Value.Item1, new Line(sp, ep));
+                            var disToLine = wallPrj.DistanceTo(tempWall.Value.Item1);
                             var prjDis = wallPrj.DistanceTo(sp);
-                            if (prjDis -length>10)
+                            if (pt.DistanceTo(sp) < 10)
                             {
-                                wallLayout = null;
-                                continue;
+                                //起点
+                                if (prjDis  > length)
+                                {
+                                    tempWall = null;
+                                    continue;
+                                }
+                                if (wallMaxDis > prjDis)
+                                {
+                                    wallMaxDis = prjDis;
+                                    wallLayout = tempWall;
+                                    //break;
+                                }
                             }
-                            wallValue = item.Value;
-                            break;
+                            else 
+                            {
+                                //终点
+                                if (prjDis - length > 10)
+                                {
+                                    tempWall = null;
+                                    continue;
+                                }
+                                if (Math.Abs(wallMinDis - prjDis) < 100)
+                                {
+                                    if (wallDisToLine > disToLine) 
+                                    {
+                                        wallMinDis = prjDis;
+                                        wallLayout = tempWall;
+                                        wallDisToLine = disToLine;
+                                    }
+                                }
+                                else if( wallMinDis < prjDis)
+                                {
+                                    wallMinDis = prjDis;
+                                    wallLayout = tempWall;
+                                    wallDisToLine = disToLine;
+                                }
+                            }
+                            
                         }
                         if (columns.Count > 0)
                         {
@@ -85,8 +122,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             var colLayout = GetColumnLayoutPoint(column.First().Key, pt, dir);
                             if (wallLayout != null && colLayout != null)
                             {
-                                var colPrj = PointToLine(colLayout.Value.Item1, new Line(sp, ep));
-                                var wallPrj = PointToLine(wallLayout.Value.Item1, new Line(sp, ep));
+                                var colPrj = EmgPilotLampUtil.PointToLine(colLayout.Value.Item1, new Line(sp, ep));
+                                var wallPrj = EmgPilotLampUtil.PointToLine(wallLayout.Value.Item1, new Line(sp, ep));
                                 dis = colPrj.DistanceTo(pt) - wallPrj.DistanceTo(pt);
                             }
                             if (Math.Abs(dis) < 2000)
@@ -104,7 +141,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         }
                         else
                         {
-                            layoutInfo = GetWallLayoutPoint(wall.First().Key, pt, dir,sp,length);
+                            layoutInfo = wallLayout;//GetWallLayoutPoint(wall.First().Key, pt, dir,sp,length);
                         }
                     }
                     else if (column.Count > 0)
@@ -229,7 +266,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             Point3d sPt = layoutLine.StartPoint;
             Point3d ePt = layoutLine.EndPoint;
             Vector3d moveDir = (ePt - sPt).GetNormal();
-            if (layoutLine.Length < minWidth)
+            if (layoutLine.Length < 350)
                 return null;
             //计算排布点
             var layoutPt = closetPt;
@@ -319,17 +356,19 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             List<Line> lines = new List<Line>();
             //多段线有可以合并的线，这里如果没有合并，如果有些是多段线
             polyline = polyline.DPSimplify(2);
-            var prjPoint = PointToLine(closetPt, startPoint, dir);
+            var prjPoint = EmgPilotLampUtil.PointToLine(closetPt, startPoint, dir);
             Vector3d otherDir = Vector3d.ZAxis.CrossProduct(dir);
             for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
                 lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
             }
+            var maxLength = lines.Max(c => c.Length);
             var prjDis = prjPoint.DistanceTo(startPoint);
-            if ( prjDis> maxDis || Math.Abs(prjDis - maxDis) <10)
+            if ( prjDis> maxDis || (maxDis>prjDis && Math.Abs(prjDis - maxDis) <10))
             {
                 //近点不符合要求，进一步计算
                 var dis = double.MinValue;
+                var disX = double.MaxValue;
                 Line tempLine = null;
                 Point3d? tempPoint = null;
                 foreach (var li in lines) 
@@ -337,12 +376,17 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     var xDir = (li.EndPoint - li.StartPoint).GetNormal();
                     if (Math.Abs(otherDir.DotProduct(xDir)) > Math.Abs(dir.DotProduct(xDir)))
                         continue;
+                    var outDir = Vector3d.ZAxis.CrossProduct(xDir);
                     var temp = li.GetClosestPointTo(pt, false);
-                    prjPoint = PointToLine(temp, startPoint, dir);
-                    var tempdis = prjPoint.DistanceTo(startPoint) ;
+                    prjPoint = EmgPilotLampUtil.PointToLine(temp, startPoint, dir);
+                    var tempdis = prjPoint.DistanceTo(startPoint);
+                    var tempDir = (temp - prjPoint).GetNormal();
+                    var tempDot = tempDir.DotProduct(outDir);
+                    if (tempDot > 0.1)
+                        continue;
                     if (Math.Abs(tempdis - maxDis) > 1)
                         continue;
-                    if (dis < tempdis) 
+                    if (dis <= tempdis && disX>Math.Abs(tempDot)) 
                     {
                         tempPoint = temp;
                         tempLine = li;
@@ -367,19 +411,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
             return layoutLine;
         }
-        Point3d PointToLine(Point3d point, Line line)
-        {
-            Point3d lineSp = line.StartPoint;
-            Vector3d lineDirection = (line.EndPoint - line.StartPoint).GetNormal();
-            var vect = point - lineSp;
-            var dot = vect.DotProduct(lineDirection);
-            return lineSp + lineDirection.MultiplyBy(dot);
-        }
-        Point3d PointToLine(Point3d point, Point3d lineSp,Vector3d lineDirection)
-        {
-            var vect = point - lineSp;
-            var dot = vect.DotProduct(lineDirection);
-            return lineSp + lineDirection.MultiplyBy(dot);
-        }
+        
     }
 }

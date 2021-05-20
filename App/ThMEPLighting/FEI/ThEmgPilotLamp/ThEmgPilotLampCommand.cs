@@ -89,29 +89,37 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
                     //获取出口块信息
                     var enterBlcok = primitivesService.GetEvacuationExitBlock(pline.Key);
-                    //foreach (var item in enterBlcok)
-                    //{
-                    //    PointToView(acdb, originTransformer, item.Position);
-                    //    //item.Position
-                    //}
-                    //return;
+
                     List<Curve> laneLines = new List<Curve>();
                     mainLines.ForEach(c => laneLines.Add(c));
                     assitLines.ForEach(c => laneLines.Add(c));
                     assitHostLines.ForEach(c => laneLines.Add(c));
                     //step1 根据线，出口信息计算，所有拐点到最近出口的位置
                     EmgPilotLampLineNode lampLineNode = new EmgPilotLampLineNode(laneLines, exitLines, enterBlcok);
-                    //foreach (var item in lampLineNode.allNodes) 
+
+                    //获取墙柱信息
+                    List<Polyline> columns = new List<Polyline>();
+                    List<Polyline> walls = new List<Polyline>();
+                    if(!ThEmgLightService.Instance.IsHostingLight)
+                        primitivesService.GetStructureInfo(pline.Key.Buffer(40)[0] as Polyline, out columns, out walls);
+                    //primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
+                    //foreach (var item in walls)
                     //{
-                    //    continue;
-                    //    if (item.isExit)
-                    //        continue;
-                    //    PointToView(acdb, originTransformer, item.nodePoint);
+                    //    List<Line> lines = new List<Line>();
+                    //    //多段线有可以合并的线，这里如果没有合并，如果有些是多段线
+                    //    var polyline = item.DPSimplify(2);
+                    //    for (int i = 0; i < polyline.NumberOfVertices; i++)
+                    //    {
+                    //        lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
+                    //    }
+                    //    foreach (var line in lines)
+                    //    {
+                    //        Line line2 = line;
+                    //        originTransformer.Reset(line2);
+                    //        acdb.ModelSpace.Add(line2);
+                    //    }
                     //}
                     //return;
-                    //获取墙柱信息
-                    primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
-
                     //根据这些线信息，拐点到出口的数据进行计算布置的点信息
                     IndicatorLight indicator = new IndicatorLight();
                     assitLines.ForEach(c => indicator.assistLines.Add(c));
