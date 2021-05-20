@@ -89,7 +89,9 @@
     <Compile Include="FEI\ThEmgPilotLamp\CreateClearEmgLamp.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\EmgLampIndicatorLight.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\EmgLampModels.cs" />
+    <Compile Include="FEI\ThEmgPilotLamp\EmgPilotLampCheck.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\EmgPilotLampLineNode.cs" />
+    <Compile Include="FEI\ThEmgPilotLamp\EmgPilotLampUtil.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\GraphUtils.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\LayoutToStructure.cs" />
     <Compile Include="FEI\ThEmgPilotLamp\ThEmgPilotLampCommand.cs" />

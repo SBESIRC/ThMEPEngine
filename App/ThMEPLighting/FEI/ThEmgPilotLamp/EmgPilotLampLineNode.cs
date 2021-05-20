@@ -61,6 +61,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var objs = new DBObjectCollection();
             tempCurves.ForEach(x => objs.Add(x));
             var allLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 50, 20.0, 2.0, Math.PI / 180.0);
+            //allLines = allLines.Where(c => c.Length > 500).ToList();
             allLines = allLines.Select(y =>
             {
                 var dir = (y.EndPoint - y.StartPoint).GetNormal();
@@ -113,10 +114,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 {
                     var node = new GraphNode();
                     node.nodePoint = sp;
-                    if (PointIsExit(sp, out int exitType,450))
+                    if (PointIsExit(sp, out int exitType,out BlockReference exitBlock, 450))
                     {
                         node.isExit = true;
                         node.nodeType = exitType;
+                        node.tag = exitBlock;
                     }
                     else 
                     {
@@ -128,10 +130,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 {
                     var node = new GraphNode();
                     node.nodePoint = ep;
-                    if (PointIsExit(ep, out int exitType, 450))
+                    if (PointIsExit(ep, out int exitType,out BlockReference exitBlock, 450))
                     {
                         node.isExit = true;
                         node.nodeType = exitType;
+                        node.tag = exitBlock;
                     }
                     else
                     {
@@ -187,10 +190,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <param name="pt"></param>
         /// <param name="maxDis"></param>
         /// <returns></returns>
-        bool PointIsExit(Point3d pt, out int blockType,double maxDis = 100/304.8) 
+        bool PointIsExit(Point3d pt, out int blockType,out BlockReference exitBlock, double maxDis = 100/304.8) 
         {
             blockType = -1;
             bool isExit = false;
+            exitBlock = null;
             if (null == pt || null == _exitBlocks || _exitBlocks.Count < 1)
                 return isExit;
             foreach (var item in _exitBlocks) 
@@ -202,6 +206,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 var dis = point3dZ0.DistanceTo(pt);
                 if (dis > maxDis)
                     continue;
+                exitBlock = item;
                 switch (item.Name)
                 {
                     case ThMEPLightingCommon.FEI_EXIT_NAME100:
