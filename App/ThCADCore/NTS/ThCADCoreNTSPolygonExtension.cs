@@ -77,6 +77,11 @@ namespace ThCADCore.NTS
             return Centroid.GetCentroid(polygon.ToNTSPolygon()).ToAcGePoint3d();
         }
 
+        public static Point3d GetMaximumInscribedCircleCenter(this AcPolygon shell)
+        {
+            return shell.ToNTSPolygon().GetCenterMaximumInscribedCircle();
+        }
+
         public static DBObjectCollection MakeValid(this AcPolygon polygon)
         {
             // zero-width buffer trick:

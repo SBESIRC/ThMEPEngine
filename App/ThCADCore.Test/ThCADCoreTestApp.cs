@@ -909,5 +909,29 @@ namespace ThCADCore.Test
                 Autodesk.AutoCAD.ApplicationServices.Application.ShowAlertDialog("选择的对象" + res.ObjectId);
             }
         }
+
+        [CommandMethod("TIANHUACAD", "ThMaximumInscribedCircle", CommandFlags.Modal)]
+        public void ThMaximumInscribedCircle()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+
+                var center = objs.GetMaximumInscribedCircleCenter();
+                Circle circle = new Circle(center, new Vector3d(0, 0, 1), 100);
+                acadDatabase.ModelSpace.Add(circle);
+            }
+        }
     }
 }

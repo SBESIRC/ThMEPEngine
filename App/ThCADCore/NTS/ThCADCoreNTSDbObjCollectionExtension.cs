@@ -7,6 +7,7 @@ using NetTopologySuite.Operation.Overlay;
 using NetTopologySuite.Operation.OverlayNG;
 using NetTopologySuite.Geometries.Utilities;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADCore.NTS
 {
@@ -81,6 +82,20 @@ namespace ThCADCore.NTS
         public static DBObjectCollection ToDbCollection(this Geometry geometry, bool keepHoles = false)
         {
             return geometry.ToDbObjects(keepHoles).ToCollection();
+        }
+
+        public static Point3d GetMaximumInscribedCircleCenter(this DBObjectCollection curves)
+        {
+            var builder = new ThCADCoreNTSBuildArea();
+            var geometry = builder.Build(curves.ToMultiLineString());
+            if (geometry is Polygon polygon)
+            {
+                return polygon.GetCenterMaximumInscribedCircle();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }
