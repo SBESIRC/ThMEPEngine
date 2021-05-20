@@ -98,5 +98,10 @@ namespace ThMEPWSS.Pipe.Engine
             Datas = cleanToolVisitor.Results.Where(o => dbObjs.Contains(o.Geometry)).ToList();
             Elements.AddRange(Datas.Select(o=>o.Geometry).Cast<Entity>().Select(x => new ThIfcDistributionFlowElement() { Outline = x }));
         }
+
+        public override void RecognizeMS(Database database, Point3dCollection polygon)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
