@@ -344,6 +344,7 @@ namespace ThMEPEngineCore.Test
                 }
             }
         }
+
         private static List<Point3d> GetPoints(string fileName)
         {
             var results = new List<Point3d>();

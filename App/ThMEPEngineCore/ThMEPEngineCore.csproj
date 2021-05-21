@@ -51,6 +51,11 @@
     <Compile Include="Algorithm\AStarAlgorithm\MapService\ToCurveMapHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MapService\ToPointMapHelper.cs" />
     <Compile Include="Algorithm\AStarAlgorithm\MinHeap.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\CostGetterService\CotterGetterService.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\NodeModel.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\PointMap.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\Model\RoutePlanMap.cs" />
+    <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\RoutePlanner.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
     <Compile Include="Algorithm\ThMEPPolygonRepairService.cs" />
