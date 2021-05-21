@@ -524,7 +524,7 @@ namespace ThMEPEngineCore
         public void THHYDRANT()
         {
             //
-            using (var sr = new StreamReader("D:\\18.geojson"))
+            using (var sr = new StreamReader("D:\\有洞空间和母子空间.dwg.Info.geojson"))
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 var hydrant = new ThHydrantEngineMgd();
@@ -551,11 +551,11 @@ namespace ThMEPEngineCore
                                     {
                                         if (f.Geometry is Polygon polygon)
                                         {
-                                            polygon.ToDbPolylines().ForEach(p => acadDatabase.ModelSpace.Add(p));
+                                            acadDatabase.ModelSpace.Add(polygon.ToDbMPolygon());
                                         }
                                         else if (f.Geometry is MultiPolygon mPolygon)
                                         {
-                                            mPolygon.ToDbPolylines().ForEach(p => acadDatabase.ModelSpace.Add(p));
+                                            acadDatabase.ModelSpace.Add(mPolygon.ToDbMPolygon());
                                         }
                                         else
                                         {
