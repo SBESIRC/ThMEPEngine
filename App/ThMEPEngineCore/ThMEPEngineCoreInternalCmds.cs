@@ -108,6 +108,28 @@ namespace ThMEPEngineCore
             }
         }
 
+        [CommandMethod("TIANHUACAD", "THBUILDMPOLYGON", CommandFlags.Modal)]
+        public void ThBuildMPolygon()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetSelection();
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var objs = new DBObjectCollection();
+                foreach (var obj in result.Value.GetObjectIds())
+                {
+                    objs.Add(acadDatabase.Element<Entity>(obj));
+                }
+                var mPolygon = objs.BuildMPolygon();
+                acadDatabase.ModelSpace.Add(mPolygon);
+                mPolygon.SetDatabaseDefaults();
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THAREAUNION", CommandFlags.Modal)]
         public void ThAreaUnion()
         {

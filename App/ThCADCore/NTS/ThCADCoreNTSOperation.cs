@@ -98,7 +98,7 @@ namespace ThCADCore.NTS
             return poylgons;
         }
 
-        public static MPolygon BuildMPolygonArea(this DBObjectCollection objs)
+        public static MPolygon BuildMPolygon(this DBObjectCollection objs)
         {
             Geometry geometry = objs.BuildAreaGeometry();
             if (geometry is Polygon polygon)
