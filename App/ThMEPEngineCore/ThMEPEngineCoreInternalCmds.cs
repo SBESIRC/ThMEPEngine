@@ -366,54 +366,57 @@ namespace ThMEPEngineCore
                     new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
                     new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
                     new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
+                    new ThOuterBoundaryExtractor{ ColorIndex=8,ElementLayer="AI-OuterBoundary"} //外墙边界
                 };
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
 
                 extractEngine.OutputGeo(Active.Document.Name);
                 extractEngine.Print(acadDatabase.Database);
-
-                var parseService = new ThFireHydrantResultParseService();
-                parseService.Parse(@"E:\ZheDa\FireHydrantCover\GeoJsonTest\t2.result.txt");
-
-                var colorIndexes = new List<int>();
-                foreach (var data in parseService.Results)
+                if(false)
                 {
-                    if (data.IsValid())
+                    var parseService = new ThFireHydrantResultParseService();
+                    parseService.Parse(@"E:\ZheDa\FireHydrantCover\GeoJsonTest\t2.result.txt");
+
+                    var colorIndexes = new List<int>();
+                    foreach (var data in parseService.Results)
                     {
-                        ObjectIdList objIds = new ObjectIdList();
-                        GetColorIndex(colorIndexes);
-                        var colorIndex = colorIndexes[colorIndexes.Count - 1];
-                        Circle circle = new Circle(data.Position, Vector3d.ZAxis, 0.5);
-                        circle.ColorIndex = colorIndex;
-                        circle.SetDatabaseDefaults();
-                        objIds.Add(acadDatabase.ModelSpace.Add(circle));
-                        var outerPoly = new Polyline();
-                        for (int i = 0; i < data.OuterPoints.Count; i++)
+                        if (data.IsValid())
                         {
-                            var pt = data.OuterPoints[i];
-                            outerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
-                        }
-                        outerPoly.ColorIndex = colorIndex;
-                        outerPoly.SetDatabaseDefaults();
-                        objIds.Add(acadDatabase.ModelSpace.Add(outerPoly));
-
-                        if (data.InnerPoints.Count >= 3)
-                        {
-                            var innerPoly = new Polyline();
-                            for (int i = 0; i < data.InnerPoints.Count; i++)
+                            ObjectIdList objIds = new ObjectIdList();
+                            GetColorIndex(colorIndexes);
+                            var colorIndex = colorIndexes[colorIndexes.Count - 1];
+                            Circle circle = new Circle(data.Position, Vector3d.ZAxis, 0.5);
+                            circle.ColorIndex = colorIndex;
+                            circle.SetDatabaseDefaults();
+                            objIds.Add(acadDatabase.ModelSpace.Add(circle));
+                            var outerPoly = new Polyline();
+                            for (int i = 0; i < data.OuterPoints.Count; i++)
                             {
-                                var pt = data.InnerPoints[i];
-                                innerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
+                                var pt = data.OuterPoints[i];
+                                outerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
                             }
-                            innerPoly.ColorIndex = colorIndex;
-                            innerPoly.SetDatabaseDefaults();
-                            objIds.Add(acadDatabase.ModelSpace.Add(innerPoly));
-                        }
+                            outerPoly.ColorIndex = colorIndex;
+                            outerPoly.SetDatabaseDefaults();
+                            objIds.Add(acadDatabase.ModelSpace.Add(outerPoly));
 
-                        if (objIds.Count > 0)
-                        {
-                            GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
+                            if (data.InnerPoints.Count >= 3)
+                            {
+                                var innerPoly = new Polyline();
+                                for (int i = 0; i < data.InnerPoints.Count; i++)
+                                {
+                                    var pt = data.InnerPoints[i];
+                                    innerPoly.AddVertexAt(i, new Point2d(pt.X, pt.Y), 0, 0, 0);
+                                }
+                                innerPoly.ColorIndex = colorIndex;
+                                innerPoly.SetDatabaseDefaults();
+                                objIds.Add(acadDatabase.ModelSpace.Add(innerPoly));
+                            }
+
+                            if (objIds.Count > 0)
+                            {
+                                GroupTools.CreateGroup(acadDatabase.Database, Guid.NewGuid().ToString(), objIds);
+                            }
                         }
                     }
                 }
