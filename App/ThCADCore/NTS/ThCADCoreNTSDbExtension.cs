@@ -235,60 +235,6 @@ namespace ThCADCore.NTS
             }
         }
 
-        public static Polygon ToNTSPolygon(this MPolygon mPolygon)
-        {
-            Polyline shell = null;
-            List<Polyline> holes = new List<Polyline>();
-            for (int i = 0; i < mPolygon.NumMPolygonLoops; i++)
-            {
-                LoopDirection direction = mPolygon.GetLoopDirection(i);
-                MPolygonLoop mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
-                Polyline polyline = new Polyline()
-                {
-                    Closed = true
-                };
-                for (int j = 0; j < mPolygonLoop.Count; j++)
-                {
-                    var bulgeVertex = mPolygonLoop[j];
-                    polyline.AddVertexAt(j, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
-                }
-                if(LoopDirection.Exterior == direction)
-                {
-                    shell = polyline;
-                }
-                else if (LoopDirection.Interior == direction)
-                {
-                    holes.Add(polyline);
-                }
-                else
-                {
-                    throw new NotSupportedException();
-                }
-            }
-            if(shell == null && holes.Count == 1)
-            {
-                return holes[0].ToNTSPolygon();
-            }
-            else if(shell != null && holes.Count == 0)
-            {
-                return shell.ToNTSPolygon();
-            }
-            else if(shell != null && holes.Count > 0)
-            {
-                List<LinearRing> holeRings = new List<LinearRing>();
-                holes.ForEach(o => 
-                {
-                    holeRings.Add(o.ToNTSLineString() as LinearRing);
-                });
-                LinearRing shellLinearRing = shell.ToNTSLineString() as LinearRing;
-                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon(shellLinearRing, holeRings.ToArray());
-            }
-            else
-            {
-                return ThCADCoreNTSService.Instance.GeometryFactory.CreatePolygon();
-            }
-        }
-
         public static Polygon ToNTSPolygon(this Circle circle)
         {
             var length = ThCADCoreNTSService.Instance.ArcTessellationLength;
