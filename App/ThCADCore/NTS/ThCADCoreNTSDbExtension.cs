@@ -43,14 +43,6 @@ namespace ThCADCore.NTS
             return plines;
         }
 
-        public static MPolygon ToDbMPolygon(this Polygon polygon)
-        {
-            List<Curve> holes = new List<Curve>();
-            var shell = polygon.Shell.ToDbPolyline();
-            polygon.Holes.ForEach(o => holes.Add(o.ToDbPolyline()));
-            return ThMPolygonTool.CreateMPolygon(shell, holes);
-        }
-
         public static Entity ToDbEntity(this Polygon polygon)
         {
             if (polygon.NumInteriorRings > 0)

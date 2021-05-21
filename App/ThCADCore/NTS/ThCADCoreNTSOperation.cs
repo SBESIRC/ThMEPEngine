@@ -98,6 +98,23 @@ namespace ThCADCore.NTS
             return poylgons;
         }
 
+        public static MPolygon BuildMPolygonArea(this DBObjectCollection objs)
+        {
+            Geometry geometry = objs.BuildAreaGeometry();
+            if (geometry is Polygon polygon)
+            {
+                return polygon.ToDbMPolygon();
+            }
+            else if (geometry is MultiPolygon mPolygons)
+            {
+                return mPolygons.ToDbMPolygon();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public static Geometry BuildAreaGeometry(this DBObjectCollection objs)
         {
             var builder = new ThCADCoreNTSBuildArea();
