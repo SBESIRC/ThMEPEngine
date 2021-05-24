@@ -20,6 +20,10 @@ namespace ThMEPEngineCore.Engine
         }
         public override void Extract(Database database)
         {
+            if (Visitor.LayerFilter.Count == 0)
+            {
+                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
+            }
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(Visitor);
             extractor.Extract(database);
@@ -28,6 +32,10 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database)
         {
+            if (Visitor.LayerFilter.Count == 0)
+            {
+                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
+            }
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(Visitor);
             extractor.ExtractFromMS(database);
@@ -42,11 +50,7 @@ namespace ThMEPEngineCore.Engine
             Visitor = new ThParkingStallVisitor();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
-        {
-            if(Visitor.LayerFilter.Count==0)
-            {
-                Visitor.LayerFilter = ThParkingStallLayerManager.XrefLayers(database).ToHashSet();
-            }
+        {            
             var engine = new ThParkingStallExtractionEngine()
             {
                 Visitor = this.Visitor,

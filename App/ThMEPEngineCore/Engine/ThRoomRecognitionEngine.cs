@@ -13,11 +13,20 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomExtractionEngine : ThSpatialElementExtractionEngine
     {
+        public List<string> LayerFilter { get; set; }
+        public ThRoomExtractionEngine()
+        {
+            LayerFilter = new List<string>();
+        }
         public override void Extract(Database database)
         {
+            if(this.LayerFilter.Count==0)
+            {
+                LayerFilter = ThRoomLayerManager.CurveXrefLayers(database);
+            }
             var visitor = new ThRoomExtractionVisitor()
             {
-                LayerFilter = ThRoomLayerManager.CurveXrefLayers(database),
+                LayerFilter = this.LayerFilter,
             };
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
@@ -27,9 +36,13 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database)
         {
+            if (this.LayerFilter.Count == 0)
+            {
+                LayerFilter = ThRoomLayerManager.CurveXrefLayers(database);
+            }
             var visitor = new ThRoomExtractionVisitor()
             {
-                LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database),
+                LayerFilter = this.LayerFilter,
             };
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
