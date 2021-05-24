@@ -102,7 +102,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             for (int i = 0; i < singleSideBlocks.Count; i++)
             {
                 var sideMainBlk = singleSideBlocks[i].getAllMainAndReMain();
-
+               
                 for (int j = singleSideBlocks[i].secBlk.Count - 1; j >= 0; j--)
                 {
                     var secPt = singleSideBlocks[i].secBlk[j];
@@ -125,9 +125,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                             newSide.secBlk.Add(secPt);
                             singleSideBlocks[i].secBlk.Remove(secPt);
                         }
-
                     }
-
                 }
             }
         }

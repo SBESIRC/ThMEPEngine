@@ -79,7 +79,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var moveLanePoly = new Polyline();
             var prevProjP = movedline.GetClosestPointTo(prevP, true);
             var projP = movedline.GetClosestPointTo(pt, true);
-            
+
             var leftLineTemp = getMoveLinePart(prevProjP, projP, movedline, out int prevPolyInx, out int ptPolyInx);
             var prevConnPt = drawEmgPipeService.getConnectPt(prevBlk, leftLineTemp);
             var prevConnProjPt = leftLineTemp.GetClosestPointTo(prevConnPt, true);
@@ -180,6 +180,54 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return moveLinePart;
         }
 
+
+        public static Polyline cutPolyline(Point3d sp, Point3d ep, Polyline pl)
+        {
+            Polyline returnPl = new Polyline();
+            Point3d spPrj = new Point3d();
+            Point3d epPrj = new Point3d();
+            Tolerance tol = new Tolerance(1, 1);
+
+            if (sp.DistanceTo(pl.StartPoint) <= ep.DistanceTo(pl.StartPoint))
+            {
+                spPrj = pl.GetClosestPointTo(sp, true);
+                epPrj = pl.GetClosestPointTo(ep, true);
+            }
+            else
+            {
+                spPrj = pl.GetClosestPointTo(ep, true);
+                epPrj = pl.GetClosestPointTo(sp, true);
+            }
+
+            int spInx = -1;
+            int epInx = -1;
+
+            for (int i = 0; i < pl.NumberOfVertices; i++)
+            {
+                var lineTemp = pl.GetLineSegmentAt(i);
+
+                if (lineTemp.IsOn(spPrj, tol))
+                {
+                    spInx = i;
+                }
+                if (lineTemp.IsOn(epPrj, tol))
+                {
+                    epInx = i;
+                }
+                if (spInx != -1 && epInx != -1)
+                { break; }
+            }
+
+            returnPl.AddVertexAt(returnPl.NumberOfVertices, spPrj.ToPoint2d(), 0, 0, 0);
+            for (int i = spInx; i < epInx; i++)
+            {
+                returnPl.AddVertexAt(returnPl.NumberOfVertices, pl.GetPoint2dAt(i+1), 0, 0, 0);
+            }
+            returnPl.AddVertexAt(returnPl.NumberOfVertices, epPrj.ToPoint2d(), 0, 0, 0);
+
+            return returnPl;
+        }
+
         private static bool tryDistByDegree(Point3d connPt, Point3d connPtProj, Line seg, out Point3d addPt)
         {
             var bAddPt = false;
@@ -210,7 +258,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     adjacent = opposite / Math.Tan(degree * Math.PI / 180);
 
-                    if (adjacent < seg.Length / 5 && adjacent<= 600)
+                    if (adjacent < seg.Length / 5 && adjacent <= 500 && adjacent >= 100)
                     {
                         addPt = connPtProj + adjacent * (seg.EndPoint - seg.StartPoint).GetNormal();
                         bAddPt = true;
@@ -222,10 +270,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     degree = degree + 5;
                 }
 
-                if (degree >= 80)
+                if (degree >= 90)
                 {
-                    degree = 90;
-                    addPt = seg.StartPoint;
+                    degree = 85;
+
+                    adjacent = opposite / Math.Tan(degree * Math.PI / 180);
+                    addPt = connPtProj + adjacent * (seg.EndPoint - seg.StartPoint).GetNormal();
+
                     bAddPt = true;
                     bEnd = true;
                 }

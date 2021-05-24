@@ -19,10 +19,9 @@ namespace ThMEPLighting.EmgLightConnect.Model
         private List<Point3d> m_tolBlk;
         private List<Point3d> m_reMainBlk;
         private List<Point3d> m_reSecBlk;
-
         private Matrix3d m_matrix;
-
         private List<(Point3d, Point3d)> m_ptConnect;
+        private List<(Polyline, List<Point3d>)> m_moveLaneList;
 
         #region properties
         public int laneSideNo { get; set; }
@@ -94,23 +93,30 @@ namespace ThMEPLighting.EmgLightConnect.Model
         public List<Point3d> reMainBlk
         {
             get
-                {
+            {
                 return m_reMainBlk;
             }
-            
+
         }
 
         public List<Point3d> reSecBlk
         {
             get { return m_reSecBlk; }
-            
+
         }
 
-        public List<(Point3d,Point3d)> ptLink
+        public List<(Point3d, Point3d)> ptLink
         {
             get { return m_ptConnect; }
         }
 
+        public List<(Polyline, List<Point3d>)> moveLaneList
+        {
+            get
+            {
+                return m_moveLaneList;
+            }
+        }
         #endregion
 
         public ThSingleSideBlocks(List<Point3d> mainBlock, List<(Line, int)> laneSide)
@@ -126,6 +132,7 @@ namespace ThMEPLighting.EmgLightConnect.Model
 
             this.m_reMainBlk = new List<Point3d>();
             this.m_reSecBlk = new List<Point3d>();
+            this.m_moveLaneList = new List<(Polyline, List<Point3d>)>();
         }
 
         public void setGroupGroup(Dictionary<Point3d, Point3d> groupBlock)
@@ -238,6 +245,12 @@ namespace ThMEPLighting.EmgLightConnect.Model
             m_reSecBlk = regroupSec;
         }
 
+        public void setMoveLaneList(List<(Polyline, List<Point3d>)> moveLaneList)
+        {
+            m_moveLaneList = moveLaneList;
+        }
+
+
         public int blkConnectNo(Point3d pt)
         {
             var tol = new Tolerance(1, 1);
@@ -273,13 +286,13 @@ namespace ThMEPLighting.EmgLightConnect.Model
 
         public void connectPt(Point3d pt1, Point3d pt2)
         {
-            if (alreadyConnect(pt1,pt2)==false)
+            if (alreadyConnect(pt1, pt2) == false)
             {
                 m_ptConnect.Add((pt1, pt2));
             }
         }
 
-        public  List<Point3d> getAllMainAndReMain()
+        public List<Point3d> getAllMainAndReMain()
         {
             var returnList = new List<Point3d>();
             returnList.AddRange(this.reMainBlk);

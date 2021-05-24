@@ -33,6 +33,7 @@
     <Compile Include="EmgLightConnect\ConnectEmgLightEngine.cs" />
     <Compile Include="EmgLightConnect\ConnectService\connectSingleSideBlkService.cs" />
     <Compile Include="EmgLightConnect\ConnectService\connectSingleSideInGroupService.cs" />
+    <Compile Include="EmgLightConnect\ConnectService\reclassMainSec.cs" />
     <Compile Include="EmgLightConnect\ConnectService\returnValueCalculation.cs" />
     <Compile Include="EmgLightConnect\drawLineService\drawCorrectLinkService.cs" />
     <Compile Include="EmgLightConnect\drawLineService\drawEmgPipeService.cs" />
