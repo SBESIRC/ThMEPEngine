@@ -967,7 +967,6 @@ namespace ThCADCore.Test
                     item.Boundary.ColorIndex = 2;
                     acadDatabase.ModelSpace.Add(item.Boundary);
                 }
-
             }
         }
     }

@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 
 namespace ThCADCore.NTS
 {
@@ -125,6 +126,11 @@ namespace ThCADCore.NTS
         {
             var loops = multiPolygon.Geometries.Cast<Polygon>().Select(o => o.ToDbCollection()).ToList();
             return ThMPolygonTool.CreateMPolygon(loops);
+        }
+
+        public static Point3d GetMaximumInscribedCircleCenter(this MPolygon shell)
+        {
+            return shell.ToNTSPolygon().GetCenterMaximumInscribedCircle();
         }
     }
 }

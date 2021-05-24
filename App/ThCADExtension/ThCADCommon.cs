@@ -193,6 +193,12 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "管道内外段与进出风口对照.json");
         }
 
+        // 消防喷淋块
+        public static string AutoFireAlarmSystemDwgPath()
+        {
+            return Path.Combine(SupportPath(), "火灾自动报警系统图.dwg");
+        }
+
 
         // 运行时根目录
         private static string RootPath()

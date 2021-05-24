@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADExtension;
+using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
 
@@ -41,7 +42,7 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             //ToDO
             if (entity is BlockReference br)
             {
-                var blockName = br.GetEffectiveName();
+                var blockName = br.Name;
                 if (BlockNameDic.Keys.Contains(blockName))
                 {
                     return true;
@@ -50,21 +51,44 @@ namespace ThMEPElectrical.SystemDiagram.Engine
             return false;
         }
 
+        private List<BlockReference> ExplodeBlockReference(BlockReference br)
+        {
+            List<BlockReference> rValue = new List<BlockReference>();
+            var blockName = br.GetEffectiveName();
+            if (BlockNameDic.Keys.Contains(blockName))
+            {
+                rValue.Add(br);
+            }
+            else
+            {
+                var objs = new DBObjectCollection();
+                br.Explode(objs);//炸开一层
+                foreach (Entity ent in objs)
+                {
+                    if  (IsDistributionElement(ent))
+                    {
+                        rValue.Add(ent as BlockReference);
+                    }
+                }
+            }
+            return rValue;
+        }
+
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            if(IsDistributionElement(blkref))
+            ExplodeBlockReference(blkref).ForEach(br =>
             {
                 var info = new ElementInfo()
                 {
-                    Layer = blkref.Layer,
-                    Name = blkref.GetEffectiveName()
+                    Layer = br.Layer,
+                    Name = br.Name
                 };
                 elements.Add(new ThRawIfcDistributionElementData()
                 {
                     Data = info,
-                    Geometry = blkref.GetTransformedCopy(matrix),
+                    Geometry = br.GetTransformedCopy(matrix),
                 });
-            }
+            });
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
@@ -85,9 +109,10 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
         private void Build()
         {
-            BlockNameDic.Add("E-BFAS410-2", "火灾应急广播扬声器");
-            BlockNameDic.Add("E-BFAS410-3", "火灾应急广播扬声器");
-            BlockNameDic.Add("E-BFAS410-4", "火灾应急广播扬声器");
+            foreach (var blockInfo in ThBlockConfigModel.BlockConfig)
+            {
+                BlockNameDic.Add(blockInfo.BlockName, blockInfo.BlockNameRemark);
+            }
         }
     }
     public class ElementInfo
