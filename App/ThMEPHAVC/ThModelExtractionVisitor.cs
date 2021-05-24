@@ -27,8 +27,7 @@ namespace ThMEPHVAC
         {
             if (entity is BlockReference reference)
             {
-                var blockName = reference.GetEffectiveName();
-                return blockName.Contains(ThHvacCommon.HTFC_BLOCK_NAME);
+                return reference.IsRawModel();
             }
             return false;
         }
