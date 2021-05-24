@@ -12,11 +12,13 @@ namespace ThMEPEngineCore.Temp
     {
         public List<Polyline> ToiletGroups { get; private set; }
         public Dictionary<Polyline, string> ToiletGroupId { get; private set; }
+        private const string AlignmentVectorPropertyName = "AlignmentVector";
+        private const string NeibourIdsPropertyName = "NeighborIds";
         public ThToiletGroupExtractor()
         {
             ToiletGroups = new List<Polyline>();
             ToiletGroupId = new Dictionary<Polyline, string>();
-            Category = "卫生间分组";
+            Category = "Region";
             ElementLayer = "卫生间分组";
         }
 
@@ -28,7 +30,6 @@ namespace ThMEPEngineCore.Temp
             };
             instance.Extract(database, pts);
             ToiletGroups = instance.ToiletGroups;
-
             ToiletGroups.ForEach(o => ToiletGroupId.Add(o, Guid.NewGuid().ToString()));
         }
 
@@ -41,6 +42,8 @@ namespace ThMEPEngineCore.Temp
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(IdPropertyName, ToiletGroupId[o]);
                 geometry.Properties.Add(CategoryPropertyName, Category);
+                geometry.Properties.Add(AlignmentVectorPropertyName,new double[] { 1.000000, 0.000000 });
+                geometry.Properties.Add(NeibourIdsPropertyName, new string[] { });
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
