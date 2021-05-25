@@ -19,18 +19,6 @@ namespace ThMEPEngineCore.Service
             }
         }
 
-        public static List<string> CurveModelSpaceLayers(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                return acadDatabase.Layers
-                    .Where(o => IsVisibleLayer(o))
-                    .Where(o => IsModelSpaceRoomLayer(o.Name))
-                    .Select(o => o.Name)
-                    .ToList();
-            }
-        }
-
         private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
         {
             return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
@@ -44,15 +32,6 @@ namespace ThMEPEngineCore.Service
                 return false;
             }
             return patterns[0] == "ROOM";
-        }
-        private static bool IsModelSpaceRoomLayer(string name)
-        {
-            string[] patterns = name.ToUpper().Split('-').ToArray();
-            if (patterns.Count() < 2)
-            {
-                return false;
-            }
-            return patterns[0] == "AI" && patterns[1] == "空间框线";
         }
     }
 }

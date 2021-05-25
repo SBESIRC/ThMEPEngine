@@ -55,5 +55,24 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(uiDrainage);
         }
 
+        /// <summary>
+        /// Tian Hua arrange pumps in water well
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THAPBYUI", CommandFlags.Modal)]
+        public void ThArrangePumpWithUI()
+        {
+            var ui = new uiWaterWellPump();
+            AcadApp.ShowModelessWindow(ui);
+        }
+
+        /// <summary>
+        /// Tian Hua create rain system diagram
+        /// </summary>
+        [CommandMethod("TIANHUACAD", "THCRSDBYUI", CommandFlags.Modal)]
+        public void ThCreateRainSystemDiagram()
+        {
+            var ui = new uiRainSystem();
+            AcadApp.ShowModelessWindow(ui);
+        }
     }
 }

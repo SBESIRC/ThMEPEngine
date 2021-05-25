@@ -16,6 +16,7 @@ using ThMEPWSS.Uitl.ExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using DU = ThMEPWSS.Assistant.DrawUtils;
 using ThMEPEngineCore.Model.Common;
+using ThMEPWSS.Uitl;
 
 namespace ThMEPWSS.Pipe.Model
 {
@@ -32,6 +33,7 @@ namespace ThMEPWSS.Pipe.Model
         None,
         Gravity,//重力雨水斗
         Side,//侧入式雨水斗
+        _87,//87雨水斗
     }
 
     public enum RainOutputTypeEnum
@@ -141,8 +143,10 @@ namespace ThMEPWSS.Pipe.Model
         public const double INDEX_TEXT_OFFSET_Y = 130;
         public const double RF_OFFSET_Y = 500;
 
-
+        [JsonIgnore]
+        public GRect Boundary;
         public List<ThWSDWaterBucket> Buckets { get; set; } = new List<ThWSDWaterBucket>();
+        //用于RF层
         public List<ThWSDPipe> VerticalPipes { get; set; } = new List<ThWSDPipe>();
         [JsonIgnore]
         public Point3dCollection Range { get; set; }
@@ -213,6 +217,13 @@ namespace ThMEPWSS.Pipe.Model
                         ctx.RainSystemDrawingContext.WaterBucketPoint = pt;
                         Dr.DrawSideWaterBucket(pt);
                         Dr.DrawSideWaterBucketLabel(pt.OffsetXY(-215, 318), $"侧入式雨水斗{DN}");
+                    }
+                    break;
+                case WaterBucketEnum._87:
+                    {
+                        //后面看看怎么画
+                        Dr.DrawGravityWaterBucket(basePt);
+                        Dr.DrawGravityWaterBucketLabel(basePt.OffsetXY(0, 125), $"87雨水斗{DN}");
                     }
                     break;
                 default:
@@ -342,21 +353,19 @@ namespace ThMEPWSS.Pipe.Model
         }
     }
 
-    public class ThWSystemDiagram : ThWSDDrawableElement
+    public class ThWSystemDiagram
     {
         protected ThWSystemDiagram()
         {
 
         }
 
-        override public void Draw(Point3d basePt, Matrix3d mat)
+        public void Draw(Point3d basePt, Matrix3d mat)
         {
-            throw new NotImplementedException();
         }
 
-        override public void Draw(Point3d basePt)
+        public void Draw(Point3d basePt)
         {
-            throw new NotImplementedException();
         }
     }
 }

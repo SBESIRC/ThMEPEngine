@@ -32,6 +32,7 @@
   <ItemGroup>
     <Compile Include="Assistant\DrawUtils.cs" />
     <Compile Include="Assistant\FengDbgTest.cs" />
+    <Compile Include="Assistant\FengDbgTesting.cs" />
     <Compile Include="Assistant\FengKeys.cs" />
     <Compile Include="Assistant\FengNTSTest.cs" />
     <Compile Include="Assistant\ThWRainSystemDiagramTest.cs" />
@@ -209,6 +210,8 @@
     <Compile Include="ThSystemDiagramCmds.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
+    <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
+    <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Content Include="Uitl\todoList.txt" />
     <Compile Include="ThSystemDiagramCmds.THCSSD.cs" />
     <Compile Include="ThWaterwellPumpCmds.cs" />

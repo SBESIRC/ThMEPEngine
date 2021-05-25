@@ -16,6 +16,9 @@ using Dreambuild.AutoCAD;
 using ThMEPWSS.Pipe.Geom;
 using Autodesk.AutoCAD.Internal;
 using ThMEPWSS.Uitl.ExtensionsNs;
+using System.Windows.Forms;
+using NetTopologySuite.Geometries;
+using ThMEPWSS.DebugNs;
 
 namespace ThMEPWSS.Assistant
 {
@@ -42,9 +45,25 @@ namespace ThMEPWSS.Assistant
     }
     public class DrawingTransaction : IDisposable
     {
+        AcadDatabase adb;
+        public DrawingTransaction(AcadDatabase adb) : this()
+        {
+            this.adb = adb;
+        }
+        public DrawingTransaction()
+        {
+            DrawUtils.DrawingQueue.Clear();
+        }
         public void Dispose()
         {
-            DrawUtils.Draw();
+            if (adb != null)
+            {
+                DrawUtils.Draw(adb);
+            }
+            else
+            {
+                DrawUtils.Draw();
+            }
         }
     }
     public static class DrawUtils
@@ -52,6 +71,34 @@ namespace ThMEPWSS.Assistant
         public static DrawingTransaction DrawingTransaction => new DrawingTransaction();
         public static Queue<Action<AcadDatabase>> DrawingQueue { get; } = new Queue<Action<AcadDatabase>>(4096);
         static readonly Dictionary<string, ObjectId> d = new Dictionary<string, ObjectId>();
+        public static void Dispose()
+        {
+            DrawingQueue.Clear();
+        }
+        public static List<Action<AcadDatabase>> TakeAllDrawingActions()
+        {
+            var lst = DrawingQueue.ToList();
+            DrawingQueue.Clear();
+            return lst;
+        }
+        public static void Draw(IEnumerable<Action<AcadDatabase>> fs, AcadDatabase adb, bool notifyOnException = true)
+        {
+            foreach (var f in fs)
+            {
+                try
+                {
+                    f(adb);
+                }
+                catch (System.Exception ex)
+                {
+                    if (notifyOnException)
+                    {
+                        MessageBox.Show((ex.InnerException ?? ex).Message);
+                    }
+                    break;
+                }
+            }
+        }
         public static ObjectId GetTextStyleId(string textStyleName)
         {
             if (!d.TryGetValue(textStyleName, out ObjectId id))
@@ -78,24 +125,23 @@ namespace ThMEPWSS.Assistant
         public static void Draw()
         {
             if (DrawingQueue.Count == 0) return;
+            using (var adb = AcadDatabase.Active())
+            {
+                Draw(adb);
+            }
+        }
+        public static void Draw(AcadDatabase adb)
+        {
             try
             {
-                using (var adb = AcadDatabase.Active())
+                while (DrawingQueue.Count > 0)
                 {
-                    Draw(adb);
+                    DrawingQueue.Dequeue()(adb);
                 }
             }
             finally
             {
                 if (DrawingQueue.Count > 0) DrawingQueue.Clear();
-            }
-        }
-
-        public static void Draw(AcadDatabase adb)
-        {
-            while (DrawingQueue.Count > 0)
-            {
-                DrawingQueue.Dequeue()(adb);
             }
         }
         public static void SetLayerAndColorIndex(string layer, int colorIndex, params Entity[] ents)
@@ -106,13 +152,13 @@ namespace ThMEPWSS.Assistant
                 ent.ColorIndex = colorIndex;
             }
         }
-        public static void DrawEntitiesLazy<T>(IList<T> ents) where T : Entity
-        {
-            DrawingQueue.Enqueue(adb => ents.ForEach(ent => adb.ModelSpace.Add(ent)));
-        }
         public static void DrawEntityLazy(Entity ent)
         {
             DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(ent));
+        }
+        public static void DrawEntitiesLazy<T>(IList<T> ents) where T : Entity
+        {
+            DrawingQueue.Enqueue(adb => ents.ForEach(ent => adb.ModelSpace.Add(ent)));
         }
         public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle)
         {
@@ -256,9 +302,9 @@ namespace ThMEPWSS.Assistant
         }
         public static void DrawBoundaryLazy(Entity e, double thickness = 2)
         {
-            DrawingQueue.Enqueue(adb => { DrawBoundary(adb.Database, e, thickness); });
+            DrawingQueue.Enqueue(adb => { _DrawBoundary(adb.Database, e, thickness); });
         }
-        public static void DrawBoundary(Database db, Entity e, double thickness)
+        public static void _DrawBoundary(Database db, Entity e, double thickness)
         {
             //if (e is BlockReference br)
             //{
@@ -284,9 +330,21 @@ namespace ThMEPWSS.Assistant
         {
             return DrawRectLazy(leftButtom, new Point3d(leftButtom.X + width, leftButtom.Y - height, leftButtom.Z));
         }
-        public static Polyline DrawLineSegment(GLineSegment seg)
+        public static Line DrawLineSegment(GLineSegment seg)
         {
-            return DrawRectLazy(new GRect(seg.StartPoint, seg.EndPoint));
+            return DrawLineLazy(seg.StartPoint, seg.EndPoint);
+        }
+        public static Polyline DrawPolyLineLazy(Coordinate[] coordinates)
+        {
+            return DrawPolyLineLazy(coordinates.Select(c => c.ToPoint3d()).ToArray());
+        }
+        public static Polyline DrawPolyLineLazy(GLineSegment seg)
+        {
+            var c = new Point2dCollection() { seg.StartPoint, seg.EndPoint };
+            var pl = new Polyline();
+            PolylineTools.CreatePolyline(pl, c);
+            DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(pl));
+            return pl;
         }
         public static Polyline DrawRectLazy(GRect rect)
         {
@@ -355,6 +413,10 @@ namespace ThMEPWSS.Assistant
         public static Line DrawLineLazy(double x1, double y1, double x2, double y2)
         {
             return DrawLineLazy(new Point3d(x1, y1, 0), new Point3d(x2, y2, 0));
+        }
+        public static Line DrawLineLazy(Point2d start, Point2d end)
+        {
+            return DrawLineLazy(start.ToPoint3d(), end.ToPoint3d());
         }
         public static Line DrawLineLazy(Point3d start, Point3d end)
         {
@@ -426,6 +488,28 @@ namespace ThMEPWSS.Assistant
             }
 
             return objectIds;
+        }
+        public static Polyline DrawLineString(LineString lineString)
+        {
+            var points = new Point3d[lineString.NumPoints];
+            for (int i = 0; i < lineString.NumPoints; i++)
+            {
+                var pt = lineString.GetPointN(i);
+                var p = new Point3d(pt.X, pt.Y, pt.Z);
+                points[i] = p;
+            }
+            return DrawPolyLineLazy(points);
+        }
+        public static Polyline DrawLinearRing(LinearRing ring)
+        {
+            var points = new Point3d[ring.NumPoints];
+            for (int i = 0; i < ring.NumPoints; i++)
+            {
+                var pt = ring.GetPointN(i);
+                var p = new Point3d(pt.X, pt.Y, pt.Z);
+                points[i] = p;
+            }
+            return DrawPolyLineLazy(points);
         }
 
         /// <summary>

@@ -11,8 +11,8 @@ namespace ThMEPWSS.Assistant
         public const string ThWRainSystemDiagramData = "qrjq0x";
         public const string ThRainSystemServiceContextData = "qrjq0y";
         public const string LinesGroupData = "qrjq0z";
-        public const string qrjq1a = "qrjq1a";
-        public const string qrjq1b = "qrjq1b";
+        public const string StoreysJsonData210519 = "qrjq1a";
+        public const string WaterBucketsJsonData210519 = "qrjq1b";
         public const string qrjq1c = "qrjq1c";
         public const string qrjq1d = "qrjq1d";
         public const string qrjq1e = "qrjq1e";

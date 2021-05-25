@@ -49,33 +49,35 @@ namespace ThMEPWSS
         [CommandMethod("TIANHUACAD", "LocatePipe", CommandFlags.Modal)]
         public void ShowVerticalPipe()
         {
-            var rst = AcHelper.Active.Editor.GetString("\n输入立管编号");
-            if (rst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
-            {
-                return;
-            }
+            //var rst = AcHelper.Active.Editor.GetString("\n输入立管编号");
+            //if (rst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+            //{
+            //    return;
+            //}
 
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-            using (var adb = AcadDatabase.Active())
-            using (var tr = DrawUtils.DrawingTransaction)
-            {
-                string targetLabel = rst.StringResult;
-                var db = adb.Database;
-                Dbg.BuildAndSetCurrentLayer(db);
-                var sv = new ThRainSystemService() { adb = adb };
-                sv.InitCache();
-                sv.CollectVerticalPipesData();
-                foreach (var e in sv.VerticalPipes)
-                {
-                    if (sv.VerticalPipeToLabelDict.TryGetValue(e, out string lb))
-                    {
-                        if (lb == targetLabel)
-                        {
-                            Dbg.ShowWhere(e);
-                        }
-                    }
-                }
-            }
+            //using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            //using (var adb = AcadDatabase.Active())
+            //using (var tr = DrawUtils.DrawingTransaction)
+            //{
+            //    string targetLabel = rst.StringResult;
+            //    var db = adb.Database;
+            //    Dbg.BuildAndSetCurrentLayer(db);
+
+            //    var sv = new ThRainSystemService() { adb = adb };
+            //    sv.InitCache();
+            //    sv.CollectVerticalPipesData();
+            //    foreach (var e in sv.VerticalPipes)
+            //    {
+            //        if (sv.VerticalPipeToLabelDict.TryGetValue(e, out string lb))
+            //        {
+            //            if (lb == targetLabel)
+            //            {
+            //                Dbg.ShowWhere(e);
+            //            }
+            //        }
+            //    }
+            //}
+            DebugNs.Util1.FindText();
         }
         [CommandMethod("TIANHUACAD", "TzTest", CommandFlags.Modal)]
         public void TzTest()

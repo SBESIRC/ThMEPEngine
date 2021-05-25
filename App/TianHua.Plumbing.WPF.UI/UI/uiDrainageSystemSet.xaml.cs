@@ -35,7 +35,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void Cancle_Click(object sender, RoutedEventArgs e)
         {
-            this.DialogResult = true;
+            this.DialogResult = false;
             this.Close();
         }
 
@@ -47,7 +47,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 MessageBox.Show("输入的数据有错误，请检查输入后在进行后续操作", "天华-提醒", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
-            this.DialogResult = false;
+            this.DialogResult = true;
             this.Close();
         }
     }

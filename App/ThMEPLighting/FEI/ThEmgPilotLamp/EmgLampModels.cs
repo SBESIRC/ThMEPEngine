@@ -214,10 +214,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// 节点类型（扩展用）
         /// </summary>
         public int nodeType { get; set; }
-        /// <summary>
-        /// 扩展数据
-        /// </summary>
-        public object tag { get; set; }
     }
     /// <summary>
     /// 图中点到出口点的行走路线

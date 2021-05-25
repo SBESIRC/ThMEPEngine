@@ -20,6 +20,10 @@ using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
 using DotNetARX;
 using System.Collections;
 using PolylineTools = ThMEPWSS.Pipe.Service.PolylineTools;
+using ThMEPWSS.CADExtensionsNs;
+using NetTopologySuite.Geometries;
+using Autodesk.AutoCAD.ApplicationServices;
+using Linq2Acad;
 
 namespace ThMEPWSS.Uitl
 {
@@ -509,18 +513,19 @@ namespace ThMEPWSS.Uitl
             foreach (var o in objs) AddObj(o);
         }
     }
+    public class CText
+    {
+        public GRect Boundary;
+        public string Text;
+    }
     public struct GRect
     {
         public bool IsNull => Equals(this, default(GRect));
         public bool IsValid => Width > 0 && Height > 0;
-        double x1;
-        double y1;
-        double x2;
-        double y2;
-        public double MinX { get => Math.Min(x1, x2); }
-        public double MinY { get => Math.Min(y1, y2); }
-        public double MaxX { get => Math.Max(x1, x2); }
-        public double MaxY { get => Math.Max(y1, y2); }
+        public double MinX { get; }
+        public double MinY { get; }
+        public double MaxX { get; }
+        public double MaxY { get; }
         public Point2d LeftTop => new Point2d(MinX, MaxY);
         public Point2d LeftButtom => new Point2d(MinX, MinY);
         public Point2d RightButtom => new Point2d(MaxX, MinY);
@@ -528,10 +533,10 @@ namespace ThMEPWSS.Uitl
         public Point2d Center => new Point2d(CenterX, CenterY);
         public GRect(double x1, double y1, double x2, double y2)
         {
-            this.x1 = Math.Min(x1, x2);
-            this.y2 = Math.Min(y1, y2);
-            this.x2 = Math.Max(x1, x2);
-            this.y1 = Math.Max(y1, y2);
+            MinX = Math.Min(x1, x2);
+            MinY = Math.Min(y1, y2);
+            MaxX = Math.Max(x1, x2);
+            MaxY = Math.Max(y1, y2);
         }
         public GRect OffsetXY(double deltaX, double deltaY)
         {
@@ -550,6 +555,10 @@ namespace ThMEPWSS.Uitl
         {
             return new GRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
         }
+        public static GRect Create(Point2d pt, double ext)
+        {
+            return new GRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
+        }
         public GRect(Point2d leftTop, double width, double height) : this(leftTop.X, leftTop.Y, leftTop.X + width, leftTop.Y - height)
         {
         }
@@ -564,42 +573,9 @@ namespace ThMEPWSS.Uitl
         public double Height => MaxY - MinY;
         public double CenterX => (MinX + MaxX) / 2;
         public double CenterY => (MinY + MaxY) / 2;
-        public double OuterRadius
-        {
-            get
-            {
-                return GeoAlgorithm.Distance(new Point2d(MinX, MinY), new Point2d(CenterX, CenterY));
-            }
-        }
-        public double InnerRadius
-        {
-            get
-            {
-                return Math.Min(Width, Height) / 2;
-            }
-        }
-        public Extents2d ToExtents2d()
-        {
-            return new Extents2d(MinX, MinY, MaxX, MaxY);
-        }
-        public Polyline CreateRect()
-        {
-            var pline = new Polyline() { Closed = true };
-            var pts = new Point2dCollection() { new Point2d(MinX, MaxY), new Point2d(MaxX, MaxY), new Point2d(MaxX, MinY), new Point2d(MinX, MinY), };
-            for (int i = 0; i < pts.Count; i++)
-            {
-                pline.AddVertexAt(i, pts[i], 0, 0, 0);
-            }
-            return pline;
-        }
-        public Polyline CreatePolygon(int num)
-        {
-            return Pipe.Service.PolylineTools.CreatePolygon(Center, num, Radius);
-        }
-        public Point3dCollection ToPoint3dCollection()
-        {
-            return new Point3dCollection() { new Point3d(MinX, MinY, 0), new Point3d(MinX, MaxY, 0), new Point3d(MaxX, MaxY, 0), new Point3d(MaxX, MinY, 0) };
-        }
+        public double OuterRadius => (new Point2d(MinX, MinY)).GetDistanceTo(new Point2d(CenterX, CenterY));
+        public double InnerRadius => Math.Min(Width, Height) / 2;
+        public Extents2d ToExtents2d() => new Extents2d(MinX, MinY, MaxX, MaxY);
         public GRect Expand(double thickness)
         {
             return new GRect(this.MinX - thickness, this.MinY - thickness, this.MaxX + thickness, this.MaxY + thickness);
@@ -614,7 +590,7 @@ namespace ThMEPWSS.Uitl
             return MinX <= point.X && point.X <= MaxX && MinY <= point.Y && point.Y <= MaxY;
         }
 
-        public bool EqualsTo(GRect other,double tollerance)
+        public bool EqualsTo(GRect other, double tollerance)
         {
             return Math.Abs(this.MinX - other.MinX) < tollerance && Math.Abs(this.MinY - other.MinY) < tollerance
                 && Math.Abs(this.MaxX - other.MaxX) < tollerance && Math.Abs(this.MaxY - other.MaxY) < tollerance;
@@ -622,6 +598,7 @@ namespace ThMEPWSS.Uitl
     }
     public struct GLineSegment
     {
+        public bool IsNull => Equals(this, default(GLineSegment));
         public GLineSegment(double x1, double y1, double x2, double y2)
         {
             X1 = x1;
@@ -639,20 +616,45 @@ namespace ThMEPWSS.Uitl
         public double Y2 { get; }
         public Point2d StartPoint { get => new Point2d(X1, Y1); }
         public Point2d EndPoint { get => new Point2d(X2, Y2); }
-        public double Length => GeoAlgorithm.Distance(StartPoint, EndPoint);
+        public double Length => StartPoint.GetDistanceTo(EndPoint);
         public double MinX => Math.Min(X1, X2);
         public double MaxX => Math.Max(X1, X2);
         public double MinY => Math.Min(Y1, Y2);
         public double MaxY => Math.Max(Y1, Y2);
-        public double AngleDegree => GeoAlgorithm.AngleToDegree((EndPoint - StartPoint).Angle);
+        public double AngleDegree
+        {
+            get
+            {
+                var dg = GeoAlgorithm.AngleToDegree((EndPoint - StartPoint).Angle);
+                if (dg < 0) dg += 360;
+                if (dg >= 360) dg -= 360;
+                return dg;
+            }
+        }
         public bool IsVertical(double tollerance)
         {
-            return Math.Abs(AngleDegree - 90) < tollerance || Math.Abs(AngleDegree - 270) < tollerance;
+            var dg = AngleDegree;
+            if (dg > 180) dg -= 180;
+            return 90 - tollerance <= dg && dg <= 90 + tollerance;
         }
         public bool IsHorizontalOrVertical(double tollerance) => IsHorizontal(tollerance) || IsVertical(tollerance);
         public bool IsHorizontal(double tollerance)
         {
-            return Math.Abs(AngleDegree) < tollerance || Math.Abs(AngleDegree - 180) < tollerance;
+            var dg = AngleDegree;
+            //if (dg > 270) dg -= 360;
+            //return -tollerance <= dg && dg <= tollerance || 180 - tollerance <= dg && dg <= 180 + tollerance;
+            if (dg > 180) dg -= 180;
+            return dg <= tollerance || dg >= 180 - tollerance;
+        }
+        public GLineSegment Extend(double ext)
+        {
+            var vec = EndPoint - StartPoint;
+            var len = vec.Length;
+            if (len == 0) return this;
+            var k = ext / len;
+            var ep = EndPoint + vec * k;
+            var sp = StartPoint + vec * (-k);
+            return new GLineSegment(sp, ep);
         }
         public GLine Line
         {
@@ -762,13 +764,13 @@ namespace ThMEPWSS.Uitl
     {
         public double X;
         public double Y;
-        public double radius;
+        public double Radius;
 
         public GCircle(double x, double y, double radius)
         {
             X = x;
             Y = y;
-            this.radius = radius;
+            this.Radius = radius;
         }
         public GCircle(Point2d center, double radius) : this(center.X, center.Y, radius)
         {
@@ -776,15 +778,15 @@ namespace ThMEPWSS.Uitl
         public Point2d Center => new Point2d(X, Y);
         public bool IsPointInMe(Point2d point)
         {
-            return GeoAlgorithm.Distance(point, Center) < radius;
+            return GeoAlgorithm.Distance(point, Center) < Radius;
         }
         public bool IsPointOutOfMe(Point2d point)
         {
-            return GeoAlgorithm.Distance(point, Center) > radius;
+            return GeoAlgorithm.Distance(point, Center) > Radius;
         }
         public bool IsPointOnMe(Point2d point, double tollerance)
         {
-            return Math.Abs(GeoAlgorithm.Distance(point, Center) - radius) < tollerance;
+            return Math.Abs(GeoAlgorithm.Distance(point, Center) - Radius) < tollerance;
         }
     }
     public struct GTriangle
@@ -966,6 +968,25 @@ namespace ThMEPWSS.Uitl
     }
     public static class GeoAlgorithm
     {
+        public static Point3d ToPoint3d(this Coordinate coordinate)
+        {
+            return new Point3d(coordinate.X, coordinate.Y, coordinate.Z);
+        }
+        public static Point2d ToPoint2d(this Coordinate coordinate)
+        {
+            return new Point2d(coordinate.X, coordinate.Y);
+        }
+        public static bool InRange(double value, double std, double tollerance)
+        {
+            return std - tollerance <= value && value <= std + tollerance;
+        }
+        public static IEnumerable<KeyValuePair<Point2d, Point2d>> YieldPoints(GLineSegment seg1, GLineSegment seg2)
+        {
+            yield return new KeyValuePair<Point2d, Point2d>(seg1.StartPoint, seg2.StartPoint);
+            yield return new KeyValuePair<Point2d, Point2d>(seg1.StartPoint, seg2.EndPoint);
+            yield return new KeyValuePair<Point2d, Point2d>(seg1.EndPoint, seg2.StartPoint);
+            yield return new KeyValuePair<Point2d, Point2d>(seg1.EndPoint, seg2.EndPoint);
+        }
         public static Point2d MidPoint(Point2d pt1, Point2d pt2)
         {
             Point2d midPoint = new Point2d((pt1.X + pt2.X) / 2.0,
@@ -999,9 +1020,35 @@ namespace ThMEPWSS.Uitl
             maxX = pts.Select(pt => pt.X).Max();
             maxY = pts.Select(pt => pt.Y).Max();
         }
-        public static bool CanConnect(GLineSegment seg1, GLineSegment seg2, double dis)
+        public static bool CanConnect(GLineSegment seg1, GLineSegment seg2, double angleTol, double dis)
         {
-            return IsLineConnected(seg1, seg2, 5) || (seg1.IsHorizontalOrVertical(5) && seg2.IsHorizontalOrVertical(5) && IsOnSameLine(seg1, seg2, 5) && GetMinConnectionDistance(seg1, seg2) < dis);
+            return GetMinConnectionDistance(seg1, seg2) <= dis && Math.Abs(seg1.AngleDegree - seg2.AngleDegree) <= angleTol;
+        }
+        public static double mult(Point2d p0, Point2d p1, Point2d p2) //叉积计算,p0为公用节点
+        {
+            return (p0.X - p1.X) * (p0.Y - p2.Y) - (p0.Y - p1.Y) * (p0.X - p2.X);
+        }
+        //判断线段是否相交
+        public static bool IsCross(GLineSegment seg1, GLineSegment seg2)
+        {
+            var p1 = seg1.StartPoint;
+            var p2 = seg1.EndPoint;
+            var p3 = seg2.StartPoint;
+            var p4 = seg2.EndPoint;
+            //先判断两个形成的矩形是否不相交，不相交那线段肯定不相交
+            if (Math.Max(p1.X, p2.X) < Math.Min(p3.X, p4.X)) return false;
+            if (Math.Max(p1.Y, p2.Y) < Math.Min(p3.Y, p4.Y)) return false;
+            if (Math.Max(p3.X, p4.X) < Math.Min(p1.X, p2.X)) return false;
+            if (Math.Max(p3.Y, p4.Y) < Math.Min(p1.Y, p2.Y)) return false;
+            //现在已经满足快速排斥实验，那么后面就是跨立实验内容(叉积判断两个线段是否相交)
+            //正确的话也就是p1,p2要在p3或者p4的两边
+            if (IsDiffSign(mult(p1, p3, p2), mult(p1, p2, p4))) return false;
+            if (IsDiffSign(mult(p3, p1, p4), mult(p3, p4, p2))) return false;
+            return true;
+        }
+        public static bool IsDiffSign(double v1, double v2)
+        {
+            return v1 < 0 && v2 > 0 || v1 > 0 && v2 < 0;
         }
         public static Point3dCollection GetPoint3dCollection(Point3d pt1, Point3d pt2)
         {
@@ -1256,6 +1303,11 @@ namespace ThMEPWSS.Uitl
             return new GRect(new Point2d(Math.Min(x1, x2), Math.Max(y1, y2)),
               new Point2d(Math.Max(x1, x2), Math.Min(y1, y2)));
         }
+        public static GRect GetEntitiesBoundaryRect(IEnumerable<Entity> ents)
+        {
+            if (!SystemDiagramUtils.GetBoundaryRect(out double minX, out double minY, out double maxX, out double maxY, ents.ToArray())) return default;
+            return new GRect(minX, minY, maxX, maxY);
+        }
         public static GRect GetBoundaryRect(params Entity[] ents)
         {
             if (!SystemDiagramUtils.GetBoundaryRect(out double minX, out double minY, out double maxX, out double maxY, ents)) return default;
@@ -1264,6 +1316,67 @@ namespace ThMEPWSS.Uitl
     }
     public class SystemDiagramUtils
     {
+        private static Tuple<Point3d, Point3d> SelectPoints()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
+            Point3d leftDownPt = Point3d.Origin;
+            if (ptLeftRes.Status == PromptStatus.OK)
+            {
+                leftDownPt = ptLeftRes.Value;
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
+            if (ptRightRes.Status == PromptStatus.OK)
+            {
+                return Tuple.Create(leftDownPt, ptRightRes.Value);
+            }
+            else
+            {
+                return Tuple.Create(leftDownPt, leftDownPt);
+            }
+        }
+
+        public static List<string> GetFloorListDatas()
+        {
+            using (var doclock = Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                // 获取楼层框线图块
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "请选择楼层框线",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(BlockReference)).DxfName,
+                };
+                var filter = OpFilter.Bulid(o =>
+                o.Dxf((int)DxfCode.Start) == string.Join(",", dxfNames));
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return new List<string>();
+                }
+                var storeys = result.Value.GetObjectIds()
+                    .Select(o => acadDatabase.Element<BlockReference>(o))
+                    .Where(o => o.GetEffectiveName() == ThWPipeCommon.STOREY_BLOCK_NAME)
+                    .Select(o => o.ObjectId)
+                    .ToObjectIdCollection();
+
+                // 获取楼层名称
+                var service = new ThReadStoreyInformationService();
+                service.Read(storeys);
+
+                return service.StoreyNames.Select(o => o.Item2).ToList();
+            }
+        }
+        
         public static bool GetBoundaryRect(out double minX, out double minY, out double maxX, out double maxY, params Entity[] ents)
         {
             var pts = new Point3dCollection();
