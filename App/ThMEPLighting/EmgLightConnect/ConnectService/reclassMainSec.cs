@@ -16,7 +16,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class reclassMainSec
     {
-        public static void regroupMainSec(List<ThSingleSideBlocks> singleSideBlocks, Polyline frame)
+        public static void regroupMainSec(List<ThSingleSideBlocks> singleSideBlocks, Polyline frame, List<Polyline> holes)
         {
             for (int i = 0; i < singleSideBlocks.Count; i++)
             {
@@ -26,7 +26,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     regroupMainSec(side, out var allBlkDict);
                     side.orderReMainBlk();
 
-                    breakMainGroup(side, frame, allBlkDict);
+                    breakMainGroup(side, frame, holes);
                     side.orderReMainBlk();
 
                 }
@@ -35,6 +35,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static void regroupMainSec(ThSingleSideBlocks side, out List<KeyValuePair<Point3d, Point3d>> allBlkDict)
         {
+            int TolCloseDist = 100;
             List<Point3d> regroupMain = new List<Point3d>();
             List<double> yTransValue = new List<double>();
             var allBlk = side.getTotalBlock();
@@ -86,7 +87,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                            .First();
 
                 //if (ySecMean != 20000)
-                if (ySecMean != 20000 && Math.Abs(ySecMean) > 100) //不在车道线上的点
+                if (ySecMean != 20000 && Math.Abs(ySecMean) > TolCloseDist) //不在车道线上的点
                 {
                     regroupMain = allBlkDict.Where(x => Math.Abs(Math.Abs(x.Value.Y) - Math.Abs(ySecMean)) < EmgConnectCommon.TolRegroupMainYRange).Select(x => x.Key).ToList();
                 }
@@ -99,7 +100,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static void breakMainGroup(ThSingleSideBlocks side, Polyline frame, List<KeyValuePair<Point3d, Point3d>> allBlkDict)
+        private static void breakMainGroup(ThSingleSideBlocks side, Polyline frame, List<Polyline> holes)
         {
             List<Point3d> regroupMain = new List<Point3d>();
 
@@ -109,7 +110,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             if (tempMoveLineList.Count > 0)
             {
 
-                var offsetList = checkMoveLineIntersectOutFrame(tempMoveLineList, frame, offset, side, out var lanePoly, out var moveLanePoly);
+                var offsetList = checkMoveLineIntersectOutFrame(tempMoveLineList, frame, holes, offset, side, out var lanePoly, out var moveLanePoly);
 
                 if (offsetList.Count == 0)
                 {
@@ -138,7 +139,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static void addRemainMainBlk(List<Point3d> reMBlk,ref List<(Polyline, List<Point3d>)> movedLaneList)
+        private static void addRemainMainBlk(List<Point3d> reMBlk, ref List<(Polyline, List<Point3d>)> movedLaneList)
         {
             var reMBlkClone = new List<Point3d>();
             reMBlkClone.AddRange(reMBlk);
@@ -186,52 +187,125 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     offSetDir = side.laneSide[j].Item2 == 0 ? 1 : -1;
                     var tempMoveLine = side.laneSide[j].Item1.GetOffsetCurves(offset * offSetDir)[0] as Line;
 
+                    if (j > 0)
+                    {
+                        if (tempMoveLine.StartPoint.IsEqualTo(tempMoveLineList.Last().EndPoint, new Tolerance(10, 10)) == false)
+                        {
+                            tempMoveLine.StartPoint = tempMoveLineList.Last().EndPoint;
+
+                        }
+                    }
+
                     tempMoveLineList.Add(tempMoveLine);
                 }
             }
             return tempMoveLineList;
         }
 
-        private static List<(double, List<Line>)> checkMoveLineIntersectOutFrame(List<Line> tempMoveLine, Polyline frame, double offset, ThSingleSideBlocks side, out Polyline lanePoly, out Polyline moveLanePoly)
+        //private static List<(double, List<Line>)> checkMoveLineIntersectOutFrame(List<Line> tempMoveLine, Polyline frame, List<Polyline> holes, double offset, ThSingleSideBlocks side, out Polyline lanePoly, out Polyline moveLanePoly)
+        //{
+        //    List<(double, List<Line>)> offsetList = new List<(double, List<Line>)>();
+        //    var lane = side.laneSide.Select(x => x.Item1).ToList();
+        //    lanePoly = getCutLane(lane, side.reMainBlk.First(), side.reMainBlk.Last());
+        //    var moveLineTemp = getCutLane(tempMoveLine, side.reMainBlk.First(), side.reMainBlk.Last());
+        //    moveLanePoly = moveLineTemp.Clone() as Polyline;
+
+        //    var checkIntersectPoly = lanePoly.Clone() as Polyline;
+
+        //    for (int i = moveLineTemp.NumberOfVertices - 1; i >= 0; i--)
+        //    {
+        //        checkIntersectPoly.AddVertexAt(checkIntersectPoly.NumberOfVertices, moveLineTemp.GetPoint2dAt(i), 0, 0, 0);
+        //    }
+        //    checkIntersectPoly.Closed = true;
+
+        //    var pts = moveLineTemp.Intersect(frame, Intersect.OnBothOperands);
+        //    if (pts.Count > 0)
+        //    {
+        //        var polyCollection = new DBObjectCollection() { frame };
+        //        var overlap = checkIntersectPoly.Intersection(polyCollection);
+
+        //        if (overlap.Count > 0)
+        //        {
+        //            var overlapPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
+        //            offsetList = getNewOffsetSeg(overlapPoly, lanePoly, offset);
+        //        }
+        //    }
+
+        //    return offsetList;
+
+        //}
+
+        private static List<(double, List<Line>)> checkMoveLineIntersectOutFrame(List<Line> tempMoveLine, Polyline frame, List<Polyline> holes, double offset, ThSingleSideBlocks side, out Polyline lanePoly, out Polyline moveLanePoly)
         {
             List<(double, List<Line>)> offsetList = new List<(double, List<Line>)>();
             var lane = side.laneSide.Select(x => x.Item1).ToList();
-            lanePoly = getCutLane(lane, side.reMainBlk.First(), side.reMainBlk.Last());
-            var moveLineTemp = getCutLane(tempMoveLine, side.reMainBlk.First(), side.reMainBlk.Last());
-            moveLanePoly = moveLineTemp.Clone() as Polyline;
-
-            var checkIntersectPoly = lanePoly.Clone() as Polyline;
-
-            for (int i = moveLineTemp.NumberOfVertices - 1; i >= 0; i--)
+            lanePoly = new Polyline();
+            moveLanePoly = new Polyline();
+            if (side.reMainBlk.Count > 1)
             {
-                checkIntersectPoly.AddVertexAt(checkIntersectPoly.NumberOfVertices, moveLineTemp.GetPoint2dAt(i), 0, 0, 0);
-            }
-            checkIntersectPoly.Closed = true;
 
-            //  DrawUtils.ShowGeometry(checkIntersectPoly, "l0test3");
 
-            var pts = moveLineTemp.Intersect(frame, Intersect.OnBothOperands);
-            if (pts.Count > 0)
-            {
-                var polyCollection = new DBObjectCollection() { frame };
-                var overlap = checkIntersectPoly.Intersection(polyCollection);
+                lanePoly = getCutLane(lane, side.reMainBlk.First(), side.reMainBlk.Last());
+                var moveLineTemp = getCutLane(tempMoveLine, side.reMainBlk.First(), side.reMainBlk.Last());
+                moveLanePoly = moveLineTemp.Clone() as Polyline;
 
-                if (overlap.Count > 0)
+              //  DrawUtils.ShowGeometry(lanePoly, "l0lanePoly");
+
+                var checkIntersectPoly = lanePoly.Clone() as Polyline;
+
+                for (int i = moveLineTemp.NumberOfVertices - 1; i >= 0; i--)
                 {
-                    var overlapPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
-                    offsetList = getNewOffsetSeg(overlapPoly, lanePoly, offset);
+                    checkIntersectPoly.AddVertexAt(checkIntersectPoly.NumberOfVertices, moveLineTemp.GetPoint2dAt(i), 0, 0, 0);
                 }
+                checkIntersectPoly.Closed = true;
+
+                var pts = moveLineTemp.Intersect(frame, Intersect.OnBothOperands);
+                if (pts.Count > 0)
+                {
+                    var polyCollection = new DBObjectCollection() { frame };
+                    var overlap = checkIntersectPoly.Intersection(polyCollection);
+
+                    if (overlap.Count > 0)
+                    {
+                        checkIntersectPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
+                    }
+                }
+
+                foreach (var f in holes)
+                {
+                    pts = moveLineTemp.Intersect(f, Intersect.OnBothOperands);
+                    if (pts.Count > 0)
+                    {
+                        var polyCollection = new DBObjectCollection() { f };
+                        var overlap = checkIntersectPoly.Difference(polyCollection);
+
+                        if (overlap.Count > 0)
+                        {
+                            checkIntersectPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
+
+                        }
+                    }
+
+                }
+
+                if (checkIntersectPoly != null && checkIntersectPoly.NumberOfVertices > 1)
+                {
+                    offsetList = getNewOffsetSeg(checkIntersectPoly, lanePoly, offset);
+                  //  DrawUtils.ShowGeometry(checkIntersectPoly, "l0asdf");
+                }
+
+
             }
-
-
             return offsetList;
 
         }
 
         private static List<(double, List<Line>)> getNewOffsetSeg(Polyline overlapPoly, Polyline lanePoly, double offsetOri)
         {
+            int TolDistDalta = 1000;
+            int TolCloseDist = 100;
+
             List<(double, List<Line>)> offsetList = new List<(double, List<Line>)>();
-            int distDaltaTol = 1000;
             double minDist = offsetOri;
             bool passLane = false;
 
@@ -243,23 +317,23 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var distDalta = Math.Abs(minDist - dist);
                 var lineSeg = new Line(overlapPoly.GetPoint3dAt(i - 1), overlapPoly.GetPoint3dAt(i));
 
-                if (100 > dist)
+                if (TolCloseDist > dist)
                 {
                     passLane = true;
                 }
 
-                if (100 < dist && distDalta > distDaltaTol)
+                if (TolCloseDist < dist && distDalta > TolDistDalta)
                 {
                     offsetList.Add((dist, new List<Line> { lineSeg }));
                     minDist = dist;
                 }
-                else if (100 < dist && passLane == true)
+                else if (TolCloseDist < dist && passLane == true)
                 {
                     offsetList.Add((dist, new List<Line> { lineSeg }));
                     minDist = dist;
                     passLane = false;
                 }
-                else if (100 < dist && distDalta <= distDaltaTol)
+                else if (TolCloseDist < dist && distDalta <= TolDistDalta)
                 {
                     if (dist <= minDist)
                     {
@@ -291,12 +365,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
 
             }
-
-            //for (int i = 0; i < offsetList.Count; i++)
-            //{
-            //    short index = Convert.ToInt16(i * 10);
-            //    DrawUtils.ShowGeometry(offsetList[i].Item2, "l0testSeg", Color.FromColorIndex(ColorMethod.ByColor, index), LineWeight.LineWeight035);
-            //}
 
             return offsetList;
         }
@@ -343,8 +411,10 @@ namespace ThMEPLighting.EmgLightConnect.Service
         /// <returns></returns>
         private static (Polyline, List<Point3d>) getMoveLaneList(ThSingleSideBlocks side, (double, List<Line>) offsetList, Polyline lanePoly, int dir)
         {
+            int TolDistDalta = 1000;
+            int TolCloseDist = 100;
+
             var offsetMax = offsetList.Item1;
-            // offsetMax = offsetMax - EmgConnectCommon.TolLinkOffsetWithFrame;
 
             var distanceList = new List<double>();
             double distance = -1;
@@ -352,9 +422,25 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var allBlk = side.getTotalBlock();
             var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
 
+            var laneDict = new Dictionary<Point3d, Point3d>();
 
-            var laneDict = offsetList.Item2.Select(x => x.StartPoint).ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse()));
-            laneDict.Add(offsetList.Item2.Last().EndPoint, offsetList.Item2.Last().EndPoint.TransformBy(side.Matrix.Inverse()));
+            foreach (var l in offsetList.Item2)
+            {
+                if (laneDict.ContainsKey(l.StartPoint) == false)
+                {
+                    var pt = l.StartPoint.TransformBy(side.Matrix.Inverse());
+                    laneDict.Add(l.StartPoint, pt);
+                }
+                if (laneDict.ContainsKey(l.EndPoint) == false)
+                {
+                    var pt = l.EndPoint.TransformBy(side.Matrix.Inverse());
+                    laneDict.Add(l.EndPoint, pt);
+                }
+
+            }
+
+            //var laneDict = offsetList.Item2.Select(x => x.StartPoint).ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse()));
+            //laneDict.Add(offsetList.Item2.Last().EndPoint, offsetList.Item2.Last().EndPoint.TransformBy(side.Matrix.Inverse()));
 
 
             laneDict = laneDict.OrderBy(x => x.Value.X).ToDictionary(x => x.Key, x => x.Value);
@@ -370,8 +456,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
             foreach (var blk in allBlkDict)
             {
                 //y比maxoffset小且移动不大的，在线段内的点都算 为了计算真实的offset
-                if (Math.Abs(blk.Value.Y) <= offsetMax && Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= 1000
-                    && ((lanePartS.Value.X <= blk.Value.X && blk.Value.X <= lanePartE.Value.X) || (lanePartE.Value.X <= blk.Value.X && blk.Value.X <= lanePartS.Value.X)))
+                if (Math.Abs(blk.Value.Y) <= offsetMax && Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= TolDistDalta
+                    && ((lanePartS.Value.X - TolCloseDist <= blk.Value.X && blk.Value.X <= lanePartE.Value.X + TolCloseDist) ||
+                        (lanePartE.Value.X - TolCloseDist <= blk.Value.X && blk.Value.X <= lanePartS.Value.X + TolCloseDist)))
                 {
                     distanceList.Add((Math.Abs(blk.Value.Y)));
                     newPointDistList.Add(blk.Key);
@@ -379,14 +466,16 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                 //比maxoffset大且在线段内且为主块的
                 if (side.reMainBlk.Contains(blk.Key) == true
-                    && ((lanePartS.Value.X - 100 <= blk.Value.X && blk.Value.X <= lanePartE.Value.X + 100) || (lanePartE.Value.X - 100 <= blk.Value.X && blk.Value.X <= lanePartS.Value.X + 100)))
+                    && ((lanePartS.Value.X - TolCloseDist <= blk.Value.X && blk.Value.X <= lanePartE.Value.X + TolCloseDist) ||
+                        (lanePartE.Value.X - TolCloseDist <= blk.Value.X && blk.Value.X <= lanePartS.Value.X + TolCloseDist)))
                 {
 
                     newReMainPointList.Add(blk.Key);
                 }
 
-                if (Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= 1000
-                   && ((lanePartS.Value.X <= blk.Value.X && blk.Value.X <= lanePartE.Value.X) || (lanePartE.Value.X <= blk.Value.X && blk.Value.X <= lanePartS.Value.X)))
+                if (Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= TolDistDalta
+                   && ((lanePartS.Value.X - TolCloseDist <= blk.Value.X && blk.Value.X <= lanePartE.Value.X + TolCloseDist) ||
+                        (lanePartE.Value.X - TolCloseDist <= blk.Value.X && blk.Value.X <= lanePartS.Value.X + TolCloseDist)))
                 {
 
                     newReMainPointList.Add(blk.Key);
@@ -407,12 +496,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                                .First();
             }
 
-            if (distance > 0)
-            {
-                // var moveLineTemp = lanePoly.GetOffsetCurves(distance * dir)[0] as Polyline;
-                // moveLine = drawEmgPipeService.cutPolyline(lanePartS, lanePartE, moveLineTemp);
-            }
-            else
+            if (distance <= 0)
             {
                 distance = offsetMax - EmgConnectCommon.TolLinkOffsetWithFrame;
             }
@@ -420,7 +504,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var moveLineTemp = lanePoly.GetOffsetCurves(distance * dir)[0] as Polyline;
 
             moveLine = drawEmgPipeService.cutPolyline(lanePartS.Key, lanePartE.Key, moveLineTemp);
-            //DrawUtils.ShowGeometry(moveLineTemp, "l0adfjiasdf", Color.FromColorIndex(ColorMethod.ByColor, 50));
 
             return (moveLine, newReMainPointList);
         }
@@ -466,75 +549,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return lineP;
 
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-        //private static Polyline checkMoveLineIntersectOutFrameOri(List<Line> tempMoveLine, List<Line> lane, Polyline frame, double offset, ThSingleSideBlocks side)
-        //{
-
-        //    var lanePoly = getCutLane(lane, side.reMainBlk.First(), side.reMainBlk.Last());
-        //    var moveLineTemp = getCutLane(tempMoveLine, side.reMainBlk.First(), side.reMainBlk.Last());
-        //    var moveLine = moveLineTemp.Clone() as Polyline;
-
-        //    var movelanePolygon = lanePoly.Clone() as Polyline;
-        //    for (int i = moveLineTemp.NumberOfVertices - 1; i >= 0; i--)
-        //    {
-        //        movelanePolygon.AddVertexAt(movelanePolygon.NumberOfVertices, moveLineTemp.GetPoint2dAt(i), 0, 0, 0);
-        //    }
-        //    movelanePolygon.Closed = true;
-
-        //    var pts = moveLine.Intersect(frame, Intersect.OnBothOperands);
-        //    if (pts.Count > 0)
-        //    {
-        //        var polyCollection = new DBObjectCollection() { frame };
-        //        var overlap = movelanePolygon.Intersection(polyCollection);
-
-        //        if (overlap.Count > 0)
-        //        {
-        //            var overlapPoly = overlap.Cast<Polyline>().OrderByDescending(x => x.Area).First();
-
-        //            double newOffsetTemp = 200000;
-        //            for (int i = 0; i < overlapPoly.NumberOfVertices; i++)
-        //            {
-        //                var dist = lanePoly.GetDistToPoint(overlapPoly.GetPoint3dAt(i), false);
-        //                if (100 < dist && dist < newOffsetTemp)
-        //                {
-        //                    newOffsetTemp = dist;
-        //                }
-        //            }
-        //            newOffsetTemp = newOffsetTemp - EmgConnectCommon.TolLinkOffsetWithFrame;
-        //            double newOffset = getLaneDisplacement(side.laneSide.Select(x => x.Item1).ToList(), side.reMainBlk, newOffsetTemp);
-
-        //            var dir = (moveLineTemp.StartPoint - lanePoly.StartPoint).GetNormal();
-        //            var angle = dir.GetAngleTo((lanePoly.GetPoint3dAt(1) - lanePoly.StartPoint).GetNormal(), Vector3d.ZAxis) * 180 / Math.PI;
-        //            int offSetDir = 1;
-        //            if (80 <= angle && angle <= 100)
-        //            {
-        //                offSetDir = 1;
-        //            }
-        //            else
-        //            {
-        //                offSetDir = -1;
-        //            }
-
-        //            moveLine = lanePoly.GetOffsetCurves(newOffset * offSetDir)[0] as Polyline;
-        //        }
-        //    }
-
-        //    return moveLine;
-
-        //}
-
 
     }
 }

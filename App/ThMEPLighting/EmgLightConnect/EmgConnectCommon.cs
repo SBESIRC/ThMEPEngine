@@ -30,12 +30,13 @@ namespace ThMEPLighting.EmgLightConnect
 
 
         public static string LayerBlockCenter = "l0BlockCenter";
-        public static string LayerMovedLane = "l1MovedLane";
         public static string LayerBlkOutline = "l1BlkOutline";
         public static string LayerConnectLine = "l4ConnectLine";
         public static string LayerConnectLineFinal = "l4ConnectLineFinal";
         public static string LayerFinalFinal = "l4ConnectLineCorrectIntersectFinal";
         public static string LayerOptimalSingleSideGroup = "l3SingleSideGroup";
+        public static string LayerBlkNo = "l5blkNo";
+
 
         public enum BlockGroupType
         {

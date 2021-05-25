@@ -39,7 +39,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             //var orderSigleSideGroup = orderSignleSideLaneOrder(ALE, sigleSideGroup);
             //var orderSigleSideGroup = orderSignleSideDistTypeC(ALE, sigleSideGroup);
 
-            var orderSigleSideGroup = orderSignleSideDistNew(ALE, sigleSideGroup);
+            var orderSigleSideGroup = orderSignleSideDist(ALE, sigleSideGroup);
 
             var blockList = new List<Point3d>();
 
@@ -50,7 +50,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     var pts = orderSigleSideGroup[i].getTotalBlock();
                     for (int j = 0; j < pts.Count; j++)
                     {
-                        DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), "l5blkNo", Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
+                        DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), EmgConnectCommon.LayerBlkNo, Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
                     }
                 }
 
@@ -99,7 +99,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return orderSingleSide;
         }
 
-        private static List<ThSingleSideBlocks> orderSignleSideDistNew(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        private static List<ThSingleSideBlocks> orderSignleSideDist(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
             var orderSingleSide = new List<ThSingleSideBlocks>();
             var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();

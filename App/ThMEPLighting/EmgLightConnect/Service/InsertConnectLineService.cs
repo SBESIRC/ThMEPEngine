@@ -31,9 +31,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     }
                 }
             }
-
         }
-
-
     }
 }

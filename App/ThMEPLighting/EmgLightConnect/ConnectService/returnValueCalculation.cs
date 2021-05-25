@@ -231,9 +231,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return hasReturnClosedPair;
         }
 
-
-
-
         //////////////////////////////not used but may used/////////////////////
 
         public static Dictionary<int, double> getReturnValueInGroup2(BlockReference ALE, List<Point3d> blockList, List<Point3d> singleSideBlock)

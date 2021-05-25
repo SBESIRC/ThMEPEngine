@@ -74,7 +74,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var laneDir = (lane.Item1.EndPoint - lane.Item1.StartPoint).GetNormal();
                 var laneNextDir = (laneNext.Item1.EndPoint - laneNext.Item1.StartPoint).GetNormal();
 
-                bAngle = Math.Abs(laneDir.DotProduct(laneNextDir)) / (laneDir.Length * laneNextDir.Length) > Math.Abs(Math.Cos(45 * Math.PI / 180));
+                bAngle = Math.Abs(laneDir.DotProduct(laneNextDir)) / (laneDir.Length * laneNextDir.Length) > Math.Abs(Math.Cos(20 * Math.PI / 180));
 
             }
 
