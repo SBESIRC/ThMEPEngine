@@ -52,16 +52,27 @@ namespace ThMEPEngineCore.Engine
     }
     public class ThWRoomRecognitionEngine : ThSpatialElementRecognitionEngine
     {
+        public List<string> LayerFilter { get; set; }
+        public ThWRoomRecognitionEngine()
+        {
+            LayerFilter = new List<string>();
+        }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomExtractionEngine();
+            var engine = new ThRoomExtractionEngine()
+            {
+                LayerFilter = this.LayerFilter,
+            };
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomExtractionEngine();
+            var engine = new ThRoomExtractionEngine()
+            {
+                LayerFilter = this.LayerFilter,
+            };
             engine.ExtractFromMS(database);
             Recognize(engine.Results, polygon);
         }

@@ -12,6 +12,13 @@ namespace ThMEPEngineCore.Engine
 {
     public class ThRoomBuilderEngine : IDisposable
     {
+        public List<string> RoomBoundaryLayerFilter { get; set; }
+        public List<string> RoomMarkLayerFilter { get; set; }
+        public ThRoomBuilderEngine()
+        {
+            RoomBoundaryLayerFilter = new List<string>();
+            RoomMarkLayerFilter = new List<string>();
+        }
         public void Dispose()
         {            
         }
@@ -19,10 +26,16 @@ namespace ThMEPEngineCore.Engine
         public void BuildMS(Database db,Point3dCollection pts)
         {
             // Room 和 Mark 来源于本地
-            var roomEngine = new ThWRoomRecognitionEngine();
+            var roomEngine = new ThWRoomRecognitionEngine()
+            {
+                LayerFilter = this.RoomBoundaryLayerFilter,
+            };
             roomEngine.RecognizeMS(db, pts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            var markEngine = new ThRoomMarkRecognitionEngine();
+            var markEngine = new ThRoomMarkRecognitionEngine()
+            {
+                LayerFilter = this.RoomMarkLayerFilter,
+            };
             markEngine.RecognizeMS(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             Build(rooms, marks);
@@ -31,10 +44,16 @@ namespace ThMEPEngineCore.Engine
         public void BuildXRef(Database db, Point3dCollection pts)
         {
             // Room 和 Mark 来源于外参
-            var roomEngine = new ThWRoomRecognitionEngine();
+            var roomEngine = new ThWRoomRecognitionEngine()
+            {
+                LayerFilter = this.RoomBoundaryLayerFilter,
+            };
             roomEngine.Recognize(db, pts);
             var rooms = roomEngine.Elements.Cast<ThIfcRoom>().ToList();
-            var markEngine = new ThRoomMarkRecognitionEngine();
+            var markEngine = new ThRoomMarkRecognitionEngine()
+            {
+                LayerFilter = this.RoomMarkLayerFilter,
+            };
             markEngine.Recognize(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             Build(rooms, marks);
