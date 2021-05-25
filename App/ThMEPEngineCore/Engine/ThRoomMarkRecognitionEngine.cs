@@ -35,10 +35,13 @@ namespace ThMEPEngineCore.Engine
 
         public override void ExtractFromMS(Database database)
         {
-
+            if (LayerFilter.Count == 0)
+            {
+                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database);
+            }
             var visitor = new ThRoomMarkExtractionVisitor
             {
-                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database)
+                LayerFilter = this.LayerFilter,
             };
             var extractor = new ThAnnotationElementExtractor();
             extractor.Accept(visitor);
