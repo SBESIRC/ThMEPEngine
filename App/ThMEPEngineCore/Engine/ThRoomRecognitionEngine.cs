@@ -38,7 +38,7 @@ namespace ThMEPEngineCore.Engine
         {
             if (this.LayerFilter.Count == 0)
             {
-                LayerFilter = ThRoomLayerManager.CurveXrefLayers(database);
+                LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database);
             }
             var visitor = new ThRoomExtractionVisitor()
             {

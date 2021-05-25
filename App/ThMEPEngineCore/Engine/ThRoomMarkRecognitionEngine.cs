@@ -37,7 +37,7 @@ namespace ThMEPEngineCore.Engine
         {
             if (LayerFilter.Count == 0)
             {
-                LayerFilter = ThSpaceNameLayerManager.TextXrefLayers(database);
+                LayerFilter = ThSpaceNameLayerManager.TextModelSpaceLayers(database);
             }
             var visitor = new ThRoomMarkExtractionVisitor
             {

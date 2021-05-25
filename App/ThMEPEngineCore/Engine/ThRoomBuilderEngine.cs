@@ -23,7 +23,7 @@ namespace ThMEPEngineCore.Engine
         {            
         }
 
-        public void BuildMS(Database db,Point3dCollection pts)
+        public List<ThIfcRoom> BuildFromMS(Database db,Point3dCollection pts)
         {
             // Room 和 Mark 来源于本地
             var roomEngine = new ThWRoomRecognitionEngine()
@@ -39,9 +39,10 @@ namespace ThMEPEngineCore.Engine
             markEngine.RecognizeMS(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             Build(rooms, marks);
+            return rooms;
         }
 
-        public void BuildXRef(Database db, Point3dCollection pts)
+        public List<ThIfcRoom> BuildFromXRef(Database db, Point3dCollection pts)
         {
             // Room 和 Mark 来源于外参
             var roomEngine = new ThWRoomRecognitionEngine()
@@ -57,6 +58,7 @@ namespace ThMEPEngineCore.Engine
             markEngine.Recognize(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
             Build(rooms, marks);
+            return rooms;
         }
 
         public void Build(List<ThIfcRoom> rooms, List<ThIfcTextNote> marks)

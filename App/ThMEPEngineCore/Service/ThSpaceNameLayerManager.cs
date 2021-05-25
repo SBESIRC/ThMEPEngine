@@ -19,6 +19,17 @@ namespace ThMEPEngineCore.Service
                     .ToList();
             }
         }
+        public static List<string> TextModelSpaceLayers(Database database)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
+            {
+                return acadDatabase.Layers
+                    .Where(o => IsVisibleLayer(o))
+                    .Where(o => IsModelSpaceLayer(o.Name))
+                    .Select(o => o.Name)
+                    .ToList();
+            }
+        }
         private static bool IsSpaceNameLayer(string name)
         {
             var layerName = ThStructureUtils.OriginalFromXref(name).ToUpper();
@@ -38,6 +49,15 @@ namespace ThMEPEngineCore.Service
         private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
         {
             return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
+        }
+        private static bool IsModelSpaceLayer(string name)
+        {
+            string[] patterns = name.ToUpper().Split('-').ToArray();
+            if (patterns.Count() < 2)
+            {
+                return false;
+            }
+            return patterns[0] == "AI" && patterns[1] == "空间名称";
         }
     }
 }
