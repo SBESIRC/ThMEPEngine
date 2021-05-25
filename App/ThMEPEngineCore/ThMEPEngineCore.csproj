@@ -417,6 +417,7 @@
     <Compile Include="Temp\ThCenterLineExtractor.cs" />
     <Compile Include="Temp\ThColumnExtractor.cs" />
     <Compile Include="Temp\ThConnectPortExtractor.cs" />
+    <Compile Include="Temp\ThExternalSpaceExtractor.cs" />
     <Compile Include="Temp\ThExtractOuterBoundaryService.cs" />
     <Compile Include="Temp\ThOuterBoundaryExtractor.cs" />
     <Compile Include="Temp\ThDoorOpeningExtractor.cs" />

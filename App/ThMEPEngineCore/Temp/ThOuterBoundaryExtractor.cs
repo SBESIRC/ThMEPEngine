@@ -16,7 +16,6 @@ namespace ThMEPEngineCore.Temp
         {
             OuterBoundaries = new List<Polyline>();
             Category = "OuterBoundary";
-            ElementLayer = "AI-OuterBoundary";
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -33,9 +32,9 @@ namespace ThMEPEngineCore.Temp
         {
             var geos = new List<ThGeometry>();
             OuterBoundaries.ForEach(o =>
-            {                
+            {
                 var geometry = new ThGeometry();
-                geometry.Properties.Add(CategoryPropertyName, Category);                
+                geometry.Properties.Add(CategoryPropertyName, Category);
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });

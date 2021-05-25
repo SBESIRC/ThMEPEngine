@@ -366,7 +366,8 @@ namespace ThMEPEngineCore
                     new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
                     new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
                     new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
-                    new ThOuterBoundaryExtractor{ ColorIndex=8,ElementLayer="AI-OuterBoundary"} //外墙边界
+                    new ThOuterBoundaryExtractor{ ColorIndex=8,ElementLayer="AI-OuterBoundary"}, //外墙边界
+                    new ThExternalSpaceExtractor{ ColorIndex=9,ElementLayer="AI-OuterBoundary"},
                 };
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
