@@ -103,5 +103,24 @@ namespace ThCADExtension
                 .Where(o => o.PropertyName == propertyName);
             return properties.First().Value as string;
         }
+
+
+        // Reference:
+        // https://forums.autodesk.com/t5/net/explode-dynamic-block-with-stretch-action/td-p/4673471
+        // https://forums.autodesk.com/t5/net/explode-dynamic-block-with-visibility-states/td-p/3643036
+        public static void ExplodeWithVisible(this BlockReference blockReference, DBObjectCollection entitySet)
+        {
+            entitySet.Clear();
+            if (blockReference.IsDynamicBlock)
+            {
+                var objs = new DBObjectCollection();
+                blockReference.Explode(objs);
+                objs.Cast<Entity>().Where(e => e.Visible).ForEach(e => entitySet.Add(e));
+            }
+            else
+            {
+                blockReference.Explode(entitySet);
+            }
+        }
     }
 }
