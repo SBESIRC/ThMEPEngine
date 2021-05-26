@@ -48,6 +48,7 @@ namespace ThMEPEngineCore.Engine
             }
 
             // 识别圆形柱
+            // 假定圆形轮廓一定是圆形柱的轮廓
             Elements.AddRange(RecognizeCircularElements(curves.Cast<Curve>().Where(o => o is Circle).ToCollection()));
             
             // 识别其他构件
@@ -64,7 +65,8 @@ namespace ThMEPEngineCore.Engine
 
         private DBObjectCollection PreprocessLinealElements(DBObjectCollection curves)
         {
-            var results = ThVStructuralElementSimplifier.MakeValid(curves);
+            var results = ThVStructuralElementSimplifier.Tessellate(curves);
+            results = ThVStructuralElementSimplifier.MakeValid(curves);
             results = ThVStructuralElementSimplifier.Normalize(results);
             results = ThVStructuralElementSimplifier.Simplify(results);
             return results;

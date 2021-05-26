@@ -1,5 +1,4 @@
-﻿using System;
-using NFox.Cad;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -67,21 +66,51 @@ namespace ThMEPEngineCore.Service
 
         public static void Classify(DBObjectCollection curves, DBObjectCollection columns, DBObjectCollection walls)
         {
+            // 还原带洞的区域
+            var polygons = curves.BuildArea();
+
             // 首先判断出矩形柱和墙
-            curves.Cast<AcPolygon>().Where(o => IsRectangle(o)).ForEach(o =>
-            {
-                if (AspectRatio(o) > 3)
+            polygons.Cast<Entity>()
+                .Where(e => e is AcPolygon)
+                .Cast<AcPolygon>()
+                .Where(e => IsRectangle(e))
+                .ForEach(e =>
                 {
-                    walls.Add(o);
-                }
-                else
+                    if (AspectRatio(e) > 3)
+                    {
+                        walls.Add(e);
+                    }
+                    else
+                    {
+                        columns.Add(e);
+                    }
+                });
+            polygons.Cast<Entity>()
+                .Where(e => e is MPolygon)
+                .Cast<MPolygon>()
+                .Where(e => IsRectangle(e))
+                .ForEach(e =>
                 {
-                    columns.Add(o);
-                }
-            });
+                    if (AspectRatio(e.Outline()) > 3)
+                    {
+                        walls.Add(e);
+                    }
+                    else
+                    {
+                        columns.Add(e);
+                    }
+                });
 
             // 接着判断非矩形（柱+剪力墙）
-
+            var others = polygons.Except(walls).Except(columns);
+            others.Cast<Entity>()
+                .Where(e => e is AcPolygon)
+                .Cast<AcPolygon>()
+                .ForEach(e => Decompose(e, columns, walls));
+            others.Cast<Entity>()
+                .Where(e => e is MPolygon)
+                .Cast<MPolygon>()
+                .ForEach(e => Decompose(e, columns, walls));
         }
 
         private static void Decompose(AcPolygon polygon, DBObjectCollection columns, DBObjectCollection walls)
@@ -93,11 +122,29 @@ namespace ThMEPEngineCore.Service
             }
             else
             {
-                foreach(AcPolygon item in results)
+                foreach (AcPolygon item in results)
                 {
                     var column = item.Buffer(DECOMPOSE_OFFSET_DISTANCE)[0] as AcPolygon;
                     columns.Add(column);
                     polygon.Difference(column).Cast<AcPolygon>().ForEach(o => walls.Add(o));
+                }
+            }
+        }
+
+        private static void Decompose(MPolygon mPolygon, DBObjectCollection columns, DBObjectCollection walls)
+        {
+            var results = mPolygon.Buffer(-DECOMPOSE_OFFSET_DISTANCE);
+            if (results.Count == 0)
+            {
+                walls.Add(mPolygon);
+            }
+            else
+            {
+                foreach (AcPolygon item in results)
+                {
+                    var column = item.Buffer(DECOMPOSE_OFFSET_DISTANCE)[0] as AcPolygon;
+                    columns.Add(column);
+                    mPolygon.Difference(column).Cast<AcPolygon>().ForEach(o => walls.Add(o));
                 }
             }
         }
@@ -118,6 +165,11 @@ namespace ThMEPEngineCore.Service
         private static AcPolygon OBB(AcPolygon polygon)
         {
             return polygon.GetMinimumRectangle();
+        }
+
+        private static bool IsRectangle(MPolygon mPolygon)
+        {
+            return IsRectangle(mPolygon.Outline());
         }
     }
 }

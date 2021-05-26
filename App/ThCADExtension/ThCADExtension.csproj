@@ -44,6 +44,7 @@
     <Compile Include="ThCUITools.cs" />
     <Compile Include="ThCurveExtension.cs" />
     <Compile Include="ThCurveCollectionExtension.cs" />
+    <Compile Include="ThDbObjectCollectionExtension.cs" />
     <Compile Include="ThDisposableSet.cs" />
     <Compile Include="ThDynamicBlockUtils.cs" />
     <Compile Include="ThEditorExtension.cs" />
