@@ -65,6 +65,8 @@
     <Compile Include="Engine\ThFireCompartmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
     <Compile Include="Engine\ThParkingStallVisitor.cs" />
+    <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
+    <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="Model\Electrical\ThFireCompartment.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
@@ -326,6 +328,7 @@
     <Compile Include="Service\ThArcBeamMarkingService.cs" />
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
+    <Compile Include="Service\ThVStructuralElementSimplifier.cs" />
     <Compile Include="Service\ThWindowSimplifier.cs" />
     <Compile Include="Service\ThCurtainWallLayerManager.cs" />
     <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />

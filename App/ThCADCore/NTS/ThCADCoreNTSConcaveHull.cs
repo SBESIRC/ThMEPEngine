@@ -10,6 +10,8 @@ using NTSVertex = NetTopologySuite.Triangulate.QuadEdge.Vertex;
 
 namespace ThCADCore.NTS
 {
+    // Ported from this link:
+    //  http://www.rotefabrik.free.fr/concave_hull/
     public class ThCADCoreNTSConcaveHull
     {
         private class Vertex

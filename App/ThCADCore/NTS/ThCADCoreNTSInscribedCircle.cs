@@ -1,9 +1,7 @@
-﻿using System;
-using NetTopologySuite.Simplify;
-using NetTopologySuite.Geometries;
-using Autodesk.AutoCAD.DatabaseServices;
+﻿using NetTopologySuite.Geometries;
 using NetTopologySuite.Algorithm.Construct;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -15,14 +13,23 @@ namespace ThCADCore.NTS
         /// <param name="polygonal">a polygonal geometry. You can enter Polygon or MultiPolygon or other</param>
         /// <param name="tolerance">the distance tolerance for computing the center point</param>
         /// <returns></returns>
-        public static Point3d GetCenterMaximumInscribedCircle(this Geometry polygonal, double tolerance = 1.0)
+        public static Point3d GetMaximumInscribedCircleCenter(this Geometry polygonal, double tolerance = 1.0)
         {
             return MaximumInscribedCircle.GetCenter(polygonal, tolerance).ToAcGePoint3d();
         }
 
-        public static Polyline GetRadiusLine(this Geometry polygonal, double tolerance)
+        /// <summary>
+        /// 获取几何学的最大内切圆
+        /// </summary>
+        /// <param name="polygonal"></param>
+        /// <param name="tolerance"></param>
+        /// <returns></returns>
+        public static Circle GetMaximumInscribedCircle(this Geometry polygonal, double tolerance = 1.0)
         {
-            return MaximumInscribedCircle.GetRadiusLine(polygonal, tolerance).ToDbPolyline();
+            var calculator = new MaximumInscribedCircle(polygonal, tolerance);
+            var center = calculator.GetCenter().ToAcGePoint3d();
+            var radius = calculator.GetCenter().Distance(calculator.GetRadiusPoint());
+            return new Circle(center, Vector3d.ZAxis, radius);
         }
     }
 }

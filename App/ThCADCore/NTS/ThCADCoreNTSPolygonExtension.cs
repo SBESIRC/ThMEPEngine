@@ -11,6 +11,11 @@ namespace ThCADCore.NTS
 {
     public static class ThCADCoreNTSPolygonExtension
     {
+        public static DBObjectCollection Difference(this AcPolygon polygon, AcPolygon other)
+        {
+            return polygon.ToNTSPolygon().Difference(other.ToNTSPolygon()).ToDbCollection();
+        }
+
         public static DBObjectCollection Difference(this AcPolygon polygon, DBObjectCollection curves)
         {
             return polygon.ToNTSPolygon().Difference(curves.UnionGeometries()).ToDbCollection();
@@ -79,7 +84,7 @@ namespace ThCADCore.NTS
 
         public static Point3d GetMaximumInscribedCircleCenter(this AcPolygon shell)
         {
-            return shell.ToNTSPolygon().GetCenterMaximumInscribedCircle();
+            return shell.ToNTSPolygon().GetMaximumInscribedCircleCenter();
         }
 
         public static DBObjectCollection MakeValid(this AcPolygon polygon)

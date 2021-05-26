@@ -1,7 +1,6 @@
 ﻿using System;
 using NFox.Cad;
 using System.Linq;
-using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;

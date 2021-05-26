@@ -10,6 +10,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_PROPERTY_Boundary = "边界";
         public static string BUILDELEMENT_PROPERTY_MATERIAL = "材质";
         public static string BUILDELEMENT_PROPERTY_LAYER = "图层";
+        public static string BUILDELEMENT_PROPERTY_HATCH_LAYER = "填充图层";
         public static string BUILDELEMENT_PROPERTY_PROJECT_LEVEL = "投影层次";
         public static List<string> BUILDELEMENT_PROPERTIES = new List<string>
         {
@@ -27,6 +28,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_LAYER_CURTAIN_WALL = "AE-WIND";
         public static string BUILDELEMENT_LAYER_FLOOR = "AE-FLOR";
         public static string BUILDELEMENT_LAYER_RAILING = "AE-HDWR";
+        public static string BUILDELEMENT_LAYER_STRU_HACH = "AE-STRU-HACH";
         // 分类
         public static string BUILDELEMENT_CATEGORY_WALL = "墙";
         public static string BUILDELEMENT_CATEGORY_S_BEAM = "结构梁";

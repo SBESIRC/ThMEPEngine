@@ -90,7 +90,7 @@ namespace ThCADCore.NTS
             var geometry = builder.Build(curves.ToMultiLineString());
             if (geometry is Polygon polygon)
             {
-                return polygon.GetCenterMaximumInscribedCircle();
+                return polygon.GetMaximumInscribedCircleCenter();
             }
             else
             {
