@@ -102,24 +102,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     List<Polyline> walls = new List<Polyline>();
                     if(!ThEmgLightService.Instance.IsHostingLight)
                         primitivesService.GetStructureInfo(pline.Key.Buffer(40)[0] as Polyline, out columns, out walls);
-                    //primitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
-                    //foreach (var item in walls)
-                    //{
-                    //    List<Line> lines = new List<Line>();
-                    //    //多段线有可以合并的线，这里如果没有合并，如果有些是多段线
-                    //    var polyline = item.DPSimplify(2);
-                    //    for (int i = 0; i < polyline.NumberOfVertices; i++)
-                    //    {
-                    //        lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
-                    //    }
-                    //    foreach (var line in lines)
-                    //    {
-                    //        Line line2 = line;
-                    //        originTransformer.Reset(line2);
-                    //        acdb.ModelSpace.Add(line2);
-                    //    }
-                    //}
-                    //return;
                     //根据这些线信息，拐点到出口的数据进行计算布置的点信息
                     IndicatorLight indicator = new IndicatorLight();
                     assitLines.ForEach(c => indicator.assistLines.Add(c));

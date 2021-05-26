@@ -46,7 +46,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <param name="sideDir"></param>
         /// <param name="sideDis"></param>
         /// <returns></returns>
-        public static Polyline LineToPolyline(Line line, Vector3d sideDir, double sideDis,double expansion=0)
+        public static Polyline LineToPolyline(Line line, Vector3d sideDir, double sideDis,double expansion=0,bool isTwoSide=false)
         {
             if (null == line)
                 return null;
@@ -60,8 +60,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 return null;
             sp = sp - lineDir.MultiplyBy(expansion);
             ep = ep + lineDir.MultiplyBy(expansion);
-            Point3d spNext = sp + sideDir.MultiplyBy(sideDis);
-            Point3d epNext = ep + sideDir.MultiplyBy(sideDis);
+            if (isTwoSide)
+            { 
+                sp = sp - sideDir.MultiplyBy(sideDis);
+                ep = ep - sideDir.MultiplyBy(sideDis);
+            }
+            Point3d spNext = sp + sideDir.MultiplyBy(isTwoSide ? sideDis * 2 : sideDis);
+            Point3d epNext = ep + sideDir.MultiplyBy(isTwoSide ? sideDis * 2 : sideDis);
 
             Point2d sp2d = new Point2d(sp.X, sp.Y);
             Point2d ep2d = new Point2d(ep.X, ep.Y);
@@ -91,7 +96,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var dis2 = prjPt.DistanceTo(point);
             if (dis > (line.Length + precision))
                 return false;
-            if (dis2 > precision)
+            if (dis2 > precisionOut)
                 return false;
             return true;
         }
@@ -113,6 +118,23 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
         public static bool LineIsCollinear(Point3d firstSp, Point3d firstEp,Point3d secondSp, Point3d secondEp, double tolerance = 1.0, double precisionOut = 5, double precisionAngle =5) 
         {
+            var isColl = LineIsCollinear(firstSp, firstEp, secondSp, secondEp, out List<Point3d> collPoints, tolerance, precisionOut, precisionAngle);
+            return isColl;
+        }
+        public static bool LineIsCollinear(Point3d firstSp, Point3d firstEp, List<Line> targetLines, double tolerance = 1.0, double precisionOut = 5, double precisionAngle = 5)
+        {
+            var isColl = false;
+            foreach (var line in targetLines) 
+            {
+                isColl = LineIsCollinear(firstSp, firstEp, line.StartPoint, line.EndPoint, out List<Point3d> collPoints, tolerance, precisionOut, precisionAngle);
+                if (isColl)
+                    return true;
+            }
+            return isColl;
+        }
+        public static bool LineIsCollinear(Point3d firstSp, Point3d firstEp, Point3d secondSp, Point3d secondEp,out List<Point3d> collPoints, double tolerance = 1.0, double precisionOut = 5, double precisionAngle = 5)
+        {
+            collPoints = new List<Point3d>();
             //这里不考虑异面问题，这里认为线为XOY平面上的两根线
             var maxAngle = precisionAngle * Math.PI / 180;
             //两根线有一定夹角，距离也可以认为是有共线
@@ -141,15 +163,44 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (firstSp.DistanceTo(tempEp) < tolerance || firstEp.DistanceTo(tempSp) < tolerance)
                     //首尾相接
                     return false;
+                List<Point3d> pts = new List<Point3d>() { firstSp, firstEp, tempSp, tempEp };
+                pts = PointOrderByLine(pts, firstSp, firstDir);
                 if (firstSp.DistanceTo(tempSp) < tolerance)
+                {
+                    if (pts.Count % 2 == 0)
+                    {
+                        //取中间两个点
+                        int c = pts.Count / 2;
+                        collPoints.Add(pts[c - 1]);
+                        collPoints.Add(pts[c]);
+                    }
+                    else 
+                    {
+                        collPoints.Add(pts[0]);
+                        collPoints.Add(pts[1]);
+                    }
                     return true;
+                }
                 Line line = new Line(tempSp, tempEp);
                 Line firstLine = new Line(firstSp, firstEp);
-                if (PointInLine(firstSp, line) || PointInLine(firstEp, line) || PointInLine(tempSp, firstLine))
+                if (PointInLine(firstSp, line) || PointInLine(firstEp, line) || PointInLine(tempEp, firstLine))
+                {
+                    if (pts.Count % 2 == 0)
+                    {
+                        //取中间两个点
+                        int c = pts.Count / 2;
+                        collPoints.Add(pts[c - 1]);
+                        collPoints.Add(pts[c]);
+                    }
+                    else
+                    {
+                        collPoints.Add(pts[1]);
+                        collPoints.Add(pts[2]);
+                    }
                     return true;
+                }
             }
             return false;
-
         }
         /// <summary>
         /// 根据点，根据节点信息构造
@@ -285,5 +336,82 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         //    currentRoute.nextRoute = InitRouteByPoints(nextPts, currentRoute);
         //    return currentRoute;
         //}
+
+        /// <summary>
+        /// 闭合区域外侧
+        /// </summary>
+        /// <param name="pline"></param>
+        /// <param name="isOut"></param>
+        /// <returns></returns>
+        public static Dictionary<Line, Vector3d> PolylineOutDir(Polyline pline, bool isOut = true)
+        {
+            Dictionary<Line, Vector3d> valuePairs = new Dictionary<Line, Vector3d>();
+            var polyline = pline.DPSimplify(10);
+            if (!polyline.IsClosed())
+                return valuePairs;
+            //要注意顺时针，逆时针问题,这个默认时顺时针
+            var pNormal = polyline.Normal;
+            var objs = new DBObjectCollection();
+            for (int i = 0; i < polyline.NumberOfVertices; i++)
+            {
+                var sp = polyline.GetPoint3dAt(i);
+                var ep = polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices);
+                if (sp.DistanceTo(ep) < 0.0001)
+                    continue;
+                var line = new Line(sp, ep);
+                var lineDir = (ep - sp).GetNormal();
+                var outDir = lineDir.CrossProduct(pNormal).GetNormal();
+                if (isOut)
+                    outDir = outDir.Negate();
+                valuePairs.Add(line, outDir);
+                objs.Add(line);
+            }
+            List<Line> newLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 5, 2.0, 2.0, Math.PI / 180.0).Cast<Line>().ToList();
+            Dictionary<Line, Vector3d> retValuePairs = new Dictionary<Line, Vector3d>();
+            foreach (var line in newLines) 
+            {
+                Vector3d outDir = new Vector3d();
+                foreach (var item in valuePairs) 
+                {
+                    if (LineIsCollinear(line.StartPoint, line.EndPoint, item.Key.StartPoint, item.Key.EndPoint))
+                    {
+                        outDir = item.Value;
+                        break;
+                    }
+                }
+                retValuePairs.Add(line, outDir);
+            }
+            return retValuePairs;
+        }
+        public static Point3d LineCloseNearPoint(Line line, Point3d point,bool pointInLine=true)
+        {
+            var prjPoint = PointToLine(point, line);
+            if (pointInLine)
+            {
+                if (PointInLine(prjPoint, line))
+                    return prjPoint;
+                if (point.DistanceTo(line.StartPoint) < point.DistanceTo(line.EndPoint))
+                    return line.StartPoint;
+                return line.EndPoint;
+            }
+            return prjPoint;
+        }
+        public static List<Point3d> PointOrderByLine(List<Point3d> orderPoints,Point3d lineSp,Vector3d lineDirection) 
+        {
+            Dictionary<Point3d, double> pointDis = PointOrderDistanceByLine(orderPoints, lineSp, lineDirection);
+            return pointDis.OrderBy(c => c.Value).Select(c => c.Key).ToList();
+        }
+        public static Dictionary<Point3d,double> PointOrderDistanceByLine(List<Point3d> orderPoints, Point3d lineSp, Vector3d lineDirection)
+        {
+            Dictionary<Point3d, double> pointDis = new Dictionary<Point3d, double>();
+            foreach (var item in orderPoints)
+            {
+                var vector = item - lineSp;
+                if (pointDis.Any(c => c.Key.IsEqualTo(item)))
+                    continue;
+                pointDis.Add(item, vector.DotProduct(lineDirection));
+            }
+            return pointDis;
+        }
     }
 }
