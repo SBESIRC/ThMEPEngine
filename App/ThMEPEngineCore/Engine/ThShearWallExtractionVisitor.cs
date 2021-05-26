@@ -5,11 +5,14 @@ using ThCADExtension;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Algorithm;
+using NetTopologySuite.Geometries;
 
 namespace ThMEPEngineCore.Engine
 {
     public class ThShearWallExtractionVisitor : ThBuildingElementExtractionVisitor
     {
+        private const double ArcTessellationLength = 100.0;
+
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
             if (dbObj is Hatch hatch)
@@ -27,8 +30,7 @@ namespace ThMEPEngineCore.Engine
             var results = new List<ThRawIfcBuildingElementData>();
             if (IsBuildElement(hatch) && CheckLayerValid(hatch))
             {
-                var newHatch = hatch.GetTransformedCopy(matrix) as Hatch;
-                var polygons = newHatch.ToPolygons();
+                var polygons = HatchToPolygons(hatch.GetTransformedCopy(matrix) as Hatch);
                 foreach (var polygon in polygons)
                 {
                     // 把“甜甜圈”式的带洞的Polygon（有且只有洞）转成不带洞的Polygon
@@ -44,6 +46,14 @@ namespace ThMEPEngineCore.Engine
                 }
             }
             return results;
+        }
+
+        private List<Polygon> HatchToPolygons(Hatch hatch)
+        {
+            using (var ov = new ThCADCoreNTSArcTessellationLength(ArcTessellationLength))
+            {
+                return hatch.ToPolygons();
+            }
         }
 
         private List<ThRawIfcBuildingElementData> HandleSolid(Solid solid, Matrix3d matrix)
