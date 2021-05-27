@@ -1415,8 +1415,23 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (lineLights.Any(c => c.isHoisting && c.linePoint.DistanceTo(item.graphNode.nodePoint) < 1000))
                     //该疏节点有吊灯，不需要后续判断
                     continue;
-                if (!addLights.Any(c => c.isHoisting && c.nearNode.nodePoint.DistanceTo(item.graphNode.nodePoint) < 100))
+                var nodeAddLight = addLights.Where(c => c.isHoisting && c.nearNode.nodePoint.DistanceTo(item.graphNode.nodePoint) < 100).ToList();
+                if (nodeAddLight == null || nodeAddLight.Count<1)
                     //添加的灯没有指向该节点的
+                    continue;
+                var nodeLights = lineLights.Where(c => !c.isHoisting && c.nearNode.nodePoint.DistanceTo(item.graphNode.nodePoint) < 100).ToList();
+                if (null != nodeLights && nodeLights.Count > 0) 
+                    nodeAddLight.AddRange(nodeLights);
+                var dir1 = nodeLights.FirstOrDefault().direction;
+                bool isAdd = false;
+                foreach (var tempLight in nodeAddLight) 
+                {
+                    if (isAdd)
+                        break;
+                    dot = tempLight.direction.DotProduct(dir1);
+                    isAdd = dot < -0.1;
+                }
+                if (!isAdd)
                     continue;
                 //添加的有指向该节点的灯，进一步判断是否需要添加，有些极限情况出现可能行太低，这里不进行考虑，如T口处加的口处的吊灯添加判断
                 var moveVect = GetHostMoveVector(item.graphNode);
