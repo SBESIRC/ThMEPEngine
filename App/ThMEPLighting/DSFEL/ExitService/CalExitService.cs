@@ -1,10 +1,12 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.Geometry;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPLighting.DSFEL.Model;
 
 namespace ThMEPLighting.DSFEL.ExitService
@@ -32,6 +34,7 @@ namespace ThMEPLighting.DSFEL.ExitService
                     {
                         exit.exitType = ExitType.SafetyExit;
                         exit.room = intersectRooms[0].Key;
+                        exit.positin = GetLayoutPosition(intersectRooms[0].Key, door);
                         exitModels.Add(exit);
                     }
                 }
@@ -39,10 +42,17 @@ namespace ThMEPLighting.DSFEL.ExitService
                 {
                     foreach (var room in intersectRooms)
                     {
-                        if (CalDoorOpenDir(door, intersectRooms[0].Key) && CheckIsExit(intersectRooms.Where(x=>x.Key != x.Key).ToList()))
+                        if (CalDoorOpenDir(door, room.Key) && CheckIsExit(intersectRooms.Where(x=>x.Key != room.Key).ToList()))
                         {
                             exit.exitType = ExitType.EvacuationExit;
                             exit.room = room.Key;
+                            exit.positin = GetLayoutPosition(room.Key, door);
+                            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+                            //{
+                            //    db.ModelSpace.Add(new Circle(exit.positin, Vector3d.ZAxis, 1000));
+                            //    db.ModelSpace.Add(room.Key);
+                            //    db.ModelSpace.Add(door.Clone() as Polyline);
+                            //}
                             exitModels.Add(exit);
                             break;
                         }
@@ -79,6 +89,17 @@ namespace ThMEPLighting.DSFEL.ExitService
             }
 
             return true;
+        }
+
+        /// <summary>
+        /// 计算疏散灯放置点位
+        /// </summary>
+        /// <param name="door"></param>
+        private Point3d GetLayoutPosition(Polyline room, Polyline door)
+        {
+            List<Point3d> pts = door.Vertices().Cast<Point3d>().ToList();
+            pts = pts.OrderBy(x => room.Distance(x)).ToList();
+            return new Point3d((pts[0].X + pts[1].X) / 2, (pts[0].Y + pts[1].Y) / 2, 0);
         }
     }
 }

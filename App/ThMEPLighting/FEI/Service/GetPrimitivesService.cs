@@ -116,6 +116,7 @@ namespace ThMEPLighting.FEI
                 }
             }
         }
+
         /// <summary>
         /// 获取区域内的主要疏散路径或辅助
         /// </summary>
