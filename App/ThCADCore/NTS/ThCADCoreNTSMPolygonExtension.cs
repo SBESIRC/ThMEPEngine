@@ -65,20 +65,6 @@ namespace ThCADCore.NTS
             throw new ArgumentException();
         }
 
-        private static Polyline ToDbPolyline(this MPolygonLoop loop)
-        {
-            Polyline polyline = new Polyline()
-            {
-                Closed = true
-            };
-            for (int i = 0; i < loop.Count; i++)
-            {
-                var bulgeVertex = loop[i];
-                polyline.AddVertexAt(i, bulgeVertex.Vertex, bulgeVertex.Bulge, 0, 0);
-            }
-            return polyline;
-        }
-
         public static Polygon ToNTSPolygon(this MPolygon mPolygon)
         {
             Polyline shell = null;
@@ -87,7 +73,7 @@ namespace ThCADCore.NTS
             {
                 LoopDirection direction = mPolygon.GetLoopDirection(i);
                 MPolygonLoop mPolygonLoop = mPolygon.GetMPolygonLoopAt(i);
-                Polyline polyline = ToDbPolyline(mPolygonLoop);
+                Polyline polyline = mPolygonLoop.ToDbPolyline();
                 if (LoopDirection.Exterior == direction)
                 {
                     shell = polyline;
