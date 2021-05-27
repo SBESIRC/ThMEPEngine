@@ -222,6 +222,11 @@ namespace ThCADExtension
             return segments;
         }
 
+        public static Polyline Tessellate(this Polyline polyline, double length)
+        {
+            return polyline.TessellatePolylineWithArc(length);
+        }
+
         public static Polyline Tessellate(this Circle circle, double length)
         {
             if (length >= 2 * Math.PI * circle.Radius)

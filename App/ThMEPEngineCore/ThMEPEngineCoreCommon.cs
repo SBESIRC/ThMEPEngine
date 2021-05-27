@@ -11,6 +11,7 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_PROPERTY_MATERIAL = "材质";
         public static string BUILDELEMENT_PROPERTY_LAYER = "图层";
         public static string BUILDELEMENT_PROPERTY_HATCH_LAYER = "填充图层";
+        public static string BUILDELEMENT_PROPERTY_HATCH_PATTERN = "填充图案";
         public static string BUILDELEMENT_PROPERTY_PROJECT_LEVEL = "投影层次";
         public static List<string> BUILDELEMENT_PROPERTIES = new List<string>
         {
@@ -19,7 +20,9 @@ namespace ThMEPEngineCore
             BUILDELEMENT_PROPERTY_MATERIAL,
             BUILDELEMENT_PROPERTY_LAYER,
             BUILDELEMENT_PROPERTY_PROJECT_LEVEL,
-            BUILDELEMENT_PROPERTY_Boundary
+            BUILDELEMENT_PROPERTY_Boundary,
+            BUILDELEMENT_PROPERTY_HATCH_LAYER,
+            BUILDELEMENT_PROPERTY_HATCH_PATTERN,
         };
 
         // 图层

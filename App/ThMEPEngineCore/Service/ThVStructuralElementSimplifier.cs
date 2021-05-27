@@ -1,4 +1,5 @@
-﻿using NFox.Cad;
+﻿using System;
+using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -61,7 +62,23 @@ namespace ThMEPEngineCore.Service
 
         public static DBObjectCollection Tessellate(DBObjectCollection curves)
         {
-            return curves.Cast<Circle>().Select(o => o.Tessellate(TESSELLATE_ARC_LENGTH)).ToCollection();
+            var objs = new DBObjectCollection();
+            foreach(Curve c in curves)
+            {
+                if (c is AcPolygon polygon)
+                {
+                    objs.Add(polygon.Tessellate(TESSELLATE_ARC_LENGTH));
+                }
+                else if (c is Circle circle)
+                {
+                    objs.Add(circle.Tessellate(TESSELLATE_ARC_LENGTH));
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            }
+            return objs;
         }
 
         public static void Classify(DBObjectCollection curves, DBObjectCollection columns, DBObjectCollection walls)

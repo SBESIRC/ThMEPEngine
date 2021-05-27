@@ -41,6 +41,36 @@ namespace ThMEPEngineCore
             //
         }
 
+        [CommandMethod("TIANHUACAD", "THVStructuralElement", CommandFlags.Modal)]
+        public void THVStructuralElement()
+        {
+            using (var acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                var engine = new ThVStructuralElementRecognitionEngine();
+                engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                engine.Elements.Where(o => o is ThIfcColumn).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                    o.Outline.SetDatabaseDefaults();
+                    o.Outline.ColorIndex = 4;
+                });
+                engine.Elements.Where(o => o is ThIfcWall).ForEach(o =>
+                {
+                    acadDatabase.ModelSpace.Add(o.Outline);
+                    o.Outline.SetDatabaseDefaults();
+                    o.Outline.ColorIndex = 6;
+                });
+            }
+        }
+
         [CommandMethod("TIANHUACAD", "THExtractColumn", CommandFlags.Modal)]
         public void ThExtractColumn()
         {
