@@ -132,38 +132,42 @@ namespace ThMEPEngineCore.Service
 
         private static void Decompose(AcPolygon polygon, DBObjectCollection columns, DBObjectCollection walls)
         {
-            var results = polygon.Buffer(-DECOMPOSE_OFFSET_DISTANCE);
-            if (results.Count == 0)
+            var polygons = polygon.Buffer(-DECOMPOSE_OFFSET_DISTANCE);
+            if (polygons.Count == 0)
             {
                 walls.Add(polygon);
             }
             else
             {
-                foreach (AcPolygon item in results)
+                var results = polygons.Cast<Entity>()
+                    .Where(e => e is AcPolygon)
+                    .Cast<AcPolygon>()
+                    .Where(e => IsRectangle(e))
+                    .Where(e => AspectRatio(e) <= 3)
+                    .ToCollection();
+                if (results.Count == 0)
                 {
-                    var column = item.Buffer(DECOMPOSE_OFFSET_DISTANCE)[0] as AcPolygon;
-                    columns.Add(column);
-                    polygon.Difference(column).Cast<AcPolygon>().ForEach(o => walls.Add(o));
+                    walls.Add(polygon);
+                }
+                else
+                {
+                    var columnObjs = results
+                        .Cast<AcPolygon>()
+                        .Select(o => o.Buffer(DECOMPOSE_OFFSET_DISTANCE)[0])
+                        .ToCollection();
+                    columnObjs.Cast<DBObject>().ForEach(o => columns.Add(o));
+                    var wallObjs = polygon.Difference(columnObjs);
+                    wallObjs = MakeValid(wallObjs);
+                    wallObjs = Normalize(wallObjs);
+                    wallObjs = Simplify(wallObjs);
+                    wallObjs.Cast<DBObject>().ForEach(o => walls.Add(o));
                 }
             }
         }
 
         private static void Decompose(MPolygon mPolygon, DBObjectCollection columns, DBObjectCollection walls)
         {
-            var results = mPolygon.Buffer(-DECOMPOSE_OFFSET_DISTANCE);
-            if (results.Count == 0)
-            {
-                walls.Add(mPolygon);
-            }
-            else
-            {
-                foreach (AcPolygon item in results)
-                {
-                    var column = item.Buffer(DECOMPOSE_OFFSET_DISTANCE)[0] as AcPolygon;
-                    columns.Add(column);
-                    mPolygon.Difference(column).Cast<AcPolygon>().ForEach(o => walls.Add(o));
-                }
-            }
+            throw new NotSupportedException();
         }
 
         private static double AspectRatio(AcPolygon polygon)
