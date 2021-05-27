@@ -43,7 +43,7 @@ namespace ThMEPLighting.FEI
                     objs.Add(transCurve);
                 });
             }
-
+            
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
             var sprayLines = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Curve>().ToList();
             if (sprayLines.Count <= 0)
@@ -53,7 +53,7 @@ namespace ThMEPLighting.FEI
             sprayLines = sprayLines.SelectMany(x => polyline.Trim(x).Cast<Curve>().ToList()).ToList();
 
             //处理车道线
-            var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 20.0, 2.0, Math.PI / 180.0);
+            var handleLines = ThMEPLineExtension.LineSimplifier(sprayLines.ToCollection(), 500, 100.0, 2.0, Math.PI / 180.0);
             var parkingLinesService = new ParkingLinesService();
             var parkingLines = parkingLinesService.CreateNodedParkingLines(polyline, handleLines, out List<List<Line>> otherPLines);
             otherLanes = otherPLines;

@@ -14,7 +14,7 @@ namespace ThMEPLighting.FEI.EvacuationPath
 {
     public class ConnectIsolatedLaneService
     {
-        readonly double tol = 5.0;
+        readonly double tol = 10.0;
         public List<ExtendLineModel> ConnectIsolatedLane(List<ExtendLineModel> extendLines, List<List<Line>> lanes, Polyline frame, List<Polyline> holes)
         {
             List<ExtendLineModel> resExtendLines = new List<ExtendLineModel>();
