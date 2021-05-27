@@ -29,6 +29,8 @@
     <Compile Include="DSFEL\ExitService\CalExitService.cs" />
     <Compile Include="DSFEL\LayoutService.cs" />
     <Compile Include="DSFEL\Model\ExitModel.cs" />
+    <Compile Include="DSFEL\Model\RoomInfoModel.cs" />
+    <Compile Include="DSFEL\Service\CreateEvacuationPathService.cs" />
     <Compile Include="DSFEL\Service\DSFELGetPrimitivesService.cs" />
     <Compile Include="EmgLightConnect\ConnectEmgLightEngine.cs" />
     <Compile Include="EmgLightConnect\ConnectService\connectSingleSideBlkService.cs" />

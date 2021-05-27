@@ -8,7 +8,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThCADExtension;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Engine;
 using ThMEPEngineCore.LaneLine;
 
 namespace ThMEPLighting.DSFEL.Service
@@ -22,7 +24,7 @@ namespace ThMEPLighting.DSFEL.Service
         }
 
         /// <summary>
-        /// 获取需要布置疏散路径的灯
+        /// 获取需要布置疏散指示灯的房间
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
@@ -47,7 +49,7 @@ namespace ThMEPLighting.DSFEL.Service
                 .Where(o => o.Layer == ThMEPLightingCommon.ROOM_TEXT_NAME_LAYER);
                 roomTexts.ForEach(x =>
                 {
-                    var isUsefel = roomTexts.Any(z => DSFELConfigCommon.LayoutRoomText.Where(y => y.Contains(z.TextString)).Count() > 0);
+                    var isUsefel = DSFELConfigCommon.LayoutRoomText.Where(y => y.Contains(x.TextString)).Count() > 0;
                     if (isUsefel)
                     {
                         var transText = x.Clone() as DBText;
@@ -104,7 +106,7 @@ namespace ThMEPLighting.DSFEL.Service
         /// 获取中心线
         /// </summary>
         /// <returns></returns>
-        public List<List<Line>> GetCentterLines(Polyline frame, List<Polyline> polylines)
+        public List<Line> GetCentterLines(Polyline frame, List<Polyline> polylines)
         {
             var objs = new DBObjectCollection();
             using (AcadDatabase acdb = AcadDatabase.Active())
@@ -138,7 +140,64 @@ namespace ThMEPLighting.DSFEL.Service
             var parkingLines = parkingLinesService.CreateNodedParkingLines(frame, handleLines, out List<List<Line>> otherPLines);
             parkingLines.AddRange(otherPLines);
 
-            return parkingLines;
+            return parkingLines.SelectMany(x => x).ToList();
         }
+
+        /// <summary>
+        /// 获取构建
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <param name="columns"></param>
+        /// <param name="walls"></param>
+        public void GetStructureInfo(Polyline polyline, out List<Polyline> columns, out List<Polyline> walls)
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                var ColumnExtractEngine = new ThColumnExtractionEngine();
+                ColumnExtractEngine.Extract(acdb.Database);
+                ColumnExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                var ColumnEngine = new ThColumnRecognitionEngine();
+                ColumnEngine.Recognize(ColumnExtractEngine.Results, polyline.Vertices());
+
+                // 启动墙识别引擎
+                var ShearWallExtractEngine = new ThShearWallExtractionEngine();
+                ShearWallExtractEngine.Extract(acdb.Database);
+                ShearWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                var ShearWallEngine = new ThShearWallRecognitionEngine();
+                ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
+
+                var archWallExtractEngine = new ThArchitectureWallExtractionEngine();
+                archWallExtractEngine.Extract(acdb.Database);
+                archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                var archWallEngine = new ThArchitectureWallRecognitionEngine();
+                archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
+
+                ////获取柱
+                columns = new List<Polyline>();
+                columns = ColumnEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                var objs = new DBObjectCollection();
+                columns.ForEach(x => objs.Add(x));
+                ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                columns = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+
+                //获取剪力墙
+                walls = new List<Polyline>();
+                walls = ShearWallEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                objs = new DBObjectCollection();
+                walls.ForEach(x => objs.Add(x));
+                thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(objs);
+                walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(polyline).Cast<Polyline>().ToList();
+
+                //获取建筑墙
+                foreach (var o in archWallEngine.Elements)
+                {
+                    if (o.Outline is Polyline wall)
+                    {
+                        walls.Add(wall);
+                    }
+                }
+            }
+        }
+
     }
 }

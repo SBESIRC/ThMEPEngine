@@ -145,18 +145,30 @@ namespace ThMEPLighting
                 }).ToList();
 
                 var plines = HandleFrame(frameLst);
-                foreach (var pline in plines)
+                var holeInfo = CalHoles(plines);
+                foreach (var pline in holeInfo)
                 {
                     DSFELGetPrimitivesService dsFELGetPrimitivesService = new DSFELGetPrimitivesService(originTransformer);
                     //获取房间
-                    var rooms = dsFELGetPrimitivesService.GetUsefulRooms(pline);
+                    var rooms = dsFELGetPrimitivesService.GetUsefulRooms(pline.Key);
 
                     //获取门 
-                    var doors = dsFELGetPrimitivesService.GetDoor(pline);
+                    var doors = dsFELGetPrimitivesService.GetDoor(pline.Key);
+
+                    //获取中心线
+                    var centerLines = dsFELGetPrimitivesService.GetCentterLines(pline.Key, rooms.Select(x => x.Key).ToList());
+
+                    //获取结构信息
+                    dsFELGetPrimitivesService.GetStructureInfo(pline.Key, out List<Polyline> columns, out List<Polyline> walls);
+
+                    //计算洞口
+                    List<Polyline> holes = new List<Polyline>(pline.Value);
+                    holes.AddRange(columns);
+                    holes.AddRange(walls);
 
                     //布置
                     LayoutService layoutService = new LayoutService();
-                    layoutService.LayoutFELService(rooms, doors);
+                    layoutService.LayoutFELService(rooms, doors, centerLines, holes);
                 }
             }
         }
@@ -274,4 +286,4 @@ namespace ThMEPLighting
             return frameLst.Cast<Polyline>().ToList();
         }
     }
-}
+}  
