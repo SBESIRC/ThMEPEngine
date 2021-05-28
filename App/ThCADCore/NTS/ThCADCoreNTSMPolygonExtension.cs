@@ -6,10 +6,7 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
-using NetTopologySuite.Algorithm;
-using NetTopologySuite.Operation.Buffer;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
-using NTSJoinStyle = NetTopologySuite.Operation.Buffer.JoinStyle;
 
 namespace ThCADCore.NTS
 {
@@ -122,37 +119,9 @@ namespace ThCADCore.NTS
             return shell.ToNTSPolygon().GetMaximumInscribedCircleCenter();
         }
 
-        public static AcPolygon GetMinimumRectangle(this MPolygon mPolygon)
-        {
-            var geometry = mPolygon.ToNTSPolygon();
-            var rectangle = MinimumDiameter.GetMinimumRectangle(geometry);
-            if (rectangle is Polygon polygon)
-            {
-                return polygon.Shell.ToDbPolyline();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-        }
-
         public static AcPolygon Outline(this MPolygon mPolygon)
         {
             return mPolygon.ToNTSPolygon().ExteriorRing.ToDbPolyline();
-        }
-
-        public static DBObjectCollection Buffer(this MPolygon mPolygon, double distance)
-        {
-            var buffer = new BufferOp(mPolygon.ToNTSPolygon(), new BufferParameters()
-            {
-                JoinStyle = NTSJoinStyle.Mitre,
-            });
-            return buffer.GetResultGeometry(distance).ToDbCollection();
-        }
-
-        public static DBObjectCollection Difference(this MPolygon mPolygon, AcPolygon other)
-        {
-            return mPolygon.ToNTSPolygon().Difference(other.ToNTSPolygon()).ToDbCollection();
         }
     }
 }
