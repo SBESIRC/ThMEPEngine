@@ -12,7 +12,7 @@ namespace ThMEPEngineCore.IO
         public static void Output(List<ThGeometry> geos,string path,string fileName)
         {
             var stream =  File.Create(Path.Combine(path, string.Format("{0}.Info.geojson", fileName)));
-            using (StreamWriter geoJson = new StreamWriter(stream,System.Text.Encoding.UTF8))
+            using (StreamWriter geoJson = new StreamWriter(stream, new UTF8Encoding(false)))
             using (JsonTextWriter writer = new JsonTextWriter(geoJson)
             {
                 Indentation = 4,
@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.IO
 
         public static string Output(List<ThGeometry> geos)
         {
-            using (var geoJson = new ExtentedStringWriter(Encoding.UTF8))
+            using (var geoJson = new ExtentedStringWriter(new UTF8Encoding(false)))
             using (var writer = new JsonTextWriter(geoJson)
             {
                 Indentation = 4,
