@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Temp
         public ThSmallRoofExtractor()
         {
             SmallRoofs = new List<Entity>();
-            Category = "小屋面";
+            Category = "SmallRoof";
             ElementLayer = "屋面";
         }
 

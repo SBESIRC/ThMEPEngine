@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Temp
         public ThBigRoofExtractor()
         {
             BigRoofs = new List<Entity>();
-            Category = "大屋面";
+            Category = "BigRoof";
             ElementLayer = "大屋面";
         }
 
