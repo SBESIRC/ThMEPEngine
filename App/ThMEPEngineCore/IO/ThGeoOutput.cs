@@ -1,8 +1,9 @@
 ﻿using System.IO;
-using System.Collections.Generic;
+using System.Text;
 using Newtonsoft.Json;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.IO.GeoJSON;
+using System.Collections.Generic;
 
 namespace ThMEPEngineCore.IO
 {
@@ -26,8 +27,8 @@ namespace ThMEPEngineCore.IO
 
         public static string Output(List<ThGeometry> geos)
         {
-            using (StringWriter geoJson = new StringWriter())
-            using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+            using (var geoJson = new ExtentedStringWriter(Encoding.UTF8))
+            using (var writer = new JsonTextWriter(geoJson)
             {
                 Indentation = 4,
                 IndentChar = ' ',
@@ -37,6 +38,23 @@ namespace ThMEPEngineCore.IO
                 var geoJsonWriter = new ThGeometryJsonWriter();
                 geoJsonWriter.Write(geos, writer);
                 return geoJson.ToString();
+            }
+        }
+    }
+    public sealed class ExtentedStringWriter : StringWriter
+    {
+        private readonly Encoding stringWriterEncoding;
+        public ExtentedStringWriter(Encoding desiredEncoding)
+            : base()
+        {
+            this.stringWriterEncoding = desiredEncoding;
+        }
+
+        public override Encoding Encoding
+        {
+            get
+            {
+                return this.stringWriterEncoding;
             }
         }
     }
