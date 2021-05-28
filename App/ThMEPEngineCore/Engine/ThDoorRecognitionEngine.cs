@@ -28,11 +28,11 @@ namespace ThMEPEngineCore.Engine
             // 构件索引服务
             ThSpatialIndexCacheService.Instance.Add(new List<BuiltInCategory>
             {
-                BuiltInCategory.OST_ArchitectureWall,
-                BuiltInCategory.OST_Column,
-                BuiltInCategory.OST_CurtainWall,
-                BuiltInCategory.OST_ShearWall,
-                BuiltInCategory.OST_Window
+                BuiltInCategory.ArchitectureWall,
+                BuiltInCategory.Column,
+                BuiltInCategory.CurtainWall,
+                BuiltInCategory.ShearWall,
+                BuiltInCategory.Window
             });
             ThSpatialIndexCacheService.Instance.Build(database, polygon);
 

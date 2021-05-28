@@ -37,19 +37,19 @@ namespace ThMEPEngineCore.Service
             {
                 switch(builtInCategory)
                 {
-                    case BuiltInCategory.OST_ArchitectureWall:
+                    case BuiltInCategory.ArchitectureWall:
                         Factories.Add(new ArchitectureWallSpatialIndexFactory());
                         break;
-                    case BuiltInCategory.OST_Column:
+                    case BuiltInCategory.Column:
                         Factories.Add(new ColumnSpatialIndexFactory());
                         break;
-                    case BuiltInCategory.OST_CurtainWall:
+                    case BuiltInCategory.CurtainWall:
                         Factories.Add(new CurtainWallSpatialIndexFactory());
                         break;
-                    case BuiltInCategory.OST_ShearWall:
+                    case BuiltInCategory.ShearWall:
                         Factories.Add(new ShearWallSpatialIndexFactory());
                         break;
-                    case BuiltInCategory.OST_Window:
+                    case BuiltInCategory.Window:
                         Factories.Add(new WindowSpatialIndexFactory());
                         break;
                     default:
@@ -102,7 +102,7 @@ namespace ThMEPEngineCore.Service
     {
         public ColumnSpatialIndexFactory()
         {
-            BuiltCategory = BuiltInCategory.OST_Column;
+            BuiltCategory = BuiltInCategory.Column;
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
@@ -119,7 +119,7 @@ namespace ThMEPEngineCore.Service
     {
         public ArchitectureWallSpatialIndexFactory()
         {
-            BuiltCategory = BuiltInCategory.OST_ArchitectureWall;
+            BuiltCategory = BuiltInCategory.ArchitectureWall;
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
@@ -136,7 +136,7 @@ namespace ThMEPEngineCore.Service
     {
         public ShearWallSpatialIndexFactory()
         {
-            BuiltCategory = BuiltInCategory.OST_ShearWall;
+            BuiltCategory = BuiltInCategory.ShearWall;
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
@@ -153,7 +153,7 @@ namespace ThMEPEngineCore.Service
     {
         public CurtainWallSpatialIndexFactory()
         {
-            BuiltCategory = BuiltInCategory.OST_CurtainWall;
+            BuiltCategory = BuiltInCategory.CurtainWall;
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
@@ -170,7 +170,7 @@ namespace ThMEPEngineCore.Service
     {
         public WindowSpatialIndexFactory()
         {
-            BuiltCategory = BuiltInCategory.OST_Window;
+            BuiltCategory = BuiltInCategory.Window;
         }
         public override void Create(Database database, Point3dCollection polygon)
         {
