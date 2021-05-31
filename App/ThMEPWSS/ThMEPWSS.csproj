@@ -19,11 +19,7 @@
     <DefineConstants>TRACE;DEBUG;ACAD2016;ACAD_ABOVE_2012;ACAD_ABOVE_2014；ACAD_ABOVE_2011</DefineConstants>
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-  <ItemGroup>
-    <Reference Include="ManagedLibrary.v16, Version=1.0.7797.32117, Culture=neutral, processorArchitecture=AMD64">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
-    </Reference>
+  <ItemGroup>    
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
@@ -313,6 +309,9 @@
       <ItemGroup>
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
+        </Reference>
+		<Reference Include="ManagedLibrary.v16">
+          <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
         </Reference>
       </ItemGroup>
     </When>
