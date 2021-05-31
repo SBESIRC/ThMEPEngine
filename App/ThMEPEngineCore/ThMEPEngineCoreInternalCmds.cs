@@ -176,8 +176,8 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THDXCX", CommandFlags.Modal)]
-        public void THDXCX()
+        [CommandMethod("TIANHUACAD", "THDXCXDemoTest", CommandFlags.Modal)]
+        public void THDXCXDemoTest()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var extractEngine = new ThExtractGeometryEngine())
@@ -297,8 +297,8 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THACLD", CommandFlags.Modal)]
-        public void THExtractAreaCenterLineTestData()
+        [CommandMethod("TIANHUACAD", "THACLDDemoTest", CommandFlags.Modal)]
+        public void THExtractAreaCenterLineDemoTest()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             using (var extractEngine = new ThExtractGeometryEngine())
@@ -331,8 +331,8 @@ namespace ThMEPEngineCore
                 extractEngine.Print(acadDatabase.Database);
             }
         }
-        [CommandMethod("TIANHUACAD", "ThFHCR", CommandFlags.Modal)]
-        public void ThFHCR()
+        [CommandMethod("TIANHUACAD", "ThFHCRDemoTest", CommandFlags.Modal)]
+        public void ThFHCRDemoTest()
         {
             //消火栓保护半径
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -439,8 +439,8 @@ namespace ThMEPEngineCore
                 }
             }
         }
-        [CommandMethod("TIANHUACAD", "ThWSDI", CommandFlags.Modal)]
-        public void ThWSDI()
+        [CommandMethod("TIANHUACAD", "ThWSDIDemoTest", CommandFlags.Modal)]
+        public void ThWSDIDemoTest()
         {
             //Water Supply Detail Drawing (给排水大样图)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -482,8 +482,8 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "ThRLP", CommandFlags.Modal)]
-        public void ThRLP()
+        [CommandMethod("TIANHUACAD", "ThRLPDemoTest", CommandFlags.Modal)]
+        public void ThRLPDemoTest()
         {
             //Roof thunder protection (屋顶防雷)
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
@@ -546,8 +546,8 @@ namespace ThMEPEngineCore
             }
         }
 
-        [CommandMethod("TIANHUACAD", "THHYDRANT", CommandFlags.Modal)]
-        public void THHYDRANT()
+        [CommandMethod("TIANHUACAD", "THHYDRANTDemoTest", CommandFlags.Modal)]
+        public void THHYDRANTDemoTest()
         {
             //
             using (var sr = new StreamReader("D:\\有洞空间和母子空间.dwg.Info.geojson"))
