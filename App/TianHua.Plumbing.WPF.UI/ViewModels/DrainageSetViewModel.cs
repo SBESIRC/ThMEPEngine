@@ -7,7 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 
-namespace TianHua.Plumbing.WPF.UI.ViewModels
+namespace ThMEPWSS.Diagram.ViewModel
 {
     public class DrainageSetViewModel : NotifyPropertyChangedBase
     {
@@ -15,6 +15,7 @@ namespace TianHua.Plumbing.WPF.UI.ViewModels
         {
             FloorLineSpace = 1800;
             FaucetFloor = "";
+            NoCheckValve = "";
             MaxDayQuota = 250;
             MaxDayHourCoefficient = 2.5;
             NumberOfHouseholds = 3.5;
@@ -41,7 +42,7 @@ namespace TianHua.Plumbing.WPF.UI.ViewModels
         /// <summary>
         /// 冲洗龙头
         /// </summary>
-        private string FaucetFloor
+        public string FaucetFloor
         {
             get { return faucetFloor; }
             set
@@ -50,6 +51,21 @@ namespace TianHua.Plumbing.WPF.UI.ViewModels
                 this.RaisePropertyChanged();
             }
         }
+
+        private string noCheckValve { get; set; }
+        /// <summary>
+        /// 无减压阀
+        /// </summary>
+        public string NoCheckValve
+        {
+            get { return noCheckValve; }
+            set
+            {
+                noCheckValve = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
 
         private double maxDayQuota { get; set; }
         /// <summary>
@@ -169,7 +185,7 @@ namespace TianHua.Plumbing.WPF.UI.ViewModels
             
         }
     }
-    public class PartitionData 
+    public class PartitionData  
     {
         public string RiserNumber { get; set; }
         public string MinimumFloorNumber { get; set; }

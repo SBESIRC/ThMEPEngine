@@ -1363,20 +1363,27 @@ namespace ThMEPWSS.Uitl
                 {
                     return new List<string>();
                 }
-                var storeys = result.Value.GetObjectIds()
-                    .Select(o => acadDatabase.Element<BlockReference>(o))
-                    .Where(o => o.GetEffectiveName() == ThWPipeCommon.STOREY_BLOCK_NAME)
-                    .Select(o => o.ObjectId)
-                    .ToObjectIdCollection();
-
-                // 获取楼层名称
-                var service = new ThReadStoreyInformationService();
-                service.Read(storeys);
-
-                return service.StoreyNames.Select(o => o.Item2).ToList();
+                var selectedIds = result.Value.GetObjectIds();
+                List<string> storeyInfoList = GetStoreyInfoList(acadDatabase, selectedIds);
+                return storeyInfoList;
             }
         }
-        
+
+        public static List<string> GetStoreyInfoList(AcadDatabase acadDatabase, ObjectId[] selectedIds)
+        {
+            var storeys = selectedIds
+                .Select(o => acadDatabase.Element<BlockReference>(o))
+                .Where(o => o.GetEffectiveName() == ThWPipeCommon.STOREY_BLOCK_NAME)
+                .Select(o => o.ObjectId)
+                .ToObjectIdCollection();
+
+            // 获取楼层名称
+            var service = new ThReadStoreyInformationService();
+            service.Read(storeys);
+            var storeyInfoList = service.StoreyNames.Select(o => o.Item2).ToList();
+            return storeyInfoList;
+        }
+
         public static bool GetBoundaryRect(out double minX, out double minY, out double maxX, out double maxY, params Entity[] ents)
         {
             var pts = new Point3dCollection();

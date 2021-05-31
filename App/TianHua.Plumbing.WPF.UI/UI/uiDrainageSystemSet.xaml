@@ -45,6 +45,11 @@
                 <TextBox Width="100" Text="{Binding FaucetFloor,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"></TextBox>
                 <Label Content="层"></Label>
             </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label Content="无减压阀："></Label>
+                <TextBox Width="100" Text="{Binding NoCheckValve,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                <Label Content="层"></Label>
+            </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
                 <Label Content="敷设方式："></Label>
                 <ItemsControl x:Name="testList" ItemsSource="{Binding DynamicRadios}">

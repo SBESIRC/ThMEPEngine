@@ -1,17 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
@@ -45,6 +33,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             if (ret == false)
                 //用户取消了操作
                 return;
+
             //用户确认，进行后续的业务逻辑
             //step1 保存用户的输入信息
             foreach (var item in viewModel.DynamicRadioButtons) 
@@ -58,10 +47,20 @@ namespace TianHua.Plumbing.WPF.UI.UI
         //run
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new ThWaterSuplySystemDiagramCmd())
+            using (var cmd = new ThWaterSuplySystemDiagramCmd(viewModel))
             {
                 cmd.Execute();
             }
+        }
+
+        private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+           
+        }
+
+        private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.InitListDatas();
         }
     }
 }

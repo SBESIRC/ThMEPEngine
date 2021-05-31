@@ -1,10 +1,6 @@
 ﻿using GalaSoft.MvvmLight.Command;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPWSS.Diagram.ViewModel
@@ -14,10 +10,27 @@ namespace ThMEPWSS.Diagram.ViewModel
         public DrainageSetViewModel()
         {
             FloorLineSpace = 1800;
-            FaucetFloor = "";
+            FaucetFloor = "1";
+            NoCheckValve = "";
             MaxDayQuota = 250;
             MaxDayHourCoefficient = 2.5;
             NumberOfHouseholds = 3.5;
+
+            PartitionDatas = new ObservableCollection<PartitionData>();
+            var pipeNumber = new string[] { "JGL", "J1L1", "J2L1", "J3L1"};
+            foreach(var number in pipeNumber)
+            {
+                var partitionData = new PartitionData();
+                partitionData.RiserNumber = number;
+                if(number == "JGL")
+                {
+                    partitionData.MinimumFloorNumber = "1";
+                    partitionData.HighestFloorNumber = "1";
+                }
+                PartitionDatas.Add(partitionData);
+            }
+            
+
 
             DynamicRadios = new ObservableCollection<DynamicRadioButton>();
             DynamicRadios.Add(new DynamicRadioButton() { Content = "穿梁", GroupName = "type", IsChecked = true });
@@ -41,7 +54,7 @@ namespace ThMEPWSS.Diagram.ViewModel
         /// <summary>
         /// 冲洗龙头
         /// </summary>
-        private string FaucetFloor
+        public string FaucetFloor
         {
             get { return faucetFloor; }
             set
@@ -50,6 +63,21 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+
+        private string noCheckValve { get; set; }
+        /// <summary>
+        /// 无减压阀
+        /// </summary>
+        public string NoCheckValve
+        {
+            get { return noCheckValve; }
+            set
+            {
+                noCheckValve = value;
+                this.RaisePropertyChanged();
+            }
+        }
+
 
         private double maxDayQuota { get; set; }
         /// <summary>
@@ -169,7 +197,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             
         }
     }
-    public class PartitionData 
+    public class PartitionData  
     {
         public string RiserNumber { get; set; }
         public string MinimumFloorNumber { get; set; }
