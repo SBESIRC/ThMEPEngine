@@ -126,7 +126,7 @@ namespace ThMEPEngineCore.CAD
             }
         }
         /// <summary>
-        /// 是否为结构梁
+        /// 是否为门
         /// </summary>
         public bool IsDoor
         {

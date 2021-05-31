@@ -62,12 +62,18 @@
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
+    <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3ShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThFireCompartmentExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
     <Compile Include="Engine\ThParkingStallVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
     <Compile Include="Model\Electrical\ThFireCompartment.cs" />
+    <Compile Include="Service\ThBuildElementSimplifier.cs" />
+    <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
+    <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
@@ -461,6 +467,7 @@
     <Compile Include="Temp\ThWaterSupplyPositionExtractor.cs" />
     <Compile Include="Temp\ThToiletGroupExtractor.cs" />
     <Compile Include="Temp\ThWaterSupplyStartExtractor.cs" />
+    <Compile Include="Engine\ThDB3ColumnExtractionVisitor.cs" />
     <Compile Include="ThMEPEngineCoreApp.cs" />
     <Compile Include="ThMEPEngineCoreCommon.cs" />
     <Compile Include="ThMEPEngineCoreGeUtils.cs" />

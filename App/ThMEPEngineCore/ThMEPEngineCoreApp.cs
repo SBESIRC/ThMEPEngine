@@ -96,7 +96,7 @@ namespace ThMEPEngineCore
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 if(result2.StringResult == "识别")
                 {
-                    var engine = new ThColumnRecognitionEngine();
+                    var engine = new ThDB3ColumnRecognitionEngine();
                     engine.Recognize(acadDatabase.Database, nFrame.Vertices());
                     engine.Elements.Select(o => o.Outline).ForEach(o =>
                     {
@@ -106,7 +106,7 @@ namespace ThMEPEngineCore
                 }
                 else
                 {
-                    var engine = new ThColumnExtractionEngine();
+                    var engine = new ThDB3ColumnExtractionEngine();
                     engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
                     var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
@@ -164,21 +164,45 @@ namespace ThMEPEngineCore
                 {
                     return;
                 }
+
+                var options = new PromptKeywordOptions("\n选择处理方式");
+                options.Keywords.Add("提取", "E", "提取(E)");
+                options.Keywords.Add("识别", "R", "识别(R)");
+                options.Keywords.Default = "提取";
+                var result2 = Active.Editor.GetKeywords(options);
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 var nFrame = ThMEPFrameService.Normalize(frame);
-                var engine = new ThShearWallExtractionEngine();
-                engine.Extract(acadDatabase.Database);
-                var results = new DBObjectCollection();
-                var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
-                foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
+                if (result2.StringResult == "识别")
                 {
-                    results.Add(filterObj as Entity);
+                    var engine = new ThDB3ShearWallRecognitionEngine();
+                    engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                    engine.Elements.Select(o => o.Outline).ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
                 }
-                results.Cast<Entity>().ForEach(o =>
+                else
                 {
-                    o.SetDatabaseDefaults(acadDatabase.Database);
-                    acadDatabase.ModelSpace.Add(o);
-                });
+                    var engine = new ThDB3ShearWallExtractionEngine();
+                    engine.Extract(acadDatabase.Database);
+                    var results = new DBObjectCollection();
+                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
+                    {
+                        results.Add(filterObj as Entity);
+                    }
+                    results.Cast<Entity>().ForEach(o =>
+                    {
+                        acadDatabase.ModelSpace.Add(o);
+                        o.SetDatabaseDefaults();
+                    });
+                }
             }
         }
         [CommandMethod("TIANHUACAD", "THExtractArchWall", CommandFlags.Modal)]

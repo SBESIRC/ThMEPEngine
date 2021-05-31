@@ -5,6 +5,7 @@ namespace ThMEPEngineCore
 {
     public class ThMEPEngineCoreCommon
     {
+        public static string BUILDELEMENT_SECTION_S = "下层";
         public static string BUILDELEMENT_PROPERTY_CATEGORY = "Category";
         public static string BUILDELEMENT_PROPERTY_USER_TYPE = "UserType";
         public static string BUILDELEMENT_PROPERTY_Boundary = "边界";
@@ -32,6 +33,8 @@ namespace ThMEPEngineCore
         public static string BUILDELEMENT_LAYER_FLOOR = "AE-FLOR";
         public static string BUILDELEMENT_LAYER_RAILING = "AE-HDWR";
         public static string BUILDELEMENT_LAYER_STRU_HACH = "AE-STRU-HACH";
+        public static string BUILDELEMENT_LAYER_STRU_WALL = "S_WALL_BELW_DASH_HACH";
+        public static string BUILDELEMENT_LAYER_STRU_COLUMN = "S_COlU_BELW_DASH_HACH";
         // 分类
         public static string BUILDELEMENT_CATEGORY_WALL = "墙";
         public static string BUILDELEMENT_CATEGORY_S_BEAM = "结构梁";
