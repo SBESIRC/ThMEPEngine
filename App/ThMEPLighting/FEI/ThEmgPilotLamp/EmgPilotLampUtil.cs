@@ -135,6 +135,10 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         public static bool LineIsCollinear(Point3d firstSp, Point3d firstEp, Point3d secondSp, Point3d secondEp,out List<Point3d> collPoints, double tolerance = 1.0, double precisionOut = 5, double precisionAngle = 5)
         {
             collPoints = new List<Point3d>();
+            var firstLength = firstSp.DistanceTo(firstEp);
+            var secondLength = secondEp.DistanceTo(secondSp);
+            if (Math.Abs(firstLength - secondLength) > 1000 && firstLength < secondLength)
+                return LineIsCollinear(secondSp, secondEp, firstSp, firstEp, out collPoints, tolerance, precisionOut, precisionAngle);
             //这里不考虑异面问题，这里认为线为XOY平面上的两根线
             var maxAngle = precisionAngle * Math.PI / 180;
             //两根线有一定夹角，距离也可以认为是有共线
@@ -276,68 +280,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         }
 
         /// <summary>
-        /// 判断生生成的灯是否符合要求，如果被边框穿过，不符合要求
-        /// （有些框线穿过边框，但需要保留）
-        /// </summary>
-        /// <param name="createPoint"></param>
-        /// <param name="arrowDir"></param>
-        /// <param name="outDir"></param>
-        /// <returns></returns>
-        bool LightIsCorrect(Polyline maxPolyline, Point3d createPoint, Vector3d arrowDir, Vector3d outDir)
-        {
-            List<Line> lines = new List<Line>();
-            var sp = createPoint + arrowDir.MultiplyBy(250);
-            var ep = createPoint - arrowDir.MultiplyBy(250);
-            var spOut = sp + outDir.MultiplyBy(250);
-            var epOut = ep + outDir.MultiplyBy(250);
-            lines.Add(new Line(sp, ep));
-            lines.Add(new Line(ep, epOut));
-            lines.Add(new Line(epOut, spOut));
-            lines.Add(new Line(spOut, sp));
-            bool isIntersection = false;
-            var maxLines = maxPolyline.ExplodeLines();
-            foreach (var line in lines)
-            {
-                if (isIntersection)
-                    break;
-                var liDir = (line.EndPoint - line.StartPoint).GetNormal();
-                foreach (var target in maxLines)
-                {
-                    if (isIntersection)
-                        break;
-                    var targetDir = (target.EndPoint - target.StartPoint).GetNormal();
-                    double angle = liDir.GetAngleTo(targetDir);
-                    angle = angle % Math.PI;
-                    if (angle < Math.PI / 18 || angle > (Math.PI - Math.PI / 18))
-                        continue;
-                    var res = ThCADCoreNTSLineExtension.Intersection(line, target, Intersect.OnBothOperands);
-                    if (null != res)
-                    {
-                        Point3d pt = new Point3d(res.X, res.Y, createPoint.Z);
-                        if (pt.DistanceTo(line.StartPoint) < 5 || pt.DistanceTo(line.EndPoint) < 5)
-                            continue;
-                        isIntersection = true;
-                    }
-                }
-            }
-            return isIntersection;
-        }
-        //GraphRoute InitRouteByPoints(List<Point3d> routePts, GraphRoute pNode)
-        //{
-        //    if (routePts == null || routePts.Count < 1)
-        //        return null;
-        //    Point3d point = routePts.FirstOrDefault();
-        //    var node = _targetInfo.allNodes.Where(c => c.nodePoint.DistanceTo(point) < 2).FirstOrDefault();
-        //    var currentRoute = new GraphRoute();
-        //    currentRoute.node = node;
-        //    List<Point3d> nextPts = new List<Point3d>();
-        //    for (int i = 1; i < routePts.Count; i++)
-        //        nextPts.Add(routePts[i]);
-        //    currentRoute.nextRoute = InitRouteByPoints(nextPts, currentRoute);
-        //    return currentRoute;
-        //}
-
-        /// <summary>
         /// 闭合区域外侧
         /// </summary>
         /// <param name="pline"></param>
@@ -345,6 +287,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         /// <returns></returns>
         public static Dictionary<Line, Vector3d> PolylineOutDir(Polyline pline, bool isOut = true)
         {
+            
             Dictionary<Line, Vector3d> valuePairs = new Dictionary<Line, Vector3d>();
             var polyline = pline.DPSimplify(10);
             if (!polyline.IsClosed())
@@ -366,7 +309,17 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 valuePairs.Add(line, outDir);
                 objs.Add(line);
             }
-            List<Line> newLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 5, 2.0, 2.0, Math.PI / 180.0).Cast<Line>().ToList();
+            
+            List<Line> newLines = new List<Line>();
+            if (objs.Count < 40)
+            {
+                //这里主要时处理柱墙的，一般不会有太多线，线太多时合并太影响效率，这里只在线不是特别多时进行合成操作
+                newLines = ThMEPEngineCore.Algorithm.ThMEPLineExtension.LineSimplifier(objs, 5, 2.0, 2.0, Math.PI / 180.0).Cast<Line>().ToList();
+            }
+            else 
+            {
+                return valuePairs;
+            }
             Dictionary<Line, Vector3d> retValuePairs = new Dictionary<Line, Vector3d>();
             foreach (var line in newLines) 
             {

@@ -140,12 +140,16 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         public Vector3d lineDir { get; }
         public Vector3d layoutLineSide { get; set; }
         public List<NodeDirection> nodeDirections { get; }
+        public List<LightLayout> leftWallLayouLight { get; }
+        public List<LightLayout> rightWallLayoutLight { get; }
         public LineGraphNode(Line li)
         {
             this.line = li;
             if (null != line)
                 lineDir = (line.EndPoint - line.StartPoint).GetNormal();
             this.nodeDirections = new List<NodeDirection>();
+            this.leftWallLayouLight = new List<LightLayout>();
+            this.rightWallLayoutLight = new List<LightLayout>();
         }
     }
     public class IndicatorLight

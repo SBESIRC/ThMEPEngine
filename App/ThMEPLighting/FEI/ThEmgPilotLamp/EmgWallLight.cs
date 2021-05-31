@@ -55,19 +55,28 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             var objs = new DBObjectCollection();
             _targetInfo.mainLines.ForEach(x => objs.Add(x));
             _targetInfo.assistLines.ForEach(x => objs.Add(x));
-            List<Line> lines = ThMEPLineExtension.LineSimplifier(objs, 500, 200.0, 200.0, Math.PI * _wallLightMergeAngle / 180).Cast<Line>().ToList();
+            var lines = ThMEPLineExtension.LineSimplifier(objs, 50, 50, 50, Math.PI / 180).Cast<Line>().ToList();
+            objs.Clear();
+            foreach (var line in lines)
+                objs.Add(line);
+            lines = ThMEPLineExtension.LineSimplifier(objs, 50, 2500, 20.0, Math.PI * _wallLightMergeAngle / 180).Cast<Line>().ToList();
             lines = lines.Where(c => c.Length > 100).ToList();
-            //合并后可能会导致线角度有变化，这里的线为后面的实际的线提供排布侧方向
-            var tempNodes = InitAllLineNode(lines, null);
-            tempNodes = CalcLineLayoutSide(tempNodes);
-            lines = ThMEPLineExtension.LineSimplifier(objs, 500, 200.0, 200.0, Math.PI * 15 / 180).Cast<Line>().ToList();
-            var _wallGraphNodes = InitAllLineNode(lines, tempNodes);
-            _wallGraphNodes = _wallGraphNodes.OrderByDescending(c => c.line.Length).ToList();
+            //合并后可能会导致线角度有变化，这里的线为后面的实际的线提供排布侧方向，
+            //这里合并时给的间距过大有些情况会报错，这里不给太大间距
+            var tempNodes = InitAllLineNode(lines);
+            lines = ThMEPLineExtension.LineSimplifier(objs, 50, 500.0, 20.0, Math.PI * 15 / 180).Cast<Line>().ToList();
+            var _wallGraphNodes = CalcLineLayoutSide(lines, tempNodes);
             return _wallGraphNodes;
         }
-        public List<LineGraphNode> CalcLineLayoutSide(List<LineGraphNode> _wallGraphNodes) 
+        /// <summary>
+        /// 根据合并和的线计算实际线要要排布在那一侧
+        /// </summary>
+        /// <param name="lines"></param>
+        /// <param name="_wallGraphNodes"></param>
+        /// <returns></returns>
+        private List<LineGraphNode> CalcLineLayoutSide(List<Line> lines,List<LineGraphNode> _wallGraphNodes)
         {
-            List<LineGraphNode> lineLayoutSides = new List<LineGraphNode>();
+            List<LineGraphNode> lineLayoutSides = InitAllLineNode(lines,true);
             foreach (var lineInfo in _wallGraphNodes)
             {
                 var zero = new Vector3d(0, 0, 0);
@@ -78,23 +87,37 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 var leftDir = dir.RotateBy(Math.PI / 2, _normal).GetNormal();
                 int minCount = (int)(lineInfo.line.Length / _lightSpace);
 
-                List<Polyline> inWalls = new List<Polyline>();
-                List<Polyline> inColumns = new List<Polyline>();
-                var inputLineInfo = new LineGraphNode(lineInfo.line);
-                inputLineInfo.layoutLineSide =lineInfo.layoutLineSide;
-                inputLineInfo.nodeDirections.AddRange(lineInfo.nodeDirections);
-                inputLineInfo.layoutLineSide = leftDir;
-                GetSideWallColumns(inputLineInfo.line, leftDir, _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
-                inColumns = ReomveColumns(inputLineInfo.line, leftDir, inColumns, inWalls);
-                var leftLights = GetLightLayoutPlan(inputLineInfo, inWalls, inColumns);
+                var leftLights = new List<LightLayout>();
+                var rightLights = new List<LightLayout>();
+                foreach (var item in lineLayoutSides) 
+                {
+                    var isColl = EmgPilotLampUtil.LineIsCollinear(lineInfo.line.StartPoint, lineInfo.line.EndPoint, item.line.StartPoint, item.line.EndPoint, 1, 1000, _wallLightMergeAngle);
+                    if (!isColl)
+                        continue;
+                    if (item.leftWallLayouLight != null && item.leftWallLayouLight.Count > 0)
+                    {
+                        foreach (var light in item.leftWallLayouLight) 
+                        {
+                            //实际排布的线可能和这里计算的线有偏差，这里将灯进行修正
+                            var prjPoint = EmgPilotLampUtil.PointToLine(light.pointInOutSide, lineInfo.line);
+                            var newLight = new LightLayout(prjPoint, light.pointInOutSide, lineInfo.line, leftDir, light.direction, light.directionSide,light.nearNode);
+                            leftLights.Add(newLight);
+                        }
+                    }
+                    if (item.rightWallLayoutLight != null && item.rightWallLayoutLight.Count > 0)
+                    {
+                        foreach (var light in item.rightWallLayoutLight)
+                        {
+                            //实际排布的线可能和这里计算的线有偏差，这里将灯进行修正
+                            var prjPoint = EmgPilotLampUtil.PointToLine(light.pointInOutSide, lineInfo.line);
+                            var newLight = new LightLayout(prjPoint, light.pointInOutSide, lineInfo.line, leftDir, light.direction, light.directionSide, light.nearNode);
+                            rightLights.Add(newLight);
+                        }
+                    }
+                }
                 var leftUnConform = leftLights == null || leftLights.Count < 1 || LineWallLightOverSpaceCount(lineInfo.line, leftLights) > 0;
-
-                inputLineInfo.layoutLineSide = leftDir.Negate();
-                GetSideWallColumns(inputLineInfo.line, leftDir.Negate(), _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
-                inColumns = ReomveColumns(inputLineInfo.line, leftDir.Negate(), inColumns, inWalls);
-                var rightLights = GetLightLayoutPlan(inputLineInfo, inWalls, inColumns);
                 var rightUnConform = rightLights == null || rightLights.Count < 1 || LineWallLightOverSpaceCount(lineInfo.line, rightLights) > 0;
-                
+
                 var realSideDir = leftDir;
                 if (lineInfo.layoutLineSide == null || lineInfo.layoutLineSide.IsEqualTo(zero))
                 {
@@ -109,13 +132,13 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         //两侧都符合要求
                         realSideDir = GetLineSideToLayoutLight(lineInfo, leftLights, rightLights);
                     }
-                    else 
+                    else
                     {
                         //只有一侧符合要求
                         realSideDir = leftUnConform ? leftDir.Negate() : leftDir;
                     }
                 }
-                else 
+                else
                 {
                     //该线有需要排布在那一侧
                     if (leftUnConform && rightUnConform)
@@ -134,8 +157,18 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         realSideDir = leftUnConform ? leftDir.Negate() : leftDir;
                     }
                 }
-                inputLineInfo.layoutLineSide = realSideDir;
-                lineLayoutSides.Add(inputLineInfo);
+                foreach (var item in lineLayoutSides)
+                {
+                    var isColl = EmgPilotLampUtil.LineIsCollinear(lineInfo.line.StartPoint, lineInfo.line.EndPoint, item.line.StartPoint, item.line.EndPoint, 1, 1000, _wallLightMergeAngle);
+                    if (!isColl)
+                        continue;
+                    
+                    var sideDir = _normal.CrossProduct(item.lineDir);
+                    var dot = realSideDir.DotProduct(sideDir);
+                    if (dot < -0.01)
+                        sideDir = sideDir.Negate();
+                    item.layoutLineSide = sideDir;
+                }
             }
             return lineLayoutSides;
         }
@@ -210,8 +243,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                             break;
                         }
                     }
-                    //endPoint = startPt + lineInfo.lineDir.MultiplyBy(maxDis < 2000?_lightSpace:maxDis);
-                    //beBreak = isAdd;
                 }
                 isFirst = isAdd;
                 startPt = endPoint;
@@ -305,10 +336,12 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (dis < nearDis)
                 {
                     nearNode = route.graphNode;
-                    if (prjPt.DistanceTo(route.graphNode.nodePoint) > 100)
+                    if (prjPt.DistanceTo(route.graphNode.nodePoint) > 10)
                         exitDir = (route.graphNode.nodePoint - prjPt).GetNormal();
-                    else
+                    else if (Math.Abs(tempDir.DotProduct(lineInfo.lineDir)) > 0.5)
                         exitDir = tempDir;
+                    else
+                        exitDir = lineInfo.lineDir;
 
                     nearDis = dis;
                     nearRoute = tempRoute;
@@ -434,7 +467,8 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
             return columns;
         }
-        List<LineGraphNode> InitAllLineNode(List<Line> lines, List<LineGraphNode> lineGraphNodes)
+       
+        List<LineGraphNode> InitAllLineNode(List<Line> lines,bool initWallLight=false)
         {
             var lineGrapheNode = new List<LineGraphNode>();
             //step1 获取每一根线上的节点
@@ -450,6 +484,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             {
                 if (null == lineNode || lineNode.nodeDirections == null || lineNode.nodeDirections.Count < 1)
                     continue;
+                //获取每根线上的节点
                 foreach (var node in lineNode.nodeDirections)
                 {
                     if (null == node)
@@ -471,58 +506,53 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         node.inDirection.Add(addDir);
                     }
                 }
-                //根据之前合并后的线计算要排布在那一侧
-                //如果没有满足的再次通过原始方式 进行计算
                 var dir = lineNode.lineDir;
                 var leftDir = dir.RotateBy(Math.PI / 2, _normal).GetNormal();
-                //var leftDir = dir.RotateBy(Math.PI / 2, _normal).GetNormal();
-                Vector3d? sideDir = null;
-                if (null != lineGraphNodes && lineGraphNodes.Count > 0)
+                int lefeInCount = 0, rightInCount = 0;
+                foreach (var node in lineNode.nodeDirections)
                 {
-                    foreach (var item in lineGraphNodes)
+                    if (node == null || null == node.inDirection || node.inDirection.Count < 1)
+                        continue;
+                    foreach (var inDir in node.inDirection)
                     {
-                        if (item == null || item.layoutLineSide == null || item.layoutLineSide.IsEqualTo(new Vector3d()))
-                            continue;
-                        var isColl = EmgPilotLampUtil.LineIsCollinear(lineNode.line.StartPoint, lineNode.line.EndPoint, item.line.StartPoint, item.line.EndPoint, 1, 1000, _wallLightMergeAngle);
-                        if (!isColl)
-                            continue;
-                        sideDir = leftDir;
-                        var thisSideDir = item.layoutLineSide;
-                        var dot = thisSideDir.DotProduct(leftDir);
-                        if (dot < -0.01)
-                            sideDir = leftDir.Negate();
-                        break;
+                        double dot = inDir.DotProduct(leftDir);
+                        if (dot > 0)
+                            lefeInCount += 1;
+                        else
+                            rightInCount += 1;
                     }
                 }
-                //根据线上的点的出入度 更新该排布的方向
-                if (!sideDir.HasValue)
+                if (lefeInCount == rightInCount && lefeInCount == 0)
                 {
-                    sideDir = leftDir;
-                    int lefeInCount = 0, rightInCount = 0;
-                    foreach (var node in lineNode.nodeDirections)
-                    {
-                        if (node == null || null == node.inDirection || node.inDirection.Count < 1)
-                            continue;
-                        foreach (var inDir in node.inDirection)
-                        {
-                            double dot = inDir.DotProduct(leftDir);
-                            if (dot > 0)
-                                lefeInCount += 1;
-                            else
-                                rightInCount += 1;
-                        }
-                    }
-                    if (lefeInCount == rightInCount && lefeInCount == 0) 
-                    {
-                        //两侧都可以进行布置
-                        sideDir = null;
-                    }
-                    else if (lefeInCount < rightInCount)
-                        sideDir = leftDir.Negate();
+                    //两侧都可以进行布置
+                    lineNode.layoutLineSide = new Vector3d();
                 }
-                lineNode.layoutLineSide = sideDir.HasValue?sideDir.Value:new Vector3d();
-            }
+                else if (lefeInCount < rightInCount)
+                    lineNode.layoutLineSide = leftDir.Negate();
+                else
+                    lineNode.layoutLineSide = leftDir;
 
+                if (!initWallLight)
+                    continue;
+                //获取左右两侧的布置灯
+                List<Polyline> inWalls = new List<Polyline>();
+                List<Polyline> inColumns = new List<Polyline>();
+                var inputLineInfo = new LineGraphNode(lineNode.line);
+                inputLineInfo.layoutLineSide = leftDir;
+                inputLineInfo.nodeDirections.AddRange(lineNode.nodeDirections);
+                GetSideWallColumns(inputLineInfo.line, leftDir, _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
+                inColumns = ReomveColumns(inputLineInfo.line, leftDir, inColumns, inWalls);
+                var leftLights = GetLightLayoutPlan(inputLineInfo, inWalls, inColumns);
+                if (null != leftLights && leftLights.Count > 0)
+                    lineNode.leftWallLayouLight.AddRange(leftLights);
+
+                inputLineInfo.layoutLineSide = leftDir.Negate();
+                GetSideWallColumns(inputLineInfo.line, leftDir.Negate(), _lineSideSpaceExt, _targetColums, _targetWalls, out inWalls, out inColumns);
+                inColumns = ReomveColumns(inputLineInfo.line, leftDir.Negate(), inColumns, inWalls);
+                var rightLights = GetLightLayoutPlan(inputLineInfo, inWalls, inColumns);
+                if (null != rightLights && rightLights.Count > 0)
+                    lineNode.rightWallLayoutLight.AddRange(rightLights);
+            }
             return lineGrapheNode;
         }
         List<LineGraphNode> GetLineNodes(Line line, double maxDis = 2300)

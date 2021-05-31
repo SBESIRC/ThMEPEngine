@@ -26,7 +26,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
         private double _lightDeleteMaxSpace = 10000;
         private double _lightDeleteMaxAngle = 30;
         private double _wallLightMergeAngle = 45;
-        private double _lineSideSpaceExt = 6000;
         //删除对向指示灯的最大间距
         private double _delOpSideHostLightMaxDis = 2500;
         public List<LineGraphNode> _wallGraphNodes;//壁装的在线的那一侧
@@ -123,10 +122,11 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     if (lineInfo.line.Length < 4500)
                         continue;
                     //根据线获取获取排布侧的墙柱
-                    //var inputLineInfo = lineInfo;
-                    _emgWallLight.GetSideWallColumns(lineInfo.line, lineInfo.layoutLineSide, _lineSideSpaceExt, _targetColums, _targetWalls, out List<Polyline> inWalls, out List<Polyline> inColumns);
-                    inColumns = _emgWallLight.ReomveColumns(lineInfo.line, lineInfo.layoutLineSide, inColumns, inWalls);
-                    var lineLights = _emgWallLight.GetLightLayoutPlan(lineInfo, inWalls, inColumns);
+                    var dir = lineInfo.lineDir;
+                    var leftDir = dir.RotateBy(Math.PI / 2, _normal).GetNormal();
+                    var lineLights = lineInfo.leftWallLayouLight;
+                    if (lineInfo.layoutLineSide.DotProduct(leftDir)<0.5)
+                        lineLights = lineInfo.rightWallLayoutLight;
                     var addLights = new List<LightLayout>();
                     foreach (var light in lineLights) 
                     {
@@ -307,6 +307,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             if (null == _wallGraphNodes || _wallGraphNodes.Count < 1)
                 return;
             var wallLight = _ligthLayouts.Where(c => !c.isHoisting).ToList();
+
             ///获取需要布置的点，并记录线排布在那一侧
             var nodeSideDirs = new Dictionary<NodeDirection,Vector3d>();
             foreach (var lineNodes in _wallGraphNodes) 
@@ -314,6 +315,18 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (null == lineNodes.nodeDirections || lineNodes.nodeDirections.Count < 1)
                     continue;
                 if (lineNodes.line.Length < 5000)
+                    continue;
+                //如果该线上灯一个也没有不进行处理
+                List<LightLayout> lineLight = new List<LightLayout>();
+                foreach (var light in _ligthLayouts) 
+                {
+                    var dot = light.direction.DotProduct(lineNodes.lineDir);
+                    if (Math.Abs(dot) < 0.5)
+                        continue;
+                    if (lineNodes.nodeDirections.Any(c => c.graphNode.nodePoint.DistanceTo(light.nearNode.nodePoint) < 1500))
+                        lineLight.Add(light);
+                }
+                if (lineLight.Count < 1)
                     continue;
                 foreach (var item in lineNodes.nodeDirections) 
                 {
@@ -337,7 +350,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 //进一步判断是否有指向本方向的非平行壁装，如果没有不进行添加
                 if (isAdd && !_isHostFirst)
                 {
-                    var checkLights = wallLight.Where(c => c.nearNode.nodePoint.IsEqualTo(item.Key.graphNode.nodePoint, new Tolerance(1, 1))).ToList();
+                    var checkLights = wallLight.Where(c => c.nearNode != null && c.nearNode.nodePoint.DistanceTo(item.Key.graphNode.nodePoint)<2500).ToList();
                     isAdd = false;
                     foreach (var wLight in checkLights)
                     {
@@ -346,7 +359,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                         if (wallLight == null)
                             continue;
                         var dotDir = wLight.direction.DotProduct(item.Key.outDirection);
-                        if (Math.Abs(dotDir) > 0.3)
+                        if (Math.Abs(dotDir) > 0.6)
                             //和疏散方向平行，不需要进一步判断
                             continue;
                         var dotSideDir = wLight.direction.DotProduct(item.Value);
@@ -776,10 +789,12 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                     continue;
                 foreach (var checkLight in wallLights) 
                 {
+                    var dis = light.pointInOutSide.DistanceTo(checkLight.pointInOutSide);
                     if (light.pointInOutSide.DistanceTo(checkLight.pointInOutSide) > distance)
                         continue;
                     if (delLights.Any(c => c.pointInOutSide.IsEqualTo(light.pointInOutSide, new Tolerance(1, 1))))
                         continue;
+                    
                     //同方向的指示灯不需要删除
                     var checkDir = checkLight.direction;
                     var dot = checkDir.DotProduct(dir);
@@ -1167,7 +1182,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 if (!isAdd)
                     break;
                 var checkPoint = createPoint.DistanceTo(nodePoint) < minSpace ? nodePoint : createPoint;
-                isAdd = checkPoint.DistanceTo(point) > _lightOffset + 100;
+                isAdd = checkPoint.DistanceTo(point) > _lightOffset + 100; 
             }
             if (!isAdd)
                 return addLights;
@@ -1196,6 +1211,17 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             }
             if (_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(createPoint) < minSpace))
                 return addLights;
+            var prjPoint = EmgPilotLampUtil.PointToLine(createPoint, nodePoint, exitDir);
+            if (isExtLine && prjPoint.DistanceTo(line.EndPoint) > _lightSpace) 
+            {
+                //移动后的排布点，导致到线的终点距离>间距，在中间在添加一个灯
+                var createPoint1 = nodePoint  + exitDir.MultiplyBy(prjPoint.DistanceTo(line.EndPoint) / 2);
+                var light1 = new LightLayout(createPoint1, createPoint1, null, leftDir, exitDir, leftDir, sNode, true);
+                light1.isCheckDelete = false;
+                light1.isTwoSide = isTwoSide;
+                light1.canDelete = false;
+                addLights.Add(light1);
+            }
             var light = new LightLayout(nodePoint, createPoint, null, leftDir, exitDir, leftDir, sNode, true);
             light.isCheckDelete = isLightFirst;
             light.isTwoSide = isTwoSide;
@@ -1244,82 +1270,140 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
 
         void ChcekWallLightAddHostingLight() 
         {
+            //布置灯具时是根据原始线合并距离比较小，这里将线合并和再进行判断间距，减少连续湾处的不符合条件的情况
             if (_isHostFirst || _lineWallLights ==null || _lineWallLights.Count<1)
                 return;
-            foreach (var item in _lineWallLights) 
+            var objs = new DBObjectCollection();
+            _targetInfo.mainLines.ForEach(x => objs.Add(x));
+            _targetInfo.assistLines.ForEach(x => objs.Add(x));
+            var lines = ThMEPLineExtension.LineSimplifier(objs, 50, 50, 50, Math.PI / 180).Cast<Line>().ToList();
+            objs.Clear();
+            foreach (var line in lines)
+                objs.Add(line);
+            lines = ThMEPLineExtension.LineSimplifier(objs, 50, 2500, 50.0, Math.PI * 15 / 180).Cast<Line>().ToList();
+            lines = lines.Where(c => c.Length > 100).OrderByDescending(c=>c.Length).ToList();
+            foreach (var mLine in lines)
             {
-                Line line = item.Key.line;
-                var lineDir = item.Key.lineDir;
-                var sideDir = item.Key.layoutLineSide;
+                if (mLine.Length <= _lightSpace)
+                    continue;
                 var lineLights = new List<LightLayout>();
-                //获取中根线上的吊装灯，
-                foreach (var light in _ligthLayouts) 
+                var mLineDir = mLine.LineDirection();
+                LineGraphNode lineGraphNode = new LineGraphNode(mLine);
+                foreach (var item in _lineWallLights)
                 {
-                    if (light == null )
+                    Line line = item.Key.line;
+                    var lineDir = item.Key.lineDir;
+                    var sideDir = item.Key.layoutLineSide;
+                    if (!EmgPilotLampUtil.LineIsCollinear(line.StartPoint, line.EndPoint, mLine.StartPoint, mLine.EndPoint, 1, 2500, 15))
                         continue;
-                    if (light.isHoisting)
+                    if (lineGraphNode.layoutLineSide.Length < 1) 
                     {
-                        if (light.linePoint.DistanceTo(light.pointInOutSide) > _lightOffset * 2)
-                            continue;
-                        if (EmgPilotLampUtil.PointInLine(light.linePoint, line, _lightOffset, _lightOffset*2))
-                            lineLights.Add(light);
+                        var normal = lineDir.CrossProduct(sideDir);
+                        if (lineDir.DotProduct(mLineDir) < 0)
+                        {
+                            lineGraphNode.layoutLineSide = normal.CrossProduct(lineDir);
+                        }
+                        else 
+                        {
+                            lineGraphNode.layoutLineSide = lineDir.CrossProduct(normal);
+                        }
                     }
-                    else 
+                    lineGraphNode.nodeDirections.AddRange(item.Key.nodeDirections);
+                    
+                    if (null == item.Value || item.Value.Count<1)
+                        continue;
+                    
+                    //获取中根线上的吊装灯，
+                    foreach (var light in _ligthLayouts)
                     {
-                        if(item.Value.Any(c=>c.linePoint.DistanceTo(light.linePoint)<100))
-                            lineLights.Add(light);
+                        if (light == null)
+                            continue;
+                        if (lineLights.Any(c => c.linePoint.DistanceTo(light.linePoint) < 1000))
+                            continue;
+                        if (light.isHoisting)
+                        {
+                            if (light.linePoint.DistanceTo(light.pointInOutSide) > _lightOffset * 2)
+                                continue;
+                            if (EmgPilotLampUtil.PointInLine(light.linePoint, line, _lightOffset, _lightOffset * 2))
+                                lineLights.Add(light);
+                        }
+                        else
+                        {
+                            if (item.Value.Any(c => c.linePoint.DistanceTo(light.linePoint) < 100))
+                                lineLights.Add(light);
+                        }
+                    }
+                    //没有找到相应的相应的灯，可能是应为端点处的
+                    if (lineLights.Count < 1)
+                    {
+                        foreach (var node in item.Key.nodeDirections)
+                        {
+                            foreach (var light in _ligthLayouts)
+                            {
+                                if (light.nearNode.nodePoint.DistanceTo(node.graphNode.nodePoint) > 1000)
+                                    continue;
+                                if (light.isHoisting)
+                                    continue;
+                                if (Math.Abs(light.direction.DotProduct(lineDir)) < 0.5)
+                                    continue;
+                                if (lineLights.Any(c => c.nearNode.nodePoint.DistanceTo(light.nearNode.nodePoint) < 1000))
+                                    continue;
+                                lineLights.Add(light);
+                            }
+                        }
                     }
                 }
                 if (lineLights.Count < 1)
                 {
                     //线上没有一个灯，该线段使用吊装灯逻辑
-                    List<Curve> curves = new List<Curve>() { line };
+                    List<Curve> curves = new List<Curve>() { mLine };
                     GetLightLayoutPlanB(curves);
                 }
-                else 
+                else
                 {
-                    lineLights = lineLights.OrderBy(c => c.linePoint.DistanceTo(line.StartPoint)).ToList();
+                    lineLights = lineLights.OrderBy(c => c.linePoint.DistanceTo(mLine.StartPoint)).ToList();
+                    var testDic = lineLights.ToDictionary(c => c, x => x.linePoint.DistanceTo(mLine.StartPoint));
                     var lineAddLights = new List<LightLayout>();
                     for (int i = 0; i < lineLights.Count; i++)
                     {
                         var light = lineLights[i];
-                        if (i == 0) 
+                        if (i == 0)
                         {
-                            if (light.linePoint.DistanceTo(line.StartPoint) > _lightSpace) 
+                            if (light.linePoint.DistanceTo(mLine.StartPoint) > _lightSpace)
                             {
                                 //需要添加
-                                var addLights = AddHostLightInWallLine(item.Key, line.StartPoint, light.linePoint);
-                                if (null != addLights && addLights.Count>0)
+                                var addLights = AddHostLightInWallLine(lineGraphNode, mLine.StartPoint, light.linePoint);
+                                if (null != addLights && addLights.Count > 0)
                                     lineAddLights.AddRange(addLights);
                             }
                         }
-                        if (i == lineLights.Count - 1) 
+                        if (i == lineLights.Count - 1)
                         {
-                            if (light.linePoint.DistanceTo(line.EndPoint) > _lightSpace + 500)
+                            if (light.linePoint.DistanceTo(mLine.EndPoint) > _lightSpace + 500)
                             {
                                 //需要添加
-                                var addLights = AddHostLightInWallLine(item.Key, light.linePoint, line.EndPoint);
+                                var addLights = AddHostLightInWallLine(lineGraphNode, light.linePoint, mLine.EndPoint);
                             }
                         }
-                        if (lineLights.Count == 1 || i==0)
+                        if (lineLights.Count == 1 || i == 0)
                             continue;
-                        var pLight= lineLights[i-1];
+                        var pLight = lineLights[i - 1];
                         var space = pLight.linePoint.DistanceTo(light.linePoint);
-                        if (space < _lightSpace+50)
+                        if (space < _lightSpace + 50)
                             continue;
                         if (pLight.isHoisting || light.isHoisting)
                         {
                             var pExitDir = pLight.direction;
                             var exitDir = light.direction;
-                            var pDot = pExitDir.DotProduct(lineDir);
-                            var dot = exitDir.DotProduct(lineDir);
+                            var pDot = pExitDir.DotProduct(mLineDir);
+                            var dot = exitDir.DotProduct(mLineDir);
                             if (pLight.isHoisting && light.isHoisting)
                             {
                                 //两个灯都是吊装
                                 if (Math.Abs(pDot) > 0.3 && Math.Abs(dot) > 0.3)
                                 {
                                     //两个吊装灯和线方向一致，中间加灯
-                                    var addLights = AddHostLightInWallLine(item.Key, pLight.linePoint, light.linePoint);
+                                    var addLights = AddHostLightInWallLine(lineGraphNode, pLight.linePoint, light.linePoint);
                                     if (null != addLights && addLights.Count > 0)
                                         lineAddLights.AddRange(addLights);
                                 }
@@ -1327,49 +1411,48 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                                 {
                                     //两个有一个吊装和线垂直，进一步判断是否需要加吊装灯
                                 }
-                                else 
+                                else
                                 {
                                     //两个吊装灯都和线垂直，这中情况不考虑中间加灯的情况
                                 }
                             }
-                            else 
+                            else
                             {
                                 //两个灯有一个壁装，一个吊装，进一步判断方向和指向是否一致，进一步判断是否添加吊装，吊装的位置
                                 if (pLight.isHoisting)
                                 {
                                     //pLight是吊灯
-                                    if (Math.Abs(pDot) > 0.3) 
+                                    if (Math.Abs(pDot) > 0.3)
                                     {
                                         //前面一个吊灯和线平行
-                                        var addLights = AddHostLightInWallLine(item.Key, pLight.linePoint, light.linePoint);
+                                        var addLights = AddHostLightInWallLine(lineGraphNode, pLight.linePoint, light.linePoint);
                                         if (null != addLights && addLights.Count > 0)
                                             lineAddLights.AddRange(addLights);
                                     }
                                 }
-                                else 
+                                else
                                 {
                                     if (Math.Abs(dot) > 0.3)
                                     {
                                         //前面一个吊灯和线平行
-                                        var addLights = AddHostLightInWallLine(item.Key, pLight.linePoint, light.linePoint);
+                                        var addLights = AddHostLightInWallLine(lineGraphNode, pLight.linePoint, light.linePoint);
                                         if (null != addLights && addLights.Count > 0)
                                             lineAddLights.AddRange(addLights);
                                     }
                                 }
                             }
                         }
-                        else 
+                        else
                         {
                             //两个都是壁装灯，中间等分进行添加灯
-                            var addLights = AddHostLightInWallLine(item.Key, pLight.linePoint, light.linePoint);
+                            var addLights = AddHostLightInWallLine(lineGraphNode, pLight.linePoint, light.linePoint);
                             if (null != addLights && addLights.Count > 0)
                                 lineAddLights.AddRange(addLights);
                         }
                     }
                     //还需要考虑拐点处是否需要添加吊灯，避免有些极端情况添加吊装后有视野盲区
-                    CheckHostAddConner(item.Key, lineLights, lineAddLights);
+                    CheckHostAddConner(lineGraphNode, lineLights, lineAddLights);
                 }
-                
             }
         }
         List<LightLayout> AddHostLightInWallLine(LineGraphNode lineInfo,Point3d startPoint,Point3d endPoint) 
@@ -1380,11 +1463,12 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 return lights;
             int count = (int)Math.Ceiling(space / _lightSpace);
             double step = space / count;
+            var addDir = (endPoint - startPoint).GetNormal();
             //两个都是壁装灯，中间等分进行添加灯
-            var point = startPoint + lineInfo.lineDir.MultiplyBy(step);
+            var point = startPoint + addDir.MultiplyBy(step);
             while (true)
             {
-                if (point.DistanceTo(endPoint) < 100)
+                if (point.DistanceTo(endPoint) < 100 || point.DistanceTo(startPoint)> space)
                     break;
                 var light1 = _emgWallLight.PointToExitDirection(lineInfo, point, lineInfo.layoutLineSide.Negate(), true);
                 var moveVect = GetHostMoveVector(light1.nearNode);
@@ -1393,7 +1477,7 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
                 light1.isCheckDelete = false;
                 light1.isTwoSide = true;
                 light1.canDelete = false;
-                point += lineInfo.lineDir.MultiplyBy(step);
+                point += addDir.MultiplyBy(step);
                 if (_ligthLayouts.Any(c => c.isHoisting && c.linePoint.DistanceTo(light1.linePoint) < 2000))
                     continue;
                 lights.Add(light1);
