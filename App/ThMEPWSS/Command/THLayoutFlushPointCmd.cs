@@ -1,10 +1,12 @@
-﻿using CLI;
-using System;
+﻿using System;
+using AcHelper.Commands;
+
+#if ACAD2016
+using CLI;
 using AcHelper;
 using Linq2Acad;
 using System.Linq;
 using ThCADExtension;
-using AcHelper.Commands;
 using ThMEPWSS.FlushPoint;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
@@ -14,7 +16,7 @@ using System.Collections.Generic;
 using ThMEPWSS.FlushPoint.Service;
 using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
-
+#endif
 
 namespace ThMEPWSS.Command
 {
@@ -26,6 +28,7 @@ namespace ThMEPWSS.Command
 
         public void Execute()
         {
+#if ACAD2016
             using (var acadDb = AcadDatabase.Active())
             {
                 var result = Active.Editor.GetEntity("\n选择一个范围框");
@@ -89,7 +92,10 @@ namespace ThMEPWSS.Command
                 var layoutService = new ThLayoutWashPointBlockService(layoutData);
                 layoutService.Layout();
             }
+#endif
         }
+
+#if ACAD2016
         private ThWashParam BuildWashParam()
         {
             var washPara = new ThWashParam();
@@ -106,5 +112,6 @@ namespace ThMEPWSS.Command
                 FlushPointParameter.ParkingAreaPointsOfArrangeStrategy;
             return washPara;
         }
+#endif
     }
 }

@@ -19,7 +19,7 @@
     <DefineConstants>TRACE;DEBUG;ACAD2016;ACAD_ABOVE_2012;ACAD_ABOVE_2014；ACAD_ABOVE_2011</DefineConstants>
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
-  <ItemGroup>    
+  <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
@@ -72,20 +72,20 @@
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
     <Compile Include="FlushPoint\Data\IPrint.cs" />
+    <Compile Include="FlushPoint\Data\ThArchitectureExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThColumnExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThDoorOpeningExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThDrainFacilityExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThExtractorBase.cs" />
     <Compile Include="FlushPoint\Data\ThObstacleExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThParkingStallExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThRoomExtractor.cs" />
-    <Compile Include="FlushPoint\Data\ThArchitectureExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThShearwallExtractor.cs" />
-    <Compile Include="FlushPoint\Data\ThColumnExtractor.cs" />
-    <Compile Include="FlushPoint\Data\ThExtractorBase.cs" />
-    <Compile Include="FlushPoint\Service\ThElementIsolateFilterService.cs" />
     <Compile Include="FlushPoint\Model\ThFlushPointParameter.cs" />
+    <Compile Include="FlushPoint\Service\ThElementIsolateFilterService.cs" />
+    <Compile Include="FlushPoint\Service\ThFlushPointParameterService.cs" />
     <Compile Include="FlushPoint\Service\ThLayoutWashPointBlockService.cs" />
     <Compile Include="FlushPoint\Service\ThObstacleExtractService.cs" />
-    <Compile Include="FlushPoint\Service\ThFlushPointParameterService.cs" />
     <Compile Include="FlushPoint\ThExtractorPropertyNameManager.cs" />
     <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
@@ -310,7 +310,7 @@
         <Reference Include="AcMPolygonMGD">
           <HintPath>..\..\Externals\AutoCAD\2016\AcMPolygonMGD.dll</HintPath>
         </Reference>
-		<Reference Include="ManagedLibrary.v16">
+        <Reference Include="ManagedLibrary.v16">
           <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
         </Reference>
       </ItemGroup>

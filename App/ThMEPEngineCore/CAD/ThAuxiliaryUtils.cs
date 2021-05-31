@@ -166,20 +166,5 @@ namespace ThMEPEngineCore.CAD
         {
             return ang / 180.0 * Math.PI;
         }
-        public static bool IsClosed(this Polyline polyline)
-        {
-            if (polyline.Closed)
-            {
-                return true;
-            }
-            else
-            {
-                if (polyline.GetPoint3dAt(0).DistanceTo(polyline.GetPoint3dAt(polyline.NumberOfVertices - 1)) <= 1.0)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
