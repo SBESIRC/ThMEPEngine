@@ -20,6 +20,10 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="ManagedLibrary.v16, Version=1.0.7797.32117, Culture=neutral, processorArchitecture=AMD64">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\Externals\GTE\2016\ManagedLibrary.v16.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Windows.Forms" />
@@ -52,6 +56,7 @@
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
     <Compile Include="Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
+    <Compile Include="Command\THLayoutFlushPointCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceNameCmd.cs" />
@@ -66,8 +71,27 @@
     <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFloorDrainVisitor.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
+    <Compile Include="FlushPoint\Data\IPrint.cs" />
+    <Compile Include="FlushPoint\Data\ThDoorOpeningExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThDrainFacilityExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThObstacleExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThParkingStallExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThRoomExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThArchitectureExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThShearwallExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThColumnExtractor.cs" />
+    <Compile Include="FlushPoint\Data\ThExtractorBase.cs" />
+    <Compile Include="FlushPoint\Service\ThElementIsolateFilterService.cs" />
+    <Compile Include="FlushPoint\Model\ThFlushPointParameter.cs" />
+    <Compile Include="FlushPoint\Service\ThLayoutWashPointBlockService.cs" />
+    <Compile Include="FlushPoint\Service\ThObstacleExtractService.cs" />
+    <Compile Include="FlushPoint\Service\ThFlushPointParameterService.cs" />
+    <Compile Include="FlushPoint\ThExtractorPropertyNameManager.cs" />
+    <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />
     <Compile Include="Pipe\Engine\ThBlockSelectionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
@@ -204,6 +228,7 @@
     <Compile Include="Service\SprayDataOperateService.cs" />
     <Compile Include="Service\ThWSprinklerKdTree.cs" />
     <Compile Include="Service\ThWSSUIService.cs" />
+    <Compile Include="ThLayoutFlushPointCmds.cs" />
     <Compile Include="ThPipeCmds.cs" />
     <Compile Include="ThSprayCmds.cs" />
     <Compile Include="Model\ThWSprinkler.cs" />

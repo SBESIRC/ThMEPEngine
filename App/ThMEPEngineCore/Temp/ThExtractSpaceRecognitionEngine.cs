@@ -11,6 +11,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -31,6 +32,8 @@ namespace ThMEPEngineCore.Temp
         /// </summary>
         public string PrivacyLayer { get; set; }
 
+        public List<Entity> SpaceNeibours { get; set; }
+
         public ThExtractSpaceRecognitionEngine()
         {
             SpaceNames = new List<Entity>();
@@ -39,6 +42,7 @@ namespace ThMEPEngineCore.Temp
             TextContainer = new Dictionary<Entity, List<Entity>>();
             AreaContainer = new Dictionary<Entity, List<Entity>>();
             SpaceIndex = new Dictionary<Entity, ThTempSpace>();
+            SpaceNeibours = new List<Entity>();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
@@ -46,8 +50,10 @@ namespace ThMEPEngineCore.Temp
             {
                 //Load Data
                 SpaceNames = RecognizeSpaceNameText(database, polygon);                
-                SpaceBoundaries = RecognizeSpaceBoundary(database, polygon);
-                SpaceBoundaries = BuildAreas(SpaceBoundaries);                
+                var boundaries = RecognizeSpaceBoundary(database, polygon);
+                var joinAreas = FilterNeedBuildAreaBoundaries(boundaries.Cast<Polyline>().ToList());
+                SpaceBoundaries.AddRange(boundaries.Where(o => !joinAreas.Contains(o)).ToList());
+                SpaceBoundaries.AddRange(BuildAreas(joinAreas.Cast<Entity>().ToList()));     
                 BuildTextContainers();
                 BuildAreaContainers();
                 CreateSpaceBoundaries();
@@ -93,6 +99,48 @@ namespace ThMEPEngineCore.Temp
                     // 找到多个，无法处理
                 }
             });
+        }
+        private List<Polyline> FilterNeedBuildAreaBoundaries(List<Polyline> boundaries)
+        {
+            //过滤要参与构件BuildArea的边界
+            var results = new List<Polyline>();
+            boundaries = boundaries.OrderBy(o => o.Area).ToList();
+            var neibourSpatialIndex = new ThCADCoreNTSSpatialIndex(SpaceNeibours.ToCollection());           
+
+            return boundaries.Where(o =>
+            {
+                var enlarge = Offset(o);
+                var neibours = neibourSpatialIndex.SelectFence(enlarge);
+                if(neibours.Count==0)
+                {
+                    return true; // 需要参与构件BuildArea
+                }
+                else
+                {
+                    var largerBoundaries = boundaries.Where(b => b.Area > o.Area).ToList();
+                    if(largerBoundaries.Where(b=>b.IsFullContains(o)).Any())
+                    {
+                        return false;
+                    }
+                    else
+                    {
+                        return true;
+                    }
+                }
+            }).ToList();
+        }
+        private Polyline Offset(Polyline boundary,double dis =20.0)
+        {
+            var nBoundary = ThMEPFrameService.Normalize(boundary);
+            var objs = nBoundary.Buffer(dis);
+            if (objs.Count>0)
+            {
+                return objs.Cast<Polyline>().OrderByDescending(o => o.Area).First();
+            }
+            else
+            {
+                return boundary;
+            }
         }
         private List<Entity> BuildAreas(List<Entity> spaces)
         {

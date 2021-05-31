@@ -1,12 +1,13 @@
 ﻿using System;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using System.Collections.Generic;
-using ThCADExtension;
+using Linq2Acad;
 using System.Linq;
 using ThCADCore.NTS;
+using ThCADExtension;
 using Dreambuild.AutoCAD;
 using GeometryExtensions;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -192,6 +193,108 @@ namespace ThMEPEngineCore.CAD
                 }
             }
             return results;
+        }
+
+        public static Polyline ToOBB(this BlockReference br,Matrix3d mt)
+        {
+            using (var acadDatabase = AcadDatabase.Use(br.Database))
+            {
+                var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
+                var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
+                rectangle.TransformBy(mt);
+                return rectangle;
+            }
+        }
+        public static Polyline ToRectangle(this Circle circle)
+        {
+            var polyline = new Polyline()
+            {
+                Closed = true,
+            };
+            polyline.AddVertexAt(0, new Point2d(circle.Center.X + circle.Radius, circle.Center.Y + circle.Radius), 0, 0, 0);
+            polyline.AddVertexAt(1, new Point2d(circle.Center.X - circle.Radius, circle.Center.Y + circle.Radius), 0, 0, 0);
+            polyline.AddVertexAt(2, new Point2d(circle.Center.X - circle.Radius, circle.Center.Y - circle.Radius), 0, 0, 0);
+            polyline.AddVertexAt(3, new Point2d(circle.Center.X + circle.Radius, circle.Center.Y - circle.Radius), 0, 0, 0);
+            return polyline;
+        }
+        public static Circle ToBoundingSphere(this List<Point3d> pts)
+        {
+            if (pts.Count == 0)
+            {
+                return new Circle();
+            }
+            //Find the max and min along the x-axie, y-axie, z-axie  
+            int maxX = pts.IndexOf(pts.OrderByDescending(o => o.X).First());
+            int minX = pts.IndexOf(pts.OrderBy(o => o.X).First());
+
+            int maxY = pts.IndexOf(pts.OrderByDescending(o => o.Y).First());
+            int minY = pts.IndexOf(pts.OrderBy(o => o.Y).First());
+
+            int maxZ = pts.IndexOf(pts.OrderByDescending(o => o.Z).First());
+            int minZ = pts.IndexOf(pts.OrderBy(o => o.Z).First());
+
+            Vector3d vec1 = new Vector3d(pts[maxX].X, pts[maxX].Y, pts[maxX].Z);
+            Vector3d vec2 = new Vector3d(pts[minX].X, pts[minX].Y, pts[minX].Z);
+            vec1 = vec1.Subtract(vec2);
+            double x = vec1.DotProduct(vec1);
+
+            vec1 = new Vector3d(pts[maxY].X, pts[maxY].Y, pts[maxY].Z);
+            vec2 = new Vector3d(pts[minY].X, pts[minY].Y, pts[minY].Z);
+            vec1 = vec1.Subtract(vec2);
+            double y = vec1.DotProduct(vec1);
+
+            vec1 = new Vector3d(pts[maxZ].X, pts[maxZ].Y, pts[maxZ].Z);
+            vec2 = new Vector3d(pts[minZ].X, pts[minZ].Y, pts[minZ].Z);
+            vec1 = vec1.Subtract(vec2);
+            double z = vec1.DotProduct(vec1);
+
+            double dia = 0;
+            int max = maxX, min = minX;
+            if (z >= x && z >= y)
+            {
+                max = maxZ;
+                min = minZ;
+                dia = z;
+            }
+            else if (y >= x && y >= z)
+            {
+                max = maxY;
+                min = minY;
+                dia = y;
+            }
+            else if (x >= y && x >= z)
+            {
+                max = maxX;
+                min = minX;
+                dia = x;
+            }
+
+            //Compute the center point  
+            Point3d center = new Point3d(
+                0.5 * (pts[max].X + pts[min].X),
+                0.5 * (pts[max].Y + pts[min].Y),
+                0.5 * (pts[max].Z + pts[min].Z));
+
+            //Compute the radious  
+            double radious = 0.5 * Math.Sqrt(dia);
+
+            //Fix it  
+            for (int i = 0; i < pts.Count; i++)
+            {
+                Vector3d d = pts[i] - center;
+                double dist2 = d.DotProduct(d);
+                if (dist2 > radious * radious)
+                {
+                    double dist = Math.Sqrt(dist2);
+                    double newRadious = (dist + radious) * 0.5;
+                    double k = (newRadious - radious) / dist;  //平移距离就是新半径-原来的半径，/dist是为了下面将方向向量归一化
+                    radious = newRadious;
+                    Vector3d temp = d.MultiplyBy(k);
+                    center = center.Add(temp);
+                }// end if  
+            }// end for vertex_num
+
+            return new Circle(center, Vector3d.ZAxis, radious);
         }
     }
 }

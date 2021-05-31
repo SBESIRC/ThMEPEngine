@@ -14,8 +14,9 @@ namespace ThMEPEngineCore.Temp
         public string Category { get; set; }
         public short ColorIndex { get; set; }
         public string ElementLayer { get; set; }
-
         public List<System.Type> Types { get; set; }
+        public bool UseDb3Engine { get; set; }
+
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
         protected string GroupIdPropertyName = "GroupId";

@@ -6,6 +6,7 @@ using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Engine;
+using System.Linq;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -17,14 +18,28 @@ namespace ThMEPEngineCore.Temp
         {
             Walls = new List<Entity>();
             Category = "ArchitectureWall";
+            UseDb3Engine = true;
+            Spaces = new List<ThTempSpace>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            using (var engine=new ThArchitectureWallRecognitionEngine())
+            if(UseDb3Engine)
             {
-                engine.Recognize(database, pts);
-                engine.Elements.ForEach(o=>Walls.Add(o.Outline));
+                using (var engine = new ThArchitectureWallRecognitionEngine())
+                {
+                    engine.Recognize(database, pts);
+                    engine.Elements.ForEach(o => Walls.Add(o.Outline));
+                }
+            }
+            else
+            {
+                var instance = new ThExtractPolylineService()
+                {
+                    ElementLayer = this.ElementLayer,
+                };
+                instance.Extract(database, pts);
+                Walls = instance.Polys.Cast<Entity>().ToList();
             }
         }
 

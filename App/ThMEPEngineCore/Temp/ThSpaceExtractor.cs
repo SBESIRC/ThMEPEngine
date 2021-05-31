@@ -37,6 +37,8 @@ namespace ThMEPEngineCore.Temp
 
         private const string PrivacyPropertyName = "Privacy";
 
+        public List<Entity> SpaceNeibours { get; set; }
+
         public ThSpaceExtractor()
         {
             Spaces = new List<ThTempSpace>();
@@ -48,6 +50,7 @@ namespace ThMEPEngineCore.Temp
             ObstacleColorIndex = 211;
             ObstacleCategory = "Obstacle";
             PrivacyLayer = "空间名称";
+            SpaceNeibours = new List<Entity>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -55,6 +58,7 @@ namespace ThMEPEngineCore.Temp
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             using (var spaceEngine = new ThExtractSpaceRecognitionEngine())
             {
+                spaceEngine.SpaceNeibours = this.SpaceNeibours;
                 spaceEngine.SpaceLayer = ElementLayer;
                 spaceEngine.NameLayer = NameLayer;
                 spaceEngine.PrivacyLayer = PrivacyLayer;

@@ -8,28 +8,28 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThExtractColumnService:ThExtractService
+    public class ThExtractPolylineService:ThExtractService
     {
-        public List<Polyline> Columns { get; set; }
-        public ThExtractColumnService()
+        public List<Polyline> Polys { get; set; }
+        public ThExtractPolylineService()
         {
-            Columns = new List<Polyline>();
+            Polys = new List<Polyline>();
         }
 
         public override void Extract(Database db,Point3dCollection pts)
         {
             using (var acadDatabase = AcadDatabase.Use(db))
             {
-                Columns=acadDatabase.ModelSpace
+                Polys = acadDatabase.ModelSpace
                     .OfType<Polyline>()
                     .Where(o => IsElementLayer(o.Layer))
                     .Select(o=>o.Clone() as Polyline)
                     .ToList();
                 if(pts.Count>=3)
                 {
-                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Columns.ToCollection());
+                    var spatialIndex = new ThCADCoreNTSSpatialIndex(Polys.ToCollection());
                     var objs = spatialIndex.SelectCrossingPolygon(pts);
-                    Columns = objs.Cast<Polyline>().ToList();
+                    Polys = objs.Cast<Polyline>().ToList();
                 }
             }
         }        

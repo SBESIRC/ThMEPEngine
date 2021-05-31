@@ -15,7 +15,7 @@ namespace ThMEPEngineCore.Engine
         public ThParkingStallVisitor()
         {
             CheckQualifiedLayer = base.CheckLayerValid;
-            CheckQualifiedBlockName = delegate(Entity entity) { return true; };
+            CheckQualifiedBlockName = (Entity entity) => true;
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {

@@ -199,6 +199,11 @@ namespace ThCADExtension
             return Path.Combine(SupportPath(), "火灾自动报警系统图.dwg");
         }
 
+        // 消防喷淋块
+        public static string WashPointLayoutDwgPath()
+        {
+            return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
+        }
 
         // 运行时根目录
         private static string RootPath()

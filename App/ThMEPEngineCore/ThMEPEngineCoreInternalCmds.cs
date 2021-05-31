@@ -203,7 +203,7 @@ namespace ThMEPEngineCore
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
                     new ThSpaceExtractor{ IsBuildObstacle=true,NameLayer="空间名称",ColorIndex=1},
-                    new ThColumnExtractor{UseDb3ColumnEngine=false,ColorIndex=2},
+                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=2},
                     new ThShearWallExtractor{ColorIndex=3},
                     new ThDrainageFacilityExtractor{ColorIndex=4},
                 };
@@ -350,19 +350,14 @@ namespace ThMEPEngineCore
                 //获取空间名称
 
                 // ,ShearWall, 门洞，门扇,柱
+        
                 var extractors = new List<ThExtractorBase>()
                 {
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
-                    //通过停车区域的Space来制造阻挡物
-                    new ThSpaceExtractor{ 
-                        IsBuildObstacle=false,
-                        ColorIndex=1,
-                        ElementLayer = "AD-AREA-OUTL",
-                        NameLayer = "AD-NAME-ROOM",
-                        PrivacyLayer ="空间名称"},
-                    new ThArchitectureWallExtractor {ColorIndex=2 },  // ArchitectureWall
-                    new ThShearWallExtractor{ColorIndex=3},  // ShearWall
-                    new ThColumnExtractor{UseDb3ColumnEngine=false,ColorIndex=4}, // Column
+                    //通过停车区域的Space来制造阻挡物                    
+                    new ThArchitectureWallExtractor {UseDb3Engine=true,ColorIndex=2},  // ArchitectureWall
+                    new ThShearWallExtractor{UseDb3Engine=false,ColorIndex=3,ElementLayer = "Wall"},  // ShearWall
+                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=4,ElementLayer="Column"}, // Column
                     new ThDoorExtractor {ColorIndex=5,ElementLayer = "门" }, // 门扇
                     new ThDoorOpeningExtractor{ ColorIndex=6,ElementLayer = "门"}, // 门洞
                     new ThEquipmentExtractor{ ColorIndex=7}, // 设备(消火栓/灭火器)
@@ -372,6 +367,20 @@ namespace ThMEPEngineCore
                 extractEngine.Accept(extractors);
                 extractEngine.Extract(acadDatabase.Database, pts);
 
+                var spaceExtractor = new ThSpaceExtractor
+                {
+                    IsBuildObstacle = false,
+                    ColorIndex = 1,
+                    ElementLayer = "AD-AREA-OUTL",
+                    NameLayer = "AD-NAME-ROOM",
+                    PrivacyLayer = "空间名称"
+                };
+                spaceExtractor.SpaceNeibours.AddRange((extractors[0] as ThArchitectureWallExtractor).Walls);
+                spaceExtractor.SpaceNeibours.AddRange((extractors[1] as ThShearWallExtractor).Walls);
+                spaceExtractor.SpaceNeibours.AddRange((extractors[2] as ThColumnExtractor).Columns);
+                spaceExtractor.Extract(acadDatabase.Database, pts);
+
+                extractEngine.Accept(spaceExtractor);
                 extractEngine.OutputGeo(Active.Document.Name);
                 extractEngine.Print(acadDatabase.Database);
                 if(false)
@@ -460,7 +469,7 @@ namespace ThMEPEngineCore
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
                     new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
-                    new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
+                    new ThColumnExtractor{UseDb3Engine=true,ColorIndex=2},
                     new ThWaterSupplyPositionExtractor{ColorIndex=3},
                     new ThWaterSupplyStartExtractor{ColorIndex=4},
                     new ThToiletGroupExtractor { ColorIndex=5},

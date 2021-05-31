@@ -1,5 +1,7 @@
 ﻿using System;
 using NFox.Cad;
+using Linq2Acad;
+using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -22,6 +24,24 @@ namespace ThMEPEngineCore.CAD
                     poly.ColorIndex = colorIndex;
                     poly.SetDatabaseDefaults();
                     db.ModelSpace.Add(poly);
+                }
+            }
+        }
+
+        public static void CreateGroup(this List<Entity> entities, Database database, int colorIndex)
+        {
+            using (var db = AcadDatabase.Use(database))
+            {
+                var objIds = new ObjectIdList();
+                entities.ForEach(o =>
+                {
+                    o.ColorIndex = colorIndex;
+                    o.SetDatabaseDefaults();
+                    objIds.Add(db.ModelSpace.Add(o));
+                });
+                if (objIds.Count > 0)
+                {
+                    GroupTools.CreateGroup(db.Database, Guid.NewGuid().ToString(), objIds);
                 }
             }
         }
@@ -145,6 +165,21 @@ namespace ThMEPEngineCore.CAD
         public static double AngToRad(this double ang)
         {
             return ang / 180.0 * Math.PI;
+        }
+        public static bool IsClosed(this Polyline polyline)
+        {
+            if (polyline.Closed)
+            {
+                return true;
+            }
+            else
+            {
+                if (polyline.GetPoint3dAt(0).DistanceTo(polyline.GetPoint3dAt(polyline.NumberOfVertices - 1)) <= 1.0)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }

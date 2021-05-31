@@ -13,19 +13,19 @@ namespace ThMEPEngineCore.Temp
     public class ThColumnExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
     {
         public List<Polyline> Columns { get; private set; }
-        private List<ThTempSpace> Spaces { get; set; }
-        public bool UseDb3ColumnEngine { get; set; }
+        private List<ThTempSpace> Spaces { get; set; }        
         public ThColumnExtractor()
         {
             Columns = new List<Polyline>();
             Category = "Column";
-            UseDb3ColumnEngine = false;
+            UseDb3Engine = false;
             ElementLayer = "柱";
+            Spaces = new List<ThTempSpace>();
         }
 
         public void Extract(Database database, Point3dCollection pts)
         {
-            if (UseDb3ColumnEngine)
+            if (UseDb3Engine)
             {
                 var columnEngine = new ThColumnRecognitionEngine();
                 columnEngine.Recognize(database, pts);
@@ -33,12 +33,12 @@ namespace ThMEPEngineCore.Temp
             }
             else
             {
-                var instance = new ThExtractColumnService()
+                var instance = new ThExtractPolylineService()
                 {
                     ElementLayer = this.ElementLayer,
                 };
                 instance.Extract(database, pts);
-                Columns = instance.Columns;
+                Columns = instance.Polys;
             }
         }
 

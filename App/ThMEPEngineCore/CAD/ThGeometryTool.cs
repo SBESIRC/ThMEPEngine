@@ -2,8 +2,8 @@
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
-using GeometryExtensions;
 using Dreambuild.AutoCAD;
+using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
@@ -329,7 +329,7 @@ namespace ThMEPEngineCore.CAD
         {
             if (ent is Polyline polyline)
             {
-                return polyline.Closed ? polyline.Contains(pt) : false;
+                return polyline.IsClosed() ? polyline.Contains(pt) : false;
             }
             else if (ent is MPolygon mPolygon)
             {
@@ -386,7 +386,7 @@ namespace ThMEPEngineCore.CAD
             if (relateMatrix.IsContains || relateMatrix.IsCovers)
             {
                 var vertices = second.EntityVertices();
-                //second所有的点都在First里面,且second上的点没有一个在first边界上                
+                //second所有的点都在First里面,且second上的点没有一个在first边界上     
                 return vertices.Cast<Point3d>().Where(o => first.IsContains(o)).Count() == vertices.Count &&
                     vertices.Cast<Point3d>().Where(o => firstPolygon.OnBoundary(o)).Count() == 0;
             }
@@ -449,6 +449,54 @@ namespace ThMEPEngineCore.CAD
             {
                 return 0.0;
             }
+        }         
+        public static List<Point3d> GetPoints(this Line line)
+        {
+            var result = new List<Point3d>();
+            result.Add(line.StartPoint);
+            result.Add(line.EndPoint);
+            return result;
+        }
+        public static List<Point3d> GetPoints(this Polyline polyline,double tesslateLength=5)
+        {
+            var result = new List<Point3d>();
+            polyline.ExplodeLines(tesslateLength).ForEach(o=>
+            {
+                result.AddRange(GetPoints(o));
+            });
+            return result;
+        }
+        public static List<Point3d> GetPoints(this Circle circle)
+        {
+            var result = new List<Point3d>();
+            result.Add(circle.Center + Vector3d.XAxis.MultiplyBy(circle.Radius));
+            result.Add(circle.Center + Vector3d.YAxis.MultiplyBy(circle.Radius));
+            result.Add(circle.Center - Vector3d.XAxis.MultiplyBy(circle.Radius));
+            result.Add(circle.Center - Vector3d.YAxis.MultiplyBy(circle.Radius));
+            return result;
+        }
+        public static List<Point3d> GetPoints(this Arc arc, double tesslateLength = 5)
+        {
+            var result = new List<Point3d>();
+            var polyline = arc.TessellateArcWithArc(tesslateLength);
+            polyline.ExplodeLines(tesslateLength).ForEach(o =>
+            {
+                result.AddRange(GetPoints(o));
+            });
+            return result;
+        }
+        public static List<Point3d> GetPoints(this Ellipse ellipse)
+        {
+            var result = new List<Point3d>();
+            var pt1 = ellipse.Center + ellipse.MajorAxis.GetNormal().MultiplyBy(ellipse.MajorRadius);
+            var pt2 = ellipse.Center + ellipse.MinorAxis.GetNormal().MultiplyBy(ellipse.MinorRadius);
+            var pt3 = ellipse.Center - ellipse.MajorAxis.GetNormal().MultiplyBy(ellipse.MajorRadius);
+            var pt4 = ellipse.Center - ellipse.MinorAxis.GetNormal().MultiplyBy(ellipse.MinorRadius);
+            result.Add(pt1);
+            result.Add(pt2);
+            result.Add(pt3);
+            result.Add(pt4);
+            return result;
         }
     }
 }

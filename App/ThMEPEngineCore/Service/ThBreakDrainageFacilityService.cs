@@ -7,15 +7,14 @@ using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using ThMEPEngineCore.Interface;
 using System.Collections.Generic;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.BuildRoom.Service;
 using Autodesk.AutoCAD.Geometry;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThBreakDrainageFacilityService
     {
-        public List<Entity> DrainageWells { get; set; }
+        public List<Entity> CollectingWells { get; set; }
         public List<Entity> DrainageDitches { get; set; }
 
         public double DitchMaxWidth { get; set; }
@@ -23,7 +22,7 @@ namespace ThMEPEngineCore.Service
 
         public ThBreakDrainageFacilityService()
         {
-            DrainageWells = new List<Entity>();
+            CollectingWells = new List<Entity>();
             DrainageDitches = new List<Entity>();
             DitchMaxWidth = 510.0;
             DrainWellMaxLength = 3500;
@@ -34,12 +33,12 @@ namespace ThMEPEngineCore.Service
             var service = new ThDrainageFacilityCleanService();
             var objs = service.Clean(curves); // 处理后的线
 
-            // 获取排水井
-            var clones = objs.Cast<Curve>().Select(o => o.WashClone() as Curve).ToCollection();           
-            DrainageWells = ObtainDrainWells(clones);
+            // 获取集水井
+            var clones = objs.Cast<Curve>().Select(o => o.WashClone() as Curve).ToCollection();
+            CollectingWells = ObtainDrainWells(clones);
 
             // 获取排水沟
-            DrainageDitches = ObtainDrainDitches(DrainageWells, objs);
+            DrainageDitches = ObtainDrainDitches(CollectingWells, objs);
         }   
 
         private List<Entity> ObtainDrainWells(DBObjectCollection lines)
@@ -85,6 +84,10 @@ namespace ThMEPEngineCore.Service
         }
         private List<Entity> ObtainDrainDitches(List<Entity> drainWells, DBObjectCollection lines)
         {
+            if(lines.Count==0)
+            {
+                return new List<Entity>();
+            }
             lines = lines.Cast<Line>().Select(o => o.ExtendLine(1.0)).ToCollection();
             lines = lines.NodingLines().ToCollection();
             lines = lines.Cast<Line>().Where(o => o.Length > 2.0).ToCollection();

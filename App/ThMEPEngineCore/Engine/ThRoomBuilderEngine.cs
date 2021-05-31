@@ -38,7 +38,7 @@ namespace ThMEPEngineCore.Engine
             };
             markEngine.RecognizeMS(db, pts);
             var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
-            Build(rooms, marks);
+            Build(rooms, marks);            
             return rooms;
         }
 

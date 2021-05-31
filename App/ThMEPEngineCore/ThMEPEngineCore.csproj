@@ -437,7 +437,7 @@
     <Compile Include="Temp\ThExtractWaterSupplyPositionService.cs" />
     <Compile Include="Temp\ThExtractToiletGroupService.cs" />
     <Compile Include="Temp\ThExtractWaterSupplyStartService.cs" />
-    <Compile Include="Temp\ThExtractColumnService.cs" />
+    <Compile Include="Temp\ThExtractPolylineService.cs" />
     <Compile Include="Temp\ThExtractConnectPortService.cs" />
     <Compile Include="Temp\ThExtractCenterLineService.cs" />
     <Compile Include="Temp\ThExtractorBase.cs" />

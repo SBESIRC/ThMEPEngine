@@ -502,7 +502,7 @@ namespace ThMEPEngineCore
                     //包括Space<隔油池、水泵房、垃圾房、停车区域>,
                     //通过停车区域的Space来制造阻挡物
                     new ThSpaceExtractor{ IsBuildObstacle=true,NameLayer="空间名称",ColorIndex=1},
-                    new ThColumnExtractor{UseDb3ColumnEngine=false,ColorIndex=2},
+                    new ThColumnExtractor{UseDb3Engine=false,ColorIndex=2},
                     new ThShearWallExtractor{ColorIndex=3},
                     new ThDrainageFacilityExtractor{ColorIndex=4},
                 };
@@ -749,7 +749,7 @@ namespace ThMEPEngineCore
                     breakService.Break(objs);
 
                     var drainageWellIds = new ObjectIdList();
-                    breakService.DrainageWells.ForEach(o =>
+                    breakService.CollectingWells.ForEach(o =>
                     {
                         o.ColorIndex = 5;
                         o.SetDatabaseDefaults();
