@@ -160,7 +160,7 @@ namespace ThMEPLighting.Garage
             return arrangeParameter;
         }
 
-        public static Polyline PolylineJig(short colorIndex)
+        public static Point3dCollection PolylineJig(short colorIndex)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
@@ -174,29 +174,14 @@ namespace ThMEPLighting.Garage
                         if (jigRes.Status == PromptStatus.OK)
                             jigger.AllVertexes.Add(jigger.LastVertex);
                     } while (jigRes.Status == PromptStatus.OK);
-                    var wcsVertexes = jigger.WcsVertexes;
-                    if (wcsVertexes.Count > 1)
-                    {
-                        Polyline polyline = new Polyline();
-                        for (int i = 0; i < wcsVertexes.Count; i++)
-                        {
-                            Point3d pt3d = wcsVertexes[i];
-                            Point2d pt2d = new Point2d(pt3d.X, pt3d.Y);
-                            polyline.AddVertexAt(i, pt2d, 0, 0, 0);
-                        }
-                        return polyline;
-                    }
-                    else
-                    {
-                        return new Polyline();
-                    }
+                    return jigger.WcsVertexes;
                 }
                 catch (System.Exception ex)
                 {
                     Active.Editor.WriteMessage(ex.ToString());
                 }
             }
-            return new Polyline();
+            return new Point3dCollection();
         }
     }
 }

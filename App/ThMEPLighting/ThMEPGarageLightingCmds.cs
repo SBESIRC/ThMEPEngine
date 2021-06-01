@@ -6,6 +6,7 @@ using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.CAD;
 using ThMEPLighting.Garage;
 using ThMEPLighting.Common;
 using QuickGraph.Algorithms;
@@ -28,15 +29,16 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 short colorIndex = 2;
-                var polyline = ThGarageInteractionUtils.PolylineJig(colorIndex);
-                if (polyline.Length == 0.0)
+                var pts = ThGarageInteractionUtils.PolylineJig((short)ColorIndex.BYLAYER);
+                if (pts.Count <= 1)
                 {
                     return;
                 }                
                 ThLayerTool.CreateLayer(ThGarageLightCommon.DxCenterLineLayerName,
                     Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
-                polyline.Layer = ThGarageLightCommon.DxCenterLineLayerName;
-                acdb.ModelSpace.Add(polyline);
+                var dx = ThDrawTool.CreatePolyline(pts,false);
+                dx.Layer = ThGarageLightCommon.DxCenterLineLayerName;
+                acdb.ModelSpace.Add(dx);
             }
         }
         [CommandMethod("TIANHUACAD", "THFDXC", CommandFlags.Modal)]
@@ -45,15 +47,16 @@ namespace ThMEPLighting
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 short colorIndex = 1;
-                var polyline = ThGarageInteractionUtils.PolylineJig(colorIndex);
-                if (polyline.Length == 0.0)
+                var pts = ThGarageInteractionUtils.PolylineJig((short)ColorIndex.BYLAYER);
+                if (pts.Count <= 1)
                 {
                     return;
                 }                
                 ThLayerTool.CreateLayer(ThGarageLightCommon.FdxCenterLineLayerName,
                     Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
-                polyline.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
-                acdb.ModelSpace.Add(polyline);
+                var fdx = ThDrawTool.CreatePolyline(pts, false);
+                fdx.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
+                acdb.ModelSpace.Add(fdx);
             }
         }
         [CommandMethod("TIANHUACAD", "THCDZMBZ", CommandFlags.Modal)]
