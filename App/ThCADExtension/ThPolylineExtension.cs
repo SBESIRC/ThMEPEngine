@@ -52,54 +52,6 @@ namespace ThCADExtension
             }
         }
 
-        public static double[] Coordinates2D(this Polyline pLine)
-        {
-            var vertices = (Point3dList)pLine.Vertices();
-            return vertices.Select(o => o.ToPoint2d().ToArray()).SelectMany(o => o).ToArray();
-        }
-
-        public static Polyline CreateRectangle(Point3d pt1, Point3d pt2, Point3d pt3, Point3d pt4)
-        {
-            var points = new Point3dCollection()
-            {
-                pt1,
-                pt2,
-                pt3,
-                pt4
-            };
-            var pline = new Polyline()
-            {
-                Closed = true,
-            };
-            pline.CreatePolyline(points);
-            return pline;
-        }
-
-        public static Polyline CreateTriangle(Point2d pt1, Point2d pt2, Point2d pt3)
-        {
-            var points = new Point2dCollection()
-            {
-                pt1,
-                pt2,
-                pt3,
-            };
-            var pline = new Polyline()
-            {
-                Closed = true,
-            };
-            pline.CreatePolyline(points);
-            return pline;
-        }
-
-        public static Polyline ToRectangle(this Extents3d extents)
-        {
-            Point3d pt1 = extents.MinPoint;
-            Point3d pt3 = extents.MaxPoint;
-            Point3d pt2 = new Point3d(pt3.X, pt1.Y, pt1.Z);
-            Point3d pt4 = new Point3d(pt1.X, pt3.Y, pt1.Z);
-            return CreateRectangle(pt1, pt2, pt3, pt4);
-        }
-
         /// <summary>
         /// 根据弦长分割Polyline
         /// </summary>
