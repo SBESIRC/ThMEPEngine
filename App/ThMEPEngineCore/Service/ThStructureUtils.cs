@@ -1,39 +1,15 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using Autodesk.AutoCAD.ApplicationServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Service
 {
     public class ThStructureUtils
     {
-        public static bool IsColumnXref(string pathName)
-        {
-            return Path.GetFileName(pathName).ToUpper().Contains("COLU");
-        }
-
-        public static bool IsBeamXref(string pathName)
-        {
-            return Path.GetFileName(pathName).ToUpper().Contains("BEAM");
-        }
-
         public static string OriginalFromXref(string xrefLayer)
         {
-            // 已绑定外参
-            if (xrefLayer.Matches("*`$#`$*"))
-            {
-                return xrefLayer.Substring(xrefLayer.LastIndexOf('$') + 1);
-            }
-
-            // 未绑定外参
-            if (xrefLayer.Matches("*|*"))
-            {
-                return xrefLayer.Substring(xrefLayer.LastIndexOf('|') + 1);
-            }
-
-            // 其他非外参
-            return xrefLayer;
+            return ThMEPXRefService.OriginalFromXref(xrefLayer);
         }
 
         /// <summary>

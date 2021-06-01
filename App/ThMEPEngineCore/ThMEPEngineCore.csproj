@@ -59,6 +59,7 @@
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
     <Compile Include="Algorithm\ThMEPPolygonRepairService.cs" />
+    <Compile Include="Algorithm\ThMEPXRefService.cs" />
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
@@ -413,7 +414,6 @@
     <Compile Include="Algorithm\ThMEPCollisionDetector.cs" />
     <Compile Include="Service\ThWellsDbExtension.cs" />
     <Compile Include="Service\ThWellsLayerManager.cs" />
-    <Compile Include="Service\ThWindowDbExtension.cs" />
     <Compile Include="Service\ThWindowLayerManager.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
     <Compile Include="Temp\IElevationQuery.cs" />

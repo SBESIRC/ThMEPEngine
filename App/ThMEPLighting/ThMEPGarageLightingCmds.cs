@@ -2,6 +2,7 @@
 using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
+using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
@@ -33,12 +34,14 @@ namespace ThMEPLighting
                 if (pts.Count <= 1)
                 {
                     return;
-                }                
-                ThLayerTool.CreateLayer(ThGarageLightCommon.DxCenterLineLayerName,
-                    Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
+                }
+                // 添加到图纸中
                 var dx = ThDrawTool.CreatePolyline(pts,false);
-                dx.Layer = ThGarageLightCommon.DxCenterLineLayerName;
                 acdb.ModelSpace.Add(dx);
+                // 设置到指定图层
+                acdb.Database.AddLayer(ThGarageLightCommon.DxCenterLineLayerName);
+                acdb.Database.SetLayerColor(ThGarageLightCommon.DxCenterLineLayerName, colorIndex);
+                dx.Layer = ThGarageLightCommon.DxCenterLineLayerName;
             }
         }
         [CommandMethod("TIANHUACAD", "THFDXC", CommandFlags.Modal)]
@@ -51,12 +54,14 @@ namespace ThMEPLighting
                 if (pts.Count <= 1)
                 {
                     return;
-                }                
-                ThLayerTool.CreateLayer(ThGarageLightCommon.FdxCenterLineLayerName,
-                    Autodesk.AutoCAD.Colors.Color.FromColorIndex(Autodesk.AutoCAD.Colors.ColorMethod.ByAci, colorIndex));
+                }
+                // 添加到图纸中
                 var fdx = ThDrawTool.CreatePolyline(pts, false);
-                fdx.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
                 acdb.ModelSpace.Add(fdx);
+                // 设置到指定图层
+                acdb.Database.AddLayer(ThGarageLightCommon.FdxCenterLineLayerName);
+                acdb.Database.SetLayerColor(ThGarageLightCommon.FdxCenterLineLayerName, colorIndex);
+                fdx.Layer = ThGarageLightCommon.FdxCenterLineLayerName;
             }
         }
         [CommandMethod("TIANHUACAD", "THCDZMBZ", CommandFlags.Modal)]

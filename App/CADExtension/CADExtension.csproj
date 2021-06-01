@@ -232,36 +232,6 @@
     <Compile Include="NFox\Cad\Utils\GsUtility.cs" />
     <Compile Include="NFox\Cad\Utils\Helper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="StraightSkeletonNet\Circular\CircularList.cs" />
-    <Compile Include="StraightSkeletonNet\Circular\CircularNode.cs" />
-    <Compile Include="StraightSkeletonNet\Circular\Edge.cs" />
-    <Compile Include="StraightSkeletonNet\Circular\Vertex.cs" />
-    <Compile Include="StraightSkeletonNet\EdgeResult.cs" />
-    <Compile Include="StraightSkeletonNet\Events\Chains\ChainType.cs" />
-    <Compile Include="StraightSkeletonNet\Events\Chains\EdgeChain.cs" />
-    <Compile Include="StraightSkeletonNet\Events\Chains\IChain.cs" />
-    <Compile Include="StraightSkeletonNet\Events\Chains\SingleEdgeChain.cs" />
-    <Compile Include="StraightSkeletonNet\Events\Chains\SplitChain.cs" />
-    <Compile Include="StraightSkeletonNet\Events\EdgeEvent.cs" />
-    <Compile Include="StraightSkeletonNet\Events\MultiEdgeEvent.cs" />
-    <Compile Include="StraightSkeletonNet\Events\MultiSplitEvent.cs" />
-    <Compile Include="StraightSkeletonNet\Events\PickEvent.cs" />
-    <Compile Include="StraightSkeletonNet\Events\SkeletonEvent.cs" />
-    <Compile Include="StraightSkeletonNet\Events\SplitEvent.cs" />
-    <Compile Include="StraightSkeletonNet\Events\VertexSplitEvent.cs" />
-    <Compile Include="StraightSkeletonNet\LavUtil.cs" />
-    <Compile Include="StraightSkeletonNet\Path\FaceNode.cs" />
-    <Compile Include="StraightSkeletonNet\Path\FaceQueue.cs" />
-    <Compile Include="StraightSkeletonNet\Path\FaceQueueUtil.cs" />
-    <Compile Include="StraightSkeletonNet\Path\PathQueue.cs" />
-    <Compile Include="StraightSkeletonNet\Path\PathQueueNode.cs" />
-    <Compile Include="StraightSkeletonNet\Primitives\LineLinear2d.cs" />
-    <Compile Include="StraightSkeletonNet\Primitives\LineParametric2d.cs" />
-    <Compile Include="StraightSkeletonNet\Primitives\PrimitiveUtils.cs" />
-    <Compile Include="StraightSkeletonNet\Primitives\PriorityQueue.cs" />
-    <Compile Include="StraightSkeletonNet\Primitives\Vector2d.cs" />
-    <Compile Include="StraightSkeletonNet\Skeleton.cs" />
-    <Compile Include="StraightSkeletonNet\SkeletonBuilder.cs" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
