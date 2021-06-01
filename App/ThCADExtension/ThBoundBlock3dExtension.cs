@@ -5,13 +5,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADExtension
 {
-    public static class ThBoundBlock2dExtension
+    public static class ThBoundBlock3dExtension
     {
-        public static Polyline ToPolyline(this BoundBlock2d boundBlock)
+        public static Polyline ToPolyline(this BoundBlock3d boundBlock)
         {
             if (boundBlock.IsBox)
             {
-                var vertices = new Point2dCollection()
+                var vertices = new Point3dCollection()
                 {
                     boundBlock.BasePoint,
                     boundBlock.BasePoint + boundBlock.Direction1,

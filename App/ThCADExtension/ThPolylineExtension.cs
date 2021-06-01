@@ -1,6 +1,4 @@
 ﻿using System;
-using DotNetARX;
-using System.Linq;
 using GeometryExtensions;
 using Dreambuild.AutoCAD;
 using Autodesk.AutoCAD.Geometry;
@@ -50,6 +48,21 @@ namespace ThCADExtension
             {
                 return poly.Vertices();
             }
+        }
+
+        /// <summary>
+        /// 多段线包围盒
+        /// </summary>
+        /// <param name="polyline"></param>
+        /// <returns></returns>
+        public static Polyline BoundBlock(this Polyline polyline)
+        {
+#if ACAD_ABOVE_2012
+            // https://forums.autodesk.com/t5/objectarx/boundblock-function-of-acgecurve2d-in-acge-lib-error/td-p/9971906
+            return polyline.GetGeCurve().BoundBlock.ToPolyline();
+#else
+            throw new NotSupportedException();
+#endif
         }
 
         /// <summary>
