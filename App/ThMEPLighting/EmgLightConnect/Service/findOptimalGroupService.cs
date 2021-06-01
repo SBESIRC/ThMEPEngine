@@ -14,10 +14,63 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     class findOptimalGroupService
     {
+        //public static List<List<List<int>>> findGroupPath(List<List<List<int>>> allPath, List<ThSingleSideBlocks> singleSideBlocks)
+        //{
+        //    List<List<List<int>>> allGroupPath = new List<List<List<int>>>();
+        //    //Dictionary<List<int>, List<List<int>>> calculatedGroupPath();
+
+        //    foreach (var path in allPath)
+        //    {
+        //        var groupPath = new List<List<int>>();
+        //        var groupPathBlocks = new List<List<ThSingleSideBlocks>>();
+
+        //        foreach (var part in path)
+        //        {
+        //            int blockSum = 0;
+        //            var partPath = new List<int>();
+        //            groupPath.Add(partPath);
+
+        //            var partPathBlocks = new List<ThSingleSideBlocks>();
+        //            groupPathBlocks.Add(partPathBlocks);
+
+        //            foreach (int laneSideIndex in part)
+        //            {
+
+        //                var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
+        //                var blockCount = laneSideBlocks.Count;
+
+        //                if (sumNo(blockSum, blockCount) && distanceInTol(partPathBlocks, laneSideBlocks))
+        //                {
+        //                    blockSum = blockSum + blockCount;
+        //                    partPath.Add(laneSideIndex);
+        //                    partPathBlocks.Add(laneSideBlocks);
+
+        //                }
+        //                else
+        //                {
+        //                    blockSum = blockCount;
+        //                    partPath = new List<int>();
+        //                    partPath.Add(laneSideIndex);
+        //                    groupPath.Add(partPath);
+
+        //                    partPathBlocks = new List<ThSingleSideBlocks>();
+        //                    partPathBlocks.Add(laneSideBlocks);
+        //                    groupPathBlocks.Add(partPathBlocks);
+        //                }
+        //            }
+        //        }
+        //        allGroupPath.Add(groupPath);
+        //    }
+
+        //    return allGroupPath;
+        //}
+
+
         public static List<List<List<int>>> findGroupPath(List<List<List<int>>> allPath, List<ThSingleSideBlocks> singleSideBlocks)
         {
+            List<List<List<int>>> allGroupPathTemp = new List<List<List<int>>>();
             List<List<List<int>>> allGroupPath = new List<List<List<int>>>();
-            //Dictionary<List<int>, List<List<int>>> calculatedGroupPath();
+            Dictionary<int, int> sideCountDict = new Dictionary<int, int>();
 
             foreach (var path in allPath)
             {
@@ -35,16 +88,19 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
                     foreach (int laneSideIndex in part)
                     {
-
                         var laneSideBlocks = singleSideBlocks.Where(x => x.laneSideNo == laneSideIndex).FirstOrDefault();
                         var blockCount = laneSideBlocks.Count;
+
+                        if (sideCountDict.ContainsKey(laneSideIndex) == false)
+                        {
+                            sideCountDict.Add(laneSideIndex, blockCount);
+                        }
 
                         if (sumNo(blockSum, blockCount) && distanceInTol(partPathBlocks, laneSideBlocks))
                         {
                             blockSum = blockSum + blockCount;
                             partPath.Add(laneSideIndex);
                             partPathBlocks.Add(laneSideBlocks);
-
                         }
                         else
                         {
@@ -59,11 +115,24 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         }
                     }
                 }
-                allGroupPath.Add(groupPath);
+
+                allGroupPathTemp.Add(groupPath);
+
+                if (minBlockCount(groupPath, sideCountDict) == false)
+                {
+                    allGroupPath.Add(groupPath);
+                }
             }
+
+            if (allGroupPath.Count == 0)
+            {
+                allGroupPath = allGroupPathTemp;
+            }
+
 
             return allGroupPath;
         }
+
 
         private static bool sumNo(int blockSum, int blockCount)
         {
@@ -111,8 +180,24 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             }
 
-
             return bReturn;
+        }
+
+        private static bool minBlockCount(List<List<int>> groupPath, Dictionary<int, int> sideCountDict)
+        {
+            var bTooSmallCount = false;
+
+            for (int i = 0; i < groupPath.Count; i++)
+            {
+                var count = groupPath[i].Select(x => sideCountDict[x]).Sum();
+                if (0 < count && count < EmgConnectCommon .TolMinLigthNo)
+                {
+                    bTooSmallCount = true;
+                    break;
+                }
+            }
+
+            return bTooSmallCount;
         }
 
         public static List<List<ThSingleSideBlocks>> findOptimalGroup(List<List<List<int>>> allGroupPath, List<ThSingleSideBlocks> singleSideBlocks)
@@ -153,10 +238,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             foreach (var path in OptimalGroup)
             {
                 if (path.Count > 0)
-
                 {
-
-
                     var pathBlocks = new List<ThSingleSideBlocks>();
                     foreach (int laneSideIndex in path)
                     {

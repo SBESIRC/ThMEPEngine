@@ -34,67 +34,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
         }
 
-        public static void relocateSecBlockSideOri(List<ThSingleSideBlocks> singleSideBlocks)
-        {
-            var allTotalMainBlk = singleSideBlocks.SelectMany(x => x.getAllMainAndReMain()).ToList();
-
-            for (int i = 0; i < singleSideBlocks.Count; i++)
-            {
-                var sideMainBlk = singleSideBlocks[i].getAllMainAndReMain();
-
-                for (int j = singleSideBlocks[i].secBlk.Count - 1; j >= 0; j--)
-                {
-                    var secPt = singleSideBlocks[i].secBlk[j];
-                    var sideNearest = sideMainBlk.Select(x => x.DistanceTo(secPt)).Min();
-                    var allNearest = allTotalMainBlk.Select(x => x.DistanceTo(secPt)).Min();
-
-                    if (sideNearest / allNearest > 3)
-                    {
-                        var newMainBlk = allTotalMainBlk.Where(x => x.DistanceTo(secPt) == allNearest).FirstOrDefault();
-                        var newSide = singleSideBlocks.Where(x => x.getTotalBlock().Contains(newMainBlk)).First();
-                        newSide.secBlk.Add(secPt);
-                        singleSideBlocks[i].secBlk.Remove(secPt);
-                    }
-
-                }
-            }
-        }
-
-        public static void relocateSecBlockSideNotUse(List<ThSingleSideBlocks> singleSideBlocks)
-        {
-            var allTotalMainBlk = singleSideBlocks.SelectMany(x => x.getAllMainAndReMain()).ToList();
-            //var allTotalMainBlk = singleSideBlocks.SelectMany(x => x.getTotalBlock()).ToList();
-
-            for (int i = 0; i < singleSideBlocks.Count; i++)
-            {
-                var sideMainBlk = singleSideBlocks[i].getAllMainAndReMain();
-                //var sideAllBlk = singleSideBlocks[i].getTotalBlock();
-
-                for (int j = singleSideBlocks[i].secBlk.Count - 1; j >= 0; j--)
-                {
-                    var secPt = singleSideBlocks[i].secBlk[j];
-                    var sideNearest = sideMainBlk.Select(x => x.DistanceTo(secPt)).Min();
-                    var allNearest = allTotalMainBlk.Select(x => x.DistanceTo(secPt)).Min();
-                    //var allNearest = allTotalMainBlk.Where(x => sideAllBlk.Contains(x) == false).Select(x => x.DistanceTo(secPt)).Min();
-
-                    if ((sideNearest / allNearest > 3) || (sideNearest > 15000 && allNearest < sideNearest))
-                    //if (sideNearest / allNearest > 3)
-                    {
-                        var newMainBlk = allTotalMainBlk.Where(x => x.DistanceTo(secPt) == allNearest).FirstOrDefault();
-                        var newSide = singleSideBlocks.Where(x => x.getTotalBlock().Contains(newMainBlk)).First();
-
-                        if (newSide.laneSideNo != singleSideBlocks[i].laneSideNo)
-                        {
-                            newSide.secBlk.Add(secPt);
-                            singleSideBlocks[i].secBlk.Remove(secPt);
-                        }
-
-                    }
-
-                }
-            }
-        }
-
         public static void relocateSecBlockSide(List<ThSingleSideBlocks> singleSideBlocks)
         {
             var allTotalMainBlk = singleSideBlocks.SelectMany(x => x.getAllMainAndReMain()).ToList();

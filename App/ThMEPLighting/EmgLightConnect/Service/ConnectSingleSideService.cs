@@ -68,6 +68,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             DrawUtils.ShowGeometry(groupLine, EmgConnectCommon.LayerOptimalSingleSideGroup, Color.FromColorIndex(ColorMethod.ByColor, 130));
 
         }
+
         public static void forDebugConnectLine(List<(Point3d, Point3d)> connectList)
         {
             var connectLine = new List<Line>();
@@ -106,6 +107,19 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 DrawUtils.ShowGeometry(newPt, string.Format("sideNo: {0}", singleSideBlocks[i].laneSideNo), "l5laneSide", Color.FromColorIndex(ColorMethod.ByColor, 30), LineWeight.LineWeight025, 200);
             }
 
+        }
+
+        public static void forDebugPrintBlkLable(List<Point3d> pts, string layer)
+        {
+            for (int j = 0; j < pts.Count; j++)
+            {
+                DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), layer, Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
+            }
+        }
+
+        public static void forDebugBlkOutline(List<ThBlock> blks)
+        {
+            blks.ForEach(x => DrawUtils.ShowGeometry(x.outline, EmgConnectCommon.LayerBlkOutline, Color.FromColorIndex(ColorMethod.ByColor, 40)));
         }
     }
 

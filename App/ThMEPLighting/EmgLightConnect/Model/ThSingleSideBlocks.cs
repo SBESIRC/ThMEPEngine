@@ -135,7 +135,7 @@ namespace ThMEPLighting.EmgLightConnect.Model
             this.m_moveLaneList = new List<(Polyline, List<Point3d>)>();
         }
 
-        public void setGroupGroup(Dictionary<Point3d, Point3d> groupBlock)
+        public void setEmgGroup(Dictionary<Point3d, Point3d> groupBlock)
         {
             m_groupBlk = groupBlock;
         }

@@ -17,13 +17,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class drawEmgPipeService
     {
-        public static Point3d getConnectPt(ThBlock blk, Line lineTemp)
+        public static Point3d getConnectPtNoUse(ThBlock blk, Line lineTemp)
         {
             Point3d connPt = new Point3d();
             Tolerance tol = new Tolerance(1, 1);
             Point3dCollection pts = new Point3dCollection();
-
-            DrawUtils.ShowGeometry(blk.outline, EmgConnectCommon.LayerBlkOutline, Color.FromColorIndex(ColorMethod.ByColor, 40));
 
             lineTemp.IntersectWith(blk.outline, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
 
@@ -40,10 +38,57 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return connPt;
         }
 
+        /// <summary>
+        /// lineTemp start point should be close to blk
+        /// </summary>
+        /// <param name="blk"></param>
+        /// <param name="lineTemp"></param>
+        /// <returns></returns>
+        public static Point3d getConnectPt(ThBlock blk, Line lineTemp)
+        {
+            int tolTooCloseDist = 100;
+            Point3d connPt = new Point3d();
+            Tolerance tol = new Tolerance(1, 1);
+            Point3dCollection pts = new Point3dCollection();
+
+            lineTemp.IntersectWith(blk.outline, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+
+            if (pts.Count > 0)
+            {
+                connPt = ptOnOutlineSidePt(pts[pts.Count - 1], blk);
+            }
+            else
+            {
+                
+                var connecPtDistDict = blk.getConnectPt().ToDictionary(x => x, x => lineTemp.GetDistToPoint (x,false));
+                connecPtDistDict = connecPtDistDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
+
+                foreach (var pt in connecPtDistDict)
+                {
+                    if (pt.Value  > tolTooCloseDist)
+                    {
+                        connPt = pt.Key;
+                        break;
+                    }
+                    else
+                    {
+                        continue;
+                    }
+                }
+                if (connPt == Point3d.Origin)
+                {
+                    connPt = connecPtDistDict.First().Key;
+                }
+
+            }
+
+            return connPt;
+        }
+
         private static Point3d ptOnOutlineSidePt(Point3d pt, ThBlock blk)
         {
             Point3d connPt = new Point3d();
-            Tolerance tol = new Tolerance(1, 1);
+            Tolerance tol = new Tolerance(10, 10);
 
             for (int i = 0; i < blk.outline.NumberOfVertices; i++)
             {
@@ -114,14 +159,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 for (int j = prevPolyInx + 1; j < ptPolyInx + 1; j++)
                 {
-                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint2dAt(j), 0, 0, 0);
+                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint3dAt(j).ToPoint2d (), 0, 0, 0);
                 }
             }
             if (prevPolyInx > ptPolyInx)
             {
                 for (int j = prevPolyInx; j > ptPolyInx; j--)
                 {
-                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint2dAt(j), 0, 0, 0);
+                    moveLanePoly.AddVertexAt(moveLanePoly.NumberOfVertices, movedline.GetPoint3dAt(j).ToPoint2d (), 0, 0, 0);
                 }
             }
             if (bAddedConn == true)
@@ -180,7 +225,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return moveLinePart;
         }
 
-
         public static Polyline cutPolyline(Point3d sp, Point3d ep, Polyline pl)
         {
             Polyline returnPl = new Polyline();
@@ -221,7 +265,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             returnPl.AddVertexAt(returnPl.NumberOfVertices, spPrj.ToPoint2d(), 0, 0, 0);
             for (int i = spInx; i < epInx; i++)
             {
-                returnPl.AddVertexAt(returnPl.NumberOfVertices, pl.GetPoint2dAt(i+1), 0, 0, 0);
+                returnPl.AddVertexAt(returnPl.NumberOfVertices, pl.GetPoint3dAt(i + 1).ToPoint2d (), 0, 0, 0);
             }
             returnPl.AddVertexAt(returnPl.NumberOfVertices, epPrj.ToPoint2d(), 0, 0, 0);
 

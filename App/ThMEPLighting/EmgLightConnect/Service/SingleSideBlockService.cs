@@ -28,15 +28,21 @@ namespace ThMEPLighting.EmgLightConnect.Service
             mainPt = new List<BlockReference>();
             groupPt = new Dictionary<Point3d, Point3d>();
 
-            if (evacList.Count > 0 && emgLightList.Count > 0)
+            if (evacList.Count > 0 || emgLightList.Count > 0)
             {
                 double groupDist = -1;
-                double scaleEvac = Math.Abs(evacList[0].ScaleFactors.X);
-                double scaleEmg = Math.Abs(emgLightList[0].ScaleFactors.X);
-                groupDist = scaleEvac * 1.25 + scaleEmg * 2.25 + EmgConnectCommon.TolGroupEmgLightEvac;
+                double scaleEvac = 100;
+                double scaleEmg = 100;
+                if (evacList.Count > 0)
+                {
+                    scaleEvac = Math.Abs(evacList[0].ScaleFactors.X);
+                }
+                if (emgLightList.Count > 0)
+                {
+                    scaleEmg = Math.Abs(emgLightList[0].ScaleFactors.X);
+                }
 
-                //for debug
-                //groupDist = 400;
+                groupDist = scaleEvac * 1.25 + scaleEmg * 2.25 + EmgConnectCommon.TolGroupEmgLightEvac;
 
                 foreach (var emgPt in emgLightList)
                 {
@@ -95,23 +101,58 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     var mainBlockGroup = separateMainBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.mainBlock], EmgConnectCommon.TolGroupBlkLane, EmgConnectCommon.TolGroupBlkLaneHead);
                     var secBlockGroup = separateSecBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.secBlock], EmgConnectCommon.TolGroupBlkLane, EmgConnectCommon.TolGroupBlkLaneHead);
 
-                    var groupLeft = new ThSingleSideBlocks(mainBlockGroup[0], new List<(Line, int)> { (mergedOrderedLane[i][j], 0) });
-                    var groupRight = new ThSingleSideBlocks(mainBlockGroup[1], new List<(Line, int)> { (mergedOrderedLane[i][j], 1) });
+                    var sideLeft = new ThSingleSideBlocks(mainBlockGroup[0], new List<(Line, int)> { (mergedOrderedLane[i][j], 0) });
+                    var sideRight = new ThSingleSideBlocks(mainBlockGroup[1], new List<(Line, int)> { (mergedOrderedLane[i][j], 1) });
 
-                    groupLeft.secBlk.AddRange(secBlockGroup[0]);
-                    groupRight.secBlk.AddRange(secBlockGroup[1]);
+                    sideLeft.secBlk.AddRange(secBlockGroup[0]);
+                    sideRight.secBlk.AddRange(secBlockGroup[1]);
 
-                    var groupBlockGroupLeft = getEmgEvacGroup(mainBlockGroup[0], emgEvacGroup);
-                    var groupBlockGroupRight = getEmgEvacGroup(mainBlockGroup[1], emgEvacGroup);
+                    var sideLeftEmgGroup = getEmgEvacGroup(mainBlockGroup[0], emgEvacGroup);
+                    var sideRightEmgGroup = getEmgEvacGroup(mainBlockGroup[1], emgEvacGroup);
 
-                    groupLeft.setGroupGroup(groupBlockGroupLeft);
-                    groupRight.setGroupGroup(groupBlockGroupRight);
+                    sideLeft.setEmgGroup(sideLeftEmgGroup);
+                    sideRight.setEmgGroup(sideRightEmgGroup);
 
-                    singleSideBlocks.Add(groupLeft);
-                    singleSideBlocks.Add(groupRight);
+                    singleSideBlocks.Add(sideLeft);
+                    singleSideBlocks.Add(sideRight);
 
-                    RemoveBlockFromList(groupLeft, blockList);
-                    RemoveBlockFromList(groupRight, blockList);
+                    RemoveBlockFromList(sideLeft, blockList);
+                    RemoveBlockFromList(sideRight, blockList);
+                }
+            }
+
+            return singleSideBlocks;
+        }
+
+        public static List<ThSingleSideBlocks> classifyMainBlocks(List<List<Line>> mergedOrderedLane, Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList, Dictionary<Point3d, Point3d> emgEvacGroup)
+        {
+            List<ThSingleSideBlocks> singleSideBlocks = new List<ThSingleSideBlocks>();
+
+            for (var i = 0; i < mergedOrderedLane.Count; i++)
+            {
+                for (var j = 0; j < mergedOrderedLane[i].Count; j++)
+                {
+
+                    var mainBlockGroup = separateMainBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.mainBlock], EmgConnectCommon.TolGroupBlkLane, EmgConnectCommon.TolGroupBlkLaneHead);
+                    //var secBlockGroup = separateSecBlocksByLine(mergedOrderedLane[i][j], blockList[EmgConnectCommon.BlockGroupType.secBlock], EmgConnectCommon.TolGroupBlkLane, EmgConnectCommon.TolGroupBlkLaneHead);
+
+                    var sideLeft = new ThSingleSideBlocks(mainBlockGroup[0], new List<(Line, int)> { (mergedOrderedLane[i][j], 0) });
+                    var sideRight = new ThSingleSideBlocks(mainBlockGroup[1], new List<(Line, int)> { (mergedOrderedLane[i][j], 1) });
+
+                    //sideLeft.secBlk.AddRange(secBlockGroup[0]);
+                    //sideRight.secBlk.AddRange(secBlockGroup[1]);
+
+                    var sideLeftEmgGroup = getEmgEvacGroup(mainBlockGroup[0], emgEvacGroup);
+                    var sideRightEmgGroup = getEmgEvacGroup(mainBlockGroup[1], emgEvacGroup);
+
+                    sideLeft.setEmgGroup(sideLeftEmgGroup);
+                    sideRight.setEmgGroup(sideRightEmgGroup);
+
+                    singleSideBlocks.Add(sideLeft);
+                    singleSideBlocks.Add(sideRight);
+
+                    RemoveBlockFromList(sideLeft, blockList);
+                    RemoveBlockFromList(sideRight, blockList);
                 }
             }
 
@@ -246,5 +287,41 @@ namespace ThMEPLighting.EmgLightConnect.Service
             blockDict.Add(EmgConnectCommon.BlockGroupType.mainBlock, mainPt);
         }
 
+        public static void classifySecBlocks(List<ThSingleSideBlocks> singleSideBlocks, Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList, Point3d ALE)
+        {
+
+            var allMainPt = singleSideBlocks.SelectMany(x => x.mainBlk).ToList();
+
+
+            foreach (var block in blockList[EmgConnectCommon.BlockGroupType.secBlock])
+            {
+                var secPt = block.Position;
+
+                var closePoint = new Point3d();
+                var closePointList = allMainPt.Where(x => x.DistanceTo(secPt) < EmgConnectCommon.TolSaperateGroupMaxDistance).ToList();
+
+                if (closePointList.Count > 0)
+                {
+                    var mainDist = closePointList.Select(x => (closePointList.IndexOf(x), 0, x.DistanceTo(secPt))).ToList();
+
+                    Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueClassify(ALE, closePointList, secPt);//key:blockListIndex value:returnValue
+
+                    closePoint = returnValueCalculation.findOptimalConnectionClassifySec(returnValueDict, mainDist, closePointList);
+
+                }
+                else
+                {
+                    closePoint = allMainPt.ToDictionary(x => x, x => x.DistanceTo(secPt)).OrderBy(x => x.Value).First().Key;
+                }
+
+
+
+                var group = singleSideBlocks.Where(x => x.getTotalBlock().Contains(closePoint)).FirstOrDefault();
+                group.secBlk.Add(secPt);
+            }
+
+            singleSideBlocks.ForEach(x => RemoveBlockFromList(x, blockList));
+
+        }
     }
 }

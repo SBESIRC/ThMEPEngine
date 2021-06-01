@@ -14,7 +14,7 @@ using ThMEPLighting.EmgLightConnect.Model;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {
-   public class drawCorrectLinkService
+    public class drawCorrectLinkService
     {
         public static List<Polyline> CorrectIntersectLink(List<Polyline> polylines, List<ThBlock> blkList)
         {
@@ -44,7 +44,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     .Where(x => x.Value.Count > 0)
                     .ToDictionary(x => x.Key, y => y.Value.First());
 
-                if (intersectPolys.Count ==1 )
+                //if (intersectPolys.Count ==1 )
+                if (intersectPolys.Count > 0)
                 {
                     var secPoly = new Polyline();
                     for (int i = 0; i < intersectPolys.Count; i++)
@@ -54,8 +55,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         polylines.Remove(intersectPoly.Key);
                         secPoly = intersectPoly.Key;
                         correctLink(intersectPt, blkList, ref firPoly, ref secPoly);
+                        resPolys.Add(secPoly);
                     }
-                    resPolys.Add(secPoly);
+
                 }
                 resPolys.Add(firPoly);
             }
@@ -65,51 +67,80 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         private static void correctLink(Point3d intersectPt, List<ThBlock> blkList, ref Polyline firPoly, ref Polyline secPoly)
         {
+            var samePt = findStPt(firPoly, secPoly, blkList);
+
+            if (samePt == Point3d.Origin)
+            {
+                //两条相交线没有同一点
+            }
+            else
+            {
+                var firRev = reversePl(firPoly, samePt, out var firPolyNew);
+                var secRev = reversePl(secPoly, samePt, out var secPolyNew);
+
+                if (firPoly.StartPoint == secPoly.StartPoint || firPoly.StartPoint == secPoly.EndPoint ||
+                    firPoly.EndPoint == secPoly.StartPoint || firPoly.EndPoint == secPoly.EndPoint)
+                {
+                    adjustSamePoint(intersectPt, ref firPolyNew, ref secPolyNew);
+                }
+                else
+                {
+                    adjustSameBlock(intersectPt, ref firPolyNew, ref secPolyNew);
+                }
+
+                //转回来
+                if (firRev == true)
+                {
+                    firPolyNew.ReverseCurve();
+                }
+                if (secRev == true)
+                {
+                    secPolyNew.ReverseCurve();
+                }
+
+                firPoly = firPolyNew;
+                secPoly = secPolyNew;
+
+            }
+        }
+
+        private static Point3d findStPt(Polyline firPoly, Polyline secPoly, List<ThBlock> blkList)
+        {
             var firSBlk = BlockListService.getBlockByConnect(firPoly.StartPoint, blkList);
             var firEBlk = BlockListService.getBlockByConnect(firPoly.EndPoint, blkList);
             var secSBlk = BlockListService.getBlockByConnect(secPoly.StartPoint, blkList);
             var secEBlk = BlockListService.getBlockByConnect(secPoly.EndPoint, blkList);
 
-            if (firSBlk != secSBlk && firSBlk != secEBlk && firEBlk != secSBlk && firEBlk != secEBlk)
-            {
+            Point3d sameBlkCenterPt = new Point3d();
 
-            }
-            else
+            if (firSBlk == secSBlk || firSBlk == secEBlk)
             {
-                if (firPoly.StartPoint == secPoly.StartPoint || firPoly.StartPoint == secPoly.EndPoint)
-                {
-                    adjustSamePoint(intersectPt, firPoly.StartPoint, ref firPoly, ref secPoly);
-                }
-                else if (firPoly.EndPoint == secPoly.StartPoint || firPoly.EndPoint == secPoly.EndPoint)
-                {
-                    adjustSamePoint(intersectPt, firPoly.EndPoint, ref firPoly, ref secPoly);
-                }
-                else
-                {
-                    adjustSameBlock(intersectPt, ref firPoly, ref secPoly);
-                }
+                sameBlkCenterPt = firSBlk.blkCenPt;
             }
+            if (firEBlk == secSBlk || firEBlk == secEBlk)
+            {
+                sameBlkCenterPt = firEBlk.blkCenPt;
+            }
+
+            return sameBlkCenterPt;
         }
 
-        private static void adjustSamePoint(Point3d intersectPt, Point3d samePoint, ref Polyline firPoly, ref Polyline secPoly)
+        private static bool reversePl(Polyline pl, Point3d startPt, out Polyline reversePl)
         {
-            var tol = new Tolerance(1, 1);
-            var firPolyNew = firPoly.Clone() as Polyline;
-            var secPolyNew = secPoly.Clone() as Polyline;
-            bool firRev = false;
-            bool secRev = false;
+            reversePl = pl.Clone() as Polyline;
+            bool bReverse = false;
 
-            if (firPoly.EndPoint.IsEqualTo(samePoint, tol))
+            if (pl.EndPoint.DistanceTo(startPt) < pl.StartPoint.DistanceTo(startPt))
             {
-                firPolyNew.ReverseCurve();
-                firRev = true;
+                reversePl.ReverseCurve();
+                bReverse = true;
             }
-            if (secPoly.EndPoint.IsEqualTo(samePoint, tol))
-            {
-                secPolyNew.ReverseCurve();
-                secRev = true;
-            }
+           
+            return bReverse;
+        }
 
+        private static void adjustSamePoint(Point3d intersectPt, ref Polyline firPolyNew, ref Polyline secPolyNew)
+        {
             //找到哪条线转 intersectPt 是不是在第一条线后
             int firInterIdx = getSeg(intersectPt, firPolyNew);
             int secInterIdx = getSeg(intersectPt, secPolyNew);
@@ -123,42 +154,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 moveSegPoint(intersectPt, secInterIdx, ref secPolyNew);
             }
 
-            //转回来
-            if (firRev == true)
-            {
-                firPolyNew.ReverseCurve();
-            }
-            if (secRev == true)
-            {
-                secPolyNew.ReverseCurve();
-            }
-
-            firPoly = firPolyNew;
-            secPoly = secPolyNew;
         }
 
-        private static void adjustSameBlock(Point3d intersectPt, ref Polyline firPoly, ref Polyline secPoly)
+        private static void adjustSameBlock(Point3d intersectPt, ref Polyline firPolyNew, ref Polyline secPolyNew)
         {
-            var firPolyNew = firPoly.Clone() as Polyline;
-            var secPolyNew = secPoly.Clone() as Polyline;
-            bool firRev = false;
-            bool secRev = false;
-
-            if (firPoly.EndPoint.DistanceTo(intersectPt) < firPoly.StartPoint.DistanceTo(intersectPt))
-            {
-                firPolyNew.ReverseCurve();
-                firRev = true;
-            }
-            if (secPoly.EndPoint.DistanceTo(intersectPt) < secPoly.StartPoint.DistanceTo(intersectPt))
-            {
-                secPolyNew.ReverseCurve();
-                secRev = true;
-            }
-
             //交换两条线第一个点
             int firInterIdx = getSeg(intersectPt, firPolyNew);
             int secInterIdx = getSeg(intersectPt, secPolyNew);
-
 
             if (firInterIdx > 0)
             {
@@ -170,19 +172,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 changeSegSPt(intersectPt, secInterIdx, ref secPolyNew, ref firPolyNew);
             }
 
-
-            //转回来
-            if (firRev == true)
-            {
-                firPolyNew.ReverseCurve();
-            }
-            if (secRev == true)
-            {
-                secPolyNew.ReverseCurve();
-            }
-
-            firPoly = firPolyNew;
-            secPoly = secPolyNew;
         }
 
         private static void moveSegPoint(Point3d intersectPt, int idx, ref Polyline pl)

@@ -18,16 +18,18 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 acadDatabase.Database.ImportLayer(ThMEPLightingCommon.EmgLightConnectLayerName);
                 acadDatabase.Database.ImportLinetype(ThMEPLightingCommon.EmgLightConnectLineType);
-
-                foreach (var poly in polylines)
+                if (polylines != null && polylines.Count > 0)
                 {
-                    for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+                    foreach (var poly in polylines)
                     {
-                        var linkLine = new Line(poly.GetPoint3dAt(i), poly.GetPoint3dAt(i + 1));
-                        linkLine.Linetype = ThMEPLightingCommon.EmgLightConnectLineType;
-                        linkLine.Layer = ThMEPLightingCommon.EmgLightConnectLayerName;
-                        linkLine.Color = Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightConnectLayerColor);
-                        acadDatabase.ModelSpace.Add(linkLine);
+                        for (int i = 0; i < poly.NumberOfVertices - 1; i++)
+                        {
+                            var linkLine = new Line(poly.GetPoint3dAt(i), poly.GetPoint3dAt(i + 1));
+                            linkLine.Linetype = ThMEPLightingCommon.EmgLightConnectLineType;
+                            linkLine.Layer = ThMEPLightingCommon.EmgLightConnectLayerName;
+                            linkLine.Color = Color.FromColorIndex(ColorMethod.ByLayer, ThMEPLightingCommon.EmgLightConnectLayerColor);
+                            acadDatabase.ModelSpace.Add(linkLine);
+                        }
                     }
                 }
             }

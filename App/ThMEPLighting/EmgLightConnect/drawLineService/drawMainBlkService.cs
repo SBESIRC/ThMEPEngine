@@ -38,9 +38,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
                             var moveLane = side.moveLaneList.Where(x => x.Item2.Contains(side.reMainBlk[reMI])).First();
                             passedMain.AddRange(moveLane.Item2);
 
+                            ConnectSingleSideService.forDebugPrintBlkLable(moveLane.Item2, "l5moveblk");
+
                             if (moveLane.Item2.Count > 1)
                             {
                                 var movedline = moveLane.Item1;
+
+                                DrawUtils.ShowGeometry(movedline, "l0moveLaneSeg");
 
                                 for (int i = 1; i < moveLane.Item2.Count; i++)
                                 {
@@ -91,11 +95,15 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var sDir = new Vector3d(1, 0, 0);
             sDir = sDir.TransformBy(prevBlk.blk.BlockTransform).GetNormal();
 
-            AStarRoutePlanner<Point3d> aStarRoute = new AStarRoutePlanner<Point3d>(frame, sDir, thisBlk.cenPt, 400, 0, 0);
+            AStarRoutePlanner<Point3d> aStarRoute = new AStarRoutePlanner<Point3d>(frame, sDir, thisBlk.blkCenPt, 400, 0, 0);
             aStarRoute.SetObstacle(holes);
-            var res = aStarRoute.Plan(prevBlk.cenPt);
+            var res = aStarRoute.Plan(prevBlk.blkCenPt);
 
-            if (res!=null && res.NumberOfVertices > 2)
+            DrawUtils.ShowGeometry(res, "l0mainSegAStar");
+
+            resCut = res;
+
+            if (res!=null && res.NumberOfVertices >= 2)
             {
                 var seg = res.GetLineSegmentAt(0);
                 if (seg.Length < TolDistDalta)
@@ -107,7 +115,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     res.RemoveVertexAt(res.NumberOfVertices - 1);
                 }
-                 resCut = drawEmgPipeService.cutLane(prevBlk.cenPt, thisBlk.cenPt, prevBlk, thisBlk, res);
+                 resCut = drawEmgPipeService.cutLane(prevBlk.blkCenPt, thisBlk.blkCenPt, prevBlk, thisBlk, res);
             }
 
             

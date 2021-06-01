@@ -198,6 +198,7 @@ namespace ThMEPLighting.EmgLight.Common
 
                 var inx = connectPt.IndexOf(connectPt.OrderBy(x => x.DistanceTo(bottomPt)).First());
 
+                //确定group的灯组是贴在下边点还是上边点
                 if (inx == 1 || inx == 3)
                 {
                     var ptNew = new Point3d(ptList[inx].X, ptList[inx].Y / Math.Abs(ptList[inx].Y) * (Math.Abs(ptList[inx].Y) + Math.Abs(ptListGroup[1].Y) + Math.Abs(ptListGroup[3].Y)), 0);
@@ -209,13 +210,28 @@ namespace ThMEPLighting.EmgLight.Common
 
             blkOutline = new Polyline();
 
-            blkOutline.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
-            blkOutline.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
-            blkOutline.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
-            blkOutline.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
-            blkOutline.TransformBy(blk.BlockTransform);
-            blkOutline.Closed = true;
+            //blkOutline.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
+            //blkOutline.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
+            //blkOutline.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
+            //blkOutline.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
+            //blkOutline.TransformBy(blk.BlockTransform);
 
+            var blkOutlineTemp = new Polyline();
+
+            blkOutlineTemp.AddVertexAt(0, new Point2d(ptList[0].X, ptList[3].Y), 0, 0, 0);
+            blkOutlineTemp.AddVertexAt(1, new Point2d(ptList[0].X, ptList[1].Y), 0, 0, 0);
+            blkOutlineTemp.AddVertexAt(2, new Point2d(ptList[2].X, ptList[1].Y), 0, 0, 0);
+            blkOutlineTemp.AddVertexAt(3, new Point2d(ptList[2].X, ptList[3].Y), 0, 0, 0);
+            blkOutlineTemp.TransformBy(blk.BlockTransform);
+
+            //transformy以后 z值有可能不完全是0 之后计算有错误
+            for (int i = 0; i < blkOutlineTemp.NumberOfVertices; i++)
+            {
+                var pt = blkOutlineTemp.GetPoint3dAt(i); //getpoint2dat 会有bug返回xy值为镜面坐标（不知道为啥
+                blkOutline.AddVertexAt(blkOutline.NumberOfVertices, new Point2d(pt.X, pt.Y), 0, 0, 0);
+            }
+
+            blkOutline.Closed = true;
 
         }
 

@@ -22,6 +22,7 @@ namespace ThMEPLighting.EmgLightConnect
         public static int TolReturnRangeInSide = 1000;
         public static int TolBlkMaxConnect = 4;
         public static int TolMaxLigthNo = 25;
+        public static int TolMinLigthNo = 5;
         public static int TolMaxReturnValue = 10000;
         public static int TolConnectSecPtRange = 12000;
         public static int TolConnectSecPrimAddValue = 10000;

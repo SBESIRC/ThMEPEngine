@@ -29,7 +29,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
         }
 
-        public static void connecSecToMain(BlockReference ALE, List<ThSingleSideBlocks> singleSideBlocks, Polyline frame)
+        public static void connecSecToMain(Point3d ALE, List<ThSingleSideBlocks> singleSideBlocks, Polyline frame)
         {
 
             //debug 没有main 只有sec的情况处理不了
@@ -45,7 +45,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
         }
 
-        private static void findGroupMainSec(ThSingleSideBlocks side, BlockReference ALE, Polyline frame)
+        private static void findGroupMainSec(ThSingleSideBlocks side, Point3d ALE, Polyline frame)
         {
             side.orderReSecBlk();
 
@@ -90,7 +90,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     var cenPt = findSecPtCenter(ptList);
 
                     //找到散点的中心前后主点间的点
-                    var secPtList = findSecBetweenMain(cenPt.TransformBy(mainConnectMatrix.Inverse()), transMainPt, transSecPt);
+                    var secPtList = findSecBetweenMain(cenPt.TransformBy(mainConnectMatrix.Inverse()), transMainPt, transSecPt, out var leftMain, out var rightMain);
                     if (secPtList.Count > 0)
                     {
                         //ptList.AddRange(secPtList.Where(x => visit[side.reSecBlk.IndexOf(x)] == false &&
@@ -102,6 +102,20 @@ namespace ThMEPLighting.EmgLightConnect.Service
                                                              x.DistanceTo(side.reMainBlk[mainI]) < EmgConnectCommon.TolConnectSecPtRange
                                                         ).ToList());
                     }
+
+                    //左右最近点的secPt
+                    secPtIndexList = findCloseSecPtList(distM, side.reMainBlk.IndexOf(leftMain));
+                    ptList.AddRange(side.reSecBlk.Where(x => secPtIndexList.Contains(side.reSecBlk.IndexOf(x)) &&
+                                                        visit[side.reSecBlk.IndexOf(x)] == false
+                                                   ).ToList());
+
+                    secPtIndexList = findCloseSecPtList(distM, side.reMainBlk.IndexOf(rightMain));
+                    ptList.AddRange(side.reSecBlk.Where(x => secPtIndexList.Contains(side.reSecBlk.IndexOf(x)) &&
+                                                        visit[side.reSecBlk.IndexOf(x)] == false
+                                                   ).ToList());
+
+
+
                     ptList = ptList.Distinct().ToList();
 
                     //主点和散点找最小生成树
@@ -125,12 +139,12 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static List<Point3d> findSecBetweenMain(Point3d transCenPt, Dictionary<Point3d, Point3d> transMainPt, Dictionary<Point3d, Point3d> transSecPt)
+        private static List<Point3d> findSecBetweenMain(Point3d transCenPt, Dictionary<Point3d, Point3d> transMainPt, Dictionary<Point3d, Point3d> transSecPt, out Point3d leftMain, out Point3d rightMain)
         {
             var xMin = double.MaxValue;
             var xMax = double.MaxValue;
-            var leftMain = new Point3d();
-            var rightMain = new Point3d();
+            leftMain = new Point3d();
+            rightMain = new Point3d();
             var secList = new List<Point3d>();
 
             foreach (var transMain in transMainPt)
@@ -163,7 +177,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
         }
 
-        private static int getRootMainBlk(int secIndex, List<(int, int, double)> distM, ThSingleSideBlocks side, BlockReference ALE, List<Point3d> ptList)
+        private static int getRootMainBlk(int secIndex, List<(int, int, double)> distM, ThSingleSideBlocks side, Point3d ALE, List<Point3d> ptList)
         {
 
             var mainList = side.reMainBlk;
@@ -172,6 +186,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var mainDist = distM.Where(x => x.Item2 == secIndex).ToList();
 
             Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInSide(ALE, mainList, secPt);//key:blockListIndex value:returnValue
+
+            //Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueClassify(ALE, mainList, secPt);
 
             var mainPt = returnValueCalculation.findOptimalConnectionInSide(returnValueDict, mainDist, mainList, secPt, side);
 

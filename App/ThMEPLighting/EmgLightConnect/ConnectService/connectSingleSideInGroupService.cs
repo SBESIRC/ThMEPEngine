@@ -48,10 +48,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 for (int i = 0; i < orderSigleSideGroup.Count; i++)
                 {
                     var pts = orderSigleSideGroup[i].getTotalBlock();
-                    for (int j = 0; j < pts.Count; j++)
-                    {
-                        DrawUtils.ShowGeometry(new Point3d(pts[j].X + 100, pts[j].Y, 0), j.ToString(), EmgConnectCommon.LayerBlkNo, Color.FromColorIndex(ColorMethod.ByColor, 40), LineWeight.LineWeight025, 200);
-                    }
+                    ConnectSingleSideService.forDebugPrintBlkLable(pts, EmgConnectCommon.LayerBlkNo);
                 }
 
                 blockList.AddRange(orderSigleSideGroup[0].getTotalBlock());
@@ -60,7 +57,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     var thisLaneBlock = orderSigleSideGroup[i].getTotalBlock();
 
-                    Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup2(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
+                   // Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup2(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
+                    Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroupAngle(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
+
                     List<(int, int, double)> closedDists = returnValueCalculation.getDistMatrix(blockList, thisLaneBlock); //(blocklist index, focused side index, distance)
 
                     var connectListTemp = returnValueCalculation.findOptimalConnectionInGroup(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);

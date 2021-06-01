@@ -11,7 +11,7 @@ namespace ThMEPLighting.EmgLight.Assistant
 {
     public class DrawUtils
     {
-        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, Color color =null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfile(List<Entity> curves, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
         {
             var objectIds = new List<ObjectId>();
             if (curves == null || curves.Count == 0)
@@ -24,7 +24,7 @@ namespace ThMEPLighting.EmgLight.Assistant
                     color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
                 }
 
-                CreateLayer(LayerName,color);
+                CreateLayer(LayerName, color);
                 foreach (var curve in curves)
                 {
                     if (curve != null)
@@ -55,7 +55,7 @@ namespace ThMEPLighting.EmgLight.Assistant
                 }
 
 
-                CreateLayer(LayerName,color);
+                CreateLayer(LayerName, color);
 
                 var clone = curve.Clone() as Entity;
                 clone.Layer = LayerName;
@@ -66,7 +66,7 @@ namespace ThMEPLighting.EmgLight.Assistant
             return objectIds;
         }
 
-        private static List<ObjectId> DrawProfile(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfile(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, string symbol = "C")
         {
             var objectIds = new List<ObjectId>();
             if (pt == null)
@@ -74,14 +74,34 @@ namespace ThMEPLighting.EmgLight.Assistant
 
             using (var db = AcadDatabase.Active())
             {
+                Entity clone = null;
                 if (color == null)
                 {
                     color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
                 }
 
-                CreateLayer(LayerName,color);
+                CreateLayer(LayerName, color);
 
-                var clone = new Circle(pt, new Vector3d(0, 0, 1), 200);
+                if (symbol == "C")
+                {
+                    clone = new Circle(pt, new Vector3d(0, 0, 1), 200);
+                }
+                else if (symbol == "S")
+                {
+                    var sq = new Polyline();
+                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - 200, pt.Y + 200),0,0,0);
+                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + 200, pt.Y + 200), 0, 0, 0);
+                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X + 200, pt.Y - 200), 0, 0, 0);
+                    sq.AddVertexAt(sq.NumberOfVertices, new Point2d(pt.X - 200, pt.Y - 200), 0, 0, 0);
+                    sq.Closed  = true;
+                    clone = sq;
+                 }
+                else
+                {
+                    clone = new Circle(pt, new Vector3d(0, 0, 1), 200);
+                }
+
+
                 clone.Layer = LayerName;
                 clone.Color = color;
                 clone.LineWeight = lineWeight;
@@ -90,7 +110,7 @@ namespace ThMEPLighting.EmgLight.Assistant
             return objectIds;
         }
 
-        private static List<ObjectId> DrawProfile(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight =1000)
+        private static List<ObjectId> DrawProfile(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight = 1000)
         {
             var objectIds = new List<ObjectId>();
             if (pt == null)
@@ -102,7 +122,7 @@ namespace ThMEPLighting.EmgLight.Assistant
                 {
                     color = Color.FromColorIndex(ColorMethod.ByLayer, 3);
                 }
-                CreateLayer(LayerName,color);
+                CreateLayer(LayerName, color);
 
                 DBText text = new DBText();
                 text.Position = pt;
@@ -124,7 +144,7 @@ namespace ThMEPLighting.EmgLight.Assistant
         /// </summary>
         /// <param name="allLayers"></param>
         /// <param name="aimLayer"></param>
-        public static ObjectId CreateLayer(string aimLayer,Color color,bool IsPlottable =false)
+        public static ObjectId CreateLayer(string aimLayer, Color color, bool IsPlottable = false)
         {
             LayerTableRecord layerRecord = null;
             using (var db = AcadDatabase.Active())
@@ -142,9 +162,9 @@ namespace ThMEPLighting.EmgLight.Assistant
                 if (layerRecord == null)
                 {
                     layerRecord = db.Layers.Create(aimLayer);
-                    if (color==null)
+                    if (color == null)
                     {
-                        color = Color.FromRgb (255, 0, 0);
+                        color = Color.FromRgb(255, 0, 0);
                     }
                     layerRecord.Color = color;
                     layerRecord.IsPlottable = IsPlottable;
@@ -191,24 +211,24 @@ namespace ThMEPLighting.EmgLight.Assistant
             return DrawProfile(curves, LayerName, color, lineWeight);
         }
 
-        private static List<ObjectId> DrawProfileDebug(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        private static List<ObjectId> DrawProfileDebug(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, string symbol = "C")
         {
             // 调试按钮关闭且图层不是保护半径有效图层
             var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
             if (!debugSwitch)
                 return new List<ObjectId>();
 
-            return DrawProfile(pt, LayerName, color, lineWeight);
+            return DrawProfile(pt, LayerName, color, lineWeight, symbol);
         }
 
-        private static List<ObjectId> DrawProfileDebug(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025,double hight=1000)
+        private static List<ObjectId> DrawProfileDebug(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight = 1000)
         {
             // 调试按钮关闭且图层不是保护半径有效图层
             var debugSwitch = (Convert.ToInt16(Application.GetSystemVariable("USERR2")) == 1);
             if (!debugSwitch)
                 return new List<ObjectId>();
 
-            return DrawProfile(pt, s, LayerName, color, lineWeight,hight);
+            return DrawProfile(pt, s, LayerName, color, lineWeight, hight);
         }
 
         public static void ShowGeometry(List<Line> geom, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
@@ -237,9 +257,9 @@ namespace ThMEPLighting.EmgLight.Assistant
             DrawUtils.DrawProfileDebug(curves, LayerName, color, lineWeight);
         }
 
-        public static void ShowGeometry(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025)
+        public static void ShowGeometry(Point3d pt, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, string symbol = "C")
         {
-            DrawUtils.DrawProfileDebug(pt, LayerName, color, lineWeight);
+            DrawUtils.DrawProfileDebug(pt, LayerName, color, lineWeight, symbol);
         }
         public static void ShowGeometry(Point3d pt, string s, string LayerName, Color color = null, LineWeight lineWeight = LineWeight.LineWeight025, double hight = 1000)
         {
