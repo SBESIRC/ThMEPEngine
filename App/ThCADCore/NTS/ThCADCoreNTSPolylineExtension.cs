@@ -96,11 +96,5 @@ namespace ThCADCore.NTS
                 throw new NotSupportedException();
             }
         }
-
-        public static bool IsClosed(this Polyline polyline)
-        {
-            var geometry = polyline.ToNTSLineString() as LineString;
-            return geometry.IsClosed;
-        }
     }
 }

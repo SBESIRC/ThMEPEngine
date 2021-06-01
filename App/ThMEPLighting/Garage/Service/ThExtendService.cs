@@ -1,13 +1,11 @@
-﻿using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
-using System.Text;
-using System.Threading.Tasks;
 using ThMEPLighting.Common;
-using ThMEPEngineCore.Algorithm;
+using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Service
 {
@@ -18,13 +16,14 @@ namespace ThMEPLighting.Garage.Service
         /// 是车道中心线合并的基准值(线槽宽度)
         /// </summary>
         private double Width { get; set; }
-        private double ExtendTolerance = 5.0;
-        private ThExtendService(List<Tuple<Curve ,Curve,Curve>> curves, double width)
+        private const double ExtendTolerance = 5.0;
+        private Tolerance PointOnCurveTolerance = new Tolerance(1E-4, 1E-4);
+        private ThExtendService(List<Tuple<Curve, Curve, Curve>> curves, double width)
         {
             Curves = curves;
             Width = width;
         }
-        public static List<Tuple<Curve, Curve, Curve>> Extend(List<Tuple<Curve, Curve, Curve>> curves,double width)
+        public static List<Tuple<Curve, Curve, Curve>> Extend(List<Tuple<Curve, Curve, Curve>> curves, double width)
         {
             var instance = new ThExtendService(curves, width);
             instance.Extend();
@@ -32,11 +31,11 @@ namespace ThMEPLighting.Garage.Service
         }
         private void Extend()
         {
-            for(int i=0;i< Curves.Count-1;i++)
+            for (int i = 0; i < Curves.Count - 1; i++)
             {
-                for (int j = i+1; j < Curves.Count; j++)
+                for (int j = i + 1; j < Curves.Count; j++)
                 {
-                    if(Curves[i].Item1 is Line first && Curves[j].Item1 is Line second)
+                    if (Curves[i].Item1 is Line first && Curves[j].Item1 is Line second)
                     {
                         if (first.StartPoint.GetVectorTo(first.EndPoint).
                              IsParallelToEx(second.StartPoint.GetVectorTo(second.EndPoint)))
@@ -46,8 +45,8 @@ namespace ThMEPLighting.Garage.Service
                     }
                     var pts = new Point3dCollection();
                     Extend(Curves[i].Item1, ExtendTolerance).IntersectWith(Extend(Curves[j].Item1, ExtendTolerance),
-                        Intersect.OnBothOperands,pts,IntPtr.Zero, IntPtr.Zero);
-                    if(pts.Count>0)
+                        Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
+                    if (pts.Count > 0)
                     {
                         var current = Curves[i];
                         var other = Curves[j];
@@ -55,9 +54,9 @@ namespace ThMEPLighting.Garage.Service
                         Curves[i] = current;
                         Curves[j] = other;
                     }
-                    else 
+                    else
                     {
-                        Extend(Curves[i].Item1, Width+1.0).IntersectWith(Extend(Curves[j].Item1, Width + 1.0),
+                        Extend(Curves[i].Item1, Width + 1.0).IntersectWith(Extend(Curves[j].Item1, Width + 1.0),
                         Intersect.OnBothOperands, pts, IntPtr.Zero, IntPtr.Zero);
                         if (pts.Count > 0)
                         {
@@ -132,8 +131,8 @@ namespace ThMEPLighting.Garage.Service
         private void Overlap(ref Curve curve1, Curve curve2, List<Tuple<Curve, Curve, Curve>> curves, bool isOne, out bool needChange)
         {
             needChange = false;
-            if (curve2.GetClosestPointTo(curve1.StartPoint, false).DistanceTo(curve1.StartPoint) < 1&&
-                !curve1.StartPoint.IsEqualTo(curve2.StartPoint, new Tolerance(5, 5)) && 
+            if (curve2.GetClosestPointTo(curve1.StartPoint, false).DistanceTo(curve1.StartPoint) < 1 &&
+                !curve1.StartPoint.IsEqualTo(curve2.StartPoint, new Tolerance(5, 5)) &&
                 !curve1.StartPoint.IsEqualTo(curve2.EndPoint, new Tolerance(5, 5)))
             {
                 if (curve2.StartPoint.DistanceTo(curve1.EndPoint) < curve2.EndPoint.DistanceTo(curve1.EndPoint))
@@ -269,7 +268,7 @@ namespace ThMEPLighting.Garage.Service
             }
 
             return isTrue;
-        } 
+        }
         private void Extend(ref Tuple<Curve, Curve, Curve> current, ref Tuple<Curve, Curve, Curve> other)
         {
             var currentItem2 = Extend(current.Item2, other.Item2, other.Item3);
@@ -280,8 +279,8 @@ namespace ThMEPLighting.Garage.Service
             current = new Tuple<Curve, Curve, Curve>(current.Item1, currentItem2, cuurentItem3);
             other = new Tuple<Curve, Curve, Curve>(other.Item1, otherItem2, otherItem3);
         }
-        private Curve Extend(Curve extendLine,Curve first,Curve second)
-        {            
+        private Curve Extend(Curve extendLine, Curve first, Curve second)
+        {
             var firstPts = new Point3dCollection();
             Extend(extendLine).IntersectWith(Extend(first), Intersect.ExtendBoth, firstPts, IntPtr.Zero, IntPtr.Zero);
             var secondPts = new Point3dCollection();
@@ -289,19 +288,19 @@ namespace ThMEPLighting.Garage.Service
             var pts = new List<Point3d>();
             pts.AddRange(firstPts.Cast<Point3d>().ToList());
             pts.AddRange(secondPts.Cast<Point3d>().ToList());
-            if(pts.Count==0)
+            if (pts.Count == 0)
             {
                 return extendLine;
             }
             var fitlerPts = FilterNotOnCurvePts(extendLine, pts);
-            if(fitlerPts.Count==0 /*|| firstPts.Count <= 1 || secondPts.Count <= 1*/)
+            if (fitlerPts.Count == 0 /*|| firstPts.Count <= 1 || secondPts.Count <= 1*/)
             {
                 return extendLine;
             }
-            bool extendStart = fitlerPts[0].DistanceTo(extendLine.StartPoint) 
+            bool extendStart = fitlerPts[0].DistanceTo(extendLine.StartPoint)
                 < fitlerPts[0].DistanceTo(extendLine.EndPoint) ? true : false;
             Point3d toPoint;
-            if(extendStart)
+            if (extendStart)
             {
                 toPoint = fitlerPts.OrderByDescending(o => o.DistanceTo(extendLine.StartPoint)).First();
             }
@@ -311,30 +310,17 @@ namespace ThMEPLighting.Garage.Service
             }
             return ExtendToPoint(extendLine, toPoint);
         }
-        private List<Point3d> FilterNotOnCurvePts(Curve curve ,List<Point3d> pts)
+        private List<Point3d> FilterNotOnCurvePts(Curve curve, List<Point3d> pts)
         {
-            var results = new List<Point3d>();
-            if (curve is Polyline polylne)
-            {
-                results = pts.Where(o => !o.IsPointOnPolyline(polylne)).ToList();
-            }
-            else if (curve is Line line)
-            {
-                results = pts.Where(o => !o.IsPointOnLine(line)).ToList();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
-            return results;
+            return pts.Where(o => !curve.IsPointOnCurve(o, PointOnCurveTolerance)).ToList();
         }
-        private Curve Extend(Curve curve,double tolerance=5.0)
+        private Curve Extend(Curve curve, double tolerance = 5.0)
         {
-            if(curve is Line line)
+            if (curve is Line line)
             {
                 return line.ExtendLine(tolerance);
             }
-            else if(curve is Polyline polyline)
+            else if (curve is Polyline polyline)
             {
                 return polyline.ExtendPolyline(tolerance);
             }
@@ -351,7 +337,7 @@ namespace ThMEPLighting.Garage.Service
             }
             else if (curve is Polyline polyline)
             {
-                return ExtendPolylineToPoint(polyline,pt);
+                return ExtendPolylineToPoint(polyline, pt);
             }
             else
             {

@@ -290,8 +290,6 @@ namespace ThMEPLighting.FEI.ThEmgPilotLamp
             
             Dictionary<Line, Vector3d> valuePairs = new Dictionary<Line, Vector3d>();
             var polyline = pline.DPSimplify(10);
-            if (!polyline.IsClosed())
-                return valuePairs;
             //要注意顺时针，逆时针问题,这个默认时顺时针
             var pNormal = polyline.Normal;
             var objs = new DBObjectCollection();

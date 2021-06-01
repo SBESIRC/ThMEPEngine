@@ -15,6 +15,7 @@ using EndCapStyle = NetTopologySuite.Operation.Buffer.EndCapStyle;
 using ThMEPEngineCore.LaneLine;
 using ThMEPLighting.Common;
 using NFox.Cad;
+using ThCADExtension;
 
 namespace ThMEPLighting.Garage.Engine
 {

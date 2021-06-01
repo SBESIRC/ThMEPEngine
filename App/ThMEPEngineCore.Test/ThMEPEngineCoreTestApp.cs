@@ -151,28 +151,6 @@ namespace ThMEPEngineCore.Test
             }
         }
 
-        [CommandMethod("TIANHUACAD", "TestFrame", CommandFlags.Modal)]
-        public void TestFrame()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("\n请选择框线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                var engine = ThBeamConnectRecogitionEngine.ExecuteRecognize(
-                    acadDatabase.Database, new Point3dCollection());
-                var frameService = new ThMEPFrameService(engine);
-                var frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                foreach (Entity item in frameService.RegionsFromFrame(frame))
-                {
-                    item.ColorIndex = 2;
-                    acadDatabase.ModelSpace.Add(item);
-                }
-            }
-        }
-
         [CommandMethod("TIANHUACAD", "THPOLYGONPARTITION", CommandFlags.Modal)]
         public void THPolygonPartition()
         {

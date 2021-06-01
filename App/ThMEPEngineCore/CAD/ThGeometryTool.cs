@@ -6,8 +6,6 @@ using Dreambuild.AutoCAD;
 using GeometryExtensions;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using NetTopologySuite.Geometries;
-using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.CAD
@@ -25,7 +23,7 @@ namespace ThMEPEngineCore.CAD
             double maxY = points.Max(x => x.Y);
             double minY = points.Min(x => x.Y);
 
-            return new List<Point3d>(){                
+            return new List<Point3d>(){
                 new Point3d(minX, minY, 0),
                 new Point3d(maxX, maxY, 0)
             };
@@ -58,10 +56,10 @@ namespace ThMEPEngineCore.CAD
         public static bool IsOverlapEx(Point3d firstSp, Point3d firstEp,
             Point3d secondSp, Point3d secondEp)
         {
-            if(IsCollinearEx(firstSp, firstEp, secondSp, secondEp))
+            if (IsCollinearEx(firstSp, firstEp, secondSp, secondEp))
             {
                 List<Point3d> pts = new List<Point3d> { firstSp, firstEp, secondSp, secondEp };
-                var maxPts= GetCollinearMaxPts(pts);
+                var maxPts = GetCollinearMaxPts(pts);
                 return (firstSp.DistanceTo(firstEp) + secondSp.DistanceTo(secondEp)) >
                     maxPts.Item1.DistanceTo(maxPts.Item2);
             }
@@ -71,7 +69,7 @@ namespace ThMEPEngineCore.CAD
         {
             return pt1 + pt1.GetVectorTo(pt2) * 0.5;
         }
-        public static Point3d GetProjectPtOnLine(this Point3d outerPt, Point3d startPt,Point3d endPt)
+        public static Point3d GetProjectPtOnLine(this Point3d outerPt, Point3d startPt, Point3d endPt)
         {
             Vector3d firstVec = startPt.GetVectorTo(endPt);
             Vector3d secondVec = startPt.GetVectorTo(outerPt);
@@ -80,7 +78,7 @@ namespace ThMEPEngineCore.CAD
             return startPt + firstVec.GetNormal().MultiplyBy(distance);
         }
         public static bool IsIntersects(this Entity firstEnt, Entity secondEnt)
-        {            
+        {
             return firstEnt.IntersectWithEx(secondEnt).Count > 0 ? true : false;
         }
         public static Point3dCollection IntersectWithEx(this Entity firstEntity, Entity secondEntity)
@@ -91,22 +89,22 @@ namespace ThMEPEngineCore.CAD
             plane.Dispose();
             return pts;
         }
-        public static bool IsPointOnLine(Point3d lineSp,Point3d lineEp,Point3d outerPt,double xyTolerance=0.0001,double zTolerance=0.001)
+        public static bool IsPointOnLine(Point3d lineSp, Point3d lineEp, Point3d outerPt, double xyTolerance = 0.0001, double zTolerance = 0.001)
         {
             Vector3d vec = lineSp.GetVectorTo(lineEp);
             Plane plane = new Plane(lineSp, vec);
             Matrix3d wcsToUcs = Matrix3d.WorldToPlane(plane);
-            Point3d newPt=outerPt.TransformBy(wcsToUcs);
-            if(Math.Abs(newPt.X)<= xyTolerance && Math.Abs(newPt.Y) <= xyTolerance)
+            Point3d newPt = outerPt.TransformBy(wcsToUcs);
+            if (Math.Abs(newPt.X) <= xyTolerance && Math.Abs(newPt.Y) <= xyTolerance)
             {
-                if(newPt.Z>= -zTolerance && newPt.Z <= (lineSp.DistanceTo(lineEp)+ zTolerance))
+                if (newPt.Z >= -zTolerance && newPt.Z <= (lineSp.DistanceTo(lineEp) + zTolerance))
                 {
                     return true;
                 }
             }
             return false;
         }
-        public static bool IsPointInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt,double tolerance=0.0)
+        public static bool IsPointInLine(Point3d lineSp, Point3d lineEp, Point3d outerPt, double tolerance = 0.0)
         {
             Vector3d vec = lineSp.GetVectorTo(lineEp).GetNormal();
             Point3d sp = lineSp + vec.MultiplyBy(tolerance);
@@ -147,7 +145,7 @@ namespace ThMEPEngineCore.CAD
             {
                 return polyline.Vertices();
             }
-            else if(entity is Line line)
+            else if (entity is Line line)
             {
                 pts.Add(line.StartPoint);
                 pts.Add(line.EndPoint);
@@ -156,7 +154,7 @@ namespace ThMEPEngineCore.CAD
             {
                 return arc.ToPolyline().Vertices();
             }
-            else if(entity is MPolygon mPolygon)
+            else if (entity is MPolygon mPolygon)
             {
                 pts = mPolygon.Vertices();
             }
@@ -165,20 +163,20 @@ namespace ThMEPEngineCore.CAD
                 throw new NotSupportedException();
             }
             return pts;
-        }        
-        public static bool IsPerpendicular(Vector3d firstVec,Vector3d secondVec,double tolerance=1.0)
+        }
+        public static bool IsPerpendicular(Vector3d firstVec, Vector3d secondVec, double tolerance = 1.0)
         {
             double rad = firstVec.GetAngleTo(secondVec);
             double ang = rad / Math.PI * 180.0;
-            return Math.Abs(ang-90.0)<= tolerance;
+            return Math.Abs(ang - 90.0) <= tolerance;
         }
-        public static double ProjectionDis(this Vector3d a,Vector3d b)
+        public static double ProjectionDis(this Vector3d a, Vector3d b)
         {
             double rad = a.GetAngleTo(b);
             return b.Length * Math.Cos(rad);
         }
         public static Point3dCollection IntersectPts(
-            Line first,Line second,Intersect intersectType,double distance=1.0)
+            Line first, Line second, Intersect intersectType, double distance = 1.0)
         {
             var pts = new Point3dCollection();
             var firstVec = first.StartPoint.GetVectorTo(first.EndPoint).GetNormal();
@@ -207,7 +205,7 @@ namespace ThMEPEngineCore.CAD
             });
             return GetCollinearMaxPts(pts);
         }
-        public static Tuple<Point3d,Point3d> GetCollinearMaxPts(this List<Point3d> pts)
+        public static Tuple<Point3d, Point3d> GetCollinearMaxPts(this List<Point3d> pts)
         {
             if (pts.Count == 0)
             {
@@ -235,8 +233,8 @@ namespace ThMEPEngineCore.CAD
                 return Tuple.Create(first, second);
             }
         }
-        public static bool IsOverlap(Point3d firstSp, Point3d firstEp, 
-            Point3d secondSp, Point3d secondEp,bool includedJoin=true)
+        public static bool IsOverlap(Point3d firstSp, Point3d firstEp,
+            Point3d secondSp, Point3d secondEp, bool includedJoin = true)
         {
             //第二根线在第一根线上的投影是否重叠
             Vector3d vec = firstSp.GetVectorTo(firstEp).GetNormal();
@@ -246,7 +244,7 @@ namespace ThMEPEngineCore.CAD
             Point3d newSecondEp = secondEp.TransformBy(wcsToUcs);
             double minZ = Math.Min(newSecondSp.Z, newSecondEp.Z);
             double maxZ = Math.Max(newSecondSp.Z, newSecondEp.Z);
-            if(includedJoin)
+            if (includedJoin)
             {
                 if (maxZ < 0)
                 {
@@ -270,54 +268,9 @@ namespace ThMEPEngineCore.CAD
             }
             return true;
         }
-        public static bool IsOverlap(this Line first ,Line second, bool includedJoin = true)
-        {
-            return IsOverlap(first.StartPoint, first.EndPoint, 
-                second.StartPoint, second.EndPoint, includedJoin);
-        }
-        public static bool IsPointOnPolyline(this Point3d pt,Polyline polyline,double tolerance=0.0001)
-        {
-            for(int i=0;i<polyline.NumberOfVertices;i++)
-            {
-               var segmentType = polyline.GetSegmentType(i);
-                if(segmentType==SegmentType.Line)
-                {
-                   var lineSegment = polyline.GetLineSegmentAt(i);
-                    if (IsPointOnLine(lineSegment.StartPoint, lineSegment.EndPoint, pt))
-                    {
-                        return true;
-                    }                    
-                }
-                else if(segmentType == SegmentType.Arc)
-                {
-                    var arcSegment = polyline.GetArcSegmentAt(i);
-                    Arc arc = new Arc(arcSegment.Center, arcSegment.Normal, 
-                        arcSegment.Radius, arcSegment.StartAngle, arcSegment.EndAngle);
-                    if (pt.IsPointOnArc(arc))
-                    {
-                        return true;
-                    }
-                }
-                else
-                {
-                    continue;
-                }
-            }
-            return false;
-        }
         public static bool IsPointOnLine(this Point3d pt, Line line, double tolerance = 0.0001)
         {
-            return IsPointOnLine(line.StartPoint, line.EndPoint, pt, tolerance);
-        }
-        public static bool IsPointOnArc(this Point3d pt, Arc arc, double tolerance = 0.0001)
-        {
-            if (Math.Abs(pt.DistanceTo(arc.Center) - arc.Radius) <= tolerance)
-            {
-                var vec = arc.Center.GetVectorTo(pt);
-                var ang = vec.GetAngleTo(Vector3d.XAxis, arc.Normal);
-                return ang >= arc.StartAngle && ang <= arc.EndAngle;
-            }
-            return false;
+            return pt.DistanceTo(line.GetClosestPointTo(pt, false)) <= tolerance;
         }
         /// <summary>
         /// 点在实体内部,不在边界
@@ -329,12 +282,11 @@ namespace ThMEPEngineCore.CAD
         {
             if (ent is Polyline polyline)
             {
-                return polyline.IsClosed() ? polyline.Contains(pt) : false;
+                return polyline.Contains(pt);
             }
             else if (ent is MPolygon mPolygon)
             {
-                var locator = new SimplePointInAreaLocator(mPolygon.ToNTSPolygon());
-                return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
+                return mPolygon.Contains(pt);
             }
             else if (ent is Circle circle)
             {
@@ -353,18 +305,18 @@ namespace ThMEPEngineCore.CAD
         /// <returns></returns>
         public static bool IsContains(this Entity A, Entity B)
         {
-            if(A is Polyline firstPoly)
+            if (A is Polyline firstPoly)
             {
                 return Contains(firstPoly, B);
             }
-            else if(A is MPolygon mPolygon)
+            else if (A is MPolygon mPolygon)
             {
                 return Contains(mPolygon, B);
             }
             else
             {
                 return false;
-            }          
+            }
         }
         /// <summary>
         /// A完全包含B（B没有任何一个点在A的边界上，都在A的里面）
@@ -395,13 +347,13 @@ namespace ThMEPEngineCore.CAD
                 return false;
             }
         }
-        private static bool Contains(Polyline firstPoly,Entity entity)
+        private static bool Contains(Polyline firstPoly, Entity entity)
         {
-            if(entity is Polyline secondPoly)
+            if (entity is Polyline secondPoly)
             {
                 return firstPoly.Contains(secondPoly);
             }
-            else if(entity is MPolygon mPolygon)
+            else if (entity is MPolygon mPolygon)
             {
                 return firstPoly.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
             }
@@ -426,10 +378,10 @@ namespace ThMEPEngineCore.CAD
             }
         }
 
-        public static double CalculatePublicSector(this Line first,Line second)
+        public static double CalculatePublicSector(this Line first, Line second)
         {
             //计算两条平行线公共部分
-            if(first.LineDirection().IsParallelToEx(second.LineDirection()))
+            if (first.LineDirection().IsParallelToEx(second.LineDirection()))
             {
                 var plane = new Plane(first.StartPoint, first.LineDirection());
                 var mt = Matrix3d.WorldToPlane(plane);
@@ -437,7 +389,7 @@ namespace ThMEPEngineCore.CAD
                 var pt2 = second.EndPoint.TransformBy(mt);
                 var secondMinZ = Math.Min(pt1.Z, pt2.Z);
                 var secondMaxZ = Math.Max(pt1.Z, pt2.Z);
-                if(secondMaxZ<=0 || secondMinZ>= first.Length)
+                if (secondMaxZ <= 0 || secondMinZ >= first.Length)
                 {
                     return 0.0;
                 }
@@ -449,7 +401,7 @@ namespace ThMEPEngineCore.CAD
             {
                 return 0.0;
             }
-        }         
+        }
         public static List<Point3d> GetPoints(this Line line)
         {
             var result = new List<Point3d>();
@@ -457,10 +409,10 @@ namespace ThMEPEngineCore.CAD
             result.Add(line.EndPoint);
             return result;
         }
-        public static List<Point3d> GetPoints(this Polyline polyline,double tesslateLength=5)
+        public static List<Point3d> GetPoints(this Polyline polyline, double tesslateLength = 5)
         {
             var result = new List<Point3d>();
-            polyline.ExplodeLines(tesslateLength).ForEach(o=>
+            polyline.ExplodeLines(tesslateLength).ForEach(o =>
             {
                 result.AddRange(GetPoints(o));
             });

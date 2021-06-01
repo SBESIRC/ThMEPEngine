@@ -4,6 +4,7 @@ using ThCADExtension;
 using Dreambuild.AutoCAD;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Algorithm.Locate;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
@@ -122,6 +123,12 @@ namespace ThCADCore.NTS
         public static AcPolygon Outline(this MPolygon mPolygon)
         {
             return mPolygon.ToNTSPolygon().ExteriorRing.ToDbPolyline();
+        }
+
+        public static bool Contains(this MPolygon polygon, Point3d pt)
+        {
+            var locator = new SimplePointInAreaLocator(polygon.ToNTSGeometry());
+            return locator.Locate(pt.ToNTSCoordinate()) == Location.Interior;
         }
     }
 }
