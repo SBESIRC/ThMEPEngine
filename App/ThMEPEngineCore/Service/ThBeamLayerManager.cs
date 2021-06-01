@@ -83,45 +83,23 @@ namespace ThMEPEngineCore.Service
                 return layers;
             }
         }
-        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
-        {
-            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
-        }
-        public static List<string> AnnotationLayers(Database database)
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-            {
-                var layers = new List<string>();
-                acadDatabase.Layers.Where(o =>
-                {
-                    if (o.Name.ToUpper().Contains("S_BEAM_TEXT"))
-                    {
-                        return true;
-                    }
-
-                    if (o.Name.ToUpper().Contains("S_BEAM_SECD_TEXT"))
-                    {
-                        return true;
-                    }
-
-                    if (o.Name.ToUpper().Contains("S_BEAM_XL_TEXT"))
-                    {
-                        return true;
-                    }
-
-                    if (o.Name.ToUpper().Contains("S_BEAM_WALL_TEXT"))
-                    {
-                        return true;
-                    }
-                    return false;
-                }).ForEachDbObject(o => layers.Add(o.Name));
-                return layers;
-            }
-        }
+        /// <summary>
+        /// 获取DB3图纸中梁标注图层
+        /// </summary>
+        /// <param name="database"></param>
+        /// <returns></returns>
         public static List<string> AnnotationXrefLayers(Database database)
         {
-            List<string> layerSuffix = new List<string> { "S_BEAM_TEXT_HORZ", "S_BEAM_TEXT_VERT", "S_BEAM_WALL_TEXT",
-                "S_BEAM_SECD_TEXT_HORZ", "S_BEAM_SECD_TEXT_VERT"," S_BEAM_XL_TEXT_HORZ","S_BEAM_XL_TEXT_VERT"};
+            List<string> layerSuffix = new List<string> { 
+                "S_BEAM_TEXT_HORZ", 
+                "S_BEAM_TEXT_VERT",
+                "S_BEAM_TEXT_SIZE",
+                "S_BEAM_WALL_TEXT",
+                "S_BEAM_XL_TEXT_HORZ",
+                "S_BEAM_XL_TEXT_VERT",
+                "S_BEAM_SECD_TEXT_HORZ", 
+                "S_BEAM_SECD_TEXT_VERT"
+            };
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 var layers = new List<string>();
@@ -143,6 +121,10 @@ namespace ThMEPEngineCore.Service
                 }).ForEachDbObject(o => layers.Add(o.Name));
                 return layers;
             }
+        }
+        private static bool IsVisibleLayer(LayerTableRecord layerTableRecord)
+        {
+            return !(layerTableRecord.IsOff || layerTableRecord.IsFrozen);
         }
     }
 }
