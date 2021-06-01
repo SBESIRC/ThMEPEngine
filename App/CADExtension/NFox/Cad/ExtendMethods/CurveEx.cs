@@ -13,17 +13,6 @@ namespace NFox.Cad
     public static class CurveEx
     {
         /// <summary>
-        /// 曲线长度
-        /// </summary>
-        /// <param name="curve">曲线</param>
-        /// <returns>长度</returns>
-        public static double GetLength(this Curve curve)
-        {
-            return
-                curve.GetDistanceAtParameter(curve.EndParam);
-        }
-
-        /// <summary>
         /// 获取分割曲线集合
         /// </summary>
         /// <param name="curve">曲线</param>

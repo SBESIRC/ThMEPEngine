@@ -29,13 +29,6 @@ namespace ThCADExtension
             return Math.Abs(dist1 - dist2);
         }
 
-        // How to calculate the length of an entity in ObjectArx/.NET
-        //  https://adndevblog.typepad.com/autocad/2012/05/how-to-calculate-the-length-of-an-entity-in-objectarxnet.html
-        public static double GetLength(this Curve curve)
-        {
-            return Math.Abs(curve.GetDistanceAtParameter(curve.EndParam) - curve.GetDistanceAtParameter(curve.StartParam));
-        }
-
         //  http://otb.manusoft.com/2013/01/quirkypolyline-exposing-foolish-programmers.htm
         public static void Extend(this Curve curve, bool extendStart, double length)
         {
