@@ -31,12 +31,12 @@ namespace ThMEPWSS.Command
 #if ACAD2016
             using (var acadDb = AcadDatabase.Active())
             {
-                var result = Active.Editor.GetEntity("\n选择一个范围框");
-                if (result.Status != PromptStatus.OK)
+                var per = Active.Editor.GetEntity("\n选择一个范围框");
+                if (per.Status != PromptStatus.OK)
                 {
                     return;
                 }
-                var entity = acadDb.Element<Entity>(result.ObjectId);
+                var entity = acadDb.Element<Entity>(per.ObjectId);
                 if (!(entity is Polyline))
                 {
                     return;
@@ -70,9 +70,25 @@ namespace ThMEPWSS.Command
                 var washData = new ThWashGeoData();
                 washData.ReadFromContent(geoContent);
 
-                var washPoint = new ThWashPointLayoutEngine();
-                double[] points = washPoint.Layout(washData, washPara);
+                var washPointEngint = new ThWashPointLayoutEngine();
+                double[] points = washPointEngint.Layout(washData, washPara);
                 var washPoints = ThFlushPointUtils.GetPoints(points);
+
+                // 过滤哪些点位靠近排水设施，哪些远离排水设施
+                var filterService = new ThFilterWashPointsService()
+                {
+                    DrainFacilityExtractor = extractors[4] as ThDrainFacilityExtractor,
+                };
+                filterService.Filter(washPoints);
+
+                var layoutInfo = filterService.LayoutInfo; //用于保存插入块的结果、靠近/远离排水设施的点 
+
+                var layOutPts = washPoints; //区域满布
+                if (ThFlushPointParameterService.Instance.FlushPointParameter.
+                        OnlyDrainageFaclityNearbyOfArrangePosition)
+                {
+                    layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
+                }                
 
                 // 打印块
                 var columns = (extractors[0] as ThColumnExtractor).Columns;
@@ -85,12 +101,15 @@ namespace ThMEPWSS.Command
                     Walls = walls,
                     WashPointBlkName = "给水角阀平面",
                     WashPointLayerName= "W-WSUP-EQPM",
-                    WashPoints= washPoints,
+                    WashPoints= layOutPts,
                     Db= acadDb.Database,
-                    PtRange=5.0,
+                    PtRange=10.0,
                 };
                 var layoutService = new ThLayoutWashPointBlockService(layoutData);
-                layoutService.Layout();
+                layoutInfo.LayoutBlock = layoutService.Layout();
+
+                //点位标识的操作通过以下保存的结果与UI交互操作
+                ThPointIdentificationService.LayoutInfo = layoutInfo;
             }
 #endif
         }
@@ -99,15 +118,21 @@ namespace ThMEPWSS.Command
         private ThWashParam BuildWashParam()
         {
             var washPara = new ThWashParam();
+            // 保护半径
             washPara.R = (int)ThFlushPointParameterService.Instance.FlushPointParameter.ProtectRadius;
+            // 建筑空间（隔油池、水泵房、垃圾房等）
             washPara.protect_arch = ThFlushPointParameterService.Instance.
                 FlushPointParameter.NecessaryArrangeSpaceOfProtectTarget;
+            // 停车区域
             washPara.protect_park = ThFlushPointParameterService.Instance.
                 FlushPointParameter.ParkingAreaOfProtectTarget;
+            // 其它空间
             washPara.protect_other = ThFlushPointParameterService.Instance.
                 FlushPointParameter.OtherSpaceOfProtectTarget;
+            // 必布空间的点位可以保护停车区域和其他空间
             washPara.extend_arch = ThFlushPointParameterService.Instance.
                 FlushPointParameter.NecesaryArrangeSpacePointsOfArrangeStrategy;
+            // 停车区域的点位可以保护其他空间
             washPara.extend_park = ThFlushPointParameterService.Instance.
                 FlushPointParameter.ParkingAreaPointsOfArrangeStrategy;
             return washPara;

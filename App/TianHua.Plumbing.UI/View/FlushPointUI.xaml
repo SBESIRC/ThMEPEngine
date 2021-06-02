@@ -199,7 +199,8 @@
                 <RadioButton Grid.Row="2" Name="rbNearbyDrainageFacility" Content="仅排水设施附近" GroupName="Layout Position"
                          IsChecked="{Binding Parameter.OnlyDrainageFaclityNearbyOfArrangePosition,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" Margin="0,3"></RadioButton>
                 <Button Grid.Row="4" Grid.Column="0" Name="btnLayoutFlushPoint" Content="布置冲洗点位" 
-                        Width="100" Height="20" HorizontalAlignment="Left" Margin="5,5" Command="{Binding LayOutFlushPointCmd}"
+                        Width="100" Height="20" HorizontalAlignment="Left" Margin="5,5"
+                        Command="{Binding LayOutFlushPointCmd}"
                         Style="{StaticResource ButtonTextStyle}"></Button>
             </Grid>
         </StackPanel>
@@ -218,11 +219,15 @@
                 <TextBlock Grid.Row="0" Text="点位标识：" 
                            Style="{StaticResource TextStyl2}" HorizontalAlignment="Left"></TextBlock>
                 <CheckBox Grid.Row="1" Name="chkCloseDrainageFacilty" Style="{StaticResource CheckBoxTextStyle}" IsThreeState="False"
-                         IsChecked="{Binding Parameter.CloseDrainageFacility, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
-                    <TextBlock Text="靠近排水设施" Style="{StaticResource TextStyl1}"></TextBlock>
+                         IsChecked="{Binding Parameter.CloseDrainageFacility, Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"  
+                          Command="{Binding NearbyDrainageFacilityCheckBoxChecked}"
+                          CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}">
+                    <TextBlock Text="靠近排水设施" Style="{StaticResource TextStyl1}"></TextBlock>                    
                 </CheckBox>
                 <CheckBox Grid.Row="2" Name="chkFarwayDrainageFacilty" Style="{StaticResource CheckBoxTextStyle}" IsThreeState="False"
-                          IsChecked="{Binding Parameter.FarwayDrainageFacility,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}">
+                          IsChecked="{Binding Parameter.FarwayDrainageFacility,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"
+                          Command="{Binding FarawayDrainageFacilityCheckBoxChecked}"
+                          CommandParameter="{Binding IsChecked,RelativeSource={RelativeSource Self}}">
                     <TextBlock Text="远离排水设施" Style="{StaticResource TextStyl1}"></TextBlock>
                 </CheckBox>
             </Grid>

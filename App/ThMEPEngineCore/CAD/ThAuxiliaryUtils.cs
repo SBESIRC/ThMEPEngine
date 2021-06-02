@@ -9,6 +9,8 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
+using Autodesk.AutoCAD.ApplicationServices;
+using AcHelper;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -165,6 +167,24 @@ namespace ThMEPEngineCore.CAD
         public static double AngToRad(this double ang)
         {
             return ang / 180.0 * Math.PI;
+        }
+        public static Extents2d GetCurrentViewBound(double shrinkScale = 1.0)
+        {
+            Point2d vSize = GetCurrentViewSize();
+            Point3d center = ((Point3d)Application.GetSystemVariable("VIEWCTR")).
+                    TransformBy(Active.Editor.CurrentUserCoordinateSystem);
+            double w = vSize.X * shrinkScale;
+            double h = vSize.Y * shrinkScale;
+            Point2d minPoint = new Point2d(center.X - w / 2.0, center.Y - h / 2.0);
+            Point2d maxPoint = new Point2d(center.X + w / 2.0, center.Y + h / 2.0);
+            return new Extents2d(minPoint, maxPoint);
+        }
+        public static Point2d GetCurrentViewSize()
+        {
+            double h = (double)Application.GetSystemVariable("VIEWSIZE");
+            Point2d screen = (Point2d)Application.GetSystemVariable("SCREENSIZE");
+            double w = h * (screen.X / screen.Y);
+            return new Point2d(w, h);
         }
     }
 }

@@ -28,6 +28,53 @@ namespace TianHua.Plumbing.UI.ViewModel
                 return new RelayCommand(LayOutFlushPoint, CanExecute);
             }
         }
+
+        public ICommand FarawayDrainageFacilityCheckBoxChecked
+        {
+            get
+            {
+                return new RelayCommand(FarawayDrainageFacilityClicked, CanExecute);
+            }
+        }
+
+        public ICommand NearbyDrainageFacilityCheckBoxChecked
+        {
+            get
+            {
+                return new RelayCommand(NearbyDrainageFacilityClicked, CanExecute);
+            }
+        }
+
+        private void FarawayDrainageFacilityClicked(Object parameter)
+        {
+            if (parameter is bool isChecked)
+            {
+                if(isChecked)
+                {
+                    ThPointIdentificationService.HighLightFarawayWashPoints();
+                }
+                else
+                {
+                    ThPointIdentificationService.UnHighLightFarawayWashPoints();
+                }
+            }
+        }
+
+        private void NearbyDrainageFacilityClicked(Object parameter)
+        {
+            if (parameter is bool isChecked)
+            {
+                if (isChecked)
+                {
+                    ThPointIdentificationService.HighLightNearbyWashPoints();
+                }
+                else
+                {
+                    ThPointIdentificationService.UnHighLightNearbyWashPoints();
+                }
+            }
+        }
+
         private void LayOutFlushPoint(Object parameter)
         {
             if(CheckParameter())
@@ -37,6 +84,7 @@ namespace TianHua.Plumbing.UI.ViewModel
                 CommandHandlerBase.ExecuteFromCommandLine(false, "ThLayoutFlushPoint");
             }            
         }
+
         private bool CheckParameter()
         {
             if(Parameter.OtherSpaceOfProtectTarget)

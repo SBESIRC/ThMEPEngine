@@ -82,10 +82,14 @@
     <Compile Include="FlushPoint\Data\ThRoomExtractor.cs" />
     <Compile Include="FlushPoint\Data\ThShearwallExtractor.cs" />
     <Compile Include="FlushPoint\Model\ThFlushPointParameter.cs" />
+    <Compile Include="FlushPoint\Service\ThCollectingWellNearbyService.cs" />
+    <Compile Include="FlushPoint\Service\ThDrainageDitchNearbyService.cs" />
     <Compile Include="FlushPoint\Service\ThElementIsolateFilterService.cs" />
+    <Compile Include="FlushPoint\Service\ThFilterWashPointsService.cs" />
     <Compile Include="FlushPoint\Service\ThFlushPointParameterService.cs" />
     <Compile Include="FlushPoint\Service\ThLayoutWashPointBlockService.cs" />
     <Compile Include="FlushPoint\Service\ThObstacleExtractService.cs" />
+    <Compile Include="FlushPoint\Service\ThPointIdentificationService.cs" />
     <Compile Include="FlushPoint\ThExtractorPropertyNameManager.cs" />
     <Compile Include="FlushPoint\ThFlushPointUtils.cs" />
     <Compile Include="Pipe\Engine\ThApplyPipesEngine.cs" />

@@ -10,6 +10,7 @@ namespace TianHua.Plumbing.UI.Model
             parkingAreaOfPT = true;
             necessaryArrangeSpaceOfPT = true;
             protectRadius = 30.0;
+            plotScale = "1:1";
         }
         public event PropertyChangedEventHandler PropertyChanged;
 

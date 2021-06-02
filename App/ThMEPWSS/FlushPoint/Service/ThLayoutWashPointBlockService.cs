@@ -3,13 +3,13 @@ using DotNetARX;
 using System.Linq;
 using ThCADCore.NTS;
 using ThCADExtension;
+using ThMEPEngineCore;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore;
-using System.IO;
+
 
 namespace ThMEPWSS.FlushPoint.Service
 {
@@ -21,11 +21,11 @@ namespace ThMEPWSS.FlushPoint.Service
         {
             LayoutData = layOutData;        
         }
-        public void Layout()
+        public Dictionary<Point3d, BlockReference> Layout()
         {
             if(LayoutData==null || !LayoutData.IsValid)
             {
-                return;
+                return new Dictionary<Point3d, BlockReference>();
             }
             BuildSpatialIndex();
             var ptDic = new Dictionary<Point3d, Vector3d>();
@@ -34,13 +34,13 @@ namespace ThMEPWSS.FlushPoint.Service
                 var vec = CalculateDirection(o);
                 ptDic.Add(o, vec);
             });
-            Print(ptDic);
+            return Print(ptDic);
         }
-        private void Print(Dictionary<Point3d, Vector3d> ptDic)
+        private Dictionary<Point3d, BlockReference> Print(Dictionary<Point3d, Vector3d> ptDic)
         {
             ImportBlock(); //导入块
             CreateLayer();
-            InsertBlock(ptDic); //根据点位，插块
+            return InsertBlock(ptDic); //根据点位，插块
         }
         private void ImportBlock()
         {
@@ -175,17 +175,20 @@ namespace ThMEPWSS.FlushPoint.Service
                 return false;
             }
         }
-        private void InsertBlock(Dictionary<Point3d,Vector3d> ptDic)
+        private Dictionary<Point3d,BlockReference> InsertBlock(Dictionary<Point3d,Vector3d> ptDic)
         {
             using (var acadDb = AcadDatabase.Active())
             {
+                var results = new Dictionary<Point3d, BlockReference>();
                 ptDic.ForEach(o =>
                 {
                     var rad = Vector3d.XAxis.GetAngleTo(o.Value, Vector3d.ZAxis);
-                    acadDb.ModelSpace.ObjectId.InsertBlockReference(
+                    var objId = acadDb.ModelSpace.ObjectId.InsertBlockReference(
                         LayoutData.WashPointLayerName, LayoutData.WashPointBlkName,
                         o.Key, new Scale3d(1.0, 1.0, 1.0), rad);
+                    results.Add(o.Key, acadDb.Element<BlockReference>(objId));
                 });
+                return results;
             }
         }
     }
