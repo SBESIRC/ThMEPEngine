@@ -36,6 +36,19 @@ namespace ThCADCore.NTS
             }
         }
 
+        public static Point3d Intersection(this Line line, Line other)
+        {
+            var geometry = line.ToNTSLineString().Intersection(other.ToNTSLineString());
+            if (geometry is Point point)
+            {
+                return point.ToAcGePoint3d();
+            }
+            else
+            {
+                throw new NotSupportedException();
+            }
+        }
+
         public static bool IsOnLine(this Line line, Point3d pt)
         {
             return PointLocation.IsOnLine(pt.ToNTSCoordinate(), line.ToNTSGeometry().Coordinates);
@@ -52,7 +65,8 @@ namespace ThCADCore.NTS
         {
             if(line1.IsCollinear(line2))
             {
-                throw new NotSupportedException();
+                return null;
+                //throw new NotSupportedException();
             }
             var linesegment1 = new LineSegment(line1.StartPoint.ToNTSCoordinate(), line1.EndPoint.ToNTSCoordinate());
             var linesegment2 = new LineSegment(line2.StartPoint.ToNTSCoordinate(), line2.EndPoint.ToNTSCoordinate());

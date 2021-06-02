@@ -18,6 +18,7 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.LaneLine;
 using System.Text.RegularExpressions;
+using System.Linq;
 
 namespace ThMEPEngineCore.Test
 {
@@ -319,6 +320,89 @@ namespace ThMEPEngineCore.Test
                     oHatch.Associative = true;
                     oHatch.AppendLoop((int)HatchLoopTypes.Default, ObjIds);
                     oHatch.EvaluateHatch(true);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THTESTMIR", CommandFlags.Modal)]
+        public void THTestMaximumRactangle()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                //获取外包框
+                List<Polyline> frameLst = new List<Polyline>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame.Clone() as Polyline);
+                }
+
+                foreach (var pline in frameLst)
+                {
+                    ThMaximumInscribedRectangle thMaximumInscribedRectangle = new ThMaximumInscribedRectangle();
+                    var rectangle = thMaximumInscribedRectangle.GetRectangle(pline);
+                    acdb.ModelSpace.Add(rectangle);
+                }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THRegionDivision", CommandFlags.Modal)]
+        public void THRegionDivision()
+        {
+            using (AcadDatabase acdb = AcadDatabase.Active())
+            {
+                // 获取框线
+                PromptSelectionOptions options = new PromptSelectionOptions()
+                {
+                    AllowDuplicates = false,
+                    MessageForAdding = "选择区域",
+                    RejectObjectsOnLockedLayers = true,
+                };
+                var dxfNames = new string[]
+                {
+                    RXClass.GetClass(typeof(Polyline)).DxfName,
+                };
+                var filter = ThSelectionFilterTool.Build(dxfNames);
+                var result = Active.Editor.GetSelection(options, filter);
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                //获取外包框
+                List<Polyline> frameLst = new List<Polyline>();
+                foreach (ObjectId obj in result.Value.GetObjectIds())
+                {
+                    var frame = acdb.Element<Polyline>(obj);
+                    frameLst.Add(frame.Clone() as Polyline);
+                }
+
+                foreach (var pline in frameLst)
+                {
+                    ThRegionDivisionService thRegionDivision = new ThRegionDivisionService();
+                    var rectangle = thRegionDivision.DivisionRegion(pline);
+                    foreach (var item in rectangle)
+                    {
+                        acdb.ModelSpace.Add(item);
+                    }
                 }
             }
         }

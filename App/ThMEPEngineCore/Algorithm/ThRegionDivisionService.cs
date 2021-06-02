@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThCADCore.NTS;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPEngineCore.Algorithm
 {
@@ -38,25 +39,9 @@ namespace ThMEPEngineCore.Algorithm
                 }
             }
             
-            var bLines = GetDivisionines(pLines, points);
+            var bLines = GetDivisionLines(pLines, points);
             var diviPoly = GetMinPolygon(bLines).Where(x => x.Area > 0).ToList();
-            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            //{
-            //    foreach (var item in diviPoly)
-            //    {
-            //        var s = item.CalObb();
-            //        db.ModelSpace.Add(s);
-            //    }
-            //}
-            //diviPoly = MergePolygon(diviPoly);
-            //using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
-            //{
-            //    foreach (var item in diviPoly)
-            //    {
-            //        var s = item.CalObb();
-            //        db.ModelSpace.Add(s);
-            //    }
-            //}
+            
             return diviPoly;
         }
 
@@ -169,8 +154,9 @@ namespace ThMEPEngineCore.Algorithm
         /// <param name="allLines"></param>
         /// <param name="allPoints"></param>
         /// <returns></returns>
-        private List<Line> GetDivisionines(List<Line> allLines, List<Point3d> allPoints)
+        private List<Line> GetDivisionLines(List<Line> allLines, List<Point3d> allPoints)
         {
+            List<Line> divLines = new List<Line>();
             foreach (var pt in allPoints)
             {
                 var tempLines = allLines.Where(x => x.StartPoint.IsEqualTo(pt, Tolerance.Global) || x.EndPoint.IsEqualTo(pt, Tolerance.Global)).ToList();
@@ -192,9 +178,8 @@ namespace ThMEPEngineCore.Algorithm
                         ray.UnitDir = dir;
                         Point3dCollection points = new Point3dCollection();
                         oLine.IntersectWith(ray, Intersect.OnBothOperands, points, IntPtr.Zero, IntPtr.Zero);
-                        if (points.Count > 0)
+                        foreach (Point3d tempP in points)
                         {
-                            var tempP = points[0];
                             if (bPoint == pt)
                             {
                                 bPoint = tempP;
@@ -212,11 +197,18 @@ namespace ThMEPEngineCore.Algorithm
                 }
                 if (bPoint != pt)
                 {
-                    allLines.Add(new Line(bPoint, pt));
-                    allLines.Add(new Line(bLine.StartPoint, bPoint));
-                    allLines.Add(new Line(bPoint, bLine.EndPoint));
-                    allLines.Remove(bLine);
+                    divLines.Add(new Line(bPoint, pt));
                 }
+            }
+
+            while (divLines.Count > 0)
+            {
+                var firLine = divLines[0];
+                var interLines = divLines.Where(x => x.IsIntersects(firLine)).ToList();
+                interLines.Add(firLine);
+                interLines = interLines.OrderBy(x => x.Length).ToList();
+                allLines.Add(interLines[0]);
+                divLines = divLines.Except(interLines).ToList();
             }
 
             return allLines;

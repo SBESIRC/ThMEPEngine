@@ -180,68 +180,6 @@ namespace ThMEPLighting
             lampLight.Execute();
         }
 
-        [CommandMethod("TIANHUACAD", "THTest", CommandFlags.Modal)]
-        public void ThTest()
-        {
-            using (AcadDatabase acdb = AcadDatabase.Active())
-            {
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(Polyline)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                //获取外包框
-                List<Curve> frameLst = new List<Curve>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    var frame = acdb.Element<Polyline>(obj);
-                    frameLst.Add(frame.Clone() as Polyline);
-                }
-                var plines = HandleFrame(frameLst);
-                var holeInfo = CalHoles(plines);
-
-                PromptSelectionOptions sOptions = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var sResult = Active.Editor.GetSelection(sOptions);
-                if (sResult.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                Point3d sPt = acdb.Element<Circle>(sResult.Value.GetObjectIds().First()).Center;
-                var eResult = Active.Editor.GetSelection(sOptions);
-                if (eResult.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-                Point3d ePt = acdb.Element<Circle>(eResult.Value.GetObjectIds().First()).Center;
-
-                foreach (var frame in holeInfo)
-                {
-                    RoutePlanner routePlanner = new RoutePlanner(frame.Key, ePt);
-                    routePlanner.SetObstacle(frame.Value);
-                    Polyline resPoly = routePlanner.Plan(sPt);
-                    acdb.ModelSpace.Add(resPoly);
-                }
-            }
-        }
-
         /// <summary>
         /// 计算外包框和其中的洞
         /// </summary>

@@ -58,6 +58,7 @@
     <Compile Include="Algorithm\AStarAlgorithm\Point_PathFinding\RoutePlanner.cs" />
     <Compile Include="Algorithm\DijkstraAlgorithm\DijkstraAlgorithm.cs" />
     <Compile Include="Algorithm\ThFindingPathByRegion.cs" />
+    <Compile Include="Algorithm\ThMaximumInscribedRectangle.cs" />
     <Compile Include="Algorithm\ThMEPPolygonRepairService.cs" />
     <Compile Include="Algorithm\ThMEPXRefService.cs" />
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
