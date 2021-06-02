@@ -11,7 +11,7 @@ using ThCADCore.NTS;
 using ThMEPEngineCore.CAD;
 using ThMEPLighting.EmgLight.Assistant;
 using ThMEPLighting.EmgLightConnect.Model;
-
+using ThMEPEngineCore.Algorithm.AStarAlgorithm;
 
 namespace ThMEPLighting.EmgLightConnect.Service
 {
@@ -373,6 +373,37 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var rotationangle = Vector3d.XAxis.GetAngleTo(dir, Vector3d.ZAxis);
             var matrix = Matrix3d.Displacement(lineList.First().StartPoint.GetAsVector()) * Matrix3d.Rotation(rotationangle, Vector3d.ZAxis, new Point3d(0, 0, 0));
             return matrix;
+        }
+
+        public static Polyline CorrectConflictFrame(Polyline frame, Polyline linkTemp, ThBlock blkS, ThBlock blkE, List<Polyline> holes)
+        {
+            Polyline link = linkTemp;
+            //var holes = new List<Polyline>();
+            var sDir = new Vector3d(1, 0, 0);
+            sDir = sDir.TransformBy(blkS.blk.BlockTransform).GetNormal();
+            //blkS.connInfo[linkTemp.StartPoint].Remove(linkTemp);
+            //blkE.connInfo[linkTemp.EndPoint].Remove(linkTemp);
+
+            var pts = linkTemp.Intersect(frame, Intersect.OnBothOperands);
+            holes.ForEach(x => pts.AddRange(linkTemp.Intersect(x, Intersect.OnBothOperands)));
+
+            if (pts.Count > 0)
+            {
+                var sPt = blkS.blkCenPt;
+                var ePt = blkE.blkCenPt;
+
+                AStarRoutePlanner<Point3d> aStarRoute = new AStarRoutePlanner<Point3d>(frame, sDir, ePt, 400, 0, 0);
+                aStarRoute.SetObstacle(holes);
+                var res = aStarRoute.Plan(sPt);
+
+                var resCut = drawEmgPipeService.cutLane(sPt, ePt, blkS, blkE, res);
+
+                if (resCut != null)
+                {
+                    link = resCut;
+                }
+            }
+            return link;
         }
 
     }

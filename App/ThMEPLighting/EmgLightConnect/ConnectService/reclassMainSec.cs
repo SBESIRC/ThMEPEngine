@@ -23,7 +23,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var side = singleSideBlocks[i];
                 if (side.Count > 0)
                 {
-                    regroupMainSec(side, out var allBlkDict);
+                    regroupMainSec(side);
                     side.orderReMainBlk();
 
                     breakMainGroup(side, frame, holes);
@@ -33,14 +33,14 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
         }
 
-        private static void regroupMainSec(ThSingleSideBlocks side, out List<KeyValuePair<Point3d, Point3d>> allBlkDict)
+        private static void regroupMainSec(ThSingleSideBlocks side)
         {
             int TolCloseDist = 100;
             List<Point3d> regroupMain = new List<Point3d>();
             List<double> yTransValue = new List<double>();
             var allBlk = side.getTotalBlock();
 
-            allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
+            var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
             var laneEndPt = side.laneSide.Last().Item1.EndPoint.TransformBy(side.Matrix.Inverse());
 
             if (side.mainBlk.Count > 0)
@@ -381,105 +381,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return distance;
         }
 
-        /// <summary>
-        ///
-        /// </summary>
-        /// <param name="side"></param>
-        /// <param name="offsetList"></param>
-        /// <param name="lanePoly"></param>
-        /// <param name="dir"></param>
-        /// <returns></returns>
-        private static (Polyline, List<Point3d>) getMoveLaneList(ThSingleSideBlocks side, (double, List<Line>) offsetList, Polyline lanePoly, int dir)
-        {
-            int TolDistDalta = 1500;
-            int TolCloseDist = 250;
-
-            var offsetMax = offsetList.Item1 + 10;
-
-            var distanceList = new List<double>();
-            double distance = -1;
-
-            var allBlk = side.getTotalBlock();
-            var allBlkDict = allBlk.ToDictionary(x => x, x => x.TransformBy(side.Matrix.Inverse())).OrderBy(item => item.Value.X).ToList();
-
-            var laneDict = new Dictionary<Point3d, Point3d>();
-
-            foreach (var l in offsetList.Item2)
-            {
-                if (laneDict.ContainsKey(l.StartPoint) == false)
-                {
-                    var pt = l.StartPoint.TransformBy(side.Matrix.Inverse());
-                    laneDict.Add(l.StartPoint, pt);
-                }
-                if (laneDict.ContainsKey(l.EndPoint) == false)
-                {
-                    var pt = l.EndPoint.TransformBy(side.Matrix.Inverse());
-                    laneDict.Add(l.EndPoint, pt);
-                }
-            }
-
-            laneDict = laneDict.OrderBy(x => x.Value.X).ToDictionary(x => x.Key, x => x.Value);
-
-            var lanePartS = laneDict.First();
-            var lanePartE = laneDict.Last();
-
-            var newPointDistList = new List<Point3d>();
-            var newReMainPointList = new List<Point3d>();
-
-            Polyline moveLine = new Polyline();
-
-            foreach (var blk in allBlkDict)
-            {
-                //y比maxoffset小且移动不大的，在线段内的点都算 为了计算真实的offset
-                if (Math.Abs(blk.Value.Y) <= offsetMax
-                    && Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= TolDistDalta
-                    && ptInSeg(blk.Value, lanePartS.Value, lanePartE.Value))
-                {
-                    distanceList.Add((Math.Abs(blk.Value.Y)));
-                    newPointDistList.Add(blk.Key);
-                }
-
-                //比maxoffset大且在线段内且为主块的
-                if (side.reMainBlk.Contains(blk.Key) == true
-                    && ptInSeg(blk.Value, lanePartS.Value, lanePartE.Value))
-                {
-
-                    newReMainPointList.Add(blk.Key);
-                }
-
-                if (Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= TolDistDalta
-                   && ptInSeg(blk.Value, lanePartS.Value, lanePartE.Value))
-                {
-                    newReMainPointList.Add(blk.Key);
-                }
-            }
-
-            newReMainPointList.AddRange(newPointDistList);
-            newReMainPointList = newReMainPointList.Distinct().ToList();
-
-            if (distanceList.Count() > 0)
-            {
-                distance = distanceList
-                               .OrderBy(x => x)
-                               .GroupBy(x => Math.Floor(x / 10))
-                               .OrderByDescending(x => x.Count())
-                               .First()
-                               .ToList()
-                               .First();
-            }
-
-            if (distance <= 0)
-            {
-                distance = offsetMax;
-            }
-
-            var moveLineTemp = lanePoly.GetOffsetCurves(distance * dir)[0] as Polyline;
-
-            moveLine = drawEmgPipeService.cutPolyline(lanePartS.Key, lanePartE.Key, moveLineTemp);
-
-            return (moveLine, newReMainPointList);
-        }
-
         private static Dictionary<int, List<KeyValuePair<Point3d, Point3d>>> classifyBlkToLaneSeg(ThSingleSideBlocks side, List<(int, KeyValuePair<Point3d, Point3d>, KeyValuePair<Point3d, Point3d>)> offsetOrderList)
         {
             Dictionary<int, List<KeyValuePair<Point3d, Point3d>>> offsetBlk = new Dictionary<int, List<KeyValuePair<Point3d, Point3d>>>();
@@ -543,78 +444,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
 
             return offsetKey;
-        }
-
-        private static (Polyline, List<Point3d>) getMoveLaneListAllOri(ThSingleSideBlocks side, (double, List<Line>) offset, List<KeyValuePair<Point3d, Point3d>> offsetListBlk, Polyline lanePoly, int dir)
-        {
-
-            var distanceList = new List<double>();
-            double distance = -1;
-            Polyline moveLine = new Polyline();
-
-            var newPointDistList = new List<Point3d>();
-            var newReMainPointList = new List<Point3d>();
-
-            int TolDistDalta = 1500;
-            var offsetMax = offset.Item1 + 10;
-
-            double sideY = side.reMainBlk[0].TransformBy(side.Matrix.Inverse()).Y;
-
-            foreach (var blk in offsetListBlk)
-            {
-                //y比maxoffset小且移动不大的，在线段内的点都算 为了计算真实的offset
-                if (blk.Value.Y * sideY > 0 &&
-                    Math.Abs(blk.Value.Y) <= offsetMax
-                    && Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= TolDistDalta)
-                {
-                    distanceList.Add((Math.Abs(blk.Value.Y)));
-                    newPointDistList.Add(blk.Key);
-                }
-
-                //比maxoffset大且在线段内且为主块的
-                if (side.reMainBlk.Contains(blk.Key) == true)
-                {
-
-                    newReMainPointList.Add(blk.Key);
-                }
-
-                if (blk.Value.Y * sideY > 0 && Math.Abs(Math.Abs(blk.Value.Y) - offsetMax) <= TolDistDalta)
-                {
-                    newReMainPointList.Add(blk.Key);
-                }
-            }
-
-            newReMainPointList = newReMainPointList.Distinct().ToList();
-            newReMainPointList = newReMainPointList.OrderBy(x => x.TransformBy(side.Matrix.Inverse()).X).ToList();
-
-            if (distanceList.Count() > 0)
-            {
-                distance = distanceList
-                               .OrderBy(x => x)
-                               .GroupBy(x => Math.Floor(x / 10))
-                               .OrderByDescending(x => x.Count())
-                               .First()
-                               .ToList()
-                               .First();
-            }
-
-            if (distance <= 0)
-            {
-                distance = offsetMax;
-            }
-
-            var moveLineTemp = lanePoly.GetOffsetCurves(distance * dir)[0] as Polyline;
-
-            if (newReMainPointList.Count > 1)
-            {
-                moveLine = drawEmgPipeService.cutPolyline(newReMainPointList.First(), newReMainPointList.Last(), moveLineTemp);
-            }
-            else
-            {
-                moveLine = moveLineTemp;
-            }
-
-            return (moveLine, newReMainPointList);
         }
 
         private static (Polyline, List<Point3d>) getMoveLaneListAll(ThSingleSideBlocks side, (double, List<Line>) offset, List<KeyValuePair<Point3d, Point3d>> offsetListBlk, Polyline lanePoly, int dir)
@@ -689,7 +518,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return (moveLine, newReMainPointList);
         }
 
-
         private static bool ptInSeg(Point3d pt, Point3d segS, Point3d segE)
         {
             int TolCloseDist = 250;
@@ -702,7 +530,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             }
             return inSeg;
         }
-
 
         /// <summary>
         /// list <idx of item in offsetInfo, (lane seg start pt, lane seg start pt in lane matrix）, （lane seg end pt, lane seg end pt in lane matrix)>

@@ -287,41 +287,41 @@ namespace ThMEPLighting.EmgLightConnect.Service
             blockDict.Add(EmgConnectCommon.BlockGroupType.mainBlock, mainPt);
         }
 
-        public static void classifySecBlocks(List<ThSingleSideBlocks> singleSideBlocks, Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList, Point3d ALE)
-        {
+        //public static void classifySecBlocks(List<ThSingleSideBlocks> singleSideBlocks, Dictionary<EmgConnectCommon.BlockGroupType, List<BlockReference>> blockList, Point3d ALE)
+        //{
 
-            var allMainPt = singleSideBlocks.SelectMany(x => x.mainBlk).ToList();
-
-
-            foreach (var block in blockList[EmgConnectCommon.BlockGroupType.secBlock])
-            {
-                var secPt = block.Position;
-
-                var closePoint = new Point3d();
-                var closePointList = allMainPt.Where(x => x.DistanceTo(secPt) < EmgConnectCommon.TolSaperateGroupMaxDistance).ToList();
-
-                if (closePointList.Count > 0)
-                {
-                    var mainDist = closePointList.Select(x => (closePointList.IndexOf(x), 0, x.DistanceTo(secPt))).ToList();
-
-                    Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueClassify(ALE, closePointList, secPt);//key:blockListIndex value:returnValue
-
-                    closePoint = returnValueCalculation.findOptimalConnectionClassifySec(returnValueDict, mainDist, closePointList);
-
-                }
-                else
-                {
-                    closePoint = allMainPt.ToDictionary(x => x, x => x.DistanceTo(secPt)).OrderBy(x => x.Value).First().Key;
-                }
+        //    var allMainPt = singleSideBlocks.SelectMany(x => x.mainBlk).ToList();
 
 
+        //    foreach (var block in blockList[EmgConnectCommon.BlockGroupType.secBlock])
+        //    {
+        //        var secPt = block.Position;
 
-                var group = singleSideBlocks.Where(x => x.getTotalBlock().Contains(closePoint)).FirstOrDefault();
-                group.secBlk.Add(secPt);
-            }
+        //        var closePoint = new Point3d();
+        //        var closePointList = allMainPt.Where(x => x.DistanceTo(secPt) < EmgConnectCommon.TolSaperateGroupMaxDistance).ToList();
 
-            singleSideBlocks.ForEach(x => RemoveBlockFromList(x, blockList));
+        //        if (closePointList.Count > 0)
+        //        {
+        //            var mainDist = closePointList.Select(x => (closePointList.IndexOf(x), 0, x.DistanceTo(secPt))).ToList();
 
-        }
+        //            Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueClassify(ALE, closePointList, secPt);//key:blockListIndex value:returnValue
+
+        //            closePoint = returnValueCalculation.findOptimalConnectionClassifySec(returnValueDict, mainDist, closePointList);
+
+        //        }
+        //        else
+        //        {
+        //            closePoint = allMainPt.ToDictionary(x => x, x => x.DistanceTo(secPt)).OrderBy(x => x.Value).First().Key;
+        //        }
+
+
+
+        //        var group = singleSideBlocks.Where(x => x.getTotalBlock().Contains(closePoint)).FirstOrDefault();
+        //        group.secBlk.Add(secPt);
+        //    }
+
+        //    singleSideBlocks.ForEach(x => RemoveBlockFromList(x, blockList));
+
+        //}
     }
 }

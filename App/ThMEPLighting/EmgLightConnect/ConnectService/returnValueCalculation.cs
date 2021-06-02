@@ -11,61 +11,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class returnValueCalculation
     {
-        public static Dictionary<int, double> getReturnValueInGroup(BlockReference ALE, List<Point3d> blockList, List<Point3d> singleSideBlock)
-        {
-            Dictionary<int, double> returnValueDict = new Dictionary<int, double>();
-
-            for (int r = 0; r < blockList.Count; r++)
-            {
-
-                var baseVector = blockList[r] - ALE.Position;
-
-                //double bx = baseVector.X;
-                //double by = baseVector.Y;
-
-                double bx = Math.Abs(baseVector.X) <= 4500 ? 0 : baseVector.X;
-                double by = Math.Abs(baseVector.Y) <= 4500 ? 0 : baseVector.Y;
-
-                var localReturnDict = new List<double>();
-
-
-                for (int i = 0; i < singleSideBlock.Count; i++)
-                {
-                    var iVector = singleSideBlock[i] - blockList[r];
-                    double returnValue = 0;
-
-                    double vx = Math.Abs(iVector.X) <= 6000 ? 0 : iVector.X;
-                    double vy = Math.Abs(iVector.Y) <= 6000 ? 0 : iVector.Y;
-
-                    if (bx * vx >= 0 && by * vy >= 0)
-                    {
-                        returnValue = 0;
-                    }
-                    else
-                    {
-                        if (bx * vx < 0)
-                        {
-                            returnValue = Math.Abs(vx);
-                        }
-                        if (by * vy < 0)
-                        {
-                            returnValue = returnValue + Math.Abs(vy);
-                        }
-
-                    }
-                    localReturnDict.Add(returnValue);
-
-                }
-
-                var maxReturnValue = localReturnDict.Max();
-
-                returnValueDict.Add(r, maxReturnValue);
-
-            }
-
-            return returnValueDict;
-        }
-
         /// <summary>
         /// (blocklist index, focused side index, distance)
         /// </summary>
@@ -75,7 +20,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
         public static List<(int, int, double)> getDistMatrix(List<Point3d> blockList, List<Point3d> singleSideBlock)
         {
             List<(int, int, double)> closedPoints = new List<(int, int, double)>(); // （ index of blockList，index of sigleSideBlock, distance)， distance）
-
 
             for (int r = 0; r < blockList.Count; r++)
             {
@@ -88,47 +32,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             }
             return closedPoints;
-        }
-
-        public static List<(Point3d, Point3d)> findOptimalConnectionInGroupNoUse(Dictionary<int, double> returnValueDict, List<(int, int, double)> closedDists, List<Point3d> blockList,
-                                              List<Point3d> thisLaneBlock, List<ThSingleSideBlocks> sideList)
-        {
-            var connectList = new List<(Point3d, Point3d)>();
-
-            var filterReturnValueDict = returnValueDict.Where(x => overConnect(blockList[x.Key], sideList) == false).ToDictionary(x => x.Key, x => x.Value);
-
-            var fileterDist = closedDists.Where(x => overConnect(blockList[x.Item1], sideList) == false &&
-                                                  overConnect(blockList[x.Item1], sideList) == false &&
-                                                  overConnect(thisLaneBlock[x.Item2], sideList) == false &&
-                                                  overConnect(thisLaneBlock[x.Item2], sideList) == false
-                                              ).ToList();
-
-            if (filterReturnValueDict.Count > 0 && fileterDist.Count > 0)
-            {
-                var minHasReturnClosedPair = hasReturnClosePair(filterReturnValueDict, fileterDist);
-                var distClosedPair = fileterDist.OrderBy(y => y.Item3).First();
-
-                //    //if ((minHasReturnClosedPair.Item3 >= distClosedPair.Item3 + EmgConnectCommon.TolReturnValueDistCheck && returnValueDict[distClosedPair.Item1] < EmgConnectCommon.TolMaxReturnValue) ||
-                //    //    minHasReturnClosedPair.Item3 >= EmgConnectCommon.TolSaperateGroupMaxDistance ||
-                //    //    distClosedPair.Item3 <= EmgConnectCommon.TolTooClosePt || minHasReturnClosedPair.Item3 > 13000)
-                if ((minHasReturnClosedPair.Item3 >= distClosedPair.Item3 + EmgConnectCommon.TolReturnValueDistCheck && returnValueDict[distClosedPair.Item1] < EmgConnectCommon.TolMaxReturnValue) ||
-                    minHasReturnClosedPair.Item3 >= EmgConnectCommon.TolSaperateGroupMaxDistance ||
-                    distClosedPair.Item3 <= EmgConnectCommon.TolTooClosePt)
-
-                {
-                    connectList.Add((blockList[distClosedPair.Item1], thisLaneBlock[distClosedPair.Item2]));
-                }
-                else
-                {
-                    connectList.Add((blockList[minHasReturnClosedPair.Item1], thisLaneBlock[minHasReturnClosedPair.Item2]));
-                }
-            }
-            else
-            {
-                var distClosedPair = closedDists.OrderBy(y => y.Item3).First();
-                connectList.Add((blockList[distClosedPair.Item1], thisLaneBlock[distClosedPair.Item2]));
-            }
-            return connectList;
         }
 
         public static List<(Point3d, Point3d)> findOptimalConnectionInGroup(Dictionary<int, double> returnValueDict, List<(int, int, double)> closedDists, List<Point3d> blockList,
@@ -150,12 +53,13 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var minHasReturnClosedPair = hasReturnClosePair(filterReturnValueDict, fileterDist);
                 var distClosedPair = fileterDist.OrderBy(y => y.Item3).First();
 
-                if (minHasReturnClosedPair.Item3 >= distClosedPair.Item3 + EmgConnectCommon.TolReturnValueDistCheck && returnValueDict[distClosedPair.Item1] < EmgConnectCommon.TolMaxReturnValue)
+                if (minHasReturnClosedPair.Item3 >= distClosedPair.Item3 + EmgConnectCommon.TolReturnValueDistCheck &&
+                    returnValueDict[distClosedPair.Item1] < EmgConnectCommon.TolReturnValueMax)
                 {
                     connectList.Add((blockList[distClosedPair.Item1], thisLaneBlock[distClosedPair.Item2]));
                     bConn = true;
                 }
-                if (bConn == false && minHasReturnClosedPair.Item3 >= 20000)
+                if (bConn == false && minHasReturnClosedPair.Item3 >= EmgConnectCommon.TolReturnValueMaxDistance)
                 {
                     connectList.Add((blockList[distClosedPair.Item1], thisLaneBlock[distClosedPair.Item2]));
                     bConn = true;
@@ -182,7 +86,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             return connectList;
         }
-
 
         private static bool overConnect(Point3d pt, List<ThSingleSideBlocks> sideList)
         {
@@ -216,72 +119,17 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return hasReturnClosedPair;
         }
 
-
-
-        public static Dictionary<int, double> getReturnValueInGroup2(BlockReference ALE, List<Point3d> blockList, List<Point3d> singleSideBlock)
+        public static Dictionary<int, double> getReturnValueInGroupAngle(Point3d ALE, List<Point3d> blockList, List<Point3d> singleSideBlock)
         {
             Dictionary<int, double> returnValueDict = new Dictionary<int, double>();
 
             for (int r = 0; r < blockList.Count; r++)
             {
 
-                var baseVector = blockList[r] - ALE.Position;
+                var baseVector = blockList[r] - ALE;
 
-                double bx = Math.Abs(baseVector.X) <= 1000 ? 0 : baseVector.X;
-                double by = Math.Abs(baseVector.Y) <= 1000 ? 0 : baseVector.Y;
-
-                var localReturnDict = new List<double>();
-
-
-                for (int i = 0; i < singleSideBlock.Count; i++)
-                {
-                    var iVector = singleSideBlock[i] - blockList[r];
-                    double returnValue = 0;
-
-                    double vx = getVectorReturnValue(iVector.X);
-                    double vy = getVectorReturnValue(iVector.Y);
-
-                    if (bx * vx >= 0 && by * vy >= 0)
-                    {
-                        returnValue = 0;
-                    }
-                    else
-                    {
-                        if (bx * vx < 0)
-                        {
-                            returnValue = Math.Abs(vx);
-                        }
-                        if (by * vy < 0)
-                        {
-                            returnValue = returnValue + Math.Abs(vy);
-                        }
-
-                    }
-                    localReturnDict.Add(returnValue);
-
-                }
-
-                var maxReturnValue = localReturnDict.Max();
-
-                returnValueDict.Add(r, maxReturnValue);
-
-            }
-
-            return returnValueDict;
-        }
-
-
-        public static Dictionary<int, double> getReturnValueInGroupAngle(BlockReference ALE, List<Point3d> blockList, List<Point3d> singleSideBlock)
-        {
-            Dictionary<int, double> returnValueDict = new Dictionary<int, double>();
-
-            for (int r = 0; r < blockList.Count; r++)
-            {
-
-                var baseVector = blockList[r] - ALE.Position;
-
-                double bx = Math.Abs(baseVector.X) <= 1000 ? 0 : baseVector.X;
-                double by = Math.Abs(baseVector.Y) <= 1000 ? 0 : baseVector.Y;
+                double bx = Math.Abs(baseVector.X) <= EmgConnectCommon.TolReturnValue0Approx ? 0 : baseVector.X;
+                double by = Math.Abs(baseVector.Y) <= EmgConnectCommon.TolReturnValue0Approx ? 0 : baseVector.Y;
 
                 var angleX = baseVector.GetAngleTo(Vector3d.XAxis);
                 if (Math.Abs(Math.Cos(angleX)) >= Math.Abs(Math.Cos(10 * Math.PI / 180)))
@@ -316,8 +164,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
                         vx = 0;
                     }
 
-
-
                     if (bx * vx >= 0 && by * vy >= 0)
                     {
                         returnValue = 0;
@@ -347,19 +193,18 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return returnValueDict;
         }
 
-
         private static double getVectorReturnValue(double oriValue)
         {
             double n = -1;
 
-            if (Math.Abs(oriValue) <= 1000)
+            if (Math.Abs(oriValue) <= EmgConnectCommon.TolReturnValue0Approx)
             {
                 n = 0;
             }
-            else if (Math.Abs(oriValue) <= 6000)
+            else if (Math.Abs(oriValue) <= EmgConnectCommon.TolReturnValueRange)
             {
-                n = Math.Abs(oriValue) / oriValue * 600;
-                n = Math.Abs(oriValue) <= 600 ? oriValue : n;
+                n = Math.Abs(oriValue) / oriValue * EmgConnectCommon.TolReturnValueRangeTo;
+                n = Math.Abs(oriValue) <= EmgConnectCommon.TolReturnValueRangeTo ? oriValue : n;
             }
             else
             {
@@ -369,51 +214,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
         }
 
 
-        public static List<(Point3d, Point3d)> findOptimalConnectionInGroup2(Dictionary<int, double> returnValueDict, List<(int, int, double)> closedDists, List<Point3d> blockList,
-                                     List<Point3d> thisLaneBlock, List<ThSingleSideBlocks> sideList)
-        {
-            var connectList = new List<(Point3d, Point3d)>();
-            bool bAdd = false;
-            var filterReturnValueDict = returnValueDict.Where(x => overConnect(blockList[x.Key], sideList) == false).ToDictionary(x => x.Key, x => x.Value);
-
-            var fileterDist = closedDists.Where(x => overConnect(blockList[x.Item1], sideList) == false &&
-                                                      overConnect(blockList[x.Item1], sideList) == false &&
-                                                      overConnect(thisLaneBlock[x.Item2], sideList) == false &&
-                                                      overConnect(thisLaneBlock[x.Item2], sideList) == false
-                                              ).ToList();
-
-            if (filterReturnValueDict.Count > 0 && fileterDist.Count > 0)
-            {
-
-                fileterDist = fileterDist.OrderBy(x => x.Item3).ToList();
-                filterReturnValueDict = filterReturnValueDict.OrderBy(x => x.Value).ToDictionary(x => x.Key, x => x.Value);
-
-
-
-
-
-            }
-            if (bAdd == false)
-            {
-
-                var distClosedPair = closedDists.OrderBy(y => y.Item3).First();
-                connectList.Add((blockList[distClosedPair.Item1], thisLaneBlock[distClosedPair.Item2]));
-            }
-            return connectList;
-        }
-
-        ////////////////////////////////////////////////////////////////////
-
-
-
-
-
-
-
-
-
-
-        ///////////////////////////////for sec to main return value/////////////////
+        ///////////InSide///////////////
         /// <summary>
         /// 副点连主点的回头量计算
         /// </summary>
@@ -428,7 +229,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             for (int r = 0; r < mainBlks.Count; r++)
             {
                 double returnValue = 0;
-                if (mainBlks[r].DistanceTo (ALE)<= secPt.DistanceTo (ALE))
+
+                if (mainBlks[r].DistanceTo(ALE) <= secPt.DistanceTo(ALE))
                 {
                     returnValue = getReturnValueTwoPoint(ALE, mainBlks[r], secPt);
                 }
@@ -436,81 +238,25 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     returnValue = getReturnValueTwoPoint(ALE, secPt, mainBlks[r]);
                 }
-               
+
+                //returnValue = getReturnValueTwoPoint(ALE, mainBlks[r], secPt);
+
                 returnValueDict.Add(r, returnValue);
             }
 
             return returnValueDict;
         }
 
-        public static Dictionary<int, double> getReturnValueClassify(Point3d ALE, List<Point3d> mainBlks, Point3d secPt)
-        {
-            Dictionary<int, double> returnValueDict = new Dictionary<int, double>();
-
-            for (int r = 0; r < mainBlks.Count; r++)
-            {
-                double returnValue = 0;
-
-                var mToS = getReturnValueTwoPointOri(ALE, mainBlks[r], secPt);
-                //var sTom = getReturnValueTwoPoint(ALE, secPt, mainBlks[r]);
-
-                //returnValue = mToS <= sTom ? mToS : sTom;
-
-                returnValue = mToS;
-
-                returnValueDict.Add(r, returnValue);
-            }
-
-
-            return returnValueDict;
-        }
-
-        private static double getReturnValueTwoPointOri(Point3d ALE, Point3d basePt, Point3d connPt)
-        {
-
-            var baseVector = basePt - ALE;
-
-            var iVector = connPt - basePt;
-            double returnValue = 0;
-
-            double vx = Math.Abs(iVector.X) <= EmgConnectCommon.TolReturnRangeInSide ? 0 : iVector.X;
-            double vy = Math.Abs(iVector.Y) <= EmgConnectCommon.TolReturnRangeInSide ? 0 : iVector.Y;
-
-            if (baseVector.X * vx >= 0 && baseVector.Y * vy >= 0)
-            {
-                returnValue = 0;
-            }
-            else
-            {
-                if (baseVector.X * vx < 0)
-                {
-                    returnValue = Math.Abs(vx);
-                }
-                if (baseVector.Y * vy < 0)
-                {
-                    returnValue = returnValue + Math.Abs(vy);
-                }
-            }
-
-            return returnValue;
-        }
 
         private static double getReturnValueTwoPoint(Point3d ALE, Point3d basePt, Point3d connPt)
         {
-
             var baseVector = basePt - ALE;
 
-            //double bx = baseVector.X;
-            //double by = baseVector.Y;
-
-            double bx = Math.Abs(baseVector.X) <= 1000 ? 0 : baseVector.X;
-            double by = Math.Abs(baseVector.Y) <= 1000 ? 0 : baseVector.Y;
+            double bx = Math.Abs(baseVector.X) <= EmgConnectCommon.TolReturnValue0Approx ? 0 : baseVector.X;
+            double by = Math.Abs(baseVector.Y) <= EmgConnectCommon.TolReturnValue0Approx ? 0 : baseVector.Y;
 
             var iVector = connPt - basePt;
             double returnValue = 0;
-
-            //double vx = Math.Abs(iVector.X) <= EmgConnectCommon.TolReturnRangeInSide ? 0 : iVector.X;
-            //double vy = Math.Abs(iVector.Y) <= EmgConnectCommon.TolReturnRangeInSide ? 0 : iVector.Y;
 
             double vx = getVectorReturnValue(iVector.X);
             double vy = getVectorReturnValue(iVector.Y);
@@ -539,7 +285,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                                                             Point3d secPt, ThSingleSideBlocks side)
         {
             var keyMainPt = new Point3d();
-
+            var bConn = false;
             var filterReturnValueDict = returnValueDict.Where(x => side.blkConnectNo(mainList[x.Key]) < EmgConnectCommon.TolBlkMaxConnect).ToDictionary(x => x.Key, x => x.Value);
 
             var fileterDist = closedDists.Where(x => side.blkConnectNo(mainList[x.Item1]) < EmgConnectCommon.TolBlkMaxConnect &&
@@ -554,51 +300,36 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 var minHasReturnClosedPair = hasReturnClosePair(filterReturnValueDict, fileterDist);
                 var distClosedPair = fileterDist.OrderBy(y => y.Item3).First();
 
-                if ((minHasReturnClosedPair.Item3 >= distClosedPair.Item3 + EmgConnectCommon.TolReturnValueDistCheck && returnValueDict[distClosedPair.Item1] < EmgConnectCommon.TolMaxReturnValue) ||
-                    minHasReturnClosedPair.Item3 >= EmgConnectCommon.TolSaperateGroupMaxDistance)
+                if ((minHasReturnClosedPair.Item3 >= distClosedPair.Item3 + EmgConnectCommon.TolReturnValueDistCheck &&
+                    returnValueDict[distClosedPair.Item1] < EmgConnectCommon.TolReturnValueMax))
                 {
                     keyMainPt = mainList[distClosedPair.Item1];
+                    bConn = true;
                 }
-                else
+
+                if (bConn == false && minHasReturnClosedPair.Item3 >= EmgConnectCommon.TolSaperateGroupMaxDistance)
+                {
+                    keyMainPt = mainList[distClosedPair.Item1];
+                    bConn = true;
+                }
+
+                if (bConn == false)
                 {
                     keyMainPt = mainList[minHasReturnClosedPair.Item1];
+                    bConn = true;
                 }
             }
-            else
+
+            if (bConn == false)
             {
                 var distClosedPair = closedDists.OrderBy(y => y.Item3).First();
                 keyMainPt = mainList[distClosedPair.Item1];
             }
 
             return keyMainPt;
+
         }
 
-        public static Point3d findOptimalConnectionClassifySec(Dictionary<int, double> returnValueDict, List<(int, int, double)> closedDists, List<Point3d> mainList)
-        {
-            var keyMainPt = new Point3d();
 
-            if (returnValueDict.Count > 0 && closedDists.Count > 0)
-            {
-                var minHasReturnClosedPair = hasReturnClosePair(returnValueDict, closedDists);
-                var distClosedPair = closedDists.OrderBy(y => y.Item3).First();
-
-                if ((minHasReturnClosedPair.Item3 >= distClosedPair.Item3 + EmgConnectCommon.TolReturnValueDistCheck && returnValueDict[distClosedPair.Item1] < EmgConnectCommon.TolMaxReturnValue) ||
-                    minHasReturnClosedPair.Item3 >= EmgConnectCommon.TolSaperateGroupMaxDistance)
-                {
-                    keyMainPt = mainList[distClosedPair.Item1];
-                }
-                else
-                {
-                    keyMainPt = mainList[minHasReturnClosedPair.Item1];
-                }
-            }
-            else
-            {
-                var distClosedPair = closedDists.OrderBy(y => y.Item3).First();
-                keyMainPt = mainList[distClosedPair.Item1];
-            }
-
-            return keyMainPt;
-        }
     }
 }

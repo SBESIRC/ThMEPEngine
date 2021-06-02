@@ -13,7 +13,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class connectSingleSideInGroupService
     {
-        public static List<(Point3d, Point3d)> connectAllSingleSide(BlockReference ALE, List<List<ThSingleSideBlocks>> OptimalGroupBlocks)
+        public static List<(Point3d, Point3d)> connectAllSingleSide(Point3d ALE, List<List<ThSingleSideBlocks>> OptimalGroupBlocks)
         {
             var connectList = new List<(Point3d, Point3d)>();
 
@@ -30,7 +30,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return connectList;
         }
 
-        private static List<(Point3d, Point3d)> connectSingleSide(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        private static List<(Point3d, Point3d)> connectSingleSide(Point3d ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
             var connectList = new List<(Point3d, Point3d)>();
 
@@ -57,13 +57,11 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     var thisLaneBlock = orderSigleSideGroup[i].getTotalBlock();
 
-                   // Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroup2(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
                     Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroupAngle(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
 
                     List<(int, int, double)> closedDists = returnValueCalculation.getDistMatrix(blockList, thisLaneBlock); //(blocklist index, focused side index, distance)
 
                     var connectListTemp = returnValueCalculation.findOptimalConnectionInGroup(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
-                    //var connectListTemp = returnValueCalculation.findOptimalConnectionInGroupFilter(returnValueDict, closedDists, blockList, thisLaneBlock, orderSigleSideGroup);
 
                     if (connectListTemp.Count > 0)
                     {
@@ -98,7 +96,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return orderSingleSide;
         }
 
-        private static List<ThSingleSideBlocks> orderSignleSideDist(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        private static List<ThSingleSideBlocks> orderSignleSideDist(Point3d ALE, List<ThSingleSideBlocks> sigleSideGroup)
         {
             var orderSingleSide = new List<ThSingleSideBlocks>();
             var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
@@ -107,7 +105,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 if (side.Count > 0)
                 {
-                    var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+                    var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE)).Min();
                     sideDistDict.Add(side, dist);
                 }
             }

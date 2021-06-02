@@ -55,6 +55,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                                     var thisBlk = BlockListService.getBlockByCenter(pt, blkList);
 
                                     var moveLanePoly = drawEmgPipeService.cutLane(prevPt, pt, prevBlk, thisBlk, movedline);
+                                    //moveLanePoly= drawEmgPipeService.CorrectConflictFrame(frame, moveLanePoly, prevBlk, thisBlk, holes);
 
                                     if (moveLanePoly != null)
                                     {

@@ -72,7 +72,9 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     ptList.Add(side.reSecBlk[j]);
 
                     //找最近的/回头量小的主块，加入图
-                    var mainI = getRootMainBlk(j, distM, side, ALE, ptList);
+                    //var mainI = getRootMainBlk(j, distM, side, ALE, ptList);
+
+                    var mainI = getRootMainBlk2(j, distM, side, ALE, ptList);
 
                     //找到同边散点到这个主块最小的散点list,加入图
                     var secPtIndexList = findCloseSecPtList(distM, mainI);
@@ -187,9 +189,47 @@ namespace ThMEPLighting.EmgLightConnect.Service
 
             Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInSide(ALE, mainList, secPt);//key:blockListIndex value:returnValue
 
-            //Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueClassify(ALE, mainList, secPt);
-
             var mainPt = returnValueCalculation.findOptimalConnectionInSide(returnValueDict, mainDist, mainList, secPt, side);
+
+            ptList.Add(mainPt);
+
+            var mainI = side.reMainBlk.IndexOf(mainPt);
+
+            return mainI;
+
+        }
+
+        private static int getRootMainBlk2(int secIndex, List<(int, int, double)> distM, ThSingleSideBlocks side, Point3d ALE, List<Point3d> ptList)
+        {
+            List<Point3d> blockList = null;
+            List<Point3d> thisLaneBlock = null;
+
+            var mainList = side.reMainBlk;
+            Point3d secPt = side.reSecBlk[secIndex];
+            var secList = new List<Point3d>() { secPt };
+    
+            var mainToALE = mainList.Select(x => x.DistanceTo(ALE)).Min();
+            var secToALE = secPt.DistanceTo(ALE);
+
+            if (mainToALE <= secToALE )
+            {
+                blockList = mainList;
+                thisLaneBlock = secList;
+            }
+            else
+            {
+                blockList =secList ;
+                thisLaneBlock = mainList;
+            }
+
+
+            Dictionary<int, double> returnValueDict = returnValueCalculation.getReturnValueInGroupAngle(ALE, blockList, thisLaneBlock);//key:blockListIndex value:returnValue
+
+            List<(int, int, double)> closedDists = returnValueCalculation.getDistMatrix(blockList, thisLaneBlock); //(blocklist index, focused side index, distance)
+
+            var connectListTemp = returnValueCalculation.findOptimalConnectionInGroup(returnValueDict, closedDists, blockList, thisLaneBlock, new List<ThSingleSideBlocks> { side });
+
+            var mainPt = connectListTemp[0].Item1.IsEqualTo(secPt, new Tolerance(1, 1)) ? connectListTemp[0].Item2 : connectListTemp[0].Item1;
 
             ptList.Add(mainPt);
 

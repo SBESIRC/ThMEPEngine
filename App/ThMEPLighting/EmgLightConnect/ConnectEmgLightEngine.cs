@@ -109,7 +109,7 @@ namespace ThMEPLighting.EmgLightConnect
             ////////
 
             ////组内连线
-            var connectList = connectSingleSideInGroupService.connectAllSingleSide(ALE, OptimalGroupBlocks);
+            var connectList = connectSingleSideInGroupService.connectAllSingleSide(ALE.Position, OptimalGroupBlocks);
 
             ////////debug 打图，要删
             ConnectSingleSideService.forDebugConnectLine(connectList);
