@@ -16,6 +16,8 @@ namespace ThMEPEngineCore.Temp
         public string ElementLayer { get; set; }
         public List<System.Type> Types { get; set; }
         public bool UseDb3Engine { get; set; }
+        public bool GroupSwitch { get; set; }
+        public bool IsolateSwitch { get; set; }
 
         protected Dictionary<Entity, List<string>> GroupOwner { get; set; }
         protected string IdPropertyName = "Id";
@@ -26,11 +28,14 @@ namespace ThMEPEngineCore.Temp
         protected string AreaOwnerPropertyName = "AreaId";
         protected string IsolatePropertyName = "Isolated";
         protected string ElevationPropertyName = "Elevation";
+        protected string StoreyBorderPropertyName = "StoreyBorder";
 
         public ThExtractorBase()
         {
             Category = "";
             ElementLayer = "";
+            GroupSwitch = false;
+            IsolateSwitch = true;
             GroupOwner = new Dictionary<Entity, List<string>>();
             Types = new List<System.Type>() { typeof(Polyline)};
         }
