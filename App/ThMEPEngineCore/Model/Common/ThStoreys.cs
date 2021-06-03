@@ -86,7 +86,7 @@ namespace ThMEPEngineCore.Model.Common
             Data = new ThBlockReferenceData(id);
         }
         public string StoreyNumber => Data.Attributes[ThPipeCommon.STOREY_ATTRIBUTE_VALUE_NUMBER];
-        private string StoreyTypeString => (string)Data.CustomProperties.GetValue(ThPipeCommon.STOREY_DYNAMIC_PROPERTY_TYPE);
+        public string StoreyTypeString => (string)Data.CustomProperties.GetValue(ThPipeCommon.STOREY_DYNAMIC_PROPERTY_TYPE);
         public StoreyType StoreyType
         {
             get

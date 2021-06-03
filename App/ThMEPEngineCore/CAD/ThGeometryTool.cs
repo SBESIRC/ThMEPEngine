@@ -357,6 +357,10 @@ namespace ThMEPEngineCore.CAD
             {
                 return firstPoly.ToNTSPolygon().Contains(mPolygon.ToNTSPolygon());
             }
+            else if(entity is Line line)
+            {
+                return firstPoly.Contains(line);
+            }
             else
             {
                 return false;

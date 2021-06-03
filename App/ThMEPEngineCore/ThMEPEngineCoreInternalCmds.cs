@@ -604,6 +604,41 @@ namespace ThMEPEngineCore
                 });
             }
         }
+        [CommandMethod("TIANHUACAD", "THLPDCDemoTest", CommandFlags.Modal)]
+        public void THLPDCDemoTest()
+        {
+            //Lightning Protection Down Conductors Test Data(防雷保护引下线)
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            using (var extractEngine = new ThExtractGeometryEngine())
+            {
+                var per = Active.Editor.GetEntity("\n选择一个框线");
+                var pts = new Point3dCollection();
+                if (per.Status == PromptStatus.OK)
+                {
+                    var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                    var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                    pts = newFrame.VerticesEx(100.0);
+                }
+                else
+                {
+                    return;
+                }
+                var extractors = new List<ThExtractorBase>()
+                {
+                    new ThStoreyExtractor(){ColorIndex=1,},
+                    new ThArchitectureOutlineExtractor(){ ColorIndex=2,GroupSwitch=true},
+                    new ThColumnExtractor(){ ColorIndex=3,UseDb3Engine=false,GroupSwitch=true},
+                    new ThShearWallExtractor(){ ColorIndex=4,UseDb3Engine=false,GroupSwitch=true},
+                    new ThBeamExtractor(){ ColorIndex =5,UseDb3Engine=false,GroupSwitch=true},
+                    new ThLightningReceivingBeltExtractor{ ColorIndex=6,GroupSwitch=true},
+                };
+                extractEngine.Accept(extractors);
+                extractEngine.Extract(acadDatabase.Database, pts);
+                extractEngine.Group((extractors[0] as ThStoreyExtractor).StoreyIds);
+                extractEngine.OutputGeo(Active.Document.Name);
+                extractEngine.Print(acadDatabase.Database);
+            }
+        }
 #endif
 
         [CommandMethod("TIANHUACAD", "THCENTERLINE", CommandFlags.Modal)]
