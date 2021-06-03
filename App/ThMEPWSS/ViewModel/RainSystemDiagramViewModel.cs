@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 using ThControlLibraryWPF.ControlUtils;
 using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.Pipe;
@@ -52,7 +53,17 @@ namespace ThMEPWSS.Diagram.ViewModel
         {
             // 绑定控件
             if (DateTime.Now == DateTime.MinValue) FloorListDatas = SystemDiagramUtils.GetFloorListDatas();
-            else ThRainSystemService.InitFloorListDatas();
+            else
+            {
+                try
+                {
+                    ThRainSystemService.InitFloorListDatas();
+                }
+                catch(System.Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
         }
     }
 

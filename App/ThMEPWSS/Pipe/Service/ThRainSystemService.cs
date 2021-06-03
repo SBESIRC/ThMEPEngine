@@ -3760,6 +3760,7 @@ namespace ThMEPWSS.Pipe.Service
         public static void ImportElementsFromStdDwg()
         {
             //return;
+            //var file = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板_20210125.dwg");
             var file = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板_20210125.dwg");
             if (File.Exists(file))
             {

@@ -3870,100 +3870,102 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         }
         public class qu0jxf
         {
+            public static void GetEntityBoundsGRectCadJson()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    Dbg.PrintLine(Dbg.SelectEntity<Entity>(adb).Bounds.ToGRect().ToCadJson());
+                }
+            }
             public static void GetEntityType()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Entity>(adb);
-                    Dbg.ShowString(e.GetType().ToString());
+                    Dbg.PrintLine(e.GetType().ToString());
                 }
             }
             public static void GetEntityLength()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Entity>(adb);
                     GeoAlgorithm.TryConvertToLineSegment(e, out GLineSegment seg);
-                    Dbg.ShowString(seg.Length.ToString());
+                    Dbg.PrintLine(seg.Length.ToString());
                 }
             }
             public static void GetEntityBlockName()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<BlockReference>(adb);
-                    Dbg.ShowString(e.Name);
+                    Dbg.PrintLine(e.Name);
                 }
             }
             public static void GetEntityBlockEffectiveName()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<BlockReference>(adb);
-                    Dbg.ShowString(e.ToDataItem().EffectiveName);
+                    Dbg.PrintLine(e.ToDataItem().EffectiveName);
                 }
             }
 
             public static void GetCircleRadius()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Circle>(adb);
-                    Dbg.ShowString(e.Radius.ToString());
+                    Dbg.PrintLine(e.Radius.ToString());
                 }
             }
             public static void GetEntityLayer()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Entity>(adb);
-                    Dbg.ShowString(e.Layer);
+                    Dbg.PrintLine(e.Layer);
                 }
             }
             public static void GetTextStyleName()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<DBText>(adb);
-                    Dbg.ShowString(e.TextStyleName);
+                    Dbg.PrintLine(e.TextStyleName);
                 }
             }
             public static void ScaleEntityTest()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Entity>(adb);
                     EntTools.Scale(e, Dbg.SelectPoint(), 2);
                 }
@@ -3971,11 +3973,10 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             public static void RotateEntityTest()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Entity>(adb);
                     EntTools.Rotate(e, Dbg.SelectPoint(), GeoAlgorithm.AngleFromDegree(45));
                 }
@@ -3983,11 +3984,10 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             public static void MoveEntityTest()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Entity>(adb);
                     EntTools.Move(e, Dbg.SelectPoint(), GeoAlgorithm.GetBoundaryRect(e).Center.ToPoint3d());
                 }
@@ -3995,13 +3995,23 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             public static void CopyEntityTest()
             {
                 Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
                 using (var adb = AcadDatabase.Active())
-                using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
-                using (var tr = DrawUtils.DrawingTransaction)
+                using (var tr = new DrawingTransaction(adb))
                 {
-                    var db = adb.Database;
                     var e = Dbg.SelectEntity<Entity>(adb);
                     EntTools.Copy(e, Dbg.SelectPoint(), GeoAlgorithm.GetBoundaryRect(e).Center.ToPoint3d());
+                }
+            }
+            public static void GetScaleFactors()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    var e=Dbg.SelectEntity<BlockReference>(adb);
+                    Dbg.PrintLine(e.ScaleFactors.ToString());
                 }
             }
         }

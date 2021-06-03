@@ -265,11 +265,188 @@ namespace ThMEPWSS.DebugNs
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
 
-                Dbg.PrintLine(Dbg.SelectEntity<Entity>(adb).Bounds.ToGRect().ToCadJson());
+                
             }
         }
         [Feng]
         public static void yyy()
+        {
+            NewMethod5();
+        }
+        [Feng]
+        public static void zzz()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var lines=Dbg.SelectEntities(adb).OfType<Line>().ToList();
+
+            }
+        }
+        private static void NewMethod5()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var db = adb.Database;
+                Dbg.BuildAndSetCurrentLayer(db);
+
+                var OFFSET_X = 2500.0;
+                var SPAN_X = 5500.0;
+                var HEIGHT = 1800.0;
+                var COUNT = 20;
+                var basePt = Dbg.SelectPoint();
+                var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+                var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
+                for (int i = 0; i < storeys.Count; i++)
+                {
+                    var storey = storeys[i];
+                    var bsPt1 = basePt.OffsetY(HEIGHT * i);
+                    NewMethod3(storey, bsPt1, lineLen);
+                    for (int j = 0; j < COUNT; j++)
+                    {
+                        var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
+
+                        if (j == 0)
+                        {
+                            Dr.DrawCheckPoint(bsPt2);
+                        }
+                        else if (j == 1)
+                        {
+                            DU.DrawBlockReference("清扫口系统", bsPt2.OffsetY(HEIGHT - 300), scale: 2, cb: br =>
+                              {
+                                  br.Layer = "W-DRAI-EQPM";
+                                  br.Rotation = GeoAlgorithm.AngleFromDegree(90);
+                              });
+                        }
+                        else if (j == 2)
+                        {
+                            DU.DrawBlockReference("洗涤盆排水", bsPt2.OffsetXY(-1000, HEIGHT - 1720 - 80 + 200), br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                if (br.IsDynamicBlock)
+                                {
+                                    br.ObjectId.SetDynBlockValue("可见性", "双池S弯");
+                                }
+                            });
+                            {
+                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, 200), bsPt2.OffsetXY(0, 200));
+                                line.Layer = "W-DRAI-DOME-PIPE";
+                                line.ColorIndex = 256;
+                            }
+                        }
+                        else if (j == 3)
+                        {
+                            Dr.DrawFloorDrain(bsPt2.OffsetX(180 - 1000));
+                            {
+                                var line = DU.DrawLineLazy(bsPt2.OffsetXY(-1000, -550), bsPt2.OffsetXY(0, -550));
+                                line.Layer = "W-DRAI-DOME-PIPE";
+                                line.ColorIndex = 256;
+                            }
+                        }
+                        else if (j == 4)
+                        {
+                            DU.DrawBlockReference("阳台支管块", bsPt2.OffsetXY(-328257, 35827), br =>
+                            {
+                                br.Layer = "W-DRAI-EQPM";
+                                br.Rotation = GeoAlgorithm.AngleFromDegree(270);
+                            });
+                        }
+                        else if (j == 5)
+                        {
+                            var line = DU.DrawLineLazy(bsPt2.OffsetXY(-200, HEIGHT - 550), bsPt2.OffsetXY(200, HEIGHT - 550));
+                            line.Layer = "W-DRAI-NOTE";
+                            line.ColorIndex = 256;
+                        }
+                    }
+                }
+                for (int j = 0; j < COUNT; j++)
+                {
+                    var x = basePt.X + OFFSET_X + (j + 1) * SPAN_X;
+                    var y1 = basePt.Y;
+                    var y2 = y1 + HEIGHT * (storeys.Count - 1);
+                    {
+                        var line = DU.DrawLineLazy(x, y1, x, y2);
+                        line.Layer = "W-DRAI-DOME-PIPE";
+                        line.ColorIndex = 256;
+                    }
+                    {
+                        var line = DU.DrawLineLazy(x + 300, y1, x + 300, y2);
+                        line.Layer = "W-DRAI-VENT-PIPE";
+                        line.ColorIndex = 256;
+                    }
+                }
+
+                {
+                    var bsPt = basePt.OffsetY(-1000);
+                    DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: bsPt,
+                   scale: 0.5,
+                   props: new Dictionary<string, string>() { { "-", "666" } },
+                   cb: br =>
+                   {
+                       br.Layer = "W-RAIN-EQPM";
+                   });
+                }
+                {
+                    var bsPt = basePt.OffsetXY(500, -1000);
+                    DU.DrawBlockReference(blkName: "污废合流井编号", basePt: bsPt,
+                   scale: 0.5,
+                   props: new Dictionary<string, string>() { { "-", "666" } },
+                   cb: br =>
+                   {
+                       br.Layer = "W-DRAI-EQPM";
+                   });
+                }
+            }
+        }
+
+        private static void NewMethod4()
+        {
+            var OFFSET_X = 2500;
+            var SPAN_X = 5500;
+            var HEIGHT = 1800;
+            var COUNT = 20;
+            var basePt = Dbg.SelectPoint();
+            var lineLen = OFFSET_X + COUNT * SPAN_X + OFFSET_X;
+            var storeys = Enumerable.Range(1, 32).Select(i => i + "F").Concat(new string[] { "RF", "RF+1", "RF+2" }).ToList();
+            for (int i = 0; i < storeys.Count; i++)
+            {
+                var storey = storeys[i];
+                var bsPt1 = basePt.OffsetY(HEIGHT * i);
+                NewMethod3(storey, bsPt1, lineLen);
+                for (int j = 0; j < COUNT; j++)
+                {
+                    var bsPt2 = bsPt1.OffsetX(OFFSET_X + (j + 1) * SPAN_X);
+                    Dbg.ShowXLabel(bsPt2);
+                }
+            }
+        }
+
+        private static void NewMethod3(string label, Point3d basePt, double lineLen)
+        {
+            {
+                var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
+                var dbt = DU.DrawTextLazy(label, ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
+                Dr.SetLabelStylesForWNote(line, dbt);
+            }
+            if (label == "RF")
+            {
+                var line = DU.DrawLineLazy(new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0), new Point3d(basePt.X + lineLen, basePt.Y + ThWSDStorey.RF_OFFSET_Y, 0));
+                var dbt = DU.DrawTextLazy("建筑完成面", ThWSDStorey.TEXT_HEIGHT, new Point3d(basePt.X + ThWSDStorey.INDEX_TEXT_OFFSET_X, basePt.Y + ThWSDStorey.RF_OFFSET_Y + ThWSDStorey.INDEX_TEXT_OFFSET_Y, 0));
+                Dr.SetLabelStylesForWNote(line, dbt);
+            }
+        }
+
+        public static void jjj()
+        {
+
+        }
+        //雨水斗对位研究
+        private static void NewMethod2()
         {
             var r1 = "{'type':'GRect','values':[1292293.678676707,581253.83417658461,1392293.678676707,699247.960999981]}".FromCadJson<GRect>();
             var r2 = "{'type':'GRect','values':[1292293.678676707,431253.83417658461,1392293.678676707,549247.960999981]}".FromCadJson<GRect>();
