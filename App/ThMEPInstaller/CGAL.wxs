@@ -3,9 +3,6 @@
 	<?include Variable.wxi ?>
 	<Fragment>
 		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-			<?define OutputPath_R18_Debug="bin\Debug" ?>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
 			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
 		</DirectoryRef>
@@ -22,9 +19,6 @@
 			<?define OutputPath_R22_Debug="bin\Debug-NET46" ?>
 		</DirectoryRef>
 		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-			<?define OutputPath_R18_Release="bin\Release" ?>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
 			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
 		</DirectoryRef>

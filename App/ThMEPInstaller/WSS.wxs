@@ -3,15 +3,6 @@
 	<?include Variable.wxi ?>
 	<Fragment>
 		<?if $(var.Configuration) = Debug ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-			<?define OutputPath_R18_Debug="bin\Debug" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPWSS_Debug" Guid="{7EB2CA84-D52F-423C-971B-A900855D151B}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPWSS_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\ThMEPWSS.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_Plumbing_UI_Debug" Guid="{02345A09-80A3-4C15-8A17-EACE6192D6E0}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_Plumbing_UI_Debug" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Debug)\TianHua.Plumbing.UI.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
 			<?define OutputPath_R19_Debug="bin\Debug-NET40" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Debug" Guid="{57360B88-252E-48A6-B8DD-CDA20C9AD9F4}" Win64="yes">
@@ -40,15 +31,6 @@
 			</Component>
 		</DirectoryRef>
 		<?elseif $(var.Configuration) = Release ?>
-		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R18">
-			<?define OutputPath_R18_Release="bin\Release" ?>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_MEPWSS_Release" Guid="{A05C12FE-F337-4AB9-9AA6-2389CB97D121}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_MEPWSS_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\ThMEPWSS.dll" />
-			</Component>
-			<Component Id="CMP_Autoloader_Contents_App_Win64_R18_Plumbing_UI_Release" Guid="{BDED9F16-9FCC-42B7-B343-A6CE0E892B79}" Win64="yes">
-				<File Id="FILE_Autoloader_Contents_App_Win64_R18_Plumbing_UI_Release" KeyPath="yes" Source="$(var.OutputRootPath)\$(var.OutputPath_R18_Release)\TianHua.Plumbing.UI.dll" />
-			</Component>
-		</DirectoryRef>
 		<DirectoryRef Id="DIR_Autoloader_Contents_App_Win64_R19">
 			<?define OutputPath_R19_Release="bin\Release-NET40" ?>
 			<Component Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Release" Guid="{A6F4C4E5-EBD6-4748-A58E-CF9083DA2A25}" Win64="yes">
@@ -81,22 +63,18 @@
 	<Fragment>
 		<ComponentGroup Id="ProductComponentsWSSWin64">
 			<?if $(var.Configuration) = Debug ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPWSS_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPWSS_Debug" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_Plumbing_UI_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Plumbing_UI_Debug" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPWSS_Debug" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Plumbing_UI_Debug" />
 			<?elseif $(var.Configuration) = Release ?>
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_MEPWSS_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_MEPWSS_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPWSS_Release" />
-			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R18_Plumbing_UI_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R19_Plumbing_UI_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_MEPWSS_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R20_Plumbing_UI_Release" />
+			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_MEPWSS_Release" />
 			<ComponentRef Id="CMP_Autoloader_Contents_App_Win64_R22_Plumbing_UI_Release" />
 			<?endif?>
 		</ComponentGroup>
