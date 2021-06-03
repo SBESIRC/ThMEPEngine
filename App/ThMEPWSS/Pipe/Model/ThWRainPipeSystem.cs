@@ -93,7 +93,7 @@ namespace ThMEPWSS.Pipe.Model
                     var c = ctxs[i];
                     if (s.Label == "3F")
                     {
-                        DU.DrawingQueue.Enqueue(adb => Dr.DrawDNLabelRight(c.BasePoint, "DN100"));
+                        NewMethod(ctx, c);
                     }
                 }
             }
@@ -110,7 +110,7 @@ namespace ThMEPWSS.Pipe.Model
                         if (s != null && s.Label == targetStorey?.Label)
                         {
                             var c = ctxs[i];
-                            DU.DrawingQueue.Enqueue(adb => Dr.DrawDNLabelRight(c.BasePoint, "DN100"));
+                            NewMethod(ctx, c);
                         }
                     }
                 }
@@ -271,8 +271,9 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
             //只有阳台雨水立管（Y2）和冷凝水立管（NL）才需要通气
-            //todo:界面中的开关控制冷凝水立管是否通气
-            if (VerticalPipeId.StartsWith("Y2") || VerticalPipeId.StartsWith("NL"))
+            //界面中的开关控制冷凝水立管是否通气
+            if (VerticalPipeId.StartsWith("Y2") ||
+                (VerticalPipeId.StartsWith("NL") && Dr.GetHasAiringForCondensePipe()))
             {
                 //。如果立管出现在RF层，则通气管伸到屋顶上（上人500 不上人2000），否则在本层设通气。
                 var r = runs.FirstOrDefault(r => r.Storey?.Label == "RF");
@@ -282,7 +283,9 @@ namespace ThMEPWSS.Pipe.Model
                     {
                         //var p = ctx.StoreyDrawingContexts[ctx.WSDStoreys.Count - 1].BasePoint;
                         var p = ctx.StoreyDrawingContexts[ctx.WSDStoreys.IndexOf(ctx.RainSystemDiagram.GetStorey("RF"))].BasePoint;
-                        pts.Insert(0, pts.First().ReplaceY(p.Y).OffsetY(ThWSDStorey.TEXT_HEIGHT).OffsetY(500));
+                        var canPeopleBeOnRoof = Dr.GetCanPeopleBeOnRoof();
+                        var offsetY = canPeopleBeOnRoof ? 500 : 2000;
+                        pts.Insert(0, pts.First().ReplaceY(p.Y).OffsetY(ThWSDStorey.TEXT_HEIGHT).OffsetY(offsetY));
                         {
                             var cd = new CircleDraw();
                             cd.Rotate(250, 180 + 45);
@@ -343,10 +346,15 @@ namespace ThMEPWSS.Pipe.Model
                     var fds2 = r.FloorDrains.Where(x => !x.HasDrivePipe).Select(x => "FloorDrain_NoDrivePipe").ToList();
                     var cps1 = r.CondensePipes.Where(x => x.HasDrivePipe).Select(x => "CondensePipe_HasDrivePipe").ToList();
                     var cps2 = r.CondensePipes.Where(x => !x.HasDrivePipe).Select(x => "CondensePipe_NoDrivePipe").ToList();
-                    var key = fds1.Concat(fds2).Concat(cps1).Concat(cps2).JoinWith(",");
+                    var key = fds1.Concat(fds2).Concat(cps1).Concat(cps2).Where(x=>!string.IsNullOrEmpty(x)).OrderBy(x => x).JoinWith(",");
                     return key;
                 }
-                var gs = runs.GroupBy(r => f(r));
+                var gs = runs.GroupBy(r => f(r)).ToList();
+                foreach (var g in gs)
+                {
+                    if (string.IsNullOrEmpty(g.Key)) continue;
+                    //Dbg.PrintLine(g.Key);
+                }
             }
 
 
@@ -362,6 +370,18 @@ namespace ThMEPWSS.Pipe.Model
             //}
 
 
+        }
+
+        private static void NewMethod(RainSystemDrawingContext ctx, PipeRunDrawingContext c)
+        {
+            var dn = ctx.VerticalPipeType switch
+            {
+                VerticalPipeType.RoofVerticalPipe => Dr.GetRoofRainPipeDN(),
+                VerticalPipeType.BalconyVerticalPipe => Dr.GetBalconyRainPipeDN(),
+                VerticalPipeType.CondenseVerticalPipe => Dr.GetCondensePipeVerticalDN(),
+                _ => throw new NotSupportedException(),
+            };
+            DU.DrawingQueue.Enqueue(adb => Dr.DrawDNLabelRight(c.BasePoint, dn));
         }
 
         private static IEnumerable<string> ConvertLabelStrings(RainSystemDrawingContext ctx)

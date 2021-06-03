@@ -71,6 +71,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         [CommandMethod("TIANHUACAD", "THCRSDBYUI", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
+            if (ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext != null) return;
             var ui = new uiRainSystem();
             AcadApp.ShowModelessWindow(ui);
         }

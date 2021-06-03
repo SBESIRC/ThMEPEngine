@@ -2,6 +2,7 @@
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.JsonExtensionsNs;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -11,11 +12,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
     public partial class uiRainSystem : ThCustomWindow
     {
         private RainSystemDiagramViewModel ViewModel = new RainSystemDiagramViewModel();
-
         public uiRainSystem()
         {
             InitializeComponent();
             this.DataContext = ViewModel;
+            Loaded += (s, e) => { ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext = new ThMEPWSS.Pipe.Service.ThRainSystemService.CommandContext() { rainSystemDiagramViewModel = ViewModel, window = this }; };
+            Closed += (s, e) => { ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext = null; };
         }
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
@@ -28,7 +30,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         //run command
         private void ImageButton_Click(object sender, RoutedEventArgs e)
         {
-            using (var cmd = new ThRainSystemDiagramCmd())
+            using (var cmd = new ThRainSystemDiagramCmd(ViewModel))
             {
                 cmd.Execute();
             }
@@ -38,6 +40,11 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void ImageButton_Click_1(object sender, RoutedEventArgs e)
         {
             ViewModel.InitFloorListDatas();
+        }
+
+        private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
+        {
+            
         }
     }
 }

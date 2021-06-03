@@ -19,6 +19,7 @@ using ThMEPWSS.Uitl.ExtensionsNs;
 using System.Windows.Forms;
 using NetTopologySuite.Geometries;
 using ThMEPWSS.DebugNs;
+using ThCADCore.NTS;
 
 namespace ThMEPWSS.Assistant
 {
@@ -151,6 +152,10 @@ namespace ThMEPWSS.Assistant
                 ent.Layer = layer;
                 ent.ColorIndex = colorIndex;
             }
+        }
+        public static void DrawGeometryLazy(Geometry geo)
+        {
+            DrawEntitiesLazy(geo.ToDbObjects().OfType<Entity>().ToList());
         }
         public static void DrawEntityLazy(Entity ent)
         {
@@ -330,9 +335,21 @@ namespace ThMEPWSS.Assistant
         {
             return DrawRectLazy(leftButtom, new Point3d(leftButtom.X + width, leftButtom.Y - height, leftButtom.Z));
         }
-        public static Line DrawLineSegment(GLineSegment seg)
+        public static Line DrawLineSegmentLazy(GLineSegment seg)
         {
             return DrawLineLazy(seg.StartPoint, seg.EndPoint);
+        }
+        public static Polyline DrawLineSegmentLazy(GLineSegment seg, double width)
+        {
+            var pl = DrawPolyLineLazy(new Point2d[] { seg.StartPoint, seg.EndPoint });
+            pl.ConstantWidth = width;
+            return pl;
+        }
+        public static Polyline DrawLineSegmentBufferLazy(GLineSegment seg, double bufSize)
+        {
+            var pl = ThCADCoreNTSOperation.Buffer(seg.ToCadLine(), bufSize);
+            DrawEntityLazy(pl);
+            return pl;
         }
         public static Polyline DrawPolyLineLazy(Coordinate[] coordinates)
         {
@@ -383,6 +400,18 @@ namespace ThMEPWSS.Assistant
                 adb.ModelSpace.Add(circle);
             });
             return circle;
+        }
+        public static Polyline DrawPolyLineLazy(params Point2d[] pts)
+        {
+            var c = new Point2dCollection();
+            foreach (var pt in pts)
+            {
+                c.Add(pt);
+            }
+            var pl = new Polyline();
+            PolylineTools.CreatePolyline(pl, c);
+            DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(pl));
+            return pl;
         }
         public static Polyline DrawPolyLineLazy(params Point3d[] pts)
         {

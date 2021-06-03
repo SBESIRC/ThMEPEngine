@@ -17,6 +17,7 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Model.Common;
 using ThMEPWSS.Assistant;
 using ThMEPWSS.JsonExtensionsNs;
+using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
@@ -112,6 +113,7 @@ namespace ThMEPWSS.Pipe.Model
         public ThWRainSystemDiagram RainSystemDiagram;
         public IList ThWRainPipeSystemGroup;
         public Point3d OutputBasePoint;
+        public VerticalPipeType VerticalPipeType;
         public RainSystemDrawingContext Clone()
         {
             return (RainSystemDrawingContext)this.MemberwiseClone();
@@ -541,7 +543,7 @@ namespace ThMEPWSS.Pipe.Model
                     runs[i].CheckPoint.HasCheckPoint = true;
                 }
             }
-          
+
         }
         public static void SetCheckPoints(ThWRainPipeSystem sys)
         {
@@ -750,7 +752,7 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
         }
-        public const double VERTICAL_STOREY_SPAN = 2000;
+        public static double VERTICAL_STOREY_SPAN => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.StoreySpan ?? 2000;
         public const double HORIZONTAL_STOREY_SPAN = 5500;
 
 
@@ -823,6 +825,13 @@ namespace ThMEPWSS.Pipe.Model
                 k++;
             }
         }
+        public static VerticalPipeType GetVerticalPipeType(Type type)
+        {
+            if (type == typeof(ThWRoofRainPipeSystem)) return VerticalPipeType.RoofVerticalPipe;
+            if (type == typeof(ThWBalconyRainPipeSystem)) return VerticalPipeType.BalconyVerticalPipe;
+            if (type == typeof(ThWCondensePipeSystem)) return VerticalPipeType.CondenseVerticalPipe;
+            throw new NotSupportedException();
+        }
         private void DrawSystem<T>(Point3d basePt, List<StoreyDrawingContext> sdCtxs, int k, List<T> g) where T : ThWRainPipeSystem
         {
             var sys = g.First();
@@ -831,8 +840,9 @@ namespace ThMEPWSS.Pipe.Model
             ctx.StoreyDrawingContexts = sdCtxs;
             ctx.RainSystemDiagram = this;
             ctx.ThWRainPipeSystemGroup = g;
+            ctx.VerticalPipeType = GetVerticalPipeType(typeof(T));
             sys.Draw(ctx);
-            DrawUtils.DrawTextLazy(sys.OutputType.OutputType.ToString(), 200, ctx.BasePoint.ReplaceX(ctx.OutputBasePoint.X));
+            //DrawUtils.DrawTextLazy(sys.OutputType.OutputType.ToString(), 200, ctx.BasePoint.ReplaceX(ctx.OutputBasePoint.X));
             DrawOutputs(g, ctx);
         }
         public HashSet<ThWRainPipeSystem> ScatteredOutputs = new HashSet<ThWRainPipeSystem>();

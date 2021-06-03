@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThControlLibraryWPF.ControlUtils;
+using ThMEPWSS.JsonExtensionsNs;
 using ThMEPWSS.Pipe;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
@@ -50,20 +51,37 @@ namespace ThMEPWSS.Diagram.ViewModel
         public void InitFloorListDatas()
         {
             // 绑定控件
-            FloorListDatas = SystemDiagramUtils.GetFloorListDatas();
+            if (DateTime.Now == DateTime.MinValue) FloorListDatas = SystemDiagramUtils.GetFloorListDatas();
+            else ThRainSystemService.InitFloorListDatas();
         }
     }
 
     public class RainSystemDiagramParamsViewModel : NotifyPropertyChangedBase
     {
+        public void CopyTo(RainSystemDiagramParamsViewModel other)
+        {
+            foreach (var pi in GetType().GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance))
+            {
+                pi.SetValue(other, pi.GetValue(this));
+            }
+        }
+        public RainSystemDiagramParamsViewModel Clone()
+        {
+            return this.ToJson().FromJson<RainSystemDiagramParamsViewModel>();
+        }
         private double _StoreySpan = 1800; //mm
-        public double StoreySpan 
-        { 
+        public double StoreySpan
+        {
             get
             {
+                if (_StoreySpan <= 0)
+                {
+                    _StoreySpan = 2000;
+                    this.RaisePropertyChanged();
+                }
                 return _StoreySpan;
             }
-            
+
             set
             {
                 _StoreySpan = value;
@@ -71,9 +89,9 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private string _BalconyFloorDrainDN;
-        public string BalconyFloorDrainDN 
-        { 
+        private string _BalconyFloorDrainDN = "DN25";
+        public string BalconyFloorDrainDN
+        {
             get
             {
                 return _BalconyFloorDrainDN;
@@ -84,9 +102,9 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-        private string _CondensePipeDN;
-        public string CondensePipeDN 
-        { 
+        private string _CondensePipeDN = "DN25";
+        public string CondensePipeVerticalDN
+        {
             get
             {
                 return _CondensePipeDN;
@@ -97,10 +115,23 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+        private string _CondensePipeHorizontalDN = "DN25";
+        public string CondensePipeHorizontalDN
+        {
+            get
+            {
+                return _CondensePipeHorizontalDN;
+            }
+            set
+            {
+                _CondensePipeHorizontalDN = value;
+                this.RaisePropertyChanged();
+            }
+        }
 
-        private string _BalconyRainPipeDN;
-        public string BalconyRainPipeDN 
-        { 
+        private string _BalconyRainPipeDN = "DN25";
+        public string BalconyRainPipeDN
+        {
             get
             {
                 return _BalconyRainPipeDN;
@@ -112,9 +143,9 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private bool _HasAirConditionerFloorDrain;
-        public bool HasAirConditionerFloorDrain 
-        { 
+        private bool _HasAirConditionerFloorDrain = true;
+        public bool HasAirConditionerFloorDrain
+        {
             get
             {
                 return _HasAirConditionerFloorDrain;
@@ -126,23 +157,23 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-        private bool _HasAiringForCondensePipe;
-        public bool HasAiringForCondensePipe 
-        { 
+        private bool _HasAiringForCondensePipe = true;
+        public bool HasAiringForCondensePipe
+        {
             get
             {
                 return _HasAiringForCondensePipe;
             }
-            
+
             set
             {
                 _HasAiringForCondensePipe = value;
                 this.RaisePropertyChanged();
             }
         }
-        private bool _CouldHavePeopleOnRoof;
-        public bool CouldHavePeopleOnRoof 
-        { 
+        private bool _CouldHavePeopleOnRoof = true;
+        public bool CouldHavePeopleOnRoof
+        {
             get
             {
                 return _CouldHavePeopleOnRoof;

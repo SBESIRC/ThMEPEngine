@@ -1,4 +1,5 @@
-﻿using System;
+﻿#pragma warning disable
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,6 +9,7 @@ using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
 using Dreambuild.AutoCAD;
 using ThMEPWSS.Assistant;
+using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
 using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
@@ -186,6 +188,7 @@ namespace ThMEPWSS.Pipe.Model
         {
             var pl = ThMEPWSS.Pipe.Service.PolylineTools.CreatePolyline(new Point3d[] { basePt.OffsetXY(-75, -75), basePt.OffsetXY(75, 75) });
             pl.ConstantWidth = 25;
+            pl.Layer = "W-RAIN-NOTE";
             DU.DrawEntityLazy(pl);
             var text = "贴底板敷设";
             var height = 300;
@@ -202,7 +205,16 @@ namespace ThMEPWSS.Pipe.Model
         }
         public static void DrawWrappingPipe(Point3d basePt)
         {
-            DU.DrawBlockReference(blkName: "*U349", basePt: basePt.OffsetXY(-450, 0), cb: br => DU.SetLayerAndColorIndex("W-BUSH", 256, br));
+            //DU.DrawBlockReference(blkName: "*U349", basePt: basePt.OffsetXY(-450, 0), cb: br => DU.SetLayerAndColorIndex("W-BUSH", 256, br));
+            //DU.DrawTextLazy("套管", basePt);
+            DU.DrawBlockReference(blkName: "套管系统", basePt: basePt.OffsetXY(-450, 0), cb: br =>
+            {
+                DU.SetLayerAndColorIndex("W-BUSH", 256, br);
+                if (br.IsDynamicBlock)
+                {
+                    br.ObjectId.SetDynBlockValue("可见性", "防水套管水平");
+                }
+            });
         }
         public static void DrawFloorDrain(Point3d basePt)
         {
@@ -313,7 +325,18 @@ namespace ThMEPWSS.Pipe.Model
                 }
             }
         }
-
+        static string fix(string str, string dft = null)
+        {
+            return string.IsNullOrWhiteSpace(str) ? dft : str;
+        }
+        public static string GetFloorDrainDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.BalconyFloorDrainDN, "DN25");//阳台地漏
+        public static string GetRoofRainPipeDN() => "DN100";
+        public static string GetCondensePipeHorizontalDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.CondensePipeHorizontalDN, "DN25");//冷凝横管
+        public static string GetCondensePipeVerticalDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.CondensePipeVerticalDN, "DN25");//冷凝立管
+        public static string GetBalconyRainPipeDN() => fix(ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.BalconyRainPipeDN, "DN25");//阳台雨立
+        public static bool GetCanPeopleBeOnRoof() => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.CouldHavePeopleOnRoof ?? false;//屋面上人
+        public static bool GetHasAiringForCondensePipe() => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.HasAiringForCondensePipe ?? true;//冷凝立管设通气
+        public static bool GetHasAirConditionerFloorDrain() => ThRainSystemService.commandContext?.rainSystemDiagramViewModel.Params.HasAirConditionerFloorDrain ?? true;//空调板夹层地漏
         public static void SetLabelStylesForWNote(params Entity[] ents)
         {
             foreach (var e in ents)
@@ -636,6 +659,8 @@ namespace ThMEPWSS.Pipe.Model
                     var pts = yd.GetPoint3ds(basePt.OffsetXY(-1200, -550)).ToList();
                     var lines = DU.DrawLinesLazy(pts);
                     ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                    var dbt = DU.DrawTextLazy(Dr.GetFloorDrainDN(), basePt.OffsetXY(-1000, -500));
+                    Dr.SetLabelStylesForRainDims(dbt);
                     if (fd.HasDrivePipe)
                     {
                         Dr.DrawWrappingPipe(basePt.OffsetY(-550));
@@ -651,10 +676,29 @@ namespace ThMEPWSS.Pipe.Model
                     var pts = yd.GetPoint3ds(basePt.OffsetXY(1200, -550)).ToList();
                     var lines = DU.DrawLinesLazy(pts);
                     ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                    var dbt = DU.DrawTextLazy(Dr.GetFloorDrainDN(), basePt.OffsetXY(500, -500));
+                    Dr.SetLabelStylesForRainDims(dbt);
                     if (fd.HasDrivePipe)
                     {
                         Dr.DrawWrappingPipe(basePt.OffsetXY(900, -550));
                     }
+                }
+                if (Dr.GetHasAirConditionerFloorDrain() && ctx.ThWRainPipeRun.MainRainPipe.Label.StartsWith("Y2L"))
+                {
+                    var _basePt = basePt.OffsetY(-800);
+                    {
+                        var line = DU.DrawLineLazy(_basePt, _basePt.OffsetX(2000));
+                        Dr.SetLabelStylesForWNote(line);
+                    }
+                    Dr.DrawFloorDrain(_basePt.OffsetX(1200 + 180));
+                    var yd = new YesDraw();
+                    yd.OffsetX(-1200 + 100);
+                    yd.OffsetXY(-100, -100);
+                    var pts = yd.GetPoint3ds(_basePt.OffsetXY(1200, -550)).ToList();
+                    var lines = DU.DrawLinesLazy(pts);
+                    ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
+                    var dbt = DU.DrawTextLazy(Dr.GetFloorDrainDN(), _basePt.OffsetXY(500, -500));
+                    Dr.SetLabelStylesForRainDims(dbt);
                 }
                 return;
             }
@@ -752,7 +796,7 @@ namespace ThMEPWSS.Pipe.Model
                         ctx.TopPoint = topPt;
                         var lines = DU.DrawLinesLazy(p1, p2, p3);
                         ThWRainPipeSystem.SetPipeRunLinesStyle(lines);
-                        var t = DU.DrawTextLazy(CondensePipes.First().DN, p1.OffsetY(-120).OffsetXY(80, 160));
+                        var t = DU.DrawTextLazy(Dr.GetCondensePipeHorizontalDN(), p1.OffsetY(-120).OffsetXY(80, 160));
                         Dr.SetLabelStylesForRainDims(t);
                     }
                 }
