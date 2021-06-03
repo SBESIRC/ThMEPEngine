@@ -40,8 +40,7 @@ namespace ThMEPWSS.Pipe.Model
         {
             get
             {
-                var path = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板_20210517.dwg");
-                return path;
+                return ThCADCommon.WashPointLayoutDwgPath();
             }
         }
         //加载需要使用的模块
