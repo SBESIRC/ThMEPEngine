@@ -19,8 +19,8 @@ namespace ThMEPLighting.EmgLightConnect
         public static int TolGroupBlkLaneHead = 400;
         public static int TolGroupEmgLightEvac = 100;//边框*scale相加以后在外扩【200】的值，不是两点200以内
 
-        public static int TolReturnValueDistCheck = 5000;
-        public static int TolReturnValueMinRange = 500;
+        public static int TolReturnValueDistCheck = 2500;
+        public static int TolReturnValueMinRange = 2500;
         public static int TolReturnValueMaxDistance = 20000;
         public static int TolReturnValue0Approx = 1000;
         public static int TolReturnValueMax = 10000;

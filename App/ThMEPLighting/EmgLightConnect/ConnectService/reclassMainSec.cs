@@ -12,6 +12,7 @@ using ThMEPLighting.EmgLightConnect.Model;
 using ThMEPLighting.EmgLight.Assistant;
 
 
+
 namespace ThMEPLighting.EmgLightConnect.Service
 {
     public class reclassMainSec
@@ -503,7 +504,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 distance = offsetMax;
             }
-
+          
+            Algorithms.PolyClean_RemoveDuplicatedVertex(lanePoly);
             var moveLineTemp = lanePoly.GetOffsetCurves(distance * dir)[0] as Polyline;
 
             if (newReMainPointList.Count > 1)
