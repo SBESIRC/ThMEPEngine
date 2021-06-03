@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(NamePropertyName, "真实建筑轮廓");
                 if(GroupSwitch)
                 {
-                    geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }                
                 geometry.Boundary = o;
                 geos.Add(geometry);
@@ -75,7 +75,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(NamePropertyName, "选取竖向构建用建筑轮廓");
                 if(GroupSwitch)
                 {
-                    geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
                 geometry.Boundary = o;
                 geos.Add(geometry);

@@ -35,6 +35,7 @@ namespace ThMEPEngineCore.Temp
                 service.Extract(database, pts);
                 Beams = service.Polys;
             }
+            Beams.ForEach(o => o.Closed = true);
         }
         public List<ThGeometry> BuildGeometries()
         {
@@ -45,7 +46,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(CategoryPropertyName, Category);
                 if(GroupSwitch)
                 {
-                    geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
                 geometry.Boundary = o;
                 geos.Add(geometry);

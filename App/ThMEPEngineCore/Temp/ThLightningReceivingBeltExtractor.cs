@@ -48,7 +48,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(NamePropertyName, "专用");
                 if(GroupSwitch)
                 {
-                    geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
                 geometry.Boundary = o;
                 geos.Add(geometry);
@@ -61,7 +61,7 @@ namespace ThMEPEngineCore.Temp
                 geometry.Properties.Add(NamePropertyName, "兼用");
                 if (GroupSwitch)
                 {
-                    geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
                 geometry.Boundary = o;
                 geos.Add(geometry);

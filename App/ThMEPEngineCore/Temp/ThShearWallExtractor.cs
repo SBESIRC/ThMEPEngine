@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.Temp
                 }                
                 if (GroupSwitch)
                 {
-                    geometry.Properties.Add(AreaOwnerPropertyName, BuildString(GroupOwner, o));
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
                 geometry.Boundary = o;
                 geos.Add(geometry);
