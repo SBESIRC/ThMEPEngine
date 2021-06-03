@@ -108,7 +108,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
             var minReturnValue = hasReturn.Select(returnValue => returnValue.Value).Min();
             foreach (var hasReturnItem in hasReturn)
             {
-                if (Math.Abs(hasReturnItem.Value - minReturnValue) <= EmgConnectCommon.TolReturnValueMinRange) //returnValue in min +-500 
+                if (Math.Abs(hasReturnItem.Value - minReturnValue) <= EmgConnectCommon.TolReturnValueMinRange) //returnValue in min +-2500 
                 {
                     hasReturnMinReturnValue.Add(hasReturnItem.Key, hasReturnItem.Value);
                 }
