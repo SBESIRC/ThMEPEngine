@@ -182,6 +182,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPElectricalService.cs" />
     <Compile Include="ThMEPElectricalUtils.cs" />
+    <Compile Include="ThSecurityPlaneCmds.cs" />
     <Compile Include="VideoMonitoringSystem\LayoutService.cs" />
     <Compile Include="VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
     <Compile Include="VideoMonitoringSystem\Utils\UtilService.cs" />
