@@ -6,11 +6,12 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPWSS.FlushPoint.Service;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.CAD;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace ThMEPWSS.FlushPoint.Data
+namespace ThMEPEngineCore.GeojsonExtractor
 {    
     public class ThColumnExtractor: ThExtractorBase,IPrint
     {
@@ -28,11 +29,14 @@ namespace ThMEPWSS.FlushPoint.Data
             var geos = new List<ThGeometry>();
             var isolateColumns = ThElementIsolateFilterService.Filter(Columns.Cast<Entity>().ToList(), Rooms);
             Columns.ForEach(o =>
-            {
-                var isolate = isolateColumns.Contains(o);
+            {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
+                if(IsolateSwitch)
+                {
+                    var isolate = isolateColumns.Contains(o);
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
+                }                
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });

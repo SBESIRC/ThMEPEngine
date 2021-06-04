@@ -4,7 +4,7 @@ using ThMEPEngineCore.Model;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPWSS.FlushPoint.Service
+namespace ThMEPEngineCore.GeojsonExtractor.Service
 {
     public class ThElementIsolateFilterService
     {

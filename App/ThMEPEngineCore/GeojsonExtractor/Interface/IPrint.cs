@@ -1,6 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPWSS.FlushPoint.Data
+namespace ThMEPEngineCore.GeojsonExtractor.Interface
 {
     public interface IPrint
     {

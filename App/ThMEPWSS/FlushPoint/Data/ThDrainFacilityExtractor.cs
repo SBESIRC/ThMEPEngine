@@ -9,6 +9,8 @@ using ThMEPEngineCore.Service;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
 namespace ThMEPWSS.FlushPoint.Data
 {

@@ -1,4 +1,4 @@
-﻿namespace ThMEPWSS.FlushPoint
+﻿namespace ThMEPEngineCore.GeojsonExtractor
 {
     public class ThExtractorPropertyNameManager
     {

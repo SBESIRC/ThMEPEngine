@@ -3,18 +3,19 @@ using ThMEPEngineCore.Model;
 using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
-using ThMEPWSS.FlushPoint.Service;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor.Service;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace ThMEPWSS.FlushPoint.Data
+namespace ThMEPEngineCore.GeojsonExtractor
 {    
-    public class ThShearwallExtractor : ThExtractorBase,IPrint
+    public class ThArchitectureExtractor : ThExtractorBase,IPrint
     {
         public List<Entity> Walls { get; private set; }
         private List<ThIfcRoom> Rooms { get; set; }
-        public ThShearwallExtractor()
+        public ThArchitectureExtractor()
         {
-            Category = BuiltInCategory.ShearWall.ToString();
+            Category = BuiltInCategory.ArchitectureWall.ToString();
             Walls = new List<Entity>();
             Rooms = new List<ThIfcRoom>();
         }
@@ -24,11 +25,14 @@ namespace ThMEPWSS.FlushPoint.Data
             var geos = new List<ThGeometry>();
             var isolateShearwalls = ThElementIsolateFilterService.Filter(Walls, Rooms);
             Walls.ForEach(o =>
-            {
-                var isolate = isolateShearwalls.Contains(o);
+            {                
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(ThExtractorPropertyNameManager.CategoryPropertyName, Category);
-                geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
+                if(IsolateSwitch)
+                {
+                    var isolate = isolateShearwalls.Contains(o);
+                    geometry.Properties.Add(ThExtractorPropertyNameManager.IsolatePropertyName, isolate);
+                }                
                 geometry.Boundary = o;
                 geos.Add(geometry);
             });
@@ -37,7 +41,7 @@ namespace ThMEPWSS.FlushPoint.Data
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            using (var engine = new ThShearWallRecognitionEngine())
+            using (var engine = new ThArchitectureWallRecognitionEngine())
             {
                 engine.Recognize(database, pts);
                 engine.Elements.ForEach(o => Walls.Add(o.Outline));
@@ -50,7 +54,7 @@ namespace ThMEPWSS.FlushPoint.Data
 
         public void Print(Database database)
         {
-            Walls.CreateGroup(database, ColorIndex);
+            Walls.CreateGroup(database,ColorIndex);
         }
     }
 }

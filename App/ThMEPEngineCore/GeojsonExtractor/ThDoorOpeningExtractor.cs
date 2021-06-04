@@ -6,13 +6,14 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.GeojsonExtractor.Interface;
 
-namespace ThMEPWSS.FlushPoint.Data
+namespace ThMEPEngineCore.GeojsonExtractor
 {
     public class ThDoorOpeningExtractor : ThExtractorBase,IPrint
     {
         public List<Polyline> Doors { get; set; }
-        private bool UseDb3Engine { get; set; }
+        
         public ThDoorOpeningExtractor()
         {
             Doors = new List<Polyline>();

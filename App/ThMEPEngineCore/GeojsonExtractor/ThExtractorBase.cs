@@ -3,7 +3,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 
-namespace ThMEPWSS.FlushPoint.Data
+namespace ThMEPEngineCore.GeojsonExtractor
 {
     public abstract class ThExtractorBase
     {
@@ -11,9 +11,15 @@ namespace ThMEPWSS.FlushPoint.Data
 
         public short ColorIndex { get; set; }
 
+        public bool UseDb3Engine { get; set; }
+        public bool GroupSwitch { get; set; }
+        public bool IsolateSwitch { get; set; }
+
         public ThExtractorBase()
         {
             Category = "";
+            GroupSwitch = false;
+            IsolateSwitch = false;
         }
         public abstract void Extract(Database database, Point3dCollection pts);
         public abstract List<ThGeometry> BuildGeometries();

@@ -1,5 +1,7 @@
 ﻿using System;
 using AcHelper.Commands;
+using ThMEPEngineCore.GeojsonExtractor;
+using NFox.Cad;
 
 #if ACAD2016
 using CLI;
@@ -45,13 +47,19 @@ namespace ThMEPWSS.Command
                 var pts = nFrame.VerticesEx(100.0);
 
                 //收集数据
-                var roomExtractor = new ThRoomExtractor() { ColorIndex = 6, };
+                var roomExtractor = new ThRoomExtractor() { ColorIndex = 6};
                 roomExtractor.Extract(acadDb.Database, pts);
+                var parkingStallExtractor = new ThParkingStallExtractor();
+                parkingStallExtractor.Extract(acadDb.Database, pts);
+                var resetService = new ThRoomNameResetService(roomExtractor.Rooms,
+                    parkingStallExtractor.ParkingStalls.ToCollection());
+                resetService.Reset();
+
                 var extractors = new List<ThExtractorBase>()
                 {
-                    new ThColumnExtractor(){ ColorIndex=1,},
-                    new ThShearwallExtractor(){ ColorIndex=2,},
-                    new ThArchitectureExtractor(){ ColorIndex=3,},
+                    new ThColumnExtractor(){ ColorIndex=1,IsolateSwitch=true},
+                    new ThShearwallExtractor(){ ColorIndex=2,IsolateSwitch=true},
+                    new ThArchitectureExtractor(){ ColorIndex=3,IsolateSwitch=true},
                     new ThObstacleExtractor(){ ColorIndex=4,},
                     new ThDrainFacilityExtractor(){ ColorIndex=5,},
                 };

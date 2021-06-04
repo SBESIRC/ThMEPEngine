@@ -72,6 +72,16 @@
     <Compile Include="Engine\ThParkingStallVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementRecognitionEngine.cs" />
+    <Compile Include="GeojsonExtractor\Interface\IGroup.cs" />
+    <Compile Include="GeojsonExtractor\Interface\IPrint.cs" />
+    <Compile Include="GeojsonExtractor\Service\ThElementIsolateFilterService.cs" />
+    <Compile Include="GeojsonExtractor\ThArchitectureExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThColumnExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThDoorOpeningExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThExtractorBase.cs" />
+    <Compile Include="GeojsonExtractor\ThExtractorPropertyNameManager.cs" />
+    <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
+    <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
     <Compile Include="Model\Electrical\ThFireCompartment.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
