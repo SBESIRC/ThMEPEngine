@@ -43,21 +43,7 @@ Task Requires.MSBuild {
     Write-Host "Found MSBuild here: $msbuildExe"
 }
 
-# $buildType build for AutoCAD R18
-Task Compile.Assembly.R18.Common -Depends Requires.MSBuild {
-    exec {
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\$buildType\",IntermediateOutputPath="..\build\obj\$buildType\" ".\ThMEPEngine.sln" /p:Configuration=$buildType /t:restore
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\$buildType\",IntermediateOutputPath="..\build\obj\$buildType\" ".\ThMEPEngine.sln" /p:Configuration=$buildType /t:rebuild
-    }
-}
-
-Task Compile.Assembly.R18.FanSelection -Depends Requires.MSBuild {
-    exec {
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\$buildType\",IntermediateOutputPath="..\build\obj\$buildType\" ".\ThMEPEquipmentSelection.sln" /p:Configuration=$buildType /t:restore
-        & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\$buildType\",IntermediateOutputPath="..\build\obj\$buildType\" ".\ThMEPEquipmentSelection.sln" /p:Configuration=$buildType /t:rebuild
-    }
-}
-
+# $buildType build for Resource DLL 
 Task Compile.Resource.R18 -Depends Requires.MSBuild {
     exec {
             & $msbuildExe /verbosity:minimal /property:OutDir="..\build\bin\$buildType\Dark\",IntermediateOutputPath="..\build\obj\$buildType\Dark\" ".\ThCuiRes\ThCuiRes.vcxproj" /t:rebuild
@@ -139,7 +125,7 @@ Task Requires.BuildType {
     Write-Host "$buildType build confirmed"
 }
 
-Task Compile.Engine -Depends Requires.BuildType, Compile.Assembly.R18.Common, Compile.Assembly.R19.Common, Compile.Assembly.R20.Common, Compile.Assembly.R22.Common
+Task Compile.Engine -Depends Requires.BuildType, Compile.Assembly.R19.Common, Compile.Assembly.R20.Common, Compile.Assembly.R22.Common
 {
 
 }
@@ -149,7 +135,7 @@ Task Compile.Resource -Depends Compile.Resource.R18, Compile.Resource.R19, Compi
 
 }
 
-Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R18.FanSelection, Compile.Assembly.R19.FanSelection, Compile.Assembly.R20.FanSelection, Compile.Assembly.R22.FanSelection
+Task Compile.FanSelection -Depends Requires.BuildType, Compile.Assembly.R19.FanSelection, Compile.Assembly.R20.FanSelection, Compile.Assembly.R22.FanSelection
 {
     
 }

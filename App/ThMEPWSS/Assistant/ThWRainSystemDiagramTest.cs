@@ -76,8 +76,9 @@
         }
         public static void Test1()
         {
-            using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
             {
                 var pt1 = "{x:-84185.9559129075,y:1871639.15102121,z:0}".JsonToPoint3d();
                 var pt2 = "{x:282170.133176226,y:335611.579893751,z:0}".JsonToPoint3d();
@@ -100,8 +101,6 @@
                 //CollectDataAndSave(adb, points, KEY, basePt);
                 DrawFromJson(adb, points, KEY, basePt);
 
-                DrLazy.Default.DrawLazy();
-                DrawUtils.Draw();
                 Dbg.FocusMainWindow();
             }
         }

@@ -41,6 +41,13 @@ namespace ThMEPWSS.JsonExtensionsNs
         {
             return lis.Select(li => source[li]).ToList();
         }
+        public static IEnumerable<int> SelectInts<T>(this IList<T> source, IList<T> std)
+        {
+            for (int i = 0; i < source.Count; i++)
+            {
+                yield return std.IndexOf(source[i]);
+            }
+        }
         public static IEnumerable<int> SelectInts<T>(this IList<T> source, Func<T, bool> f)
         {
             for (int i = 0; i < source.Count; i++)
@@ -62,6 +69,10 @@ namespace ThMEPWSS.JsonExtensionsNs
         public static KeyValuePair<K, V> ToKV<K, V>(this Tuple<K, V> t)
         {
             return new KeyValuePair<K, V>(t.Item1, t.Item2);
+        }
+        public static GRect ToGRect(this Extents2d extents2D)
+        {
+            return new GRect(extents2D.MinPoint, extents2D.MaxPoint);
         }
         public static GRect ToGRect(this Extents3d extents3D)
         {
@@ -121,12 +132,26 @@ namespace ThMEPWSS.CADExtensionsNs
     {
         public static GRect ToGRect(this Geometry geo)
         {
-            var env=geo.EnvelopeInternal;
+            var env = geo.EnvelopeInternal;
             return new GRect(env.MinX, env.MinY, env.MaxX, env.MaxY);
         }
         public static LinearRing ToLinearRing(this GRect r)
         {
             return new LinearRing(GeoNTSConvertion.ConvertToCoordinateArray(r));
+        }
+        public static LineString ToLineString(this IList<Point3d> pts)
+        {
+            var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points);
+        }
+        public static LinearRing ToLinearRing(this IList<Point3d> pts)
+        {
+            var points = pts.Cast<Point3d>().Select(pt => pt.ToNTSCoordinate()).ToArray();
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLinearRing(points);
+        }
+        public static Polygon ToPolygon(this GRect r)
+        {
+            return new Polygon(r.ToLinearRing());
         }
         public static LineString ToLineString(this GLineSegment seg)
         {
@@ -135,15 +160,15 @@ namespace ThMEPWSS.CADExtensionsNs
                 seg.StartPoint.ToNTSCoordinate(),
                 seg.EndPoint.ToNTSCoordinate(),
             };
-            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points.ToArray());
+            return ThCADCoreNTSService.Instance.GeometryFactory.CreateLineString(points);
         }
-        public static NetTopologySuite.Geometries.Prepared.IPreparedGeometry ToIPreparedGeometry(this Geometry geo)
+        public static NetTopologySuite.Geometries.Prepared.IPreparedGeometry CreateIPreparedGeometry(this Geometry geo)
         {
             return ThCADCoreNTSService.Instance.PreparedGeometryFactory.Create(geo);
         }
-        public static Geometry Buffer(this GLineSegment seg,double distance)
+        public static Geometry Buffer(this GLineSegment seg, double distance)
         {
-            return seg.ToLineString().Buffer(distance,NetTopologySuite.Operation.Buffer.EndCapStyle.Flat);
+            return seg.ToLineString().Buffer(distance, NetTopologySuite.Operation.Buffer.EndCapStyle.Flat);
         }
         public static GRect ToGRect(this Envelope env)
         {

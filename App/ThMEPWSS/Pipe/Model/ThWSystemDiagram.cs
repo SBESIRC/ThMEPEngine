@@ -221,7 +221,6 @@ namespace ThMEPWSS.Pipe.Model
                     break;
                 case WaterBucketEnum._87:
                     {
-                        //后面看看怎么画
                         Dr.DrawGravityWaterBucket(basePt);
                         Dr.DrawGravityWaterBucketLabel(basePt.OffsetXY(0, 125), $"87雨水斗{DN}");
                     }
@@ -353,19 +352,7 @@ namespace ThMEPWSS.Pipe.Model
         }
     }
 
-    public class ThWSystemDiagram
+    public abstract class ThWSystemDiagram
     {
-        protected ThWSystemDiagram()
-        {
-
-        }
-
-        public void Draw(Point3d basePt, Matrix3d mat)
-        {
-        }
-
-        public void Draw(Point3d basePt)
-        {
-        }
     }
 }

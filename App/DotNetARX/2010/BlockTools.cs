@@ -248,7 +248,7 @@ namespace DotNetARX
         /// </summary>
         /// <param name="blockReferenceId">块参照的Id</param>
         /// <returns>返回块参照的属性名和属性值</returns>
-        public static SortedDictionary<string, string> GetAttributesInBlockReference(this ObjectId blockReferenceId)
+        public static SortedDictionary<string, string> GetAttributesInBlockReference(this ObjectId blockReferenceId,bool OnlyShowVisible=false)
         {
             SortedDictionary<string, string> attributes = new SortedDictionary<string, string>();
             Database db = blockReferenceId.Database;
@@ -260,7 +260,17 @@ namespace DotNetARX
                 foreach (ObjectId attId in bref.AttributeCollection)
                 {
                     AttributeReference attRef = (AttributeReference)trans.GetObject(attId, OpenMode.ForRead);
-                    attributes.Add(attRef.Tag, attRef.TextString);
+                    if(OnlyShowVisible)
+                    {
+                        if(attRef.Visible)
+                        {
+                            attributes.Add(attRef.Tag, attRef.TextString);
+                        }
+                    }
+                    else
+                    {
+                        attributes.Add(attRef.Tag, attRef.TextString);
+                    }
                 }
                 trans.Commit();
             }

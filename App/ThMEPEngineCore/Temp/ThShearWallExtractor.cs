@@ -1,12 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using DotNetARX;
 using Linq2Acad;
-using ThMEPEngineCore.Model;
-using Autodesk.AutoCAD.Geometry;
-using Autodesk.AutoCAD.DatabaseServices;
-using ThMEPEngineCore.Engine;
 using System.Linq;
+using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Engine;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
@@ -20,6 +20,7 @@ namespace ThMEPEngineCore.Temp
             Category = "ShearWall";
             UseDb3Engine = true;
             Spaces = new List<ThTempSpace>();
+            ElementLayer = "剪力墙";
         }
 
         public void Extract(Database database, Point3dCollection pts)
@@ -48,15 +49,19 @@ namespace ThMEPEngineCore.Temp
             var geos = new List<ThGeometry>();
             Walls.ForEach(o =>
             {
-                var isolate = IsIsolate(Spaces, o);
-                if(isolate)
+                var geometry = new ThGeometry();
+                geometry.Properties.Add(CategoryPropertyName, Category);
+                if(IsolateSwitch)
                 {
-                    var geometry = new ThGeometry();
-                    geometry.Properties.Add(CategoryPropertyName, Category);
+                    var isolate = IsIsolate(Spaces, o);
                     geometry.Properties.Add(IsolatePropertyName, isolate);
-                    geometry.Boundary = o;
-                    geos.Add(geometry);
+                }                
+                if (GroupSwitch)
+                {
+                    geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
                 }
+                geometry.Boundary = o;
+                geos.Add(geometry);
             });
             return geos;
         }
@@ -84,7 +89,10 @@ namespace ThMEPEngineCore.Temp
         }
         public void Group(Dictionary<Entity, string> groupId)
         {
-            throw new NotImplementedException();
+            if(GroupSwitch)
+            {
+                Walls.ForEach(o => GroupOwner.Add(o, FindCurveGroupIds(groupId, o)));
+            }            
         }
     }
 }

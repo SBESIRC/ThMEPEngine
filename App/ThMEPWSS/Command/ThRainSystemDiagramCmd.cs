@@ -25,12 +25,18 @@ namespace ThMEPWSS.Command
 {
     using ThMEPEngineCore.Engine;
     using ThMEPWSS.Assistant;
+    using ThMEPWSS.Diagram.ViewModel;
     using ThMEPWSS.JsonExtensionsNs;
     using ThMEPWSS.Pipe.Service;
 
     //雨水排水系统图
     public class ThRainSystemDiagramCmd : IAcadCommand, IDisposable
     {
+        RainSystemDiagramViewModel _vm = null;
+        public ThRainSystemDiagramCmd(RainSystemDiagramViewModel vm = null)
+        {
+            _vm = vm;
+        }
         public void Dispose()
         {
         }
@@ -71,7 +77,14 @@ namespace ThMEPWSS.Command
             //发布出去的时候做try catch，本地测试直接调用，不要catch，便于捕获异常！
             try
             {
-                ThRainSystemService.DrawRainSystemDiagram1();
+                if (_vm == null)
+                {
+                    ThRainSystemService.DrawRainSystemDiagram2();
+                }
+                else
+                {
+                    ThRainSystemService.DrawRainSystemDiagram3();
+                }
             }
             catch (System.Exception ex)
             {
@@ -79,7 +92,7 @@ namespace ThMEPWSS.Command
             }
         }
 
-        private static void Execute1()
+        public void Execute1()
         {
             using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             using (var adb = AcadDatabase.Active())

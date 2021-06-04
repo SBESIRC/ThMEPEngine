@@ -555,6 +555,10 @@ namespace ThMEPWSS.Uitl
         {
             return new GRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
         }
+        public static GRect Create(Point2d pt, double extX, double extY)
+        {
+            return new GRect(pt.X - extX, pt.Y - extY, pt.X + extX, pt.Y + extY);
+        }
         public static GRect Create(Point2d pt, double ext)
         {
             return new GRect(pt.X - ext, pt.Y - ext, pt.X + ext, pt.Y + ext);
@@ -606,16 +610,16 @@ namespace ThMEPWSS.Uitl
             X2 = x2;
             Y2 = y2;
         }
-        public GLineSegment(Point2d point1, Point2d point2) : this(point1.X, point1.Y, point2.X, point2.Y)
-        {
-        }
+        public GLineSegment(Point3d point1, Point3d point2) : this(point1.X, point1.Y, point2.X, point2.Y) { }
+        public GLineSegment(Point2d point1, Point2d point2) : this(point1.X, point1.Y, point2.X, point2.Y) { }
         public bool IsValid => !(X1 == X2 && Y1 == Y2);
         public double X1 { get; }
         public double Y1 { get; }
         public double X2 { get; }
         public double Y2 { get; }
-        public Point2d StartPoint { get => new Point2d(X1, Y1); }
-        public Point2d EndPoint { get => new Point2d(X2, Y2); }
+        public Point2d StartPoint => new Point2d(X1, Y1);
+        public Point2d EndPoint => new Point2d(X2, Y2);
+        public Point2d Center => GeoAlgorithm.MidPoint(StartPoint, EndPoint);
         public double Length => StartPoint.GetDistanceTo(EndPoint);
         public double MinX => Math.Min(X1, X2);
         public double MaxX => Math.Max(X1, X2);
@@ -631,19 +635,24 @@ namespace ThMEPWSS.Uitl
                 return dg;
             }
         }
+        public double SingleAngleDegree
+        {
+            get
+            {
+                var dg = AngleDegree;
+                if (dg >= 180) dg -= 180;
+                return dg;
+            }
+        }
         public bool IsVertical(double tollerance)
         {
-            var dg = AngleDegree;
-            if (dg > 180) dg -= 180;
+            var dg = SingleAngleDegree;
             return 90 - tollerance <= dg && dg <= 90 + tollerance;
         }
         public bool IsHorizontalOrVertical(double tollerance) => IsHorizontal(tollerance) || IsVertical(tollerance);
         public bool IsHorizontal(double tollerance)
         {
-            var dg = AngleDegree;
-            //if (dg > 270) dg -= 360;
-            //return -tollerance <= dg && dg <= tollerance || 180 - tollerance <= dg && dg <= 180 + tollerance;
-            if (dg > 180) dg -= 180;
+            var dg = SingleAngleDegree;
             return dg <= tollerance || dg >= 180 - tollerance;
         }
         public GLineSegment Extend(double ext)
@@ -968,6 +977,29 @@ namespace ThMEPWSS.Uitl
     }
     public static class GeoAlgorithm
     {
+        public static Point3d ToPoint3d(this Vector3d v)
+        {
+            return new Point3d(v.X, v.Y, v.Z);
+        }
+        public static Point2d ToPoint2d(this Vector2d v)
+        {
+            return new Point2d(v.X, v.Y);
+        }
+        public static bool IsParallelTo(this Vector3d vector, Vector3d other, double tol)
+        {
+            double angle = vector.GetAngleTo(other) / Math.PI * 180.0;
+            return (angle < tol) || ((180.0 - angle) < tol);
+        }
+        public static bool IsParallelTo(this GLineSegment first, GLineSegment second)
+        {
+            var firstVec = first.EndPoint - first.StartPoint;
+            var secondVec = second.EndPoint - second.StartPoint;
+            return firstVec.IsParallelTo(secondVec);
+        }
+        public static bool EqualsTo(this double value1, double value2, double tollerance)
+        {
+            return value2 - tollerance <= value1 && value1 <= value2 + tollerance;
+        }
         public static Point3d ToPoint3d(this Coordinate coordinate)
         {
             return new Point3d(coordinate.X, coordinate.Y, coordinate.Z);

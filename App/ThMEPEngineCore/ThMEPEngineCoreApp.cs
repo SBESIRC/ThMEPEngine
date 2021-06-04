@@ -92,21 +92,159 @@ namespace ThMEPEngineCore
                     return;
                 }
 
+                var options2 = new PromptKeywordOptions("\n选择数据来源");
+                options2.Keywords.Add("原始", "O", "原始(O)");
+                options2.Keywords.Add("平台", "P", "平台(P)");
+                options2.Keywords.Add("全部", "A", "全部(A)");
+                options2.Keywords.Default = "全部";
+                var result3 = Active.Editor.GetKeywords(options2);
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 var nFrame = ThMEPFrameService.Normalize(frame);
                 if(result2.StringResult == "识别")
                 {
-                    var engine = new ThDB3ColumnRecognitionEngine();
-                    engine.Recognize(acadDatabase.Database, nFrame.Vertices());
-                    engine.Elements.Select(o => o.Outline).ForEach(o =>
+                    if (result3.StringResult == "原始")
+                    {
+                        var engine = new ThColumnRecognitionEngine();
+                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Elements.Select(o => o.Outline).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
+                    }
+                    else if (result3.StringResult == "平台")
+                    {
+                        var engine = new ThDB3ColumnRecognitionEngine();
+                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Elements.Select(o => o.Outline).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
+                    }
+                    else if (result3.StringResult == "全部")
+                    {
+                        var elements = new List<ThIfcBuildingElement>();
+                        var engine1 = new ThColumnRecognitionEngine();
+                        engine1.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        elements.AddRange(engine1.Elements);
+                        var engine2 = new ThDB3ColumnRecognitionEngine();
+                        engine2.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        elements.AddRange(engine2.Elements);
+                        elements.Select(o => o.Outline)
+                            .ToCollection()
+                            .UnionPolygons()
+                            .Cast<Entity>()
+                            .ForEach(o =>
+                            {
+                                acadDatabase.ModelSpace.Add(o);
+                                o.SetDatabaseDefaults();
+                            });
+                    }
+                }
+                else
+                {
+                    var engine = new ThDB3ColumnExtractionEngine();
+                    engine.Extract(acadDatabase.Database);
+                    var results = new DBObjectCollection();
+                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
+                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
+                    {
+                        results.Add(filterObj as Entity);
+                    }
+                    results.Cast<Entity>().ForEach(o =>
                     {
                         acadDatabase.ModelSpace.Add(o);
                         o.SetDatabaseDefaults();
                     });
                 }
+            }
+        }
+
+        [CommandMethod("TIANHUACAD", "THExtractShearWall", CommandFlags.Modal)]
+        public void THExtractShearWall()
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                var result = Active.Editor.GetEntity("\n选择框线");
+                if (result.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var options = new PromptKeywordOptions("\n选择处理方式");
+                options.Keywords.Add("提取", "E", "提取(E)");
+                options.Keywords.Add("识别", "R", "识别(R)");
+                options.Keywords.Default = "提取";
+                var result2 = Active.Editor.GetKeywords(options);
+                if (result2.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                var options2 = new PromptKeywordOptions("\n选择数据来源");
+                options2.Keywords.Add("原始", "O", "原始(O)");
+                options2.Keywords.Add("平台", "P", "平台(P)");
+                options2.Keywords.Add("全部", "A", "全部(A)");
+                options2.Keywords.Default = "全部";
+                var result3 = Active.Editor.GetKeywords(options2);
+                if (result3.Status != PromptStatus.OK)
+                {
+                    return;
+                }
+
+                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
+                var nFrame = ThMEPFrameService.Normalize(frame);
+                if (result2.StringResult == "识别")
+                {
+                    if (result3.StringResult == "原始")
+                    {
+                        var engine = new ThShearWallRecognitionEngine();
+                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Elements.Select(o => o.Outline).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
+                    }
+                    else if (result3.StringResult == "平台")
+                    {
+                        var engine = new ThDB3ShearWallRecognitionEngine();
+                        engine.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        engine.Elements.Select(o => o.Outline).ForEach(o =>
+                        {
+                            acadDatabase.ModelSpace.Add(o);
+                            o.SetDatabaseDefaults();
+                        });
+                    }
+                    else if (result3.StringResult == "全部")
+                    {
+                        var elements = new List<ThIfcBuildingElement>();
+                        var engine1 = new ThShearWallRecognitionEngine();
+                        engine1.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        elements.AddRange(engine1.Elements);
+                        var engine2 = new ThDB3ShearWallRecognitionEngine();
+                        engine2.Recognize(acadDatabase.Database, nFrame.Vertices());
+                        elements.AddRange(engine2.Elements);
+                        elements.Select(o => o.Outline)
+                            .ToCollection()
+                            .UnionPolygons()
+                            .Cast<Entity>()
+                            .ForEach(o =>
+                            {
+                                acadDatabase.ModelSpace.Add(o);
+                                o.SetDatabaseDefaults();
+                            });
+                    }
+                }
                 else
                 {
-                    var engine = new ThDB3ColumnExtractionEngine();
+                    var engine = new ThDB3ShearWallExtractionEngine();
                     engine.Extract(acadDatabase.Database);
                     var results = new DBObjectCollection();
                     var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
@@ -154,57 +292,7 @@ namespace ThMEPEngineCore
                 beamTextDbExtension.BeamTexts.ForEach(o => acadDatabase.ModelSpace.Add(o));
             }
         }
-        [CommandMethod("TIANHUACAD", "THExtractShearWall", CommandFlags.Modal)]
-        public void THExtractShearWall()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                var result = Active.Editor.GetEntity("\n选择框线");
-                if (result.Status != PromptStatus.OK)
-                {
-                    return;
-                }
 
-                var options = new PromptKeywordOptions("\n选择处理方式");
-                options.Keywords.Add("提取", "E", "提取(E)");
-                options.Keywords.Add("识别", "R", "识别(R)");
-                options.Keywords.Default = "提取";
-                var result2 = Active.Editor.GetKeywords(options);
-                if (result2.Status != PromptStatus.OK)
-                {
-                    return;
-                }
-
-                Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
-                var nFrame = ThMEPFrameService.Normalize(frame);
-                if (result2.StringResult == "识别")
-                {
-                    var engine = new ThDB3ShearWallRecognitionEngine();
-                    engine.Recognize(acadDatabase.Database, nFrame.Vertices());
-                    engine.Elements.Select(o => o.Outline).ForEach(o =>
-                    {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.SetDatabaseDefaults();
-                    });
-                }
-                else
-                {
-                    var engine = new ThDB3ShearWallExtractionEngine();
-                    engine.Extract(acadDatabase.Database);
-                    var results = new DBObjectCollection();
-                    var spatialIndex = new ThCADCoreNTSSpatialIndexEx(engine.Results.Select(o => o.Geometry).ToCollection());
-                    foreach (var filterObj in spatialIndex.SelectCrossingPolygon(nFrame))
-                    {
-                        results.Add(filterObj as Entity);
-                    }
-                    results.Cast<Entity>().ForEach(o =>
-                    {
-                        acadDatabase.ModelSpace.Add(o);
-                        o.SetDatabaseDefaults();
-                    });
-                }
-            }
-        }
         [CommandMethod("TIANHUACAD", "THExtractArchWall", CommandFlags.Modal)]
         public void THExtractArchWall()
         {

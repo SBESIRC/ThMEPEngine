@@ -8,6 +8,10 @@
         /// </summary>
         ArchitectureWall,
         /// <summary>
+        /// 建筑轮廓线
+        /// </summary>
+        ArchitectureOutline,
+        /// <summary>
         /// 梁
         /// </summary>
         Beam,
@@ -56,6 +60,10 @@
         /// </summary>
         LaneLine,
         /// <summary>
+        /// 接闪带
+        /// </summary>
+        LightningReceivingBelt,
+        /// <summary>
         /// 障碍物
         /// </summary>
         Obstacle,
@@ -95,6 +103,10 @@
         /// 空间
         /// </summary>
         Space,
+        /// <summary>
+        /// 楼层框线
+        /// </summary>
+        StoreyBorder,
         /// <summary>
         /// 窗户
         /// </summary>

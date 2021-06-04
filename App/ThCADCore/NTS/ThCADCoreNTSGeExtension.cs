@@ -43,7 +43,14 @@ namespace ThCADCore.NTS
         {
             return point.Coordinate.ToAcGePoint2d();
         }
-
+        public static Point ToNTSPoint(this Point3d point)
+        {
+            return new Point(point.X, point.Y, point.Z);
+        }
+        public static Point ToNTSPoint(this Point2d point)
+        {
+            return new Point(point.X, point.Y);
+        }
         public static Coordinate ToNTSCoordinate(this Point3d point)
         {
             return new Coordinate(
@@ -64,7 +71,7 @@ namespace ThCADCore.NTS
         public static Coordinate[] ToNTSCoordinates(this Point3dCollection points)
         {
             var coordinates = new List<Coordinate>();
-            foreach(Point3d pt in points)
+            foreach (Point3d pt in points)
             {
                 coordinates.Add(pt.ToNTSCoordinate());
             }
@@ -74,7 +81,7 @@ namespace ThCADCore.NTS
         public static Point3dCollection ToAcGePoint3ds(this Coordinate[] coordinates)
         {
             var points = new Point3dCollection();
-            foreach(var coordinate in coordinates)
+            foreach (var coordinate in coordinates)
             {
                 points.Add(coordinate.ToAcGePoint3d());
             }
