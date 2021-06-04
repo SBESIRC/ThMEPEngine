@@ -152,6 +152,7 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="StructureHandleService\GetPrimitivesService.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModel.cs" />
@@ -181,6 +182,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ThMEPElectricalService.cs" />
     <Compile Include="ThMEPElectricalUtils.cs" />
+    <Compile Include="VideoMonitoringSystem\LayoutService.cs" />
+    <Compile Include="VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
+    <Compile Include="VideoMonitoringSystem\Utils\UtilService.cs" />
+    <Compile Include="VideoMonitoringSystem\VMExitLayoutService\GetLayoutStructureService.cs" />
+    <Compile Include="VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
