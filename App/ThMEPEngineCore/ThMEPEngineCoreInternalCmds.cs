@@ -658,7 +658,7 @@ namespace ThMEPEngineCore
                 //string inputFile = inputFileName;
                 //string inputGeoJson = File.ReadAllText(inputFile);
 
-                var revisedContent = geojsonContent.Replace("给水起点","WaterSupplyStartPoint").Replace("给水点位", "WaterSupplyPoint");
+                var revisedContent = geojsonContent.Replace("WaterStartPoint","WaterSupplyStartPoint");
 
                 var output = SystemDiagramMethods.ProcessMainBranchs(revisedContent);
                 //string outputFile = @"D:\xx2.geojson";
