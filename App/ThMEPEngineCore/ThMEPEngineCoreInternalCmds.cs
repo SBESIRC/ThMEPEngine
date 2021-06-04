@@ -604,6 +604,94 @@ namespace ThMEPEngineCore
                 });
             }
         }
+
+        [CommandMethod("TIANHUACAD", "THROUTEMAINPIPE", CommandFlags.Modal)]
+        public void ThRouteMainPipe()
+        {
+            //Water Supply Detail Drawing (给排水大样图)
+
+            string geojsonContent = string.Empty;
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                using (var extractEngine = new ThExtractGeometryEngine())
+                {
+                    //Get Geojson input string
+                    var per = Active.Editor.GetEntity("\n选择一个框线");
+                    var pts = new Point3dCollection();
+                    if (per.Status == PromptStatus.OK)
+                    {
+                        var frame = acadDatabase.Element<Polyline>(per.ObjectId);
+                        var newFrame = ThMEPFrameService.NormalizeEx(frame);
+                        pts = newFrame.VerticesEx(100.0);
+                    }
+
+                    var extractors = new List<ThExtractorBase>()
+                    {
+                        new ThSpaceExtractor{ IsBuildObstacle=false,ColorIndex=1},
+                        new ThColumnExtractor{UseDb3ColumnEngine=true,ColorIndex=2},
+                        new ThWaterSupplyPositionExtractor{ColorIndex=3},
+                        new ThWaterSupplyStartExtractor{ColorIndex=4},
+                        new ThToiletGroupExtractor { ColorIndex=5},
+                    };
+
+                    extractEngine.Accept(extractors);
+                    extractEngine.Extract(acadDatabase.Database, pts);
+
+                    var toiletGroupDic = new Dictionary<Entity, string>();
+                    foreach (var item in (extractors[4] as ThToiletGroupExtractor).ToiletGroupId)
+                    {
+                        toiletGroupDic.Add(item.Key, item.Value);
+                    }
+
+                    extractEngine.Group(toiletGroupDic);
+                    //geojsonContent = Active.Document.Name;
+                    //geojsonContent = extractEngine.OutputGeo(Active.Document.Name);
+                    geojsonContent = extractEngine.OutputGeo();
+                }
+            }
+
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                ThPipeSystemDiagramMgd SystemDiagramMethods = new ThPipeSystemDiagramMgd();
+
+                //string inputFile = @"D:\DATA\Git\GeometricTools\GTE\Samples\CSharpCppManaged\CppLibrary\GroupingPipe\data\pipe\case-0.geojson";
+                //string inputFile = inputFileName;
+                //string inputGeoJson = File.ReadAllText(inputFile);
+
+                var revisedContent = geojsonContent.Replace("给水起点","WaterSupplyStartPoint").Replace("给水点位", "WaterSupplyPoint");
+
+                var output = SystemDiagramMethods.ProcessMainBranchs(revisedContent);
+                //string outputFile = @"D:\xx2.geojson";
+                //File.WriteAllText(outputFile, output);
+
+                var serializer = GeoJsonSerializer.Create();
+
+                using (var stringReader = new StringReader(output))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                    var FeaturesWithLineString = new List<IFeature>();
+
+                    foreach (var f in features)
+                    {
+                        if (f.Attributes.Exists("Category") && f.Attributes["Category"].Equals("Pipe"))
+                        {
+                            if (f.Geometry.GeometryType.Equals("LineString"))
+                            {
+                                var coordinates = f.Geometry.Coordinates;
+                                var linePts = new List<Point3d>();
+                                foreach (var coord in coordinates)
+                                {
+                                    linePts.Add(new Point3d(coord.X, coord.Y, 0));
+                                }
+
+                                Draw.Line(linePts.ToArray());
+                            }
+                        }
+                    }
+                }
+            }
+        }
         [CommandMethod("TIANHUACAD", "THLPDCDemoTest", CommandFlags.Modal)]
         public void THLPDCDemoTest()
         {

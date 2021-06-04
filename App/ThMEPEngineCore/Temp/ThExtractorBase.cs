@@ -77,6 +77,8 @@ namespace ThMEPEngineCore.Temp
         
         protected bool IsIsolate(List<ThTempSpace> spaces , Entity o)
         {
+            if (spaces == null)
+                return false;
             foreach(var space in spaces)
             {
                 if(space.Outline.IsFullContains(o))
