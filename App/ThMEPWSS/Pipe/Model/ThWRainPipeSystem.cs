@@ -174,20 +174,6 @@ namespace ThMEPWSS.Pipe.Model
                                 }
                             });
                         }
-                        if (r.TranslatorPipe.TranslatorType == TranslatorTypeEnum.Gravity)
-                        {
-                            DU.DrawingQueue.Enqueue(adb =>
-                            {
-                                var pts = c.YesDraw.GetPoint3ds(c.BasePoint).ToList();
-                                if (pts.Count >= 4)
-                                {
-                                    var pt = pts[3];
-                                    Dr.DrawUnderBoardLabelAtLeftTop(pt.OffsetX(180));
-                                    Dr.DrawDNLabel(pt.OffsetX(180).OffsetXY(300, -50 - 250));
-                                }
-                            });
-                        }
-
                     }
                     {
                         var basePt = c.BasePoint;

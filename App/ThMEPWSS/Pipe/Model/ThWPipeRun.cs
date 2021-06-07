@@ -176,7 +176,7 @@ namespace ThMEPWSS.Pipe.Model
             var width = height * 0.8 * text.Length + 200;
             var yd = new YesDraw();
             //yd.Rotate(505, 90 + 45);
-            yd.OffsetXY(460, -830);
+            yd.OffsetXY(460, -830 - ThWRainPipeRun.FIX_Y_OFFSET);
             yd.OffsetX(width);
             var pts = yd.GetPoint3ds(basePt).ToList();
             var lines = DU.DrawLinesLazy(pts);
@@ -824,6 +824,7 @@ namespace ThMEPWSS.Pipe.Model
             //左侧自上而下 室外机冷凝水高层地漏、室内机冷凝水高层点位、室内机冷凝水低层点位
             //右侧 室外机冷凝水低层地漏
         }
+        public const double FIX_Y_OFFSET = 520.0;
         public static void CalcOffsets(TranslatorTypeEnum translatorType, YesDraw yd)
         {
             switch (translatorType)
@@ -831,7 +832,7 @@ namespace ThMEPWSS.Pipe.Model
                 case TranslatorTypeEnum.None:
                     break;
                 case TranslatorTypeEnum.Long:
-                    yd.OffsetY(-280 + ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
+                    yd.OffsetY(-280 - FIX_Y_OFFSET + ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
                     yd.Rotate(170, 180 + 45);
                     yd.OffsetX(-1260);
                     yd.Rotate(170, 180 + 45);
@@ -839,12 +840,6 @@ namespace ThMEPWSS.Pipe.Model
                 case TranslatorTypeEnum.Short:
                     yd.OffsetY(150);
                     yd.GoXY(-150, 0);
-                    break;
-                case TranslatorTypeEnum.Gravity:
-                    yd.OffsetY(-280);
-                    yd.Rotate(170, 180 + 45);
-                    yd.OffsetX(-1260);
-                    yd.Rotate(170, 180 + 45);
                     break;
                 default:
                     break;
@@ -865,9 +860,6 @@ namespace ThMEPWSS.Pipe.Model
                         break;
                     case TranslatorTypeEnum.Short:
                         Dr.DrawShortTranslatorLabel(basePt);
-                        break;
-                    case TranslatorTypeEnum.Gravity:
-                        if (false) Dr.DrawLabelLeft(basePt, "Gravity");
                         break;
                     default:
                         break;
@@ -890,9 +882,6 @@ namespace ThMEPWSS.Pipe.Model
                 case TranslatorTypeEnum.Short:
                     Dr.DrawShortTranslator(basePt);
                     Dr.DrawShortTranslatorLabel(basePt);
-                    break;
-                case TranslatorTypeEnum.Gravity:
-                    Dr.DrawLongTranslator(basePt);
                     break;
                 default:
                     break;

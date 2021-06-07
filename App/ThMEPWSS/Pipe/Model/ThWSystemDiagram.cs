@@ -25,7 +25,6 @@ namespace ThMEPWSS.Pipe.Model
         None,
         Long, //转管
         Short, //乙字湾
-        Gravity //重力雨水斗转换
     }
 
     public enum WaterBucketEnum
@@ -185,10 +184,10 @@ namespace ThMEPWSS.Pipe.Model
     public class ThWSDWaterBucket : ThWSDDrawableElement, IEquatable<ThWSDWaterBucket>
     {
         public string Label { get; set; } = string.Empty;
-        public string DN = "DN100";
+        public string DN { get; set; } = "DN100";
         public WaterBucketEnum Type { get; set; }
         public ThWSDStorey Storey { get; set; }
-
+        public GRect Boundary;
         public ThWSDWaterBucket()
         {
             //LayerName = ThWPipeCommon.W_RAIN_EQPM;

@@ -977,6 +977,12 @@ namespace ThMEPWSS.Uitl
     }
     public static class GeoAlgorithm
     {
+        public static Vector3d ToVector3d(this Point3d pt) => new Vector3d(pt.X, pt.Y, pt.Z);
+        public static Vector2d ToVector2d(this Point2d pt) => new Vector2d(pt.X, pt.Y);
+        public static Point2d ToLongPoint2d(this Point2d pt)
+        {
+            return new Point2d(Convert.ToInt64(pt.X), Convert.ToInt64(pt.Y));
+        }
         public static Point3d ToPoint3d(this Vector3d v)
         {
             return new Point3d(v.X, v.Y, v.Z);
@@ -1008,7 +1014,7 @@ namespace ThMEPWSS.Uitl
         {
             return new Point2d(coordinate.X, coordinate.Y);
         }
-        public static bool InRange(double value, double std, double tollerance)
+        public static bool InRange(this double value, double std, double tollerance)
         {
             return std - tollerance <= value && value <= std + tollerance;
         }

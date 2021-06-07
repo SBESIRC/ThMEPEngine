@@ -54,6 +54,7 @@ namespace ThMEPWSS.DebugNs
     using Newtonsoft.Json.Linq;
     using ThMEPEngineCore.Engine;
     using NetTopologySuite.Geometries;
+    using System.Linq.Expressions;
 
     public class FengDbgTest
     {
@@ -421,11 +422,12 @@ namespace ThMEPWSS.DebugNs
     }
     public class ThDebugTool
     {
+        
         public static GeometryFactory GeometryFactory => ThCADCoreNTSService.Instance.GeometryFactory;
         public static DocumentLock DocumentLock => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument();
         public static Editor Editor => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.Editor;
         public static Document MdiActiveDocument => Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument;
-        static Dictionary<string, object> ctx => ThDebugClass.ctx;
+        public static Dictionary<string, object> ctx => ThDebugClass.ctx;
         public static void ShowString(string str)
         {
             if (!isDebugging) return;
@@ -717,9 +719,34 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             var basePt = rst.Value;
             return basePt;
         }
+        public static bool TrySelectPoint(out Point3d pt)
+        {
+            var basePtOptions = new PromptPointOptions("\n选择图纸基点");
+            var rst = Active.Editor.GetPoint(basePtOptions);
+            if (rst.Status != PromptStatus.OK)
+            {
+                pt = default;
+                return false;
+            }
+            pt = rst.Value;
+            return true;
+        }
         public static Point3dCollection SelectRange()
         {
             return SelectGRect().ToPoint3dCollection();
+        }
+        public static Point3dCollection TrySelectRange()
+        {
+            return TrySelectRect()?.ToPoint3dCollection();
+        }
+        public static Tuple<Point3d, Point3d> TrySelectRect()
+        {
+            var ptLeftRes = Active.Editor.GetPoint("\n请您框选范围，先选择左上角点");
+            if (ptLeftRes.Status != PromptStatus.OK) return null;
+            Point3d leftDownPt = ptLeftRes.Value;
+            var ptRightRes = Active.Editor.GetCorner("\n再选择右下角点", leftDownPt);
+            if (ptRightRes.Status != PromptStatus.OK) return null;
+            return new Tuple<Point3d, Point3d>(leftDownPt, ptRightRes.Value);
         }
         public static GRect SelectGRect()
         {
@@ -747,6 +774,15 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             else
             {
                 return Tuple.Create(leftDownPt, leftDownPt);
+            }
+        }
+        static _nzm __nzm;
+        public static _nzm nzm
+        {
+            get
+            {
+                __nzm??= _nzm.nzm;
+                return __nzm;
             }
         }
     }
@@ -3870,6 +3906,16 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         }
         public class qu0jxf
         {
+            public static void BlockReferenceToDataItemToJson()
+            {
+                Dbg.FocusMainWindow();
+                using (Dbg.DocumentLock)
+                using (var adb = AcadDatabase.Active())
+                using (var tr = new DrawingTransaction(adb))
+                {
+                    Dbg.PrintLine(Dbg.SelectEntity<BlockReference>(adb).ToDataItem().ToJson());
+                }
+            }
             public static void GetEntityBoundsGRectCadJson()
             {
                 Dbg.FocusMainWindow();
@@ -4010,7 +4056,7 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
                 using (var adb = AcadDatabase.Active())
                 using (var tr = new DrawingTransaction(adb))
                 {
-                    var e=Dbg.SelectEntity<BlockReference>(adb);
+                    var e = Dbg.SelectEntity<BlockReference>(adb);
                     Dbg.PrintLine(e.ScaleFactors.ToString());
                 }
             }
@@ -7300,7 +7346,975 @@ namespace qtc49j
 }
 
 
+namespace ThMEPWSS.DebugNs
+{
+    using System;
+    using System.Linq;
+    using System.Text;
+    using System.Reflection;
+    using System.Collections.Generic;
+    using System.Windows.Forms;
+    using ThMEPWSS.JsonExtensionsNs;
+    using Dbg = ThMEPWSS.DebugNs.ThDebugTool;
+    using DU = ThMEPWSS.Assistant.DrawUtils;
+    using Autodesk.AutoCAD.EditorInput;
+    using AcHelper;
+    using Autodesk.AutoCAD.Geometry;
+    using Linq2Acad;
+    using ThMEPWSS.Pipe.Model;
+    using ThMEPWSS.Pipe.Engine;
+    using Autodesk.AutoCAD.DatabaseServices;
+    using System.Diagnostics;
+    using Autodesk.AutoCAD.ApplicationServices;
+    using Dreambuild.AutoCAD;
+    using DotNetARX;
+    using Autodesk.AutoCAD.Internal;
+    using static ThMEPWSS.DebugNs.ThPublicMethods;
+    using ThMEPWSS.CADExtensionsNs;
+    using ThMEPWSS.Uitl;
+    using ThMEPWSS.Uitl.DebugNs;
+    using ThMEPWSS.Uitl.ExtensionsNs;
+    using ThMEPWSS.Assistant;
+    using ThMEPWSS.Pipe.Service;
+    using NFox.Cad;
+    using ThCADCore.NTS;
+    using Autodesk.AutoCAD.Colors;
+    using System.Runtime.Remoting;
+    using PolylineTools = Pipe.Service.PolylineTools;
+    using CircleTools = Pipe.Service.CircleTools;
+    using System.IO;
+    using Autodesk.AutoCAD.Runtime;
+    using static StaticMethods;
+    using ThMEPWSS.Pipe;
+    using Newtonsoft.Json;
+    using System.Text.RegularExpressions;
+    using ThCADExtension;
+    using System.Collections;
+    using ThCADCore.NTS.IO;
+    using Newtonsoft.Json.Linq;
+    using ThMEPEngineCore.Engine;
+    using NetTopologySuite.Geometries;
+    using System.Linq.Expressions;
+    public class _nzm
+    {
+        private _nzm() { }
+        static _nzm __nzm;
+        public static _nzm nzm
+        {
+            get
+            {
+                if (!Dbg.isDebugging) return null;
+                if (__nzm == null)
+                {
+                    var o = new _nzm();
+                    var types = ((Assembly)Dbg.ctx["nozomi"]).GetTypes().Where(x => x.IsPublic && !x.IsEnum).ToList();
+                    var baseTypeDict = new Dictionary<Type, string>()
+                {
+                    {typeof(byte),"byte"} ,
+                    {typeof(sbyte),"sbyte"} ,
+                    {typeof(ushort),"ushort"} ,
+                    {typeof(short),"short"} ,
+                    {typeof(uint),"uint"} ,
+                    {typeof(int),"int"} ,
+                    {typeof(ulong),"ulong"} ,
+                    {typeof(long),"long"} ,
+                    {typeof(string),"string"} ,
+                    {typeof(object),"object"} ,
+                    {typeof(void),"void"} ,
+                    {typeof(byte[]),"byte[]"} ,
+                    {typeof(float),"float"} ,
+                    {typeof(double),"double"} ,
+                    {typeof(decimal),"decimal"} ,
+                    {typeof(DateTime),"DateTime"} ,
+                };
+                    foreach (var type in types)
+                    {
+                        var d = baseTypeDict;
+                        var mis = type.GetMethods(BindingFlags.Public | BindingFlags.Static);
+                        foreach (var mi in mis)
+                        {
+                            if (Regex.IsMatch(mi.Name, @"[\+`<>]")) continue;
+                            if (!(d.ContainsKey(mi.ReturnType) && mi.GetParameters().All(p => d.ContainsKey(p.ParameterType)))) continue;
+                            o.Init(mi);
+                        }
+                    }
+                    __nzm = o;
+                }
+                return __nzm;
+            }
+        }
+        public int Copy(string sourceFile, string targetFile) => f0(sourceFile, targetFile);
+        public int Move(string sourceFile, string targetFile) => f1(sourceFile, targetFile);
+        public int Delete(string filePath) => f2(filePath);
+        public int GetLastError() => f3();
+        public string GetErrorString() => f4();
+        public string GetErrorString(int n) => f5(n);
+        public void KillProcess(string preciseName) => f6(preciseName);
+        public void OpenDir(string dir) => f7(dir);
+        public void OpenFile(string file) => f8(file);
+        public void Open(string path) => f9(path);
+        public string RunAndRead(string fileName, string args) => f10(fileName, args);
+        public byte[] AesEncrypt(byte[] bytes, string key) => f11(bytes, key);
+        public string AesEncrypt(string str, string key) => f12(str, key);
+        public byte[] AesDecrypt(byte[] encryptedBytes, string key) => f13(encryptedBytes, key);
+        public string AesDecrypt(string Base64Str, string key) => f14(Base64Str, key);
+        public uint GetCrc32(byte[] bytes, int start, int count) => f15(bytes, start, count);
+        public byte[] EncryptData(byte[] data, string publickeyXml) => f16(data, publickeyXml);
+        public byte[] DecryptData(byte[] data, string privatekeyXml) => f17(data, privatekeyXml);
+        public byte[] Sign(byte[] data, string privatekeyXml) => f18(data, privatekeyXml);
+        public string GetMD5StringFromFile(string filePath) => f19(filePath);
+        public string GetSHA1StringFromFile(string filePath) => f20(filePath);
+        public string GetMd5StringFromString(string str) => f21(str);
+        public string GetMd5String(byte[] bytes) => f22(bytes);
+        public byte[] GetMd5Bytes(byte[] bytes) => f23(bytes);
+        public string Base16To10(string colorStr) => f24(colorStr);
+        public string Base10To16(string colorStr) => f25(colorStr);
+        public void SetHtmlText(string html, string plainText) => f26(html, plainText);
+        public string GetText() => f27();
+        public void JoinWith(string str) => f28(str);
+        public void SetText(string text) => f29(text);
+        public void Test() => f30();
+        public int memcmp(byte[] b1, byte[] b2, int count) => f31(b1, b2, count);
+        public int memcmp(byte[] b1, byte[] b2, uint count) => f32(b1, b2, count);
+        public int memcpy(byte[] dst, byte[] src, int count) => f33(dst, src, count);
+        public int memcpy(byte[] dst, byte[] src, uint count) => f34(dst, src, count);
+        public int memset(byte[] p, int x, int count) => f35(p, x, count);
+        public int memset(byte[] p, int x, uint count) => f36(p, x, count);
+        public string ReadTextFile(string fileName, int limitedSize) => f37(fileName, limitedSize);
+        public void WriteUtf8BOMTextFile(string str, string filePath) => f38(str, filePath);
+        public void WriteGbkTextFile(string str, string filePath) => f39(str, filePath);
+        public byte[] EncodeUTF8(string str) => f40(str);
+        public byte[] EncodeUTF16LE(string str) => f41(str);
+        public double ToUtcTime_Double(DateTime time) => f42(time);
+        public double ToUtcTime_Double_Milliseconds(DateTime time) => f43(time);
+        public int ToUtcTime_Int(DateTime time) => f44(time);
+        public long ToUtcTime_Long(DateTime time) => f45(time);
+        public long ToUtcTime_Milliseconds(DateTime time) => f46(time);
+        public long ToUtfTime_Ticks(DateTime time) => f47(time);
+        public DateTime ToDateTimeFromUtc(double time) => f48(time);
+        public DateTime ToDateTimeFromUtf_Milliseconds(long time) => f49(time);
+        public DateTime ToDateTimeFromUtf_Ticks(long time) => f50(time);
+        public DateTime ToDateTimeFrunUtf(int time) => f51(time);
+        public DateTime ToDateTimeFromUtf(long time) => f52(time);
+        public int get_NowUtcSeconds() => f53();
+        public long get_NowUtcMilliSeconds() => f54();
+        public long get_NowTicks() => f55();
+        public void MkDir(string dir) => f56(dir);
+        public string GetFullPath(string path) => f57(path);
+        public string GetParentPath(string path) => f58(path);
+        public string ReName(string path, string newName) => f59(path, newName);
+        public string UrlJoin(string baseUrl, string url) => f60(baseUrl, url);
+        public string FromHtmlText(string html) => f61(html);
+        public string ToHtmlText(string text) => f62(text);
+        public string GetFileMd5(string filePath) => f63(filePath);
+        public string CutEnd(string str, int n) => f64(str, n);
+        public string ReadFromFile(string filePath, int limitedSize) => f65(filePath, limitedSize);
+        public byte[] EncodeUtf8(string str) => f66(str);
+        public string DecodeUtf8(byte[] bytes) => f67(bytes);
+        public byte[] EncodeUnicode(string str) => f68(str);
+        public string DecodeUnicode(byte[] bytes) => f69(bytes);
+        public byte[] EncodeGbk(string str) => f70(str);
+        public string DecodeGbk(byte[] bytes) => f71(bytes);
+        public void AssertNotNull(object obj) => f72(obj);
+        public void AssertNotNullOrEmpty(string str) => f73(str);
+        public void AssertNotNullOrWhiteSpace(string str) => f74(str);
+        public string GetStandardPathString(string path) => f75(path);
+        public string EscapeFromFilePathChars(string path) => f76(path);
+        public string GetExtension(string name) => f77(name);
+        public string GetNameWithoutExtension(string fullname) => f78(fullname);
+        public string GetName(string path) => f79(path);
+        public string wpj(string str, string str2) => f80(str, str2);
+        public string lpj(string str, string str2) => f81(str, str2);
+        public string ToWpt(string str) => f82(str);
+        public string ToLpt(string str) => f83(str);
+        public string ToStdWinFullPath(string path) => f84(path);
+        public void AssertNotExists(string path) => f85(path);
+        public void AssertIsDir(string dir) => f86(dir);
+        public void AssertIsEmptyDir(string dir) => f87(dir);
+        public void AssertIsFile(string file) => f88(file);
+        public string ToAnsiString(byte[] bytes) => f89(bytes);
+        public string ToAnsiString(byte[] bytes, int start, int length) => f90(bytes, start, length);
+        public string ToAsciiString(byte[] bytes) => f91(bytes);
+        public string ToAsciiString(byte[] bytes, int start, int length) => f92(bytes, start, length);
+        public string ToUtf8String(byte[] bytes) => f93(bytes);
+        public string ToUtf8String(byte[] bytes, int start, int length) => f94(bytes, start, length);
+        public string ToUnicodeString(byte[] bytes) => f95(bytes);
+        public string ToUnicodeString(byte[] bytes, int start, int length) => f96(bytes, start, length);
+        public string ToHexString(byte[] bytes, int start, int length) => f97(bytes, start, length);
+        public string ToHexString(byte[] bytes) => f98(bytes);
+        public string ToBase64String(byte[] bytes, int start, int length) => f99(bytes, start, length);
+        public string ToBase64String(byte[] bytes) => f100(bytes);
+        public byte[] ToByteArrayFromHexString(string hexStr) => f101(hexStr);
+        public byte[] Base64Decode(string Base64Str) => f102(Base64Str);
 
+        Func<string, string, int> f0;
+        Func<string, string, int> f1;
+        Func<string, int> f2;
+        Func<int> f3;
+        Func<string> f4;
+        Func<int, string> f5;
+        Action<string> f6;
+        Action<string> f7;
+        Action<string> f8;
+        Action<string> f9;
+        Func<string, string, string> f10;
+        Func<byte[], string, byte[]> f11;
+        Func<string, string, string> f12;
+        Func<byte[], string, byte[]> f13;
+        Func<string, string, string> f14;
+        Func<byte[], int, int, uint> f15;
+        Func<byte[], string, byte[]> f16;
+        Func<byte[], string, byte[]> f17;
+        Func<byte[], string, byte[]> f18;
+        Func<string, string> f19;
+        Func<string, string> f20;
+        Func<string, string> f21;
+        Func<byte[], string> f22;
+        Func<byte[], byte[]> f23;
+        Func<string, string> f24;
+        Func<string, string> f25;
+        Action<string, string> f26;
+        Func<string> f27;
+        Action<string> f28;
+        Action<string> f29;
+        Action f30;
+        Func<byte[], byte[], int, int> f31;
+        Func<byte[], byte[], uint, int> f32;
+        Func<byte[], byte[], int, int> f33;
+        Func<byte[], byte[], uint, int> f34;
+        Func<byte[], int, int, int> f35;
+        Func<byte[], int, uint, int> f36;
+        Func<string, int, string> f37;
+        Action<string, string> f38;
+        Action<string, string> f39;
+        Func<string, byte[]> f40;
+        Func<string, byte[]> f41;
+        Func<DateTime, double> f42;
+        Func<DateTime, double> f43;
+        Func<DateTime, int> f44;
+        Func<DateTime, long> f45;
+        Func<DateTime, long> f46;
+        Func<DateTime, long> f47;
+        Func<double, DateTime> f48;
+        Func<long, DateTime> f49;
+        Func<long, DateTime> f50;
+        Func<int, DateTime> f51;
+        Func<long, DateTime> f52;
+        Func<int> f53;
+        Func<long> f54;
+        Func<long> f55;
+        Action<string> f56;
+        Func<string, string> f57;
+        Func<string, string> f58;
+        Func<string, string, string> f59;
+        Func<string, string, string> f60;
+        Func<string, string> f61;
+        Func<string, string> f62;
+        Func<string, string> f63;
+        Func<string, int, string> f64;
+        Func<string, int, string> f65;
+        Func<string, byte[]> f66;
+        Func<byte[], string> f67;
+        Func<string, byte[]> f68;
+        Func<byte[], string> f69;
+        Func<string, byte[]> f70;
+        Func<byte[], string> f71;
+        Action<object> f72;
+        Action<string> f73;
+        Action<string> f74;
+        Func<string, string> f75;
+        Func<string, string> f76;
+        Func<string, string> f77;
+        Func<string, string> f78;
+        Func<string, string> f79;
+        Func<string, string, string> f80;
+        Func<string, string, string> f81;
+        Func<string, string> f82;
+        Func<string, string> f83;
+        Func<string, string> f84;
+        Action<string> f85;
+        Action<string> f86;
+        Action<string> f87;
+        Action<string> f88;
+        Func<byte[], string> f89;
+        Func<byte[], int, int, string> f90;
+        Func<byte[], string> f91;
+        Func<byte[], int, int, string> f92;
+        Func<byte[], string> f93;
+        Func<byte[], int, int, string> f94;
+        Func<byte[], string> f95;
+        Func<byte[], int, int, string> f96;
+        Func<byte[], int, int, string> f97;
+        Func<byte[], string> f98;
+        Func<byte[], int, int, string> f99;
+        Func<byte[], string> f100;
+        Func<string, byte[]> f101;
+        Func<string, byte[]> f102;
+
+        void Init(MethodInfo mi)
+        {
+            var k = mi.ToString();
+            if (k == "Int32 Copy(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f0 = Expression.Lambda<Func<string, string, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Int32 Move(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f1 = Expression.Lambda<Func<string, string, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Int32 Delete(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f2 = Expression.Lambda<Func<string, int>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Int32 GetLastError()")
+            {
+                f3 = Expression.Lambda<Func<int>>(Expression.Block(Expression.Call(null, mi))).Compile();
+                return;
+            }
+            if (k == "System.String GetErrorString()")
+            {
+                f4 = Expression.Lambda<Func<string>>(Expression.Block(Expression.Call(null, mi))).Compile();
+                return;
+            }
+            if (k == "System.String GetErrorString(Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(int), "v0");
+                f5 = Expression.Lambda<Func<int, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void KillProcess(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f6 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void OpenDir(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f7 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void OpenFile(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f8 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void Open(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f9 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String RunAndRead(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f10 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Byte[] AesEncrypt(Byte[], System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f11 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String AesEncrypt(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f12 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Byte[] AesDecrypt(Byte[], System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f13 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String AesDecrypt(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f14 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "UInt32 GetCrc32(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f15 = Expression.Lambda<Func<byte[], int, int, uint>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "Byte[] EncryptData(Byte[], System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f16 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Byte[] DecryptData(Byte[], System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f17 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Byte[] Sign(Byte[], System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f18 = Expression.Lambda<Func<byte[], string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String GetMD5StringFromFile(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f19 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetSHA1StringFromFile(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f20 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetMd5StringFromString(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f21 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetMd5String(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f22 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Byte[] GetMd5Bytes(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f23 = Expression.Lambda<Func<byte[], byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String Base16To10(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f24 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String Base10To16(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f25 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void SetHtmlText(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f26 = Expression.Lambda<Action<string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String GetText()")
+            {
+                f27 = Expression.Lambda<Func<string>>(Expression.Block(Expression.Call(null, mi))).Compile();
+                return;
+            }
+            if (k == "Void JoinWith(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f28 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void SetText(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f29 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void Test()")
+            {
+                f30 = Expression.Lambda<Action>(Expression.Block(Expression.Call(null, mi))).Compile();
+                return;
+            }
+            if (k == "Int32 memcmp(Byte[], Byte[], Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f31 = Expression.Lambda<Func<byte[], byte[], int, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "Int32 memcmp(Byte[], Byte[], UInt32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
+                var pe2 = Expression.Parameter(typeof(uint), "v2");
+                f32 = Expression.Lambda<Func<byte[], byte[], uint, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "Int32 memcpy(Byte[], Byte[], Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f33 = Expression.Lambda<Func<byte[], byte[], int, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "Int32 memcpy(Byte[], Byte[], UInt32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(byte[]), "v1");
+                var pe2 = Expression.Parameter(typeof(uint), "v2");
+                f34 = Expression.Lambda<Func<byte[], byte[], uint, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "Int32 memset(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f35 = Expression.Lambda<Func<byte[], int, int, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "Int32 memset(Byte[], Int32, UInt32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(uint), "v2");
+                f36 = Expression.Lambda<Func<byte[], int, uint, int>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "System.String ReadTextFile(System.String, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                f37 = Expression.Lambda<Func<string, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Void WriteUtf8BOMTextFile(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f38 = Expression.Lambda<Action<string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Void WriteGbkTextFile(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f39 = Expression.Lambda<Action<string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Byte[] EncodeUTF8(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f40 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Byte[] EncodeUTF16LE(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f41 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Double ToUtcTime_Double(System.DateTime)")
+            {
+                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
+                f42 = Expression.Lambda<Func<DateTime, double>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Double ToUtcTime_Double_Milliseconds(System.DateTime)")
+            {
+                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
+                f43 = Expression.Lambda<Func<DateTime, double>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Int32 ToUtcTime_Int(System.DateTime)")
+            {
+                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
+                f44 = Expression.Lambda<Func<DateTime, int>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Int64 ToUtcTime_Long(System.DateTime)")
+            {
+                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
+                f45 = Expression.Lambda<Func<DateTime, long>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Int64 ToUtcTime_Milliseconds(System.DateTime)")
+            {
+                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
+                f46 = Expression.Lambda<Func<DateTime, long>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Int64 ToUtfTime_Ticks(System.DateTime)")
+            {
+                var pe0 = Expression.Parameter(typeof(DateTime), "v0");
+                f47 = Expression.Lambda<Func<DateTime, long>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.DateTime ToDateTimeFromUtc(Double)")
+            {
+                var pe0 = Expression.Parameter(typeof(double), "v0");
+                f48 = Expression.Lambda<Func<double, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.DateTime ToDateTimeFromUtf_Milliseconds(Int64)")
+            {
+                var pe0 = Expression.Parameter(typeof(long), "v0");
+                f49 = Expression.Lambda<Func<long, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.DateTime ToDateTimeFromUtf_Ticks(Int64)")
+            {
+                var pe0 = Expression.Parameter(typeof(long), "v0");
+                f50 = Expression.Lambda<Func<long, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.DateTime ToDateTimeFrunUtf(Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(int), "v0");
+                f51 = Expression.Lambda<Func<int, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.DateTime ToDateTimeFromUtf(Int64)")
+            {
+                var pe0 = Expression.Parameter(typeof(long), "v0");
+                f52 = Expression.Lambda<Func<long, DateTime>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Int32 get_NowUtcSeconds()")
+            {
+                f53 = Expression.Lambda<Func<int>>(Expression.Block(Expression.Call(null, mi))).Compile();
+                return;
+            }
+            if (k == "Int64 get_NowUtcMilliSeconds()")
+            {
+                f54 = Expression.Lambda<Func<long>>(Expression.Block(Expression.Call(null, mi))).Compile();
+                return;
+            }
+            if (k == "Int64 get_NowTicks()")
+            {
+                f55 = Expression.Lambda<Func<long>>(Expression.Block(Expression.Call(null, mi))).Compile();
+                return;
+            }
+            if (k == "Void MkDir(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f56 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetFullPath(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f57 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetParentPath(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f58 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ReName(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f59 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String UrlJoin(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f60 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String FromHtmlText(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f61 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToHtmlText(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f62 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetFileMd5(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f63 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String CutEnd(System.String, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                f64 = Expression.Lambda<Func<string, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String ReadFromFile(System.String, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                f65 = Expression.Lambda<Func<string, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "Byte[] EncodeUtf8(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f66 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String DecodeUtf8(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f67 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Byte[] EncodeUnicode(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f68 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String DecodeUnicode(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f69 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Byte[] EncodeGbk(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f70 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String DecodeGbk(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f71 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void AssertNotNull(System.Object)")
+            {
+                var pe0 = Expression.Parameter(typeof(object), "v0");
+                f72 = Expression.Lambda<Action<object>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void AssertNotNullOrEmpty(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f73 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void AssertNotNullOrWhiteSpace(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f74 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetStandardPathString(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f75 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String EscapeFromFilePathChars(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f76 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetExtension(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f77 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetNameWithoutExtension(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f78 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String GetName(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f79 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String wpj(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f80 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String lpj(System.String, System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                var pe1 = Expression.Parameter(typeof(string), "v1");
+                f81 = Expression.Lambda<Func<string, string, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1)), pe0, pe1).Compile();
+                return;
+            }
+            if (k == "System.String ToWpt(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f82 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToLpt(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f83 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToStdWinFullPath(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f84 = Expression.Lambda<Func<string, string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void AssertNotExists(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f85 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void AssertIsDir(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f86 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void AssertIsEmptyDir(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f87 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Void AssertIsFile(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f88 = Expression.Lambda<Action<string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToAnsiString(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f89 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToAnsiString(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f90 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "System.String ToAsciiString(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f91 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToAsciiString(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f92 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "System.String ToUtf8String(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f93 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToUtf8String(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f94 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "System.String ToUnicodeString(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f95 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToUnicodeString(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f96 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "System.String ToHexString(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f97 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "System.String ToHexString(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f98 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "System.String ToBase64String(Byte[], Int32, Int32)")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                var pe1 = Expression.Parameter(typeof(int), "v1");
+                var pe2 = Expression.Parameter(typeof(int), "v2");
+                f99 = Expression.Lambda<Func<byte[], int, int, string>>(Expression.Block(Expression.Call(null, mi, pe0, pe1, pe2)), pe0, pe1, pe2).Compile();
+                return;
+            }
+            if (k == "System.String ToBase64String(Byte[])")
+            {
+                var pe0 = Expression.Parameter(typeof(byte[]), "v0");
+                f100 = Expression.Lambda<Func<byte[], string>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Byte[] ToByteArrayFromHexString(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f101 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+            if (k == "Byte[] Base64Decode(System.String)")
+            {
+                var pe0 = Expression.Parameter(typeof(string), "v0");
+                f102 = Expression.Lambda<Func<string, byte[]>>(Expression.Block(Expression.Call(null, mi, pe0)), pe0).Compile();
+                return;
+            }
+
+        }
+    }
+}
 
 namespace ThMEPWSS.DebugNs
 {
@@ -7808,6 +8822,14 @@ namespace ThMEPWSS.DebugNs
         }
         public static void FindText()
         {
+            qu690p((x, y) => x?.ToUpper() == y?.ToUpper());
+        }
+        public static void FindText_Contains()
+        {
+            qu690p((x, y) => x?.ToUpper().Contains(y.ToUpper()) ?? false);
+        }
+        static void qu690p(Func<string, string, bool> f)
+        {
             Dbg.FocusMainWindow();
             var rst = AcHelper.Active.Editor.GetString("\n输入立管编号");
             if (rst.Status != Autodesk.AutoCAD.EditorInput.PromptStatus.OK) return;
@@ -7879,7 +8901,8 @@ namespace ThMEPWSS.DebugNs
                     {
                         foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                         {
-                            if (e.TextString.ToUpper() == rst.StringResult.ToUpper())
+                            //if (e.TextString.ToUpper() == rst.StringResult.ToUpper())
+                            if (f(e.TextString, rst.StringResult))
                             {
                                 Dbg.ShowWhere(e);
                             }

@@ -425,11 +425,25 @@ namespace ThMEPWSS.Assistant
             DrawingQueue.Enqueue(adb => adb.ModelSpace.Add(pl));
             return pl;
         }
+        public static List<Line> DrawLinesLazy(params Point2d[] pts)
+        {
+            return DrawLinesLazy((IList<Point2d>)pts);
+        }
         public static List<Line> DrawLinesLazy(params Point3d[] pts)
         {
             return DrawLinesLazy((IList<Point3d>)pts);
         }
         public static List<Line> DrawLinesLazy(IList<Point3d> pts)
+        {
+            var ret = new List<Line>();
+            for (int i = 0; i < pts.Count - 1; i++)
+            {
+                var line = DrawLineLazy(pts[i], pts[i + 1]);
+                ret.Add(line);
+            }
+            return ret;
+        }
+        public static List<Line> DrawLinesLazy(IList<Point2d> pts)
         {
             var ret = new List<Line>();
             for (int i = 0; i < pts.Count - 1; i++)

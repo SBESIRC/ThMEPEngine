@@ -995,7 +995,6 @@ namespace ThMEPWSS.Pipe.Service
             {
                 if (HasShortConverters(pipe)) return TranslatorTypeEnum.Short;
                 if (HasLongConverters(pipe)) return TranslatorTypeEnum.Long;
-                if (HasGravityConverters(pipe)) return TranslatorTypeEnum.Gravity;
             }
 
             foreach (var pp in _GetVerticalPipes(pipes, verticalPipeID))
@@ -1431,7 +1430,7 @@ namespace ThMEPWSS.Pipe.Service
             var f1 = GeometryFac.CreateGRectContainsSelector(lineHGs);
             foreach (var bd in bds)
             {
-                var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1300, 250);
+                var g = GRect.Create(bd.Center.OffsetY(-10).OffsetY(-250), 1500, 250);
                 {
                     var e = DU.DrawRectLazy(g);
                     e.ColorIndex = 2;
@@ -1445,7 +1444,7 @@ namespace ThMEPWSS.Pipe.Service
                     var ents = geo.ToDbObjects().OfType<Entity>().ToList();
                     var line = lineHs[lineHGs.IndexOf(geo)];
                     var dis = line.Center.GetDistanceTo(bd.Center);
-                    if (100 <= dis && dis <= 400)
+                    if (dis.InRange(100, 400) || Math.Abs(line.Center.Y - bd.Center.Y).InRange(.1, 400))
                     {
                         geoData.LabelLines.Add(new GLineSegment(bd.Center, line.Center).Extend(.1));
                     }
@@ -1492,6 +1491,15 @@ namespace ThMEPWSS.Pipe.Service
             for (int i = 0; i < geoData.WLines.Count; i++)
             {
                 geoData.WLines[i] = geoData.WLines[i].Extend(10);//50不行，冷凝管断开就处理不了了，剩下的不管了
+            }
+            //雨水斗再扩大一点
+            for (int i = 0; i < geoData.SideWaterBuckets.Count; i++)
+            {
+                geoData.SideWaterBuckets[i] = geoData.SideWaterBuckets[i].Expand(100);
+            }
+            for (int i = 0; i < geoData.GravityWaterBuckets.Count; i++)
+            {
+                geoData.GravityWaterBuckets[i] = geoData.GravityWaterBuckets[i].Expand(100);
             }
             //后面可以自定义precise模型
         }
@@ -3201,9 +3209,10 @@ namespace ThMEPWSS.Pipe.Service
 
         public static void InitFloorListDatas()
         {
-            var ctx = commandContext;
             Dbg.FocusMainWindow();
-            var range = Dbg.SelectRange();
+            var range = Dbg.TrySelectRange();
+            if (range == null) return;
+            var ctx = commandContext;
             ctx.range = range;
             using var adb = AcadDatabase.Active();
             ctx.StoreyContext = GetStoreyContext(range, adb);
@@ -3456,6 +3465,12 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static void DrawRainSystemDiagram2()
         {
+
+            Dbg.FocusMainWindow();
+            var range = Dbg.TrySelectRange();
+            if (range == null) return;
+            if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
+
             ThRainSystemService.ImportElementsFromStdDwg();
 
             using (Dbg.DocumentLock)
@@ -3463,10 +3478,7 @@ namespace ThMEPWSS.Pipe.Service
             {
                 try
                 {
-                    Dbg.FocusMainWindow();
                     DU.Dispose();
-                    var range = Dbg.SelectRange();
-                    var basePt = Dbg.SelectPoint();
                     var storeys = ThRainSystemService.GetStoreys(range, adb);
                     var geoData = new RainSystemGeoData();
                     geoData.Init();
@@ -3520,6 +3532,9 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static void DrawRainSystemDiagram3()
         {
+            Dbg.FocusMainWindow();
+            if (!Dbg.TrySelectPoint(out Point3d basePt)) return;
+
             DU.Dispose();
             ThRainSystemService.ImportElementsFromStdDwg();
 
@@ -3532,10 +3547,9 @@ namespace ThMEPWSS.Pipe.Service
             {
                 try
                 {
-                    Dbg.FocusMainWindow();
                     DU.Dispose();
+
                     var range = commandContext.range;
-                    var basePt = Dbg.SelectPoint();
                     var storeys = commandContext.StoreyContext.thStoreysDatas;
                     var geoData = new RainSystemGeoData();
                     geoData.Init();
@@ -3778,21 +3792,19 @@ namespace ThMEPWSS.Pipe.Service
 
 
                     var fs = new Dictionary<Action, string>();
-                    fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault("侧排雨水斗系统")), "侧排雨水斗系统");
-                    fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault("重力流雨水井编号")), "重力流雨水井编号");
-                    fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault("$TwtSys$00000132")), "$TwtSys$00000132");
+                    {
+                        var blocks = new string[] { "侧排雨水斗系统", "重力流雨水井编号", "标高", "$TwtSys$00000132", "地漏系统", "套管系统" };
+                        foreach (var blk in blocks)
+                        {
+                            fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blk)), blk);
+                        }
+                    }
 
-                    //fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault("*U349")));
-                    //fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault("*U348")));//FloorDrain
-                    fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault("地漏系统")), "地漏系统");//FloorDrain
-                    fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault("套管系统")), "套管系统");//FloorDrain
 
                     fs.Add(() => adb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE1"), false), "TH-STYLE1");
                     //fs.Add(() => adb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE2"), false));
                     fs.Add(() => adb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false), "TH-STYLE3");
 
-                    //fs.Add(() => adb.Layers.Import(blockDb.Layers.ElementOrDefault("W-NOTE")), "W-NOTE");
-                    //fs.Add(() => adb.Layers.Import(blockDb.Layers.ElementOrDefault("W-RAIN-DIMS")), "W-RAIN-DIMS");
                     {
                         var layers = new string[] { "W-WSUP-COOL-PIPE", "W-WSUP-HOT-PIPE", "W-WSUP-HOTR-PIPE", "W-WSUP-HOTI-PIPE", "W-WSUP-EQPM", "W-WSUP-DIMS", "W-WSUP-NOTE", "W-DRIN-PIPE", "W-DRIR-PIPE", "W-DRIN-EQPM", "W-DRIN-DIMS", "W-DRIN-NOTE", "W-DRAI-DOME-PIPE", "W-DRAI-VENT-PIPE", "W-DRAI-EQPM", "W-DRAI-DIMS", "W-DRAI-NOTE", "W-RAIN-PIPE", "W-RAIN-EQPM", "W-RAIN-DIMS", "W-RAIN-NOTE", "W-RECL-PIPE", "W-RECL-EQPM", "W-RECL-DIMS", "W-RECL-NOTE", "W-COCR-PIPE", "W-COCR-EQPM", "W-COCR-DIMS", "W-COCR-NOTE", "W-FRPT-HYDT-PIPE", "W-FRPT-SPRL-PIPE", "W-FRPT-DRAI-PIPE", "W-FRPT-EXTG", "W-FRPT-HYDT", "W-FRPT-SPRL", "W-FRPT-HYDT-EQPM", "W-FRPT-HYDT-DIMS", "W-FRPT-NOTE", "W-GAS-PIPE", "W-GAS-EQPM", "W-GAS-DIMS", "W-GAS-NOTE", "W-SHET-PROF", "W-NOTE-NAME", "W-XF", "W-XR", "W-SHET-IDGF", "W-NOTE", "W-BUSH", "W-BUSH-NOTE", "W-HOLE", "W-HOLE-NOTE", "W-DRAI-FLDR", "W-SHET-SHET", "W-EQPM", "W-FRPT-SPRL-DIMS", "W-FRPT-SPRL-EQPM", "W-EQPM-ANTI", "W-gx-EN-note", "W-gx-ET-note", "W-DRAI-OUT-PIPE", "W-RAIN-OUT-PIPE", "W-E-PIPE", "W-T-PIPE", "W-ZH-DIMS", "W-ZH-NOTE", "W-E-EQPM", "W-T-EQPM", "W-E-NOTE", "W-T-NOTE", "W-E-DIMS", "W-T-DIMS", "W-BUSH-DIMS", "W-BUSH-TAB", "W-HOLE-DIMS", "W-DRAI-SEWA-PIPE", "W-DRAI-WAST-PIPE" };
                         foreach (var layer in layers)
@@ -4509,6 +4521,10 @@ namespace ThMEPWSS.Pipe.Service
         public static bool HasGravityLabelConnected(string text)
         {
             return re.IsMatch(text);
+        }
+        public static Match TestGravityLabelConnected(string text)
+        {
+            return re.Match(text);
         }
         public bool HasGravityLabelConnected(Point3dCollection range, string pipeId)
         {

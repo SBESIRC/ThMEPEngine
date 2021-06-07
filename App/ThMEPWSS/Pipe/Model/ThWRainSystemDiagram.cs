@@ -605,12 +605,6 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     var pipes = thRainSystemService.GetRoofVerticalPipeNotes(s.Range);
                     var translatorType = GetTranslatorType(s, roofPipeNote);
-                    if (translatorType.Equals(TranslatorTypeEnum.Gravity))
-                    {
-                        //重力雨水斗转管
-                        rainPipeSystem.WaterBucket = new ThWSDWaterBucket() { Type = WaterBucketEnum.Gravity, Storey = s, DN = dn };
-                        bSetWaterBucket = true;
-                    }
 
                     if (pipes.Contains(roofPipeNote))
                     {
@@ -913,9 +907,13 @@ namespace ThMEPWSS.Pipe.Model
                         //Dr.DrawRainPort(bsPt);
                         if (j == 0)
                         {
-                            Dr.DrawRainPort(basePt.OffsetX(400));
-                            Dr.DrawRainPortLabel(basePt.OffsetX(-50));
-                            Dr.DrawStarterPipeHeightLabel(basePt.OffsetX(-50 + 1650));
+                            //var points=new Point2d[]{new Point2d(0,0),new Point2d(-200,-200),new Point2d(-1800,-200)};
+                            var pt = basePt;
+                            {
+                                Dr.DrawRainPort(pt.OffsetX(400));//雨水口
+                                Dr.DrawRainPortLabel(pt.OffsetX(-50));//接至雨水口
+                                Dr.DrawStarterPipeHeightLabel(pt.OffsetX(-50 + 1650));//起端管底标高
+                            }
                         }
                         break;
                     case RainOutputTypeEnum.DrainageDitch:
