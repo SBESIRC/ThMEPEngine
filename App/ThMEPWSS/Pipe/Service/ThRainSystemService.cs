@@ -3759,9 +3759,7 @@ namespace ThMEPWSS.Pipe.Service
         }
         public static void ImportElementsFromStdDwg()
         {
-            //return;
-            //var file = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板_20210125.dwg");
-            var file = ThCADCommon.WashPointLayoutDwgPath();
+            var file = ThCADCommon.WSSDwgPath();
             if (File.Exists(file))
             {
                 using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())

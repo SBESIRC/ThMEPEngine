@@ -66,7 +66,7 @@ namespace ThMEPWSS.FlushPoint.Service
         private void Import()
         {
             using (var currentDb = AcadDatabase.Use(LayoutData.Db))
-            using (var blockDb = AcadDatabase.Open(ThCADCommon.WashPointLayoutDwgPath(), DwgOpenMode.ReadOnly, false))
+            using (var blockDb = AcadDatabase.Open(ThCADCommon.WSSDwgPath(), DwgOpenMode.ReadOnly, false))
             {
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WaterSupplyMarkLayerName), false);
             }

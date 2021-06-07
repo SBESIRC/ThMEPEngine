@@ -131,7 +131,7 @@ namespace ThCADExtension
         // 给排水专业图纸
         public static string WSSDwgPath()
         {
-            return Path.Combine(SupportPath(), "地上给排水平面图.dwg");
+            return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
         }
 
         // 电气照明疏散指示灯图块
@@ -197,12 +197,6 @@ namespace ThCADExtension
         public static string AutoFireAlarmSystemDwgPath()
         {
             return Path.Combine(SupportPath(), "火灾自动报警系统图.dwg");
-        }
-
-        // 消防喷淋块
-        public static string WashPointLayoutDwgPath()
-        {
-            return Path.Combine(SupportPath(), "地上给水排水平面图模板.dwg");
         }
 
         // 运行时根目录

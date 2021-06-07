@@ -41,7 +41,7 @@ namespace ThMEPWSS.Pipe.Model
         {
             get
             {
-                return ThCADCommon.WashPointLayoutDwgPath();
+                return ThCADCommon.WSSDwgPath();
             }
         }
         //加载需要使用的模块
