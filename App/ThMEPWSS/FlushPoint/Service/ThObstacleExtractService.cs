@@ -108,21 +108,39 @@ namespace ThMEPWSS.FlushPoint.Service
             using (var acadDb = AcadDatabase.Use(db))
             {
                 var results = new List<Curve>();
-                acadDb.ModelSpace.OfType<BlockReference>().ForEach(o =>
+                acadDb.ModelSpace.OfType<Entity>().ForEach(o =>
                 {
-                    if (IsBuildElementBlockReference(o) && IsPointedLayer(o.Layer))
+                    if(IsPointedLayer(o.Layer))
                     {
-                        var btr = acadDb.Element<BlockTableRecord>(o.BlockTableRecord);
-                        if(IsBuildElementBlock(btr))
+                        if (o is BlockReference br && IsBuildElementBlockReference(br))
                         {
-                            var objs = ThDrawTool.Explode(o)
+                            var btr = acadDb.Element<BlockTableRecord>(br.BlockTableRecord);
+                            if (IsBuildElementBlock(btr))
+                            {
+                                var objs = ThDrawTool.Explode(br)
+                                .Cast<Entity>()
+                                .Where(e => e is Circle && e.Visible)
+                                .ToList();
+                                var circles = objs
+                                .Cast<Circle>()
+                                .Where(e => IsPointedCircle(e))
+                                .ToList();
+                                circles.ForEach(o =>
+                                {
+                                    results.Add(o.ToRectangle());
+                                });
+                            }
+                        }
+                        else if (o.GetType().IsTianZhengElement())
+                        {
+                            var objs = ThDrawTool.ExplodeEx(o)
                             .Cast<Entity>()
                             .Where(e => e is Circle && e.Visible)
                             .ToList();
-                            var circles =  objs
-                            .Cast<Circle>()
-                            .Where(e => IsPointedCircle(e))
-                            .ToList();
+                            var circles = objs
+                                .Cast<Circle>()
+                                .Where(e => IsPointedCircle(e))
+                                .ToList();
                             circles.ForEach(o =>
                             {
                                 results.Add(o.ToRectangle());
@@ -137,12 +155,7 @@ namespace ThMEPWSS.FlushPoint.Service
         private bool IsPointedCircle(Circle circle)
         {
             return circle.Radius<=200;
-        }
-
-        private bool IsTianZhengElement(Type type)
-        {
-            return type.IsNotPublic && type.Name.StartsWith("Imp");
-        }
+        }  
 
         private string GetBlockKey(string name)
         {
