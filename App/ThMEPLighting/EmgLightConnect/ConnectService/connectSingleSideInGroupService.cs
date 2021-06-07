@@ -66,7 +66,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                     if (connectListTemp.Count > 0)
                     {
                         connectList.AddRange(connectListTemp);
-                        orderSigleSideGroup[i].connectPt(connectListTemp[0].Item1, connectListTemp[0].Item2);
+                        addConnectPt(ref orderSigleSideGroup, connectListTemp[0]);
                     }
 
                     blockList.AddRange(thisLaneBlock);
@@ -76,24 +76,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             return connectList;
 
 
-        }
-
-        private static List<ThSingleSideBlocks> orderSignleSideOrigin(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
-        {
-            var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
-
-            foreach (var side in sigleSideGroup)
-            {
-                if (side.Count > 0)
-                {
-                    var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
-                    sideDistDict.Add(side, dist);
-                }
-            }
-
-            var orderSingleSide = sideDistDict.OrderBy(x => x.Value).Select(x => x.Key).ToList();
-
-            return orderSingleSide;
         }
 
         private static List<ThSingleSideBlocks> orderSignleSideDist(Point3d ALE, List<ThSingleSideBlocks> sigleSideGroup)
@@ -107,6 +89,8 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 {
                     var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE)).Min();
                     sideDistDict.Add(side, dist);
+
+                    var distDict = side.getTotalBlock().ToDictionary(x => x, x => x.DistanceTo(ALE));
                 }
             }
 
@@ -137,6 +121,84 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 }
                 orderSingleSide.AddRange(notInSide);
             }
+
+            return orderSingleSide;
+        }
+
+        private static double distanceInSide(ThSingleSideBlocks sideA, ThSingleSideBlocks sideB)
+        {
+            //double x = (sideA.laneSide.Last().Item1.EndPoint.X - sideA.laneSide.First().Item1.StartPoint.X) / 2 + sideA.laneSide.First().Item1.StartPoint.X;
+            //double y = (sideA.laneSide.Last().Item1.EndPoint.Y - sideA.laneSide.First().Item1.StartPoint.Y) / 2 + sideA.laneSide.First().Item1.StartPoint.Y;
+            //var ACenPt = new Point3d(x, y, 0);
+
+
+            //x = (sideB.laneSide.Last().Item1.EndPoint.X - sideB.laneSide.First().Item1.StartPoint.X) / 2 + sideB.laneSide.First().Item1.StartPoint.X;
+            //y = (sideB.laneSide.Last().Item1.EndPoint.Y - sideB.laneSide.First().Item1.StartPoint.Y) / 2 + sideB.laneSide.First().Item1.StartPoint.Y;
+            //var BCenPt = new Point3d(x, y, 0);
+
+
+            //var dist = ACenPt.DistanceTo(BCenPt);
+
+            var listA = sideA.getTotalBlock();
+            var listB = sideB.getTotalBlock();
+
+            double dist = 200000;
+
+            for (int i = 0; i < listA.Count; i++)
+            {
+
+                for (int j = 0; j < listB.Count; j++)
+                {
+                    var distTemp = listA[i].DistanceTo(listB[j]);
+
+                    if (distTemp < dist)
+                    {
+                        dist = distTemp;
+                    }
+                }
+            }
+
+            return dist;
+        }
+
+        private static void addConnectPt(ref List<ThSingleSideBlocks> sigleSideGroup, (Point3d, Point3d) connectPt)
+        {
+
+
+            var sidePt1 = sigleSideGroup.Where(x => x.getTotalBlock().Contains(connectPt.Item1)).First();
+            sidePt1.connectPt(connectPt.Item1, connectPt.Item2);
+
+
+            var sidePt2 = sigleSideGroup.Where(x => x.getTotalBlock().Contains(connectPt.Item2)).First();
+            sidePt2.connectPt(connectPt.Item2, connectPt.Item1);
+
+        }
+
+
+
+
+
+
+
+
+
+
+        ////////////not use now, but keep the code for reference////////
+
+        private static List<ThSingleSideBlocks> orderSignleSideOrigin(BlockReference ALE, List<ThSingleSideBlocks> sigleSideGroup)
+        {
+            var sideDistDict = new Dictionary<ThSingleSideBlocks, double>();
+
+            foreach (var side in sigleSideGroup)
+            {
+                if (side.Count > 0)
+                {
+                    var dist = side.getTotalBlock().Select(x => x.DistanceTo(ALE.Position)).Min();
+                    sideDistDict.Add(side, dist);
+                }
+            }
+
+            var orderSingleSide = sideDistDict.OrderBy(x => x.Value).Select(x => x.Key).ToList();
 
             return orderSingleSide;
         }
@@ -270,42 +332,6 @@ namespace ThMEPLighting.EmgLightConnect.Service
             {
                 orderInsert(orderP, newPar, sides, ref orderSides);
             }
-        }
-
-        private static double distanceInSide(ThSingleSideBlocks sideA, ThSingleSideBlocks sideB)
-        {
-            //double x = (sideA.laneSide.Last().Item1.EndPoint.X - sideA.laneSide.First().Item1.StartPoint.X) / 2 + sideA.laneSide.First().Item1.StartPoint.X;
-            //double y = (sideA.laneSide.Last().Item1.EndPoint.Y - sideA.laneSide.First().Item1.StartPoint.Y) / 2 + sideA.laneSide.First().Item1.StartPoint.Y;
-            //var ACenPt = new Point3d(x, y, 0);
-
-
-            //x = (sideB.laneSide.Last().Item1.EndPoint.X - sideB.laneSide.First().Item1.StartPoint.X) / 2 + sideB.laneSide.First().Item1.StartPoint.X;
-            //y = (sideB.laneSide.Last().Item1.EndPoint.Y - sideB.laneSide.First().Item1.StartPoint.Y) / 2 + sideB.laneSide.First().Item1.StartPoint.Y;
-            //var BCenPt = new Point3d(x, y, 0);
-
-
-            //var dist = ACenPt.DistanceTo(BCenPt);
-
-            var listA = sideA.getTotalBlock();
-            var listB = sideB.getTotalBlock();
-
-            double dist = 200000;
-
-            for (int i = 0; i < listA.Count; i++)
-            {
-
-                for (int j = 0; j < listB.Count; j++)
-                {
-                    var distTemp = listA[i].DistanceTo(listB[j]);
-
-                    if (distTemp < dist)
-                    {
-                        dist = distTemp;
-                    }
-                }
-            }
-
-            return dist;
         }
 
         private static void Prim(double[,] graph, int verticesCount, out int[] parent)
