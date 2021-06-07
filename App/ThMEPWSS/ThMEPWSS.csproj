@@ -71,8 +71,8 @@
     <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
+    <Compile Include="Engine\ThFloorDrainExtractionVisitor.cs" />
     <Compile Include="Engine\ThFloorDrainRecognitionEngine.cs" />
-    <Compile Include="Engine\ThFloorDrainVisitor.cs" />
     <Compile Include="Engine\ThWObstaclesRecognitionEngine.cs" />
     <Compile Include="Engine\ThWSprinklerRecognitionEngine.cs" />
     <Compile Include="FlushPoint\Data\ThDrainFacilityExtractor.cs" />

@@ -25,20 +25,26 @@ namespace ThMEPWSS.Engine
 
         public override void Extract(Database database)
         {
-            var visitor = new ThFloorDrainVisitor()
+            var visitor = new ThFloorDrainExtractionVisitor()
             {
                 BlockObbSwitch = this.BlockObbSwitch,
             };
             var extractor = new ThDistributionElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
-            extractor.ExtractFromMS(database);
-            Results = visitor.Results;
+            Results.AddRange(visitor.Results);
         }
 
         public override void ExtractFromMS(Database database)
         {
-            throw new NotImplementedException();
+            var visitor = new ThFloorDrainExtractionVisitor()
+            {
+                BlockObbSwitch = this.BlockObbSwitch,
+            };
+            var extractor = new ThDistributionElementExtractor();
+            extractor.Accept(visitor);
+            extractor.ExtractFromMS(database);
+            Results.AddRange(visitor.Results);
         }
     }
     public class ThFloorDrainRecognitionEngine : ThDistributionElementRecognitionEngine
@@ -54,6 +60,7 @@ namespace ThMEPWSS.Engine
         {
             var engine = new ThFloorDrainExtractionEngine();
             engine.Extract(database);
+            engine.ExtractFromMS(database);
             var originDatas = engine.Results;
             if (polygon.Count > 0)
             {

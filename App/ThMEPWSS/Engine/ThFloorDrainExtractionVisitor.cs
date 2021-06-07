@@ -9,12 +9,12 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPWSS.Engine
 {
-    public class ThFloorDrainVisitor : ThDistributionElementExtractionVisitor
+    public class ThFloorDrainExtractionVisitor : ThDistributionElementExtractionVisitor
     {
         public List<string> BlkNames { get; set; }
         public Func<string, List<string>, bool> JudgeBlkNameExisted {get;set;}
         public bool BlockObbSwitch { get; set; }
-        public ThFloorDrainVisitor()
+        public ThFloorDrainExtractionVisitor()
         {
             BlkNames = new List<string>() { "地漏", "W-drain-3", "W-drain-4", "$TwtSys$00000141", 
                 "$TwtSys$00000137", "$TwtSys$00000329", "$TwtSys$00000327", "$TwtSys$00000328", 
@@ -96,6 +96,10 @@ namespace ThMEPWSS.Engine
             {
                 throw new NotSupportedException();
             }
+        }
+        public override bool CheckLayerValid(Entity curve)
+        {
+            return true;
         }
     }
 }
