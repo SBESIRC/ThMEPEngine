@@ -18,7 +18,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             new ThFireTelephoneWireCircuit(),
             new ThAlarmControlWireCircuit(),
             new ThDC24VPowerWireCircuit(),
-            new ThTextWireCircuit()
+            new ThTextWireCircuit(),
+            new ThConnect280FireDamperWireCircuit()
         };
 
         /// <summary>
@@ -27,6 +28,10 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         public static List<ThWireCircuit> VerticalWireCircuits = new List<ThWireCircuit>()
         {
             new ThFormHeaderVerticalWireCircuit(),
+            new ThFirePumpStartVerticalWireCircuit(),
+            new ThFireWaterTankLevelVerticalWireCircuit(),
+            new ThFireControlRoomVerticalWireCircuit(),
+            new ThSprinklerPumpStartSignalWireCircuit()
         };
     }
 }

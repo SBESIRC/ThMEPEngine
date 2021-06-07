@@ -16,13 +16,17 @@
   </PropertyGroup>
   <Import Project="..\..\Config\TIANHUA.CSharp.General.net472.targets" />
   <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Xaml" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assistant\GeometryTrans.cs" />
@@ -84,10 +88,11 @@
     <Compile Include="CAD\DBExtract.cs" />
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
-    <Compile Include="Command\ThAutoFireAlarmSystemCommand.cs" />
+    <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
+    <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
-    <Compile Include="Command\ThWholeFireSystemDiagramCommand.cs" />
+    <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
@@ -163,14 +168,20 @@
     <Compile Include="SystemDiagram\Model\ThFloorModel.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThAlarmControlWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThBroadcastWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThConnect280FireDamperWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThDC24VPowerWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFireControlRoomVerticalWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThFireIndicatingWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFirePumpStartVerticalWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThFireTelephoneWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThFireWaterTankLevelVerticalWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThFormHeaderVerticalWireCircuit.cs" />
+    <Compile Include="SystemDiagram\Model\WireCircuit\ThSprinklerPumpStartSignalWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThTextWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuit.cs" />
     <Compile Include="SystemDiagram\Model\WireCircuit\ThWireCircuitConfig.cs" />
     <Compile Include="SystemDiagram\Service\CalHolesService.cs" />
+    <Compile Include="SystemDiagram\Service\FireCompartmentParameter.cs" />
     <Compile Include="SystemDiagram\Service\InsertBlockService.cs" />
     <Compile Include="ThAutoFireAlarmSystemCmd.cs" />
     <Compile Include="ThAutoFireAlarmSystemCommon.cs" />
@@ -211,7 +222,6 @@
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

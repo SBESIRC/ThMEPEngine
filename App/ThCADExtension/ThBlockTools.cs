@@ -26,5 +26,29 @@ namespace ThCADExtension
                 entities.ForEach(o => acadDatabase.AddNewlyCreatedDBObject(o));
             }
         }
+
+        /// <summary>
+        /// 获取块引用的属性值（支持重复属性名）
+        /// </summary>
+        /// <param name="blockReferenceId"></param>
+        /// <returns></returns>
+        public static List<KeyValuePair<string, string>> GetAttributesInBlockReferenceEx(this ObjectId blockReferenceId)
+        {
+            List<KeyValuePair<string, string>> attributes = new List<KeyValuePair<string, string>>();
+            Database db = blockReferenceId.Database;
+            using (Transaction trans = db.TransactionManager.StartTransaction())
+            {
+                // 获取块参照
+                BlockReference bref = (BlockReference)trans.GetObject(blockReferenceId, OpenMode.ForRead);
+                // 遍历块参照的属性，并将其属性名和属性值添加到字典中
+                foreach (ObjectId attId in bref.AttributeCollection)
+                {
+                    AttributeReference attRef = (AttributeReference)trans.GetObject(attId, OpenMode.ForRead);
+                    attributes.Add(new KeyValuePair<string, string>(attRef.Tag, attRef.TextString));
+                }
+                trans.Commit();
+            }
+            return attributes; // 返回块参照的属性名和属性值
+        }
     }
 }

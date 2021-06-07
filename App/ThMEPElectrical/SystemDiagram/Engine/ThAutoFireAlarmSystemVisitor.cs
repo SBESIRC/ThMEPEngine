@@ -9,16 +9,17 @@ using ThCADExtension;
 using ThMEPElectrical.SystemDiagram.Model;
 using ThMEPEngineCore.Algorithm;
 using ThMEPEngineCore.Engine;
+using DotNetARX;
 
 namespace ThMEPElectrical.SystemDiagram.Engine
 {
     public  class ThAutoFireAlarmSystemVisitor : ThDistributionElementExtractionVisitor
     {
-        public Dictionary<string, string> BlockNameDic { get; set; }
+        //public Dictionary<string, string> BlockNameDic { get; set; }
         public ThAutoFireAlarmSystemVisitor()
         {
-            BlockNameDic = new Dictionary<string, string>();
-            Build();
+            //BlockNameDic = new Dictionary<string, string>();
+            //Build();
         }
         public override void DoExtract(List<ThRawIfcDistributionElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -39,56 +40,36 @@ namespace ThMEPElectrical.SystemDiagram.Engine
 
         public override bool IsDistributionElement(Entity entity)
         {
+            return true;
             //ToDO
-            if (entity is BlockReference br)
-            {
-                var blockName = br.Name;
-                if (BlockNameDic.Keys.Contains(blockName))
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private List<BlockReference> ExplodeBlockReference(BlockReference br)
-        {
-            List<BlockReference> rValue = new List<BlockReference>();
-            var blockName = br.GetEffectiveName();
-            if (BlockNameDic.Keys.Contains(blockName))
-            {
-                rValue.Add(br);
-            }
-            else
-            {
-                var objs = new DBObjectCollection();
-                br.Explode(objs);//炸开一层
-                foreach (Entity ent in objs)
-                {
-                    if  (IsDistributionElement(ent))
-                    {
-                        rValue.Add(ent as BlockReference);
-                    }
-                }
-            }
-            return rValue;
+            //if (entity is BlockReference br)
+            //{
+            //    var blockName = br.Name;
+            //    if (BlockNameDic.Keys.Contains(blockName))
+            //    {
+            //        return true;
+            //    }
+            //}
+            //return false;
         }
 
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
-            ExplodeBlockReference(blkref).ForEach(br =>
+            if(IsDistributionElement(blkref))
             {
+                var dic = blkref.Id.GetAttributesInBlockReferenceEx();
                 var info = new ElementInfo()
                 {
-                    Layer = br.Layer,
-                    Name = br.Name
+                    Layer = blkref.Layer,
+                    Name = blkref.Name,
+                    AttNames = dic
                 };
                 elements.Add(new ThRawIfcDistributionElementData()
                 {
                     Data = info,
-                    Geometry = br.GetTransformedCopy(matrix),
+                    Geometry = blkref.GetTransformedCopy(matrix),
                 });
-            });
+            }
         }
 
         private bool IsContain(ThMEPXClipInfo xclip, Entity ent)
@@ -109,15 +90,17 @@ namespace ThMEPElectrical.SystemDiagram.Engine
         }
         private void Build()
         {
-            foreach (var blockInfo in ThBlockConfigModel.BlockConfig)
-            {
-                BlockNameDic.Add(blockInfo.BlockName, blockInfo.BlockNameRemark);
-            }
+            //foreach (var blockInfo in ThBlockConfigModel.BlockConfig)
+            //{
+            //    BlockNameDic.Add(blockInfo.BlockName, blockInfo.BlockNameRemark);
+            //}
         }
     }
     public class ElementInfo
     {
         public string Layer { get; set; }
         public string Name { get; set; }
+
+        public List<KeyValuePair<string, string>> AttNames { get; set; }
     }
 }

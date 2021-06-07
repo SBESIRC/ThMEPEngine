@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 {
+    /// <summary>
+    /// 系统图的左边框和表头
+    /// </summary>
     public class ThFormHeaderVerticalWireCircuit : ThWireCircuit
     {
         public override List<Entity> Draw()

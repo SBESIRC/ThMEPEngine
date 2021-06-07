@@ -20,7 +20,7 @@ using ThMEPEngineCore.Model.Electrical;
 
 namespace ThMEPElectrical.Command
 {
-    class ThWholeFireSystemDiagramCommand : IAcadCommand, IDisposable
+    class ThFrameFireSystemDiagramCommand : IAcadCommand, IDisposable
     {
         public void Dispose()
         {
@@ -50,24 +50,13 @@ namespace ThMEPElectrical.Command
             }
         }
 
-        /// <summary>
-        /// 计算块的实际坐标
-        /// </summary>
-        /// <param name="rowIndex"></param>
-        /// <param name="BlockInfo"></param>
-        /// <returns></returns>
-        public Point3d CalculateCoordinates(int rowIndex, ThBlockModel BlockInfo)
-        {
-            return new Point3d(3000 * (BlockInfo.Index - 1) + BlockInfo.Position.X, 3000 * (rowIndex - 1) + BlockInfo.Position.Y, 0);
-        }
-
         public void Execute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
             {
                 using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())//防火分区块引擎
                 using (var StoreysRecognitionEngine = new ThStoreysRecognitionEngine())//楼层引擎
-                using (var FireCompartmentEngine = new ThFireCompartmentRecognitionEngine() { LayerFilter = new List<string>() { ThAutoFireAlarmSystemCommon.FireDistrictByLayer } })//防火分区引擎
+                using (var FireCompartmentEngine = new ThFireCompartmentRecognitionEngine() { LayerFilter = FireCompartmentParameter.LayerNames })//防火分区引擎
                 {
                     //火灾自动报警系统diagram实例化
                     ThAutoFireAlarmSystemModel diagram = new ThAutoFireAlarmSystemModel();
@@ -85,75 +74,62 @@ namespace ThMEPElectrical.Command
                     #endregion
 
                     //拿到全图所有防火分区
-                    FireCompartmentEngine.RecognizeMS(acadDatabase.Database, new Point3dCollection());
-                    //foreach (var item in FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList())
-                    //{
-                    //    item.Boundary.ColorIndex = 2;
-                    //    acadDatabase.ModelSpace.Add(item.Boundary);
-                    //}
+                    FireCompartmentEngine.RecognizeMS(acadDatabase.Database, points);
 
                     //获取选择区域的所有所需块
                     BlockReferenceEngine.Recognize(acadDatabase.Database, points);
+                    BlockReferenceEngine.RecognizeMS(acadDatabase.Database, points);
 
                     //获取选择区域的所有的楼层框线
                     StoreysRecognitionEngine.Recognize(acadDatabase.Database, points);
 
                     //初始化楼层
-                    diagram.InitStoreys(StoreysRecognitionEngine.Elements, FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList());
+                    var AddFloorss = diagram.InitStoreys(acadDatabase, StoreysRecognitionEngine.Elements, FireCompartmentEngine.Elements.Cast<ThFireCompartment>().ToList());
+
+                    //获取块引擎附加信息
+                    var datas = BlockReferenceEngine.QueryAllOriginDatas();
 
                     //填充块数量到防火分区
-                    diagram.GetFloorInfo().ForEach(floor =>
+                    diagram.SetGlobalBlockInfo(datas);
+                    AddFloorss.ForEach(floor =>
                     {
+                        var FloorBlockInfo = diagram.GetFloorBlockInfo(floor.FloorBoundary);
                         //在这里可以加OrderBy
                         floor.FireDistricts.ForEach(fireDistrict =>
                         {
                             fireDistrict.Data = new DataSummary()
                             {
-                                BlockData = BlockReferenceEngine.FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary)
+                                BlockData = diagram.FillingBlockNameConfigModel(fireDistrict.FireDistrictBoundary, floor.FloorName == "JF")
                             };
+                            fireDistrict.DrawFireDistrict = fireDistrict.Data.BlockData.BlockStatistics.Values.Count(v => v > 0) > 0;
+                        });
+                        int Max_FireDistrictNo = 1;
+                        //Max_FireDistrictNo = floor.FireDistricts.OrderByDescending(f=>f.FireDistrictNo).FirstOrDefault().FireDistrictNo+1;
+                        var The_MaxNo_FireDistrict = floor.FireDistricts.OrderByDescending(f => f.FireDistrictNo).FirstOrDefault();
+                        Max_FireDistrictNo = The_MaxNo_FireDistrict.FireDistrictNo;
+                        string FloorName = Max_FireDistrictNo > 1 ? The_MaxNo_FireDistrict.FireDistrictName.Split('-')[0] : floor.FloorName;
+                        floor.FireDistricts.Where(f => f.DrawFireDistrict && f.DrawFireDistrictNameText).ToList().ForEach(o =>
+                        {
+                            o.FireDistrictNo = ++Max_FireDistrictNo;
+                            o.FireDistrictName = FloorName + "-" + Max_FireDistrictNo;
                         });
                     });
 
-                    #region 填充进Model
-                    //1
-                    //FireStoreys.ToList().ForEach(o =>
-                    //{
-                    //    var FireDistrict = new ThFireDistrict
-                    //    {
-                    //        FireDistrictName = o.Key.FloorName,
-                    //        Data = new DataSummary()
-                    //        {
-                    //            BlockData = dataEngine.FillingBlockNameConfigModel(o.Value)
-                    //        }
-                    //    };
-                    //    o.Key.FireDistricts.Add(FireDistrict);
-                    //    diagram.floors.Add(o.Key);
-                    //});
+                    //绘画该图纸的防火分区编号
+                    diagram.DrawFireCompartmentNum(acadDatabase.Database, AddFloorss);
 
-                    //2
-                    //diagram.GetFireDistrictsInfo().ForEach(FireDistricts =>
-                    //{
-                    //    FireDistricts.Data = new DataSummary()
-                    //    {
-                    //        BlockData = dataEngine.FillingBlockNameConfigModel(FireDistricts.PointCollection)
-                    //    };
-                    //});
+                    //把楼层信息添加到系统图中
+                    diagram.floors.AddRange(AddFloorss);
 
-                    //diagram.GetFloorInfo().ForEach(floor =>
-                    //{
-                    //            //在这里可以加OrderBy
-                    //            floor.FireDistricts.ForEach(fireDistrict =>
-                    //                {
-                    //        fireDistrict.Data = new DataSummary()
-                    //        {
-                    //            BlockData = dataEngine.FillingBlockNameConfigModel(fireDistrict.FireDistrictPolyLine)
-                    //        };
-                    //    });
-                    //});
-                    #endregion
+                    var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位!");
+                    var position = Point3d.Origin;
+                    if (ppr.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                    {
+                        position = ppr.Value;
+                    }
 
-                    //画
-                    diagram.Draw();
+                    //画系统图
+                    diagram.DrawSystemDiagram(position.GetAsVector());
                 }
             }
         }

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using ThMEPElectrical.SystemDiagram.Service;
 
 namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 {
@@ -28,6 +29,8 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
 
             Line Startline3 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1), 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1500, OuterFrameLength * (FloorIndex - 1) + 3000, 0));
             Result.Add(Startline3);
+
+            InsertBlockService.InsertCountBlock(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2300, OuterFrameLength * (FloorIndex - 1) + 1150, 0), new Scale3d(-100, 100, 100), 0, new Dictionary<string, string>() { { "N", this.fireDistrict.Data.BlockData.BlockStatistics["消防广播火栓强制启动模块"].ToString() } });
             #endregion
 
             CurrentIndex++;
@@ -77,7 +80,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         {
             List<Entity> result = new List<Entity>();
             double RightmostPosition = 0;
-            double BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.BlockName == "E-BFAS520" && y.Index == currentIndex).Position.X - 150;
+            double BlockPosition = ThBlockConfigModel.BlockConfig.First(y => y.UniqueName== "消防广播火栓强制启动模块").Position.X - 150;
             Line Midline1 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + BlockPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
             result.Add(Midline1);
             RightmostPosition = BlockPosition + 300;

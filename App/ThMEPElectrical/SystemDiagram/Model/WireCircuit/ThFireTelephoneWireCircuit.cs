@@ -26,15 +26,15 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             bool DrawBFAS220 = true;
             bool DrawBFAS330 = true;
             //判断末尾是否有连接块,如没有，则省略整条线都不画了
-            if (this.fireDistrict.Data.BlockData.BlockStatistics["E-BFAS212"] == 0)
+            if (this.fireDistrict.Data.BlockData.BlockStatistics["手动火灾报警按钮(带消防电话插座)"] == 0)
             {
                 DrawBFAS212 = false;
             }
-            if (this.fireDistrict.Data.BlockData.BlockStatistics["E-BFAS220"] == 0)
+            if (this.fireDistrict.Data.BlockData.BlockStatistics["火灾报警电话"] == 0)
             {
                 DrawBFAS220 = false;
             }
-            if (this.fireDistrict.Data.BlockData.BlockStatistics["E-BFAS330"] == 0)
+            if (this.fireDistrict.Data.BlockData.BlockStatistics["火灾声光警报器"] == 0)
             {
                 DrawBFAS330 = false;
             }

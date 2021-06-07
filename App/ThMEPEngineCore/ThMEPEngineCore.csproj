@@ -68,6 +68,7 @@
     <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3ShearWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThFireCompartmentExtractionVisitor.cs" />
+    <Compile Include="Engine\ThFireCompartmentNameExtractionVisitor.cs" />
     <Compile Include="Engine\ThFireCompartmentRecognitionEngine.cs" />
     <Compile Include="Engine\ThParkingStallVisitor.cs" />
     <Compile Include="Engine\ThVStructuralElementExtractionVisitor.cs" />

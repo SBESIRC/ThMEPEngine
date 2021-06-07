@@ -1,0 +1,95 @@
+﻿<cus:ThCustomWindow x:Class="TianHua.Electrical.UI.SystemDiagram.UI.SelectLayers"
+                    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                    xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+                    xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF" xmlns:controlutils="clr-namespace:ThControlLibraryWPF.ControlUtils;assembly=ThControlLibraryWPF"
+                    SizeToContent="WidthAndHeight"
+                    mc:Ignorable="d"
+                    Title="火灾自动报警系统图">
+    <Grid Margin="3"  Focusable="False" FocusManager.FocusedElement="{Binding ElementName=btnLayoutLaneLine}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <StackPanel Grid.Row="0" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
+            <Label Content="生成系统图方式："  Focusable="False" />
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5"  Focusable="False" HorizontalAlignment="Center">
+                <RadioButton Name="SelectAll" Width="80" VerticalAlignment="Center" Focusable="True" FocusManager.IsFocusScope="False" IsTabStop="True"
+                             TabIndex="2" VerticalContentAlignment="Bottom" Margin="10,0,0,0" IsChecked="True">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0"  Focusable="False" Content="所有图纸" ></Label>
+                    </Grid>
+                </RadioButton>
+                <RadioButton Name="SelectFrame" Width="80" VerticalAlignment="Center" Focusable="True" TabIndex="3" IsTabStop="True" VerticalContentAlignment="Bottom" Margin="20,0,10,0" IsChecked="False">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"></RowDefinition>
+                            <RowDefinition Height="20"></RowDefinition>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="1" VerticalContentAlignment="Bottom" Padding="0,0,0,-1" Content="手动选择" ></Label>
+                    </Grid>
+                </RadioButton>
+            </StackPanel>
+            <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
+        </StackPanel>
+        <StackPanel Grid.Row="1" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
+            <Label Content="计数模块:"  Focusable="False" />
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
+                <Label Content="火灾报警控制总线计数模块："></Label>
+                <TextBox x:Name="ControlBusCountTXT" Width="30" HorizontalContentAlignment="Center" Text="{Binding ControlBusCountTXT,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
+                <Label Content="短路隔离器计数模块："></Label>
+                <TextBox x:Name="ShortCircuitIsolatorTxt" Width="30" HorizontalContentAlignment="Center" Text="{Binding ShortCircuitIsolatorTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Left">
+                <Label Content="消防广播火灾启动计数模块："></Label>
+                <TextBox x:Name="FireBroadcastingTxt" Width="30" HorizontalContentAlignment="Center" Text="{Binding FireBroadcastingTxt,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+            </StackPanel>
+            <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Vertical"  Focusable="False" Margin="0,5,0,0">
+            <Label Content="添加防火分区图层:"  Focusable="False" />
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5" Height="24" Focusable="False" HorizontalAlignment="Center">
+                <TextBox x:Name="AddLayerTxt" Width="140" HorizontalContentAlignment="Left"></TextBox>
+                <cus:ImageButton Margin="10,0,0,0" Content="添加" Width="40" Height="24"  Click="AddLayerButton_Click"></cus:ImageButton>
+            </StackPanel>
+            <Border BorderThickness="0,0,0,1" Height="5"   Focusable="False" ></Border>
+        </StackPanel>
+        <StackPanel Grid.Row="3" Orientation="Vertical">
+            <Border BorderThickness="0.5" Margin="0,5,0,5"></Border>
+            <Label Content="请选择防火分区所在图层"></Label>
+            <ItemsControl x:Name="LayerList" ItemsSource="{Binding DynamicCheckBoxs}" MaxHeight="200">
+                <ItemsControl.Template>
+                    <ControlTemplate TargetType="ItemsControl">
+                        <ScrollViewer x:Name="ScrollViewer" Padding="{TemplateBinding Padding}">
+                            <ItemsPresenter/>
+                        </ScrollViewer>
+                    </ControlTemplate>
+                </ItemsControl.Template>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <CheckBox VerticalContentAlignment="Center" VerticalAlignment="Center" Margin="0,5,0,5" Padding="0" Content="{Binding Content}" IsChecked="{Binding IsChecked}"></CheckBox>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Vertical" ></StackPanel>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
+        </StackPanel>
+        <StackPanel Grid.Row="4" HorizontalAlignment="Right">
+            <cus:ImageButton Content="确定" Width="70" Height="24"  TabIndex="4" Click="ImageButton_Click"></cus:ImageButton>
+        </StackPanel>
+    </Grid>
+</cus:ThCustomWindow>
+

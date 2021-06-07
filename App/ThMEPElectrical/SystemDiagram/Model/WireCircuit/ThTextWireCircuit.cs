@@ -19,12 +19,12 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
         {
             List<Entity> Result = new List<Entity>();
             int CurrentIndex = this.StartIndexBlock;
-            while (CurrentIndex < EndIndexBlock)
+            while (CurrentIndex <= EndIndexBlock)
             {
                 int Quantity = 0;
                 ThBlockConfigModel.BlockConfig.Where(o => o.Index == CurrentIndex).ToList().ForEach(x =>
                 {
-                    if (x.ShowQuantity && ((Quantity = this.fireDistrict.Data.BlockData.BlockStatistics[x.BlockName]) > 0 || !x.CanHidden))
+                    if (x.ShowQuantity && ((Quantity = this.fireDistrict.Data.BlockData.BlockStatistics[x.UniqueName]) > 0 || !x.CanHidden))
                     {
                         DBText QuantityText = new DBText() { Height = 250, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
                         QuantityText.TextString = Quantity.ToString();
@@ -32,7 +32,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                         QuantityText.AlignmentPoint = QuantityText.Position;
                         Result.Add(QuantityText);
                     }
-                    if (x.ShowText && (this.fireDistrict.Data.BlockData.BlockStatistics[x.BlockName] > 0 || !x.CanHidden))
+                    if (x.ShowText && (this.fireDistrict.Data.BlockData.BlockStatistics[x.UniqueName] > 0 || !x.CanHidden))
                     {
                         DBText Text = new DBText() { Height = 350, WidthFactor = 0.5, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3") };
                         Text.TextString = x.BlockNameRemark;

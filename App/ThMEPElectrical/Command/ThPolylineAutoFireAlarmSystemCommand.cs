@@ -4,19 +4,13 @@ using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
 using Linq2Acad;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ThCADExtension;
 using ThMEPElectrical.SystemDiagram.Engine;
 using ThMEPElectrical.SystemDiagram.Model;
-using ThMEPElectrical.SystemDiagram.Model.WireCircuit;
-using ThMEPElectrical.SystemDiagram.Service;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThAutoFireAlarmSystemCommand : IAcadCommand, IDisposable
+    public class ThPolylineAutoFireAlarmSystemCommand : IAcadCommand, IDisposable
     {
         public void Dispose()
         {
@@ -26,13 +20,14 @@ namespace ThMEPElectrical.Command
         public void Execute()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var dataEngine = new ThAutoFireAlarmSystemRecognitionEngine())
+            using (var BlockReferenceEngine = new ThAutoFireAlarmSystemRecognitionEngine())
             {
                 var per = Active.Editor.GetEntity("\n选择一个防火分区(多段线):");
                 var pts = new Point3dCollection();
+                Entity frame;
                 if (per.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
                 {
-                    var frame = acadDatabase.Element<Entity>(per.ObjectId);
+                    frame = acadDatabase.Element<Entity>(per.ObjectId);
                     if (frame is Polyline polyLineframe)
                     {
                         pts = polyLineframe.TessellatePolylineWithArc(100).Vertices();
@@ -51,52 +46,50 @@ namespace ThMEPElectrical.Command
                 //加载块集合配置文件白名单
                 ThBlockConfigModel.Init();
                 //获取该区域的所有所需块
-                dataEngine.Recognize(acadDatabase.Database, pts);
+                BlockReferenceEngine.Recognize(acadDatabase.Database, pts);
+                BlockReferenceEngine.RecognizeMS(acadDatabase.Database, pts);
 
                 #region 填充进Model
-                ThAutoFireAlarmSystemModel DataModel = new ThAutoFireAlarmSystemModel();
+                ThAutoFireAlarmSystemModel diagram = new ThAutoFireAlarmSystemModel();
+
+                //获取块引擎附加信息
+                var datas = BlockReferenceEngine.QueryAllOriginDatas();
+
+                //填充块数量到防火分区
+                diagram.SetGlobalBlockInfo(datas);
                 //添加一个楼层信息
-                DataModel.floors.Add(new ThFloorModel()
+                diagram.floors.Add(new ThFloorModel()
                 {
                     FloorNumber = 1
                 });
                 //添加一个防火分区
-                DataModel.floors[0].FireDistricts.Add(new ThFireDistrictModel
+                var FloorBlockInfo = diagram.GetFloorBlockInfo(frame as Polyline);
+                diagram.floors[0].FireDistricts.Add(new ThFireDistrictModel
                 {
                     FireDistrictName = "Select",
                     Data = new DataSummary()
                     {
-                        BlockData = dataEngine.FillingBlockNameConfigModel()
-                    }
-                });
-                //添加一个防火分区 第二层 test
-                DataModel.floors[0].FireDistricts.Add(new ThFireDistrictModel
-                {
-                    FireDistrictName = "All1",
-                    Data = new DataSummary()
-                    {
-                        BlockData = dataEngine.FillingBlockNameConfigModelAll1Test()
-                    }
-                });
-                //添加一个防火分区 第三层 test
-                DataModel.floors[0].FireDistricts.Add(new ThFireDistrictModel
-                {
-                    FireDistrictName = "All0",
-                    Data = new DataSummary()
-                    {
-                        BlockData = dataEngine.FillingBlockNameConfigModelAll0Test()
+                        BlockData = diagram.FillingBlockNameConfigModel(frame)
                     }
                 });
                 #endregion
 
-                //画
-                DataModel.Draw();
+                //绘画该图纸的防火分区编号
+                diagram.DrawFireCompartmentNum(acadDatabase.Database, diagram.GetFloorInfo());
+                //
 
+                var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位!");
+                var position = Point3d.Origin;
+                if (ppr.Status == Autodesk.AutoCAD.EditorInput.PromptStatus.OK)
+                {
+                    position = ppr.Value;
+                }
 
-
+                //画系统图
+                diagram.DrawSystemDiagram(position.GetAsVector());
             }
         }
 
-        
+
     }
 }

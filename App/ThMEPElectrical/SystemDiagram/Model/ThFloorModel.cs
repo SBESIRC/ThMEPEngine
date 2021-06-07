@@ -26,43 +26,42 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// <summary>
         /// 楼层数
         /// </summary>
-        public int? FloorNumber { get; set; }
+        public int FloorNumber { get; set; }
 
         /// <summary>
         /// 防火分区信息
         /// </summary>
         public List<ThFireDistrictModel> FireDistricts { get; set; }
 
+        /// <summary>
+        /// 楼层PolyLine
+        /// </summary>
+        public Polyline FloorBoundary { get; set; }
         public ThFloorModel()
         {
             FireDistricts = new List<ThFireDistrictModel>();
         }
 
-        // <summary>
+        /// <summary>
         /// 初始化楼层
         /// </summary>
         /// <param name="storeys"></param>
-        public void InitFloors(AcadDatabase acadDatabase, BlockReference FloofBlockReference, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
+        public void InitFloors(AcadDatabase acadDatabase, BlockReference FloofBlockReference, List<ThMEPEngineCore.Model.Electrical.ThFireCompartment> fireCompartments, ThCADCore.NTS.ThCADCoreNTSSpatialIndex spatialIndex)
         {
-            List<Entity> FindFireCompartments = new List<Entity>();
-            Polyline obb = GetBlockOBB(acadDatabase.Database, FloofBlockReference, FloofBlockReference.BlockTransform);
-            FindFireCompartments = spatialIndex.SelectWindowPolygon(obb).Cast<Entity>().ToList();
-            foreach (var item in FindFireCompartments)
+            FloorBoundary = GetBlockOBB(acadDatabase.Database, FloofBlockReference, FloofBlockReference.BlockTransform);
+            var FindFireCompartmentsEntity = spatialIndex.SelectWindowPolygon(FloorBoundary);
+            var FindFireCompartments = fireCompartments.Where(e => FindFireCompartmentsEntity.Contains(e.Boundary));
+            //foreach (Entity item in FindFireCompartmentsEntity)
+            //{
+            //    item.ColorIndex = 2;
+            //    acadDatabase.ModelSpace.Add(item);
+            //}
+            if (FindFireCompartmentsEntity.Count > 0)
             {
-                item.ColorIndex = 2;
-                acadDatabase.ModelSpace.Add(item);
-            }
-            if (FindFireCompartments.Count > 0)
-            {
-                int FireDistrictNo = 1;
                 FindFireCompartments.ForEach(o =>
                 {
-                    ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel()
-                    {
-                        FireDistrictName = this.FloorName + "-" + FireDistrictNo++,
-                        DrawFireDistrictNameText = true
-                    };
-                    NewFireDistrict.InitFireDistrict(o);
+                    ThFireDistrictModel NewFireDistrict = new ThFireDistrictModel();
+                    NewFireDistrict.InitFireDistrict(this.FloorNumber,o);
                     this.FireDistricts.Add(NewFireDistrict);
                 });
             }
@@ -72,7 +71,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 {
                     FireDistrictName = this.FloorName
                 };
-                NewFireDistrict.InitFireDistrict(FloofBlockReference);
+                NewFireDistrict.InitFireDistrict(this.FloorNumber, FloofBlockReference);
                 this.FireDistricts.Add(NewFireDistrict);
             }
         }

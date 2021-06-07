@@ -130,5 +130,24 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             }
             return line;
         }
+
+        /// <summary>
+        /// 画挂块的实心圆点
+        /// </summary>
+        /// <param name="CurrentAddress">当前地址索引</param>
+        /// <param name="IsHorizontalLine">线的方向:True水平线,False竖直线</param>
+        /// <returns></returns>
+        protected Entity DrawFilledCircle(Point2d CircleCenter)
+        {
+            Polyline polyline = new Polyline()
+            {
+                Closed = true
+            };
+            var sp = CircleCenter.Add(new Vector2d(-25, 0));
+            var ep = CircleCenter.Add(new Vector2d(25, 0));
+            polyline.AddVertexAt(0, sp, Math.Tan(Math.PI / 4.0), 300, 300);
+            polyline.AddVertexAt(1, ep, Math.Tan(Math.PI / 4.0), 300, 300);
+            return polyline;
+        }
     }
 }

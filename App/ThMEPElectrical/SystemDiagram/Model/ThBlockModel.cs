@@ -12,12 +12,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
     public class ThBlockModel
     {
         /// <summary>
-        /// 连接块
+        /// 每个块的唯一名称标识，不可重复
         /// </summary>
-        //public BlockReference Block { get; set; }
+        public string UniqueName  { get; set; }
 
         /// <summary>
-        /// 块名
+        /// 系统图对应块名
         /// </summary>
         public string BlockName { get; set; }
 
@@ -25,6 +25,11 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// 外接属性集合
         /// </summary>
         public Dictionary<string, string> attNameValues { get; set; }
+
+        /// <summary>
+        /// 块计数默认数量
+        /// </summary>
+        public int DefaultQuantity { get; set; } = 0;
 
         /// <summary>
         /// 是否显示外接属性
@@ -72,12 +77,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public Point3d QuantityPosition { get; set; }
 
         /// <summary>
-        /// 是否显示块的计数
+        /// 是否显示块的中文名称
         /// </summary>
         public bool ShowText { get; set; } = false;
 
         /// <summary>
-        /// 块计数地址
+        /// 块中文名称地址
         /// </summary>
         public Point3d TextPosition { get; set; }
 
@@ -91,6 +96,60 @@ namespace ThMEPElectrical.SystemDiagram.Model
         /// </summary>
         public List<ThBlockModel> AssociatedBlocks { get; set; }
 
+        /// <summary>
+        /// 块计数统计类型
+        /// </summary>
+        public StatisticType StatisticMode { get; set; } = 0;
 
+        /// <summary>
+        /// 统计用外接属性集合
+        /// </summary>
+        public Dictionary<string, List<string>> StatisticAttNameValues { get; set; }
+
+        /// <summary>
+        /// 依赖其他统计模块
+        /// </summary>
+        public List<string> RelyBlockUniqueNames { get; set; }
+
+        /// <summary>
+        /// 依赖其他统计模块的规则
+        /// </summary>
+        public int DependentStatisticalRule { get; set; } = 1;
+
+        /// <summary>
+        /// 膨胀系数
+        /// </summary>
+        public int CoefficientOfExpansion { get; set; } = 1;
+    }
+
+    /// <summary>
+    /// 统计类型
+    /// </summary>
+    public enum StatisticType
+    {
+        /// <summary>
+        /// 按块名统计
+        /// </summary>
+        BlockName,
+        /// <summary>
+        /// 按外接属性统计
+        /// </summary>
+        Attributes,
+        /// <summary>
+        /// 依赖其他模块统计
+        /// </summary>
+        RelyOthers,
+        /// <summary>
+        /// 按房间统计
+        /// </summary>
+        Room,
+        /// <summary>
+        /// 需要特殊处理
+        /// </summary>
+        NeedSpecialTreatment,
+        /// <summary>
+        /// 不需要统计
+        /// </summary>
+        NoStatisticsRequired
     }
 }

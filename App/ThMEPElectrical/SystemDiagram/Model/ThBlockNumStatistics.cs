@@ -18,6 +18,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public ThBlockNumStatistics()
         {
             this.BlockStatistics = new Dictionary<string, int>();
+            ThBlockConfigModel.BlockConfig.ForEach(o => this.BlockStatistics.Add(o.UniqueName, o.DefaultQuantity));
         }
     }
 }

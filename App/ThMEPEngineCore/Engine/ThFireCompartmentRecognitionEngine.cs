@@ -25,14 +25,23 @@ namespace ThMEPEngineCore.Engine
         }
         public override void ExtractFromMS(Database database)
         {
+            //获取防火分区边框访问者
             var visitor = new ThFireCompartmentExtractionVisitor()
             {
                 LayerFilter = this.LayerFilter,
             };
+            //获取防火分区编号访问者
+            var visitorDbText = new ThFireCompartmentNameExtractionVisitor()
+            {
+                LayerFilter = this.LayerFilter,
+            };
+
             var extractor = new ThSpatialElementExtractor();
             extractor.Accept(visitor);
+            extractor.Accept(visitorDbText);
             extractor.ExtractFromMS(database);
             Results = visitor.Results;
+            Results.AddRange(visitorDbText.Results);
         }
     }
 
@@ -62,17 +71,29 @@ namespace ThMEPEngineCore.Engine
 
         public override void Recognize(List<ThRawIfcSpatialElementData> datas, Point3dCollection polygon)
         {
-            var dbObjs = datas.Select(o => o.Geometry).ToCollection();
+            var dbPolylineObjs = datas.Where(o => o.Geometry is Polyline).Select(o => o.Geometry).ToCollection();
+            var dbDbTextObjs = datas.Where(o => o.Geometry is DBText || o.Geometry is MText).Select(o => o.Geometry).ToCollection();
+            ThCADCoreNTSSpatialIndex DbTextspatialIndex = new ThCADCoreNTSSpatialIndex(dbDbTextObjs);
             if (polygon.Count > 0)
             {
-                var spatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
-                dbObjs = spatialIndex.SelectCrossingPolygon(polygon);
-                datas = datas.Where(o => dbObjs.Contains(o.Geometry)).ToList();
+                var PolyLinespatialIndex = new ThCADCoreNTSSpatialIndex(dbPolylineObjs);
+                //DbTextspatialIndex = new ThCADCoreNTSSpatialIndex(dbDbTextObjs);
+                dbPolylineObjs = PolyLinespatialIndex.SelectCrossingPolygon(polygon);
             }
+            datas = datas.Where(o => dbPolylineObjs.Contains(o.Geometry)).ToList();
             List<Polyline> FireCompartmentData = datas.Select(x => x.Geometry as Polyline).ToList();
             var Holes = CalHoles(FireCompartmentData);
             // 通过获取的OriginData 分类
-            Elements.AddRange(FireCompartmentData.Select(x => new ThFireCompartment() { Boundary = Holes.Keys.Contains(x) ? GetMpolygon(Holes.FirstOrDefault(o=>o.Key==x)) : x }));
+            var ThFireCompartments = FireCompartmentData.Select(x => new ThFireCompartment() { Boundary = Holes.Keys.Contains(x) ? GetMpolygon(Holes.FirstOrDefault(o => o.Key == x)) : x }).ToList();
+            foreach (var FireCompartment in ThFireCompartments)
+            {
+                var objs = DbTextspatialIndex.SelectCrossingPolygon(FireCompartment.Boundary);
+                if(objs.Count>0)
+                {
+                    FireCompartment.Number = objs[0] is DBText dBText ? dBText.TextString : (objs[0] as MText).Contents;
+                }
+            }
+            Elements.AddRange(ThFireCompartments);
         }
 
         private Dictionary<Polyline, List<Polyline>> CalHoles(List<Polyline> frames)

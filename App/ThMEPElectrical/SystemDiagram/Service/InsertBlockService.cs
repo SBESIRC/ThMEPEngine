@@ -15,6 +15,12 @@ namespace ThMEPElectrical.SystemDiagram.Service
 {
     public static class InsertBlockService
     {
+        public static Vector3d offset = new Vector3d();
+
+        public static void SetOffset(Vector3d Toffset)
+        {
+            offset = Toffset;
+        }
 
         public static void InsertLineType(string LayerName,string LineType)
         {
@@ -35,7 +41,15 @@ namespace ThMEPElectrical.SystemDiagram.Service
             {
                 string LayerName = ThAutoFireAlarmSystemCommon.OuterBorderBlockByLayer;
                 acadDatabase.Database.ImportBlockLayer(LayerName);
+                string CountLayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
+                acadDatabase.Database.ImportBlockLayer(CountLayerName);
             }
+        }
+
+        public static void InsertFireDistrictByLayer(AcadDatabase acadDatabase)
+        {
+            string LayerName = ThAutoFireAlarmSystemCommon.FireDistrictByLayer;
+            acadDatabase.Database.ImportBlockLayer(LayerName);
         }
 
         public static void InsertOuterBorderBlock(int RowNum, int ColNum)
@@ -49,7 +63,7 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 {
                     for (int j = -1; j < ColNum; j++)
                     {
-                        acadDatabase.Database.InsertBlock(LayerName, ThAutoFireAlarmSystemCommon.OuterBorderBlockName, new Point3d(3000 * j, 3000 * i, 0), new Scale3d(1), 0, false, null);
+                        acadDatabase.Database.InsertBlock(LayerName, ThAutoFireAlarmSystemCommon.OuterBorderBlockName, new Point3d(3000 * j, 3000 * i, 0).Add(offset), new Scale3d(1), 0, false, null);
                     }
                 }
             }
@@ -84,13 +98,54 @@ namespace ThMEPElectrical.SystemDiagram.Service
                 acadDatabase.Database.ImportBlockLayer(LayerName);
                 foreach (var BlockInfo in dicBlockPoints)
                 {
-                    string BlockName = BlockInfo.Value.BlockName;
-                    if (!ImportBlockSet.Contains(BlockName))
+                    try
                     {
-                        acadDatabase.Database.ImportBlock(BlockName);
-                        ImportBlockSet.Add(BlockName);
+                        string BlockName = BlockInfo.Value.BlockName;
+                        if (!ImportBlockSet.Contains(BlockName))
+                        {
+                            acadDatabase.Database.ImportBlock(BlockName);
+                            ImportBlockSet.Add(BlockName);
+                        }
+                        //水池液位传感器是个比较特殊的块，需要包一层由E-BFAS630-3->E-BFAS630-5
+                        //然后插入E-BFAS630-5时，再给他炸开
+                        if (BlockInfo.Value.BlockName == "E-BFAS630-5")
+                        {
+                            var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                            var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                            blkref.ExplodeToOwnerSpace();
+                            blkref.Erase();
+                        }
+                        else
+                        {
+                            acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                        }
                     }
-                    acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key, new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                    catch(Exception ex)
+                    {
+
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 插入计数图块
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="vector">偏移量</param>
+        public static void InsertCountBlock(Point3d position, Scale3d scale, double angle, Dictionary<string, string> attNameValues)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                string LayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
+                string BlockName = ThAutoFireAlarmSystemCommon.CountBlockName;
+                try
+                {
+                    acadDatabase.Database.InsertBlock(LayerName, BlockName, position.Add(offset), scale, angle, true, attNameValues);
+                }
+                catch (Exception ex)
+                {
+
                 }
             }
         }
@@ -104,14 +159,14 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// <param name="position"></param>
         /// <param name="scale"></param>
         /// <param name="angle"></param>
-        private static void InsertBlock(this Database database, string layer, string name, Point3d position, Scale3d scale, double angle, bool showAtt, Dictionary<string, string> attNameValues)
+        private static ObjectId InsertBlock(this Database database, string layer, string name, Point3d position, Scale3d scale, double angle, bool showAtt, Dictionary<string, string> attNameValues)
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
             {
                 if (showAtt)
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle, attNameValues);
+                    return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle, attNameValues);
                 else
-                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle);
+                    return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle);
             }
         }
 

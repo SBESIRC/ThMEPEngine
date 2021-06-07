@@ -23,29 +23,27 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             Result.Add(Startline2);
             #endregion
             //判断末尾是否有连接块,如没有，则省略整条线都不画了
-            if (this.fireDistrict.Data.BlockData.BlockStatistics["E-BFAS030"] == 0 && this.fireDistrict.Data.BlockData.BlockStatistics["E-BFAS031"] == 0)
+            if (this.fireDistrict.Data.BlockData.BlockStatistics["区域显示器/火灾显示盘"] != 0 || this.fireDistrict.Data.BlockData.BlockStatistics["楼层或回路重复显示屏"] != 0)
             {
-                return Result;
-            }
-            //画起点框
-            #region 起点框
-            Line Startline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2200, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 3000, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
-            Result.Add(Startline1);
-            #endregion
+                //画起点框
+                #region 起点框
+                Line Startline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1) + 2200, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 3000, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                Result.Add(Startline1);
+                #endregion
 
-            CurrentIndex++;
-            while (CurrentIndex < EndIndexBlock)
-            {
-                //该模块没有挂块，那就画一条直线
-                Result.Add(DrawStraightLine(CurrentIndex));
                 CurrentIndex++;
+                while (CurrentIndex < EndIndexBlock)
+                {
+                    //该模块没有挂块，那就画一条直线
+                    Result.Add(DrawStraightLine(CurrentIndex));
+                    CurrentIndex++;
+                }
+                //画终点框
+                #region 终点框
+                Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1), OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1250, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
+                Result.Add(Endline1);
+                #endregion
             }
-            //画终点框
-            #region 终点框
-            Line Endline1 = new Line(new Point3d(OuterFrameLength * (CurrentIndex - 1), OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * (CurrentIndex - 1) + 1250, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
-            Result.Add(Endline1);
-            #endregion
-
             //设置线型
             Result.ForEach(o =>
             {
