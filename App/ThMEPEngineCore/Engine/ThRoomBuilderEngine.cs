@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.Engine
         public List<ThIfcRoom> BuildFromMS(Database db,Point3dCollection pts)
         {
             // Room 和 Mark 来源于本地
-            var roomEngine = new ThWRoomRecognitionEngine()
+            var roomEngine = new ThDB3RoomRecognitionEngine()
             {
                 LayerFilter = this.RoomBoundaryLayerFilter,
             };
@@ -45,7 +45,7 @@ namespace ThMEPEngineCore.Engine
         public List<ThIfcRoom> BuildFromXRef(Database db, Point3dCollection pts)
         {
             // Room 和 Mark 来源于外参
-            var roomEngine = new ThWRoomRecognitionEngine()
+            var roomEngine = new ThDB3RoomRecognitionEngine()
             {
                 LayerFilter = this.RoomBoundaryLayerFilter,
             };
@@ -76,26 +76,35 @@ namespace ThMEPEngineCore.Engine
                      m.Geometry.GetPoint3dAt(0),
                      m.Geometry.GetPoint3dAt(2));
                 var containers = SelectTextIntersectPolygon(rooms.Select(o => o.Boundary).ToList(), m.Geometry);
-                containers = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
-                if (containers.Count > 0)
+                var results = containers.Where(n => n is Polyline polyline && polyline.Contains(textCenterPt)).ToList();
+                results.AddRange(containers.Where(n => n is MPolygon mPolygon && mPolygon.Contains(textCenterPt)));
+                if (results.Count > 0)
                 {
-                    var containerRooms = rooms.Where(o => containers.Contains(o.Boundary)).ToList();
+                    var containerRooms = rooms.Where(o => results.Contains(o.Boundary)).ToList();
                     textContainer.Add(m, containerRooms);
                 }
             });
             return textContainer;
         }
 
-        private List<Curve> SelectTextIntersectPolygon(List<Curve> curves, Polyline textOBB)
+        private List<Entity> SelectTextIntersectPolygon(List<Entity> curves, Polyline textOBB)
         {
             return curves.Where(o =>
             {
                 if (o is Polyline polyline)
                 {
                     var relation = new ThCADCoreNTSRelate(polyline, textOBB);
-                    return relation.IsOverlaps || relation.IsCovers || relation.IsContains;
+                    return relation.IsOverlaps || relation.IsContains;
                 }
-                return false;
+                else if (o is MPolygon mPolygon)
+                {
+                    var relation = new ThCADCoreNTSRelate(mPolygon, textOBB);
+                    return relation.IsOverlaps || relation.IsContains;
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
             }).ToList();
         }
 
@@ -106,10 +115,10 @@ namespace ThMEPEngineCore.Engine
                 if (o.Value.Count > 0)
                 {
                     var smallestAreaRoom = o.Value.OrderBy(v=>(v.Boundary as Polyline).Area).First();
-                    if(smallestAreaRoom.Tags.IndexOf(o.Key.Text)<0)
-                    {
-                        smallestAreaRoom.Tags.Add(o.Key.Text);
-                    }                    
+                    //if(smallestAreaRoom.Tags.IndexOf(o.Key.Text)<0)
+                    //{
+                    //    smallestAreaRoom.Tags.Add(o.Key.Text);
+                    //}                    
                 }
             });
         }

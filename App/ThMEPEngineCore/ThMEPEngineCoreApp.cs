@@ -387,7 +387,7 @@ namespace ThMEPEngineCore
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 engine.Recognize(acadDatabase.Database, frame.Vertices());
-                engine.Elements.ForEach(o =>
+                engine.Elements.Cast<ThIfcParkingStall>().ForEach(o =>
                 {
                     acadDatabase.ModelSpace.Add(o.Boundary);
                 });
@@ -655,7 +655,7 @@ namespace ThMEPEngineCore
         public void THExtractRoom()
         {
             using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            using (var roomEngine = new ThWRoomRecognitionEngine())
+            using (var roomEngine = new ThDB3RoomRecognitionEngine())
             {
                 var result = Active.Editor.GetEntity("\n选择框线");
                 if (result.Status != PromptStatus.OK)
@@ -664,7 +664,7 @@ namespace ThMEPEngineCore
                 }
                 Polyline frame = acadDatabase.Element<Polyline>(result.ObjectId);
                 roomEngine.Recognize(acadDatabase.Database, frame.Vertices());
-                roomEngine.Elements.ForEach(o =>
+                roomEngine.Elements.Cast<ThIfcRoom>().ForEach(o =>
                 {
                     o.Boundary.ColorIndex = 5;
                     o.Boundary.SetDatabaseDefaults();

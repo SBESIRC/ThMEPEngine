@@ -7,7 +7,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRoomExtractionVisitor : ThSpatialElementExtractionVisitor
+    public class ThDB3RoomExtractionVisitor : ThSpatialElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcSpatialElementData> elements, Entity dbObj, Matrix3d matrix)
         {

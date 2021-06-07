@@ -186,7 +186,7 @@ namespace ThMEPWSS.Pipe.Engine
                     frameSpaces.Add(roofSpaces[0]);
                 }
 
-                var boundaryEngine = new ThMEPEngineCore.Engine.ThWRoomRecognitionEngine();
+                var boundaryEngine = new ThMEPEngineCore.Engine.ThDB3RoomRecognitionEngine();
                 boundaryEngine.RecognizeMS(acadDatabase.Database, pts);
                 var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
                 var markEngine = new ThRoomMarkRecognitionEngine();
@@ -194,11 +194,11 @@ namespace ThMEPWSS.Pipe.Engine
                 var marks = markEngine.Elements.Cast<ThIfcTextNote>().ToList();
                 var builder = new ThRoomBuilderEngine();
                 builder.Build(rooms, marks);
-                this.Spaces = rooms.Select(o => new ThIfcSpace()
-                {
-                    Tags = o.Tags,
-                    Boundary = o.Boundary,
-                }).ToList();
+                //this.Spaces = rooms.Select(o => new ThIfcSpace()
+                //{
+                //    Tags = o.Tags,
+                //    Boundary = o.Boundary,
+                //}).ToList();
 
                 var rainPipesEngine = new ThWCompositeRecognitionEngine();
                 rainPipesEngine.Recognize(database, GetBoundaryVertices(frameSpaces, standardSpaces));

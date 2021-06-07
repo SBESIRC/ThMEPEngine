@@ -34,7 +34,7 @@ namespace ThMEPWSS.FlushPoint.Data
                 engine.Visitor = visitor;
                 engine.Recognize(database, pts);
                 engine.RecognizeMS(database, pts);
-                ParkingStalls.AddRange(engine.Elements.Select(o => o.Boundary).ToList());
+                ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
             }
             // 只看图层
             using (var engine = new ThParkingStallRecognitionEngine())
@@ -44,7 +44,7 @@ namespace ThMEPWSS.FlushPoint.Data
                 visitor.CheckQualifiedBlockName = (Entity e) => true;
                 engine.Recognize(database, pts);
                 engine.RecognizeMS(database, pts);
-                ParkingStalls.AddRange(engine.Elements.Select(o => o.Boundary).ToList());
+                ParkingStalls.AddRange(engine.Elements.Cast<ThIfcParkingStall>().Select(o => o.Boundary).ToList());
             }
         }
 

@@ -11,10 +11,10 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThRoomExtractionEngine : ThSpatialElementExtractionEngine
+    public class ThDB3RoomExtractionEngine : ThSpatialElementExtractionEngine
     {
         public List<string> LayerFilter { get; set; }
-        public ThRoomExtractionEngine()
+        public ThDB3RoomExtractionEngine()
         {
             LayerFilter = new List<string>();
         }
@@ -24,7 +24,7 @@ namespace ThMEPEngineCore.Engine
             {
                 LayerFilter = ThRoomLayerManager.CurveXrefLayers(database);
             }
-            var visitor = new ThRoomExtractionVisitor()
+            var visitor = new ThDB3RoomExtractionVisitor()
             {
                 LayerFilter = this.LayerFilter,
             };
@@ -40,7 +40,7 @@ namespace ThMEPEngineCore.Engine
             {
                 LayerFilter = ThRoomLayerManager.CurveModelSpaceLayers(database);
             }
-            var visitor = new ThRoomExtractionVisitor()
+            var visitor = new ThDB3RoomExtractionVisitor()
             {
                 LayerFilter = this.LayerFilter,
             };
@@ -50,16 +50,16 @@ namespace ThMEPEngineCore.Engine
             Results.AddRange(visitor.Results);
         }
     }
-    public class ThWRoomRecognitionEngine : ThSpatialElementRecognitionEngine
+    public class ThDB3RoomRecognitionEngine : ThSpatialElementRecognitionEngine
     {
         public List<string> LayerFilter { get; set; }
-        public ThWRoomRecognitionEngine()
+        public ThDB3RoomRecognitionEngine()
         {
             LayerFilter = new List<string>();
         }
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomExtractionEngine()
+            var engine = new ThDB3RoomExtractionEngine()
             {
                 LayerFilter = this.LayerFilter,
             };
@@ -69,7 +69,7 @@ namespace ThMEPEngineCore.Engine
 
         public override void RecognizeMS(Database database, Point3dCollection polygon)
         {
-            var engine = new ThRoomExtractionEngine()
+            var engine = new ThDB3RoomExtractionEngine()
             {
                 LayerFilter = this.LayerFilter,
             };

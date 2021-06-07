@@ -2,6 +2,7 @@
 using NetTopologySuite.Operation.Relate;
 using NTSDimension = NetTopologySuite.Geometries.Dimension;
 using AcPolygon = Autodesk.AutoCAD.DatabaseServices.Polyline;
+using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThCADCore.NTS
 {
@@ -12,6 +13,11 @@ namespace ThCADCore.NTS
         public ThCADCoreNTSRelate(AcPolygon poly0, AcPolygon poly2)
         {
             Matrix = RelateOp.Relate(poly0.ToNTSPolygon(), poly2.ToNTSPolygon());
+        }
+
+        public ThCADCoreNTSRelate(MPolygon mPolygon, AcPolygon polygon)
+        {
+            Matrix = RelateOp.Relate(mPolygon.ToNTSGeometry(), polygon.ToNTSPolygon());
         }
 
         public ThCADCoreNTSRelate(Polygon poly0, Polygon poly2)
