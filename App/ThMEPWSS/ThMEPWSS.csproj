@@ -55,6 +55,7 @@
     <Compile Include="Command\ThCheckDeepWellPumpCmd.cs" />
     <Compile Include="Command\ThCreateWaterWellPumpCmd.cs" />
     <Compile Include="Command\ThCreateWithdrawalFormCmd.cs" />
+    <Compile Include="Command\ThFireControlSystemDiagramCmd.cs" />
     <Compile Include="Command\THLayoutFlushPointCmd.cs" />
     <Compile Include="Command\ThPipeCreateCmd.cs" />
     <Compile Include="Command\ThPipeDrawSpaceCmd.cs" />
@@ -231,6 +232,7 @@
     <Compile Include="ThSystemDiagramCmds.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
+    <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\RainSystemDiagramViewModel.cs" />
     <Compile Include="ViewModel\WaterwellPumpParamsViewModel.cs" />
     <Content Include="Uitl\todoList.txt" />

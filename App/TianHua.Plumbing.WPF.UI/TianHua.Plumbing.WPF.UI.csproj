@@ -91,6 +91,10 @@
     <Compile Include="UI\uiDrainageSystemSet.xaml.cs">
       <DependentUpon>uiDrainageSystemSet.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiFireControlSystem.xaml.cs" >
+     <DependentUpon>uiFireControlSystem.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="UI\uiRainSystem.xaml.cs">
       <DependentUpon>uiRainSystem.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -125,6 +129,10 @@
     <Page Include="UI\uiDrainageSystemSet.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiFireControlSystem.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="UI\uiRainSystem.xaml">
       <SubType>Designer</SubType>
