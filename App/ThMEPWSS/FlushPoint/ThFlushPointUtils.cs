@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using ThMEPEngineCore.IO;
 using ThMEPEngineCore.Model;
 using Autodesk.AutoCAD.Geometry;
@@ -23,6 +24,10 @@ namespace ThMEPWSS.FlushPoint
                 results.Add(new Point3d(coords[i], coords[i + 1], 0));
             }
             return results;
+        }
+        public static void SortWashPoints(List<Point3d> washPoints)
+        {
+            washPoints = washPoints.OrderBy(o => o.X).ThenBy(o => o.Y).ToList();
         }
     }
 }

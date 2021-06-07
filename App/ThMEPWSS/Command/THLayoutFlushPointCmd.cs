@@ -96,9 +96,10 @@ namespace ThMEPWSS.Command
                         OnlyDrainageFaclityNearbyOfArrangePosition)
                 {
                     layOutPts = layoutInfo.NearbyPoints; //仅仅排水设施附近
-                }                
+                }
 
                 // 打印块
+                ThFlushPointUtils.SortWashPoints(layOutPts);
                 var columns = (extractors[0] as ThColumnExtractor).Columns;
                 var walls = new List<Entity>();
                 walls.AddRange((extractors[1] as ThShearwallExtractor).Walls);
@@ -111,10 +112,13 @@ namespace ThMEPWSS.Command
                     WashPointLayerName= "W-WSUP-EQPM",
                     WashPoints= layOutPts,
                     Db= acadDb.Database,
-                    PtRange=10.0,
+                    PtRange=10.0,                   
                 };
                 var layoutService = new ThLayoutWashPointBlockService(layoutData);
                 layoutInfo.LayoutBlock = layoutService.Layout();
+
+                var markService = new ThLayoutWashPointMarkService(layoutData);
+                markService.Layout();
 
                 //点位标识的操作通过以下保存的结果与UI交互操作
                 ThPointIdentificationService.LayoutInfo = layoutInfo;

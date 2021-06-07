@@ -83,6 +83,7 @@
     <Compile Include="FlushPoint\Service\ThFilterWashPointsService.cs" />
     <Compile Include="FlushPoint\Service\ThFlushPointParameterService.cs" />
     <Compile Include="FlushPoint\Service\ThLayoutWashPointBlockService.cs" />
+    <Compile Include="FlushPoint\Service\ThLayoutWashPointMarkService.cs" />
     <Compile Include="FlushPoint\Service\ThObstacleExtractService.cs" />
     <Compile Include="FlushPoint\Service\ThPointIdentificationService.cs" />
     <Compile Include="FlushPoint\Service\ThRoomNameResetService.cs" />

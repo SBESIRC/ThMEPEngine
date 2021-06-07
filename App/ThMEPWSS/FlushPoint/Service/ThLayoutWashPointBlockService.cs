@@ -9,7 +9,8 @@ using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-
+using System.Text.RegularExpressions;
+using System;
 
 namespace ThMEPWSS.FlushPoint.Service
 {
@@ -49,11 +50,13 @@ namespace ThMEPWSS.FlushPoint.Service
             {
                 currentDb.Blocks.Import(blockDb.Blocks.ElementOrDefault(LayoutData.WashPointBlkName), false);
                 currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WashPointLayerName), false);
+                currentDb.Layers.Import(blockDb.Layers.ElementOrDefault(LayoutData.WaterSupplyMarkLayerName), false);
             }
         }
         private void CreateLayer()
         {
             LayoutData.Db.CreateAILayer(LayoutData.WashPointLayerName, (short)ColorIndex.BYLAYER);
+            LayoutData.Db.CreateAILayer(LayoutData.WaterSupplyMarkLayerName, (short)ColorIndex.BYLAYER);
         }
         private void BuildSpatialIndex()
         {
@@ -197,18 +200,59 @@ namespace ThMEPWSS.FlushPoint.Service
         public List<Entity> Walls { get; set; }
         public List<Entity> Columns { get; set; }
         public string WashPointBlkName { get; set; }
+        /// <summary>
+        /// 冲洗点位块的图层名称
+        /// </summary>
         public string WashPointLayerName { get; set; }
+        /// <summary>
+        /// 冲洗点位标注的图层名称
+        /// </summary>
+        public string WaterSupplyMarkLayerName { get; set; }
+        /// <summary>
+        /// 冲洗点位标注文字的图层名称
+        /// </summary>
+        public string WaterSupplyMarkStyle { get; set; }
         public List<Point3d> WashPoints { get; set; }
+        /// <summary>
+        /// 冲洗点扩大搜索的范围(找到相邻的墙、柱子等)
+        /// </summary>
         public double PtRange { get; set; }
+        /// <summary>
+        /// 引线高度
+        /// </summary>
+        public double LeaderHeight { get; set; }
+        /// <summary>
+        /// 引线角度
+        /// </summary>
+        public double LeaderAngle { get; set; }
+        /// <summary>
+        /// 文字高度
+        /// </summary>
+        public double TextHeight { get; set; }
+        /// <summary>
+        /// 楼层标识
+        /// </summary>
+        public string FloorSign { get; set; }
+        /// <summary>
+        /// 图纸比例
+        /// </summary>
+        public string PlotScale { get; set; }
         public Database Db { get; set; }
         public WashPointLayoutData()
         {
             PtRange = 5.0;
+            LeaderAngle = 45;
+            TextHeight = 3.5;
             WashPointBlkName = "给水角阀平面";
             WashPointLayerName = "W-WSUP-EQPM";
+            WaterSupplyMarkLayerName = "W-WSUP-NOTE";
+            WaterSupplyMarkStyle = "TH-STYLE3";
+            PlotScale = "1:1";
             Walls = new List<Entity>();
             Columns = new List<Entity>();
             WashPoints = new List<Point3d>();
+            FloorSign = ThFlushPointParameterService.Instance.FlushPointParameter.FloorSign;
+            PlotScale = ThFlushPointParameterService.Instance.FlushPointParameter.PlotScale;
         }
         public bool IsValid
         {
@@ -236,6 +280,41 @@ namespace ThMEPWSS.FlushPoint.Service
                 return false;
             }
             return true;
+        }
+        /// <summary>
+        /// 文字高度乘以比例后的高度
+        /// </summary>
+        /// <returns></returns>
+        public double GetMarkTextSize()
+        {
+            string pattern = @"\d+";
+            var rg = new Regex(pattern);
+            var nums =rg.Matches(PlotScale).Cast<Match>().Select(o=>double.Parse(o.Value)).ToList();
+            if (nums.Count == 2 && nums[1] > 0)
+            {
+                return TextHeight * nums[1];
+            }
+            else
+            {
+                return TextHeight;
+            }
+        }
+        public double GetLeaderYForwardLength(double ratio = 3.0)
+        {
+            if(LeaderHeight>0)
+            {
+                return LeaderHeight;
+            }
+            else
+            {
+                var textSize = GetMarkTextSize();
+                return textSize * ratio;
+            }
+        }
+        public double GetLeaderXForwardLength()
+        {
+            var height = GetLeaderYForwardLength();
+            return height / Math.Tan(ThAuxiliaryUtils.AngToRad(LeaderAngle));
         }
     }
 }
