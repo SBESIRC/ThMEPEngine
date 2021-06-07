@@ -9,6 +9,7 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
@@ -44,7 +45,6 @@ namespace ThMEPWSS.Command
                 layingMethod = (int)LayingMethod.Buried;//敷设方式为埋地
             }
 
-
             if (!ThWCompute.IsCorrectNum(Convert.ToString(setViewModel.FloorLineSpace), "int"))
             {
                 MessageBox.Show("楼层线输入有误，只能是正整数");
@@ -55,35 +55,101 @@ namespace ThMEPWSS.Command
             FloorHeight = ThWCompute.AutomaticValue(FloorHeight, 1500, 9999);
 
             var FlushFaucet = new List<int>();//冲洗龙头层
-            var strType = new List<char>();
-            if(!ThWCompute.IsCorrectNum(setViewModel.FaucetFloor, "str"))
-            {
-                MessageBox.Show("冲洗龙头输入有误，只能是数字，\"-\",\",\"");
-                return;
-            }
-            
+
             if (setViewModel.FaucetFloor != "")
             {
                 foreach (var f in setViewModel.FaucetFloor.Split(','))
                 {
-                    FlushFaucet.Add(Convert.ToInt32(f));
+                    if(f.Contains('-'))
+                    {
+                        var f1 = f.Split('-')[0];
+                        var f2 = f.Split('-').Last();
+                        if(f1 != "" && f2 != "")
+                        {
+                            if (Regex.IsMatch(f1, @"^[+-]?\d*$") && Regex.IsMatch(f2, @"^[+-]?\d*$"))
+                            {
+                                if (Convert.ToInt32(f1) < Convert.ToInt32(f2))
+                                {
+                                    for (int i = Convert.ToInt32(f1); i <= Convert.ToInt32(f2); i++)
+                                    {
+                                        if (!FlushFaucet.Contains(i))
+                                        {
+                                            FlushFaucet.Add(i);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    MessageBox.Show("冲洗龙头输入有误，\"-\"左边数字必须小于右边");
+                                    return;
+                                }
+                            }
+                        }
+                        
+                        else
+                        {
+                            MessageBox.Show("冲洗龙头输入有误，\"-\"左右只能是数字");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (f != "" && !FlushFaucet.Contains(Convert.ToInt32(f)))
+                        {
+                            FlushFaucet.Add(Convert.ToInt32(f));
+                        }
+                    }
                 }
             }
 
             var NoPRValve = new List<int>();//无减压阀层
-            if (!ThWCompute.IsCorrectNum(setViewModel.NoCheckValve, "str"))
-            {
-                MessageBox.Show("无减压阀层输入有误，只能是数字，\"-\",\",\"");
-                return;
-            }
-            
             if (setViewModel.NoCheckValve != "")
             {
                 foreach (var f in setViewModel.NoCheckValve.Split(','))
                 {
-                    NoPRValve.Add(Convert.ToInt32(f));
+                    if (f.Contains('-'))
+                    {
+                        var f1 = f.Split('-')[0];
+                        var f2 = f.Split('-').Last();
+                        if(f1 != "" && f2 != "")
+                        {
+                            if (Regex.IsMatch(f1, @"^[+-]?\d*$") && Regex.IsMatch(f2, @"^[+-]?\d*$"))
+                            {
+                                if (Convert.ToInt32(f1) < Convert.ToInt32(f2))
+                                {
+                                    for (int i = Convert.ToInt32(f1); i <= Convert.ToInt32(f2); i++)
+                                    {
+                                        if (!NoPRValve.Contains(i))
+                                        {
+                                            NoPRValve.Add(i);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    MessageBox.Show("冲洗龙头输入有误，\"-\"左边数字必须小于右边");
+                                    return;
+                                }
+                            }
+                        }
+                        
+                        else
+                        {
+                            MessageBox.Show("冲洗龙头输入有误，\"-\"左右只能是数字");
+                            return;
+                        }
+                    }
+                    else
+                    {
+                        if (f != "" && !NoPRValve.Contains(Convert.ToInt32(f)))
+                        {
+                            NoPRValve.Add(Convert.ToInt32(f));
+                        }
+                    }
                 }
             }
+
+
 
             var selectedArea = UiConfigs.SelectedArea;
             var floorAreaList = UiConfigs.FloorAreaList;
@@ -132,6 +198,10 @@ namespace ThMEPWSS.Command
             
             for (int i = 0; i < setViewModel.PartitionDatas.Count; i++)
             {
+                if(Convert.ToInt32(setViewModel.PartitionDatas[i].MinimumFloorNumber) <= 0)
+                {
+                    continue;
+                }
                 pipeNumber.Add(setViewModel.PartitionDatas[i].RiserNumber);
                 lowestStorey.Add(Convert.ToInt32(setViewModel.PartitionDatas[i].MinimumFloorNumber));
                 highestStorey.Add(Convert.ToInt32(setViewModel.PartitionDatas[i].HighestFloorNumber));
@@ -142,13 +212,19 @@ namespace ThMEPWSS.Command
                 }
             }
             var floorExist = new List<int>();
+            var pipeFloorList = new List<int>();
             for(int i = 0; i < pipeNumber.Count; i++)
             {
                 for(int j = lowestStorey[i]; j <= highestStorey[i]; j++)
                 {
+                    pipeFloorList.Add(j);
+                    if (j == 0)
+                    {
+                        break;
+                    }
                     if(floorExist.Contains(j))
                     {
-                        MessageBox.Show("存在楼层重复");
+                        MessageBox.Show("水管楼层重复");
                         return;
                     }
                     else
@@ -233,8 +309,6 @@ namespace ThMEPWSS.Command
                 {
                     PipeSystem[i].DrawPipeLine(i, indexStartX, indexStartY, FloorHeight, PipeGap, PipeSystem.Count);
                     pt.Add(PipeSystem[i].GetPipeX());
-                    ;
-
                 }
 
                 //创建支管偏移数组
@@ -263,109 +337,144 @@ namespace ThMEPWSS.Command
                         HouseholdNum = maxHouseholdNums;
                     }
                     double Ngi = ThWCompute.InnerProduct(floorCleanToolList[i][areaIndex].GetCleaningTools(), WaterEquivalent) / HouseholdNum;
-                    double U0i = 100 * QL * m * Kh / (0.2 * Ngi * T * 3600);
+                    double U0i = 0;
+                    if (Math.Abs(Ngi) > 1e-6)
+                    {
+                        U0i = 100 * QL * m * Kh / (0.2 * Ngi * T * 3600);
+                        
+                    }
+                    
                     var pipeCompute = new PipeCompute(U0i, Ngi);
-                    var DN = pipeCompute.PipeDiameterCompute();
-                    BranchPipe.Add(new ThWSSDBranchPipe(DN, StoreyList[i], indexStartY, PipeOffsetX[i], BlockSize, layingMethod));
+                    var DN = "";
+                    if (Math.Abs(Ngi) > 1e-6)
+                    {
+                        DN = pipeCompute.PipeDiameterCompute();
+                    }
+                   
+                    BranchPipe.Add(new ThWSSDBranchPipe(DN, StoreyList[i], indexStartY, PipeOffsetX[i], BlockSize, layingMethod, areaIndex));
                 }
 
                 //支管绘制
                 for (int i = 0; i < BranchPipe.Count; i++)
                 {
-                    BranchPipe[i].DrawBranchPipe();
+                    if(pipeFloorList.Contains(i+1))
+                    {
+                        BranchPipe[i].DrawBranchPipe();
+                    }
                 }
 
+                var layFlag = true;
+                var elevateFlag = true;
                 for (int i = 0; i < floorNumbers; i++)
                 {
-                    if (i + 1 == 5)//第五层放置减压阀详图
+                    if (pipeFloorList.Contains(i + 1))
                     {
-                        //绘制减压阀详图
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.PRValveDetail,
-                        BranchPipe[i].GetPRValveDetailSite(), new Scale3d(1, 1, 1), 0);
-                        var ptls = new Point3d[3];
-                        ptls[0] = BranchPipe[i-1].GetPressureReducingValveSite();
-                        ptls[1] = new Point3d(BranchPipe[i-1].GetPressureReducingValveSite().X + 500, BranchPipe[i].GetPRValveDetailSite().Y, 0);
-                        ptls[2] = BranchPipe[i].GetPRValveDetailSite();
-                        var polyline = new Polyline3d(0,new Point3dCollection(ptls),false);
-                        acadDatabase.CurrentSpace.Add(polyline);
-                    }
-                   
-                    if (i + 1 == 3) //第三层放置敷设方式说明
-                    {
-                        BranchPipe[i].DrawLayMethodNote();
-                    }
+                        if (i + 1 == 5)//第五层放置减压阀详图
+                        {
+                            //绘制减压阀详图
+                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.PRValveDetail,
+                            BranchPipe[i].GetPRValveDetailSite(), new Scale3d(1, 1, 1), 0);
+                            var ptls = new Point3d[3];
+                            ptls[0] = BranchPipe[i - 1].GetPressureReducingValveSite();
+                            ptls[1] = new Point3d(BranchPipe[i - 1].GetPressureReducingValveSite().X + 500, BranchPipe[i].GetPRValveDetailSite().Y, 0);
+                            ptls[2] = BranchPipe[i].GetPRValveDetailSite();
+                            var polyline = new Polyline3d(0, new Point3dCollection(ptls), false);
+                            acadDatabase.CurrentSpace.Add(polyline);
+                        }
+
+                        if (i + 1 >= 3) //第三层放置敷设方式说明
+                        {
+                            if (BranchPipe[i].GetHouseholds() != 0 && layFlag)
+                            {
+                                BranchPipe[i].DrawLayMethodNote();
+                                layFlag = false;
+                            }
+                        }
 
 
-                    if (i+1 == 6)//第六层放置水管引出标高
-                    {
+
+                        if (i + 1 >= 6)//第六层放置水管引出标高
+                        {
+                            if (!BranchPipe[i].GetCheckValveSite().IsNull() && elevateFlag)
+                            {
+                                elevateFlag = false;
+                                for (int j = 0; j < BranchPipe[i].GetCheckValveSite().Count; j++)
+                                {
+                                    var ptLs = new Point3d[4];
+
+                                    ptLs[0] = new Point3d(BranchPipe[i].GetWaterPipeInterrupted()[0].X, BranchPipe[i].GetCheckValveSite()[j].Y, 0);
+                                    ptLs[1] = new Point3d(ptLs[0].X + 500 + j * 300, ptLs[0].Y, 0);
+                                    ptLs[2] = new Point3d(ptLs[1].X, ptLs[1].Y + 350 * (BranchPipe[i].GetCheckValveSite().Count - j - 1), 0);
+                                    ptLs[3] = new Point3d(ptLs[2].X + 500, ptLs[2].Y, 0);
+
+                                    var lineNote = new Polyline3d(0, new Point3dCollection(ptLs), false);
+                                    lineNote.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
+                                    acadDatabase.CurrentSpace.Add(lineNote);
+
+                                    acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
+                                    ptLs[2], new Scale3d(0.5, 0.5, 0.5), 0, new Dictionary<string, string> { { "标高", "H+X.XX" } });
+                                }
+                            }
+                        }
+
+                        if (BranchPipe[i].BranchPipes == null)
+                        {
+                            continue;
+                        }
+
                         for (int j = 0; j < BranchPipe[i].GetCheckValveSite().Count; j++)
                         {
-                            var ptLs = new Point3d[4];
-
-                            ptLs[0] = new Point3d(BranchPipe[i].GetWaterPipeInterrupted()[0].X, BranchPipe[i].GetCheckValveSite()[j].Y, 0);
-                            ptLs[1] = new Point3d(ptLs[0].X + 500 + i * 300, ptLs[0].Y, 0);
-                            ptLs[2] = new Point3d(ptLs[1].X, ptLs[1].Y + 350 * (BranchPipe[i].GetCheckValveSite().Count - j - 1), 0);
-                            ptLs[3] = new Point3d(ptLs[2].X + 500, ptLs[2].Y, 0);
-
-                            var lineNote = new Polyline3d(0, new Point3dCollection(ptLs), false);
-                            lineNote.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
-                            acadDatabase.CurrentSpace.Add(lineNote);
-
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                            ptLs[2], new Scale3d(0.5, 0.5, 0.5), 0);
+                            //绘制截止阀
+                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
+                            BranchPipe[i].GetCheckValveSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
+                            //绘制水表
+                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.WaterMeter,
+                            BranchPipe[i].GetWaterMeterSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
+                            //绘制水管中断
+                            if (j < floorCleanToolList[i][areaIndex].GetHouseholdNums())
+                            {
+                                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterPipeInterrupted,
+                                BranchPipe[i].GetWaterPipeInterrupted()[j], new Scale3d(0.8 - 1.6 * layingMethod, 0.8, 0.8), Math.PI * (1 - layingMethod / 2.0));
+                            }
                         }
-                    }
-
-                    if (BranchPipe[i].BranchPipes == null)
-                    {
-                        continue;
-                    }
-
-                    for (int j = 0; j < BranchPipe[i].GetCheckValveSite().Count; j++)
-                    {
-                        //绘制截止阀
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                        BranchPipe[i].GetCheckValveSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
-                        //绘制水表
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.WaterMeter,
-                        BranchPipe[i].GetWaterMeterSite()[j], new Scale3d(0.5, 0.5, 0.5), 0);
-                        //绘制水管中断
-                        if (j < floorCleanToolList[i][areaIndex].GetHouseholdNums())
+                        if (!NoPRValve.Contains(i + 1))//有减压阀层
                         {
-                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterPipeInterrupted,
-                            BranchPipe[i].GetWaterPipeInterrupted()[j], new Scale3d(0.8 - 1.6 * layingMethod, 0.8, 0.8), Math.PI * (1 - layingMethod/2.0));
+                            //绘制减压阀
+                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.PressureReducingValve,
+                            BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.7, 0.7, 0.7), Math.PI * 3 / 2);
                         }
-                    }
-                    if (!NoPRValve.Contains(i + 1))//有减压阀层
-                    {
-                        //绘制减压阀
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.PressureReducingValve,
-                        BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.7, 0.7, 0.7), Math.PI * 3 / 2);
-                    }
-                    else//无减压阀层
-                    {
-                        //绘制截止阀
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
-                        BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.5, 0.5, 0.5), Math.PI * 3 / 2);
+                        else//无减压阀层
+                        {
+                            //绘制截止阀
+                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.CheckValve,
+                            BranchPipe[i].GetPressureReducingValveSite(), new Scale3d(0.5, 0.5, 0.5), Math.PI * 3 / 2);
+                            
+                        }
+
                         //绘制自动排气阀
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-COOL-PIPE", WaterSuplyBlockNames.AutoExhaustValve,
-                        BranchPipe[i].GetAutoExhaustValveSite(), new Scale3d(0.5, 0.5, 0.5), 0);
-                        if(i + 1 == floorNumbers)//最高层放置自动排气阀说明
+                        if(highestStorey.Contains(i+1))
                         {
-                            BranchPipe[i].DrawAutoExhaustValveNote();
+                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-COOL-PIPE", WaterSuplyBlockNames.AutoExhaustValve,
+                            BranchPipe[i].GetAutoExhaustValveSite(), new Scale3d(0.5, 0.5, 0.5), 0);
+                            if (i + 1 == floorNumbers)//最高层放置自动排气阀说明
+                            {
+                                BranchPipe[i].DrawAutoExhaustValveNote();
+                            }
                         }
-                    }
-                    if (FlushFaucet.Contains(i + 1))
-                    {
-                        //绘制真空破坏器
-                        acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.VacuumBreaker,
-                        BranchPipe[i].GetVacuumBreakerSite(), new Scale3d(1, 1, 1), 0);
-                        //绘制水龙头
-                        var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterTap,
-                        BranchPipe[i].GetWaterTapSite(), new Scale3d(1, 1, 1), 0);
-                        //设置水龙头的动态属性
-                        objId.SetDynBlockValue("可见性", "向右");
-                    }
+                        
+
+                        if (FlushFaucet.Contains(i + 1))
+                        {
+                            //绘制真空破坏器
+                            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.VacuumBreaker,
+                            BranchPipe[i].GetVacuumBreakerSite(), new Scale3d(1, 1, 1), 0);
+                            //绘制水龙头
+                            var objId = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterTap,
+                            BranchPipe[i].GetWaterTapSite(), new Scale3d(1, 1, 1), 0);
+                            //设置水龙头的动态属性
+                            objId.SetDynBlockValue("可见性", "向右");
+                        }
+                    }   
                 }
             }  
         }

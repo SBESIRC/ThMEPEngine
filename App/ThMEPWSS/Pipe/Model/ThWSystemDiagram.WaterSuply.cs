@@ -11,10 +11,10 @@ using ThMEPWSS.Pipe.Service;
 using ThCADCore.NTS;
 using NFox.Cad;
 using ThMEPEngineCore.Model.Common;
-using System.Windows.Forms;
 using ThMEPEngineCore.Model;
 using ThMEPWSS.Diagram.ViewModel;
 using Dreambuild.AutoCAD;
+using ThMEPEngineCore.Engine;
 
 namespace ThMEPWSS.Pipe.Model
 {
@@ -32,6 +32,7 @@ namespace ThMEPWSS.Pipe.Model
         public const string PipeDiameter = "给水管径100";
         public const string PRValveDetail = "减压阀详图";
     }
+
 
     public class WaterSuplyUtils
     {
@@ -77,9 +78,9 @@ namespace ThMEPWSS.Pipe.Model
         private double FloorHeight { get; set; }//楼层线间距
         private bool HasFlushFaucet { get; set; }//有冲洗龙头
         private bool NoPRValve { get; set; }//无减压阀
-        private int Households { get; set; }//每层的住户数
+        private int[] Households { get; set; }//每层的住户数
 
-        public ThWSSDStorey(int floorNumber, double floorHeight, bool hasFlushFaucet, bool noPRValve, int households)
+        public ThWSSDStorey(int floorNumber, double floorHeight, bool hasFlushFaucet, bool noPRValve, int[] households)
         {
             FloorNumber = floorNumber;
             FloorHeight = floorHeight;
@@ -102,12 +103,13 @@ namespace ThMEPWSS.Pipe.Model
         {
             return HasFlushFaucet;
         }
+
         public bool GetPRValve()
         {
             return NoPRValve;
         }
 
-        public int GetHouseholds()
+        public int[] GetHouseholds()
         {
             return Households;
         }
@@ -124,28 +126,28 @@ namespace ThMEPWSS.Pipe.Model
 
         public void DrawStorey(int i, int floorNums, double indexStartX, double indexStartY, double floorLength)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
+            using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
+            var line1 = CreateLine(indexStartX, indexStartY, floorLength);
+            acadDatabase.CurrentSpace.Add(line1);
+            //文字绘制
+            DBText textFirst = new DBText
             {
-                var line1 = CreateLine(indexStartX, indexStartY, floorLength);
-                acadDatabase.CurrentSpace.Add(line1);
-                //文字绘制
-                DBText textFirst = new DBText();
-                textFirst.Position = new Point3d(indexStartX + 500, indexStartY + i * FloorHeight, 0);
-                textFirst.Height = 200;
-                if (i < floorNums)
-                {
-                    textFirst.TextString = Convert.ToString(i + 1) + "F";
-                    textFirst.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                }
-                else
-                {
-                    textFirst.TextString = "RF";
-                    textFirst.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                }
-                acadDatabase.CurrentSpace.Add(textFirst);
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
-                new Point3d(indexStartX, indexStartY + i * FloorHeight, 0), new Scale3d(1, 1, 1), 0);
-            } 
+                Position = new Point3d(indexStartX + 500, indexStartY + i * FloorHeight, 0),
+                Height = 200
+            };
+            if (i < floorNums)
+            {
+                textFirst.TextString = Convert.ToString(i + 1) + "F";
+                textFirst.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+            }
+            else
+            {
+                textFirst.TextString = "RF";
+                textFirst.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
+            }
+            acadDatabase.CurrentSpace.Add(textFirst);
+            var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
+            new Point3d(indexStartX, indexStartY + i * FloorHeight, 0), new Scale3d(1, 1, 1), 0, new Dictionary<string, string>() { { "标高", "H+X.XX" } });
         }
     }
 
@@ -157,9 +159,9 @@ namespace ThMEPWSS.Pipe.Model
         private List<int> HighStoreyList { get; set; }//竖管最高层列表
         private double PipeOffset_X { get; set; } //竖管相对于楼层的偏移量
         private double PipeX { get; set; }//竖管的X坐标
+        private double PipeY { get; set; }//竖管的Y坐标
         private string PipeNumber { get; set; } //竖管编号
         public List<ThWSSDPipeUnit> PipeUnits { get; set; }//PipeUnit的数组
-
 
         public ThWSuplySystemDiagram(string pipeNumber, int loweststorey, int higheststorey, double pipeOffset_X, List<int> highStoreyList)
         {
@@ -176,18 +178,24 @@ namespace ThMEPWSS.Pipe.Model
             return PipeX;
         }
 
+        public double GetPipeY()
+        {
+            return PipeY;
+        }
+
         public string GetPipeNumber()
         {
             return PipeNumber;
         }
 
-        public List<Line> CreatePipeLine(double indexStartX, double indexStartY, double FloorHeight, double pipeGap)
+        public List<Line> CreatePipeLine(double indexStartX, double indexStartY, double FloorHeight)
         {
             var lineList = new List<Line>();
             var pt1 = new Point3d(indexStartX + PipeOffset_X, indexStartY - 300, 0);
+            var pt2 = new Point3d();
             if (Higheststorey > 5)
             {
-                var pt2 = new Point3d(pt1.X, indexStartY + Higheststorey * FloorHeight - 0.175 * FloorHeight, 0);
+                pt2 = new Point3d(pt1.X, indexStartY + Higheststorey * FloorHeight - 0.175 * FloorHeight, 0);
                 var pt121 = new Point3d(pt1.X, pt1.Y + 2 * FloorHeight + 140, 0);
                 var pt122 = new Point3d(pt1.X, pt121.Y + 420, 0);
                 var pt123 = new Point3d(pt1.X, indexStartY + (Higheststorey - 2) * FloorHeight + 140, 0);
@@ -196,148 +204,177 @@ namespace ThMEPWSS.Pipe.Model
                 lineList.Add(new Line(pt1, pt121));
                 lineList.Add(new Line(pt122, pt123));
                 lineList.Add(new Line(pt124, pt2));
-
-                foreach (var line1 in lineList)
-                {
-                    line1.LayerId = DbHelper.GetLayerId("W-WSUP-COOL-PIPE");
-                }
             }
             else
             {
-                var pt2 = new Point3d(pt1.X, indexStartY + Higheststorey * FloorHeight - 0.175 * FloorHeight, 0);
-                var line1 = new Line(pt1, pt2);
-                line1.LayerId = DbHelper.GetLayerId("W-WSUP-COOL-PIPE");
+                pt2 = new Point3d(pt1.X, indexStartY + Higheststorey * FloorHeight - 0.175 * FloorHeight, 0);
                 lineList.Add(new Line(pt1, pt2));
 
             }
+            foreach (var line1 in lineList)
+            {
+                line1.LayerId = DbHelper.GetLayerId("W-WSUP-COOL-PIPE");
+            }
             PipeX = pt1.X;
+            PipeY = pt2.Y;
 
             return lineList;
         }
 
         public void DrawPipeLine(int i, double indexStartX, double indexStartY, double FloorHeight, double pipeGap, int PipeNums)
         {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())  //要插入图纸的空间
+            using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
+            var PipeLine = CreatePipeLine(indexStartX, indexStartY, FloorHeight);
+            foreach (var line1 in PipeLine)
             {
-                var PipeLine = CreatePipeLine(indexStartX, indexStartY, FloorHeight, pipeGap * i);
-                foreach(var line1 in PipeLine)
+                acadDatabase.CurrentSpace.Add(line1);
+            }
+
+            //绘制水管中断
+            acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterPipeInterrupted,
+            new Point3d(GetPipeX(), indexStartY - 300, 0), new Scale3d(1, 1, 1), Math.PI * 3 / 2);
+
+            if (!PipeNumber.Contains("JGL"))
+            {
+               
+
+
+                for (int j = PipeUnits.Count - 1; j >= 0; j--)
                 {
-                    acadDatabase.CurrentSpace.Add(line1);
-                }
-
-                //绘制水管中断
-                acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-EQPM", WaterSuplyBlockNames.WaterPipeInterrupted,
-                new Point3d(GetPipeX(), indexStartY - 300, 0), new Scale3d(1, 1, 1), Math.PI * 3 / 2);
-
-
-                if(!PipeNumber.Contains("JGL"))
-                {
-                    for (int j = 0; j < PipeUnits.Count; j++)
+                    //管径图样插入 (DN50)
+                    if (j != PipeUnits.Count - 1)
                     {
-                        //管径图样插入 (DN50)
-                        if (j != 0 && j != PipeUnits.Count - 1)
+                        if (PipeUnits[j].GetPipeDiameter().Equals(PipeUnits[j + 1].GetPipeDiameter()))
                         {
-                            if (PipeUnits[j].GetPipeDiameter().Equals(PipeUnits[j - 1].GetPipeDiameter()) && PipeUnits[j].GetPipeDiameter().Equals(PipeUnits[j + 1].GetPipeDiameter()))
-                            {
-                                continue;
-                            }
+                            continue;
                         }
-
-                        var Position = new Point3d(GetPipeX(), indexStartY + FloorHeight * j + 1000, 0);
+                    }
+                    if (PipeUnits[j].GetPipeDiameter() != "")
+                    {
+                        var Position = new Point3d(GetPipeX(), indexStartY + FloorHeight * (j + 1) - 700 - FloorHeight/3, 0);
                         var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
                         Position, new Scale3d(1, 1, 1), Math.PI / 2);
                         objID.SetDynBlockValue("可见性", PipeUnits[j].GetPipeDiameter());
                     }
+                }
 
-                    //绘制立管起点
-                    var ptLs = new Point3d[3];
-                    ptLs[0] = new Point3d(GetPipeX(), indexStartY - 300, 0);
-                    ptLs[1] = new Point3d(GetPipeX(), indexStartY - 1000 - 500 * i, 0);
-                    ptLs[2] = new Point3d(GetPipeX() + 9000 + 600 * i, ptLs[1].Y, 0);
-                    var polyLine = new Polyline3d(0, new Point3dCollection(ptLs), false);
-                    polyLine.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
-                    acadDatabase.CurrentSpace.Add(polyLine);
 
-                    DBText text = new DBText();
-                    text.Position = new Point3d(ptLs[1].X + 600 * i, ptLs[1].Y + 50, 0);
-                    text.Height = 350;
-                    text.TextString = "接自加压" + Convert.ToString(i + 1) + "区生活给水管" + PipeUnits[0].GetPipeDiameter() + "(X.XXMPa)";
-                    text.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                    acadDatabase.CurrentSpace.Add(text);
-                    text.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
+                //绘制立管起点
+                var ptLs = new Point3d[3];
+                ptLs[0] = new Point3d(GetPipeX(), indexStartY - 300, 0);
+                ptLs[1] = new Point3d(GetPipeX(), indexStartY - 1000 - 500 * i, 0);
+                ptLs[2] = new Point3d(GetPipeX() + 5500 + 600 * i, ptLs[1].Y, 0);
+                var polyLine = new Polyline3d(0, new Point3dCollection(ptLs), false)
+                {
+                    LayerId = DbHelper.GetLayerId("W-WSUP-NOTE")
+                };
+                acadDatabase.CurrentSpace.Add(polyLine);
 
-                    //绘制立管编号 J1L1 J2L2 J3L3       2F统一标注
-                    var ptPipeNumLs = new Point3d[3];
-                    ptPipeNumLs[0] = new Point3d(GetPipeX() - 1300 - (PipeNums - i - 1) * 600, indexStartY + FloorHeight + 200 + (PipeNums - i - 1) * 450, 0);
-                    ptPipeNumLs[1] = new Point3d(ptPipeNumLs[0].X + 1100, ptPipeNumLs[0].Y, 0);
-                    ptPipeNumLs[2] = new Point3d(GetPipeX(), ptPipeNumLs[0].Y - 200 - (PipeNums - i - 1) * 600, 0);
-                    var PipePolyLine = new Polyline3d(0, new Point3dCollection(ptPipeNumLs), false);
+                DBText text = new DBText
+                {
+                    Position = new Point3d(ptLs[1].X + 600 * i, ptLs[1].Y + 50, 0),
+                    Height = 350,
+                    WidthFactor = 0.7,
+                    TextString = "接自加压" + Convert.ToString(i + 1) + "区生活给水管" + PipeUnits[0].GetPipeDiameter() + "(X.XXMPa)",
+                    TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+                };
+                acadDatabase.CurrentSpace.Add(text);
+                text.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
+
+                //绘制立管编号 J1L1 J2L2 J3L3       2F统一标注
+                var ptPipeNumLs = new Point3d[3];
+                ptPipeNumLs[0] = new Point3d(GetPipeX() - 1300 - (PipeNums - i - 1) * 600, indexStartY + FloorHeight + 200 + (PipeNums - i - 1) * 450, 0);
+                ptPipeNumLs[1] = new Point3d(ptPipeNumLs[0].X + 1100, ptPipeNumLs[0].Y, 0);
+                ptPipeNumLs[2] = new Point3d(GetPipeX(), ptPipeNumLs[0].Y - 200 - (PipeNums - i - 1) * 600, 0);
+                var PipePolyLine = new Polyline3d(0, new Point3dCollection(ptPipeNumLs), false)
+                {
+                    LayerId = DbHelper.GetLayerId("W-NOTE")
+                };
+                acadDatabase.CurrentSpace.Add(PipePolyLine);
+
+                DBText text1 = new DBText
+                {
+                    Position = ptPipeNumLs[0],
+                    Height = 350,
+                    WidthFactor = 0.7,
+                    TextString = PipeNumber,
+                    LayerId = DbHelper.GetLayerId("W-WSUP-NOTE"),
+                    TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+                };
+                acadDatabase.CurrentSpace.Add(text1);
+
+                for (int j = 1; j <= i; j++)//越是低层的立管，标注越少
+                {
+                    //绘制立管编号 J1L1 J2L2 J3L3
+                    var ptPipeNumLsj = new Point3d[3];
+                    ptPipeNumLsj[0] = new Point3d(GetPipeX() - 1300 - (PipeNums - i - 1) * 600, indexStartY + FloorHeight * (HighStoreyList[j] - 1) + 200 + (PipeNums - i - 1) * 450, 0);
+                    ptPipeNumLsj[1] = new Point3d(ptPipeNumLsj[0].X + 1100, ptPipeNumLsj[0].Y, 0);
+                    ptPipeNumLsj[2] = new Point3d(GetPipeX(), ptPipeNumLsj[0].Y - 200 - (PipeNums - i - 1) * 600, 0);
+                    var PipePolyLinej = new Polyline3d(0, new Point3dCollection(ptPipeNumLsj), false);
                     PipePolyLine.LayerId = DbHelper.GetLayerId("W-NOTE");
-                    acadDatabase.CurrentSpace.Add(PipePolyLine);
+                    acadDatabase.CurrentSpace.Add(PipePolyLinej);
 
-                    DBText text1 = new DBText();
-                    text1.Position = ptPipeNumLs[0];
-                    text1.Height = 350;
-                    text1.WidthFactor = 0.7;
-                    text1.TextString = PipeNumber;
-                    text1.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
-                    text1.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                    acadDatabase.CurrentSpace.Add(text1);
+                    DBText textj = new DBText
+                    {
+                        Position = ptPipeNumLsj[0],
+                        Height = 350,
+                        WidthFactor = 0.7,
+                        TextString = PipeNumber,
+                        LayerId = DbHelper.GetLayerId("W-WSUP-NOTE"),
+                        TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+                    };
+                    acadDatabase.CurrentSpace.Add(textj);
+                }
 
-                    for(int j = 1; j <= i; j++)//越是低层的立管，标注越少
+                //绘制立管简编号 J1 J2 J3
+                for (int j = 0; j < 2; j++)
+                {
+                    if (PipeLine.Count >= 2)
                     {
-                        //绘制立管编号 J1L1 J2L2 J3L3
-                        var ptPipeNumLsj = new Point3d[3];
-                        ptPipeNumLsj[0] = new Point3d(GetPipeX() - 1300 - (PipeNums - i - 1) * 600, indexStartY + FloorHeight * (HighStoreyList[j] - 1) + 200 + (PipeNums - i - 1) * 450, 0);
-                        ptPipeNumLsj[1] = new Point3d(ptPipeNumLsj[0].X + 1100, ptPipeNumLsj[0].Y, 0);
-                        ptPipeNumLsj[2] = new Point3d(GetPipeX(), ptPipeNumLsj[0].Y - 200 - (PipeNums - i - 1) * 600, 0);
-                        var PipePolyLinej = new Polyline3d(0, new Point3dCollection(ptPipeNumLsj), false);
-                        PipePolyLine.LayerId = DbHelper.GetLayerId("W-NOTE");
-                        acadDatabase.CurrentSpace.Add(PipePolyLinej);
-                        
-                        DBText textj = new DBText();
-                        textj.Position = ptPipeNumLsj[0];
-                        textj.Height = 350;
-                        textj.WidthFactor = 0.7;
-                        textj.TextString = PipeNumber;
-                        textj.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
-                        textj.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                        acadDatabase.CurrentSpace.Add(textj);
-                    }
-                    
-                    //绘制立管简编号 J1 J2 J3
-                    for (int j = 0; j < 2; j++)
-                    {
-                        DBText simpleNumber1 = new DBText();
-                        simpleNumber1.Position = new Point3d(PipeLine[j].EndPoint.X, PipeLine[j].EndPoint.Y - 150, 0);
-                        simpleNumber1.Height = 350;
-                        simpleNumber1.WidthFactor = 0.7;
+                        DBText simpleNumber1 = new DBText
+                        {
+                            Position = new Point3d(PipeLine[j].EndPoint.X, PipeLine[j].EndPoint.Y - 150, 0),
+                            Height = 350,
+                            WidthFactor = 0.7
+                        };
                         simpleNumber1.Rotate(PipeLine[j].EndPoint, Math.PI / 2);
-                        simpleNumber1.TextString = PipeNumber.Substring(0, 2);
+                        if (PipeNumber.Length > 2)
+                        {
+                            simpleNumber1.TextString = PipeNumber.Substring(0, 2);
+                        }
+                        else
+                        {
+                            simpleNumber1.TextString = PipeNumber;
+                        }
                         simpleNumber1.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
                         simpleNumber1.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                         acadDatabase.CurrentSpace.Add(simpleNumber1);
                     }
 
-                    //绘制分区框线
-                    var ptList = new Point3d[4];
-                    ptList[0] = new Point3d(PipeX - 3000, Higheststorey * FloorHeight + indexStartY + 200, 0);
-                    ptList[1] = new Point3d(PipeX + 3000, Higheststorey * FloorHeight + indexStartY + 200, 0);
-                    ptList[2] = new Point3d(PipeX + 3000, (Loweststorey - 1) * FloorHeight + indexStartY + 400, 0);
-                    ptList[3] = new Point3d(PipeX - 3000, (Loweststorey - 1) * FloorHeight + indexStartY + 400, 0);
-                    var rect = new Polyline3d(0, new Point3dCollection(ptList),true);
-                    rect.LayerId = DbHelper.GetLayerId("说明");
-                    acadDatabase.CurrentSpace.Add(rect);
-
-                    var textRect = new DBText();
-                    textRect.Position = new Point3d(ptList[1].X - 500, ptList[1].Y - 500, 0);
-                    textRect.Height = 150;
-                    textRect.WidthFactor = 0.7;
-                    textRect.TextString = "分区" + Convert.ToString(i);
-                    textRect.LayerId = DbHelper.GetLayerId("说明");
-                    textRect.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                    acadDatabase.CurrentSpace.Add(textRect);
                 }
+
+                //绘制分区框线
+                //var ptList = new Point3d[4];
+                //ptList[0] = new Point3d(PipeX - 3000, Higheststorey * FloorHeight + indexStartY + 200, 0);
+                //ptList[1] = new Point3d(PipeX + 3000, Higheststorey * FloorHeight + indexStartY + 200, 0);
+                //ptList[2] = new Point3d(PipeX + 3000, (Loweststorey - 1) * FloorHeight + indexStartY + 400, 0);
+                //ptList[3] = new Point3d(PipeX - 3000, (Loweststorey - 1) * FloorHeight + indexStartY + 400, 0);
+                //var rect = new Polyline3d(0, new Point3dCollection(ptList), true)
+                //{
+                //    LayerId = DbHelper.GetLayerId("说明")
+                //};
+                //acadDatabase.CurrentSpace.Add(rect);
+
+                //var textRect = new DBText
+                //{
+                //    Position = new Point3d(ptList[1].X - 500, ptList[1].Y - 500, 0),
+                //    Height = 150,
+                //    WidthFactor = 0.7,
+                //    TextString = "分区" + Convert.ToString(i),
+                //    LayerId = DbHelper.GetLayerId("说明"),
+                //    TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+                //};
+                //acadDatabase.CurrentSpace.Add(textRect);
             }
         }
     }
@@ -449,7 +486,7 @@ namespace ThMEPWSS.Pipe.Model
         public List<Line> BranchPipes;//PipeUnit的数组
         private bool HasFlushFaucet { get; set; } //有冲洗龙头
         private bool NoValve { get; set; }//无减压阀
-        private int Households { get; set; }//住户数
+        private int[] Households { get; set; }//住户数
         private Point3d PressureReducingValveSite { get; set; } //减压阀位置
         private List<Point3d> CheckValveSite { get; set; } //截止阀位置
         private List<Point3d> WaterMeterSite { get; set; } //水表位置
@@ -464,9 +501,9 @@ namespace ThMEPWSS.Pipe.Model
         private double FloorHeight { get; set; }//楼层高
         private double PipeOffsetX { get; set; }//立管的 X 偏移量
         private double IndexStartY { get; set; }//起始 Y 偏移量
-        public ThWSSDBranchPipe(string dn, ThWSSDStorey storey, double indexStartY, double pipeOffsetX, List<double[]> blockSize, int layingMethod)
+        private int AreaIndex { get; set; }//分区索引
+        public ThWSSDBranchPipe(string dn, ThWSSDStorey storey, double indexStartY, double pipeOffsetX, List<double[]> blockSize, int layingMethod, int areaIndex)
         {
-            //DN, StoreyList[i], PipeOffsetX[i], BlockSize, LAYINGMETHOD
             DN = dn;//管径号
             FloorNumber = storey.GetFloorNumber();//楼层号
             HasFlushFaucet = storey.GetFlushFaucet();//有冲洗龙头
@@ -477,8 +514,9 @@ namespace ThMEPWSS.Pipe.Model
             IndexStartY = indexStartY;//起始 Y 偏移量
             BlockSize = blockSize;//模型尺寸
             LayingMethod = layingMethod;//敷设方式
-            
-            if (Households == 0 && HasFlushFaucet)
+            AreaIndex = areaIndex;
+
+            if (Households[AreaIndex] == 0 && HasFlushFaucet)
             {
                 var pt1 = new Point3d(PipeOffsetX, IndexStartY + (FloorNumber - 0.175) * FloorHeight, 0);
                 var pt2 = new Point3d(pt1.X + 0.2 * FloorHeight, pt1.Y, 0);
@@ -509,7 +547,7 @@ namespace ThMEPWSS.Pipe.Model
                 WaterTapSite = new Point3d(pt21.X, pt21.Y - 150, 0);//水龙头位置
                 
             }
-            else if(Households == 0)//没有住户不添加支管
+            else if(Households[AreaIndex] == 0)//没有住户不添加支管
             {
                 ;
             }
@@ -521,12 +559,11 @@ namespace ThMEPWSS.Pipe.Model
 
         public void Init()
         {
-            ///////////////////////////////////////////////////////
             //支管 point 初始化
             var pt1 = new Point3d(PipeOffsetX, IndexStartY + (FloorNumber - 0.175) * FloorHeight, 0);
             var pt2 = new Point3d(pt1.X + 400, pt1.Y, 0);
             var pt231 = new Point3d(pt2.X, pt2.Y - 0.1 * FloorHeight, 0);
-            var pt232 = new Point3d();
+            Point3d pt232;
 
             if (NoValve)
             {
@@ -537,15 +574,15 @@ namespace ThMEPWSS.Pipe.Model
                 pt232 = new Point3d(pt2.X, pt2.Y - 0.1 * FloorHeight - 0.7 * BlockSize[0][0], 0);
             }
             var pt3 = new Point3d(pt2.X, pt232.Y - 0.145 * FloorHeight, 0);
-            TextSite = new Point3d(pt3.X - BlockSize[0][1]/2, pt3.Y, 0);//new Point3d(pt2.X, pt3.Y, 0);//文字标注
+            TextSite = new Point3d(pt3.X - BlockSize[0][1]/2 + 50, IndexStartY + FloorHeight * FloorNumber - 700 - FloorHeight/3, 0);//new Point3d(pt2.X, pt3.Y, 0);//文字标注
             var pt371 = new Point3d(pt3.X + 225, pt3.Y, 0);
             var pt372 = new Point3d(pt371.X + 0.5 * BlockSize[1][0], pt3.Y, 0);
             var pt373 = new Point3d(pt372.X + 75, pt3.Y, 0);
             var pt374 = new Point3d(pt373.X + 0.5 * BlockSize[2][0], pt3.Y, 0);
-            var pt7 = new Point3d();
-            var pt11 = new Point3d();
+            Point3d pt7;
+            Point3d pt11;
 
-            PRValveDetailSite = new Point3d(pt1.X + 3000, IndexStartY + (FloorNumber - 1) * FloorHeight + 200, 0);
+            PRValveDetailSite = new Point3d(pt1.X + 7000, IndexStartY + (FloorNumber - 1) * FloorHeight + 200, 0);
             BranchPipes = new List<Line>();//支管列表
             WaterPipeInterrupted = new List<Point3d>();//水管阻断位置列表
             CheckValveSite = new List<Point3d>();//截止阀位置列表
@@ -574,7 +611,7 @@ namespace ThMEPWSS.Pipe.Model
             else
             {
                 pt7 = new Point3d(pt374.X + 150, pt3.Y, 0);
-                pt11 = new Point3d(pt7.X, pt7.Y - (0.125 + 0.1 * (Households - 1)) * FloorHeight, 0);
+                pt11 = new Point3d(pt7.X, pt7.Y - (0.125 + 0.1 * (Households[AreaIndex] - 1)) * FloorHeight, 0);
                 WaterPipeInterrupted.Add(pt11);//第1个水管截断位置
             }
             
@@ -586,19 +623,18 @@ namespace ThMEPWSS.Pipe.Model
             BranchPipes.Add(new Line(pt374, pt7));
             BranchPipes.Add(new Line(pt7, pt11));
             
-            CheckValveSite.Add(new Point3d((pt371.X + pt372.X) / 2, pt3.Y, 0));//第一个截止阀位置           
-            
+            CheckValveSite.Add(new Point3d((pt371.X + pt372.X) / 2, pt3.Y, 0));//第一个截止阀位置                      
             WaterMeterSite.Add(new Point3d((pt373.X + pt374.X) / 2, pt3.Y, 0));//第一个水表位置
 
-            for (int i = 1; i < Households; i++)
+            for (int i = 1; i < Households[AreaIndex]; i++)
             {
                 var pt4 = new Point3d(pt2.X, pt3.Y - i * 0.1 * FloorHeight, 0);
                 var pt481 = new Point3d(pt371.X, pt4.Y, 0);
                 var pt482 = new Point3d(pt372.X, pt4.Y, 0);
                 var pt483 = new Point3d(pt373.X, pt4.Y, 0);
                 var pt484 = new Point3d(pt374.X, pt4.Y, 0);
-                var pt8 = new Point3d();
-                var pt12 = new Point3d();
+                Point3d pt8;
+                Point3d pt12;
                 BranchPipes.Add(new Line(pt4, pt481));
                 BranchPipes.Add(new Line(pt482, pt483));
 
@@ -611,22 +647,19 @@ namespace ThMEPWSS.Pipe.Model
                     pt12 = new Point3d(pt8.X, pt11.Y - i * 0.075 * FloorHeight, 0);
                     var pt16 = new Point3d(pt11.X + 0.5 * FloorHeight, pt12.Y, 0);
                     BranchPipes.Add(new Line(pt12, pt16));
-
                     WaterPipeInterrupted.Add(pt16);//第i个水管截断位置
-
                 }
                 else
                 {
                     pt8 = new Point3d(pt7.X - i * 150, pt3.Y, 0);
                     pt12 = new Point3d(pt8.X, pt11.Y, 0);
                     WaterPipeInterrupted.Add(pt12);//第i个水管截断位置
-
                 }
                 BranchPipes.Add(new Line(pt4, pt481));
                 BranchPipes.Add(new Line(pt482, pt483));
                 BranchPipes.Add(new Line(pt484, pt8));
                 BranchPipes.Add(new Line(pt8, pt12));
-                if(i == Households - 1 && !HasFlushFaucet)
+                if(i == Households[AreaIndex] - 1 && !HasFlushFaucet)
                 {
                     BranchPipes.Add(new Line(pt3, pt4));
                 }
@@ -634,12 +667,12 @@ namespace ThMEPWSS.Pipe.Model
 
             if (HasFlushFaucet) //有冲洗龙头
             {
-                var pt19 = new Point3d(pt3.X, pt3.Y - Households * 0.1 * FloorHeight, 0);
+                var pt19 = new Point3d(pt3.X, pt3.Y - Households[AreaIndex] * 0.1 * FloorHeight, 0);
                 var pt19201 = new Point3d(pt371.X, pt19.Y, 0);
                 var pt19202 = new Point3d(pt372.X, pt19.Y, 0);
                 var pt19203 = new Point3d(pt373.X, pt19.Y, 0);
                 var pt19204 = new Point3d(pt374.X, pt19.Y, 0);
-                var pt20 = new Point3d(pt7.X + 150 * Households, pt19.Y, 0);
+                var pt20 = new Point3d(pt7.X + 150 * Households[AreaIndex], pt19.Y, 0);
                 var pt21 = new Point3d(pt20.X, pt20.Y + 0.45 * FloorHeight, 0);
 
                 BranchPipes.Add(new Line(pt3, pt19));
@@ -652,7 +685,6 @@ namespace ThMEPWSS.Pipe.Model
                 WaterMeterSite.Add(new Point3d((pt19203.X + pt19204.X) / 2, pt19203.Y, 0));//第五个水表位置
                 VacuumBreakerSite = pt21;//真空破坏器位置
                 WaterTapSite = new Point3d(pt21.X, pt21.Y - 150, 0);//水龙头位置
-
             }
         }
 
@@ -673,7 +705,6 @@ namespace ThMEPWSS.Pipe.Model
         {
             return CheckValveSite;
         }
-
 
         public List<Point3d> GetWaterMeterSite()//获取水表位置
         {
@@ -705,98 +736,107 @@ namespace ThMEPWSS.Pipe.Model
             return PRValveDetailSite;
         }
 
+        public int GetHouseholds()
+        {
+            return Households[AreaIndex];
+        }
+
         public void DrawBranchPipe()
         {
-            using (var acadDatabase = AcadDatabase.Active())
+            using var acadDatabase = AcadDatabase.Active();
+            if (!(BranchPipes is null))
             {
-                if (!(BranchPipes is null))
+                if (GetDN() != "")
                 {
                     var objID = acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-DIMS", WaterSuplyBlockNames.PipeDiameter,
-                    GetTextSite(), new Scale3d(1, 1, 1), Math.PI / 2);
+                GetTextSite(), new Scale3d(1, 1, 1), Math.PI / 2);
                     objID.SetDynBlockValue("可见性", GetDN());
-
-                    var BPipeLines = BranchPipes;
-                    for (int j = 0; j < BPipeLines.Count; j++)
-                    {
-                        acadDatabase.CurrentSpace.Add(BPipeLines[j]);
-                    }
                 }
-            }  
+
+                var BPipeLines = BranchPipes;
+                for (int j = 0; j < BPipeLines.Count; j++)
+                {
+                    BPipeLines[j].LayerId = DbHelper.GetLayerId("W-WSUP-COOL-PIPE");
+                    acadDatabase.CurrentSpace.Add(BPipeLines[j]);
+                }
+            }
         }
 
         public void DrawAutoExhaustValveNote()
         {
-            using (var acadDatabase = AcadDatabase.Active())
+            using var acadDatabase = AcadDatabase.Active();
+            var pt1 = new Point3d(AutoExhaustValveSite.X, AutoExhaustValveSite.Y + BlockSize[3][1] / 4, 0);// - BlockSize[3][1]/2
+            var pt2 = new Point3d(pt1.X - 450, pt1.Y - 450, 0);
+            var pt3 = new Point3d(pt2.X - 3400, pt2.Y, 0);
+            acadDatabase.CurrentSpace.Add(new Line(pt1, pt2));
+            acadDatabase.CurrentSpace.Add(new Line(pt2, pt3));
+
+            var text1 = new DBText
             {
-                var pt1 = new Point3d(AutoExhaustValveSite.X, AutoExhaustValveSite.Y + BlockSize[3][1] / 4, 0);// - BlockSize[3][1]/2
-                var pt2 = new Point3d(pt1.X - 450, pt1.Y - 450, 0);
-                var pt3 = new Point3d(pt2.X - 3400 ,pt2.Y, 0);
-                acadDatabase.CurrentSpace.Add(new Line(pt1, pt2));
-                acadDatabase.CurrentSpace.Add(new Line(pt2, pt3));
+                Height = 350,
+                WidthFactor = 0.7,
+                Position = new Point3d(pt3.X + 50, pt3.Y,0),// pt3,
+                TextString = "自动排气阀DN20，余同",
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+            };
+            acadDatabase.CurrentSpace.Add(text1);
+            text1.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
 
-                var text1 = new DBText();
-                text1.Height = 350;
-                text1.WidthFactor = 0.7;
-                text1.Position = pt3;
-                text1.TextString = "自动排气阀DN20，余同";
-                text1.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                acadDatabase.CurrentSpace.Add(text1);
-                text1.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
-
-                var text2 = new DBText();
-                text2.Height = 350;
-                text2.WidthFactor = 0.7;
-                text2.Position = new Point3d(pt3.X, pt3.Y-350,0);
-                text2.TextString = "排气阀贴板底敷设";
-                text2.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                acadDatabase.CurrentSpace.Add(text2);
-                text2.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
-            }
+            var text2 = new DBText
+            {
+                Height = 350,
+                WidthFactor = 0.7,
+                Position = new Point3d(pt3.X + 50, pt3.Y - 350, 0),
+                TextString = "排气阀贴板底敷设",
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+            };
+            acadDatabase.CurrentSpace.Add(text2);
+            text2.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
         }
 
         public void DrawLayMethodNote()
         {
-            using (var acadDatabase = AcadDatabase.Active())
+            using var acadDatabase = AcadDatabase.Active();
+            for (int j = 0; j < GetWaterPipeInterrupted().Count; j++)
             {
-                for(int i = 0; i < GetWaterPipeInterrupted().Count; i++)
+                var pti1 = new Point3d(GetWaterPipeInterrupted()[j].X - 106 - 150, GetWaterPipeInterrupted()[j].Y - 106, 0);
+                var pti2 = new Point3d(GetWaterPipeInterrupted()[j].X + 106 - 150, GetWaterPipeInterrupted()[j].Y + 106, 0);
+                var line1 = new Line(pti1, pti2);
+                line1.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
+                acadDatabase.CurrentSpace.Add(line1);
+            }
+            var pt1 = new Point3d(GetWaterPipeInterrupted()[0].X - 150, GetWaterPipeInterrupted()[GetWaterPipeInterrupted().Count - 1].Y, 0);// - BlockSize[3][1]/2
+            var pt2 = new Point3d(pt1.X, GetWaterPipeInterrupted()[0].Y + 500, 0);
+            var pt3 = new Point3d(pt2.X + 3700, pt2.Y, 0);
+            acadDatabase.CurrentSpace.Add(new Line(pt1, pt2));
+            acadDatabase.CurrentSpace.Add(new Line(pt2, pt3));
+
+            var text1 = new DBText
+            {
+                Height = 350,
+                WidthFactor = 0.7,
+                Position = new Point3d(pt2.X + 50, pt2.Y, 0),
+                TextString = "DNXX×X+DNXX×X（余同）",
+                TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+            };
+
+            acadDatabase.CurrentSpace.Add(text1);
+            text1.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
+
+            if (LayingMethod == 0)
+            {
+                var text2 = new DBText
                 {
-                    var pti1 = new Point3d(GetWaterPipeInterrupted()[i].X - 106 - 150, GetWaterPipeInterrupted()[i].Y - 106, 0);
-                    var pti2 = new Point3d(GetWaterPipeInterrupted()[i].X + 106 - 150, GetWaterPipeInterrupted()[i].Y + 106, 0);
-                    var line1 = new Line(pti1, pti2);
-                    line1.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                    acadDatabase.CurrentSpace.Add(line1);
-
-                }
-                var pt1 = new Point3d(GetWaterPipeInterrupted()[0].X - 150, GetWaterPipeInterrupted()[GetWaterPipeInterrupted().Count - 1].Y, 0);// - BlockSize[3][1]/2
-                var pt2 = new Point3d(pt1.X, pt1.Y + 500, 0);
-                var pt3 = new Point3d(pt2.X + 3400, pt2.Y, 0);
-                acadDatabase.CurrentSpace.Add(new Line(pt1, pt2));
-                acadDatabase.CurrentSpace.Add(new Line(pt2, pt3));
-
-                var text1 = new DBText();
-                text1.Height = 350;
-                text1.WidthFactor = 0.7;
-                text1.Position = pt2;
-                text1.TextString = "DNXX×X+DNXX×X（余同）";
-                text1.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-
-                acadDatabase.CurrentSpace.Add(text1);
-                text1.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");               
-
-                if (LayingMethod == 0)
-                {
-                    var text2 = new DBText();
-                    text2.Height = 350;
-                    text2.WidthFactor = 0.7;
-                    text2.Position = new Point3d(pt2.X, pt2.Y - 350, 0);
-                    text2.TextString = "XXXX敷设，接至户内给水管";
-                    text2.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
-                    acadDatabase.CurrentSpace.Add(text2);
-                    text2.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
-                }
+                    Height = 350,
+                    WidthFactor = 0.7,
+                    Position = new Point3d(pt2.X + 50, pt2.Y - 350, 0),
+                    TextString = "XXXX敷设，接至户内给水管",
+                    TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
+                };
+                acadDatabase.CurrentSpace.Add(text2);
+                text2.LayerId = DbHelper.GetLayerId("W-WSUP-DIMS");
             }
         }
-
 
 
         public void Draw(Point3d basePt, Matrix3d mat)
@@ -817,10 +857,10 @@ namespace ThMEPWSS.Pipe.Model
 
     public class CleaningToolsSystem
     {
-        private int FloorNumber;//楼层号
-        private int PartNumber;//分区号
-        private int HouseholdNums;//住户数
-        private int[] CleaningTools;//卫生洁具数组
+        private readonly int FloorNumber;//楼层号
+        private readonly int PartNumber;//分区号
+        private readonly int HouseholdNums;//住户数
+        private readonly int[] CleaningTools;//卫生洁具数组
 
         public CleaningToolsSystem(int floorNumber, int partNumber, int householdNums, int[] cleaningTools)
         {
@@ -880,12 +920,12 @@ namespace ThMEPWSS.Pipe.Model
 
             for(int i = 0; i < LineXList.Count + 1; i++)
             {
-                var rect = new Point3d[5];
-                if(i == 0)
+                Point3d[] rect;
+                if (i == 0)
                 {
                     rect = CreatePolyLine(StartPt.X, LineXList[i], StartPt.Y, EndPt.Y);
                 }
-                else if(i == LineXList.Count)
+                else if (i == LineXList.Count)
                 {
                     rect = CreatePolyLine(LineXList[i-1], EndPt.X, StartPt.Y, EndPt.Y);
                 }
@@ -916,6 +956,15 @@ namespace ThMEPWSS.Pipe.Model
             return result;
         }
 
+        public static int[] CreateZerosArray(int m)//创建全0的二维数组
+        {
+            var result = new int[m];
+            for (int i = 0; i < m; i++)//遍历楼层
+            {              
+                    result[i] = 0;               
+            }
+            return result;
+        }
 
         public static double InnerProduct(int[] Array1, double[] Array2)//求两个数组的內积
         {
@@ -927,108 +976,120 @@ namespace ThMEPWSS.Pipe.Model
             return result;
         }
 
-        public static int[,] CountKitchenNums(List<List<Point3dCollection>> floorAreaList, Point3dCollection selectArea, List<List<int>> floorList, int FloorNumbers)
+        public static List<int[]> CountKitchenNums(List<List<Point3dCollection>> floorAreaList, Point3dCollection selectArea, List<List<int>> floorList, int FloorNumbers)
         {
-            using (var acadDatabase = AcadDatabase.Active())
+            using var acadDatabase = AcadDatabase.Active();
+            //统计厨房数     
+            var engineKitchen = new ThMEPEngineCore.Engine.ThRoomMarkRecognitionEngine()
             {
-                //统计厨房数
-                var engineKitchen = new ThMEPEngineCore.Engine.ThRoomMarkRecognitionEngine();//创建厨房识别引擎
+                LayerFilter = new List<string> { "AI-空间名称" },
+            };//创建厨房识别引擎
+            engineKitchen.RecognizeMS(acadDatabase.Database, selectArea);//厨房识别
+            var ele = engineKitchen.Elements;
+            var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
+            if(rooms.Count() == 0)
+            {
+                engineKitchen = new ThRoomMarkRecognitionEngine();
                 engineKitchen.Recognize(acadDatabase.Database, selectArea);//厨房识别
-                var ele = engineKitchen.Elements;
-                var rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房"))
-                    .Select(e => (e as ThIfcTextNote).Geometry);
-                var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
-                var households = new int[floorAreaList.Count, floorAreaList[0].Count];
-                for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层
+                ele = engineKitchen.Elements;
+                rooms = ele.Where(e => (e as ThIfcTextNote).Text.Equals("厨房")).Select(e => (e as ThIfcTextNote).Geometry);
+            }
+            var kitchenIndex = new ThCADCoreNTSSpatialIndex(rooms.ToCollection());
+            var households = new int[floorAreaList.Count, floorAreaList[0].Count];
+            for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层
+            {
+                for (int j = 0; j < floorAreaList[0].Count; j++)
+                {
+                    households[i, j] = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]).Count;
+                }
+            }
+
+            var floorKitchenNumList = CreateZerosArray(FloorNumbers, floorAreaList[0].Count);
+            for (int i = 0; i < floorList.Count; i++)
+            {
+                foreach (var f in floorList[i])
                 {
                     for (int j = 0; j < floorAreaList[0].Count; j++)
                     {
-                        households[i, j] = kitchenIndex.SelectCrossingPolygon(floorAreaList[i][j]).Count;
+                        floorKitchenNumList[f - 1, j] = households[i, j];
                     }
                 }
-
-                var floorKitchenNumList = CreateZerosArray(FloorNumbers, floorAreaList[0].Count);//new int[FloorNumbers, floorAreaList[0].Count];
-                for (int i = 0; i < floorList.Count; i++)
-                {
-                    foreach (var f in floorList[i])
-                    {
-                        for (int j = 0; j < floorAreaList[0].Count; j++)
-                        {
-                            floorKitchenNumList[f - 1, j] = households[i, j];
-                        }
-                    }
-                }
-                return floorKitchenNumList;
             }
-                
+            var fHouseNumList = new List<int[]>();
+            for (int i = 0; i < floorKitchenNumList.Length / floorAreaList[0].Count; i++)
+            {
+                var house = new int[floorAreaList[0].Count];
+                for (int j = 0; j < floorAreaList[0].Count; j++)
+                {
+                    house[j] = floorKitchenNumList[i, j];
+                }
+                fHouseNumList.Add(house);
+            }
+            return fHouseNumList;
         }
 
-        public static List<List<CleaningToolsSystem>> CountCleanToolNums(List<List<Point3dCollection>> floorAreaList, int[,] households, List<List<int>> floorList, Point3dCollection selectArea, List<int> notExistFloor)
+        public static List<List<CleaningToolsSystem>> CountCleanToolNums(List<List<Point3dCollection>> floorAreaList, List<int[]> households, List<List<int>> floorList, Point3dCollection selectArea, List<int> notExistFloor)
         {
-            using (var acadDatabase = AcadDatabase.Active())
-            {
-                //统计卫生洁具数
-                var engine = new Engine.ThWCleanToolsRecongnitionEngine();
-                engine.Recognize(acadDatabase.Database, selectArea);
-                var allCleanToolsInSelectedArea = engine.Datas.Select(d => d.Geometry).ToCollection();
-                var allCleanToolsSpatialIndex = new ThCADCoreNTSSpatialIndex(allCleanToolsInSelectedArea);
+            using var acadDatabase = AcadDatabase.Active();
+            //统计卫生洁具数
+            var engine = new Engine.ThWCleanToolsRecongnitionEngine();
+            engine.Recognize(acadDatabase.Database, selectArea);
+            var allCleanToolsInSelectedArea = engine.Datas.Select(d => d.Geometry).ToCollection();
+            var allCleanToolsSpatialIndex = new ThCADCoreNTSSpatialIndex(allCleanToolsInSelectedArea);
 
-                var CleanToolList = new List<List<CleaningToolsSystem>>();
-                for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层块
+            var CleanToolList = new List<List<CleaningToolsSystem>>();
+            for (int i = 0; i < floorAreaList.Count; i++)//遍历每个楼层块
+            {
+                foreach (var f in floorList[i])//遍历每个楼层
                 {
-                    foreach (var f in floorList[i])//遍历每个楼层
-                    {
-                        var CleanTools = new List<CleaningToolsSystem>();
-                        for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
-                        {
-                            var cleanToolsInSubArea = allCleanToolsSpatialIndex.SelectCrossingPolygon(floorAreaList[i][j]);
-                            var allBlockNames = engine.Datas.Select(ct => ct.Data as string);
-                            var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
-                            foreach (var ct in cleanToolsInSubArea)
-                            {
-                                var ctBr = ct as BlockReference;
-                                cleanTools[ThCleanToolsManager.CleanToolIndex(ctBr.Name)] += 1;
-                            }
-                            var CleanTool = new CleaningToolsSystem(f, j, households[f - 1, j], cleanTools);
-                            CleanTools.Add(CleanTool);
-                        }
-                        CleanToolList.Add(CleanTools);
-                    }
-                }
-                foreach (var nf in notExistFloor)
-                {
-                    var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
                     var CleanTools = new List<CleaningToolsSystem>();
                     for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
                     {
-                        CleanTools.Add(new CleaningToolsSystem(nf, j, 0, cleanTools));
+                        var cleanToolsInSubArea = allCleanToolsSpatialIndex.SelectCrossingPolygon(floorAreaList[i][j]);
+                        var allBlockNames = engine.Datas.Select(ct => ct.Data as string);
+                        var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+                        foreach (var ct in cleanToolsInSubArea)
+                        {
+                            var ctBr = ct as BlockReference;
+                            cleanTools[ThCleanToolsManager.CleanToolIndex(ctBr.Name)] += 1;
+                        }
+                        var CleanTool = new CleaningToolsSystem(f, j, households[f - 1][j], cleanTools);
+                        CleanTools.Add(CleanTool);
                     }
                     CleanToolList.Add(CleanTools);
                 }
-                CleanToolList = CleanToolList.OrderBy(l => l.First().GetFloorNumber()).ToList();
-                return CleanToolList;
             }
-
+            foreach (var nf in notExistFloor)
+            {
+                var cleanTools = new int[8] { 0, 0, 0, 0, 0, 0, 0, 0 };
+                var CleanTools = new List<CleaningToolsSystem>();
+                for (int j = 0; j < floorAreaList[0].Count; j++)//遍历楼层的每个区域
+                {
+                    CleanTools.Add(new CleaningToolsSystem(nf, j, 0, cleanTools));
+                }
+                CleanToolList.Add(CleanTools);
+            }
+            CleanToolList = CleanToolList.OrderBy(l => l.First().GetFloorNumber()).ToList();
+            return CleanToolList;
         }
 
-
         //创建楼层列表
-        public static List<ThWSSDStorey> CreateStoreysList(int FloorNumbers, double FloorHeight, List<int> FlushFaucet, List<int> NoPRValve, int[,] households)
+        public static List<ThWSSDStorey> CreateStoreysList(int FloorNumbers, double FloorHeight, List<int> FlushFaucet, List<int> NoPRValve, List<int[]> households)
         {
             var StoreyList = new List<ThWSSDStorey>();
             for (int i = 0; i < FloorNumbers; i++)
             {
                 bool hasFlushFaucet = FlushFaucet.Contains(i+1);  //有冲洗龙头为true
                 bool noValve = NoPRValve.Contains(i + 1);  //无减压阀为true                      
-
                 //楼层初始化
-                var storey = new ThWSSDStorey(i + 1, FloorHeight, hasFlushFaucet, noValve, households[i,0]);
+                var storey = new ThWSSDStorey(i + 1, FloorHeight, hasFlushFaucet, noValve, households[i]);
                 StoreyList.Add(storey);
             }
-            StoreyList.Add(new ThWSSDStorey(FloorNumbers + 1, FloorHeight, false, false, 0));
+            var zeroHouse = CreateZerosArray(households[0].Length);
+            StoreyList.Add(new ThWSSDStorey(FloorNumbers + 1, FloorHeight, false, false, zeroHouse));
+
             return StoreyList;
         }
-
 
         public static List<ThWSuplySystemDiagram> CreatePipeSystem(ref List<double[]> NGLIST, ref List<double[]> U0LIST, List<int> lowestStorey
             , List<int> highestStorey, double PipeOffset_X, List<List<CleaningToolsSystem>> floorCleanToolList, int areaIndex, double PipeGap
@@ -1037,7 +1098,6 @@ namespace ThMEPWSS.Pipe.Model
             var QL = setViewModel.MaxDayQuota;  //最高日用水定额 QL
             var Kh = setViewModel.MaxDayHourCoefficient;  //最高日小时变化系数  Kh
             var m = setViewModel.NumberOfHouseholds;   //每户人数  m
-
 
             var PipeSystem = new List<ThWSuplySystemDiagram>();// 创建竖管系统列表
 
@@ -1060,34 +1120,39 @@ namespace ThMEPWSS.Pipe.Model
                     }
 
                     NgList[j] = InnerProduct(toolNums, WaterEquivalent) / householdNum;
-                                
-                    U0List[j] = 100 * QL * m * Kh / (0.2 * NgList[j] * T * 3600);
+                    if(Math.Abs(NgList[j]) < 1e-6)
+                    {
+                        U0List[j] = 0;
+                    }
+                    else
+                    {
+                        U0List[j] = 100 * QL * m * Kh / (0.2 * NgList[j] * T * 3600);
+                    }                               
                 }
                 for (int j = lowestStorey[i] - 2; j >= 0; j--)
                 {
                     NgList[j] = 0;
                     U0List[j] = 0;
                 }
-
                 for (int j = lowestStorey[i] - 1; j < highestStorey[i]; j++)// 对于竖管 i 的第 j 个竖管单元(即第 j 层)
                 {
                     U0aveList[j] = 0;
                     NgTotalList[j] = 0;
-
                     for (int k = j; k < highestStorey[i]; k++)
                     {
                         U0aveList[j] += U0List[k] * NgList[k];
                         NgTotalList[j] += NgList[k];
                     }
-                    U0aveList[j] /= NgTotalList[j];
-
+                    if(Math.Abs(NgTotalList[j]) > 1e-6)
+                    {
+                        U0aveList[j] /= NgTotalList[j];
+                    }
                 }
                 for (int j = 0; j < lowestStorey[i] - 1; j++)// 对于竖管 i 的第 j 个竖管单元(即第 j 层)
                 {
                     U0aveList[j] = U0aveList[lowestStorey[i] - 1];
                     NgTotalList[j] = NgTotalList[lowestStorey[i] - 1];
                 }
-
                 for (int j = 0; j < highestStorey[i]; j++)
                 {
                     var pipeCompute = new PipeCompute(U0aveList[j], NgTotalList[j]);
@@ -1097,12 +1162,11 @@ namespace ThMEPWSS.Pipe.Model
                 NGLIST.Add(NgTotalList);
                 U0LIST.Add(U0aveList);
             }
+
             return PipeSystem;
         }
 
-
-        //获取block尺寸
-        public static double[] GetBlockSize(BlockTable bt, string BlockValue)
+        public static double[] GetBlockSize(BlockTable bt, string BlockValue)//获取block尺寸
         {
             if (bt.Has(BlockValue))
             {
@@ -1113,11 +1177,12 @@ namespace ThMEPWSS.Pipe.Model
                 var Hight = extent.MaxPoint.Y - extent.MinPoint.Y;
                 var Size = new double[] { Length, Hight };
 
+
+
                 return Size;
             }
             return new double[] { 0, 0 };
         }
-
 
         //创建模块尺寸列表
         public static List<double[]> CreateBlockSizeList(BlockTable bt)
@@ -1131,7 +1196,6 @@ namespace ThMEPWSS.Pipe.Model
             return BlockSize;
         }
 
-
         public static Point3dCollection CreatePolyLine(Point3d pt1, Point3d pt2)
         {
             var ptls = new Point3d[5];
@@ -1143,7 +1207,6 @@ namespace ThMEPWSS.Pipe.Model
             var SelectedArea = new Point3dCollection(ptls);
             return SelectedArea;
         }
-
 
         //创建单层的分区列表
         public static List<Point3dCollection> CreateRectList(ThStoreys sobj)
@@ -1174,28 +1237,25 @@ namespace ThMEPWSS.Pipe.Model
         //创建所有楼层的分区列表
         public static List<List<Point3dCollection>> CreateFloorAreaList(List<ThIfcSpatialElement> elements)
         {
-            using (var acadDatabase = AcadDatabase.Active())
+            using var acadDatabase = AcadDatabase.Active();
+            var FloorAreaList = new List<List<Point3dCollection>>();
+            foreach (var obj in elements)//遍历楼层
             {
-                var FloorAreaList = new List<List<Point3dCollection>>();
-                foreach (var obj in elements)//遍历楼层
+                if (obj is ThStoreys)
                 {
-                    if (obj is ThStoreys)
+                    var sobj = obj as ThStoreys;
+                    var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
+                    if (!br.IsDynamicBlock) continue;
+                    if (sobj.StoreyType.ToString().Contains("StandardStorey"))
                     {
-                        var sobj = obj as ThStoreys;
-                        var br = acadDatabase.Element<BlockReference>(sobj.ObjectId);
-                        if (!br.IsDynamicBlock) continue;
-                        if(sobj.StoreyType.ToString().Contains("StandardStorey"))
-                        {
-                            var rectList = CreateRectList(sobj);
-                            FloorAreaList.Add(rectList);//分区的多段线添加
-                        }
-                        
+                        var rectList = CreateRectList(sobj);
+                        FloorAreaList.Add(rectList);//分区的多段线添加
                     }
                 }
-                return FloorAreaList;
             }
-        }
 
+            return FloorAreaList;
+        }
 
         //提取每张图纸的楼层号
         public static List<List<int>> CreateFloorNumList(List<string> FloorNum)
@@ -1242,10 +1302,9 @@ namespace ThMEPWSS.Pipe.Model
                 }
                 FloorNumList.Add(fiNum);
             }
+
             return FloorNumList;
         }
-
-       
 
         //统计分区数
         public static int CountAreaNums(List<List<Point3dCollection>> FloorAreaList, ThCADCoreNTSSpatialIndex kitchenIndex)
@@ -1257,25 +1316,16 @@ namespace ThMEPWSS.Pipe.Model
                 var areaNums = 0;
                 for (int j = 0; j < FloorAreaList[i].Count; j++)
                 {
-                    households[i, j] = Convert.ToInt32(kitchenIndex.SelectCrossingPolygon(FloorAreaList[i][j]).Count > 0);
+                    households[i, j] = Convert.ToInt32(kitchenIndex.SelectCrossingPolygon(FloorAreaList[i][j]).Count >0);
                     areaNums += households[i, j];
                 }
-                if (i == 0)
+                if (AreaNums < areaNums)
                 {
                     AreaNums = areaNums;
-                }
-                else
-                {
-                    if (AreaNums != areaNums)
-                    {
-                        MessageBox.Show("有效分割线数目不对");
-                        return -1;
-                    }
                 }
             }
             return AreaNums;
         }
-
 
         public static List<string> CreateTypeList(string ListType)
         {
@@ -1307,7 +1357,6 @@ namespace ThMEPWSS.Pipe.Model
                     return false;
                 }
             }
-
             return true;
         }
 
@@ -1323,8 +1372,48 @@ namespace ThMEPWSS.Pipe.Model
             }
             return num;
         }
-
-
     }
+
+    public class ThExtractRoomNameService
+    {
+
+        public static IEnumerable<Polyline> RoomBuilder(AcadDatabase db, Point3dCollection selectedArea)
+        {
+            var roomMarkEngine = new ThRoomMarkRecognitionEngine()
+            {
+                LayerFilter = new List<string> { "AI-空间名称" },
+            };
+            roomMarkEngine.RecognizeMS(db.Database, selectedArea);
+            var rooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
+
+            if (rooms is null)
+            {
+                roomMarkEngine = new ThRoomMarkRecognitionEngine();
+                roomMarkEngine.Recognize(db.Database, selectedArea); //来源于参照
+                rooms = roomMarkEngine.Elements.Select(e => (e as ThIfcTextNote).Geometry);
+            }
+            return rooms;
+
+        }
+        public static void Extract(Database db, Point3dCollection pts, List<string> layfilter)
+        {
+            //暂时Coding根据需要提取房间名称
+            var results = new List<string>();
+            //从外部参照提取
+            var roomMarkEngine = new ThRoomMarkRecognitionEngine()
+            {
+                LayerFilter = layfilter,
+            };
+            roomMarkEngine.RecognizeMS(db, pts); //来源于本地
+            if (roomMarkEngine.Elements.Count == 0)
+            {
+                roomMarkEngine.Recognize(db, pts); //来源于参照
+            }
+            //roomMarkEngine.Elements.Cast<Thifc>
+        }
+    } 
 }
+
+
+
 

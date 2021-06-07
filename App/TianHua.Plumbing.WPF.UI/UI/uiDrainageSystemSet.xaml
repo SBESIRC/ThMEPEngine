@@ -19,7 +19,8 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal">
             <Label Content="楼层线间距"></Label>
-            <TextBox Width="100" HorizontalContentAlignment="Right" Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}"></TextBox>
+            <TextBox Width="100" HorizontalContentAlignment="Right" LostFocus="TextBox_LostFocus"  Text="{Binding FloorLineSpace,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,NotifyOnValidationError=True}" KeyDown = "FloorLineGap_KeyPress "  TextChanged="TextBox_TextChanged_FloorGap" Height="25" VerticalAlignment="Bottom">
+            </TextBox>
             <Label Content="mm" VerticalContentAlignment="Bottom"></Label>
         </StackPanel>
         <StackPanel Orientation="Vertical" Grid.Row="1" Margin="0,5,0,5">
@@ -36,18 +37,18 @@
                       SelectedItem="{Binding SelectPartition,Mode=TwoWay,NotifyOnSourceUpdated=True,NotifyOnTargetUpdated=True,UpdateSourceTrigger=PropertyChanged}">
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="立管编号" Width="75" CanUserSort="False" CanUserResize="False" Binding="{Binding RiserNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                    <DataGridTextColumn Header="最低层" Width="55" CanUserSort="False" CanUserResize="False" Binding="{Binding MinimumFloorNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
-                    <DataGridTextColumn Header="最高层" Width="55" CanUserSort="False" CanUserResize="False" Binding="{Binding HighestFloorNumber,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></DataGridTextColumn>
+                    <DataGridTextColumn Header="最低层" Width="55" CanUserSort="False" CanUserResize="False"  Binding="{Binding MinimumFloorNumber,Mode=TwoWay,UpdateSourceTrigger=LostFocus}" ></DataGridTextColumn>
+                    <DataGridTextColumn Header="最高层" Width="55" CanUserSort="False" CanUserResize="False" Binding="{Binding HighestFloorNumber,Mode=TwoWay,UpdateSourceTrigger=LostFocus}"></DataGridTextColumn>
                 </DataGrid.Columns>
             </DataGrid>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="冲洗龙头："></Label>
-                <TextBox Width="100" Text="{Binding FaucetFloor,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                <TextBox Width="100"   Text="{Binding FaucetFloor,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}" KeyDown = "FlushFaucet_KeyPress" TextChanged="TextBox_TextChanged_Faucet"></TextBox>
                 <Label Content="层"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label Content="无减压阀："></Label>
-                <TextBox Width="100" Text="{Binding NoCheckValve,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                <TextBox Width="100" Text="{Binding NoCheckValve,Mode=TwoWay,ValidatesOnNotifyDataErrors=False,UpdateSourceTrigger=PropertyChanged}" KeyDown = "NoCheckValve_KeyPress" TextChanged="TextBox_TextChanged_NoCheckValve"></TextBox>
                 <Label Content="层"></Label>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
@@ -82,16 +83,16 @@
                     <RowDefinition Height="30"></RowDefinition>
                 </Grid.RowDefinitions>
                 <Label Grid.Row="0" Grid.Column="0" Width="Auto" Content="最高日用水定额qL："/>
-                <TextBox Grid.Row="0" Grid.Column="1" Height="24" Width="40" HorizontalContentAlignment="Right" Text="{Binding MaxDayQuota,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnNotifyDataErrors=True}"></TextBox>
+                <TextBox Grid.Row="0" Grid.Column="1" Height="24" Width="40" HorizontalContentAlignment="Right" LostFocus="LostFocus_MaxDayQuota"  Text="{Binding MaxDayQuota,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnNotifyDataErrors=True}"  KeyDown = "KeyPress_MaxDayQuota" TextChanged="TextChanged_MaxDayQuota"></TextBox>
                 <Label Grid.Row="0" Grid.Column="2" Content="L/人d"></Label>
 
                 <Label Grid.Row="1" Width="Auto" Grid.Column="0" Grid.ColumnSpan="2" Content="最高日小时变化系数Kh："/>
-                <TextBox Grid.Row="1" Grid.Column="1" Height="24" Grid.ColumnSpan="2" Width="50"  HorizontalAlignment="Right" HorizontalContentAlignment="Right" Text="{Binding MaxDayHourCoefficient ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnNotifyDataErrors=True}"></TextBox>
+                <TextBox Grid.Row="1" Grid.Column="1" Height="24" Grid.ColumnSpan="2" Width="50"  HorizontalAlignment="Right" HorizontalContentAlignment="Right" LostFocus="LostFocus_MaxDayHourCoefficient"  Text="{Binding MaxDayHourCoefficient ,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnNotifyDataErrors=True}" KeyDown = "KeyPress_MaxDayHourCoefficient" TextChanged="TextChanged_MaxDayHourCoefficient"></TextBox>
 
 
                 <Label Grid.Row="2" Grid.Column="0" Content="每户人数："/>
                 <StackPanel Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" HorizontalAlignment="Right" Orientation="Horizontal">
-                    <TextBox Grid.Row="2" Grid.Column="1" Height="24" Width="40" Text="{Binding NumberOfHouseholds,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnNotifyDataErrors=True}" HorizontalContentAlignment="Right"></TextBox>
+                    <TextBox Grid.Row="2" Grid.Column="1" Height="24" Width="40" LostFocus="LostFocus_NumberOfHouseholds" Text="{Binding NumberOfHouseholds,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged,ValidatesOnNotifyDataErrors=True}" HorizontalContentAlignment="Right" KeyDown = "KeyPress_NumberOfHouseholds" TextChanged="TextChanged_NumberOfHouseholds"></TextBox>
                     <Label Grid.Row="2" Grid.Column="2" Content="人" Padding="0" Margin="5,0,0,0" VerticalContentAlignment="Center"></Label>
                 </StackPanel>
                 

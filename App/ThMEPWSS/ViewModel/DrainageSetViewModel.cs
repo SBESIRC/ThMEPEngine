@@ -1,6 +1,10 @@
 ﻿using GalaSoft.MvvmLight.Command;
+using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.RegularExpressions;
 using ThControlLibraryWPF.ControlUtils;
 
 namespace ThMEPWSS.Diagram.ViewModel
@@ -49,11 +53,11 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
-
         private string faucetFloor { get; set; }
         /// <summary>
         /// 冲洗龙头
         /// </summary>
+        [RegularExpression(@"\d+", ErrorMessage = ("Invalid format"))]
         public string FaucetFloor
         {
             get { return faucetFloor; }
@@ -196,11 +200,113 @@ namespace ThMEPWSS.Diagram.ViewModel
             SelectPartition = PartitionDatas.FirstOrDefault();
             
         }
+
+        //todo:
+         //实现输入参数的 clone
+        public DrainageSetViewModel Clone()
+        {
+            var cloned = new DrainageSetViewModel();
+            cloned.FloorLineSpace = this.floorLineSpace;
+            cloned.FaucetFloor = FaucetFloor;
+            cloned.NoCheckValve = NoCheckValve;
+            cloned.MaxDayQuota = MaxDayQuota;
+            cloned.MaxDayHourCoefficient = MaxDayHourCoefficient;
+            cloned.NumberOfHouseholds = NumberOfHouseholds;
+
+            cloned.PartitionDatas.Clear();
+            foreach(var pd in PartitionDatas)
+            {
+                cloned.PartitionDatas.Add(pd.Clone());
+            }
+            {
+                //cloned.PartitionDatas = PartitionDatas.cl
+                //var pipeNumber = new string[] { "JGL", "J1L1", "J2L1", "J3L1" };
+                //foreach (var number in pipeNumber)
+                //{
+                //    //var partitionData = new PartitionData();
+                //    //partitionData.RiserNumber = number;
+                //    //if (number == "JGL")
+                //    //{
+                //    //    partitionData.MinimumFloorNumber = "1";
+                //    //    partitionData.HighestFloorNumber = "1";
+                //    //}
+                //    cloned.PartitionDatas.Add(partitionData);
+                //}
+            }
+
+            return cloned;
+        }
     }
-    public class PartitionData  
+    public class PartitionData : NotifyPropertyChangedBase//,IDataErrorInfo
     {
         public string RiserNumber { get; set; }
-        public string MinimumFloorNumber { get; set; }
-        public string HighestFloorNumber { get; set; }
+        //public string MinimumFloorNumber { get; set; }
+
+        private string minimumFloorNumber;
+        public string MinimumFloorNumber 
+        {
+            get
+            {
+                return minimumFloorNumber;
+            } 
+            set
+            {
+                if (value != null && Regex.IsMatch(value, @"^[+-]?\d*$") && value != "")
+                {
+                    if(Convert.ToInt32(value) != 0)
+                    {
+                        minimumFloorNumber = Convert.ToString((Convert.ToInt32(value)));
+                        RaisePropertyChanged("MinimumFloorNumber");
+                    }
+                   
+                }
+            }
+        }
+
+        //public string HighestFloorNumber { get; set; }
+        private string highestFloorNumber;
+        public string HighestFloorNumber
+        {
+            get
+            {
+                return highestFloorNumber;
+            }
+            set
+            {
+                if (value != null && Regex.IsMatch(value, @"^[+-]?\d*$") && value != "")
+                {
+                    if(Convert.ToInt32(value) != 0)
+                    {
+                        highestFloorNumber = Convert.ToString((Convert.ToInt32(value)));
+                        RaisePropertyChanged("HighestFloorNumber");
+                    }
+                   
+                }
+                    
+            }
+        }
+        public PartitionData Clone()
+        {
+            var cloned = new PartitionData();
+            cloned.RiserNumber = RiserNumber;
+            cloned.MinimumFloorNumber = MinimumFloorNumber;
+            cloned.HighestFloorNumber = HighestFloorNumber;
+            return cloned;
+        }
+        //public string Error => throw new NotImplementedException();
+
+        //public string this[string columnName]
+        //{
+        //    get
+        //    {
+        //        if(columnName.Equals("MinimumFloorNumber"))
+        //        {
+        //            if (minimumFloorNumber <= 0)
+        //                return "Invalid value";
+        //        }
+
+        //        return "";
+        //    }
+        //}
     }
 }

@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPWSS.Uitl;
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -27,12 +28,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 MessageBox.Show("数据错误：获取选中住户分区失败，无法进行后续操作");
                 return;
             }
+            var oldViewModel = viewModel.SelectRadionButton.SetViewModel.Clone();
             uiDrainageSystemSet systemSet = new uiDrainageSystemSet(viewModel.SelectRadionButton.Content,viewModel.SelectRadionButton.SetViewModel);
             systemSet.Owner = this;
             var ret= systemSet.ShowDialog();
             if (ret == false)
+            {
                 //用户取消了操作
+                viewModel.SelectRadionButton.SetViewModel = oldViewModel;
                 return;
+            }
 
             //用户确认，进行后续的业务逻辑
             //step1 保存用户的输入信息
@@ -58,9 +63,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
            
         }
 
+        private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
+        {
+            viewModel.FloorFraming();
+        }
+
         private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
             viewModel.InitListDatas();
+            //var sys = new SystemDiagramUtils();
+            
         }
     }
 }

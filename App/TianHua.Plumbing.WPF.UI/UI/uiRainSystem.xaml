@@ -9,7 +9,7 @@
                     SizeToContent="WidthAndHeight"
                     Height="500"
              mc:Ignorable="d">
-    <Grid  Margin="5" FocusManager.FocusedElement="{Binding ElementName=btnSelectFloor}">
+    <Grid  Margin="5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
