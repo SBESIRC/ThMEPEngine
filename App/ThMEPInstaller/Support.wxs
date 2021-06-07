@@ -30,6 +30,9 @@
       <Component Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" Guid="{52925679-6A6D-477F-83DC-7C99E78FC0E1}" Win64="yes">
         <File Id="FILE_Autoloader_PackageContents_Support_Block_Conversion" Source="$(var.AutoloaderContentsPath)\Support\天华提电气块转换配置表.dwg" KeyPath="yes" />
       </Component>
+      <Component Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" Guid="{3F30BE8F-A8F1-41A4-ABD5-735D23DB7F0F}" Win64="yes">
+        <File Id="FILE_Autoloader_PackageContents_Support_Block_AFAS" Source="$(var.AutoloaderContentsPath)\Support\火灾自动报警系统图.dwg" KeyPath="yes" />
+      </Component>
       <Component Id="CMP_Autoloader_PackageContents_Support_Block_HVAC" Guid="{43833F2E-6239-4C90-A71E-61903B3F7A2A}" Win64="yes">
         <File Id="FILE_Autoloader_PackageContents_Support_Block_HVAC" Source="$(var.AutoloaderContentsPath)\Support\地上给水排水平面图模板.dwg" KeyPath="yes" />
       </Component>
@@ -102,6 +105,7 @@
       <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Spray" />
       <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Sensor" />
       <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Storey" />
+      <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_AFAS" />
       <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Broadcast" />
       <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_Conversion" />			
       <ComponentRef Id="CMP_Autoloader_PackageContents_Support_Block_LaneLineLight" />
