@@ -55,7 +55,7 @@ namespace ThMEPLighting.EmgLightConnect.Service
                 Ymin = yTransValue.Min() - EmgConnectCommon.TolRegroupMainYRange;
                 YMax = yTransValue.Max() + EmgConnectCommon.TolRegroupMainYRange;
 
-                if (yTransValue.Max() - yTransValue.Min() > 2000)
+                if (yTransValue.Max() - yTransValue.Min() > 3000)
                 {
                     double ySecMean = 20000;
                     ySecMean = yTransValue
