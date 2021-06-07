@@ -9,6 +9,7 @@ using ThMEPEngineCore.CAD;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
+using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPWSS.FlushPoint.Service
 {
@@ -131,16 +132,15 @@ namespace ThMEPWSS.FlushPoint.Service
                                 });
                             }
                         }
-                        else if (o.GetType().IsTianZhengElement())
+                        else if (o.IsTCHElement())
                         {
-                            var objs = ThDrawTool.ExplodeEx(o)
+                            var objs = o.ExplodeTCHElement()
                             .Cast<Entity>()
                             .Where(e => e is Circle && e.Visible)
                             .ToList();
-                            var circles = objs
-                                .Cast<Circle>()
-                                .Where(e => IsPointedCircle(e))
-                                .ToList();
+                            var circles = objs.Cast<Circle>()
+                            .Where(e => IsPointedCircle(e))
+                            .ToList();
                             circles.ForEach(o =>
                             {
                                 results.Add(o.ToRectangle());

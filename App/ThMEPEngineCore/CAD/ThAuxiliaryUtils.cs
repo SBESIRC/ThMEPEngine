@@ -186,10 +186,5 @@ namespace ThMEPEngineCore.CAD
             double w = h * (screen.X / screen.Y);
             return new Point2d(w, h);
         }
-        public static bool IsTianZhengElement(this Type type)
-        {
-            return type.IsNotPublic &&
-                type.FullName == "Autodesk.AutoCAD.DatabaseServices.ImpEntity";
-        }
     }
 }
