@@ -11,7 +11,7 @@ namespace ThMEPWSS.Command
     public class ThFireControlSystemDiagramCmd : IAcadCommand, IDisposable
     {
         FireControlSystemDiagramViewModel _vm;
-        public ThFireControlSystemDiagramCmd(FireControlSystemDiagramViewModel vm)
+        public ThFireControlSystemDiagramCmd(FireControlSystemDiagramViewModel vm = null)
         {
             _vm = vm;
         }
