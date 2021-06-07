@@ -194,6 +194,37 @@ namespace ThMEPEngineCore.CAD
             }
             return results;
         }
+        public static DBObjectCollection ExplodeEx(Entity entity)
+        {
+            // Support explode tianzheng element
+            var results = new DBObjectCollection();
+            var subObjs = new DBObjectCollection();
+            entity.Explode(subObjs);
+            foreach (Entity ent in subObjs)
+            {
+                if(ent.GetType().IsTianZhengElement())
+                {
+                    var nestObjs = ExplodeEx(ent);
+                    foreach (Entity nestEnt in nestObjs)
+                    {                        
+                        results.Add(nestEnt);
+                    }
+                }
+                else if (ent is BlockReference br)
+                {
+                    var nestObjs = ExplodeEx(br);
+                    foreach (Entity nestEnt in nestObjs)
+                    {
+                        results.Add(nestEnt);
+                    }
+                }        
+                else
+                {
+                    results.Add(ent);
+                }
+            }
+            return results;
+        }
 
         public static Polyline ToOBB(this BlockReference br,Matrix3d mt)
         {

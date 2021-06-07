@@ -26,6 +26,7 @@ namespace ThMEPEngineCore.Model
             return new ThIfcRoom()
             {
                 Boundary = entity,
+                Tags = new List<string>(),
                 Uuid = Guid.NewGuid().ToString()
             };
         }
