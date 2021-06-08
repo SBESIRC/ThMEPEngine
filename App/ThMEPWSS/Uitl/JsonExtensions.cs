@@ -312,5 +312,54 @@ namespace ThMEPWSS.CADExtensionsNs
             }
             return ret;
         }
+
+        public static double DistanceToOtherLineSegment(this Line thisLine, Line otherLine)
+        {
+            double distance = 0.0;
+            Point3d this_point1 = thisLine.StartPoint;
+            Point3d this_point2 = thisLine.EndPoint;
+            Vector3d this_vector = thisLine.Delta;
+
+            Point3d other_point1 = otherLine.StartPoint;
+            Point3d other_point2 = otherLine.EndPoint;
+            Vector3d other_vector = otherLine.Delta;
+
+            Vector3d vector00 = this_point1.GetVectorTo(other_point1);
+            Vector3d vector01 = this_point1.GetVectorTo(other_point2);
+
+            Vector3d vector10 = this_point2.GetVectorTo(other_point1);
+            Vector3d vector11 = this_point2.GetVectorTo(other_point2);
+
+            double angle00 = other_vector.GetAngleTo(vector00);
+            double angle01 = other_vector.GetAngleTo(vector01);
+
+            double angle10 = other_vector.GetAngleTo(vector10);
+            double angle11 = other_vector.GetAngleTo(vector11);
+
+            if((angle00 < Math.PI/2.0 && angle01 < Math.PI / 2.0) && (angle10 < Math.PI / 2.0 && angle11 < Math.PI / 2.0))
+            {
+                distance = this_point2.DistanceTo(other_point1);
+            }
+            else if((angle00 > Math.PI / 2.0 && angle01 > Math.PI / 2.0) && (angle10 > Math.PI / 2.0 && angle11 > Math.PI / 2.0))
+            {
+                distance = this_point1.DistanceTo(other_point2);
+            }
+            else
+            {
+                distance = thisLine.Distance(otherLine);
+            }
+
+            return distance;
+        }
+
+        public static double DistanceToPoint(this Line thisLine, Point3d otherPoint)
+        {
+            double distance = 0.0;
+
+            Point3d closestPoint = thisLine.GetClosestPointTo(otherPoint, false);
+            distance = otherPoint.DistanceTo(closestPoint);
+
+            return distance;
+        }
     }
 }

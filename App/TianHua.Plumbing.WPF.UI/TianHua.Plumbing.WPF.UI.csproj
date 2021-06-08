@@ -106,6 +106,9 @@
     <Compile Include="UI\uiWaterWellPump.xaml.cs">
       <DependentUpon>uiWaterWellPump.xaml</DependentUpon>
     </Compile>
+    <Compile Include="UI\uiWaterWellPumpFilter.xaml.cs">
+      <DependentUpon>uiWaterWellPumpFilter.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -143,6 +146,10 @@
       <Generator>XamlIntelliSenseFileGenerator</Generator>
     </Page>
     <Page Include="UI\uiWaterWellPump.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="UI\uiWaterWellPumpFilter.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

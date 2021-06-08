@@ -1,6 +1,7 @@
-﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.uiWaterWellPump"
+﻿<cus:ThCustomWindow x:Class="TianHua.Plumbing.WPF.UI.UI.UiWaterWellPump"
              xmlns:cus="clr-namespace:ThControlLibraryWPF.CustomControl;assembly=ThControlLibraryWPF"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:sys="clr-namespace:System;assembly=mscorlib"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
@@ -8,23 +9,125 @@
                     WindowStartupLocation="CenterOwner"
                     Title="集水井水泵"
                     SizeToContent="Height"
-                    Width="500"
-                    Height="100"
+                    Width="200"
+                    Height="462.154"
              mc:Ignorable="d" >
+    <cus:ThCustomWindow.Resources>
+        <x:Array x:Key="PNLists" Type ="sys:String">
+            <sys:String>1</sys:String>
+            <sys:String>2</sys:String>
+            <sys:String>3</sys:String>
+            <sys:String>4</sys:String>
+        </x:Array>
+        <x:Array x:Key="PSLists" Type ="sys:String">
+            <sys:String>1:50</sys:String>
+            <sys:String>1:100</sys:String>
+            <sys:String>1:150</sys:String>
+        </x:Array>
+        <x:Array x:Key="DNLists" Type ="sys:String">
+            <sys:String>DN25</sys:String>
+            <sys:String>DN50</sys:String>
+            <sys:String>DN80</sys:String>
+            <sys:String>DN100</sys:String>
+        </x:Array>
+        <x:Array x:Key="FPLists" Type ="sys:String">
+            <sys:String>B1</sys:String>
+            <sys:String>B2</sys:String>
+            <sys:String>B3</sys:String>
+            <sys:String>B4</sys:String>
+        </x:Array>
+        <x:Array x:Key="NPLists" Type ="sys:String">
+            <sys:String>A</sys:String>
+            <sys:String>B</sys:String>
+            <sys:String>C</sys:String>
+            <sys:String>D</sys:String>
+            <sys:String>E</sys:String>
+            <sys:String>F</sys:String>
+            <sys:String>G</sys:String>
+            <sys:String>H</sys:String>
+            <sys:String>I</sys:String>
+            <sys:String>J</sys:String>
+            <sys:String>K</sys:String>
+            <sys:String>L</sys:String>
+            <sys:String>M</sys:String>
+            <sys:String>N</sys:String>
+        </x:Array>
+    </cus:ThCustomWindow.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
-            <RowDefinition></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
+            <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
-            <ColumnDefinition></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <CheckBox Grid.Row="0" Grid.Column="0"  IsChecked="{Binding FilterByWatewellSize}">集水井尺寸过滤</CheckBox>
-        <TextBox Grid.Row="0" Grid.Column="1" Width="45" Text="{Binding MinimumArea}"></TextBox>
-        <Button x:Name="testButton" Grid.Row="1" Grid.Column="1" Click="testButton_Click">Test</Button>
+        <StackPanel Orientation="Vertical" Grid.Row="0">
+            <Grid>
+                <Label Content="集水井设置"></Label>
+            </Grid>
+            <StackPanel Orientation="Vertical" Margin="0,5,0,0" VerticalAlignment="Bottom">
+                <Button x:Name="btnWaterwellRecog" Content="集水井图块识别" VerticalAlignment="Center" HorizontalAlignment ="Center" Click="btnWaterwellRecog_Click"></Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <CheckBox Content="集水井尺寸过滤" IsChecked="{Binding FilterByWatewellSize}"></CheckBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="最小面积："></Label>
+                <TextBox Height="23" VerticalAlignment="Center" HorizontalAlignment="Center" Text="{Binding MinimumArea}"></TextBox>
+                <Label Content="m^2"></Label>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="楼层位置："></Label>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource FPLists}}" SelectedIndex="0" SelectedValue="{Binding FloorLocation}"></ComboBox>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="1">
+            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
+            <Grid>
+                <Label Content="水泵设置"></Label>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="编号前缀："></Label>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource NPLists}}" SelectedIndex="0" SelectedValue="{Binding NumberPrefix}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="单井水泵数："></Label>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource PNLists}}" SelectedIndex="1" SelectedValue="{Binding PumpsNumber}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Label Content="管径："></Label>
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource DNLists}}" SelectedIndex="0" SelectedValue="{Binding PipeDN}"></ComboBox>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="2">
+            <Grid>
+                <Label Content="布置方式:"></Label>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <RadioButton GroupName="ArrangeTypeGroup" Content="点选" IsChecked="{Binding IsPickSelection}" />
+                <RadioButton GroupName="ArrangeTypeGroup" Content="框选" IsChecked="{Binding IsFrameSelection}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <CheckBox Content="覆盖已布集水井" IsChecked="{Binding CoveredWaterWell}"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="3">
+            <Grid>
+                <Label Content="出图比例:"></Label>
+            </Grid>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <ComboBox Width="100" ItemsSource="{Binding Source={StaticResource PSLists}}" SelectedIndex="0" SelectedValue="{Binding MapScale}"></ComboBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
+                <Button x:Name="btnFixDeepWaterPump" Content="布置" Width="75"  Click="btnFixDeepWaterPump_Click"/>
+            </StackPanel>
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="4">
+            <Rectangle Stroke="#FF000000" Height="1" StrokeThickness="1" StrokeDashArray="4 8" SnapsToDevicePixels="True"/>
+            <StackPanel Orientation="Vertical"  Margin="0,5,0,0" VerticalAlignment="Center">
+                <Button x:Name="btnGenerTable" Content="生成提资表" Click="btnGenerTable_Click"/>
+                <Button Content="校验潜水泵"/>
+            </StackPanel>
+        </StackPanel>
     </Grid>
 </cus:ThCustomWindow>

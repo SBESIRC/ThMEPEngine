@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using ThControlLibraryWPF.CustomControl;
+using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -20,18 +21,34 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// <summary>
     /// uiWaterWellPump.xaml 的交互逻辑
     /// </summary>
-    public partial class uiWaterWellPump : ThCustomWindow
+    public partial class UiWaterWellPump : ThCustomWindow
     {
-        public WaterwellPumpParamsViewModel ViewModel = new WaterwellPumpParamsViewModel();
-        public uiWaterWellPump()
+        private WaterwellPumpParamsViewModel ViewModel = new WaterwellPumpParamsViewModel();
+        public UiWaterWellPump()
         {
             InitializeComponent();
             DataContext = ViewModel;
         }
 
-        private void testButton_Click(object sender, RoutedEventArgs e)
+        private void btnWaterwellRecog_Click(object sender, RoutedEventArgs e)
         {
-            var rst = ViewModel.FilterByWatewellSize;
+            uiWaterWellPumpFilter uiFilter = new uiWaterWellPumpFilter();
+            if(uiFilter.ShowDialog() == true)
+            {
+                ViewModel.SetIdentfyConfigInfo(uiFilter.GetIdentfyConfigInfo());
+            }
+        }
+
+        private void btnFixDeepWaterPump_Click(object sender, RoutedEventArgs e)
+        {
+            ThCreateWaterWellPumpCmd cmd = new ThCreateWaterWellPumpCmd(ViewModel);
+            cmd.Execute();
+        }
+
+        private void btnGenerTable_Click(object sender, RoutedEventArgs e)
+        {
+            ThCreateWithdrawalFormCmd cmd = new ThCreateWithdrawalFormCmd(ViewModel);
+            cmd.Execute();
         }
     }
 }

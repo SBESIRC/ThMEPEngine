@@ -8,6 +8,7 @@ using AcHelper;
 using Autodesk.AutoCAD.EditorInput;
 using Linq2Acad;
 using ThMEPWSS.Pipe.Model;
+using Autodesk.AutoCAD.ApplicationServices;
 
 namespace ThMEPWSS.Pipe
 {
@@ -161,6 +162,16 @@ namespace ThMEPWSS.Pipe
             }
 
             return entityList;
+        }
+
+        public static string GetEffectiveName(Entity entity)
+        {
+            string effName = "";
+            if (entity is BlockReference reference)
+            {
+                effName = reference.GetEffectiveName();
+            }
+            return effName;
         }
     }
 }

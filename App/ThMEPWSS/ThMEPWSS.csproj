@@ -94,6 +94,7 @@
     <Compile Include="Pipe\Engine\ThBlockSelectionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWBlockReferenceVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWCleanToolsRecongnitionEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWDeepWellPumpEngine.cs" />
     <Compile Include="Pipe\Engine\ThWDeviceExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWGravityWaterBucketExtractionVisitor.cs" />
     <Compile Include="Pipe\Engine\ThWRainPipeExtractionVisitor.cs" />
@@ -114,9 +115,11 @@
     <Compile Include="Pipe\Engine\ThWRoofFloorRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWRoomRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWaterBucketEngine.cs" />
+    <Compile Include="Pipe\Engine\ThWWaterWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Engine\ThWWellRecognitionEngine.cs" />
     <Compile Include="Pipe\Geom\GeomUtils.cs" />
     <Compile Include="Pipe\Model\ThWaterWellPumpArrangement.cs" />
+    <Compile Include="Pipe\Model\ThWDeepWellPump.cs" />
     <Compile Include="Pipe\Model\ThWPipeInterfaces.cs" />
     <Compile Include="Pipe\Model\ThWPipeRun.cs" />
     <Compile Include="Pipe\Model\ThWDevice.cs" />
@@ -135,6 +138,7 @@
     <Compile Include="Pipe\Model\ThWRoofRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWRainPipe.cs" />
     <Compile Include="Pipe\Model\ThWCondensePipe.cs" />
+    <Compile Include="Pipe\Model\ThWWaterWell.cs" />
     <Compile Include="Pipe\Model\ThWWell.cs" />
     <Compile Include="Pipe\Output\ThWCompositeTagOutPutEngine.cs" />
     <Compile Include="Pipe\Output\ThWRoofDeviceFloorOutPutEngine.cs" />

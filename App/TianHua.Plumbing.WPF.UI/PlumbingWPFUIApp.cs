@@ -58,10 +58,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
         /// <summary>
         /// Tian Hua arrange pumps in water well
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THAPBYUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]
         public void ThArrangePumpWithUI()
         {
-            var ui = new uiWaterWellPump();
+            var ui = new UiWaterWellPump();
             AcadApp.ShowModelessWindow(ui);
         }
 
