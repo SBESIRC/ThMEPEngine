@@ -589,11 +589,14 @@ namespace ThMEPWSS.Pipe.Model
         private void drawLazy(PipeRunDrawingContext ctx)
         {
             if (Storey == null) return;
-            DU.DrawingQueue.Enqueue(adb =>
+            if (Dbg.__showXLabel)
             {
-                var basePt = ctx.BasePoint;
-                Dbg.ShowXLabel(basePt);
-            });
+                DU.DrawingQueue.Enqueue(adb =>
+                {
+                    var basePt = ctx.BasePoint;
+                    Dbg.ShowXLabel(basePt);
+                });
+            }
 
             DrawTranslatorLazy(ctx);
             DrawCheckPointLazy(ctx);

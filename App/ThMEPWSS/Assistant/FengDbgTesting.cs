@@ -315,7 +315,18 @@ namespace ThMEPWSS.DebugNs
         [Feng]
         public static void xx()
         {
-
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var basePt = Dbg.SelectPoint();
+                DU.DrawBlockReference(blkName: "通气帽系统", basePt: basePt, layer: "W-DRAI-DOME-PIPE", cb: br =>
+                {
+                    br.ObjectId.SetDynBlockValue("距离1", 2000.0);
+                    br.ObjectId.SetDynBlockValue("可见性1", "侧墙通气管");
+                });
+            }
         }
 
         //好奇怪。。。目前搞不定了
@@ -1105,7 +1116,7 @@ namespace ThMEPWSS.DebugNs
                         {
                             wLines.Add(line.ToGLineSegment());
                         }
-                        else if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                        else if (ThRainSystemService.IsTianZhengElement(e))
                         {
                             //var lst = e.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
                             //if (lst.Count == 1 && lst[0] is Line ln && ln.Length > 0)
@@ -1267,7 +1278,7 @@ namespace ThMEPWSS.DebugNs
                         {
                             cts.Add(new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() });
                         }
-                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e.GetType())))
+                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e)))
                         {
                             foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                             {
@@ -1280,7 +1291,7 @@ namespace ThMEPWSS.DebugNs
                         //!!!
                         var pps = new List<Entity>();
                         //pps.AddRange(entities.OfType<Circle>().Where(c => 40 < c.Radius && c.Radius < 100));
-                        pps.AddRange(entities.Where(x => (x.Layer == "WP_KTN_LG" || x.Layer == "W-RAIN-EQPM") && ThRainSystemService.IsTianZhengElement(x.GetType())));
+                        pps.AddRange(entities.Where(x => (x.Layer == "WP_KTN_LG" || x.Layer == "W-RAIN-EQPM") && ThRainSystemService.IsTianZhengElement(x)));
                         static GRect getRealBoundaryForPipe(Entity ent)
                         {
                             return ent.Bounds.ToGRect(50);
@@ -1372,7 +1383,7 @@ namespace ThMEPWSS.DebugNs
         }
         public static bool IsTianZhengWaterPort(Entity e)
         {
-            if ((e.Layer == "W-RAIN-EQPM" || e.Layer == "W-RAIN-NOTE" || e.Layer == "W-RAIN-DIMS") && ThRainSystemService.IsTianZhengElement(e.GetType()))
+            if ((e.Layer == "W-RAIN-EQPM" || e.Layer == "W-RAIN-NOTE" || e.Layer == "W-RAIN-DIMS") && ThRainSystemService.IsTianZhengElement(e))
             {
                 var lst = e.ExplodeToDBObjectCollection();
                 if (lst.Count == 1)
@@ -1523,7 +1534,7 @@ namespace ThMEPWSS.DebugNs
                         {
                             cts.Add(new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() });
                         }
-                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e.GetType())))
+                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e)))
                         {
                             foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                             {
@@ -1538,7 +1549,7 @@ namespace ThMEPWSS.DebugNs
                         pps.AddRange(entities.OfType<Circle>().Where(c => 40 <= c.Radius && c.Radius <= 60));
                         pps.AddRange(entities
                             .Where(x => (x.Layer == "WP_KTN_LG" || x.Layer == "W-RAIN-EQPM")
-                            && ThRainSystemService.IsTianZhengElement(x.GetType()))
+                            && ThRainSystemService.IsTianZhengElement(x))
                              .Where(x => x.ExplodeToDBObjectCollection().OfType<Circle>().Any())
                             );
                         static GRect getRealBoundaryForPipe(Entity ent)
@@ -1697,7 +1708,7 @@ namespace ThMEPWSS.DebugNs
                 Dbg.BuildAndSetCurrentLayer(db);
 
                 var lines = adb.ModelSpace.OfType<Entity>()
-                  .Where(e => e.Layer == "W-DRAI-DOME-PIPE" && ThRainSystemService.IsTianZhengElement(e.GetType()))
+                  .Where(e => e.Layer == "W-DRAI-DOME-PIPE" && ThRainSystemService.IsTianZhengElement(e))
                   .SelectMany(e => e.ExplodeToDBObjectCollection().OfType<Line>())
                   .Select(e => e.ToGLineSegment())
                   .ToList();
@@ -1736,7 +1747,7 @@ namespace ThMEPWSS.DebugNs
                 Dbg.BuildAndSetCurrentLayer(db);
 
                 var lines = adb.ModelSpace.OfType<Entity>()
-                  .Where(e => e.Layer == "W-RAIN-PIPE" && ThRainSystemService.IsTianZhengElement(e.GetType()))
+                  .Where(e => e.Layer == "W-RAIN-PIPE" && ThRainSystemService.IsTianZhengElement(e))
                   .SelectMany(e => e.ExplodeToDBObjectCollection().OfType<Line>())
                   .Select(e => e.ToGLineSegment())
                   .ToList();
@@ -1895,7 +1906,7 @@ namespace ThMEPWSS.DebugNs
             using (var tr = new DrawingTransaction(adb))
             {
                 var lines = adb.ModelSpace.OfType<Entity>()
-                   .Where(e => e.Layer == "W-RAIN-PIPE" && ThRainSystemService.IsTianZhengElement(e.GetType()))
+                   .Where(e => e.Layer == "W-RAIN-PIPE" && ThRainSystemService.IsTianZhengElement(e))
                    .SelectMany(e => e.ExplodeToDBObjectCollection().OfType<Line>())
                    .ToList();
                 var res = ThMEPEngineCore.Algorithm.ThLineMerger.Merge(lines);
@@ -1917,7 +1928,7 @@ namespace ThMEPWSS.DebugNs
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
                 var segs = adb.ModelSpace.OfType<Entity>()
-                    .Where(e => e.Layer == "W-RAIN-PIPE" && ThRainSystemService.IsTianZhengElement(e.GetType()))
+                    .Where(e => e.Layer == "W-RAIN-PIPE" && ThRainSystemService.IsTianZhengElement(e))
                     .SelectMany(e => e.ExplodeToDBObjectCollection().OfType<Line>())
                     .Select(e => e.ToGLineSegment()).ToList();
                 var h = GeometryFac.LineGrouppingHelper.Create(segs);
@@ -2182,7 +2193,7 @@ namespace ThMEPWSS.DebugNs
                             {
                                 wLines.Add(line.ToGLineSegment());
                             }
-                            else if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                            else if (ThRainSystemService.IsTianZhengElement(e))
                             {
                                 //var lst = e.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
                                 //if (lst.Count == 1 && lst[0] is Line ln && ln.Length > 0)
@@ -2279,7 +2290,7 @@ namespace ThMEPWSS.DebugNs
                     }
                     {
                         var ents = new List<Entity>();
-                        foreach (var ent in entities.OfType<Entity>().Where(x => x.Layer == "W-RAIN-DIMS" && ThRainSystemService.IsTianZhengElement(x.GetType())))
+                        foreach (var ent in entities.OfType<Entity>().Where(x => x.Layer == "W-RAIN-DIMS" && ThRainSystemService.IsTianZhengElement(x)))
                         {
                             foreach (var br in ent.ExplodeToDBObjectCollection().OfType<BlockReference>())
                             {
@@ -2327,7 +2338,7 @@ namespace ThMEPWSS.DebugNs
                         {
                             cts.Add(new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() });
                         }
-                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-DIMS" && ThRainSystemService.IsTianZhengElement(e.GetType())))
+                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-DIMS" && ThRainSystemService.IsTianZhengElement(e)))
                         {
                             foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                             {
@@ -3525,7 +3536,7 @@ namespace ThMEPWSS.DebugNs
                                         {
                                             wLines.Add(line.ToGLineSegment());
                                         }
-                                        else if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                                        else if (ThRainSystemService.IsTianZhengElement(e))
                                         {
                                             //var lst = e.ExplodeToDBObjectCollection().OfType<Entity>().ToList();
                                             //if (lst.Count == 1 && lst[0] is Line ln && ln.Length > 0)
@@ -3872,7 +3883,7 @@ namespace ThMEPWSS.DebugNs
                         {
                             cts.Add(new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() });
                         }
-                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e.GetType())))
+                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e)))
                         {
                             foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                             {
@@ -4025,7 +4036,7 @@ namespace ThMEPWSS.DebugNs
                         {
                             cts.Add(new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() });
                         }
-                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e.GetType())))
+                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e)))
                         {
                             foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                             {
@@ -4184,7 +4195,7 @@ namespace ThMEPWSS.DebugNs
                         {
                             cts.Add(new CText() { Text = e.TextString, Boundary = e.Bounds.ToGRect() });
                         }
-                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e.GetType())))
+                        foreach (var ent in adb.ModelSpace.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e)))
                         {
                             foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                             {
@@ -4325,7 +4336,7 @@ namespace ThMEPWSS.DebugNs
                         //    labelLines.Add(e.ToGLineSegment());
                         //}
 
-                        foreach (var ent in entities.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e.GetType())))
+                        foreach (var ent in entities.OfType<Entity>().Where(e => e.Layer == "W-RAIN-NOTE" && ThRainSystemService.IsTianZhengElement(e)))
                         {
                             foreach (var e in ent.ExplodeToDBObjectCollection().OfType<DBText>())
                             {
@@ -4346,7 +4357,7 @@ namespace ThMEPWSS.DebugNs
                         var q = entities.OfType<Entity>().Where(x => (x.Layer == "WP_KTN_LG" || x.Layer == "W-RAIN-EQPM")).Where(e =>
                         {
                             if (e is Circle) return true;
-                            if (ThRainSystemService.IsTianZhengElement(e.GetType()))
+                            if (ThRainSystemService.IsTianZhengElement(e))
                             {
                                 return e.ExplodeToDBObjectCollection().OfType<Circle>().Any();
                             }

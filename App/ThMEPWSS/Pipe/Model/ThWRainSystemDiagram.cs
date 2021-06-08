@@ -874,6 +874,14 @@ namespace ThMEPWSS.Pipe.Model
                             var pt = ctx.StoreyDrawingContexts[ctx.RainSystemDiagram.GetStoreyIndex(floor)].BasePoint.ReplaceX(_basePt.X);
                             //Dbg.ShowWhere(pt);
                             pt = pt.OffsetXY(-1500, 150);
+                            if (floor == "RF")
+                            {
+                                pt = pt.OffsetXY(1500, 350);
+                            }
+                            else if (floor == "RF+1")
+                            {
+                                pt = pt.OffsetY(200);
+                            }
                             Dr.DrawLabel(pt, "散排至" + floor);
                             ScatteredOutputs.Add(sys);
                         }

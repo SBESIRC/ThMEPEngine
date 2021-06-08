@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using DotNetARX;
 using Dreambuild.AutoCAD;
 using System;
 using System.Collections.Generic;
@@ -216,6 +217,24 @@ namespace ThMEPWSS.Pipe.Model
             if (pts.Any())
             {
                 ctx.OutputBasePoint = pts.Last();
+                if (ctx.StoreyDrawingContexts.FirstOrDefault(x => x.Storey?.Label == "RF")?.BasePoint is Point3d pt)
+                {
+
+                    if (pts.Last().Y == pt.Y)
+                    {
+                        pt = pt.ReplaceX(pts.Last().X).OffsetY(500);
+                        pts[pts.Count - 1] = pt;
+                        DU.DrawingQueue.Enqueue(adb =>
+                        {
+                            if (ctx.RainSystemDiagram.ScatteredOutputs.Contains(this))
+                            {
+                                DrawPipeLinesLazy(pts);
+                            }
+                        });
+                        return;
+                    }
+
+                }
             }
             {
                 if (ctx.WaterBucketPoint is Point3d pt)
@@ -270,15 +289,27 @@ namespace ThMEPWSS.Pipe.Model
                         //var p = ctx.StoreyDrawingContexts[ctx.WSDStoreys.Count - 1].BasePoint;
                         var p = ctx.StoreyDrawingContexts[ctx.WSDStoreys.IndexOf(ctx.RainSystemDiagram.GetStorey("RF"))].BasePoint;
                         var canPeopleBeOnRoof = Dr.GetCanPeopleBeOnRoof();
-                        var offsetY = canPeopleBeOnRoof ? 500 : 2000;
-                        pts.Insert(0, pts.First().ReplaceY(p.Y).OffsetY(ThWSDStorey.TEXT_HEIGHT).OffsetY(offsetY));
+                        var offsetY = canPeopleBeOnRoof ? 500.0 : 2000.0;
+                        if (DateTime.Now == DateTime.MinValue)
                         {
-                            var cd = new CircleDraw();
-                            cd.Rotate(250, 180 + 45);
-                            cd.Rotate(250, -45);
-                            var lines = cd.GetLines(pts.First()).ToList();
-                            DU.DrawEntitiesLazy(lines);
-                            SetPipeRunLinesStyle(lines);
+                            pts.Insert(0, pts.First().ReplaceY(p.Y).OffsetY(ThWSDStorey.TEXT_HEIGHT).OffsetY(offsetY));
+                            {
+                                var cd = new CircleDraw();
+                                cd.Rotate(250, 180 + 45);
+                                cd.Rotate(250, -45);
+                                var lines = cd.GetLines(pts.First()).ToList();
+                                DU.DrawEntitiesLazy(lines);
+                                SetPipeRunLinesStyle(lines);
+                            }
+                        }
+                        else
+                        {
+                            var pt = pts.First().ReplaceY(p.Y).OffsetY(ThWSDStorey.TEXT_HEIGHT).OffsetY(500.0 + 150);
+                            DU.DrawBlockReference(blkName: "通气帽系统", basePt: pt, layer: "W-DRAI-DOME-PIPE", cb: br =>
+                            {
+                                br.ObjectId.SetDynBlockValue("距离1", 500.0);
+                                br.ObjectId.SetDynBlockValue("可见性1", "侧墙通气管");
+                            });
                         }
                     }
                 }
@@ -292,14 +323,28 @@ namespace ThMEPWSS.Pipe.Model
                             var s = r.Storey;
                             var y = ctx.StoreyDrawingContexts[ctx.RainSystemDiagram.GetStoreyIndex(s.Label)].BasePoint.Y;
                             if (y <= pts.First().Y) y = pts.First().Y;
-                            pts.Insert(0, pts.First().ReplaceY(y).OffsetY(500));
+                            if (DateTime.Now == DateTime.MinValue)
                             {
-                                var cd = new CircleDraw();
-                                cd.Rotate(250, 180 + 45);
-                                cd.Rotate(250, -45);
-                                var lines = cd.GetLines(pts.First()).ToList();
-                                DU.DrawEntitiesLazy(lines);
-                                SetPipeRunLinesStyle(lines);
+                                pts.Insert(0, pts.First().ReplaceY(y).OffsetY(500));
+                                {
+                                    var cd = new CircleDraw();
+                                    cd.Rotate(250, 180 + 45);
+                                    cd.Rotate(250, -45);
+                                    var lines = cd.GetLines(pts.First()).ToList();
+                                    DU.DrawEntitiesLazy(lines);
+                                    SetPipeRunLinesStyle(lines);
+                                }
+                            }
+                            else
+                            {
+                                var canPeopleBeOnRoof = Dr.GetCanPeopleBeOnRoof();
+                                var offsetY = canPeopleBeOnRoof ? 500.0 : 2000.0;
+                                var pt = pts.First().ReplaceY(y).OffsetY(500.0 + 150);
+                                DU.DrawBlockReference(blkName: "通气帽系统", basePt: pt, layer: "W-DRAI-DOME-PIPE", cb: br =>
+                                {
+                                    br.ObjectId.SetDynBlockValue("距离1", 500.0);
+                                    br.ObjectId.SetDynBlockValue("可见性1", "侧墙通气管");
+                                });
                             }
                         }
                     }
@@ -332,7 +377,7 @@ namespace ThMEPWSS.Pipe.Model
                     var fds2 = r.FloorDrains.Where(x => !x.HasDrivePipe).Select(x => "FloorDrain_NoDrivePipe").ToList();
                     var cps1 = r.CondensePipes.Where(x => x.HasDrivePipe).Select(x => "CondensePipe_HasDrivePipe").ToList();
                     var cps2 = r.CondensePipes.Where(x => !x.HasDrivePipe).Select(x => "CondensePipe_NoDrivePipe").ToList();
-                    var key = fds1.Concat(fds2).Concat(cps1).Concat(cps2).Where(x=>!string.IsNullOrEmpty(x)).OrderBy(x => x).JoinWith(",");
+                    var key = fds1.Concat(fds2).Concat(cps1).Concat(cps2).Where(x => !string.IsNullOrEmpty(x)).OrderBy(x => x).JoinWith(",");
                     return key;
                 }
                 var gs = runs.GroupBy(r => f(r)).ToList();

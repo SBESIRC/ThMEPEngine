@@ -1,4 +1,4 @@
-﻿using Autodesk.AutoCAD.Runtime;
+using Autodesk.AutoCAD.Runtime;
 using ThMEPWSS.Command;
 
 namespace ThMEPWSS
