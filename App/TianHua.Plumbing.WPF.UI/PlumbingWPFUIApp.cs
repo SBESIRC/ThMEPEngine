@@ -67,8 +67,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         /// <summary>
         /// Tian Hua create rain system diagram
+        /// 雨水系统图
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THCRSDBYUI", CommandFlags.Modal)]
+        //[CommandMethod("TIANHUACAD", "THCRSDBYUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
             if (ThMEPWSS.Pipe.Service.ThRainSystemService.commandContext != null) return;
