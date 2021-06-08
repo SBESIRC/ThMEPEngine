@@ -417,7 +417,7 @@
     <!--Assembly App, Plumbing.UI, 2012 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
-        <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing UI" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
                 <Command Local="THPYS" Global="THPYS" />
@@ -427,7 +427,7 @@
     <!--Assembly App, Plumbing.UI, 2014 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing UI" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
                 <Command Local="THPYS" Global="THPYS" />
@@ -437,7 +437,7 @@
     <!--Assembly App, Plumbing.UI, 2016 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
-        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing UI" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
                 <Command Local="THPYS" Global="THPYS" />
@@ -447,10 +447,46 @@
     <!--Assembly App, Plumbing.UI, 2018 version-->
     <Components>
         <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
-        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing" AppName="PlumbingUI" AppType=".NET">
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing UI" AppName="PlumbingUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THPL" Global="THPL" />
                 <Command Local="THPYS" Global="THPYS" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Plumbing.WPF.UI, 2012 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R18.2" SeriesMax="R18.2" />
+        <ComponentEntry ModuleName="./Contents/Win64/2012/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THYSXTT" Global="THYSXTT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Plumbing.WPF.UI, 2014 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R19.0" SeriesMax="R19.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THYSXTT" Global="THYSXTT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Plumbing.WPF.UI, 2016 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R20.1" SeriesMax="R20.1" />
+        <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THYSXTT" Global="THYSXTT" />
+            </Commands>
+        </ComponentEntry>
+    </Components>
+    <!--Assembly App, Plumbing.WPF.UI, 2018 version-->
+    <Components>
+        <RuntimeRequirements OS="Win64" Platform="AutoCAD" SeriesMin="R22.0" SeriesMax="R22.0" />
+        <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
+            <Commands GroupName="TIANHUACAD">
+                <Command Local="THYSXTT" Global="THYSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>
