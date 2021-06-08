@@ -230,6 +230,7 @@
     <Compile Include="ThSprayCmds.cs" />
     <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.cs" />
+    <Compile Include="ThSystemDiagramCmds.THFCSD.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
