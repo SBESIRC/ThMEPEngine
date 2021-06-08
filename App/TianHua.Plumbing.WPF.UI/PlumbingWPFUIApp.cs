@@ -81,7 +81,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         /// <summary>
         /// Tian Hua create fire control system diagram
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THCRFCSDBYUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
         public void ThCreateFireControlSystemDiagram()
         {
             var ui = new uiFireControlSystem();

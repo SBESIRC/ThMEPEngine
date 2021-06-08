@@ -3,7 +3,7 @@ using System.Windows.Controls;
 using ThControlLibraryWPF.CustomControl;
 using ThMEPWSS.Command;
 using ThMEPWSS.Diagram.ViewModel;
-using ThMEPWSS.Uitl;
+
 
 namespace TianHua.Plumbing.WPF.UI.UI
 {
@@ -60,19 +60,16 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void ListBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-           
         }
 
         private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.FloorFraming();
+            viewModel.CreateFloorFraming();
         }
 
         private void btnReadStoreys_Click(object sender, RoutedEventArgs e)
         {
-            viewModel.InitListDatas();
-            //var sys = new SystemDiagramUtils();
-            
+            viewModel.InitListDatas();            
         }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using GalaSoft.MvvmLight.Command;
 using System;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -33,8 +32,6 @@ namespace ThMEPWSS.Diagram.ViewModel
                 }
                 PartitionDatas.Add(partitionData);
             }
-            
-
 
             DynamicRadios = new ObservableCollection<DynamicRadioButton>();
             DynamicRadios.Add(new DynamicRadioButton() { Content = "穿梁", GroupName = "type", IsChecked = true });
@@ -82,7 +79,6 @@ namespace ThMEPWSS.Diagram.ViewModel
             }
         }
 
-
         private double maxDayQuota { get; set; }
         /// <summary>
         /// 最高日用水定额
@@ -96,10 +92,12 @@ namespace ThMEPWSS.Diagram.ViewModel
                 this.RaisePropertyChanged();
             }
         }
+
         private double maxDayHourCoefficient { get; set; }
         /// <summary>
         /// 最高日小时变化系数
         /// </summary>
+
         public double MaxDayHourCoefficient
         {
             get { return maxDayHourCoefficient; }
@@ -180,6 +178,7 @@ namespace ThMEPWSS.Diagram.ViewModel
             //将选中项定位到新增
             SelectPartition = PartitionDatas.Last();
         }
+
         RelayCommand deletePartitionRow;
         public RelayCommand DeletePartitionRow
         {
@@ -201,8 +200,6 @@ namespace ThMEPWSS.Diagram.ViewModel
             
         }
 
-        //todo:
-         //实现输入参数的 clone
         public DrainageSetViewModel Clone()
         {
             var cloned = new DrainageSetViewModel();
@@ -218,29 +215,14 @@ namespace ThMEPWSS.Diagram.ViewModel
             {
                 cloned.PartitionDatas.Add(pd.Clone());
             }
-            {
-                //cloned.PartitionDatas = PartitionDatas.cl
-                //var pipeNumber = new string[] { "JGL", "J1L1", "J2L1", "J3L1" };
-                //foreach (var number in pipeNumber)
-                //{
-                //    //var partitionData = new PartitionData();
-                //    //partitionData.RiserNumber = number;
-                //    //if (number == "JGL")
-                //    //{
-                //    //    partitionData.MinimumFloorNumber = "1";
-                //    //    partitionData.HighestFloorNumber = "1";
-                //    //}
-                //    cloned.PartitionDatas.Add(partitionData);
-                //}
-            }
 
             return cloned;
         }
     }
+
     public class PartitionData : NotifyPropertyChangedBase//,IDataErrorInfo
     {
         public string RiserNumber { get; set; }
-        //public string MinimumFloorNumber { get; set; }
 
         private string minimumFloorNumber;
         public string MinimumFloorNumber 
@@ -253,17 +235,15 @@ namespace ThMEPWSS.Diagram.ViewModel
             {
                 if (value != null && Regex.IsMatch(value, @"^[+-]?\d*$") && value != "")
                 {
-                    if(Convert.ToInt32(value) != 0)
+                    if (Convert.ToInt32(value) != 0)
                     {
                         minimumFloorNumber = Convert.ToString((Convert.ToInt32(value)));
                         RaisePropertyChanged("MinimumFloorNumber");
                     }
-                   
                 }
             }
         }
 
-        //public string HighestFloorNumber { get; set; }
         private string highestFloorNumber;
         public string HighestFloorNumber
         {
@@ -281,10 +261,10 @@ namespace ThMEPWSS.Diagram.ViewModel
                         RaisePropertyChanged("HighestFloorNumber");
                     }
                    
-                }
-                    
+                } 
             }
         }
+
         public PartitionData Clone()
         {
             var cloned = new PartitionData();
@@ -293,20 +273,5 @@ namespace ThMEPWSS.Diagram.ViewModel
             cloned.HighestFloorNumber = HighestFloorNumber;
             return cloned;
         }
-        //public string Error => throw new NotImplementedException();
-
-        //public string this[string columnName]
-        //{
-        //    get
-        //    {
-        //        if(columnName.Equals("MinimumFloorNumber"))
-        //        {
-        //            if (minimumFloorNumber <= 0)
-        //                return "Invalid value";
-        //        }
-
-        //        return "";
-        //    }
-        //}
     }
 }

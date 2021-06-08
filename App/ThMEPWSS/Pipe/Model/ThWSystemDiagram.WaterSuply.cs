@@ -4,7 +4,6 @@ using DotNetARX;
 using Linq2Acad;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using ThCADExtension;
 using ThMEPWSS.Pipe.Service;
@@ -15,10 +14,11 @@ using ThMEPEngineCore.Model;
 using ThMEPWSS.Diagram.ViewModel;
 using Dreambuild.AutoCAD;
 using ThMEPEngineCore.Engine;
+using System.Text.RegularExpressions;
+using System.Windows;
 
 namespace ThMEPWSS.Pipe.Model
 {
-    //预定义 block 名称
     public class WaterSuplyBlockNames
     {
         public const string CheckValve = "截止阀";
@@ -31,12 +31,12 @@ namespace ThMEPWSS.Pipe.Model
         public const string Elevation = "标高";
         public const string PipeDiameter = "给水管径100";
         public const string PRValveDetail = "减压阀详图";
+        public const string FloorFraming = "楼层框定";
     }
 
 
     public class WaterSuplyUtils
     {
-        //读取供水系统模块文件的路径
         public static string WaterSuplyBlockFilePath
         {
             get
@@ -129,7 +129,6 @@ namespace ThMEPWSS.Pipe.Model
             using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
             var line1 = CreateLine(indexStartX, indexStartY, floorLength);
             acadDatabase.CurrentSpace.Add(line1);
-            //文字绘制
             DBText textFirst = new DBText
             {
                 Position = new Point3d(indexStartX + 500, indexStartY + i * FloorHeight, 0),
@@ -178,16 +177,6 @@ namespace ThMEPWSS.Pipe.Model
             return PipeX;
         }
 
-        public double GetPipeY()
-        {
-            return PipeY;
-        }
-
-        public string GetPipeNumber()
-        {
-            return PipeNumber;
-        }
-
         public List<Line> CreatePipeLine(double indexStartX, double indexStartY, double FloorHeight)
         {
             var lineList = new List<Line>();
@@ -221,7 +210,7 @@ namespace ThMEPWSS.Pipe.Model
             return lineList;
         }
 
-        public void DrawPipeLine(int i, double indexStartX, double indexStartY, double FloorHeight, double pipeGap, int PipeNums)
+        public void DrawPipeLine(int i, double indexStartX, double indexStartY, double FloorHeight, int PipeNums)
         {
             using AcadDatabase acadDatabase = AcadDatabase.Active();  //要插入图纸的空间
             var PipeLine = CreatePipeLine(indexStartX, indexStartY, FloorHeight);
@@ -236,9 +225,6 @@ namespace ThMEPWSS.Pipe.Model
 
             if (!PipeNumber.Contains("JGL"))
             {
-               
-
-
                 for (int j = PipeUnits.Count - 1; j >= 0; j--)
                 {
                     //管径图样插入 (DN50)
@@ -257,7 +243,6 @@ namespace ThMEPWSS.Pipe.Model
                         objID.SetDynBlockValue("可见性", PipeUnits[j].GetPipeDiameter());
                     }
                 }
-
 
                 //绘制立管起点
                 var ptLs = new Point3d[3];
@@ -350,31 +335,7 @@ namespace ThMEPWSS.Pipe.Model
                         simpleNumber1.TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3");
                         acadDatabase.CurrentSpace.Add(simpleNumber1);
                     }
-
                 }
-
-                //绘制分区框线
-                //var ptList = new Point3d[4];
-                //ptList[0] = new Point3d(PipeX - 3000, Higheststorey * FloorHeight + indexStartY + 200, 0);
-                //ptList[1] = new Point3d(PipeX + 3000, Higheststorey * FloorHeight + indexStartY + 200, 0);
-                //ptList[2] = new Point3d(PipeX + 3000, (Loweststorey - 1) * FloorHeight + indexStartY + 400, 0);
-                //ptList[3] = new Point3d(PipeX - 3000, (Loweststorey - 1) * FloorHeight + indexStartY + 400, 0);
-                //var rect = new Polyline3d(0, new Point3dCollection(ptList), true)
-                //{
-                //    LayerId = DbHelper.GetLayerId("说明")
-                //};
-                //acadDatabase.CurrentSpace.Add(rect);
-
-                //var textRect = new DBText
-                //{
-                //    Position = new Point3d(ptList[1].X - 500, ptList[1].Y - 500, 0),
-                //    Height = 150,
-                //    WidthFactor = 0.7,
-                //    TextString = "分区" + Convert.ToString(i),
-                //    LayerId = DbHelper.GetLayerId("说明"),
-                //    TextStyleId = DbHelper.GetTextStyleId("TH-STYLE3")
-                //};
-                //acadDatabase.CurrentSpace.Add(textRect);
             }
         }
     }
@@ -880,11 +841,6 @@ namespace ThMEPWSS.Pipe.Model
             return HouseholdNums;
         }
 
-        public int GetPartNumber()
-        {
-            return PartNumber;
-        }
-
         public int GetFloorNumber()
         {
             return FloorNumber;
@@ -980,7 +936,7 @@ namespace ThMEPWSS.Pipe.Model
         {
             using var acadDatabase = AcadDatabase.Active();
             //统计厨房数     
-            var engineKitchen = new ThMEPEngineCore.Engine.ThRoomMarkRecognitionEngine()
+            var engineKitchen = new ThRoomMarkRecognitionEngine()
             {
                 LayerFilter = new List<string> { "AI-空间名称" },
             };//创建厨房识别引擎
@@ -1360,23 +1316,60 @@ namespace ThMEPWSS.Pipe.Model
             return true;
         }
 
-        public static double AutomaticValue(double num, double minNum, double maxNum)
+        public static List<int> ExtractData(string floorls, string dataName)
         {
-            if (num < minNum)
+            var FlushFaucet = new List<int>();//冲洗龙头层
+            if (floorls != "")
             {
-                return minNum;
+                foreach (var f in floorls.Split(','))
+                {
+                    if (f.Contains('-'))
+                    {
+                        var f1 = f.Split('-')[0];
+                        var f2 = f.Split('-').Last();
+                        if (f1 != "" && f2 != "")
+                        {
+                            if (Regex.IsMatch(f1, @"^[+-]?\d*$") && Regex.IsMatch(f2, @"^[+-]?\d*$"))
+                            {
+                                if (Convert.ToInt32(f1) < Convert.ToInt32(f2))
+                                {
+                                    for (int i = Convert.ToInt32(f1); i <= Convert.ToInt32(f2); i++)
+                                    {
+                                        if (!FlushFaucet.Contains(i))
+                                        {
+                                            FlushFaucet.Add(i);
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    MessageBox.Show(dataName + "输入有误，\"-\"左边数字必须小于右边");
+                                    return new List<int>();
+                                }
+                            }
+                        }
+
+                        else
+                        {
+                            MessageBox.Show(dataName + "输入有误，\"-\"左右只能是数字");
+                            return new List<int>();
+                        }
+                    }
+                    else
+                    {
+                        if (f != "" && !FlushFaucet.Contains(Convert.ToInt32(f)))
+                        {
+                            FlushFaucet.Add(Convert.ToInt32(f));
+                        }
+                    }
+                }
             }
-            if (num > maxNum)
-            {
-                return maxNum;
-            }
-            return num;
+            return FlushFaucet;
         }
     }
 
     public class ThExtractRoomNameService
     {
-
         public static IEnumerable<Polyline> RoomBuilder(AcadDatabase db, Point3dCollection selectedArea)
         {
             var roomMarkEngine = new ThRoomMarkRecognitionEngine()
@@ -1409,9 +1402,9 @@ namespace ThMEPWSS.Pipe.Model
             {
                 roomMarkEngine.Recognize(db, pts); //来源于参照
             }
-            //roomMarkEngine.Elements.Cast<Thifc>
         }
     } 
+
 }
 
 

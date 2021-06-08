@@ -9,7 +9,6 @@ using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using ThMEPWSS.Diagram.ViewModel;
 using ThMEPWSS.Pipe.Model;
@@ -45,112 +44,30 @@ namespace ThMEPWSS.Command
                 layingMethod = (int)LayingMethod.Buried;//敷设方式为埋地
             }
 
-            if (!ThWCompute.IsCorrectNum(Convert.ToString(setViewModel.FloorLineSpace), "int"))
-            {
-                MessageBox.Show("楼层线输入有误，只能是正整数");
-                return;
-            }
             var FloorHeight = setViewModel.FloorLineSpace;  //楼层线间距 mm
             
-            FloorHeight = ThWCompute.AutomaticValue(FloorHeight, 1500, 9999);
-
             var FlushFaucet = new List<int>();//冲洗龙头层
-
-            if (setViewModel.FaucetFloor != "")
+            if(setViewModel.FaucetFloor != "")
             {
-                foreach (var f in setViewModel.FaucetFloor.Split(','))
+                var dataName = "冲洗龙头";
+                FlushFaucet = ThWCompute.ExtractData(setViewModel.FaucetFloor, dataName);
+                if (FlushFaucet.Count == 0)
                 {
-                    if(f.Contains('-'))
-                    {
-                        var f1 = f.Split('-')[0];
-                        var f2 = f.Split('-').Last();
-                        if(f1 != "" && f2 != "")
-                        {
-                            if (Regex.IsMatch(f1, @"^[+-]?\d*$") && Regex.IsMatch(f2, @"^[+-]?\d*$"))
-                            {
-                                if (Convert.ToInt32(f1) < Convert.ToInt32(f2))
-                                {
-                                    for (int i = Convert.ToInt32(f1); i <= Convert.ToInt32(f2); i++)
-                                    {
-                                        if (!FlushFaucet.Contains(i))
-                                        {
-                                            FlushFaucet.Add(i);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    MessageBox.Show("冲洗龙头输入有误，\"-\"左边数字必须小于右边");
-                                    return;
-                                }
-                            }
-                        }
-                        
-                        else
-                        {
-                            MessageBox.Show("冲洗龙头输入有误，\"-\"左右只能是数字");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        if (f != "" && !FlushFaucet.Contains(Convert.ToInt32(f)))
-                        {
-                            FlushFaucet.Add(Convert.ToInt32(f));
-                        }
-                    }
+                    return;
                 }
             }
 
-            var NoPRValve = new List<int>();//无减压阀层
+            var NoPRValve = new List<int>();
             if (setViewModel.NoCheckValve != "")
             {
-                foreach (var f in setViewModel.NoCheckValve.Split(','))
+                var dataName = "无减压阀";
+                NoPRValve = ThWCompute.ExtractData(setViewModel.NoCheckValve, dataName);
+                if (NoPRValve.Count == 0)
                 {
-                    if (f.Contains('-'))
-                    {
-                        var f1 = f.Split('-')[0];
-                        var f2 = f.Split('-').Last();
-                        if(f1 != "" && f2 != "")
-                        {
-                            if (Regex.IsMatch(f1, @"^[+-]?\d*$") && Regex.IsMatch(f2, @"^[+-]?\d*$"))
-                            {
-                                if (Convert.ToInt32(f1) < Convert.ToInt32(f2))
-                                {
-                                    for (int i = Convert.ToInt32(f1); i <= Convert.ToInt32(f2); i++)
-                                    {
-                                        if (!NoPRValve.Contains(i))
-                                        {
-                                            NoPRValve.Add(i);
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    MessageBox.Show("冲洗龙头输入有误，\"-\"左边数字必须小于右边");
-                                    return;
-                                }
-                            }
-                        }
-                        
-                        else
-                        {
-                            MessageBox.Show("冲洗龙头输入有误，\"-\"左右只能是数字");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        if (f != "" && !NoPRValve.Contains(Convert.ToInt32(f)))
-                        {
-                            NoPRValve.Add(Convert.ToInt32(f));
-                        }
-                    }
+                    return;
                 }
             }
-
-
-
+           
             var selectedArea = UiConfigs.SelectedArea;
             var floorAreaList = UiConfigs.FloorAreaList;
             var floorNumList = UiConfigs.FloorNumList;
@@ -163,39 +80,16 @@ namespace ThMEPWSS.Command
                     floorNumbers = fn.Max();
                 }
             }
-            if (!ThWCompute.IsCorrectNum(Convert.ToString(setViewModel.MaxDayQuota), "int"))
-            {
-                MessageBox.Show("最高日用水定额输入有误，只能是正整数");
-                return;
-            }
-           
-            var QL = setViewModel.MaxDayQuota;  //最高日用水定额 QL
-            QL = ThWCompute.AutomaticValue(QL, 130, 320);
-           
-            if (!ThWCompute.IsCorrectNum(Convert.ToString(setViewModel.MaxDayHourCoefficient), "float"))
-            {
-                MessageBox.Show("最高日小时变化系数输入有误，只能是正数");
-                return;
-            }
-           
+            
+            var QL = setViewModel.MaxDayQuota;  //最高日用水定额 QL            
             var Kh = Convert.ToDouble(setViewModel.MaxDayHourCoefficient.ToString("0.0"));  //最高日小时变化系数  Kh
-            Kh = ThWCompute.AutomaticValue(Kh, 2.0, 2.8);
-
-            if (!ThWCompute.IsCorrectNum(Convert.ToString(setViewModel.NumberOfHouseholds), "float"))
-            {
-                MessageBox.Show("每户人数输入有误，只能是正数");
-                return;
-            }
-
             var m = Convert.ToDouble(setViewModel.NumberOfHouseholds.ToString("0.0"));   //每户人数  m
-            m = ThWCompute.AutomaticValue(m, 1, 6);
 
             //立管编号及对应的最低、最高层
             var pipeNumber = new List<String>();
             var lowestStorey = new List<int>();
             var highestStorey = new List<int>();
-            
-            
+                       
             for (int i = 0; i < setViewModel.PartitionDatas.Count; i++)
             {
                 if(Convert.ToInt32(setViewModel.PartitionDatas[i].MinimumFloorNumber) <= 0)
@@ -234,10 +128,7 @@ namespace ThMEPWSS.Command
                 }
             }
             
-            
-
             double floorLength = 20000;//楼板线长度
-
             var WaterEquivalent = new double[] { 0.5, 0.75, 1, 0.75, 1, 0.5, 1, 1.2 };//用水当量数
 
             using (Active.Document.LockDocument())//非模态框不能直接操作CAD，需要加锁
@@ -307,7 +198,7 @@ namespace ThMEPWSS.Command
                 var pt = new List<double>();
                 for (int i = 0; i < PipeSystem.Count; i++)
                 {
-                    PipeSystem[i].DrawPipeLine(i, indexStartX, indexStartY, FloorHeight, PipeGap, PipeSystem.Count);
+                    PipeSystem[i].DrawPipeLine(i, indexStartX, indexStartY, FloorHeight, PipeSystem.Count);
                     pt.Add(PipeSystem[i].GetPipeX());
                 }
 
@@ -326,8 +217,7 @@ namespace ThMEPWSS.Command
                 }
 
                 //创建支管对象
-                var BranchPipe = new List<ThWSSDBranchPipe>();
-                        
+                var BranchPipe = new List<ThWSSDBranchPipe>();  
                         
                 for (int i = 0; i < floorNumbers; i++)
                 {
@@ -371,7 +261,6 @@ namespace ThMEPWSS.Command
                     {
                         if (i + 1 == 5)//第五层放置减压阀详图
                         {
-                            //绘制减压阀详图
                             acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.PRValveDetail,
                             BranchPipe[i].GetPRValveDetailSite(), new Scale3d(1, 1, 1), 0);
                             var ptls = new Point3d[3];
@@ -391,8 +280,6 @@ namespace ThMEPWSS.Command
                             }
                         }
 
-
-
                         if (i + 1 >= 6)//第六层放置水管引出标高
                         {
                             if (!BranchPipe[i].GetCheckValveSite().IsNull() && elevateFlag)
@@ -407,8 +294,10 @@ namespace ThMEPWSS.Command
                                     ptLs[2] = new Point3d(ptLs[1].X, ptLs[1].Y + 350 * (BranchPipe[i].GetCheckValveSite().Count - j - 1), 0);
                                     ptLs[3] = new Point3d(ptLs[2].X + 500, ptLs[2].Y, 0);
 
-                                    var lineNote = new Polyline3d(0, new Point3dCollection(ptLs), false);
-                                    lineNote.LayerId = DbHelper.GetLayerId("W-WSUP-NOTE");
+                                    var lineNote = new Polyline3d(0, new Point3dCollection(ptLs), false)
+                                    {
+                                        LayerId = DbHelper.GetLayerId("W-WSUP-NOTE")
+                                    };
                                     acadDatabase.CurrentSpace.Add(lineNote);
 
                                     acadDatabase.ModelSpace.ObjectId.InsertBlockReference("W-WSUP-NOTE", WaterSuplyBlockNames.Elevation,
@@ -462,7 +351,6 @@ namespace ThMEPWSS.Command
                             }
                         }
                         
-
                         if (FlushFaucet.Contains(i + 1))
                         {
                             //绘制真空破坏器

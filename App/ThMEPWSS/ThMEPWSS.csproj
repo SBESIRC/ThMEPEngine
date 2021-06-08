@@ -69,6 +69,7 @@
     <Compile Include="Command\ThSprinklerLayoutCmd.cs" />
     <Compile Include="Command\ThSprinklerLayoutCmdUtils.cs" />
     <Compile Include="Command\ThWaterSuplySystemDiagramCmd.cs" />
+    <Compile Include="Common\Utils.cs" />
     <Compile Include="Engine\ThAHMarkExtractionVisitor.cs" />
     <Compile Include="Engine\ThAHMarkRecognitionEngine.cs" />
     <Compile Include="Engine\ThFloorDrainExtractionVisitor.cs" />
