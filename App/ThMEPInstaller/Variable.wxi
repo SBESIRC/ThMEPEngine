@@ -1,30 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Include>
-	<!-- The name of the product -->
-	<?define Name = "天华MEP工具集" ?>
-	<!-- The Description of the product -->
-	<?define Description = "为天华MEP设计师提供自动化的解决方案" ?>
-	<!-- The manufacturer, for setup package publisher and folder info -->
-	<?define Manufacturer = "天华AI研究中心" ?>
-	<!-- The version number of this setup package-->
-	<?define Version = "1.0.0" ?>
-	<!-- Product code -->
-	<?define ProductCode = "CC5E48FB-AB03-450F-A1A1-894B8AC1E72B" ?>
-	<!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
-	<?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
-	<!-- Autoloader path. -->
-	<?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
-	<?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
-	<!-- Output root path. -->
-	<?define OutputRootPath = "$(var.ProjectDir)\..\build" ?>
-	<!-- Lanuage. -->
-	<?define LanuageIdentifier = "zh-CN" ?>
-	<!-- Native. -->
-	<?define 64bitNative = "x64" ?>
-	<!-- Dotfuscated. -->
-	<?define Dotfuscated = "." ?>
-	<!-- DevExpress version suffix -->
-	<?define DevExpressVersionSuffix = "v17.2" ?>
-	<!-- CGAL path -->
-	<?define CGALRootPath = "$(env.CGAL4_GMP)\lib" ?>
+  <!-- The name of the product -->
+  <?define Name = "天华MEP工具集" ?>
+  <!-- The Description of the product -->
+  <?define Description = "为天华MEP设计师提供自动化的解决方案" ?>
+  <!-- The manufacturer, for setup package publisher and folder info -->
+  <?define Manufacturer = "天华AI研究中心" ?>
+  <!-- The version number of this setup package-->
+  <?define Version = "1.0.0" ?>
+  <!-- Product code -->
+  <?define ProductCode = "CC5E48FB-AB03-450F-A1A1-894B8AC1E72B" ?>
+  <!-- UpgradeCode must be unique and not changed once the first version of the program is installed. -->
+  <?define UpgradeCode = "4E78C925-EFFF-4EB9-A986-5C0F35058CFC" ?>
+  <!-- Autoloader path. -->
+  <?define AutoloaderPath = "$(var.ProjectDir)\..\..\AutoLoader" ?>
+  <?define AutoloaderContentsPath = "$(var.AutoloaderPath)\Contents" ?>
+  <!-- Output root path. -->
+  <?define OutputRootPath = "$(var.ProjectDir)\..\build" ?>
+  <!-- Lanuage. -->
+  <?define LanuageIdentifier = "zh-CN" ?>
+  <!-- Native. -->
+  <?define 64bitNative = "x64" ?>
+  <!-- Dotfuscated. -->
+  <?define Dotfuscated = "." ?>
+  <!-- DevExpress version suffix -->
+  <?define DevExpressVersionSuffix = "v17.2" ?>
+  <!-- CGAL path -->
+  <?define CGALPath = "$(var.ProjectDir)\..\..\Externals\CGAL" ?>
+  <!-- GDAL path -->
+  <?define GDALPath = "$(var.ProjectDir)\..\..\Externals\GDAL" ?>
 </Include>
