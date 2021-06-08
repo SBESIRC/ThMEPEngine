@@ -20,7 +20,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             pts.AddRange(CreateWallLayoutPt(doorPt, columns, walls));
 
             var layoutPt = CalLayoutPt(pts, dir, doorPt);
-            var layoutDir = (layoutPt - doorPt).GetNormal();
+            var layoutDir = (doorPt - layoutPt).GetNormal();
 
             return new KeyValuePair<Point3d, Vector3d>(layoutPt, layoutDir);
         }
@@ -61,7 +61,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             List<Point3d> pts = new List<Point3d>();
             foreach (var column in columns)
             {
-                var bufferColumn = column.Buffer(bufferWidth)[0] as Polyline;
+                var bufferColumn = (column.Buffer(bufferWidth)[0] as Polyline).DPSimplify(1);
                 var allLines = UtilService.GetAllLinesInPolyline(bufferColumn);
                 foreach (var line in allLines)
                 {

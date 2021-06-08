@@ -158,7 +158,7 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
-    <Compile Include="StructureHandleService\GetPrimitivesService.cs" />
+    <Compile Include="SecurityPlaneSystem\StructureHandleService\GetPrimitivesService.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
     <Compile Include="SystemDiagram\Model\ThAutoFireAlarmSystemModel.cs" />
@@ -195,12 +195,12 @@
     <Compile Include="ThMEPElectricalService.cs" />
     <Compile Include="ThMEPElectricalUtils.cs" />
     <Compile Include="ThSecurityPlaneCmds.cs" />
-    <Compile Include="VideoMonitoringSystem\LayoutService.cs" />
-    <Compile Include="VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
-    <Compile Include="VideoMonitoringSystem\Utils\UtilService.cs" />
-    <Compile Include="VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
-    <Compile Include="VideoMonitoringSystem\VMExitLayoutService\GetLayoutStructureService.cs" />
-    <Compile Include="VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\LayoutService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\Utils\UtilService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\GetLayoutStructureService.cs" />
+    <Compile Include="SecurityPlaneSystem\VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CADExtension\CADExtension.csproj">
@@ -223,6 +223,9 @@
       <Project>{ad98390a-569d-4774-aa3e-d9f00bc84cd6}</Project>
       <Name>ThMEPEngineCore</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="SecurityPlaneSystem\IntrusionAlarmSystem\" />
   </ItemGroup>
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">

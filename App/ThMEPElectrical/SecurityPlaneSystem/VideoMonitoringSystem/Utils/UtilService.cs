@@ -21,7 +21,11 @@ namespace ThMEPElectrical.VideoMonitoringSystem.Utls
             List<Line> lines = new List<Line>();
             for (int i = 0; i < polyline.NumberOfVertices; i++)
             {
-                lines.Add(new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices)));
+                var line = new Line(polyline.GetPoint3dAt(i), polyline.GetPoint3dAt((i + 1) % polyline.NumberOfVertices));
+                if (line.Length > 5)
+                {
+                    lines.Add(line);
+                }
             }
 
             return lines;

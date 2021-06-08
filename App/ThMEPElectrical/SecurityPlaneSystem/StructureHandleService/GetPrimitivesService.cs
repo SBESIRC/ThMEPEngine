@@ -71,18 +71,34 @@ namespace ThMEPElectrical.StructureHandleService
         /// </summary>
         /// <param name="polyline"></param>
         /// <returns></returns>
-        public List<Polyline> GetRoomInfo(Polyline polyline)
+        public List<ThIfcRoom> GetRoomInfo(Polyline polyline)
         {
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                var roomBuilder = new ThRoomBuilderEngine()
+                var roomEngine = new ThDB3RoomExtractionEngine()
                 {
-                    RoomBoundaryLayerFilter = new List<string> { "AI-房间框线" },
-                    RoomMarkLayerFilter = new List<string> { "AI-房间名称" },
+                    LayerFilter = new List<string> { "AI-房间框线" },
                 };
-                var rooms = roomBuilder.BuildFromMS(acdb.Database, polyline.Vertices());
+                roomEngine.ExtractFromMS(acdb.Database);
+                roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
-                return rooms.Select(x => x.Boundary as Polyline).ToList();
+                var markEngine = new ThDB3RoomExtractionEngine()
+                {
+                    LayerFilter = new List<string> { "AI-房间名称" },
+                };
+                markEngine.ExtractFromMS(acdb.Database);
+                markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+
+                var boundaryEngine = new ThDB3RoomRecognitionEngine();
+                boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
+                var rooms = boundaryEngine.Elements.Cast<ThIfcRoom>().ToList();
+                var markRecEngine = new ThRoomMarkRecognitionEngine();
+                markRecEngine.Recognize(markEngine.Results.Cast<ThRawIfcAnnotationElementData>().ToList(), polyline.Vertices());
+                 var marks = markRecEngine.Elements.Cast<ThIfcTextNote>().ToList();
+                var builder = new ThRoomBuilderEngine();
+                builder.Build(rooms, marks);
+
+                return rooms;
             }
         }
 
@@ -97,14 +113,14 @@ namespace ThMEPElectrical.StructureHandleService
             var doors = new List<Polyline>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
-                return acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").ToList();
-
-                var doorExtractEngine = new ThDoorExtractionEngine();
-                doorExtractEngine.Extract(acdb.Database);
-                doorExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
-                var doorEngine = new ThDoorRecognitionEngine();
-                doorEngine.Recognize(doorExtractEngine.Results, polyline.Vertices());
-                doors = doorEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
+                doors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => x.Clone() as Polyline).ToList();
+                doors.ForEach(x => originTransformer.Transform(x));
+                //var doorExtractEngine = new ThDoorExtractionEngine();
+                //doorExtractEngine.Extract(acdb.Database);
+                //doorExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //var doorEngine = new ThDoorRecognitionEngine();
+                //doorEngine.Recognize(doorExtractEngine.Results, polyline.Vertices());
+                //doors = doorEngine.Elements.Select(o => o.Outline).Cast<Polyline>().ToList();
             }
 
             return doors;

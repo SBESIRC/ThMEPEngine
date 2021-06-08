@@ -7,12 +7,13 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.VideoMonitoringSystem
 {
     public class LayoutService
     {
-        public void ExitLayoutService(List<Polyline> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls)
+        public List<KeyValuePair<Point3d, Vector3d>> ExitLayoutService(List<ThIfcRoom> rooms, List<Polyline> doors, List<Polyline> columns, List<Polyline> walls)
         {
             //找到可布置构建
             GetLayoutStructureService layoutStructureService = new GetLayoutStructureService();
@@ -25,13 +26,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem
                 layoutInfo.Add(layout.Layout(info.doorCenterPoint, info.doorDir, info.walls, info.colums));
             }
 
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var item in layoutInfo)
-                {
-                    db.ModelSpace.Add(new Line(item.Key, item.Key + 1000 * item.Value));
-                }
-            }
+            return layoutInfo;
         }
 
         public void LaneLayoutService(List<Line> lanes, List<Polyline> doors, List<Polyline> rooms)

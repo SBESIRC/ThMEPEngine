@@ -15,6 +15,7 @@ using ThCADExtension;
 using ThMEPElectrical.StructureHandleService;
 using ThMEPElectrical.VideoMonitoringSystem;
 using ThMEPEngineCore.Algorithm;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.Command
 {
@@ -77,20 +78,26 @@ namespace ThMEPElectrical.Command
                     var temp = outFrame.Clone() as Polyline;
                     originTransformer.Reset(temp);
                     //获取构建信息
-                    var rooms = new List<Polyline>();
+                    var rooms = new List<ThIfcRoom>();
                     using (var ov = new ThCADCoreNTSArcTessellationLength(3000))
                     {
                         rooms = getPrimitivesService.GetRoomInfo(temp);
-                        rooms.ForEach(x => originTransformer.Transform(x));
                     }
                     var doors = getPrimitivesService.GetDoorInfo(temp);
-                    doors.ForEach(x => originTransformer.Transform(x));
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
 
                     //布置
                     LayoutService layoutService = new LayoutService();
-                    layoutService.ExitLayoutService(rooms, doors, columns, walls);
-                    
+                    var layoutInfo = layoutService.ExitLayoutService(rooms, doors, columns, walls);
+                    using (AcadDatabase db = AcadDatabase.Active())
+                    {
+                        foreach (var item in layoutInfo)
+                        {
+                            Line line = new Line(item.Key, item.Key + 1000 * item.Value);
+                            originTransformer.Reset(line);
+                            db.ModelSpace.Add(line);
+                        }
+                    }
                 }
             }
         }
