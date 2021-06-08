@@ -13,10 +13,14 @@ namespace ThCADExtension
         //  https://adndevblog.typepad.com/autocad/2012/05/accessing-visible-entities-in-a-dynamic-block.html
         public static Dictionary<string, ObjectIdCollection> DynablockVisibilityStates(this ThBlockReferenceData blockReference)
         {
-            using (var acadDatabase = AcadDatabase.Use(blockReference.HostDatabase))
+            return DynablockVisibilityStates(blockReference.HostDatabase, blockReference.EffectiveName);
+        }
+        private static Dictionary<string, ObjectIdCollection> DynablockVisibilityStates(Database database, string blockName)
+        {
+            using (var acadDatabase = AcadDatabase.Use(database))
             {
                 var groups = new Dictionary<string, ObjectIdCollection>();
-                var btr = acadDatabase.Blocks.ElementOrDefault(blockReference.EffectiveName);
+                var btr = acadDatabase.Blocks.ElementOrDefault(blockName);
                 if (btr == null)
                 {
                     return groups;
@@ -75,19 +79,27 @@ namespace ThCADExtension
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference,string propertyName)
+        public static ObjectIdCollection VisibleEntities(this ThBlockReferenceData blockReference)
         {
-            var objs = new ObjectIdCollection();
-            var visibilityStates = DynablockVisibilityStates(blockReference);
-            var properties = blockReference.CustomProperties
-                .Cast<DynamicBlockReferenceProperty>()
-                .Where(o => o.PropertyName == propertyName);
-            foreach (var property in properties)
+            var visibility = blockReference.CurrentVisibilityStateValue();
+            return VisibleEntities(blockReference.HostDatabase, blockReference.EffectiveName, visibility);
+        }
+
+        /// <summary>
+        /// 提取动态块中指定可见性下可见的实体
+        /// </summary>
+        /// <param name="database"></param>
+        /// <param name="blockName"></param>
+        /// <param name="visibility"></param>
+        /// <returns></returns>
+        public static ObjectIdCollection VisibleEntities(Database database, string blockName, string visibility)
+        {
+            var visibilityStates = DynablockVisibilityStates(database, blockName);
+            if (visibilityStates.ContainsKey(visibility))
             {
-                visibilityStates.Where(o => o.Key == property.Value as string)
-                    .ForEach(o => objs.Add(o.Value));
+                return visibilityStates[visibility];
             }
-            return objs;
+            return new ObjectIdCollection();
         }
 
         /// <summary>
@@ -95,15 +107,14 @@ namespace ThCADExtension
         /// </summary>
         /// <param name="blockReference"></param>
         /// <returns></returns>
-        public static string CurrentVisibilityStateValue(this ThBlockReferenceData blockReference,string propertyName)
+        public static string CurrentVisibilityStateValue(this ThBlockReferenceData blockReference)
         {
             var visibilityStates = blockReference.DynablockVisibilityStates();
             var properties = blockReference.CustomProperties
                 .Cast<DynamicBlockReferenceProperty>()
-                .Where(o => o.PropertyName == propertyName);
+                .Where(o => o.PropertyName == "可见性" || o.PropertyName == "可见性1");
             return properties.First().Value as string;
         }
-
 
         // Reference:
         // https://forums.autodesk.com/t5/net/explode-dynamic-block-with-stretch-action/td-p/4673471

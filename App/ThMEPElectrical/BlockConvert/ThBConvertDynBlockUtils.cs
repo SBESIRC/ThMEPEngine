@@ -17,7 +17,7 @@ namespace ThMEPElectrical.BlockConvert
             using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.HostDatabase))
             {
                 var texts = new List<string>();
-                foreach (ObjectId obj in blockReference.VisibleEntities(ThBConvertCommon.BLOCK_MAP_ATTRIBUTES_BLOCK_VISIBILITY))
+                foreach (ObjectId obj in blockReference.VisibleEntities())
                 {
                     var entity = acadDatabase.Element<Entity>(obj);
                     if (entity is DBText dBText)
