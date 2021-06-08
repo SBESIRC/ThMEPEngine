@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using NFox.Cad;
 using System;
 using System.Collections.Generic;
@@ -26,6 +27,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             List<LayoutInfoModel> roomInfo = new List<LayoutInfoModel>();
             foreach (var room in rooms)
             {
+                room.Closed = true;
                 var bufferRoom = room.Buffer(tol)[0] as Polyline;
                 var needDoors = GetNeedDoors(doors, bufferRoom);
 
@@ -33,7 +35,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 {
                     LayoutInfoModel layoutInfo = new LayoutInfoModel();
                     var roomPtInfo = GetDoorCenterPointOnRoom(room, nDoor);
-                    var poly = GetLayoutRange(room, nDoor, roomPtInfo);
+                    var poly = GetLayoutRange(roomPtInfo);
                     if (poly != null)
                     {
                         var nCols = GetNeedColumns(columns, poly);
@@ -57,7 +59,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <param name="room"></param>
         /// <param name="door"></param>
         /// <returns></returns>
-        private Polyline GetLayoutRange(Polyline room, Polyline door, KeyValuePair<Point3d, Vector3d> roomPtInfo)
+        private Polyline GetLayoutRange(KeyValuePair<Point3d, Vector3d> roomPtInfo)
         {
             var rotateAngle = (angle / 2) * Math.PI / 180;
             var dir1 = roomPtInfo.Value.RotateBy(rotateAngle, Vector3d.ZAxis);
@@ -68,29 +70,24 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
 
             Ray ray = new Ray() { BasePoint = roomPtInfo.Key, UnitDir = dir1 };
             Point3dCollection pts = new Point3dCollection();
-            criclePoly.IntersectWith(ray, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+            circle.IntersectWith(ray, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
             var pt1 = pts.Cast<Point3d>().Where(x => x.IsEqualTo(roomPtInfo.Key, new Tolerance(1, 1))).FirstOrDefault();
 
             ray.UnitDir = dir2;
             pts = new Point3dCollection();
-            criclePoly.IntersectWith(ray, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
+            circle.IntersectWith(ray, Intersect.OnBothOperands, pts, (IntPtr)0, (IntPtr)0);
             var pt2 = pts.Cast<Point3d>().Where(x => x.IsEqualTo(roomPtInfo.Key, new Tolerance(1, 1))).FirstOrDefault();
 
-            if (pt1 == null || pt2 == null)
-            {
-                return null;
-            }
-
-            var objCollection = room.GetAllLinesInPolyline();
+            var objCollection = criclePoly.GetAllLinesInPolyline();
             objCollection.Add(new Line(roomPtInfo.Key, pt1));
             objCollection.Add(new Line(roomPtInfo.Key, pt2));
             List<Polyline> polygons = objCollection.ToCollection().Polygons().Cast<Polyline>().ToList();
             var resPoly = polygons.OrderBy(x => x.Area).FirstOrDefault();
-            
+
             Circle blindCircle = new Circle(roomPtInfo.Key, Vector3d.ZAxis, blindArea);
             var blindCriclePoly = blindCircle.Tessellate(length);
 
-            return resPoly.Intersection(new DBObjectCollection() { blindCriclePoly })[0] as Polyline;
+            return resPoly.Difference(blindCriclePoly)[0] as Polyline;
         }
 
         /// <summary>

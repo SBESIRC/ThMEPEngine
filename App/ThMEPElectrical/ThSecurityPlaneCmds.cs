@@ -10,10 +10,10 @@ namespace ThMEPElectrical
 {
     public class ThSecurityPlaneCmds
     {
-        [CommandMethod("TIANHUACAD", "THTCD", CommandFlags.Modal)]
-        public void ThLaneLine()
+        [CommandMethod("TIANHUACAD", "ThVMSystem", CommandFlags.Modal)]
+        public void ThVideoMSystem()
         {
-            using (var cmd = new ThLaneLineCommand())
+            using (var cmd = new ThVideoMonitoringSystemCommand())
             {
                 cmd.Execute();
             }

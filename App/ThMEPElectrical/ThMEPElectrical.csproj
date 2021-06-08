@@ -92,7 +92,6 @@
     <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
-    <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
@@ -197,6 +196,7 @@
     <Compile Include="VideoMonitoringSystem\LayoutService.cs" />
     <Compile Include="VideoMonitoringSystem\Model\LayoutInfoModel.cs" />
     <Compile Include="VideoMonitoringSystem\Utils\UtilService.cs" />
+    <Compile Include="VideoMonitoringSystem\VMExitLayoutService\LayoutVideoByLine.cs" />
     <Compile Include="VideoMonitoringSystem\VMExitLayoutService\GetLayoutStructureService.cs" />
     <Compile Include="VideoMonitoringSystem\VMExitLayoutService\LayoutVideo.cs" />
   </ItemGroup>

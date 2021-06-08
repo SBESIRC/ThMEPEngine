@@ -1,5 +1,6 @@
 ﻿using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.Geometry;
+using Linq2Acad;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -23,13 +24,29 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             {
                 layoutInfo.Add(layout.Layout(info.doorCenterPoint, info.doorDir, info.walls, info.colums));
             }
-            
-            
+
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                foreach (var item in layoutInfo)
+                {
+                    db.ModelSpace.Add(new Line(item.Key, item.Key + 1000 * item.Value));
+                }
+            }
         }
 
-        public void LaneLayoutService()
+        public void LaneLayoutService(List<Line> lanes, List<Polyline> doors, List<Polyline> rooms)
         {
 
+            LayoutVideoByLine layout = new LayoutVideoByLine();
+            var layoutInfo = layout.Layout(lanes, doors, rooms);
+
+            using (AcadDatabase db = AcadDatabase.Active())
+            {
+                foreach (var item in layoutInfo)
+                {
+                    db.ModelSpace.Add(new Line(item.Key, item.Key + 1000 * item.Value));
+                }
+            }
         }
     }
 }

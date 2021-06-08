@@ -37,6 +37,16 @@ namespace ThMEPEngineCore.Algorithm.DijkstraAlgorithm
         }
 
         /// <summary>
+        /// 起点到达终点的最短路径距离
+        /// </summary>
+        /// <param name="spt"></param>
+        /// <returns></returns>
+        public Dictionary<Point3d, double> FindingAllPathMinNodeLength(Point3d spt)
+        {
+            return FindingPath(spt).ToDictionary(x => x.NodePt, y => y.value);
+        }
+
+        /// <summary>
         /// 计算已知终点的最短路径
         /// </summary>
         /// <param name="spt"></param>

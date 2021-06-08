@@ -22,78 +22,10 @@ namespace ThMEPElectrical.StructureHandleService
 {
     public class GetPrimitivesService
     {
-        ThMEPOriginTransformer originTransformer;
+        public ThMEPOriginTransformer originTransformer;
         public GetPrimitivesService(ThMEPOriginTransformer originTransformer)
         {
             this.originTransformer = originTransformer;
-        }
-
-        /// <summary>
-        /// 获取框线信息
-        /// </summary>
-        /// <returns></returns>
-        public List<Polyline> GetFrameInfo()
-        {
-            using (AcadDatabase acadDatabase = AcadDatabase.Active())
-            {
-                // 获取框线
-                PromptSelectionOptions options = new PromptSelectionOptions()
-                {
-                    AllowDuplicates = false,
-                    MessageForAdding = "选择区域",
-                    RejectObjectsOnLockedLayers = true,
-                };
-                var dxfNames = new string[]
-                {
-                    RXClass.GetClass(typeof(BlockReference)).DxfName,
-                };
-                var filter = ThSelectionFilterTool.Build(dxfNames);
-                var result = Active.Editor.GetSelection(options, filter);
-                if (result.Status != PromptStatus.OK)
-                {
-                    return new List<Polyline>();
-                }
-
-                List<BlockReference> frameLst = new List<BlockReference>();
-                foreach (ObjectId obj in result.Value.GetObjectIds())
-                {
-                    var frame = acadDatabase.Element<BlockReference>(obj);
-                    frameLst.Add(frame.Clone() as BlockReference);
-                }
-
-                List<Polyline> frames = new List<Polyline>();
-                foreach (var frameBlock in frameLst)
-                {
-                    var frame = GetBlockInfo(frameBlock).Where(x => x is Polyline).Cast<Polyline>().OrderByDescending(x => x.Area).FirstOrDefault();
-                    if (frame != null)
-                    {
-                        frames.Add(frame);
-                    }
-                }
-                return frames;
-            }
-        }
-
-        /// <summary>
-        /// 获取块内信息
-        /// </summary>
-        /// <param name="blockReference"></param>
-        /// <returns></returns>
-        private List<Entity> GetBlockInfo(BlockReference blockReference)
-        {
-            var matrix = blockReference.BlockTransform.PreMultiplyBy(Matrix3d.Identity);
-            using (AcadDatabase acadDatabase = AcadDatabase.Use(blockReference.Database))
-            {
-                var results = new List<Entity>();
-                var blockTableRecord = acadDatabase.Blocks.Element(blockReference.BlockTableRecord);
-                foreach (var objId in blockTableRecord)
-                {
-                    var dbObj = acadDatabase.Element<Entity>(objId);
-                    dbObj.TransformBy(matrix);
-                    results.Add(dbObj);
-                }
-                return results;
-            }
         }
 
         /// <summary>
@@ -145,8 +77,8 @@ namespace ThMEPElectrical.StructureHandleService
             {
                 var roomBuilder = new ThRoomBuilderEngine()
                 {
-                    RoomBoundaryLayerFilter = new List<string> { "AI-空间框线" },
-                    RoomMarkLayerFilter = new List<string> { "AI-空间名称" },
+                    RoomBoundaryLayerFilter = new List<string> { "AI-房间框线" },
+                    RoomMarkLayerFilter = new List<string> { "AI-房间名称" },
                 };
                 var rooms = roomBuilder.BuildFromMS(acdb.Database, polyline.Vertices());
 
@@ -165,6 +97,8 @@ namespace ThMEPElectrical.StructureHandleService
             var doors = new List<Polyline>();
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
+                return acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").ToList();
+
                 var doorExtractEngine = new ThDoorExtractionEngine();
                 doorExtractEngine.Extract(acdb.Database);
                 doorExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
