@@ -5,7 +5,7 @@ namespace ThMEPWSS
 {
     public class ThLayoutFlushPointCmds
     {
-        [CommandMethod("TIANHUACAD", "ThLayoutFlushPoint", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THDXCXBZ", CommandFlags.Modal)]
         public void LayoutFlushPoint()
         {
             using (var cmd = new THLayoutFlushPointCmd())

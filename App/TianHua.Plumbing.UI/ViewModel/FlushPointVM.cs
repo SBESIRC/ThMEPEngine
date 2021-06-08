@@ -81,7 +81,7 @@ namespace TianHua.Plumbing.UI.ViewModel
             {
                 CollectParameter();
                 SetFocusToDwgView();
-                CommandHandlerBase.ExecuteFromCommandLine(false, "ThLayoutFlushPoint");
+                CommandHandlerBase.ExecuteFromCommandLine(false, "THDXCXBZ");
             }            
         }
 
