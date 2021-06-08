@@ -16,6 +16,10 @@ namespace ThMEPWSS.Pipe.Model
     {
         public List<string> WhiteList = new List<string>();//白名单
         public List<string> BlackList = new List<string>();//黑名单
+        public WaterWellIdentifyConfigInfo()
+        {
+            WhiteList.Add("集水井");
+        }
     }
     public class WaterWellConfigInfo
     {
@@ -51,5 +55,5 @@ namespace ThMEPWSS.Pipe.Model
         public void Execute()
         {
         }
-}
+    }
 }

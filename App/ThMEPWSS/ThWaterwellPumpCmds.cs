@@ -24,26 +24,26 @@ namespace ThMEPWSS
         /// <summary>
         /// 执行生成泵命令
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]
-        public void CreateWaterWellPump()
-        {
-            using (var cmd = new ThCreateWaterWellPumpCmd())
-            {
-                cmd.Execute();
-            }
-        }
+        //[CommandMethod("TIANHUACAD", "THSJSB", CommandFlags.Modal)]
+        //public void CreateWaterWellPump()
+        //{
+        //    using (var cmd = new ThCreateWaterWellPumpCmd())
+        //    {
+        //        cmd.Execute();
+        //    }
+        //}
 
         /// <summary>
         /// 执行生成提资表命令
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THSJSBTZ", CommandFlags.Modal)]
-        public void CreateWithdrawalForm() 
-        {
-            using (var cmd = new ThCreateWithdrawalFormCmd())
-            {
-                cmd.Execute();
-            }
-        }
+        //[CommandMethod("TIANHUACAD", "THSJSBTZ", CommandFlags.Modal)]
+        //public void CreateWithdrawalForm() 
+        //{
+        //    using (var cmd = new ThCreateWithdrawalFormCmd())
+        //    {
+        //        cmd.Execute();
+        //    }
+        //}
 
         /// <summary>
         /// 执行校验潜水泵命令
