@@ -3797,7 +3797,8 @@ namespace ThMEPWSS.Pipe.Service
 
                     var fs = new Dictionary<Action, string>();
                     {
-                        var blocks = new string[] { "侧排雨水斗系统", "重力流雨水井编号", "标高", "$TwtSys$00000132", "地漏系统", "套管系统" };
+                        //var blocks = new string[] { "侧排雨水斗系统", "重力流雨水井编号", "标高", "地漏系统", "套管系统" };
+                        var blocks = blockDb.Blocks.Select(x=>x.Name).ToList();
                         foreach (var blk in blocks)
                         {
                             fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blk)), blk);
@@ -3810,7 +3811,8 @@ namespace ThMEPWSS.Pipe.Service
                     fs.Add(() => adb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false), "TH-STYLE3");
 
                     {
-                        var layers = new string[] { "W-WSUP-COOL-PIPE", "W-WSUP-HOT-PIPE", "W-WSUP-HOTR-PIPE", "W-WSUP-HOTI-PIPE", "W-WSUP-EQPM", "W-WSUP-DIMS", "W-WSUP-NOTE", "W-DRIN-PIPE", "W-DRIR-PIPE", "W-DRIN-EQPM", "W-DRIN-DIMS", "W-DRIN-NOTE", "W-DRAI-DOME-PIPE", "W-DRAI-VENT-PIPE", "W-DRAI-EQPM", "W-DRAI-DIMS", "W-DRAI-NOTE", "W-RAIN-PIPE", "W-RAIN-EQPM", "W-RAIN-DIMS", "W-RAIN-NOTE", "W-RECL-PIPE", "W-RECL-EQPM", "W-RECL-DIMS", "W-RECL-NOTE", "W-COCR-PIPE", "W-COCR-EQPM", "W-COCR-DIMS", "W-COCR-NOTE", "W-FRPT-HYDT-PIPE", "W-FRPT-SPRL-PIPE", "W-FRPT-DRAI-PIPE", "W-FRPT-EXTG", "W-FRPT-HYDT", "W-FRPT-SPRL", "W-FRPT-HYDT-EQPM", "W-FRPT-HYDT-DIMS", "W-FRPT-NOTE", "W-GAS-PIPE", "W-GAS-EQPM", "W-GAS-DIMS", "W-GAS-NOTE", "W-SHET-PROF", "W-NOTE-NAME", "W-XF", "W-XR", "W-SHET-IDGF", "W-NOTE", "W-BUSH", "W-BUSH-NOTE", "W-HOLE", "W-HOLE-NOTE", "W-DRAI-FLDR", "W-SHET-SHET", "W-EQPM", "W-FRPT-SPRL-DIMS", "W-FRPT-SPRL-EQPM", "W-EQPM-ANTI", "W-gx-EN-note", "W-gx-ET-note", "W-DRAI-OUT-PIPE", "W-RAIN-OUT-PIPE", "W-E-PIPE", "W-T-PIPE", "W-ZH-DIMS", "W-ZH-NOTE", "W-E-EQPM", "W-T-EQPM", "W-E-NOTE", "W-T-NOTE", "W-E-DIMS", "W-T-DIMS", "W-BUSH-DIMS", "W-BUSH-TAB", "W-HOLE-DIMS", "W-DRAI-SEWA-PIPE", "W-DRAI-WAST-PIPE" };
+                        //var layers = new string[] { "W-WSUP-COOL-PIPE", "W-WSUP-HOT-PIPE", "W-WSUP-HOTR-PIPE", "W-WSUP-HOTI-PIPE", "W-WSUP-EQPM", "W-WSUP-DIMS", "W-WSUP-NOTE", "W-DRIN-PIPE", "W-DRIR-PIPE", "W-DRIN-EQPM", "W-DRIN-DIMS", "W-DRIN-NOTE", "W-DRAI-DOME-PIPE", "W-DRAI-VENT-PIPE", "W-DRAI-EQPM", "W-DRAI-DIMS", "W-DRAI-NOTE", "W-RAIN-PIPE", "W-RAIN-EQPM", "W-RAIN-DIMS", "W-RAIN-NOTE", "W-RECL-PIPE", "W-RECL-EQPM", "W-RECL-DIMS", "W-RECL-NOTE", "W-COCR-PIPE", "W-COCR-EQPM", "W-COCR-DIMS", "W-COCR-NOTE", "W-FRPT-HYDT-PIPE", "W-FRPT-SPRL-PIPE", "W-FRPT-DRAI-PIPE", "W-FRPT-EXTG", "W-FRPT-HYDT", "W-FRPT-SPRL", "W-FRPT-HYDT-EQPM", "W-FRPT-HYDT-DIMS", "W-FRPT-NOTE", "W-GAS-PIPE", "W-GAS-EQPM", "W-GAS-DIMS", "W-GAS-NOTE", "W-SHET-PROF", "W-NOTE-NAME", "W-XF", "W-XR", "W-SHET-IDGF", "W-NOTE", "W-BUSH", "W-BUSH-NOTE", "W-HOLE", "W-HOLE-NOTE", "W-DRAI-FLDR", "W-SHET-SHET", "W-EQPM", "W-FRPT-SPRL-DIMS", "W-FRPT-SPRL-EQPM", "W-EQPM-ANTI", "W-gx-EN-note", "W-gx-ET-note", "W-DRAI-OUT-PIPE", "W-RAIN-OUT-PIPE", "W-E-PIPE", "W-T-PIPE", "W-ZH-DIMS", "W-ZH-NOTE", "W-E-EQPM", "W-T-EQPM", "W-E-NOTE", "W-T-NOTE", "W-E-DIMS", "W-T-DIMS", "W-BUSH-DIMS", "W-BUSH-TAB", "W-HOLE-DIMS", "W-DRAI-SEWA-PIPE", "W-DRAI-WAST-PIPE" };
+                        var layers = blockDb.Layers.Select(x => x.Name).ToList();
                         foreach (var layer in layers)
                         {
                             fs.Add(() => adb.Layers.Import(blockDb.Layers.ElementOrDefault(layer)), layer);
