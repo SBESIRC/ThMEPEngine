@@ -89,9 +89,11 @@
     <Compile Include="CAD\InfoReader.cs" />
     <Compile Include="CAD\ThCompassDrawJig.cs" />
     <Compile Include="Command\ThAllDrawingsFireSystemDiagramCommand.cs" />
+    <Compile Include="Command\ThFrameFireSystemDiagramCommand.cs" />
     <Compile Include="Command\ThPolylineAutoFireAlarmSystemCommand.cs" />
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
+    <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
