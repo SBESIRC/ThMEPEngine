@@ -38,6 +38,8 @@ namespace ThMEPWSS
                 {
                     var frame = db.Element<Polyline>(per.ObjectId);
                     engine.Recognize(db.Database, frame.Vertices());
+                    engine.RecognizeMS(db.Database, frame.Vertices());
+                    //engine.Elements
                 }
             }
         }
