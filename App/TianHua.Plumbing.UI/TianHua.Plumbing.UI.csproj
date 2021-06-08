@@ -100,7 +100,6 @@
     <Compile Include="Model\FlushPointParameter.cs" />
     <Compile Include="PlumbingUIApp.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="ThWaterUIApp.cs" />
     <Compile Include="Validation\ProtectRadiusRule.cs" />
     <Compile Include="ViewModel\FlushPointVM.cs" />
     <Compile Include="View\FlushPointUI.xaml.cs">
