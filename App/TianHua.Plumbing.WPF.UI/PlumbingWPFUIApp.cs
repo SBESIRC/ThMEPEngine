@@ -1,11 +1,4 @@
 ﻿using Autodesk.AutoCAD.Runtime;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using ThMEPWSS.Command;
-using TianHua.Plumbing.WPF.UI;
 using AcadApp = Autodesk.AutoCAD.ApplicationServices.Application;
 
 namespace TianHua.Plumbing.WPF.UI.UI
@@ -65,11 +58,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
-        /// <summary>
-        /// Tian Hua create rain system diagram
-        /// 雨水系统图
-        /// </summary>
-        //[CommandMethod("TIANHUACAD", "THCRSDBYUI", CommandFlags.Modal)]
+
         [CommandMethod("TIANHUACAD", "THYSXTT", CommandFlags.Modal)]
         public void ThCreateRainSystemDiagram()
         {
@@ -78,9 +67,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             AcadApp.ShowModelessWindow(ui);
         }
 
-        /// <summary>
-        /// Tian Hua create fire control system diagram
-        /// </summary>
+
         [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
         public void ThCreateFireControlSystemDiagram()
         {

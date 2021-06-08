@@ -353,6 +353,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2014/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYSXTT" Global="THYSXTT" />
+                <Command Local="THJSXTT" Global="THJSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -362,6 +363,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2016/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYSXTT" Global="THYSXTT" />
+                <Command Local="THJSXTT" Global="THJSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -371,6 +373,7 @@
         <ComponentEntry ModuleName="./Contents/Win64/2018/TianHua.Plumbing.WPF.UI.dll" LoadOnAutoCADStartup="false" LoadOnCommandInvocation="true" AppDescription="Assembly app for Plumbing WPF UI" AppName="PlumbingWPFUI" AppType=".NET">
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYSXTT" Global="THYSXTT" />
+                <Command Local="THJSXTT" Global="THJSXTT" />
             </Commands>
         </ComponentEntry>
     </Components>
