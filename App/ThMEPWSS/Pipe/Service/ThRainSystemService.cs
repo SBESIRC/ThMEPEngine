@@ -3774,7 +3774,11 @@ namespace ThMEPWSS.Pipe.Service
         public static void ImportElementsFromStdDwg()
         {
             var file = ThCADCommon.WSSDwgPath();
-            if (File.Exists(file))
+            if (!File.Exists(file))
+            {
+                MessageBox.Show($"\"{file}\"不存在");
+                return;
+            }
             {
                 using (var @lock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
                 using (AcadDatabase adb = AcadDatabase.Active())
