@@ -1,5 +1,4 @@
-﻿using System;
-using Linq2Acad;
+﻿using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.Internal;
 using Autodesk.AutoCAD.EditorInput;
@@ -140,6 +139,17 @@ namespace ThCADExtension
             else
             {
                 return MatchPropertiesFrom(attributeDefinition);
+            }
+        }
+
+        public static Polyline ToOBB(this BlockReference br, Matrix3d ecs2Wcs)
+        {
+            using (var acadDatabase = AcadDatabase.Use(br.Database))
+            {
+                var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
+                var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
+                rectangle.TransformBy(ecs2Wcs);
+                return rectangle;
             }
         }
 

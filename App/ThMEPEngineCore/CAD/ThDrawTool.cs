@@ -194,16 +194,6 @@ namespace ThMEPEngineCore.CAD
             }
             return results;
         }
-        public static Polyline ToOBB(this BlockReference br,Matrix3d mt)
-        {
-            using (var acadDatabase = AcadDatabase.Use(br.Database))
-            {
-                var blockTableRecord = acadDatabase.Blocks.Element(br.BlockTableRecord);
-                var rectangle = blockTableRecord.GeometricExtents().ToRectangle();
-                rectangle.TransformBy(mt);
-                return rectangle;
-            }
-        }
         public static Polyline ToRectangle(this Circle circle)
         {
             var polyline = new Polyline()
