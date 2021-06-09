@@ -26,7 +26,7 @@ namespace ThMEPEngineCore.Temp
         {
             if(UseDb3Engine)
             {
-                using (var engine = new ThArchitectureWallRecognitionEngine())
+                using (var engine = new ThDB3ArchWallRecognitionEngine())
                 {
                     engine.Recognize(database, pts);
                     engine.Elements.ForEach(o => Walls.Add(o.Outline));

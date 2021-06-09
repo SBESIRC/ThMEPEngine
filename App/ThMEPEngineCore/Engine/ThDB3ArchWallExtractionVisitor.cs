@@ -6,7 +6,7 @@ using ThMEPEngineCore.Algorithm;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThArchitectureWallExtractionVisitor : ThBuildingElementExtractionVisitor
+    public class ThDB3ArchWallExtractionVisitor : ThBuildingElementExtractionVisitor
     {
         public override void DoExtract(List<ThRawIfcBuildingElementData> elements, Entity dbObj, Matrix3d matrix)
         {
@@ -26,12 +26,7 @@ namespace ThMEPEngineCore.Engine
         }
         public override bool IsBuildElement(Entity entity)
         {
-            if (entity.Hyperlinks.Count > 0)
-            {
-                var thPropertySet = ThPropertySet.CreateWithHyperlink(entity.Hyperlinks[0].Description);
-                return thPropertySet.IsArchWall;
-            }
-            return false;
+            return entity.Hyperlinks.Count > 0;
         }
         private List<ThRawIfcBuildingElementData> HandleCurve(Polyline polyline, Matrix3d matrix)
         {

@@ -22,7 +22,7 @@ namespace ThMEPWSS.Engine
             {
                 LayerFilter = ThStructureColumnLayerManager.HatchXrefLayers(database),
             };
-            var archWallVisitor = new ThArchitectureWallExtractionVisitor()
+            var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
                 LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
             };
@@ -44,7 +44,7 @@ namespace ThMEPWSS.Engine
             windowEngine.Recognize(windowVisitor.Results, polygon);
             var columnEngine = new ThColumnRecognitionEngine();
             columnEngine.Recognize(columnVisitor.Results, polygon);
-            var archWallEngine = new ThArchitectureWallRecognitionEngine();
+            var archWallEngine = new ThDB3ArchWallRecognitionEngine();
             archWallEngine.Recognize(archWallVisitor.Results, polygon);
             var shearWallEngine = new ThShearWallRecognitionEngine();
             shearWallEngine.Recognize(shearWallVisitor.Results, polygon);

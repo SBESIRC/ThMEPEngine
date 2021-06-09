@@ -112,7 +112,7 @@ namespace ThMEPLighting.EmgLight.Common
             var archWallExtractEngine = new ThArchitectureWallExtractionEngine();
             archWallExtractEngine.Extract(acdb.Database);
             archWallExtractEngine.Results.ForEach(x => transformer.Transform(x.Geometry));
-            var archWallEngine = new ThArchitectureWallRecognitionEngine();
+            var archWallEngine = new ThDB3ArchWallRecognitionEngine();
             archWallEngine.Recognize(archWallExtractEngine.Results, transBufferFrame.Vertices());
 
             ////获取柱

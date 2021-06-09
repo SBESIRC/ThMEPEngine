@@ -91,7 +91,7 @@ namespace ThMEPWSS.Command
             walls = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(pFrame).Cast<Polyline>().ToList();
 
             //建筑构建
-            using (var archWallEngine = new ThArchitectureWallRecognitionEngine())
+            using (var archWallEngine = new ThDB3ArchWallRecognitionEngine())
             {
                 //建筑墙
                 archWallEngine.Recognize(acdb.Database, polyline.Vertices());

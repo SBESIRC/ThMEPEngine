@@ -169,7 +169,7 @@ namespace ThMEPLighting.DSFEL.Service
                 var archWallExtractEngine = new ThArchitectureWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
                 archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
-                var archWallEngine = new ThArchitectureWallRecognitionEngine();
+                var archWallEngine = new ThDB3ArchWallRecognitionEngine();
                 archWallEngine.Recognize(archWallExtractEngine.Results, polyline.Vertices());
 
                 ////获取柱

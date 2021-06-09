@@ -10,26 +10,33 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Engine
 {
-    public class ThArchitectureWallExtractionEngine : ThBuildingElementExtractionEngine
+    public class ThDB3ArchWallExtractionEngine : ThBuildingElementExtractionEngine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThArchitectureWallExtractionVisitor()
+            var archWallVisitor = new ThDB3ArchWallExtractionVisitor()
             {
                 LayerFilter = ThArchitectureWallLayerManager.CurveXrefLayers(database),
             };
+            var pcArchWallVisitor = new ThDB3ArchWallExtractionVisitor()
+            {
+                LayerFilter = ThPCArchitectureWallLayerManager.CurveXrefLayers(database),
+            };
             var extractor = new ThBuildingElementExtractor();
-            extractor.Accept(visitor);
+            extractor.Accept(archWallVisitor);
+            extractor.Accept(pcArchWallVisitor);
             extractor.Extract(database);
-            Results = visitor.Results;
+            Results = new List<ThRawIfcBuildingElementData>();
+            Results.AddRange(archWallVisitor.Results);
+            Results.AddRange(pcArchWallVisitor.Results);
         }
     }
 
-    public class ThArchitectureWallRecognitionEngine : ThBuildingElementRecognitionEngine
+    public class ThDB3ArchWallRecognitionEngine : ThBuildingElementRecognitionEngine
     {
         public override void Recognize(Database database, Point3dCollection polygon)
         {
-            var engine = new ThArchitectureWallExtractionEngine();
+            var engine = new ThDB3ArchWallExtractionEngine();
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }

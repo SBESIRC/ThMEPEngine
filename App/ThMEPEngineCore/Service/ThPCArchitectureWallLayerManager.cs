@@ -5,7 +5,7 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Service
 {
-    public class ThArchitectureWallLayerManager
+    public class ThPCArchitectureWallLayerManager
     {
         public static List<string> CurveXrefLayers(Database database)
         {
@@ -27,7 +27,7 @@ namespace ThMEPEngineCore.Service
         private static bool IsArchitectureWallCurveLayer(string name)
         {
             string[] patterns = ThStructureUtils.OriginalFromXref(name).ToUpper().Split('$').Reverse().ToArray();
-            return patterns[0] == "AE-WALL";
+            return (patterns[0] == "PC_YZ_WALL") || (patterns[0] == "PC_NQ_GZ_HACH");
         }
     }
 }

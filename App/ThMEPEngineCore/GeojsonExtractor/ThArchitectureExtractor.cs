@@ -41,7 +41,7 @@ namespace ThMEPEngineCore.GeojsonExtractor
 
         public override void Extract(Database database, Point3dCollection pts)
         {
-            using (var engine = new ThArchitectureWallRecognitionEngine())
+            using (var engine = new ThDB3ArchWallRecognitionEngine())
             {
                 engine.Recognize(database, pts);
                 engine.Elements.ForEach(o => Walls.Add(o.Outline));

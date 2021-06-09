@@ -142,7 +142,7 @@
     <Compile Include="Engine\ThAnnotationElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThAnnotationElementExtractor.cs" />
     <Compile Include="Engine\ThAnnotationElementRecognitionEngine.cs" />
-    <Compile Include="Engine\ThArchitectureWallExtractionVisitor.cs" />
+    <Compile Include="Engine\ThDB3ArchWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamExtractionVisitor.cs" />
     <Compile Include="Engine\ThBeamPreprocessEngine.cs" />
     <Compile Include="Engine\ThBuildingElementExtractionEngine.cs" />
@@ -188,6 +188,7 @@
     <Compile Include="Service\ThNTSMakeValidService.cs" />
     <Compile Include="Service\ThNTSSimplifyService.cs" />
     <Compile Include="Service\ThNTSSpatialIndexExService.cs" />
+    <Compile Include="Service\ThPCArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThRectangleConverter.cs" />
     <Compile Include="Service\ThRailingLayerManager.cs" />
     <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />
@@ -204,7 +205,7 @@
     <Compile Include="Engine\ThDistributionElementExtractionVisitor.cs" />
     <Compile Include="Engine\ThDistributionElementExtractor.cs" />
     <Compile Include="Engine\ThDoorRecognitionEngine.cs" />
-    <Compile Include="Engine\ThArchitectureWallRecognitionEngine.cs" />
+    <Compile Include="Engine\ThDB3ArchWallRecognitionEngine.cs" />
     <Compile Include="Engine\ThBeamConnectRecogitionEngine.cs" />
     <Compile Include="Engine\ThBeamRecognitionEngine.cs" />
     <Compile Include="Engine\ThBuildingElementPreprocessEngine.cs" />
@@ -374,7 +375,6 @@
     <Compile Include="Service\ThPositionTagsLayerManager.cs" />
     <Compile Include="Service\ThRoomLayerManager.cs" />
     <Compile Include="Service\ThRoomDbExtension.cs" />
-    <Compile Include="Service\ThArchitectureWallDbExtension.cs" />
     <Compile Include="Service\ThArchitectureWallLayerManager.cs" />
     <Compile Include="Service\ThArchitectureWallSimplifier.cs" />
     <Compile Include="Service\ThBeamLinkExtension.cs" />
