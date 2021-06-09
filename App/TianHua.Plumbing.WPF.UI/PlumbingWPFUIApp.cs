@@ -74,5 +74,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             var ui = new uiFireControlSystem();
             AcadApp.ShowModelessWindow(ui);
         }
+
+        //todo: implement command
     }
 }
