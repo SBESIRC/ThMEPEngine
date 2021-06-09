@@ -23,6 +23,8 @@ Win10
 
 [Debugging AutoCAD using Visual Studio 2013](https://www.keanw.com/2013/11/debugging-autocad-using-visual-studio-2013.html)
 
+[Learn Productivity Tips and Tricks for the Debugger in Visual Studio](https://docs.microsoft.com/en-us/visualstudio/debugger/debugger-tips-and-tricks?view=vs-2019)
+
 # AutoCAD.NET tips
 
 [Cleaning up after yourself: how and when to dispose of AutoCAD objects in .NET](https://www.keanw.com/2008/06/cleaning-up-aft.html)
