@@ -5,7 +5,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:TianHua.Plumbing.WPF.UI.UI"
-                    Title="地上排水系统图"
+                    Title="地上给水系统图"
                     SizeToContent="WidthAndHeight"
              mc:Ignorable="d" >
     <Grid  Margin="5" >

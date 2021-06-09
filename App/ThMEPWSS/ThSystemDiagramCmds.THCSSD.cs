@@ -127,7 +127,6 @@ namespace ThMEPWSS
                         }
                         CleanToolList.Add(CleanTools);
                     }
-
                 }
             }
         }

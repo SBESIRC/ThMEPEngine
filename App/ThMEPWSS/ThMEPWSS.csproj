@@ -235,7 +235,13 @@
     <Compile Include="ThSprayCmds.cs" />
     <Compile Include="Model\ThWSprinkler.cs" />
     <Compile Include="ThSystemDiagramCmds.cs" />
+    <Compile Include="ThSystemDiagramCmds.THDXXHSXTT.cs" />
     <Compile Include="ThSystemDiagramCmds.THFCSD.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Command\ThFireHydrantCmd.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\MainlineLoop.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\PipeDiameter.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Model\PointType.cs" />
+    <Compile Include="UndergroundFireHydrantSystem\Service\ThFireHydrantSelectArea.cs" />
     <Compile Include="ViewModel\DrainageSetViewModel.cs" />
     <Compile Include="ViewModel\DrainageViewModel.cs" />
     <Compile Include="ViewModel\FireControlSystemDiagramViewModel.cs" />
@@ -289,6 +295,7 @@
       <Name>TianHua.EquipmentSelection</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="$(DefineConstants.Contains('ACAD2012'))">
       <ItemGroup>

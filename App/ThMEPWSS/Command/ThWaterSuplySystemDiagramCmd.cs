@@ -217,7 +217,7 @@ namespace ThMEPWSS.Command
                 }
 
                 //创建支管对象
-                var BranchPipe = new List<ThWSSDBranchPipe>();  
+                var BranchPipe = new List<ThWSSDBranchPipe>();
                         
                 for (int i = 0; i < floorNumbers; i++)
                 {
@@ -231,7 +231,6 @@ namespace ThMEPWSS.Command
                     if (Math.Abs(Ngi) > 1e-6)
                     {
                         U0i = 100 * QL * m * Kh / (0.2 * Ngi * T * 3600);
-                        
                     }
                     
                     var pipeCompute = new PipeCompute(U0i, Ngi);
@@ -268,6 +267,7 @@ namespace ThMEPWSS.Command
                             ptls[1] = new Point3d(BranchPipe[i - 1].GetPressureReducingValveSite().X + 500, BranchPipe[i].GetPRValveDetailSite().Y, 0);
                             ptls[2] = BranchPipe[i].GetPRValveDetailSite();
                             var polyline = new Polyline3d(0, new Point3dCollection(ptls), false);
+                            polyline.LayerId = DbHelper.GetLayerId("W-NOTE");
                             acadDatabase.CurrentSpace.Add(polyline);
                         }
 
@@ -288,7 +288,6 @@ namespace ThMEPWSS.Command
                                 for (int j = 0; j < BranchPipe[i].GetCheckValveSite().Count; j++)
                                 {
                                     var ptLs = new Point3d[4];
-
                                     ptLs[0] = new Point3d(BranchPipe[i].GetWaterPipeInterrupted()[0].X, BranchPipe[i].GetCheckValveSite()[j].Y, 0);
                                     ptLs[1] = new Point3d(ptLs[0].X + 500 + j * 300, ptLs[0].Y, 0);
                                     ptLs[2] = new Point3d(ptLs[1].X, ptLs[1].Y + 350 * (BranchPipe[i].GetCheckValveSite().Count - j - 1), 0);

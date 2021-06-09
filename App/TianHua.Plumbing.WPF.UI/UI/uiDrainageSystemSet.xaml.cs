@@ -53,10 +53,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             this.DialogResult = true;
             this.Close();
         }
-
       
-
-
         private void TextBox_TextChanged_FloorGap(object sender, TextChangedEventArgs e)
         {
             var str = ((TextBox)e.Source).Text.ToString();
@@ -97,7 +94,6 @@ namespace TianHua.Plumbing.WPF.UI.UI
             {
                 int max = 9999;
                 int min = 1500;
-
                 int number = int.Parse(strText);
                 if (number < min)
                     (sender as TextBox).Text = Convert.ToString(min);
@@ -106,15 +102,14 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 else
                     e.Handled = false;
             }
-            
         }
-
-
 
 
         private void FlushFaucet_KeyPress(object sender, KeyEventArgs e)
         {
-            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || (e.Key >= Key.D0 && e.Key <= Key.D9) || e.Key == Key.OemComma || e.Key == Key.OemMinus)
+            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || 
+                (e.Key >= Key.D0 && e.Key <= Key.D9) || 
+                 e.Key == Key.OemComma || e.Key == Key.OemMinus)
             {
                 e.Handled = false;
             }
@@ -155,15 +150,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
             }
 
-            
-           
             ((TextBox)e.Source).Text = newStr;
 
         }
 
         private void NoCheckValve_KeyPress(object sender, KeyEventArgs e)
         {
-            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || (e.Key >= Key.D0 && e.Key <= Key.D9) || e.Key == Key.OemComma || e.Key == Key.OemMinus)
+            if ((e.Key >= Key.NumPad0 && e.Key <= Key.NumPad9) || 
+                (e.Key >= Key.D0 && e.Key <= Key.D9) || 
+                 e.Key == Key.OemComma || e.Key == Key.OemMinus)
             {
                 e.Handled = false;
             }
@@ -177,7 +172,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             var str = ((TextBox)e.Source).Text.ToString();
             if (string.IsNullOrEmpty(str))
+            {
                 return;
+            }
             var charArrs = str.ToCharArray();
             var newStr = "";
             foreach (var item in charArrs)
@@ -201,16 +198,12 @@ namespace TianHua.Plumbing.WPF.UI.UI
                 {
                     newStr += item;
                 }
-
             }
-
-
 
             ((TextBox)e.Source).Text = newStr;
         }
 
-       
-
+ 
         private void LostFocus_MaxDayQuota(object sender, RoutedEventArgs e)
         {
             TextBox txtBox = sender as TextBox;
@@ -262,11 +255,9 @@ namespace TianHua.Plumbing.WPF.UI.UI
             ((TextBox)e.Source).Text = newStr;
         }
 
-
         private void LostFocus_MaxDayHourCoefficient(object sender, RoutedEventArgs e)
         {
             TextBox txtBox = sender as TextBox;
-
             
             if ((sender as TextBox).Text.Contains('.'))
             {
@@ -383,7 +374,5 @@ namespace TianHua.Plumbing.WPF.UI.UI
             }
             ((TextBox)e.Source).Text = newStr;
         }
-
-
     }
 }
