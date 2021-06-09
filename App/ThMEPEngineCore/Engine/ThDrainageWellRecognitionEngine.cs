@@ -97,7 +97,7 @@ namespace ThMEPEngineCore.Engine
             engine.Extract(database);
             Recognize(engine.Results, polygon);
         }
-        private void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
+        public override void Recognize(List<ThRawIfcDistributionElementData> datas, Point3dCollection polygon)
         {
             var ents = new List<Entity>();
             var objs = datas.Select(o => o.Geometry).ToCollection();
