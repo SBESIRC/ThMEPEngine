@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Autodesk.AutoCAD.DatabaseServices;
-using Autodesk.AutoCAD.Geometry;
 using DotNetARX;
+using System.Linq;
 using Dreambuild.AutoCAD;
+using Autodesk.AutoCAD.Geometry;
+using System.Collections.Generic;
+using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPWSS.Assistant;
-using ThMEPWSS.DebugNs;
 using ThMEPWSS.Pipe.Service;
 using ThMEPWSS.Uitl;
 using ThMEPWSS.Uitl.ExtensionsNs;
@@ -134,7 +131,6 @@ namespace ThMEPWSS.Pipe.Model
     }
     public static class Dr
     {
-
         public static void DrawStarterPipeHeightLabel(Point3d basePt)
         {
             var text = "起端管底标高-0.65";
@@ -175,7 +171,6 @@ namespace ThMEPWSS.Pipe.Model
             var height = 300;
             var width = height * 0.8 * text.Length + 200;
             var yd = new YesDraw();
-            //yd.Rotate(505, 90 + 45);
             yd.OffsetXY(460, -830 - ThWRainPipeRun.FIX_Y_OFFSET);
             yd.OffsetX(width);
             var pts = yd.GetPoint3ds(basePt).ToList();
@@ -194,7 +189,6 @@ namespace ThMEPWSS.Pipe.Model
             var height = 300;
             var width = height * 0.8 * text.Length + 200;
             var yd = new YesDraw();
-            //yd.Rotate(505, 90 + 45);
             yd.OffsetXY(-450, 830);
             yd.OffsetX(-width);
             var pts = yd.GetPoint3ds(basePt).ToList();
@@ -211,8 +205,6 @@ namespace ThMEPWSS.Pipe.Model
                 var d = new Dictionary<string, object>() { { "可见性", "防水套管水平" }, };
                 fbk.InsertBlockReference(basePt.OffsetXY(-450, 0), "套管系统", before: br =>
                 {
-                    //br.ScaleFactors = new Scale3d(scale);
-                    //br.Rotation = angle;
                     DU.SetLayerAndColorIndex("W-BUSH", 256, br);
 
                 }, after: br =>
@@ -274,7 +266,6 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     br.ScaleFactors = new Scale3d(scale);
                     br.Layer = "W-NOTE";
-
                 }, after: br =>
                 {
                     if (br.IsDynamicBlock)
@@ -295,16 +286,20 @@ namespace ThMEPWSS.Pipe.Model
         }
         public static void DrawRainPort(Point3d basePt)
         {
-            DU.DrawBlockReference(blkName: "$TwtSys$00000132", basePt: basePt.OffsetXY(-450, 0), cb: br => DU.SetLayerAndColorIndex("W-DRAI-NOTE", 256, br));
+            DU.DrawBlockReference(
+                blkName: "$TwtSys$00000132",
+                basePt: basePt.OffsetXY(-450, 0),
+                cb: br => DU.SetLayerAndColorIndex("W-DRAI-NOTE", 256, br));
         }
 
         public static void DrawWaterWell(Point3d basePt, string DN)
         {
-            DU.DrawBlockReference(blkName: "重力流雨水井编号", basePt: basePt,
+            DU.DrawBlockReference(
+                blkName: "重力流雨水井编号",
+                basePt: basePt,
                 scale: 0.5,
                 props: new Dictionary<string, string>() { { "-", DN ?? "" } },
-               layer: "W-RAIN-EQPM"
-               );
+                layer: "W-RAIN-EQPM");
         }
 
         public static void DrawShortTranslatorLabel(Point3d basePt)
@@ -802,8 +797,6 @@ namespace ThMEPWSS.Pipe.Model
         {
             switch (translatorType)
             {
-                case TranslatorTypeEnum.None:
-                    break;
                 case TranslatorTypeEnum.Long:
                     yd.OffsetY(-280 - FIX_Y_OFFSET + ThWRainSystemDiagram.VERTICAL_STOREY_SPAN);
                     yd.Rotate(170, 180 + 45);
@@ -823,42 +816,15 @@ namespace ThMEPWSS.Pipe.Model
             if (Storey == null) return;
             DU.DrawingQueue.Enqueue(adb =>
             {
-                var basePt = ctx.BasePoint;
                 switch (TranslatorPipe.TranslatorType)
                 {
-                    case TranslatorTypeEnum.None:
-                        break;
-                    case TranslatorTypeEnum.Long:
-                        if (false) Dr.DrawLabelLeft(basePt, "Long");
-                        break;
                     case TranslatorTypeEnum.Short:
-                        Dr.DrawShortTranslatorLabel(basePt);
+                        Dr.DrawShortTranslatorLabel(ctx.BasePoint);
                         break;
                     default:
                         break;
                 }
             });
-        }
-
-        private void DrawTranslator(PipeRunDrawingContext ctx)
-        {
-            if (Storey == null) return;
-            var basePt = ctx.BasePoint;
-            switch (TranslatorPipe.TranslatorType)
-            {
-                case TranslatorTypeEnum.None:
-                    Dr.DrawNormalLine(basePt);
-                    break;
-                case TranslatorTypeEnum.Long:
-                    Dr.DrawLongTranslator(basePt);
-                    break;
-                case TranslatorTypeEnum.Short:
-                    Dr.DrawShortTranslator(basePt);
-                    Dr.DrawShortTranslatorLabel(basePt);
-                    break;
-                default:
-                    break;
-            }
         }
 
         public override int GetHashCode()

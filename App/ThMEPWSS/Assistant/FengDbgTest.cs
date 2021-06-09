@@ -3059,7 +3059,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             {
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
-                Dr.DrawLabelRight(Dbg.SelectPoint(), "xx");
 
                 //var t = DU.DrawTextLazy("测试", 100, Dbg.SelectPoint());
                 var dbText = new DBText
