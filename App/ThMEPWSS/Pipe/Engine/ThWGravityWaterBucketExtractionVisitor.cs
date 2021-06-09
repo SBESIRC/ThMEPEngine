@@ -47,7 +47,6 @@ namespace ThMEPWSS.Pipe.Engine
         private void HandleBlockReference(List<ThRawIfcDistributionElementData> elements, BlockReference blkref, Matrix3d matrix)
         {
             if (!blkref.ObjectId.IsValid) return;
-            if (elements != null) return;
             elements.Add(new ThRawIfcDistributionElementData()
             {
                 Geometry = blkref.GetTransformedCopy(matrix),

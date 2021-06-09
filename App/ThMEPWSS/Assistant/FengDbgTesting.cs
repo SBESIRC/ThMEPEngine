@@ -57,7 +57,100 @@ namespace ThMEPWSS.DebugNs
     using Microsoft.CSharp;
     using System.CodeDom.Compiler;
     using System.Linq.Expressions;
+    public class FastBlock
+    {
+        BlockTable bt;
+        BlockTableRecord btr;
+        AcadDatabase adb;
+        Database db;
+        Dictionary<string, ObjectId> d1 = new Dictionary<string, ObjectId>();
+        Dictionary<string, BlockTableRecord> d2 = new Dictionary<string, BlockTableRecord>();
+        Dictionary<BlockTableRecord, List<AttributeDefinition>> d3 = new Dictionary<BlockTableRecord, List<AttributeDefinition>>();
+        Dictionary<BlockTableRecord, Action<BlockReference, Dictionary<string, string>>> d4 = new Dictionary<BlockTableRecord, Action<BlockReference, Dictionary<string, string>>>();
+        private FastBlock() { }
+        public static FastBlock Create(AcadDatabase adb)
+        {
+            var o = new FastBlock();
+            var spaceId = adb.ModelSpace.ObjectId;
+            var db = spaceId.Database;
+            o.adb = adb;
+            o.db = db;
+            var bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+            o.bt = bt;
+            o.btr = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
+            foreach (var blockName in adb.Blocks.Select(x => x.Name))
+            {
+                var btrId = bt[blockName];
+                var record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
+                o.d1[blockName] = btrId;
+                o.d2[blockName] = record;
+                if (record.HasAttributeDefinitions)
+                {
+                    var attrDefs = new List<AttributeDefinition>();
+                    foreach (ObjectId id in record)
+                    {
+                        if (id.GetObject(OpenMode.ForRead) is AttributeDefinition attr)
+                            attrDefs.Add(attr);
+                    }
+                    o.d3[record] = attrDefs;
+                    var attrDefKeys = attrDefs.Select(x => x.Tag.ToUpper()).ToList();
+                    o.d4[record] = (br, d) =>
+                    {
+                        for (int i = 0; i < attrDefs.Count; i++)
+                        {
+                            var k = attrDefKeys[i];
+                            var attrDef = attrDefs[i];
+                            if (d.TryGetValue(k, out string value))
+                            {
+                                var attr = CreateAttribute(db, br, attrDef);
+                                attr.TextString = value;
+                                AppendAttribute(db, br, attr);
+                            }
+                        }
+                    };
+                }
+            }
+            return o;
+        }
+        public bool HasBlock(string name) => d1.ContainsKey(name);
+        public BlockReference InsertBlockReference(Point3d position, string blockName,
+            Dictionary<string, string> attNameValue = null,
+            Action<BlockReference> before = null,
+            Action<BlockReference> after = null)
+        {
+            if (!d1.TryGetValue(blockName, out ObjectId id)) return null;
+            var br = new BlockReference(position, id);
+            before?.Invoke(br);
+            btr.AppendEntity(br);
+            if (attNameValue != null)
+            {
+                var record = d2[blockName];
+                d4[record](br, attNameValue);
+            }
+            db.TransactionManager.AddNewlyCreatedDBObject(br, true);
+            after?.Invoke(br);
+            return br;
+        }
+        public static void AppendAttribute(Database db, BlockReference br, AttributeReference attribute)
+        {
+            //向块参照添加属性对象
+            br.AttributeCollection.AppendAttribute(attribute);
+            db.TransactionManager.AddNewlyCreatedDBObject(attribute, true);
+        }
 
+        public static AttributeReference CreateAttribute(Database db, BlockReference br, AttributeDefinition attDef)
+        {
+            //创建一个新的属性对象
+            AttributeReference attribute = new AttributeReference();
+            //从属性定义获得属性对象的对象特性
+            attribute.SetAttributeFromBlock(attDef, br.BlockTransform);
+            //设置属性对象的其它特性
+            attribute.Position = attDef.Position.TransformBy(br.BlockTransform);
+            attribute.Rotation = attDef.Rotation;
+            attribute.AdjustAlignment(db);
+            return attribute;
+        }
+    }
     public class RainSystemCadData
     {
         public List<Geometry> Storeys;
@@ -403,9 +496,173 @@ namespace ThMEPWSS.DebugNs
             //}
 
         }
+        [Feng(" ThMEPWSS.Common.Utils.CreateFloorFraming()")]
+        public static void quev3i()
+        {
+            ThMEPWSS.Common.Utils.CreateFloorFraming();
+        }
+        [Feng("ImportElementsFromStdDwg")]
+        public static void quev3d()
+        {
+            ThRainSystemService.ImportElementsFromStdDwg();
+        }
+        [Feng("雨水管径100")]
+        public static void quexpp()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                //DU.DrawBlockReference(blkName: "雨水管径100", basePt:Dbg.SelectPoint(), layer: "W-NOTE", props: new Dictionary<string, string>() { { "可见性", /*Dr.GetFloorDrainDN()*/"DN25" }, { "角度1", "90" } });
+                //DU.DrawBlockReference(blkName: "雨水管径100", basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
+                //{
+                //    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
+                //});
 
-        //画标高
-        private static void NewMethod6()
+                //DU.DrawBlockReference(blkName: "雨水管径100",scale:.5, basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
+                DU.DrawBlockReference(blkName: "雨水管径100", scale: 1, basePt: Dbg.SelectPoint().OffsetX(600), layer: "W-NOTE", cb: br =>
+                {
+                    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
+                    //br.ObjectId.SetDynBlockValue("角度1", Math.PI / 2);
+                    br.ObjectId.SetDynBlockValue("角度1", Math.PI);
+                });
+            }
+        }
+        [Feng]
+        public static void test2()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var basePt = Dbg.SelectPoint();
+                var dn = "DN25";
+                //var angle = Math.PI / 2;
+                var angle = Math.PI;
+                DU.DrawBlockReference(blkName: "雨水管径100", scale: 1, basePt: basePt, layer: "W-NOTE", cb: br =>
+                {
+                    br.ObjectId.SetDynBlockValue("可见性", dn);
+                    br.ObjectId.SetDynBlockValue("角度1", Math.PI);
+                });
+            }
+        }
+        [Feng]
+        public static void test()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                var pt = Dbg.SelectPoint();
+                var fbk = FastBlock.Create(adb);
+                for (int i = 0; i < 1; i++)
+                //for (int i = 0; i < 1; i++)
+                {
+                    var dn = "DN25";
+                    var angle = Math.PI / 2;
+                    //var angle = Math.PI;
+                    //var angle = 0;
+                    Dr.InsetDNBlock(pt, dn, angle, .5);
+                }
+
+            }
+        }
+        public static void quf6ek()
+        {
+
+            //for (int i = 0; i < 1000; i++)
+            //{
+            //    var dn = "DN25";
+            //    var angle = Math.PI / 2;
+            //    NewMethod9(pt, fbk, dn, angle);
+            //}
+        }
+
+
+
+
+        public static ObjectId InsertBlockReference(ObjectId spaceId, string layer, string blockName, Point3d position, Scale3d scale, double rotateAngle, Dictionary<string, string> attNameValues)
+        {
+            Database db = spaceId.Database;//获取数据库对象
+            //以读的方式打开块表
+            BlockTable bt = (BlockTable)db.BlockTableId.GetObject(OpenMode.ForRead);
+            //如果没有blockName表示的块，则程序返回
+            if (!bt.Has(blockName)) return ObjectId.Null;
+            //以写的方式打开空间（模型空间或图纸空间）
+            BlockTableRecord space = (BlockTableRecord)spaceId.GetObject(OpenMode.ForWrite);
+            ObjectId btrId = bt[blockName];//获取块表记录的Id
+            //打开块表记录
+            BlockTableRecord record = (BlockTableRecord)btrId.GetObject(OpenMode.ForRead);
+            //创建一个块参照并设置插入点
+            BlockReference br = new BlockReference(position, bt[blockName]);
+            br.ScaleFactors = scale;//设置块参照的缩放比例
+            if (layer != null) br.Layer = layer;//设置块参照的层名
+            br.Rotation = rotateAngle;//设置块参照的旋转角度
+            space.AppendEntity(br);//为了安全，将块表状态改为读 
+            //判断块表记录是否包含属性定义
+            if (record.HasAttributeDefinitions)
+            {
+                //若包含属性定义，则遍历属性定义
+                foreach (ObjectId id in record)
+                {
+                    //检查是否是属性定义
+                    AttributeDefinition attDef = id.GetObject(OpenMode.ForRead) as AttributeDefinition;
+                    if (attDef != null)
+                    {
+                        NewMethod8(attNameValues, db, br, attDef);
+                    }
+                }
+            }
+            db.TransactionManager.AddNewlyCreatedDBObject(br, true);
+            return br.ObjectId;//返回添加的块参照的Id
+        }
+
+        private static void NewMethod8(Dictionary<string, string> d, Database db, BlockReference br, AttributeDefinition attDef)
+        {
+            var attribute = FastBlock.CreateAttribute(db, br, attDef);
+            //判断是否包含指定的属性名称
+            {
+                var s = attDef.Tag.ToUpper();
+                if (d.ContainsKey(s))
+                {
+                    //设置属性值
+                    attribute.TextString = d[s].ToString();
+                }
+            }
+            FastBlock.AppendAttribute(db, br, attribute);
+        }
+
+
+
+        [Feng("雨水管径100")]
+        public static void quev3n()
+        {
+            Dbg.FocusMainWindow();
+            using (Dbg.DocumentLock)
+            using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
+            {
+                //DU.DrawBlockReference(blkName: "雨水管径100", basePt:Dbg.SelectPoint(), layer: "W-NOTE", props: new Dictionary<string, string>() { { "可见性", /*Dr.GetFloorDrainDN()*/"DN25" }, { "角度1", "90" } });
+                //DU.DrawBlockReference(blkName: "雨水管径100", basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
+                //{
+                //    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
+                //});
+
+                //DU.DrawBlockReference(blkName: "雨水管径100",scale:.5, basePt: Dbg.SelectPoint(), layer: "W-NOTE", cb: br =>
+                DU.DrawBlockReference(blkName: "雨水管径100", scale: 1, basePt: Dbg.SelectPoint().OffsetX(600), layer: "W-NOTE", cb: br =>
+                {
+                    br.ObjectId.SetDynBlockValue("可见性", Dr.GetFloorDrainDN());
+                    //br.ObjectId.SetDynBlockValue("角度1", Math.PI / 2);
+                    br.ObjectId.SetDynBlockValue("角度1", Math.PI);
+                });
+            }
+
+        }
+        [Feng("画标高")]
+        public static void NewMethod6()
         {
             Dbg.FocusMainWindow();
             using (Dbg.DocumentLock)

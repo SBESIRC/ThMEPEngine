@@ -41,10 +41,17 @@ namespace TianHua.Plumbing.WPF.UI.UI
         {
             ViewModel.InitFloorListDatas();
         }
-
+        //这明明是“新建楼层图框”
         private void btnSelectFloor_Click(object sender, RoutedEventArgs e)
         {
-            
+            try
+            {
+                ThMEPWSS.Common.Utils.CreateFloorFraming();
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
     }
 }

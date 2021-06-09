@@ -46,10 +46,14 @@ namespace ThMEPWSS.Assistant
     }
     public class DrawingTransaction : IDisposable
     {
-        AcadDatabase adb;
+        public static DrawingTransaction Cur { get; private set; }
+        public AcadDatabase adb { get; }
+        public FastBlock fbk { get; }
         public DrawingTransaction(AcadDatabase adb) : this()
         {
             this.adb = adb;
+            this.fbk = FastBlock.Create(adb);
+            Cur = this;
         }
         public DrawingTransaction()
         {
@@ -57,13 +61,20 @@ namespace ThMEPWSS.Assistant
         }
         public void Dispose()
         {
-            if (adb != null)
+            try
             {
-                DrawUtils.Draw(adb);
+                if (adb != null)
+                {
+                    DrawUtils.Draw(adb);
+                }
+                else
+                {
+                    DrawUtils.Draw();
+                }
             }
-            else
+            finally
             {
-                DrawUtils.Draw();
+                Cur = null;
             }
         }
     }
