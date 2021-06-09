@@ -18,7 +18,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             int currentIndex = 19;
             List<Entity> Result = new List<Entity>();
             int PressureSwitchMaxFloor = 0;//灭火系统流量开关最高楼层
-            int FireHydrantPumpMaxFloor = 0;//消火栓泵最低楼层
+            int FireHydrantPumpMaxFloor = 0;//消火栓泵最高楼层
             for (int FloorNum = 0; FloorNum < AllFireDistrictData.Count; FloorNum++)
             {
                 //拿到该防火分区数据
@@ -30,8 +30,7 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 }
                 if (AreaData.Data.BlockData.BlockStatistics["消火栓泵"] > 0)
                 {
-                    if (FireHydrantPumpMaxFloor == 0)
-                        FireHydrantPumpMaxFloor = FloorNum + 1;
+                    FireHydrantPumpMaxFloor = FloorNum + 1;
                     Result.AddRange(DrawFireHydrantPumpLine(currentIndex,FloorNum));
                 }
             }
@@ -47,6 +46,14 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     o.Layer = this.CircuitLayer;
                     o.ColorIndex = this.CircuitColorIndex;
                 });
+
+                Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * FireHydrantPumpMaxFloor - 1900, 0))
+                {
+                    Linetype = "ByLayer",
+                    Layer = "E-FAS-WIRE4",
+                    ColorIndex = 4
+                };
+                Result.Add(Endline2);
             }
             else
                 Result = new List<Entity>();

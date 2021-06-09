@@ -30,10 +30,11 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
             {
                 DrawBFAS212 = false;
             }
-            if (this.fireDistrict.Data.BlockData.BlockStatistics["火灾报警电话"] == 0)
-            {
-                DrawBFAS220 = false;
-            }
+            //现在逻辑变动，张皓讲火灾报警电话一定要画
+            //if (this.fireDistrict.Data.BlockData.BlockStatistics["火灾报警电话"] == 0)
+            //{
+            //    DrawBFAS220 = false;
+            //}
             if (this.fireDistrict.Data.BlockData.BlockStatistics["火灾声光警报器"] == 0)
             {
                 DrawBFAS330 = false;

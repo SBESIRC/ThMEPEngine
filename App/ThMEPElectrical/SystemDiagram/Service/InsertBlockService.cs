@@ -74,21 +74,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// </summary>
         /// <param name="block"></param>
         /// <param name="vector">偏移量</param>
-        //public static void InsertSpecifyBlock(ThBlockModel block, int RowIndex)
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Active())
-        //    {
-        //        string LayerName = ThAutoFireAlarmSystemCommon.BlockByLayer;
-        //        acadDatabase.Database.ImportBlock(block.BlockName, LayerName);
-        //        acadDatabase.Database.InsertBlock(LayerName, block.BlockName, new Point3d(3000 * (block.Index - 1) + block.Position.X, 3000 * (RowIndex - 1) + block.Position.Y, 0), new Scale3d(100), 0);
-        //    }
-        //}
-
-        /// <summary>
-        /// 插入指定图块
-        /// </summary>
-        /// <param name="block"></param>
-        /// <param name="vector">偏移量</param>
         public static void InsertSpecifyBlock(Dictionary<Point3d, ThBlockModel> dicBlockPoints)
         {
             List<string> ImportBlockSet = new List<string>();
@@ -106,24 +91,46 @@ namespace ThMEPElectrical.SystemDiagram.Service
                             acadDatabase.Database.ImportBlock(BlockName);
                             ImportBlockSet.Add(BlockName);
                         }
-                        //水池液位传感器是个比较特殊的块，需要包一层由E-BFAS630-3->E-BFAS630-5
-                        //然后插入E-BFAS630-5时，再给他炸开
-                        if (BlockInfo.Value.BlockName == "E-BFAS630-5")
+                        //消火栓泵直接启动信号线 和 喷淋泵直接启动信号线 比较特殊，无需扩大100倍
+                        if (BlockName.Contains("直接启动信号线"))
                         {
-                            var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
+                            var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(1), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
                             var blkref = acadDatabase.Element<BlockReference>(objId, true);
                             blkref.ExplodeToOwnerSpace();
                             blkref.Erase();
                         }
                         else
-                        {
                             acadDatabase.Database.InsertBlock(LayerName, BlockName, BlockInfo.Key.Add(offset), new Scale3d(100), 0, BlockInfo.Value.ShowAtt, BlockInfo.Value.attNameValues);
-                        }
                     }
-                    catch(Exception ex)
+                    catch (Exception ex)
                     {
 
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 插入底部固定图块
+        /// </summary>
+        /// <param name="block"></param>
+        /// <param name="vector">偏移量</param>
+        public static void InsertSpecifyBlock(string BlockName)
+        {
+            using (AcadDatabase acadDatabase = AcadDatabase.Active())
+            {
+                string LayerName = ThAutoFireAlarmSystemCommon.CountBlockByLayer;
+                acadDatabase.Database.ImportBlockLayer(LayerName);
+                acadDatabase.Database.ImportBlock(BlockName);
+                try
+                {
+                    var objId = acadDatabase.Database.InsertBlock(LayerName, BlockName, new Point3d(-3000, 0, 0).Add(offset), new Scale3d(), 0, false, null);
+                    var blkref = acadDatabase.Element<BlockReference>(objId, true);
+                    blkref.ExplodeToOwnerSpace();
+                    blkref.Erase();
+                }
+                catch (Exception ex)
+                {
                 }
             }
         }
@@ -169,22 +176,6 @@ namespace ThMEPElectrical.SystemDiagram.Service
                     return acadDatabase.ModelSpace.ObjectId.InsertBlockReference(layer, name, position, scale, angle);
             }
         }
-
-        /// <summary>
-        /// 导入图块
-        /// </summary>
-        /// <param name="database"></param>
-        /// <param name="name"></param>
-        /// <param name="layer"></param>
-        //private static void ImportBlock(this Database database, string name, string layer)
-        //{
-        //    using (AcadDatabase acadDatabase = AcadDatabase.Use(database))
-        //    using (AcadDatabase blockDb = AcadDatabase.Open(ThCADCommon.AutoFireAlarmSystemDwgPath(), DwgOpenMode.ReadOnly, false))
-        //    {
-        //        acadDatabase.Blocks.Import(blockDb.Blocks.ElementOrDefault(name), false);
-        //        acadDatabase.Layers.Import(blockDb.Layers.ElementOrDefault(layer), false);
-        //    }
-        //}
 
         /// <summary>
         /// 导入图层

@@ -35,7 +35,6 @@ namespace ThMEPElectrical.Command
             var dm = Application.DocumentManager;
             foreach (Document doc in dm)
             {
-                //Application.DocumentManager.MdiActiveDocument = doc;
                 using (DocumentLock docLock = doc.LockDocument())
                 using (var acadDatabase = Linq2Acad.AcadDatabase.Use(doc.Database))
                 {

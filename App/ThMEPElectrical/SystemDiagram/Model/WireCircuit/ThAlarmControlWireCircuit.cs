@@ -533,6 +533,10 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 RightmostPosition = BlockPosition + 500;
                 Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 result.Add(Midline2);
+                Line Midline3 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * (FloorIndex - 1) + 1100, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 750, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
+                result.Add(Midline3);
+                Line Midline4 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 750, OuterFrameLength * (FloorIndex - 1) + 1200, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 950, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
+                result.Add(Midline4);
             }
             return result;
         }
@@ -552,6 +556,10 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                 RightmostPosition = BlockPosition + 500;
                 Line Midline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + RightmostPosition, OuterFrameLength * (FloorIndex - 1) + Offset, 0), new Point3d(OuterFrameLength * currentIndex, OuterFrameLength * (FloorIndex - 1) + Offset, 0));
                 result.Add(Midline2);
+                Line Midline3 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * (FloorIndex - 1) + 1100, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 750, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
+                result.Add(Midline3);
+                Line Midline4 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 750, OuterFrameLength * (FloorIndex - 1) + 1200, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 950, OuterFrameLength * (FloorIndex - 1) + 1200, 0));
+                result.Add(Midline4);
             }
             return result;
         }

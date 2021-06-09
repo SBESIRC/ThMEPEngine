@@ -18,7 +18,13 @@ namespace ThMEPElectrical.SystemDiagram.Model
         public static void Init()
         {
             if (!BlockConfig.IsNull())
+            {
+                //重新加载用户配置
+                var SpecialBlock = BlockConfig.Where(o => o.StatisticMode == StatisticType.RelyOthers);
+                SpecialBlock.First(o => o.UniqueName == "短路隔离器").DependentStatisticalRule = FireCompartmentParameter.ShortCircuitIsolatorCount;
+                SpecialBlock.First(o => o.UniqueName == "消防广播火栓强制启动模块").DependentStatisticalRule = FireCompartmentParameter.FireBroadcastingCount;
                 return;
+            }
             BlockConfig = new List<ThBlockModel>();
             #region #1
             #endregion
@@ -127,7 +133,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 BlockAliasName = "E-BFAS220",
                 BlockNameRemark = "火灾报警电话",
                 Index = 7,
-                CanHidden = true,
+                CanHidden = false,
                 Position = new Point3d(2250, 800, 0),
                 ShowQuantity = true,
                 QuantityPosition = new Point3d(2600, 1150, 0)
@@ -570,12 +576,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     new ThBlockModel()
                     {
                         UniqueName = "消防水箱_水池液位传感器",
-                        BlockName = "E-BFAS630-5",
+                        BlockName = "E-BFAS-630-5",
                         BlockNameRemark = "消防水箱_水池液位传感器",
                         Index = 18,
                         Position = new Point3d(1500, 2350, 0),
                         ShowAtt = true,
-                        attNameValues = new Dictionary<string, string>() { { "F", "LT" } },
+                        attNameValues = new Dictionary<string, string>() { { "F", "F" } ,{ "LT", "LT" }},
                     }
                 }
             });
@@ -621,6 +627,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         Position = new Point3d(1500, 1500, 0),
                         ShowAtt=true,
                         attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
+                    },
+                    new ThBlockModel()
+                    {
+                        UniqueName = "消火栓泵直接启动信号线",
+                        BlockName = "消火栓泵直接启动信号线",
+                        BlockNameRemark = "消火栓泵直接启动信号线",
+                        Index = 19,
+                        Position = new Point3d(0, 0, 0),
                     }
                 }
             });
@@ -664,6 +678,14 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         Position = new Point3d(1500, 1500, 0),
                         ShowAtt=true,
                         attNameValues = new Dictionary<string, string>() { { "F", "I/O" } }
+                    },
+                    new ThBlockModel()
+                    {
+                        UniqueName = "喷淋泵直接启动信号线",
+                        BlockName = "喷淋泵直接启动信号线",
+                        BlockNameRemark = "喷淋泵直接启动信号线",
+                        Index = 20,
+                        Position = new Point3d(0, 0, 0),
                     }
                 }
             });
@@ -690,12 +712,12 @@ namespace ThMEPElectrical.SystemDiagram.Model
                     new ThBlockModel()
                     {
                         UniqueName = "消防水池_水池液位传感器",
-                        BlockName = "E-BFAS630-5",
+                        BlockName = "E-BFAS-630-5",
                         BlockNameRemark = "消防水池_水池液位传感器",
                         Index = 21,
                         Position = new Point3d(1500, 2350, 0),
                         ShowAtt = true,
-                        attNameValues = new Dictionary<string, string>() { { "F", "LT" } },
+                        attNameValues = new Dictionary<string, string>() { { "F", "F" } ,{ "LT", "LT" }},
                     }
                 }
             });

@@ -15,7 +15,6 @@ namespace TianHua.Electrical.UI.SystemDiagram
             if (null != ChoiseLayers && ChoiseLayers.IsLoaded)
                 return;
             ChoiseLayers = new SelectLayers();
-            //AcadApp.ShowModelessWindow(ChoiseLayers);
             var isOk = AcadApp.ShowModalWindow(ChoiseLayers);
             if (isOk == true)
             {
@@ -26,6 +25,10 @@ namespace TianHua.Electrical.UI.SystemDiagram
                 else if (ChoiseLayers.commondType == 2)
                 {
                     CommandHandlerBase.ExecuteFromCommandLine(false, "THAFASF");
+                }
+                else if (ChoiseLayers.commondType == 3)
+                {
+                    CommandHandlerBase.ExecuteFromCommandLine(false, "THAFASP");
                 }
             }
         }

@@ -41,6 +41,13 @@ namespace ThMEPElectrical.SystemDiagram.Model.WireCircuit
                     o.Layer = this.CircuitLayer;
                     o.ColorIndex = this.CircuitColorIndex;
                 });
+                Line Endline2 = new Line(new Point3d(OuterFrameLength * (currentIndex - 1) + 650, 0, 0), new Point3d(OuterFrameLength * (currentIndex - 1) + 650, OuterFrameLength * SprayPumpMaxFloor - 1900, 0))
+                {
+                    Linetype = "ByLayer",
+                    Layer = "E-FAS-WIRE4",
+                    ColorIndex = 4
+                };
+                Result.Add(Endline2);
             }
             else
                 Result = new List<Entity>();

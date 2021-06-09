@@ -27,5 +27,17 @@ namespace ThMEPElectrical.SystemDiagram.Service
         /// 消防广播火灾启动计数模块
         /// </summary>
         public static int FireBroadcastingCount = 20;
+
+        /// <summary>
+        /// 底部固定部分:1.包含消防室 2.不含消防室
+        /// </summary>
+        public static int FixedPartType = 1;
+
+        /// <summary>
+        /// 系统图生成方式： 
+        /// V1.0 按防火分区区分
+        /// V2.0 按回路区分
+        /// </summary>
+        public static int SystemDiagramGenerationType = 1;
     }
 }

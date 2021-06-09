@@ -76,7 +76,6 @@ namespace ThMEPElectrical.Command
 
                 //绘画该图纸的防火分区编号
                 diagram.DrawFireCompartmentNum(acadDatabase.Database, diagram.GetFloorInfo());
-                //
 
                 var ppr = Active.Editor.GetPoint("\n请选择系统图生成点位!");
                 var position = Point3d.Origin;

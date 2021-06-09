@@ -214,12 +214,6 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         }
                     });
 
-                    //画防火分区名字
-                    //if (fireDistrict.DrawFireDistrictNameText)
-                    //{
-                    //    DrawEntitys.Add(new DBText() { Height = 2000, WidthFactor = 0.7, HorizontalMode = TextHorizontalMode.TextMid, TextStyleId = DbHelper.GetTextStyleId("TH-STYLE1"), TextString = fireDistrict.FireDistrictName, Position = fireDistrict.TextPoint, AlignmentPoint = fireDistrict.TextPoint, ColorIndex = 2, Layer = ThAutoFireAlarmSystemCommon.FireDistrictByLayer });
-                    //}
-
                     //跳入下一层
                     RowIndex++;
                 }
@@ -231,8 +225,7 @@ namespace ThMEPElectrical.SystemDiagram.Model
                         DrawEntitys.AddRange(o.Draw());
                     });
                 }
-                //此方法有BUG，无法正常显示
-                //acadDatabase.ModelSpace.Add(DrawEntitys);
+
                 foreach (Entity item in DrawEntitys)
                 {
                     item.Move(Offset);
@@ -242,6 +235,8 @@ namespace ThMEPElectrical.SystemDiagram.Model
                 InsertBlockService.InsertOuterBorderBlock(RowIndex - 1, ThAutoFireAlarmSystemCommon.SystemColLeftNum + ThAutoFireAlarmSystemCommon.SystemColRightNum);
                 //画所有的块
                 InsertBlockService.InsertSpecifyBlock(dicBlockPoints);
+                //画底部固定部分
+                InsertBlockService.InsertSpecifyBlock(FireCompartmentParameter.FixedPartType == 1 ? ThAutoFireAlarmSystemCommon.FixedPartContainsFireRoom : ThAutoFireAlarmSystemCommon.FixedPartExcludingFireRoom);
             }
         }
 

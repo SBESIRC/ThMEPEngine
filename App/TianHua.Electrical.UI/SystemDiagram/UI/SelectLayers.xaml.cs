@@ -24,9 +24,22 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
     {
         static DrainageLayerViewModel viewModel;
         /// <summary>
-        /// 生成系统图方式:1.全部图纸 2.手动选择
+        /// 生成系统图方式:1.所有已打开图纸 2.手动选择楼层范围 3.手动选择防火分区
         /// </summary>
         public int commondType = 1;
+
+        /// <summary>
+        /// 底部固定部分:1.包含消防室 2.不含消防室
+        /// </summary>
+        private int PublicSectionType = 1;
+
+        /// <summary>
+        /// 系统图生成方式： 
+        /// V1.0 按防火分区区分
+        /// V2.0 按回路区分
+        /// </summary>
+        private int DiagramGenerationType = 1;
+
         public SelectLayers()
         {
             InitializeComponent();
@@ -36,7 +49,6 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                     ShortCircuitIsolatorTxt = FireCompartmentParameter.ShortCircuitIsolatorCount,
                     FireBroadcastingTxt = FireCompartmentParameter.FireBroadcastingCount,
                     ControlBusCountTXT = FireCompartmentParameter.ControlBusCount
-
                 };
             this.DataContext = viewModel;
         }
@@ -63,11 +75,22 @@ namespace TianHua.Electrical.UI.SystemDiagram.UI
                         continue;
                     SelectLayers.Add(item.Content);
                 }
+                if (SelectA.IsChecked.Value)
+                    commondType = 1;
+                else if (SelectF.IsChecked.Value)
+                    commondType = 2;
+                else
+                    commondType = 3;
+                PublicSectionType = IncludingFireRoom.IsChecked.Value ? 1 : 2;
+                DiagramGenerationType = DistinguishByFireCompartment.IsChecked.Value ? 1 : 2;
+
                 FireCompartmentParameter.LayerNames = SelectLayers;
                 FireCompartmentParameter.ControlBusCount = int.Parse(ControlBusCountTXT.Text);
                 FireCompartmentParameter.FireBroadcastingCount = int.Parse(FireBroadcastingTxt.Text);
                 FireCompartmentParameter.ShortCircuitIsolatorCount = int.Parse(ShortCircuitIsolatorTxt.Text);
-                commondType = SelectAll.IsChecked.Value ? 1 : 2;
+                FireCompartmentParameter.FixedPartType = PublicSectionType;
+                FireCompartmentParameter.SystemDiagramGenerationType = DiagramGenerationType;
+
                 this.DialogResult = true;
                 this.Close();
             }

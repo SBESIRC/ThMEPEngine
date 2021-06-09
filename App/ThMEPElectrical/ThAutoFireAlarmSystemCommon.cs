@@ -12,9 +12,6 @@ namespace ThMEPElectrical
         public static readonly double FireDistrictShortestLength = 200;
         public static readonly string FireDistrictByLayer = "AD-AREA-DIVD";     //防火分区图层
 
-
-        //列数量
-        //public static readonly int SystemColNum = 21;
         //左部分的列数量
         public static readonly int SystemColLeftNum = 5;
         //左部分的列数量
@@ -34,6 +31,8 @@ namespace ThMEPElectrical
         public static readonly string SystemDiagramChartHeader1 = "楼层或防火分区";
         public static readonly string SystemDiagramChartHeader2 = "楼层或防火分区分线箱";
         public static readonly string SystemDiagramChartHeader3 = "楼层或防火分区火灾自动报警设备";
+        public static readonly string FixedPartContainsFireRoom = "系统图固定部分（含消控室）";
+        public static readonly string FixedPartExcludingFireRoom = "系统图固定部分（不含消控室）";
 
         //配置
         public static readonly List<string> AlarmControlWireCircuitBlocks = new List<string>() { 
