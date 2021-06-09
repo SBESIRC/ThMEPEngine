@@ -126,5 +126,10 @@
         public const string BLOCK_VALVE_VISIBILITY_SILENCER_100 = "ZP100";
         public const string BLOCK_VALVE_VISIBILITY_SILENCER_200 = "ZP200";
         public const string BLOCK_VALVE_VISIBILITY_ELECTRIC = "电动多叶调节风阀";
+
+        //风口动态块属性名
+        public const string BLOCK_DYNAMIC_PORT_WIDTH_OR_DIAMETER = "宽度或直径";
+        public const string BLOCK_DYNAMIC_PORT_HEIGHT = "高度";
+        public const string BLOCK_DYNAMIC_PORT_RANGE = "种类";
     }
 }

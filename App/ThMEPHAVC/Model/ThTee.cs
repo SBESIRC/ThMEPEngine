@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using DotNetARX;
+using Linq2Acad;
 using Autodesk.AutoCAD.Geometry;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
 using ThMEPHVAC.CAD;
-using Linq2Acad;
 using ThMEPHVAC.Duct;
 
 namespace ThMEPHVAC.Model

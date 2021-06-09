@@ -29,6 +29,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\ThDuctPortsAnalysis.cs" />
+    <Compile Include="Model\ThDuctPortsConstructor.cs" />
+    <Compile Include="Model\ThDuctPortsDistribute.cs" />
+    <Compile Include="Model\ThDuctPortsDraw.cs" />
+    <Compile Include="Model\ThDuctPortsFactory.cs" />
+    <Compile Include="Model\ThDuctPortsJudger.cs" />
+    <Compile Include="Model\ThDuctPortsService.cs" />
     <Compile Include="Model\ThServiceTee.cs" />
     <Compile Include="Model\ThTee.cs" />
     <Compile Include="Model\ThVTee.cs" />
