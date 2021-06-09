@@ -38,7 +38,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         /// <summary>
         /// Tian Hua Create water suply system diagram
         /// </summary>
-        [CommandMethod("TIANHUACAD", "THCSSDBYUI", CommandFlags.Modal)]
+        [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
         public void ThCreateWaterSuplySystemDiagramWithUI()
         {
             if (null != uiDrainage && uiDrainage.IsLoaded)
@@ -68,7 +68,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
         }
 
 
-        [CommandMethod("TIANHUACAD", "THJSXTT", CommandFlags.Modal)]
+        //[CommandMethod("TIANHUACAD", "THFCSD", CommandFlags.Modal)]
         public void ThCreateFireControlSystemDiagram()
         {
             var ui = new uiFireControlSystem();

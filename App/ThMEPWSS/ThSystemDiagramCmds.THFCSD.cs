@@ -5,7 +5,7 @@ namespace ThMEPWSS
 {
     public partial class ThSystemDiagramCmds
     {
-        [CommandMethod("TIANHUACAD", "THFCFD", CommandFlags.Modal)]
+        //[CommandMethod("TIANHUACAD", "THFCSDTEST", CommandFlags.Modal)]
         public void ThCreateFireControlSystemDiagram()
         {
             using (var cmd = new ThFireControlSystemDiagramCmd())
