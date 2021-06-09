@@ -166,7 +166,7 @@ namespace ThMEPLighting.DSFEL.Service
                 var ShearWallEngine = new ThShearWallRecognitionEngine();
                 ShearWallEngine.Recognize(ShearWallExtractEngine.Results, polyline.Vertices());
 
-                var archWallExtractEngine = new ThArchitectureWallExtractionEngine();
+                var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
                 archWallExtractEngine.Extract(acdb.Database);
                 archWallExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
                 var archWallEngine = new ThDB3ArchWallRecognitionEngine();

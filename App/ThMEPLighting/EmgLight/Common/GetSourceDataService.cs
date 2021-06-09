@@ -109,7 +109,7 @@ namespace ThMEPLighting.EmgLight.Common
             var ShearWallEngine = new ThShearWallRecognitionEngine();
             ShearWallEngine.Recognize(ShearWallExtractEngine.Results, transBufferFrame.Vertices());
 
-            var archWallExtractEngine = new ThArchitectureWallExtractionEngine();
+            var archWallExtractEngine = new ThDB3ArchWallExtractionEngine();
             archWallExtractEngine.Extract(acdb.Database);
             archWallExtractEngine.Results.ForEach(x => transformer.Transform(x.Geometry));
             var archWallEngine = new ThDB3ArchWallRecognitionEngine();
