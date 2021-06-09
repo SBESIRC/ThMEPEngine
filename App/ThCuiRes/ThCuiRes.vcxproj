@@ -239,7 +239,7 @@
     <Image Include="Images\THSSZSD_dark_large.ico" />
     <Image Include="Images\THKJHZ_dark_small.ico" />    
     <Image Include="Images\THKJHZ_dark_large.ico" />
-	<Image Include="Images\THKJMM_dark_small.ico" />    
+	  <Image Include="Images\THKJMM_dark_small.ico" />    
     <Image Include="Images\THKJMM_dark_large.ico" />
     <Image Include="Images\THKJSQ_dark_small.ico" />    
     <Image Include="Images\THKJSQ_dark_large.ico" />
@@ -247,6 +247,12 @@
     <Image Include="Images\THKJTQ_dark_large.ico" />
     <Image Include="Images\THFJJC_dark_small.ico" />    
     <Image Include="Images\THFJJC_dark_large.ico" />
+    <Image Include="Images\THYSXTT_dark_small.ico" />    
+    <Image Include="Images\THYSXTT_dark_large.ico" />
+    <Image Include="Images\THJSXTT_dark_small.ico" />    
+    <Image Include="Images\THJSXTT_dark_large.ico" />
+    <Image Include="Images\THPSXTT_dark_small.ico" />    
+    <Image Include="Images\THPSXTT_dark_large.ico" />
     <Image Include="Images\THALIGN_bottom_dark_small.ico" />
     <Image Include="Images\THALIGN_bottom_dark_large.ico" />
     <Image Include="Images\THALIGN_horizontal_dark_small.ico" />

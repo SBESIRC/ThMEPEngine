@@ -245,6 +245,12 @@
     <Image Include="Images\THKJTQ_light_large.ico" />
     <Image Include="Images\THFJJC_light_small.ico" />    
     <Image Include="Images\THFJJC_light_large.ico" />
+    <Image Include="Images\THYSXTT_light_small.ico" />    
+    <Image Include="Images\THYSXTT_light_large.ico" />
+    <Image Include="Images\THJSXTT_light_small.ico" />    
+    <Image Include="Images\THJSXTT_light_large.ico" />
+    <Image Include="Images\THPSXTT_light_small.ico" />    
+    <Image Include="Images\THPSXTT_light_large.ico" />
     <Image Include="Images\THALIGN_bottom_light_small.ico" />
     <Image Include="Images\THALIGN_bottom_light_large.ico" />
     <Image Include="Images\THALIGN_horizontal_light_small.ico" />
