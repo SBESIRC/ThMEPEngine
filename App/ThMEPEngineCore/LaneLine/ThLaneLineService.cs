@@ -47,13 +47,24 @@ namespace ThMEPEngineCore.LaneLine
                 return new List<List<Line>>();
             }
 
-            parkingLines = parkingLines.SelectMany(x => roomPoly.Trim(x).Cast<Polyline>()
+            parkingLines = parkingLines.SelectMany(x =>
+            {
+                var trimEntity = roomPoly.Trim(x);
+                List<Polyline> resPoly = new List<Polyline>();
+                foreach (var entity in trimEntity)
+                {
+                    if (entity is Polyline poly)
+                    {
+                        resPoly.Add(poly);
+                    }
+                }
+                return resPoly;
+            })
                 .Select(y =>
                 {
                     var dir = (y.EndPoint - y.StartPoint).GetNormal();
                     return new Line(y.StartPoint - dir * 1, y.EndPoint + dir * 1);
-                }))
-                .ToList();
+                }).ToList();
             var objs = new DBObjectCollection();
             parkingLines.ForEach(x => objs.Add(x));
             var nodeGeo = objs.ToNTSNodedLineStrings();

@@ -20,7 +20,7 @@ using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.Command
 {
-    public class ThVideoMonitoringSystemCommand : IAcadCommand, IDisposable
+    class ThVideoMonitoringSystemWithLaneCommand : IAcadCommand, IDisposable
     {
         public void Dispose()
         {
@@ -70,7 +70,7 @@ namespace ThMEPElectrical.Command
                 ThMEPOriginTransformer originTransformer = new ThMEPOriginTransformer(pt);
                 frames = frames.Select(x =>
                 {
-                    originTransformer.Transform(x);
+                    //originTransformer.Transform(x);
                     return ThMEPFrameService.Normalize(x);
                 }).ToList();
                 GetPrimitivesService getPrimitivesService = new GetPrimitivesService(originTransformer);
@@ -78,23 +78,29 @@ namespace ThMEPElectrical.Command
                 {
                     //获取构建信息
                     var rooms = new List<ThIfcRoom>();
-                    using (var ov = new ThCADCoreNTSArcTessellationLength(3000))
+                    using (var ov = new ThCADCoreNTSArcTessellationLength(3000))   //将弧打成多段线
                     {
                         rooms = getPrimitivesService.GetRoomInfo(outFrame);
                     }
                     var doors = getPrimitivesService.GetDoorInfo(outFrame);
                     getPrimitivesService.GetStructureInfo(outFrame, out List<Polyline> columns, out List<Polyline> walls);
+                    var lanes = getPrimitivesService.GetLanes(outFrame, out List<List<Line>> otherLanes);
+                    lanes.AddRange(otherLanes);
 
                     //布置
                     LayoutService layoutService = new LayoutService();
-                    var layoutInfo = layoutService.ExitLayoutService(rooms, doors, columns, walls);
+                    var layoutInfo = layoutService.LaneLayoutService(lanes.SelectMany(x => x).ToList(), doors, rooms);
                     using (AcadDatabase db = AcadDatabase.Active())
                     {
                         foreach (var item in layoutInfo)
                         {
-                            Line line = new Line(item.Key, item.Key + 1000 * item.Value);
-                            originTransformer.Reset(line);
+                            var ep = item.Key + 200 * item.Value;
+                            Line line = new Line(item.Key, ep);
+                            //originTransformer.Reset(line);
+                            Circle circle = new Circle(ep, Vector3d.ZAxis, 100);
+                            //originTransformer.Reset(circle);
                             db.ModelSpace.Add(line);
+                            db.ModelSpace.Add(circle);
                         }
                     }
                 }

@@ -10,19 +10,21 @@ using ThCADCore.NTS;
 using ThMEPElectrical.VideoMonitoringSystem.Model;
 using ThMEPElectrical.VideoMonitoringSystem.Utls;
 using ThMEPEngineCore.Algorithm.DijkstraAlgorithm;
+using ThMEPEngineCore.Model;
 
 namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
 {
     public class LayoutVideoByLine
     {
-        public double distance = 500;
+        public double distance = 5000;
         double tol = 10;
 
-        public List<KeyValuePair<Point3d, Vector3d>> Layout(List<Line> lanes, List<Polyline> doors, List<Polyline> rooms)
+        public List<KeyValuePair<Point3d, Vector3d>> Layout(List<Line> lanes, List<Polyline> doors, List<ThIfcRoom> rooms)
         {
             List<KeyValuePair<Point3d, Vector3d>> resLayout = new List<KeyValuePair<Point3d, Vector3d>>();
-            foreach (var room in rooms)
+            foreach (var thRoom in rooms)
             {
+                var room = thRoom.Boundary as Polyline;
                 //获取需要的构建信息
                 var bufferRoom = room.Buffer(tol)[0] as Polyline;
                 var needDoors = GetNeedDoors(doors, bufferRoom);
@@ -30,13 +32,20 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
                 var nLanes = GetNeedLanes(lanes, room);
 
                 //计算延申线（用于计算最短路径）
-                var extendLines = CreateExtendLines(doorPts, lanes);
-                var allLines = new List<Line>(lanes);
+                var extendLines = CreateExtendLines(doorPts, nLanes);
+                using (Linq2Acad.AcadDatabase db = Linq2Acad.AcadDatabase.Active())
+                {
+                    foreach (var item in extendLines)
+                    {
+                        db.ModelSpace.Add(item);
+                    }
+                }
+                var allLines = new List<Line>(nLanes);
                 allLines.AddRange(extendLines);
-                allLines = UtilService.GetNodedLines(allLines, room);
+                allLines = UtilService.GetNodedLines(allLines, room.Buffer(distance)[0] as Polyline);
 
                 //获取布置点位信息
-                var layoutInfo = GetLayoutPts(lanes);
+                var layoutInfo = GetLayoutPts(nLanes);
 
                 //计算布置点朝向
                 var layoutPtInfo = CalLayoutPtDir(layoutInfo, allLines, doorPts);
@@ -60,8 +69,8 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             var ptInf = CalPtDistanceToExit(allLines, doorPts);
             foreach (var info in layoutInfo)
             {
-                var linePtInfo = ptInf.Where(x => UtilService.CheckPointIsOnLine(info.Key, x.Key, 1)).ToList();
-                if (linePtInfo.Count < 0)
+                var linePtInfo = ptInf.Where(x => UtilService.CheckPointIsOnLine(info.Key, x.Key, 3)).ToList();
+                if (linePtInfo.Count <= 0)
                 {
                     continue;
                 }
@@ -92,11 +101,11 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         {
             Dictionary<Point3d, double> ptInfo = new Dictionary<Point3d, double>();
             DijkstraAlgorithm dijkstra = new DijkstraAlgorithm(allLines.Cast<Curve>().ToList());
-            var pts = allLines.GetAllPoints();
+            var pts = allLines.GetAllPoints().OrderBy(x => x.X).ThenBy(y => y.Y).ToList();
             foreach (var pt in pts)
             {
                 var pathInfo = dijkstra.FindingAllPathMinNodeLength(pt)
-                    .Where(x => doorPts.Any(y => y.IsEqualTo(x.Key, new Tolerance(1, 1))))
+                    .Where(x => doorPts.Any(y => y.IsEqualTo(x.Key, new Tolerance(3, 3))))
                     .OrderBy(x => x.Value)
                     .First();
                 ptInfo.Add(pt, pathInfo.Value);
@@ -123,7 +132,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
 
                 var firPt = sp + space / 2 * dir;
                 List<Point3d> layoutPts = new List<Point3d>() { firPt };
-                for (int i = 1; i <= num; i++)
+                for (int i = 1; i < num; i++)
                 {
                     firPt = firPt + space * dir;
                     layoutPts.Add(firPt);
@@ -146,7 +155,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             List<Line> extendLines = new List<Line>();
             foreach (var pt in doorPts)
             {
-                Line line = lanes.OrderBy(x => x.GetClosestPointTo(pt, false)).First();
+                Line line = lanes.OrderBy(x => x.GetClosestPointTo(pt, false).DistanceTo(pt)).First();
                 extendLines.Add(new Line(pt, line.GetClosestPointTo(pt, false)));
             }
 
@@ -174,8 +183,8 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         private List<Line> GetNeedLanes(List<Line> lanes, Polyline room)
         {
             ThCADCoreNTSSpatialIndex thCADCoreNTSSpatialIndex = new ThCADCoreNTSSpatialIndex(lanes.ToCollection());
-            var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Polyline>().ToList();
-            return needLanes.SelectMany(x => room.Trim(x).Cast<Line>().ToList()).ToList();
+            var needLanes = thCADCoreNTSSpatialIndex.SelectCrossingPolygon(room).Cast<Line>().ToList();
+            return needLanes.SelectMany(x => room.Trim(x).Cast<Polyline>().Select(y => new Line(y.StartPoint, y.EndPoint))).ToList();
         }
     }
 }

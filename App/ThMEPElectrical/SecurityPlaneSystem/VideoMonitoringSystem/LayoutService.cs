@@ -29,19 +29,13 @@ namespace ThMEPElectrical.VideoMonitoringSystem
             return layoutInfo;
         }
 
-        public void LaneLayoutService(List<Line> lanes, List<Polyline> doors, List<Polyline> rooms)
+        public List<KeyValuePair<Point3d, Vector3d>> LaneLayoutService(List<Line> lanes, List<Polyline> doors, List<ThIfcRoom> rooms)
         {
 
             LayoutVideoByLine layout = new LayoutVideoByLine();
             var layoutInfo = layout.Layout(lanes, doors, rooms);
 
-            using (AcadDatabase db = AcadDatabase.Active())
-            {
-                foreach (var item in layoutInfo)
-                {
-                    db.ModelSpace.Add(new Line(item.Key, item.Key + 1000 * item.Value));
-                }
-            }
+            return layoutInfo;
         }
     }
 }

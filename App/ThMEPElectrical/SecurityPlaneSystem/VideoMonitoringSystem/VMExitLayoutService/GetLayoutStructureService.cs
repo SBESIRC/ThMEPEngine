@@ -19,7 +19,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
     {
         double tol = 10;
         double angle = 135;
-        double layoutRange = 10000;
+        double layoutRange = 5000;
         double blindArea = 1250;
         double length = 200;
 

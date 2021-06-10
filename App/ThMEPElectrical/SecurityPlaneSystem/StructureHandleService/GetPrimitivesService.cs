@@ -44,7 +44,7 @@ namespace ThMEPElectrical.StructureHandleService
                 laneLines.ForEach(x =>
                 {
                     var transCurve = x.Clone() as Curve;
-                    originTransformer.Transform(transCurve);
+                    //originTransformer.Transform(transCurve);
                     objs.Add(transCurve);
                 });
             }
@@ -80,14 +80,14 @@ namespace ThMEPElectrical.StructureHandleService
                     LayerFilter = new List<string> { "AI-房间框线" },
                 };
                 roomEngine.ExtractFromMS(acdb.Database);
-                roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //roomEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var markEngine = new ThDB3RoomExtractionEngine()
                 {
                     LayerFilter = new List<string> { "AI-房间名称" },
                 };
                 markEngine.ExtractFromMS(acdb.Database);
-                markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
+                //markEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
 
                 var boundaryEngine = new ThDB3RoomRecognitionEngine();
                 boundaryEngine.Recognize(roomEngine.Results, polyline.Vertices());
@@ -114,7 +114,7 @@ namespace ThMEPElectrical.StructureHandleService
             using (AcadDatabase acdb = AcadDatabase.Active())
             {
                 doors = acdb.ModelSpace.OfType<Polyline>().Where(x => x.Layer == "AI-门").Select(x => x.Clone() as Polyline).ToList();
-                doors.ForEach(x => originTransformer.Transform(x));
+                //doors.ForEach(x => originTransformer.Transform(x));
                 //var doorExtractEngine = new ThDoorExtractionEngine();
                 //doorExtractEngine.Extract(acdb.Database);
                 //doorExtractEngine.Results.ForEach(x => originTransformer.Transform(x.Geometry));
