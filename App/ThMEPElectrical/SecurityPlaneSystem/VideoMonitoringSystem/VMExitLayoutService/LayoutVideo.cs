@@ -34,7 +34,7 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
         /// <returns></returns>
         private Point3d CalLayoutPt(List<Point3d> pts, Vector3d dir, Point3d doorPt)
         {
-            return pts.ToDictionary(x =>x,y =>
+            return pts.Distinct().ToDictionary(x =>x,y =>
             {
                 var layoutDir = (y - doorPt).GetNormal();
                 double angle = layoutDir.GetAngleTo(dir);
@@ -89,13 +89,13 @@ namespace ThMEPElectrical.VideoMonitoringSystem.VMExitLayoutService
             List<Point3d> pts = new List<Point3d>();
             foreach (var wall in walls)
             {
-                var allPts = wall.Vertices();
+                var bufferWall = wall.Buffer(bufferWidth)[0] as Polyline;
+                var allPts = bufferWall.Vertices();
                 foreach (Point3d pt in allPts)
                 {
                     var checkLine = new Line(pt, doorPt);
                     if (CheckIntersectWithStruc(checkLine, walls, columns))
                     {
-                        var bufferWall = wall.Buffer(bufferWidth)[0] as Polyline;
                         var allLines = UtilService.GetAllLinesInPolyline(bufferWall);
                         var interPts = allLines.Select(x => x.GetClosestPointTo(pt, false)).OrderBy(x => x.DistanceTo(pt)).ToList();
                         pts.Add(interPts[0]);

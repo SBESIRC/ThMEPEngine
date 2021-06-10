@@ -17,6 +17,7 @@ using NFox.Cad;
 using System.IO;
 using ThCADExtension;
 using ThMEPWSS.Diagram.ViewModel;
+using ThMEPEngineCore.CAD;
 
 namespace ThMEPWSS.Command
 {
@@ -41,10 +42,15 @@ namespace ThMEPWSS.Command
                 range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
                 range.Add(input.Item2);
                 range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-                waterwellEngine.RecognizeMS(database.Database, range);
-                foreach (ThIfcDistributionFlowElement element in waterwellEngine.Elements)
+                waterwellEngine.Recognize(database.Database, range);
+                foreach (var element in waterwellEngine.Datas)
                 {
-                    ThWWaterWell waterWell = ThWWaterWell.Create(element.Outline);
+                    ThWWaterWell waterWell = ThWWaterWell.Create(element);
+
+                    database.ModelSpace.Add(waterWell.OBB);
+                    waterWell.Outline.ColorIndex = 1;
+                    waterWell.Outline.SetDatabaseDefaults();
+
                     waterWell.Init();
                     waterWellList.Add(waterWell);
                 }
@@ -67,35 +73,69 @@ namespace ThMEPWSS.Command
             }
             return deepWellPump;
         }
-        public List<Line> GetWallColumnEdges()
+        public List<Line> GetWallColumnEdges(Point3dCollection polygon)
         {
-            using (var database = AcadDatabase.Active())
-            using (var acadDb = AcadDatabase.Use(database.Database))
+            var results = new List<Line>();
+            using (var acadDatabase = AcadDatabase.Active())
+            using (var columnEngine = new ThColumnRecognitionEngine())
+            using (var shearWallEngine = new ThShearWallRecognitionEngine())
+            using (var archWallEngine = new ThDB3ArchWallRecognitionEngine())
             {
-                return acadDb.ModelSpace.OfType<Line>().Where(o => o.Layer == "墙柱边线").ToList();
+                columnEngine.Recognize(acadDatabase.Database, polygon);
+                shearWallEngine.Recognize(acadDatabase.Database, polygon);
+                archWallEngine.Recognize(acadDatabase.Database, polygon);
+                results.AddRange(ToLines(columnEngine.Elements.Cast<ThIfcColumn>().Select(o => o.Outline).ToList()));
+                results.AddRange(ToLines(shearWallEngine.Elements.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
+                results.AddRange(ToLines(archWallEngine.Elements.Cast<ThIfcWall>().Select(o => o.Outline).ToList()));
+                return results;
             }
+        }
+        private List<Line> ToLines(List<Entity> entities)
+        {
+            //要设置分割长度TesslateLength
+            var results = new List<Line>();
+            entities.ForEach(o =>
+            {
+                if(o is Polyline polyline)
+                {
+                    results.AddRange(polyline.ToLines());
+                }
+                else if(o is MPolygon mPolygon)
+                {
+                    results.AddRange(mPolygon.Loops().SelectMany(l => l.ToLines()));
+                }
+                else if(o is Circle circle)
+                {
+                    results.AddRange(circle.Tessellate(50.0).ToLines());
+                }
+                else
+                {
+                    throw new NotSupportedException();
+                }
+            });
+            return results;
         }
         public List<Line> GetWallColumnEdgesInRange(Tuple<Point3d, Point3d> input)
         {
-            var allEdges = GetWallColumnEdges();
             var range = new Point3dCollection();
             range.Add(input.Item1);
             range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
             range.Add(input.Item2);
             range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
-            var spatialIndex = new ThCADCoreNTSSpatialIndex(allEdges.ToCollection());
-            var dbObjects = spatialIndex.SelectCrossingPolygon(range);
+            var allEdges = GetWallColumnEdges(range);
+            //var spatialIndex = new ThCADCoreNTSSpatialIndex(allEdges.ToCollection());
+            //var dbObjects = spatialIndex.SelectCrossingPolygon(range);
 
-            var rst = new List<Line>();
-            foreach(var obj in dbObjects)
-            { 
-                if(obj is Line)
-                {
-                    rst.Add(obj as Line);
-                }
-            }
+            //var rst = new List<Line>();
+            //foreach(var obj in dbObjects)
+            //{ 
+            //    if(obj is Line)
+            //    {
+            //        rst.Add(obj as Line);
+            //    }
+            //}
 
-            return rst;
+            return allEdges;
         }
         public List<Point3d> GetParkSpacePointInRange(Tuple<Point3d, Point3d> input)
         {
@@ -119,6 +159,33 @@ namespace ThMEPWSS.Command
                     {
                         var blk = obj as BlockReference;
                         rst.Add(blk.Position);
+                    }
+                }
+                return rst;
+            }
+        }
+        public List<BlockReference> GetPipeInRange(Tuple<Point3d, Point3d> input)
+        {
+            using (var database = AcadDatabase.Active())
+            using (var acadDb = AcadDatabase.Use(database.Database))
+            {
+                var range = new Point3dCollection();
+                range.Add(input.Item1);
+                range.Add(new Point3d(input.Item1.X, input.Item2.Y, 0));
+                range.Add(input.Item2);
+                range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
+
+                var partSpace = acadDb.ModelSpace.OfType<BlockReference>().Where(o => o.GetEffectiveName() == "带定位立管" || o.GetEffectiveName() == "带定位立管150").ToList();
+                var spatialIndex = new ThCADCoreNTSSpatialIndex(partSpace.ToCollection());
+                var dbObjects = spatialIndex.SelectCrossingPolygon(range);
+
+                var rst = new List<BlockReference>();
+                foreach (var obj in dbObjects)
+                {
+                    if (obj is BlockReference)
+                    {
+                        var blk = obj as BlockReference;
+                        rst.Add(blk);
                     }
                 }
                 return rst;
@@ -157,6 +224,7 @@ namespace ThMEPWSS.Command
         }
         public void Execute()
         {
+            using (var database = AcadDatabase.Active())
             using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
             {
                 ImportBlockFile();
@@ -178,12 +246,13 @@ namespace ThMEPWSS.Command
                         return;
                     }
                     //获取墙
-                    List<Line> wellLine = GetWallColumnEdgesInRange(input);
+                    List<Line> wallLine = GetWallColumnEdgesInRange(input);
                     //获取车位
                     List<Point3d> parkPoint = GetParkSpacePointInRange(input);
                     //获取潜水泵
                     List<ThWDeepWellPump> pumpList = GetDeepWellPumpList();
-
+                    //获取带定位水管
+                    List<BlockReference> pipeList = GetPipeInRange(input);
                     //添加排水泵
                     foreach (ThWWaterWell waterWell in water_well_list)
                     {
@@ -198,14 +267,19 @@ namespace ThMEPWSS.Command
                         }
                         //计算集水井是否靠近墙
                         waterWell.ParkSpacePoint = parkPoint;
-                        waterWell.NearWall(wellLine, 50);
-                        //计算集水井是否包含潜水泵
+                        waterWell.NearWall(wallLine, 50);
+                        //计算潜水泵是否在集水井内
                         foreach (ThWDeepWellPump pump in pumpList)
                         {
                             if (waterWell.ContainPump(pump))
                             {
                                 break;
                             }
+                        }
+                        //计算水管是否在集水井内
+                        foreach (var pump in pipeList)
+                        {
+                            waterWell.ContainPipe(pump);
                         }
 
                         if (configInfo.PumpInfo.isCoveredWaterWell)
@@ -214,6 +288,7 @@ namespace ThMEPWSS.Command
                             {
                                 waterWell.RemovePump();
                             }
+                            waterWell.RemovePipe();
                             if (!waterWell.AddDeepWellPump(configInfo))
                             {
                                 //提示或写入日志表当前集水井添加泵失败

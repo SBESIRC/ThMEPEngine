@@ -1,4 +1,4 @@
-﻿using System;
+﻿using NFox.Cad;
 using System.Linq;
 using ThCADCore.NTS;
 using ThMEPEngineCore.Model;
@@ -6,7 +6,6 @@ using ThMEPEngineCore.Engine;
 using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
-using NFox.Cad;
 
 namespace ThMEPEngineCore.Service
 {
@@ -107,11 +106,15 @@ namespace ThMEPEngineCore.Service
         public override void Create(Database database, Point3dCollection polygon)
         {
             using (var engine = new ThColumnRecognitionEngine())
+            using (var db3Engine = new ThDB3ColumnRecognitionEngine())
             {
                 // 识别结构柱
                 engine.Recognize(database, polygon);
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(
-                    engine.Elements.Select(o => o.Outline).ToCollection());
+                db3Engine.Recognize(database, polygon);
+                var dbObjs = new DBObjectCollection();
+                engine.Elements.ForEach(o=>dbObjs.Add(o.Outline));
+                db3Engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
+                SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
         }
     }
@@ -127,8 +130,9 @@ namespace ThMEPEngineCore.Service
             {
                 // 识别结构柱
                 engine.Recognize(database, polygon);
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(
-                    engine.Elements.Select(o => o.Outline).ToCollection());
+                var dbObjs = new DBObjectCollection();
+                engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
+                SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
         }
     }
@@ -141,11 +145,15 @@ namespace ThMEPEngineCore.Service
         public override void Create(Database database, Point3dCollection polygon)
         {
             using (var engine = new ThShearWallRecognitionEngine())
+            using (var db3Engine = new ThDB3ShearWallRecognitionEngine())
             {
                 // 识别结构柱
                 engine.Recognize(database, polygon);
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(
-                    engine.Elements.Select(o => o.Outline).ToCollection());
+                db3Engine.Recognize(database, polygon);
+                var dbObjs = new DBObjectCollection();
+                engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
+                db3Engine.Elements.ForEach(o => dbObjs.Add(o.Outline));
+                SpatialIndex = new ThCADCoreNTSSpatialIndex(dbObjs);
             }
         }
     }
@@ -161,8 +169,15 @@ namespace ThMEPEngineCore.Service
             {
                 // 识别结构柱
                 engine.Recognize(database, polygon);
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(
+                if(engine.Elements.Count>0)
+                {
+                    SpatialIndex = new ThCADCoreNTSSpatialIndex(
                     engine.Elements.Select(o => o.Outline).ToCollection());
+                }
+                else
+                {
+                    SpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
+                }
             }
         }
     }
@@ -178,8 +193,15 @@ namespace ThMEPEngineCore.Service
             {
                 // 识别结构柱
                 engine.Recognize(database, polygon);
-                SpatialIndex = new ThCADCoreNTSSpatialIndex(
+                if(engine.Elements.Count>0)
+                {
+                    SpatialIndex = new ThCADCoreNTSSpatialIndex(
                     engine.Elements.Select(o => o.Outline).ToCollection());
+                }
+                else
+                {
+                    SpatialIndex = new ThCADCoreNTSSpatialIndex(new DBObjectCollection());
+                }
             }
         }
     }

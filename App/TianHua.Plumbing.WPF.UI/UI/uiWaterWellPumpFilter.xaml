@@ -10,9 +10,9 @@
                     Title="集水井图块识别"
                     SizeToContent="Height"
                     Width="200"
-                    Height="462.154"
+                    Height="320"
              mc:Ignorable="d" >
-    <Grid>
+    <Grid Margin="5,5,5,5">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="Auto"></RowDefinition>

@@ -13,6 +13,11 @@ namespace ThMEPEngineCore.Engine
     {
         public List<ThRawIfcBuildingElementData> Results { get; protected set; }
 
+        public ThBuildingElementExtractionEngine()
+        {
+            Results = new List<ThRawIfcBuildingElementData>();
+        }
+
         public abstract void Extract(Database database);
     }
 }

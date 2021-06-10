@@ -66,7 +66,8 @@ namespace ThMEPEngineCore.Engine
         {
             var objs = new DBObjectCollection() { curve };
             objs = ThWindowSimplifier.Simplify(objs);
-            if(objs.Count > 0 && objs[0] is Polyline polyline)
+            objs = ThWindowSimplifier.Normalize(objs);
+            if (objs.Count > 0 && objs[0] is Polyline polyline)
             {
                 return ThPolylineHandler.Handle(polyline);
             }

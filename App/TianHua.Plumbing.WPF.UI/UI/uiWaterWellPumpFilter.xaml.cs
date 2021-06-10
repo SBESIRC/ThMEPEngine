@@ -23,7 +23,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
     /// </summary>
     public partial class uiWaterWellPumpFilter : ThCustomWindow
     {
-        WaterWellIdentifyConfigInfo identifyConfigInfo = new WaterWellIdentifyConfigInfo();
+        private WaterWellIdentifyConfigInfo identifyConfigInfo = new WaterWellIdentifyConfigInfo();
         public uiWaterWellPumpFilter()
         {
             InitializeComponent();
@@ -31,6 +31,41 @@ namespace TianHua.Plumbing.WPF.UI.UI
         public WaterWellIdentifyConfigInfo GetIdentfyConfigInfo()
         {
             return identifyConfigInfo;
+        }
+
+        public void SetWaterWellIdentifyConfigInfo(WaterWellIdentifyConfigInfo info)
+        {
+            for(int i = 0; i < info.WhiteList.Count;i++)
+            {
+                if( 0 == i)
+                {
+                    WhiteTextBox0.Text = info.WhiteList[i];
+                }
+                else if (1 == i)
+                {
+                    WhiteTextBox1.Text = info.WhiteList[i];
+                }
+                else if (2 == i)
+                {
+                    WhiteTextBox2.Text = info.WhiteList[i];
+                }
+            }
+
+            for (int i = 0; i < info.BlackList.Count; i++)
+            {
+                if (0 == i)
+                {
+                    BlackTextBox0.Text = info.BlackList[i];
+                }
+                else if (1 == i)
+                {
+                    BlackTextBox1.Text = info.BlackList[i];
+                }
+                else if (2 == i)
+                {
+                    BlackTextBox2.Text = info.BlackList[i];
+                }
+            }
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -57,15 +92,15 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
             if (!BlackTextBox0.Text.IsNullOrEmpty())
             {
-                identifyConfigInfo.BlackList.Add(WhiteTextBox0.Text);
+                identifyConfigInfo.BlackList.Add(BlackTextBox0.Text);
             }
             if (!BlackTextBox1.Text.IsNullOrEmpty())
             {
-                identifyConfigInfo.BlackList.Add(WhiteTextBox1.Text);
+                identifyConfigInfo.BlackList.Add(BlackTextBox1.Text);
             }
             if (!BlackTextBox2.Text.IsNullOrEmpty())
             {
-                identifyConfigInfo.BlackList.Add(WhiteTextBox2.Text);
+                identifyConfigInfo.BlackList.Add(BlackTextBox2.Text);
             }
 
             this.DialogResult = true;

@@ -18,5 +18,14 @@ namespace ThMEPElectrical
                 cmd.Execute();
             }
         }
+
+        [CommandMethod("TIANHUACAD", "ThVMLSystem", CommandFlags.Modal)]
+        public void ThVideoMLSystem()
+        {
+            using (var cmd = new ThVideoMonitoringSystemWithLaneCommand())
+            {
+                cmd.Execute();
+            }
+        }
     }
 }

@@ -52,20 +52,10 @@ namespace ThMEPEngineCore.Engine
                     {
                         Visitors.ForEach(v =>
                         {
-                            v.Results.AddRange(DoExtract(e, v));
+                            v.DoExtract(v.Results, e);
                         });
                     });
             }
-        }
-
-        private List<ThRawIfcAnnotationElementData> DoExtract(Entity e, ThAnnotationElementExtractionVisitor visitor)
-        {
-            var results = new List<ThRawIfcAnnotationElementData>();
-            if (visitor.CheckLayerValid(e))
-            {
-                visitor.DoExtract(results, e);
-            }
-            return results;
         }
 
         private List<ThRawIfcAnnotationElementData> DoExtract(

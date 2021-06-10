@@ -30,17 +30,18 @@ namespace ThMEPEngineCore.Service
         public static Line GetCenterLine(DBText dbText)
         {
             var boundary = dbText.TextOBB();
-            return GetCenterLine(boundary,dbText.Rotation);
+            var mt = Matrix3d.Rotation(dbText.Rotation, Vector3d.ZAxis, dbText.Position);
+            return GetCenterLine(boundary,Vector3d.XAxis.TransformBy(mt));
         }
         public static Line GetCenterLine(MText mText)
         {
             var boundary = mText.TextOBB();
-            return GetCenterLine(boundary, mText.Direction.GetAngleTo(Vector3d.XAxis));
+            return GetCenterLine(boundary, mText.Direction);
         }
-        private static Line GetCenterLine(Polyline textObb,double rotation)
+        private static Line GetCenterLine(Polyline textObb,Vector3d vec)
         {
             var lines = textObb.ToLines();
-            lines = lines.Where(o => IsParallel(o.Angle, rotation)).ToList();
+            lines = lines.Where(o => ThGeometryTool.IsParallelToEx(o.LineDirection(),vec)).ToList();
 
             if (lines[0].LineDirection().IsCodirectionalTo(lines[1].LineDirection(), new Tolerance(1, 1)))
             {

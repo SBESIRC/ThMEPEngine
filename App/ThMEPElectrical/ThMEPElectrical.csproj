@@ -94,6 +94,7 @@
     <Compile Include="Command\ThBConvertCommand.cs" />
     <Compile Include="Command\ThLaneLineCommand.cs" />
     <Compile Include="Command\ThVideoMonitoringSystemCommand.cs" />
+    <Compile Include="Command\ThVideoMonitoringSystemWithLaneCommand.cs" />
     <Compile Include="ConnectPipe\ConnetPipeService.cs" />
     <Compile Include="ConnectPipe\InsertConnectPipeService.cs" />
     <Compile Include="ConnectPipe\Model\BroadcastModel.cs" />
@@ -158,6 +159,7 @@
     <Compile Include="PostProcess\MainSecondBeamPointAdjustor.cs" />
     <Compile Include="PostProcess\PlacePointAdjustor.cs" />
     <Compile Include="PostProcess\Adjustor\RegularPlacePointAdjustor.cs" />
+    <Compile Include="SecurityPlaneSystem\StructureHandleService\CommonService.cs" />
     <Compile Include="SecurityPlaneSystem\StructureHandleService\GetPrimitivesService.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemRecognitionEngine.cs" />
     <Compile Include="SystemDiagram\Engine\ThAutoFireAlarmSystemVisitor.cs" />
