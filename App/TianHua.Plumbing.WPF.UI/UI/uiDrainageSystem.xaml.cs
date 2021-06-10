@@ -23,30 +23,25 @@ namespace TianHua.Plumbing.WPF.UI.UI
 
         private void btnSet_Click(object sender, RoutedEventArgs e)
         {
-            if (null == viewModel || viewModel.SelectRadionButton == null)
-            {
-                MessageBox.Show("数据错误：获取选中住户分区失败，无法进行后续操作");
-                return;
-            }
-            var oldViewModel = viewModel.SelectRadionButton.SetViewModel.Clone();
-            uiDrainageSystemSet systemSet = new uiDrainageSystemSet(viewModel.SelectRadionButton.Content,viewModel.SelectRadionButton.SetViewModel);
+            var oldViewModel = viewModel.SetViewModel?.Clone();
+            uiDrainageSystemSet systemSet = new uiDrainageSystemSet(viewModel.SetViewModel);
             systemSet.Owner = this;
             var ret= systemSet.ShowDialog();
             if (ret == false)
             {
                 //用户取消了操作
-                viewModel.SelectRadionButton.SetViewModel = oldViewModel;
+                viewModel.SetViewModel = oldViewModel;
                 return;
             }
 
             //用户确认，进行后续的业务逻辑
             //step1 保存用户的输入信息
-            foreach (var item in viewModel.DynamicRadioButtons) 
-            {
-                if (item == null || !item.IsChecked)
-                    continue;
-                item.SetViewModel = systemSet.setViewModel;
-            }
+            //foreach (var item in viewModel.DynamicRadioButtons) 
+            //{
+            //    if (item == null || !item.IsChecked)
+            //        continue;
+            //    item.SetViewModel = systemSet.setViewModel;
+            //}
         }
 
         //run

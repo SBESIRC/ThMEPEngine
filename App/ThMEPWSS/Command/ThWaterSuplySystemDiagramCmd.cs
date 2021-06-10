@@ -36,7 +36,7 @@ namespace ThMEPWSS.Command
                 return;
             }
             var areaIndex = Convert.ToInt32(UiConfigs.SelectRadionButton.Content.Split('组')[1]) - 1;//读取分区
-            var setViewModel = UiConfigs.DynamicRadioButtons[areaIndex].SetViewModel;
+            var setViewModel = UiConfigs.SetViewModel;
 
             var layingMethod = (int)LayingMethod.Piercing;//敷设方式默认为穿梁
             if (setViewModel.DynamicRadios[1].IsChecked)
@@ -102,6 +102,11 @@ namespace ThMEPWSS.Command
                 if(lowestStorey[i] > highestStorey[i])
                 {
                     MessageBox.Show("当前行最底层的值大于最高层");
+                    return;
+                }
+                if(lowestStorey[i] > floorNumbers || highestStorey[i] > floorNumbers)
+                {
+                    MessageBox.Show("水管楼层超过最高楼层");
                     return;
                 }
             }

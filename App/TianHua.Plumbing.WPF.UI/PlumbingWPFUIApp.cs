@@ -31,7 +31,7 @@ namespace TianHua.Plumbing.WPF.UI.UI
             if (null != uiSet && uiSet.IsLoaded)
                 return;
 
-            uiSet = new uiDrainageSystemSet("住户分组1");
+            uiSet = new uiDrainageSystemSet();
             AcadApp.ShowModelessWindow(uiSet);
         }
 

@@ -25,10 +25,10 @@ namespace TianHua.Plumbing.WPF.UI.UI
     {
         public DrainageSetViewModel setViewModel;
         //private DrainageSetViewModel orgViewModel;
-        public uiDrainageSystemSet(string attrTitle, DrainageSetViewModel viewModel =null)
+        public uiDrainageSystemSet( DrainageSetViewModel viewModel = null)
         {
             InitializeComponent();
-            this.Title = "参数设置-" + attrTitle;
+            this.Title = "参数设置";
             setViewModel = viewModel;
             //orgViewModel = viewModel;
             if (null == viewModel)

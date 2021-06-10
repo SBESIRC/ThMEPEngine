@@ -152,7 +152,7 @@ namespace ThMEPWSS.Diagram.ViewModel
                     DynamicRadioButtons = new ObservableCollection<DynamicRadioButtonViewModel>();
                     for (int i = 0; i < AreaNums; i++)
                     {
-                        DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true, SetViewModel = new DrainageSetViewModel() });
+                        DynamicRadioButtons.Add(new DynamicRadioButtonViewModel { Content = "分组" + Convert.ToString(i + 1), GroupName = "group", IsChecked = true});
                     }
                 }
             }
@@ -189,6 +189,8 @@ namespace ThMEPWSS.Diagram.ViewModel
                 return dynamicRadioButtons.Where(c => c.IsChecked).FirstOrDefault();
             }
         }
+
+        public DrainageSetViewModel SetViewModel { get; set; } = new DrainageSetViewModel();
     }
 
     public class DynamicRadioButton
@@ -200,6 +202,6 @@ namespace ThMEPWSS.Diagram.ViewModel
 
     public class DynamicRadioButtonViewModel : DynamicRadioButton
     {
-        public DrainageSetViewModel SetViewModel { get; set; }
+        //public DrainageSetViewModel SetViewModel { get; set; }
     }
 }
