@@ -631,10 +631,12 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
         }
         public static void FocusMainWindow()
         {
-            //Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
-            var w = Autodesk.AutoCAD.ApplicationServices.Application.MainWindow;
-            var mi = w.GetType().GetMethod("Focus");
-            mi?.Invoke(w, null);
+#if ACAD_ABOVE_2014
+            Autodesk.AutoCAD.ApplicationServices.Application.MainWindow.Focus();
+#endif
+            //var w = Autodesk.AutoCAD.ApplicationServices.Application.MainWindow;
+            //var mi = w.GetType().GetMethod("Focus");
+            //mi?.Invoke(w, null);
         }
         public static void OpenCadDwgFile(string file, bool readOnly = false)
         {
@@ -3057,7 +3059,6 @@ new Line() { StartPoint = r.LeftButtom.ToPoint3d(), EndPoint = r.RightTop.ToPoin
             {
                 var db = adb.Database;
                 Dbg.BuildAndSetCurrentLayer(db);
-                Dr.DrawLabelRight(Dbg.SelectPoint(), "xx");
 
                 //var t = DU.DrawTextLazy("测试", 100, Dbg.SelectPoint());
                 var dbText = new DBText

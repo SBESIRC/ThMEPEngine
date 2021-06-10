@@ -1296,11 +1296,11 @@ namespace ThMEPWSS.Uitl
             var phi = AngleFromDegree(degree);
             return new Tuple<double, double>(radius * Math.Cos(phi), radius * Math.Sin(phi));
         }
-        public static double AngleToDegree(double angle)
+        public static double AngleToDegree(this double angle)
         {
             return angle * 180 / Math.PI;
         }
-        public static double AngleFromDegree(double degree)
+        public static double AngleFromDegree(this double degree)
         {
             return degree * Math.PI / 180;
         }

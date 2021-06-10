@@ -3028,6 +3028,7 @@ new Point2d(maxX, minY)
             Dbg.FocusMainWindow();
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
             {
                 try
                 {
@@ -3071,6 +3072,7 @@ new Point2d(maxX, minY)
             ThRainSystemService.ImportElementsFromStdDwg();
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
             {
                 try
                 {
@@ -3132,6 +3134,7 @@ new Point2d(maxX, minY)
             if (commandContext.StoreyContext.thStoreysDatas == null) return;
             using (Dbg.DocumentLock)
             using (var adb = AcadDatabase.Active())
+            using (var tr = new DrawingTransaction(adb))
             {
                 try
                 {
@@ -3338,8 +3341,13 @@ new Point2d(maxX, minY)
                             fs.Add(() => adb.Blocks.Import(blockDb.Blocks.ElementOrDefault(blk)), blk);
                         }
                     }
-                    fs.Add(() => adb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE1"), false), "TH-STYLE1");
-                    fs.Add(() => adb.TextStyles.Import(blockDb.TextStyles.ElementOrDefault("TH-STYLE3"), false), "TH-STYLE3");
+                    {
+                        blockDb.DimStyles.ForEach(x => adb.DimStyles.Import(x));
+                        foreach (var txtStyle in blockDb.TextStyles)
+                        {
+                            adb.TextStyles.Import(txtStyle);
+                        }
+                    }
                     {
                         var layers = blockDb.Layers.Select(x => x.Name).ToList();
                         foreach (var layer in layers)

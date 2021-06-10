@@ -164,6 +164,7 @@ namespace ThMEPWSS.Pipe.Model
                 var line = DU.DrawLineLazy(basePt.X, basePt.Y, basePt.X + lineLen, basePt.Y);
                 var dbt = DU.DrawTextLazy(Label, TEXT_HEIGHT, new Point3d(basePt.X + INDEX_TEXT_OFFSET_X, basePt.Y + INDEX_TEXT_OFFSET_Y, 0));
                 Dr.SetLabelStylesForWNote(line, dbt);
+                DU.DrawBlockReference(blkName: "标高", basePt: basePt.OffsetX(550), layer: "W-NOTE", props: new Dictionary<string, string>() { { "标高", "" } });
             }
             if (Label == "RF")
             {
@@ -276,7 +277,7 @@ namespace ThMEPWSS.Pipe.Model
         /// 标注
         /// </summary>
         public string Label { get; set; } = string.Empty;
-        public string DN { get; set; } = string.Empty;
+        public string DN { get; set; } = "DN25";
         /// <summary>
         /// 是否有套管
         /// </summary>

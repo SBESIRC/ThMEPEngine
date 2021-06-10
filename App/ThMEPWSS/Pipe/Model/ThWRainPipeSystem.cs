@@ -94,11 +94,11 @@ namespace ThMEPWSS.Pipe.Model
                     var c = ctxs[i];
                     if (s.Label == "3F")
                     {
-                        NewMethod(ctx, c);
+                        DrawDNText(ctx, c);
                     }
                 }
             }
-
+            var ok = false;
             {
                 var re = new Regex(@"(\d+)F");
                 var storeys = ctx.WSDStoreys.Where(s => re.IsMatch(s.Label)).ToList();
@@ -111,7 +111,7 @@ namespace ThMEPWSS.Pipe.Model
                         if (s != null && s.Label == targetStorey?.Label)
                         {
                             var c = ctxs[i];
-                            NewMethod(ctx, c);
+                            DrawDNText(ctx, c);
                         }
                     }
                 }
@@ -126,26 +126,29 @@ namespace ThMEPWSS.Pipe.Model
                             if (s != null && s.Label == targetStorey?.Label)
                             {
                                 var c = ctxs[i];
-                                //立管编号1 立管编号2
-                                if (texts.Count == 1)
-                                {
-                                    DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(c.BasePoint, texts[0], ""));
-                                }
-                                else if (texts.Count == 2)
-                                {
-                                    DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(c.BasePoint, texts[0], texts[1]));
-                                }
-                                else
-                                {
-                                    DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(c.BasePoint, texts.JoinWith(";"), ""));
-                                }
-
+                                var pt = c.BasePoint;
+                                DrawPipeLabels(texts, pt);
+                                ok = true;
                             }
                         }
                     }
                 }
             }
+            {
+                var storeys = runs.Select(x => x.Storey).Where(x => !string.IsNullOrEmpty(x?.Label)).ToList();
+                //如果楼层熟练小于5层 则在最高层进行立管编号的标注？
+                if (!ok || storeys.Count < 5)
+                {
+                    var s = storeys.LastOrDefault();
+                    if (s != null)
+                    {
+                        Vector3d v = default;
+                        if (s.Label == "RF+2") v = new Vector3d(0, -400, 0);
+                        DrawPipeLabels(texts, ctxs[runs.FindIndex(r => r.Storey == s)].BasePoint+v);
+                    }
+                }
 
+            }
             double sdx = 0;
             for (int i = 0; i < runs.Count; i++)
             {
@@ -308,7 +311,7 @@ namespace ThMEPWSS.Pipe.Model
                             DU.DrawBlockReference(blkName: "通气帽系统", basePt: pt, layer: "W-DRAI-DOME-PIPE", cb: br =>
                             {
                                 br.ObjectId.SetDynBlockValue("距离1", 500.0);
-                                br.ObjectId.SetDynBlockValue("可见性1", "侧墙通气管");
+                                br.ObjectId.SetDynBlockValue("可见性1", "伸顶通气管");
                             });
                         }
                     }
@@ -343,7 +346,7 @@ namespace ThMEPWSS.Pipe.Model
                                 DU.DrawBlockReference(blkName: "通气帽系统", basePt: pt, layer: "W-DRAI-DOME-PIPE", cb: br =>
                                 {
                                     br.ObjectId.SetDynBlockValue("距离1", 500.0);
-                                    br.ObjectId.SetDynBlockValue("可见性1", "侧墙通气管");
+                                    br.ObjectId.SetDynBlockValue("可见性1", "伸顶通气管");
                                 });
                             }
                         }
@@ -403,7 +406,23 @@ namespace ThMEPWSS.Pipe.Model
 
         }
 
-        private static void NewMethod(RainSystemDrawingContext ctx, PipeRunDrawingContext c)
+        private static void DrawPipeLabels(List<string> texts, Point3d pt)
+        {//立管编号1 立管编号2
+            if (texts.Count == 1)
+            {
+                DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(pt, texts[0], ""));
+            }
+            else if (texts.Count == 2)
+            {
+                DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(pt, texts[0], texts[1]));
+            }
+            else
+            {
+                DU.DrawingQueue.Enqueue(adb => Dr.DrawPipeLabel(pt, texts.JoinWith(";"), ""));
+            }
+        }
+
+        private static void DrawDNText(RainSystemDrawingContext ctx, PipeRunDrawingContext c)
         {
             var dn = ctx.VerticalPipeType switch
             {
