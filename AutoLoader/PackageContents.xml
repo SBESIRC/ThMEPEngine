@@ -354,6 +354,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
+                <Command Local="THSJSB"  Global="THSJSB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -364,6 +365,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
+                <Command Local="THSJSB"  Global="THSJSB" />
             </Commands>
         </ComponentEntry>
     </Components>
@@ -374,6 +376,7 @@
             <Commands GroupName="TIANHUACAD">
                 <Command Local="THYSXTT" Global="THYSXTT" />
                 <Command Local="THJSXTT" Global="THJSXTT" />
+                <Command Local="THSJSB"  Global="THSJSB" />
             </Commands>
         </ComponentEntry>
     </Components>
