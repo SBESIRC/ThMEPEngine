@@ -9,6 +9,8 @@ using DotNetARX;
 using ThCADCore.NTS;
 using ThMEPWSS.CADExtensionsNs;
 using System.Diagnostics;
+using ThMEPEngineCore.Engine;
+using ThMEPWSS.Pipe.Engine;
 
 namespace ThMEPWSS.Pipe.Model
 {
@@ -33,10 +35,13 @@ namespace ThMEPWSS.Pipe.Model
         public List<int> WallSide = new List<int>();//靠墙边
         public List<Line> WallLines = null;//墙线
         public List<Point3d> ParkSpacePoint { set; get; }
-        private ThWDeepWellPump DeepWellPump = null;//潜水泵
+        public List<BlockReference> PipeList { set; get; }
+    private ThWDeepWellPump DeepWellPump = null;//潜水泵
+        public Polyline OBB { get; set; }
         public ThWWaterWell()
         {
-           
+            OBB = new Polyline();
+            PipeList = new List<BlockReference>();
         }
         public void Init()
         {
@@ -45,48 +50,21 @@ namespace ThMEPWSS.Pipe.Model
             //将边进行逆时针编号
             EdgeSort();
             //获取长
+            Length = WaterWellVertex[0].DistanceTo(WaterWellVertex[1]);
             //获取宽
+            Width = WaterWellVertex[0].DistanceTo(WaterWellVertex[3]);
             var blk = Outline as BlockReference;
-            if (blk.IsDynamicBlock)
-            {
-                foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
-                {
-                    if (property.PropertyName == "长")
-                    {
-                        Length = (double)property.Value;
-                    }
-                    else if (property.PropertyName == "宽")
-                    {
-                        Width = (double)property.Value;
-                    }
-                }
-            }
-            else
-            {
-                var propDic = blk.ObjectId.GetAttributesInBlockReference();
-                var LENGTH = "长";
-                if (propDic.ContainsKey(LENGTH))
-                {
-                    var val = propDic[LENGTH];
-                    Length = double.Parse(val);
-                }
-                var WIDTH = "宽";
-                if (propDic.ContainsKey(WIDTH))
-                {
-                    var val = propDic[WIDTH];
-                    Width = double.Parse(val);
-                }
-            }
-            Title = blk.GetEffectiveName();            //获取title
             Rotation = blk.Rotation;
         }
         //读取供水系统模块文件的路径
-        public static ThWWaterWell Create(Entity entity)
+        public static ThWWaterWell Create(ThRawIfcDistributionElementData data)
         {
+            var elementInfo = data.Data as WWaterWellElementInfo;
             var waterWell = new ThWWaterWell();
-            waterWell.Outline = entity;
+            waterWell.Outline = data.Geometry;
+            waterWell.OBB = elementInfo.Outline;
             waterWell.Uuid = Guid.NewGuid().ToString();
-
+            waterWell.Title = elementInfo.BlkEffectiveName;
             return waterWell;
         }
         public void RemovePump()
@@ -96,6 +74,17 @@ namespace ThMEPWSS.Pipe.Model
                 using (var db = Linq2Acad.AcadDatabase.Active())
                 {
                     var ent = db.Element<Entity>(DeepWellPump.PumpObjectID, true);
+                    ent.Erase();
+                }
+            }
+        }
+        public void RemovePipe()
+        {
+            foreach (var pipe in PipeList)
+            {
+                using (var db = Linq2Acad.AcadDatabase.Active())
+                {
+                    var ent = db.Element<Entity>(pipe.ObjectId, true);
                     ent.Erase();
                 }
             }
@@ -115,24 +104,22 @@ namespace ThMEPWSS.Pipe.Model
         public bool ContainPump(ThWDeepWellPump pump)
         {
             Point3d postion = pump.GetPosition();
-            var outline = new Polyline() { Closed = true };
-            if (Outline is Polyline polyline)
-            {
-                outline = polyline;
-            }
-            else if (Outline is BlockReference br)
-            {
-                outline = br.GeometricExtents.ToRectangle();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
             //如果point在区域内，获取该点
-            if (outline.Contains(postion))
+            if (OBB.Contains(postion))
             {
                 IsHavePump = true;
                 DeepWellPump = pump;
+                return true;
+            }
+            return false;
+        }
+        public bool ContainPipe(BlockReference pipe)
+        {
+            Point3d postion = pipe.Position;
+            //如果point在区域内，获取该点
+            if (OBB.Contains(postion))
+            {
+                PipeList.Add(pipe);
                 return true;
             }
             return false;
@@ -254,6 +241,7 @@ namespace ThMEPWSS.Pipe.Model
                 {
                     var blkId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-DRAI-EQPM", riserName, position, new Scale3d(1, 1, 1), 0);
                     var blk = acadDb.Element<BlockReference>(blkId);
+                    blk.Rotation = angele * Math.PI / 180;
                     if (blk.IsDynamicBlock)
                     {
                         foreach (DynamicBlockReferenceProperty property in blk.DynamicBlockReferencePropertyCollection)
@@ -273,13 +261,12 @@ namespace ThMEPWSS.Pipe.Model
         }
         public double GetSideAngle(int side)
         {
-            double angle = 0;
-            angle = Rotation + side * 90.0;
-            if (angle >= 360.0)
-            {
-                int w = (int)angle / 360;
-                angle = angle - w * 360.0;
-            }
+            Tuple<int, int> sideLine = WaterWellEdge[side];
+            Point3d point1 = WaterWellVertex[sideLine.Item1];
+            Point3d point2 = WaterWellVertex[sideLine.Item2];
+            var vec = point1.GetVectorTo(point2);
+            var angle = Vector3d.XAxis.GetAngleTo(vec, Vector3d.ZAxis);
+            angle = angle  / Math.PI * 180.0;
             return angle;
         }
         public double GetAcreage()
@@ -290,10 +277,10 @@ namespace ThMEPWSS.Pipe.Model
         }
         private void VertexSort()
         {
-            var vertex = Outline.GeometricExtents.ToRectangle().Vertices();
+            var vertex = OBB.Vertices();
+//            var vertex = Outline.GeometricExtents.ToRectangle().Vertices();
             var blk = Outline as BlockReference;
             Point3d postion = blk.Position;
-//            var value = blk.ObjectId.GetDynBlockValue("Propname");
             int index0 = 0;
             int index1 = 0;
             int index2 = 0;
@@ -348,7 +335,7 @@ namespace ThMEPWSS.Pipe.Model
         }
         private void EdgeSort()
         {
-            //得到四条边顶点index,点按照逆时针旋转
+            //得到四条边顶点index,按照逆时针排序
             Tuple<int, int> edge1 = Tuple.Create(0, 1);
             Tuple<int, int> edge2 = Tuple.Create(3, 0);
             Tuple<int, int> edge3 = Tuple.Create(2, 3);
@@ -420,10 +407,11 @@ namespace ThMEPWSS.Pipe.Model
             foreach (Line line in WallLines)
             {
                 Vector3d line_vector = line.Delta;
-                if (edge_vector.IsParallelTo(line_vector))//如果平行
+//                if (edge_vector.IsParallelTo(line_vector))//如果平行
                 {
-                    double tmpDist = edgeLine.DistanceToOtherLineSegment(line);
-                    if(dist > tmpDist)
+                    double tmpDist = line.DistanceToPoint(edgeLine.GetMidpoint());
+                    //                    double tmpDist = edgeLine.DistanceToOtherLineSegment(line);
+                    if (dist > tmpDist)
                     {
                         dist = tmpDist;
                     }
@@ -709,23 +697,10 @@ namespace ThMEPWSS.Pipe.Model
             Vector3d normal = point1.GetVectorTo(point2).GetNormal();
             double angle = Vector3d.XAxis.GetAngleTo(normal);
             List<Point3d> offsetPoints = GetOffsetPoint(point3, angle + Math.PI * 0.5, 150.0);
-            var outline = new Polyline() { Closed = true };
-            if (Outline is Polyline polyline)
-            {
-                outline = polyline;
-            }
-            else if (Outline is BlockReference br)
-            {
-                outline = br.GeometricExtents.ToRectangle();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
             foreach (Point3d point in offsetPoints)
             {
                 //如果point在区域内，获取该点
-                if (outline.Contains(point))
+                if (OBB.Contains(point))
                 {
                     pumpPos = point;
                     break;
@@ -743,33 +718,29 @@ namespace ThMEPWSS.Pipe.Model
             double length = point1.DistanceTo(point2);
             Vector3d normal = point1.GetVectorTo(point2).GetNormal();
             double angle = Vector3d.XAxis.GetAngleTo(normal);
-            double margin = 300.0;
-            space = length - 300.0 * 2.0;
-            if(space > 900)
+            double margin = 300.0;//边距
+            space = length - margin * 2.0;
+            int tmpInt = (int)((space + 50)/ 100);
+            space = tmpInt * 100;
+            margin = (length - space) / 2.0;
+            if ((space - 900) > 0)
             {
-                margin = (length - 900.0) / 2.0;
                 space = 900;
+                margin = (length - space) / 2.0;
+            }
+            else if((space - 500) < 0)
+            {
+                tmpInt = (int)(space / 100);
+                space = (tmpInt + 1) * 100;
+                margin = (length - space) / 2.0;
             }
             Vector3d vector = normal * margin;
             Point3d tmpPos = point1 + vector;
             List<Point3d> offsetPoints = GetOffsetPoint(tmpPos, angle + Math.PI*0.5, 150);
-            var outline = new Polyline() { Closed=true};
-            if(Outline is Polyline polyline)
-            {
-                outline = polyline;
-            }
-            else if(Outline is BlockReference br)
-            {
-                outline = br.GeometricExtents.ToRectangle();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
             foreach (Point3d point in offsetPoints)
             {
                 //如果point在区域内，获取该点
-                if (outline.Contains(point))
+                if (OBB.Contains(point))
                 {
                     pumpPos = point;
                     break;
@@ -787,32 +758,28 @@ namespace ThMEPWSS.Pipe.Model
             Vector3d normal = point1.GetVectorTo(point2).GetNormal();
             double angle = Vector3d.XAxis.GetAngleTo(normal);
             double margin = 300.0;
-            space = (length - 300.0 * 2)/2;
-            if(space > 900)
+            space = (length - margin * 2)/2;
+            int tmpInt = (int)((space + 50) / 100);
+            space = tmpInt * 100;
+            margin = (length - space * 2) / 2;
+            if (space > 900)
             {
-                margin = (length - 900 * 2) / 2;
                 space = 900;
+                margin = (length - space * 2) / 2;
+            }
+            else if (space < 500)
+            {
+                tmpInt = (int)(space / 100);
+                space = (tmpInt + 1) * 100;
+                margin = (length - space * 2) / 2;
             }
             Vector3d vector = normal * margin;
             Point3d tmpPos = point1 + vector;
             List<Point3d> offsetPoints = GetOffsetPoint(tmpPos, angle + Math.PI * 0.5, 150.0);
-            var outline = new Polyline() { Closed = true };
-            if (Outline is Polyline polyline)
-            {
-                outline = polyline;
-            }
-            else if (Outline is BlockReference br)
-            {
-                outline = br.GeometricExtents.ToRectangle();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
             foreach (Point3d point in offsetPoints)
             {
                 //如果point在区域内，获取该点
-                if (outline.Contains(point))
+                if (OBB.Contains(point))
                 {
                     pumpPos = point;
                     break;
@@ -830,32 +797,28 @@ namespace ThMEPWSS.Pipe.Model
             Vector3d normal = point1.GetVectorTo(point2).GetNormal();
             double angle = Vector3d.XAxis.GetAngleTo(normal);
             double margin = 300.0;
-            space = (length - 300.0 * 2)/3;
-            if(space > 900)
+            space = (length - margin * 2)/3;
+            int tmpInt = (int)((space + 50) / 100);
+            space = tmpInt * 100;
+            margin = (length - space * 3) / 2;
+            if (space > 900)
             {
-                margin = (length - 900 * 3) / 2;
                 space = 900;
+                margin = (length - space * 3) / 2;
+            }
+            else if (space < 500)
+            {
+                tmpInt = (int)(space / 100);
+                space = (tmpInt + 1) * 100;
+                margin = (length - space * 3) / 2;
             }
             Vector3d vector = normal * margin;
             Point3d tmpPos = point1 + vector;
             List<Point3d> offsetPoints = GetOffsetPoint(tmpPos, angle + Math.PI * 0.5, 150.0);
-            var outline = new Polyline() { Closed = true };
-            if (Outline is Polyline polyline)
-            {
-                outline = polyline;
-            }
-            else if (Outline is BlockReference br)
-            {
-                outline = br.GeometricExtents.ToRectangle();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
             foreach (Point3d point in offsetPoints)
             {
                 //如果point在区域内，获取该点
-                if (outline.Contains(point))
+                if (OBB.Contains(point))
                 {
                     pumpPos = point;
                     break;

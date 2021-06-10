@@ -82,9 +82,9 @@ namespace ThMEPWSS.Command
                 range.Add(input.Item2);
                 range.Add(new Point3d(input.Item2.X, input.Item1.Y, 0));
                 waterwellEngine.RecognizeMS(database.Database, range);
-                foreach (ThIfcDistributionFlowElement element in waterwellEngine.Elements)
+                foreach (var element in waterwellEngine.Datas)
                 {
-                    ThWWaterWell waterWell = ThWWaterWell.Create(element.Outline);
+                    ThWWaterWell waterWell = ThWWaterWell.Create(element);
                     waterWell.Init();
                     waterWellList.Add(waterWell);
                 }
@@ -173,7 +173,7 @@ namespace ThMEPWSS.Command
                         tmpItem.StrFloor = "B4F";
                     }
                     tmpItem.StrPumpCount = g.Key.ToString();
-                    tmpItem.StrPumpSum = (g.ToList<int>().Count() * g.Key).ToString();
+                    tmpItem.StrPumpSum = g.ToList<int>().Count().ToString();
                     formItmes.Add(tmpItem);
                 }
             });
@@ -199,9 +199,9 @@ namespace ThMEPWSS.Command
                     dic.Add("集水井编号", item.StrNumber);
                     dic.Add("楼层编号", item.StrFloor);
                     dic.Add("位置", "普通车库");
-                    dic.Add("流量", "15");
-                    dic.Add("扬程", "20");
-                    dic.Add("电量", "20");
+                    dic.Add("流量", "xx");
+                    dic.Add("扬程", "xx");
+                    dic.Add("电量", "xx");
                     dic.Add("井内水泵台数", item.StrPumpCount);
                     dic.Add("数量统计", item.StrPumpSum);
                     var bodyId = acadDb.ModelSpace.ObjectId.InsertBlockReference("W-NOTE", WaterWellBlockNames.WaterWellTableBody, position, new Scale3d(1, 1, 1), 0, dic);

@@ -33,7 +33,8 @@ namespace TianHua.Plumbing.WPF.UI.UI
         private void btnWaterwellRecog_Click(object sender, RoutedEventArgs e)
         {
             uiWaterWellPumpFilter uiFilter = new uiWaterWellPumpFilter();
-            if(uiFilter.ShowDialog() == true)
+            uiFilter.SetWaterWellIdentifyConfigInfo(ViewModel.GetConfigInfo().WaterWellInfo.identifyInfo);
+            if (uiFilter.ShowDialog() == true)
             {
                 ViewModel.SetIdentfyConfigInfo(uiFilter.GetIdentfyConfigInfo());
             }
