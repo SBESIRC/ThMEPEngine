@@ -38,7 +38,7 @@ namespace ThMEPWSS.Common
                 using (var acadDatabase = AcadDatabase.Active())
                 {
                     acadDatabase.ModelSpace.ObjectId.InsertBlockReference("0", WaterSuplyBlockNames.FloorFraming,
-                    propmptResult.Value, new Scale3d(1, 1, 1), 0);
+                    propmptResult.Value, new Scale3d(1, 1, 1), 0, new Dictionary<string, string> { {"楼层编号" , "1" } });
                 }
             }
         }
