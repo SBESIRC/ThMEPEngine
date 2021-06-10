@@ -121,19 +121,20 @@ namespace ThMEPEngineCore.CAD
         }
         public static Polyline TextOBB(this DBText dBText)
         {
-            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, Vector3d.ZAxis, dBText.Position);
+            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * dBText.Rotation, dBText.Normal, dBText.Position);
             DBText newText = dBText.GetTransformedCopy(clockwiseMat) as DBText;
             Polyline obb = newText.GeometricExtents.ToRectangle();
-            Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, Vector3d.ZAxis, dBText.Position);
+            Matrix3d counterClockwiseMat = Matrix3d.Rotation(dBText.Rotation, dBText.Normal, dBText.Position);
             obb.TransformBy(counterClockwiseMat);
             return obb;
         }
         public static Polyline TextOBB(this MText mText)
         {
-            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * mText.Rotation, Vector3d.ZAxis, mText.Location);
+            var ang = Vector3d.XAxis.GetAngleTo(mText.Direction, mText.Normal);
+            Matrix3d clockwiseMat = Matrix3d.Rotation(-1.0 * ang, mText.Normal, mText.Location);
             var newText = mText.GetTransformedCopy(clockwiseMat) as MText;
-            Polyline obb = newText.GeometricExtents.ToRectangle();
-            Matrix3d counterClockwiseMat = Matrix3d.Rotation(mText.Rotation, Vector3d.ZAxis, mText.Location);
+            var obb = newText.GeometricExtents.ToRectangle();
+            Matrix3d counterClockwiseMat = Matrix3d.Rotation(ang, mText.Normal, mText.Location);
             obb.TransformBy(counterClockwiseMat);
             return obb;
         }

@@ -40,8 +40,11 @@ namespace ThMEPEngineCore.Engine
             if (IsBuildElement(polyline) && IsDoorStone(polyline))
             {
                 var clone = polyline.WashClone();
-                clone.TransformBy(matrix);
-                curves.Add(clone);
+                if (polyline.Area > 0.0 && clone != null)
+                {
+                    clone.TransformBy(matrix);
+                    curves.Add(clone);
+                }
             }
             return curves.Select(o => CreateBuildingElementData(o)).ToList();
         }
