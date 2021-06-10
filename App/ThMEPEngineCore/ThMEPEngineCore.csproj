@@ -348,7 +348,7 @@
     <Compile Include="Service\ThArchitectureElevationLayerManager.cs" />
     <Compile Include="Service\ThArchitectureElevationRecognition.cs" />
     <Compile Include="Service\ThVStructuralElementSimplifier.cs" />
-    <Compile Include="Service\ThWindowSimplifier.cs" />
+    <Compile Include="Service\ThElementSimplifier.cs" />
     <Compile Include="Service\ThCurtainWallLayerManager.cs" />
     <Compile Include="Service\ThAxialAxisTagDbExtension.cs" />
     <Compile Include="Service\ThAxialAxisTagLayerManager.cs" />
@@ -426,6 +426,7 @@
     <Compile Include="Service\ThWellsDbExtension.cs" />
     <Compile Include="Service\ThWellsLayerManager.cs" />
     <Compile Include="Service\ThWindowLayerManager.cs" />
+    <Compile Include="Service\ThSlabLayerManager.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
     <Compile Include="Temp\IElevationQuery.cs" />
     <Compile Include="Temp\IExtract.cs" />

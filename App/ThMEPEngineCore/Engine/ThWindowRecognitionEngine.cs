@@ -65,8 +65,9 @@ namespace ThMEPEngineCore.Engine
         private Entity Wash(Curve curve)
         {
             var objs = new DBObjectCollection() { curve };
-            objs = ThWindowSimplifier.Simplify(objs);
-            objs = ThWindowSimplifier.Normalize(objs);
+            var simplifer = new ThWindowSimplifier();
+            objs = simplifer.Simplify(objs);
+            objs = simplifer.Normalize(objs);
             if (objs.Count > 0 && objs[0] is Polyline polyline)
             {
                 return ThPolylineHandler.Handle(polyline);

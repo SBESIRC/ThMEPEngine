@@ -6,6 +6,7 @@ using Autodesk.AutoCAD.Geometry;
 using System.Collections.Generic;
 using Autodesk.AutoCAD.DatabaseServices;
 using ThMEPEngineCore.Model;
+using ThMEPEngineCore.Service;
 
 namespace ThMEPEngineCore.Engine
 {
@@ -13,7 +14,10 @@ namespace ThMEPEngineCore.Engine
     {
         public override void Extract(Database database)
         {
-            var visitor = new ThSlabExtractionVisitor();
+            var visitor = new ThSlabExtractionVisitor()
+            {
+                LayerFilter = ThSlabLayerManager.CurveXrefLayers(database),
+            };
             var extractor = new ThBuildingElementExtractor();
             extractor.Accept(visitor);
             extractor.Extract(database);
@@ -57,6 +61,16 @@ namespace ThMEPEngineCore.Engine
                         Elements.Add(ThIfcSlab.Create(polyline));
                     }
                 });
+        }
+        private Entity Wash(Curve curve)
+        {
+            var objs = new DBObjectCollection() { curve };
+            var simplifer = new ThSlabSimplifier();
+            objs = simplifer.Tessellate(objs);
+            objs = simplifer.Simplify(objs);
+            objs = simplifer.MakeValid(objs);            
+            objs = simplifer.Normalize(objs);
+            return objs.Count > 0 ? objs[0] as Entity : new Polyline();
         }
     }
 }
