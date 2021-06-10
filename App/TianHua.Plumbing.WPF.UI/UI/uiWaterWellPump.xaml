@@ -109,7 +109,7 @@
                 <Label Content="布置方式:"></Label>
             </Grid>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">
-                <RadioButton GroupName="ArrangeTypeGroup" Content="点选" IsChecked="{Binding IsPickSelection}" />
+                <RadioButton GroupName="ArrangeTypeGroup" Content="点选" Visibility="Collapsed" IsChecked="{Binding IsPickSelection}" />
                 <RadioButton Margin="15,0,0,0" GroupName="ArrangeTypeGroup" Content="框选" IsChecked="{Binding IsFrameSelection}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0" VerticalAlignment="Center">

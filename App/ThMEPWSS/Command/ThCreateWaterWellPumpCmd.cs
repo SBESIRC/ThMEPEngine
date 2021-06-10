@@ -199,18 +199,17 @@ namespace ThMEPWSS.Command
         {
             get
             {
-                var path = Path.Combine(ThCADCommon.SupportPath(), "地上给水排水平面图模板_20210517.dwg");
+                var path = ThCADCommon.WSSDwgPath();
                 return path;
             }
         }
-        public static int ImportBlockCount = 0;
+        public static bool BlockImported = false;
         public void ImportBlockFile()
         {
-            if(ImportBlockCount!=0)
+            if(BlockImported)
             {
                 return;
             }
-            ImportBlockCount++;
             //导入一个块
             using (AcadDatabase blockDb = AcadDatabase.Open(WaterWellBlockFilePath, DwgOpenMode.ReadOnly, false))//引用模块的位置
             using (var acadDb = Linq2Acad.AcadDatabase.Active())
@@ -221,92 +220,102 @@ namespace ThMEPWSS.Command
                 acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-EQPM"));
                 acadDb.Layers.Import(blockDb.Layers.ElementOrDefault("W-DRAI-EQPM"));
             }
+
+            BlockImported = true;
         }
         public void Execute()
         {
-            using (var database = AcadDatabase.Active())
-            using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+            try
             {
-                ImportBlockFile();
-                //获取配置信息
-                if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.DOTCHOICE)
+                using (var doclock = Autodesk.AutoCAD.ApplicationServices.Application.DocumentManager.MdiActiveDocument.LockDocument())
+                using (var database = AcadDatabase.Active())
                 {
-                    //获取选择数据 
-                    //获取集水井区域 
-                }
-                else if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.BOXCHOICE)
-                {
-                    var input = ThWGeUtils.SelectPoints();
-                    //获取集水井
-                    var water_well_list = GetWaterWellEntityList(input);
-                    if (water_well_list.IsNull())
-                    {
-                        //命令栏提示“未选中集水井”
-                        //退出本次布置动作
-                        return;
-                    }
-                    //获取墙
-                    List<Line> wallLine = GetWallColumnEdgesInRange(input);
-                    //获取车位
-                    List<Point3d> parkPoint = GetParkSpacePointInRange(input);
-                    //获取潜水泵
-                    List<ThWDeepWellPump> pumpList = GetDeepWellPumpList();
-                    //获取带定位水管
-                    List<BlockReference> pipeList = GetPipeInRange(input);
-                    //添加排水泵
-                    foreach (ThWWaterWell waterWell in water_well_list)
-                    {
-                        //开启尺寸过滤
-                        if (configInfo.WaterWellInfo.isWaterWellSizeFilter)
-                        {
-                            double area = waterWell.GetAcreage();
-                            if (area < configInfo.WaterWellInfo.fMinacreage)
-                            {
-                                continue;
-                            }
-                        }
-                        //计算集水井是否靠近墙
-                        waterWell.ParkSpacePoint = parkPoint;
-                        waterWell.NearWall(wallLine, 50);
-                        //计算潜水泵是否在集水井内
-                        foreach (ThWDeepWellPump pump in pumpList)
-                        {
-                            if (waterWell.ContainPump(pump))
-                            {
-                                break;
-                            }
-                        }
-                        //计算水管是否在集水井内
-                        foreach (var pump in pipeList)
-                        {
-                            waterWell.ContainPipe(pump);
-                        }
+                    ImportBlockFile();
 
-                        if (configInfo.PumpInfo.isCoveredWaterWell)
+                    //获取配置信息
+                    if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.DOTCHOICE)
+                    {
+                        //获取选择数据 
+                        //获取集水井区域 
+                    }
+                    else if (configInfo.PumpInfo.PumpLyoutType == LAYOUTTYPE.BOXCHOICE)
+                    {
+                        var input = ThWGeUtils.SelectPoints();
+                        //获取集水井
+                        var water_well_list = GetWaterWellEntityList(input);
+                        if (water_well_list.IsNull())
                         {
-                            if (waterWell.IsHavePump)
-                            {
-                                waterWell.RemovePump();
-                            }
-                            waterWell.RemovePipe();
-                            if (!waterWell.AddDeepWellPump(configInfo))
-                            {
-                                //提示或写入日志表当前集水井添加泵失败
-                            }
+                            //命令栏提示“未选中集水井”
+                            //退出本次布置动作
+                            return;
                         }
-                        else
+                        //获取墙
+                        List<Line> wallLine = GetWallColumnEdgesInRange(input);
+                        //获取车位
+                        List<Point3d> parkPoint = GetParkSpacePointInRange(input);
+                        //获取潜水泵
+                        List<ThWDeepWellPump> pumpList = GetDeepWellPumpList();
+                        //获取带定位水管
+                        List<BlockReference> pipeList = GetPipeInRange(input);
+                        //添加排水泵
+                        foreach (ThWWaterWell waterWell in water_well_list)
                         {
-                            if (waterWell.IsHavePump)
+                            //开启尺寸过滤
+                            if (configInfo.WaterWellInfo.isWaterWellSizeFilter)
                             {
-                                continue;
+                                double area = waterWell.GetAcreage();
+                                if (area < configInfo.WaterWellInfo.fMinacreage)
+                                {
+                                    continue;
+                                }
                             }
-                            if (!waterWell.AddDeepWellPump(configInfo))
+                            //计算集水井是否靠近墙
+                            waterWell.ParkSpacePoint = parkPoint;
+                            waterWell.NearWall(wallLine, 50);
+                            //计算潜水泵是否在集水井内
+                            foreach (ThWDeepWellPump pump in pumpList)
                             {
-                                //提示或写入日志表当前集水井添加泵失败
+                                if (waterWell.ContainPump(pump))
+                                {
+                                    break;
+                                }
+                            }
+                            //计算水管是否在集水井内
+                            foreach (var pump in pipeList)
+                            {
+                                waterWell.ContainPipe(pump);
+                            }
+
+                            if (configInfo.PumpInfo.isCoveredWaterWell)
+                            {
+                                if (waterWell.IsHavePump)
+                                {
+                                    waterWell.RemovePump();
+                                }
+                                waterWell.RemovePipe();
+                                if (!waterWell.AddDeepWellPump(configInfo))
+                                {
+                                    //提示或写入日志表当前集水井添加泵失败
+                                }
+                            }
+                            else
+                            {
+                                if (waterWell.IsHavePump)
+                                {
+                                    continue;
+                                }
+                                if (!waterWell.AddDeepWellPump(configInfo))
+                                {
+                                    //提示或写入日志表当前集水井添加泵失败
+                                }
                             }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Active.Editor.WriteMessage(ex.Message);                
             }
         }
     }
