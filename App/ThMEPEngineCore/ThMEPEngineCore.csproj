@@ -65,6 +65,8 @@
     <Compile Include="Algorithm\ThOrientedBoundingBox.cs" />
     <Compile Include="Algorithm\ThMEPCenterlineService.cs" />
     <Compile Include="Algorithm\ThRegionDivisionService.cs" />
+    <Compile Include="Engine\ThAXISLineExtractionVisitor.cs" />
+    <Compile Include="Engine\ThAXISLineRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ColumnRecognitionEngine.cs" />
     <Compile Include="Engine\ThDB3ShearWallExtractionVisitor.cs" />
     <Compile Include="Engine\ThDB3ShearWallRecognitionEngine.cs" />
@@ -85,6 +87,7 @@
     <Compile Include="GeojsonExtractor\ThRoomExtractor.cs" />
     <Compile Include="GeojsonExtractor\ThShearwallExtractor.cs" />
     <Compile Include="Model\Electrical\ThFireCompartment.cs" />
+    <Compile Include="Model\ThAXISLine.cs" />
     <Compile Include="Service\ThBuildElementSimplifier.cs" />
     <Compile Include="Service\ThDoorStoneLayerManager.cs" />
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
