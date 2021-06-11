@@ -93,6 +93,7 @@
     <Compile Include="Service\ThDoorMarkLayerManager.cs" />
     <Compile Include="Service\ThDB3ColumnSimplifier.cs" />
     <Compile Include="Service\ThDB3ShearWallSimplifier.cs" />
+    <Compile Include="Service\ThMPolygonSerializeService.cs" />
     <Compile Include="Service\ThNTSPolygonizeService.cs" />
     <Compile Include="Algorithm\ThPolygonToGapPolylineService.cs" />
     <Compile Include="Algorithm\ThLineMerger.cs" />
@@ -194,6 +195,7 @@
     <Compile Include="Service\ThNTSSimplifyService.cs" />
     <Compile Include="Service\ThNTSSpatialIndexExService.cs" />
     <Compile Include="Service\ThPCArchitectureWallLayerManager.cs" />
+    <Compile Include="Service\ThPolylineSerializeService.cs" />
     <Compile Include="Service\ThRectangleConverter.cs" />
     <Compile Include="Service\ThRailingLayerManager.cs" />
     <Compile Include="Service\ThSpaceSpatialPredicateService.cs" />

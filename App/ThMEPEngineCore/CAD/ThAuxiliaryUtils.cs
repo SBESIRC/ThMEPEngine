@@ -1,4 +1,5 @@
 ﻿using System;
+using AcHelper;
 using NFox.Cad;
 using Linq2Acad;
 using DotNetARX;
@@ -10,7 +11,6 @@ using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 using Autodesk.AutoCAD.DatabaseServices;
 using Autodesk.AutoCAD.ApplicationServices;
-using AcHelper;
 
 namespace ThMEPEngineCore.CAD
 {
@@ -185,6 +185,14 @@ namespace ThMEPEngineCore.CAD
             Point2d screen = (Point2d)Application.GetSystemVariable("SCREENSIZE");
             double w = h * (screen.X / screen.Y);
             return new Point2d(w, h);
+        }        
+        public static string PointToString(this Point3d pt)
+        {
+            return pt.X + "," + pt.Y + "," + pt.Z;
+        }
+        public static string PointToString(this Point2d pt)
+        {
+            return pt.X + "," + pt.Y;
         }
     }
 }
