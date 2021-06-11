@@ -19,7 +19,7 @@ namespace ThMEPEngineCore.Temp
             DualpurposeBelts = new List<Line>();
             SpecialBeltLayer = "E-THUN-WIRE";
             DualpurposeBeltLayer = "E-GRND-WIRE";
-            Category = "LightningReceivingBelt";
+            Category = BuiltInCategory.LightningReceivingBelt.ToString();
         }
         public void Extract(Database database, Point3dCollection pts)
         {
@@ -45,7 +45,7 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(NamePropertyName, "专用");
+                geometry.Properties.Add(NamePropertyName, "专设接闪带");
                 if(GroupSwitch)
                 {
                     geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));
@@ -58,7 +58,7 @@ namespace ThMEPEngineCore.Temp
             {
                 var geometry = new ThGeometry();
                 geometry.Properties.Add(CategoryPropertyName, Category);
-                geometry.Properties.Add(NamePropertyName, "兼用");
+                geometry.Properties.Add(NamePropertyName, "兼用接闪带");
                 if (GroupSwitch)
                 {
                     geometry.Properties.Add(GroupIdPropertyName, BuildString(GroupOwner, o));

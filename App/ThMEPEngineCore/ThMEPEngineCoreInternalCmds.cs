@@ -715,8 +715,8 @@ namespace ThMEPEngineCore
                 {
                     new ThStoreyExtractor(){ColorIndex=1,},
                     new ThArchitectureOutlineExtractor(){ ColorIndex=2,GroupSwitch=true,},
-                    new ThColumnExtractor(){ ColorIndex=3,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
-                    new ThShearWallExtractor(){ ColorIndex=4,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
+                    new ThOuterOtherColumnExtractor(){ ColorIndex=3,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
+                    new ThOuterOtherShearWallExtractor(){ ColorIndex=4,UseDb3Engine=false,GroupSwitch=true,IsolateSwitch=false},
                     new ThBeamExtractor(){ ColorIndex =5,UseDb3Engine=false,GroupSwitch=true},
                     new ThLightningReceivingBeltExtractor{ ColorIndex=6,GroupSwitch=true},
                 };

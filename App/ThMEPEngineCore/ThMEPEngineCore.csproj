@@ -431,12 +431,14 @@
     <Compile Include="Service\ThWindowLayerManager.cs" />
     <Compile Include="Service\ThSlabLayerManager.cs" />
     <Compile Include="Temp\IBuildGeometry.cs" />
+    <Compile Include="Temp\IColumnData.cs" />
     <Compile Include="Temp\IElevationQuery.cs" />
     <Compile Include="Temp\IExtract.cs" />
     <Compile Include="Temp\IGroup.cs" />
     <Compile Include="Temp\IParse.cs" />
     <Compile Include="Temp\IPrint.cs" />
     <Compile Include="Temp\IRead.cs" />
+    <Compile Include="Temp\IShearWallData.cs" />
     <Compile Include="Temp\ThArchitectureOutlineExtractor.cs" />
     <Compile Include="Temp\ThArrangeObstacleService.cs" />
     <Compile Include="Temp\ThBeamExtractor.cs" />
@@ -446,6 +448,8 @@
     <Compile Include="Temp\ThExternalSpaceExtractor.cs" />
     <Compile Include="Temp\ThExtractOuterBoundaryService.cs" />
     <Compile Include="Temp\ThExtractLineService.cs" />
+    <Compile Include="Temp\ThExtractOuterOtherShearWallService.cs" />
+    <Compile Include="Temp\ThExtractOuterOtherColumnService.cs" />
     <Compile Include="Temp\ThLightningReceivingBeltExtractor.cs" />
     <Compile Include="Temp\ThOuterBoundaryExtractor.cs" />
     <Compile Include="Temp\ThDoorOpeningExtractor.cs" />
@@ -474,6 +478,8 @@
     <Compile Include="Temp\ThExtractService.cs" />
     <Compile Include="Temp\ThExtractSpaceRecognitionEngine.cs" />
     <Compile Include="Temp\ThLaneLineExtractor.cs" />
+    <Compile Include="Temp\ThOuterOtherShearWallExtractor.cs" />
+    <Compile Include="Temp\ThOuterOtherColumnExtractor.cs" />
     <Compile Include="Temp\ThParkingStallExtractor.cs" />
     <Compile Include="Temp\ThArchitectureWallExtractor.cs" />
     <Compile Include="Temp\ThFireHydrantResultParseService.cs" />

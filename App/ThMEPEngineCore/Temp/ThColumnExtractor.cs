@@ -10,14 +10,15 @@ using Autodesk.AutoCAD.DatabaseServices;
 
 namespace ThMEPEngineCore.Temp
 {
-    public class ThColumnExtractor : ThExtractorBase, IExtract,IPrint, IBuildGeometry,IGroup
+    public class ThColumnExtractor : ThExtractorBase, IExtract, IPrint, IBuildGeometry, IGroup
     {
         public List<Polyline> Columns { get; private set; }
-        private List<ThTempSpace> Spaces { get; set; }        
+        private List<ThTempSpace> Spaces { get; set; }  
+        
         public ThColumnExtractor()
         {
             Columns = new List<Polyline>();
-            Category = "Column";
+            Category = BuiltInCategory.Column.ToString();
             UseDb3Engine = true;
             ElementLayer = "柱";
             Spaces = new List<ThTempSpace>();

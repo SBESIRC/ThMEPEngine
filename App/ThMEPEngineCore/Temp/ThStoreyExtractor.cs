@@ -22,9 +22,8 @@ namespace ThMEPEngineCore.Temp
         public ThStoreyExtractor()
         {
             Storeys = new List<StoreyInfo>();
-            Category = "StoreyBorder";
+            Category = BuiltInCategory.StoreyBorder.ToString();
             UseDb3Engine = true;
-            ElementLayer = "AD-FLOOR-AREA";
         }
 
         public void Extract(Database database, Point3dCollection pts)
