@@ -24,7 +24,7 @@ namespace ThMEPEngineCore.Service
 
         private static Match BeamAnnotaionMatch(string str)
         {
-            var match = Regex.Match(str, @"^(\s*\d*[.]?\d*\s*)[xX](\s*\d*[.]?\d*)");
+            var match = Regex.Match(str, @"^(\s*\d+[.]?\d*\s*)[xX×](\s*\d+[.]?\d*)");
             return match;
         }
 
