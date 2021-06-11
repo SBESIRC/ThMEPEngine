@@ -7,6 +7,8 @@ using Autodesk.AutoCAD.EditorInput;
 using Autodesk.AutoCAD.DatabaseServices;
 using System;
 using DotNetARX;
+using ThMEPEngineCore.IO;
+using System.Text;
 
 
 #if ACAD2016
@@ -660,11 +662,55 @@ namespace ThMEPEngineCore
 
                 var revisedContent = geojsonContent.Replace("WaterStartPoint","WaterSupplyStartPoint");
 
-                var output = SystemDiagramMethods.ProcessMainBranchs(revisedContent);
-                //string outputFile = @"D:\xx2.geojson";
-                //File.WriteAllText(outputFile, output);
+                var groupedContent = SystemDiagramMethods.ProcessGrouping(revisedContent);
 
                 var serializer = GeoJsonSerializer.Create();
+                var revisedContent2 = string.Empty;
+                using (var stringReader = new StringReader(groupedContent))
+                using (var jsonReader = new JsonTextReader(stringReader))
+                {
+                    var features = serializer.Deserialize<FeatureCollection>(jsonReader);
+                    var FeaturesWithLineString = new List<IFeature>();
+                    foreach (var f in features)
+                    {
+                        if(f.Geometry.GeometryType.Equals("Point") && f.Attributes.Exists("Direction"))
+                        {
+                            var coordinates = f.Geometry.Coordinates;
+                            var pt = new Point3d(coordinates[0].X, coordinates[0].Y, 0);
+                            
+                            
+                            var dirArr = f.Attributes["Direction"] as List<object>;
+                            var branchLen = 400;
+                            var dirVector = new Vector3d(double.Parse(dirArr[0].ToString()) * branchLen, double.Parse(dirArr[1].ToString()) * branchLen,0);
+
+                            var revisedPt = pt + dirVector;
+                            f.Geometry.Coordinates[0].X = revisedPt.X;
+                            f.Geometry.Coordinates[0].Y = revisedPt.Y;
+                            //f.Attributes["Direction"] = new double[2] { 1000.0,0.0};
+                            var linePts = new List<Point3d>();
+                            linePts.Add(pt);
+                            linePts.Add(revisedPt);
+                            Draw.Line(linePts.ToArray());
+                        }
+                    }
+
+                    using (var geoJson = new ExtentedStringWriter(new UTF8Encoding(false)))
+                    using (JsonTextWriter writer = new JsonTextWriter(geoJson)
+                    {
+                        Indentation = 4,
+                        IndentChar = ' ',
+                        Formatting = Formatting.Indented,
+                    })
+                    {
+                        var geoJsonWriter = new GeoJsonWriter();
+                        geoJsonWriter.Write(features, writer);
+                        revisedContent2 = geoJson.ToString();
+                    }
+                }
+
+                var output = SystemDiagramMethods.ProcessMainBranchs(revisedContent2);
+                //string outputFile = @"D:\xx2.geojson";
+                //File.WriteAllText(outputFile, output);
 
                 using (var stringReader = new StringReader(output))
                 using (var jsonReader = new JsonTextReader(stringReader))
